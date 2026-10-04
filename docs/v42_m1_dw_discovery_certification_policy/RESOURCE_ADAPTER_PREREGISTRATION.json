@@ -1,0 +1,37 @@
+{
+  "original_prereg_commit": "6716e136527db8332eefc982b33e85379de335a1",
+  "original_prereg_SHA": "dc33278c6a183b23bc851d4c464977d8f7f7077779815748c267a819f11577bd",
+  "frozen_scientific_source_unchanged": true,
+  "resource_gate4": {
+    "workers": 4,
+    "PASS": false,
+    "round": 1,
+    "stage": "WORKER_RESIDENCY_BEFORE_PRICING",
+    "failures": [
+      "AVAILABLE_RAM_BELOW_GATE"
+    ],
+    "observed_per_process_peak_RSS": {
+      "97132": 935034880,
+      "51812": 932388864,
+      "57332": 934035456,
+      "99132": 948183040
+    },
+    "observed_total_pricing_peak_RSS": 3749642240,
+    "observed_parent_peak_RSS": 7786950656,
+    "min_available_RAM": 7461302272,
+    "physical_RAM": 34049220608,
+    "max_pagefile_growth": 0,
+    "sample_period_seconds": 1,
+    "native_pricing_calls": 0,
+    "native_RMP_status": 11,
+    "native_RMP_wall_seconds": 0.3205601000227034
+  },
+  "next_workers": 2,
+  "downgrade": [
+    2,
+    1
+  ],
+  "remaining_optimize_budget": 899.6794398999773,
+  "budget_reset": false,
+  "correction": "Apply already preregistered memory gate before RMP; normal resource INTERRUPTED RMP triggers deterministic downgrade and fresh RMP. Only resource coordination and receipt/budget carry are adapted; domains, columns, thresholds, pricing caps, certificate code and tolerances unchanged."
+}

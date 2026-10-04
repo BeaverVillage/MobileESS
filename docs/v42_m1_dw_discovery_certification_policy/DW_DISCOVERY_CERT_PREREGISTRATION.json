@@ -1,0 +1,72 @@
+{
+  "scientific_base": "851956172cf9b5cde5ebcfb2f3145b90de024987",
+  "old_policy_stop_commit": "4fc7df0e309c348853f0364dc5a9f866f2310e93",
+  "checkpoint_columns": 1066,
+  "optimize_budget_seconds": 900.0,
+  "budget_authority": "Union of actual native optimize wall intervals across worker processes plus sequential RMP solves; build/audit/test and checkpoint I/O separately recorded.",
+  "schedule": [
+    "DISCOVERY",
+    "DISCOVERY",
+    "DISCOVERY",
+    "CERTIFICATION"
+  ],
+  "discovery_cap_seconds": 20,
+  "certification_cap_seconds": 60,
+  "final_certification_max_seconds": 120,
+  "final_reserve_rule": "Reserve120s for a final certification before starting another ordinary cycle/round; cycle estimate is3*(last_RMP_wall+20*ceil(4/workers))+(last_RMP_wall+60*ceil(4/workers))+8s. At cycle boundary use final certification when remaining<cycle_estimate+120, or before an ordinary round if remaining<max(30,last_RMP_wall)+ordinary_cap*ceil(4/workers)+124. Final cap=min(120,(remaining_after_RMP-4)/ceil(4/workers)); no automatic extension.",
+  "candidate_workers": [
+    4,
+    2,
+    1
+  ],
+  "Threads": 1,
+  "environment": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "FeasibilityTol": 1e-08,
+  "IntFeasTol": 1e-08,
+  "OptimalityTol": 1e-08,
+  "postsolve_affine_tolerance": 1e-06,
+  "discovery_negative_threshold": -1e-07,
+  "no_negative_BestBd_authority": -1e-08,
+  "MIPGap": 0,
+  "MIPGapAbs": 0,
+  "full_original_domain": true,
+  "heuristic_domain_restriction": false,
+  "column_deletion": false,
+  "column_aging": false,
+  "previous_feasible_MIP_start_only": true,
+  "corrected_theorem_SHA": "e367d739cfac38b96d4962c089c2c258f794f62c19cef123bf7528d4c1669e2d",
+  "certificate_source_SHA": "62878e96a00249a0ffe2ca6c18137720a30f58a2228123d619917d1ef804cd42",
+  "bound_authority": "Terminal native global ObjBound, including ObjCon; fixed1e-8 safety and outward Fraction rounding; exact global residual box correction unchanged.",
+  "certificate_policy": "Only CERTIFICATION and FINAL_CERTIFICATION publish corrected lower bounds/material decisions. Discovery finite bounds preserved diagnostically, without lower-bound/no-negative/convergence claims.",
+  "certification_column_policy": "No columns added in certification rounds; next discovery generates columns under its own fresh dual.",
+  "material_threshold": 0.5737116103498322,
+  "material_stop": "L>=threshold or OPTIMAL audited RMP U<=threshold, immediately stop; otherwise INCONCLUSIVE",
+  "convergence": "All four terminal OPTIMAL same-dual rc>=-1e-8 and safe bracket gap<=1e-6; BestBd no-negative is also separately recorded. No incomplete-pricing convergence.",
+  "resource_gate": {
+    "min_available_RAM": "max(8GiB,0.15*physical_RAM)",
+    "severe_pagefile_growth_bytes": 2147483648,
+    "sampling_seconds": 1,
+    "allow_external_heavy_processes": false,
+    "no_OOM": true,
+    "no_license_error": true,
+    "no_numerical_or_model_mismatch": true,
+    "downgrade": [
+      4,
+      2,
+      1
+    ]
+  },
+  "performance_gate": {
+    "discovery_round_wall": "median<=60s with4 workers, <=120s with1/2; includes RMP, pricing, validation, column addition, checkpoint.",
+    "throughput": "Validated added discovery columns per total canary elapsed minute strictly greater than preserved old policy columns per observed elapsed minute.",
+    "no_scientific_violation": true,
+    "no_resource_safety_failure": true
+  },
+  "stop_file": "STOP_REQUEST.json: monitor calls Model.terminate(), terminal receipts preserved, no abrupt kill",
+  "no_production": true
+}

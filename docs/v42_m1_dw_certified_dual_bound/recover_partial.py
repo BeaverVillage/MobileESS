@@ -1,0 +1,22 @@
+"""Recover only completed receipts after external session interruption; no optimization."""
+import sys,re,json
+sys.path.insert(0,sys.argv[1])
+from v42_dw_bound.common import *
+from v42_dw_bound.finalize import manifest
+from datetime import datetime,timezone
+gate('partial_recovery');preserved();commit=verify_freeze()
+live=read(OUT/'DW_BOUND_LIVE_STATUS.json');prices=ledger('DW_OPTIMAL_PRICING_LEDGER.csv',OUT);rmps=ledger('DW_RMP_LEDGER.csv',OUT)
+certs=[read(p) for p in sorted((OUT/'bound_certificates').glob('*.json'))]
+valid=[c for c in certs if c['certified']];best=max(valid,key=lambda c:c['L_corr']);columns=ledger('DW_NEW_COLUMN_LEDGER.csv',OUT)
+rows=ledger('DW_BOUND_SINGLE_THREAD_RESOURCE_TIMELINE.csv',OUT)
+external=[dict(UTC=r['UTC'],process=p) for r in rows for p in json.loads(r['heavy_processes']) if not p['self']]
+assert not external
+stop=dict(stop_reason='USER_STOP_FOR_PRICING_POLICY_REDESIGN',scientific_failure=False,policy_experiment_status='POLICY_EXPERIMENT_PARTIAL',materiality_at_stop='INCONCLUSIVE',remaining_budget_discarded_intentionally=True,history_preserved=True,
+ termination_method='Control-C sent through exec session; session exited 1 without native terminal receipt or worker finally output',normal_native_termination_confirmed=False,active_call=21,active_MESS='MESS01',active_native_terminal_status=None,active_global_bound_certified=False,active_incumbent_added=False,
+ completed_RMP=len(rmps),completed_pricing=len(prices),added_columns=len(columns),retained_columns=1048+len(columns),completed_optimize_wall_seconds=live['heavy_seconds'],remaining_budget_before_active_call_seconds=live['remaining_heavy_seconds'],interrupted_call_wall_exact=None,source_commit=commit,source_freeze_SHA=sha(OUT/'EXECUTION_FREEZE.json'),UTC=datetime.now(timezone.utc).isoformat())
+write('EXACT_PRICING_POLICY_STOP_RECEIPT.json',stop)
+write('DW_BOUND_SINGLE_THREAD_RESOURCE_SUMMARY.json',dict(status='POLICY_EXPERIMENT_PARTIAL',reconstructed_from_preserved_timeline=True,normal_close_not_observed=True,observed_peak_process_RSS=max(int(r['process_RSS']) for r in rows),observed_minimum_system_free_RAM=min(int(r['system_RAM_free']) for r in rows),observed_maximum_swap_used=max(int(r['swap_used']) for r in rows),sample_count=len(rows),worker_processes=1,Gurobi_Threads=1,external_heavy_process_observations=external,sequential_policy_PASS=not external))
+write('DW_FINAL_BOUND_CERTIFICATE.json',dict(PASS=True,materiality='INCONCLUSIVE',policy_experiment_status='POLICY_EXPERIMENT_PARTIAL',best_certificate=best,interval=[live['best_L'],live['best_U']],DW_ROOT_OPTIMAL_CERTIFIED=False,original_integer_UB_claimed=False,active_call_not_certified=True))
+build=read(OUT/'DW_BOUND_BUILD_RECEIPT.json')
+result=dict(status='INCONCLUSIVE',policy_experiment_status='POLICY_EXPERIMENT_PARTIAL',stop_reason=stop['stop_reason'],base=BASE,checkpoint_columns=1048,new_RMP_solves=len(rmps),new_pricing_calls=len(prices),interrupted_unreceipted_pricing_calls=1,new_columns=len(columns),retained_columns=1048+len(columns),pricing_OPTIMAL=sum(p['classification'].startswith('OPTIMAL') for p in prices),pricing_TIME_LIMIT_WITH_VALID_BOUND=sum(p['classification']=='TIME_LIMIT_WITH_VALID_BOUND' for p in prices),pricing_UNCERTIFIED=sum(p['classification']=='UNCERTIFIED' for p in prices),first_RMP_objective=float(rmps[0]['objective']),first_corrected_LB=valid[0]['L_corr'],first_interval=[valid[0]['L_corr'],valid[0]['U_RMP']],best_corrected_certified_LB=live['best_L'],smallest_RMP_upper=live['best_U'],final_interval=[live['best_L'],live['best_U']],arc_root_LB=BASE_LB,material_threshold=T_MATERIAL,certified_improvement_lower=live['best_L']-BASE_LB,DW_ROOT_OPTIMAL_CERTIFIED=False,DW_ROOT_LB=None,total_heavy_wall_seconds=live['heavy_seconds'],heavy_wall_accounting_scope='Completed native optimize calls only; interrupted active call has no exact terminal timer receipt.',interrupted_heavy_wall_exact=None,heavy_wall_until_decision=None,elapsed_including_build_audit_seconds=float(rows[-1]['wall_seconds']),build_seconds=build['build_seconds'],enclosure_audit_seconds=build['enclosure_audit_seconds'],wall_budget_PASS=live['heavy_seconds']<3600,first_negative_termination=False,full_domain=True,old_pricing_replayed=0,old_failed_dual_used=False,branch_and_price_run=False,production_M1=False,P2_RUN=False,A2_RUN=False,M2_RUN=False,May_optimizer_Actual_Fresh_AC=[0,0,0])
+write('DW_FINAL_RESULT.json',result);manifest();print('PARTIAL_COMPLETED_EVIDENCE_RECOVERED',len(prices),len(columns))
