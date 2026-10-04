@@ -1,4 +1,4 @@
-1. Draft PR/SHA는 게시 후 PR 본문에 기록. Semantic 384 / full 1831 PASS; actual concurrent heavy native solve=0, 다른 Lane kill/terminate=0; git clean은 push 후 검증.
+1. Draft PR [#147](https://github.com/BeaverVillage/MobileESS/pull/147); scientific payload SHA 3d41bd8874fbe758db87a81cc28a92be0e048fa3. Semantic384 / full1831 PASS, actual concurrent heavy native solve=0, 다른 Lane kill/terminate=0/0. Payload remote SHA 일치 및 clean 확인. 최종 publication metadata HEAD와 마지막 clean 확인은 PR 본문/최종 응답에 기록.
 2. PR143 exact head ce5d30fb9bcb91ab8395d1313e868d24f5fde517 및 모든 old tracked bytes 보존.
 3. Frozen FULL matrix 961472 rows / 316743 columns / 8587630 nnz; native relax crosscheck PASS, SOS/general/indicator/Q constructs 없음.
 4. Discrete -> continuous 208312개 (binary 208312, integer 0); original LB/UB 그대로.
