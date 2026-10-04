@@ -1,0 +1,16 @@
+{
+  "PASS": true,
+  "formula": "delta_m=min(0,beta_m); alpha_prime_m=alpha_m+delta_m",
+  "algebra": [
+    "For every v in X_m, rc_m(v)>=r_m_star>=beta_m. If beta_m<0, rc_m(v)-delta_m>=beta_m-beta_m=0; otherwise rc_m(v)-delta_m>=beta_m>=0.",
+    "With minimization Pi<=0 on <= rows, Pi>=0 on >= rows, unrestricted equality Pi, every feasible point satisfies c_z z+sum c_m v >= constant+Pi h+(c_z-G^T Pi)z+sum (c_m-B_m^T Pi)v.",
+    "For lambda>=0 and each sum lambda_m=1, corrected column inequalities imply sum lambda_m (c_m-B_m^T Pi)v>=sum alpha_prime_m.",
+    "Thus L=constant+Pi h+min_proven_box_z(c_z-G^T Pi)z+sum alpha_prime_m is a valid full-DW lower bound. No assumption of zero residual on free/global variables is made.",
+    "For an exactly optimal RMP dual with strong duality, its global-box dual plus sum alpha equals z_RMP, giving the textbook expression z_RMP+sum delta. The floating solver ObjVal is NOT substituted for an exact dual objective.",
+    "Restricted feasible columns are a subset of the full master columns, so exact restricted optimum U=z_RMP bounds full optimum above. Real solver U is accepted only with native OPTIMAL, all-original-row postsolve1e-6 and strict bounds/route1e-8 under the registered numerical authority.",
+    "L>=T proves materiality; U<=T proves nonmateriality. Equality at T follows the requested <= nonmaterial decision convention. No original-integer UB is inferred from U."
+  ],
+  "implementation_refinement": "Exact Fraction global dual and finite proven coordinate enclosures pay every global stationarity residual. Native global ObjBound is lowered by fixed1e-8 and rounded down before forming beta/delta. Only inequality-sign-valid raw Pi is used; no sign projection or pricing-dual alteration.",
+  "bounded_enumeration_proof_SHA": "387ba0471aec308dcb5899069aaa046791f70ad36b5a4a33e1c8adf88c0d7070",
+  "formal_proof_before_scientific_runner": true
+}
