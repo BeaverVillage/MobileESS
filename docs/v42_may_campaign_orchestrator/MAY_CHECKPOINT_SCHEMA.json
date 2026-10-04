@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Lane D atomic campaign checkpoint v1",
+  "type": "object",
+  "required": ["schema_version", "identity", "revision", "production_calls", "stages", "transitions", "campaign_status"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "identity": {"$ref": "#/$defs/identity"},
+    "revision": {"type": "integer", "minimum": 1},
+    "production_calls": {"const": {"optimizer": 0, "Actual": 0, "Fresh_AC": 0}},
+    "stages": {"type": "object", "additionalProperties": {"$ref": "#/$defs/stage"}},
+    "transitions": {"type": "array", "items": {
+      "type": "object", "required": ["id", "old", "new", "timestamp"],
+      "properties": {"id": {"type": "string"}, "old": {"type": "string"}, "new": {"type": "string"}, "timestamp": {"type": "string", "format": "date-time"}}
+    }},
+    "campaign_status": {"enum": ["NOT_RUN", "RUNNING", "PASS", "BLOCKED", "INTERRUPTED"]}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nullable_sha": {"anyOf": [{"$ref": "#/$defs/sha"}, {"type": "null"}]},
+    "identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["scientific_sha", "input_sha", "stage_version", "plan_sha", "mode"],
+      "properties": {
+        "scientific_sha": {"$ref": "#/$defs/sha"}, "input_sha": {"$ref": "#/$defs/sha"},
+        "plan_sha": {"$ref": "#/$defs/sha"}, "stage_version": {"type": "string", "minLength": 1}, "mode": {"const": "MOCK_ONLY"}
+      }
+    },
+    "stage": {
+      "type": "object", "additionalProperties": false,
+      "required": ["status", "arm", "day", "loop", "stage", "scientific_sha", "input_sha", "output_sha", "stage_version", "timestamps", "worker", "failure_reason", "failure_kind", "retry_count", "receipt_path"],
+      "properties": {
+        "status": {"enum": ["NOT_RUN", "READY", "RUNNING", "PASS", "FAIL", "INTERRUPTED", "BLOCKED"]},
+        "arm": {"enum": ["B0", "B1", "B2", "B3", null]},
+        "day": {"anyOf": [{"type": "string", "format": "date"}, {"type": "null"}]},
+        "loop": {"enum": [1, 2, 3, 4, null]}, "stage": {"type": "string"},
+        "scientific_sha": {"$ref": "#/$defs/sha"}, "input_sha": {"$ref": "#/$defs/nullable_sha"},
+        "output_sha": {"$ref": "#/$defs/nullable_sha"}, "receipt_sha": {"$ref": "#/$defs/sha"},
+        "stage_version": {"type": "string"},
+        "timestamps": {"type": "object", "additionalProperties": {"type": "string", "format": "date-time"}},
+        "worker": {"type": ["string", "null"]}, "failure_reason": {"type": ["string", "null"]},
+        "failure_kind": {"type": ["string", "null"]},
+        "retry_count": {"type": "integer", "minimum": 0, "maximum": 10},
+        "receipt_path": {"type": ["string", "null"]}
+      }
+    }
+  }
+}
