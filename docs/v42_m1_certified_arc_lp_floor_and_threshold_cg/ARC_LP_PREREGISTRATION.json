@@ -1,0 +1,67 @@
+{
+  "base": "ce5d30fb9bcb91ab8395d1313e868d24f5fde517",
+  "arc_optimize_budget_seconds": 600,
+  "arc_budget_includes_tiny_sign_fixtures": true,
+  "optional_second_LP": false,
+  "CG_optimize_budget_seconds": 900,
+  "budgets_separate": true,
+  "automatic_extension": false,
+  "primary_LP": {
+    "Threads": 1,
+    "Method": 2,
+    "Crossover": 0,
+    "PreDual": 0,
+    "BarConvTol": 1e-11,
+    "FeasibilityTol": 1e-08,
+    "OptimalityTol": 1e-08,
+    "TimeLimit": "600 minus already consumed native sign-fixture time and safety margin"
+  },
+  "primary_method_reason": "Single-thread barrier without crossover, the original pure LP method with complete original-axis X/Pi/RC; exact rational equality-multiplier repair handles stationarity residual. No MIP parameter, no algorithm sweep.",
+  "matrix_SHA": "35bdc6e7c2664b763d3d0456b7296b7c8830d7c7c39a61a3cb32e699f8bb2024",
+  "attributes_SHA": "ba6eacea23b71db0b5c6d4e18d6370942906ce2790276127139dbc2ece1d2912",
+  "relaxation_map_SHA": "381e05bbee3cca05c81d1c6bdd4f906ba728abfde2729d85df1a03866f1dd8b8",
+  "certificate": "Exact Fraction sign-valid Lagrangian bound over original LB/UB only. Reverse original triangular binding equalities repair free-coordinate stationarity in equality multipliers; original matrix unchanged. A required infinite interval endpoint with nonzero coefficient invalidates the certificate. Never use pseudo-finite infinity or incumbent/MIP BestBd.",
+  "certificate_numerical_gate": {
+    "affine": 1e-06,
+    "bounds": 1e-08,
+    "objective_agreement": 1e-08,
+    "dual_support_le_primal_tolerance": 1e-08,
+    "desirable_primal_dual_gap": 1e-07
+  },
+  "threshold_reference": "Native terminal OPTIMAL original arc objective plus exact 1/200. Also store certified floor plus1/200; outward max/min of both thresholds for material/nonmaterial respectively, preventing a decision inside numerical uncertainty band.",
+  "Discovery_rounds_max": 8,
+  "Discovery_cap": 20,
+  "Certification_cap": 90,
+  "Certification_rounds_max": 1,
+  "early_triggers": [
+    "two consecutive zero accepted",
+    "last3 completed rounds total upper decrease < 0.001",
+    "U minus official T <= 0.002",
+    "budget cannot reserve next Discovery + post RMP + final certification"
+  ],
+  "fixed_pricing_workers": 4,
+  "pricing_Threads": 1,
+  "RAM_floor_GiB": 1,
+  "hard_stops": [
+    "OOM",
+    "commit >=95%",
+    "PR142 sustained hard paging + pagefile growth",
+    "solver/license/model failure"
+  ],
+  "multi_columns_per_MESS": 4,
+  "warm_RMP_selected": false,
+  "warm_tests": false,
+  "adaptive_smoothing": "Unchanged PR142 next_smoothing_weight; restore center and alpha0.125 only if exact pool+row+dual axis identity, otherwise true current center/alpha0.125",
+  "true_RC_acceptance": -1e-07,
+  "no_negative_BestBd": -1e-08,
+  "pricing_full_original_domain": true,
+  "pricing_redesign": false,
+  "column_deletion": false,
+  "parameter_sweeps": false,
+  "May_production": [
+    0,
+    0,
+    0
+  ],
+  "Branch_and_Price": false
+}
