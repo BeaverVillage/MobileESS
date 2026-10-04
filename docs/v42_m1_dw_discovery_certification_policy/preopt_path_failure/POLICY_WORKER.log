@@ -1,0 +1,43 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+POLICY_DONE {'scientific_base': '851956172cf9b5cde5ebcfb2f3145b90de024987', 'old_policy_stop_commit': '4fc7df0e309c348853f0364dc5a9f866f2310e93', 'preopt_commit': '6716e136527db8332eefc982b33e85379de335a1', 'status': 'POLICY_CANARY_INCONCLUSIVE', 'materiality': 'INCONCLUSIVE', 'policy_canary': 'INCONCLUSIVE', 'stop_reason': "EXECUTION_ERROR:GurobiError(10013, 'Unable to write file')", 'workers': 4, 'resource_PASS': False, 'resource_safety_failure_observed': False, 'initial_retained_columns': 1066, 'new_RMP_solves': 0, 'new_pricing_calls': 0, 'new_discovery_columns': 0, 'retained_columns': 1066, 'discovery_rounds': 0, 'certification_rounds': 0, 'median_discovery_round_wall': None, 'median_certification_round_wall': None, 'old_columns_per_minute': 0.2962470482195092, 'new_columns_per_minute': 0.0, 'time_to_first_new_certified_LB': None, 'heavy_to_first_new_certified_LB': None, 'best_corrected_LB': 0.5104145457228156, 'smallest_RMP_upper': None, 'final_interval': [0.5104145457228156, None], 'material_threshold': 0.5737116103498322, 'DW_ROOT_OPTIMAL_CERTIFIED': False, 'DW_ROOT_LB': None, 'total_optimize_wall_union': 0.0, 'sum_native_optimize_wall': 0, 'total_elapsed_including_build_audit': 48.80853489995934, 'heavy_wall_to_materiality_decision': None, 'build_seconds': 37.4437159000081, 'May_production': [0, 0, 0], 'no_branch_and_price': True, 'old_TIME_LIMIT_retroactively_added': False}
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw_policy\run.py", line 208, in <module>
+    if __name__=='__main__':Experiment().run()
+                            ^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw_policy\run.py", line 174, in run
+    round_start=time.perf_counter();before=len(self.columns);dual=self.solve_master(kind)
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw_policy\run.py", line 84, in solve_master
+    model.Params.LogFile=(OUT.relative_to(ROOT)/f'logs/RMP_{self.current_round:04d}.log').as_posix()
+    ^^^^^^^^^^^^^^^^^^^^
+  File "src/gurobipy/param.pxi", line 287, in gurobipy._core.ParamClass.__setattr__
+  File "src/gurobipy/env.pxi", line 412, in gurobipy._core.Env.setParam
+  File "src/gurobipy/env.pxi", line 309, in gurobipy._core.Env.__setone
+gurobipy._exception.GurobiError: Unable to write file
+Warning: Failed to open log file 'docs/v42_m1_dw_discovery_certification_policy/logs/RMP_0001.log'
