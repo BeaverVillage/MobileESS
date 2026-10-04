@@ -1,7 +1,7 @@
 # Lane B 최종 검토
 
 1. 기준은 Draft PR #143 exact head `ce5d30fb9bcb91ab8395d1313e868d24f5fde517`이다. PR143 head를 작업 시작과 게시 직전에 조회하여 동일 SHA를 확인했다. 병렬 lane의 작업은 merge/rebase/cherry-pick하지 않았다.
-2. 새 branch는 `codex/v42-m1-branch-and-price-framework-prep`이다. Draft PR과 게시 commit은 게시 영수증 및 PR head로 확인한다. merge하지 않는다.
+2. 새 branch는 `codex/v42-m1-branch-and-price-framework-prep`, Draft PR은 [#145](https://github.com/BeaverVillage/MobileESS/pull/145)다. 검증된 구현 게시 commit은 `f49b7ce180bba4246eb2829492615ddefbf2049a`이며 뒤따르는 게시 메타데이터 commit의 최종 SHA는 PR head와 외부 게시 영수증으로 확인한다. PR은 OPEN/DRAFT이며 merge하지 않았다.
 3. 신규 소스는 `v42_bap/__init__.py`, `state.py`, `adapter.py`, `solver.py`, `fixtures.py`, `lexicographic.py`, `verify.py`이며 테스트는 `tests/v42_bap/test_framework.py`다. 보고서·증거는 이 문서와 같은 디렉터리에 있다. 기존 production/scientific 소스의 변경은 0개다.
 4. 재사용한 D-W 인터페이스는 기존 matrix `build`, `Block.price`, `column`, `exact_coupling`, `hash_column`, `Master.add`, `exact_rc`, `corrected_rows`, native physical validator, `global_dual`, 4-MESS `corrected`다. 정확한 참조는 `BAP_EXISTING_INTERFACE_AUDIT.md`에 기록했다.
 5. Node는 ID/parent/depth, immutable branch decisions, inherited/inactive/current column IDs, certified LB, RMP objective, pricing status, incumbent association, fathom reason, creation order, node SHA와 bound/terminal certificate를 저장한다. best-bound queue의 tie는 depth, node_id 순서다.
