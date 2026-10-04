@@ -4,7 +4,7 @@ from pathlib import Path
 import psutil
 _clock=time.perf_counter
 ROOT=Path.cwd();sys.path.insert(0,str(ROOT));OUT=ROOT/'docs/v42_m1_dw_accelerated_root_integration'
-LANE=Path('C:/Users/kjw39/OneDrive/臾몄꽌/ChatGPT/Mobile ESS 2/v42_may_campaign_orchestrator_pr')
+LANE=Path('C:/Users/kjw39/OneDrive/문서/ChatGPT/Mobile ESS 2/v42_may_campaign_orchestrator_pr')
 FORBIDDEN=('gurobipy','opendssdirect','dss','v42_native','v42_dw_','v42_benders')
 PRECG=os.environ.get('DW_TEST_LABEL')=='PRECG';observations=[];events=[];active=[None];done=threading.Event();failure=[]
 def static_mock_audit():
