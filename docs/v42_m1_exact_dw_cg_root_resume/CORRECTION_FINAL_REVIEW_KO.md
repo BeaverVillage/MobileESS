@@ -1,4 +1,4 @@
-1. PR: https://github.com/BeaverVillage/MobileESS/pull/140; 결과 commit 게시 전. 최종 SHA/원격 일치/clean은 최종 응답에서 확인. semantic 271 / full 1718 PASS.
+1. PR: https://github.com/BeaverVillage/MobileESS/pull/140; 결과 commit 93d4a49b681696fd34adda8d134d8763e021dd26. 최종 SHA/원격 일치/clean은 최종 응답에서 확인. semantic 271 / full 1718 PASS.
 2. 원본 INCONCLUSIVE 이력 보존: PASS; 기존 8959개 파일의 바이트 일치.
 3. 정정: 기존 V42 contract에 맞춰 affine postsolve audit 1e-8 → 1e-6.
 4. Solver FeasibilityTol / IntFeasTol / OptimalityTol = 1e-8 유지.
