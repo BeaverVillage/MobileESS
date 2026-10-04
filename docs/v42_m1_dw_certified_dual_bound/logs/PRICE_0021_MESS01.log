@@ -1,0 +1,162 @@
+
+Gurobi 13.0.2 (win64) logging started Sun Oct  4 15:27:46 2026
+
+Set parameter LogFile to value "docs/v42_m1_dw_certified_dual_bound/logs/PRICE_0021_MESS01.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  300
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+Method  2
+Crossover  2
+DegenMoves  0
+MIPFocus  3
+NodeMethod  1
+CutPasses  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 51458 rows, 58814 columns and 314503 nonzeros (Min)
+Model fingerprint: 0x3d10687b
+Model has 2808 linear objective coefficients and an objective constant of 6.4493851428011244e-03
+Variable types: 6796 continuous, 52018 integer (52018 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [2e-11, 1e-05]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+Loaded user MIP start with objective 0.00073397
+MIP start from previous solve produced solution with objective -0.0136398 (0.04s)
+MIP start from previous solve produced solution with objective -0.0136482 (0.05s)
+Loaded MIP start from previous solve with objective -0.0136482
+
+Presolve removed 8934 rows and 2 columns
+Presolve time: 2.26s
+Presolved: 42524 rows, 58812 columns, 292169 nonzeros
+Variable types: 6794 continuous, 52018 integer (52018 binary)
+Root relaxation presolve removed 2 rows and 2 columns
+Root relaxation presolved: 42522 rows, 58810 columns, 292165 nonzeros
+
+Root barrier log...
+
+Ordering time: 0.06s
+
+Barrier statistics:
+ AA' NZ     : 5.988e+05
+ Factor NZ  : 1.086e+06 (roughly 50 MB of memory)
+ Factor Ops : 7.173e+07 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0  -4.38076344e-02 -3.44328495e+04  1.80e+04 1.80e-04  3.80e+00     5s
+   1  -5.23427615e-02 -2.95275662e+04  2.42e+03 3.01e-03  5.56e-01     5s
+   2   7.75285743e-02 -9.26999076e+03  3.51e+02 1.56e-04  9.62e-02     5s
+   3  -1.06771309e-02 -2.43472536e+03  8.38e+01 1.21e-15  2.33e-02     5s
+   4  -5.84031753e-02 -1.93621146e+03  4.22e+01 1.21e-15  1.66e-02     5s
+   5  -7.51480972e-02 -1.52719039e+03  2.56e+01 1.53e-15  1.26e-02     5s
+   6  -7.93669972e-02 -1.20920377e+03  1.69e+01 4.13e-15  9.95e-03     5s
+   7  -7.38544018e-02 -1.04164046e+03  1.38e+01 4.16e-15  8.69e-03     5s
+   8  -5.79517793e-02 -9.33614767e+02  1.10e+01 4.14e-15  7.48e-03     5s
+   9   4.63262716e-03 -3.84569724e+02  3.37e+00 3.17e-15  2.88e-03     5s
+  10   8.92531677e-03 -1.47089992e+02  1.12e+00 3.11e-15  1.09e-03     5s
+  11   1.02894925e-02 -1.01052717e+02  3.23e-01 3.37e-15  6.83e-04     5s
+  12   1.05290345e-02 -1.43929642e+01  6.63e-04 2.23e-15  9.13e-05     5s
+  13   7.21321273e-03 -2.73630803e+00  1.31e-06 8.69e-16  1.74e-05     5s
+  14   1.33767212e-03 -3.78798449e-01  5.53e-07 4.42e-16  2.41e-06     5s
+  15  -3.64027346e-03 -2.17618406e-01  1.54e-07 4.34e-16  1.36e-06     5s
+  16  -8.61162012e-03 -1.38105483e-01  4.65e-08 4.42e-16  8.21e-07     5s
+  17  -1.05976734e-02 -1.00969440e-01  2.93e-08 4.81e-16  5.73e-07     5s
+  18  -1.40364867e-02 -7.57454052e-02  1.65e-08 5.03e-16  3.91e-07     5s
+  19  -1.65396351e-02 -5.69689594e-02  8.83e-09 4.48e-16  2.56e-07     5s
+  20  -1.81181812e-02 -4.96981952e-02  5.48e-09 5.01e-16  2.00e-07     5s
+  21  -1.88051431e-02 -4.58202979e-02  4.30e-09 5.86e-16  1.71e-07     5s
+  22  -1.99064259e-02 -3.96178948e-02  2.59e-09 5.66e-16  1.25e-07     6s
+  23  -2.09665172e-02 -3.17351119e-02  1.29e-09 4.85e-16  6.83e-08     6s
+  24  -2.17965065e-02 -2.91948732e-02  5.19e-10 4.79e-16  4.69e-08     6s
+  25  -2.20338318e-02 -2.61231353e-02  3.51e-10 4.61e-16  2.59e-08     6s
+  26  -2.20655633e-02 -2.59858951e-02  3.31e-10 5.71e-16  2.48e-08     6s
+  27  -2.21882136e-02 -2.54431113e-02  2.47e-10 6.38e-16  2.06e-08     6s
+  28  -2.22857942e-02 -2.44412366e-02  1.84e-10 5.10e-16  1.37e-08     6s
+  29  -2.23296644e-02 -2.42226552e-02  1.58e-10 6.06e-16  1.20e-08     6s
+  30  -2.23737796e-02 -2.38620989e-02  1.29e-10 5.81e-16  9.43e-09     6s
+  31  -2.24900513e-02 -2.36325596e-02  6.13e-11 6.11e-16  7.24e-09     6s
+  32  -2.25536650e-02 -2.35078161e-02  7.40e-11 6.78e-16  6.05e-09     6s
+  33  -2.25672777e-02 -2.32745939e-02  6.78e-11 6.20e-16  4.48e-09     6s
+  34  -2.25912644e-02 -2.29107331e-02  2.29e-11 4.65e-16  2.02e-09     6s
+  35  -2.26101484e-02 -2.26239145e-02  1.28e-10 4.07e-16  8.73e-11     6s
+  36  -2.26110760e-02 -2.26111340e-02  2.13e-10 3.40e-14  3.68e-13     6s
+  37  -2.26111164e-02 -2.26111286e-02  3.61e-09 6.88e-15  7.77e-14     6s
+  38  -2.26111250e-02 -2.26111267e-02  6.47e-10 5.00e-15  1.05e-14     6s
+
+Barrier solved model in 38 iterations and 6.25 seconds (2.77 work units)
+Optimal objective -2.26111250e-02
+
+
+Root crossover log...
+
+   18358 DPushes remaining with DInf 0.0000000e+00                 6s
+       0 DPushes remaining with DInf 0.0000000e+00                 6s
+
+   24230 PPushes remaining with PInf 1.7326728e-05                 6s
+       0 PPushes remaining with PInf 0.0000000e+00                 7s
+
+  Push phase complete: Pinf 0.0000000e+00, Dinf 2.5569572e-05      7s
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   34092   -2.2611125e-02   0.000000e+00   0.000000e+00      7s
+   34102   -2.2611125e-02   0.000000e+00   0.000000e+00      7s
+Crossover time: 0.62 seconds (0.59 work units)
+   34102   -2.2611125e-02   0.000000e+00   0.000000e+00      7s
+
+Root relaxation: objective -2.261113e-02, 34102 iterations, 2.97 seconds (2.35 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.02261    0 1344   -0.01365   -0.02261  65.7%     -    7s
+H    0     0                      -0.0166442   -0.02261  35.8%     -    7s
+H    0     0                      -0.0166883   -0.02261  35.5%     -    7s
+H    0     0                      -0.0180937   -0.02261  25.0%     -    7s
+H    0     0                      -0.0181480   -0.02261  24.6%     -    7s
+H    0     0                      -0.0181635   -0.02261  24.5%     -    8s
+H    0     0                      -0.0194005   -0.02261  16.5%     -    8s
+H    0     0                      -0.0194382   -0.02261  16.3%     -    8s
+H    0     0                      -0.0194601   -0.02261  16.2%     -    8s
+     0     0   -0.02260    0  137   -0.01946   -0.02260  16.1%     -   17s
+     0     0   -0.02260    0 1352   -0.01946   -0.02260  16.1%     -   34s
+H    0     0                      -0.0194605   -0.02260  16.1%     -   36s
+H    0     0                      -0.0194691   -0.02260  16.1%     -   36s
+     0     0   -0.02235    0  203   -0.01947   -0.02235  14.8%     -   44s
+H    0     0                      -0.0194764   -0.02235  14.8%     -   51s
+     0     0   -0.02235    0 1264   -0.01948   -0.02235  14.8%     -   62s
+     0     0   -0.02235    0  347   -0.01948   -0.02235  14.8%     -   74s
+     0     2   -0.02235    0  347   -0.01948   -0.02235  14.8%     -   80s
+     1     4   -0.02218    1  157   -0.01948   -0.02235  14.8%  2185   96s
+     4     6   -0.02215    3  152   -0.01948   -0.02215  13.7%  1101  103s
+     6     8   -0.02214    5  132   -0.01948   -0.02214  13.7%  1356  106s
+     8    10   -0.02178    7  133   -0.01948   -0.02214  13.7%  1631  110s
+    10    12   -0.02196    4  137   -0.01948   -0.02212  13.6%  2079  115s
+    13    15   -0.02187    9  244   -0.01948   -0.02210  13.5%  1810  121s
+    15    17   -0.02200   11  302   -0.01948   -0.02210  13.5%  1956  125s
+    18    20   -0.02203    2  374   -0.01948   -0.02203  13.1%  1944  130s
+H   19    19                      -0.0194792   -0.02203  13.1%  1842  131s
+H   19    19                      -0.0194968   -0.02203  13.0%  1842  131s
+H   19    19                      -0.0195118   -0.02203  12.9%  1842  132s
+    21    23   -0.02170    2  123   -0.01951   -0.02200  12.7%  1959  135s
+    26    28   -0.02157    5   78   -0.01951   -0.02198  12.6%  1766  141s
+    31    33   -0.02168    3  129   -0.01951   -0.02197  12.6%  1578  147s
+    36    38   -0.02023   14   94   -0.01951   -0.02193  12.4%  1484  151s
+    39    41   -0.02180   10  295   -0.01951   -0.02192  12.4%  1672  158s
