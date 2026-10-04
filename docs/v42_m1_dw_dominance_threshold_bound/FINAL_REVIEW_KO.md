@@ -1,4 +1,4 @@
-1. 요청 branch `codex/v42-m1-dw-dominance-threshold-bound-v1`. Draft PR과 최종 remote SHA는 게시 후 PR 본문에 기록한다. Semantic 361 PASS, full pytest 1808 PASS. Git clean은 게시 후 확인한다.
+1. Draft PR [#143](https://github.com/BeaverVillage/MobileESS/pull/143); scientific payload SHA `4cd81b6be5d09fb3b7a8414ae938543e4a9f32bf`. Semantic 361 PASS, full pytest 1,808 PASS. First remote SHA/base SHA 일치와 clean tree PASS. 최종 metadata commit SHA는 PR 본문 및 최종 응답에 기록한다.
 2. PR142 exact head `29a115748e7c1f3a983019fe005e91710defa0d2` 및 remote Draft identity PASS.
 3. checkpoint retained trajectory 1,158개 전부 SHA, 원본 local rows, raw integrality, physical semantics, coupling projection 감사 PASS. Old pricing replay 0.
 4. `conv(X_m^I) ⊆ P_m^arc`, 원본 축 복원 및 full-scale projected inclusion PASS. 따라서 `z_arc_LP ≤ z_DW_root`. 이는 모든 미발견 legal trajectory에도 성립하는 affine inclusion이다.
