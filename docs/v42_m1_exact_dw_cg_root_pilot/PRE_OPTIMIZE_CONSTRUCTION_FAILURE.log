@@ -1,0 +1,24 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw\run.py", line 211, in <module>
+    if __name__=='__main__':Pilot().run()
+                            ^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw\run.py", line 30, in __init__
+    self.blocks=[Block(self.B,self.e,self.owner,self.row_owner,native,m) for m in range(4)]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw\run.py", line 30, in <listcomp>
+    self.blocks=[Block(self.B,self.e,self.owner,self.row_owner,native,m) for m in range(4)]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw\models.py", line 30, in __init__
+    self.model=build(self.A,self.d,'DW_PRICE_'+self.unit);self.vars=self.model.getVars();self.mask=self.d['types']!='C'
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw\models.py", line 18, in build
+    assert signature(B,e)==signature(A,d) and np.array_equal(e['row_names'],d['row_names'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

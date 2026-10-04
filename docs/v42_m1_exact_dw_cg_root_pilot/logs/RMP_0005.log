@@ -1,0 +1,153 @@
+
+Gurobi 13.0.2 (win64) logging started Sun Oct  4 12:02:38 2026
+
+Set parameter LogFile to value "docs/v42_m1_exact_dw_cg_root_pilot/logs/RMP_0005.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  300
+FeasibilityTol  1e-08
+OptimalityTol  1e-08
+Method  2
+BarConvTol  1e-11
+Crossover  1
+PreDual  0
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 679959 rows, 81237 columns and 7162620 nonzeros (Min)
+Model has 1 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e-24, 2e+03]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+LP warm-start: discard basis
+Presolve time: 0.69s
+Presolved: 17017 rows, 3212 columns, 116704 nonzeros
+
+Ordering time: 0.01s
+
+Barrier statistics:
+ Dense cols : 142
+ AA' NZ     : 1.577e+05
+ Factor NZ  : 2.168e+05 (roughly 10 MB of memory)
+ Factor Ops : 4.197e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   5.38359342e+02 -2.82014001e+03  2.79e+03 2.84e-06  5.41e+01     1s
+   1   5.38336831e+02 -4.31670104e+03  2.39e+03 1.68e+01  4.72e+01     1s
+   2   5.38265612e+02 -4.26212861e+03  2.36e+03 1.70e+01  4.64e+01     1s
+   3   5.38603413e+02 -8.39013286e+03  2.16e+03 3.24e+01  3.65e+01     1s
+   4   5.38488453e+02 -1.20434576e+04  1.97e+03 2.01e+01  2.97e+01     1s
+   5   5.40983460e+02 -1.32636921e+04  1.74e+03 1.86e+01  2.65e+01     1s
+   6   5.42974051e+02 -1.48389608e+04  1.41e+03 1.57e+01  2.17e+01     1s
+   7   3.38663674e+02 -1.48320075e+04  1.35e+03 1.68e+01  1.84e+01     1s
+   8   3.13177179e+02 -1.64318537e+04  8.12e+02 1.63e+01  1.19e+01     1s
+   9   1.70579966e+02 -1.69411790e+04  5.53e+02 2.18e+01  7.65e+00     1s
+  10   1.17898930e+02 -1.58786009e+04  3.67e+02 2.26e+01  4.93e+00     1s
+  11   6.85938852e+01 -1.31059121e+04  2.12e+02 1.78e+01  2.73e+00     1s
+  12   4.19175945e+01 -8.07233553e+03  1.26e+02 2.02e+01  1.48e+00     1s
+  13   3.86461167e+01 -7.31160173e+03  1.16e+02 1.87e+01  1.34e+00     1s
+  14   2.97772282e+01 -7.15004622e+03  8.84e+01 1.84e+01  1.11e+00     1s
+  15   1.09059081e+01 -3.20142120e+03  3.00e+01 8.92e+00  3.81e-01     1s
+  16   4.15506762e+00 -1.03531693e+03  9.66e+00 5.94e+00  1.10e-01     1s
+  17   2.27463705e+00 -3.43789961e+02  4.02e+00 2.49e+00  3.69e-02     1s
+  18   1.75388735e+00 -1.83948169e+02  2.47e+00 1.38e+00  1.91e-02     1s
+  19   1.08769396e+00 -1.42115490e+02  4.78e-01 1.04e+00  9.12e-03     1s
+  20   9.28187298e-01 -5.07239120e+01  2.02e-08 3.59e-01  2.71e-03     1s
+  21   9.23410582e-01 -1.79646749e-01  3.72e-08 7.44e-03  5.81e-05     1s
+  22   7.60735590e-01  1.73677749e-01  2.22e-08 3.13e-03  2.88e-05     1s
+  23   7.54851002e-01  2.15563693e-01  1.73e-08 2.63e-03  2.57e-05     1s
+  24   7.53100583e-01  2.17281531e-01  1.68e-08 2.63e-03  2.56e-05     1s
+  25   7.62335282e-01  2.41548346e-01  1.60e-08 2.48e-03  2.55e-05     1s
+  26   7.48436231e-01  3.71721736e-01  1.39e-08 1.73e-03  2.01e-05     1s
+  27   7.45010966e-01  3.93602107e-01  1.34e-08 1.73e-03  1.85e-05     1s
+  28   7.45621719e-01  4.01088995e-01  1.31e-08 1.62e-03  1.81e-05     1s
+  29   7.45246313e-01  3.32230892e-01  1.31e-08 2.06e-03  1.82e-05     2s
+  30   7.66227520e-01  3.87669517e-01  1.19e-08 1.68e-03  1.63e-05     2s
+  31   7.55090102e-01  4.35320483e-01  1.18e-08 1.66e-03  1.59e-05     2s
+  32   7.57106615e-01  4.81628505e-01  1.02e-08 1.97e-03  1.02e-05     2s
+  33   7.56950725e-01  4.97625200e-01  1.00e-08 1.96e-03  1.02e-05     2s
+  34   7.57320560e-01  5.13197360e-01  9.99e-09 1.96e-03  1.01e-05     2s
+  35   7.65291928e-01  4.06673272e-01  8.40e-09 1.86e-03  9.92e-06     2s
+  36   7.64319631e-01  4.13695576e-01  7.92e-09 2.17e-03  9.89e-06     2s
+  37   7.63996583e-01  4.05935074e-01  7.76e-09 2.29e-03  9.54e-06     2s
+  38   7.56622095e-01  4.21879439e-01  6.64e-09 2.01e-03  8.65e-06     2s
+  39   7.56629328e-01  4.15539144e-01  6.62e-09 2.15e-03  8.58e-06     2s
+  40   7.50017512e-01  4.00056352e-01  5.30e-09 2.19e-03  8.09e-06     2s
+  41   7.56458320e-01  4.35509005e-01  5.10e-09 2.08e-03  8.24e-06     2s
+  42   7.55497415e-01  3.94436888e-01  4.84e-09 1.77e-03  7.07e-06     2s
+  43   7.53827126e-01  4.32792332e-01  4.17e-09 2.22e-03  6.50e-06     2s
+  44   7.55267490e-01  4.37029949e-01  4.17e-09 2.24e-03  6.52e-06     2s
+  45   7.55426732e-01  3.92404299e-01  4.13e-09 3.44e-03  6.37e-06     2s
+  46   7.44415417e-01  4.00017121e-01  4.02e-09 3.36e-03  5.78e-06     2s
+  47   7.45303221e-01  3.86109491e-01  3.78e-09 3.31e-03  4.89e-06     2s
+  48   7.44345481e-01  6.16732205e-01  3.53e-09 2.18e-03  1.74e-06     2s
+  49   7.36015580e-01  6.50772153e-01  3.53e-09 2.25e-03  1.73e-06     2s
+  50   7.40991752e-01  6.47357803e-01  2.49e-09 2.25e-03  1.56e-06     2s
+  51   7.41316188e-01  6.73650026e-01  2.43e-09 3.00e-03  1.43e-06     2s
+  52   7.38266577e-01  6.27034915e-01  8.70e-10 2.90e-03  5.72e-07     2s
+  53   7.38677080e-01  6.28435736e-01  7.41e-09 2.97e-03  5.89e-07     2s
+  54   7.39242044e-01  6.49697282e-01  7.06e-09 2.79e-03  5.00e-07     2s
+  55   7.43575810e-01  6.27559734e-01  8.62e-09 3.40e-03  3.23e-07     2s
+  56   7.43545628e-01  6.27885205e-01  8.64e-09 3.39e-03  3.23e-07     2s
+  57   7.42641372e-01  6.37645772e-01  8.45e-09 3.31e-03  3.02e-07     2s
+  58   7.43175759e-01  7.27113112e-01  6.13e-09 2.70e-03  2.78e-07     2s
+  59   7.43679391e-01  7.19316094e-01  3.11e-08 2.74e-03  2.81e-07     2s
+  60   7.44071344e-01  6.59130634e-01  2.28e-08 2.82e-03  9.18e-08     2s
+  61   7.48705245e-01  6.26161929e-01  2.25e-08 3.11e-03  8.02e-08     2s
+  62   7.47356130e-01  6.23990448e-01  1.96e-08 3.15e-03  8.19e-08     2s
+  63   7.47757178e-01  7.52332283e-01  1.81e-08 2.27e-03  7.74e-08     2s
+  64   7.46369506e-01  8.28573883e-01  2.57e-08 2.30e-03  6.81e-08     2s
+  65   7.46361089e-01  7.89536717e-01  5.65e-08 2.65e-03  4.30e-08     2s
+  66   7.45516816e-01  7.20436092e-01  5.30e-08 2.76e-03  2.95e-08     2s
+  67   7.48774353e-01  7.57545770e-01  5.02e-08 2.27e-03  3.61e-08     2s
+  68   7.48805240e-01  7.56718487e-01  4.99e-08 2.33e-03  3.69e-08     2s
+  69   7.48813089e-01  7.54851779e-01  6.12e-08 2.42e-03  2.96e-08     3s
+  70   7.48812729e-01  7.55679112e-01  6.13e-08 2.44e-03  2.79e-08     3s
+  71   7.49481195e-01  7.51062128e-01  6.57e-08 2.43e-03  4.39e-08     3s
+  72   7.49731178e-01  7.42976956e-01  5.77e-08 2.46e-03  5.54e-08     3s
+  73   7.49724343e-01  7.43694681e-01  6.45e-08 2.45e-03  5.51e-08     3s
+  74   7.49840306e-01  7.13522080e-01  3.25e-08 3.44e-03  7.19e-08     3s
+
+Barrier performed 74 iterations in 2.63 seconds (2.46 work units)
+Sub-optimal termination - objective 7.47757178e-01
+
+Crossover log...
+
+      20 DPushes remaining with DInf 0.0000000e+00                 3s
+       0 DPushes remaining with DInf 0.0000000e+00                 3s
+
+      17 PPushes remaining with PInf 0.0000000e+00                 3s
+       0 PPushes remaining with PInf 0.0000000e+00                 3s
+
+  Push phase complete: Pinf 0.0000000e+00, Dinf 8.8069140e+00      3s
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+      37    6.9805214e-01   0.000000e+00   8.806914e+00      3s
+Crossover time: 0.02 seconds (0.06 work units)
+Crossover changed status from Sub-Optimal to Optimal
+      74    6.6360786e-01   0.000000e+00   0.000000e+00      3s
+
+Solved in 74 iterations and 3.28 seconds (3.21 work units)
+Optimal objective  6.636078553e-01
+Set parameter Threads to value 1
+Set parameter Method to value 2
+Set parameter Crossover to value 1
+Set parameter TimeLimit to value 300
+Set parameter FeasibilityTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter BarConvTol to value 1e-11
+Set parameter PreDual to value 0
+Set parameter Seed to value 20260929

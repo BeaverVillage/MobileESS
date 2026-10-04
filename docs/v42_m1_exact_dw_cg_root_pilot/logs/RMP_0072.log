@@ -1,0 +1,93 @@
+
+Gurobi 13.0.2 (win64) logging started Sun Oct  4 12:11:03 2026
+
+Set parameter LogFile to value "docs/v42_m1_exact_dw_cg_root_pilot/logs/RMP_0072.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  300
+FeasibilityTol  1e-08
+OptimalityTol  1e-08
+Method  2
+BarConvTol  1e-11
+Crossover  1
+PreDual  0
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 679959 rows, 81505 columns and 7170773 nonzeros (Min)
+Model has 1 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e-24, 2e+03]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+LP warm-start: discard basis
+Presolve time: 1.08s
+Presolved: 73576 rows, 20059 columns, 609845 nonzeros
+
+Ordering time: 0.06s
+
+Barrier statistics:
+ Dense cols : 776
+ AA' NZ     : 7.646e+05
+ Factor NZ  : 1.252e+06 (roughly 50 MB of memory)
+ Factor Ops : 1.145e+08 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   7.86793135e+01 -4.70539063e+04  4.08e+05 0.00e+00  1.01e+03     1s
+   1   7.96438322e+01 -5.10156786e+04  4.02e+05 5.60e+01  9.85e+02     1s
+   2   8.14278367e+01 -4.43191281e+04  3.93e+05 6.30e+01  9.65e+02     1s
+   3   8.31003432e+01 -3.88348241e+04  3.84e+05 7.12e+01  9.35e+02     1s
+   4   8.51481354e+01 -3.87349951e+04  3.73e+05 7.22e+01  9.19e+02     2s
+   5   8.53544317e+01 -3.82515805e+04  3.71e+05 7.23e+01  9.17e+02     2s
+   6   8.67767040e+01 -4.19292679e+04  3.64e+05 8.17e+01  8.80e+02     2s
+   7   8.67726491e+01 -4.29267310e+04  3.63e+05 8.18e+01  8.81e+02     2s
+   8   8.75020863e+01 -4.31158934e+04  3.60e+05 8.25e+01  8.74e+02     2s
+   9   8.81264495e+01 -4.32468739e+04  3.56e+05 8.29e+01  8.69e+02     2s
+  10   8.81283505e+01 -4.30730458e+04  3.56e+05 8.29e+01  8.69e+02     2s
+  11   8.85148731e+01 -4.31108449e+04  3.54e+05 8.38e+01  8.63e+02     2s
+  12   8.90678159e+01 -4.15066127e+04  3.51e+05 8.43e+01  8.45e+02     2s
+  13   9.00684557e+01 -3.97807134e+04  3.46e+05 8.55e+01  8.28e+02     2s
+  14   9.03483755e+01 -4.08332372e+04  3.44e+05 8.61e+01  8.22e+02     2s
+  15   9.03652000e+01 -4.24379474e+04  3.44e+05 8.60e+01  8.22e+02     2s
+  16   9.03704411e+01 -4.66769918e+04  3.44e+05 8.60e+01  8.20e+02     2s
+  17   9.07019868e+01 -4.52764455e+04  3.42e+05 8.72e+01  8.09e+02     2s
+  18   9.07001067e+01 -4.46358551e+04  3.42e+05 8.73e+01  8.07e+02     2s
+  19   9.07031991e+01 -4.40722290e+04  3.42e+05 8.73e+01  8.07e+02     2s
+  20   9.07030677e+01 -4.37449066e+04  3.42e+05 8.74e+01  8.06e+02     2s
+  21   9.07040708e+01 -4.40641815e+04  3.42e+05 8.73e+01  8.05e+02     2s
+  22   9.07038876e+01 -4.47663117e+04  3.42e+05 8.72e+01  8.04e+02     2s
+
+Barrier performed 22 iterations in 2.28 seconds (4.39 work units)
+Numerical trouble encountered
+
+Model may be infeasible or unbounded.  Consider using the
+homogeneous algorithm (through parameter 'BarHomogeneous')
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    1.0000000e+00   1.968939e+05   1.166025e+10      3s
+Crossover changed status from Numeric to Optimal
+    7426    6.0963634e-01   0.000000e+00   0.000000e+00      5s
+
+Solved in 7426 iterations and 4.76 seconds (10.35 work units)
+Optimal objective  6.096363419e-01
+Set parameter Threads to value 1
+Set parameter Method to value 2
+Set parameter Crossover to value 1
+Set parameter TimeLimit to value 300
+Set parameter FeasibilityTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter BarConvTol to value 1e-11
+Set parameter PreDual to value 0
+Set parameter Seed to value 20260929

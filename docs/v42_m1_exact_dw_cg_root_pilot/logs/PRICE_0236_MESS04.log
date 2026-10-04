@@ -1,0 +1,133 @@
+
+Gurobi 13.0.2 (win64) logging started Sun Oct  4 12:09:15 2026
+
+Set parameter LogFile to value "docs/v42_m1_exact_dw_cg_root_pilot/logs/PRICE_0236_MESS04.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  600
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+Method  2
+Crossover  2
+DegenMoves  0
+MIPFocus  3
+NodeMethod  1
+CutPasses  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 51481 rows, 58841 columns and 314646 nonzeros (Min)
+Model fingerprint: 0x8c63bce9
+Model has 1944 linear objective coefficients and an objective constant of 3.1384036467302495e-05
+Variable types: 6799 continuous, 52042 integer (52042 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [3e-11, 3e-04]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+Loaded user MIP start with objective -2.71051e-19
+MIP start from previous solve did not produce a new incumbent solution
+
+Presolve removed 8938 rows and 2 columns
+Presolve time: 0.50s
+Presolved: 42543 rows, 58839 columns, 292302 nonzeros
+Variable types: 6797 continuous, 52042 integer (52042 binary)
+Root relaxation presolve removed 2 rows and 2 columns
+Root relaxation presolved: 42541 rows, 58837 columns, 292298 nonzeros
+
+Root barrier log...
+
+Ordering time: 0.04s
+
+Barrier statistics:
+ AA' NZ     : 5.993e+05
+ Factor NZ  : 1.094e+06 (roughly 50 MB of memory)
+ Factor Ops : 7.380e+07 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   2.20232970e-01 -3.44573025e+04  1.81e+04 5.17e-03  3.81e+00     1s
+   1  -5.56065996e-02 -2.87629880e+04  2.42e+03 4.12e-03  5.55e-01     1s
+   2   6.39318264e-02 -1.10131735e+04  3.51e+02 1.80e-04  1.09e-01     1s
+   3  -6.15042796e-02 -3.04072406e+03  1.06e+02 3.00e-06  2.93e-02     1s
+   4  -2.94919326e-01 -2.39837633e+03  4.86e+01 4.23e-15  2.01e-02     1s
+   5  -4.68205887e-01 -1.86831057e+03  2.83e+01 9.70e-15  1.51e-02     1s
+   6  -5.71789172e-01 -1.40303823e+03  2.15e+01 1.05e-14  1.17e-02     1s
+   7  -6.52558252e-01 -1.15957711e+03  1.61e+01 1.05e-14  9.71e-03     1s
+   8  -6.28300209e-01 -8.60969197e+02  1.34e+01 1.66e-14  7.76e-03     1s
+   9  -2.69916644e-01 -4.31016727e+02  4.20e+00 1.45e-14  3.51e-03     1s
+  10  -6.72806860e-02 -1.44395984e+02  6.35e-01 1.44e-14  1.03e-03     1s
+  11  -5.03530884e-02 -2.66412803e+01  1.60e-01 1.24e-14  1.82e-04     1s
+  12  -5.77381869e-02 -4.00657321e+00  9.26e-03 9.62e-15  2.52e-05     1s
+  13  -7.61752998e-02 -3.25408308e+00  2.69e-03 9.32e-15  2.02e-05     1s
+  14  -9.57330851e-02 -1.06698951e+00  1.67e-04 7.41e-15  6.16e-06     1s
+  15  -1.01005389e-01 -2.32086325e-01  5.62e-07 6.82e-15  8.31e-07     1s
+  16  -1.01382619e-01 -1.98330139e-01  2.79e-07 7.54e-15  6.14e-07     1s
+  17  -1.01961195e-01 -1.42933457e-01  4.35e-08 7.19e-15  2.60e-07     1s
+  18  -1.02378610e-01 -1.24203227e-01  1.08e-08 6.89e-15  1.38e-07     1s
+  19  -1.02865289e-01 -1.10133327e-01  1.61e-09 7.28e-15  4.61e-08     1s
+  20  -1.03064631e-01 -1.07465690e-01  6.65e-10 7.33e-15  2.79e-08     1s
+  21  -1.03073913e-01 -1.06601035e-01  6.19e-10 8.09e-15  2.23e-08     1s
+  22  -1.03223208e-01 -1.05177684e-01  2.66e-10 7.91e-15  1.24e-08     1s
+  23  -1.03309702e-01 -1.04399308e-01  1.50e-10 7.44e-15  6.90e-09     1s
+  24  -1.03357010e-01 -1.04148066e-01  1.03e-10 7.97e-15  5.01e-09     1s
+  25  -1.03367580e-01 -1.03982196e-01  8.90e-11 8.60e-15  3.89e-09     1s
+  26  -1.03390434e-01 -1.03840228e-01  1.12e-10 9.48e-15  2.85e-09     1s
+  27  -1.03421512e-01 -1.03690233e-01  1.87e-10 7.69e-15  1.70e-09     2s
+  28  -1.03433905e-01 -1.03587177e-01  1.62e-10 8.53e-15  9.71e-10     2s
+  29  -1.03438429e-01 -1.03544299e-01  1.11e-10 7.18e-15  6.71e-10     2s
+  30  -1.03441173e-01 -1.03503203e-01  7.93e-11 7.30e-15  3.93e-10     2s
+  31  -1.03445531e-01 -1.03495932e-01  9.22e-11 8.53e-15  3.19e-10     2s
+  32  -1.03449419e-01 -1.03467975e-01  7.65e-11 6.83e-15  1.18e-10     2s
+  33  -1.03451787e-01 -1.03461092e-01  2.05e-10 2.51e-12  5.90e-11     2s
+  34  -1.03453217e-01 -1.03455945e-01  6.70e-11 9.15e-12  1.75e-11     2s
+  35  -1.03453636e-01 -1.03454287e-01  1.67e-09 5.37e-12  4.23e-12     2s
+  36  -1.03453901e-01 -1.03453895e-01  1.77e-11 5.38e-12  1.34e-13     2s
+
+Barrier solved model in 36 iterations and 1.71 seconds (2.71 work units)
+Optimal objective -1.03453901e-01
+
+Crossover time: 1.14 seconds (2.40 work units)
+
+Root relaxation: objective -1.034535e-01, 48700 iterations, 2.26 seconds (4.10 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.10345    0 2001   -0.00000   -0.10345      -     -    2s
+H    0     0                      -0.1033621   -0.10345  0.09%     -    3s
+H    0     0                      -0.1033766   -0.10345  0.07%     -    3s
+
+Explored 1 nodes (48700 simplex iterations) in 4.53 seconds (5.62 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 2: -0.103377 -2.71051e-19 
+
+Solve interrupted
+Best objective -1.033766293723e-01, best bound -1.034534543401e-01, gap 0.0743%
+
+User-callback calls 853, time in user-callback 1.45 sec
+Set parameter Threads to value 1
+Set parameter Method to value 2
+Set parameter NodeMethod to value 1
+Set parameter Crossover to value 2
+Set parameter DegenMoves to value 0
+Set parameter CutPasses to value 1
+Set parameter MIPFocus to value 3
+Set parameter MIPGap to value 0
+Set parameter MIPGapAbs to value 0
+Set parameter TimeLimit to value 600
+Set parameter FeasibilityTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter Seed to value 20260929
