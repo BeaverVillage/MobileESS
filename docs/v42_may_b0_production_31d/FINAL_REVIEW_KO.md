@@ -1,4 +1,4 @@
-1. Draft PR/branch/final SHA/clean tree는 PR_PUBLICATION.json 및 최종 응답에서 확인. Branch=codex/v42-may-b0-production-31d.
+1. Draft PR #148: https://github.com/BeaverVillage/MobileESS/pull/148; branch=codex/v42-may-b0-production-31d; implementation SHA=9777b5363467b63e5cb8970074d5330ab7548960. 최종 publication SHA/remote 일치/clean은 최종 응답과 PR head에서 확인.
 
 2. Base PR146 exact SHA=0760b8f56398344e55d938b175d88761d19ff657. 입력/모델/checker authority gate PASS.
 
@@ -20,7 +20,7 @@
 
 11. Maximum system commit=95.080444%.
 
-12. Pagefile change=1.140388 GiB; max Pages Input/sec=180074.9272765848; sustained catastrophic paging=False.
+12. Pagefile change=1.140388 GiB; max Pages Input/sec=180074.9272765848; sustained catastrophic paging=False. Sampling=1s, measured maximum gap=1.156s.
 
 13. Campaign wall=332.953000 seconds.
 
@@ -42,7 +42,7 @@
 
 22. 기존 B0 metric={"authority": ["v42_capacity/planning.py", "v42_capacity/replay.py"], "runtime_shortfall_GPUh": 103074.47260195577, "CC4_shortfall_GPUh": 63442.0458551875, "Planning_IT_kWh": 108082.10321473914, "Planning_PCC_kWh": 152563.98761600722, "Actual_GPUh": 482537.99749999994, "Actual_IT_kWh": 324744.13360578945, "Actual_PCC_kWh": 369226.0344353302, "rho": null, "rho_reason": "Existing fixed B0 capacity/reference producer does not publish an optimized rho; no new objective invented", "comparisons_to_other_arms": false}. 다른 arm 비교·새 rho 발명 없음.
 
-23. Retry=0, interruption transitions=0; restart receipt 참조.
+23. Retry=0, interruption transitions=0; restart receipt 참조. 최종 run crash/retry/restart=0/0/0; 초기 측정 불충족 run의 transient I/O retry=1은 non-authoritative 진단 이력.
 
 24. Idempotency: terminal receipt 155개 hash/bytes 재검증, 재계산 0. 과거 B0 output 대체 0.
 
@@ -54,7 +54,7 @@
 
 28. Git base SHA + executed code/input SHA manifest + frozen config/date/checker/OpenDSS/run ID. SHA256_MANIFEST.json으로 artifact bytes 검증.
 
-29. Unresolved scientific issue=None; B0_SCIENTIFIC_PASS=True.
+29. Unresolved scientific issue=None; B0_SCIENTIFIC_PASS=True. 검증 명령 admission 오분류는 게시 코드에서 SHA-bound 예외로 수정했고, 실행 당시 observer bytes/원래 pause 이력은 보존했다.
 
 30. B0 종료 후 명시적 STOP. B1 READY/release/실행 없음.
 
