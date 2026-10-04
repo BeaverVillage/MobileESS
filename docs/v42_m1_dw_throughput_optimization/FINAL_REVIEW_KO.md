@@ -1,4 +1,4 @@
-1. Draft PR publication pending, final SHA publication pending; semantic 334, full 1781 PASS; 최종 clean/remote 검증은 PUBLICATION.json.
+1. Draft PR https://github.com/BeaverVillage/MobileESS/pull/142, final SHA 최종 remote exact HEAD는 PR 본문 및 완료 응답에서 검증해 기록; scientific payload cb4089a5fc81f108db1940648c8c8b01049d2797; semantic 334, full 1781 PASS; 최종 clean/remote 검증은 PUBLICATION.json.
 2. PR141 exact head cae31ce64c83d1e94c158a46e2739fd2ff7e7da3: PASS.
 3. Checkpoint 1078개, 제외된 old TIME_LIMIT/interrupted/uncertified points 승격 없음.
 4. RAM floor 1 GiB; old8GiB/15% superseded.
