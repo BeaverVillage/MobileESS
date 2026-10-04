@@ -1,0 +1,150 @@
+
+Gurobi 13.0.2 (win64) logging started Sun Oct  4 16:01:35 2026
+
+Set parameter LogFile to value "docs/v42_m1_dw_discovery_certification_policy/logs/PRICE_0015_MESS03.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  20
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+Method  2
+Crossover  2
+DegenMoves  0
+MIPFocus  3
+NodeMethod  1
+CutPasses  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 51596 rows, 58976 columns and 315361 nonzeros (Min)
+Model fingerprint: 0x8f5cf912
+Model has 2808 linear objective coefficients and an objective constant of 6.5485037121530637e-03
+Variable types: 6814 continuous, 52162 integer (52162 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [8e-13, 1e-05]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+Loaded user MIP start with objective -1.64105e-15
+MIP start from previous solve produced solution with objective -0.0137066 (0.05s)
+MIP start from previous solve produced solution with objective -0.0138045 (0.05s)
+Loaded MIP start from previous solve with objective -0.0138045
+
+Presolve removed 8958 rows and 2 columns
+Presolve time: 0.86s
+Presolved: 42638 rows, 58974 columns, 292967 nonzeros
+Variable types: 6812 continuous, 52162 integer (52162 binary)
+Root relaxation presolve removed 3 rows and 2 columns
+Root relaxation presolved: 42635 rows, 58972 columns, 292915 nonzeros
+
+Root barrier log...
+
+Ordering time: 0.06s
+
+Barrier statistics:
+ AA' NZ     : 6.006e+05
+ Factor NZ  : 1.080e+06 (roughly 50 MB of memory)
+ Factor Ops : 6.927e+07 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   2.40921398e-03 -3.45219537e+04  1.80e+04 2.04e-04  3.80e+00     1s
+   1  -4.63941810e-02 -2.93383429e+04  2.39e+03 2.53e-03  5.43e-01     2s
+   2   7.76254402e-02 -8.95834753e+03  3.44e+02 9.85e-05  9.27e-02     2s
+   3  -1.44289334e-02 -2.39252570e+03  7.54e+01 2.28e-15  2.20e-02     2s
+   4  -5.90788880e-02 -1.89699576e+03  3.93e+01 2.13e-15  1.58e-02     2s
+   5  -7.43296321e-02 -1.45536076e+03  2.45e+01 2.10e-15  1.19e-02     2s
+   6  -7.70185122e-02 -1.16087067e+03  1.69e+01 2.75e-15  9.54e-03     2s
+   7  -4.13898764e-02 -1.02144798e+03  1.25e+01 3.63e-15  8.22e-03     2s
+   8   7.40258866e-03 -3.21657906e+02  3.19e+00 3.20e-15  2.53e-03     2s
+   9   1.10663870e-02 -1.25614575e+02  3.71e-01 2.95e-15  8.50e-04     2s
+  10   1.12239216e-02 -2.51848609e+01  2.83e-02 2.70e-15  1.61e-04     2s
+  11   9.44261764e-03 -3.94588618e+00  1.03e-04 1.60e-15  2.50e-05     2s
+  12   1.91163976e-03 -1.30994653e+00  7.19e-07 5.10e-16  8.30e-06     2s
+  13  -6.61202662e-04 -4.09512478e-01  1.12e-07 2.07e-16  2.59e-06     2s
+  14  -8.19971032e-03 -2.46695884e-01  1.81e-08 1.32e-16  1.51e-06     2s
+  15  -1.13008949e-02 -1.64488887e-01  8.46e-09 8.13e-17  9.69e-07     2s
+  16  -1.42899834e-02 -1.22346423e-01  2.64e-09 6.14e-17  6.83e-07     2s
+  17  -1.59304961e-02 -8.64450556e-02  9.30e-10 3.88e-17  4.46e-07     2s
+  18  -1.65430218e-02 -6.69529056e-02  5.90e-10 2.77e-17  3.19e-07     2s
+  19  -1.67336846e-02 -5.72240177e-02  5.10e-10 2.37e-17  2.56e-07     2s
+  20  -1.75575065e-02 -4.73436873e-02  2.15e-10 1.74e-17  1.88e-07     2s
+  21  -1.77877307e-02 -3.74603717e-02  1.63e-10 1.17e-17  1.24e-07     2s
+  22  -1.81453971e-02 -3.33132823e-02  9.61e-11 1.16e-17  9.59e-08     2s
+  23  -1.82465107e-02 -3.14255664e-02  8.13e-11 9.33e-18  8.33e-08     2s
+  24  -1.84037658e-02 -2.90922491e-02  5.97e-11 9.36e-18  6.76e-08     2s
+  25  -1.85636680e-02 -2.76952555e-02  4.32e-11 1.02e-17  5.77e-08     2s
+  26  -1.87343044e-02 -2.50430245e-02  2.80e-11 7.86e-18  3.99e-08     3s
+  27  -1.89212881e-02 -2.30228061e-02  2.57e-11 7.64e-18  2.59e-08     3s
+  28  -1.91064840e-02 -2.21045819e-02  1.70e-11 7.77e-18  1.90e-08     3s
+  29  -1.91445416e-02 -2.19611824e-02  9.08e-12 7.90e-18  1.78e-08     3s
+  30  -1.92050703e-02 -2.11304543e-02  1.32e-11 7.95e-18  1.22e-08     3s
+  31  -1.92754111e-02 -2.01600860e-02  1.06e-11 6.42e-18  5.59e-09     3s
+  32  -1.93123275e-02 -1.99180481e-02  7.62e-12 7.14e-18  3.83e-09     3s
+  33  -1.93220435e-02 -1.99107669e-02  7.63e-12 7.45e-18  3.72e-09     3s
+  34  -1.93252521e-02 -1.98489630e-02  8.20e-12 8.12e-18  3.31e-09     3s
+  35  -1.93311336e-02 -1.94178546e-02  8.01e-12 6.49e-18  5.48e-10     3s
+  36  -1.93594110e-02 -1.93802396e-02  2.06e-11 2.53e-15  1.32e-10     3s
+  37  -1.93614130e-02 -1.93674532e-02  5.11e-11 3.69e-14  3.82e-11     3s
+  38  -1.93614505e-02 -1.93658712e-02  3.76e-11 4.41e-13  2.80e-11     3s
+  39  -1.93615236e-02 -1.93645432e-02  2.42e-11 7.32e-13  1.91e-11     3s
+  40  -1.93615638e-02 -1.93630389e-02  3.01e-11 1.40e-12  9.33e-12     3s
+  41  -1.93615801e-02 -1.93625715e-02  1.85e-10 1.28e-12  6.27e-12     3s
+  42  -1.93615925e-02 -1.93617453e-02  9.71e-11 1.96e-12  9.67e-13     3s
+  43  -1.93616062e-02 -1.93616186e-02  8.23e-12 1.64e-12  7.89e-14     3s
+  44  -1.93616075e-02 -1.93616076e-02  1.03e-12 2.44e-13  7.06e-16     3s
+
+Barrier solved model in 44 iterations and 3.25 seconds (2.94 work units)
+Optimal objective -1.93616075e-02
+
+Crossover time: 0.71 seconds (0.76 work units)
+
+Root relaxation: objective -1.936161e-02, 30888 iterations, 2.93 seconds (2.68 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.01936    0 1355   -0.01380   -0.01936  40.3%     -    4s
+H    0     0                      -0.0149167   -0.01936  29.8%     -    4s
+H    0     0                      -0.0150345   -0.01936  28.8%     -    5s
+H    0     0                      -0.0150644   -0.01936  28.5%     -    5s
+H    0     0                      -0.0169126   -0.01936  14.5%     -    5s
+H    0     0                      -0.0169317   -0.01936  14.4%     -    5s
+     0     0   -0.01935    0  170   -0.01693   -0.01935  14.3%     -   12s
+
+Cutting planes:
+  MIR: 241
+  Flow cover: 53
+  BQP: 561
+
+Explored 1 nodes (32969 simplex iterations) in 20.02 seconds (20.33 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 5: -0.0169317 -0.0150644 -0.0150345 ... -0.0138045
+
+Time limit reached
+Best objective -1.693165760039e-02, best bound -1.934627725737e-02, gap 14.2610%
+Set parameter Threads to value 1
+Set parameter Method to value 2
+Set parameter NodeMethod to value 1
+Set parameter Crossover to value 2
+Set parameter DegenMoves to value 0
+Set parameter CutPasses to value 1
+Set parameter MIPFocus to value 3
+Set parameter MIPGap to value 0
+Set parameter MIPGapAbs to value 0
+Set parameter FeasibilityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter Seed to value 20260929
+Set parameter TimeLimit to value 60
