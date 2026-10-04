@@ -235,14 +235,16 @@ def test_no_warm_basis_policy_and_timing_separated(native_proofs):
 @pytest.mark.parametrize('kind', ['CERTIFICATION', 'FINAL_CERTIFICATION'])
 def test_certification_has_no_quota_and_true_unstabilized_dual(kind):
     validator, points = pricing_fixture()
+    snap = DiscoverySnapshot.create(7, (2.,), (-3.,), (10.,)*4, (20.,)*4, .3, 40.)
     class Native:
         def terminate(self): raise AssertionError('Certification must not quota terminate')
-    controller = DiscoveryController(kind, 0, snapshot(), validator, RuntimeFlags(True, True, True, True))
+    controller = DiscoveryController(kind, 0, snap, validator, RuntimeFlags(True, True, True, True))
     for point in points: assert controller.observe(point, Native()) is None
     assert not controller.enabled and not controller.accepted
-    settings = certification_settings(kind, snapshot(), RuntimeFlags(True, True, True, True))
+    settings = certification_settings(kind, snap, RuntimeFlags(True, True, True, True))
     assert not settings['early_quota_terminate'] and settings['global_BestBd_required']
-    assert settings['search_dual'] == snapshot().true_dual
+    assert settings['search_dual'] == snap.true_dual != snap.smoothed_dual
+    assert settings['convexity_dual'] == snap.convexity_dual != snap.smoothed_convexity_dual
 
 
 def test_original_corrected_LB_and_interrupted_receipt_firewall():

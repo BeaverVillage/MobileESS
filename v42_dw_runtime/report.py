@@ -230,11 +230,17 @@ These are single toy observations with guard overhead, not production performanc
         description='Cache key = SHA256(canonical JSON of trajectory_SHA + exact authority). RC/dual SHA are historical provenance; no current RC reuse. Finite numbers and complete passing physical/local/integrality report required.')
     write('DW_INCREMENTAL_AUDIT_SCHEMA.json', json.dumps(schema, indent=2))
     peak = max(resources['peak_sampled_RSS_bytes'], tests['peak_sampled_RSS_bytes'])/2**20
+    publication_path = OUT/'DW_PUBLICATION_RECEIPT.json'
+    publication = json.loads(publication_path.read_text(encoding='utf8')) if publication_path.exists() else None
+    publication_text = (f"Draft PR: [{publication['draft_PR']}]({publication['draft_PR']}). 최초 게시 SHA "
+                        f"`{publication['first_published_head']}`의 원격 일치와 clean tree를 확인했다."
+                        if publication else 'Draft PR 게시 후 DW_PUBLICATION_RECEIPT.json에 URL과 최초 게시 SHA를 기록한다.')
     write('FINAL_REVIEW_KO.md', f"""
 # Lane C 최종 검토
 
 1. 기준은 PR143 exact head `{BASE_HEAD}`이며 1,158개 retained registry를 보존했다.
-2. 브랜치 `codex/v42-m1-dw-runtime-acceleration-prep`의 Draft PR과 게시 SHA는
+2. {publication_text}
+   브랜치 `codex/v42-m1-dw-runtime-acceleration-prep`의 Draft PR과 게시 SHA는
    DW_PUBLICATION_RECEIPT.json 및 PR의 현재 head를 확인한다. 최종 head는 후속 게시 기록
    커밋을 포함하므로 `git ls-remote origin refs/heads/codex/v42-m1-dw-runtime-acceleration-prep`가
    최종 SHA 권위다. 게시 후 사용자에게 최종 SHA를 별도로 보고한다.

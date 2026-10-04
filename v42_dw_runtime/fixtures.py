@@ -313,12 +313,13 @@ def rmp_proof(environment, directory):
 def certification_proof():
     from .contracts import certification_settings
     from v42_dw_bound.certificate import corrected, receipt
-    snap = snapshot()
+    snap = DiscoverySnapshot.create(7, (2.,), (-3.,), (10.,)*4, (20.,)*4, .3, 40.)
     flags = RuntimeFlags(True, True, True, True)
     paths = {kind: certification_settings(kind, snap, flags)
              for kind in ('CERTIFICATION', 'FINAL_CERTIFICATION')}
     for settings in paths.values():
         assert settings['search_dual'] == snap.true_dual
+        assert settings['convexity_dual'] == snap.convexity_dual
         assert settings['dual_SHA'] == snap.dual_SHA
         assert not settings['early_quota_terminate'] and not settings['incremental_pool_audit']
         assert settings['global_BestBd_required'] and not settings['smoothed_certificate']

@@ -1,7 +1,8 @@
 # Lane C 최종 검토
 
 1. 기준은 PR143 exact head `ce5d30fb9bcb91ab8395d1313e868d24f5fde517`이며 1,158개 retained registry를 보존했다.
-2. 브랜치 `codex/v42-m1-dw-runtime-acceleration-prep`의 Draft PR과 게시 SHA는
+2. Draft PR: [https://github.com/BeaverVillage/MobileESS/pull/144](https://github.com/BeaverVillage/MobileESS/pull/144). 최초 게시 SHA `aa03e3ff3b7b2fcba9385a8eb97dd616e2deabd6`의 원격 일치와 clean tree를 확인했다.
+   브랜치 `codex/v42-m1-dw-runtime-acceleration-prep`의 Draft PR과 게시 SHA는
    DW_PUBLICATION_RECEIPT.json 및 PR의 현재 head를 확인한다. 최종 head는 후속 게시 기록
    커밋을 포함하므로 `git ls-remote origin refs/heads/codex/v42-m1-dw-runtime-acceleration-prep`가
    최종 SHA 권위다. 게시 후 사용자에게 최종 SHA를 별도로 보고한다.
@@ -33,7 +34,7 @@
     이 PR에서 연결하지 않았다. 환경변수만 설정하면 기존 runner가 변경되는 구조가 아니다.
 16. 단일 Gurobi process, Threads=1, fixture당 TimeLimit=5 s. fixture optimize 11회,
     Lane C test optimize 11회는 모두 작은 모델이며 순차 실행됐다.
-    관측 RSS 최대 104.03 MiB(호출 전후 표본), memory stress 없음. 공유 Lane A 프로세스는 측정하지 않았다.
+    관측 RSS 최대 104.69 MiB(호출 전후 표본), memory stress 없음. 공유 Lane A 프로세스는 측정하지 않았다.
 17. Full-scale M1/Arc-LP/pricing, production RMP/OpenDSS, May 호출은 모두 0회다.
 18. Lane C 31개 테스트 PASS, compileall/static diff 검사 PASS.
     FULL_PYTEST_DEFERRED_DUE_PARALLEL_HEAVY_LANE=true로 repo-wide pytest는 유보했다.
