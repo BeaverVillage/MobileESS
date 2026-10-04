@@ -1,0 +1,5 @@
+PR141's 8 GiB gate stopped four-worker residency before any four-way pricing optimize. This computational-policy canary starts from its exact1078-column checkpoint, uses a1 GiB floor plus commit/thrashing/OOM safeguards, and applies preregistered adaptive exponential smoothing to coupling and convexity duals for Discovery, rechecks every candidate under the same iteration true RMP dual, and captures independently validated negative MIPSOL trajectories in the unchanged full pricing domain.
+
+Actual four-way resource PASS: True; native overlap 132.409s; pricing calls 28; new columns 80. Columns/min .80998 → 6.91001; discovery median88.079s → 70.3343452999834. Warm RMP selected: False.
+
+Unstabilized same-dual corrected certification remains unchanged. Materiality INCONCLUSIVE, bracket [0.5215744487783405, 0.5836817975103938]; no CG convergence/root optimality claim. Heavy union 501.694s <=900s, including warm/cold copies. PR141 files byte-preserved; semantic 334 / full 1781 pass, Threads1 with no overlapping test optimize. May/Actual/FreshAC=0/0/0; no B&P/production M1/P2/A2/M2.

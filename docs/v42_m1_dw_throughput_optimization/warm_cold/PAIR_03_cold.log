@@ -1,0 +1,91 @@
+
+Gurobi 13.0.2 (win64) logging started Sun Oct  4 16:45:29 2026
+
+Set parameter LogFile to value "docs/v42_m1_dw_throughput_optimization/warm_cold/PAIR_03_cold.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  60
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+OptimalityTol  1e-08
+Method  2
+LPWarmStart  0
+BarConvTol  1e-11
+Crossover  1
+PreDual  0
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 679959 rows, 82311 columns and 7215301 nonzeros (Min)
+Model fingerprint: 0xa4fc13db
+Model has 1 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e-24, 2e+03]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Presolve time: 2.86s
+Presolved: 123368 rows, 40998 columns, 1541852 nonzeros
+
+Ordering time: 0.49s
+
+Barrier statistics:
+ Dense cols : 2262
+ AA' NZ     : 1.892e+06
+ Factor NZ  : 3.575e+06 (roughly 100 MB of memory)
+ Factor Ops : 8.991e+08 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   4.00962857e+03 -1.10277111e+06  8.29e+07 0.00e+00  5.08e+04     7s
+   1   4.00929869e+03 -1.11117597e+06  8.29e+07 1.27e+02  5.09e+04     7s
+   2   4.00870348e+03 -1.10565089e+06  8.29e+07 1.09e+02  5.09e+04     8s
+   3   4.00873485e+03 -1.10579787e+06  8.29e+07 1.15e+02  5.09e+04     8s
+   4   4.01062027e+03 -1.10914252e+06  8.29e+07 1.18e+02  5.09e+04     8s
+   5   4.00991781e+03 -1.11522735e+06  8.29e+07 1.33e+02  5.09e+04     8s
+   6   4.00972301e+03 -1.11502451e+06  8.29e+07 1.33e+02  5.09e+04     9s
+   7   4.00947710e+03 -1.11597490e+06  8.29e+07 1.31e+02  5.09e+04     9s
+   8   4.00971496e+03 -1.11892395e+06  8.29e+07 1.34e+02  5.09e+04     9s
+   9   4.00973137e+03 -1.13060415e+06  8.29e+07 1.38e+02  5.09e+04     9s
+  10   4.00991261e+03 -1.13166156e+06  8.29e+07 1.35e+02  5.09e+04     9s
+  11   4.00980799e+03 -1.13576960e+06  8.29e+07 1.30e+02  5.09e+04    10s
+  12   4.01008517e+03 -1.12169215e+06  8.29e+07 1.30e+02  5.07e+04    10s
+  13   4.01012248e+03 -1.11968097e+06  8.29e+07 1.28e+02  5.05e+04    10s
+  14   4.01018430e+03 -1.11708666e+06  8.29e+07 1.37e+02  5.05e+04    10s
+  15   4.01057788e+03 -1.10994869e+06  8.29e+07 1.38e+02  5.04e+04    11s
+  16   4.01060382e+03 -1.11281746e+06  8.29e+07 1.40e+02  5.03e+04    11s
+  17   4.01058109e+03 -1.11213739e+06  8.29e+07 1.40e+02  5.03e+04    11s
+  18   4.01040498e+03 -1.11672500e+06  8.29e+07 2.10e+02  5.03e+04    11s
+  19   4.01035874e+03 -1.11240890e+06  8.29e+07 2.10e+02  5.02e+04    11s
+  20   4.01133357e+03 -1.11845511e+06  8.28e+07 2.09e+02  5.02e+04    12s
+  21   4.01122263e+03 -1.11627098e+06  8.28e+07 2.09e+02  5.01e+04    12s
+
+Barrier performed 21 iterations in 11.97 seconds (12.39 work units)
+Numerical trouble encountered
+
+Model may be infeasible or unbounded.  Consider using the
+homogeneous algorithm (through parameter 'BarHomogeneous')
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    1.0000000e+00   9.923362e+05   3.677406e+10     13s
+   17268    1.0000000e+00   1.644986e+05   6.381402e+09     15s
+   21460    1.0000000e+00   1.719728e+03   2.732276e+09     20s
+   22630    1.0000000e+00   6.238582e+01   2.783352e+07     25s
+   24030    5.8887842e-01   0.000000e+00   3.672159e-02     30s
+Crossover changed status from Numeric to Optimal
+   24830    5.8630350e-01   0.000000e+00   0.000000e+00     34s
+
+Solved in 24830 iterations and 34.10 seconds (48.20 work units)
+Optimal objective  5.863035015e-01
+
+User-callback calls 26389, time in user-callback 2.55 sec

@@ -1,0 +1,55 @@
+
+Gurobi 13.0.2 (win64) logging started Sun Oct  4 16:44:03 2026
+
+Set parameter LogFile to value "docs/v42_m1_dw_throughput_optimization/warm_cold/PAIR_01_warm.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  60
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+OptimalityTol  1e-08
+Method  1
+LPWarmStart  2
+BarConvTol  1e-11
+Crossover  1
+PreDual  0
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 679959 rows, 82311 columns and 7215301 nonzeros (Min)
+Model has 1 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e-24, 2e+03]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+LP warm-start: use basis
+Presolve time: 2.89s
+Presolved: 123368 rows, 40998 columns, 1541852 nonzeros
+
+LP warm-start: get start vectors from basis, then crush them
+Dual warm-start: 1451 superbasic variables.
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0      handle free variables                          4s
+   15450    4.7984177e-01   9.115097e+05   0.000000e+00      5s
+   18717    2.7165311e+01   2.594917e+08   0.000000e+00     10s
+   20127    1.8468521e+02   1.865345e+07   0.000000e+00     16s
+   20887    2.9300031e+02   8.815017e+05   0.000000e+00     20s
+   21787    3.5337022e+02   4.287039e+05   0.000000e+00     25s
+   23427    3.8494244e+02   3.973940e+04   0.000000e+00     30s
+   25053    5.8927292e-01   0.000000e+00   8.116739e-01     35s
+   25948    5.8630350e-01   0.000000e+00   0.000000e+00     39s
+
+Solved in 25948 iterations and 38.87 seconds (65.12 work units)
+Optimal objective  5.863035015e-01
+
+User-callback calls 26232, time in user-callback 2.99 sec

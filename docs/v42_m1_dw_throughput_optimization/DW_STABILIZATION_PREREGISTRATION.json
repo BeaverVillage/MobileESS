@@ -1,0 +1,20 @@
+{
+  "mode": "adaptive_exponential",
+  "enabled_by_user_before_any_optimize": true,
+  "policy": {
+    "enabled": true,
+    "mode": "adaptive_exponential",
+    "initial": 0.3,
+    "minimum": 0.1,
+    "maximum": 0.8,
+    "first_discovery": "pi_smooth=pi_true and convexity_smooth=convexity_true; no distortion",
+    "update": "Use alpha_current in current snapshot; compute d_norm from successive TRUE global coupling dual Linf; d_norm>.50 => next=max(.10,.5*current); .10<d_norm<=.50 => unchanged; <=.10 => next=min(.80,1.25*current). All subsequent RMP snapshots update coupling and convexity duals together, including certification diagnostics; certification pricing uses true snapshot only.",
+    "acceptance": "full original feasibility and manual smooth RC<=-1e-7 AND manual true RC<=-1e-7, bit-exact dedup only",
+    "stagnation": "After3 consecutive discovery rounds with zero accepted columns, immediately schedule certification. If four global BestBd do not provide no-negative authority, record SMOOTHING_STAGNATION=true. No domain restriction/fallback.",
+    "checkpoint": "Save true/smooth dual SHAs and vectors, alpha_current/next, both RCs, candidates, accepted columns, wall, cert bracket; explicit resume preserves smoothing state.",
+    "fixture": "Full enumeration bounded LP CG with adaptive smoothed discovery plus exact true-dual recovery must match unstabilized/full optimum before first full-domain discovery.",
+    "box_proximal_trust_region": false
+  },
+  "scientific_certificate_uses_true_dual_only": true,
+  "box_proximal_trust_region_run": false
+}
