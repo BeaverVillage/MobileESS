@@ -1,0 +1,25 @@
+# PR143 existing interface audit
+
+Scientific base: `ce5d30fb9bcb91ab8395d1313e868d24f5fde517`, Draft PR [143](https://github.com/BeaverVillage/MobileESS/pull/143). Audit uses source and small synthetic matrices only. No frozen production matrix loading, native production model construction, Arc-LP optimization, root pricing, or campaign invocation.
+
+| Existing interface at the frozen base | Scientific authority | Lane-B use |
+| --- | --- | --- |
+| `v42_dw_root/models.py:10` `subset`, `:12` `build` | Exact original matrix, bounds, names, types, objective and constant transport; Threads=1 | Synthetic local/RMP/direct model transport; byte/array reconstruction assertions retained |
+| `v42_dw_root/models.py:22` `hash_column` | IEEE float64 local vector, coupling vector, objective, including shapes | Immutable registry SHA; unit-prefixed ID separates identical vectors belonging to different MESS |
+| `v42_dw_root/models.py:28` `Block`, `:39` `price` | Entire original local domain, `c-B.T@pi`, convexity constant `-alpha`; original injection coefficients are exact +/-1 sign changes | `restrict_pricing` copies the supplied complete model and adds only branch equalities; original `price` called unchanged |
+| `v42_dw_root/models.py:64` `column`, `:67` `exact_coupling` | Actual original coupling product and exact Fraction transport audit | Every accepted native trajectory is transported and hashed through these methods |
+| `v42_dw_root/models.py:79` `Master`, `:86` `add` | Global continuous variables plus MESS convexities; sparse gp.Column transport | `BoundedMaster` retains `Master.add`; compatible columns only, no global deletion |
+| `v42_dw_root/run.py:18` `exact_rc` | Verified reduced-cost sign and Fraction evaluation | Original method independently checks native pricing ObjVal before registry admission |
+| `v42_dw_root/run.py:87` and `v42_dw_bound/run.py:78` | Dual snapshot SHA binds coupling Pi and convexity alpha | New node snapshot also binds node ID and Phase I/P1 mode; no result reused across dual/domain changes |
+| `v42_dw_resume/audit.py:10` `corrected_rows`, `:21` `Block.validate` | Corrected affine tolerance 1e-6; physical bounds, exact original binaries and route equalities remain 1e-8; no repairs | Production adapter calls supplied original full physical validator; synthetic fixture calls the same raw checker plus native physical validator |
+| `v42_native/mess.py:161` `validate` | Stay/travel route flow, transit P/Q, SOC, travel energy, PCS16 and exact circle audit | Existing native validator independently audits all synthetic local trajectories and incumbents |
+| `v42_dw_bound/certificate.py:7` `global_dual`, `:17` `corrected` | Exact rational global weak duality, global residual-box payment, all-unit full-domain pricing bounds with 1e-8 safety and downward rounding | Four-unit `corrected` is reused unchanged. One/two-unit fixtures use exactly the same algebra over their real units |
+| `v42_dw_bound/run.py:133` checkpoint; `v42_dw_throughput/run.py` checkpoint methods | Pool provenance and source version retained; no production scientific checkpoint format is overwritten | New separate atomic tree checkpoint stores immutable registry, active queue, all tree nodes, certificates, incumbent and base/code SHA |
+| `v42_two/contract.py:29` `mess_groups`, constants `P1_EPS`, `COMPONENT_EPS` | P1 max line loading; P2 movement energy then count; reserve and tie are report-only | Interface imports ordered component names and lock tolerances unchanged |
+| `v42_dw_root/fixtures.py:26` `original_fixture`, `:46` `enumerate_vertices` | Tiny two-slot/two-site route/mode polytopes with exact rational endpoint enumeration | Reused directly as bounded fixture construction/enumeration; existing fixture runners are never invoked |
+
+The production physical representation has `arc[m,k]`, `charge_mode[m,t]`, Pch/Pdis/Q and SOC; it has no independent `x[m,site,t]` location variable. Location branching therefore projects the sum of outgoing native arcs at the time-network node. Travel departure counts as occupancy at departure; intermediate transit slots have zero node occupancy. Individual travel arcs give movement decisions. All original binary coordinates are also candidates, ensuring integral location does not conceal fractional modes/stay arcs.
+
+`Master.raw_audit` assumes four units and the original production master. The bounded wrapper audits its own transported rows with the existing generic matrix audit, keeping original source unchanged. A restricted-master infeasibility is not full-node infeasibility: Phase I exact full-domain pricing is required. Native TIME_LIMIT alone is not a no-column or fathoming certificate.
+
+No shared existing source was modified; there are no backward-incompatible interface changes or activated production features. Production integration must supply existing validated Blocks/Master factory, independently audited global incumbent reconstruction, original global-variable enclosures and a node-domain certificate validator. The Lane-B guard intentionally refuses large models; lifting it is outside this PR.

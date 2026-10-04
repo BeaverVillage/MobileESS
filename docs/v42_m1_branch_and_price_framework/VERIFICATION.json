@@ -1,0 +1,199 @@
+{
+  "PASS": true,
+  "base_sha": "ce5d30fb9bcb91ab8395d1313e868d24f5fde517",
+  "code_sha": "a918befd64ccc2d1d2365bdbf6724962cb2754b941aaebacb533d1bbf7385015",
+  "flags": {
+    "BAP_FRAMEWORK_IMPLEMENTED": true,
+    "BAP_FULL_SCALE_RUN": false,
+    "BAP_PRODUCTION_RUN": false,
+    "BAP_BRANCH_RULE_BASELINE_IMPLEMENTED": true,
+    "BAP_NODE_LOCAL_PRICING_IMPLEMENTED": true,
+    "BAP_COLUMN_INHERITANCE_IMPLEMENTED": true,
+    "BAP_CHECKPOINT_RESTART_IMPLEMENTED": true,
+    "BAP_TOY_FIXTURES_PASS": true,
+    "BAP_DIRECT_MILP_EQUIVALENCE_PASS": true,
+    "FULL_PYTEST_DEFERRED_DUE_PARALLEL_HEAVY_LANE": true,
+    "MAY_PRODUCTION_CALLS": 0
+  },
+  "bounded_fixtures": [
+    {
+      "name": "A_one_MESS_two_slots_two_sites",
+      "PASS": true,
+      "MESS": 1,
+      "slots": 2,
+      "sites": 2,
+      "enumerated_vertices": [
+        8
+      ],
+      "direct_MILP": 0.5,
+      "complete_trajectory_master": 0.5,
+      "branch_and_price": 0.5,
+      "same_optimal_physical_projection_PASS": true,
+      "objective_equality_PASS": true,
+      "node_count": 1,
+      "branch_count": 0,
+      "generated_columns": 3,
+      "incumbent_validation": {
+        "PASS": true,
+        "objective": 0.5,
+        "all_original_scientific_rows": true,
+        "independent_physical_validation": true,
+        "max_global_violation": 2.7755575615628914e-17
+      },
+      "gap": 2.0000000100495186e-08,
+      "fathom_reasons": [
+        "PROVEN_NO_IMPROVING_PRICING_AND_INTEGRAL"
+      ],
+      "continuous_domain": "Every route/mode-pattern polytope vertex; continuous lambda mixtures within a common integral pattern remain legal."
+    },
+    {
+      "name": "B_two_MESS_coupled_capacity",
+      "PASS": true,
+      "MESS": 2,
+      "slots": 2,
+      "sites": 2,
+      "enumerated_vertices": [
+        8,
+        8
+      ],
+      "direct_MILP": 0.875,
+      "complete_trajectory_master": 0.875,
+      "branch_and_price": 0.875,
+      "same_optimal_physical_projection_PASS": true,
+      "objective_equality_PASS": true,
+      "node_count": 3,
+      "branch_count": 1,
+      "generated_columns": 13,
+      "incumbent_validation": {
+        "PASS": true,
+        "objective": 0.875,
+        "all_original_scientific_rows": true,
+        "independent_physical_validation": true,
+        "max_global_violation": 0.0
+      },
+      "gap": 2.2857142971994497e-08,
+      "fathom_reasons": [
+        "PROVEN_NO_IMPROVING_PRICING_AND_INTEGRAL",
+        "PROVEN_NO_IMPROVING_PRICING_AND_INTEGRAL"
+      ],
+      "continuous_domain": "Every route/mode-pattern polytope vertex; continuous lambda mixtures within a common integral pattern remain legal."
+    },
+    {
+      "name": "C_SOC_movement",
+      "PASS": true,
+      "MESS": 1,
+      "slots": 2,
+      "sites": 2,
+      "enumerated_vertices": [
+        8
+      ],
+      "direct_MILP": 0.6,
+      "complete_trajectory_master": 0.6,
+      "branch_and_price": 0.6,
+      "same_optimal_physical_projection_PASS": true,
+      "objective_equality_PASS": true,
+      "node_count": 1,
+      "branch_count": 0,
+      "generated_columns": 1,
+      "incumbent_validation": {
+        "PASS": true,
+        "objective": 0.6,
+        "all_original_scientific_rows": true,
+        "independent_physical_validation": true,
+        "max_global_violation": 0.0
+      },
+      "gap": 1.6666666750412656e-08,
+      "fathom_reasons": [
+        "PROVEN_NO_IMPROVING_PRICING_AND_INTEGRAL"
+      ],
+      "continuous_domain": "Every route/mode-pattern polytope vertex; continuous lambda mixtures within a common integral pattern remain legal."
+    },
+    {
+      "name": "D_location_branch",
+      "PASS": true,
+      "MESS": 1,
+      "slots": 2,
+      "sites": 2,
+      "enumerated_vertices": [
+        8
+      ],
+      "direct_MILP": 0.875,
+      "complete_trajectory_master": 0.875,
+      "branch_and_price": 0.875,
+      "same_optimal_physical_projection_PASS": true,
+      "objective_equality_PASS": true,
+      "node_count": 3,
+      "branch_count": 1,
+      "generated_columns": 6,
+      "incumbent_validation": {
+        "PASS": true,
+        "objective": 0.875,
+        "all_original_scientific_rows": true,
+        "independent_physical_validation": true,
+        "max_global_violation": 0.0
+      },
+      "gap": 1.1428571485997248e-08,
+      "fathom_reasons": [
+        "PROVEN_NO_IMPROVING_PRICING_AND_INTEGRAL",
+        "NODE_INFEASIBLE"
+      ],
+      "continuous_domain": "Every route/mode-pattern polytope vertex; continuous lambda mixtures within a common integral pattern remain legal."
+    },
+    {
+      "name": "E_movement_branch",
+      "PASS": true,
+      "MESS": 1,
+      "slots": 2,
+      "sites": 2,
+      "enumerated_vertices": [
+        8
+      ],
+      "direct_MILP": 0.875,
+      "complete_trajectory_master": 0.875,
+      "branch_and_price": 0.875,
+      "same_optimal_physical_projection_PASS": true,
+      "objective_equality_PASS": true,
+      "node_count": 3,
+      "branch_count": 1,
+      "generated_columns": 6,
+      "incumbent_validation": {
+        "PASS": true,
+        "objective": 0.875,
+        "all_original_scientific_rows": true,
+        "independent_physical_validation": true,
+        "max_global_violation": 0.0
+      },
+      "gap": 1.1428571485997248e-08,
+      "fathom_reasons": [
+        "PROVEN_NO_IMPROVING_PRICING_AND_INTEGRAL",
+        "NODE_INFEASIBLE"
+      ],
+      "continuous_domain": "Every route/mode-pattern polytope vertex; continuous lambda mixtures within a common integral pattern remain legal."
+    },
+    {
+      "name": "F_phase_I_global_infeasible",
+      "PASS": true,
+      "exact_infeasibility_reason": "PHASE_I_PROVEN_INFEASIBLE"
+    },
+    {
+      "name": "G_full_local_infeasible",
+      "PASS": true,
+      "exact_infeasibility_reason": "FULL_LOCAL_DOMAIN_INFEASIBLE"
+    }
+  ],
+  "direct_MILP_equivalence_cases": 5,
+  "full_pytest_deferred_command": "python -m pytest -q",
+  "fixture_command": "python -m v42_bap.verify",
+  "lane_b_test_command": "python -m pytest -q tests/v42_bap",
+  "no_shared_production_source_edits": true,
+  "native_pricing_same_dual_audits": 39,
+  "lane_b_unit_tests": {
+    "PASS": true,
+    "passed": 23,
+    "wall_seconds": 0.59,
+    "command": "python -m pytest -q tests/v42_bap --basetemp C:/Users/kjw39/AppData/Local/Temp/mobileess_lane_b_pytest"
+  },
+  "compile_PASS": true,
+  "json_syntax_PASS": true,
+  "branch": "codex/v42-m1-branch-and-price-framework-prep"
+}
