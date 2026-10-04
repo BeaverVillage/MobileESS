@@ -1,0 +1,82 @@
+{
+  "PASS": true,
+  "native_source_SHA": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec",
+  "route_authority": {
+    "route_file": {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\cache\\v37_may_locked_final\\traffic\\shared\\traffic\\2025-05-01\\ROUTE_TABLE.json.gz",
+      "sha256": "3a08a7485ccfa153a3cd944132a251e8360002ce479546e943d91a4de2f3fca9",
+      "bytes": 5814550,
+      "period": "2025-05-01",
+      "units": "seconds,kWh",
+      "role": "May01 route table",
+      "authority_status": "FROZEN_SOURCE_REUSED"
+    },
+    "excluded": {
+      "same_site_represented_by_stay": 2304,
+      "outside_inherited_RouteArc_time_contract": 1670
+    },
+    "accepted_routes": 51322,
+    "battery": {
+      "minimum": 440.0,
+      "maximum": 1080.0,
+      "initial": 760.0,
+      "terminal": 760.0,
+      "p_limit": 300.0,
+      "pcs_kva": 400.0,
+      "eta_charge": 0.95,
+      "eta_discharge": 0.95,
+      "dt_hours": 0.25
+    },
+    "initial_MESS_sites": {
+      "MESS01": "STA01",
+      "MESS02": "STA12",
+      "MESS03": "STA08",
+      "MESS04": "STA06"
+    },
+    "sites": [
+      "IDC01",
+      "IDC02",
+      "IDC03",
+      "IDC04",
+      "IDC05",
+      "IDC06",
+      "IDC07",
+      "IDC08",
+      "IDC09",
+      "IDC10",
+      "IDC11",
+      "IDC12",
+      "STA01",
+      "STA02",
+      "STA03",
+      "STA04",
+      "STA05",
+      "STA06",
+      "STA07",
+      "STA08",
+      "STA09",
+      "STA10",
+      "STA11",
+      "STA12"
+    ],
+    "native": true,
+    "synthetic": false,
+    "PR101_head": "f536e65fc7fb968c52e99e4a5b017953edc53744",
+    "PR101_wholesale_merge": false,
+    "PR101_code_ported": false,
+    "audit": "Current PR104 constructor already preserves joint route/P/Q/SOC, exact forward reachability, inner16, travel energy and terminal SOC. PR101 native route reduction not material; no extra prescreen port needed for one M1.",
+    "M1_MIP_START_AVAILABLE": false,
+    "M1_start_reason": "No accepted MESS plan bound to this new A1 anchor and voltage authority; old A1 zero P/Q is not a MESS reference plan"
+  },
+  "actual_transit_interval": "[depart,connect): depart,...,connect-1",
+  "connect_is_not_automatically_transit": true,
+  "all_arcs_strictly_forward": true,
+  "proof": [
+    "All arcs strictly increase time. Nonnegative integer unit-flow, a single origin supply and terminal flow=1 imply exactly one origin-to-terminal path; no circulation or disconnected positive path is possible in this DAG.",
+    "If movement arc (source,depart,destination,connect) is selected, the path has no node/stay arc in slots depart through connect-1. All stay indicators of that unit at these slots equal zero.",
+    "Original connected_Pch/Pdis and nonnegative bounds force both active powers to zero. Original connected_Qmin/max force Q=0. Slot connect may use a destination stay arc and is excluded from transit.",
+    "Travel energy is debited at depart by the unchanged original energy_balance row; it is ignored here only to enlarge the support relaxation."
+  ],
+  "no_route_pruning": true,
+  "no_new_binary": true
+}

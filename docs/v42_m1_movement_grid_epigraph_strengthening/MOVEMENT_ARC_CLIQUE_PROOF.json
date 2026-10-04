@@ -1,0 +1,13 @@
+{
+  "PASS": true,
+  "cliques": 0,
+  "members": 0,
+  "definition": "Positive-coefficient evaluated movement arcs with same unit and original outgoing flow node (source,depart).",
+  "proof": [
+    "The original integer unit path visits an outgoing flow node at most once, because time strictly increases. Thus sum of outgoing alternatives <=1.",
+    "The positive-coefficient fractional subset also has at most one selected member. If none is selected the clique cut is rho>=L0; if a member a is selected it is rho>=L_arc[a].",
+    "All coefficients are nonnegative. On the nonnegative binary-domain relaxation the clique inequality dominates each of its individual member inequalities."
+  ],
+  "origin_flow_rows_preserved": true,
+  "no_added_at_most_one_domain_constraint": true
+}
