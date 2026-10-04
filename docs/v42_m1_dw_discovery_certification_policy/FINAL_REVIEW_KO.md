@@ -25,7 +25,7 @@
 25. May day workers B0/B1/B2/B3=4/1/4/1, Threads1.
 26. B2 inner1 / B3 inner 1, resource gate 이후만 허용.
 27. May optimizer/Actual/Fresh AC=0/0/0; scientific1458-node계획/firewall 보존.
-28. Semantic 315 / full 1762 PASS. Draft PR 게시 전; result SHA 게시 전; 최종 SHA/remote/clean은 최종 응답에서 확인.
+28. Semantic 315 / full 1762 PASS. Draft PR https://github.com/BeaverVillage/MobileESS/pull/141; result SHA 283190d194c4208da029d87c3ef03c2f02aeb45d; 최종 SHA/remote/clean은 최종 응답에서 확인.
 
 기존 exact-optimal-pricing-every-round 실험은 계산정책 병목이 확인되어 사용자 지시에 따라 중단했으며, 그 partial scientific result는 INCONCLUSIVE로 보존했다. 중단된 활성 call은 정상 native terminal receipt를 확인하지 못해 인증에서 제외했다.
 
