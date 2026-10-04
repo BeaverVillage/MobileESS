@@ -157,3 +157,13 @@ def test_source_freeze_configuration_and_manifest_hash_are_bound():
     with pytest.raises(PermissionError):verify_freeze(bad,config)
     bad=copy.deepcopy(f);bad['configuration']['CATASTROPHIC_PAGES_INPUT_PER_SECOND']=999999
     with pytest.raises(PermissionError):verify_freeze(bad,config)
+
+
+def test_powershell_utf8_json_preserves_nonascii_windows_paths(tmp_path):
+    p=tmp_path/'snapshot.json';atomic(p,dict(path='C:\\문서\\데이터\\input.json'))
+    source=ROOT/'tools/v42/monitor_b1_may.ps1'
+    script=f"[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new(); . '{source}' -LibraryOnly; Read-AtomicSnapshot '{p}' $null | ConvertTo-Json -Compress"
+    r=subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-Command',script],capture_output=True,text=True,encoding='utf-8')
+    assert r.returncode==0,r.stderr
+    assert json.loads(r.stdout)==read(p)
+    assert '-Encoding UTF8' in (ROOT/'tools/v42/start_b1_may_detached.ps1').read_text(encoding='utf-8-sig')

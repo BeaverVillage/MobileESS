@@ -177,7 +177,7 @@ function Get-MonitorFrame {
 
 function Read-AtomicSnapshot {
     param([string]$Path, $Previous)
-    try { return Get-Content -LiteralPath $Path -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop }
+    try { return Get-Content -LiteralPath $Path -Encoding UTF8 -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop }
     catch { return $Previous }
 }
 
