@@ -28,17 +28,26 @@ def run(args):
     runtime_fixtures.baseline_audit=types.FunctionType(historical.__code__,dict(historical.__globals__,subprocess=HistoricalGit),historical.__name__,historical.__defaults__)
     import pytest,gurobipy as gp
     from threadpoolctl import threadpool_limits
-    gp.setParam('Threads',1);original=gp.Model.optimize;calls=[];active=[False]
+    import threading
+    gp.setParam('Threads',1);original=gp.Model.optimize;calls=[];active=[None];observations=[];conflicts=[];done=threading.Event()
+    def watch():
+        while not done.wait(.5):
+            rows,blocked=inspect_native();observations.append(dict(perf=time.perf_counter(),processes=rows,blocked=blocked))
+            if blocked and active[0] is not None:
+                conflicts.append(dict(perf=time.perf_counter(),blocked=blocked));active[0].terminate()
+    thread=threading.Thread(target=watch,daemon=True);thread.start()
     def optimize(m,*a,**k):
         while inspect_native()[1]:print('PYTEST_FIXTURE_WAIT_RESOURCE',flush=True);time.sleep(2)
-        assert not active[0];active[0]=True;m.Params.Threads=1;start=time.perf_counter()
+        assert active[0] is None;active[0]=m;m.Params.Threads=1;start=time.perf_counter()
         try:return original(m,*a,**k)
-        finally:active[0]=False;calls.append(dict(start=start,end=time.perf_counter(),Threads=m.Params.Threads))
+        finally:active[0]=None;calls.append(dict(start=start,end=time.perf_counter(),Threads=m.Params.Threads))
     gp.Model.optimize=optimize
     try:
         with threadpool_limits(limits=1):code=pytest.main(args)
-    finally:gp.Model.optimize=original;resources.snapshot=original_snapshot
+    finally:done.set();thread.join();gp.Model.optimize=original;resources.snapshot=original_snapshot
     label=os.environ.get('DW_TEST_LABEL') or ('SEMANTIC' if any('tests/' in x or 'tests\\' in x for x in args) else 'FULL')
-    write('PYTEST_'+label+'_RECEIPT.json',dict(exit_code=code,arguments=args,after_heavy=True,environment=ENV,all_Gurobi_Threads_one=all(r['Threads']==1 for r in calls),calls_nonoverlapping=all(a['end']<=b['start'] for a,b in zip(calls,calls[1:])),calls=calls,actual_concurrent_heavy_native_solve=0,other_lane_kill_calls=0,other_lane_terminate_calls=0))
+    write(label+'_PYTEST_LANE_CONCURRENCY_AUDIT.json',dict(observations=observations,conflicts=conflicts,actual_concurrent_heavy_native_solve=len(conflicts),other_lane_kill_calls=0,other_lane_terminate_calls=0))
+    write('PYTEST_'+label+'_RECEIPT.json',dict(exit_code=code,arguments=args,after_heavy=True,environment=ENV,all_Gurobi_Threads_one=all(r['Threads']==1 for r in calls),calls_nonoverlapping=all(a['end']<=b['start'] for a,b in zip(calls,calls[1:])),calls=calls,actual_concurrent_heavy_native_solve=len(conflicts),other_lane_kill_calls=0,other_lane_terminate_calls=0))
+    assert not conflicts,'Conflicting native lane detected during own fixture'
     return code
 if __name__=='__main__':raise SystemExit(run(sys.argv[1:] or ['-q']))
