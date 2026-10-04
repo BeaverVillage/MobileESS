@@ -135,46 +135,6 @@ function Get-MonitorView {
     }
 }
 
-function Get-MonitorFrame {
-    param($View, [int]$Width = 120, [string]$SourceWarning = '')
-    # Keep the ordinary four-worker display within a 120 x 30 console.
-    $width = [math]::Max(70, $Width - 1)
-    $subWidth = [math]::Max(14, $width - 55)
-    $lines = [System.Collections.Generic.List[string]]::new()
-    $lines.Add(('=' * [math]::Min(76, $width)))
-    $lines.Add(' MAY 2025 CAMPAIGN MONITOR')
-    if ($View.Failed -gt 0) { $lines.Add('!!! FAILURE DETECTED !!!') }
-    if ($SourceWarning) { $lines.Add((Get-MonitorText "SOURCE WARNING: $SourceWarning" $width)) }
-    $lines.Add(('Progress : {0} / {1} days ({2}%)' -f $View.Completed, $View.Total, $View.Percent))
-    $lines.Add(('Running  : {0}' -f $View.Running))
-    $lines.Add(('Failed   : {0}' -f $View.Failed))
-    $lines.Add(('Status   : {0}' -f $View.Status))
-    $lines.Add(('Orchestrator : {0}' -f $View.Orchestrator))
-    $heartbeatText = if ($null -eq $View.HeartbeatAgeSeconds) { '-' } elseif ([double]::IsPositiveInfinity($View.HeartbeatAgeSeconds)) { 'STALE' } elseif ($View.Status -in @('DEAD', 'STALE')) { 'STALE ({0:N0} s)' -f $View.HeartbeatAgeSeconds } else { '{0:N0} s ago' -f $View.HeartbeatAgeSeconds }
-    $lines.Add(('Heartbeat    : {0}' -f $heartbeatText))
-    $lines.Add('')
-    $lines.Add('ACTIVE / FAILED DATES')
-    $format = '{0,-10} {1,-7} {2,-10} {3,-' + $subWidth + '} {4,-8} {5}'
-    $lines.Add(($format -f 'DATE', 'STATUS', 'STAGE', 'SUB-STAGE', 'PROGRESS', 'RESULT'))
-    if ($View.Rows.Count -eq 0) { $lines.Add('None') }
-    foreach ($row in $View.Rows) {
-        $lines.Add(($format -f $row.Date, $row.Status, (Get-MonitorText $row.Stage 10),
-            (Get-MonitorText $row.Substage $subWidth), $row.Progress, $row.Result))
-    }
-    $lines.Add('')
-    $lines.Add('FAILURES')
-    if ($View.Failures.Count -eq 0) { $lines.Add('None') }
-    foreach ($failure in $View.Failures) {
-        $lines.Add((Get-MonitorText ('{0} | {1} / {2} | {3}' -f $failure.Date,
-            $failure.Stage, $failure.Substage, $failure.Reason) $width))
-    }
-    $lines.Add('')
-    $lines.Add(('Last update: {0}' -f $View.LastUpdate))
-    $lines.Add('Refresh: 10s | Ctrl+C: close monitor only')
-    $lines.Add(('=' * [math]::Min(76, $width)))
-    return $lines.ToArray()
-}
-
 function Read-AtomicSnapshot {
     param([string]$Path, $Previous)
     try { return Get-Content -LiteralPath $Path -Encoding UTF8 -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop }
@@ -182,13 +142,23 @@ function Read-AtomicSnapshot {
 }
 
 function Get-B1Frame {
-    param($Live,$Heartbeat,$Resource,[hashtable]$Failures)
+    param($Live,$Heartbeat,$Resource,[hashtable]$Failures,$ProcessInfo=$null)
     $process = $Heartbeat.process
+    # The coordinator can resume through an audited operational entrypoint.
+    # Match all published command arguments as well as PID/creation time,
+    # instead of assuming that every coordinator uses the original -m command.
+    $commandTokens=@($process.command | Where-Object { $_ })
+    $rootIndex=[array]::IndexOf($commandTokens,'--root')
+    if ($commandTokens.Count -lt 3 -or $rootIndex -lt 0 -or
+        $rootIndex+1 -ge $commandTokens.Count -or
+        -not [string]::Equals([string]$commandTokens[$rootIndex+1],$Root,[StringComparison]::OrdinalIgnoreCase)) {
+        $commandTokens=@('__INVALID_B1_COORDINATOR_COMMAND__')
+    }
     $master = [pscustomobject]@{
         heartbeat_timestamp_utc=$Heartbeat.timestamp_UTC; last_update=$Live.timestamp_UTC
         orchestrator_pid=$process.PID
         orchestrator_creation_time_utc=([DateTimeOffset]::FromUnixTimeMilliseconds([long]($process.creation_time*1000))).UtcDateTime.ToString('o')
-        orchestrator_command_match_tokens=@('v42_b1_production','--root',$Root)
+        orchestrator_command_match_tokens=$commandTokens
         completed_days=@($Live.day_rows | Where-Object status -eq 'PASS' | ForEach-Object day)
         running_days=@($Live.day_rows | Where-Object { $_.status -ne 'PASS' -and $_.status -ne 'NOT_RUN' -and $_.status -ne 'FAIL' } | ForEach-Object day)
         failed_days=@($Live.day_rows | Where-Object status -eq 'FAIL' | ForEach-Object day)
@@ -197,14 +167,162 @@ function Get-B1Frame {
     foreach($row in $Live.day_rows) {
         $details[$row.day]=[pscustomobject]@{status=$row.status;case='B1';current_stage=$row.stage;error_summary=$row.reason}
     }
-    $liveness=Get-CampaignLiveness $master
+    $liveness=Get-CampaignLiveness $master -ProcessInfo $ProcessInfo
     $view=Get-MonitorView $master $details $Failures $liveness
     $state=if ($liveness.State -in @('DEAD','STALE')) {$liveness.State} else {$Live.state}
     [pscustomobject]@{State=$state; Liveness=$liveness; View=$view; Live=$Live; Resource=$Resource; Readonly=$true; Root=$Root}
 }
 
+function Get-B1OutputFolder {
+    param($Live,$Checkpoint,[string]$Stage)
+    $day=[string]$Live.active.day
+    if (-not $day -or -not $Checkpoint.stages -or $Checkpoint.run_id -ne $Live.run_id) { return $null }
+    $row=$Checkpoint.stages.PSObject.Properties["$day/$Stage"].Value
+    if ($row.status -eq 'PASS') {
+        $receipt=Read-AtomicSnapshot $row.receipt $null
+        $id=$receipt.identity
+        if ($receipt.mode -ne 'B1_PRODUCTION' -or -not $receipt.PASS) { return $null }
+        $folder=[string]$receipt.folder
+    } elseif ($row.status -eq 'RUNNING' -and $Stage -eq $Live.active.stage -and
+              $row.worker.PID -eq $Live.active.worker.PID -and $row.worker.PID) {
+        $request=Read-AtomicSnapshot $row.request $null
+        $id=$request.identity; $folder=[string]$request.output
+        if ($request.mode -ne 'B1_PRODUCTION') { return $null }
+    } else { return $null }
+    if ($id.arm -ne 'B1' -or $id.day -ne $day -or $id.stage -ne $Stage -or $id.run_id -ne $Live.run_id -or -not $folder) { return $null }
+    $full=[IO.Path]::GetFullPath($folder)
+    $prefix=[IO.Path]::GetFullPath($Root).TrimEnd('\')+'\'
+    if (-not $full.StartsWith($prefix,[StringComparison]::OrdinalIgnoreCase)) { return $null }
+    return $full
+}
+
+function Get-B1Metrics {
+    param($Live,$Solve,$Audit,$Fresh)
+    $rho=$null; $source=$null; $gap=$null
+    $p=$Live.progress
+    $stage=[string]$Live.active.stage
+    if ($stage -in @('FRESH_AC','VALIDATION_FREEZE') -and $null -ne $Fresh.summary.rho_max_AC) {
+        $rho=$Fresh.summary.rho_max_AC; $source='Fresh AC'
+    } elseif ($stage -eq 'A1' -and $Live.state -eq 'RUNNING' -and
+              $p.phase -eq 'rho' -and $p.solver_status -eq 'OPTIMIZING' -and $null -ne $p.incumbent) {
+        $rho=$p.incumbent; $source='Planning'
+    } elseif ($stage -in @('A1','PLANNING_FREEZE','ACTUAL','FRESH_AC','VALIDATION_FREEZE')) {
+        if ($null -ne $Audit.P1_rho) { $rho=$Audit.P1_rho; $source='Planning' }
+        else {
+            $primary=@($Solve.passes | Where-Object component -eq 'rho' | Select-Object -Last 1)
+            if ($primary.Count -and $null -ne $primary[0].objective) { $rho=$primary[0].objective; $source='Planning' }
+        }
+    }
+    if ($stage -eq 'A1' -and $Live.state -eq 'RUNNING' -and $p.solver_status -eq 'OPTIMIZING') {
+        $gap=$p.gap
+    }
+    # Preserve zero, reject NaN/Inf and sentinel values; never relabel a P2
+    # intervention objective as line loading or fabricate a missing incumbent.
+    if ($null -ne $rho -and (-not [double]::IsNaN([double]$rho)) -and
+        (-not [double]::IsInfinity([double]$rho)) -and [double]$rho -ge 0 -and [double]$rho -lt 1e90) {
+        $loadingText=('{0:N2}% ({1})' -f (100*[double]$rho),$source)
+    } else { $rho=$null; $loadingText='-- (해 대기)' }
+    if ($null -ne $gap -and (-not [double]::IsNaN([double]$gap)) -and
+        (-not [double]::IsInfinity([double]$gap)) -and [double]$gap -ge 0 -and [double]$gap -lt 1e90) {
+        $gapText=('{0:N2}%' -f (100*[double]$gap))
+    } else { $gap=$null; $gapText='--' }
+    [pscustomobject]@{Loading=$rho;Source=$source;Gap=$gap;LoadingText=$loadingText;GapText=$gapText}
+}
+
+function Get-B1Progress {
+    param($Live)
+    $total=31
+    $processed=@($Live.day_rows | Where-Object { $_.status -in @('PASS','FAIL') }).Count
+    if (-not $Live.day_rows) { $processed=[int]$Live.PASS_days }
+    $percent=100.0*$processed/$total
+    $filled=[int][math]::Floor(20*$processed/$total)
+    $overall=('전체 진행  [{0}{1}] {2:N1}% · {3}/{4}일 처리' -f ('#'*$filled),('.'*(20-$filled)),$percent,$processed,$total)
+    $p=$Live.progress; $stage=[string]$Live.active.stage
+    $part=$null; $required=$null; $label=$null
+    if ($stage -eq 'A1' -and $p.phase -eq 'MODEL_BUILD') {
+        foreach ($pair in @(@('classes_complete','classes_required','작업 분류'),@('units_complete','units_required','제약 연결'),@('jobs_complete','jobs_required','작업 생성'))) {
+            if ($null -ne $p.($pair[0]) -and $p.($pair[1]) -gt 0) {
+                $part=[double]$p.($pair[0]); $required=[double]$p.($pair[1]); $label=$pair[2]; break
+            }
+        }
+    } elseif ($stage -eq 'FRESH_AC' -and $null -ne $p.OpenDSS_slot) {
+        $part=[double]$p.OpenDSS_slot; $required=96; $label='Fresh AC'
+    }
+    $stagePercent=$null
+    if ($required -gt 0) {
+        $stagePercent=100*$part/$required
+        $current=('현재 진행  {0} {1:N0}/{2:N0} · {3:N1}%' -f $label,$part,$required,$stagePercent)
+    } elseif ($stage -eq 'A1' -and $p.solver_status -eq 'OPTIMIZING') {
+        $phases=@('rho','migration_count','shift_magnitude','prestart_relocation')
+        $index=[array]::IndexOf($phases,[string]$p.phase)+1
+        $current=('현재 진행  최적화 {0}/4 · 경과 {1:N0}초 / 제한 1800초' -f $index,[double]$p.elapsed)
+    } else { $current='현재 진행  '+$(if ($Live.state -eq 'COMPLETE') {'완료'} elseif ($Live.state -eq 'WAIT_RESOURCE') {'대기 중'} else {'단계 준비 중'}) }
+    [pscustomobject]@{Percent=$percent;Processed=$processed;Total=$total;StagePercent=$stagePercent;OverallText=$overall;CurrentText=$current}
+}
+
+function Get-B1AttemptSummary {
+    param($Live,$Checkpoint)
+    if (-not $Live.active.day -or -not $Live.active.stage -or $Checkpoint.run_id -ne $Live.run_id) { return $null }
+    $row=$Checkpoint.stages.PSObject.Properties["$($Live.active.day)/$($Live.active.stage)"].Value
+    if (-not $row.request -or $row.attempts -le 1) { return $null }
+    $parent=Split-Path (Split-Path $row.request -Parent) -Parent
+    $prefix=[IO.Path]::GetFullPath($Root).TrimEnd('\')+'\'
+    if (-not [IO.Path]::GetFullPath($parent).StartsWith($prefix,[StringComparison]::OrdinalIgnoreCase)) { return $null }
+    $resourceStops=0; $infeasible=0
+    for ($attempt=1;$attempt -lt [int]$row.attempts;$attempt++) {
+        $folder=Join-Path $parent ([string]$attempt)
+        $cancel=Read-AtomicSnapshot (Join-Path $folder 'CANCEL.json') $null
+        if ($cancel.reason -eq 'RESOURCE_HARD_GUARD') { $resourceStops++; continue }
+        $solve=Read-AtomicSnapshot (Join-Path $folder 'o/A1_SOLVE_RESULT.json') $null
+        if (@($solve.passes | Where-Object status -eq 3).Count) { $infeasible++ }
+    }
+    [pscustomobject]@{Attempt=[int]$row.attempts;ResourceStops=$resourceStops;Infeasible=$infeasible}
+}
+
+function Get-CompactB1Lines {
+    param($Frame,$Metrics,$Attempts=$null)
+    $live=$Frame.Live; $resource=$Frame.Resource
+    $labels=@{RUNNING='실행 중';WAIT_RESOURCE='자원 대기';FAIL='실패';COMPLETE='완료';DEAD='연결 끊김';STALE='갱신 지연';INFRASTRUCTURE_FAILURE='실행 오류';INTERRUPTING_RESOURCE_GUARD='자원 보호 중'}
+    $state=$labels[[string]$Frame.State]; if (-not $state) { $state=$Frame.State }
+    $stage=[string]$live.active.stage; $phase=[string]$live.progress.phase
+    $phaseLabels=@{MODEL_BUILD='모델 생성';SOURCE_VERIFICATION='입력 확인';rho='선로부하율 최적화';migration_count='이동 횟수 최소화';shift_magnitude='시간 변경 최소화';prestart_relocation='배치 변경 최소화'}
+    $detail=$phaseLabels[$phase]
+    $current=if ($live.active.day) { "$($live.active.day)  /  $stage" } else { '--' }
+    if ($detail -and $stage -eq 'A1') { $current+=" · $detail" }
+    if ($stage -eq 'FRESH_AC' -and $null -ne $live.progress.OpenDSS_slot) { $current+=" · $($live.progress.OpenDSS_slot)/96" }
+    $lines=[Collections.Generic.List[string]]::new()
+    $lines.Add('Mobile ESS | May 2025 · B1')
+    $lines.Add(('상태  {0}     완료  {1}/31     실패  {2}' -f $state,$live.PASS_days,$Frame.View.Failed))
+    $progress=Get-B1Progress $live
+    $lines.Add($progress.OverallText)
+    $lines.Add(('현재  {0}' -f $current))
+    $lines.Add($progress.CurrentText)
+    if ($Attempts) {
+        $lines.Add(('시도  {0}회차 · 메모리 보호 중단 {1}회 · 해 없음 {2}회' -f $Attempts.Attempt,$Attempts.ResourceStops,$Attempts.Infeasible))
+    }
+    $lines.Add('')
+    $lines.Add(('최대 선로 부하율  {0}     Gap  {1}' -f $Metrics.LoadingText,$Metrics.GapText))
+    $lines.Add('')
+    $lines.Add(('RAM 여유  {0:N2} GiB     메모리 Commit  {1:N1}%' -f $resource.available_GiB,$resource.commit_percent))
+    if ($Frame.State -eq 'WAIT_RESOURCE') {
+        $reason=if (@($resource.foreign_heavy).Count) { '다른 대규모 계산 실행 중' }
+            elseif ($resource.available_GiB -lt 1) { '가용 메모리 부족' }
+            elseif ($resource.commit_percent -ge 95) { 'Commit 한도 대기' }
+            elseif ($resource.catastrophic_sustained_paging) { '지속적인 페이징' }
+            else { '자원 확인 중' }
+        $lines.Add("대기 이유  $reason · 안전해지면 자동 재개")
+    }
+    foreach ($failure in $Frame.View.Failures) {
+        $lines.Add((Get-MonitorText ("실패  $($failure.Date) · $($failure.Substage) · $($failure.Reason)") 110))
+    }
+    if ($Frame.Liveness.State -eq 'STALE') { $lines.Add('상태 갱신이 지연되고 있습니다.') }
+    elseif ($Frame.Liveness.State -eq 'DEAD') { $lines.Add('관리 프로세스 연결을 확인할 수 없습니다.') }
+    return $lines.ToArray()
+}
+
 if ($LibraryOnly) { return }
 if (-not $Root) { throw 'Run root required' }
+$Root=(Resolve-Path -LiteralPath $Root).Path
 $Host.UI.RawUI.WindowTitle='Mobile ESS V42 May B1 Production Monitor'
 $live=$null; $heartbeat=$null; $resource=$null; $failures=@{}
 do {
@@ -213,32 +331,28 @@ do {
     $resource=Read-AtomicSnapshot (Join-Path $Root 'B1_RESOURCE_LIVE.json') $resource
     if ($live.process -and $heartbeat.process) {
         $frame=Get-B1Frame $live $heartbeat $resource $failures
-        if ($Json) { $frame | ConvertTo-Json -Depth 20 }
+        $checkpoint=Read-AtomicSnapshot (Join-Path $Root 'CHECKPOINT.json') $null
+        $a1=Get-B1OutputFolder $live $checkpoint 'A1'
+        $freshFolder=Get-B1OutputFolder $live $checkpoint 'FRESH_AC'
+        $solve=$null; $audit=$null; $fresh=$null
+        if ($a1) {
+            $solve=Read-AtomicSnapshot (Join-Path $a1 'A1_SOLVE_RESULT.json') $null
+            $audit=Read-AtomicSnapshot (Join-Path $a1 'A1_PHYSICAL_AUDIT.json') $null
+        }
+        if ($freshFolder) { $fresh=Read-AtomicSnapshot (Join-Path $freshFolder 'FRESH_RESULT.json') $null }
+        $metrics=Get-B1Metrics $live $solve $audit $fresh
+        $attempts=Get-B1AttemptSummary $live $checkpoint
+        if ($Json) { [pscustomobject]@{Frame=$frame;Metrics=$metrics;Progress=(Get-B1Progress $live);Attempts=$attempts} | ConvertTo-Json -Depth 20 }
         else {
             if (-not $Once) { Clear-Host }
-            Write-Host 'Mobile ESS V42 May B1 Production Monitor'
-            Write-Host ("Run: {0} | State: {1} | Coordinator: {2} | heartbeat age: {3:N1}s" -f $live.run_id,$frame.State,$frame.Liveness.Orchestrator,$frame.Liveness.HeartbeatAgeSeconds)
-            Write-Host ("B1: {0}/31 PASS | stages: {1}/155 | day-worker=1 | Threads=1 | A1 total TimeLimit=1800s" -f $live.PASS_days,$live.stage_PASS)
-            Write-Host ("RAM available: {0:N2} GiB | commit: {1:N2}% | tree RSS: {2:N2} GiB | A1 RSS: {3:N2} GiB" -f $resource.available_GiB,$resource.commit_percent,$resource.B1_tree_RSS_GiB,$resource.A1_solver_RSS_GiB)
-            Write-Host ("CPU: {0}% | pagefile: {1:N2} GiB | pages input/sec: {2} | foreign heavy: {3}" -f $resource.CPU_percent,$resource.pagefile_used_GiB,$resource.pages_input_per_sec,(@($resource.foreign_heavy).Count))
-            Write-Host 'B2=0 B3=0 M1=0 M2=0 | MESS OFF | reoptimization=0 | P/Q repair=0'
-            Write-Host ''
-            Write-Host 'ACTIVE / FAILED DATES (completed PASS dates omitted)'
-            if ($frame.View.Rows.Count) { $frame.View.Rows | Format-Table Date,Status,Stage,Substage,Progress,Reason -AutoSize | Out-Host }
-            else { Write-Host 'None' }
-            if ($live.active.stage -eq 'A1' -and $live.progress) {
-                $p=$live.progress
-                $metrics=foreach($key in @('phase','solver_status','elapsed','incumbent','BestBd','gap','node_count')) {
-                    $v=$p.$key; if($null -eq $v) {$v='N/A'}; "$key=$v"
-                }
-                Write-Host ($metrics -join ' | ')
-            } else { Write-Host 'A1 objective/incumbent/BestBd/gap/nodes: N/A' }
-            if ($live.active.stage -eq 'FRESH_AC' -and $null -ne $live.progress.OpenDSS_slot) {
-                Write-Host ("Fresh OpenDSS: {0}/96" -f $live.progress.OpenDSS_slot)
-            } else { Write-Host 'Fresh OpenDSS progress: N/A' }
-            Write-Host 'Atomic status reads | Refresh 1s | Ctrl+C closes only this monitor'
+            $lines=Get-CompactB1Lines $frame $metrics $attempts
+            $color=if ($frame.State -eq 'FAIL') {'Red'} elseif ($frame.State -eq 'WAIT_RESOURCE') {'Yellow'} else {'Cyan'}
+            for ($i=0;$i -lt $lines.Count;$i++) {
+                if ($i -eq 1) { Write-Host $lines[$i] -ForegroundColor $color }
+                else { Write-Host $lines[$i] }
+            }
         }
     } elseif ($Once) { throw 'Live status/heartbeat not ready' }
-    else { Write-Host 'Waiting for atomic B1 status/heartbeat...' }
+    else { Write-Host 'B1 상태를 기다리는 중...' }
     if (-not $Once) { Start-Sleep -Seconds 1 }
 } while (-not $Once)
