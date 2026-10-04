@@ -1,0 +1,54 @@
+{
+  "scientific_base": "31858f4e35b44caadeee2a72ef2ae2d35b74899b",
+  "runtime_source": "42204661b8a92e0b1153ade0dc11830d54ec8df5",
+  "CG_native_union_budget_seconds": 1800,
+  "automatic_extension": false,
+  "canary": {
+    "pairs": 1,
+    "order": [
+      "cold_fresh",
+      "persistent"
+    ],
+    "per_solve_cap": 60,
+    "native_union_budget": 122,
+    "selection_wall_reduction": 0.15,
+    "objective_tolerance": 1e-08,
+    "dual_tolerance": 1e-08,
+    "identity_required": true,
+    "full_original_postsolve_required": true,
+    "persistent_initialization_reported_separately": true,
+    "paired_wall": "cold fresh build+optimize vs retained append/update+optimize; persistent one-time initialization separately reported, no counterfactual or median claims"
+  },
+  "RMP_cap": 60,
+  "Discovery_cap": 20,
+  "Discovery_max_rounds": 12,
+  "Certification_cap": 120,
+  "Certification_max_rounds": 1,
+  "workers": 4,
+  "Threads": 1,
+  "validation_workers": 4,
+  "RAM_floor_GiB": 1,
+  "commit_ceiling_percent": 95,
+  "paging_guard": "sustained >=1000 PagesInput/sec over >=9.5s AND >=256MiB pagefile growth",
+  "quota": 4,
+  "quota_only_distinct_new_valid_true_RC": -1e-07,
+  "early_triggers": [
+    "two zero accepted",
+    "last3 completed upper decrease <0.0005",
+    "U-T <=0.0015",
+    "reserve D20+postRMP60+C120+guards"
+  ],
+  "official_threshold_policy": "L>=T material; U<=T nonmaterial, T read from verified PR147 native-reference authority. PR147 support-reference threshold remains diagnostic; latest user explicitly specifies single official threshold.",
+  "smoothing": "exact PR147 state restore, alpha_next0.1; unchanged PR142 adaptive rule",
+  "cache_initial": "old receipts lack complete PR144 key: full1244 seed audit before reuse",
+  "persistent_basis_import": false,
+  "convergence_requires": "all4 terminal OPTIMAL, same true dual, valid global bound>=-1e-8",
+  "crash_resume": "atomic completed-round checkpoint and append-only saved call receipts; conservative full reservation debit for unfinished native phases; recover persisted completed calls without replay; one1800s grant only",
+  "B0_untouched": true,
+  "B1_B2_B3_calls": [
+    0,
+    0,
+    0
+  ],
+  "Branch_and_Price": false
+}
