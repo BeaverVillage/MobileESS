@@ -1,0 +1,50 @@
+{
+  "base_head": "29a115748e7c1f3a983019fe005e91710defa0d2",
+  "checkpoint_columns": 1158,
+  "optimize_budget_seconds": 900,
+  "budget_authority": "Union of native optimize intervals, including any fixture solves; fixtures here use exact Fraction enumeration and make zero native optimize calls. No automatic extension.",
+  "maximum_discovery_rounds": 8,
+  "discovery_cap": 20,
+  "certification_cap": 90,
+  "final_certification_rounds_at_most": 1,
+  "early_triggers": [
+    "two consecutive zero accepted rounds",
+    "total U decrease over last three completed rounds < 0.001",
+    "U - T <= 0.002"
+  ],
+  "immediate_stop": "Audited U <= T immediately after every RMP; no pricing certification needed",
+  "fixed_workers": 4,
+  "Threads": 1,
+  "RAM_floor_GiB": 1,
+  "warm_RMP_selected": false,
+  "warm_RMP_tests": false,
+  "adaptive_smoothing": "PR142 fixed adaptive update rule, initial next alpha 0.125; restore center only exact pool/dual/row axis identity",
+  "true_RC_threshold": -1e-07,
+  "no_negative_BestBd": -1e-08,
+  "FeasibilityTol": 1e-08,
+  "IntFeasTol": 1e-08,
+  "OptimalityTol": 1e-08,
+  "postsolve_affine": 1e-06,
+  "maximum_columns_per_MESS": 4,
+  "maximum_columns_per_round": 16,
+  "full_original_domain": true,
+  "column_deletion": false,
+  "speed_tuning": false,
+  "classification_policy": {
+    "min_material_component": 0.001,
+    "weakness_supported": "sum room >= max(0.001, T - L_corr)",
+    "true_negative": "sum -min(0,inc) >= 0.001",
+    "close_bound": "sum room <= max(1e-6, 0.05*negative magnitude)",
+    "mixed": "Both supported weakness and true negative material components",
+    "inconclusive": "Receipts insufficient or no registered predicate applies"
+  },
+  "certificate_authority": "True dual plus native full-domain global BestBd only; unchanged exact Fraction residual correction and fixed 1e-8 beta safety; incumbents diagnostic only",
+  "material_threshold": 0.5737116103498322,
+  "Arc_floor_candidate": 0.5687116103498322,
+  "May_production": [
+    0,
+    0,
+    0
+  ],
+  "Branch_and_Price": false
+}
