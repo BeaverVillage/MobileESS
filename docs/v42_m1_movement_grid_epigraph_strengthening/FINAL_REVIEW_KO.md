@@ -1,4 +1,4 @@
-1. PR / SHA / tests / clean: Draft PR 게시 대기; scientific commit `commit 이후 기록`. Exact base `4ea94878a40327a11e57c7a9b69030da9e158993`. Semantic 254 PASS / full pytest 1678 PASS; git diff 및 cached diff --check PASS. 최종 metadata commit의 remote SHA와 clean tree는 최종 응답에서 별도 확인한다.
+1. PR / SHA / tests / clean: https://github.com/BeaverVillage/MobileESS/pull/139; scientific commit `b97c4a332ad548bc65e94d67da97cb6667a4d84f`. Exact base `4ea94878a40327a11e57c7a9b69030da9e158993`. Semantic 254 PASS / full pytest 1678 PASS; git diff 및 cached diff --check PASS. 최종 metadata commit의 remote SHA와 clean tree는 최종 응답에서 별도 확인한다.
 2. PR138 model identity PASS: 886,017 rows / 316,743 columns / 208,312 binaries / 8,447,855 nnz. Matrix indptr/indices/coefficients, RHS/senses/bounds/types/objective/varnames 및 native rownames SHA, A1/NormalAmps/source authority cold 재감사 PASS; 기존 5,229개 파일 byte 보존.
 3. Baseline root LB: 0.5687116103498322. 저장된 PR137 raw primal을 separation에 재사용; baseline 신규 solve=0.
 4. Polished fixed-discrete LP status: OPTIMAL; Threads=1/Method=2/Crossover=1/TimeLimit=300, runtime 1.548s. 기존 validated zero-action의 정수 패턴만 고정했고 continuous 값은 다시 최적화했다.
