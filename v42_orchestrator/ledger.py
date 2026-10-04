@@ -86,6 +86,19 @@ class CoordinatorLock:
 
 
 class Ledger:
+    synthetic_only = True
+
+    def make_identity(self, plan, input_sha, stage_version):
+        return dict(scientific_sha=plan['scientific_sha'], input_sha=input_sha,
+                    stage_version=stage_version, plan_sha=digest(plan), mode='MOCK_ONLY')
+
+    def validate_counters(self, counters):
+        return counters == dict(optimizer=0, Actual=0, Fresh_AC=0)
+
+    def validate_payload(self, node, payload):
+        phase = 'PLANNING' if node['planning'] or node['stage'] == 'PLANNING_FREEZE' else node['stage']
+        return payload.get('producer_phase') == phase and payload.get('synthetic_only') is True
+
     def __init__(self, root, plan, *, input_sha, stage_version=STAGE_VERSION):
         if not isinstance(input_sha, str) or len(input_sha) != 64 or any(c not in '0123456789abcdef' for c in input_sha):
             raise ValueError('Explicit SHA256 input authority required')
@@ -96,14 +109,13 @@ class Ledger:
         self.plan = plan
         self.nodes = {n['id']: n for n in plan['nodes']}
         self.path = self.root / 'CAMPAIGN_STATE.json'
-        self.identity = dict(scientific_sha=plan['scientific_sha'], input_sha=input_sha,
-                             stage_version=stage_version, plan_sha=digest(plan), mode='MOCK_ONLY')
+        self.identity = self.make_identity(plan, input_sha, stage_version)
         try:
             if self.path.exists():
                 self.state = json.loads(self.path.read_text(encoding='utf8'))
                 if self.state.get('schema_version') != 1 or set(self.state['stages']) != set(self.nodes):
                     raise ValueError('Checkpoint topology/schema mismatch; use a new campaign root')
-                if self.state.get('production_calls') != dict(optimizer=0, Actual=0, Fresh_AC=0):
+                if not self.validate_counters(self.state.get('production_calls')):
                     raise ValueError('Mock checkpoint contains production execution')
                 for sid, row in self.state['stages'].items():
                     if row.get('status') not in TRANSITIONS:
@@ -188,12 +200,12 @@ class Ledger:
         try:
             receipt = json.loads(path.read_text(encoding='utf8'))
             if (receipt['identity'] != self.expected(sid) or receipt['status'] != 'PASS'
-                    or receipt['synthetic_only'] is not True
+                    or receipt['synthetic_only'] is not self.synthetic_only
                     or receipt['output_sha'] != digest(receipt['payload'])):
                 return None
             expected_phase = ('PLANNING' if self.nodes[sid]['planning'] or
                               self.nodes[sid]['stage'] == 'PLANNING_FREEZE' else self.nodes[sid]['stage'])
-            if receipt['payload'].get('producer_phase') != expected_phase:
+            if receipt['payload'].get('producer_phase') != expected_phase or not self.validate_payload(self.nodes[sid], receipt['payload']):
                 return None
             return receipt
         except (ValueError, KeyError, TypeError):
@@ -276,10 +288,10 @@ class Ledger:
                 raise ValueError('Publication requires RUNNING')
             expected_phase = ('PLANNING' if self.nodes[sid]['planning'] or
                               self.nodes[sid]['stage'] == 'PLANNING_FREEZE' else self.nodes[sid]['stage'])
-            if payload.get('producer_phase') != expected_phase or payload.get('synthetic_only') is not True:
-                raise ValueError('Mock acceptance requires synthetic output with matching producer phase')
+            if payload.get('producer_phase') != expected_phase or not self.validate_payload(self.nodes[sid], payload):
+                raise ValueError('Receipt payload failed mode-specific acceptance/provenance validation')
             receipt = dict(status='PASS', identity=self.expected(sid), payload=copy.deepcopy(payload),
-                           output_sha=digest(payload), synthetic_only=True, accepted_at=now())
+                           output_sha=digest(payload), synthetic_only=self.synthetic_only, accepted_at=now())
             path = self.receipt_path(sid)
             if path.exists():
                 previous = self.read_receipt(sid)
