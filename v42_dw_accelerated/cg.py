@@ -10,12 +10,16 @@ from v42_dw_bound.certificate import global_dual,receipt
 import numpy as np,multiprocessing as mp,gurobipy as gp,threading,gc
 
 class Experiment(Mechanics):
-    def __init__(self):
+    def __init__(self,resume=False):
         gc.collect();self.commit=verify_freeze();preserve_old();arc=read(SCI/'ARC_LP_CERTIFIED_RESULT.json');assert arc['ARC_LP_CERTIFIED'];assert not STOP.exists()
         self.resume_checkpoint=read(OUT/'DW_CHECKPOINT_LATEST.json') if (OUT/'CG_STARTED.json').exists() else None
         if self.resume_checkpoint is None:
             with (OUT/'CG_STARTED.json').open('x',encoding='utf8') as f:json.dump(dict(preopt_commit=self.commit,budget=1800,arc_budget_carried=0),f)
-        else:assert self.resume_checkpoint['type']!='TERMINAL','ONE_RUN_ALREADY_FINISHED'
+        else:
+            if self.resume_checkpoint['type']=='TERMINAL':
+                prior=read(OUT/'DW_ACCELERATED_FINAL_RESULT.json')
+                assert resume and prior['stop_reason']=='RMP_NOT_OPTIMAL' and prior['materiality']=='INCONCLUSIVE' and self.resume_checkpoint['elapsed_budget']<BUDGET,'ONE_RUN_ALREADY_FINISHED'
+        self.explicit_resume=resume;self.RMP_cap=300. if resume else 60.;self.force_final_after_incomplete=False
         self.begin=time.perf_counter();self.budget_carried=0.;self.wall_carried=0.;self.intervals=[];self.rmps=[];self.prices=[];self.columns=[];self.rounds=[];self.certs=[];self.canaries=[];self.capture_ledger=[];self.smoothing_rows=[];self.current_round=0;self.call=0;self.column_id=0;self.workers=4;self.context=mp.get_context('spawn');self.cancel=self.context.Event();self.processes=[];self.pipes=[];self.pids=[];self.monitor=Monitor(self.pids,self.cancel)
         self.floor=arc['L_arc_cert'];self.authority=read(SCI/'DW_MATERIAL_THRESHOLD_AUTHORITY.json');old=read(SCI/'DW_THRESHOLD_FINAL_RESULT.json');self.best_corr=old['best_corrected_LB'];self.bestU=old['smallest_RMP_upper'];self.bestL=max(self.floor,self.best_corr);self.materiality=decision(self.bestL,self.bestU,self.authority);self.converged=False;self.stop=None;self.accepted=[];self.uppers=[self.bestU]
         start=time.perf_counter();self.A,self.d,self.B,self.e,*_=inputs();self.owner,self.row_owner=axes()
@@ -69,7 +73,7 @@ class Experiment(Mechanics):
 
     def solve_master(self,kind):
         self.current_round+=1;self.resource_gate('RMP');rmp_begin=time.perf_counter();model=self.master.model;model.reset(0 if self.persistent_selected else 1)
-        settings=dict(Threads=1,Method=2,Crossover=1,LPWarmStart=0,PreDual=0,BarConvTol=1e-11,Seed=20260929,FeasibilityTol=EPS,IntFeasTol=EPS,OptimalityTol=EPS,TimeLimit=min(60,max(.001,self.remaining()-2)))
+        settings=dict(Threads=1,Method=2,Crossover=1,LPWarmStart=0,PreDual=0,BarConvTol=1e-11,Seed=20260929,FeasibilityTol=EPS,IntFeasTol=EPS,OptimalityTol=EPS,TimeLimit=min(self.RMP_cap,max(.001,self.remaining()-124)))
         for k,v in settings.items():model.setParam(k,v)
         model.Params.LogFile=(OUT.relative_to(ROOT)/f'logs/RMP_{self.current_round:04d}.log').as_posix()
         self.monitor.phase='RMP';self.active_spent=self.spent();self.active_start=time.perf_counter();self.active[0]=model
@@ -93,7 +97,7 @@ class Experiment(Mechanics):
 
     def certify(self,dual,prices):
         pi,alpha,key,file=dual;value,proof=global_dual(self.master.A,self.master.d,pi,self.lo[self.master.columns],self.hi[self.master.columns])
-        c=receipt(self.current_round,1,pi,alpha,key,value,proof,prices,self.rmps[-1]['objective'],self.master,self.blocks);c['type']='FINAL_CERTIFICATION';c['file']=f'bound_certificates/ROUND_{self.current_round:04d}.json'
+        c=receipt(self.current_round,1,pi,alpha,key,value,proof,prices,self.authority_rmp()['objective'],self.master,self.blocks);c['true_dual_origin_RMP']=self.authority_rmp()['round'];c['latest_RMP_optimal']=self.rmps[-1]['status']==2;c['type']='FINAL_CERTIFICATION';c['file']=f'bound_certificates/ROUND_{self.current_round:04d}.json'
         if c['certified']:self.best_corr=max(self.best_corr,c['L_corr'])
         self.bestL=max(self.floor,self.best_corr);self.materiality=decision(self.bestL,self.bestU,self.authority);self.converged=bool(c['certified'] and all(p['native_status']==2 and p['valid_bound'] and p['ObjBound']>=-EPS for p in prices))
         c['materiality']=self.materiality;c['aggregated_lower']=self.bestL;c['threshold']=self.authority['T_cert'];write(c['file'],c);self.certs.append(c);return c
@@ -125,12 +129,13 @@ class Experiment(Mechanics):
             dual=self.resume_dual() if self.resume_checkpoint else self.solve_master('INITIAL_TRUE_RMP');self.uppers=self.uppers or [self.bestU];self.checkpoint('INITIAL_TRUE_RMP')
             if dual is None or self.stop:return
             for k in range(len(self.accepted),12):
+                if self.force_final_after_incomplete:break
                 if self.resume_checkpoint and early_trigger(self.accepted,self.uppers,self.authority['T_cert']):break
                 if self.resume_phase and self.resume_phase['kind']=='FINAL_CERTIFICATION':break
                 if STOP.exists():self.stop='USER_STOP';break
                 if self.cancel.is_set():self.stop='RESOURCE_STOP';break
                 # Reserve full next post-append RMP60 + final C90, plus guard.
-                if self.remaining()<204:self.stop='BUDGET_EARLY_CERTIFICATION';break
+                if self.remaining()<self.RMP_cap+144:self.stop='BUDGET_EARLY_CERTIFICATION';break
                 before=len(self.columns);round_start=time.perf_counter();self.active_spent=self.spent();self.active_start=time.perf_counter();prices,safe=self.pricing_round('DISCOVERY',dual,20);self.active_start=None
                 if not safe:self.stop='RESOURCE_OR_PRICING_FAILURE';self.checkpoint('DISCOVERY_FAILED',prices);break
                 self.parallel_validation(prices,dual)
@@ -139,11 +144,14 @@ class Experiment(Mechanics):
                         if c['selected']:self.add(dict(p,**c),dual[0],dual[1])
                         self.capture_ledger.append(dict(call=p['call'],round=p['round'],MESS=p['MESS'],arrival=c['arrival'],point_file=c['point_file'],point_SHA=c['point_SHA'],column_SHA=c['column_SHA'],rc_smooth=c['manual_search_rc'],rc_true=c['rc_inc'],valid_negative=c['valid_negative'],selected=c['selected'],pricing_optimum_claimed=False))
                 count=len(self.columns)-before;self.accepted.append(count);smooth=self.smoothing_rows[-1];smooth.update(accepted=count,proposed=sum(len(p['candidates']) for p in prices),rejected_after_true_RC=sum(c['manual_search_rc']<=DISCOVERY_RC and c['rc_inc']>DISCOVERY_RC for p in prices for c in p['candidates']))
-                prior=self.bestU;self.checkpoint('DISCOVERY_ADDED',prices);dual=self.solve_master('POST_DISCOVERY_TRUE_RMP');self.uppers.append(self.bestU)
+                prior=self.bestU;self.checkpoint('DISCOVERY_ADDED',prices);dual=self.solve_master('POST_DISCOVERY_TRUE_RMP');
+                if dual is not None:self.uppers.append(self.bestU)
                 trigger=early_trigger(self.accepted,self.uppers,self.authority['T_cert'])
                 self.rounds.append(dict(discovery_round=k+1,pricing_round=prices[0]['round'],post_RMP_round=self.current_round,workers=4,columns_added=count,round_wall_seconds=time.perf_counter()-round_start,pricing_optimize_union=union_seconds([p['interval'] for p in prices]),pricing_batch_wall=self.canaries[-1]['batch_wall_seconds'],validation_wall=self.validation_rows[-1]['total_wall'],audit_wall=self.audit_rows[-1]['wall'],RMP_wall=self.rmps[-1].get('total_RMP_wall'),U_before=prior,U_after=self.bestU,D_U=self.bestU-self.authority['T_cert'],L_cert=self.bestL,D_L=self.authority['T_cert']-self.bestL,early_certification_trigger=trigger))
                 self.checkpoint('POST_DISCOVERY',prices);self.save();print('THRESHOLD_DISCOVERY',k+1,count,self.bestU,self.spent(),trigger,flush=True)
-                if dual is None or self.stop or trigger:break
+                if dual is None and self.stop=='RMP_NOT_OPTIMAL':
+                    dual=self.last_completed_dual();self.stop=None;self.force_final_after_incomplete=True
+                if dual is None or self.stop or trigger or self.force_final_after_incomplete:break
             if not self.stop or self.stop=='BUDGET_EARLY_CERTIFICATION':
                 if dual is not None and not self.cancel.is_set() and self.remaining()>=124:
                     self.active_spent=self.spent();self.active_start=time.perf_counter();self.tier_audit('FINAL_CERTIFICATION',dual[0],dual[1],dual[2]);prices,safe=self.pricing_round('FINAL_CERTIFICATION',dual,120);self.active_start=None
@@ -162,9 +170,11 @@ class Experiment(Mechanics):
         if not (OUT/'DW_ACCELERATED_FINAL_CERTIFICATION.json').exists():write('DW_ACCELERATED_FINAL_CERTIFICATION.json',dict(status='NOT_RUN',reason=self.stop,exact_threshold_decision=self.materiality))
         self.materiality=decision(self.bestL,self.bestU,self.authority);ds=[r['round_wall_seconds'] for r in self.rounds];elapsed=self.elapsed()
         write('DW_ACCELERATED_FINAL_RESULT.json',dict(status='THRESHOLD_EXPERIMENT_INCONCLUSIVE' if self.materiality=='INCONCLUSIVE' else 'EXACT_THRESHOLD_DECISION',materiality=self.materiality,stop_reason=self.stop,initial_retained_columns=1244,retained_columns=1244+len(self.columns),new_RMP_solves=len(self.rmps),new_pricing_calls=len(self.prices),new_discovery_columns=len(self.columns),discovery_rounds=len(self.accepted),certification_rounds=len(self.certs),best_corrected_LB=self.best_corr,new_corrected_LB=self.certs[-1]['L_corr'] if self.certs and self.certs[-1]['certified'] else None,arc_floor=self.floor,best_certified_LB=self.bestL,smallest_RMP_upper=self.bestU,final_interval=[self.bestL,self.bestU],material_threshold=self.authority['T_cert'],threshold_authority=self.authority,DW_ROOT_OPTIMAL_CERTIFIED=self.converged,total_optimize_wall_union=self.spent(),sum_native_optimize_wall=sum(b-a for a,b in self.intervals),elapsed_including_build_audit=elapsed,build_seconds=self.build_seconds,columns_per_min=len(self.columns)/(elapsed/60),discovery_median=float(np.median(ds)) if ds else None,RMP_upper_decrease_per_min=(read(SCI/'DW_THRESHOLD_FINAL_RESULT.json')['smallest_RMP_upper']-self.bestU)/(elapsed/60),warm_RMP_selected=False,workers=4,Threads=1,RAM_floor_GiB=1,actual_four_overlap_seconds=sum(c.get('actual_four_overlap_seconds',0) for c in self.canaries),adaptive_smoothing=True,smoothing_alpha_final=self.smooth_weight,no_domain_restriction=True,pricing_redesign=False,May_production=[0,0,0],Branch_and_Price=False))
-        write('DW_OPTIMIZE_INTERVALS.json',dict(intervals=self.intervals,union_seconds=self.spent(),budget=1800,arc_budget_carried=0));self.checkpoint('TERMINAL');self.save();self.runtime_receipts();print('THRESHOLD_CG_DONE',self.materiality,self.bestL,self.bestU,len(self.columns),self.spent(),flush=True)
+        write('DW_OPTIMIZE_INTERVALS.json',dict(intervals=self.intervals,union_seconds=self.spent(),budget_carried=self.budget_carried,current_segment_union=union_seconds(self.intervals),previous_intervals_file='PRE_RESUME_DW_OPTIMIZE_INTERVALS.json' if self.budget_carried else None,budget=1800,arc_budget_carried=0));self.checkpoint('TERMINAL');self.save();self.runtime_receipts();print('THRESHOLD_CG_DONE',self.materiality,self.bestL,self.bestU,len(self.columns),self.spent(),flush=True)
 
 from .integration import Integration
 # Runtime methods override only adapters; frozen science imports remain original.
 for _name in Integration.METHODS:setattr(Experiment,_name,getattr(Integration,_name))
-if __name__=="__main__":Experiment().run()
+if __name__=="__main__":
+ import sys
+ Experiment(resume='--resume' in sys.argv).run()

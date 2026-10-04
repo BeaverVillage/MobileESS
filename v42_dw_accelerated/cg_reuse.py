@@ -45,7 +45,7 @@ class Mechanics:
         if not phase:
             for m in range(4):
                 self.call+=1
-                jobs.append(dict(RMP_objective=self.rmps[-1]['objective'],smoothing_alpha=self.smoothing_rows[-1]['alpha_used'] if kind=='DISCOVERY' else 1.,retained_SHAs=sorted(self.seen[m]),call=self.call,round=self.current_round,type=kind,unit=m,dual_SHA=search_key,dual_file=search_file,true_dual_SHA=key,true_dual_file=file,stabilized_discovery=search_key!=key,cap=cap,log=f'logs/PRICE_{self.call:04d}_{UNITS[m]}.log',receipt=f'pricing_receipts/PRICE_{self.call:04d}.json'))
+                jobs.append(dict(RMP_objective=self.authority_rmp()['objective'],smoothing_alpha=self.smoothing_rows[-1]['alpha_used'] if kind=='DISCOVERY' else 1.,retained_SHAs=sorted(self.seen[m]),call=self.call,round=self.current_round,type=kind,unit=m,dual_SHA=search_key,dual_file=search_file,true_dual_SHA=key,true_dual_file=file,stabilized_discovery=search_key!=key,cap=cap,log=f'logs/PRICE_{self.call:04d}_{UNITS[m]}.log',receipt=f'pricing_receipts/PRICE_{self.call:04d}.json'))
         assert len(jobs)==4
         # Durably bind ALL job identities before the first native dispatch.
         write('DW_PHASE_STATE.json',dict(kind=kind,true_dual_SHA=key,search_file=search_file,search_key=search_key,jobs=jobs,committed=False,alpha_next=self.smooth_weight,smoothing_rows=self.smoothing_rows))

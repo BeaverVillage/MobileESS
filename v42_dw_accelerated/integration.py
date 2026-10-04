@@ -14,7 +14,7 @@ import numpy as np,psutil
 
 FLAGS=RuntimeFlags(True,True,True,False)
 class Integration:
- METHODS=('setup_audits','audit_one','tier_audit','parallel_validation','resource_gate','restore_run','resume_dual','debit_done','full_pool_final','runtime_receipts')
+ METHODS=('setup_audits','audit_one','tier_audit','parallel_validation','resource_gate','restore_run','resume_dual','debit_done','full_pool_final','runtime_receipts','authority_rmp','last_completed_dual')
  def resource_gate(self,phase):
   row=self.monitor.sample();blocked=resource_failures(row,self.monitor.rows)
   processes=[]
@@ -45,13 +45,13 @@ class Integration:
   with ThreadPoolExecutor(max_workers=4,thread_name_prefix='DW_INITIAL_AUDIT') as ex:
    receipts=list(ex.map(lambda c:self.audit_one(c,pi,alpha,'INITIAL1244'),missing))
   for r in receipts:self.cache.add(r)
-  self.cache.save(OUT/'PHYSICAL_AUDIT_CACHE.json');write('DW_INITIAL_POOL_AUDIT.json',dict(PASS=True,columns=1244,initial_full_audits=len(missing),authority=asdict(self.audit_authority),authority_key=self.audit_authority.key,wall=time.perf_counter()-start,old_receipt_key_incomplete=True,no_pricing_replayed=True))
+  self.cache.save(OUT/'PHYSICAL_AUDIT_CACHE.json');write('DW_AUDIT_CACHE_RESTORE.json' if (OUT/'DW_INITIAL_POOL_AUDIT.json').exists() else 'DW_INITIAL_POOL_AUDIT.json',dict(PASS=True,columns=1244,initial_full_audits=len(missing),authority=asdict(self.audit_authority),authority_key=self.audit_authority.key,wall=time.perf_counter()-start,old_receipt_key_incomplete=True,no_pricing_replayed=True))
  def audit_one(self,c,pi,alpha,label):
   v=self.validators[c['unit']];r=v.audit(c['x']);assert r['local_PASS'] and r['physical_PASS'] and r['integral'];assert v.trajectory_sha(c['x'])==c['key']
   rc=float(exact_rc(self.blocks[c['unit']],c['x'],pi,alpha[c['unit']]))
   return AuditReceipt(c['key'],self.audit_authority,r['max_residual'],rc,hashlib.sha256(pi.tobytes()+alpha.tobytes()).hexdigest(),self.current_round,datetime.now(timezone.utc).isoformat(),label,canonical(r))
  def tier_audit(self,kind,pi,alpha,key):
-  begin=time.perf_counter();data={c['key']:c for c in self.master.column_data};newly=[c['SHA256'] for c in self.columns if c['round']==self.current_round-1];plan=audit_plan(kind,data,newly,self.audit_authority,self.cache,FLAGS)
+  begin=time.perf_counter();data={c['key']:c for c in self.master.column_data};newly=list(getattr(self,'pending_new',[]))+[c['SHA256'] for c in self.columns if c['round']==self.current_round-1];self.pending_new=[];plan=audit_plan(kind,data,newly,self.audit_authority,self.cache,FLAGS)
   required=plan['columns_to_full_audit']
   with ThreadPoolExecutor(max_workers=4,thread_name_prefix='DW_POOL_AUDIT') as ex:
    receipts=list(ex.map(lambda k:self.audit_one(data[k],pi,alpha,kind),required))
@@ -68,7 +68,7 @@ class Integration:
  def parallel_validation(self,prices,dual):
   begin=time.perf_counter();pi,alpha,key,file=dual
   with np.load(OUT/prices[0]['dual_file']) as z:sp=z['pi'];sa=z['alpha']
-  snap=DiscoverySnapshot.create(self.current_round,pi,sp,alpha,sa,self.smoothing_rows[-1]['alpha_used'],self.rmps[-1]['objective'])
+  snap=DiscoverySnapshot.create(self.current_round,pi,sp,alpha,sa,self.smoothing_rows[-1]['alpha_used'],self.authority_rmp()['objective'])
   batches={p['unit']:[] for p in prices}
   for p in prices:
    for c in p['candidates']:
@@ -118,23 +118,39 @@ class Integration:
     with np.load(OUT/phase['search_file']) as z:self.smooth_pi=z['pi'];self.smooth_conv=z['alpha']
     self.smooth_weight=phase['alpha_next'];self.smoothing_rows=phase['smoothing_rows'];self.smooth_file=phase['search_file'];self.smooth_key=phase['search_key']
   write('DW_RESUME_RECEIPT.json',dict(PASS=True,conservative_budget_debit=self.budget_carried,checkpoint_type=cp['type'],recover_uncommitted_phase=bool(self.resume_phase),no_second_budget_grant=True))
- def resume_dual(self):
-  cp=self.resume_checkpoint
-  if cp['type']=='DISCOVERY_ADDED':
-   dual=self.solve_master('RECOVER_POST_DISCOVERY_TRUE_RMP');self.uppers.append(self.bestU)
-   self.checkpoint('RECOVER_POST_DISCOVERY');return dual
-  row=cp['RMP'];assert sha(OUT/row['point_file'])==row['point_SHA']
+ def authority_rmp(self):
+  return next(r for r in reversed(self.rmps) if r['status']==2)
+ def last_completed_dual(self):
+  row=self.authority_rmp();assert sha(OUT/row['point_file'])==row['point_SHA']
   with np.load(OUT/row['point_file']) as z:pi=z['pi'];alpha=z['alpha']
   self.previous_pi=pi.copy()
-  prior=(OUT/self.rmps[-2]['point_file']) if len(self.rmps)>=2 else SCI/read(SCI/'DW_CHECKPOINT_LATEST.json')['RMP']['point_file']
-  with np.load(prior) as z:self.last_true_pi=z['pi'].copy()
+  prior=[r for r in self.rmps if r['status']==2]
+  file=OUT/prior[-2]['point_file'] if len(prior)>=2 else SCI/read(SCI/'DW_CHECKPOINT_LATEST.json')['RMP']['point_file']
+  with np.load(file) as z:self.last_true_pi=z['pi'].copy()
   return pi,alpha,row['dual_SHA'],row['point_file']
+ def resume_dual(self):
+  cp=self.resume_checkpoint
+  # Successful points/calls are NEVER optimized again. Only the LP whose native
+  # terminal TIME_LIMIT provided no authoritative point is completed on its
+  # exact preserved append-only pool; the previous60s debit remains charged.
+  if cp['RMP']['status']!=2 or cp['type']=='DISCOVERY_ADDED':
+   failed=cp['RMP'];self.pending_new=[c['SHA256'] for c in self.columns if c['round']==failed['round']-1]
+   self.uppers=[read(SCI/'DW_THRESHOLD_FINAL_RESULT.json')['smallest_RMP_upper']]+[r['objective'] for r in self.rmps if r['status']==2 and r['type']!='INITIAL_TRUE_RMP']
+   self.last_completed_dual();dual=self.solve_master('RESUME_INCOMPLETE_RMP')
+   if dual is not None:
+    self.uppers.append(self.bestU)
+    if self.rounds:
+     self.rounds[-1].update(recovered_post_RMP_round=self.current_round,U_after=self.bestU,D_U=self.bestU-self.authority['T_cert'],incomplete_native_call_retained=failed['round'],early_certification_trigger=early_trigger(self.accepted,self.uppers,self.authority['T_cert']))
+   else:
+    self.stop=None;self.force_final_after_incomplete=True;dual=self.last_completed_dual()
+   self.checkpoint('RECOVER_POST_DISCOVERY');return dual
+  return self.last_completed_dual()
  def full_pool_final(self):
-  if not self.rmps or self.rmps[-1]['status']!=2:
-   write('DW_FULL_POOL_FINAL_AUDIT.json',dict(PASS=False,reason='NO_FINAL_OPTIMAL_RMP'));return
-  row=self.rmps[-1]
+  if not any(r['status']==2 for r in self.rmps):
+   write('DW_FULL_POOL_FINAL_AUDIT.json',dict(PASS=False,reason='NO_OPTIMAL_RMP_AUTHORITY'));return
+  row=self.authority_rmp()
   with np.load(OUT/row['point_file']) as z:pi=z['pi'];alpha=z['alpha']
-  audit=self.tier_audit('FINAL_CHECKPOINT',pi,alpha,row['dual_SHA']);write('DW_FULL_POOL_FINAL_AUDIT.json',dict(PASS=True,columns=len(self.master.column_data),audit=audit,current_true_RC=self.current_RC_rows,no_column_deletion=True))
+  audit=self.tier_audit('FINAL_CHECKPOINT',pi,alpha,row['dual_SHA']);write('DW_FULL_POOL_FINAL_AUDIT.json',dict(PASS=True,columns=len(self.master.column_data),audit=audit,current_true_RC=self.current_RC_rows,no_column_deletion=True,true_dual_origin_RMP=row['round'],latest_RMP_optimal=self.rmps[-1]['status']==2,point_extension='new column lambdas zero on last completed primal point'))
  def runtime_receipts(self):
   rows=[]
   for p in self.prices:
