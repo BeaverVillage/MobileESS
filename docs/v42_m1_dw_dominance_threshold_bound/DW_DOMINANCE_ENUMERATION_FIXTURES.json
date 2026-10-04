@@ -1,0 +1,618 @@
+{
+  "PASS": true,
+  "method": "Exact Fraction Gaussian elimination of every active-row combination and every binary assignment; full continuous-face vertex enumeration, no native solver, no sampled vertices.",
+  "native_optimize_calls": 0,
+  "fixtures": [
+    {
+      "fixture": "route_split",
+      "blocks": 1,
+      "all_local_integer_assignments": 4,
+      "all_integer_face_vertices": 1,
+      "arc_vertices": 4,
+      "DW_vertices": 2,
+      "z_arc_LP": "1/2",
+      "z_DW_LP": "1",
+      "z_original_integer": "1",
+      "z_DW_integer": "1",
+      "PASS": true,
+      "rows": [
+        {
+          "a": [
+            "-1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "0",
+            "-1"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "1",
+            "1"
+          ],
+          "sense": "=",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "-2",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "-1"
+        }
+      ],
+      "local_vertices": [
+        [
+          "1",
+          "0"
+        ]
+      ],
+      "coupling": "sum cost*x - rho <= -offset",
+      "offset": 0,
+      "cost": [
+        "1",
+        "0"
+      ]
+    },
+    {
+      "fixture": "charge_mode",
+      "blocks": 1,
+      "all_local_integer_assignments": 2,
+      "all_integer_face_vertices": 2,
+      "arc_vertices": 6,
+      "DW_vertices": 4,
+      "z_arc_LP": "0",
+      "z_DW_LP": "1",
+      "z_original_integer": "1",
+      "z_DW_integer": "1",
+      "PASS": true,
+      "rows": [
+        {
+          "a": [
+            "-1",
+            "0",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "0",
+            "-1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "0",
+            "0",
+            "-1"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "1",
+            "0",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "0",
+            "1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "-1",
+            "1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "1",
+            "0",
+            "1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "1",
+            "-1"
+          ],
+          "sense": "=",
+          "rhs": "0"
+        }
+      ],
+      "local_vertices": [
+        [
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "1",
+          "0",
+          "0"
+        ]
+      ],
+      "coupling": "sum cost*x - rho <= -offset",
+      "offset": 1,
+      "cost": [
+        "0",
+        "-1",
+        "-1"
+      ]
+    },
+    {
+      "fixture": "SOC_travel_energy",
+      "blocks": 1,
+      "all_local_integer_assignments": 2,
+      "all_integer_face_vertices": 1,
+      "arc_vertices": 4,
+      "DW_vertices": 2,
+      "z_arc_LP": "1/2",
+      "z_DW_LP": "1",
+      "z_original_integer": "1",
+      "z_DW_integer": "1",
+      "PASS": true,
+      "rows": [
+        {
+          "a": [
+            "-1",
+            "0",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "0",
+            "-1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "0",
+            "0",
+            "-1"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "1",
+            "0",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "1/2"
+        },
+        {
+          "a": [
+            "0",
+            "0",
+            "1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "1",
+            "-1",
+            "1"
+          ],
+          "sense": "=",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "0",
+            "1"
+          ],
+          "sense": "=",
+          "rhs": "1"
+        }
+      ],
+      "local_vertices": [
+        [
+          "0",
+          "0",
+          "1"
+        ]
+      ],
+      "coupling": "sum cost*x - rho <= -offset",
+      "offset": 1,
+      "cost": [
+        "0",
+        "-1",
+        "0"
+      ]
+    },
+    {
+      "fixture": "PCS",
+      "blocks": 1,
+      "all_local_integer_assignments": 2,
+      "all_integer_face_vertices": 4,
+      "arc_vertices": 8,
+      "DW_vertices": 8,
+      "z_arc_LP": "0",
+      "z_DW_LP": "0",
+      "z_original_integer": "0",
+      "z_DW_integer": "0",
+      "PASS": true,
+      "rows": [
+        {
+          "a": [
+            "-1",
+            "0",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "0",
+            "-1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "0",
+            "0",
+            "-1"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "1",
+            "0",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "0",
+            "1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "-1",
+            "1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "1",
+            "0",
+            "1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "1",
+            "1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "1",
+            "-1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "-1",
+            "1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "-1",
+            "-1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        }
+      ],
+      "local_vertices": [
+        [
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "1"
+        ],
+        [
+          "1",
+          "0",
+          "0"
+        ],
+        [
+          "1",
+          "1",
+          "0"
+        ]
+      ],
+      "coupling": "sum cost*x - rho <= -offset",
+      "offset": 1,
+      "cost": [
+        "0",
+        "-1",
+        "-1"
+      ]
+    },
+    {
+      "fixture": "grid_coupling",
+      "blocks": 1,
+      "all_local_integer_assignments": 2,
+      "all_integer_face_vertices": 1,
+      "arc_vertices": 4,
+      "DW_vertices": 2,
+      "z_arc_LP": "1/2",
+      "z_DW_LP": "1",
+      "z_original_integer": "1",
+      "z_DW_integer": "1",
+      "PASS": true,
+      "rows": [
+        {
+          "a": [
+            "-1"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "-2"
+          ],
+          "sense": "<",
+          "rhs": "-1"
+        }
+      ],
+      "local_vertices": [
+        [
+          "1"
+        ]
+      ],
+      "coupling": "sum cost*x - rho <= -offset",
+      "offset": 0,
+      "cost": [
+        "1"
+      ]
+    },
+    {
+      "fixture": "terminal_SOC",
+      "blocks": 1,
+      "all_local_integer_assignments": 2,
+      "all_integer_face_vertices": 1,
+      "arc_vertices": 4,
+      "DW_vertices": 2,
+      "z_arc_LP": "3/4",
+      "z_DW_LP": "1",
+      "z_original_integer": "1",
+      "z_DW_integer": "1",
+      "PASS": true,
+      "rows": [
+        {
+          "a": [
+            "-1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "0",
+            "-1"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "1",
+            "0"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "1",
+            "1"
+          ],
+          "sense": "=",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "0",
+            "-1"
+          ],
+          "sense": "<",
+          "rhs": "-3/4"
+        }
+      ],
+      "local_vertices": [
+        [
+          "0",
+          "1"
+        ]
+      ],
+      "coupling": "sum cost*x - rho <= -offset",
+      "offset": 1,
+      "cost": [
+        "-1",
+        "0"
+      ]
+    },
+    {
+      "fixture": "multi_MESS_coupling",
+      "blocks": 2,
+      "all_local_integer_assignments": 2,
+      "all_integer_face_vertices": 1,
+      "arc_vertices": 8,
+      "DW_vertices": 2,
+      "z_arc_LP": "1",
+      "z_DW_LP": "2",
+      "z_original_integer": "2",
+      "z_DW_integer": "2",
+      "PASS": true,
+      "rows": [
+        {
+          "a": [
+            "-1"
+          ],
+          "sense": "<",
+          "rhs": "0"
+        },
+        {
+          "a": [
+            "1"
+          ],
+          "sense": "<",
+          "rhs": "1"
+        },
+        {
+          "a": [
+            "-2"
+          ],
+          "sense": "<",
+          "rhs": "-1"
+        }
+      ],
+      "local_vertices": [
+        [
+          "1"
+        ]
+      ],
+      "coupling": "sum cost*x - rho <= -offset",
+      "offset": 0,
+      "cost": [
+        "1"
+      ]
+    }
+  ],
+  "scope": "Small independent bounded fixtures; inclusion theorem and actual full-scale matrix audit provide the full-domain proof, these fixtures are regression checks."
+}
