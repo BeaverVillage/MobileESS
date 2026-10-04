@@ -5,7 +5,7 @@ SCI=ROOT/'docs/v42_m1_certified_arc_lp_floor_and_threshold_cg'
 BASE='31858f4e35b44caadeee2a72ef2ae2d35b74899b'
 RUNTIME='42204661b8a92e0b1153ade0dc11830d54ec8df5'
 def write(n,d):
- p=OUT/n;p.parent.mkdir(parents=True,exist_ok=True);q=p.with_suffix(p.suffix+'.tmp');q.write_text(json.dumps(d,ensure_ascii=False,indent=2,allow_nan=False)+'\n',encoding='utf8');q.replace(p)
+ p=OUT/n;p.parent.mkdir(parents=True,exist_ok=True);q=p.with_suffix(p.suffix+'.tmp');q.write_text(json.dumps(d,ensure_ascii=False,indent=2,allow_nan=False)+'\n',encoding='utf8',newline='\n');q.replace(p)
 def audit():
  from v42_degen.identity import inputs,signature,digest
  from v42_dw_root.partition import axes
