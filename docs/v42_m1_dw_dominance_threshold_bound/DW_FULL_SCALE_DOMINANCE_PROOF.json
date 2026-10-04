@@ -1,0 +1,22 @@
+{
+  "PASS": true,
+  "definitions": {
+    "X_m_I": "Original local affine rows, original continuous bounds and original binary route/mode variables; no route restrictions.",
+    "P_m_arc": "Same original rows and bounds, replacing each binary integrality constraint with its original [0,1] bounds.",
+    "DW": "All of conv(X_m_I); unchanged shared grid coordinates z, bounds, objective, and coupling rows."
+  },
+  "proof_steps": [
+    "Each x in X_m_I satisfies every defining affine row and bound of P_m_arc, so X_m_I is a subset of P_m_arc.",
+    "P_m_arc is convex: linear equality/inequality rows and intervals are preserved by nonnegative weights summing to one. Thus conv(X_m_I) is a subset of P_m_arc, including every unseen legal trajectory.",
+    "Define x_m = sum_p lambda[m,p] v[m,p], lambda >= 0, sum_p lambda = 1. All original local rows/bounds hold by linearity; original integer coordinates lie in [0,1].",
+    "Exact a[m,p]=B_m v[m,p] gives Gz + sum_m B_m x_m = Gz + sum_m sum_p lambda[m,p] a[m,p]. Same sense/RHS and identical shared bounds mean every original global row holds.",
+    "Duplicate elimination has exact byte-identical representatives, so all FULL rows hold as well. Original variable-axis reconstruction adds no global or rho freedom.",
+    "Objective c_z*z + sum_m c_m*x_m + c0 equals the DW objective. Therefore projected DW feasible set is a subset of FULL arc LP, and z_arc_LP <= z_DW_root for minimization."
+  ],
+  "unbounded_rays": "Every local variable has finite original bounds; integer faces bounded. Shared unbounded grid variables remain unchanged globally, not replaced by columns.",
+  "finite_pool_not_full_hull": true,
+  "full_domain_proof_is_symbolic_affine_inclusion": true,
+  "retained_columns_audited": 1158,
+  "numerical_column_receipts": "Feasible under frozen affine 1e-6 and raw integral/bounds 1e-8 audits; mathematical inclusion concerns exact feasible sets, solver certificates use the stated numerical contract.",
+  "coupling_audit_SHA": "df23aa21da730492c638b5dcf9c52d0403087d4276474a5d6c8440034e4cc5a0"
+}

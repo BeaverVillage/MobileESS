@@ -1,0 +1,25 @@
+{
+  "PASS": false,
+  "dominance_theorem_PASS": true,
+  "full_scale_matrix_PASS": true,
+  "enumeration_PASS": true,
+  "requested_floor": 0.5687116103498322,
+  "adopted_floor": null,
+  "stop_stage": 4,
+  "status": "STOP_ARC_LP_LOWER_CERTIFICATE_SCOPE_UNVERIFIED",
+  "mathematical_rule": "If L_arc <= z_arc_LP and z_arc_LP <= z_DW*, and L_corr <= z_DW*, then max(L_arc,L_corr) <= z_DW*. The first premise is not supplied by a global integer-MIP lower bound alone.",
+  "counterexample": {
+    "local_blocks": "X1=X2={0,1}",
+    "unchanged_global_coupling": "x1+x2 >= 1/2",
+    "objective": "min x1+x2",
+    "z_original_integer": "1",
+    "valid_MIP_lower_bound": "1",
+    "z_arc_LP": "1/2",
+    "z_DW_root": "1/2",
+    "why": "A global MIP lower bound can exceed the full DW root. Local convexification does not preserve arbitrary global integer cuts."
+  },
+  "primal_objective_not_used_as_LB": true,
+  "empirical_LP_agreement_not_used_as_proof": true,
+  "pricing_incumbent_not_used_as_LB": true,
+  "source_provenance_SHA": "3eb2fb6eb278c163f467cd1cdfba7a31bd0bdedf3b32fff29f5714d184d32ae0"
+}
