@@ -142,13 +142,23 @@ function Read-AtomicSnapshot {
 }
 
 function Get-B1Frame {
-    param($Live,$Heartbeat,$Resource,[hashtable]$Failures)
+    param($Live,$Heartbeat,$Resource,[hashtable]$Failures,$ProcessInfo=$null)
     $process = $Heartbeat.process
+    # The coordinator can resume through an audited operational entrypoint.
+    # Match all published command arguments as well as PID/creation time,
+    # instead of assuming that every coordinator uses the original -m command.
+    $commandTokens=@($process.command | Where-Object { $_ })
+    $rootIndex=[array]::IndexOf($commandTokens,'--root')
+    if ($commandTokens.Count -lt 3 -or $rootIndex -lt 0 -or
+        $rootIndex+1 -ge $commandTokens.Count -or
+        -not [string]::Equals([string]$commandTokens[$rootIndex+1],$Root,[StringComparison]::OrdinalIgnoreCase)) {
+        $commandTokens=@('__INVALID_B1_COORDINATOR_COMMAND__')
+    }
     $master = [pscustomobject]@{
         heartbeat_timestamp_utc=$Heartbeat.timestamp_UTC; last_update=$Live.timestamp_UTC
         orchestrator_pid=$process.PID
         orchestrator_creation_time_utc=([DateTimeOffset]::FromUnixTimeMilliseconds([long]($process.creation_time*1000))).UtcDateTime.ToString('o')
-        orchestrator_command_match_tokens=@('v42_b1_production','--root',$Root)
+        orchestrator_command_match_tokens=$commandTokens
         completed_days=@($Live.day_rows | Where-Object status -eq 'PASS' | ForEach-Object day)
         running_days=@($Live.day_rows | Where-Object { $_.status -ne 'PASS' -and $_.status -ne 'NOT_RUN' -and $_.status -ne 'FAIL' } | ForEach-Object day)
         failed_days=@($Live.day_rows | Where-Object status -eq 'FAIL' | ForEach-Object day)
@@ -157,7 +167,7 @@ function Get-B1Frame {
     foreach($row in $Live.day_rows) {
         $details[$row.day]=[pscustomobject]@{status=$row.status;case='B1';current_stage=$row.stage;error_summary=$row.reason}
     }
-    $liveness=Get-CampaignLiveness $master
+    $liveness=Get-CampaignLiveness $master -ProcessInfo $ProcessInfo
     $view=Get-MonitorView $master $details $Failures $liveness
     $state=if ($liveness.State -in @('DEAD','STALE')) {$liveness.State} else {$Live.state}
     [pscustomobject]@{State=$state; Liveness=$liveness; View=$view; Live=$Live; Resource=$Resource; Readonly=$true; Root=$Root}
@@ -249,7 +259,8 @@ function Get-CompactB1Lines {
     foreach ($failure in $Frame.View.Failures) {
         $lines.Add((Get-MonitorText ("실패  $($failure.Date) · $($failure.Substage) · $($failure.Reason)") 110))
     }
-    if ($Frame.Liveness.State -in @('DEAD','STALE')) { $lines.Add('상태 갱신이 멈췄습니다.') }
+    if ($Frame.Liveness.State -eq 'STALE') { $lines.Add('상태 갱신이 지연되고 있습니다.') }
+    elseif ($Frame.Liveness.State -eq 'DEAD') { $lines.Add('관리 프로세스 연결을 확인할 수 없습니다.') }
     return $lines.ToArray()
 }
 

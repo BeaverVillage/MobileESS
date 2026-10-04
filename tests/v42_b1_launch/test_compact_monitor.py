@@ -55,3 +55,35 @@ def test_readonly_monitor_and_output_identity_guard():
     assert '$id.run_id -ne $Live.run_id' in source
     assert '$id.day -ne $day' in source and '$row.worker.PID -eq $Live.active.worker.PID' in source
     assert 'Resolve-Path -LiteralPath $Root' in source
+
+
+def test_frame_tracks_coordinator_replacement_and_rejects_stale_identity():
+    monitor=ROOT/'tools/v42/monitor_b1_may.ps1'
+    script=f"[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new(); . '{monitor}' -LibraryOnly; " + r'''
+    $Root='C:\test B1'
+    $created=[DateTimeOffset]::UtcNow.AddMinutes(-1)
+    $process=[pscustomobject]@{PID=123;creation_time=$created.ToUnixTimeMilliseconds()/1000.0;command=@('python.exe','-m','v42_b1_production','run','--root',$Root)}
+    $heartbeat=[pscustomobject]@{process=$process;timestamp_UTC=[DateTime]::UtcNow.ToString('o')}
+    $live=[pscustomobject]@{state='RUNNING';timestamp_UTC=$heartbeat.timestamp_UTC;day_rows=@()}
+    $actual=[pscustomobject]@{CreationDate=$created.UtcDateTime;CommandLine=($process.command -join ' ')}
+    $a=Get-B1Frame $live $heartbeat $null @{} -ProcessInfo $actual
+    $process.command=@('python.exe','C:\ops\run_b1_without_memory_guard.py','--root',$Root)
+    $actual.CommandLine=$process.command -join ' '
+    $b=Get-B1Frame $live $heartbeat $null @{} -ProcessInfo $actual
+    $actual.CommandLine='python.exe foreign.py --root C:\test B1'
+    $c=Get-B1Frame $live $heartbeat $null @{} -ProcessInfo $actual
+    $actual.CommandLine=$process.command -join ' ';$actual.CreationDate=$created.UtcDateTime.AddMinutes(1)
+    $d=Get-B1Frame $live $heartbeat $null @{} -ProcessInfo $actual
+    $actual.CreationDate=$created.UtcDateTime;$heartbeat.timestamp_UTC=[DateTime]::UtcNow.AddSeconds(-60).ToString('o')
+    $e=Get-B1Frame $live $heartbeat $null @{} -ProcessInfo $actual
+    $heartbeat.timestamp_UTC=[DateTime]::UtcNow.ToString('o');$process.command=@('python.exe','foreign.py')
+    $actual.CommandLine=$process.command -join ' '
+    $f=Get-B1Frame $live $heartbeat $null @{} -ProcessInfo $actual
+    @($a,$b,$c,$d,$e,$f)|ForEach-Object { $_.Liveness }|ConvertTo-Json -Depth 5 -Compress
+    '''
+    result=subprocess.run(['powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-Command',script],
+                          capture_output=True,text=True,encoding='utf-8')
+    assert result.returncode==0 and not result.stderr,result.stderr
+    rows=json.loads(result.stdout)
+    assert [row['State'] for row in rows]==['RUNNING','RUNNING','DEAD','DEAD','STALE','DEAD']
+    assert rows[1]['IdentityMatches'] is True and rows[4]['Orchestrator']=='ALIVE'
