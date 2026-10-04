@@ -105,53 +105,32 @@ def audit():
             raise ValueError('SHARED_DAY_INPUT_GATE_FAILED')
         bundles.append(dict(day=day, input=record(path),
                             shared_input_only_not_B1_native_bundle_certification=True))
-    # Identify concrete physical backend definitions without importing native code.
-    backends = []
-    for folder in ROOT.glob('v42_*'):
-        if not folder.is_dir():
-            continue
-        for path in folder.rglob('*.py'):
-            tree = ast.parse(path.read_text(encoding='utf-8-sig'))
-            for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef) and node.name == 'reconstruct_physical':
-                    concrete = any(not isinstance(s, (ast.Expr, ast.Pass))
-                                   or isinstance(s, ast.Expr) and not isinstance(s.value, (ast.Constant, ast.Str))
-                                   for s in node.body)
-                    backends.append(dict(path=str(path.relative_to(ROOT)), line=node.lineno, concrete_body=concrete))
-    historical = Path('C:/codex_mobileess_workspace/MobileESS_v41r2_780gpu_capacity_rebase')
-    files = [historical / 'tools/v37/run_may_locked_final.ps1', historical / 'tools/v37/monitor_may.ps1',
-             Path('C:/codex_mobileess_workspace/MobileESS_v41r3_scale_rebalance/dayahead/v39l/infrastructure.py')]
-    evidence = [source_evidence(ROOT / 'v42_single_thread/a1.py', lambda s: '1499' in s or 'census[k]' in s),
-                source_evidence(ROOT / 'v42_boundary/boundaries.py', lambda s: 'MAY01_FINAL_NATIVE_INPUT_BUNDLE' in s),
-                source_evidence(ROOT / 'v42_temporal/native.py', lambda s: '2025-05-01' in s or 'MAY01_FINAL_NATIVE_INPUT_BUNDLE' in s),
-                source_evidence(ROOT / 'v42_native/planning.py', lambda s: 'PLAN_FIELDS' in s or 'unknown_arrival_policy' in s),
-                source_evidence(ROOT / 'v42_orchestrator/config.py', lambda s: 'no production adapter' in s),
-                source_evidence(ROOT / 'v42_capacity/actual.py', lambda s: "'B0:'" in s),
-                source_evidence(Path('C:/codex_mobileess_workspace/MobileESS_v41r3_scale_rebalance/dayahead/v41r3/native_actual.py'),
-                                lambda s: "regulator_taps" in s or 'old_apply(odd,voltage,0)' in s)]
-    reasons = [
-        'Existing current A1 entry asserts 1499 jobs and 2025-05-01, reads one MAY01 native bundle and compares its single-day model census.',
-        'No concrete reconstruct_physical implementation was found in current v42_* source; ActualBackend contains only a Protocol declaration.',
-        'A1 freeze emits selected_jobs/anchor, without a demonstrated producer for the V42 FrozenDayAheadPlan fields and frozen unknown-arrival policy.',
-        'B0 Actual is a fixed source-site FCFS replay; using it for optimized B1 would discard A1 decisions.',
-        'Historical V41R3 Actual initialization uses Planning regulator_taps[0]; direct reuse violates the requested no Planning tap replay contract.',
-    ]
-    return dict(status='NOT_LAUNCHED_SCIENTIFIC_INTEGRATION_REQUIRED', launch_ready=False,
+    production = ROOT / 'docs/v42_may_b1_production_31d'
+    binding = read(production/'B1_INPUT_BINDING_AUDIT.json')
+    if (not binding['PASS'] or [r['day'] for r in binding['days']] != list(days)
+        or any(r['native_raw'] != r['known_physical'] or r['TX_current_rows'] != 120
+               or r['coefficients'] != 96 or r['optimization_calls'] != 0 for r in binding['days'])):
+        raise ValueError('FULL_CURRENT_NATIVE_INPUT_BINDING_REQUIRED')
+    lineage = read(production/'HISTORICAL_LINEAGE_AUDIT.json')
+    diagnostic = read(production/'NATIVE_PORT_DIAGNOSTIC.json')
+    model = read(production/'NATIVE_MODEL_BINDING_SMOKE.json')
+    detached = read(production/'DETACHMENT_SELF_TEST.json')
+    tests = read(production/'VALIDATION.json')
+    if (not lineage['PASS'] or lineage['historical_decisions_reused'] != 0
+        or not diagnostic['adapter_diagnostic_PASS'] or diagnostic['production_days_PASS'] != 0
+        or not model['PASS'] or model['NormalAmps_rows'] != 11520 or model['native_optimize_calls'] != 0
+        or not detached['PASS'] or not tests['PASS']):
+        raise ValueError('PORT_PREFLIGHT_REQUIRED')
+    return dict(status='READY_FOR_NEW_DETACHED_B1_PRODUCTION', launch_ready=True,
                 base_SHA=BASE, audited_HEAD=head, B0_barrier=b0, scope=scope(), days=list(days),
                 scientific_order=list(expected), scheduling='one complete day pipeline at a time',
-                B1_all_31_Planning_barrier=False, causal_source=record(ROOT / 'v42_campaign/plan.py'),
-                PR146_DAG_source=record(ROOT / 'v42_orchestrator/dag.py'),
-                frozen_plan=record(ROOT / 'docs/v42_m1_cutpass_loop_campaign/MAY_CAMPAIGN_DRY_RUN_PLAN.json'),
-                B1_stage_count=len(nodes), shared_day_inputs=bundles, backend_definitions=backends,
-                historical_monitor_and_scheduler=[record(p) for p in files], evidence=evidence,
-                blockers=reasons, new_scientific_production_calls=0, B0_reruns=0,
-                task_created=False, monitor_launched=False, campaign_PID=None, monitor_PID=None,
-                B2_calls=0, B3_calls=0, M1_calls=0, M2_calls=0, Branch_and_Price_calls=0,
-                required_next_work=['31 source-backed native A1 input bundles with per-day Runtime/CC4/TS/WAN/electrical authority',
-                    'A1 decision -> verified FrozenDayAheadPlan serialization preserving all physical job identities',
-                    'Concrete frozen-policy Actual replay and fresh autonomous DSS adapter with all four physical audits',
-                    'Production stage receipts/restart hooks followed by detached task and monitor prelaunch tests'],
-                notes='This is a failed launch-readiness audit, not a resource wait or an authoritative B1 production run.')
+                B1_all_31_Planning_barrier=False, B1_stage_count=len(nodes), shared_day_inputs=bundles,
+                blockers=[], implementation_lineage='PR24 -> PR25 V39E/V39L -> PR26 V39J/V39K; current V42 overrides',
+                implementation=[record(ROOT/'v42_b1_production'/n) for n in ('inputs.py','native.py','replay.py','worker.py','coordinator.py','detach.py')],
+                current_input_audit=record(production/'B1_INPUT_BINDING_AUDIT.json'),
+                validation=[record(production/n) for n in ('HISTORICAL_LINEAGE_AUDIT.json','NATIVE_PORT_DIAGNOSTIC.json','NATIVE_MODEL_BINDING_SMOKE.json','DETACHMENT_SELF_TEST.json','VALIDATION.json')],
+                old_decisions_reused=0, B0_reruns=0, B2_calls=0, B3_calls=0, M1_calls=0, M2_calls=0,
+                notes='Readiness only; new per-day A1/freeze/Actual/Fresh/validation science runs in the dedicated detached campaign.')
 
 
 def main():

@@ -101,3 +101,6 @@ Complete the source-backed B1 integration above, validate the unchanged native
 equations and causal policy on the 31-day input authority, then adapt the
 located historical monitor and scheduler, test detachment, commit the reviewed
 adapter, freeze a new run ID/SHA, and launch. No B2/B3 auto-advance is permitted.
+# Superseded initial scope audit
+
+The initial PR148-only integration blocker was resolved by the explicit historical V39E → V37 → V36 port. See [current production implementation](../v42_may_b1_production_31d/README.md) and the updated `B1_LAUNCH_PREFLIGHT.json`. The retained initial validation/description files describe the earlier investigation, not current launch readiness.
