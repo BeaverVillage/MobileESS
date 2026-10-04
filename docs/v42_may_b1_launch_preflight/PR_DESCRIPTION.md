@@ -1,0 +1,5 @@
+The May 2025 B1 detached launch cannot yet pass scientific integration preflight at PR148's exact head. The current A1 entry is fixed to May 1 and does not produce the current V42 frozen Actual-policy document; the V42 physical reconstruction backend is a Protocol declaration. Launching B0 replay or the mock scheduler would misrepresent optimized B1.
+
+Adds a read-only, fail-closed preflight with source hashes and line evidence. It verifies the authoritative B0 barrier (31 days, 155 receipts, 1,519 referenced output hashes), frozen May dates, and existing per-day B1 ordering, and records the actual historical May monitor and Task Scheduler source paths. No production stage, task, or monitor is launched. Remaining integration and unperformed detached-launch checks are explicit in the README.
+
+Validation: 14 launch-gate tests and 4 existing independent completed-B0 audits pass; static compile and `git diff --check` pass. Preflight returns nonzero with the missing-integration receipt. This PR does **not** claim the requested detached production launch is complete.
