@@ -1,0 +1,36 @@
+{
+  "PASS": true,
+  "fixtures": [
+    {
+      "terminal_SOC": 1.0,
+      "patterns_enumerated": 8,
+      "feasible_patterns": 6,
+      "all_vertices_enumerated": 8,
+      "original_status": 2,
+      "DW_integer_status": 2,
+      "integer_equivalence_PASS": true,
+      "original_integer_objective": 0.5,
+      "DW_integer_objective": 0.5,
+      "arc_LP": 0.5,
+      "DW_LP": 0.5,
+      "route_PQ_SOC_equal": true,
+      "DW_LP_ge_arc_LP": true
+    },
+    {
+      "terminal_SOC": 1.5,
+      "patterns_enumerated": 8,
+      "feasible_patterns": 0,
+      "all_vertices_enumerated": 0,
+      "original_status": 3,
+      "DW_integer_status": 3,
+      "integer_equivalence_PASS": true
+    }
+  ],
+  "scientific_inputs_used": false,
+  "all_legal_fixture_routes_enumerated": true,
+  "continuous_enumeration": "For each of all 2 legal paths x 4 mode patterns, terminal SOC reduces the original physical polytope to a rectangle intersected with one equality. Enumerate every rational endpoint. Q=0, PCS16 is nonbinding under original fixture Pmax=.5, all SOC bounds verified.",
+  "integer_DW_definition": "Lambda remains continuous over all local vertices. Reconstructed original route/mode variables are binary, forcing all positive lambdas to have one common binary pattern. Mixtures of vertices within that pattern represent every continuous feasible point. A binary single-vertex selection would not generally be exact and is not used.",
+  "proof": "Finite union of bounded pattern polytopes: their vertices generate each polytope. Root lambda convexifies the union; enforcing reconstructed original binaries recovers the original union exactly. Thus integer feasible sets/optima match, and the full DW LP relaxation is contained in the original arc LP relaxation.",
+  "production_integer_DW_calls": 0,
+  "branch_and_price_calls": 0
+}

@@ -1,0 +1,103 @@
+
+Gurobi 13.0.2 (win64) logging started Sun Oct  4 12:20:15 2026
+
+Set parameter LogFile to value "docs/v42_m1_exact_dw_cg_root_pilot/logs/RMP_0125.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  300
+FeasibilityTol  1e-08
+OptimalityTol  1e-08
+Method  2
+BarConvTol  1e-11
+Crossover  1
+PreDual  0
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 679959 rows, 81717 columns and 7180860 nonzeros (Min)
+Model has 1 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e-24, 2e+03]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+LP warm-start: discard basis
+Presolve time: 1.07s
+Presolved: 83563 rows, 24456 columns, 704013 nonzeros
+
+Ordering time: 0.08s
+
+Barrier statistics:
+ Dense cols : 852
+ AA' NZ     : 9.023e+05
+ Factor NZ  : 1.515e+06 (roughly 60 MB of memory)
+ Factor Ops : 1.941e+08 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   9.88526102e+01 -6.23346461e+04  6.61e+05 0.00e+00  1.26e+03     1s
+   1   1.00630846e+02 -6.98586458e+04  6.48e+05 1.13e+01  1.25e+03     1s
+   2   1.04681864e+02 -7.64273671e+04  6.20e+05 2.39e+01  1.21e+03     1s
+   3   1.05803839e+02 -8.34006608e+04  6.12e+05 3.73e+01  1.20e+03     2s
+   4   1.07133496e+02 -8.35876312e+04  6.02e+05 2.28e+01  1.18e+03     2s
+   5   1.07302414e+02 -8.33664981e+04  6.01e+05 1.88e+01  1.18e+03     2s
+   6   1.07305229e+02 -8.35987403e+04  6.01e+05 2.85e+01  1.18e+03     2s
+   7   1.07445797e+02 -8.24187196e+04  6.00e+05 2.69e+01  1.17e+03     2s
+   8   1.07599356e+02 -8.37268997e+04  5.99e+05 2.64e+01  1.17e+03     2s
+   9   1.07600518e+02 -8.37119017e+04  5.99e+05 2.72e+01  1.17e+03     2s
+  10   1.07685430e+02 -8.55760658e+04  5.98e+05 3.82e+01  1.17e+03     2s
+  11   1.09893205e+02 -8.92944462e+04  5.83e+05 4.83e+01  1.14e+03     2s
+  12   1.12559459e+02 -8.64537471e+04  5.64e+05 4.55e+01  1.11e+03     2s
+  13   1.12583544e+02 -8.66239904e+04  5.64e+05 4.54e+01  1.11e+03     2s
+  14   1.12784508e+02 -8.73033074e+04  5.62e+05 5.58e+01  1.11e+03     2s
+  15   1.12824760e+02 -8.48476687e+04  5.62e+05 5.56e+01  1.09e+03     2s
+  16   1.12828894e+02 -8.45097823e+04  5.62e+05 4.67e+01  1.08e+03     2s
+  17   1.12838214e+02 -8.40338696e+04  5.62e+05 3.98e+01  1.08e+03     2s
+  18   1.12832512e+02 -8.40306120e+04  5.62e+05 3.99e+01  1.07e+03     2s
+  19   1.12826438e+02 -8.40444675e+04  5.62e+05 3.99e+01  1.07e+03     2s
+  20   1.12819604e+02 -8.40727210e+04  5.62e+05 4.01e+01  1.07e+03     2s
+  21   1.12854304e+02 -8.41390869e+04  5.62e+05 3.96e+01  1.07e+03     3s
+  22   1.13391698e+02 -8.49094445e+04  5.58e+05 3.79e+01  1.06e+03     3s
+  23   1.13880854e+02 -8.50239931e+04  5.54e+05 3.72e+01  1.05e+03     3s
+  24   1.15537893e+02 -8.57644628e+04  5.43e+05 3.66e+01  1.04e+03     3s
+  25   1.17550812e+02 -1.09545391e+05  5.28e+05 5.61e+01  9.96e+02     3s
+  26   1.17603628e+02 -1.09555461e+05  5.28e+05 5.82e+01  9.95e+02     3s
+  27   1.18808230e+02 -1.09937982e+05  5.20e+05 5.75e+01  9.85e+02     3s
+  28   1.18808449e+02 -1.09620192e+05  5.20e+05 5.89e+01  9.78e+02     3s
+  29   1.18812529e+02 -1.08842304e+05  5.20e+05 5.70e+01  9.78e+02     3s
+  30   1.18836381e+02 -1.09560931e+05  5.19e+05 5.55e+01  9.72e+02     3s
+  31   1.18909943e+02 -1.10010545e+05  5.19e+05 5.50e+01  9.66e+02     3s
+
+Barrier performed 31 iterations in 3.21 seconds (5.69 work units)
+Numerical trouble encountered
+
+Model may be infeasible or unbounded.  Consider using the
+homogeneous algorithm (through parameter 'BarHomogeneous')
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    1.0000000e+00   2.520080e+05   1.638049e+10      4s
+    9886    8.7811356e-01   1.629470e+02   1.233594e+08      5s
+Crossover changed status from Numeric to Optimal
+   11241    6.0077386e-01   0.000000e+00   0.000000e+00      7s
+
+Solved in 11241 iterations and 7.01 seconds (17.08 work units)
+Optimal objective  6.007738647e-01
+Set parameter Threads to value 1
+Set parameter Method to value 2
+Set parameter Crossover to value 1
+Set parameter TimeLimit to value 300
+Set parameter FeasibilityTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter BarConvTol to value 1e-11
+Set parameter PreDual to value 0
+Set parameter Seed to value 20260929

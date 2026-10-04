@@ -1,0 +1,112 @@
+{
+  "PASS": true,
+  "base_exact_head": "c8e518f97cbe1748f3e8773128ff8152bd394ee8",
+  "original_tracked_files_preserved": 5313,
+  "SEMANTIC": {
+    "PASS": true,
+    "passed": 253,
+    "runtime_seconds": 75.63,
+    "native_exception_traces": 8,
+    "native_exception_traces_preserved": true,
+    "test_optimization_calls": 2,
+    "log_SHA": "655acb10adef5b200e893ebdb6701a277244a99e2dde9239395a170d6adec2f9"
+  },
+  "FULL": {
+    "PASS": true,
+    "passed": 1700,
+    "runtime_seconds": 206.07,
+    "native_exception_traces": 8,
+    "native_exception_traces_preserved": true,
+    "test_optimization_calls": 368,
+    "log_SHA": "f5751ff54a4ea59dbe79ed9185c987d630a95cb2b4690eaaaeb8da68c0cd056c"
+  },
+  "required_regressions": {
+    "PR139_scientific_identity": true,
+    "A1_freeze": true,
+    "zero_margin": true,
+    "NormalAmps": true,
+    "P1_P2_contract": true,
+    "matrix_partition_reassembly": true,
+    "all_original_local_rows_column_validation": true,
+    "master_original_coupling_coefficients": true,
+    "manual_RC_equals_solver_RC": true,
+    "full_original_pricing_domain": true,
+    "no_topk_pool_hamming_site_time_restriction": true,
+    "timeout_not_no_column": true,
+    "validated_negative_column_allowed": true,
+    "four_certificates_same_dual": true,
+    "bounded_integer_equivalence": true,
+    "DW_fixture_LP_ge_arc_LP": true,
+    "no_column_aging_deletion": true,
+    "campaign_preservation": true,
+    "Actual_firewall": true,
+    "B3_four_loops": true,
+    "production_zero": true
+  },
+  "scientific_executed_sources_unchanged": true,
+  "independent_full_original_column_audits": 840,
+  "exact_original_cold_identity_PASS": true,
+  "pricing_dual_binding_PASS": true,
+  "pricing_policy_PASS": true,
+  "compile_PASS": true,
+  "git_diff_checks_PASS": true,
+  "total_pilot_wall_seconds": 2141.402752700029,
+  "pilot_wall_budget_PASS": true,
+  "single_heavy_worker_PASS": true,
+  "environment": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1"
+  },
+  "DW_ROOT_OPTIMAL_CERTIFIED": false,
+  "incomplete_objective_not_promoted": true,
+  "post_pilot_namespace_migration": {
+    "post_pilot_only": true,
+    "scientific_optimization_retry_calls": 0,
+    "reason": "Immutable legacy production guards prohibit importing the historical v42_dw namespace. Isolate the new root-only pilot under v42_dw_root.",
+    "all_scientific_source_bytes_preserved": true,
+    "source_mapping": [
+      {
+        "executed_path": "v42_dw/common.py",
+        "current_path": "v42_dw_root/common.py",
+        "sha256": "7588c39a9e62c1f429fdfbd1005724174af1e223f1248e591573ff5b4bcba3df"
+      },
+      {
+        "executed_path": "v42_dw/prepare.py",
+        "current_path": "v42_dw_root/prepare.py",
+        "sha256": "d419a4c2e887c32876a51f7a3b1838034eafd5580200c7a0b012b753f08ab028"
+      },
+      {
+        "executed_path": "v42_dw/partition.py",
+        "current_path": "v42_dw_root/partition.py",
+        "sha256": "ca06b19431687cd67d7a6b4e19d7751e39a8fae8448046f4051370bbcc0b7309"
+      },
+      {
+        "executed_path": "v42_dw/fixtures.py",
+        "current_path": "v42_dw_root/fixtures.py",
+        "sha256": "075c64be69a030d972de222e36f55bb7a09c9e076bcf223b71a89242e13ac699"
+      },
+      {
+        "executed_path": "v42_dw/models.py",
+        "current_path": "v42_dw_root/models.py",
+        "sha256": "60697354920ca60444699fb0156010d341825c632c93d5e6ecdf9485e9e4436d"
+      },
+      {
+        "executed_path": "v42_dw/run.py",
+        "current_path": "v42_dw_root/run.py",
+        "sha256": "38d40dd2b16dbf04d565423b93be6e5d9e3c49752e876a43bbb938bf2ad927a4"
+      }
+    ]
+  },
+  "full_test_initial_failure": "Two immutable historical tests reject every sys.modules entry under the production v42_dw namespace. Moved this new root-only pilot to v42_dw_root after pilot termination, preserving the exact executed scientific bytes and original failure logs/receipt. No production code or legacy test was modified.",
+  "full_test_temporary_path_failure": "The second full run had 8 campaign-fixture setup errors from one WinError 5 atomic os.replace in the system ESTsoft/CreatorTemp path. The third local D: temp path resolved through a junction to a Unicode OneDrive path, causing 5 native Gurobi file-write failures. The first actual-ASCII attempt omitted the new parent directory and had 139 missing-temp-base setup errors. All raw logs and receipts retained. After creating the parent, the path-probe tests and final full run use fresh --basetemp C:/Users/Public/CodexDWRootTests paths outside Git, with unchanged campaign code and tests.",
+  "pre_optimize_construction_failure": "Original selected subset numpy string arrays retain full-model dtype width; Gurobi native subset names have a narrower storage dtype. Fixed the transport assertion to require exact CSR arrays and exact values of every attribute/name. Original failure log retained; no scientific optimization occurred before this fix.",
+  "Branch_and_Price_calls": 0,
+  "P2_calls": 0,
+  "A2_calls": 0,
+  "M2_calls": 0,
+  "campaign_optimizer_calls": 0,
+  "campaign_Actual_calls": 0,
+  "campaign_Fresh_AC_calls": 0
+}

@@ -1,0 +1,94 @@
+
+Gurobi 13.0.2 (win64) logging started Sun Oct  4 12:06:51 2026
+
+Set parameter LogFile to value "docs/v42_m1_exact_dw_cg_root_pilot/logs/RMP_0041.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  300
+FeasibilityTol  1e-08
+OptimalityTol  1e-08
+Method  2
+BarConvTol  1e-11
+Crossover  1
+PreDual  0
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 679959 rows, 81381 columns and 7166345 nonzeros (Min)
+Model has 1 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e-24, 2e+03]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+LP warm-start: discard basis
+Presolve time: 0.94s
+Presolved: 49333 rows, 12303 columns, 389353 nonzeros
+
+Ordering time: 0.04s
+
+Barrier statistics:
+ Dense cols : 523
+ AA' NZ     : 5.088e+05
+ Factor NZ  : 7.971e+05 (roughly 30 MB of memory)
+ Factor Ops : 4.314e+07 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.78299269e+03 -2.09119355e+04  7.95e+04 1.28e-06  1.78e+02     1s
+   1   1.78296006e+03 -2.14537869e+04  7.83e+04 5.84e+00  1.76e+02     1s
+   2   1.78298246e+03 -2.16471299e+04  7.68e+04 5.22e+00  1.74e+02     1s
+   3   1.78299286e+03 -2.21494056e+04  7.65e+04 5.30e+00  1.73e+02     1s
+   4   1.78326435e+03 -3.38309035e+04  7.50e+04 3.67e+01  1.62e+02     1s
+   5   1.78327679e+03 -3.88781490e+04  7.35e+04 4.28e+01  1.56e+02     1s
+   6   1.78329309e+03 -4.02888415e+04  7.17e+04 4.19e+01  1.54e+02     1s
+   7   1.78327045e+03 -4.00383271e+04  7.09e+04 4.33e+01  1.52e+02     1s
+   8   1.78330395e+03 -4.20958587e+04  7.02e+04 4.29e+01  1.50e+02     1s
+   9   1.78330527e+03 -4.20594704e+04  7.02e+04 4.37e+01  1.50e+02     1s
+  10   1.78331348e+03 -4.26470908e+04  7.02e+04 4.30e+01  1.50e+02     1s
+  11   1.78332462e+03 -4.21834985e+04  7.01e+04 4.55e+01  1.50e+02     1s
+  12   1.78332052e+03 -4.12461711e+04  7.01e+04 4.51e+01  1.47e+02     1s
+  13   1.78341598e+03 -4.24796554e+04  6.97e+04 4.31e+01  1.45e+02     1s
+  14   1.78341615e+03 -4.22498488e+04  6.97e+04 4.51e+01  1.45e+02     1s
+  15   1.78341846e+03 -4.21197470e+04  6.97e+04 4.57e+01  1.45e+02     1s
+  16   1.78342504e+03 -4.24826031e+04  6.96e+04 4.43e+01  1.45e+02     2s
+  17   1.78342756e+03 -4.23011750e+04  6.96e+04 4.54e+01  1.45e+02     2s
+  18   1.78343172e+03 -4.26417709e+04  6.96e+04 4.46e+01  1.45e+02     2s
+  19   1.78343188e+03 -4.24350666e+04  6.96e+04 4.57e+01  1.45e+02     2s
+  20   1.78343515e+03 -4.26743620e+04  6.96e+04 4.48e+01  1.45e+02     2s
+  21   1.78343686e+03 -4.24873189e+04  6.96e+04 4.58e+01  1.44e+02     2s
+
+Barrier performed 21 iterations in 1.68 seconds (3.23 work units)
+Numerical trouble encountered
+
+Model may be infeasible or unbounded.  Consider using the
+homogeneous algorithm (through parameter 'BarHomogeneous')
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    1.0000000e+00   1.082598e+05   5.414749e+09      2s
+Crossover changed status from Numeric to Optimal
+
+Extra simplex iterations after uncrush: 2
+    3115    6.3659862e-01   0.000000e+00   0.000000e+00      3s
+
+Solved in 3115 iterations and 3.42 seconds (7.11 work units)
+Optimal objective  6.365986199e-01
+Set parameter Threads to value 1
+Set parameter Method to value 2
+Set parameter Crossover to value 1
+Set parameter TimeLimit to value 300
+Set parameter FeasibilityTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter BarConvTol to value 1e-11
+Set parameter PreDual to value 0
+Set parameter Seed to value 20260929
