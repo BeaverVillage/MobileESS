@@ -1,0 +1,59 @@
+{
+  "Gurobi_version": [
+    13,
+    0,
+    2
+  ],
+  "runtime_parameter_introspection": {
+    "Method": [
+      "Method",
+      "<class 'int'>",
+      -1,
+      -1,
+      6,
+      -1
+    ],
+    "LPWarmStart": [
+      "LPWarmStart",
+      "<class 'int'>",
+      -1,
+      -1,
+      2,
+      -1
+    ],
+    "Presolve": [
+      "Presolve",
+      "<class 'int'>",
+      -1,
+      -1,
+      2,
+      -1
+    ],
+    "Threads": [
+      "Threads",
+      "<class 'int'>",
+      0,
+      -1,
+      1024,
+      0
+    ]
+  },
+  "old_basis_discard_logs": [
+    "docs/v42_m1_dw_discovery_certification_policy/logs/RMP_0003.log",
+    "docs/v42_m1_dw_discovery_certification_policy/logs/RMP_0005.log",
+    "docs/v42_m1_dw_discovery_certification_policy/logs/RMP_0006.log"
+  ],
+  "diagnosis": "PR141 explicitly supplies VBasis/CBasis but keeps Method=2 and default LPWarmStart; native barrier discards the basis. An unchanged-model cached optimize is not basis-acceptance evidence. Appended lambdas preserve all rows and old variable order; initialize their lower-bound nonbasic VBasis=-1.",
+  "candidate": {
+    "Method": 1,
+    "LPWarmStart": 2,
+    "Presolve": -1,
+    "Threads": 1
+  },
+  "candidate_semantics": "Documented dual simplex; derive primal/dual start vectors from supplied complete basis, crush to presolved model, refine presolved simplex start.",
+  "documentation": [
+    "https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#lpwarmstart",
+    "https://docs.gurobi.com/projects/optimizer/en/current/reference/attributes/variable.html#vbasis"
+  ],
+  "parameter_sweep": false
+}
