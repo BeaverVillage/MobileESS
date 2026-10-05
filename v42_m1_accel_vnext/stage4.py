@@ -27,6 +27,13 @@ def run():
         exact_unit_DAG_flow_lift=True,full_original_integer_preimages_preserved=True,
         original_signature=signature(b.A,b.d),reduced_signature=signature(reduced,data))
     write(OUT/'04_REDUCTION_MATRIX_AUDIT.json',audit)
+    if audit['removed_columns']==0:
+        write(OUT/'04_PRICING_REDUCTION_BENCHMARK.json',dict(stage=4,status='REJECTED_NO_ELIMINATION',selected=False,
+            structural_screen_only=True,matrix_audit=audit,exact_optimum_identity_by_identical_matrix=True,
+            performance_gain_claimed=False,native_calls=0,
+            reason='No changed formulation exists to benchmark; identical model cannot remove pricing work',
+            continuation_calls=0,Branch_and_Price_calls=0))
+        print('STAGE4_TERMINAL REJECTED_NO_ELIMINATION',flush=True);return
     guard=Guard('04',[]);guard.gate();started=time.perf_counter();guard.start(started+600)
     result=dict(stage=4,matrix_audit=audit,variants={},selected=False,full_scale_optimum_identity=None,
                 same_true_dual_SHA=cp['RMP']['dual_SHA'],continuation_calls=0,Branch_and_Price_calls=0)

@@ -1,0 +1,15 @@
+{
+  "base_SHA": "63e81dc3b6d236549f566e65e07dcd05ac0a160c",
+  "returncode": 1,
+  "command": [
+    "python",
+    "-m",
+    "pytest",
+    "tests/v42_dw_runtime/test_runtime.py::test_original_sources_domain_checkpoint_unchanged",
+    "-q"
+  ],
+  "stdout": "F                                                                        [100%]\n================================== FAILURES ===================================\n______________ test_original_sources_domain_checkpoint_unchanged ______________\n\n    def test_original_sources_domain_checkpoint_unchanged():\n>       proof = baseline_audit()\n\ntests\\v42_dw_runtime\\test_runtime.py:262: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\n    def baseline_audit():\n        git = lambda *args: subprocess.check_output(['git', *args], cwd=ROOT, text=True).strip()\n        checkpoint_path = 'docs/v42_m1_dw_throughput_optimization/DW_THROUGHPUT_CHECKPOINT_LATEST.json'\n        checkpoint = json.loads((ROOT/checkpoint_path).read_text(encoding='utf8'))\n        assert len(checkpoint['pool']) == 1158\n        modified = git('diff', BASE_HEAD, '--name-only').splitlines()\n>       assert all(p.startswith(('v42_dw_runtime/', 'tests/v42_dw_runtime/', 'docs/v42_m1_dw_runtime_acceleration/'))\n                   for p in modified)\nE       AssertionError\n\nv42_dw_runtime\\fixtures.py:343: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/v42_dw_runtime/test_runtime.py::test_original_sources_domain_checkpoint_unchanged\n1 failed in 0.87s\n",
+  "stderr": "",
+  "reason": "historical PR144 branch scope assertion rejects accepted descendant commits",
+  "scientific_source_modified": false
+}
