@@ -1,5 +1,7 @@
 # Exact M1 acceleration 개발 최종 검토
 
+Draft PR: https://github.com/BeaverVillage/MobileESS/pull/154 (base: frozen PR152 branch). 최종 delivery SHA와 remote 일치는 Git/PR head로 확인한다.
+
 과학적 기준: PR152 `63e81dc3b6d236549f566e65e07dcd05ac0a160c`, pool 1,604, LB 0.5687115725336208, UB 0.5741861223241257. authoritative checkpoint는 변경하지 않았다.
 
 Full pytest: 1900 passed / 1 failed / 0 errors. failure는 PR152 exact 원본에서도 재현된 historical branch-scope assertion이며 assertion을 바꾸거나 숨기지 않았다. 전체 원본 파일 12919개 byte 보존 및 saved-point original matrix 독립 audit PASS.
