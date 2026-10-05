@@ -1,0 +1,83 @@
+{
+  "PASS": false,
+  "scientific_equivalence_PASS": true,
+  "status": "KNOWN_BASELINE_TEST_FAILURE",
+  "full_pytest_passed": 1900,
+  "full_pytest_failed": 1,
+  "full_pytest_errors": 0,
+  "known_baseline_failure": {
+    "base_SHA": "63e81dc3b6d236549f566e65e07dcd05ac0a160c",
+    "returncode": 1,
+    "command": [
+      "python",
+      "-m",
+      "pytest",
+      "tests/v42_dw_runtime/test_runtime.py::test_original_sources_domain_checkpoint_unchanged",
+      "-q"
+    ],
+    "stdout": "F                                                                        [100%]\n================================== FAILURES ===================================\n______________ test_original_sources_domain_checkpoint_unchanged ______________\n\n    def test_original_sources_domain_checkpoint_unchanged():\n>       proof = baseline_audit()\n\ntests\\v42_dw_runtime\\test_runtime.py:262: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\n    def baseline_audit():\n        git = lambda *args: subprocess.check_output(['git', *args], cwd=ROOT, text=True).strip()\n        checkpoint_path = 'docs/v42_m1_dw_throughput_optimization/DW_THROUGHPUT_CHECKPOINT_LATEST.json'\n        checkpoint = json.loads((ROOT/checkpoint_path).read_text(encoding='utf8'))\n        assert len(checkpoint['pool']) == 1158\n        modified = git('diff', BASE_HEAD, '--name-only').splitlines()\n>       assert all(p.startswith(('v42_dw_runtime/', 'tests/v42_dw_runtime/', 'docs/v42_m1_dw_runtime_acceleration/'))\n                   for p in modified)\nE       AssertionError\n\nv42_dw_runtime\\fixtures.py:343: AssertionError\n=========================== short test summary info ===========================\nFAILED tests/v42_dw_runtime/test_runtime.py::test_original_sources_domain_checkpoint_unchanged\n1 failed in 0.87s\n",
+    "stderr": "",
+    "reason": "historical PR144 branch scope assertion rejects accepted descendant commits",
+    "scientific_source_modified": false
+  },
+  "lightweight_stage_tests": 19,
+  "original_files_preserved": 12919,
+  "checkpoint_columns": 1604,
+  "all_experiment_wall_caps_PASS": true,
+  "independent_saved_point_audits": [
+    {
+      "file": "FINAL/PR152/TRUE_RMP_POINT.npz",
+      "SHA": "c23f0951be31114fe83dfd2f402c453c61ae1c36709a1db62795d078cab2bbbc",
+      "audit": {
+        "PASS": true,
+        "finite": true,
+        "max_constraint_violation": 1.1574741165532032e-11,
+        "max_bound_violation": 2.2737367544323206e-13,
+        "max_integrality_violation": null,
+        "objective": 0.574115768594322,
+        "affine_postsolve_tolerance": 1e-06,
+        "bound_audit_tolerance_unchanged": 1e-08,
+        "integer_pattern_exact": true,
+        "route_equality_max_residual": 2.220446049250313e-16,
+        "route_equality_tolerance_unchanged": 1e-08,
+        "physical_bounds_modified": false
+      }
+    },
+    {
+      "file": "05_original_POINT.npz",
+      "SHA": "dbb4cff1c7e4ccf92f07163e9c344cd545c7162847d913b3d6ed0cb2b68efafd",
+      "audit": {
+        "PASS": true,
+        "finite": true,
+        "max_constraint_violation": 1.3654771757742878e-11,
+        "max_bound_violation": 5.39508834280284e-13,
+        "max_integrality_violation": null,
+        "objective": 0.5741861223241257,
+        "affine_postsolve_tolerance": 1e-06,
+        "bound_audit_tolerance_unchanged": 1e-08,
+        "integer_pattern_exact": true,
+        "route_equality_max_residual": 1.9984014443252818e-15,
+        "route_equality_tolerance_unchanged": 1e-08,
+        "physical_bounds_modified": false
+      }
+    }
+  ],
+  "foreign_process_control_calls": 0,
+  "stage3_noncomparable_excluded": true,
+  "root_continuation_calls": 0,
+  "Branch_and_Price_calls": 0,
+  "May_production_calls": [
+    0,
+    0,
+    0
+  ],
+  "post_combination_native_calls": 0,
+  "full_task_terminal": true,
+  "performance_selected": false,
+  "final_candidate_completed": false,
+  "final_comparison_status": "NONCOMPARABLE",
+  "final_guard_interruptions": 1,
+  "final_noncomparable_timings_excluded": true,
+  "clean_20_percent_acceleration_evidence_available": false,
+  "final_stop_confirmed": true
+}
