@@ -99,3 +99,24 @@ def test_gate_admits_an_import_reservation_without_native_call_proof(monkeypatch
     monkeypatch.setattr(module,'inspect_live',lambda _:([idle],[]))
     assert monitor.gate('fixture')['PASS']
     assert not monitor.cancel.is_set()
+
+
+def test_live_observer_reads_actual_utf8_bom_source_and_binds_pid(monkeypatch,tmp_path):
+    from types import SimpleNamespace
+    import json
+    import v42_dw_harvest.native_state as module
+    source=tmp_path/'worker.py';source.write_text(SOURCE,encoding='utf-8-sig')
+    class Process:
+        pid=123
+        info=dict(pid=123,ppid=1,name='python.exe',create_time=100.)
+        def create_time(self):return 100.
+        def memory_maps(self,grouped=True):return [SimpleNamespace(path='gurobi130.dll')]
+        def memory_info(self):return SimpleNamespace(rss=2**30)
+    sample=stack();sample[0]['frames'][0]['filename']=str(source)
+    monkeypatch.setattr(module.psutil,'process_iter',lambda _:iter([Process()]))
+    monkeypatch.setattr(module.psutil,'Process',lambda _:Process())
+    monkeypatch.setattr(module.shutil,'which',lambda _:'py-spy.exe')
+    monkeypatch.setattr(module.subprocess,'run',lambda *a,**k:SimpleNamespace(returncode=0,stdout=json.dumps(sample),stderr=''))
+    rows,blocked=module.inspect_live()
+    assert len(blocked)==1 and blocked[0]['pid']==123
+    assert blocked[0]['PID_identity_rechecked'] and rows[0]['live_call_proofs'][0]['line']==3

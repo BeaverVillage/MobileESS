@@ -88,7 +88,7 @@ def inspect_live(excluded=()):
             if after != before:
                 continue  # PID reuse cannot authorize a conflict.
             observed = classify(row, stacks,
-                lambda name: Path(name).read_text(encoding='utf8-sig'))
+                lambda name: Path(name).read_text(encoding='utf-8-sig'))
             observed.update(PID_identity_rechecked=True, stack_error=error)
             rows.append(observed)
             if observed['classification'] == 'CONFIRMED_FOREIGN_NATIVE_SOLVE':
