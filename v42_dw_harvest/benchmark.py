@@ -22,13 +22,14 @@ def payload(path):
 
 
 def run(mode):
+    leg_started=time.perf_counter()
     assert mode in ('BASELINE','CHALLENGER')
     assert read(OUT/'MULTICOLUMN_LIGHTWEIGHT_TESTS.json')['PASS']
     preserved()
     leg=OUT/mode.lower();live=leg/'live';cp=read(leg/'immutable/DW_CHECKPOINT_LATEST.json')
     with (leg/'BENCHMARK_STARTED.json').open('x',encoding='utf8') as f:
         f.write('{"rounds":1,"RMP_calls":1,"retries":0}\n')
-    owned=[];monitor=Monitor(owned);processes=[];pipes=[];cancel=mp.get_context('spawn').Event()
+    owned=[];monitor=Monitor(owned,leg);processes=[];pipes=[];cancel=mp.get_context('spawn').Event()
     native_intervals=[];active_calls={};rmp_model=None
     monitor.budget_used=lambda:sum(e-s for s,e in native_intervals)+sum(time.perf_counter()-s for s in active_calls.values())
     try:
@@ -131,6 +132,8 @@ def run(mode):
         monitor.gate(mode+'_RMP');rmp_model.reset(1)
         pricing_sum=sum(end-start for start,end in native_intervals)
         cap=min(200.,max(.001,300.-pricing_sum-10.))
+        cap=min(cap,monitor.deadline-time.perf_counter()-35.)
+        if cap<=0:raise TimeoutError('NO_CONTINUOUS_WALL_REMAINING_FOR_RMP')
         cfg=dict(cp['RMP']['settings'],TimeLimit=cap)
         for k,v in cfg.items():rmp_model.setParam(k,v)
         rmp_model.Params.LogFile=str(live/'logs/RMP_ONCE.log')
@@ -177,6 +180,15 @@ def run(mode):
         if rmp_model is not None:rmp_model.dispose()
         monitor.close();table(leg/'RESOURCE_LEDGER.csv',monitor.rows)
     preserved()
+    if os.environ.get('V42_DW_CLEAN_REVALIDATION')=='1':
+        # Both metrics include freeze checks, admission, build, audit, cleanup.
+        final=read(OUT/f'MULTICOLUMN_{mode}_1ROUND.json')
+        final['core_wall_seconds']=final['total_wall_seconds']
+        final['total_wall_seconds']=time.perf_counter()-leg_started
+        final['efficiency']=final['upper_improvement']/final['total_wall_seconds'] if final['upper_improvement'] is not None else None
+        final['metric_wall_includes_freeze_admission_build_audit_cleanup']=True
+        write(OUT/f'MULTICOLUMN_{mode}_1ROUND.json',final)
+        print('FINAL_LEG_WALL',mode,final['total_wall_seconds'],final['efficiency'],flush=True)
 
 
 if __name__=='__main__':run(sys.argv[1])

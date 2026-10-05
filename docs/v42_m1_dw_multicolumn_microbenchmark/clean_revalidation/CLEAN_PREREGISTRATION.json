@@ -1,0 +1,39 @@
+{
+  "PR152": "63e81dc3b6d236549f566e65e07dcd05ac0a160c",
+  "PR153_parent": "3d33133e0c4177cb417ee3f03a85cde21f2b43a0",
+  "columns_each": 1604,
+  "rounds_each": 1,
+  "RMP_each": 1,
+  "pricing_each": 4,
+  "Threads": 1,
+  "continuous_pair_wall_cap_seconds": 600,
+  "clock_includes": "worker startup, both legs including freeze/admission/build/validation/cleanup and every intervening wait; no resets",
+  "initial_A_stage_wait_before_clock": true,
+  "pricing_cap_seconds": 20,
+  "RMP_cap_seconds": 200,
+  "secondary_native_cap_each_seconds": 300,
+  "alpha": 0.1,
+  "K_per_MESS": 8,
+  "K_per_round": 32,
+  "primary_metric": "audited upper improvement / full leg wall-second",
+  "minimum_efficiency_ratio": 1.2,
+  "acceptance": [
+    "scientific equivalence PASS",
+    "invalid admitted=0",
+    "guard interruptions=0",
+    "both audited uppers nonincreasing",
+    "Challenger efficiency >=1.2*Baseline",
+    "continuous pair wall <=600"
+  ],
+  "native_conflict_requires": "same live PID/create_time + engine mapped + nonblocking stack + source-bound current native call site; imports/reservations/unknown states never block",
+  "A_stage_barrier": "all currently observed benchmark_a_stage_vnext2.py supervisor/workers terminal; no foreign process control",
+  "retry": false,
+  "authoritative_continuation_calls": 0,
+  "Certification_calls": 0,
+  "Branch_and_Price_calls": 0,
+  "May_production_calls": [
+    0,
+    0,
+    0
+  ]
+}

@@ -6,6 +6,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'docs/v42_m1_dw_multicolumn_microbenchmark'
+if os.environ.get('V42_DW_CLEAN_REVALIDATION') == '1':
+    OUT = OUT / 'clean_revalidation'
 OLD = ROOT / 'docs/v42_m1_dw_root_continuation_v2'
 BASE = '63e81dc3b6d236549f566e65e07dcd05ac0a160c'
 ENV = dict.fromkeys(('OMP_NUM_THREADS', 'MKL_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'NUMEXPR_NUM_THREADS'), '1')
