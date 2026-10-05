@@ -44,6 +44,9 @@ def wait_admission(exp,phase):
     if '-m' in cmd and cmd[cmd.index('-m')+1]=='v42_b1_production.worker':authorized.append(row)
    blocked=[row for row in blocked if row not in authorized]
   failures=resource_failures(sample,exp.monitor.rows)
+  resume_permit=OUT/'USER_RESUME_AUTHORIZATION.json'
+  waived=resume_permit.exists() and read(resume_permit).get('launch_condition_wait_waived',False)
+  if waived:break
   if not blocked and not failures:break
   if STOP.exists():raise InterruptedError('USER_STOP_AT_WAIT_RESOURCE')
   if not waited:
@@ -55,7 +58,7 @@ def wait_admission(exp,phase):
    events.append(event);exp.last_wait_heartbeat=time.perf_counter();write('DW_CONTINUATION_WAIT_RESOURCE.json',dict(status='WAIT_RESOURCE',events=events,optimization_budget_consumed_by_wait=0));print('WAIT_RESOURCE',phase,exp.spent(),len(blocked),failures,flush=True)
   exp.active_start=None;exp.cancel.clear();exp.monitor.failed.clear();time.sleep(2)
  exp.cancel.clear();exp.monitor.failed.clear();exp.wait_events=events
- write('DW_CONTINUATION_WAIT_RESOURCE.json',dict(status='ADMITTED',events=events,latest_processes=processes,authorized_B1_native_reservations=authorized,B1_concurrency_authorized=bool(authorized),wait_seconds=time.perf_counter()-start if waited else 0.,optimization_budget_consumed_by_wait=0,other_lane_kill_calls=0,other_lane_terminate_calls=0))
+ write('DW_CONTINUATION_WAIT_RESOURCE.json',dict(status='ADMITTED',events=events,latest_processes=processes,observed_native_reservations=observed_native,observed_resource_failures=failures,user_launch_wait_waived=waived,authorized_B1_native_reservations=authorized,B1_concurrency_authorized=bool(authorized),wait_seconds=time.perf_counter()-start if waited else 0.,optimization_budget_consumed_by_wait=0,other_lane_kill_calls=0,other_lane_terminate_calls=0))
  if getattr(exp,'runtime_suspended',False):
   exp.restore_models()
   if phase!='PRICING_MODEL_BUILD':exp.start_workers(4)
