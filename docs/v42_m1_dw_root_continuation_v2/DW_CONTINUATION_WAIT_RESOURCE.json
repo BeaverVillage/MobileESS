@@ -1,25 +1,56 @@
 {
   "status": "ADMITTED",
-  "events": [],
+  "events": [
+    {
+      "phase": "PRICING_MODEL_BUILD",
+      "UTC": "2026-10-04T13:51:51.029051+00:00",
+      "elapsed_wait": 0.7953821000410244,
+      "blocked": [],
+      "guards": [
+        "SYSTEM_COMMIT_AT_LEAST_95_PERCENT"
+      ],
+      "new_budget_consumed": 130.61970969993854,
+      "pool_count": 1461,
+      "alpha": 0.1,
+      "other_lane_kill_calls": 0,
+      "other_lane_terminate_calls": 0
+    }
+  ],
   "latest_processes": [
     {
-      "pid": 100664,
-      "ppid": 104080,
       "name": "python.exe",
+      "ppid": 108824,
+      "pid": 56900,
+      "cmd": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "C:\\v42_b1_monitor_work\\tools\\v42\\run_b1_without_memory_guard.py",
+        "--root",
+        "C:\\v42_b1_runs\\2cd4fc39"
+      ],
+      "cwd": "C:\\v42_b1_work",
+      "RSS": 74145792,
+      "native_maps": [],
+      "classification": "NO_NATIVE_ENGINE_MAPPED",
+      "nonheavy_proof": null
+    },
+    {
+      "name": "python.exe",
+      "ppid": 56900,
+      "pid": 95564,
       "cmd": [
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
         "-m",
         "v42_b1_production.worker",
-        "C:\\v42_b1_runs\\2cd4fc39\\a\\20250501\\0\\6\\request.json"
+        "C:\\v42_b1_runs\\2cd4fc39\\a\\20250501\\0\\7\\request.json"
       ],
       "cwd": "C:\\v42_b1_work",
-      "RSS": 630448128,
+      "RSS": 3911958528,
       "native_maps": [
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\dss_python_backend\\dss_capi.dll",
-        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\gurobi130.dll",
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\dss_python_backend\\_dss_capi.pyd",
-        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_matrixapi.cp311-win_amd64.pyd",
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\gurobi130.dll",
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_model.cp311-win_amd64.pyd",
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_matrixapi.cp311-win_amd64.pyd",
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_core.cp311-win_amd64.pyd",
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_lowlevel.cp311-win_amd64.pyd",
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_modelutil.cp311-win_amd64.pyd",
@@ -31,45 +62,27 @@
       ],
       "classification": "NATIVE_HEAVY_OR_UNOBSERVABLE_RESERVATION",
       "nonheavy_proof": null
-    },
-    {
-      "pid": 104080,
-      "ppid": 76356,
-      "name": "python.exe",
-      "cmd": [
-        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
-        "-m",
-        "v42_b1_production",
-        "run",
-        "--root",
-        "C:\\v42_b1_runs\\2cd4fc39"
-      ],
-      "cwd": "C:\\v42_b1_work",
-      "RSS": 28635136,
-      "native_maps": [],
-      "classification": "NO_NATIVE_ENGINE_MAPPED",
-      "nonheavy_proof": null
     }
   ],
   "authorized_B1_native_reservations": [
     {
-      "pid": 100664,
-      "ppid": 104080,
       "name": "python.exe",
+      "ppid": 56900,
+      "pid": 95564,
       "cmd": [
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
         "-m",
         "v42_b1_production.worker",
-        "C:\\v42_b1_runs\\2cd4fc39\\a\\20250501\\0\\6\\request.json"
+        "C:\\v42_b1_runs\\2cd4fc39\\a\\20250501\\0\\7\\request.json"
       ],
       "cwd": "C:\\v42_b1_work",
-      "RSS": 630448128,
+      "RSS": 3911958528,
       "native_maps": [
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\dss_python_backend\\dss_capi.dll",
-        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\gurobi130.dll",
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\dss_python_backend\\_dss_capi.pyd",
-        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_matrixapi.cp311-win_amd64.pyd",
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\gurobi130.dll",
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_model.cp311-win_amd64.pyd",
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_matrixapi.cp311-win_amd64.pyd",
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_core.cp311-win_amd64.pyd",
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_lowlevel.cp311-win_amd64.pyd",
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\gurobipy\\_modelutil.cp311-win_amd64.pyd",

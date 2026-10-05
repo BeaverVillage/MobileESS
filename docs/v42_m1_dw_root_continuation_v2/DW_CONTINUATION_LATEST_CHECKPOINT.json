@@ -1,5 +1,5 @@
 {
-  "type": "RECOVER_RESOURCE_INTERRUPTED_RMP",
+  "type": "PAUSED_BY_USER",
   "pool": [
     {
       "file": "docs/v42_m1_exact_dw_cg_root_pilot/columns/COLUMN_000000_MESS01.npz",
@@ -8773,15 +8773,15 @@
   "dual_axis_SHA": "c732529a3740ede09c38aeec10bc7150502ad7ffeeeb0dba9e1b0f2a855a34af",
   "row_axis_SHA": "3d366b50d6a2552df7a711203b2d68b36350f231ab2bf4bc70eb51ca11d25ae2",
   "RMP": {
-    "round": 16,
-    "type": "POST_DISCOVERY_TRUE_RMP",
+    "round": 17,
+    "type": "RESUME_INCOMPLETE_RMP",
     "status": 11,
     "objective": null,
     "dual_SHA": null,
-    "wall_seconds": 55.87937769998098,
+    "wall_seconds": 13.11290020000888,
     "interval": [
-      457899.1966876,
-      457955.0760653
+      458725.4569878,
+      458738.569888
     ],
     "warm_basis_supplied": false,
     "settings": {
@@ -9197,68 +9197,32 @@
   "smooth_key": "5c539398f12d1fa9328223fc5107ea04e0b2a6e148a733e4b2593a8054560f6b",
   "optimize_intervals": [
     [
-      457793.0306753,
-      457801.365553
-    ],
-    [
-      457793.0262195,
-      457813.3151121
-    ],
-    [
-      457793.0367141,
-      457813.2782242
-    ],
-    [
-      457793.0346432,
-      457813.2542599
-    ],
-    [
-      457824.7730236,
-      457861.5412919
-    ],
-    [
-      457867.4559589,
-      457872.6327107
-    ],
-    [
-      457867.4578513,
-      457873.5746359
-    ],
-    [
-      457867.4193295,
-      457875.3042121
-    ],
-    [
-      457867.4324951,
-      457885.1025006
-    ],
-    [
-      457899.1966876,
-      457955.0760653
+      458725.4569878,
+      458738.569888
     ]
   ],
-  "elapsed_budget": 130.61970969993854,
-  "elapsed_wall": 812.933682199975,
+  "elapsed_budget": 143.73260989994742,
+  "elapsed_wall": 898.9729524999857,
   "authority_key": "8803b14d599542565c0ff8260ebc0de1ad02bee7c7e9ec12580a37dd06f4556a",
   "audit_cache_SHA": "e3f923d2edc16082c37e501842cecb4ec691f075ea4d0f62244fec10e9ab26c8",
   "feature_selection_SHA": "630460a709055df8db069bb6201c58c09619f68a3051666afc9d037fc1101b61",
   "early_stop_statistics": [],
   "resource_usage": {
     "observed_per_process_peak_RSS": {},
-    "observed_total_pricing_peak_RSS": 4255260672,
-    "observed_total_tree_peak_RSS": 14251560960,
-    "observed_parent_peak_RSS": 10872909824,
-    "min_available_RAM": 580395008,
+    "observed_total_pricing_peak_RSS": 4299075584,
+    "observed_total_tree_peak_RSS": 14473310208,
+    "observed_parent_peak_RSS": 10808627200,
+    "min_available_RAM": 3260416,
     "physical_RAM": 34049220608,
-    "max_commit_percent": 99.63131654011639,
-    "pagefile_delta_bytes": 1267269632,
-    "max_pagefile_delta_bytes": 1264271360,
-    "max_hard_page_input_pages_per_sec": 359541.0095075279,
+    "max_commit_percent": 99.64096004003233,
+    "pagefile_delta_bytes": 1748545536,
+    "max_pagefile_delta_bytes": 931168256,
+    "max_hard_page_input_pages_per_sec": 278517.28804299806,
     "hard_fault_events_observable": false,
     "hard_paging_pages_observable": true,
-    "max_CPU_percent": 68.6,
+    "max_CPU_percent": 74.1,
     "sample_target_seconds": 0.5,
-    "max_sample_gap_seconds": 1.7404455000068992,
+    "max_sample_gap_seconds": 1.1919913000310771,
     "exact_unsampled_peak_not_claimed": true,
     "thermal_observable": false,
     "license_errors": []
@@ -9313,9 +9277,9 @@
       "wall": 189.33501689997502
     }
   ],
-  "source_commit": "db9bb6cafd90c3eba9a47cc19298650944d1e3db",
+  "source_commit": "ed86b216bb78028d36c8ad6a3667f296e0d6d185",
   "historical_PR149_optimize": 755.4275769999367,
-  "cumulative_optimize": 886.0472866998753,
+  "cumulative_optimize": 899.1601868998841,
   "restart_state": {
     "rmps": [
       {
@@ -9383,6 +9347,33 @@
         "interval": [
           457899.1966876,
           457955.0760653
+        ],
+        "warm_basis_supplied": false,
+        "settings": {
+          "Threads": 1,
+          "Method": 2,
+          "Crossover": 1,
+          "LPWarmStart": 0,
+          "PreDual": 0,
+          "BarConvTol": 1e-11,
+          "Seed": 20260929,
+          "FeasibilityTol": 1e-08,
+          "IntFeasTol": 1e-08,
+          "OptimalityTol": 1e-08,
+          "TimeLimit": 300.0
+        },
+        "point_file": null
+      },
+      {
+        "round": 17,
+        "type": "RESUME_INCOMPLETE_RMP",
+        "status": 11,
+        "objective": null,
+        "dual_SHA": null,
+        "wall_seconds": 13.11290020000888,
+        "interval": [
+          458725.4569878,
+          458738.569888
         ],
         "warm_basis_supplied": false,
         "settings": {
@@ -43764,5 +43755,17 @@
         "wall": 0.351980299979914
       }
     ]
+  },
+  "pause": {
+    "resume_requires_May_B1_complete": true,
+    "new_grant": false,
+    "completed_calls_must_not_replay": true,
+    "interrupted_RMP_rounds": [
+      16,
+      17
+    ],
+    "interruptions_used_as_certificate": false,
+    "STOP_REQUEST_preserved": true,
+    "superseded_by": "USER_RESUME_AUTHORIZATION.json"
   }
 }
