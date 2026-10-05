@@ -15,9 +15,13 @@ class Guard:
 
     def sample(self, processes=False):
         v=psutil.virtual_memory(); s=psutil.swap_memory(); now=time.perf_counter()
+        rss=psutil.Process().memory_info().rss
+        for pid in list(self.excluded):
+            try:rss+=psutil.Process(pid).memory_info().rss
+            except psutil.NoSuchProcess:pass
         row=dict(stage=self.stage, epoch=time.time(), perf=now, available_RAM=v.available,
                  pagefile_used=s.used, pagefile_delta=s.used-self.baseline,
-                 RSS=psutil.Process().memory_info().rss, **self.windows.sample())
+                 RSS=rss, **self.windows.sample())
         self.rows.append(row); failures=resource_failures(row,self.rows)
         if processes:
             observed, blocked=inspect_live(self.excluded)
@@ -56,7 +60,9 @@ class Guard:
     def close(self):
         self.done.set()
         if self.thread:self.thread.join()
-        self.sample(True); self.windows.close()
+        terminal_failures=self.sample(True)
+        self.failures.extend(f for f in terminal_failures if f not in self.failures)
+        self.windows.close()
         table(OUT/f'{self.stage}_RESOURCE_LEDGER.csv',self.rows)
         write(OUT/f'{self.stage}_PROCESS_PROOFS.json',dict(events=self.events,failures=self.failures,
               foreign_control_calls=0, guard_interruptions=int(bool(self.failures))))
