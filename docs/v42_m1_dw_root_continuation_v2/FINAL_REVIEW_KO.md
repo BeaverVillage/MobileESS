@@ -1,8 +1,8 @@
-1. Draft PR / final remote SHA / clean은 게시 후 최종 응답에서 확인. Native source-freeze SHA 8ea3db9ccb055d99dc26a7ebe5c64f6fd21f69a0; authoritative pool SHA 2a5bc40ed37a57e290af387068e0b0c95fa107965ee634887cc9b9e1c6a2daf9.
+1. Draft PR #152 https://github.com/BeaverVillage/MobileESS/pull/152; branch codex/v42-m1-dw-root-continuation-v2; evidence commit/local/remote/PR SHA 05710b17d973487058b7a2208760f8037c36f9dd 일치, 당시 git clean. 최종 metadata commit SHA/clean은 최종 응답에서 확인. Native source-freeze SHA 8ea3db9ccb055d99dc26a7ebe5c64f6fd21f69a0; authoritative pool1604 동결.
 2. PR149 exact head 867b86d2c503dfb991f08f27c3240c69aeba5153; 12106 tracked files의 bytes 보존.
 3. Authoritative1433-column pool d645ed6cd5da38c6d52623f866870d4ea3a1fc065be99edd5c70d9e1b86f5ba8; 완료 pricing/RMP replay0.
 4. True dual 83962f3186e5283a7ff0c084ebb1bdaf7c10544db3224c8bc4de1d807e2c4681; smoothing b8bc73c5f7d77f5df97e6ca5bf2e1c03c52497a0b6073686448749debfb4c524, alpha=0.1; exact axis/pool binding.
-5. B1 resource interaction: 과거 WAIT_RESOURCE observations 48 보존. 이후 사용자 명시 재개 지시로 launch wait 조건을 해제했으며 runtime RAM/commit/OOM guards 유지. Other-lane kill/terminate/edit0; wait optimize debit0.
+5. B1 resource interaction: 과거 WAIT_RESOURCE observations 48 보존. 이후 사용자 명시 재개 지시로 launch wait 조건을 해제했으며 runtime RAM/commit/OOM guards 유지. Other-lane kill/terminate/edit0; wait optimize debit0. 마지막 monitor session sampled min RAM=4.906402587890625GiB, max commit=49.83284640826048%, severe-paging rule samples=0; 과거 RAM/commit 초과와 INTERRUPTED receipts 보존.
 6. Starting interval [0.5687115725336208, 0.5769475518070709].
 7. Starting D_U=0.0032359413323204134, D_L=0.005000037941129687.
 8. New authorized native optimize UNION budget1800s; automatic second grant false.
