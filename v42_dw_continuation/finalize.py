@@ -7,6 +7,7 @@ from v42_degen.identity import inputs,signature
 from v42_dw_root.partition import axes
 from v42_dw_root.run import exact_rc
 from v42_disjunctive.certificate import rational_bound,down
+from .audit_helpers import ordered_events,check_segment_chain
 
 def verify():
  preserved=preserve_old();verify_freeze();imports=read(OUT/'DW_PR144_IMPORT_AUDIT.json');assert all(sha(ROOT/x['path'])==x['sha256'] for x in imports['imports'])
@@ -14,6 +15,7 @@ def verify():
  assert all(sha(ROOT/x['file'])==x['file_SHA'] for x in cp['pool'])
  poolSHA=hashlib.sha256(json.dumps([(x['MESS'],x['column_SHA']) for x in cp['pool']],separators=(',',':')).encode()).hexdigest();assert poolSHA==cp['pool_SHA']
  budget=read(OUT/'DW_OPTIMIZE_INTERVALS.json');assert budget['union_seconds']==result['total_optimize_wall_union']<=1800
+ write('DW_SEGMENTED_BUDGET_INDEPENDENT_AUDIT.json',check_segment_chain(OUT))
  assert abs(budget['budget_carried']+union_seconds(budget['intervals'])-budget['union_seconds'])<1e-8 and read(OUT/'DW_RESUME_RECEIPT.json')['PASS']
  A,d,B,e,*_=inputs();assert signature(A,d)==read(OUT/'DW_CONTINUATION_BASE_AUDIT.json')['full_matrix_signature'];owner,rows=axes();mask=pure_binary_equalities(A,d)
  with np.load(OLD/'DW_NATIVE_ROW_NAMES.npz') as z:native=z['names']
@@ -77,15 +79,15 @@ def flags():
 
 def report(tests):
  r=read(OUT/'DW_CONTINUATION_FINAL_RESULT.json');cp=read(OUT/'DW_CHECKPOINT_LATEST.json');b=read(OUT/'DW_CONTINUATION_BASE_AUDIT.json');wait=read(OUT/'DW_CONTINUATION_WAIT_RESOURCE.json');f=read(OUT/'FINAL_FLAGS.json');prices=cp['restart_state']['prices'];rmps=cp['restart_state']['rmps'];cert=read(OUT/'DW_CONTINUATION_FINAL_CERTIFICATION.json');du=r['smallest_RMP_upper']-r['material_threshold'];dl=r['material_threshold']-r['best_certified_LB'];neg=f['REMAINING_EXACT_NEGATIVE_RC']
- events=[(x['interval'][1],'RMP',x) for x in rmps if x['status']==2]+[(max(read(OUT/n)['interval'][1] for n in x['pricing_receipts']),'CERTIFICATION',x) for x in cp['restart_state']['certs'] if x['certified']]
+ events=ordered_events(rmps,cp['restart_state']['certs'])
  upper=b['current_upper'];corr=read(SCI/'DW_ACCELERATED_FINAL_RESULT.json')['best_corrected_LB'];distance=[]
  def record(kind,point,dual):
   lower=max(b['floor'],corr);distance.append(dict(kind=kind,point=point,true_dual_SHA=dual,U_RMP=upper,L_corr=corr,L_final=lower,T_cert=b['threshold'],D_U=upper-b['threshold'],D_L=b['threshold']-lower))
  record('PR149',14,b['true_dual_SHA'])
- for _,kind,x in sorted(events,key=lambda x:x[0]):
+ for point,kind,x in events:
   if kind=='RMP':upper=min(upper,x['objective'])
   else:corr=max(corr,x['L_corr'])
-  record(kind,x['round'],x['dual_SHA'])
+  record(kind,point,x['dual_SHA'])
  assert [distance[-1]['L_final'],distance[-1]['U_RMP']]==r['final_interval']
  table('DW_CONTINUATION_THRESHOLD_DISTANCE.csv',distance);write('DW_CONTINUATION_DISTANCE_AUDIT.json',dict(PASS=True,RMP_points=len([x for x in distance if x['kind']=='RMP']),certified_points=len([x for x in distance if x['kind']=='CERTIFICATION']),final_interval=r['final_interval'],receipts_reconstructed=True))
  prior_wait=read(OUT/'PRE_B1_OVERRIDE_WAIT_RESOURCE.json') if (OUT/'PRE_B1_OVERRIDE_WAIT_RESOURCE.json').exists() else dict(events=[])
