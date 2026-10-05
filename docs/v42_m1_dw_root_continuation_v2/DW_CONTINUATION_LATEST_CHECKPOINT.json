@@ -1,5 +1,5 @@
 {
-  "type": "RECOVER_EXTERNAL_CONTROL_INTERRUPTED_RMP",
+  "type": "PAUSED_BY_USER",
   "pool": [
     {
       "file": "docs/v42_m1_exact_dw_cg_root_pilot/columns/COLUMN_000000_MESS01.npz",
@@ -63087,5 +63087,19 @@
         "wall": 0.4022024000005331
       }
     ]
+  },
+  "pause": {
+    "instruction": "작업 중단해. B1작업할거야.",
+    "resume_requires_user_authorization": true,
+    "STOP_REQUEST_preserved": true,
+    "new_grant": false,
+    "completed_calls_must_not_replay": true,
+    "interrupted_RMP_rounds": [
+      16,
+      17,
+      19
+    ],
+    "interruptions_used_as_certificate": false,
+    "superseded_by": "USER_RESUME_AUTHORIZATION.json"
   }
 }
