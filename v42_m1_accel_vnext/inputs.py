@@ -32,6 +32,19 @@ class Snapshot:
             assert np.array_equal(axis,self.blocks[unit].columns)
             assert self.blocks[unit].column(x)[2]==h['column_SHA']
             self.pool.append(dict(unit=unit,x=x,a=a,c=c,key=h['column_SHA']))
+        # Independently recover every original full local row, including rows
+        # absent from the reduced matrix. A row is local iff its support has
+        # one owner; numerical coefficients are never used as a tolerance gate.
+        self.original_local=[]
+        for unit,b in enumerate(self.blocks):
+            has=np.asarray(abs(self.A)@(self.owner==unit).astype(float)).ravel()>0
+            others=np.asarray(abs(self.A)@(self.owner!=unit).astype(float)).ravel()>0
+            rows=np.flatnonzero(has & ~others)
+            matrix=self.A[rows][:,b.columns]
+            attrs=dict(self.d,rhs=self.d['rhs'][rows],sense=self.d['sense'][rows],
+                lower=self.d['lower'][b.columns],upper=self.d['upper'][b.columns],
+                types=self.d['types'][b.columns],objective=self.d['objective'][b.columns],constant=np.array(0.))
+            self.original_local.append((matrix,attrs))
 
     def master(self, pool):
         from v42_dw_resume.audit import Master
@@ -50,6 +63,7 @@ class Snapshot:
 
 def controlled_columns(snapshot):
     from v42_dw_root.run import exact_rc
+    from v42_dw_resume.audit import corrected_rows,pure_binary_equalities
     frozen=read(OUT/'CONTROLLED_INPUTS.json');result=[]
     seen={c['key'] for c in snapshot.pool}
     for h in frozen['columns']:
@@ -57,6 +71,8 @@ def controlled_columns(snapshot):
         unit=h['unit'];b=snapshot.blocks[unit]
         with np.load(p) as z:x=z['x'].copy();axis=z['axis'].copy()
         assert np.array_equal(axis,b.columns) and b.validate(x,True)['PASS']
+        matrix,attrs=snapshot.original_local[unit]
+        assert corrected_rows(matrix,attrs,x,True,pure_binary_equalities(matrix,attrs))['PASS']
         a,c,key=b.column(x);assert key not in seen and key==h['column_SHA'];seen.add(key)
         rc=exact_rc(b,x,snapshot.pi,snapshot.alpha[unit]);assert rc<=-1e-7
         result.append(dict(unit=unit,x=x,a=a,c=c,key=key,true_RC=float(rc)))

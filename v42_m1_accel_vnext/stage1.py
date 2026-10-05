@@ -7,6 +7,9 @@ import time
 
 def run():
     assert not (OUT/'01_PERSISTENT_RMP_BENCHMARK.json').exists()
+    freeze=read(OUT/'01_SOURCE_FREEZE.json')
+    assert all(sha(ROOT/p)==h for p,h in freeze['files'].items())
+    assert sha(OUT/'M1_ACCEL_VNEXT_PREREGISTRATION.md')==freeze['preregistration_SHA']
     snapshot=Snapshot(); extra=controlled_columns(snapshot)
     guard=Guard('01');guard.gate();started=time.perf_counter();guard.start(started+600)
     result=dict(stage=1,columns=1604,controlled_additions=[5,5],variants={},source_commit=__import__('subprocess').check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip())
