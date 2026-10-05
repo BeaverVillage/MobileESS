@@ -7,7 +7,9 @@ import threading
 import time
 
 class Guard:
-    def __init__(self, stage, excluded=()):
+    def __init__(self, stage, excluded=(), foreign_policy='wait'):
+        assert foreign_policy in ('wait', 'observe')
+        self.foreign_policy=foreign_policy; self.foreign_seen=False
         self.stage=stage; self.excluded=excluded; self.rows=[]; self.events=[]
         self.windows=WindowsCounters(); self.done=threading.Event(); self.cancel=threading.Event()
         self.active=None; self.failures=[]; self.deadline=float('inf'); self.thread=None
@@ -26,7 +28,9 @@ class Guard:
         if processes:
             observed, blocked=inspect_live(self.excluded)
             self.events.append(dict(epoch=time.time(), stage=self.stage, processes=observed, confirmed_heavy=blocked))
-            if blocked: failures.append('CONFIRMED_FOREIGN_NATIVE_OVERLAP')
+            if blocked:
+                self.foreign_seen=True
+                if self.foreign_policy=='wait':failures.append('CONFIRMED_FOREIGN_NATIVE_OVERLAP')
         if now >= self.deadline-15: failures.append('CONTINUOUS_WALL_DEADLINE')
         return failures
 
@@ -34,7 +38,8 @@ class Guard:
         while True:
             failures=self.sample(True)
             write(OUT/f'{self.stage}_RESOURCE_ADMISSION.json',dict(state='WAIT_RESOURCE' if failures else 'ADMITTED',
-                  events=self.events, latest=self.rows[-1], failures=failures, foreign_control_calls=0))
+                  events=self.events, latest=self.rows[-1], failures=failures,
+                  foreign_policy=self.foreign_policy, foreign_control_calls=0))
             if not failures: return
             print('WAIT_RESOURCE',self.stage,failures,flush=True)
             time.sleep(5)
@@ -62,10 +67,13 @@ class Guard:
         if self.thread:self.thread.join()
         terminal_failures=self.sample(True)
         self.failures.extend(f for f in terminal_failures if f not in self.failures)
+        if self.foreign_seen and 'CONFIRMED_FOREIGN_NATIVE_OVERLAP' not in self.failures:
+            self.failures.append('CONFIRMED_FOREIGN_NATIVE_OVERLAP')
         self.windows.close()
         table(OUT/f'{self.stage}_RESOURCE_LEDGER.csv',self.rows)
         write(OUT/f'{self.stage}_PROCESS_PROOFS.json',dict(events=self.events,failures=self.failures,
-              foreign_control_calls=0, guard_interruptions=int(bool(self.failures))))
+              foreign_control_calls=0, foreign_policy=self.foreign_policy,
+              guard_interruptions=int(self.cancel.is_set())))
         return dict(failures=self.failures,peak_RSS=max(r['RSS'] for r in self.rows),
                     min_available_RAM=min(r['available_RAM'] for r in self.rows),
                     max_commit_percent=max(r['commit_percent'] for r in self.rows if r['commit_percent'] is not None))

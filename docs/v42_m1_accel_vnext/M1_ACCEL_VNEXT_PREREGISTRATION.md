@@ -52,3 +52,8 @@ Discovery admission requires exact Fraction true-dual RC <=-1e-7; no-negative
 certificate requires a valid global BestBd >=-1e-8. Incumbents are never lower
 bounds. Stabilization never replaces true-dual certification. Full local physics,
 coupling, route domain, all 96 slots, four MESS, and material threshold unchanged.
+
+
+## Final user concurrency override
+
+The user subsequently instructed Lane A to execute verification even if a B1 worker exists. For the ONE final comparison only, confirmed foreign native overlap is observed without waiting or interrupting the run. Any overlap marks timings NONCOMPARABLE and prevents selection. Foreign process control remains forbidden; RAM/commit/paging and the 600-second deadline guards remain active. Earlier stage receipts and policies are unchanged.

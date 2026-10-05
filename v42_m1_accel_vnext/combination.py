@@ -20,12 +20,15 @@ def run():
     assert not set(retained)&{1,2,3,4},'Unexpected selection requires a new explicitly audited combined adapter'
     cuts=5 in retained
     freeze=read(OUT/'FINAL_SOURCE_FREEZE.json');assert all(sha(ROOT/p)==h for p,h in freeze['files'].items())
-    guard=Guard('FINAL',[]);guard.gate();snapshot=Snapshot();guard.gate()
+    # Latest human instruction permits running with a B1 worker. Observe actual
+    # overlap without pausing; overlapping timings remain NONCOMPARABLE.
+    guard=Guard('FINAL',[],foreign_policy='observe');guard.gate();snapshot=Snapshot();guard.gate()
     with np.load(OLD/snapshot.cp['smooth_file']) as z:
         pi=.1*snapshot.pi+.9*z['pi'];alpha=.1*snapshot.alpha+.9*z['alpha']
     started=time.perf_counter();guard.start(started+600)
     result=dict(variants={},retained_stages=retained,selected=False,wall_cap_seconds=600,
         candidate='root mode-linking cuts' if cuts else 'PR152 identity: no individually retained modifications',
+        foreign_native_policy='observe_without_pause; overlap excludes selection evidence',
         authoritative_continuation_calls=0,Branch_and_Price_calls=0,Certification_calls=0,May_production_calls=[0,0,0],
         root_CG_10_15_minutes_estimate=None,estimate_reason='one bounded round cannot establish exact CG convergence runtime')
     master=None

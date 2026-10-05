@@ -30,8 +30,14 @@ def run():
     for path in sorted(OUT.glob('*_RESOURCE_LEDGER.csv')):
         with path.open(encoding='utf8',newline='') as f:records.extend(csv.DictReader(f))
     table(OUT/'RESOURCE_LEDGER.csv',records)
-    rows=[dict(Variant='PR152 baseline',Pricing_wall=None,RMP_wall=None,New_cols=0,UB_decrease=0.,UB_decrease_per_second=None,
-        Root_LB_effect='frozen LB '+str(freeze['LB']),Peak_RSS=None,Selected=False)]
+    baseline=final.get('variants',{}).get('PR152',{})
+    comparable_final=final['status']!='NONCOMPARABLE'
+    rows=[dict(Variant='PR152 baseline',
+        Pricing_wall=baseline.get('pricing_batch_wall_seconds') if comparable_final else None,
+        RMP_wall=baseline.get('RMP_native_seconds') if comparable_final else None,
+        New_cols=baseline.get('accepted',0),UB_decrease=baseline.get('UB_decrease'),
+        UB_decrease_per_second=baseline.get('efficiency') if comparable_final else None,
+        Root_LB_effect='frozen LB '+str(freeze['LB']),Peak_RSS=final.get('resource',{}).get('peak_RSS'),Selected=False)]
     for label,r in zip(LABELS,results):
         v=r.get('variants',{});metric={};price=None;rmp=None;new=0;delta=None;eff=None
         if label=='Persistent RMP' and 'persistent' in v:
@@ -50,8 +56,9 @@ def run():
             Root_LB_effect='0 (redundant full-DW cuts)' if label=='Root cuts' else 'no new certificate',
             Peak_RSS=r.get('resource',{}).get('peak_RSS'),Selected=r['selected'],Status=r['status']))
     f=final.get('variants',{}).get('candidate',{})
-    rows.append(dict(Variant='Final exact combination',Pricing_wall=f.get('pricing_batch_wall_seconds'),RMP_wall=f.get('RMP_native_seconds'),
-        New_cols=f.get('accepted'),UB_decrease=f.get('UB_decrease'),UB_decrease_per_second=f.get('efficiency'),
+    rows.append(dict(Variant='Final exact combination',Pricing_wall=f.get('pricing_batch_wall_seconds') if comparable_final else None,
+        RMP_wall=f.get('RMP_native_seconds') if comparable_final else None,
+        New_cols=f.get('accepted'),UB_decrease=f.get('UB_decrease'),UB_decrease_per_second=f.get('efficiency') if comparable_final else None,
         Root_LB_effect='frozen independent LB unchanged',Peak_RSS=final.get('resource',{}).get('peak_RSS'),Selected=final['selected'],Status=final['status']))
     table(OUT/'M1_ACCEL_STEPWISE_COMPARISON.csv',rows)
     selection=dict(M1_ACCELERATION_SELECTED=final['selected'],stages=[dict(stage=i+1,status=r['status'],retained=r['selected']) for i,r in enumerate(results)],
@@ -71,7 +78,7 @@ def run():
     write(OUT/'VERIFICATION.json',dict(PASS=failed==0,scientific_equivalence_PASS=True,
         status='PASS' if failed==0 else 'KNOWN_BASELINE_TEST_FAILURE',
         full_pytest_passed=int(match[1]),full_pytest_failed=failed,full_pytest_errors=errors,
-        known_baseline_failure=known if failed else None,lightweight_stage_tests=17,
+        known_baseline_failure=known if failed else None,lightweight_stage_tests=19,
         original_files_preserved=len(freeze['files']),checkpoint_columns=1604,all_experiment_wall_caps_PASS=cap,
         independent_saved_point_audits=point_audits,foreign_process_control_calls=0,
         stage3_noncomparable_excluded=True,root_continuation_calls=0,Branch_and_Price_calls=0,
@@ -92,9 +99,10 @@ def run():
         'Stage 2: box guidance LP가 90초 cap 안에 optimal이 되지 않아 미채택. alpha sweep이나 자동 연장은 없었다.',
         'Stage 3: HYBRID_DP_LP_POSSIBLE, continuous SOC/P/Q 유지한 toy 3개 PASS. B1 실제 PID+optimize overlap 때문에 timing 제외; full-scale hybrid 비교 미완료, 미채택.',
         'Stage 4: 실제 block의 exact parallel-arc 제거 대상 0개. 동일 formulation의 추가 native solve 없이 구조적으로 REJECTED.',
-        f'Stage 5: {results[4]["status"]}. mode-linking cut은 정수 해에 유효하고 toy arc LP를 강화하지만 full D-W에는 redundant라 이론적 root-bound 효과는 0이다.',
+        f'Stage 5: {results[4]["status"]}. mode-linking cut은 정수 해에 유효하고 toy arc LP를 강화하지만 full D-W에는 redundant라 이론적 root-bound 효과는 0이다. own runner의 상태를 대기로 잘못 판단해 제어 중단한 원본 RMP/첫 root receipt는 보존했고 재실행하지 않았다. 두 번째 root는 terminal receipt가 없어 인증에서 제외했다. cuts full-scale 비교는 미완료라 미채택했다.',
         '최종 조합은 개별 retained stage만 포함했다. 빈 집합이면 PR152 identity 비교이며 개선 알고리즘으로 채택하지 않는다.',
-        'Root-CG 10–15분 도달 가능성은 한 round로 외삽할 근거가 없어 추정하지 않았다. 다음 단일 blocker는 깨끗한 구간에서 exact pricing/global-bound 구조 개선을 실증하는 것이다.',
+        'Root-CG 10–15분 도달 가능성은 한 round로 외삽할 근거가 없어 추정하지 않았다. 다음 단일 blocker는 >=20% exact end-to-end 효율 개선에 대한 재현 가능한 증거의 부재다.',
+        '마지막 사용자 지시에 따라 최종 비교는 B1 worker의 존재 또는 actual overlap을 이유로 중단하지 않았다. actual overlap이 관측된 시간은 NONCOMPARABLE로 기록하고 selection evidence에서 제외했다. RAM/commit/deadline 보호는 유지했다.',
         'Lane A의 May production calls=0/0/0. B1의 자체 대기/중단/재시작은 read-only 관측만 했으며 제어 호출은 0이다.',
         '본 작업은 휴리스틱 또는 convergence tolerance 완화 없이 exact M1 알고리즘의 계산 효율만 개선했다.',
         'B1 May production은 독립적으로 실행되었으며, Lane-A 작업은 B1 process/worktree/artifacts를 변경하거나 종료하지 않았다.',
