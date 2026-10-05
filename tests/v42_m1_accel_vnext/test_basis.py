@@ -42,3 +42,16 @@ def test_python_super_not_native():
 
 def test_import_not_native():
     assert observation('import gurobipy as gp\n',1)['optimize_state']=='UNCONFIRMED'
+
+def test_opendss_real_FFI_wrapper_is_live_native_evidence():
+    source='def Solve(self):\n self._check_for_error(self._lib.Solution_Solve())\n'
+    stack=[dict(pid=7,thread_id=8,frames=[dict(filename='C:/Python/Lib/site-packages/opendssdirect/Solution.py',line=2,name='Solve')])]
+    r=classify(dict(pid=7,native_maps=['dss_capi.dll']),stack,lambda _:source)
+    assert r['classification']=='CONFIRMED_FOREIGN_NATIVE_SOLVE'
+    assert r['live_call_proofs'][0]['call']=='Solution_Solve'
+
+def test_opendss_mock_wrapper_not_installed_native_library():
+    source='def Solve(self):\n self._check_for_error(self._lib.Solution_Solve())\n'
+    stack=[dict(pid=7,thread_id=8,frames=[dict(filename='tests/fake_solution.py',line=2,name='Solve')])]
+    r=classify(dict(pid=7,native_maps=['dss_capi.dll']),stack,lambda _:source)
+    assert r['optimize_state']=='UNCONFIRMED'

@@ -11,7 +11,7 @@ import subprocess
 import time
 import psutil
 
-NATIVE_CALLS = {'optimize', 'presolve', 'Solve', 'SolveSnap'}
+NATIVE_CALLS = {'optimize', 'presolve', 'Solve', 'SolveSnap', 'SolveDirect', 'SolveNoControl', 'SolvePFlow', 'SolvePlusControl'}
 
 
 def call_witness(frame, source):
@@ -20,7 +20,15 @@ def call_witness(frame, source):
     tree = ast.parse(source)
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-            if node.func.attr in NATIVE_CALLS and node.lineno <= line <= node.end_lineno:
+            api_call=node.func.attr.startswith(('Solution_Solve','ctx_Solution_Solve'))
+            native_call=node.func.attr in NATIVE_CALLS or api_call
+            if native_call and node.lineno <= line <= node.end_lineno:
+                if api_call:
+                    filename=frame.get('filename','').replace('\\','/').lower()
+                    package=any(p in filename for p in ['/site-packages/opendssdirect/','/site-packages/dss/'])
+                    receiver=node.func.value
+                    ffi= isinstance(receiver,ast.Attribute) and receiver.attr=='_lib'
+                    if not (package and ffi):continue
                 if isinstance(node.func.value, ast.Call) and isinstance(node.func.value.func, ast.Name) and node.func.value.func.id == 'super':
                     # A Python wrapper is real native evidence only when its
                     # enclosing class provably subclasses this imported gp.Model.

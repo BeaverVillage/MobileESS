@@ -71,7 +71,7 @@ def run():
     write(OUT/'VERIFICATION.json',dict(PASS=failed==0,scientific_equivalence_PASS=True,
         status='PASS' if failed==0 else 'KNOWN_BASELINE_TEST_FAILURE',
         full_pytest_passed=int(match[1]),full_pytest_failed=failed,full_pytest_errors=errors,
-        known_baseline_failure=known if failed else None,lightweight_stage_tests=15,
+        known_baseline_failure=known if failed else None,lightweight_stage_tests=17,
         original_files_preserved=len(freeze['files']),checkpoint_columns=1604,all_experiment_wall_caps_PASS=cap,
         independent_saved_point_audits=point_audits,foreign_process_control_calls=0,
         stage3_noncomparable_excluded=True,root_continuation_calls=0,Branch_and_Price_calls=0,
