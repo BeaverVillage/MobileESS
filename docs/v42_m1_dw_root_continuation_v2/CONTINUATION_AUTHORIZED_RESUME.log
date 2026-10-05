@@ -1,0 +1,55 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+THRESHOLD_RMP 15 0.5767502323464561 57.057160899974406 INCONCLUSIVE
+CONTINUATION_DISCOVERY 1 12 0.5767502323464561 57.057160899974406 None
+CONTINUATION_DISCOVERY 2 16 0.5767502323464561 130.61970969993854 None
+CONTINUATION_CG_DONE INCONCLUSIVE 0.5687115725336208 0.5767502323464561 28 130.61970969993854
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw_continuation\cg.py", line 182, in <module>
+    Experiment(resume='--resume' in sys.argv).run()
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw_continuation\cg.py", line 150, in run
+    self.run_certification(self.last_completed_dual(),'INCOMPLETE_RMP');self.stop='RMP_NOT_OPTIMAL';break
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw_continuation\cg.py", line 163, in run_certification
+    self.tier_audit('FINAL_CERTIFICATION',dual[0],dual[1],dual[2]);prices,safe=self.pricing_round('FINAL_CERTIFICATION',dual,120)
+                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw_continuation\cg_reuse.py", line 35, in pricing_round
+    self.resource_gate(kind);pi,alpha,key,file=dual;results=[];self.monitor.phase=kind;sample_start=len(self.monitor.rows);batch_start=time.perf_counter();write('DW_INFLIGHT.json',dict(kind=kind,spent_before=self.spent(),reserved_optimize_seconds=min(self.remaining(),cap*math.ceil(4/self.workers)+4),round=self.current_round,dual_SHA=key))
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw_continuation\integration.py", line 20, in resource_gate
+    wait_admission(self,phase)
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw_continuation\admission.py", line 35, in wait_admission
+    sample=exp.monitor.sample();processes,blocked=inspect_native(exp.pids)
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw_continuation\admission.py", line 23, in inspect_native
+    cmd=p.cmdline();maps=[x.path for x in p.memory_maps(grouped=True) if any(s in x.path.lower() for s in ('gurobi','opendss','dss_capi'))];proof=nonheavy_binding(p) if maps else None
+                                                                                                                                                  ^^^^^^^^^^^^^^^^^^^
+  File "D:\ChatGPT\Mobile ESS 2\work\m1-exact-dw-cg-root-pilot\v42_dw_continuation\admission.py", line 7, in nonheavy_binding
+    command=' '.join(p.parent().cmdline());match=re.search(r"@'\s*\n(.*?)\n'@",command,re.S)
+                     ^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'cmdline'
