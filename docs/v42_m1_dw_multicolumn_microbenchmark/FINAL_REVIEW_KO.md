@@ -1,22 +1,40 @@
-1. Baseline retained columns 15; pool1604 → 1619.
-2. Challenger retained columns 21; pool1604 → 1625.
-3. Harvested candidates/MESS: Baseline [8, 7, 6, 5], Challenger [8, 13, 6, 5] (MESS01–04).
-4. Validated negative columns/MESS: Baseline [6, 6, 4, 3], Challenger [6, 10, 4, 3] (MESS01–04).
-5. Duplicate/dominance independent recount: Baseline [{'MESS': 'MESS01', 'candidates_encountered': 8, 'negative_callback_candidates': 8, 'captured_distinct_vectors': 8, 'validated_negative_columns': 6, 'independently_validated_columns': 7, 'captured_trajectory_duplicates': 0, 'nonduplicate_policy_rejections': 2, 'callback_raw_duplicates': 0, 'exact_projection_duplicates': 0, 'postsolve_repeat_observations': 0, 'dominated_removed': 0, 'retained_columns': 4}, {'MESS': 'MESS02', 'candidates_encountered': 7, 'negative_callback_candidates': 7, 'captured_distinct_vectors': 7, 'validated_negative_columns': 6, 'independently_validated_columns': 7, 'captured_trajectory_duplicates': 0, 'nonduplicate_policy_rejections': 2, 'callback_raw_duplicates': 0, 'exact_projection_duplicates': 0, 'postsolve_repeat_observations': 0, 'dominated_removed': 0, 'retained_columns': 4}, {'MESS': 'MESS03', 'candidates_encountered': 6, 'negative_callback_candidates': 6, 'captured_distinct_vectors': 6, 'validated_negative_columns': 4, 'independently_validated_columns': 5, 'captured_trajectory_duplicates': 0, 'nonduplicate_policy_rejections': 0, 'callback_raw_duplicates': 0, 'exact_projection_duplicates': 0, 'postsolve_repeat_observations': 0, 'dominated_removed': 0, 'retained_columns': 4}, {'MESS': 'MESS04', 'candidates_encountered': 5, 'negative_callback_candidates': 5, 'captured_distinct_vectors': 5, 'validated_negative_columns': 3, 'independently_validated_columns': 4, 'captured_trajectory_duplicates': 0, 'nonduplicate_policy_rejections': 0, 'callback_raw_duplicates': 0, 'exact_projection_duplicates': 0, 'postsolve_repeat_observations': 0, 'dominated_removed': 0, 'retained_columns': 3}]; Challenger [{'MESS': 'MESS01', 'candidates_encountered': 8, 'negative_callback_candidates': 8, 'captured_distinct_vectors': 8, 'validated_negative_columns': 6, 'independently_validated_columns': 7, 'captured_trajectory_duplicates': 0, 'nonduplicate_policy_rejections': 0, 'callback_raw_duplicates': 0, 'exact_projection_duplicates': 0, 'postsolve_repeat_observations': 6, 'dominated_removed': 0, 'retained_columns': 6}, {'MESS': 'MESS02', 'candidates_encountered': 13, 'negative_callback_candidates': 13, 'captured_distinct_vectors': 13, 'validated_negative_columns': 10, 'independently_validated_columns': 11, 'captured_trajectory_duplicates': 0, 'nonduplicate_policy_rejections': 2, 'callback_raw_duplicates': 0, 'exact_projection_duplicates': 0, 'postsolve_repeat_observations': 10, 'dominated_removed': 0, 'retained_columns': 8}, {'MESS': 'MESS03', 'candidates_encountered': 6, 'negative_callback_candidates': 6, 'captured_distinct_vectors': 6, 'validated_negative_columns': 4, 'independently_validated_columns': 5, 'captured_trajectory_duplicates': 0, 'nonduplicate_policy_rejections': 0, 'callback_raw_duplicates': 0, 'exact_projection_duplicates': 0, 'postsolve_repeat_observations': 4, 'dominated_removed': 0, 'retained_columns': 4}, {'MESS': 'MESS04', 'candidates_encountered': 5, 'negative_callback_candidates': 5, 'captured_distinct_vectors': 5, 'validated_negative_columns': 3, 'independently_validated_columns': 4, 'captured_trajectory_duplicates': 0, 'nonduplicate_policy_rejections': 0, 'callback_raw_duplicates': 0, 'exact_projection_duplicates': 0, 'postsolve_repeat_observations': 3, 'dominated_removed': 0, 'retained_columns': 3}]. Postsolve repeats와 batch-cap rejection을 projection duplicate와 구분.
-6. Baseline pricing native sum 63.75946639999893s / pricing wall 22.425645299997996s.
-7. Challenger pricing native sum 52.044583599999896s / pricing wall 18.409992100001546s.
-8. Baseline RMP 69.35413529999641s, native status 2.
-9. Challenger RMP 35.97411219999776s, native status 2.
-10. Baseline upper decrease 7.035372980368493e-05; 0.5741861223241257 → 0.574115768594322.
-11. Challenger upper decrease 7.057853271852377e-05; 0.5741861223241257 → 0.5741155437914072.
-12. Baseline improvement/wall-second 4.377775424151859e-07, total wall 160.7065758000026s.
-13. Challenger improvement/wall-second 6.164804630897311e-07, total wall 114.48624399999972s.
-14. Resource sampled peaks Baseline {'sampled_peak_tree_RSS_GiB': 10.993148803710938, 'min_available_RAM_GiB': 8.772315979003906, 'max_commit_percent': 45.49261301713161, 'guard_failures': [], 'samples': 306, 'sampled_not_exact_peaks': True, 'other_lane_kill_calls': 0, 'other_lane_terminate_calls': 0}; Challenger {'sampled_peak_tree_RSS_GiB': 10.93239974975586, 'min_available_RAM_GiB': 9.112617492675781, 'max_commit_percent': 44.58602467361131, 'guard_failures': ['OTHER_NATIVE_RESERVATION'], 'samples': 225, 'sampled_not_exact_peaks': True, 'other_lane_kill_calls': 0, 'other_lane_terminate_calls': 0}.
-15. Scientific equivalence PASS; matrix/domain/physical rows/coupling/pricing settings/true-dual authority/Certification code unchanged. No invalid admission.
-16. Status MICROBENCHMARK_INCONCLUSIVE; MULTICOLUMN_SELECTED=False. Blocker: OTHER_NATIVE_RESERVATION caused three non-quota Discovery interruptions; observed efficiency is descriptive, not an unconfounded adoption comparison. Native reservation PID/call context 미저장으로 타 Lane의 실제 optimize는 입증하지 않음. Single-pair 관측값은 채택 근거로 쓰지 않고 재실행0.
-17. New commit / Draft PR / remote SHA / clean은 publication receipt 및 최종 응답에서 확인.
-18. Authoritative CG continuation calls=0; historical grant 사용0; native benchmark receipt charge 221.13390349999827 /600s; automatic extension0.
-19. Branch-and-Price calls=0; May production0/0/0; 다른 Lane kill/terminate/edit0. Benchmark native 완료 후 추가 optimize0. 이후 사용자 process-only 중단 금지 지시에 따라 검증·게시를 대기 없이 계속 완료.
+1. Baseline retained: 새 15개, 1,604 → 1,619개 (MESS01–04: 4/4/4/3).
+
+2. Challenger retained: 새 21개, 1,604 → 1,625개 (6/8/4/3).
+
+3. Harvested MIPSOL candidates/MESS: Baseline 8/7/6/5, Challenger 8/13/6/5. 모두 negative proposal 관측; admission은 별도 audit.
+
+4. 검증된 distinct negative columns/MESS: Baseline 6/6/4/3, Challenger 6/10/4/3. 독립 physics PASS candidates: 각각 7/7/5/4, 7/11/5/4.
+
+5. Captured trajectory duplicate / exact projection duplicate / strict dominance 제거: 두 방식 모두 0/0/0. Challenger postsolve 재관측 duplicate는 6/10/4/3으로 신규 column 수에서 제외했다. Batch cap으로 제외한 distinct valid candidates는 Baseline 4개, Challenger 2개이며 duplicate로 계산하지 않았다.
+
+6. Baseline pricing: native 합계 63.759466s, batch wall 22.425645s; retained/native pricing minute 14.115551.
+
+7. Challenger pricing: native 합계 52.044584s, batch wall 18.409992s; retained/native pricing minute 24.210012. MESS02는 K=8 quota 종료, MESS01/03/04는 OTHER_NATIVE_RESERVATION guard로 조기 종료됐다.
+
+8. Baseline RMP: 69.354135s, OPTIMAL, original matrix/primal audit PASS.
+
+9. Challenger RMP: 35.974112s, OPTIMAL, original matrix/primal audit PASS.
+
+10. Baseline audited upper: 0.5741861223241257 → 0.574115768594322; 감소 0.00007035372980368493.
+
+11. Challenger audited upper: 0.5741861223241257 → 0.5741155437914072; 감소 0.00007057853271852377.
+
+12. Baseline audited upper improvement/wall-sec: 4.377775424151859e-7 (total wall 160.706576s).
+
+13. Challenger audited upper improvement/wall-sec: 6.164804630897311e-7 (total wall 114.486244s). 조기 종료된 pricing을 포함한 관측값이므로 공정한 성능 우위나 채택 근거로 사용하지 않았다.
+
+14. Sampled peak tree RSS / min available RAM / max commit: Baseline 10.993GiB / 8.772GiB / 45.493%; Challenger 10.932GiB / 9.113GiB / 44.586%. 정확한 연속 peak가 아닌 sampling 결과다. Guard가 foreign PID/call context를 저장하지 않아 실제 다른 Lane optimize나 원인을 단정하지 않는다.
+
+15. Scientific equivalence PASS; lightweight exact fixtures 10/10 PASS (0.46s); 전체 admitted 36개 invalid=0. Original 12,919 tracked files와 terminal 2,033 hash bindings 보존, 동일 checkpoint/duals/seed/domain/settings. Certification 코드는 원래 controller로 위임되며 변경되지 않았다. 전체 inherited pytest 재실행은 수행하지 않았으며 신규 검증 범위는 fixtures와 독립 matrix/semantic audit다.
+
+16. MICROBENCHMARK_INCONCLUSIVE; MULTICOLUMN_SELECTED=false. 관측 효율은 개선됐지만 3개 pricing의 guard 조기 종료로 acceptance 비교의 독립성이 부족하다. 최신 process 지시는 두 benchmark 종료 후 도착했고, 이후 마무리를 process 존재 때문에 대기시키지 않았다. Historical guard receipts는 보존했고 재실행하지 않았다.
+
+17. Draft PR [#153](https://github.com/BeaverVillage/MobileESS/pull/153); publication evidence commit/remote SHA `b6fe074e570211b945dfb83e6937f548dbd3eefd` 일치, evidence tree와 PR152 tree clean. 후속 report/manifest commit의 최종 remote SHA/clean은 최종 응답에서 확인한다. 전체 tracked child diff check PASS; raw native logs byte 보존; SHA256_MANIFEST 제공.
+
+18. AUTHORITATIVE_ROOT_CONTINUATION_NOT_RUN; authoritative continuation calls=0, Certification calls=0, historical budget consumption=0. 각 leg 정확히 1 Discovery + 1 RMP, 총 8 pricing + 2 RMP; native receipt charge 221.1339035/600s (Baseline 133.1144430, Challenger 88.0194605). 자동 연장/second round/replay=0. PR152 authoritative interval [0.5687115725336208, 0.5741861223241257], threshold 0.5737116104747505, CG convergence=false, materiality INCONCLUSIVE 유지.
+
+19. BRANCH_AND_PRICE_NOT_RUN; Branch-and-Price calls=0, May production=0/0/0, 다른 Lane kill/terminate/edit=0. Microbenchmark 결과를 authority에 합치지 않고 이 작업의 계산을 종료했다.
 
 PR152의 1,604-column checkpoint는 immutable baseline으로 보존했으며, 동일 checkpoint의 read-only copies에서 기존 방식과 multi-column 방식을 각각 정확히 1 Discovery round + 1 RMP로 비교했다.
 
