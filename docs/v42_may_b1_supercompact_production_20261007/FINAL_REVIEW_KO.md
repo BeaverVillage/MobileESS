@@ -1,6 +1,6 @@
 # PR134 정확 압축 및 독립 May B1 실행
 
-압축 분류 **A_STAGE_SUPERCOMPACT_SELECTED**, 캠페인은 **MAY_B1_CAMPAIGN_RUNNING**이다. 아래 날짜 수치는 2026-10-06T18:38:19.326189+00:00의 스냅샷이다. 31일 완료나 repair queue 완료를 주장하지 않는다.
+압축 분류 **A_STAGE_SUPERCOMPACT_SELECTED**, 캠페인은 **MAY_B1_CAMPAIGN_RUNNING**이다. 아래 날짜 수치는 2026-10-06T18:38:54.745574+00:00의 스냅샷이다. 31일 완료나 repair queue 완료를 주장하지 않는다.
 
 PR134 accepted 기준은 `52ef855a59144a7c561df44b81dc2ad265babdbd`이며 1,499개 작업·96슬롯의 current accepted freeze를 원본 원시 해로 재구성했다. input SHA `f18b9dea2686b49de73b6d5d6ec7cc9e409c82e47b7f3bf7d29bdf5b1ba31170`, accepted DATA SHA `79263899f1040d8b13b5af29dc881c52e83ac543c96f90f8e63e9061b637aa74`, 원본 matrix SHA `eee234d2b56c733cb8f52a8585ac6f93314f85de7f986adc709f40a05df8bc47`. 세부 source/input/model 축과 SHA는 Phase-I PR134_BASE_IDENTITY.json에 있다. PR150/151은 fixed replay·monitor·실행 운영 참고로만 사용했다.
 
