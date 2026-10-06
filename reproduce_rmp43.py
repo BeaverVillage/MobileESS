@@ -39,10 +39,16 @@ def corrected_audit():
 def run():
     OUT.mkdir(exist_ok=True)
     marker=OUT/'ONE_SHOT_REGISTRATION.json'
-    with marker.open('x',encoding='utf8') as f:
-        json.dump(dict(pid=os.getpid(),process_creation=psutil.Process().create_time(),start=time.time(),
-                       maximum_initial_RMP_calls=1,maximum_repaired_revalidation_calls=1,
-                       fullscale_BAP_seconds_only_after_PASS=600,root_CG_continuation=False,P2=False,BAP7200=False),f,indent=2)
+    if marker.exists():
+        assert not (OUT/'INITIAL_NATIVE_CALL_STARTED.json').exists(),'ONE_INITIAL_SOLVE_ONLY'
+        assert "'-0x93433a3'" in read(OUT/'DRIVER_ERROR.json')['traceback'],'ONLY_UNSIGNED_IDENTITY_WRAPPER_REBUILD_ALLOWED'
+        p=OUT/'UNSIGNED_IDENTITY_WRAPPER_REBUILD.json'
+        with p.open('x',encoding='utf8') as f:json.dump(dict(reason='Signed int32 fingerprint equals expected uint32; zero native calls before wrapper correction',pid=os.getpid()),f)
+    else:
+        with marker.open('x',encoding='utf8') as f:
+            json.dump(dict(pid=os.getpid(),process_creation=psutil.Process().create_time(),start=time.time(),
+                           maximum_initial_RMP_calls=1,maximum_repaired_revalidation_calls=1,
+                           fullscale_BAP_seconds_only_after_PASS=600,root_CG_continuation=False,P2=False,BAP7200=False),f,indent=2)
     start=time.perf_counter();cp=read(OLD/'DW_CHECKPOINT_LATEST.json');r42=read(OLD/'RMP_RECEIPT_0042.json')
     assert cp['RMP']['round']==42 and len(cp['pool'])==1841
     pointpath=OLD/r42['point_file'];assert sha(pointpath)==r42['point_SHA']
@@ -67,13 +73,13 @@ def run():
         master.column_data[-1]['a']=None
         if j%100==0:print(json.dumps(dict(build_columns=j+1,total=1841)),flush=True)
     m=master.model
-    assert (m.NumConstrs,m.NumVars,m.NumNZs,m.Fingerprint)==(679959,83058,7514086,0xf6cbcc5d),('MODEL_IDENTITY_MISMATCH',m.NumConstrs,m.NumVars,m.NumNZs,hex(m.Fingerprint))
+    assert (m.NumConstrs,m.NumVars,m.NumNZs,m.Fingerprint&0xffffffff)==(679959,83058,7514086,0xf6cbcc5d),('MODEL_IDENTITY_MISMATCH',m.NumConstrs,m.NumVars,m.NumNZs,hex(m.Fingerprint))
     m.reset(1)
     for k,v in PARAMS.items():m.setParam(k,v)
     m.Params.LogFile=str(OUT/'RMP43_EQUIVALENT.log')
     write('PRE_SOLVE_IDENTITY.json',dict(PASS=True,checkpoint_SHA=sha(OLD/'DW_CHECKPOINT_LATEST.json'),
         last_valid_point_SHA=r42['point_SHA'],last_valid_dual_SHA=r42['dual_SHA'],retained_columns=1841,
-        model=dict(rows=m.NumConstrs,columns=m.NumVars,nnz=m.NumNZs,fingerprint=hex(m.Fingerprint)),
+        model=dict(rows=m.NumConstrs,columns=m.NumVars,nnz=m.NumNZs,fingerprint=hex(m.Fingerprint&0xffffffff)),
         objective_constant=m.ObjCon,parameters=PARAMS,source_model_identity=identity,row_axis_SHA=cp['row_axis_SHA'],
         same_objective_rows_solver_settings=True,warm_start_imported=False,memory_guards=False,build_wall_seconds=time.perf_counter()-start))
     write('INITIAL_NATIVE_CALL_STARTED.json',dict(call_number=1,pid=os.getpid(),start=time.time(),parameters=PARAMS))
