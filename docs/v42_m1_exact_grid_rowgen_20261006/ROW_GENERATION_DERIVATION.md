@@ -47,5 +47,5 @@ expressions into each face. Mathematical elimination is possible and unique,
 but expansion recreates dense repeated coefficients; current row deferral alone
 reduces initial native row/nnz size materially without floating transport changes.
 
-本算法不包含 ML/Top-K/trajectory-pool restriction, grid recourse optimization,
+This algorithm has no ML/Top-K/trajectory-pool restriction, grid recourse optimization,
 or the historical giant P/Q/SOC recourse. No production runtime is inferred.
