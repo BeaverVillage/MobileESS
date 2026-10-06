@@ -77,4 +77,3 @@ class Guard:
         return dict(failures=self.failures,peak_RSS=max(r['RSS'] for r in self.rows),
                     min_available_RAM=min(r['available_RAM'] for r in self.rows),
                     max_commit_percent=max(r['commit_percent'] for r in self.rows if r['commit_percent'] is not None))
-
