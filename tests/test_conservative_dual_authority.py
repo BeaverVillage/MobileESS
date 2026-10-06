@@ -2,7 +2,7 @@ from fractions import Fraction as F
 import numpy as np
 import pytest
 from scipy import sparse
-from v42_m_stage_root.conservative_authority import numerical_zero_sign,free_rc_consistency,split_gates
+from v42_m_stage_root.conservative_authority import numerical_zero_sign,free_rc_consistency,split_gates,primal_rmp_gate,eligible_native_pricing_bound
 from v42_m_stage_root.numerical_certificate import canonicalize,independent_csc
 from v42_bap.state import Tree,ColumnRegistry,BinaryProjection,NodeResult
 
@@ -12,6 +12,18 @@ def test_authorized_numerical_sign_boundary(sense,pi):
 
 def test_sign_above_fixed_threshold_is_rejected():
     with pytest.raises(ValueError,match='EXCEEDS'):numerical_zero_sign([2e-8],['<'])
+
+def test_convexity_and_bounds_keep_original_stricter_authority():
+    A=sparse.eye(2,format='csr');rhs=np.array([0.,1.]);s=np.array(['=','=']);lo=np.array([-np.inf,0.]);hi=np.array([np.inf,np.inf])
+    assert primal_rmp_gate(A,np.array([0.,1.]),rhs,s,lo,hi,1)['PASS']
+    assert not primal_rmp_gate(A,np.array([0.,1.+5e-7]),rhs,s,lo,hi,1)['PASS']
+    assert not primal_rmp_gate(A,np.array([0.,1.]),rhs,s,np.array([-np.inf,1.+2e-8]),hi,1)['PASS']
+
+def test_unvalidated_pricing_point_never_authorizes_bound():
+    assert eligible_native_pricing_bound(9,-.006,True,False) is None
+    assert eligible_native_pricing_bound(11,-.006,True,True)==-.006
+    assert eligible_native_pricing_bound(9,-.006,False,False)==-.006
+    assert eligible_native_pricing_bound(12,-.006,False,False) is None
 
 def test_free_rc_consistency_does_not_fabricate_exact_support():
     r=free_rc_consistency(np.array([5e-10]),np.array([-np.inf]),np.array([np.inf]))

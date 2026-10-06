@@ -8,6 +8,24 @@ from fractions import Fraction as F
 
 TAU_DUAL = 1e-8
 
+def primal_rmp_gate(A, point, rhs, sense, lower, upper, convexity_count=4):
+    point=np.asarray(point);sense=np.asarray(sense)
+    r=A@point-rhs
+    v=np.where(sense=='=',abs(r),np.where(sense=='<',np.maximum(r,0),np.maximum(-r,0)))
+    convexity=float(np.max(abs(r[-convexity_count:]),initial=0))
+    bounds=float(max(0,np.max(lower-point),np.max(point-upper)))
+    maximum=float(np.max(v,initial=0))
+    return dict(PASS=bool(np.isfinite(point).all() and maximum<=1e-6 and
+                np.all(sense[-convexity_count:]=='=') and convexity<=TAU_DUAL and bounds<=TAU_DUAL),
+                maximum_row_violation=maximum,convexity_residual=convexity,maximum_bound_violation=bounds)
+
+def eligible_native_pricing_bound(status, bound, has_incumbent, incumbent_valid):
+    if status not in (2,9,11) or not np.isfinite(bound) or abs(bound)>=1e90:
+        return None
+    if has_incumbent and not incumbent_valid:
+        return None
+    return float(bound)
+
 def numerical_zero_sign(pi, sense):
     pi = np.asarray(pi, dtype=float).copy()
     sense = np.asarray(sense)

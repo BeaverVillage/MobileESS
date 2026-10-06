@@ -1,0 +1,78 @@
+
+Gurobi 13.0.2 (win64) logging started Tue Oct  6 14:13:08 2026
+
+Set parameter LogFile to value "C:\v42_m1_dual_early_bap_20261006\docs\v42_m1_conservative_early_bap_20261006\node4_price2.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  20
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 51596 rows, 58976 columns and 315361 nonzeros (Min)
+Model fingerprint: 0xb38a46e1
+Model has 2378 linear objective coefficients and an objective constant of 1.1654481435763357e-02
+Variable types: 6814 continuous, 52162 integer (52162 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [8e-21, 1e-05]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+MIP start from previous solve produced solution with objective -0.0112068 (0.02s)
+MIP start from previous solve produced solution with objective -0.0112341 (0.03s)
+Loaded MIP start from previous solve with objective -0.0112341
+
+Presolve removed 8958 rows and 2 columns
+Presolve time: 0.37s
+Presolved: 42638 rows, 58974 columns, 292967 nonzeros
+Variable types: 6812 continuous, 52162 integer (52162 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   35919    6.2294892e+00   6.881875e+03   0.000000e+00      5s
+   55891   -1.4624344e-02   0.000000e+00   4.664347e+00     10s
+   63349   -1.5434276e-02   0.000000e+00   0.000000e+00     12s
+   63349   -1.5434276e-02   0.000000e+00   0.000000e+00     12s
+
+Root relaxation: objective -1.543428e-02, 63349 iterations, 11.60 seconds (27.55 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.01543    0  116   -0.01123   -0.01543  37.4%     -   13s
+H    0     0                      -0.0153657   -0.01543  0.45%     -   13s
+H    0     0                      -0.0153716   -0.01543  0.41%     -   13s
+     0     0   -0.01541    0  158   -0.01537   -0.01541  0.24%     -   14s
+     0     0   -0.01540    0   42   -0.01537   -0.01540  0.17%     -   16s
+H    0     0                      -0.0153818   -0.01540  0.10%     -   16s
+H    0     0                      -0.0153824   -0.01540  0.10%     -   16s
+     0     0   -0.01540    0   51   -0.01538   -0.01540  0.10%     -   16s
+     0     0   -0.01540    0   46   -0.01538   -0.01540  0.10%     -   16s
+*    0     0               0      -0.0153974   -0.01540  0.00%     -   17s
+
+Cutting planes:
+  Implied bound: 4
+  MIR: 1
+  Flow cover: 2
+  Relax-and-lift: 4
+
+Explored 1 nodes (115049 simplex iterations) in 17.02 seconds (38.54 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 4: -0.0153974 -0.0153824 -0.0153716 -0.0112341 
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective -1.539738470021e-02, best bound -1.539738470021e-02, gap 0.0000%
+
+User-callback calls 1206, time in user-callback 0.01 sec

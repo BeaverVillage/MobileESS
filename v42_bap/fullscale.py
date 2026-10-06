@@ -19,7 +19,7 @@ from v42_dw_root.partition import axes
 from v42_dw_root.models import Block,hash_column
 from v42_dw_resume.audit import Block as CheckedBlock,prototypes,corrected_rows,pure_binary_equalities
 from v42_m_stage_root.dual_authority import capture
-from v42_m_stage_root.conservative_authority import numerical_zero_sign,free_rc_consistency
+from v42_m_stage_root.conservative_authority import numerical_zero_sign,free_rc_consistency,primal_rmp_gate,eligible_native_pricing_bound
 from v42_dw_bound.certificate import global_dual,corrected
 from v42_disjunctive.certificate import down
 from revalidate_rmp43 import canonical_rebuild
@@ -143,6 +143,8 @@ class FullScaleEarlyBAP:
                     ix=np.flatnonzero(a);column=gp.Column(a[ix].tolist()+[1.],[self.constraints[i] for i in ix]+[self.constraints[len(self.grows)+m]])
                     self.basevars.append(self.model.addVar(lb=0.,obj=c,name=f'lambda[{b.unit},new{len(self.new)-1}]',column=column));self.model.update()
                     record['added_column']=key
+        bound=eligible_native_pricing_bound(model.Status,bound if bound is not None else np.nan,bool(model.SolCount),record['candidate_valid'])
+        record['bound']=bound
         self.prices.append(record);write('PRICING_LEDGER.json',self.prices)
         return bound
     def node_solve(self,node,registry):
@@ -159,9 +161,9 @@ class FullScaleEarlyBAP:
         x=np.asarray(self.model.getAttr('X'));p,z=self.projection(x)
         # Original affine/physical thresholds, no node infeasibility claim.
         matrix=self.model.getA().tocsr();rhs=np.asarray(self.model.getAttr('RHS'));sense=np.asarray(self.model.getAttr('Sense'))
-        r=matrix@x-rhs;vio=np.where(sense=='=',abs(r),np.where(sense=='<',np.maximum(r,0),np.maximum(-r,0)))
-        if np.max(vio,initial=0)>1e-6:return NodeResult('PRIMAL_AUDIT_INCONCLUSIVE',keys)
         file=OUT/f'NODE_{node.node_id:04d}_BEFORE_GATE.npz';capture(self.model,file)
+        primal=primal_rmp_gate(matrix,x,rhs,sense,np.asarray(self.model.getAttr('LB')),active_upper)
+        if not primal['PASS']:return NodeResult('PRIMAL_AUDIT_INCONCLUSIVE',keys)
         pi,trace=numerical_zero_sign(np.asarray(self.model.getAttr('Pi')),sense)
         rc=np.asarray(self.model.getAttr('Obj'))-matrix.T@pi
         try:free_rc_consistency(rc,np.asarray(self.model.getAttr('LB')),np.asarray(self.model.getAttr('UB')))

@@ -1,0 +1,87 @@
+
+Gurobi 13.0.2 (win64) logging started Tue Oct  6 14:06:36 2026
+
+Set parameter LogFile to value "C:\v42_m1_dual_early_bap_20261006\docs\v42_m1_conservative_early_bap_20261006\node1_price2.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  20
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 51596 rows, 58976 columns and 315361 nonzeros (Min)
+Model fingerprint: 0x01b0af12
+Model has 2592 linear objective coefficients and an objective constant of 1.1840865834251096e-02
+Variable types: 6814 continuous, 52162 integer (52162 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [2e-11, 1e-05]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+Presolve removed 8958 rows and 2 columns
+Presolve time: 0.37s
+Presolved: 42638 rows, 58974 columns, 292967 nonzeros
+Variable types: 6812 continuous, 52162 integer (52162 binary)
+Found heuristic solution: objective 0.0038414
+Found heuristic solution: objective 0.0027353
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   45211   -8.9165939e-03   9.414806e+02   0.000000e+00      5s
+   50991   -1.1045749e-02   0.000000e+00   0.000000e+00      6s
+   50991   -1.1045749e-02   0.000000e+00   0.000000e+00      6s
+
+Root relaxation: objective -1.104575e-02, 50991 iterations, 5.50 seconds (11.95 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.01105    0  181    0.00274   -0.01105   504%     -    6s
+H    0     0                      -0.0091915   -0.01105  20.2%     -    6s
+H    0     0                      -0.0091919   -0.01105  20.2%     -    6s
+H    0     0                      -0.0094767   -0.01105  16.6%     -    7s
+     0     0   -0.01079    0  161   -0.00948   -0.01079  13.9%     -    8s
+H    0     0                      -0.0094899   -0.01079  13.7%     -    8s
+H    0     0                      -0.0095024   -0.01079  13.6%     -    8s
+     0     0   -0.01079    0  161   -0.00950   -0.01079  13.6%     -    9s
+     0     0   -0.01071    0  164   -0.00950   -0.01071  12.7%     -   10s
+     0     0   -0.01071    0  191   -0.00950   -0.01071  12.7%     -   16s
+H    0     0                      -0.0095238   -0.01071  12.4%     -   17s
+     0     0   -0.01071    0  199   -0.00952   -0.01071  12.4%     -   18s
+     0     0          -    0        -0.00952   -0.01071  12.4%     -   20s
+
+Cutting planes:
+  Gomory: 2
+  MIR: 1
+  Flow cover: 3
+  RLT: 1
+
+Explored 1 nodes (111694 simplex iterations) in 20.01 seconds (40.22 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 7: -0.00952379 -0.00950241 -0.00948993 ... 0.00384145
+
+Time limit reached
+Best objective -9.523792982888e-03, best bound -1.070699153919e-02, gap 12.4236%
+
+User-callback calls 2255, time in user-callback 0.01 sec
+Set parameter MIPGap to value 0
+Set parameter MIPGapAbs to value 0
+Set parameter Threads to value 1
+Set parameter FeasibilityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter Seed to value 20260929
+Set parameter LogToConsole to value 0
+Set parameter TimeLimit to value 20

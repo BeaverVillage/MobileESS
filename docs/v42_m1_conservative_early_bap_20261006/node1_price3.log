@@ -1,0 +1,76 @@
+
+Gurobi 13.0.2 (win64) logging started Tue Oct  6 14:06:58 2026
+
+Set parameter LogFile to value "C:\v42_m1_dual_early_bap_20261006\docs\v42_m1_conservative_early_bap_20261006\node1_price3.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  20
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 51481 rows, 58841 columns and 314646 nonzeros (Min)
+Model fingerprint: 0xda79b10a
+Model has 2592 linear objective coefficients and an objective constant of 1.1281643125393927e-02
+Variable types: 6799 continuous, 52042 integer (52042 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [2e-11, 1e-05]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+Presolve removed 8938 rows and 2 columns
+Presolve time: 0.37s
+Presolved: 42543 rows, 58839 columns, 292302 nonzeros
+Variable types: 6797 continuous, 52042 integer (52042 binary)
+Found heuristic solution: objective 0.0032949
+Found heuristic solution: objective 0.0021720
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   43209   -6.3805815e-03   0.000000e+00   3.656962e+00      5s
+   58900   -1.1604646e-02   0.000000e+00   0.000000e+00      9s
+   58900   -1.1604646e-02   0.000000e+00   0.000000e+00      9s
+
+Root relaxation: objective -1.160465e-02, 58900 iterations, 7.88 seconds (18.35 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.01160    0  200    0.00217   -0.01160   634%     -    9s
+H    0     0                      -0.0100963   -0.01160  14.9%     -   10s
+     0     0   -0.01148    0  221   -0.01010   -0.01148  13.7%     -   11s
+     0     0   -0.01147    0  212   -0.01010   -0.01147  13.6%     -   11s
+     0     0   -0.01096    0  218   -0.01010   -0.01096  8.51%     -   12s
+     0     0   -0.01096    0  218   -0.01010   -0.01096  8.51%     -   12s
+     0     0   -0.01095    0  224   -0.01010   -0.01095  8.50%     -   12s
+     0     0   -0.01095    0  793   -0.01010   -0.01095  8.50%     -   20s
+
+Explored 1 nodes (116323 simplex iterations) in 20.01 seconds (43.21 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 3: -0.0100963 0.00217195 0.00329487 
+
+Time limit reached
+Best objective -1.009634641807e-02, best bound -1.095496086317e-02, gap 8.5042%
+
+User-callback calls 1679, time in user-callback 0.02 sec
+Set parameter MIPGap to value 0
+Set parameter MIPGapAbs to value 0
+Set parameter Threads to value 1
+Set parameter FeasibilityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter Seed to value 20260929
+Set parameter LogToConsole to value 0
+Set parameter TimeLimit to value 20

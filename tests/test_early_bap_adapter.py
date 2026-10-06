@@ -2,7 +2,7 @@ from fractions import Fraction as F
 from types import SimpleNamespace
 import numpy as np
 from scipy import sparse
-from v42_bap.fullscale import FileRegistry
+from v42_bap.fullscale import FileRegistry,FullScaleEarlyBAP
 from v42_bap.state import BinaryProjection,BranchDecision
 from v42_dw_bound.certificate import global_dual,corrected
 
@@ -26,3 +26,16 @@ def test_native_negative_pricing_bound_is_paid_not_zeroed_and_rebuilt_exactly():
     lb,exact,beta,delta=corrected(value,alpha,bounds)
     assert exact==value+sum(delta,F(0)) and beta[0]<F(float(-.006)) and delta[0]<F(float(-.006))
     assert lb<.5-.006 and F(lb)<=exact
+
+def test_rejected_native_primal_still_has_pre_gate_snapshot(monkeypatch):
+    import v42_bap.fullscale as module
+    events=[]
+    attributes={'Obj':np.array([1.,0.]),'UB':np.array([np.inf,np.inf]),'LB':np.array([0.,0.]),
+                'X':np.array([0.,1.+5e-7]),'RHS':np.array([0.,1.]),'Sense':np.array(['=','='])}
+    model=SimpleNamespace(Status=2,ObjVal=1.,Params=SimpleNamespace(),getAttr=lambda k:attributes[k],getA=lambda:sparse.eye(2,format='csr'))
+    solver=FullScaleEarlyBAP.__new__(FullScaleEarlyBAP);solver.root_pending=False;solver.model=model
+    solver.update_columns=lambda n:events.append('columns');solver.optimize=lambda *a:events.append('optimize')
+    solver.projection=lambda x:(((.5,),),(0.,))
+    monkeypatch.setattr(module,'capture',lambda *a:events.append('durable_snapshot'))
+    result=solver.node_solve(SimpleNamespace(node_id=777,column_ids=('k',)),None)
+    assert result.status=='PRIMAL_AUDIT_INCONCLUSIVE' and events==['columns','optimize','durable_snapshot']
