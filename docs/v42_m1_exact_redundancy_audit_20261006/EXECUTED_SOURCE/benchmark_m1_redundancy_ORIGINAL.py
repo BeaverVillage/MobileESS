@@ -26,9 +26,7 @@ def parameters(m):
   if name.startswith('_'):continue
   try:
    info=m.getParamInfo(name)
-   if info is not None:
-    value=info[2]
-    result[name]=('Infinity' if value>0 else '-Infinity') if isinstance(value,float) and not math.isfinite(value) else value
+   if info is not None:result[name]=info[2]
   except (gp.GurobiError,AttributeError):pass
  assert all(k in result for k in ['Threads','Seed','MIPGap','Method','Presolve','Cuts','Heuristics','MIPFocus','FeasibilityTol','OptimalityTol','IntFeasTol'])
  return result
