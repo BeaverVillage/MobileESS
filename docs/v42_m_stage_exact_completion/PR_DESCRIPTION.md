@@ -1,0 +1,11 @@
+PR152의 1,604-column checkpoint에서 시작한 exact root continuation이 RMP43의 true-dual 부호 검증에서 중단됐다. 마지막 감사된 RMP42와 유효 컬럼 1,841개를 보존했고, **ROOT_CG_CONVERGED=false / M1_ALGORITHM_READY=false**로 종료했다. 예산 소진이나 알고리즘 완료로 보고하지 않는다.
+
+- PR154의 Hybrid LP-valued binary-label pricing을 네 MESS에서 같은 PR152 true dual 및 full original domain으로 점검했다. 모두 global certificate 검증에 실패해 `ORIGINAL_GUROBI_EXACT`를 유지했다. MESS01의 완료된 Gurobi solve는 replay하지 않았고, 사용자 중단 전후 active benchmark wall 합계는 209.892초다. Single continuous performance run 또는 20% 개선을 주장하지 않는다.
+- 신규 root grant는 역사적 2,122.716초와 분리된 1,800초다. 15 Discovery rounds / 15 native RMP calls(14 audited points) / 64 pricing calls에서 237개 컬럼을 추가했다. 신규 native union 사용량은 1,010.136초이며, 남은 예산을 자동 재사용하거나 추가 grant를 만들지 않았다. 마지막 RMP의 start/end interval이 종료 오류로 저장되지 않아 실제 측정된 durable journal debit 55.062초를 사용했고, 누락된 interval을 만들지 않았다.
+- 최종 audited restricted-LP primal upper는 0.5729695797088222, certified LB는 0.5687115725336208이다. Exact root LP objective는 미확정이며, materiality `PROVEN_NONMATERIAL`이 root 수렴을 대체하지 않는다. 전체 1,841개 컬럼, zero-extended 마지막 유효 primal point 및 원본 행렬 감사가 PASS다. 마지막 valid same-dual pricing certificate의 corrected bound는 독립 CSC/Fraction 계산으로 재검증했다.
+- Native `OPTIMAL`이지만 audited point/dual이 없는 RMP가 이전 유효 점을 덮어쓰지 않도록 closeout/checkpoint selection을 보완했다. Native 실행에 사용된 소스 snapshot을 보존했고, solve/pricing/certification 및 과학적 감사 메서드가 변경되지 않았음을 AST/SHA로 검증했다. 후속 수정 후 optimizer 재실행은 없다. Exact dual sign gate와 수렴 수치 권한은 완화하지 않았다.
+- B&P, P2, final M1 freeze, fresh M1/M2 canary, A2/current M2 authority assessment는 `NOT_RUN_PREREQUISITE`다. May B2/B3/L1–L4 campaign을 실행하지 않았다. Constructor build-only 시간은 복원할 수 없어 미확정으로 표시했고, 첫 optimize 이전 준비/복원/감사 wall은 telemetry에서 별도 측정했다.
+
+검증: 초기 회귀 83개 PASS, 과거 PR143→PR144 전용 branch-diff fixture 1개 제외. 후속 control 검증 3개 PASS(기존 2개 재검증 및 신규 rejected-dual regression 1개). Compilation, 전체 풀/원본 primal 감사, independent bound 계산, PR152 byte preservation 및 manifest readback PASS. 모든 native 모델 Threads=1, pricing worker 최대 4개. 최저 가용 RAM 약 4.23 GiB, 최고 commit 52.90%; OOM/solver/license failure 및 다른 native solve overlap 없음. 순시 paging spike는 기록했으며 지속적 catastrophic paging guard는 발동하지 않았다.
+
+상세 26항목 보고서 및 필수 실행 원칙: `docs/v42_m_stage_exact_completion/FINAL_REVIEW_KO.md`. 최종 중단 사유: **EXACT_RMP_DUAL_SIGN_REJECTED**. 최종 stop state: **M1_ROOT_NOT_CONVERGED**.

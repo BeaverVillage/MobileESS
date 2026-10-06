@@ -1,0 +1,23 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+HYBRID_DECISION False 46.04798740000115 None
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\v42_m_stage_exact_completion\v42_m_stage\benchmark.py", line 101, in <module>
+    if __name__=='__main__':run()
+                            ^^^^^
+  File "C:\v42_m_stage_exact_completion\v42_m_stage\benchmark.py", line 63, in run
+    hybrid,x=solve(b.A,attrs,seconds=60.,validator=lambda v:b.validate(v,True)['PASS'] and
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\v42_m_stage_exact_completion\v42_m1_accel_vnext\labels.py", line 58, in solve
+    bound,proof=global_dual(A,d,np.asarray(m.getAttr('Pi')),lo,hi)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\v42_m_stage_exact_completion\v42_dw_bound\certificate.py", line 8, in global_dual
+    assert np.all(pi[d['sense']=='<']<=0) and np.all(pi[d['sense']=='>']>=0),'RAW_PI_SIGN_INVALID'
+AssertionError: RAW_PI_SIGN_INVALID
