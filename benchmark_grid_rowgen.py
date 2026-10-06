@@ -54,6 +54,7 @@ class Comparison:
         self.commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
         self.trajectory=[];self.calls=[];self.results=[]
         write('MICROBENCHMARK_INPUT_FREEZE.json',dict(source_commit=self.commit,scientific_identity=self.identity,
+            source_worktree_SHA={p:sha(ROOT/p) for p in ('benchmark_grid_rowgen.py','run_grid_comparison.py','v42_rowgen/core.py','v42_rowgen/native.py')},
             signature=signature(self.B,self.e),start_point_SHA=sha(source),start_validation=seedcheck,
             inherited_floor=self.initial_lb,initial_UB=self.initial_ub,initial_gap=gap(self.initial_ub,self.initial_lb),
             Start_only=True,all_original_variables_unfixed=True,fixture_optimization_not_fullscale=True,
