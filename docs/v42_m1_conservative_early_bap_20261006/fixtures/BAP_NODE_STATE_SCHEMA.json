@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "node_id",
+    "parent_id",
+    "depth",
+    "decisions",
+    "inherited_column_ids",
+    "inactive_column_ids",
+    "column_ids",
+    "lower_bound",
+    "rmp_objective",
+    "pricing_status",
+    "incumbent_association",
+    "fathom_reason",
+    "creation_order",
+    "checkpoint_sha",
+    "bound_certificate",
+    "terminal_certificate"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "node_id": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "parent_id": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "depth": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "variable",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "variable": {
+            "type": "object",
+            "required": [
+              "family",
+              "mess",
+              "time",
+              "site_or_arc",
+              "terms"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "family": {
+                "enum": [
+                  "location",
+                  "movement",
+                  "original_binary"
+                ]
+              },
+              "mess": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "time": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "site_or_arc": {
+                "type": "string"
+              },
+              "terms": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              }
+            }
+          },
+          "value": {
+            "type": "integer",
+            "enum": [
+              0,
+              1
+            ]
+          }
+        }
+      }
+    },
+    "inherited_column_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "inactive_column_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "column_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "lower_bound": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "rmp_objective": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "pricing_status": {
+      "type": "string"
+    },
+    "incumbent_association": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "fathom_reason": {
+      "enum": [
+        null,
+        "BOUND_DOMINATED",
+        "EXPLICIT_FIXTURE_TERMINATION",
+        "INTEGER_PROJECTED_SOLUTION",
+        "NODE_INFEASIBLE",
+        "PROVEN_NO_IMPROVING_PRICING_AND_INTEGRAL"
+      ]
+    },
+    "creation_order": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "checkpoint_sha": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "bound_certificate": {},
+    "terminal_certificate": {}
+  }
+}

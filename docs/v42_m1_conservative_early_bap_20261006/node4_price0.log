@@ -1,0 +1,66 @@
+
+Gurobi 13.0.2 (win64) logging started Tue Oct  6 14:12:32 2026
+
+Set parameter LogFile to value "C:\v42_m1_dual_early_bap_20261006\docs\v42_m1_conservative_early_bap_20261006\node4_price0.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  20
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 51459 rows, 58814 columns and 314527 nonzeros (Min)
+Model fingerprint: 0x02fb8b9e
+Model has 2378 linear objective coefficients and an objective constant of 1.0573901135893463e-02
+Variable types: 6796 continuous, 52018 integer (52018 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [8e-21, 1e-05]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+MIP start from previous solve produced solution with objective -0.0125592 (0.03s)
+MIP start from previous solve produced solution with objective -0.0125893 (0.03s)
+Loaded MIP start from previous solve with objective -0.0125893
+
+Presolve removed 8972 rows and 54 columns
+Presolve time: 0.38s
+Presolved: 42487 rows, 58760 columns, 291909 nonzeros
+Variable types: 6788 continuous, 51972 integer (51972 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   35122    6.3604500e+00   2.576579e+03   0.000000e+00      5s
+   51948   -1.2667215e-02   0.000000e+00   6.799244e+01     10s
+   64322   -1.6514857e-02   0.000000e+00   0.000000e+00     15s
+   64322   -1.6514857e-02   0.000000e+00   0.000000e+00     15s
+
+Root relaxation: objective -1.651486e-02, 64322 iterations, 14.11 seconds (35.82 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.01651    0  122   -0.01259   -0.01651  31.2%     -   15s
+H    0     0                      -0.0164522   -0.01651  0.38%     -   15s
+     0     0   -0.01648    0   86   -0.01645   -0.01648  0.20%     -   16s
+*    0     0               0      -0.0164780   -0.01648  0.00%     -   18s
+
+Explored 1 nodes (106156 simplex iterations) in 18.16 seconds (43.94 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 3: -0.016478 -0.0164522 -0.0125893 
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective -1.647796500008e-02, best bound -1.647796500008e-02, gap 0.0000%
+
+User-callback calls 1259, time in user-callback 0.01 sec

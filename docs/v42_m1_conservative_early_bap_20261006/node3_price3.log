@@ -1,0 +1,91 @@
+
+Gurobi 13.0.2 (win64) logging started Tue Oct  6 14:11:20 2026
+
+Set parameter LogFile to value "C:\v42_m1_dual_early_bap_20261006\docs\v42_m1_conservative_early_bap_20261006\node3_price3.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  20
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 51482 rows, 58841 columns and 314647 nonzeros (Min)
+Model fingerprint: 0x00a7492a
+Model has 2519 linear objective coefficients and an objective constant of 1.1192819168438960e-02
+Variable types: 6799 continuous, 52042 integer (52042 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [2e-20, 9e-06]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+MIP start from previous solve produced solution with objective -0.00528852 (0.02s)
+MIP start from previous solve produced solution with objective -0.00532388 (0.03s)
+Loaded MIP start from previous solve with objective -0.00532388
+
+Presolve removed 9155 rows and 27 columns
+Presolve time: 0.38s
+Presolved: 42327 rows, 58814 columns, 291414 nonzeros
+Variable types: 6773 continuous, 52041 integer (52041 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   41947    5.4641320e+00   5.018578e+01   0.000000e+00      5s
+   59373   -8.5810467e-03   0.000000e+00   6.254195e+00     10s
+   70305   -1.0031224e-02   0.000000e+00   0.000000e+00     13s
+   70305   -1.0031224e-02   0.000000e+00   0.000000e+00     13s
+
+Root relaxation: objective -1.003122e-02, 70305 iterations, 12.80 seconds (31.68 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.01003    0  151   -0.00532   -0.01003  88.4%     -   14s
+H    0     0                      -0.0074938   -0.01003  33.9%     -   14s
+H    0     0                      -0.0076219   -0.01003  31.6%     -   14s
+H    0     0                      -0.0077015   -0.01003  30.3%     -   15s
+H    0     0                      -0.0080267   -0.01003  25.0%     -   15s
+     0     0   -0.01002    0  134   -0.00803   -0.01002  24.9%     -   16s
+     0     0   -0.01002    0  134   -0.00803   -0.01002  24.9%     -   17s
+     0     0   -0.01002    0  136   -0.00803   -0.01002  24.9%     -   17s
+     0     0   -0.01002    0  136   -0.00803   -0.01002  24.9%     -   17s
+     0     0   -0.01002    0  140   -0.00803   -0.01002  24.9%     -   17s
+     0     0   -0.01002    0  140   -0.00803   -0.01002  24.9%     -   17s
+     0     0   -0.01002    0  129   -0.00803   -0.01002  24.9%     -   18s
+     0     0   -0.01002    0  129   -0.00803   -0.01002  24.9%     -   19s
+     0     0   -0.01002    0  135   -0.00803   -0.01002  24.9%     -   19s
+     0     0   -0.01002    0  142   -0.00803   -0.01002  24.9%     -   19s
+     0     0   -0.01002    0  143   -0.00803   -0.01002  24.9%     -   20s
+
+Cutting planes:
+  MIR: 12
+  Flow cover: 8
+
+Explored 1 nodes (92185 simplex iterations) in 20.01 seconds (43.26 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 5: -0.00802667 -0.00770147 -0.00762193 ... -0.00532388
+
+Solve interrupted
+Best objective -8.026665723219e-03, best bound -1.002240570076e-02, gap 24.8639%
+
+User-callback calls 2481, time in user-callback 0.04 sec
+Set parameter MIPGap to value 0
+Set parameter MIPGapAbs to value 0
+Set parameter Threads to value 1
+Set parameter FeasibilityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter Seed to value 20260929
+Set parameter LogToConsole to value 0
+Set parameter TimeLimit to value 20

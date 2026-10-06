@@ -1,0 +1,94 @@
+
+Gurobi 13.0.2 (win64) logging started Tue Oct  6 14:08:05 2026
+
+Set parameter LogFile to value "C:\v42_m1_dual_early_bap_20261006\docs\v42_m1_conservative_early_bap_20261006\node2_price0.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  20
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 51459 rows, 58814 columns and 314527 nonzeros (Min)
+Model fingerprint: 0xe92365f8
+Model has 2736 linear objective coefficients and an objective constant of 1.0049330946409599e-02
+Variable types: 6796 continuous, 52018 integer (52018 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [2e-12, 1e-05]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+MIP start from previous solve did not produce a new incumbent solution
+MIP start from previous solve violates constraint EARLY_BAP_branch[0] by 1.000000000
+
+Presolve removed 8934 rows and 2 columns
+Presolve time: 0.36s
+Presolved: 42525 rows, 58812 columns, 292169 nonzeros
+Variable types: 6794 continuous, 52018 integer (52018 binary)
+Found heuristic solution: objective 0.0039987
+Found heuristic solution: objective 0.0039619
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   39509   -1.3673363e-02   0.000000e+00   1.208393e-04      5s
+   40054   -1.3673580e-02   0.000000e+00   0.000000e+00      5s
+   40054   -1.3673580e-02   0.000000e+00   0.000000e+00      5s
+
+Root relaxation: objective -1.367358e-02, 40054 iterations, 4.45 seconds (10.13 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.01367    0  127    0.00396   -0.01367   445%     -    6s
+H    0     0                      -0.0128032   -0.01367  6.80%     -    6s
+H    0     0                      -0.0128191   -0.01367  6.67%     -    6s
+H    0     0                      -0.0128989   -0.01367  6.01%     -    6s
+H    0     0                      -0.0129262   -0.01367  5.78%     -    6s
+H    0     0                      -0.0129301   -0.01367  5.75%     -    6s
+     0     0   -0.01365    0  135   -0.01293   -0.01365  5.53%     -    7s
+     0     0   -0.01365    0   75   -0.01293   -0.01365  5.53%     -   11s
+     0     0   -0.01353    0   94   -0.01293   -0.01353  4.64%     -   12s
+H    0     0                      -0.0129303   -0.01352  4.60%     -   13s
+H    0     0                      -0.0129362   -0.01352  4.55%     -   13s
+     0     0   -0.01352    0   94   -0.01294   -0.01352  4.55%     -   13s
+     0     0   -0.01341    0  110   -0.01294   -0.01341  3.67%     -   14s
+     0     0   -0.01341    0  110   -0.01294   -0.01341  3.65%     -   14s
+     0     0   -0.01341    0   88   -0.01294   -0.01341  3.65%     -   14s
+     0     0   -0.01341    0   88   -0.01294   -0.01341  3.64%     -   15s
+     0     0   -0.01341    0   88   -0.01294   -0.01341  3.64%     -   15s
+     0     0   -0.01340    0   88   -0.01294   -0.01340  3.60%     -   15s
+     0     0   -0.01340    0   88   -0.01294   -0.01340  3.60%     -   15s
+     0     0   -0.01340    0   88   -0.01294   -0.01340  3.60%     -   15s
+     0     0   -0.01340    0   80   -0.01294   -0.01340  3.60%     -   16s
+H    0     0                      -0.0129452   -0.01340  3.53%     -   16s
+     0     0          -    0        -0.01295   -0.01340  3.51%     -   20s
+
+Explored 1 nodes (136298 simplex iterations) in 20.01 seconds (39.22 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 8: -0.0129452 -0.0129362 -0.0129303 ... 0.00399866
+
+Time limit reached
+Best objective -1.294517700110e-02, best bound -1.340019976785e-02, gap 3.5150%
+
+User-callback calls 2687, time in user-callback 0.01 sec
+Set parameter MIPGap to value 0
+Set parameter MIPGapAbs to value 0
+Set parameter Threads to value 1
+Set parameter FeasibilityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter Seed to value 20260929
+Set parameter LogToConsole to value 0
+Set parameter TimeLimit to value 20

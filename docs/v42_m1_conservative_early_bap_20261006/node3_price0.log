@@ -1,0 +1,95 @@
+
+Gurobi 13.0.2 (win64) logging started Tue Oct  6 14:10:19 2026
+
+Set parameter LogFile to value "C:\v42_m1_dual_early_bap_20261006\docs\v42_m1_conservative_early_bap_20261006\node3_price0.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  20
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 51459 rows, 58814 columns and 314527 nonzeros (Min)
+Model fingerprint: 0x9dcf110f
+Model has 2519 linear objective coefficients and an objective constant of 1.1110395038480748e-02
+Variable types: 6796 continuous, 52018 integer (52018 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [2e-20, 9e-06]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+MIP start from previous solve did not produce a new incumbent solution
+MIP start from previous solve violates constraint EARLY_BAP_branch[0] by 1.000000000
+
+Presolve removed 8972 rows and 54 columns
+Presolve time: 0.37s
+Presolved: 42487 rows, 58760 columns, 291909 nonzeros
+Variable types: 6788 continuous, 51972 integer (51972 binary)
+Found heuristic solution: objective 0.0050177
+Found heuristic solution: objective 0.0027044
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   30743    2.8695592e+00   3.001922e+04   0.000000e+00      5s
+   57789   -1.0081079e-02   0.000000e+00   9.424248e-01     10s
+   60178   -1.0113397e-02   0.000000e+00   0.000000e+00     11s
+   60178   -1.0113397e-02   0.000000e+00   0.000000e+00     11s
+
+Root relaxation: objective -1.011340e-02, 60178 iterations, 10.15 seconds (22.75 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.01011    0  206    0.00270   -0.01011   474%     -   12s
+H    0     0                      -0.0059477   -0.01011  70.0%     -   12s
+H    0     0                      -0.0076992   -0.01011  31.4%     -   12s
+H    0     0                      -0.0077106   -0.01011  31.2%     -   12s
+H    0     0                      -0.0081086   -0.01011  24.7%     -   12s
+     0     0   -0.01011    0  215   -0.00811   -0.01011  24.6%     -   13s
+     0     0   -0.01010    0  215   -0.00811   -0.01010  24.6%     -   14s
+     0     0   -0.01010    0  221   -0.00811   -0.01010  24.6%     -   14s
+     0     0   -0.00959    0  234   -0.00811   -0.00959  18.3%     -   15s
+     0     0   -0.00959    0  261   -0.00811   -0.00959  18.2%     -   15s
+H    0     0                      -0.0081091   -0.00959  18.2%     -   16s
+     0     0   -0.00959    0  261   -0.00811   -0.00959  18.2%     -   16s
+     0     0   -0.00959    0  293   -0.00811   -0.00959  18.2%     -   16s
+     0     0   -0.00959    0  294   -0.00811   -0.00959  18.2%     -   17s
+     0     0   -0.00959    0  279   -0.00811   -0.00959  18.2%     -   17s
+     0     0   -0.00959    0  279   -0.00811   -0.00959  18.2%     -   17s
+     0     0   -0.00959    0  276   -0.00811   -0.00959  18.2%     -   18s
+     0     0   -0.00959    0  195   -0.00811   -0.00959  18.2%     -   19s
+
+Cutting planes:
+  Gomory: 1
+  MIR: 4
+  Flow cover: 4
+
+Explored 1 nodes (92581 simplex iterations) in 20.01 seconds (38.62 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 6: -0.00810909 -0.00810865 -0.00771061 ... 0.00501767
+
+Solve interrupted
+Best objective -8.109089853178e-03, best bound -9.585554527503e-03, gap 18.2075%
+
+User-callback calls 2928, time in user-callback 0.03 sec
+Set parameter MIPGap to value 0
+Set parameter MIPGapAbs to value 0
+Set parameter Threads to value 1
+Set parameter FeasibilityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter Seed to value 20260929
+Set parameter LogToConsole to value 0
+Set parameter TimeLimit to value 20
