@@ -38,6 +38,11 @@ def test_bound_dual_terms_are_required(tmp_path):
     try:
         p=tmp_path/'bounds.npz';capture(m,p);r=validate(p)
         assert r['PASS'] and r['dual_objective_including_bound_terms']==-2.
+        meta=json.loads(p.with_suffix('.json').read_text())
+        assert meta['primal_objective_before_gate']==-2. and meta['dual_objective_before_gate']==-2.
+        assert meta['bound_dual_sum_before_gate']==-2.
+        with np.load(p) as z:
+            assert z['bound_upper_dual'].tolist()==[-1.] and z['bound_dual_terms'].tolist()==[-2.]
     finally:m.dispose()
 
 def mutate(p,key,value,reseal=False):

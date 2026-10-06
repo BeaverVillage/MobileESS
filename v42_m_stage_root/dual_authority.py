@@ -11,7 +11,8 @@ from scipy import sparse
 EPS=1e-8
 ROW_EPS=1e-6
 ARRAY_FIELDS=('indptr','indices','data','shape','rhs','sense','lower','upper',
-              'objective','constant','row_names','names','point','pi','rc')
+              'objective','constant','row_names','names','point','pi','rc',
+              'row_multiplier','bound_lower_dual','bound_upper_dual','bound_dual_terms')
 
 def array_sha(value):
     a=np.ascontiguousarray(value)
@@ -22,6 +23,10 @@ def canonical_dual(raw_pi,row_multiplier):
     s=np.asarray(row_multiplier,dtype=float)
     if not np.isfinite(s).all() or np.any(s==0):raise ValueError('INVALID_ROW_TRANSFORMATION')
     return np.asarray(raw_pi,dtype=float)*s
+
+def parameter_value(model,name):
+    value=model.getParamInfo(name)[2]
+    return value if not isinstance(value,float) or np.isfinite(value) else str(value)
 
 def capture(model,path):
     """Read one terminal representation; persist *before* any acceptance gate."""
@@ -36,6 +41,15 @@ def capture(model,path):
         objective=np.asarray(model.getAttr('Obj')),constant=np.array(model.ObjCon),
         row_names=np.asarray(model.getAttr('ConstrName')),names=np.asarray(model.getAttr('VarName')),
         point=np.asarray(model.getAttr('X')),pi=np.asarray(model.getAttr('Pi')),rc=np.asarray(model.getAttr('RC')))
+    values['row_multiplier']=np.ones(A.shape[0])
+    rc=values['rc'];selected=np.where(rc>=0,values['lower'],values['upper']);mask=rc!=0
+    available=bool(np.all(np.isfinite(selected[mask])) and np.all(abs(selected[mask])<1e90))
+    values['bound_lower_dual']=np.maximum(rc,0)
+    values['bound_upper_dual']=np.minimum(rc,0)
+    terms=np.zeros_like(rc);terms[mask]=rc[mask]*selected[mask]
+    values['bound_dual_terms']=terms
+    primal=float(values['objective']@values['point']+values['constant'])
+    dual=float(values['pi']@values['rhs']+values['constant']+terms.sum()) if available else None
     optional={}
     for attr in ('BarPi','BarX','VBasis','CBasis'):
         try:values['raw_'+attr]=np.asarray(model.getAttr(attr));optional[attr]='SAVED_NOT_USED'
@@ -43,10 +57,14 @@ def capture(model,path):
     identity={k:array_sha(values[k]) for k in ARRAY_FIELDS}
     meta=dict(origin=str(uuid.uuid4()),status=int(model.Status),model_sense=int(model.ModelSense),
         fingerprint=int(model.Fingerprint),native_objective=float(model.ObjVal),runtime=float(model.Runtime),
-        parameters={k:model.getParamInfo(k)[2] for k in ('Method','Crossover','Threads','OptimalityTol','FeasibilityTol','Seed')},
+        parameters={k:parameter_value(model,k) for k in ('Method','Crossover','Threads','OptimalityTol','FeasibilityTol','Seed','LPWarmStart','PreDual','BarConvTol','IntFeasTol','TimeLimit','LogToConsole')},
         terminal_pair='X/Pi/RC queried from the same terminal model; BarPi/BarX never substituted',
         row_convention='Master build transports original CSR/RHS/senses verbatim; added convexity is equality.',
-        original_to_native_row_multiplier=1,optional=optional,identity=identity)
+        original_to_native_row_multiplier=1,optional=optional,identity=identity,
+        row_axis_SHA=identity['row_names'],row_sense_SHA=identity['sense'],row_scaling_transform_SHA=identity['row_multiplier'],
+        primal_objective_before_gate=primal,dual_objective_before_gate=dual,
+        bound_dual_terms_available=available,bound_dual_sum_before_gate=float(terms.sum()) if available else None,
+        bound_dual_convention='minimization: lower dual=max(native RC,0), upper dual=min(native RC,0); supporting bound terms, no projection')
     with path.open('xb') as stream:np.savez_compressed(stream,**values)
     meta['snapshot_SHA']=hashlib.sha256(path.read_bytes()).hexdigest()
     path.with_suffix('.json').write_text(json.dumps(meta,indent=2,allow_nan=False),encoding='utf8')
@@ -75,8 +93,19 @@ def validate(path):
     strong=bool(support_available and difference<=EPS and abs(primal-meta['native_objective'])<=EPS)
     feasible=bool(vio.max(initial=0)<=ROW_EPS and bounds<=EPS)
     pair=bool(meta['status']==2 and meta['model_sense']==1 and meta['original_to_native_row_multiplier']==1
+        and np.all(v['row_multiplier']==1)
         and meta['terminal_pair']=='X/Pi/RC queried from the same terminal model; BarPi/BarX never substituted')
-    result=dict(PASS=bool(identity and finite and sign and error<=EPS and strong and feasible and pair),
+    terms=np.zeros_like(rc);terms[mask]=rc[mask]*selected[mask]
+    pregate=bool(np.array_equal(v['bound_lower_dual'],np.maximum(rc,0))
+        and np.array_equal(v['bound_upper_dual'],np.minimum(rc,0))
+        and np.array_equal(v['bound_dual_terms'],terms)
+        and meta['primal_objective_before_gate']==primal
+        and meta['dual_objective_before_gate']==(float(pi@v['rhs']+v['constant']+terms.sum()) if support_available else None)
+        and meta['row_axis_SHA']==array_sha(v['row_names'])
+        and meta['row_sense_SHA']==array_sha(v['sense'])
+        and meta['row_scaling_transform_SHA']==array_sha(v['row_multiplier']))
+    result=dict(PASS=bool(identity and finite and sign and error<=EPS and strong and feasible and pair and pregate),
+        required_pre_gate_evidence_PASS=pregate,
         same_axis_SHA_PASS=identity,same_terminal_representation_PASS=pair,finite=finite,strict_sense_sign_PASS=sign,
         first_bad_row=None if not len(bad) else dict(index=int(bad[0]),name=str(v['row_names'][bad[0]]),sense=str(sense[bad[0]]),Pi=float(pi[bad[0]])),
         max_existing_column_RC_error=error,existing_column_RC_PASS=error<=EPS,
