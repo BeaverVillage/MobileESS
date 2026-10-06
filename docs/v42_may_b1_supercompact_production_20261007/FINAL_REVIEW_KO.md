@@ -1,6 +1,6 @@
 # PR134 정확 압축 및 독립 May B1 실행
 
-압축 분류 **A_STAGE_SUPERCOMPACT_SELECTED**, 캠페인은 **MAY_B1_CAMPAIGN_RUNNING**이다. 아래 날짜 수치는 2026-10-06T18:38:54.745574+00:00의 스냅샷이다. 31일 완료나 repair queue 완료를 주장하지 않는다.
+압축 분류 **A_STAGE_SUPERCOMPACT_SELECTED**, 캠페인은 **MAY_B1_CAMPAIGN_RUNNING**이다. 아래 날짜 수치는 2026-10-06T18:47:17.155383+00:00의 스냅샷이다. 31일 완료나 repair queue 완료를 주장하지 않는다.
 
 PR134 accepted 기준은 `52ef855a59144a7c561df44b81dc2ad265babdbd`이며 1,499개 작업·96슬롯의 current accepted freeze를 원본 원시 해로 재구성했다. input SHA `f18b9dea2686b49de73b6d5d6ec7cc9e409c82e47b7f3bf7d29bdf5b1ba31170`, accepted DATA SHA `79263899f1040d8b13b5af29dc881c52e83ac543c96f90f8e63e9061b637aa74`, 원본 matrix SHA `eee234d2b56c733cb8f52a8585ac6f93314f85de7f986adc709f40a05df8bc47`. 세부 source/input/model 축과 SHA는 Phase-I PR134_BASE_IDENTITY.json에 있다. PR150/151은 fixed replay·monitor·실행 운영 참고로만 사용했다.
 
@@ -24,9 +24,9 @@ PR134 accepted 기준은 `52ef855a59144a7c561df44b81dc2ad265babdbd`이며 1,499�
 | 캠페인 항목 | 현재 |
 |---|---|
 | run | `B1_PR134_SC_202505_20261006T183422_4fb25507` |
-| PASS / timeout / FAIL | 0 / 0 / 0 |
-| pending | 31 |
-| 현재 날짜/단계 | 2025-05-01 / A1 |
+| PASS / timeout / FAIL | 1 / 0 / 0 |
+| pending | 30 |
+| 현재 날짜/단계 | 2025-05-02 / A1 |
 | proven infeasible | 0; 단일 solver status를 증명으로 사용하지 않음 |
 | 구현·수치·Fresh 실패 | 최종 날짜 상태 및 repair CSV에 개별 분류; 아직 월 전체 결과 없음 |
 | 해결/미해결 | 현재 오류 ledger 참고; 최종 repair 감사 pending |
@@ -41,3 +41,9 @@ coordinator·worker·monitor의 PID/생성시각/명령과 `svchost→services�
 각 날짜는 네 원래 목적에 합계3600 native초를 공유한다. 타임아웃·수치·Fresh·검증 실패는 원본 증거와 repair queue를 보존하고 다음 독립 날짜로 이동한다. 인프라 재시도는 최대2회이며 중단 A1은 partial resume 없이0초로 시작한다. 모든 날짜 시도 후 safe 인프라 복구 이외의 미해결 과학·수치 결함은 정확 진단이 필요하다. 예산 확대·과학적 parameter 변경·결과 수정으로 PASS를 만들지 않는다. OS finalizer는 31일 실제 결과를 해당 docs namespace에 후속 commit/push하고 PASS/timeout/unresolved를 분리한다.
 
 Draft PR [#163](https://github.com/BeaverVillage/MobileESS/pull/163). 최종 commit은 이 보고서와 SHA manifest를 담은 evidence commit이며, 별도 frozen production SHA를 위에 명시했다. 최종 월 감사는 아직 생성되지 않았다.
+
+현재 완료 날짜의 5개 causal receipt·모든 payload SHA를 다시 감사했다. INITIAL_COMPLETED_DATE_AUDIT.json에 원시 native UB/LB/gap/runtime과 Fresh 요약을 보존했다.
+
+2025-05-01: 전체5단계 PASS, native 합계 308.110초, Fresh 96/96, Actual 최대 선로 부하율 69.0820%, voltage/current/transformer current/kVA 위반 모두0. 이는 새 production 날짜의 실제 측정이며 paired fresh 원본 대비 속도 개선을 뜻하지 않는다.
+
+추가 immutable dependency pin audit PASS: 외부 참조·최상위 과학 모듈 339개 파일의 SHA를 확인했다. 초기 manifest를 별도 보존했고 code/model/input bytes, solver 설정, run/stage identity와 native clock/start는 바꾸지 않았다. DEPENDENCY_CLOSURE_AUDIT.json을 참고한다.
