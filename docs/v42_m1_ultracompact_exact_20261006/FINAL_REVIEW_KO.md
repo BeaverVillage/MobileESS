@@ -59,7 +59,7 @@ line thermal, PCS16, route-flow, grid-response family까지 family-level 구조�
 | 37 | Valid UB | C2 0.6694159238756877 / C3 0.6694159238756877 |
 | 38 | Valid gap | C2 0.15043610389449788 / C3 0.15043610397376117; MIPGap=.005 유지 |
 | 39 | Selected | True; C3A |
-| 40 | Exact commit / Draft PR | 0a27fb90dead2b944a72c31145f5a7bdc4dbb9ac / Draft PR 생성 예정; 실행 소스 커밋은 아래 기록 |
+| 40 | Exact commit / Draft PR | native 실행 소스 0a27fb90dead2b944a72c31145f5a7bdc4dbb9ac; 선택 증거 커밋 b2ff6f6f917cd48efbed8d928e9aa1177008d95b / https://github.com/BeaverVillage/MobileESS/pull/162 |
 
 ## 검증과 계산 범위
 
