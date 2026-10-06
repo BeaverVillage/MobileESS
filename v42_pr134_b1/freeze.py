@@ -28,7 +28,7 @@ Infrastructure retries are at most two, from a complete valid stage checkpoint. 
 Task Scheduler owns coordinator, monitor and hourly watchdog, with logon resume, PT0S duration and normal CPU/memory priority. The newest user instruction explicitly authorizes this OS hourly watchdog and supersedes the old Windows-repeat ban. No headless agent, algorithm retuning, root CG/B&P, M-stage, B2 or B3 is dispatched.
 
 All 31 independent dates are attempted before the repair queue is finalized. Proven safe infrastructure defects can be repaired with focused tests, scientific identity proof, a new implementation commit and affected-date compatibility review. Unproved scientific changes and silent deadline/capacity/Runtime/CC4/voltage/gap changes are prohibited. Timeouts retain the original budget and are not repeatedly retried. Terminal evidence distinguishes PASS, timeout, independently proven infeasible and unresolved defects. OS tasks publish the fixed evidence namespace and final commit without invoking an unattended coding agent.
-''',encoding='utf8')
+''',encoding='utf8',newline='\n')
     plan=[dict(day=r['day'],reuse=r['classification']=='REUSED',action='REUSE_COMPLETE' if r['classification']=='REUSED' else 'FRESH_A1_FROM_ZERO',native_budget=3600,Actual_reoptimization=0,PQ_repair=0) for r in read(root/'REUSE_IMPORT_PLAN.json')['days']]
     # A compatibility case must be imported before launch. This is a fail-closed
     # guard against accidentally recomputing a date already proved reusable.
@@ -59,7 +59,7 @@ Phase I 전수 압축·독립 verifier·원본 accepted witness 왕복 및 전�
 기존 32개 campaign checkpoint를 읽기 전용으로 감사했다. 완료 파일이 없는 경우 또는 정확 source/model/input/objective/validation 호환성을 입증하지 못한 경우는 재사용하지 않는다. 현재 증명된 전체 날짜 재사용은 0이다. 자세한 원인은 ALL_EXISTING_DATE_REUSE_CASES.json과 DATE_REUSE_AUDIT.csv에 있다.
 
 31개 날짜의 원본 R0·현재 frozen Runtime/CC4/C0/C1·grid authority를 동결했다. scientific source는 PR134이며 PR150/151 입력 재구성은 사용하지 않는다. production은 별도의 Scheduler 소유 실행으로 시작한 뒤 실제 PID/생성시각/명령과 서비스 소유 계통을 검증한다. 아직 월 완료를 주장하지 않는다. 각 날짜의 실패·timeout은 기록하고 다음 날짜로 이동한다.
-''',encoding='utf8')
+''',encoding='utf8',newline='\n')
     atomic(OUT/'SHA256_MANIFEST.json',dict(files=[record(p) for p in sorted(OUT.iterdir()) if p.is_file() and p.name!='SHA256_MANIFEST.json']))
 
 def freeze(root):

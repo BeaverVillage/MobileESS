@@ -51,7 +51,7 @@ def _publish(root,freeze,cp):
 true infeasibility는 단일 native status에서 주장하지 않는다. 실패와 원본 budget을 보존하며 Actual 재최적화·P/Q repair·메모리 guard·감속·parameter sweep은 모두 0/false이다.
 
 source {freeze['Git_SHA']}. 원본 출처별 Runtime은 FINAL_CAMPAIGN_RESULT.json에 있다. detached service 소유 계통을 기록했으며 앱 종료 실험을 수행했다고 주장하지 않는다.
-''',encoding='utf8')
+''',encoding='utf8',newline='\n')
     atomic(OUT/'SHA256_MANIFEST.json',dict(files=[record(p) for p in sorted(OUT.iterdir()) if p.is_file() and p.name!='SHA256_MANIFEST.json']))
     if not (root/'FINAL_PUBLICATION.json').exists():
         # User explicitly requested final evidence commit/publication. No code

@@ -51,7 +51,7 @@ PASS {totals['PASS']}/31 · TIMEOUT {totals['TIMEOUT']}/31 · FAIL {totals['FAIL
 조치: {actions}
 
 메모리·CPU 정보는 관찰용이며 중단·감속·solver 설정 변경에 사용하지 않는다.
-''',encoding='utf8')
+''',encoding='utf8',newline='\n')
     return value
 
 if __name__=='__main__':run(sys.argv[1])
