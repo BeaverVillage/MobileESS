@@ -13,10 +13,12 @@ def run():
     xml=ET.parse(OUT/'TEST_RESULTS.xml');suites=list(xml.getroot().iter('testsuite'))
     test_result=dict(tests=sum(int(s.get('tests',0)) for s in suites),failures=sum(int(s.get('failures',0)) for s in suites),errors=sum(int(s.get('errors',0)) for s in suites),skipped=sum(int(s.get('skipped',0)) for s in suites))
     assert test_result['failures']==test_result['errors']==0
-    native=[]
-    for p in sorted((OUT/'toy_snapshots').rglob('*.json')):
-        m=read(p)
-        if 'origin' in m and 'snapshot_SHA' in m:native.append(dict(file=str(p.relative_to(OUT)),origin=m['origin'],Runtime=m['runtime'],status=m['status']))
+    native=[];origins=set()
+    for folder in ('initial_guard_snapshots','toy_snapshots'):
+        for p in sorted((OUT/folder).rglob('*.json')):
+            m=read(p)
+            if 'origin' in m and 'snapshot_SHA' in m and m['origin'] not in origins:
+                origins.add(m['origin']);native.append(dict(file=str(p.relative_to(OUT)),origin=m['origin'],Runtime=m['runtime'],status=m['status']))
     write('TOY_NATIVE_RUNTIME_LEDGER.json',dict(calls=len(native),native_Runtime_sum=sum(x['Runtime'] for x in native),scope='Only tiny Gurobi LP fixtures; historical certificate tests also include tiny SciPy LP enumeration, outside M1 grant and not Gurobi Model.Runtime.',calls_detail=native))
     repair_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     write('DUAL_SIGN_FIX_REGRESSION.json',dict(PASS=True,scope='New evidence-durability/terminal-LP guard and existing corrected-bound regressions only; not resolution of RMP43.',test_result=test_result,new_guard_tests=15,
