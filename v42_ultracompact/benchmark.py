@@ -80,7 +80,7 @@ def run():
         write('ULTRACOMPACT_ROOT_COMPARISON.json',dict(PASS=True,C2=a,C3=b,other_C3_candidates_identical=True,all_native_parameters_except_log_identical=True))
         c=arm('C2','MILP',validator,lb,resource);d=arm('C3A','MILP',validator,lb,resource);assert c['PASS'] and d['PASS'] and same_params(c,d)
         write('ULTRACOMPACT_MILP_COMPARISON.json',dict(PASS=True,C2=c,C3=d,all_native_parameters_except_log_identical=True))
-        timegate=a['root_completed'] and b['root_completed'] and b['root_time']<=.85*a['root_time'];workgate=a['root_completed'] and b['root_completed'] and b['root_Work']<=.85*a['root_Work'];nodegate=d['nodes_after_root']>c['nodes_after_root']+1;boundgate=d['valid_LB']>c['valid_LB']+1e-6;gapgate=d['valid_gap']<c['valid_gap']-1e-6;incgate=d['first_new_valid_incumbent'] is not None and (c['first_new_valid_incumbent'] is None or d['first_new_valid_incumbent']<=.85*c['first_new_valid_incumbent']);selected=bool(timegate or workgate or nodegate or boundgate or gapgate or incgate)
-        write('ULTRACOMPACT_SELECTION.json',dict(PASS=True,state='ULTRACOMPACT_EXACT_SELECTED' if selected else 'ULTRACOMPACT_EXACT_BUT_NO_SPEEDUP',selected=selected,selected_formulation='C3A' if selected else 'FROZEN_PR161_C2',exactness=True,root_time_gate=timegate,root_Work_gate=workgate,node_gate=nodegate,valid_LB_gate=boundgate,valid_gap_gate=gapgate,new_incumbent_gate=incgate,comparison_tolerance=1e-6,algorithm_tournament_executed=False,STOP=True))
+        from .selection import decision
+        write('ULTRACOMPACT_SELECTION.json',decision(a,b,c,d))
     finally:resource.close()
 if __name__=='__main__':run()
