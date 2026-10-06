@@ -1,4 +1,4 @@
-현재 PR160의 4-MESS/96-slot scientific authority를 보존한 exact node-activity/continuous-flow M1을 재구성하고 정적 고정점 압축을 적용했습니다. 최종 C2는 654,348행 / 306,040열 / binary 9,322개 / nnz 5,584,200개입니다. 원본 대비 binary 95.5254%, C0 대비 nnz 35.5539% 감소했습니다.
+현재 PR160의 4-MESS/96-slot scientific authority를 보존한 exact node-activity/continuous-flow M1을 재구성하고 정적 고정점 압축을 적용했습니다. 최종 C2는 654,348행 / 306,040열 / binary 9,322개 / nnz 5,584,200개입니다. 원본 대비 binary 95.524982%, C0 대비 nnz 35.5539% 감소했습니다.
 
 C0와 C1은 같은 300초 arm wall budget에서 root를 완료하지 못했고 C2만 root LP를 207.78초에 완료해 SUPER_COMPACT_EXACT_SELECTED로 동결했습니다. valid gap은 약 15.0436%이며 0.5% 도달이나 root 이후 B&B 진척은 주장하지 않습니다.
 
