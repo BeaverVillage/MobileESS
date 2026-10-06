@@ -89,3 +89,18 @@ def test_barrier_dual_cannot_be_declared_a_terminal_simplex_pair(tmp_path):
     meta=json.loads(p.with_suffix('.json').read_text());meta['terminal_pair']='BarPi with terminal X'
     p.with_suffix('.json').write_text(json.dumps(meta))
     r=validate(p);assert not r['PASS'] and not r['same_terminal_representation_PASS']
+
+def test_infinite_bound_nonzero_native_rc_is_saved_and_never_zeroed(tmp_path):
+    m=gp.Model();m.Params.OutputFlag=0;m.Params.Threads=1
+    m.addVar(lb=0,obj=1,name='unbounded_upper');m.optimize()
+    class NativeReadFailureFixture:
+        def __getattr__(self,name):return getattr(m,name)
+        def getAttr(self,name):
+            return [-1e-15] if name=='RC' else m.getAttr(name)
+    try:
+        p=tmp_path/'infinite_support.npz';meta=capture(NativeReadFailureFixture(),p)
+        assert meta['dual_objective_before_gate'] is None and not meta['bound_dual_terms_available']
+        with np.load(p) as z:
+            assert z['rc'][0]==-1e-15 and np.isneginf(z['bound_dual_terms'][0])
+        assert not validate(p)['strong_duality_PASS']
+    finally:m.dispose()
