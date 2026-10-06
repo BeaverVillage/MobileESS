@@ -1,0 +1,73 @@
+
+Gurobi 13.0.2 (win64) logging started Wed Oct  7 02:42:55 2026
+
+Set parameter LogFile to value "C:\v42_a1_pr134_supercompact_exact_20261007\.pr134_sc_local\SHORT_A2SC.log"
+Set parameter TimeLimit to value 300
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  300
+MIPGap  0.005
+Method  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 7828869 rows, 6852953 columns and 42419133 nonzeros (Min)
+Model fingerprint: 0x67239da4
+Model has 1 linear objective coefficients
+Variable types: 4590282 continuous, 2262671 integer (2220986 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 3e+05]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [7e-01, 3e+05]
+  RHS range        [6e-07, 1e+06]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Loaded user MIP start with objective 0.671588
+Processed MIP start in 1.35 seconds (0.00 work units)
+
+Presolve removed 148637 rows and 72081 columns (presolve time = 5s)...
+Presolve removed 365808 rows and 166509 columns (presolve time = 10s)...
+Presolve removed 435611 rows and 173061 columns (presolve time = 15s)...
+Presolve removed 570095 rows and 176617 columns (presolve time = 20s)...
+Presolve removed 580630 rows and 183957 columns (presolve time = 25s)...
+Presolve removed 581831 rows and 187557 columns (presolve time = 30s)...
+Presolve removed 586115 rows and 191690 columns (presolve time = 36s)...
+Presolve removed 587505 rows and 193640 columns (presolve time = 40s)...
+Presolve removed 588154 rows and 193649 columns (presolve time = 45s)...
+Presolve removed 588154 rows and 193649 columns (presolve time = 50s)...
+Presolve removed 588154 rows and 193649 columns (presolve time = 55s)...
+Presolve removed 588154 rows and 193699 columns (presolve time = 60s)...
+Presolve removed 589020 rows and 194167 columns (presolve time = 66s)...
+Presolve removed 589008 rows and 194155 columns
+Presolve time: 67.14s
+Presolved: 7239861 rows, 6658798 columns, 31474154 nonzeros
+Variable types: 2601420 continuous, 4057378 integer (3196793 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    6.4069034e-01   3.530167e+04   0.000000e+00     79s
+
+Root relaxation: interrupted, 3389 iterations, 3.59 seconds (4.31 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0          -    0         0.67159    0.67158  0.00%     -   79s
+
+Explored 1 nodes (3389 simplex iterations) in 80.48 seconds (191.23 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 2: 0.671588 0.671588 
+
+Optimal solution found (tolerance 5.00e-03)
+Best objective 6.715878825912e-01, best bound 6.715831803436e-01, gap 0.0007%
+
+User-callback calls 14326, time in user-callback 1.46 sec
