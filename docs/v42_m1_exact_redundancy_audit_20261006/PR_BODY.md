@@ -1,0 +1,13 @@
+The current PR159 4-MESS M1 contains provably redundant constraints. This child audit proves and removes 190,280 unique rows (21.4759%) and 2,860,885 nonzeros (33.8652%) while retaining all 316,743 columns, including every 81,216 grid auxiliary. The candidate matrix has 695,737 rows and 5,586,970 nonzeros. Original route, mode, SOC, PCS16, grid limits, objective and numerical authority are unchanged.
+
+The proofs use exact sparse duplicates, exact dyadic proportionality checks, original DAG-flow reachability, rational SOC/PCS outer domains and outward-safe affine support. Fractional route/site mixtures are covered. All removed rows independently replay and the final dependency graph closes simultaneously. The 49,709 exact duplicate rows all have empty LHS; no additional dominated rows were found. Ambiguous rows remain.
+
+After the user stopped a previously observed fleet optimizer, process gates passed before both sequential monolithic arms. Each used the same validated start, certified full-domain LB, MIPGap=.005, native TimeLimit=270s and arm wall cap=300s. Both remained at unfinished root with valid UB 0.6694159238756877, LB 0.5687115725336208 and gap 15.04361455%. Work fell from approximately 580.91 to 421.67815 and sampled RSS from 3.300 to 2.729 GiB, but unmatched unfinished-root Work and memory are insufficient for selection. Final state: EXACT_REDUNDANCY_PROVEN_BUT_NO_SPEEDUP; selected=false.
+
+The original arm completed before result serialization rejected an infinite default parameter. Its native log, final points and resource ledger were recovered without rerunning the original optimize. Some original timing fields are unavailable and Work/runtime use printed precision. The reduced arm changed only metadata encoding; the scientific arm AST matches the archived original bytes. Both optimize calls, source commits and recovery scope are retained.
+
+Validation: all 1,536 assignments across the existing 12 physical fixture families; 12 adversarial cases; independent replay of every 190,280 removed rows, including four rejected certificate mutations; exact PR159 scientific signature and original-row/column transport. No fleet output, shared mutable cache, mass LP stage, formulation callbacks or production run was used.
+
+Base: PR159 exact head 07c9ae892335b34a32faf82cff6266ab5cf80aac. Original executed source: 4eca8fcc28be2c7fafcc4ce8aed783043b16600c. Reduced/recovery source: 29026cb4e06a5d03ecf57405ffa68ff18e6edeaa. Core result evidence: 08bac60b53a414ec92b95bc1cba0e36ed52d584a.
+
+All required artifacts, hash manifest and the 26-question Korean review are in docs/v42_m1_exact_redundancy_audit_20261006/FINAL_REVIEW_KO.md.
