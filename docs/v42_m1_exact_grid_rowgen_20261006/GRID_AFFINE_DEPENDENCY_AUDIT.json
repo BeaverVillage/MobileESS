@@ -1,0 +1,52 @@
+{
+  "PASS": true,
+  "direct_row_generation_possible": true,
+  "new_native_calls": 0,
+  "affine_auxiliary_definitions": 81216,
+  "injection_equation": "injection_P=sum(Pdis-Pch); injection_Q=sum(Q)",
+  "response_equation": "response=original RHS - sum(original nonpivot coefficients * upstream injection); native pivot exactly +1",
+  "grid_evaluation": "Original CSR rows on full master point, with certified roundoff enclosure and exact rational fallback.",
+  "grid_security_rows": 598465,
+  "full_original_grid_rows": 673920,
+  "original_scientific_sources": {
+    "v42_integrated/build.py": "74ae4415d8165cd3101913cac5b20250d0da8184014c0ddf50df234b0330c3b9",
+    "v42_integrated/contract.py": "5b120d3ef9647ab8189baeb33abbe83e4a374845083ed39bcf066e66879c8e17",
+    "v42_m1_sparse/grid.py": "16912a1661a98f10b6abf034ff92e293e070c140fec42432c3caa677aec19e24",
+    "v42_native/grid.py": "2c623d86e6d1473896873f47bc92bf2140687b5c801d75e31b8c4864e409da9a",
+    "v42_bootstrap/grid.py": "a03e6586807eec716a744aefc109d0db0c9c819a430bb7eb7ef335b85525a9fb",
+    "v42_native/mess.py": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec"
+  },
+  "coefficient_authority": {
+    "full_MPS_sha256": "66c426469ddfd85de69946b67ea93b6d370fd28fa8815ec9b98736b62157753f",
+    "reduced_MPS_sha256": "f018f040e5f3a1d6e1315c3308f34c7279d965e808c4a4ac8039995f5886c397",
+    "matrix_sha256": "35bdc6e7c2664b763d3d0456b7296b7c8830d7c7c39a61a3cb32e699f8bb2024",
+    "data_sha256": "ba6eacea23b71db0b5c6d4e18d6370942906ce2790276127139dbc2ece1d2912",
+    "A1_freeze_sha256": "d16ab0194a44a52c0e2d5277ad438bf4229e5c125967b8a995125da61f0fa0e0",
+    "NormalAmps_authority": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51"
+  },
+  "all_temporal_MESS_physics_in_master": true,
+  "grid_dependencies": [
+    "injection_P",
+    "injection_Q",
+    "response_line_P",
+    "response_line_Q",
+    "response_line_correction",
+    "response_transformer_P",
+    "response_transformer_Q",
+    "rho_max"
+  ],
+  "classification_method": "Every native equality pivot, bound, type and dependency audited; not name inference alone.",
+  "current_model_signature": {
+    "matrix_indptr": "6287c85f23b5b7a49c1f71cb8ec3752891c1f9500574a358b7a16cd3aa3fd830",
+    "matrix_indices": "e051004e913fab94a3d6a1b0165333e4761fb99092399cd9fa2a4eefa16b9d0d",
+    "matrix_coefficients": "68d4c6477406244fe6de0a611d702a2f0bf5970c068290ee81880b81704b4811",
+    "objective": "b2bc9e64b158536e5ec67d1a93a78d17d332b3a348e790be6c291ccc0a070fd3",
+    "objective_constant": "1dae8a198acbfaa1803b2e785b004493a428386a534519e2e9b355969370d449",
+    "bounds_lower": "266e60cde820cf784fb7ca9ec3c5103ca5c348a05cde09b2e556557b180825f0",
+    "bounds_upper": "3814f8b990573dd51d47a9833c55dde40aab26591ad6be78d8245547269ac237",
+    "vtypes": "3d49a75a5456ebc3d794b30355bf9ee1715c04fc252a49ff6527129264aece36",
+    "RHS": "a26f8e6afaafc4e69ee815aa6a8cfe659714ce3ef3177ea56dcb34c92ed7ecc4",
+    "senses": "6607ea8173cbaf4d68ff85ce3375c3dc2a88f20eb0bc2f59167ece380bf11932",
+    "variable_names": "cf880d77d8fa2578142e7c2cd067e2420c0e07920c56a542d8d500020e6c8568"
+  }
+}
