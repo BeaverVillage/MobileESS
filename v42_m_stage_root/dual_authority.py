@@ -55,7 +55,7 @@ def capture(model,path):
         try:values['raw_'+attr]=np.asarray(model.getAttr(attr));optional[attr]='SAVED_NOT_USED'
         except Exception:optional[attr]='UNAVAILABLE'
     quality={}
-    for attr in ('DualVio','DualResidual','ComplVio','ConstrVio','ConstrResidual','BoundVio','MaxVio','Kappa','KappaExact'):
+    for attr in ('DualVio','DualResidual','ComplVio','ConstrVio','ConstrResidual','BoundVio','MaxVio'):
         try:
             value=float(model.getAttr(attr));quality[attr]=value if np.isfinite(value) else str(value)
         except Exception:quality[attr]='UNAVAILABLE'
