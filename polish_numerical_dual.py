@@ -14,7 +14,14 @@ def run():
     previous=read(OUT/'OFFLINE_CERTIFICATE_RESULT.json')
     assert previous['PASS'] is False and previous['native_solve_calls']==0
     POLISH.mkdir(exist_ok=True)
-    with (POLISH/'ONE_NATIVE_POLISH_REGISTERED.json').open('x',encoding='utf8') as f:
+    marker=POLISH/'ONE_NATIVE_POLISH_REGISTERED.json'
+    if marker.exists():
+        assert not (POLISH/'NATIVE_POLISH_CALL_STARTED.json').exists(),'ONE_POLISH_NATIVE_CALL_ONLY'
+        assert "KeyError: 'raw_VBasis'" in read(POLISH/'DRIVER_ERROR.json')['traceback']
+        with (POLISH/'PRECALL_BASIS_LOADING_CORRECTION.json').open('x',encoding='utf8') as f:
+            json.dump(dict(native_calls_before_correction=0,reason='Canonical rebuild returns mandatory arrays only; load optional basis directly from verified raw snapshot'),f)
+    else:
+      with marker.open('x',encoding='utf8') as f:
         json.dump(dict(maximum_native_calls=1,source_snapshot_SHA=sha(RAW),pid=os.getpid(),
             source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
             settings=SETTINGS,existing_acceptance_EPS=1e-8,
@@ -22,11 +29,14 @@ def run():
             exact_model_unchanged=True,retained_columns=1841,root_CG=False,early_BAP=False,BAP7200=False,P2=False),f,indent=2)
     m,v,meta=canonical_rebuild(RAW);m.reset(1)
     for key,value in SETTINGS.items():m.setParam(key,value)
-    m.setAttr('VBasis',m.getVars(),v['raw_VBasis'].tolist());m.setAttr('CBasis',m.getConstrs(),v['raw_CBasis'].tolist());m.update()
+    with np.load(RAW) as z:vb=z['raw_VBasis'];cb=z['raw_CBasis']
+    assert len(vb)==m.NumVars and len(cb)==m.NumConstrs
+    m.setAttr('VBasis',m.getVars(),vb.tolist());m.setAttr('CBasis',m.getConstrs(),cb.tolist());m.update()
     m.Params.LogFile=str(POLISH/'CERTIFICATE_ONLY_DUAL_SIMPLEX.log')
     write('PRE_SOLVE_IDENTITY.json',dict(fingerprint=hex(m.Fingerprint&0xffffffff),
         rows=m.NumConstrs,columns=m.NumVars,nnz=m.NumNZs,settings=SETTINGS,
         source_raw_snapshot_SHA=sha(RAW),same_exact_CSR_RHS_bounds_objective_and_axes=True,
+        launch_source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         raw_basis_reused_only_at_identical_full_RMP_axes=True,primal_incumbent_warm_start=False,
         solver_tolerances_tightened_not_relaxed=True,acceptance_authority_unchanged=True,memory_guards=False))
     write('NATIVE_POLISH_CALL_STARTED.json',dict(native_calls=1,start=time.time(),settings=SETTINGS))
