@@ -1,0 +1,53 @@
+{
+  "PASS": true,
+  "native_optimization_methods_AST_unchanged": [
+    "solve_master",
+    "certify",
+    "smooth_snapshot",
+    "run",
+    "run_certification",
+    "spent",
+    "remaining"
+  ],
+  "scientific_audit_methods_AST_unchanged": [
+    "setup_audits",
+    "audit_one",
+    "tier_audit",
+    "parallel_validation"
+  ],
+  "pricing_and_convergence_policy_bytes_unchanged": true,
+  "executed_source_snapshot_matches_original_freeze": true,
+  "post_native_control_tests": "3 passed; 2 existing repeated plus 1 new rejected-dual regression",
+  "independent_bound_check": {
+    "PASS": true,
+    "method": "Independent CSC columnwise Fraction support plus same-dual native global bounds and outward rounding",
+    "source_SHA": "4e928709d4b3acd2bdbeca09a26447b50fab63e8956b23322e7c1885ce3e9617",
+    "true_dual_SHA": "a855124c17927f22b458b99b45a418fb3d4e1ca278bfff4426b3e043c2cd6542",
+    "exact_global_numerator": "231872564526712844721360585201147273575789049309853",
+    "exact_global_denominator": "374144419156711147060143317175368453031918731001856",
+    "corrected_numerator": "205841358500440279675069145688928832118151494396573",
+    "corrected_denominator": "374144419156711147060143317175368453031918731001856",
+    "reconstructed_corrected_LB": 0.5501655188774129,
+    "restricted_LP_upper": 0.5733092627423072,
+    "existing_numerical_authority": 1e-08,
+    "global_optimize_calls": 0,
+    "inherited_arc_support": {
+      "PASS": true,
+      "method": "Independent CSC-column exact Fraction dot products from saved rational dual; no equality-repair algorithm reused.",
+      "free_stationarity_zero": 81216,
+      "original_bounds_only": true,
+      "exact_numerator": "3833108416124447585467054845115100440198880648088964264844613412789",
+      "exact_denominator": "6739986666787659948666753771754907668409286105635143120275902562304",
+      "L_dual_support": 0.5687115725336208
+    }
+  },
+  "runtime_limitations": {
+    "build_only_not_durably_preserved": true,
+    "initial_prepare_wall": 49.87632549999398,
+    "measured_root_and_closeout_wall": 2332.89854129999,
+    "missing_last_RMP_interval_endpoints": true,
+    "durable_native_debit_used": true,
+    "full_native_interval_independent_reconstruction": false,
+    "fresh_production_runtime_claimed": false
+  }
+}

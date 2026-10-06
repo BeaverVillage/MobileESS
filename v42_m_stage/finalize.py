@@ -6,12 +6,14 @@ import subprocess
 import math
 
 def rows(path):
-    with Path(path).open(encoding='utf8-sig',newline='') as f:return list(csv.DictReader(f))
+    with Path(path).open(encoding='utf-8-sig',newline='') as f:return list(csv.DictReader(f))
 
 def run():
     result=read(OUT/'DW_CONTINUATION_FINAL_RESULT.json');cp=read(OUT/'DW_CHECKPOINT_LATEST.json')
     assert not result['DW_ROOT_OPTIMAL_CERTIFIED'],'Converged root must advance through B&P; do not close here'
-    preserved=preserve_old();budget=check_segment_chain(OUT);assert budget['total']<=1800
+    preserved=preserve_old()
+    budget=read(OUT/'ROOT_BUDGET_RECOVERY_AUDIT.json') if (OUT/'ROOT_BUDGET_RECOVERY_AUDIT.json').exists() else check_segment_chain(OUT)
+    assert budget['PASS'] and budget['total']<=1800
     pool=read(OUT/'DW_CONTINUATION_FULL_POOL_AUDIT.json');assert pool['PASS']
     reg=read(OUT/'REGRESSION_RECEIPT.json');assert reg['exit_code']==0
     bench=read(OUT/'HYBRID_PRICING_CLEAN_BENCHMARK.json');selection=read(OUT/'HYBRID_PRICING_SELECTION.json')
@@ -24,7 +26,8 @@ def run():
         historical_development_native=read(OUT/'ROOT1604_RESUME_AUTHORITY.json')['historical_total_native'],
         new_root_development_native=budget['total'],new_root_sum_model_native=result['sum_native_optimize_wall'],
         total_historical_plus_new_root_native=result['cumulative_optimize'],
-        build_seconds=result['build_seconds'],elapsed_build_audit_and_optimization=result['elapsed_including_build_audit'],
+        build_seconds=result['build_seconds'],initial_prepare_before_first_optimize_wall=result.get('initial_prepare_before_first_optimize_wall'),
+        elapsed_build_audit_and_optimization=result['elapsed_including_build_audit'],
         stop_reason=result['stop_reason'],last_certification=certificate,
         exact_optimum_claimed=False,existing_numerical_authority=EPS,automatic_extension=False))
     table('ROOT_CG_PROGRESS.csv',cp['restart_state']['rounds'])
@@ -45,7 +48,8 @@ def run():
         ('M2_RUNTIME_LEDGER.csv',['stage','native_seconds','budget_total'])]:table(name,[],fields)
     resource=[]
     for filename in ('FAILED_ATTEMPT_HYBRID_RESOURCE_LEDGER.csv','HYBRID_REMAINING_RESOURCE_LEDGER.csv',
-                     'DW_CONTINUATION_RESOURCE_LEDGER.csv'):
+                     'DW_CONTINUATION_RESOURCE_LEDGER.csv','ROOT_CLOSEOUT_RESOURCE_LEDGER.csv'):
+        if not (OUT/filename).exists():continue
         for r in rows(OUT/filename):resource.append(dict(source_ledger=filename,**r))
     table('RESOURCE_LEDGER.csv',resource)
     peaks=dict(min_available_RAM=min(float(r['available_RAM']) for r in resource),
@@ -64,16 +68,19 @@ def run():
             production_runtime=category in ('E_FRESH_M1_CANARY','F_M2_CANARY')))
     table('RUNTIME_CATEGORY_LEDGER.csv',ledgers)
     freeze=read(OUT/'ROOT_EXECUTION_FREEZE.json')
-    assert all(sha(ROOT/p)==h for p,h in freeze['sources'].items())
+    repair=read(OUT/'REPORT_ONLY_REPAIR_AUTHORITY.json') if (OUT/'REPORT_ONLY_REPAIR_AUTHORITY.json').exists() else dict(files={})
+    assert all(sha(ROOT/p)==repair['files'].get(p,h) for p,h in freeze['sources'].items())
     assert all(sha(OUT/p)==h for p,h in freeze['authorities'].items())
     verification=dict(PASS=True,final_stop_state='M1_ROOT_NOT_CONVERGED',PR152_preserved_files=preserved,
-        source_freeze_unchanged=True,root_development_budget=budget,resource_peaks=peaks,
+        algorithm_source_freeze_unchanged=True,report_only_repair=repair,root_development_budget=budget,resource_peaks=peaks,
         regression=reg,HYBRID_SELECTED=False,ROOT_CG_CONVERGED=False,M1_ALGORITHM_READY=False,
         BAP_nodes=0,BAP_incumbent=None,BAP_global_LB=None,BAP_gap=None,
         M1_fresh_canary_status='NOT_RUN_PREREQUISITE',M2_canary_status='NOT_RUN_PREREQUISITE',
         full_May_B2_B3_L1_L4_launched=False,backend_changed_during_root=False,
         development_columns_in_fresh_runtime=False,foreign_native=read(OUT/'ROOT_FOREIGN_NATIVE_OBSERVATION.json'))
     write('VERIFICATION.json',verification)
+    build_display='미복원' if result['build_seconds'] is None else f"{result['build_seconds']:.6f}초"
+    prep_display=result.get('initial_prepare_before_first_optimize_wall')
     review=f'''# V42 M-stage exact completion 검토
 
 최종 중단 상태: **M1_ROOT_NOT_CONVERGED**. Root 미수렴이므로 B&P, P2, fresh M1/M2 canary 및 May B2/B3/L1–L4 production은 실행하지 않았다.
@@ -95,7 +102,8 @@ def run():
 | 신규 root 모델별 native 시간 합계 | {result['sum_native_optimize_wall']:.6f}초 |
 | 기존 development native union | {authority['historical_total_native']:.6f}초 |
 | 기존 + 신규 development native union | {result['cumulative_optimize']:.6f}초 |
-| Root build | {result['build_seconds']:.6f}초 |
+| Root constructor build-only | {build_display} |
+| 첫 native optimize 전 준비/복원/감사 | {prep_display}초 (telemetry epoch 기준) |
 | Root build/audit/solve 전체 경과 | {result['elapsed_including_build_audit']:.6f}초 |
 | B&P nodes / incumbent / global LB / gap | 0 / 미실행 / 미실행 / 미실행 |
 | M1 P1 / P2 movement energy / count | 미수락 / 미실행 / 미실행 |
@@ -110,7 +118,7 @@ def run():
 
 원래 MESS01 Gurobi pricing은 완료된 log/point를 복구했으며 재실행하지 않았다. Hybrid의 RAW_PI_SIGN_INVALID 검증 실패를 보존하고, 사용자 중단 이후 나머지 세 MESS만 비교했다. Benchmark 두 실행 구간의 active wall 합계는 {bench['total_active_benchmark_wall_seconds']:.6f}초이다. 사용자 중단을 포함한 시간을 단일 continuous wall 성능 결과로 주장하지 않았다. 동등성과 속도 개선이 입증되지 않아 기존 pricing backend의 reject/freeze 결정을 그대로 유지했다.
 
-1800초 신규 root grant는 역사적 예산과 분리했다. 병렬 pricing의 예산은 PR152와 동일한 optimize interval union으로 집계했으며, 모델별 native 합계도 별도 공개한다. Build/audit/wait는 production runtime으로 바꾸어 보고하지 않는다. 중단 사유는 {result['stop_reason']}이다. RMP upper는 fractional restricted-master 상한이며, 정수 M1 incumbent acceptance가 아니다.
+1800초 신규 root grant는 역사적 예산과 분리했다. 병렬 pricing의 예산은 PR152와 동일한 optimize interval union으로 집계했으며, 모델별 native 합계도 별도 공개한다. Build/audit/wait는 production runtime으로 바꾸어 보고하지 않는다. 중단 사유는 {result['stop_reason']}이다. 예산 소진으로 종료한 것이 아니며 exact dual 부호 검증 실패로 중단했다. 마지막 RMP optimize의 start/end interval은 종료 과정에서 저장되지 않았으므로, 실제 측정된 durable budget journal debit을 사용하고 구간을 만들어 내지 않았다. RMP upper는 fractional restricted-master 상한이며, 정수 M1 incumbent acceptance가 아니다. Build-only 시간은 실패 시 보존되지 않아 초기 pool/audit 복원 wall을 별도 표기한 측정 한계가 있다.
 
 PR152의 1,604-column checkpoint는 M1 알고리즘 개발 및 exact root completion에만 사용했으며, 논문용 fresh M1 runtime 측정에는 development checkpoint에서 학습된 column을 주입하지 않았다.
 

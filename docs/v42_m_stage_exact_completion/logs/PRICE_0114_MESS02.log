@@ -1,0 +1,143 @@
+
+Gurobi 13.0.2 (win64) logging started Tue Oct  6 11:01:29 2026
+
+Set parameter LogFile to value "docs/v42_m_stage_exact_completion/logs/PRICE_0114_MESS02.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  20
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+Method  2
+Crossover  2
+DegenMoves  0
+MIPFocus  3
+NodeMethod  1
+CutPasses  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 51527 rows, 58895 columns and 314932 nonzeros (Min)
+Model fingerprint: 0xf5cb3f72
+Model has 4539 linear objective coefficients and an objective constant of 0.00994186084814727
+Variable types: 6805 continuous, 52090 integer (52090 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [1e-13, 7e-06]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+Loaded user MIP start with objective -0.00259024
+
+Presolve removed 8946 rows and 2 columns
+Presolve time: 0.58s
+Presolved: 42581 rows, 58893 columns, 292568 nonzeros
+Variable types: 6803 continuous, 52090 integer (52090 binary)
+Root relaxation presolve removed 1 rows and 1 columns
+Root relaxation presolved: 42580 rows, 58892 columns, 292566 nonzeros
+
+Root barrier log...
+
+Ordering time: 0.04s
+
+Barrier statistics:
+ AA' NZ     : 5.996e+05
+ Factor NZ  : 1.096e+06 (roughly 50 MB of memory)
+ Factor Ops : 7.451e+07 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.97028708e-02 -3.44919789e+04  1.80e+04 1.12e-04  3.80e+00     1s
+   1  -3.23443950e-02 -2.94152884e+04  2.54e+03 3.23e-03  5.75e-01     1s
+   2   7.30768668e-02 -1.16582978e+04  4.08e+02 2.75e-04  1.20e-01     1s
+   3   2.24463261e-02 -2.59634224e+03  1.04e+02 2.62e-14  2.60e-02     1s
+   4  -1.90148786e-02 -2.37345064e+03  6.65e+01 2.50e-14  2.12e-02     1s
+   5  -4.12422953e-02 -2.15227864e+03  4.89e+01 2.62e-14  1.83e-02     1s
+   6  -6.45599821e-02 -1.85104134e+03  3.12e+01 2.41e-14  1.49e-02     1s
+   7  -7.53773471e-02 -1.60920965e+03  2.22e+01 2.70e-14  1.28e-02     1s
+   8  -7.93313807e-02 -1.42197992e+03  1.74e+01 2.81e-14  1.13e-02     1s
+   9  -7.72734716e-02 -1.24707150e+03  1.43e+01 2.65e-14  1.01e-02     1s
+  10  -7.18637231e-02 -1.21543391e+03  1.30e+01 2.77e-14  9.57e-03     1s
+  11  -1.55828528e-02 -1.02954200e+03  8.75e+00 3.06e-14  7.73e-03     1s
+  12  -4.41937160e-03 -5.47111441e+02  5.51e+00 1.89e-14  4.26e-03     2s
+  13   1.12423537e-02 -1.66841503e+02  1.40e+00 1.48e-14  1.30e-03     2s
+  14   1.39265038e-02 -3.07523246e+01  2.62e-01 1.08e-14  2.28e-04     2s
+  15   1.38049858e-02 -4.02864101e+00  2.49e-04 5.99e-15  2.56e-05     2s
+  16   7.48077719e-03 -7.70714044e-01  1.01e-07 7.08e-15  4.93e-06     2s
+  17   7.09649441e-03 -4.57020107e-01  3.30e-08 7.40e-15  2.94e-06     2s
+  18   4.94092999e-03 -2.32478814e-01  1.41e-08 7.33e-15  1.50e-06     2s
+  19   2.71333876e-03 -9.96562429e-02  3.38e-09 7.50e-15  6.48e-07     2s
+  20   1.02459445e-03 -6.52208910e-02  1.89e-09 7.66e-15  4.19e-07     2s
+  21   3.26597622e-04 -4.78282256e-02  1.48e-09 7.29e-15  3.05e-07     2s
+  22  -1.97818418e-03 -3.81116113e-02  5.11e-10 8.80e-15  2.29e-07     2s
+  23  -2.94304512e-03 -3.17452346e-02  2.70e-10 9.50e-15  1.82e-07     2s
+  24  -3.24720944e-03 -2.74353613e-02  2.07e-10 9.83e-15  1.53e-07     2s
+  25  -3.37239559e-03 -2.42819084e-02  1.83e-10 9.64e-15  1.32e-07     2s
+  26  -3.66998708e-03 -2.06011153e-02  1.33e-10 9.54e-15  1.07e-07     2s
+  27  -3.96964492e-03 -1.54650665e-02  8.30e-11 9.23e-15  7.28e-08     2s
+  28  -4.08733744e-03 -1.48200065e-02  7.17e-11 1.02e-14  6.79e-08     2s
+  29  -4.29615411e-03 -1.26484654e-02  5.45e-11 1.08e-14  5.29e-08     2s
+  30  -4.34794211e-03 -1.00339267e-02  4.54e-11 8.25e-15  3.60e-08     2s
+  31  -4.44031465e-03 -9.51396166e-03  3.15e-11 9.97e-15  3.21e-08     2s
+  32  -4.54395836e-03 -7.91720510e-03  3.15e-11 8.34e-15  2.14e-08     2s
+  33  -4.62824288e-03 -6.89153133e-03  2.37e-11 8.62e-15  1.43e-08     2s
+  34  -4.73820097e-03 -6.33153591e-03  1.85e-11 8.26e-15  1.01e-08     2s
+  35  -4.80354712e-03 -6.07414838e-03  1.39e-11 8.38e-15  8.04e-09     2s
+  36  -4.83983705e-03 -5.79531269e-03  1.45e-11 7.91e-15  6.05e-09     2s
+  37  -4.92744810e-03 -5.55206412e-03  3.95e-11 7.71e-15  3.95e-09     2s
+  38  -4.97082879e-03 -5.49940800e-03  7.10e-11 8.37e-15  3.35e-09     2s
+  39  -5.02246354e-03 -5.37763742e-03  3.76e-11 8.37e-15  2.25e-09     2s
+  40  -5.04621874e-03 -5.27532604e-03  5.70e-11 8.38e-15  1.45e-09     2s
+  41  -5.06034779e-03 -5.25103435e-03  4.69e-11 9.41e-15  1.21e-09     2s
+  42  -5.07429512e-03 -5.22073017e-03  7.55e-11 1.11e-14  9.27e-10     2s
+  43  -5.08479576e-03 -5.17793620e-03  1.30e-10 7.71e-15  5.90e-10     2s
+  44  -5.08743181e-03 -5.16841657e-03  4.48e-10 9.37e-15  5.13e-10     2s
+  45  -5.09761403e-03 -5.16375471e-03  4.69e-10 1.02e-14  4.19e-10     2s
+  46  -5.10070349e-03 -5.15220959e-03  3.78e-10 9.74e-15  3.26e-10     2s
+  47  -5.10302980e-03 -5.14551945e-03  2.57e-10 1.05e-14  2.69e-10     3s
+  48  -5.10555819e-03 -5.14055715e-03  2.16e-10 1.02e-14  2.22e-10     3s
+  49  -5.10596714e-03 -5.12798495e-03  2.01e-10 7.88e-15  1.39e-10     3s
+  50  -5.10683969e-03 -5.12570793e-03  1.67e-10 2.76e-13  1.19e-10     3s
+  51  -5.10842532e-03 -5.12007544e-03  1.70e-10 9.77e-13  7.38e-11     3s
+  52  -5.10948652e-03 -5.11800456e-03  2.08e-10 1.49e-12  5.40e-11     3s
+  53  -5.10983381e-03 -5.11611147e-03  1.93e-10 2.16e-12  3.99e-11     3s
+  54  -5.11060959e-03 -5.11605710e-03  1.41e-10 2.22e-12  3.46e-11     3s
+  55  -5.11110758e-03 -5.11256694e-03  8.92e-11 4.10e-12  9.40e-12     3s
+  56  -5.11146135e-03 -5.11155442e-03  3.29e-11 1.74e-12  6.41e-13     3s
+  57  -5.11150820e-03 -5.11151921e-03  1.71e-11 7.33e-13  7.55e-14     3s
+  58  -5.11151662e-03 -5.11151672e-03  4.23e-12 2.67e-14  1.01e-15     3s
+
+Barrier solved model in 58 iterations and 2.82 seconds (3.53 work units)
+Optimal objective -5.11151662e-03
+
+Crossover time: 0.34 seconds (0.54 work units)
+
+Root relaxation: objective -5.111502e-03, 23378 iterations, 2.31 seconds (3.09 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   -0.00511    0  484   -0.00259   -0.00511  97.3%     -    3s
+H    0     0                      -0.0025980   -0.00511  96.7%     -    4s
+H    0     0                      -0.0026595   -0.00511  92.2%     -    5s
+H    0     0                      -0.0026981   -0.00511  89.4%     -    5s
+H    0     0                      -0.0026983   -0.00511  89.4%     -    5s
+H    0     0                      -0.0027114   -0.00511  88.5%     -    5s
+
+Explored 1 nodes (23378 simplex iterations) in 5.69 seconds (6.50 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 4: -0.0027114 -0.00269808 -0.00265954 -0.00259798 
+
+Solve interrupted
+Best objective -2.711395909869e-03, best bound -5.111502254750e-03, gap 88.5192%
+
+User-callback calls 1511, time in user-callback 1.18 sec

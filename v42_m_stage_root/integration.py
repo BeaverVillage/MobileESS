@@ -1,5 +1,6 @@
 """Full original-row adapters, deterministic batches and conservative restart."""
 from .common import *
+from .accepted import accepted_rmp
 from .resources import resource_failures
 from v42_dw_runtime.contracts import RuntimeFlags,DiscoverySnapshot,Candidate,canonical
 from v42_dw_runtime.validation import OriginalBlockValidator,validate_batches
@@ -149,12 +150,12 @@ class Integration:
   table('DW_EARLY_STOP_FULLSCALE_LEDGER.csv',rows)
 
  def authority_rmp(self):
-  return next((r for r in reversed(self.rmps) if r['status']==2),self.initial_rmp)
+  return next((r for r in reversed(self.rmps) if accepted_rmp(r)),self.initial_rmp)
  def last_completed_dual(self):
   row=self.authority_rmp();assert sha(OUT/row['point_file'])==row['point_SHA']
   with np.load(OUT/row['point_file']) as z:pi=z['pi'];alpha=z['alpha']
   self.previous_pi=pi.copy()
-  completed=[r for r in self.rmps if r['status']==2]
+  completed=[r for r in self.rmps if accepted_rmp(r)]
   prior=OUT/completed[-2]['point_file'] if len(completed)>=2 else SCI/self.initial_rmp['point_file'].split('/')[-1] if completed else SCI/read(SCI/'DW_CHECKPOINT_LATEST.json')['RMP']['point_file']
   with np.load(prior) as z:self.last_true_pi=z['pi'].copy()
   return pi,alpha,row['dual_SHA'],row['point_file']
