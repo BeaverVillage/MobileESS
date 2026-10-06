@@ -54,10 +54,16 @@ def capture(model,path):
     for attr in ('BarPi','BarX','VBasis','CBasis'):
         try:values['raw_'+attr]=np.asarray(model.getAttr(attr));optional[attr]='SAVED_NOT_USED'
         except Exception:optional[attr]='UNAVAILABLE'
+    quality={}
+    for attr in ('DualVio','DualResidual','ComplVio','ConstrVio','ConstrResidual','BoundVio','MaxVio','Kappa','KappaExact'):
+        try:
+            value=float(model.getAttr(attr));quality[attr]=value if np.isfinite(value) else str(value)
+        except Exception:quality[attr]='UNAVAILABLE'
     identity={k:array_sha(values[k]) for k in ARRAY_FIELDS}
     meta=dict(origin=str(uuid.uuid4()),status=int(model.Status),model_sense=int(model.ModelSense),
         fingerprint=int(model.Fingerprint),native_objective=float(model.ObjVal),runtime=float(model.Runtime),
-        parameters={k:parameter_value(model,k) for k in ('Method','Crossover','Threads','OptimalityTol','FeasibilityTol','Seed','LPWarmStart','PreDual','BarConvTol','IntFeasTol','TimeLimit','LogToConsole')},
+        parameters={k:parameter_value(model,k) for k in ('Method','Crossover','Threads','OptimalityTol','FeasibilityTol','Seed','LPWarmStart','PreDual','BarConvTol','IntFeasTol','TimeLimit','LogToConsole','Presolve','NumericFocus','Quad','MarkowitzTol')},
+        native_quality_before_gate=quality,
         terminal_pair='X/Pi/RC queried from the same terminal model; BarPi/BarX never substituted',
         row_convention='Master build transports original CSR/RHS/senses verbatim; added convexity is equality.',
         original_to_native_row_multiplier=1,optional=optional,identity=identity,
