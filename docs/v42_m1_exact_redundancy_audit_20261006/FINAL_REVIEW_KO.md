@@ -53,7 +53,7 @@
 23. 유효 UB는 0.6694159238756877 → 0.6694159238756877, global LB는 0.5687115725336208 → 0.5687115725336208, global gap은 15.04361455% → 15.04361455%다. Verbatim native BestBd는 0.2529539575959 → 0.25295395759592587로 별도 기록했다. 동일한 기존 full-domain valid LB와 원본 검증 시작점을 양쪽에 사용했다.
 24. 표본 peak RSS는 3.300GiB → 2.729GiB, process commit은 4.919GiB → 4.349GiB, 최소 available RAM은 15.642GiB → 15.064GiB다. 0.5s 표본 peak이며 절대 peak를 주장하지 않는다.
 25. EXACT_REDUNDANCY_REDUCTION_SELECTED=false. Root 시간 gate=False, valid LB/gap gate=False, beyond-root transition gate=False. 메모리 감소나 미완료 root의 서로 다른 Work 양만으로 선택하지 않았다.
-26. 과학적 기준 exact commit은 위 PR159 head다. 이 감사의 evidence commit 및 새 Draft PR은 발행 후 PUBLICATION.md와 최종 응답에 기록한다. PR159는 수정하지 않았다.
+26. Exact core result/evidence commit은 08bac60b53a414ec92b95bc1cba0e36ed52d584a이며, 새 Draft PR은 [#160](https://github.com/BeaverVillage/MobileESS/pull/160)이다. Original 실행 소스는 4eca8fcc28be2c7fafcc4ce8aed783043b16600c, reduced/recovery 실행 소스는 29026cb4e06a5d03ecf57405ffa68ff18e6edeaa다. 최종 publication head는 push 후 최종 응답에서 검증하며 PR159는 수정하지 않았다.
 
 ## 증명의 범위와 재현
 
