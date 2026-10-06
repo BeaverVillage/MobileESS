@@ -89,6 +89,10 @@ class Experiment(Mechanics):
         row=dict(round=self.current_round,type=kind,status=model.Status,objective=None,dual_SHA=None,wall_seconds=end-start,interval=[start,end],warm_basis_supplied=False,settings=settings,point_file=None)
         self.rmps.append(row)
         if model.Status!=2:self.stop='RMP_NOT_OPTIMAL';self.save();return None
+        # Preserve rejected terminal Pi/X/RC and exact matrix axes before any
+        # sign/physical assertion; failures never authorize pricing.
+        from .dual_authority import require_terminal_dual
+        require_terminal_dual(model,OUT/f'DUAL_AUTHORITY_SNAPSHOT_{self.current_round:04d}.npz')
         checked=self.master.raw_audit();point=np.zeros(self.B.shape[1]);point[self.master.columns]=model.getAttr('X',self.master.z)
         for v,c in zip(self.master.lambdas,self.master.column_data):point[self.blocks[c['unit']].columns]+=float(v.X)*c['x']
         full=corrected_rows(self.A,self.d,point,False,self.route_mask);assert checked['PASS'] and full['PASS'] and model.DualVio<=EPS
