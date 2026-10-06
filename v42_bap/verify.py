@@ -23,7 +23,8 @@ def write(name, value):
 
 
 def source_sha():
-    return digest({p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted((ROOT / 'v42_bap').glob('*.py'))})
+    # Full-scale adapter is not imported/executed by these bounded fixtures.
+    return digest({p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted((ROOT / 'v42_bap').glob('*.py')) if p.name != 'fullscale.py'})
 
 
 def run():

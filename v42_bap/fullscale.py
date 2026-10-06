@@ -7,7 +7,7 @@ from pathlib import Path
 from dataclasses import asdict
 from types import SimpleNamespace
 from fractions import Fraction as F
-import time,json,hashlib,subprocess,os
+import time,json,hashlib,subprocess,os,threading
 import numpy as np
 import psutil
 import gurobipy as gp
@@ -25,12 +25,15 @@ from v42_disjunctive.certificate import down
 from revalidate_rmp43 import canonical_rebuild
 from run_restricted_1841 import ROOT,OUT,RAW,read,write,sha,pool_point
 
+def column_key(h):
+    return str(int(h['MESS'][-2:])-1)+':'+h['column_SHA']
+
 class FileRegistry:
     """Immutable compressed column references; no dense coupling tuple copies."""
     def __init__(self,pool,axis):
         self.columns={};self.axis=axis
         for h in pool:
-            key=h['column_SHA'];self.columns[key]=SimpleNamespace(mess=int(h['MESS'][-2:])-1,h=h,sha=key)
+            key=column_key(h);self.columns[key]=SimpleNamespace(mess=int(h['MESS'][-2:])-1,h=h,sha=h['column_SHA'])
     def point(self,key):return pool_point(self.columns[key].h)
     def partition(self,keys,decisions):
         active=[];inactive=[]
@@ -50,12 +53,12 @@ class FullScaleEarlyBAP:
         self.original=prototypes(self.B,self.e,self.owner,self.row_owner,self.native)
         self.pool=read(ROOT/'docs/v42_m_stage_exact_completion/DW_CHECKPOINT_LATEST.json')['pool']
         self.registry=FileRegistry(self.pool,self.owner)
-        self.tree=Tree(self.registry,tuple(h['column_SHA'] for h in self.pool),tolerance=1e-8,allow_early_branching=True)
+        self.tree=Tree(self.registry,tuple(column_key(h) for h in self.pool),tolerance=1e-8,allow_early_branching=True)
         gate=read(OUT/'certificate/SPLIT_DUAL_GATES.json');assert gate['EXACT_DUAL_AUTHORITY_FOR_BAP']
         self.floor=gate['current_certified_conservative_global_LB']
         self.tree.nodes[0].lower_bound=self.floor
         self.tree.nodes[0].bound_certificate=dict(PASS=True,node_id=0,source='frozen inherited/full-domain conservative certificate',LB=self.floor)
-        rim=read(OUT/'RESTRICTED_INTEGER_MASTER_RESULT.json');assert rim['integer_UB'] is not None
+        rim=read(OUT/('RESTRICTED_INCUMBENT_SEARCH_RESULT.json' if (OUT/'RESTRICTED_INCUMBENT_SEARCH_RESULT.json').exists() else 'RESTRICTED_INTEGER_MASTER_RESULT.json'));assert rim['integer_UB'] is not None
         self.tree.incumbent=dict(objective=rim['integer_UB'],node_id=-1,validation=rim['independent_audit'])
         self.projections=native_projections(self.original)
         with np.load(RAW) as z:self.rootpoint=z['point'].copy()
@@ -78,7 +81,11 @@ class FullScaleEarlyBAP:
         for k,v in dict(Threads=1,FeasibilityTol=1e-8,IntFeasTol=1e-8,OptimalityTol=1e-8,Seed=20260929,LogToConsole=0,TimeLimit=min(cap,self.remaining())).items():m.setParam(k,v)
         m.Params.LogFile=str(OUT/(label.replace('/','_')+'.log'))
         start=time.perf_counter();print('NATIVE_START '+label,flush=True)
-        m.optimize(lambda m,w:self.sample())
+        # Wall authority only; never resource/RAM based. Covers native routines
+        # that do not invoke callbacks frequently enough near the deadline.
+        timer=threading.Timer(min(cap,self.remaining()),m.terminate);timer.daemon=True;timer.start()
+        try:m.optimize(lambda m,w:self.sample())
+        finally:timer.cancel()
         self.native_spent+=m.Runtime
         r=dict(label=label,start=start-self.start,end=time.perf_counter()-self.start,native_runtime=m.Runtime,status=m.Status,
             objective=m.ObjVal if m.SolCount else None,ObjBound=m.ObjBound if m.IsMIP and abs(m.ObjBound)<1e90 else None,
@@ -101,7 +108,7 @@ class FullScaleEarlyBAP:
     def update_columns(self,node):
         keys=list(node.column_ids)
         active=set(self.registry.partition(keys,node.decisions)[0])
-        for j,h in enumerate(self.pool+self.new):self.basevars[self.offset+j].UB=gp.GRB.INFINITY if h['column_SHA'] in active else 0.
+        for j,h in enumerate(self.pool+self.new):self.basevars[self.offset+j].UB=gp.GRB.INFINITY if column_key(h) in active else 0.
         self.model.update()
     def native_price(self,node,pi,alpha,m):
         if m not in self.blocks:self.blocks[m]=CheckedBlock(self.B,self.e,self.owner,self.row_owner,self.native,m)
@@ -125,12 +132,14 @@ class FullScaleEarlyBAP:
             record.update(candidate_valid=valid,rc=float(exact))
             if bound is not None and valid and bound>float(exact)+1e-8:raise ValueError('PRICING_BOUND_CONTRADICTION')
             if valid and exact<-F(1e-8):
-                a,c,key=b.column(x)
+                a,c,column_sha=b.column(x);key=str(m)+':'+column_sha
+                _,coupling_error=b.exact_coupling(x,a)
+                if coupling_error>1e-12:raise ValueError('PRICING_ORIGINAL_COUPLING_TRANSPORT_FAILED')
                 if key not in self.registry.columns:
                     name=f'columns/NEW_{len(self.new):04d}_{b.unit}.npz';p=OUT/name;p.parent.mkdir(parents=True,exist_ok=True)
                     np.savez_compressed(p,x=x,a=a,c=c,axis=b.columns)
-                    h=dict(file=p.relative_to(ROOT).as_posix(),file_SHA=sha(p),column_SHA=key,MESS=b.unit)
-                    self.new.append(h);self.registry.columns[key]=SimpleNamespace(mess=m,h=h,sha=key)
+                    h=dict(file=p.relative_to(ROOT).as_posix(),file_SHA=sha(p),column_SHA=column_sha,MESS=b.unit)
+                    self.new.append(h);self.registry.columns[key]=SimpleNamespace(mess=m,h=h,sha=column_sha)
                     ix=np.flatnonzero(a);column=gp.Column(a[ix].tolist()+[1.],[self.constraints[i] for i in ix]+[self.constraints[len(self.grows)+m]])
                     self.basevars.append(self.model.addVar(lb=0.,obj=c,name=f'lambda[{b.unit},new{len(self.new)-1}]',column=column));self.model.update()
                     record['added_column']=key
@@ -146,6 +155,7 @@ class FullScaleEarlyBAP:
         if self.model.Status!=2:return NodeResult('RMP_INCONCLUSIVE',keys)
         rmp_objective=self.model.ObjVal
         rmp_cost=np.asarray(self.model.getAttr('Obj'))
+        active_upper=np.asarray(self.model.getAttr('UB'))
         x=np.asarray(self.model.getAttr('X'));p,z=self.projection(x)
         # Original affine/physical thresholds, no node infeasibility claim.
         matrix=self.model.getA().tocsr();rhs=np.asarray(self.model.getAttr('RHS'));sense=np.asarray(self.model.getAttr('Sense'))
@@ -177,6 +187,8 @@ class FullScaleEarlyBAP:
             # All retained RCs with corrected convexity dual, paid native safety.
             M=matrix.tocsc();minimum=None
             for j in range(self.offset,matrix.shape[1]):
+                if active_upper[j]==0:continue  # fixed zero has zero bound support;
+                # incompatible trajectories are outside this node's pricing domain.
                 a,b=M.indptr[j:j+2];q=F(float(rmp_cost[j]))-sum((F(float(pi[int(i)]))*F(float(w)) for i,w in zip(M.indices[a:b],M.data[a:b]) if pi[int(i)]),F(0))
                 unit=(self.pool+self.new)[j-self.offset]['MESS'];q-=delta[int(unit[-2:])-1]
                 minimum=q if minimum is None else min(minimum,q)
@@ -210,7 +222,7 @@ def run():
         # Historical continuation kept the same certified floor throughout.
         history=read(ROOT/'docs/v42_m_stage_exact_completion/DW_CONTINUATION_FINAL_RESULT.json')
         assert history['best_certified_LB']==solver.floor
-        selected=(reduction>0 or end['gap']<=.005) and end['gap']<=start['gap']
+        selected=(start['gap']-end['gap']>1e-8 or end['gap']<=.005) and end['gap']<=start['gap']
         write('EARLY_BAP_MICROBENCHMARK.json',dict(EXACT_DUAL_AUTHORITY_FOR_BAP=True,starting=start,ending=end,wall_seconds=elapsed,native_runtime=solver.native_spent,
             gap_reduction_per_wall_second=reduction,EARLY_BAP_SELECTED=selected,historical_root_CG_certified_global_gap_reduction_per_wall_second=0.,
             historical_comparison_scope='Same inherited global floor and current fixed integer UB; historical restricted-LP improvement is not global gap progress',
