@@ -95,6 +95,12 @@ def run():
         final_certified_best_UB_grid_PASS=True,final_best_UB_origin='previously validated original integer Start; no new UB improvement',
         stop_reason='BOUNDED_DEVELOPMENT_WALL_END_NOT_SCIENTIFIC_CONVERGENCE',
         rows_added_after_last_solve_not_yet_resolved=last['added'],additional_native_solves=0))
+    rawselection=OUT/'M1_DECOMPOSITION_SELECTION_BENCHMARK_RAW.json'
+    if not rawselection.exists():rawselection.write_bytes((OUT/'M1_DECOMPOSITION_SELECTION.json').read_bytes())
+    selection.update(exhaustive_final_separation_scope='certified best UB (original-feasible inherited Start), not terminal row-generation candidate',
+        row_generation_candidate_converged=candidate_converged,last_candidate_original_grid_violations=last['added'],
+        benchmark_raw_selection_SHA=sha(rawselection),additional_native_solves_after_budget=0)
+    write('M1_DECOMPOSITION_SELECTION.json',selection)
     assert len(calls)==a['master_solves']+b['master_solves']
     assert all(v['arm']=='A_BASELINE' for v in calls[:a['master_solves']])
     assert all(v['arm']=='B_ROWGEN' for v in calls[a['master_solves']:])
