@@ -78,3 +78,9 @@ def test_snapshot_cannot_be_overwritten(tmp_path):
     try:
         with pytest.raises(FileExistsError):capture(m,p)
     finally:m.dispose()
+
+def test_barrier_dual_cannot_be_declared_a_terminal_simplex_pair(tmp_path):
+    m=fixture('<');p=tmp_path/'pair.npz';capture(m,p);m.dispose()
+    meta=json.loads(p.with_suffix('.json').read_text());meta['terminal_pair']='BarPi with terminal X'
+    p.with_suffix('.json').write_text(json.dumps(meta))
+    r=validate(p);assert not r['PASS'] and not r['same_terminal_representation_PASS']

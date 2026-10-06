@@ -74,9 +74,10 @@ def validate(path):
     difference=abs(primal-dual) if dual is not None else None
     strong=bool(support_available and difference<=EPS and abs(primal-meta['native_objective'])<=EPS)
     feasible=bool(vio.max(initial=0)<=ROW_EPS and bounds<=EPS)
-    pair=meta['status']==2 and meta['model_sense']==1 and meta['original_to_native_row_multiplier']==1
+    pair=bool(meta['status']==2 and meta['model_sense']==1 and meta['original_to_native_row_multiplier']==1
+        and meta['terminal_pair']=='X/Pi/RC queried from the same terminal model; BarPi/BarX never substituted')
     result=dict(PASS=bool(identity and finite and sign and error<=EPS and strong and feasible and pair),
-        same_axis_SHA_PASS=identity,finite=finite,strict_sense_sign_PASS=sign,
+        same_axis_SHA_PASS=identity,same_terminal_representation_PASS=pair,finite=finite,strict_sense_sign_PASS=sign,
         first_bad_row=None if not len(bad) else dict(index=int(bad[0]),name=str(v['row_names'][bad[0]]),sense=str(sense[bad[0]]),Pi=float(pi[bad[0]])),
         max_existing_column_RC_error=error,existing_column_RC_PASS=error<=EPS,
         strong_duality_PASS=strong,primal_objective=primal,dual_objective_including_bound_terms=dual,
