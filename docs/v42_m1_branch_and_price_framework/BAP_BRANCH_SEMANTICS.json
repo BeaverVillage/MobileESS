@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "scientific_base_sha": "ce5d30fb9bcb91ab8395d1313e868d24f5fde517",
+  "immutable": true,
+  "candidates": [
+    "location (time-network departure node occupancy)",
+    "movement (individual original travel arc)",
+    "original_binary (all original arc/mode binaries)"
+  ],
+  "branch_values": [
+    0,
+    1
+  ],
+  "selection": [
+    "closest to .5",
+    "family",
+    "MESS",
+    "time",
+    "site_or_arc",
+    "original terms"
+  ],
+  "child_union_parent": true,
+  "child_intersection_empty": true,
+  "native_location": "sum outgoing original arc[m,k] at (site,time); zero during transit",
+  "pricing": "all original local rows/bounds/types plus equality on same original-variable expression",
+  "lambda_column_branching": false,
+  "strong_branching": false,
+  "original_scientific_modules_changed": false
+}

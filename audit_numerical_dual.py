@@ -8,6 +8,7 @@ from v42_m_stage_root.dual_authority import ARRAY_FIELDS,array_sha
 from v42_degen.identity import inputs,digest
 from v42_dw_root.partition import axes
 from v42_m_stage_root.numerical_certificate import canonicalize,independent_csc,residual,support,down
+from v42_m_stage_root.conservative_authority import numerical_zero_sign,free_rc_consistency,split_gates
 
 ROOT=Path(__file__).resolve().parent
 HISTORY=ROOT/'docs/v42_m1_rmp43_reproduction_20261006'
@@ -93,7 +94,7 @@ def rational_artifact(name,pi):
     np.savez_compressed(OUT/name,rows=np.array(rows,dtype=np.int64),
         numerators=np.array([str(pi[i].numerator) for i in rows]),denominators=np.array([str(pi[i].denominator) for i in rows]))
 def fraction_record(q):return dict(numerator=str(q.numerator),denominator=str(q.denominator),float_diagnostic=float(q))
-def attempt():
+def attempt(conservative=False):
     start=time.perf_counter();A,v,meta,B,e,owner,row_owner,raw=run_metrics()
     write('AUDIT_PREREGISTRATION.json',dict(native_solve_calls=0,raw_snapshot_SHA=sha(RAW),
         policy='User-authorized numerical boundary canonicalization only with existing residual authority; exact original-equality free stationarity and convexity dual correction, then independent rational support.',
@@ -101,6 +102,11 @@ def attempt():
         root_CG=False,early_BAP=False,BAP7200=False,P2=False))
     if not raw['floating_residual_candidate_within_existing_authority']:
         write('OFFLINE_CERTIFICATE_RESULT.json',dict(PASS=False,EXACT_DUAL_AUTHORITY_PASS=False,reason='RAW_RESIDUAL_OUTSIDE_AUTHORITY',native_solve_calls=0));return
+    sign_pi,sign_trace=numerical_zero_sign(v['pi'],v['sense'])
+    recomputed=v['objective']-A.T@sign_pi
+    free_trace=free_rc_consistency(recomputed,v['lower'],v['upper'])
+    write('NUMERICAL_ZERO_AUTHORITY.json',dict(**sign_trace,**free_trace,all_RC_recomputed_after_sign_projection=True,
+        individual_RC_zeroing=False,conservative_gate_requested=conservative,raw_snapshot_unchanged=True))
     source=ROOT/'docs/v42_m1_dw_certified_dual_bound/PROVEN_COORDINATE_ENCLOSURES.npz'
     proof=read(source.with_name('COORDINATE_ENCLOSURE_PROOF.json'))
     assert proof['PASS'] and sha(source)==proof['artifact_SHA']
@@ -147,7 +153,10 @@ def attempt():
         primal=F(float(v['constant']))+sum((F(float(c))*F(float(x)) for c,x in zip(v['objective'],v['point']) if c),F(0))
         difference=primal-Li;safe=down(Li-F(EPS))
         max_RC_change=max(abs(qi[j]-F(float(v['rc'][j]))) for j in range(A.shape[1]))
-        rmppass=minimum>=0 and free==len(cols)-1 and abs(difference)<=F(EPS) and F(safe)<=Li and max_RC_change<=F(EPS)
+        gates=split_gates(primal,Li,exact_signs=True,exact_columns=minimum>=0,
+            exact_bounds=free==len(cols)-1 and F(safe)<=Li,independent_identity=True,
+            corrected_formula=True,rational_verification=True)
+        rmppass=minimum>=0 and free==len(cols)-1 and F(safe)<=Li and max_RC_change<=F(EPS) and (gates['weak_duality_PASS'] if conservative else abs(difference)<=F(EPS))
         write('RMP_RATIONAL_SUPPORT_CERTIFICATE.json',dict(PASS=rmppass,scope='Only the current 1841-column RMP; not full-domain pricing closure or an integer UB',
             independent_CSR_CSC_identity_PASS=True,original_bounds_only=True,infinite_support_rejected=True,
             all_original_free_stationarity_exact_zero=free,all_83058_RC_recomputed=True,
@@ -187,7 +196,11 @@ def attempt():
             global_support_value=fraction_record(global_value),independent_full_original_CSC_PASS=True,
             canonical_dual_SHA=sha(OUT/'CANONICAL_RATIONAL_DUAL.npz'),stale_pricing_bound_used=False,full_domain_native_pricing_calls=0,
             root_CG_converged=False,integer_UB=None,not_a_materiality_reproof=True))
-        result=dict(PASS=bool(rmppass and fullpass),EXACT_DUAL_AUTHORITY_PASS=bool(rmppass and fullpass),
+        gates['CONSERVATIVE_DUAL_LB_CERTIFICATE']=gates['EXACT_DUAL_AUTHORITY_FOR_BAP']=bool(rmppass and fullpass) if conservative else False
+        write('SPLIT_DUAL_GATES.json',dict(**gates,restricted_safe_LB=safe,full_domain_corrected_LB=down(corrected),
+            current_certified_conservative_global_LB=max(.5687115725336208,down(corrected)),restricted_LB_is_not_global=True))
+        result=dict(PASS=bool(rmppass and fullpass),EXACT_DUAL_AUTHORITY_PASS=bool(gates['OPTIMAL_DUAL_IDENTITY'] and rmppass and fullpass),
+            EXACT_DUAL_AUTHORITY_FOR_BAP=gates['EXACT_DUAL_AUTHORITY_FOR_BAP'],
             raw_native_dual_remains_strict_sign_FAIL=True,user_authorized_canonical_rational_witness=True,
             native_solve_calls=0,polish_required=not bool(rmppass and fullpass),root_CG=False,early_BAP=False,BAP7200=False,P2=False,
             raw_snapshot_SHA=sha(RAW),canonical_dual_SHA=sha(OUT/'CANONICAL_RATIONAL_DUAL.npz'),
@@ -198,8 +211,8 @@ def attempt():
         print(json.dumps(read(OUT/'OFFLINE_CERTIFICATE_RESULT.json')),flush=True)
 if __name__=='__main__':
     import argparse
-    parser=argparse.ArgumentParser();parser.add_argument('--certificate',action='store_true');parser.add_argument('--raw',type=Path);parser.add_argument('--out',type=Path)
+    parser=argparse.ArgumentParser();parser.add_argument('--certificate',action='store_true');parser.add_argument('--conservative',action='store_true');parser.add_argument('--raw',type=Path);parser.add_argument('--out',type=Path)
     args=parser.parse_args()
     if args.raw:RAW=args.raw.resolve()
     if args.out:OUT=args.out.resolve()
-    attempt() if args.certificate else run_metrics()
+    attempt(args.conservative) if args.certificate else run_metrics()
