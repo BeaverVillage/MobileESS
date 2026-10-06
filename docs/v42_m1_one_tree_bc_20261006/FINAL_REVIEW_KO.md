@@ -25,7 +25,7 @@
 | 20. Build / native / wall초 | 1.634 / 273.569 / 278.132 | 1.289 / 271.840 / 276.499 |
 | 21. RSS / process commit / min RAM | 3.035 GiB / 4.172 GiB / 15.857 GiB | 8.126 GiB / 11.303 GiB / 10.599 GiB |
 | 22. Selected | — | False |
-| 23. Benchmark source commit | 69ae9406e5fa3c5569cc08d8d723ad0cbbcea445 | Draft PR는 별도 PR_RECEIPT.json 및 최종 응답에 기록 |
+| 23. Benchmark source commit / Draft PR | 69ae9406e5fa3c5569cc08d8d723ad0cbbcea445 | [Draft PR159](https://github.com/BeaverVillage/MobileESS/pull/159), PR158의 자식 |
 
 실제 MIPNODE separation=0,
 MIPSOL exhaustive separation=2.

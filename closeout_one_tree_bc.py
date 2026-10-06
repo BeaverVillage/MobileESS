@@ -161,7 +161,7 @@ def run():
         ('20. Build / native / wall초',f"{a['build_wall']:.3f} / {a['native_runtime']:.3f} / {a['wall_runtime']:.3f}",f"{b['build_wall']:.3f} / {b['native_runtime']:.3f} / {b['wall_runtime']:.3f}"),
         ('21. RSS / process commit / min RAM',f"{gib(a['peak_RSS'])} / {gib(a['peak_process_commit'])} / {gib(a['minimum_available_RAM'])}",f"{gib(b['peak_RSS'])} / {gib(b['peak_process_commit'])} / {gib(b['minimum_available_RAM'])}"),
         ('22. Selected','—',selection['ONE_TREE_BC_SELECTED']),
-        ('23. Benchmark source commit',execution['source_commit'],'Draft PR는 별도 PR_RECEIPT.json 및 최종 응답에 기록')]
+        ('23. Benchmark source commit / Draft PR',execution['source_commit'],'[Draft PR159](https://github.com/BeaverVillage/MobileESS/pull/159), PR158의 자식')]
     text=f"""# M1 one-tree exact grid branch-and-cut 최종 검토
 
 최종 상태: **{selection['final_state']}**. ONE_TREE_BC_SELECTED={str(selection['ONE_TREE_BC_SELECTED']).lower()}.
