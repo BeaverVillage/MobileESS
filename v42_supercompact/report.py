@@ -75,7 +75,7 @@ def run():
     if selection['SUPER_COMPACT_EXACT_SELECTED']:
         freeze=read('SUPERCOMPACT_EXECUTION_FREEZE.json');freeze.update(name='SUPER_COMPACT_CURRENT_AUTHORITY_M1',selection=selection,freeze_files={n:sha(OUT/n) for n in ['C2_A.npz','C2_DATA.npz','C2_ELIMINATION_CERTIFICATES.json','C2_ROW_CERTIFICATES.json','C2_RETAINED_AXES.npz','COMPACT_BOUND_TIGHTENING.csv','C2_VALID_START.npz','COMPACT_START_MAPPING.json']},heavy_experiment_STOP=True);write('SUPER_COMPACT_CURRENT_AUTHORITY_M1.json',freeze)
     manifest={}
-    paths=list((ROOT/'v42_supercompact').glob('*.py'))+[ROOT/'v42_supercompact/.gitattributes',ROOT/'.gitignore']+list(OUT.iterdir())
+    paths=list((ROOT/'v42_supercompact').glob('*.py'))+[ROOT/'v42_supercompact/.gitattributes',ROOT/'.gitignore',ROOT/'.gitattributes']+list(OUT.iterdir())
     for p in sorted(paths):
         if p.is_file() and p.name!='SHA256_MANIFEST.json':manifest[str(p.relative_to(ROOT)).replace('\\','/')]=sha(p)
     write('SHA256_MANIFEST.json',dict(algorithm='SHA256',files=manifest,file_count=len(manifest),manifest_self_excluded=True,scientific_base=BASE,executed_source_commit=source))

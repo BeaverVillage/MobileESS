@@ -47,7 +47,7 @@ F1 원본 arc reference: rows 695,737, cols 316,743, B 208,312, nnz 5,586,970. F
 | 30. 유효 UB/LB/gap | 아래 표. native BestBd와 inherited full-domain LB는 별도 열로 표시. |
 | 31. 메모리 | 아래 peak RSS/process commit 표. 메모리만으로 선택하지 않는다. |
 | 32. SUPER_COMPACT_EXACT_SELECTED | True |
-| 33. 정확한 commit / Draft PR | 실행 source 4c491cbb4427776d0ac095ef563c3908422522f8; evidence receipt 4c491cbb4427776d0ac095ef563c3908422522f8; Draft PR 작성 예정; 게시 후 최종 head는 PUBLICATION.json/최종 응답에 별도 기록. |
+| 33. 정확한 commit / Draft PR | 실행 source 4c491cbb4427776d0ac095ef563c3908422522f8; evidence receipt 2b2fcef10a1de7e858ca129c7c399280e9ce2a72; Draft PR 작성 예정; 게시 후 최종 head는 PUBLICATION.json/최종 응답에 별도 기록. |
 | 34. 선택 시 다음 lane | Lane A native C2가 우선. Lane B/C는 callback/원본 행 preimage 증명 후, Lane D는 original-arc F1, Lane E는 recourse 10배 개선 예측 이후. 이번 작업에서는 tournament 미실행. |
 
 | arm | root 완료 | root LP s | root LP Work (로그) | native Runtime s | 전체 Work | nodes | raw BestBd | safe native LB | inherited LB | valid LB | valid UB | valid gap |
