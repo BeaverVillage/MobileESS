@@ -117,4 +117,3 @@ class LPOracle:
         assert self.objective_identity()['PASS'];write(receipt.relative_to(OUT),result);self.active=None
         print('EXTERNAL_LP_COMPLETE',n,result['LP_status'],round(result['Runtime'],3),result['LP_objective'],result['basis_accepted'],flush=True);return result
     def close(self):self.gp.Model.optimize=self.original_optimize;self.m.dispose()
-
