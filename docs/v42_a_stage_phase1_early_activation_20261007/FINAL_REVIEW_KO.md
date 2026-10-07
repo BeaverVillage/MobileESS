@@ -58,6 +58,6 @@
 
 25. **정확한 최종 HEAD?** 최종 공개 HEAD는 [FINAL_PUBLICATION_RECEIPT.json](C:/Users/kjw39/Documents/Codex/2026-10-07/v42-a-stage-early-static/FINAL_PUBLICATION_RECEIPT.json)의 exact_final_head에 기록. 실행 소스 HEAD: ba1c9b2ff63ea2b6be13ab06a601986eef82a775. 자기 commit 해시 순환참조를 피하는 외부 출판 영수증.
 
-26. **Draft PR URL?** Draft PR publication pending
+26. **Draft PR URL?** https://github.com/BeaverVillage/MobileESS/pull/174
 
 실행 종료 후 새 native solve는 수행하지 않았다. 다른 날짜 및 full A1/Planning/Actual/Fresh는 실행하지 않았다. 최종 HEAD/remote/clean-tree 검증은 외부 출판 영수증이 고정하며, 각 native 실행 소스와 archive 해시는 NATIVE_RUN_SOURCES.csv에 별도로 고정한다.
