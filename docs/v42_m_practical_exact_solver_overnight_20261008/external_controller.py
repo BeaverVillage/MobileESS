@@ -157,7 +157,15 @@ def audit_checkpoint(bb,A,d):
 def start_queue(oracle,args):
     finish_pending_recoveries()
     checkpoint=RUN/'OPEN_CHECKPOINT.json'
-    ledger=read(OUT/'GLOBAL_BOUND_LEDGER.json');registered=max([ledger['initial']['LB']]+[r['LB'] for r in ledger['events']])
+    ledger=read(OUT/'GLOBAL_BOUND_LEDGER.json');assert ledger['initial']['LB']==INITIAL_LB and ledger['initial']['UB']==INITIAL_UB
+    bounds=[INITIAL_LB]
+    for event in ledger['events']:
+        source=(OUT/event['source']).resolve();assert source.is_relative_to(OUT.resolve()) and sha(source)==event['source_SHA256']
+        receipt=read(source);audit=source.parent/'INDEPENDENT_AUDIT.json'
+        assert sha(audit)==event['independent_audit_SHA256'] and read(audit)['PASS']
+        assert not receipt['restricted'] and receipt['bound_authority']['PASS'] and receipt['global_LB']==event['LB'] and receipt['valid_UB']==event['UB']
+        bounds.append(event['LB'])
+    registered=max(bounds)
     assert F.from_float(args.initial_lb)<=F.from_float(registered),'INITIAL_LB_EXCEEDS_REGISTERED_GLOBAL_AUTHORITY'
     with np.load(Path(args.center)) as z:center=z['x'].copy()
     replay=full_replay(oracle.A,oracle.d,center);assert replay['PASS']
