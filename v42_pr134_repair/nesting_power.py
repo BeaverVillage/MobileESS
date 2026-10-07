@@ -15,7 +15,7 @@ def run(day):
     import v42_temporal.native as temporal
     b=read(PRODUCTION/'inputs'/day/'NATIVE_INPUT.json');d='DAY_'+day.replace('-','')
     base=ROOT/'docs/v42_may_b0_zero_margin_holdout';p=read(base/'INPUT/BUNDLE'/d/'PLANNING_INPUT_BUNDLE.json')
-    c1=pd.read_csv(base/'INPUT/BUNDLE'/d/'C1_PLANNING_COEFFICIENTS.csv');power0=read(base/'INPUT/BUNDLE'/d/'POWER_AUTHORITY.json')
+    c1=pd.read_csv(base/'INPUT/BUNDLE'/d/'C1_PLANNING_COEFFICIENTS.csv',float_precision='round_trip');power0=read(base/'INPUT/BUNDLE'/d/'POWER_AUTHORITY.json')
     cert,power,idle,swing=temporal.load_power(b)
     discrepancies=[]
     for row in c1.itertuples():
@@ -30,7 +30,7 @@ def run(day):
         C1_swing_equal=swing==power0['current_IT_swing_kW_per_active_GPU'],
         B0_C1=record(base/'INPUT/BUNDLE'/d/'C1_PLANNING_COEFFICIENTS.csv'),
         B0_power=record(base/'INPUT/BUNDLE'/d/'POWER_AUTHORITY.json'),B1_electrical_certificate=b['electrical_certificate'],
-        B0_voltage=p['primary_voltage'],B1_voltage=dict(lower_pu=.95,upper_pu=1.05),
+        B0_voltage=p['primary_voltage_band_pu'],B1_voltage=dict(lower_pu=.95,upper_pu=1.05),
         B0_network_authority=p['network_authority'],B1_electrical_input_refs=walk_refs(cert['input_identity']),
         B0_background_refs=walk_refs(read(base/'INPUT/BUNDLE'/d/'SOURCE_PROVENANCE.json')),
         C1_grid_embedding_proven=False,

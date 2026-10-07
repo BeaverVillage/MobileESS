@@ -64,14 +64,16 @@ def run(day):
     # A continuous IIS relaxation is a certificate problem, not a modified
     # production model. LP infeasibility proves integer-model infeasibility.
     columns=np.unique(a[rows].indices);small=a[rows][:,columns]
-    iz=dict(lb=np.where(np.isin(columns,lbs),z['lb'][columns],-np.inf),
-        ub=np.where(np.isin(columns,ubs),z['ub'][columns],np.inf),rhs=z['rhs'][rows],sense=z['sense'][rows])
+    # IISLB/IISUB omit implicit binary domains. Retaining every original
+    # bound makes this an exact relaxation of a subset of original rows,
+    # sufficient (not necessarily minimal) for an original infeasibility proof.
+    iz=dict(lb=z['lb'][columns],ub=z['ub'][columns],rhs=z['rhs'][rows],sense=z['sense'][rows])
     lp=gp.Model('ORIGINAL_IIS_CERTIFICATE_ONLY');lp.Params.OutputFlag=0
     lx=lp.addMVar(len(columns),lb=iz['lb'],ub=iz['ub']);lp.addMConstr(small,lx,iz['sense'],iz['rhs']);lp.update()
     lp.Params.Threads=1;lp.Params.Method=1;lp.Params.InfUnbdInfo=1;lp.Params.DualReductions=0
     lp.Params.TimeLimit=max(0,BUDGET-spent);lp.Params.LogFile=str(target/'ORIGINAL_IIS_LP_CERTIFICATE.log');lp.optimize();spent+=lp.Runtime
     result.update(IIS_LP_status=lp.Status,IIS_LP_native_runtime=lp.Runtime,diagnostic_budget_used=spent,
-        IIS_LP_certificate_only=True,production_settings_changed=False)
+        IIS_LP_certificate_only=True,IIS_LP_all_original_bounds_retained=True,production_settings_changed=False)
     if lp.Status==gp.GRB.INFEASIBLE:
         ray=np.array(lp.getAttr('FarkasDual'));np.savez_compressed(target/'ORIGINAL_IIS_RAW_FARKAS.npz',ray=ray,rows=rows,columns=columns)
         cert=exact_ray(small,iz,ray);atomic(target/'EXACT_RAW_FARKAS_CHECK.json',cert)
