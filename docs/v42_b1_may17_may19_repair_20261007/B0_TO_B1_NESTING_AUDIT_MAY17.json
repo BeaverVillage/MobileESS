@@ -1,0 +1,114 @@
+{
+  "day": "2025-05-17",
+  "physical_population_equal": true,
+  "Runtime_GPU_service_mismatches": [],
+  "same_current_C0_Q50": true,
+  "same_current_C0_Q90": true,
+  "same_capacity": true,
+  "same_issue": true,
+  "B0_reference": {
+    "path": "C:\\v42_a1_pr134_supercompact_exact_20261007\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250517\\REFERENCE.json",
+    "sha256": "a29a21d48dac61f253ed5505007d224ffa7291390bfda92720cd6ed052ed4e16",
+    "bytes": 3151314
+  },
+  "B1_reference": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-17\\common_q90_v3\\COMMON_B0_REFERENCE_JOBS.json",
+    "sha256": "2376e37e517a78482ce0d95300f950d434799bf3c87ccbe4e863ce8431797d77",
+    "bytes": 2214433,
+    "period": "2025-05-17",
+    "units": "GPU,seconds,issue-origin 900s slots",
+    "role": "Authoritative known-job independent-day reference and exact service",
+    "authority_status": "FROZEN_SOURCE_REUSED"
+  },
+  "B0_rule": "V42_COMMON_FCFS_Q50_NOMINAL_RELEASE_V2",
+  "B1_rule": "PR134_ORIGINAL_R0_REQUESTED_DURATION_REFERENCE_WITH_CURRENT_Q50_SERVICE",
+  "zero_action_embedding": false,
+  "differing_positive_jobs": 2024,
+  "absent_start_site_jobs": 1935,
+  "first_counterexample": [
+    {
+      "job_uid": "8772829",
+      "B0_site": "AIDC01",
+      "B1_site": "AIDC08",
+      "B0_start": 0,
+      "B1_start": 5,
+      "GPU": 1,
+      "service_slots": 16,
+      "allowed_starts": [
+        5
+      ],
+      "fixed_domain": false,
+      "B0_point_in_domain": false,
+      "reason": "NONZERO_PRESTART_RELOCATION_RELATIVE_TO_PR134_R0;NONZERO_TIMESHIFT_RELATIVE_TO_PR134_R0;B0_START_SITE_ABSENT_COMPLETE_PR134_DOMAIN"
+    },
+    {
+      "job_uid": "8937967",
+      "B0_site": "AIDC01",
+      "B1_site": "AIDC08",
+      "B0_start": 0,
+      "B1_start": 5,
+      "GPU": 1,
+      "service_slots": 3,
+      "allowed_starts": [
+        5
+      ],
+      "fixed_domain": false,
+      "B0_point_in_domain": false,
+      "reason": "NONZERO_PRESTART_RELOCATION_RELATIVE_TO_PR134_R0;NONZERO_TIMESHIFT_RELATIVE_TO_PR134_R0;B0_START_SITE_ABSENT_COMPLETE_PR134_DOMAIN"
+    },
+    {
+      "job_uid": "8937970",
+      "B0_site": "AIDC01",
+      "B1_site": "AIDC08",
+      "B0_start": 0,
+      "B1_start": 5,
+      "GPU": 1,
+      "service_slots": 3,
+      "allowed_starts": [
+        5
+      ],
+      "fixed_domain": false,
+      "B0_point_in_domain": false,
+      "reason": "NONZERO_PRESTART_RELOCATION_RELATIVE_TO_PR134_R0;NONZERO_TIMESHIFT_RELATIVE_TO_PR134_R0;B0_START_SITE_ABSENT_COMPLETE_PR134_DOMAIN"
+    },
+    {
+      "job_uid": "8937971",
+      "B0_site": "AIDC01",
+      "B1_site": "AIDC08",
+      "B0_start": 0,
+      "B1_start": 5,
+      "GPU": 1,
+      "service_slots": 3,
+      "allowed_starts": [
+        5
+      ],
+      "fixed_domain": false,
+      "B0_point_in_domain": false,
+      "reason": "NONZERO_PRESTART_RELOCATION_RELATIVE_TO_PR134_R0;NONZERO_TIMESHIFT_RELATIVE_TO_PR134_R0;B0_START_SITE_ABSENT_COMPLETE_PR134_DOMAIN"
+    },
+    {
+      "job_uid": "8937972",
+      "B0_site": "AIDC01",
+      "B1_site": "AIDC08",
+      "B0_start": 0,
+      "B1_start": 5,
+      "GPU": 1,
+      "service_slots": 3,
+      "allowed_starts": [
+        5
+      ],
+      "fixed_domain": false,
+      "B0_point_in_domain": false,
+      "reason": "NONZERO_PRESTART_RELOCATION_RELATIVE_TO_PR134_R0;NONZERO_TIMESHIFT_RELATIVE_TO_PR134_R0;B0_START_SITE_ABSENT_COMPLETE_PR134_DOMAIN"
+    }
+  ],
+  "timing_axis": "Both issue-relative slots; day controls use issue slots24..119",
+  "B0_CC4_rule": "capacity queue retains carryout/backlog",
+  "B1_CC4_rule": "cohort temporal Q10/Q90 cumulative envelope and work-conservation",
+  "B0_to_B1_CC4_embedding_proven": false,
+  "C1_grid_embedding_proven": false,
+  "direct_witness_status": "UNAVAILABLE_ZERO_ACTION_DOMAIN_COUNTEREXAMPLE",
+  "scientific_change_to_force_embedding_permitted": false,
+  "optimization_calls": 0,
+  "explanation": "B0 current FCFS Q50 reference is not the PR134 R0 reference. Identical service does not imply identical admitted no-action trajectory. No witness is fabricated or rounded."
+}
