@@ -1,0 +1,28 @@
+{
+  "day": "2025-05-19",
+  "source_commit": "6fde0f1806b1e5d425de50d43bb1202b0e2baae5",
+  "classification": "PHASE1_NUMERICAL_CERTIFICATION_FAIL",
+  "ACTIVE_DOMAIN_FEASIBLE": false,
+  "FULL_LP_FEASIBILITY_CLOSED": false,
+  "FULL_LP_DOMAIN_INFEASIBLE": false,
+  "LP_PRICING_CLOSED": false,
+  "INTEGER_DOMAIN_CLOSURE_PROVEN": false,
+  "PRODUCTION_ACCEPTED": false,
+  "activation_rounds": 0,
+  "artificials_in_original_or_production": 0,
+  "initial_phi": 0.006626776621085752,
+  "error": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\kjw39\\\\Documents\\\\Codex\\\\2026-10-07\\\\a-stage-phase1-pricing\\\\docs\\\\v42_a_stage_phase1_pricing_20261007\\\\MAY19\\\\ROUND_000\\\\BLOCKS\\\\0216b79ec3bb8b1f22f5510196354e133189553f3863211da87699c140acffb6\\\\INDEPENDENT_DUAL_SIGN_AND_RAW_REPLAY.json.75276.9ee64c7569434b0bbd757fd870d50941.tmp'",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-07\\a-stage-phase1-pricing\\v42_a_stage_phase1\\runner.py\", line 298, in run\n    pricing,negative=full_pricing(native,original,master,raw,descriptor,data,domains,ledger,axes,n,global_rows,local_rows,owned,folder)\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-07\\a-stage-phase1-pricing\\v42_a_stage_phase1\\runner.py\", line 51, in full_pricing\n    try:return _full_pricing(native,*args,**kwargs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-07\\a-stage-phase1-pricing\\v42_a_stage_phase1\\runner.py\", line 103, in _full_pricing\n    atomic(folder/'INDEPENDENT_DUAL_SIGN_AND_RAW_REPLAY.json',dict(sign=sign,raw=replay))\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-07\\a-stage-phase1-pricing\\v42_pr134_b1\\common.py\", line 47, in atomic\n    t.write_text(json.dumps(clean(v),ensure_ascii=False,indent=2,allow_nan=False)+'\\n',encoding='utf8',newline='\\n');replace_file(t,p)\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\pathlib.py\", line 1078, in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\pathlib.py\", line 1044, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\kjw39\\\\Documents\\\\Codex\\\\2026-10-07\\\\a-stage-phase1-pricing\\\\docs\\\\v42_a_stage_phase1_pricing_20261007\\\\MAY19\\\\ROUND_000\\\\BLOCKS\\\\0216b79ec3bb8b1f22f5510196354e133189553f3863211da87699c140acffb6\\\\INDEPENDENT_DUAL_SIGN_AND_RAW_REPLAY.json.75276.9ee64c7569434b0bbd757fd870d50941.tmp'\n",
+  "native_seconds": 268.82299995422363,
+  "pricing_wall_seconds": 5.376908200007165,
+  "native_calls": 2,
+  "final_original_model": {
+    "rows": 712791,
+    "cols": 83751,
+    "nnz": 13751140
+  },
+  "final_active_STAY": 35893,
+  "final_active_migration": 128,
+  "actual_activated_STAY": 0,
+  "actual_activated_migration": 0
+}
