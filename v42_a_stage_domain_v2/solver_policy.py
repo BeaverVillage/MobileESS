@@ -45,4 +45,3 @@ def apply_policy(model, policy, gp):
         raise PermissionError('DIAGNOSTIC_CROSSOVER0_NOT_PRODUCTION_POLICY')
     for name,value in policy['parameters'].items():model.setParam(name,value)
     return {name:getattr(model.Params,name) for name in policy['parameters']}
-

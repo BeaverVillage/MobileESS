@@ -22,7 +22,7 @@ from v42_pr134_b1.common import atomic, read, record, digest
 
 ROOT=Path(__file__).resolve().parents[1]
 DOCS=ROOT/'docs/v42_a_stage_domain_authority_v2_20261007'
-STATIC=Path('C:/v42_a_stage_v2_stress4_20261007/static')
+STATIC=ROOT.parent/'v42-a-stage-v2-stress4-static'
 
 
 def snapshot_of(model, objectives):

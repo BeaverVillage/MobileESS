@@ -181,4 +181,3 @@ def test_native_error_accounts_only_failed_current_call_once(tmp_path,monkeypatc
     assert result['classification']=='UNRESOLVED'
     receipt=json.loads((tmp_path/'run/migration_count/NATIVE_TELEMETRY.json').read_text())
     assert receipt['objective_stage_timings'][0]['native_seconds']==.5
-

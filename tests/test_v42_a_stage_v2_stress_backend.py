@@ -100,4 +100,3 @@ def test_integer_certificate_rejects_numerical_native_status_and_stale_matrix():
     backend.model.Status=gp.GRB.OPTIMAL
     backend.last_verification['source_matrix_sha256']='0'*64
     assert not backend.integer_certificate('shift_magnitude',1.,.5)['PASS']
-
