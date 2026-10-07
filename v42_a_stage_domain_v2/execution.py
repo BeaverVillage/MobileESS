@@ -165,6 +165,9 @@ def require_action_authorized(authority, action='OPTIMIZE', *, require_day=True)
         day = _native_day.get()
     if day is None and require_day:
         raise PermissionError('A_STAGE_PRODUCTION_DAY_REQUIRED')
+    from v42_a_stage_lex.execution import current as lex_current, authorize as lex_authorize
+    if lex_current() is not None:
+        return lex_authorize(day, action)
     from v42_a_stage_bnp.execution import current as bnp_current, authorize as bnp_authorize
     if bnp_current() is not None:
         return bnp_authorize(day, action)
@@ -229,6 +232,10 @@ def guard_model_optimize(model):
     day = getattr(model, '_v42_a_stage_day', None)
     context_day = _native_day.get()
     effective_day=day if day is not None else context_day
+    from v42_a_stage_lex.execution import current as lex_current, guard as lex_guard
+    if lex_current() is not None:
+        lex_guard(model, effective_day)
+        return
     from v42_a_stage_bnp.execution import current as bnp_current, guard as bnp_guard
     if bnp_current() is not None:
         bnp_guard(model, effective_day)
