@@ -88,3 +88,12 @@ equivalence or invalid physical/original-row replay stops the experiment.
 Final reporting retains active/full-domain acceptance separately, identifies
 every unresolved closure, and never turns TIME_LIMIT into infeasibility.
 
+## CLI protocol verification
+
+The command-line entrypoint delegates to the canonical package module so the
+backend and runner use the same `StageBuild` class. A real subprocess regression
+executes four fresh stages with current-run locks through a pure Python mock
+adapter. A native-optimizer sentinel remains uncalled. The subprocess also
+rejects an unauthorized May date before importing the adapter. These fixtures
+exercise execution protocol only and provide no scientific production result.
+

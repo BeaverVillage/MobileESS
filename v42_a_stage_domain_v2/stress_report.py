@@ -483,6 +483,136 @@ def _stage_sentence(summary, name):
             f"활성 도메인 목적 증명={_display(summary.get(name+'_active_optimum_proven'))}. 전체 도메인 최적성은 별도 closure 판단입니다.")
 
 
+def model_size_changes(out, authority_docs=AUTHORITY_DOCS):
+    """Compare actual V2 rho build with both read-only legacy representations."""
+    values = []
+    axes = {'rows':('constraints','rows'), 'columns':('columns','columns'),
+            'binaries':('binaries','binaries'), 'integer_count_variables':('integers','integers'),
+            'continuous':('continuous','continuous'), 'nnz':('nonzeros','nnz')}
+    new_axes = {'rows':'rows','columns':'cols','binaries':'binaries',
+                'integer_count_variables':'integer_counts','continuous':'continuous','nnz':'nnz'}
+    for day in DAYS:
+        legacy = read(Path(authority_docs)/('MAY'+day[-2:]+'_STATIC_DOMAIN_CENSUS.json'), {})
+        full = legacy.get('old_native_F2_CRA_exact_census', {})
+        reduced = legacy.get('old_reduced_S0_exact_census', {})
+        actual = next((r for r in rows(Path(out)/('MAY'+day[-2:])/'MODEL_CENSUS_BY_LEX_STAGE.csv')
+                       if r.get('stage') == 'rho'), {})
+        for metric,(old_key,reduced_key) in axes.items():
+            new = finite(actual.get(new_axes[metric]))
+            values.append(dict(date=day, metric=metric,
+                historical_full_F2_CRA=full.get(old_key), historical_reduced_A2SC=reduced.get(reduced_key),
+                new_actual_V2_rho=new,
+                delta_vs_historical_full_F2_CRA=subtract(new, full.get(old_key)),
+                delta_vs_historical_reduced_A2SC=subtract(new, reduced.get(reduced_key)),
+                new_count_kind='ACTUAL_NATIVE_BUILD' if new is not None else 'UNAVAILABLE',
+                historical_scope='READ_ONLY_OLD_S0; FULL_F2_CRA_AND_REDUCED_A2SC_SEPARATELY',
+                new_scope='V2_RHO_NATIVE_BUILD_BEFORE_LATER_LEX_LOCKS',
+                missing_values_inferred=False))
+    return values
+
+
+def physical_observations(out, summaries):
+    """Read every replay, including a failed point before PASS_RESULT exists."""
+    observations = []
+    for summary in summaries:
+        day = summary['date']; folder = Path(out)/('MAY'+day[-2:]); replays = []
+        for component in LEX:
+            path = folder/component/'INDEPENDENT_ORIGINAL_AND_PHYSICAL_REPLAY.json'
+            if not path.exists(): continue
+            receipt = read(path, {}); physical = receipt.get('physical') or {}
+            original = receipt.get('base_original_rows') or physical.get('all_original_rows') or {}
+            observed = dict(component=component, replay_PASS=receipt.get('PASS'),
+                physical_PASS=physical.get('PASS'), original_rows_PASS=original.get('PASS'),
+                original_authority_tolerance=original.get('original_authority_tolerance'),
+                original_rows_violations_over_authority=original.get('violations_over_authority'),
+                original_max_row_violation=original.get('max_row_violation'),
+                original_max_bound_violation=original.get('max_bound_violation'),
+                original_max_integrality_residual=original.get('max_integrality_residual'),
+                original_worst_row_family=original.get('worst_row_family'),
+                failed=physical.get('failed'), all_phase_grid=physical.get('all_phase_grid'),
+                receipt=record(path))
+            for key in ('physical_capacity_max_violation','grid_max_violation','CC4_max_violation',
+                        'Runtime_max_violation','independent_known_GPU_max_violation',
+                        'independent_Runtime_binding_max_violation'):
+                observed[key] = physical.get(key)
+            replays.append(observed)
+        fresh_path = folder/'PHYSICAL_VALIDATION.json'
+        fresh = read(fresh_path)
+        observations.append(dict(date=day, planning_replay_availability='OBSERVED' if replays else 'UNAVAILABLE',
+            planning_point_replays=replays,
+            fresh_physical_validation=fresh,
+            fresh_physical_receipt=record(fresh_path) if fresh_path.exists() else None,
+            accepted_Fresh_physical_PASS=summary['physical_PASS'], missing_values_inferred=False,
+            residuals_are_not_converted_to_failures_without_the_authoritative_tolerance=True))
+    return observations
+
+
+def _count(value):
+    number = finite(value)
+    return f'{int(number):,}' if number is not None and int(number) == number else _display(number)
+
+
+def _model_change_sentence(changes):
+    byday = {day:{r['metric']:r for r in changes if r['date'] == day} for day in DAYS}
+    sentences = []
+    for day,axes in byday.items():
+        if not axes or axes['columns']['new_actual_V2_rho'] is None:
+            sentences.append('May'+day[-2:]+' native 모델 수는 관측 불가')
+            continue
+        parts = []
+        for metric,label in (('columns','변수'),('rows','행'),('binaries','binary'),
+                             ('integer_count_variables','integer count'),('continuous','continuous'),('nnz','nnz')):
+            row = axes[metric]
+            parts.append(f"{label} {_count(row['new_actual_V2_rho'])} (기존 full F2-CRA 대비 delta {_count(row['delta_vs_historical_full_F2_CRA'])})")
+        sentences.append('May'+day[-2:]+' '+', '.join(parts))
+    return '; '.join(sentences)+'. 기존 reduced A2SC 대비 delta는 MODEL_SIZE_BEFORE_AFTER.csv에 별도 기록했습니다. 지원 확대와 exact 표현 축약을 합친 실제 모델 변화이며, 이를 과학 후보 삭제로 해석하지 않습니다.'
+
+
+def _physical_sentence(observations):
+    sentences = []
+    for date in observations:
+        replays = date['planning_point_replays']; day = 'May'+date['date'][-2:]
+        if not replays:
+            sentences.append(day+' planning point의 독립 물리 replay 미관측')
+            continue
+        measurements = []
+        for r in replays:
+            measurements.append(f"{r['component']} replay PASS={_display(r['replay_PASS'])}, "
+                f"original row max residual={_display(r['original_max_row_violation'])}, "
+                f"authority 초과 행={_display(r['original_rows_violations_over_authority'])}, "
+                f"physical capacity max={_display(r['physical_capacity_max_violation'])}, "
+                f"CC4 max={_display(r['CC4_max_violation'])}, Runtime max={_display(r['Runtime_max_violation'])}, "
+                f"실패 목록={_display(r['failed'])}")
+        sentences.append(day+' '+'; '.join(measurements))
+    return '; '.join(sentences)+'. 수치와 tolerance, GPU/Runtime binding 및 grid 상세는 PHYSICAL_OBSERVATIONS.json에 있습니다. planning replay와 Fresh 이후 최종 물리 PASS를 구분하며 미관측을 무위반 PASS로 해석하지 않습니다.'
+
+
+def _migration_zero_sentence(summary):
+    value = summary.get('migration_count_value'); proven = summary.get('migration_count_active_optimum_proven') is True
+    if not proven: return f'새 migration_count*=0 여부는 미확인입니다. 새 관측 incumbent={_display(value)}이며 optimum이 증명되지 않았습니다.'
+    if value == 0: return '예. 새 활성 도메인의 migration_count optimum=0을 독립 정수 목적 인증으로 증명했습니다. 전체 도메인 최적성은 별도 closure 판단입니다.'
+    return f'아니오. 새 활성 도메인에서 증명된 migration_count optimum={_display(value)}이며 이 값을 정확히 잠급니다.'
+
+
+def _problem_resolution(summaries, out):
+    short = {s['date'][-2:]:s for s in summaries}; messages = []
+    messages.append('May17 기존 인공 도메인 infeasibility: '+
+        ('새 독립 replay를 통과한 활성 feasible point로 해소를 확인했습니다' if short['17']['A1_active_domain_feasible']
+         else '새 검증 feasible point를 얻지 못해 해소 여부 미확인입니다'))
+    messages.append('May19 feasibility: '+
+        ('새 complete-STAY 활성 도메인에서 독립 feasible point를 확인했습니다; CC4/전압 원인의 counterfactual 판단은 하지 않습니다'
+         if short['19']['A1_active_domain_feasible'] else '새 검증 feasible point를 얻지 못했습니다'))
+    telemetry = _telemetry(Path(out)/'MAY12', 'rho'); root = _root_observation(telemetry)
+    messages.append('May12 root bottleneck: '+
+        (f"새 고정 barrier 정책에서 root 완료를 관측했습니다 (root relaxation {_display(root['root_relaxation_seconds'])}초), 활성 P1 증명={_display(short['12']['rho_active_optimum_proven'])}"
+         if root['root_completed'] else '새 root 완료를 관측하지 못했습니다; 미관측 시간은 추정하지 않습니다'))
+    messages.append('May10 later P2 proof: '+
+        (f"새 활성 shift exact optimum={_display(short['10']['shift_magnitude_value'])} 증명을 얻었습니다; prestart 증명={_display(short['10']['prestart_relocation_active_optimum_proven'])}"
+         if short['10']['shift_magnitude_active_optimum_proven'] else '새 활성 shift exact optimum 증명은 미완료입니다'))
+    full = ', '.join(s['date'] for s in summaries if s['physical_PASS']) or '없음'
+    return '; '.join(messages)+'. 개별 feasibility/root/활성 목적 진전은 전체 정수-domain 승인과 구분합니다. 전체 생산 및 Fresh 물리 PASS 날짜: '+full+'.'
+
+
 def review_ko(summaries, results, out, source_commit, pr_url, observed_head, overall, authority_docs=AUTHORITY_DOCS):
     byday = {s['date']:s for s in summaries}; short = {s['date'][-2:]:s for s in summaries}
     complete = read(out/'COMPLETE_STAY_VERIFICATION.json', {})
@@ -498,6 +628,8 @@ def review_ko(summaries, results, out, source_commit, pr_url, observed_head, ove
     telemetry12 = _telemetry(out/'MAY12', 'rho'); root12 = _root_observation(telemetry12)
     beforeafter = rows(out/'MAY10/SHIFT_STAGE_BEFORE_AFTER.csv')
     forensic = read(out/'MAY10/SHIFT_STAGE_FORENSIC.json', {})
+    changes = model_size_changes(out, authority_docs)
+    physical = physical_observations(out, summaries)
     actual_migration_zero = short['10']['migration_count_active_optimum_proven'] and short['10']['migration_count_value'] == 0
     signatures = source_identity.get('dates', {})
     unchanged = source_identity.get('PASS') is True and all(v.get('hard_limits_service_Runtime_CC4_GPU_grid_unchanged') is True for v in signatures.values())
@@ -514,13 +646,15 @@ def review_ko(summaries, results, out, source_commit, pr_url, observed_head, ove
         '예. R0/reference는 P2 이동 기준과 no-action anchor이며 독립적 causal release를 대체하는 시작 하한이 아닙니다.',
         f"독립 complete STAY 검증 PASS={_display(complete.get('PASS'))}, 모든 scope 물리 지원={_display(complete.get('all_scopes_complete_physical_stay_support'))}. 검증된 기존 class histogram을 유지하고 singleton mixed는 원래 event-flow를 보존합니다. native 활성화는 날짜별 STAY_DOMAIN_COMPLETE와 실제 build receipt를 보십시오.",
         f"공통 권한 nesting 정적 검증 PASS={_display(nesting.get('PASS'))}. no-flex 자체의 전역 feasibility는 이 주장에 포함되지 않습니다.",
-        counts+'. PRE_RUN_MODEL_CENSUS는 구조적 변수 수/추정 행·nnz, MODEL_CENSUS_BY_LEX_STAGE는 실제 생성 수입니다. May10 변화는 SHIFT_STAGE_BEFORE_AFTER.csv에 null과 함께 구분했습니다.',
+        counts+'. '+_model_change_sentence(changes)+' PRE_RUN_MODEL_CENSUS는 구조적 변수 수/추정 행·nnz, MODEL_CENSUS_BY_LEX_STAGE는 실제 생성 수입니다. May10 shift 변화는 SHIFT_STAGE_BEFORE_AFTER.csv에 null과 함께 구분했습니다.',
         f"다른 과학 열을 가격만으로 합치지 않았습니다. canonical 후보 제거={_display(migration_audit.get('canonical_pool_semantic_candidate_removals'))}; 전체 scientific signature의 단사성 감사 PASS={_display(migration_audit.get('PASS'))}.",
         lazy+'. full path multiplicity를 lossless lazy pool에 유지합니다. 정적 lazy 크기를 pricing/정수 closure로 해석하지 않습니다.',
         '고정 정책: '+json.dumps(policy.get('parameters', policy), ensure_ascii=False, sort_keys=True)+'. 실제 SOLVER_PARAMETERS와 pass telemetry를 함께 기록했습니다.',
         '아니오. 한 정책만 preregister하며 날짜별 튜닝과 재시도 tournament를 허용하지 않습니다.',
         f"May17 독립 새 해 replay에 따른 활성 도메인 feasible={_display(short['17']['A1_active_domain_feasible'])}, 전체 승인={_display(short['17']['A1_full_domain_accepted'])}.",
-        f"기존 35개 Option의 원래 과학 속성 포함 membership={_display(membership.get('MAY17_35_RESCUE_OPTIONS_INCLUDED'))}. 새 solve 활성 feasibility={_display(short['17']['A1_active_domain_feasible'])}; 정적 포함만으로 rescue 재현/초과 성능을 주장하지 않습니다.",
+        f"기존 35개 Option의 원래 과학 속성 포함 membership={_display(membership.get('MAY17_35_RESCUE_OPTIONS_INCLUDED'))}. "+
+            ('새 실행의 독립 검증 feasible point를 얻어 기존 인공 도메인 infeasibility의 해소를 확인했습니다. 같은 35개를 실제 선택했다거나 전체-domain optimum/성능 우위를 주장하지 않습니다.'
+             if short['17']['A1_active_domain_feasible'] else '새 독립 검증 feasible point는 미확인입니다. 정적 포함만으로 rescue 재현이나 새 feasibility를 주장하지 않습니다.'),
         f"May19 독립 새 해 replay에 따른 활성 도메인 feasible={_display(short['19']['A1_active_domain_feasible'])}, 전체 승인={_display(short['19']['A1_full_domain_accepted'])}.",
         ('관측된 선택 자유도: '+json.dumps(freedom, ensure_ascii=False) if freedom else '새 feasible point가 없어 어떤 자유도가 해결했다고 주장하지 않습니다.')+' 선택 조합은 관측이며 counterfactual 원인 귀속은 미증명입니다. CC4/전압 원인도 closure 없이 단정하지 않습니다.',
         f"아니오. 정적 frozen identity에서 CC4/Runtime/service/GPU/grid hard limit 불변 검증={_display(unchanged)}. 실행 identity 미관측은 별도로 표기합니다.",
@@ -528,7 +662,7 @@ def review_ko(summaries, results, out, source_commit, pr_url, observed_head, ove
         f"기존 root dual simplex 3562.46초. 새 root relaxation 시간={_display(root12['root_relaxation_seconds'])}초, root 완료 관측 native 시간={_display(root12['root_completion_native_seconds'])}초. 관측 지표와 root phase duration을 혼동하지 않습니다.",
         _stage_sentence(short['12'], 'rho'), _stage_sentence(short['10'], 'rho'),
         _stage_sentence(short['10'], 'migration_count'),
-        f"{_display(actual_migration_zero)}. 새 migration value={_display(short['10']['migration_count_value'])}, 활성 목적 증명={_display(short['10']['migration_count_active_optimum_proven'])}. 미관측/미증명은 zero로 가정하지 않습니다.",
+        _migration_zero_sentence(short['10']),
         ('새 migration zero가 증명되어 projection 영수증: '+json.dumps(forensic.get('actual_zero_projection'), ensure_ascii=False)
          if actual_migration_zero else '새 zero optimum이 증명되지 않아 no-migration projection 축소를 가정할 수 없습니다.')+' 실제 stage 전후 수치는 SHIFT_STAGE_BEFORE_AFTER.csv에 있습니다.',
         f"{_display(short['10']['shift_magnitude_value'])}. 새 독립 replay 및 원래 rows 검증 없이는 유효한 incumbent로 승인하지 않습니다.",
@@ -538,12 +672,12 @@ def review_ko(summaries, results, out, source_commit, pr_url, observed_head, ove
         ', '.join(verified) or '없음. root LP 가격 closure만으로 integer-domain closure를 인정하지 않습니다.',
         ', '.join(accepted) or '없음. 활성-domain feasibility/lex proof와 전체-domain 승인을 구분했습니다.',
         ', '.join(pipeline) or '없음. A1 전체 승인 후에만 Planning freeze, 고정 Actual, Fresh OpenDSS를 진행할 수 있습니다.',
-        '새 independent replay의 물리 검증과 Fresh 이후 최종 물리 검증은 별도입니다. Fresh 최종 PASS 날짜: '+(', '.join(s['date'] for s in summaries if s['physical_PASS']) or '없음')+'. 미관측을 무위반 PASS로 해석하지 않습니다.',
+        _physical_sentence(physical)+' Fresh 최종 PASS 날짜: '+(', '.join(s['date'] for s in summaries if s['physical_PASS']) or '없음')+'.',
         f"아니오. frozen issue-time 인과 입력 감사={_display(future_zero)}. after-issue 실제 outcome을 도메인 생성에 사용하지 않습니다.",
         '아니오. '+('; '.join(f"May{day[-2:]} 기록={_display(results[day].get('Actual_reoptimization'))}" for day in DAYS))+'. 실행되지 않은 Actual은 승인되지 않습니다.',
         '아니오. '+('; '.join(f"May{day[-2:]} 기록={_display(results[day].get('PQ_repair'))}" for day in DAYS))+'. 숨은 repair를 승인하지 않습니다.',
         '아니오. '+('; '.join(f"May{day[-2:]} 다른 날짜 실행 기록={_display(results[day].get('other_27_dates_run'))}" for day in DAYS))+'. 실행 permit은 네 날짜로 한정됩니다.',
-        '실제 전체 생산 PASS로 해결된 날짜: '+(', '.join(s['date'] for s in summaries if s['physical_PASS']) or '없음')+'. 후보벽 제거/정적 membership PASS는 계산 timeout 또는 전체 생산 성공의 증거를 대신하지 않습니다.',
+        _problem_resolution(summaries, out),
         '; '.join(f"May{s['date'][-2:]} {s['final_classification']}, 원인={s.get('error') or results[s['date']].get('domain_status', {}).get('closure_limitation', '해당 objective/closure/pipeline 미증명; 실제 receipt 참조')}" for s in summaries if not s['physical_PASS']),
         f"보고서 생성의 구현 commit={source_commit or '미지정'}, 당시 관측 HEAD={observed_head or '관측 불가'}. 이 보고서를 포함하는 최종 evidence commit은 자기 참조가 불가능하므로 게시 후 git rev-parse HEAD/PR head와 외부 publication receipt로 확인합니다.",
         pr_url or '미게시. Draft PR 생성/갱신 후 외부 publication receipt와 사용자 최종 응답에 URL을 기록합니다.',
@@ -599,6 +733,9 @@ def finalize(source_commit=None, pr_url=None, *, out=OUT, root=ROOT,
                 write(output/'SCHEDULING_FREEDOM_AUDIT.json', audit)
         if result.get('global_scientific_stop') or errors: stopped_by = day
     may10_before_after(out/'MAY10', results['2025-05-10'], production)
+    table(out/'MODEL_SIZE_BEFORE_AFTER.csv', model_size_changes(out, authority_docs))
+    write(out/'PHYSICAL_OBSERVATIONS.json', dict(dates=physical_observations(out, summaries),
+        planning_point_replay_is_not_Fresh_OpenDSS_validation=True, missing_values_inferred=False))
     # Accepted dates need all downstream files, even if the pipeline has not
     # reached them. Placeholders are unavailable, not fabricated successful runs.
     for s in summaries:

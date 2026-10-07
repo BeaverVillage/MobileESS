@@ -179,3 +179,60 @@ def test_selected_freedoms_are_measured_against_exact_scientific_class_reference
     assert audit['choices_by_freedom_combination'] == {
         'TIMESHIFT':1, 'PRESTART_RELOCATION':1, 'TIMESHIFT+PRESTART_RELOCATION+MIGRATION':1}
     assert not audit['counterfactual_causality_proven']
+
+
+def test_actual_model_changes_keep_legacy_full_and_reduced_axes_separate(tmp_path):
+    out = tmp_path/'stress'; authority = tmp_path/'authority'
+    write(authority/'MAY17_STATIC_DOMAIN_CENSUS.json', dict(
+        old_native_F2_CRA_exact_census=dict(columns=80, constraints=90, binaries=3, integers=5, continuous=72, nonzeros=300),
+        old_reduced_S0_exact_census=dict(columns=60, rows=70, binaries=2, integers=4, continuous=54, nnz=200)))
+    report.table(out/'MAY17/MODEL_CENSUS_BY_LEX_STAGE.csv', [dict(
+        stage='rho', cols=100, rows=120, binaries=6, integer_counts=8, continuous=86, nnz=400)])
+    changes = report.model_size_changes(out, authority)
+    may17 = {r['metric']:r for r in changes if r['date'] == '2025-05-17'}
+    assert may17['columns']['new_actual_V2_rho'] == 100
+    assert may17['columns']['delta_vs_historical_full_F2_CRA'] == 20
+    assert may17['columns']['delta_vs_historical_reduced_A2SC'] == 40
+    assert may17['rows']['delta_vs_historical_full_F2_CRA'] == 30
+    assert all(r['new_actual_V2_rho'] is None for r in changes if r['date'] == '2025-05-19')
+    sentence = report._model_change_sentence(changes)
+    assert '변수 100' in sentence and 'delta 20' in sentence
+    assert 'May19 native 모델 수는 관측 불가' in sentence
+
+
+def test_failed_physical_replay_is_reported_even_before_pass_result_exists(tmp_path):
+    write(tmp_path/'MAY19/rho/INDEPENDENT_ORIGINAL_AND_PHYSICAL_REPLAY.json', dict(
+        PASS=False, base_original_rows=dict(PASS=False, original_authority_tolerance=1e-5,
+              violations_over_authority=3, max_row_violation=0.01, worst_row_family='CC4'),
+        physical=dict(PASS=False, failed=['CC4_CONTRACT'], CC4_max_violation=0.01,
+              Runtime_max_violation=0, physical_capacity_max_violation=0)))
+    observation = report.physical_observations(tmp_path, [dict(date='2025-05-19', physical_PASS=False)])
+    replay = observation[0]['planning_point_replays'][0]
+    assert replay['replay_PASS'] is False
+    assert replay['original_rows_violations_over_authority'] == 3
+    assert replay['failed'] == ['CC4_CONTRACT']
+    assert observation[0]['fresh_physical_validation'] is None
+    sentence = report._physical_sentence(observation)
+    assert 'authority 초과 행=3' in sentence and 'CC4_CONTRACT' in sentence
+
+
+def test_operational_progress_is_reported_without_full_domain_promotion(tmp_path):
+    summaries = [dict(date=day, A1_active_domain_feasible=day[-2:] in ('17','19'),
+        rho_active_optimum_proven=day.endswith('12'), shift_magnitude_active_optimum_proven=day.endswith('10'),
+        shift_magnitude_value=4, prestart_relocation_active_optimum_proven=False, physical_PASS=False)
+        for day in report.DAYS]
+    write(tmp_path/'MAY12/rho/NATIVE_TELEMETRY.json', dict(root_relaxation=dict(seconds=12, iterations=100, objective=0.5)))
+    sentence = report._problem_resolution(summaries, tmp_path)
+    assert '인공 도메인 infeasibility: 새 독립 replay를 통과한 활성 feasible point로 해소' in sentence
+    assert 'root 완료를 관측했습니다' in sentence
+    assert '새 활성 shift exact optimum=4 증명' in sentence
+    assert '전체 생산 및 Fresh 물리 PASS 날짜: 없음' in sentence
+
+
+def test_unproven_zero_incumbent_does_not_become_zero_or_nonzero_optimum():
+    uncertain = report._migration_zero_sentence(dict(migration_count_value=0, migration_count_active_optimum_proven=False))
+    assert '미확인' in uncertain and '아니오' not in uncertain
+    unknown = report._migration_zero_sentence(dict(migration_count_value=None, migration_count_active_optimum_proven=False))
+    assert '미확인' in unknown and '관측 불가' in unknown
+    assert '예.' in report._migration_zero_sentence(dict(migration_count_value=0, migration_count_active_optimum_proven=True))
+    assert 'optimum=5' in report._migration_zero_sentence(dict(migration_count_value=5, migration_count_active_optimum_proven=True))

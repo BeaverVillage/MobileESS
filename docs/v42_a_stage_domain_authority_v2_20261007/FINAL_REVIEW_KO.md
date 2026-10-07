@@ -44,4 +44,4 @@
 
 초기 정적 검토 단계에서는 production optimize를 실행하지 않았습니다. 후보 복원이 두 날짜의 계산 문제를 해결한다는 주장은 하지 않습니다. 추가 승인 후 결과는 stress4 보고서에서 확인합니다.
 
-짧은 검증: 1523개 PASS. 초기 정적 검토 단계 Actual/Fresh/campaign/예약 실행은 0회입니다.
+짧은 검증: 1529개 PASS. 초기 정적 검토 단계 Actual/Fresh/campaign/예약 실행은 0회입니다.

@@ -2,6 +2,10 @@
 from pathlib import Path
 from types import SimpleNamespace
 import json
+import os
+import subprocess
+import sys
+import textwrap
 import pytest
 import gurobipy as gp
 from v42_a_stage_domain_v2.execution import (REQUIRED_STRESS_GATES,REQUIRED_RUN_SOURCE_NAMES,
@@ -181,3 +185,103 @@ def test_native_error_accounts_only_failed_current_call_once(tmp_path,monkeypatc
     assert result['classification']=='UNRESOLVED'
     receipt=json.loads((tmp_path/'run/migration_count/NATIVE_TELEMETRY.json').read_text())
     assert receipt['objective_stage_timings'][0]['native_seconds']==.5
+
+
+def subprocess_fixture(tmp_path):
+    """Freeze a separate mock adapter for the real python -m entrypoint."""
+    _,gates=permit_fixture(tmp_path/'gates')
+    adapter=tmp_path/'cli_mock_adapter.py'
+    adapter.write_text(textwrap.dedent('''
+        from pathlib import Path
+        from types import SimpleNamespace
+        import json, os
+        import gurobipy as gp
+        import v42_a_stage_domain_v2.stress_runner as runner
+        from v42_a_stage_domain_v2.execution import guard_model_optimize
+
+        evidence_path=Path(os.environ['V42_CLI_MOCK_EVIDENCE'])
+        evidence=dict(scope='SYNTHETIC_SUBPROCESS_ONLY',native_optimizer_calls=0,
+            builds=[],mock_optimize_calls=[],disposed=[],stagebuild_module=runner.StageBuild.__module__)
+        def save():evidence_path.write_text(json.dumps(evidence))
+        save()
+        def reject_native(*args,**kwargs):
+            evidence['native_optimizer_calls']+=1;save()
+            raise AssertionError('REAL_NATIVE_OPTIMIZER_FORBIDDEN_IN_CLI_FIXTURE')
+        gp.Model.optimize=reject_native
+        runner.other_heavy_optimizers=lambda:[]
+
+        class MockModel:
+            NumVars=1;NumConstrs=1;NumBinVars=0;NumIntVars=1;NumNZs=1
+            NumQConstrs=0;NumQNZs=0;NumSOS=0;NumGenConstrs=0
+            Status=gp.GRB.OPTIMAL;SolCount=1;Runtime=.25;Work=.01;NodeCount=0.
+            ObjVal=0.;ObjBound=0.;MIPGap=0.
+            def __init__(self,component):self.Params=SimpleNamespace();self.component=component
+            def update(self):pass
+            def setObjective(self,*args):pass
+            def setParam(self,name,value):setattr(self.Params,name,value)
+            def optimize(self,callback):
+                guard_model_optimize(self)
+                evidence['mock_optimize_calls'].append(self.component);save()
+            def getAttr(self,name):return [0.]
+            def dispose(self):evidence['disposed'].append(self.component);save()
+
+        class Backend:
+            def __init__(self):self.models=[]
+            def build(self,day,folder,component,locks,previous):
+                if previous is not None:previous['native_model'].dispose()
+                model=MockModel(component)
+                assert all(model is not old for old in self.models)
+                self.models.append(model)
+                evidence['builds'].append(dict(component=component,locks=len(locks),fresh=True,
+                    previous_new_run_only=previous is None or all(l['current_new_run_only'] for l in locks)))
+                save()
+                return runner.StageBuild(model,None,[('rho',0),('migration_count',0),('shift_slots',0),('prestart_changes',0)],
+                    None,None,(dict(day=day),),None,dict(scientific_identity_PASS=True,STAY_DOMAIN_COMPLETE=True,
+                        stage_equivalence=dict(PASS=True,scope='SYNTHETIC_SUBPROCESS_ONLY'),
+                        input_identity=dict(PASS=True,scope='SYNTHETIC_SUBPROCESS_ONLY'),
+                        domain_census=dict(scope='SYNTHETIC_SUBPROCESS_ONLY'),
+                        static_artifacts=[dict(path='SYNTHETIC_SUBPROCESS_ONLY',sha256='a'*64,bytes=0)],base_matrix_sha256='b'*64))
+            def verify(self,*args):
+                return dict(PASS=True,physical=dict(PASS=True,scope='SYNTHETIC_SUBPROCESS_ONLY'),selected_jobs={},controls=[])
+            def integer_certificate(self,*args):return dict(PASS=True,scope='SYNTHETIC_SUBPROCESS_ONLY')
+            def production_pipeline(self,*args):raise AssertionError('UNRESOLVED_SYNTHETIC_DOMAIN_CANNOT_RUN_PIPELINE')
+        '''),encoding='utf8')
+    package=Path(__file__).resolve().parents[1]/'v42_a_stage_domain_v2'
+    permit=tmp_path/'permit.json'
+    create_stress_run_permit(gates,[package/name for name in REQUIRED_RUN_SOURCE_NAMES]+[adapter],output=permit)
+    policy=tmp_path/'policy.json';policy.write_text(json.dumps(solver_policy(gp)),encoding='utf8')
+    environment=os.environ.copy()
+    environment['PYTHONPATH']=str(tmp_path)+os.pathsep+environment.get('PYTHONPATH','')
+    environment['V42_CLI_MOCK_EVIDENCE']=str(tmp_path/'evidence.json')
+    command=[sys.executable,'-B','-m','v42_a_stage_domain_v2.stress_runner',
+        '--permit',str(permit),'--policy',str(policy),'--backend','cli_mock_adapter:Backend',
+        '--output',str(tmp_path/'run')]
+    return command,environment
+
+
+def test_real_cli_mock_adapter_completes_four_fresh_stages_without_native_optimizer(tmp_path):
+    command,environment=subprocess_fixture(tmp_path)
+    child=subprocess.run(command+['--day','2025-05-17'],env=environment,capture_output=True,text=True,
+        cwd=Path(__file__).resolve().parents[1],timeout=30)
+    assert child.returncode==0,child.stdout+child.stderr
+    result=json.loads((tmp_path/'run/A1_RESULT.json').read_text())
+    evidence=json.loads((tmp_path/'evidence.json').read_text())
+    assert result['classification']=='A1_ACTIVE_DOMAIN_SOLVED_DOMAIN_CLOSURE_UNRESOLVED'
+    assert len(result['passes'])==4 and result['native_seconds']==1.
+    assert not result['A1_full_domain_accepted'] and not result['Planning_freeze']
+    assert not result['Actual'] and not result['Fresh_OpenDSS']
+    assert evidence['native_optimizer_calls']==0
+    assert evidence['stagebuild_module']=='v42_a_stage_domain_v2.stress_runner'
+    assert [row['locks'] for row in evidence['builds']]==[0,1,2,3]
+    assert all(row['fresh'] and row['previous_new_run_only'] for row in evidence['builds'])
+    assert evidence['mock_optimize_calls']==list(('rho','migration_count','shift_magnitude','prestart_relocation'))
+    assert evidence['disposed']==evidence['mock_optimize_calls']
+
+
+def test_real_cli_other_may_date_never_imports_mock_adapter(tmp_path):
+    command,environment=subprocess_fixture(tmp_path)
+    child=subprocess.run(command+['--day','2025-05-01'],env=environment,capture_output=True,text=True,
+        cwd=Path(__file__).resolve().parents[1],timeout=30)
+    assert child.returncode==2 and 'invalid choice' in child.stderr
+    assert not (tmp_path/'evidence.json').exists()
+    assert not (tmp_path/'run').exists()

@@ -330,4 +330,7 @@ def main():
     run_four_dates(args.backend,args.permit,args.policy,args.output);return 0
 
 
-if __name__=='__main__':sys.exit(main())
+if __name__=='__main__':
+    # Backends import this canonical module's StageBuild. Delegate the CLI too,
+    # so a second __main__ class cannot reject an otherwise valid stage object.
+    sys.exit(importlib.import_module('v42_a_stage_domain_v2.stress_runner').main())
