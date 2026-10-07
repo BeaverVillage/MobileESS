@@ -10,9 +10,9 @@
 
 4. **추가 valid cuts**: 364
 
-5. **Cross-MESS cover cuts**: 32개: support30 + integer2
+5. **Cross-MESS cover cuts**: 236개: single-time support30 + integer2 + two-time support204
 
-6. **Multi-time route/SOC cuts**: 332개: two-time fleet support204 + route conflicts128; two-time integer covers0, SOC-only conflicts0
+6. **Multi-time route/SOC cuts**: 332개: two-time fleet support204 + route conflicts128; two-time integer covers0, SOC-only conflicts0. 두시점 커버204는 5번에도 포함된다.
 
 7. **최대 저장 LP 위반**: -0.12935067925339261; 1e-8 초과 위반0개. 강화 효과를 입증하지 못했다.
 
