@@ -165,6 +165,11 @@ def require_action_authorized(authority, action='OPTIMIZE', *, require_day=True)
         day = _native_day.get()
     if day is None and require_day:
         raise PermissionError('A_STAGE_PRODUCTION_DAY_REQUIRED')
+    # The successor permit has narrower native model/phase authorization than
+    # the preserved complete-STAY diagnostic permit.
+    from .fast_execution import current_fast_permit, authorize_fast_action
+    if current_fast_permit() is not None:
+        return authorize_fast_action(day, action)
     permit=_stress_permit.get()
     if permit is not None:
         if day not in STRESS_DATES:
@@ -209,6 +214,10 @@ def guard_model_optimize(model):
     day = getattr(model, '_v42_a_stage_day', None)
     context_day = _native_day.get()
     effective_day=day if day is not None else context_day
+    from .fast_execution import current_fast_permit, guard_fast_model
+    if current_fast_permit() is not None:
+        guard_fast_model(model, effective_day)
+        return
     if _stress_permit.get() is not None:
         require_action_authorized(effective_day,'OPTIMIZE')
     elif day in STRESS_DATES or context_day in STRESS_DATES:

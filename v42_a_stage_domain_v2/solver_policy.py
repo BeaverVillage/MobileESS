@@ -7,6 +7,24 @@ SCHEMA = 'A_STAGE_SOLVER_POLICY_V2'
 PRESERVED = ('MIPGap','Seed','FeasibilityTol','OptimalityTol','IntFeasTol')
 
 
+def validate_frozen_policy(policy):
+    """The fast successor reuses exactly one frozen scientific/native plan."""
+    if policy.get('schema') != SCHEMA or policy.get('PASS') is not True:
+        raise PermissionError('A_STAGE_SOLVER_POLICY_V2_REQUIRED')
+    original = policy.get('original_authority_parameters')
+    if original != SETTINGS:
+        raise PermissionError('FROZEN_ORIGINAL_AUTHORITY_SETTINGS_DRIFT')
+    expected = dict(original, Threads=1, Method=2, NodeMethod=1, MIPFocus=3,
+        Crossover=original.get('Crossover', policy['parameter_support']['Crossover']['default']))
+    if policy.get('parameters') != expected or expected['Crossover'] == 0:
+        raise PermissionError('FAST_FROZEN_GLOBAL_SOLVER_POLICY_DRIFT')
+    if policy.get('parameter_sweep') is not False or policy.get('scientific_model_change') is not False:
+        raise PermissionError('FAST_FROZEN_GLOBAL_SOLVER_POLICY_DRIFT')
+    if policy.get('preserved_scientific_settings') != {key: original[key] for key in PRESERVED}:
+        raise PermissionError('FROZEN_A_STAGE_SCIENTIFIC_TOLERANCE_DRIFT')
+    return True
+
+
 def solver_policy(gp, *, frozen_settings=None):
     original=deepcopy(SETTINGS if frozen_settings is None else frozen_settings)
     version=tuple(gp.gurobi.version())

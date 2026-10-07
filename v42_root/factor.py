@@ -4,6 +4,7 @@ All byte states use an exact rational quantum derived from payload and
 nominal bottleneck rates. No pair x transfer-start binary exists.
 """
 from collections import defaultdict,Counter
+from dataclasses import replace
 from fractions import Fraction
 from functools import reduce
 from math import gcd,lcm
@@ -26,12 +27,17 @@ def authority(j,g,r):
     if units>1e8:raise ValueError('EXACT_BYTE_QUANTUM_NUMERIC_RANGE_UNSUPPORTED')
     return pairs,float(quantum),units,{key:float(min(B,Fraction(x))/quantum) for key,x in rates.items()}
 
-def add_job(m,j,g,r,*,compress=False,optional=False,eliminate_depart=None,eliminate_arrive=None,share_links=None,eliminate_f0=None,eliminate_state=None,byte_scale=1.):
+def add_job(m,j,g,r,*,compress=False,optional=False,eliminate_depart=None,eliminate_arrive=None,share_links=None,eliminate_f0=None,eliminate_state=None,byte_scale=1.,preserve_stay_flow=False):
     depart=compress if eliminate_depart is None else eliminate_depart
     arrive=compress if eliminate_arrive is None else eliminate_arrive
     link=compress if share_links is None else share_links
     f0_removed=compress if eliminate_f0 is None else eliminate_f0
     state_removed=compress if eliminate_state is None else eliminate_state
+    if preserve_stay_flow and not g.events['w']:
+        if optional:raise ValueError('OPTIONAL_TRACK_REQUIRES_MIGRATION_DOMAIN')
+        # Activation may identify a currently unique STAY. Its engineering
+        # fixed marker must not discard the retained source-flow authority.
+        return compact_job(m,j,replace(g,fixed=None))
     if g.fixed:return compact_job(m,j,g)
     if not g.events['w']:
         if optional:raise ValueError('OPTIONAL_TRACK_REQUIRES_MIGRATION_DOMAIN')

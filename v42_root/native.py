@@ -23,24 +23,25 @@ def bind(m,row,x,coefficient):
         if x.getConstant():m._root_binding_constants[row]+=coefficient*x.getConstant()
     elif x:m._root_binding_constants[row]+=coefficient*x
 
-def local_units(m,jobs,bounds,r,graphs,classes,kind,context=None):
+def local_units(m,jobs,bounds,r,graphs,classes,kind,context=None,*,preserve_singleton_mixed_flow=()):
     tail=max(b.latest_completion for b in bounds.values());started=perf_counter()
     context=context or Context()
     units=[];class_for={u:key for key,us in classes.items() for u in us};generator=Generator(r,tail)
     cfg=settings(kind)
+    retained_flow=set(preserve_singleton_mixed_flow)
     def push(uid,v,*,members=None,optional=False,stay_count=False,unit_id=None):
-        units.append(dict(id=unit_id or uid,uid=uid,members=members or [uid],v=v,optional=optional,stay_count=stay_count,class_key=class_for[uid],canonical_post_tie=kind not in ('F2A','F2B','F2C') and not cfg['tie']))
+        units.append(dict(id=unit_id or uid,uid=uid,members=members or [uid],v=v,optional=optional,stay_count=stay_count,retained_mixed_flow=uid in retained_flow,class_key=class_for[uid],canonical_post_tie=kind not in ('F2A','F2B','F2C') and not cfg['tie']))
     aggregate=cfg['aggregate'];compress=cfg['aux']
     options=dict(eliminate_depart=compress or cfg['depart'],eliminate_arrive=compress or cfg['arrive'],share_links=compress or cfg['link'],eliminate_f0=compress or cfg['f0'],eliminate_state=compress or cfg['state'],byte_scale=2.**20 if cfg['scale_wan'] else 1.)
     if not aggregate:
         for i,(uid,j) in enumerate(sorted(jobs.items())):
-            push(uid,factor.add_job(m,j,graphs[uid],r,**options))
+            push(uid,factor.add_job(m,j,graphs[uid],r,preserve_stay_flow=uid in retained_flow,**options))
             if i%20==0:context.progress(dict(phase='LOCAL_UNITS',formulation=kind,jobs_complete=i+1,jobs_required=len(jobs),seconds=perf_counter()-started))
     else:
         for index,(key,us) in enumerate(sorted(classes.items())):
             uid=us[0];j=jobs[uid];g=graphs[uid];N=len(us)
             if N==1 or g.fixed:
-                for u in us:push(u,factor.add_job(m,jobs[u],graphs[u],r,**options))
+                for u in us:push(u,factor.add_job(m,jobs[u],graphs[u],r,preserve_stay_flow=u in retained_flow,**options))
                 continue
             stays=tuple((k,s) for k,s in g.events['y'] if s+j.service_slots<=bounds[uid].latest_completion and generator.fits(k,s,j.service_slots,j.gpu))
             sj=replace(j,uid='CLASS_'+key[:12]);sv=factor.stay(m,sj,g,N,starts=stays,eliminate_f0=options['eliminate_f0'],eliminate_state=options['eliminate_state'])
@@ -79,7 +80,8 @@ def build(context,data,kind):
     wanrows={(l,t):m.addConstr(gp.LinExpr()<=(rate-r.fixed_wan.get((l,t),0))/byte_scale,name='physical_WAN') for (l,t),rate in r.wan_capacities.items()}
     active={t:m.addConstr(gp.LinExpr()<=r.max_active_transfers-r.fixed_transfers.get(t,0),name='physical_ACTIVE') for t in range(r.control_end)}
     primary,timing,controls=grid(m,bundle,known,risk,stage=Stage.A1);m.update();grid_seconds=perf_counter()-started;global_vars=m.NumVars
-    classes=prep['classes'];units=local_units(m,jobs,bounds,r,graphs,classes,kind,context)
+    classes=prep['classes'];units=local_units(m,jobs,bounds,r,graphs,classes,kind,context,
+        preserve_singleton_mixed_flow=prep.get('preserve_singleton_mixed_flow',()))
     metrics=[gp.LinExpr() for _ in range(3)];finish_groups=defaultdict(list);representative={};runtime_vectors={};tie=gp.LinExpr();rank=0
     process=psutil.Process();peak=process.memory_info().rss
     for index,unit in enumerate(units):

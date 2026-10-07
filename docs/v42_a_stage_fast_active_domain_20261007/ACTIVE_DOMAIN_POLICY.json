@@ -1,0 +1,44 @@
+{
+  "PASS": true,
+  "schema": "FAST_ACTIVE_INITIAL_POLICY_V1",
+  "same_site_radius": 2,
+  "extra_stay_per_class": 8,
+  "migration_extra_seeds": 0,
+  "mandatory_support_uncapped": true,
+  "scientific_domain_cap": false,
+  "permanent_speed_deletion": false,
+  "required": [
+    "valid_no_flex_anchor",
+    "historical_hard_valid_STAY",
+    "validated_rescue",
+    "independently_replay_valid_incumbent"
+  ],
+  "migration_initial": "finite validated rescue and independently verified incumbent support only",
+  "induced_native_STAY_and_recombined_migration_counted": true,
+  "matrix_evidence": {
+    "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-07\\a-stage-domain-v2\\docs\\v42_a_stage_domain_authority_v2_20261007\\MAY19_STATIC_DOMAIN_CENSUS.json",
+    "sha256": "ccb71f30521418556c21cf714d747e0a4b47b1b0411092e30e956e565c764dd1",
+    "bytes": 1562354
+  },
+  "rationale": "197537 physical STAY versus34426 historical STAY; old migration seed represented11737638 paths; mandatory support retained, only optional extras capped",
+  "cap_tuned_after_canary": false,
+  "batch": {
+    "initial": 64,
+    "minimum": 32,
+    "maximum": 256,
+    "high_density_threshold": 0.5,
+    "low_density_threshold": 0.1,
+    "adaptation": "double above high density, halve below low density; pricing statistics only"
+  },
+  "max_pricing_iterations": 4,
+  "max_activation_batch": 256,
+  "pricing": {
+    "migration_scan_limit": 4096,
+    "migration_order": "CANONICAL_BLOCK_KEY_ROTATING_FINITE_PREFIX",
+    "stay_scan": "EXHAUSTIVE_INACTIVE_STAY"
+  },
+  "canary_native_budget_seconds": 300,
+  "production_native_budget_seconds": 3600,
+  "preferred_full_A1_seconds": 1800,
+  "solver_parameter_sweep": false
+}

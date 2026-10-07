@@ -7,9 +7,9 @@ import subprocess
 
 ROOT=Path(__file__).resolve().parents[1]
 BASE='1e2d819406081af5b4bbee6fab3c4b5c3e102b2b'
-CHECKPOINT='08cdba2f5988c4f5334e24548257bcd505a949cd'
+CHECKPOINT='b4e061bdf2416eccd7aa2a42b3761db1affce8c1'
 ARCHITECTURE_BASE='e2d4779685fff6d0cf022c649733b2ca41fdfc08'
-RECEIPT=ROOT/'docs/v42_a_stage_v2_stress4_20261007/AUTHORIZED_V2_SOURCE_SUPERSESSION.json'
+RECEIPT=ROOT/'docs/v42_a_stage_fast_active_domain_20261007/AUTHORIZED_V2_SOURCE_SUPERSESSION.json'
 # Every inherited source edit is explicitly scoped. New modules have no old
 # source seal to supersede and are frozen separately by the execution permit.
 CHANGES=frozenset('''
@@ -176,7 +176,7 @@ def seal(output=None):
             row.update(attribute_provenance(base))
         rows.append(row)
     result=dict(PASS=True,schema='A_STAGE_V2_EXACT_SOURCE_SUPERSESSION_V1',exact_base=BASE,checkpoint_head=CHECKPOINT,
-        authorization='User attachments 1732fc8f-dd30-4565-b224-1e78d407194a and 83d71f06-2de3-49fa-b6d4-555df7f05ff9',
+        authorization='User attachments 1732fc8f-dd30-4565-b224-1e78d407194a, 83d71f06-2de3-49fa-b6d4-555df7f05ff9, b2130dd9-8835-4610-906a-08b0585231ef',
         historical_production_gates_unchanged=True,supersession_grants_production_execution=False,
         preserved_historical_receipts_modified=False,files=rows)
     target=Path(output) if output is not None else RECEIPT

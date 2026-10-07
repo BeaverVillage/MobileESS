@@ -73,7 +73,8 @@ def strengthen_histogram_capacity(original, current, descriptor, data, mapping):
     eligible, excluded_units = {}, []
     for unit in descriptor["units"]:
         uid = unit["uid"]; job = jobs[uid]
-        if unit.get("optional") or not (unit.get("stay_count") or not graphs[uid].events["w"]):
+        if (unit.get("optional") or unit.get("retained_mixed_flow")
+                or not (unit.get("stay_count") or not graphs[uid].events["w"])):
             excluded_units.append(unit.get("id", uid)); continue
         if (not isinstance(job.gpu, int) or isinstance(job.gpu, bool) or job.gpu <= 0
                 or not isinstance(job.service_slots, int) or isinstance(job.service_slots, bool)
@@ -211,7 +212,8 @@ def verify_histogram_capacity_strengthening(original, current, augmented, descri
     _, jobs, _, resources, _, graphs, _, _ = data
     for unit in descriptor["units"]:
         uid = unit["uid"]; job = jobs[uid]
-        if unit.get("optional") or not (unit.get("stay_count") or not graphs[uid].events["w"]):
+        if (unit.get("optional") or unit.get("retained_mixed_flow")
+                or not (unit.get("stay_count") or not graphs[uid].events["w"])):
             continue
         for (site, start), encoded in unit["v"]["y"].items():
             if encoded[0] == "v":
