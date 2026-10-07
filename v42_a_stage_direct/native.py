@@ -16,7 +16,7 @@ class Native(cg.Native):
             hints=getattr(self,'hint_point',None)
             if hints is not None and model.NumIntVars:
                 if len(hints)!=model.NumVars:raise ValueError('ORIGINAL_INCUMBENT_HINT_AXES_REQUIRED')
-                indices=np.flatnonzero(s.vtypes!='C');variables=[model.getVars()[int(j)] for j in indices]
+                indices=np.flatnonzero(s.vtypes!='C');allvars=model.getVars();variables=[allvars[int(j)] for j in indices]
                 values=np.rint(hints[indices]).tolist()
                 if any(v<s.lower[j] or v>s.upper[j] for j,v in zip(indices,values)):raise ValueError('INDIVIDUAL_HINTS_MUST_FIT_ORIGINAL_BOXES')
                 model.setAttr('VarHintVal',variables,values);model.setAttr('VarHintPri',variables,[1]*len(values));model.update()

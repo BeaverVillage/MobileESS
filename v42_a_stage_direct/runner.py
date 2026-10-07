@@ -93,7 +93,11 @@ def run():
                 finally:native.budget=budget;native.incumbent_callback=None
                 if not read(f/'INDEPENDENT_COMPILED_MODEL_VERIFICATION.json')['PASS']:raise ValueError('CURRENT_COMPLETE_NATIVE_MODEL_REQUIRED')
                 if 'X' in raw:candidate(raw['X'],rec['objective'])
-                if rec['status']==3:
+                prior_cert=integer_optimality_certificate(name,best['value'],LB,bound_independently_validated=True,
+                    primal_independently_validated=True,integrality_proven=True)
+                if prior_cert['PASS']:
+                    node['status']='CLOSED_PRIOR_FULL_DOMAIN_BOUND_AND_VALIDATED_NEW_PRIMAL'
+                elif rec['status']==3:
                     LB=partition['right']['valid_LB'];node['status']='LEFT_PROVEN_INFEASIBLE_RIGHT_BOUND_CLOSED'
                 elif rec['status'] in (2,9,11) and rec['native_error'] is None and rec['ObjBound'] is not None and math.isfinite(rec['ObjBound']):
                     LB=max(LB,min(float(rec['ObjBound']),partition['right']['valid_LB']));node['status']='OPEN_CURRENT_NATIVE_BOUND'
