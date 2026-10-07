@@ -1,0 +1,497 @@
+{
+  "final_state": "MAY17_MAY19_TRUE_INFEASIBILITY_PROVEN",
+  "dates": {
+    "2025-05-17": {
+      "primary_classification": "TRUE_SCIENTIFIC_INFEASIBILITY",
+      "explanation": "PR134 R0 fixed start/service/class-cardinality requirements exceed GPU capacity over selected early issue slots. Exact proof uses 26 known_GPU_binding and48 class_exact_cardinality rows and original bounds; no grid/CC4 row is needed.",
+      "exact_certificate": {
+        "PASS": true,
+        "day": "2025-05-17",
+        "classification": "TRUE_SCIENTIFIC_INFEASIBILITY",
+        "original_matrix": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-17\\A0_MATRIX.npz",
+          "sha256": "2bc0aede988236bfb803da5513e6082faf995094c455c601fbd83a2dc6564953",
+          "bytes": 15099136
+        },
+        "attributes": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-17\\A0_ATTRIBUTES_CODED.npz",
+          "sha256": "c5987af7d6d8503f3a0d4a5de3c5b8c562f166601518dc45f8b57378d831d863",
+          "bytes": 3704908
+        },
+        "raw_ray": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-17\\BOUND_COMPLETE_RAW_FARKAS.npz",
+          "sha256": "e396fa87ab9ef37496975257c376c80a67f1116d7f32ad398dc9a457c356ae8f",
+          "bytes": 2397
+        },
+        "exact_minimum": "-1153",
+        "exact_rhs": "-1254",
+        "exact_positive_contradiction_margin": "101",
+        "margin_float": 101.0,
+        "row_signs_valid": true,
+        "unbounded_nonzero_terms": [],
+        "all_binary_integer_domains_relaxed": true,
+        "LP_infeasibility_proves_original_MIP_infeasibility": true,
+        "optimizer_calls": 0,
+        "production_reducer_or_native_certificate_imported": false,
+        "residual_terms_discarded": 0,
+        "tolerance_used_to_ignore_residuals": false,
+        "original_checker_tolerance": 1e-05,
+        "exact_worst_case_row_and_bound_residual_allowance": "171185785004024653/147573952589676412928",
+        "allowance_float": 0.00116,
+        "contradiction_survives_original_checker_tolerance": true,
+        "row_family_counts": {
+          "known_GPU_binding": 26,
+          "class_exact_cardinality": 48
+        },
+        "weighted_rows": 74,
+        "bound_terms": 65,
+        "rational_completion": null,
+        "proof": "Signed original rows imply sum_j c_j*x_j <= exact_rhs. Original bounds imply sum_j c_j*x_j >= exact_minimum. The strict positive rational gap is impossible.",
+        "numerical_false_infeasibility": false
+      },
+      "compressed_FULL_LP_equivalence": true,
+      "original_model_identity": {
+        "day": "2025-05-17",
+        "original_native_names": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-17\\ORIGINAL_NATIVE_NAMES.npz",
+          "sha256": "9e841d73f0cb5d1e008f8ea23521e9a79ea9ef31d2a410f572d83ec095a7aba4",
+          "bytes": 813111
+        },
+        "original_matrix": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-17\\A0_MATRIX.npz",
+          "sha256": "2bc0aede988236bfb803da5513e6082faf995094c455c601fbd83a2dc6564953",
+          "bytes": 15099136
+        },
+        "original_attributes": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-17\\A0_ATTRIBUTES_CODED.npz",
+          "sha256": "c5987af7d6d8503f3a0d4a5de3c5b8c562f166601518dc45f8b57378d831d863",
+          "bytes": 3704908
+        },
+        "raw_original_fingerprint": 97858618,
+        "original_rebuilt_from_PR134": true,
+        "coefficient_differences": 0,
+        "original_bounds_RHS_senses_objective_types_equal": true,
+        "all_four_objectives_equal": true,
+        "models": [
+          {
+            "name": "ORIGINAL_FULL",
+            "rows": 701771,
+            "cols": 25809,
+            "nnz": 12653654,
+            "binary": 1677,
+            "integer": 924,
+            "continuous": 23208,
+            "native_fingerprint": 97858618
+          },
+          {
+            "name": "CURRENT_COMPRESSED",
+            "rows": 144568,
+            "cols": 23089,
+            "nnz": 3241610,
+            "binary": 1675,
+            "integer": 924,
+            "continuous": 20490,
+            "native_fingerprint": 402668185
+          },
+          {
+            "name": "CURRENT_COMPRESSED_RELAXED",
+            "rows": 144568,
+            "cols": 23089,
+            "nnz": 3241610,
+            "binary": 0,
+            "integer": 0,
+            "continuous": 23089,
+            "native_fingerprint": -1015603545
+          }
+        ],
+        "PASS": true,
+        "optimization_calls": 0,
+        "solver_settings": {
+          "Threads": 1,
+          "Method": 1,
+          "Seed": 20260929,
+          "MIPGap": 0.005,
+          "Presolve": -1,
+          "Cuts": -1,
+          "Heuristics": 0.05,
+          "NumericFocus": 0,
+          "FeasibilityTol": 1e-06,
+          "OptimalityTol": 1e-06,
+          "IntFeasTol": 1e-05
+        },
+        "integrality_only_relaxed_in_third": true
+      },
+      "original_native_runtime": 2.134000062942505,
+      "diagnostic_native_and_IIS_budget_used": 41.36624760489212,
+      "B0_zero_action_available": false,
+      "input_binding_bug_found": false,
+      "stale_objective_lock_found": false,
+      "date_specific_certificate_reuse_bug_found": false,
+      "numerical_false_infeasibility": false,
+      "scientific_feasible_set_changed": false,
+      "production_repair_applied": false,
+      "production_rerun_performed": false,
+      "rerun_not_performed_reason": "Original LP infeasibility independently proven; no legitimate implementation defect to repair. Changing the R0 windows, CC4 envelope or voltage constraints would change the scientific feasible set.",
+      "new_FreshAC_or_physical_pipeline_result": null,
+      "grid_conflicts": []
+    },
+    "2025-05-19": {
+      "primary_classification": "TRUE_SCIENTIFIC_INFEASIBILITY",
+      "explanation": "At day slots1 and2, the frozen affine voltage upper constraints require more early electrical load than the R0 known-job bounds and CC4 cohort0 cumulative upper service envelope allow. Exact proof combines known GPU bindings, CC4_CDF_U[0,2], site partitions and two voltage_upper rows, plus two unchanged headroom rows for exact rational completion.",
+      "exact_certificate": {
+        "PASS": true,
+        "day": "2025-05-19",
+        "classification": "TRUE_SCIENTIFIC_INFEASIBILITY",
+        "original_matrix": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-19\\A0_MATRIX.npz",
+          "sha256": "8603f616e574572a693efd60c25947e61f54d3a7ede3d3325048af9ce0be670b",
+          "bytes": 39857202
+        },
+        "attributes": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-19\\A0_ATTRIBUTES_CODED.npz",
+          "sha256": "dd07d35b0d7ccd8f9f20e08404beba0ba8396e2401dd98dcb0f0322b5387f511",
+          "bytes": 6647376
+        },
+        "raw_ray": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-19\\ORIGINAL_IIS_RAW_FARKAS.npz",
+          "sha256": "8837a05032e224463a96a3cfc4a368d819d69ffa37fb24e64ea44ebe98f67af4",
+          "bytes": 1260
+        },
+        "exact_minimum": "-436560783815710681838490305764285/633825300114114700748351602688",
+        "exact_rhs": "-47823586256220630270281119324121/39614081257132168796771975168",
+        "exact_positive_contradiction_margin": "328616596283819402486007603421651/633825300114114700748351602688",
+        "margin_float": 518.4655712302031,
+        "row_signs_valid": true,
+        "unbounded_nonzero_terms": [],
+        "all_binary_integer_domains_relaxed": true,
+        "LP_infeasibility_proves_original_MIP_infeasibility": true,
+        "optimizer_calls": 0,
+        "production_reducer_or_native_certificate_imported": false,
+        "residual_terms_discarded": 0,
+        "tolerance_used_to_ignore_residuals": false,
+        "original_checker_tolerance": 1e-05,
+        "exact_worst_case_row_and_bound_residual_allowance": "107687048364863474420035468522407967868362213955253526361/24519928653854221733733552434404946937899825954937634816",
+        "allowance_float": 4.3918173615051055,
+        "contradiction_survives_original_checker_tolerance": true,
+        "row_family_counts": {
+          "known_GPU_binding": 19,
+          "CC4_CDF_U": 1,
+          "CC4_site_nominal_partition": 2,
+          "nominal_and_compute_headroom": 2,
+          "voltage_upper": 2
+        },
+        "weighted_rows": 26,
+        "bound_terms": 118,
+        "rational_completion": {
+          "path": "C:\\v42_a1_pr134_supercompact_exact_20261007\\docs\\v42_b1_may17_may19_repair_20261007\\MAY19_RATIONAL_FARKAS_COMPLETION.json",
+          "sha256": "d627de76c895f0e94a981995f393d582021b9060d148b7b82320651524e4b2b8",
+          "bytes": 3071
+        },
+        "proof": "Signed original rows imply sum_j c_j*x_j <= exact_rhs. Original bounds imply sum_j c_j*x_j >= exact_minimum. The strict positive rational gap is impossible.",
+        "numerical_false_infeasibility": false
+      },
+      "compressed_FULL_LP_equivalence": true,
+      "original_model_identity": {
+        "day": "2025-05-19",
+        "original_native_names": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-19\\ORIGINAL_NATIVE_NAMES.npz",
+          "sha256": "32ee99d829637086dea85290c694fbbd5d47db7c0fb453b52aea60702519ca67",
+          "bytes": 20777640
+        },
+        "original_matrix": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-19\\A0_MATRIX.npz",
+          "sha256": "8603f616e574572a693efd60c25947e61f54d3a7ede3d3325048af9ce0be670b",
+          "bytes": 39857202
+        },
+        "original_attributes": {
+          "path": "C:\\v42_b1_may17_may19_repair_20261007\\2025-05-19\\A0_ATTRIBUTES_CODED.npz",
+          "sha256": "dd07d35b0d7ccd8f9f20e08404beba0ba8396e2401dd98dcb0f0322b5387f511",
+          "bytes": 6647376
+        },
+        "raw_original_fingerprint": -1667335194,
+        "original_rebuilt_from_PR134": true,
+        "coefficient_differences": 0,
+        "original_bounds_RHS_senses_objective_types_equal": true,
+        "all_four_objectives_equal": true,
+        "models": [
+          {
+            "name": "ORIGINAL_FULL",
+            "rows": 3731730,
+            "cols": 2738613,
+            "nnz": 27743601,
+            "binary": 930588,
+            "integer": 28812,
+            "continuous": 1779213,
+            "native_fingerprint": -1667335194
+          },
+          {
+            "name": "CURRENT_COMPRESSED",
+            "rows": 3028050,
+            "cols": 2684461,
+            "nnz": 18244129,
+            "binary": 929216,
+            "integer": 28812,
+            "continuous": 1726433,
+            "native_fingerprint": -735434520
+          },
+          {
+            "name": "CURRENT_COMPRESSED_RELAXED",
+            "rows": 3028050,
+            "cols": 2684461,
+            "nnz": 18244129,
+            "binary": 0,
+            "integer": 0,
+            "continuous": 2684461,
+            "native_fingerprint": -1917631124
+          }
+        ],
+        "PASS": true,
+        "optimization_calls": 0,
+        "solver_settings": {
+          "Threads": 1,
+          "Method": 1,
+          "Seed": 20260929,
+          "MIPGap": 0.005,
+          "Presolve": -1,
+          "Cuts": -1,
+          "Heuristics": 0.05,
+          "NumericFocus": 0,
+          "FeasibilityTol": 1e-06,
+          "OptimalityTol": 1e-06,
+          "IntFeasTol": 1e-05
+        },
+        "integrality_only_relaxed_in_third": true
+      },
+      "original_native_runtime": 6.8429999351501465,
+      "diagnostic_native_and_IIS_budget_used": 204.4417422626575,
+      "B0_zero_action_available": false,
+      "input_binding_bug_found": false,
+      "stale_objective_lock_found": false,
+      "date_specific_certificate_reuse_bug_found": false,
+      "numerical_false_infeasibility": false,
+      "scientific_feasible_set_changed": false,
+      "production_repair_applied": false,
+      "production_rerun_performed": false,
+      "rerun_not_performed_reason": "Original LP infeasibility independently proven; no legitimate implementation defect to repair. Changing the R0 windows, CC4 envelope or voltage constraints would change the scientific feasible set.",
+      "new_FreshAC_or_physical_pipeline_result": null,
+      "grid_conflicts": [
+        {
+          "original_row": 25667,
+          "day_slot": 1,
+          "node_phase_axis": 239,
+          "node_phase_count": 386,
+          "RHS": -0.004124172538282123,
+          "all_control_coefficients_nonpositive": false,
+          "bound_pu": 1.05,
+          "coefficient_terms": [
+            {
+              "variable": "known[AIDC01,25]",
+              "coefficient": 1.4059288149506944e-09
+            },
+            {
+              "variable": "known[AIDC02,25]",
+              "coefficient": -6.974365358401274e-06
+            },
+            {
+              "variable": "known[AIDC03,25]",
+              "coefficient": -6.958528878047155e-06
+            },
+            {
+              "variable": "known[AIDC04,25]",
+              "coefficient": -6.983738766436368e-06
+            },
+            {
+              "variable": "known[AIDC05,25]",
+              "coefficient": -2.0212100076120516e-05
+            },
+            {
+              "variable": "known[AIDC06,25]",
+              "coefficient": -7.002670349821344e-06
+            },
+            {
+              "variable": "known[AIDC07,25]",
+              "coefficient": -6.893009349429991e-06
+            },
+            {
+              "variable": "known[AIDC08,25]",
+              "coefficient": -6.925985773701667e-06
+            },
+            {
+              "variable": "known[AIDC09,25]",
+              "coefficient": -6.8207198191845115e-06
+            },
+            {
+              "variable": "known[AIDC10,25]",
+              "coefficient": -3.4570401287186114e-05
+            },
+            {
+              "variable": "known[AIDC11,25]",
+              "coefficient": -3.0012966569852168e-05
+            },
+            {
+              "variable": "known[AIDC12,25]",
+              "coefficient": -2.283913990520767e-05
+            },
+            {
+              "variable": "anonymous_GPU[AIDC01,1]",
+              "coefficient": 1.4059288149506944e-09
+            },
+            {
+              "variable": "anonymous_GPU[AIDC02,1]",
+              "coefficient": -6.974365358401274e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC03,1]",
+              "coefficient": -6.958528878047155e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC04,1]",
+              "coefficient": -6.983738766436368e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC05,1]",
+              "coefficient": -2.0212100076120516e-05
+            },
+            {
+              "variable": "anonymous_GPU[AIDC06,1]",
+              "coefficient": -7.002670349821344e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC07,1]",
+              "coefficient": -6.893009349429991e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC08,1]",
+              "coefficient": -6.925985773701667e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC09,1]",
+              "coefficient": -6.8207198191845115e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC10,1]",
+              "coefficient": -3.4570401287186114e-05
+            },
+            {
+              "variable": "anonymous_GPU[AIDC11,1]",
+              "coefficient": -3.0012966569852168e-05
+            },
+            {
+              "variable": "anonymous_GPU[AIDC12,1]",
+              "coefficient": -2.283913990520767e-05
+            }
+          ]
+        },
+        {
+          "original_row": 32615,
+          "day_slot": 2,
+          "node_phase_axis": 239,
+          "node_phase_count": 386,
+          "RHS": -0.005337794061562207,
+          "all_control_coefficients_nonpositive": false,
+          "bound_pu": 1.05,
+          "coefficient_terms": [
+            {
+              "variable": "known[AIDC01,26]",
+              "coefficient": 5.000545771503528e-09
+            },
+            {
+              "variable": "known[AIDC02,26]",
+              "coefficient": -6.975007851974491e-06
+            },
+            {
+              "variable": "known[AIDC03,26]",
+              "coefficient": -6.9594168955371085e-06
+            },
+            {
+              "variable": "known[AIDC04,26]",
+              "coefficient": -6.98373672679496e-06
+            },
+            {
+              "variable": "known[AIDC05,26]",
+              "coefficient": -2.0212351004295988e-05
+            },
+            {
+              "variable": "known[AIDC06,26]",
+              "coefficient": -7.002390782093732e-06
+            },
+            {
+              "variable": "known[AIDC07,26]",
+              "coefficient": -6.895400461208552e-06
+            },
+            {
+              "variable": "known[AIDC08,26]",
+              "coefficient": -6.927744668123932e-06
+            },
+            {
+              "variable": "known[AIDC09,26]",
+              "coefficient": -6.823516853137014e-06
+            },
+            {
+              "variable": "known[AIDC10,26]",
+              "coefficient": -3.456764079897593e-05
+            },
+            {
+              "variable": "known[AIDC11,26]",
+              "coefficient": -3.0008242061821252e-05
+            },
+            {
+              "variable": "known[AIDC12,26]",
+              "coefficient": -2.2834887972501246e-05
+            },
+            {
+              "variable": "anonymous_GPU[AIDC01,2]",
+              "coefficient": 5.000545771503528e-09
+            },
+            {
+              "variable": "anonymous_GPU[AIDC02,2]",
+              "coefficient": -6.975007851974491e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC03,2]",
+              "coefficient": -6.9594168955371085e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC04,2]",
+              "coefficient": -6.98373672679496e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC05,2]",
+              "coefficient": -2.0212351004295988e-05
+            },
+            {
+              "variable": "anonymous_GPU[AIDC06,2]",
+              "coefficient": -7.002390782093732e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC07,2]",
+              "coefficient": -6.895400461208552e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC08,2]",
+              "coefficient": -6.927744668123932e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC09,2]",
+              "coefficient": -6.823516853137014e-06
+            },
+            {
+              "variable": "anonymous_GPU[AIDC10,2]",
+              "coefficient": -3.456764079897593e-05
+            },
+            {
+              "variable": "anonymous_GPU[AIDC11,2]",
+              "coefficient": -3.0008242061821252e-05
+            },
+            {
+              "variable": "anonymous_GPU[AIDC12,2]",
+              "coefficient": -2.2834887972501246e-05
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "two_causes_identical": false,
+  "scientific_scope": "Frozen PR134 A1 linear/integer formulation and its R0 temporal/reference input authority. Not a claim that current FCFS B0 or the physical power network has no feasible schedule."
+}

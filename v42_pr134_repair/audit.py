@@ -19,7 +19,7 @@ def run(day):
     # The complete axes were checked above, including every unchanged bound.
     rows=[]
     for j in np.flatnonzero(affected):
-        rows.append(dict(original_column=int(j),name=str(names['vars'][j]),family=str(z['vf_names'][z['vf'][j]]),
+        rows.append(dict(original_column=int(j),name=str(names['vars'][j]),family=str(names['vars'][j]).split('[')[0],
             old_LB=z['lb'][j],old_UB=z['ub'][j],old_type=str(z['vtype'][j]),compressed_column=int(mapping[j]),
             new_LB=lb[j],new_UB=ub[j],new_type=str(typ[j]),
             classification='DATE_RECOMPUTED',certified=result['PASS'],certificate_SHA=sha(target/'A2SC_PROOF.npz')))
