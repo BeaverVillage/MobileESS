@@ -83,8 +83,8 @@ def run():
         INTEGER_DOMAIN_CLOSURE_PROVEN=False,PRODUCTION_ACCEPTED=False,initial_phi=None,phase1_master_solves=0,
         time_to_zero=None,permanent_scientific_candidate_deletions=0,physics_or_tolerance_changed=False,
         forbidden_dates_or_pipeline_run=False,source_commit=read(OUT/'SOURCE_FREEZE.json')['git_head'])
-    p1result=dict(status='NOT_RUN_PHASE1_GATE',PASS=False)
-    finalclosure=dict(PASS=False,status='NOT_RUN_PHASE1_OR_INCREMENTAL_P1_GATE',full_150_coverage=False,INTEGER_DOMAIN_CLOSURE_PROVEN=False)
+    p1result=dict(status='NOT_AUTHORIZED_THIS_TASK_STOP_AT_ZERO',PASS=False)
+    finalclosure=dict(PASS=False,status='NOT_AUTHORIZED_THIS_TASK',full_150_coverage=False,INTEGER_DOMAIN_CLOSURE_PROVEN=False)
     try:
         for iteration in range(12):
             folder=OUT/'M19'/('R'+str(iteration));folder.mkdir(parents=True,exist_ok=True)
@@ -126,32 +126,7 @@ def run():
                 result['classification']='PHASE1_EARLY_ACTIVATION_ACCEPTED'
                 # Original artificial-free replay is included in verify_zero;
                 # no full sweep is performed during Phase I.
-                stable_classes=set();p1cursor=0
-                for p1iteration in range(12):
-                    p1folder=OUT/'M19'/('P'+str(p1iteration));budget.remaining()
-                    prec,praw=native.solve(original,p1folder,'ORIGINAL_P1');p1result=dict(prec,PASS=False)
-                    if prec['status']!=gp.GRB.OPTIMAL or not all(k in praw for k in ('X','Pi','RC')):raise BudgetStop('ORIGINAL_P1_NOT_OPTIMAL')
-                    psign=verify_sign_convention(original,praw['Pi'],praw['RC']);preplay=primal_replay(original,praw['X'])
-                    p1result.update(PASS=psign['PASS'] and preplay['PASS'],sign=psign,replay=preplay)
-                    atomic(p1folder/'RAW_REPLAY.json',p1result)
-                    if not p1result['PASS']:raise ValueError('ORIGINAL_P1_RAW_REPLAY_FAIL')
-                    while len(stable_classes)<150:
-                        pricefolder=p1folder/('Q'+str(len(batches)))
-                        priced,negative=partial(native,executor,workers,original,None,praw,data,domains,ledger,axes,local_rows,owned,pricefolder,p1cursor,max_classes=150-len(stable_classes))
-                        batches.append(dict(stage='P1',iteration=p1iteration,**{k:v for k,v in priced.items() if k not in ('receipts','class_ids')}))
-                        p1cursor=priced['next_index']
-                        if negative:stable_classes.clear();break
-                        stable_classes.update(priced['class_ids'])
-                    if len(stable_classes)==150:
-                        if any(b.get('negative_blocks_unmaterialized',0) for b in batches if b['stage']=='P1' and b['iteration']==p1iteration):
-                            raise BudgetStop('P1_NEGATIVE_BLOCK_UNMATERIALIZED_AFTER_COMPLETE_RECOVERY')
-                        priced,negative=partial(native,executor,workers,original,None,praw,data,domains,ledger,axes,local_rows,owned,p1folder/'FINAL',full_sweep=True)
-                        finalclosure=closure(original,praw,global_rows,axes,n,priced);result['LP_PRICING_CLOSED']=finalclosure['PASS']
-                        if finalclosure['PASS']:break
-                        if not negative:raise BudgetStop('FINAL_CLOSURE_BOUND_GAP_UNRESOLVED')
-                    activate.previous_cols=original.matrix.shape[1]
-                    currentstate=(base,descriptor,data,domains,ledger,base_axes,n,grows,local_rows,owned)
-                    data,ledger,original,descriptor,global_rows,local_rows,owned,axes=activate(currentstate,negative,'P'+str(p1iteration),p1folder,activations)
+                atomic(folder/'ARTIFICIAL_FREE_ORIGINAL_VERIFICATION.json',zero)
                 break
             scanned_classes=set();negative=[];price_folder=folder
             while not negative and len(scanned_classes)<150:
@@ -183,6 +158,8 @@ def run():
         result.update(final_phi=None if not traces else traces[-1]['Phi'],phase1_trajectory=[r['Phi'] for r in traces],
             valid_negative_columns=sum(r['valid_negative_columns'] for r in batches),activated_columns=len(activations),
             activated_STAY=sum(r['kind']=='STAY' for r in activations),activated_migration=sum(r['kind']=='MIGRATION' for r in activations),
+            activation_rounds=len(set(r['iteration'] for r in activations)),stagnation=result['classification']=='PHASE1_ACTIVATION_STAGNATION',
+            scientific_status='PASS' if result['ACTIVE_DOMAIN_FEASIBLE'] else 'INCONCLUSIVE',
             partial_pricing_batches=len(batches),native_calls=len(native.calls),native_seconds=native.native_seconds,
             elapsed_wall_seconds=perf_counter()-budget.started,accounted_seconds=budget.accounted(),selected_workers=workers,
             final_original_model=dict(rows=original.matrix.shape[0],cols=original.matrix.shape[1],nnz=original.matrix.nnz),
