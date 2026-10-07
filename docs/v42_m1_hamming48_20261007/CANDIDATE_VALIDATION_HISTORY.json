@@ -1,0 +1,81 @@
+{
+  "audits": [
+    {
+      "point": "BEST_SOLVER_POINT.npz",
+      "point_SHA256": "f9192e2d6a8eb04b4096f983bdc1abbf65c1abab5613e02cd759713299d5c6cc",
+      "objective": 0.6324498168172089,
+      "PASS": true,
+      "original": {
+        "PASS": true,
+        "finite": true,
+        "max_constraint_violation": 5.184663810916652e-10,
+        "max_bound_violation": 2.0205170961691894e-10,
+        "max_integrality_violation": 0.0,
+        "objective": 0.6324498168172089
+      },
+      "physical": {
+        "PASS": true,
+        "C3_residual": {
+          "finite": true,
+          "max_constraint_residual": 5.184663810916652e-10,
+          "max_bound_residual": 2.0205170961691894e-10,
+          "max_integrality_residual": 0.0,
+          "objective": 0.6324498168172089
+        },
+        "original_physical_audit": {
+          "PASS": true,
+          "raw": {
+            "PASS": true,
+            "finite": true,
+            "max_constraint_violation": 5.184663810916652e-10,
+            "max_bound_violation": 2.0205170961691894e-10,
+            "max_integrality_violation": 0.0,
+            "objective": 0.6324498168172089,
+            "integer_pattern_exact": true,
+            "route_equality_max_residual": 0.0,
+            "affine_postsolve_tolerance": 1e-06,
+            "bound_and_route_tolerance": 1e-08
+          },
+          "exhaustive_grid": {
+            "PASS": true,
+            "checked_rows": 673920,
+            "ambiguous_exact_checks": 0,
+            "maximum_upper": 7.73966100003244e-14,
+            "tolerance": 1e-08
+          },
+          "objective": 0.6324498168172089,
+          "route_SOC_PCS": {
+            "PASS": true,
+            "violations": [],
+            "max_exact_circle_ratio": 0.9907995527518827,
+            "mobility_energy_kwh": 69.03977797111658
+          },
+          "mode_connection": {
+            "charge_mode_and_connection_PASS": true,
+            "charge_mode_and_connection_violations": []
+          },
+          "original_grid_physics": "All original voltage/line-current/NormalAmps/transformer-kVA affine rows exhaustively checked.",
+          "repairs": 0
+        },
+        "saved_inverse_certificate_used": true,
+        "C2_model_rebuilt": false,
+        "route_auxiliary_inverse_max_difference": 0.0,
+        "start_repaired": false,
+        "physical_start_max_difference": null,
+        "new_incumbent_inverse_mapping": "Frozen PR162 route-auxiliary mapping; raw C3 point retained unchanged",
+        "objective": 0.6324498168172089
+      },
+      "restricted": {
+        "PASS": true,
+        "finite": true,
+        "max_constraint_violation": 5.184663810916652e-10,
+        "max_bound_violation": 2.0205170961691894e-10,
+        "max_integrality_violation": 0.0,
+        "objective": 0.6324498168172089
+      }
+    }
+  ],
+  "all_MIPSOL_points_saved": true,
+  "validation_order": "best native candidate first, then remaining improving MIPSOL candidates in objective order until first valid minimum",
+  "no_extra_solve": true
+}
