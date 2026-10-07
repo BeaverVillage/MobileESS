@@ -1,0 +1,79 @@
+{
+  "PASS": true,
+  "independent_constructor_imported": false,
+  "network": {
+    "PASS": true,
+    "nonempty_flow_rows": 8942,
+    "flow_arc_incidences": 415760,
+    "energy_arc_coefficients": 198986,
+    "connection_rows": 17884,
+    "compact_binary_node_masses_verified": 9038,
+    "original_flow_exact_preimages_verified": true,
+    "integral_unit_flow_is_one_acyclic_path": true,
+    "complete_time_DAG_is_safe_supergraph": true,
+    "all_original_bounds_preserved": true
+  },
+  "grid_rows_verified": 30,
+  "exact_support_duals_verified": 2880,
+  "selected_cuts_independently_verified": 364,
+  "outward_rounding_all_original_domain_PASS": true,
+  "mutation_tests": [
+    {
+      "test": "Every support capacity decreased / direction changed",
+      "cases": 5760,
+      "PASS": true
+    },
+    {
+      "test": "Every exact RHS / coefficient and native outward coefficient altered",
+      "cases": 1092,
+      "PASS": true
+    }
+  ],
+  "adversarial_route_cases": 31714,
+  "reference_integer_points": [
+    {
+      "name": "PR171",
+      "original_C3A": {
+        "PASS": true,
+        "finite": true,
+        "max_constraint_violation": 5.798882690110201e-10,
+        "max_bound_violation": 2.158078169812345e-10,
+        "max_integrality_violation": 0.0,
+        "objective": 0.6306505800203936
+      },
+      "all_new_cut_max_violation": 0.0,
+      "PASS": true
+    },
+    {
+      "name": "original_C3A_start",
+      "original_C3A": {
+        "PASS": true,
+        "finite": true,
+        "max_constraint_violation": 1.3827730072080158e-09,
+        "max_bound_violation": 0.0,
+        "max_integrality_violation": 0.0,
+        "objective": 0.6694159238756877
+      },
+      "all_new_cut_max_violation": 0.0,
+      "PASS": true
+    }
+  ],
+  "stored_LP_max_violation": -0.12935067925339305,
+  "selected_budget": 512,
+  "no_optimize_calls": true,
+  "seconds": 83.4789482000051,
+  "SOC_only_conflicts": 0,
+  "SOC_effect": "Two-slot SOC span/power and intervening maximum-charge envelopes are conservative; SOC-only pruning is absent when these bounds do not exclude any route-compatible pair.",
+  "all_original_integer_schedules_preserved": true,
+  "verified_inputs_SHA256": {
+    "PREREGISTRATION.md": "186fb70431b93609141b0b5594f50aa0e82a4bf0940206f7a2799055b3295644",
+    "GRID_SUPPORT_PROOFS.json": "73a6083d4de1e7c883cd96f734d1415c37148f66a82d267f41501ec072b81876",
+    "CUT_PROOFS.json": "5ead8c5190cdd2e1d535dfb883051fff295a357196cdcd59d6c2274f283dbbfa",
+    "SELECTED_CUT_MATRIX.npz": "a5d4a8f9141b0871c2cd77ced7f0d9ecc2d2303fb471439b04e5f0ea80484784",
+    "SELECTED_CUT_DATA.npz": "3de6c512318f0b9ebeb49cbe60c6cccfa64a235926bb1c1224a80191dec8ded1",
+    "construct.py": "cbb20f2632d8ff7e44342c9420ec062daa492fe9393c810340c02c065efe9f7a",
+    "integer_covers.py": "58927b73474edbfd86786fd9ae330aa491bd45c3be238e754ebca822de61e6dc",
+    "verify_cuts.py": "a934dd7820f5d934a7b505923c183884780c172443bda329a6ab1ceb6d2a6a42",
+    "support.py": "92c37ae63ade91bccf4a8fd2afd56c843a52b5543d75678e19aceef38dbd1162"
+  }
+}
