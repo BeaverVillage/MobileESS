@@ -11,7 +11,8 @@ import scipy.sparse as sp
 
 def implied_upper(snapshot,global_rows,n,resource_rows):
     if np.any(snapshot.lower[:n]!=0):raise ValueError('IMPLIED_BOX_NONNEGATIVE_ZERO_LOWER_REQUIRED')
-    rows=np.asarray([i for i in global_rows if i not in set(resource_rows)],dtype=int)
+    excluded=set(resource_rows)
+    rows=np.asarray([i for i in global_rows if i not in excluded],dtype=int)
     if snapshot.matrix[rows,n:].nnz:raise ValueError('CANDIDATE_COEFFICIENT_IN_GLOBAL_ONLY_CERTIFICATE_ROW')
     original=snapshot.matrix[rows,:n].tocsr();sense=snapshot.senses[rows];rhs=snapshot.rhs[rows]
     forward=np.flatnonzero(sense!='>');reverse=np.flatnonzero(sense!='<')
