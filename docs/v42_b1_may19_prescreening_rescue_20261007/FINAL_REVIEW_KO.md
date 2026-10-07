@@ -52,7 +52,7 @@
 
 26. 최종 분류: MAY19_PRESCREENING_UNRESOLVED. 전체 물리 후보 집합의 불가능성을 증명한 결과가 아니다.
 
-27. 최종 commit / Draft PR는 PUBLICATION_RECEIPT.json과 최종 전달에 기록한다.
+27. 결과 artifact commit: `e9ac7137fa6989317c720d711295dedf973b3a3d`. Draft PR: [#166](https://github.com/BeaverVillage/MobileESS/pull/166). 최종 publication commit은 이 대화의 최종 전달 및 PR 현재 head로 확인한다. Native 실행 source commit은 `d57a1a8b6120a597749e0a9ed6584966544fc942`이다.
 
 위 옵션 수와 마지막 census는 선택된 production 도메인이 아니라 계획상 마지막으로 테스트한 S_D를 설명한다. 첫 feasible tested shell은 확인되지 않았다. 전역 최소성을 주장하지 않는다.
 
