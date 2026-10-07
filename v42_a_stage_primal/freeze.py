@@ -1,4 +1,4 @@
-import subprocess,zipfile
+import subprocess,zipfile,hashlib
 from pathlib import Path
 from v42_pr134_b1.common import read,record,atomic,sha
 from v42_a_stage_lexcases.policy import ROOT,OUT,STATIC
@@ -22,7 +22,8 @@ def freeze():
     tree=subprocess.check_output(['git','ls-tree','-r',head],cwd=ROOT,text=True);blobs={l.split('\t',1)[1]:l.split()[2] for l in tree.splitlines()}
     for p in sources:
         if p.is_relative_to(ROOT):
-            h=subprocess.check_output(['git','hash-object',str(p)],cwd=ROOT,text=True).strip()
+            b=p.read_bytes();h=hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+            if h!=blobs.get(p.relative_to(ROOT).as_posix()):h=subprocess.check_output(['git','hash-object',str(p)],cwd=ROOT,text=True).strip()
             if h!=blobs.get(p.relative_to(ROOT).as_posix()):raise PermissionError('UNCOMMITTED_PRIMAL_SOURCE:'+str(p))
     gates=[Path(r['path']) for r in old['gate_receipts']]+[OUT/'PRIMAL_ENTRY_GATE.json',OUT/'PRIMAL_PROPOSALS.json']
     if not all(read(p).get('PASS') for p in gates):raise PermissionError('PRIMAL_PRE_RUN_GATE_REQUIRED')
