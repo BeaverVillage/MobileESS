@@ -7,7 +7,12 @@ def build():
     frozen=read('FROZEN64_RESULT.json');p1=read('P1_RESULT.json');integer=read('INTEGER_RESULT.json');clock=read('OVERNIGHT_START.json')
     results=[]
     for p in sorted(OUT.rglob('NATIVE_RESULT.json')):
-        r=json.loads(p.read_text(encoding='utf-8-sig'));results.append(dict(folder=p.parent.relative_to(OUT).as_posix(),**r))
+        r=json.loads(p.read_text(encoding='utf-8-sig'));identity=p.parent/'MODEL_IDENTITY.json'
+        if identity.exists():
+            axes=json.loads(identity.read_text(encoding='utf-8-sig'))
+            r.update({k:axes.get(k) for k in ('rows','cols','nnz')})
+        r['native_nodes_per_hour']=3600*r['NodeCount']/r['native_seconds'] if r.get('NodeCount') is not None and r.get('native_seconds') else None
+        results.append(dict(folder=p.parent.relative_to(OUT).as_posix(),**r))
     stats=dict(completed_native_solves=len(results),native_seconds=sum(r.get('native_seconds') or 0 for r in results),
         Work=sum(r.get('Work') or 0 for r in results),peak_RSS_bytes=max((r.get('peak_RSS_bytes') or 0 for r in results),default=0),
         max_factor_nnz=max((r.get('max_factor_nnz') or 0 for r in results),default=0),
@@ -16,7 +21,7 @@ def build():
         inflight_solve_not_in_completed_totals=True)
     (OUT/'AGGREGATE_PROGRESS.json').write_text(json.dumps(stats,indent=2)+'\n',encoding='utf8')
     with (OUT/'ALL_COMPLETED_NATIVE_SOLVES.csv').open('w',newline='',encoding='utf8') as f:
-        keys=['folder','status','objective','ObjBound','native_seconds','Work','NodeCount','peak_RSS_bytes','max_factor_nnz','max_factor_memory_GB']
+        keys=['folder','status','objective','ObjBound','rows','cols','nnz','native_seconds','Work','NodeCount','native_nodes_per_hour','peak_RSS_bytes','max_factor_nnz','max_factor_memory_GB']
         w=csv.DictWriter(f,fieldnames=keys,extrasaction='ignore');w.writeheader();w.writerows(results)
     case=read('P2_CASE_RESULT.json') if (OUT/'P2_CASE_RESULT.json').exists() else None
     if (OUT/'P2_CG_RESULT.json').exists():case=read('P2_CG_RESULT.json')
