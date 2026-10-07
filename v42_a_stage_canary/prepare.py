@@ -68,7 +68,9 @@ def prepare(day):
         axes[(family.upper(),*key) if isinstance(key,tuple) else (family.upper(),'',key)]=row
     grows,_,_=row_partition(base,desc,n,axes.values())
     if len(row_codes)!=model.NumConstrs:raise ValueError('ORIGINAL_ROW_FAMILY_CAPTURE_REQUIRED')
-    rf=np.asarray(row_codes)[:len(grows)];rf_names=np.asarray(row_labels);families=rf_names[rf]
+    # The original builder may interleave global and local rows.  The
+    # assembled reference orders only the selected original global rows first.
+    rf=np.asarray(row_codes)[np.asarray(grows,dtype=np.int64)];rf_names=np.asarray(row_labels);families=rf_names[rf]
     voltage=read(data[0]['electrical_certificate']['path'])['outputs']['voltage']
     if record(voltage['path'])['sha256']!=voltage['sha256']:raise ValueError('GRID_ARCHIVE_DRIFT')
     with np.load(voltage['path']) as z:node_names=z['node_names'].copy()
