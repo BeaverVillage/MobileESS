@@ -138,7 +138,10 @@ def audit_checkpoint(bb,A,d):
             with np.load(folder/'LP_POINT_PROOF.npz') as z:x=z['x'];pi=z['Pi']
             computed,_,_,_=hc.exact_bounded_lagrangian(CSC,e,pi);assert computed['exact_rational']==cert['exact_rational']==r['certified_LB'] and r['native_status']==2
             if r.get('archived_origin'):
-                assert r['archived_origin']['archived_completed_OPTIMAL'] and r['archived_origin']['new_root_optimize_calls']==0 and r['basis_output_SHA256'] is None
+                assert r['archived_origin']['archived_completed_OPTIMAL'] and r['archived_origin']['new_root_optimize_calls']==0 
+                if r['basis_output_SHA256'] is not None:
+                    assert sha(folder/'BASIS.npz')==r['basis_output_SHA256']==r['archived_origin']['saved_same_domain_basis_origin']['SHA256']
+                    assert r['archived_origin']['saved_same_domain_basis_origin']['same_original_root_domain'] and r['archived_origin']['saved_same_domain_basis_origin']['not_node_proof']
                 assert sha(hc.HISTORY/'PURE_LP_RESULT.json')==r['archived_origin']['source_result_SHA256'] and read(hc.HISTORY/'PURE_LP_RESULT.json')['Status']==2
             else:assert sha(folder/'BASIS.npz')==r['basis_output_SHA256']
             if r.get('branch_variable') is not None:
@@ -235,6 +238,7 @@ def run(args):
         assert args.resume and args.recover_node==0 and len(bb.state['nodes'])==1
         assert (RUN/'NUMERIC_STABILITY_RECOVERY_ONCE.json').exists(),'REGISTERED_NUMERIC_RECOVERY_MUST_BE_CONSUMED_FIRST'
         from import_archived_root import receipt
+        atomic(RUN/'ARCHIVED_ROOT_IMPORT_ONCE.json',dict(UTC=stamp(),root_optimize_calls=0,same_scientific_domain=True))
         node=bb.select();assert node['id']==0;bb.begin(node);bb.save(checkpoint);oracle.choose_branch=chooser(bb,oracle.d)
         imported=receipt(oracle,node,RUN);bb.apply(0,imported);bb.save(checkpoint);audit_checkpoint(bb,oracle.A,oracle.d)
     try:
@@ -252,7 +256,11 @@ def run(args):
             atomic(RUN/'OPEN_COVERAGE.json',bb.audit());atomic(RUN/'NODE_LEDGER.json',bb.state['ledger'])
             table(RUN/'NODE_LEDGER.csv',[{k:r.get(k) for k in ['node_id','parent','depth','LP_status','certified_LB','effective_LB','Runtime','Work','basis_supplied','basis_accepted','fractional_binary_count','branch_name','state','prune_reason']} for r in bb.state['ledger']])
             atomic(RUN/'PSEUDOCOSTS.json',pseudocosts(bb))
-            if result['LP_status']=='UNRESOLVED':break # Fail closed and let scheduler select the next registered backend.
+            if result['LP_status']=='UNRESOLVED':
+                # Retain the certified inherited floor in OPEN. The core selects
+                # the best-bound unprocessed leaf next, allowing its unsolved
+                # sibling to be measured without resolving this failed LP.
+                continue
             if bb.audit()['global_gap']<=.005:break
         audit_checkpoint(bb,oracle.A,oracle.d)
         atomic(RUN/'RESULT.json',dict(UTC=stamp(),coverage=bb.audit(),processed=bb.state['processed'],processed_this_session=bb.state['processed']-start_count,wall_seconds=time.perf_counter()-begin,LP_calls_this_session=len(oracle.calls),restartable_OPEN_queue=True,pruning_counts={reason:sum(r['prune_reason']==reason for r in bb.state['ledger']) for reason in ['EXACT_LP_INFEASIBILITY','CERTIFIED_LB_AT_LEAST_VALIDATED_UB','INTEGER_REPLAY_PASS_AND_CERTIFIED_OPTIMUM']},strong_branching='Not performed: current measured LP cost does not justify extra probes',root_recovery_Method='ARCHIVED_OPTIMAL_PROOF_IMPORT_WITHOUT_NEW_ROOT_SOLVE',child_Method=1,heuristic_branch_rank='deterministic measured pseudocost with fractionality and original family tie-break',unresolved_domains_retained=True))
