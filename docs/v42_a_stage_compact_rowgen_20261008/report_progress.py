@@ -21,6 +21,11 @@ def build():
     case=read('P2_CASE_RESULT.json') if (OUT/'P2_CASE_RESULT.json').exists() else None
     if (OUT/'P2_CG_RESULT.json').exists():case=read('P2_CG_RESULT.json')
     recovery=read('CERTIFICATE_RECOVERY/REPAIRED_NODE_BOUND.json') if (OUT/'CERTIFICATE_RECOVERY/REPAIRED_NODE_BOUND.json').exists() else None
+    repair=read('PRIMAL_REPAIR_V2_RESULT.json') if (OUT/'PRIMAL_REPAIR_V2_RESULT.json').exists() else None
+    repair_calls=[r for r in results if '/PRIMAL_REPAIR' in r['folder']]
+    cg=read('P2_CG_CHECKPOINT.json') if (OUT/'P2_CG_CHECKPOINT.json').exists() else None
+    cg_stop=read('CG_RESOURCE_STOP_DIAGNOSIS.json') if (OUT/'CG_RESOURCE_STOP_DIAGNOSIS.json').exists() else None
+    transportation=read('EXACT_TRANSPORT_RESULT.json') if (OUT/'EXACT_TRANSPORT_RESULT.json').exists() else None
     trajectories=list(csv.DictReader((OUT/'PHASE1_ITERATION_TRACE.csv').open(encoding='utf8')))
     closed=read('M19/FROZEN64/ALL_REMAINING_ROWS/NATIVE_RESULT.json');identity=read('M19/FROZEN64/ALL_REMAINING_ROWS/MODEL_IDENTITY.json')
     trajectories.append(dict(solve=19,Phi=0,exact_Phi='0',row_closed=True,rows=identity['rows'],cols=identity['cols'],nnz=identity['nnz'],
@@ -50,6 +55,7 @@ Pure physical path lambdas fail to represent the original fractional native migr
 | P1 original integer control | 1,046,444 | 362,044 | 14,820,623 |
 | Complete relevant MIG=0 integer domain | 732,455 | 255,356 | 23,972,931 |
 | Same integer domain with inherited valid cuts | 732,618 | 255,356 | 23,979,160 |
+| Same integer domain with weighted CG cuts | 732,641 | 255,356 | 23,980,385 |
 
 ## Frozen64 Phase-I and row closure
 
@@ -77,11 +83,23 @@ Independent LP certificate recovery subsequently diagnosed four exact negative r
 
 Prepared weighted integer histogram capacity rounding adds 23 valid rows / 1,225 nnz to the inherited 163-cut model. It preserves every original integer schedule and objective and strengthens only the LP relaxation. Its exact formula is sum(floor(g/d)*y)<=floor(R/d), derived from the actual nonnegative integer GPU binding. `WEIGHTED_CG_BUILD_VERIFICATION.json` records static preparation; native application is claimed only if a later `P2_CG_STARTED.json` and completed native results exist. No solver parameter sweep is used.
 
+The weighted-CG continuation preserves the prior integer bound and incumbent. Its first query covers Z in [ceil(validLB-1e-6), UB-1], while the Z>=UB sibling is recorded with analytic LB=UB. An open interval then enters the same exhaustive fixed-value case architecture. The current persisted stage ledger has LB `{None if cg is None else cg.get('valid_global_LB')}` and UB `{None if cg is None or cg.get('incumbent') is None else cg['incumbent']['value']}`; in-flight callback values are progress only.
+
+The weighted-CG first interval completed 188 nodes in 1,189.448s / Work2,851.274 without a primal. Its following exact case stopped after 156.178s / one node because the system RAM guard observed 1,929,695,232 bytes available, below the 2GiB reserve. The generic runner message names the component limit; `CG_RESOURCE_STOP_DIAGNOSIS.json` records the actual resource cause. Status11 is not infeasibility. Total weighted-CG native time was 1,345.626s / Work3,123.764, with LB948 / UB950 preserved. All subsequent native execution is sequential. The system commit still had headroom; the RAM guard stopped the A process and did not inspect or control M.
+
+A separate primal-only repair architecture proposes one-count histogram transfers that reduce Shift 950 to 948. Thirty-one proposals passed exact objective and GPU-box screening. Screening is not physical feasibility. Each temporary query fixes the original integer assignment and retains all original rows, continuous bounds, scientific objectives and inherited locks. Its LP bound is never used as a domain bound or to delete a candidate. Only a row/bound/integrality-qualified point followed by full original physical replay can become a UB. The first 90-second allocation ended with a raw point rejected by physical reconstruction; that source epoch and result are preserved. The next epoch applies the row/bound/integrality gates before physical reconstruction and allocates 180 seconds per query, with unchanged native solver policy. Completed repair calls: `{len(repair_calls)}`. Latest completed repair result: `{None if repair is None else {k:v for k,v in repair.items() if k in ('accepted','value','valid_LB','stop_reason')}}`. Two simultaneous A-stage solves, when used, each have Threads=1 and system-wide RAM/commit guards; no M process is inspected or controlled.
+
+Primal-only exact original-row invariant pair swaps generated zero improving proposals. A pure-Python integer successive-shortest-path transportation method also considered multi-class cycles, preserving class/site mass and the occupied start histogram for equal GPU/service-length groups. Every proposed change must cancel exactly in every original scientific matrix row and pass the full physical replay. It used zero native solves and returned Shift `{None if transportation is None else transportation['shift']}` with no new UB. These restricted primal searches provide no full-domain lower bound. Bounded fixtures include a three-cycle missed by pair swaps and exact coupling-drift rejection.
+
+Read-only parent-basis qualification verifies every CSR coefficient, row sense and RHS on 732,457 rows / 255,356 columns. Only unresolved fixed-assignment queries may reuse that basis with dual simplex / LPWarmStart2; previously infeasible temporary assignments and every scientific candidate remain recorded. The prepared direct continuation uses the original affine integer objective, without Z, with exhaustive objective<=UB-1 / objective>=UB siblings. Incumbent [variable hints](https://docs.gurobi.com/projects/optimizer/en/current/reference/attributes/variable.html#varhintval) are nonbinding heuristic guidance; they never supply a bound or pruning authority. Matrix/box/type/RHS/objective read-back and full physical primal replay remain mandatory. Observed node rates differ between the inherited objective-row search and the Z-based searches; these are not an isolated causal benchmark. Prepared continuation code is not an execution claim.
+
 ## Conditional canaries and measured totals
 
 May17 → May12 → May10 can execute only after May19 A1 acceptance with at least 5,400s remaining at the trigger. The same completed architecture and policies are used without retuning. No other date is included. Individual results, when present, live in `CANARIES/<date>/RESULT.json`; prepared code is not evidence of execution.
 
 Completed solves: **{stats['completed_native_solves']}**; total native **{stats['native_seconds']:.3f}s**, Work **{stats['Work']:.3f}**; maximum observed own-process RSS **{stats['peak_RSS_bytes']:,} bytes**; elapsed wall **{stats['wall_seconds']:.3f}s**. In-flight work is excluded until its native result persists. `ALL_COMPLETED_NATIVE_SOLVES.csv` is the deduplicated per-folder ledger. Static build, serialization, full physical replay and source hashing contribute to wall time separately. The P1 target is already reached; the current measured bottleneck is exact P2 Shift integer closure, not P1 gap.
+
+Across completed stages the maximum factor was `{stats['max_factor_nnz']:,}` nnz / `{stats['max_factor_memory_GB']}` GB; the Phase-I-specific maximum remains 17.73M / 0.5GB.
 
 Source freezes record each actually executed commit, exact source file hashes and immutable ZIP archive. Matrix/point binaries remain in the external static directory with SHA256 receipts; repository evidence includes the replay, identity, source, trace and certificate JSON/CSV/log files.
 '''
