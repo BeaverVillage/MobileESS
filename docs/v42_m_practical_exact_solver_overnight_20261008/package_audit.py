@@ -1,7 +1,7 @@
 """Independent replay and OPEN proof audit; native optimize is forbidden."""
 from practical_support import *
 import cold_barrier_external_controller as controller
-from owned_solver_guard_v3 import owned_controller_alive
+from owned_solver_guard_v4 import owned_controller_alive
 import argparse
 
 def run(output=None):
