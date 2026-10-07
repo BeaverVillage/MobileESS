@@ -1,0 +1,252 @@
+{
+  "classification": "ROOT_GAP_NOT_EXPLAINED_BY_TESTED_LOCAL_HULLS",
+  "scope": "Tested one-slot connected-power/mode/PCS hull cuts only; no global-hull impossibility claim.",
+  "production_selected_formulation": "C3A",
+  "tested_strengthening_selected_for_production": false,
+  "base_PR": 162,
+  "exact_base": "1d922c91eb27056a5ccc79c92ef18146707099ab",
+  "reference_incumbent": 0.6694159238756877,
+  "integer_optimum_known": false,
+  "gap_is_to_known_incumbent_not_proven_true_integrality_gap": true,
+  "pure_LP_objective_proxy": 0.568711942993466,
+  "pure_LP_raw_replay_PASS": false,
+  "baseline_valid_global_LB": 0.5687116003498334,
+  "best_strengthened_valid_global_LB": 0.5687116003498334,
+  "absolute_global_LB_improvement": 0.0,
+  "material_threshold": 0.001,
+  "material_strengthening_demonstrated": false,
+  "required_LB_for_point5percent_gap": 0.6660688442563093,
+  "required_LB_increase": 0.09735724390647593,
+  "required_LB_increase_fraction_recovered": 0.0,
+  "final_LP_objective_proxy": 0.5687116625302993,
+  "final_LP_objective_proxy_gain": -2.804631666908364e-07,
+  "cut_LP_raw_feasibility_PASS_rounds": [
+    5,
+    7,
+    8,
+    9
+  ],
+  "cut_LP_raw_feasibility_FAIL_rounds": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    10
+  ],
+  "rounds": 10,
+  "added_rows": 320,
+  "added_nnz": 17837,
+  "selected_cut_families": {
+    "AGGREGATE_CONNECTED_POWER": 252,
+    "FOLDED_PCS_CONNECTED_POWER": 38,
+    "LOCAL_CONNECTED_POWER": 30
+  },
+  "baseline_violated_counts": {
+    "AGGREGATE_CONNECTED_POWER": 250,
+    "LOCAL_CONNECTED_POWER": 5871,
+    "FOLDED_PCS_CONNECTED_POWER": 2323
+  },
+  "original_rows_deleted": 0,
+  "original_columns_added": 0,
+  "final_matrix_rows": 583128,
+  "final_matrix_columns": 306040,
+  "final_matrix_nnz": 5369449,
+  "final_LP_runtime": 245.87800002098083,
+  "final_LP_work": 463.617170314853,
+  "runtime_increase_vs_recovery_LP": -5.440000057220459,
+  "total_cut_LP_runtime": 3749.956999540329,
+  "total_cut_LP_work": 4929.615899412038,
+  "baseline_presolved": {
+    "rows": 407255,
+    "columns": 299112,
+    "nnz": 4429517
+  },
+  "final_presolved": {
+    "rows": 407571,
+    "columns": 299112,
+    "nnz": 4447343
+  },
+  "all_candidate_start_max_signed_cut_violation": 0.0,
+  "integer_feasible_set_preserved": true,
+  "saved_projection_exact_local_hull_separation_witnesses": [
+    {
+      "id": "AGGREGATE_CONNECTED_POWER:MESS02:24:ALL",
+      "family": "AGGREGATE_CONNECTED_POWER",
+      "MESS": "MESS02",
+      "slot": 24,
+      "site": "ALL",
+      "exact_signed_violation": "2764421914502264069/144115188075855872",
+      "signed_violation_float": 19.18203037036731,
+      "exact_start_signed_violation": "-300",
+      "independently_proven_candidate": true,
+      "captured_projection_outside_tested_conservative_local_hull": true,
+      "compared_tolerance": 1e-08,
+      "violation_to_tolerance_ratio": 1918203037.036731
+    },
+    {
+      "id": "LOCAL_CONNECTED_POWER:MESS04:65:IDC01",
+      "family": "LOCAL_CONNECTED_POWER",
+      "MESS": "MESS04",
+      "slot": 65,
+      "site": "IDC01",
+      "exact_signed_violation": "7869773088559781/1125899906842624",
+      "signed_violation_float": 6.9897626251956,
+      "exact_start_signed_violation": "0",
+      "independently_proven_candidate": true,
+      "captured_projection_outside_tested_conservative_local_hull": true,
+      "compared_tolerance": 1e-08,
+      "violation_to_tolerance_ratio": 698976262.51956
+    },
+    {
+      "id": "FOLDED:PCS_FOLDED_FACET_04:MESS04:65:IDC01",
+      "family": "FOLDED_PCS_CONNECTED_POWER",
+      "MESS": "MESS04",
+      "slot": 65,
+      "site": "IDC01",
+      "exact_signed_violation": "84769213932703983252753594485181/5070602400912917605986812821504",
+      "signed_violation_float": 16.717779709456618,
+      "exact_start_signed_violation": "0",
+      "independently_proven_candidate": true,
+      "captured_projection_outside_tested_conservative_local_hull": true,
+      "compared_tolerance": 1e-08,
+      "violation_to_tolerance_ratio": 1671777970.9456618
+    }
+  ],
+  "original_P1_P2_preserved": true,
+  "tolerance_unchanged": 1e-08,
+  "selective_integrality_results": [
+    {
+      "family": "node_activity",
+      "status": 9,
+      "native_LB": 0.5687116103498313,
+      "conservative_native_LB": 0.5687116003498311,
+      "valid_global_LB": 0.5687116003498334,
+      "runtime": 300.12800002098083,
+      "work": 591.2225462485828,
+      "selected_integrality_residual": 0.0,
+      "raw_matrix_replay_PASS": true,
+      "diagnostic_only": true
+    },
+    {
+      "family": "charge_mode",
+      "status": 9,
+      "native_LB": 0.5687116105149937,
+      "conservative_native_LB": 0.5687116005149936,
+      "valid_global_LB": 0.5687116005149936,
+      "runtime": 300.2079999446869,
+      "work": 796.0953773304135,
+      "selected_integrality_residual": 0.0,
+      "raw_matrix_replay_PASS": true,
+      "diagnostic_only": true
+    }
+  ],
+  "selective_family_attribution": "두 제한 시험에서 지배적인 gap 기여 계열을 확정할 만큼의 전역 하한 상승을 얻지 못했다. TimeLimit 결과는 해당 계열의 무관함을 증명하지 않는다.",
+  "selective_bounds_are_native_MIP_attributes_with_minus_1e8_convention": true,
+  "selective_bounds_are_not_exact_rational_certificates": true,
+  "numerical_bound_certification_unresolved_if_proxy_gain_material": false,
+  "root_only_executed": false,
+  "root_only_skip_reason": "No material independently validated LP bound gain.",
+  "native_barrier_ObjBound_used_as_certificate": false,
+  "scientific_point_repairs": 0,
+  "new_full_MILP_calls": 0,
+  "recommended_next_experiment": {
+    "experiments": 1,
+    "executed": false,
+    "scope": "MESS04, zero-based 4-slot window 69-72: exact joint route/stay/transit, charge-mode, P/Q and SOC transition hull, mapped to fixed critical grid rows line.sw1::A and line.l10::A.",
+    "rationale": "Include observed fractional departures at 69, movement energy, connection at 71 and the critical row at 72. One-slot facets leave cross-time SOC/mobility and simultaneous critical-grid coupling unresolved.",
+    "boundary_SOC_not_fixed_to_observed_LP_values": true,
+    "preserve_original_physics": true,
+    "no_global_schedule_enumeration": true,
+    "separate_future_authorization_required": true
+  },
+  "workflow_integrity_and_strict_numeric_feasibility_reported_separately": true,
+  "final_cut_point_discrete_fractionality": {
+    "node_activity": {
+      "binary_count": 8938,
+      "fractional_count": 7070,
+      "fractionality_rate": 0.7910046990378161,
+      "sum_min_x_1mx": 282.1689540330412,
+      "max_min_x_1mx": 0.29213804530779613,
+      "mean_min_x_1mx": 0.03156958536955037,
+      "fractional_variable_mass": 282.16894965976553,
+      "min_value": 5.81739218021165e-10,
+      "max_value": 0.29213804530779613,
+      "binary_bound_violation": 0.0
+    },
+    "charge_mode": {
+      "binary_count": 384,
+      "fractional_count": 384,
+      "fractionality_rate": 1.0,
+      "sum_min_x_1mx": 183.65126518153278,
+      "max_min_x_1mx": 0.49984798816615283,
+      "mean_min_x_1mx": 0.47825850307690826,
+      "fractional_variable_mass": 183.65126518153278,
+      "min_value": 0.48380438249925045,
+      "max_value": 0.9962327127194951,
+      "binary_bound_violation": 0.0
+    }
+  },
+  "final_cut_point_remaining_candidate_violations": {
+    "AGGREGATE_CHARGE_MODE": {
+      "candidate_count": 384,
+      "violated_count": 0,
+      "max_signed_violation": -35.56058472072168,
+      "max_positive_violation": 0.0,
+      "sum_positive_violation_above_tolerance": 0.0,
+      "selected_candidate_count": 0,
+      "selected_violated_count": 0,
+      "unselected_candidate_count": 384,
+      "unselected_violated_count": 0,
+      "most_violated_candidate_id": "AGGREGATE_CHARGE_MODE:MESS03:3:ALL"
+    },
+    "AGGREGATE_CONNECTED_POWER": {
+      "candidate_count": 384,
+      "violated_count": 0,
+      "max_signed_violation": -2.4430734179108766,
+      "max_positive_violation": 0.0,
+      "sum_positive_violation_above_tolerance": 0.0,
+      "selected_candidate_count": 252,
+      "selected_violated_count": 0,
+      "unselected_candidate_count": 132,
+      "unselected_violated_count": 0,
+      "most_violated_candidate_id": "AGGREGATE_CONNECTED_POWER:MESS01:1:ALL"
+    },
+    "AGGREGATE_DISCHARGE_MODE": {
+      "candidate_count": 384,
+      "violated_count": 0,
+      "max_signed_violation": 0.0,
+      "max_positive_violation": 0.0,
+      "sum_positive_violation_above_tolerance": 0.0,
+      "selected_candidate_count": 0,
+      "selected_violated_count": 0,
+      "unselected_candidate_count": 384,
+      "unselected_violated_count": 0,
+      "most_violated_candidate_id": "AGGREGATE_DISCHARGE_MODE:MESS01:0:ALL"
+    },
+    "FOLDED_PCS_CONNECTED_POWER": {
+      "candidate_count": 35768,
+      "violated_count": 91,
+      "max_signed_violation": 8.729451594498919,
+      "max_positive_violation": 8.729451594498919,
+      "sum_positive_violation_above_tolerance": 14.168168699695897,
+      "selected_candidate_count": 38,
+      "selected_violated_count": 0,
+      "unselected_candidate_count": 35730,
+      "unselected_violated_count": 91,
+      "most_violated_candidate_id": "FOLDED:PCS_FOLDED_FACET_02:MESS02:65:STA02"
+    },
+    "LOCAL_CONNECTED_POWER": {
+      "candidate_count": 9216,
+      "violated_count": 150,
+      "max_signed_violation": 7.128792595625729,
+      "max_positive_violation": 7.128792595625729,
+      "sum_positive_violation_above_tolerance": 11.663917536399453,
+      "selected_candidate_count": 30,
+      "selected_violated_count": 0,
+      "unselected_candidate_count": 9186,
+      "unselected_violated_count": 150,
+      "most_violated_candidate_id": "LOCAL_CONNECTED_POWER:MESS02:65:STA02"
+    }
+  }
+}
