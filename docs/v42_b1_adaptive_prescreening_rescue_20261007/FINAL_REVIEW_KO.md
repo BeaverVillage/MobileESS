@@ -34,7 +34,7 @@ May17의 작은 확장 도메인은 전체 A1 정수 feasibility와 독립 물�
 24. **May17 최종 feasibility:** 제한된35개 옵션 집합의 full integer/physical feasibility는 PASS. 최소성은 UNRESOLVED. ALL same-site rank7 후보에서32개 이하 클래스 가능성을 zero-objective로 검사했으나600.006초 TIME_LIMIT, witness0,51,012nodes였으므로33을 최소라고 단정하지 않았다. 조건부 admitted-pool 최소33/35/5/125를 전체 우주의 최소로 일반화하지 않았다.
 25. **May19 최종 feasibility:** 최소 integer-feasible 도메인 미확인, UNRESOLVED. 전체86,143,284개 물리 옵션을 새 certificate support로 다시 가격해 full-pool lower-bound margin −297,682.354를 확인했다. 이 certificate가 full universe를 배제할 수 없으므로 PRESCREENING_ONLY_INSUFFICIENT를 주장하지 않는다. 반대로 negative support margin을 feasible witness로 사용하지 않는다.
 26. **일반 adaptive 규칙:** S0 witness PASS면 즉시STOP/재사용. 그렇지 않으면 독립 exact infeasibility를 요구하고 causal physical pool을 lazy 전수 가격한다. signed certificate-breaking 옵션만 same-site nearest rank부터 작은 필요 batch로 복원하고 fresh LP→MIP→전체 행/물리→동일 exact 압축을 검증한다. 필요하면 같은 사이트 뒤 compatible-site/prestart, 마지막으로 원래 허가된 migration을 검사한다. 양쪽 날짜 integer feasibility와 전체 최소성 증명이 완료되기 전 정상 목적/production gate는 닫힌다. 날짜별 후보 리스트를 코드에 하드코딩하지 않았다.
-27. **commit / Draft PR:** PR163 exact head 위의 별도 `codex/v42-adaptive-minimal-prescreening` branch로 제출한다. 최종 commit과 생성된 Draft PR URL은 이 대화의 최종 전달 및 publication receipt를 따른다.
+27. **commit / Draft PR:** 구현 commit `f61d565629d81a1e2e1f938c62a52ed101c83061`, lossless artifact commit `6d269016fb0655afd760560f1d02d2ef8d2a6933`. [Draft PR #165](https://github.com/BeaverVillage/MobileESS/pull/165). 이후 publication-only commit의 최종 head는 PR의 headRefOid 및 이 대화의 최종 전달을 따른다.
 
 ## 보존·정정·한계
 
