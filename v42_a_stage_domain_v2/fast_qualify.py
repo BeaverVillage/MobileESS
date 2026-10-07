@@ -9,15 +9,17 @@ from v42_pr134_b1.common import atomic,read,record
 
 
 def qualify():
-    junit=STATIC/'FAST_FULL_TESTS.xml';xml=ET.parse(junit).getroot()
-    cases=xml.findall('.//testcase');failed=[c.attrib for c in cases if any(c.find(k) is not None for k in ('failure','error','skipped'))]
+    junit=STATIC/'FAST_FULL_TESTS.xml'
+    test_receipts=[junit,STATIC/'FAST_FINAL_TARGETED.xml']
+    cases=[c for path in test_receipts for c in ET.parse(path).getroot().findall('.//testcase')]
+    failed=[c.attrib for c in cases if any(c.find(k) is not None for k in ('failure','error','skipped'))]
     if failed:raise ValueError('CURRENT_FULL_TEST_QUALIFICATION_NOT_PASS:'+str(failed[:3]))
     changed=subprocess.check_output(['git','diff','--name-only','b4e061bdf2416eccd7aa2a42b3761db1affce8c1'],cwd=ROOT,text=True).splitlines()
     new=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=ROOT,text=True).splitlines()
     sources=[ROOT/p for p in sorted(set(changed+new)) if p.endswith('.py')]
     for path in sources:compile(path.read_text(encoding='utf-8-sig'),str(path),'exec')
     atomic(OUT/'FAST_PRE_RUN_TESTS.json',dict(PASS=True,test_cases=len(cases),unique_test_cases=len({(c.get('classname'),c.get('name')) for c in cases}),
-        failures=0,errors=0,skipped=0,Junit=record(junit),compiled_changed_python=len(sources),
+        failures=0,errors=0,skipped=0,Junit=record(junit),independent_Junit_receipts=[record(p) for p in test_receipts],compiled_changed_python=len(sources),
         compiled_sources=[record(p) for p in sources],native_canary_calls_before_qualification=0,
         no_test_fabrication=True,full_test_suite=True))
     # The preserved old gates certify unchanged scientific modules; the fast
