@@ -46,12 +46,13 @@ def run():
     variables=m.getVars();m.NumStart=1;m.setAttr('Start',variables,x.tolist());m.update()
     assert np.array_equal(np.asarray(m.getAttr('Start')),x) and m.NumStart==1
     B,e=arrays(m);assert B.shape==A.shape and (B!=A).nnz==0
-    assert all(np.asarray(e[k]).dtype==np.asarray(d[k]).dtype and np.asarray(e[k]).tobytes()==np.asarray(d[k]).tobytes() for k in d)
+    assert all(np.asarray(e[k]).dtype==np.asarray(d[k]).dtype and np.asarray(e[k]).tobytes()==np.asarray(d[k]).tobytes() for k in d if k!='row_names')
+    assert np.array_equal(e['row_names'],d['row_names']) # Native string transport drops unused Unicode padding only.
     identity=verify(ROOT,e,int(m.ModelSense));write('OBJECTIVE_IDENTITY.json',identity);assert identity['PASS']
     effective=parameters(m);assert all(effective[k]==v for k,v in SETTINGS.items())
     build_seconds=time.perf_counter()-begin
     write('SOLVER_PARAMETERS.json',dict(settings=SETTINGS,all_effective_before=effective,start_complete=True,start_variable_count=len(x)))
-    write('MODEL_TRANSPORT_AUTHORITY.json',dict(PASS=True,rows=m.NumConstrs,cols=m.NumVars,nnz=m.NumNZs,binaries=m.NumBinVars,T1_rows=0,diagnostic_rows=0,all_native_fields_raw_bytes_match=True,Fingerprint=int(m.Fingerprint),build_seconds=build_seconds,objective_identity_SHA256=sha(OUT/'OBJECTIVE_IDENTITY.json'),Start_SHA256=sha(OUT/'START_POINT.npz')))
+    write('MODEL_TRANSPORT_AUTHORITY.json',dict(PASS=True,rows=m.NumConstrs,cols=m.NumVars,nnz=m.NumNZs,binaries=m.NumBinVars,T1_rows=0,diagnostic_rows=0,all_numeric_fields_and_variable_axis_raw_bytes_match=True,row_names_identical=True,row_name_storage_padding=dict(source=str(d['row_names'].dtype),native=str(e['row_names'].dtype)),Fingerprint=int(m.Fingerprint),build_seconds=build_seconds,objective_identity_SHA256=sha(OUT/'OBJECTIVE_IDENTITY.json'),Start_SHA256=sha(OUT/'START_POINT.npz')))
     times=dict.fromkeys(['presolve_end','barrier_start','barrier_end','crossover_start','crossover_end','root_relaxation_complete','first_MIPNODE','first_nonroot_node','first_branch_evidence','first_incumbent'])
     events=[];trajectory=[];barrier=[];nonroot_counts=set();errors=[];incumbents=[];last=-5.;live=-30.;last_nodes=-1.
     def cb(model,where):
