@@ -16,6 +16,7 @@ from .native import Native,BudgetStop
 from .execution import verify
 from .candidate import expanded_graph,point_for_option,exact_coupling
 from .pricing import partial
+from .progress import capture,inclusion_witness
 
 def csv(path,rows,defaults):
     table(path,rows,sorted(set().union(*(r.keys() for r in rows))) if rows else defaults)
@@ -77,7 +78,7 @@ def run():
     atomic(OUT/'RUN_STARTED.json',dict(day=DAY,source_freeze=record(OUT/'SOURCE_FREEZE.json'),budget=900,no_resets=True))
     workers=read(OUT/'PARALLEL_PRICING_EQUIVALENCE.json')['selected_workers']
     executor=ProcessPoolExecutor(max_workers=workers) if workers>1 else None
-    traces=[];activations=[];batches=[];sizes=[];relative=[];cursor=0
+    traces=[];activations=[];batches=[];sizes=[];relative=[];cursor=0;prior=None
     result=dict(day=DAY,classification=None,ACTIVE_DOMAIN_FEASIBLE=False,LP_PRICING_CLOSED=False,
         INTEGER_DOMAIN_CLOSURE_PROVEN=False,PRODUCTION_ACCEPTED=False,initial_phi=None,phase1_master_solves=0,
         time_to_zero=None,permanent_scientific_candidate_deletions=0,physics_or_tolerance_changed=False,
@@ -110,8 +111,14 @@ def run():
             csv(OUT/'PHASE1_ITERATION_TRACE.csv',traces,['iteration','Phi'])
             print('EARLY_PHASE',iteration,phi,flush=True)
             if previous is not None and phi>previous+1e-8:
-                atomic(folder/'MONOTONICITY_INVESTIGATION.json',dict(previous=previous,current=phi,replay=replay,stop=True))
-                raise BudgetStop('MATERIAL_PHI_INCREASE_INVESTIGATION')
+                budget.remaining()
+                witness,mapped=inclusion_witness(prior,original,descriptor,master,n)
+                point_path=STATIC/folder.relative_to(OUT)/'PRIOR_POINT_WITNESS.npz'
+                np.savez_compressed(point_path,X=mapped)
+                atomic(folder/'MONOTONICITY_INVESTIGATION.json',dict(previous=previous,current=phi,replay=replay,
+                    witness=witness,separate_point=record(point_path),stop=not witness['PASS'],
+                    native_raw_Phi_not_replaced=True,numerical_degeneracy_investigated=True))
+                if not witness['PASS']:raise BudgetStop('MATERIAL_PHI_INCREASE_INVESTIGATION')
             if (rec['max_factor_nnz'] or 0)>250000000 or (rec['max_factor_memory_GB'] or 0)>2:
                 raise BudgetStop('PHASE1_DOMAIN_EXPANSION_TOO_LARGE')
             if zero['PASS']:
@@ -153,6 +160,7 @@ def run():
             if not negative:raise BudgetStop('BOUNDED_PRICING_NO_CONCRETE_COLUMN_RECOVERED')
             if iteration==11:raise BudgetStop('TWELVE_PHASE1_MASTERS_LIMIT')
             activate.previous_cols=original.matrix.shape[1]
+            prior=capture(original,descriptor,master,raw)
             currentstate=(base,descriptor,data,domains,ledger,base_axes,n,grows,local_rows,owned)
             data,ledger,original,descriptor,global_rows,local_rows,owned,axes=activate(currentstate,negative,iteration,folder,activations)
             master=elastic_master(original,global_rows,weights_by_row={i:frozen[r] for i,r in enumerate(grows)})

@@ -75,3 +75,31 @@ def test_raw_backstop_rejects_other_date_integer_or_wrong_model(monkeypatch):
         with pytest.raises(PermissionError):execution.guard(model,'2025-05-19')
         with pytest.raises(PermissionError):execution.authorize('2025-05-19','ACTUAL')
     finally:execution._scope.reset(token)
+
+def test_numerical_phi_increase_with_prior_inclusion_is_not_forced_stop():
+    from test_v42_a_stage_phase1 import snapshot
+    from v42_a_stage_phase1.core import elastic_master
+    from v42_a_stage_early.progress import capture,inclusion_witness
+    first=snapshot([(1,1)]);before=elastic_master(first,(0,1))
+    descriptor=dict(units=[dict(id='j',v=dict(y={('A',0):('v',0)}))])
+    raw=dict(X=np.asarray([1.,0.,0.,1.]))
+    prior=capture(first,descriptor,before,raw)
+    new=snapshot([(1,1),(1,0)]);after=elastic_master(new,(0,1))
+    expanded=dict(units=[dict(id='j',v=dict(y={('A',0):('v',0),('B',0):('v',1)}))])
+    witness,point=inclusion_witness(prior,new,expanded,after,0)
+    assert witness['PASS'] and witness['mapped_Phi']==witness['previous_Phi']
+    assert np.array_equal(raw['X'],[1.,0.,0.,1.])
+    assert point[1]==0 and witness['separate_projection']
+
+def test_prior_point_witness_rejects_nonincluded_row_or_weight():
+    from test_v42_a_stage_phase1 import snapshot
+    from v42_a_stage_phase1.core import elastic_master
+    from v42_a_stage_early.progress import capture,inclusion_witness
+    first=snapshot([(1,1)]);before=elastic_master(first,(0,1))
+    descriptor=dict(units=[dict(id='j',v=dict(y={('A',0):('v',0)}))])
+    prior=capture(first,descriptor,before,dict(X=np.asarray([1.,0.,0.,1.])))
+    changed=replace(first,rhs=np.asarray([2.,0.]));after=elastic_master(changed,(0,1),weights_by_row={r:w for r,w in zip(before.artificial_rows,before.weights)})
+    witness,_=inclusion_witness(prior,changed,descriptor,after,0)
+    assert not witness['PASS']
+    prior['weights']=tuple(w*2 for w in prior['weights'])
+    with pytest.raises(ValueError,match='WEIGHT'):inclusion_witness(prior,changed,descriptor,after,0)
