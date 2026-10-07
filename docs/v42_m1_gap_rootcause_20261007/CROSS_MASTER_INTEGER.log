@@ -1,0 +1,86 @@
+
+Gurobi 13.0.2 (win64) logging started Wed Oct  7 19:46:15 2026
+
+Set parameter OutputFlag to value 1
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  300
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0.005
+OptimalityTol  1e-08
+Method  2
+Crossover  2
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 3626 rows, 919 columns and 10290 nonzeros (Min)
+Model fingerprint: 0x9d093fb4
+Model has 1 linear objective coefficients
+Variable types: 727 continuous, 192 integer (192 binary)
+Coefficient statistics:
+  Matrix range     [1e-08, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [6e-02, 2e+03]
+  RHS range        [2e-04, 1e+03]
+
+Presolve removed 1738 rows and 194 columns
+Presolve time: 0.01s
+Presolved: 1888 rows, 725 columns, 5606 nonzeros
+Variable types: 533 continuous, 192 integer (192 binary)
+Found heuristic solution: objective 0.6597240
+Found heuristic solution: objective 0.6118475
+Found heuristic solution: objective 0.5962722
+Root barrier log...
+
+Ordering time: 0.00s
+
+Barrier statistics:
+ AA' NZ     : 3.670e+03
+ Factor NZ  : 4.855e+03
+ Factor Ops : 5.405e+04 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   6.27343597e+01 -6.51737418e+03  2.99e+03 6.22e-06  3.50e+01     0s
+   1   3.65697924e+01 -1.53647009e+03  8.65e+02 3.89e-16  8.21e+00     0s
+   2   6.35442050e-01 -1.65732361e+02  1.06e+00 8.49e-14  2.17e-01     0s
+   3   5.83252283e-01 -4.41034993e+01  3.70e-02 2.12e-14  5.66e-02     0s
+   4   5.78333653e-01 -7.90677917e-01  4.69e-13 1.84e-16  1.73e-03     0s
+   5   5.38562569e-01  3.58438853e-01  1.20e-12 1.78e-17  2.28e-04     0s
+   6   4.50143431e-01  4.37660612e-01  2.73e-12 1.47e-16  1.58e-05     0s
+   7   4.44904044e-01  4.42583391e-01  2.93e-12 5.89e-17  2.94e-06     0s
+   8   4.43952473e-01  4.43038274e-01  2.25e-11 2.64e-18  1.16e-06     0s
+   9   4.43500878e-01  4.43349887e-01  6.37e-12 2.08e-16  1.91e-07     0s
+  10   4.43465264e-01  4.43465116e-01  1.82e-12 2.18e-18  1.87e-10     0s
+  11   4.43465190e-01  4.43465190e-01  1.07e-12 2.43e-15  5.53e-16     0s
+
+Barrier solved model in 11 iterations and 0.03 seconds (0.03 work units)
+Optimal objective 4.43465190e-01
+
+Crossover time: 0.00 seconds (0.00 work units)
+
+Use crossover to convert LP symmetric solution to basic solution...
+Crossover time: 0.00 seconds (0.00 work units)
+
+Root relaxation: objective 4.434652e-01, 110 iterations, 0.01 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.44347    0    2    0.59627    0.44347  25.6%     -    0s
+H    0     0                       0.4436632    0.44347  0.04%     -    0s
+
+Explored 1 nodes (110 simplex iterations) in 0.03 seconds (0.04 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 4: 0.443663 0.596272 0.611848 0.659724 
+
+Optimal solution found (tolerance 5.00e-03)
+Best objective 4.436632449117e-01, best bound 4.434651896852e-01, gap 0.0446%

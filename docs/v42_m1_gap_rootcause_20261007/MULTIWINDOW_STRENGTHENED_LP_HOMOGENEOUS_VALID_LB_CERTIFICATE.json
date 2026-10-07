@@ -1,0 +1,54 @@
+{
+  "lower_bound": 0.5687115940355527,
+  "exact_rational": "55779070841485839840720467768156909938657153103445958937/98079714615416886934934209737619787751599303819750539264",
+  "exact_pi_rhs_and_constant": "225696281689159868104111464101392462911/340282366920938463463374607431768211456",
+  "exact_original_box_correction": "-9273451726815049997319454884947652551715087422220328679/98079714615416886934934209737619787751599303819750539264",
+  "exact_homogeneous_private_correction": "-86682416376015962340458715773/5316911983139663491615228241121378304",
+  "blocks": [
+    {
+      "label": "MESS04_69_72",
+      "disjuncts": 232837,
+      "minimum_private_residual_cost_exact": "-122929217682977355574223/21267647932558653966460912964485513216",
+      "minimizer": {
+        "pathid": 4485,
+        "connected_mode_bits": 4
+      },
+      "all_private_variables_accounted": true
+    },
+    {
+      "label": "MESS03_69_72",
+      "disjuncts": 232837,
+      "minimum_private_residual_cost_exact": "-346729542574846166384479288869/21267647932558653966460912964485513216",
+      "minimizer": {
+        "pathid": 2426,
+        "connected_mode_bits": 1
+      },
+      "all_private_variables_accounted": true
+    }
+  ],
+  "matrix_nonzeros": 28679818,
+  "nonzero_dual_products_evaluated": 6412682,
+  "all_arithmetic_exact_dyadic_integer_and_Fraction": true,
+  "lower_float_outward_rounded": true,
+  "requires_primal_feasibility": false,
+  "optimize_calls": 0,
+  "proof": "Clip dual row signs; c*x+c0 >= pi*rhs+c0+r*x. Every hull lift satisfies 440*lambda<=E<=1080*lambda,0<=p<=300*lambda,|Q|<=400*lambda,lambda>=0,sum(lambda)=1 and0<=u_t<=sum(off_t lambda). Thus min r*x over these relaxed perspective boxes equals the minimum disjunct residual cost per block, with min(0,r_u) allocated to off disjuncts. Original variables independently minimize over original finite boxes. Dynamics and PCS may be dropped only in this certificate minimization, never from the model. This relaxed domain contains every original integer lift, so the lower bound is valid.",
+  "valid_for_every_original_integer_schedule": true,
+  "not_a_formulation_change": true,
+  "runtime_seconds": 27.304839799995534,
+  "input_dual_array_bytes_SHA256": "51193519c15c726b245f8ebe22cf616962499911f06dc02effa8360f2c84051b",
+  "source_hulls": [
+    {
+      "label": "MESS04_69_72",
+      "matrix_SHA256": "52d86fddc1193df6d90cb38299bb43e0a4cf9cba7beec2dcbe9e936e2be33e98",
+      "data_SHA256": "8ef0169956ed46349e84bcaba246b833a260d337d3c521ddd987ab88577ace77",
+      "independent_verification_SHA256": "976989ef4840cbba913b10a9c5c013e36030aa0983f2a22f52abd00392864696"
+    },
+    {
+      "label": "MESS03_69_72",
+      "matrix_SHA256": "25f05aa8ae5ede26c76a1ef9cc20e3d1185ccc9e1eef129b8a89b4bbfd5a3f71",
+      "data_SHA256": "8ef0169956ed46349e84bcaba246b833a260d337d3c521ddd987ab88577ace77",
+      "independent_verification_SHA256": "b1f102e4c2aeb2c6dbda497b94b674dd21279b9dd4ac76904e43c05862a35ccb"
+    }
+  ]
+}

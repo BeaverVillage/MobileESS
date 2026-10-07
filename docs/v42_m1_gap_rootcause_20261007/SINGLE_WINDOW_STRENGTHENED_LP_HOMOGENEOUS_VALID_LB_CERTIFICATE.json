@@ -1,0 +1,38 @@
+{
+  "lower_bound": 0.5581653526317286,
+  "exact_rational": "240769730214443774802892029981105023989443877126213745628457854960159/431359146674410236714672241392314090778194310760649159697657763987456",
+  "exact_pi_rhs_and_constant": "62042145126374200825834095725458918012018170125251/93536104789177786765035829293842113257979682750464",
+  "exact_original_box_correction": "-45349163007119290743530364249996804267734563563102012763314827689441/431359146674410236714672241392314090778194310760649159697657763987456",
+  "exact_homogeneous_private_correction": "-567639346904142003191213026956069/22300745198530623141535718272648361505980416",
+  "blocks": [
+    {
+      "label": "MESS04_69_72",
+      "disjuncts": 232837,
+      "minimum_private_residual_cost_exact": "-567639346904142003191213026956069/22300745198530623141535718272648361505980416",
+      "minimizer": {
+        "pathid": 231,
+        "connected_mode_bits": 0
+      },
+      "all_private_variables_accounted": true
+    }
+  ],
+  "matrix_nonzeros": 17015715,
+  "nonzero_dual_products_evaluated": 14754548,
+  "all_arithmetic_exact_dyadic_integer_and_Fraction": true,
+  "lower_float_outward_rounded": true,
+  "requires_primal_feasibility": false,
+  "optimize_calls": 0,
+  "proof": "Clip dual row signs; c*x+c0 >= pi*rhs+c0+r*x. Every hull lift satisfies 440*lambda<=E<=1080*lambda,0<=p<=300*lambda,|Q|<=400*lambda,lambda>=0,sum(lambda)=1 and0<=u_t<=sum(off_t lambda). Thus min r*x over these relaxed perspective boxes equals the minimum disjunct residual cost per block, with min(0,r_u) allocated to off disjuncts. Original variables independently minimize over original finite boxes. Dynamics and PCS may be dropped only in this certificate minimization, never from the model. This relaxed domain contains every original integer lift, so the lower bound is valid.",
+  "valid_for_every_original_integer_schedule": true,
+  "not_a_formulation_change": true,
+  "runtime_seconds": 25.113085299992235,
+  "input_dual_array_bytes_SHA256": "661ee838d8ce8d6798981bde70f01a8792e95a3a109acd9f3252bd5cdf7c5da1",
+  "source_hulls": [
+    {
+      "label": "MESS04_69_72",
+      "matrix_SHA256": "52d86fddc1193df6d90cb38299bb43e0a4cf9cba7beec2dcbe9e936e2be33e98",
+      "data_SHA256": "8ef0169956ed46349e84bcaba246b833a260d337d3c521ddd987ab88577ace77",
+      "independent_verification_SHA256": "976989ef4840cbba913b10a9c5c013e36030aa0983f2a22f52abd00392864696"
+    }
+  ]
+}

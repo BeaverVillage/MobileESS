@@ -21,6 +21,18 @@ def module(name, path):
     m=importlib.util.module_from_spec(spec);sys.modules[name]=m;spec.loader.exec_module(m);return m
 history_authority=module('gap_history_authority', HISTORY/'independent_hull.py')
 exact_bound_module=module('gap_history_bound', HISTORY/'numerical_bound_audit.py')
+ORIGINAL_SOURCE_LOCATION=history_authority.SOURCE
+bundled_source=OUT/'source_authority'
+selected_source=Path(os.environ.get('V42_SOURCE_AUTHORITY_DIR',str(bundled_source)))
+if all((selected_source/name).is_file() for name in ('FULL_A.npz','FULL_DATA.npz','DATA.pkl')):
+    # Read-only relocation of the same frozen bytes; historical files untouched.
+    import v42_degen.common as degen_authority
+    import v42_strengthening.common as strengthening_authority
+    import v42_strengthening.analysis as graph_authority
+    history_authority.SOURCE=selected_source
+    degen_authority.SOURCE=selected_source
+    strengthening_authority.SOURCE=selected_source
+    graph_authority.SOURCE=selected_source
 Authority=history_authority.Authority
 exact_bounded_lagrangian=exact_bound_module.exact_bounded_lagrangian
 
@@ -50,6 +62,9 @@ def load():
     return A,d,x
 def replay(A,d,x,integral=False):
     from v42_integrated.matrix import audit
+    if 'types' not in d:
+        assert not integral,'INTEGRAL_REPLAY_REQUIRES_TYPES'
+        d=dict(d,types=np.full(A.shape[1],'C'))
     return audit(A,d,x,integral=integral,tolerance=1e-8)
 def physical_reader():
     # Only instantiate the saved inverse + frozen validator; no historical write/main.
