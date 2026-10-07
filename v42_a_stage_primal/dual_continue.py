@@ -37,6 +37,7 @@ def freeze():
             if h!=blobs.get(rel):h=subprocess.check_output(['git','hash-object',str(p)],cwd=ROOT,text=True).strip()
             if h!=blobs.get(rel):raise PermissionError('UNCOMMITTED_PRIMAL_DUAL_SOURCE:'+rel)
     gates=[Path(r['path']) for r in parent['gate_receipts']]+[OUT/'PRIMAL_PARENT_BASIS_QUALIFICATION.json',OUT/'PRIMAL_DUAL_ENTRY_GATE.json']
+    if not all(read(p).get('PASS') is True for p in gates):raise PermissionError('PRIMAL_DUAL_PRE_RUN_GATE_FAIL')
     archive=STATIC/('PRIMAL_DUAL_EXECUTED_SOURCE_'+head+'.zip')
     with zipfile.ZipFile(archive,'x',compression=zipfile.ZIP_DEFLATED) as z:
         for i,p in enumerate(sources):z.write(p,'repo/'+p.relative_to(ROOT).as_posix() if p.is_relative_to(ROOT) else 'external/'+str(i)+'/'+p.name)
