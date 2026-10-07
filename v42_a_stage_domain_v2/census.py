@@ -53,6 +53,28 @@ def write(path, value):
                     encoding='utf8', newline='\n')
 
 
+def support_intervals(support):
+    """Lossless canonical inclusive start intervals, independently per site."""
+    bysite=defaultdict(list)
+    for start,site in sorted(set(support)):bysite[site].append(start)
+    result={}
+    for site,starts in sorted(bysite.items()):
+        intervals=[]
+        for start in sorted(starts):
+            if intervals and start==intervals[-1][1]+1:intervals[-1][1]=start
+            else:intervals.append([start,start])
+        result[site]=intervals
+    return result
+
+
+def restored_support(row):
+    if 'restored_STAY_support' in row:return {tuple(pair) for pair in row['restored_STAY_support']}
+    result={(start,site) for site,intervals in row['restored_STAY_support_by_site_intervals'].items()
+            for lo,hi in intervals for start in range(lo,hi+1)}
+    if len(result)!=row['restored_STAY_options']:raise ValueError('RESTORED_STAY_INTERVAL_COUNT_IDENTITY')
+    return result
+
+
 def load_frozen(day, production=PRODUCTION):
     if day not in DAYS:
         raise ValueError('STATIC_STRESS_DATE_CENSUS_SCOPE')
@@ -277,7 +299,8 @@ def census(day, production=PRODUCTION, out=OUT):
         classes.append(dict(class_id=key, representative=uid, members=members, class_exact_cardinality=N,
                             state=job.state, qos=job.qos, protected=job.protected,
                             old_S0=oldcounts, new_hard_physical=newcounts,
-                            restored_STAY_options=len(restored), restored_STAY_support=restored,
+                            restored_STAY_options=len(restored), restored_STAY_support_by_site_intervals=support_intervals(restored),
+                            restored_STAY_support_sha256=digest(restored),
                             old_STAY_removed=len(removed), old_migration_all_paths_included=old_migration_included,
                             active_initial_options=active_paths, active_STAY_options=len(active.stays),
                             lazy_STAY_options=len(domain.stays)-len(active.stays), active_variable_delta=dict(delta_vars),
@@ -340,7 +363,7 @@ def census(day, production=PRODUCTION, out=OUT):
                   old_native_F2_CRA_exact_census={k:receipt[k] for k in ('columns','binaries','integers','continuous','constraints','nonzeros')},
                   old_reduced_S0_exact_census={k:compact[k] for k in ('columns','binaries','integers','continuous','rows','nnz')},
                   expected_active_initial_variable_delta=dict(variable_delta),
-                  expected_active_initial_variable_delta_count_kind='EXACT_STRUCTURAL_FROM_F2_CRA_BRANCHES_NO_NATIVE_BUILD',
+                  expected_active_initial_variable_delta_count_kind='EXACT_STRUCTURAL_FROM_F2_CRA_BRANCHES_PRE_RUNTIME_PROJECTION_NO_NATIVE_BUILD',
                   native_additional_rows_estimate=native_rows_estimate, native_additional_nnz_estimate=native_nnz_estimate,
                   matrix_size_estimate_kind='EXTRAPOLATED_ADDITIVE; A2SC reductions must be rederived later',
                   isolated_complete_STAY_support=dict(binary_variables=hist_binary, integer_count_variables=hist_integer,
@@ -403,14 +426,14 @@ def model_forecast(censuses, out=OUT):
                          columns=stay['binary_variables']+stay['integer_count_variables']+stay['continuous_Runtime_finish_variables'],
                          rows=stay['cardinality_rows']+stay['continuous_Runtime_finish_variables'], nnz=stay['direct_incidence_nnz'],
                          variable_count_kind='EXACT_ISOLATED_SUPPORT_COUNT', rows_nnz_count_kind='SUPPORT_ONLY_DIRECT_INCIDENCE; NOT_FULL_NATIVE_MATRIX', model_adopted=False))
-        rows.append(dict(common, domain='C_NEW_ACTIVE_INITIAL', comparison='complete STAY plus inherited old migration graph; F2-CRA before reduction',
+        rows.append(dict(common, domain='C_NEW_ACTIVE_INITIAL', comparison='proven STAY scopes; singleton mixed S0+anchor/lazy STAY; inherited migration; pre Runtime projection',
                          support_options=census_value['active_initial_options'],
                          class_count_variables=census_value['active_class_count_variables'],
                          binary_variables=old['binaries']+delta.get('binary',0), integer_count_variables=old['integers']+delta.get('integer',0),
                          continuous_variables=old['continuous']+delta.get('continuous',0),
                          columns=old['columns']+sum(delta.values()),
                          rows=old['constraints']+census_value['native_additional_rows_estimate'], nnz=old['nonzeros']+census_value['native_additional_nnz_estimate'],
-                         variable_count_kind='EXACT_STRUCTURAL_FROM_INHERITED_FACTORY_BRANCHES',
+                         variable_count_kind='EXACT_STRUCTURAL_FROM_INHERITED_FACTORY_BRANCHES_PRE_RUNTIME_PROJECTION',
                          rows_nnz_count_kind='EXTRAPOLATED_ADDITIVE; NOT_A_NATIVE_MODEL_BUILD', model_adopted=True,
                          lazy_STAY_options=census_value['lazy_STAY_options']))
         rows.append(dict(common, domain='D_MIGRATION_LAZY_POOL', comparison='matrix-free scientific pool; only newly omitted migrations activate later',

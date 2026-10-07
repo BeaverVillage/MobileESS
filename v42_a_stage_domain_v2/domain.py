@@ -211,8 +211,13 @@ def active_stay_domain(job, bound, resources, graph, domain, cardinality):
     return Domain(tuple(sorted(support)), (), domain.cache, job.service_slots)
 
 
-def prepare_active(data):
-    """Build-free V2 adapter: proven STAY scopes active; other support lazy."""
+def prepare_active(data, *, complete_stay=False):
+    """Build-free adapter; full activation retains singleton original flow LP.
+
+    The qualification expansion adds every hard-valid STAY path to the same
+    original singleton flow representation. It never substitutes an unproved
+    histogram projection for that representation.
+    """
     bundle, jobs, bounds, resources, raw, graphs, old, prep = data
     gen = Generator(resources, max(b.latest_completion for b in bounds.values()))
     domains, new_bounds, new_graphs, active_stay_support = {}, {}, {}, {}
@@ -226,7 +231,7 @@ def prepare_active(data):
                 raise ValueError('CLASS_PHYSICAL_OPTION_UNIFORMITY')
         domain = physical_domain(job, bound, resources, gen)
         wide = replace(bound, allowed_starts=physical_starts(job, bound, resources.control_end))
-        active = active_stay_domain(job,wide,resources,graphs[uid],domain,len(members))
+        active = domain if complete_stay else active_stay_domain(job,wide,resources,graphs[uid],domain,len(members))
         graph = augment_stay_graph(job, wide, graphs[uid], active)
         active_stay_support[key] = dict(physical=len(domain.stays),active=len(active.stays),
                                        lazy=len(domain.stays)-len(active.stays))
@@ -238,7 +243,8 @@ def prepare_active(data):
     metadata = dict(prep, domain_authority=AUTHORITY,
                     complete_stay_active=all(v['lazy']==0 for v in active_stay_support.values()),
                     active_stay_support=active_stay_support,
-                    stay_active_policy='COMPLETE_PROVEN_HISTOGRAM; SINGLETON_MIXED_FLOW_S0_PLUS_ANCHOR_WITH_LAZY_STAY',
+                    stay_active_policy=('COMPLETE_PROVEN_HISTOGRAM; COMPLETE_ORIGINAL_SINGLETON_FLOW'
+                        if complete_stay else 'COMPLETE_PROVEN_HISTOGRAM; SINGLETON_MIXED_FLOW_S0_PLUS_ANCHOR_WITH_LAZY_STAY'),
                     full_migration_domain_active=False, class_exact_cardinality_preserved=True,
                     scientific_classes_unchanged=True, noflex_nesting=nesting,
                     physical_domain_hash=digest({u:d.sha for u,d in sorted(domains.items())}))

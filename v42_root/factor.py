@@ -164,8 +164,15 @@ def stay(m,j,g,N,*,compress=False,starts=None,eliminate_f0=None,eliminate_state=
             x=m.addVar(lb=0,ub=N,vtype=typ,name=f'F0_count[{j.uid},{k},{key[1]}]');v['f0'][key]=x
             m.addConstr(x==y[k,s],name='fixed_duration_count_finish')
     states=sorted({(k,t) for k,s in keys for t in range(s,s+j.service_slots)})
+    # Exact same finite incidence; avoid rescanning every site's full support
+    # at every slot when V2 restores long reference-tail start intervals.
+    from bisect import bisect_left, bisect_right
+    bysite=defaultdict(list)
+    for k,s in keys:bysite[k].append(s)
+    bysite={k:sorted(ss) for k,ss in bysite.items()}
     for k,t in states:
-        expr=gp.quicksum(x for (site,s),x in y.items() if site==k and s<=t<s+j.service_slots)
+        ss=bysite[k];a=bisect_left(ss,t-j.service_slots+1);b=bisect_right(ss,t)
+        expr=gp.quicksum(y[k,s] for s in ss[a:b])
         if state_removed:v['r0'][k,t]=expr
         else:
             x=m.addVar(lb=0,ub=N,name=f'R0_count[{j.uid},{k},{t}]');v['r0'][k,t]=x

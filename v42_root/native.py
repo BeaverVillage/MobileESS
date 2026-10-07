@@ -113,8 +113,10 @@ def build(context,data,kind):
     runtime_counts={}
     for key,xs in sorted(finish_groups.items()):
         klass,site,end=key;uid=representative[key];j=jobs[uid]
-        x=m.addVar(lb=0,ub=len(classes[klass]),name=f'finish_count[{klass[:12]},{site},{end}]');runtime_counts[key]=x
-        m.addConstr(x==gp.quicksum(xs),name='exact_Runtime_finish_count')
+        from v42_a_stage_domain_v2.runtime_projection import finish_count
+        x=finish_count(m,xs,len(classes[klass]),f'finish_count[{klass[:12]},{site},{end}]',
+                       direct=prep.get('domain_authority')=='AIDC_A_STAGE_DOMAIN_AUTHORITY_V2')
+        runtime_counts[key]=x
         for target,a in runtime_vectors[key]:bind(m,riskrows[target],x,-a)
     for row,a in m._root_binding_constants.items():row.RHS-=a
     m.update();peak=max(peak,process.memory_info().rss);family_indices=defaultdict(set);seen=set()
@@ -124,7 +126,7 @@ def build(context,data,kind):
                 variables=[x] if isinstance(x,gp.Var) else [x.getVar(i) for i in range(x.size())] if isinstance(x,gp.LinExpr) else []
                 for variable in variables:
                     if variable.index not in seen:family_indices[family].add(variable.index);seen.add(variable.index)
-    family_indices['Runtime_finish_count']={x.index for x in runtime_counts.values()}
+    family_indices['Runtime_finish_count']={x.index for x in runtime_counts.values() if isinstance(x,gp.Var)}
     counts={n:len(ids) for n,ids in family_indices.items()};row_density=np.diff(m.getA().indptr)
     stats=dict(formulation=kind,features=cfg,jobs_complete=len(jobs),all_jobs_complete=True,scientific_classes=len(classes),aggregation=aggregate,aggregation_mode='exact staying-path integer histogram plus individually service-preserving optional migration lanes' if aggregate else 'none',columns=m.NumVars,binaries=m.NumBinVars,integers=m.NumIntVars-m.NumBinVars,continuous=m.NumVars-m.NumIntVars,constraints=m.NumConstrs,nonzeros=m.NumNZs,max_row_density=int(row_density.max()),family_counts=counts,logical_units=len(units),global_variables=global_vars,Runtime_finish_counts=len(runtime_counts),model_build_seconds=perf_counter()-started,grid_seconds=grid_seconds,peak_observed_RSS_bytes=peak,quadratic_constraints=m.NumQConstrs,quadratic_objective=m.NumQNZs,SOS=m.NumSOS,general_constraints=m.NumGenConstrs,original_tie_in_MILP=cfg['tie'],canonical_post_tie=not cfg['tie'],complete_domains=True)
     stats.update(complete_domains=prep.get('full_migration_domain_active',True),

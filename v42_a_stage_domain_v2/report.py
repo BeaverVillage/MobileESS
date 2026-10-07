@@ -104,12 +104,13 @@ def finalize(source_commit=None,pr_url=None):
             and membership17['MAY17_35_RESCUE_OPTIONS_INCLUDED']
             and membership19['PR165_38_AND_PR166_S_A_S_B_S_C_S_D_INCLUDED'])
     verification=dict(PASS=bool(passed),authority=AUTHORITY,base=BASE,
+        phase='INITIAL_STATIC_DOMAIN_REVIEW_BEFORE_AUTHORIZED_FOUR_DATE_QUALIFICATION',
         scientific_domain_new=True,implementation_static_review_complete=True,
         historical_diagnostic_changes=changed,historical_PR134_overwritten=False,
         stress_date_native_optimize_calls=0,production_optimize_calls=0,
         PASS27_reoptimized=False,campaign_runs=0,Actual_runs=0,Fresh_runs=0,scheduled_optimizers_created=0,
         matrix_free_census_native_builds=0,
-        synthetic_static_native_fixtures_only=True,synthetic_optimizer_calls=0,
+        validation_scope='Short synthetic fixtures and read-only historical native models; no stress production solve',
         complete_STAY_scientific_domain=True,universal_compact_adopted=False,
         existing_histogram_exact_projection_preserved=True,failed_singleton_LP_substitution_retained_lazy=True,
         class_membership_cardinality_preserved=True,CC4_Runtime_service_GPU_grid_limits_changed=False,
@@ -122,7 +123,7 @@ def finalize(source_commit=None,pr_url=None):
     forecast=list(csv.DictReader((OUT/'MODEL_SIZE_FORECAST.csv').open(encoding='utf8')))
     active={r['day'][-2:]:r for r in forecast if r['domain']=='C_NEW_ACTIVE_INITIAL'}
     lines=['# V42 A-stage 도메인 권한 V2 최종 검토','',
-        '이번 결과는 새로운 후보 도메인 권한의 구현·정적 검증입니다. 네 날짜의 실행 가능성, 속도, 최적성은 새로 증명하지 않았습니다.', '',
+        '이 문서는 추가 실행 승인 전의 V2 도메인 정적 검토 단계 기록입니다. 추가 승인에 따른 네 날짜 stress 실행과 최종 판단은 ../v42_a_stage_v2_stress4_20261007/FINAL_REVIEW_KO.md에서 별도로 기록합니다.', '',
         '1. 기존 prescreen은 물리적으로 가능한 시작을 R0 이후로 제한하여 과학적 feasible set과 계산용 활성 후보를 혼동했습니다.',
         '2. reference-start 하한, known-window/reference-lower 필터 및 119 슬롯 복원 상한은 독립적 물리 release가 아닌 후보 제한이었습니다.',
         '3. 인과 release, 기존 completion, GPU/rack/site, 보호·high·urgent, 체크포인트/WAN/restart, RUNNING 이력, terminal 불가능성과 완전 계수 일치 중복만 영구 컷이 가능합니다.',
@@ -148,11 +149,11 @@ def finalize(source_commit=None,pr_url=None):
         '24. PR165 38개 및 PR166 S_A/S_B/S_C/S_D의 모든 시험 Option을 원래 과학 속성까지 포함하여 정적으로 확인했습니다.',
         '25. 날짜별 전망은 아래 표와 MODEL_SIZE_FORECAST.csv에 있습니다. native model을 생성하지 않았고 rows/nnz는 추정입니다.',
         '26. binary/integer/continuous 변화는 기존 F2-CRA 분기에서 구조적으로 계산했습니다. A2SC 후속 축약률은 가정하지 않습니다.',
-        '27. May10/12/17/19 native optimize 호출은 0회입니다. 실행 경로는 STRESS_DATE_OPTIMIZATION_NOT_AUTHORIZED로 차단됩니다.',
+        '27. 초기 정적 검토 단계의 May10/12/17/19 native optimize 호출은 0회입니다. 추가 승인 이후에는 12개 PASS receipt와 실행 소스 SHA를 고정한 permit 안에서만 네 날짜 실행을 허용합니다.',
         '28. 기존 27개 PASS 날짜는 재실행하지 않았습니다.',
         '29. CC4/Runtime/service/GPU/rack/WAN/grid/전압/정격은 변경하지 않았습니다. shift는 원래 양수 영역의 계수와 동일하며 새 이른 시작에는 절댓값 이동 크기를 사용합니다.',
         '30. Production-domain 최적성은 미인증이고 PRODUCTION_DOMAIN_ACCEPTED=false입니다. root LP 가격 검사만으로 MILP 완결성을 주장하지 않습니다.',
-        '31. 네 날짜 실행 전 사용자 검토·새 실행 승인, 새 권한의 native build/독립 계수 검증, 메모리/tractability 검토가 필요합니다. 생산 최적성에는 전체 finite 활성화 또는 유효한 정수 closure 증명이 필요합니다. 이후 27개 날짜를 포함한 새 campaign도 별도 승인 대상입니다.',
+        '31. 추가 지시에서 네 날짜 실행은 이미 승인됐습니다. 실행 전 정확성·정적·짧은 테스트 PASS를 요구하며 생산 최적성에는 전체 finite 활성화 또는 유효한 정수 closure 증명이 필요합니다. 다른 27개 날짜는 계속 실행 금지입니다.',
         f"32. 구현 source commit: {source_commit or '게시 직전 source commit을 PUBLICATION_RECEIPT.json에서 기록합니다.'}; Draft PR: {pr_url or '검증 완료 후 게시합니다.'}", '',
         '| 날짜 | 과학 STAY 복원 | 활성 columns | binary | integer count | continuous | rows 추정 | nnz 추정 |',
         '|---|---:|---:|---:|---:|---:|---:|---:|'])
@@ -160,8 +161,8 @@ def finalize(source_commit=None,pr_url=None):
         r=active[day]
         values=[censuses[day]['new_candidates_restored_relative_to_old_S0']]+[int(r[k]) for k in ('columns','binary_variables','integer_count_variables','continuous_variables','rows','nnz')]
         lines.append('| May'+day+' | '+' | '.join(f'{v:,}' for v in values)+' |')
-    lines.extend(['','May10의 P2 단계 시간과 May12 root LP 수치/solver-method 관측 코드를 준비했지만 실행하지 않았습니다. 후보를 올바르게 넓힌다고 두 날짜가 해결된다는 주장은 하지 않습니다.',
-                  '',f"짧은 검증: {test['passed']}개 PASS. Scientific production optimize/Actual/Fresh/campaign/예약 실행은 0회입니다."])
+    lines.extend(['','초기 정적 검토 단계에서는 production optimize를 실행하지 않았습니다. 후보 복원이 두 날짜의 계산 문제를 해결한다는 주장은 하지 않습니다. 추가 승인 후 결과는 stress4 보고서에서 확인합니다.',
+                  '',f"짧은 검증: {test['passed']}개 PASS. 초기 정적 검토 단계 Actual/Fresh/campaign/예약 실행은 0회입니다."])
     (OUT/'FINAL_REVIEW_KO.md').write_text('\n'.join(lines)+'\n',encoding='utf8',newline='\n')
     manifest=[record(p) for p in sorted(OUT.rglob('*')) if p.is_file() and p.name!='SHA256_MANIFEST.json']
     manifest += [record(p) for p in sorted((ROOT/'v42_a_stage_domain_v2').glob('*.py'))]

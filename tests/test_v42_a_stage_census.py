@@ -9,7 +9,7 @@ from v42_job_capability import Job, Resources, ServiceBoundary
 from v42_boundary.generator import Generator
 from v42_compact.graph import GraphFactory
 from v42_a_stage_domain_v2.domain import physical_domain, physical_starts, augment_stay_graph, active_stay_domain
-from v42_a_stage_domain_v2.census import structural_variable_delta
+from v42_a_stage_domain_v2.census import structural_variable_delta, support_intervals, restored_support, digest
 
 
 @pytest.mark.parametrize('N,migration,single_site', [(1,False,False),(3,False,False),
@@ -60,3 +60,42 @@ def test_committed_static_membership_receipts():
     assert may19['groups']['PR165_38']['checked_options']==38
     assert all(group['PASS'] for group in may19['groups'].values())
     assert may17['optimize_calls']==may19['optimize_calls']==0
+
+
+@pytest.mark.parametrize('sources,risk_nnz',[(0,3),(1,3),(3,3),(3,0)])
+def test_exact_runtime_projection_nnz_delta_on_tiny_fixture(sources,risk_nnz):
+    gp=pytest.importorskip('gurobipy')
+    from v42_a_stage_domain_v2.runtime_projection import finish_count
+    def build(direct):
+        model=gp.Model('TINY_RUNTIME_NNZ_FORECAST_FIXTURE');model.Params.OutputFlag=0
+        try:
+            finishes=[model.addVar(lb=0,ub=3) for _ in range(sources)] if sources else [3.]
+            count=finish_count(model,finishes,3,'count',direct=direct)
+            for coefficient in range(1,risk_nnz+1):
+                target=model.addVar(lb=0)
+                model.addConstr(target==coefficient*count)
+            model.update();return model.getA().nnz
+        finally:model.dispose()
+    before,after=build(False),build(True)
+    assert after-before == risk_nnz*sources-risk_nnz-sources-1
+
+
+def test_lossless_per_site_start_interval_encoding():
+    support={(0,'A'),(1,'A'),(2,'A'),(5,'A'),(3,'B'),(4,'B')}
+    encoded=support_intervals(support)
+    assert encoded=={'A':[[0,2],[5,5]],'B':[[3,4]]}
+    assert restored_support(dict(restored_STAY_options=6,restored_STAY_support_by_site_intervals=encoded))==support
+    with pytest.raises(ValueError,match='INTERVAL_COUNT'):
+        restored_support(dict(restored_STAY_options=7,restored_STAY_support_by_site_intervals=encoded))
+
+
+def test_committed_census_all_axes_and_lossless_support():
+    root=Path(__file__).resolve().parents[1]/'docs/v42_a_stage_domain_authority_v2_20261007'
+    for label in ('MAY10','MAY12','MAY17','MAY19'):
+        data=json.loads((root/(label+'_STATIC_DOMAIN_CENSUS.json')).read_text(encoding='utf8'))
+        assert sum(data['candidate_counts_by_site'].values())==data['total_physical_path_multiplicity']
+        assert sum(data['candidate_counts_by_start_displacement'].values())==data['total_physical_path_multiplicity']
+        assert sum(data['STAY_candidate_counts_by_site'].values())==data['hard_valid_STAY_starts']
+        for row in data['candidate_counts_by_class']:
+            support=restored_support(row)
+            assert digest(sorted(support))==row['restored_STAY_support_sha256']

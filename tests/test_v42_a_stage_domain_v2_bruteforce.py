@@ -7,7 +7,7 @@ from v42_job_capability import (
     Job, Option, Resources, ServiceBoundary, checkpoint_records, validate,
 )
 from v42_a_stage_domain_v2.domain import (
-    activate_stay, contains, physical_domain, prepare_active,
+    activate_stay, augment_stay_graph, contains, physical_domain, prepare_active,
 )
 
 
@@ -151,6 +151,22 @@ def test_already_proven_class_histogram_activates_complete_stay():
     assert len(active[7]["classes"]["c"]) == 2
 
 
+def test_qualification_complete_stay_activation_retains_singleton_original_flow():
+    data = fallback_fixture()
+    active, domains = prepare_active(data, complete_stay=True)
+    uid = active[7]["classes"]["c"][0]
+    old, graph = data[5][uid], active[5][uid]
+    assert active[7]["complete_stay_active"]
+    assert active[7]["active_stay_support"]["c"]["lazy"] == 0
+    assert all((site, start) in graph.events["y"] and (site, start + 4) in graph.events["f0"]
+               for start, site in domains[uid].stays)
+    assert graph.events["w"] == old.events["w"] and graph.events["q"] == old.events["q"]
+    assert graph.compatible == old.compatible and graph.transfers == old.transfers
+    assert graph.physical == old.physical
+    assert active[7]["classes"] == data[7]["classes"]
+    assert not active[7]["full_migration_domain_active"]
+
+
 def test_lazy_stay_activation_preserves_existing_migration_attributes():
     active, domains = prepare_active(fallback_fixture())
     uid = active[7]["classes"]["c"][0]
@@ -184,3 +200,68 @@ def test_lazy_stay_activation_updates_counts_and_is_content_idempotent():
     repeated = activate_stay(expanded, domains, {"c": [option]})
     assert repeated[5][uid].sha == expanded[5][uid].sha
     assert repeated[7]["active_stay_support"] == expanded[7]["active_stay_support"]
+
+
+def test_complete_original_flow_integer_stay_schedules_exact_without_solve():
+    """Every integer STAY assignment equals exactly one canonical physical path.
+
+    Enumerate start/finish choices in a tiny expanded actual original flow.
+    Migration variables are zero; all source occupancy is the unique balance
+    lift. This audits every original local/resource row without optimization.
+    """
+    from fractions import Fraction
+    import gurobipy as gp
+    from v42_compact.formulation import add_resources
+    from v42_exact.support import ExactFactory
+    from v42_root.factor import add_job, contributions
+    job = Job("TINY_COMPLETE_ORIGINAL_FLOW", "PENDING", 0, 0, 0, "A", 3, 1,
+              initial_sites=("A", "B"), checkpoint_authorized=True,
+              duration_authority="EXPLICIT_TINY_FIXTURE")
+    bound = ServiceBoundary("TINY", True, True, (0, 1, 2), 8)
+    resources = Resources({"A": 4, "B": 4}, {"A": (4,), "B": (4,)},
+                          {(link, t): 4 for link in ("AB", "BA") for t in range(8)},
+                          {("A", "B"): ("AB",), ("B", "A"): ("BA",)},
+                          8, 4, {("A", 2): 4}, {}, {})
+    domain = physical_domain(job, bound, resources)
+    old = ExactFactory(resources, 8).graph(job, bound)
+    wide = replace(bound, allowed_starts=tuple(range(6)))
+    graph = augment_stay_graph(job, wide, old, domain)
+    assert graph.events["w"] == old.events["w"] and graph.compatible == old.compatible
+    assert graph.transfers == old.transfers and graph.physical == old.physical
+    expected = {Option(start, site, ((site, start, start + 3),)) for start, site in domain.stays}
+    assert len(expected) == 9
+    found, examined = set(), 0
+    model = gp.Model("TINY_STATIC_COMPLETE_ORIGINAL_FLOW")
+    try:
+        model.Params.OutputFlag = 0
+        unit = add_job(model, job, graph, resources, eliminate_f0=True,
+                       eliminate_state=True, eliminate_depart=True,
+                       eliminate_arrive=True, share_links=True)
+        add_resources(model, contributions(job, graph, unit), resources)
+        model.update()
+        matrix = model.getA().tocsr()
+        rows = model.getConstrs()
+        for (site, start), start_variable in unit["y"].items():
+            for (finish_site, end), finish_variable in unit["f0"].items():
+                point = [Fraction(0)] * model.NumVars
+                point[start_variable.index] = 1
+                point[finish_variable.index] = 1
+                if site == finish_site and start < end:
+                    for (location, slot), variable in unit["r0"].items():
+                        if location == site and start <= slot < end:
+                            point[variable.index] = 1
+                valid = True
+                for row in rows:
+                    lo, hi = matrix.indptr[row.index:row.index + 2]
+                    value = sum((Fraction(float(a)) * point[int(column)]
+                                 for column, a in zip(matrix.indices[lo:hi], matrix.data[lo:hi])), Fraction(0))
+                    rhs = Fraction(row.RHS)
+                    valid &= value == rhs if row.Sense == "=" else value <= rhs if row.Sense == "<" else value >= rhs
+                examined += 1
+                if valid:
+                    found.add(Option(start, site, ((site, start, end),)))
+        assert examined == 90
+        assert found == expected
+        assert all(validate(job, option, wide, resources) for option in found)
+    finally:
+        model.dispose()
