@@ -113,6 +113,19 @@ class LPOracle:
                 os.replace(tmp,folder/'PARTIAL_BASIS.npz')
                 result['partial_basis']=dict(file='PARTIAL_BASIS.npz',SHA256=sha(folder/'PARTIAL_BASIS.npz'),native_status=status,not_a_certificate=True)
             except (gp.GurobiError,AttributeError,AssertionError):result['partial_basis']=None
+        # Read available diagnostics from this completed LP only. A partial
+        # point/dual is never accepted as an LP proof or integer incumbent.
+        result['Kappa']=None
+        try:result['Kappa']=float(m.Kappa)
+        except (gp.GurobiError,AttributeError):pass
+        result['KappaExact']=None # No additional condition-estimation solve.
+        if status not in (2,3):
+            try:
+                partial_x=np.asarray(m.getAttr('X'));assert partial_x.shape==(self.A.shape[1],)
+                point_save(folder/'UNRESOLVED_POINT.npz',partial_x)
+                result['unresolved_point']=dict(file='UNRESOLVED_POINT.npz',SHA256=sha(folder/'UNRESOLVED_POINT.npz'),not_a_certificate=True,not_an_incumbent=True)
+                result['unresolved_relaxed_replay']=hc.replay(self.A,dict(d,types=np.full(len(self.variables),'C')),partial_x,False)
+            except (gp.GurobiError,AttributeError,AssertionError):pass
         proof_start=time.perf_counter()
         if status==2:
             x=np.asarray(m.getAttr('X'));pi=np.asarray(m.getAttr('Pi'));rc=np.asarray(m.getAttr('RC'))

@@ -154,6 +154,11 @@ def audit_checkpoint(bb,A,d):
         if r.get('partial_basis'):
             assert r['LP_status']=='UNRESOLVED' and r['partial_basis']['not_a_certificate']
             assert sha(folder/r['partial_basis']['file'])==r['partial_basis']['SHA256']
+        if r.get('unresolved_point'):
+            partial=r['unresolved_point'];assert partial['not_a_certificate'] and partial['not_an_incumbent'] and r['LP_status']=='UNRESOLVED'
+            assert sha(folder/partial['file'])==partial['SHA256']
+            with np.load(folder/partial['file']) as z:partial_x=z['x']
+            assert hc.replay(A,dict(e,types=np.full(A.shape[1],'C')),partial_x,False)==r['unresolved_relaxed_replay']
         if r.get('witness'):
             with np.load(RUN/r['witness']['point']) as z:x=z['x']
             assert full_replay(A,d,x)['PASS']
@@ -231,6 +236,8 @@ def start_queue(oracle,args):
 
 def run(args):
     assert not existing_m0_alive(),'REGISTERED_M0_STILL_RUNNING_NO_DUPLICATE'
+    from owned_controller_guard import owned_controller_alive
+    assert owned_controller_alive() is None,'OWNED_EXTERNAL_CONTROLLER_STILL_RUNNING_NO_DUPLICATE'
     RUN.mkdir(exist_ok=True);oracle=oracle_code.LPOracle();bb=start_queue(oracle,args);checkpoint=RUN/'OPEN_CHECKPOINT.json';begin=time.perf_counter();start_count=bb.state['processed']
     oracle.checkpoint_hook=lambda:bb.save(checkpoint)
     oracle.retry_basis_for_node=lambda node:retry_basis_source(bb,node)
