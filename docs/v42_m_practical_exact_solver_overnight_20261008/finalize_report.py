@@ -27,7 +27,13 @@ def run():
     for name,r in sessions.items():
         if r.get('LP_calls_this_session') and r.get('wall_seconds'):
             wall_rates[name]=dict(LP_calls=r['LP_calls_this_session'],wall_seconds=r['wall_seconds'],LP_attempts_per_controller_wall_hour=r['LP_calls_this_session']*3600/r['wall_seconds'],setup_excluded=True)
-    natives=[read(p) for p in sorted((OUT/'runs').glob('*/RESULT.json'))]
+    natives=[]
+    for p in sorted((OUT/'runs').glob('*/RESULT.json')):
+        r=read(p);original=r.pop('global_LB')
+        r['raw_derived_global_LB']=original
+        r['accepted_global_LB']=read(p.parent/'INDEPENDENT_AUDIT.json').get('accepted_global_LB',original)
+        r['raw_receipt_source']=p.relative_to(OUT).as_posix();r['raw_receipt_SHA256']=sha(p)
+        natives.append(r)
     stages=dict(M0='기존 ROOT의 수치 정체를 보존하고 운영자 중단. 기존 OPTIMAL ROOT의 정확한 인증을 재사용하여 새 ROOT 재실행 없이 20개 자식 벤치마크 및 OPEN 후속 탐색 완료.',M1='600s 기존 canary 반복 없이 Cuts=0/Heuristics=0 native 대조 1회와 external 성능을 비교.',M2='양쪽 자식, best-bound, 정확한 인증, fixing SHA, checkpoint, crash-safe 복구 및 volatile 독립 감사 캐시를 패키징.',M3='native production 1회가 첫 60분 동안 유효 bound/tree 진전을 보이지 않아 clean stop 후 external로 전환.',M4=f"조건부 primal 개입 {summary['primal_interventions']}회. 노드의 실제 LB 상승 또는 exact fathoming이 없으면 실행하지 않는 등록 gate 적용.",M5='fractional family와 현재 쌍대 row support 분석 후 certified pseudocost/fractionality/dual relevance로 분기 순서 조정. pruning에는 사용하지 않음.',M6='P1 0.5% 목표 및 inherited acceptance가 없으면 P2 실행하지 않음. 원본 energy/count 목적함수와 기존 lock만 사전 준비.',M7='재시작 가능한 전체 OPEN proof ledger, full original replay, source identity, 독립 감사 CLI 및 exactness fixture 제공.',M8=decision['classification'])
     result=dict(UTC=stamp(),classification=decision['classification'],decision=decision,scientific_base_PR=177,scientific_base_HEAD='b86486a6f58d6c39a1ea4ff2c7e984372b6087a5',scientific_authority_PR=162,identity=audit['identity'],objective_identity_PASS=True,objective='minimize rho',scientific_model_modifications=0,initial=dict(LB=INITIAL_LB,UB=INITIAL_UB,gap=(INITIAL_UB-INITIAL_LB)/abs(INITIAL_UB)),final=bounds,full_original_incumbent_replay_PASS=True,complete_OPEN_coverage=coverage,stages=stages,native_runs=natives,external=summary['external'],external_session_wall_throughput=wall_rates,resources=summary['resources'],tests=tests,primal_interventions=summary['primal_interventions'],P2_executed=summary['P2_executed'],P2_preparation=read(OUT/'P2_AUTHORITY_PREPARATION.json'),root_import=read(OUT/'ARCHIVED_ROOT_LP_CERTIFICATE_AUDIT.json'),numerical_conditioning=read(OUT/'ROOT_CONDITIONING_AUDIT.json'),independent_package_audit_SHA256=sha(OUT/'PACKAGE_AUDIT.json'),immutable_deadline=read(OUT/'IMMUTABLE_DEADLINE.json'),reporting_git_HEAD=git('rev-parse','HEAD'),final_publication_HEAD_policy='Final commit HEAD, remote match and clean tree verified after report commit; reported in PR body and chat to avoid a self-referential commit hash',Draft_PR_URL='https://github.com/BeaverVillage/MobileESS/pull/179',native_tree_restartable=False,external_OPEN_queue_restartable=True)
     atomic(OUT/'RESULT.json',result)
@@ -82,7 +88,7 @@ Basis supplied/accepted는 {summary['external']['basis_supplied']}/{summary['ext
 
 ## 현재 proof 상태와 재시작
 
-`fractional_binaries`는 각 저장된 LP 점점의 통계입니다. 특히 Crossover=0 barrier의 interior point를 최적 simplex vertex의 fractionality와 같다고 해석하지 않습니다. 기본 raw LP 잔차가 있는 점에서 큰 fractional count만으로 추가 integrality gap이나 infeasibility를 증명하지 않았습니다.
+`fractional_binaries`는 각 저장된 LP 점의 통계입니다. 특히 Crossover=0 barrier의 interior point를 최적 simplex vertex의 fractionality와 같다고 해석하지 않습니다. 기본 raw LP 잔차가 있는 점에서 큰 fractional count만으로 추가 integrality gap이나 infeasibility를 증명하지 않았습니다.
 
 생성 노드 {summary['external']['generated_nodes']}, 처리 {summary['external']['processed_nodes']}, OPEN {len(summary['external']['OPEN_ids'])}, unresolved OPEN {summary['external']['unresolved_retained_OPEN']}. pruning counts: `{summary['external']['prune_counts']}`. 양쪽 자식을 모두 유지하고 전역 LB를 모든 OPEN의 최솟값으로 계산합니다. heuristic 분기 점수는 pruning 근거가 아닙니다.
 
