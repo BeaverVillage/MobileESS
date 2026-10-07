@@ -1,0 +1,25 @@
+# Original-native LP optimality pricing authority
+
+The pricing objective is the original current lexicographic objective; the initial controlled diagnostic uses rho. No historical optimum, objective lock or bound is imported. GPU, Runtime, WAN and active-transfer coupling coefficients come from the frozen scientific interfaces. Runtime uses the inherited operation order `gamma * (gpu * float(kernel[lag]))`, preserving the original binary64 coefficient.
+
+For minimization, `verify_dual` checks Pi <= 0 on <= rows and Pi >= 0 on >= rows. For the actual native matrix it computes every primitive residual `r = c - A' Pi` exactly, then the valid lower bound
+
+`objective_constant + Pi b + sum_j min_{lower_j <= x_j <= upper_j} r_j x_j`.
+
+Original finite bounds are part of this bound. A negative residual on a bounded variable is not ignored. A nonzero residual requiring an infinite endpoint invalidates a finite certificate. The verifier accepts no numeric solver status as a substitute for these checks. Exact primal replay and equality of its objective to that bound prove the provided finite LP optimal; a small numerical gap is reported without being converted to exact equality.
+
+For compressed histogram STAY variables, the adapter independently identifies the actual cardinality row from its primitive support/RHS, matches an existing direct Y native column and objectives, and prices the omitted Y column through the unchanged coupling coefficients and cardinality potential. Both repeated row names and heuristically assumed row ordering are excluded from normalization identity. Negative prices activate a deterministic bounded top-K batch. GPU dual prefix sums and cached Runtime values avoid repeating occupancy work. Batch size changes only from negative-price density within the preregistered limits. Unselected candidates remain scientific options. The final diagnostic iteration proposes no activation that would lack a subsequent LP solve.
+
+Retained singleton mixed-flow and migration options use exact coupling witness scores, with explicit scope limitations. Physical paths do not cover every native fractional direction. In a duration-one source-flow fixture, half a start at0 plus half at2 can finish entirely at2, with half occupancy at0 and1. Every deterministic STAY path can have objective1 while this original native fractional point has objective0. This is why an exhaustive path-price scan cannot prove closure of the original mixed-flow LP.
+
+The finite primitive bridge `price_native_extension` checks an actual native extension, maps all original rows/columns exactly, extends dual weights by zero on additional rows, and evaluates every new primitive column with its original bounds. A zero dual extension on homogeneous local rows is only a dual construction: it does not alone prove an active primal point lifts feasibly. The verifier independently checks the zero lift against all added rows. The result is a finite extension certificate, never automatic scientific-domain closure.
+
+The cheapest investigated full-native certificate is a class-at-a-time local LP oracle retaining the original local polytope. For each full block `P_k`, certify
+
+`beta_k <= min_{z_k in P_k} (c_k - B_k' Pi) z_k`.
+
+`NativeLocalBlock`, `local_pricing_snapshot` and `verify_local_pricing` preserve the actual original native coordinates and include fractional finish directions. Their local dual bound uses every original local row and bound. With all scientific blocks independently covered, the global lower bound is `objective_constant + Pi b_global + min_box((c_0 - A_0' Pi) x_0) + sum_k beta_k`. If this equals a replay-valid active primal objective, the complete original native LP is closed. This decomposition changes neither the physical feasible set nor the native relaxation; substituting physical path convex hulls would change the latter and is prohibited.
+
+The provided APIs certify finite extensions and supplied local blocks. **No complete scientific full-native block producer, row/column coverage registry or aggregate production certificate is currently proved.** The bounded migration scan is incomplete, and physical STAY enumeration does not cure mixed fractional-direction gaps. Therefore live adapter receipts set `native_full_direction_coverage_verified=false` and `LP_PRICING_CLOSED=false`, even if all scanned witnesses have nonnegative price. MILP is prohibited by user section13 until the required full native LP certificate exists. A short restricted-LP canary may still measure build, presolve and barrier behavior; it is not a production solve.
+
+LP pricing closure, if later proved, would establish only the complete original native relaxation. It does not establish full integer optimality. Integer-domain closure needs exact finite activation, valid branch-and-price with branch constraints included in every pricing oracle, or a separate valid integer certificate. Those methods are not claimed implemented here. `INTEGER_DOMAIN_CLOSURE_PROVEN`, `FULL_DOMAIN_ACCEPTED` and production acceptance remain separate false/unresolved statuses.
