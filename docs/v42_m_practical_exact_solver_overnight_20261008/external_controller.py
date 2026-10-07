@@ -230,6 +230,7 @@ def run(args):
     oracle.retry_basis_for_node=lambda node:retry_basis_source(bb,node)
     try:
         while remaining(900)>0 and time.perf_counter()-begin<args.seconds:
+            if args.max_nodes is not None and bb.state['processed']-start_count>=args.max_nodes:break
             node=bb.state['nodes'][str(bb.state['in_flight'])] if bb.state['in_flight'] is not None else bb.select()
             if node is None:break
             oracle.choose_branch=chooser(bb,oracle.d);bb.begin(node);bb.save(checkpoint)
@@ -247,6 +248,6 @@ def run(args):
     finally:bb.save(checkpoint);oracle.close()
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--center',required=True);p.add_argument('--seconds',type=float,default=10800);p.add_argument('--initial-lb',type=float,default=INITIAL_LB);p.add_argument('--resume',action='store_true');p.add_argument('--import-m0',action='store_true');p.add_argument('--recover-node',type=int);a=p.parse_args();assert not(a.resume and a.import_m0)
+    p=argparse.ArgumentParser();p.add_argument('--center',required=True);p.add_argument('--seconds',type=float,default=10800);p.add_argument('--initial-lb',type=float,default=INITIAL_LB);p.add_argument('--resume',action='store_true');p.add_argument('--import-m0',action='store_true');p.add_argument('--recover-node',type=int);p.add_argument('--max-nodes',type=int);a=p.parse_args();assert not(a.resume and a.import_m0)
     try:run(a)
     except BaseException:atomic(RUN/'EXECUTION_ERROR.json',dict(UTC=stamp(),error=traceback.format_exc()));raise

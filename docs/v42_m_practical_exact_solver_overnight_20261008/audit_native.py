@@ -59,7 +59,20 @@ def audit(folder):
     assert sha(folder/'BEST_VALID_POINT.npz')==read(folder/'BEST_FULL_REPLAY.json')['point_SHA256']
     bound=native_bound_valid(receipt,True,restricted,best,log);assert bound==receipt['bound_authority']
     if restricted:assert bound['global_LB_candidate'] is None and 'RESTRICTED_PRIMAL_BOUND_NOT_GLOBAL' in bound['reasons']
-    atomic(folder/'INDEPENDENT_AUDIT.json',dict(PASS=True,UTC=stamp(),audit_optimize_calls=0,model_build_calls=0,source_commit_and_SHA_PASS=True,objective_identity_PASS=True,deadline_identity_PASS=True,full_original_replay_PASS=True,valid_UB=best,bound_authority=bound,all_incumbent_events=results,every_unique_integer_vector_independently_replayed=True,restricted_bound_never_global=restricted,original_physics_A1_authority_PASS=True))
+    accepted_LB=None
+    if not restricted:
+        prior=[INITIAL_LB];ledger_path=OUT/'GLOBAL_BOUND_LEDGER.json'
+        if ledger_path.exists():
+            for event in read(ledger_path)['events']:
+                source=OUT/event['source'];assert sha(source)==event['source_SHA256']
+                registered=read(source);assert not registered['restricted'] and registered['bound_authority']['PASS']
+                # The native receipt, rather than rounded CLI floor text, is
+                # the authority for an event's LB.
+                prior.append(registered['bound_authority']['global_LB_candidate'])
+        accepted_LB=max(prior+([bound['global_LB_candidate']] if bound['PASS'] else []))
+        if receipt['global_LB']!=accepted_LB:
+            atomic(folder/'DERIVED_GLOBAL_LB_CORRECTION.json',dict(reported_derived_LB=receipt['global_LB'],accepted_global_LB=accepted_LB,difference=receipt['global_LB']-accepted_LB,reason='Rounded command-line initial floor is not a new bound certificate. Preserve raw results; use only registered authority and native ObjBound.',original_native_ObjBound_unchanged=receipt['ObjBound'],scientific_objective_unchanged=True))
+    atomic(folder/'INDEPENDENT_AUDIT.json',dict(PASS=True,UTC=stamp(),audit_optimize_calls=0,model_build_calls=0,source_commit_and_SHA_PASS=True,objective_identity_PASS=True,deadline_identity_PASS=True,full_original_replay_PASS=True,valid_UB=best,accepted_global_LB=accepted_LB,bound_authority=bound,all_incumbent_events=results,every_unique_integer_vector_independently_replayed=True,restricted_bound_never_global=restricted,original_physics_A1_authority_PASS=True))
     print('INDEPENDENT_NATIVE_AUDIT_PASS',folder.name,len(events),best)
 def run():
     finished=[];pending=[]
