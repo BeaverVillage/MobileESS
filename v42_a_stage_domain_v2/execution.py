@@ -165,6 +165,9 @@ def require_action_authorized(authority, action='OPTIMIZE', *, require_day=True)
         day = _native_day.get()
     if day is None and require_day:
         raise PermissionError('A_STAGE_PRODUCTION_DAY_REQUIRED')
+    from v42_a_stage_practical.execution import current as practical_current, authorize as practical_authorize
+    if practical_current() is not None:
+        return practical_authorize(day, action)
     from v42_a_stage_compact_rowgen.execution import current as compact_current, authorize as compact_authorize
     if compact_current() is not None:
         return compact_authorize(day, action)
@@ -223,6 +226,10 @@ def guard_model_optimize(model):
     day = getattr(model, '_v42_a_stage_day', None)
     context_day = _native_day.get()
     effective_day=day if day is not None else context_day
+    from v42_a_stage_practical.execution import current as practical_current, guard as practical_guard
+    if practical_current() is not None:
+        practical_guard(model, effective_day)
+        return
     from v42_a_stage_compact_rowgen.execution import current as compact_current, guard as compact_guard
     if compact_current() is not None:
         compact_guard(model, effective_day)
