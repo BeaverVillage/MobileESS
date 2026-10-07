@@ -7,7 +7,7 @@ with the failed attempt preserved, never a claim of a resumed solver tree.
 from practical_support import *
 from fractions import Fraction as F
 import argparse,copy,shutil,traceback
-import numeric_recovery_oracle as oracle_code
+import archived_root_child_oracle as oracle_code
 core=oracle_code.core;ExactBB=core.ExactBB
 RUN=OUT/'external_production'
 
@@ -137,7 +137,10 @@ def audit_checkpoint(bb,A,d):
             cert=read(folder/'LB_CERTIFICATE.json');assert sha(folder/'LB_CERTIFICATE.json')==r['LB_certificate_SHA256'] and sha(folder/'LP_POINT_PROOF.npz')==cert['proof_vector_SHA256']
             with np.load(folder/'LP_POINT_PROOF.npz') as z:x=z['x'];pi=z['Pi']
             computed,_,_,_=hc.exact_bounded_lagrangian(CSC,e,pi);assert computed['exact_rational']==cert['exact_rational']==r['certified_LB'] and r['native_status']==2
-            assert sha(folder/'BASIS.npz')==r['basis_output_SHA256']
+            if r.get('archived_origin'):
+                assert r['archived_origin']['archived_completed_OPTIMAL'] and r['archived_origin']['new_root_optimize_calls']==0 and r['basis_output_SHA256'] is None
+                assert sha(hc.HISTORY/'PURE_LP_RESULT.json')==r['archived_origin']['source_result_SHA256'] and read(hc.HISTORY/'PURE_LP_RESULT.json')['Status']==2
+            else:assert sha(folder/'BASIS.npz')==r['basis_output_SHA256']
             if r.get('branch_variable') is not None:
                 j=r['branch_variable'];assert j in binary and j not in dict(node['fixings']) and float(x[j])==r['raw_fractional_branch_value'] and x[j] not in (0,1)
         elif r['LP_status']=='INFEASIBLE':
@@ -224,15 +227,16 @@ def start_queue(oracle,args):
     bb.save(checkpoint);return bb
 
 def run(args):
-    prior=read(RUN/'RESULT.json');assert prior['coverage']['unresolved_OPEN']==[0] and prior['processed']==1 and prior['root_recovery_Method']==0,'PRIOR_PRIMAL_ROOT_FAILURE_REQUIRED'
-    assert args.resume and args.recover_node==0,'EXPLICIT_SAME_OPEN_ROOT_RECOVERY_REQUIRED'
-    assert not (RUN/'NUMERIC_STABILITY_RECOVERY_ONCE.json').exists(),'ONE_NUMERIC_STABILITY_RECOVERY_ONLY'
-    archive=RUN/'session_results/primal_pstart_result.json';archive.parent.mkdir(exist_ok=True);assert not archive.exists();archive.write_bytes((RUN/'RESULT.json').read_bytes())
-    atomic(RUN/'NUMERIC_STABILITY_RECOVERY_ONCE.json',dict(UTC=stamp(),prior_result_SHA256=sha(RUN/'RESULT.json'),objective_original=True,root_Method=0,NumericFocus=3,PStart='independently replay-PASS native original LP root vector',LPWarmStart=1,children_Method=1))
     assert not existing_m0_alive(),'REGISTERED_M0_STILL_RUNNING_NO_DUPLICATE'
     RUN.mkdir(exist_ok=True);oracle=oracle_code.LPOracle();bb=start_queue(oracle,args);checkpoint=RUN/'OPEN_CHECKPOINT.json';begin=time.perf_counter();start_count=bb.state['processed']
     oracle.checkpoint_hook=lambda:bb.save(checkpoint)
     oracle.retry_basis_for_node=lambda node:retry_basis_source(bb,node)
+    if args.reuse_archived_root:
+        assert args.resume and args.recover_node==0 and len(bb.state['nodes'])==1
+        assert (RUN/'NUMERIC_STABILITY_RECOVERY_ONCE.json').exists(),'REGISTERED_NUMERIC_RECOVERY_MUST_BE_CONSUMED_FIRST'
+        from import_archived_root import receipt
+        node=bb.select();assert node['id']==0;bb.begin(node);bb.save(checkpoint);oracle.choose_branch=chooser(bb,oracle.d)
+        imported=receipt(oracle,node,RUN);bb.apply(0,imported);bb.save(checkpoint);audit_checkpoint(bb,oracle.A,oracle.d)
     try:
         while remaining(900)>0 and time.perf_counter()-begin<args.seconds:
             if args.max_nodes is not None and bb.state['processed']-start_count>=args.max_nodes:break
@@ -251,10 +255,10 @@ def run(args):
             if result['LP_status']=='UNRESOLVED':break # Fail closed and let scheduler select the next registered backend.
             if bb.audit()['global_gap']<=.005:break
         audit_checkpoint(bb,oracle.A,oracle.d)
-        atomic(RUN/'RESULT.json',dict(UTC=stamp(),coverage=bb.audit(),processed=bb.state['processed'],processed_this_session=bb.state['processed']-start_count,wall_seconds=time.perf_counter()-begin,LP_calls_this_session=len(oracle.calls),restartable_OPEN_queue=True,pruning_counts={reason:sum(r['prune_reason']==reason for r in bb.state['ledger']) for reason in ['EXACT_LP_INFEASIBILITY','CERTIFIED_LB_AT_LEAST_VALIDATED_UB','INTEGER_REPLAY_PASS_AND_CERTIFIED_OPTIMUM']},strong_branching='Not performed: current measured LP cost does not justify extra probes',root_recovery_Method=0,child_Method=1,heuristic_branch_rank='deterministic measured pseudocost with fractionality and original family tie-break',unresolved_domains_retained=True))
+        atomic(RUN/'RESULT.json',dict(UTC=stamp(),coverage=bb.audit(),processed=bb.state['processed'],processed_this_session=bb.state['processed']-start_count,wall_seconds=time.perf_counter()-begin,LP_calls_this_session=len(oracle.calls),restartable_OPEN_queue=True,pruning_counts={reason:sum(r['prune_reason']==reason for r in bb.state['ledger']) for reason in ['EXACT_LP_INFEASIBILITY','CERTIFIED_LB_AT_LEAST_VALIDATED_UB','INTEGER_REPLAY_PASS_AND_CERTIFIED_OPTIMUM']},strong_branching='Not performed: current measured LP cost does not justify extra probes',root_recovery_Method='ARCHIVED_OPTIMAL_PROOF_IMPORT_WITHOUT_NEW_ROOT_SOLVE',child_Method=1,heuristic_branch_rank='deterministic measured pseudocost with fractionality and original family tie-break',unresolved_domains_retained=True))
     finally:bb.save(checkpoint);oracle.close()
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--center',required=True);p.add_argument('--seconds',type=float,default=10800);p.add_argument('--initial-lb',type=float,default=INITIAL_LB);p.add_argument('--resume',action='store_true');p.add_argument('--import-m0',action='store_true');p.add_argument('--recover-node',type=int);p.add_argument('--max-nodes',type=int);a=p.parse_args();assert not(a.resume and a.import_m0)
+    p=argparse.ArgumentParser();p.add_argument('--center',required=True);p.add_argument('--seconds',type=float,default=10800);p.add_argument('--initial-lb',type=float,default=INITIAL_LB);p.add_argument('--resume',action='store_true');p.add_argument('--import-m0',action='store_true');p.add_argument('--recover-node',type=int);p.add_argument('--max-nodes',type=int);p.add_argument('--reuse-archived-root',action='store_true');a=p.parse_args();assert not(a.resume and a.import_m0)
     try:run(a)
     except BaseException:atomic(RUN/'EXECUTION_ERROR.json',dict(UTC=stamp(),error=traceback.format_exc()));raise
