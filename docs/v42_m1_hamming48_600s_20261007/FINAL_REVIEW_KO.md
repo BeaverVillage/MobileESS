@@ -80,6 +80,6 @@ Pch/Pdis/Q의 affine 기여와 grid 개선은 동반 관찰이며 인과 분해�
 
 다음 행동은 정확히1개: **새 valid UB=0.6306505800203936 중심에서 동일 슬롯/Hamming48/params/600초의 단일 recenter primal 실험을 사전등록할 것. 이 작업에서는 실행하지 않는다.** 이유: Material improvement ΔUB=0.0017992367968152623, 직전300초 gain 대비1.1776754953614978배이다. H=47로 경계와 한 비트 차이이며 TIME_LIMIT로 종료했다. 새 검증 해를 중심으로 같은 제한을 유지한 한 번의 탐색을 추천하지만 local/global 최적성이나 포화를 주장하지 않는다. 실행=False. 이 작업은 여기서 끝나며 다른 solve는 수행하지 않는다.
 
-Draft PR: Draft PR 생성 후 기록
+Draft PR: https://github.com/BeaverVillage/MobileESS/pull/171
 
 최종40자리 HEAD는 Draft PR 본문의 `Final HEAD`와 사용자 최종 응답에 기록한다. `git rev-parse HEAD`로 확인한다. 동일 commit 파일에 자체 SHA를 넣는 순환을 만들지 않는다. Manifest는 자기 자신과 Python cache를 제외한 namespace 전체 파일의 원본 bytes를 SHA256으로 봉인한다. PR169/170 및 scientific 자료는 기존 hashes와 같아야 하며 최종 작업 트리는 clean이어야 한다.
