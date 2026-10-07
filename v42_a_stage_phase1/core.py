@@ -34,6 +34,12 @@ class ElasticMaster:
             raise ValueError('ORIGINAL_ROW_AUTHORITY_CHANGED')
         if len(set(self.global_rows)) != len(self.global_rows):
             raise ValueError('GLOBAL_ROW_DUPLICATE')
+        expected_rows, expected_signs = [], []
+        for row in self.global_rows:
+            for sign in ((1., -1.) if a.senses[row] == '=' else (-1.,) if a.senses[row] == '<' else (1.,)):
+                expected_rows.append(row); expected_signs.append(sign)
+        if tuple(expected_rows) != self.artificial_rows or tuple(expected_signs) != self.artificial_signs:
+            raise ValueError('ORIGINAL_SENSE_ARTIFICIAL_SIGN_MUTATION')
         if (len(self.weights) != len(self.artificial_rows)
                 or any(Fraction(w) <= 0 for w in self.weights)):
             raise ValueError('STRICTLY_POSITIVE_RATIONAL_WEIGHTS_REQUIRED')
@@ -52,7 +58,7 @@ class ElasticMaster:
         return True
 
 
-def elastic_master(original, global_rows):
+def elastic_master(original, global_rows, *, weights_by_row=None):
     """Fixed dyadic row normalization: 1/next power of two of native scale."""
     original.require()
     if any(original.lower > original.upper):
@@ -63,7 +69,8 @@ def elastic_master(original, global_rows):
             raise ValueError('GLOBAL_ROW_AXIS')
         a = original.matrix.data[original.matrix.indptr[row]:original.matrix.indptr[row+1]]
         scale = max(1., abs(float(original.rhs[row])), float(np.max(abs(a), initial=0)))
-        weight = Fraction(1, 2**max(0, math.ceil(math.log2(scale))))
+        weight = (Fraction(weights_by_row[row]) if weights_by_row is not None else
+                  Fraction(1, 2**max(0, math.ceil(math.log2(scale)))))
         sense = original.senses[row]
         for sign in ((1., -1.) if sense == '=' else (-1.,) if sense == '<' else (1.,)):
             rows.append(row); signs.append(sign); weights.append(weight)
@@ -163,11 +170,19 @@ This is a safe lower bound, not an assertion of exact native optimality.
         value = float(np.sum(products))
         k = 2*len(products)+4
         if k*eps >= .5: raise ValueError('INTERVAL_DOT_TOO_LARGE')
-        error = np.nextafter(k*eps/(1-k*eps)*float(np.sum(abs(products))) + k*np.nextafter(0., 1.), np.inf)
-        rlo = np.nextafter(c[j]-value-error, -np.inf)
-        rhi = np.nextafter(c[j]-value+error, np.inf)
-        if rlo < 0 and (not math.isfinite(upper[j]) or upper[j] >= 1e100): return None
-        if rhi > 0 and (not math.isfinite(lower[j]) or lower[j] <= -1e100): return None
+        magnitude = np.nextafter(float(np.sum(abs(products)))/(1-k*eps), np.inf)
+        error = np.nextafter(k*eps/(1-k*eps)*magnitude + k*np.nextafter(0., 1.), np.inf)
+        rlo = np.nextafter(np.nextafter(c[j]-value, -np.inf)-error, -np.inf)
+        rhi = np.nextafter(np.nextafter(c[j]-value, np.inf)+error, np.inf)
+        if (rlo < 0 and (not math.isfinite(upper[j]) or upper[j] >= 1e100)
+                or rhi > 0 and (not math.isfinite(lower[j]) or lower[j] <= -1e100)):
+            exact = Fraction(float(c[j]))-sum((Fraction(float(a.data[k]))*Fraction(float(pi[a.indices[k]]))
+                for k in range(lo,hi)),Fraction(0))
+            value = float(exact)
+            rlo = value if Fraction(value) <= exact else np.nextafter(value,-np.inf)
+            rhi = value if Fraction(value) >= exact else np.nextafter(value,np.inf)
+            if rlo < 0 and (not math.isfinite(upper[j]) or upper[j] >= 1e100): return None
+            if rhi > 0 and (not math.isfinite(lower[j]) or lower[j] <= -1e100): return None
         candidates = [0.] if lower[j] <= 0 <= upper[j] else []
         for r in (rlo, rhi):
             for b in (lower[j], upper[j]):
