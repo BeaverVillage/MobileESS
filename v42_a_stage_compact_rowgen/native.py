@@ -15,7 +15,7 @@ from v42_a_stage_domain_v2.fast_telemetry import FastTelemetry
 from v42_a_stage_domain_v2.telemetry import native_scalar
 from v42_a_stage_domain_v2.postsolve_review import internal_attempts
 from .policy import OUT,STATIC,DAY,POLICY
-from .policy import HISTORY
+from v42_a_stage_phase1.setup import HISTORY
 from .resources import sample
 
 
