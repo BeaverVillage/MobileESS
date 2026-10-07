@@ -39,3 +39,5 @@ Root relaxation 완료=True, nonroot 관측=False. Root relaxation 이후 구간
 기존 coefficient-range 안내는 PR173의 동일 모델과 동일 수치 판정 권위에 따라 기록했다. 새 수치 경고/오류는 NUMERICAL_AUTHORITY.json에서 별도로 구분한다. Native zero-objective ObjBound=0.0는 rho의 전역 LB로 사용하지 않았다. TIME_LIMIT/INTERRUPTED는 정수 후보 유무와 관계없이 양쪽 bound를 유지한다. INFEASIBLE의 LB 승격에는 원래 전체 영역·모델·컷·수치 권위가 모두 PASS여야 하며, feasible UB에는 원래 C3A 및 route/movement/SOC/PQ/PCS/grid/A1 독립 replay PASS가 필요하다.
 
 요청한 단일 1800초 실행을 마쳤다. 추가 solve나 MIPFocus=1, May/A2/M2/P2 실험은 실행하지 않는다.
+
+Draft PR: [#175](https://github.com/BeaverVillage/MobileESS/pull/175), PR173 위에 적층. 최종 40자리 HEAD는 PR 본문의 `Final HEAD`와 최종 대화에 기록한다.
