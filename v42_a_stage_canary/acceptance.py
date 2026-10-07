@@ -2,7 +2,7 @@
 from v42_pr134_b1.common import read,record
 from .policy import OVERNIGHT
 def final_acceptance():
-    for name,engine in (('P2_CG_RESULT.json','WEIGHTED_CG'),('P2_CASE_RESULT.json','EXACT_CASES')):
+    for name,engine in (('DIRECT_RESULT.json','ORIGINAL_OBJECTIVE_DIRECT'),('P2_CG_RESULT.json','WEIGHTED_CG'),('P2_CASE_RESULT.json','EXACT_CASES')):
         path=OVERNIGHT/name
         if path.exists():
             r=read(path)

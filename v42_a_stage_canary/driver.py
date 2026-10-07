@@ -18,7 +18,11 @@ def run(day):
     for prior in DAYS[:position]:
         if not (OUT/prior/'RESULT.json').exists():raise PermissionError('REQUESTED_CANARY_ORDER_REQUIRED')
     atomic(folder/'STARTED.json',dict(PASS=True,day=day,immutable_deadline=budget.record,source=record(OUT/'CANARY_SOURCE_FREEZE.json')))
-    started=time();native=Native(budget,day);result=dict(day=day,A1_accepted=False,classification='A_NUMERICAL_INCONCLUSIVE')
+    engine=read(OUT/'CONDITIONAL_CANARY_GATE.json')['May19_engine']
+    if engine=='ORIGINAL_OBJECTIVE_DIRECT':
+        from .direct import Native as EngineNative
+    else:EngineNative=Native
+    started=time();native=EngineNative(budget,day);result=dict(day=day,A1_accepted=False,classification='A_NUMERICAL_INCONCLUSIVE')
     try:
         state=prepare(day);pricing.HISTORY=folder;targeted.HISTORY=folder
         state,x,expanded,priced=rowcol(native,state,day)

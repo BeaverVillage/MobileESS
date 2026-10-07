@@ -56,10 +56,14 @@ def run(native,state,expanded,p1,day):
     atomic(folder/'P2/MIGRATION_CERTIFICATE.json',proof);locks.append(LexLock('migration_count',Fraction(0),True,sha(folder/'P2/MIGRATION_CERTIFICATE.json')))
     strong,cuts=strengthen_histogram_capacity(z,z,zp.descriptor,zs['data'],np.arange(z.matrix.shape[1],dtype=np.int64))
     atomic(folder/'P2/INHERITED_INTEGER_STRENGTHENING.json',cuts)
-    if read(OUT/'CONDITIONAL_CANARY_GATE.json')['May19_engine']=='WEIGHTED_CG':
+    engine=read(OUT/'CONDITIONAL_CANARY_GATE.json')['May19_engine']
+    if engine in ('WEIGHTED_CG','ORIGINAL_OBJECTIVE_DIRECT'):
         from v42_a_stage_cg.cuts import strengthen
         strong,cg=strengthen(z,strong,cuts);atomic(folder/'P2/WEIGHTED_CG_BUILD_VERIFICATION.json',cg)
-    from .cases import run as exact_cases
+    if engine=='ORIGINAL_OBJECTIVE_DIRECT':
+        from .direct import run as exact_cases
+    else:
+        from .cases import run as exact_cases
     results,warm=exact_cases(native,strong,z,warm,zp,locks,folder)
     path=STATIC/day/'FINAL_VALIDATED_A1_POINT.npz';np.savez_compressed(path,X=warm)
     result=dict(A1_accepted=True,classification='A_PRACTICAL_SOLVER_A1_ACCEPTED',P1=candidate,migration_count=0,

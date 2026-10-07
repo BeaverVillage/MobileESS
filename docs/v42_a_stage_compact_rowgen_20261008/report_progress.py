@@ -20,6 +20,9 @@ def build():
         w=csv.DictWriter(f,fieldnames=keys,extrasaction='ignore');w.writeheader();w.writerows(results)
     case=read('P2_CASE_RESULT.json') if (OUT/'P2_CASE_RESULT.json').exists() else None
     if (OUT/'P2_CG_RESULT.json').exists():case=read('P2_CG_RESULT.json')
+    if (OUT/'DIRECT_RESULT.json').exists():case=read('DIRECT_RESULT.json')
+    direct=read('DIRECT_CHECKPOINT.json') if (OUT/'DIRECT_CHECKPOINT.json').exists() else None
+    dual=read('PRIMAL_DUAL_RESULT.json') if (OUT/'PRIMAL_DUAL_RESULT.json').exists() else None
     recovery=read('CERTIFICATE_RECOVERY/REPAIRED_NODE_BOUND.json') if (OUT/'CERTIFICATE_RECOVERY/REPAIRED_NODE_BOUND.json').exists() else None
     repair=read('PRIMAL_REPAIR_V2_RESULT.json') if (OUT/'PRIMAL_REPAIR_V2_RESULT.json').exists() else None
     repair_calls=[r for r in results if '/PRIMAL_REPAIR' in r['folder']]
@@ -103,5 +106,9 @@ Across completed stages the maximum factor was `{stats['max_factor_nnz']:,}` nnz
 
 Source freezes record each actually executed commit, exact source file hashes and immutable ZIP archive. Matrix/point binaries remain in the external static directory with SHA256 receipts; repository evidence includes the replay, identity, source, trace and certificate JSON/CSV/log files.
 '''
+    text+='''\n## Continuation receipts\n\n'''
+    text+=f"Completed qualified parent-basis continuation: `{None if dual is None else {k:v for k,v in dual.items() if k in ('accepted','attempts','native_seconds','Work','stop_reason')}}`. This is a primal-only repair; no temporary-query bound supplies full-domain authority.\n\n"
+    text+=f"Original-objective direct continuation: `{None if case is None or not (OUT/'DIRECT_RESULT.json').exists() else {k:v for k,v in case.items() if k in ('A1_accepted','stages','native_seconds','Work','stop_reason')}}`. Current persisted direct ledger: LB `{None if direct is None else direct.get('valid_global_LB')}`, UB `{None if direct is None or direct.get('incumbent') is None else direct['incumbent']['value']}`. A running ledger is progress; final domain bound authority requires the completed native result, actual model read-back and exhaustive sibling partition.\n\n"
+    text+="Exact final HEAD, Draft PR URL, remote match and clean tree are recorded after the final commit in the external `FINAL_HANDOFF.json` and `FINAL_REPORT.md`, outside the worktree to avoid a self-referential commit hash.\n"
     (OUT/'REPORT.md').write_text(text,encoding='utf8');print(json.dumps(stats))
 if __name__=='__main__':build()
