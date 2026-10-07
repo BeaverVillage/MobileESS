@@ -46,7 +46,7 @@
 
 22. **Final HEAD**: 이 파일을 포함하는 최종 commit의 HEAD는 PR 본문 Final HEAD와 최종 대화에 40자리로 기록한다. Native 실행 소스 HEAD=9dfb1165c857d63d5ca57d87293ae6be4e703254
 
-23. **Draft PR URL**: Draft PR 생성 후 기록
+23. **Draft PR URL**: https://github.com/BeaverVillage/MobileESS/pull/173
 
 정적 검증: 30개 원래 grid row, 2880개 exact support dual, 9038개 compact binary node mass, 6852개 변조 거절, 31714개 경로 adversarial 검사 PASS. 원래 정수 reference2개도 새 컷을 만족했다.
 
