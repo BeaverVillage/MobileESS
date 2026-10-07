@@ -23,6 +23,22 @@ def build():
     if (OUT/'DIRECT_RESULT.json').exists():case=read('DIRECT_RESULT.json')
     direct=read('DIRECT_CHECKPOINT.json') if (OUT/'DIRECT_CHECKPOINT.json').exists() else None
     dual=read('PRIMAL_DUAL_RESULT.json') if (OUT/'PRIMAL_DUAL_RESULT.json').exists() else None
+    bounds=[]
+    for e in read('INTEGER_INCUMBENT_TRACE.json')['events']:
+        bounds.append(dict(component='rho',LB=e['valid_LB'],UB=e['valid_UB'],gap_ratio=e['global_gap'],authority='FULL_PRICED_RATIONAL_ROOT_DUAL_AND_ORIGINAL_PRIMAL',source='INTEGER_INCUMBENT_TRACE.json'))
+    bounds.append(dict(component='migration_count',LB=0,UB=0,gap_ratio=0,authority='UNIVERSAL_NONNEGATIVE_BOUND_AND_ORIGINAL_PRIMAL',source='P2_MIGRATION_PROBE_RESULT.json'))
+    bounds.append(dict(component='shift_magnitude',LB=946,UB=950,gap_ratio=4/950,authority='CURRENT_COMPLETE_RELEVANT_INTEGER_MODEL',source='M19/P2/REFINEMENT/SHIFT_MAGNITUDE/N0/INDEPENDENT_INTEGER_BOUND_PROVENANCE.json'))
+    bounds.append(dict(component='shift_magnitude',LB=948,UB=950,gap_ratio=2/950,authority='CURRENT_COMPLETE_NATIVE_BOUND_WITH_EXHAUSTIVE_SIBLING',source='INTERRUPTED_BOUND_RECOVERY.json'))
+    for folder in ('EXACT_CASES','WEIGHTED_CG'):
+        for path in sorted((OUT/'M19/P2'/folder).rglob('INTEGER_BOUND_PROVENANCE.json')):
+            r=json.loads(path.read_text(encoding='utf-8-sig'))
+            if r.get('PASS') and r.get('valid_stage_LB') is not None:
+                L=r['valid_stage_LB'];bounds.append(dict(component='shift_magnitude',LB=L,UB=950,gap_ratio=(950-L)/950,authority='CURRENT_COMPLETE_NATIVE_BOUND_WITH_EXHAUSTIVE_SIBLING',source=path.relative_to(OUT).as_posix()))
+    if direct is not None:
+        for e in direct.get('events',[]):
+            bounds.append(dict(component=e['component'],LB=e['LB'],UB=e['UB'],gap_ratio=(e['UB']-e['LB'])/abs(e['UB']) if e['UB'] else 0,authority='COMPLETED_DIRECT_MODEL_AND_EXHAUSTIVE_SIBLING',source='DIRECT_CHECKPOINT.json'))
+    with (OUT/'VALID_GLOBAL_BOUND_TRAJECTORY.csv').open('w',newline='',encoding='utf8') as f:
+        w=csv.DictWriter(f,fieldnames=list(bounds[0]));w.writeheader();w.writerows(bounds)
     recovery=read('CERTIFICATE_RECOVERY/REPAIRED_NODE_BOUND.json') if (OUT/'CERTIFICATE_RECOVERY/REPAIRED_NODE_BOUND.json').exists() else None
     repair=read('PRIMAL_REPAIR_V2_RESULT.json') if (OUT/'PRIMAL_REPAIR_V2_RESULT.json').exists() else None
     repair_calls=[r for r in results if '/PRIMAL_REPAIR' in r['folder']]
