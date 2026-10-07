@@ -1,5 +1,5 @@
 """Export truthful diagnostic artifacts. Unproved minimality stays UNRESOLVED."""
-import sys,csv,re,shutil,json
+import sys,csv,re,shutil,json,gzip,hashlib
 from .common import *
 
 def report_table(name,rows):
@@ -7,6 +7,15 @@ def report_table(name,rows):
     with (OUT/name).open('w',encoding='utf8',newline='') as f:
         writer=csv.DictWriter(f,fields,lineterminator='\n');writer.writeheader()
         writer.writerows({k:json.dumps(v,ensure_ascii=False) if isinstance(v,(dict,list)) else v for k,v in row.items()} for row in rows)
+
+def copy_evidence(source,target):
+    if source.suffix=='.json' and source.stat().st_size>5_000_000:
+        payload=source.read_bytes();compressed=target.with_suffix(target.suffix+'.gz')
+        compressed.write_bytes(gzip.compress(payload,compresslevel=9,mtime=0))
+        if hashlib.sha256(gzip.decompress(compressed.read_bytes())).hexdigest()!=sha(source):raise ValueError('LARGE_JSON_ARCHIVE_ROUNDTRIP')
+        atomic(target,dict(lossless_gzip=compressed.name,sha256=sha(compressed),original_sha256=sha(source),original_bytes=len(payload),
+                          source=record(source),roundtrip_PASS=True))
+    else:shutil.copyfile(source,target)
 
 def log_metrics(folder,prefix):
     p=folder/(prefix+'_NATIVE.log')
@@ -47,9 +56,9 @@ def main():
                          'PHYSICAL_SUPPORT_EXACT_CERTIFICATE.json','INDEPENDENT_PHYSICAL_SUPPORT_CERTIFICATE.json','REPRICE_COUNTS.json','NEXT_SELECTION_NECESSARY_ONLY.json',
                          'SELECTED_INPUT_PROVENANCE_RECOVERY.json','INDEPENDENT_EXACT_CERTIFICATE.json','ZERO_START_AUDIT.json','LP_NATIVE.log','MIP_NATIVE.log',
                          'EXACT_NECESSARY_SUPPORT_SELECTION.json','INDEPENDENT_EXACT_SUPPORT_SELECTION.json','EXCLUDED_GREEDY_BATCH.json','FULL_PHYSICAL_UNIVERSE_SUPPORT_AUDIT.json','NO_TRUNCATION_SCALE_AUDIT.json'):
-                if (folder/name).exists():shutil.copyfile(folder/name,dest/name)
+                if (folder/name).exists():copy_evidence(folder/name,dest/name)
             for name in ('COMPRESSION_VERIFICATION.json','A2SC_MODEL_CENSUS.json','A2SC_INDEPENDENT_VERIFICATION.json','PROJECTED_OBJECTIVES.json'):
-                if (folder/'COMPACT'/name).exists():shutil.copyfile(folder/'COMPACT'/name,dest/name)
+                if (folder/'COMPACT'/name).exists():copy_evidence(folder/'COMPACT'/name,dest/name)
             if valid and r.get('physical_PASS') is True:full.append((folder,c,r))
         report_table(lab+'_EXPANSION_TRACE.csv',traces)
         selected=full[-1] if full else None

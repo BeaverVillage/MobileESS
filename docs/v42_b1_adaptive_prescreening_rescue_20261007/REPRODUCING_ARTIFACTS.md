@@ -23,6 +23,11 @@ GPU/rack capacity, immutable occupancy, WAN payload, fixed WAN and transfer
 concurrency, restart and carryout. Migration blocks contain every transfer start
 and are lossless; the representative is not an approximation or pruning rule.
 
+Large projected-objective JSON is likewise preserved as exact gzip. Its `.json`
+file records `lossless_gzip`, compressed/original SHA and roundtrip PASS. Decode
+that payload to inspect every coefficient; this avoids a multi-million-line
+generated diff. The original case JSON and all objective forms remain unchanged.
+
 `build_only` snapshots one restricted full model before any optimize call.
 `solve_snapshot` verifies snapshot hashes, creates fresh LP then MIP with zero
 objective and original settings, and replays all rows/bounds/integrality and
