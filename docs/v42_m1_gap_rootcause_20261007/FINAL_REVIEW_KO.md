@@ -55,7 +55,7 @@ PR167의 원래 B9,322개 중 fractional7,454개(약79.96%), node_activity7,070�
 30. **다음 해결 방식:** improved primal search를 우선 권고한다. 정확히 하나의 다음 실험은 새 valid incumbent에서 같은64..84 블록/Hamming radius48/300초/Threads1, 설정·물리 유지다. 기존radius24가 포화됐고 valid UB 개선 증거가 있다. **이 실험은 실행하지 않았다.** compact/global trajectory/B&P를 채택할 dominance 증거는 아직 부족하다. static design만 TRAJECTORY_FORMULATION_DESIGN.md에 있다.
 31. **최종 분류:** primary **GAP_PARTIALLY_ATTRIBUTED** 하나. LB/UB 관측 개선 축 **UB_DOMINATED**. 전체 원인 확정과 같은 의미가 아니다.
 32. **최종 commit SHA:** 이 보고서와 manifest를 포함한 최종 PR HEAD. 자체 commit SHA를 그 commit 안에 쓰는 순환을 피하며 정확한 값은 PR body 및 최종 응답에 별도로 기록한다.
-33. **Draft PR:** 생성 전; 최종 봉인에서 URL 기록.
+33. **Draft PR:** https://github.com/BeaverVillage/MobileESS/pull/169.
 
 ## 수치·capture 제한
 
