@@ -91,6 +91,6 @@ HAMMING48_PRIMAL_IMPROVEMENT_CONFIRMED. 유효 UB 0.6339776033797229 → 0.63244
 
 42. **Final commit SHA?** 최종 40자리 HEAD는 이 Draft PR 본문의 `Final HEAD`와 사용자 최종 응답에 기록한다. 저장된 작업에서 `git rev-parse HEAD`로 동일 SHA를 확인한다. 사전등록 및 실행 source commit은 OPTIMIZE_ONCE.json에 별도로 기록한다. 자체 commit SHA를 같은 commit의 파일 내용에 넣는 순환을 만들지 않는다.
 
-43. **Draft PR URL?** 생성 후 이 문서와 PR 본문에 기록
+43. **Draft PR URL?** https://github.com/BeaverVillage/MobileESS/pull/170
 
 Grid 효과는 원래 C3A 행과 저장된 native row axes로 실제 branch/time을 복구하여 계산했다. Pch/Pdis/Q affine 기여 변화와 rho 감소의 동반 관찰은 인과 분해가 아니다. 모든 retained thermal rows를 평가하고 critical/top improvement rows를 CSV에 기록했으며, 원래 grid 전체는 별도 frozen replay로 확인했다.
