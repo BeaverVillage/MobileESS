@@ -1,0 +1,25 @@
+{
+  "UTC": "2026-10-07T17:57:52.250566+00:00",
+  "immutable_deadline_preserved": true,
+  "condition": {
+    "native_production_clean_stop": "FIRST_HOUR_NO_MATERIAL_BOUND_OR_TREE_PROGRESS",
+    "M0_root_OPTIMAL_receipt_absent": true,
+    "M0_LP_elapsed_at_least_seconds": 7200,
+    "last_10_simplex_lines_all_primal_infeasibility_above": 1000000.0,
+    "last_10_objectives_all_above_original_rho_upper_bound": 1.0
+  },
+  "action": "If all conditions hold, snapshot the registered M0 attempt and stop only its verified owned PID, retaining root in-flight OPEN; then import that same root domain into the preregistered cold dual-simplex recovery controller after the process has exited.",
+  "ownership_checks": [
+    "PID",
+    "create_time",
+    "exact external_bb.py cmdline",
+    "dedicated worktree cwd"
+  ],
+  "unknown_native_final_status_retained": true,
+  "operator_aborted_not_claimed_native_INTERRUPTED": true,
+  "M0_raw_artifacts_unchanged": true,
+  "no_concurrent_duplicate_root": true,
+  "unresolved_domain_never_pruned": true,
+  "new_attempt_not_tree_resume": true,
+  "rationale": "A completed native stall test plus more than two hours of infeasible crossover cleanup permits a bounded numerical handoff within the single overnight deadline. The unfinished M0 attempt supplies no LP certificate; waiting indefinitely would prevent testing the registered recovery backend."
+}

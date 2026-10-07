@@ -100,6 +100,16 @@ def chooser(bb,d):
         return min(candidates,key=rank)
     return choose
 
+def retry_basis_source(bb,node):
+    for failed in reversed(bb.state.get('failed_attempt_history',[])):
+        result=failed.get('result',{});archive=failed.get('archive');partial=result.get('partial_basis')
+        if result.get('node_id')!=node['id'] or not partial or not archive:continue
+        assert result['fixing_hash']==node['fixing_hash'] and partial['not_a_certificate']
+        p=(RUN/archive['archive']/partial['file']).resolve();assert p.is_relative_to(RUN.resolve())
+        assert sha(p)==partial['SHA256']==archive['files'][partial['file']]
+        return p
+    return None
+
 def audit_checkpoint(bb,A,d):
     CSC=A.tocsc();binary=set(map(int,np.flatnonzero(d['types']=='B')));checks=[]
     for failed in bb.state.get('failed_attempt_history',[]):
@@ -135,6 +145,9 @@ def audit_checkpoint(bb,A,d):
             with np.load(folder/'FARKAS_PROOF.npz') as z:ray=z['FarkasDual']
             computed,_,_,_=hc.exact_bounded_lagrangian(CSC,dict(e,objective=np.zeros_like(d['objective']),constant=np.array(0.)),-ray)
             assert computed['exact_rational']==cert['exact_rational'] and r['exact_infeasibility_PASS']==(F(computed['exact_rational'])>0)
+        if r.get('partial_basis'):
+            assert r['LP_status']=='UNRESOLVED' and r['partial_basis']['not_a_certificate']
+            assert sha(folder/r['partial_basis']['file'])==r['partial_basis']['SHA256']
         if r.get('witness'):
             with np.load(RUN/r['witness']['point']) as z:x=z['x']
             assert full_replay(A,d,x)['PASS']
@@ -144,6 +157,8 @@ def audit_checkpoint(bb,A,d):
 def start_queue(oracle,args):
     finish_pending_recoveries()
     checkpoint=RUN/'OPEN_CHECKPOINT.json'
+    ledger=read(OUT/'GLOBAL_BOUND_LEDGER.json');registered=max([ledger['initial']['LB']]+[r['LB'] for r in ledger['events']])
+    assert F.from_float(args.initial_lb)<=F.from_float(registered),'INITIAL_LB_EXCEEDS_REGISTERED_GLOBAL_AUTHORITY'
     with np.load(Path(args.center)) as z:center=z['x'].copy()
     replay=full_replay(oracle.A,oracle.d,center);assert replay['PASS']
     key=hashlib.sha256(center.tobytes()).hexdigest();point=RUN/'incumbents'/f'{key}.npz';replay_path=point.with_suffix('.REPLAY.json')
@@ -181,6 +196,10 @@ def start_queue(oracle,args):
             if not rp.exists():atomic(rp,previous_replay)
             bb.state['incumbent']=dict(point=p.relative_to(RUN).as_posix(),SHA256=sha(p),replay=rp.relative_to(RUN).as_posix(),replay_SHA256=sha(rp))
         else:bb.state['UB']=str(F.from_float(float(center[239826])));bb.state['incumbent']=incumbent
+        if len(bb.state['nodes'])==1 and bb.state['nodes']['0']['state']=='OPEN':
+            root=bb.state['nodes']['0'];floor=str(max(F(root['inherited_LB']),F.from_float(args.initial_lb)))
+            root['inherited_LB']=floor;root['LB']=str(max(F(root['LB']),F(floor)))
+            atomic(RUN/'INHERITED_GLOBAL_BOUND.json',dict(LB_exact=floor,global_bound_ledger_SHA256=sha(OUT/'GLOBAL_BOUND_LEDGER.json'),authority='Previously accepted full original native MILP bound; applies to the same entire original root domain',not_new_LP_certificate=True))
         # An unresolved root is retried under the registered recovery algorithm;
         # its domain remains identical and its prior attempt is archived.
         for n in list(bb.state['nodes'].values()):
@@ -200,6 +219,7 @@ def run(args):
     assert not existing_m0_alive(),'REGISTERED_M0_STILL_RUNNING_NO_DUPLICATE'
     RUN.mkdir(exist_ok=True);oracle=oracle_code.LPOracle();bb=start_queue(oracle,args);checkpoint=RUN/'OPEN_CHECKPOINT.json';begin=time.perf_counter();start_count=bb.state['processed']
     oracle.checkpoint_hook=lambda:bb.save(checkpoint)
+    oracle.retry_basis_for_node=lambda node:retry_basis_source(bb,node)
     try:
         while remaining(900)>0 and time.perf_counter()-begin<args.seconds:
             node=bb.state['nodes'][str(bb.state['in_flight'])] if bb.state['in_flight'] is not None else bb.select()

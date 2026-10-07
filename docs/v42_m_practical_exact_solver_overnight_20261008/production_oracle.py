@@ -55,6 +55,15 @@ class LPOracle:
                 m.setAttr('VBasis',self.variables,z['VBasis'].tolist());m.setAttr('CBasis',self.rows,z['CBasis'].tolist())
             m.Params.Method=1;m.Params.LPWarmStart=1;basis_supplied=True
         else:m.Params.Method=1;m.Params.Crossover=2;m.Params.LPWarmStart=1 # Registered cold dual-simplex recovery after M0 crossover failure.
+        if hasattr(self,'retry_basis_for_node'):
+            retry_basis=self.retry_basis_for_node(node)
+            if retry_basis is not None:
+                basis_source=retry_basis
+                with np.load(basis_source) as z:
+                    assert z['VBasis'].shape==(self.A.shape[1],) and z['CBasis'].shape==(self.A.shape[0],)
+                    assert np.all(np.isin(z['VBasis'],[-3,-2,-1,0])) and np.all(np.isin(z['CBasis'],[-1,0]))
+                    m.setAttr('VBasis',self.variables,z['VBasis'].tolist());m.setAttr('CBasis',self.rows,z['CBasis'].tolist())
+                m.Params.Method=1;m.Params.LPWarmStart=1;basis_supplied=True
         m.Params.TimeLimit=bounded_limit(1800 if node['parent'] is None else 900)
         m.Params.LogFile=str(folder/'LP.log');m.update();identity=self.objective_identity();assert identity['PASS'],'OBJECTIVE_IDENTITY_FAILED_STOP_NODE_OPTIMIZE_0'
         settings=parameters(m);setup=time.perf_counter()-t0
@@ -83,6 +92,17 @@ class LPOracle:
         status=int(m.Status);assert parameters(m)==settings
         result=dict(identity=self.identity,fixing_hash=node['fixing_hash'],node_id=n,fixings=node['fixings'],LP_status={2:'OPTIMAL',3:'INFEASIBLE'}.get(status,'UNRESOLVED'),native_status=status,LP_objective=float(m.ObjVal) if status==2 else None,certified_LB=None,optimal_LP_certificate_PASS=False,exact_infeasibility_PASS=False,proof_checked=True,Runtime=float(m.Runtime),Work=float(m.Work),IterCount=float(m.IterCount),BarIterCount=int(m.BarIterCount),setup_wall_seconds=setup,peak_RSS=max(rss),basis_supplied=basis_supplied,basis_source=basis_source.relative_to(OUT).as_posix() if basis_source else None,branch_variable=None,branch_is_original_binary=False,raw_fractional_branch_value=None,fractional_binary_count=None,witness=None,receipt=receipt.relative_to(OUT).as_posix(),parameters=settings,objective_identity=identity,phases=phases,callback_errors=errors,exception=exception,bounds_SHA256=hashlib.sha256(d['lower'].tobytes()+d['upper'].tobytes()).hexdigest())
         assert not errors and exception is None,'LP_CALLBACK_OR_NATIVE_EXCEPTION_RETAIN_IN_FLIGHT'
+        if status not in (2,3):
+            # A genuine simplex basis is an LP restart artifact, never a MIP
+            # tree checkpoint and never a node proof on a nonoptimal LP.
+            try:
+                vb=np.asarray(m.getAttr('VBasis'),dtype=np.int8);cbasis=np.asarray(m.getAttr('CBasis'),dtype=np.int8)
+                assert np.all(np.isin(vb,[-3,-2,-1,0])) and np.all(np.isin(cbasis,[-1,0]))
+                tmp=folder/'PARTIAL_BASIS.npz.tmp'
+                with tmp.open('wb') as f:np.savez_compressed(f,VBasis=vb,CBasis=cbasis);f.flush();os.fsync(f.fileno())
+                os.replace(tmp,folder/'PARTIAL_BASIS.npz')
+                result['partial_basis']=dict(file='PARTIAL_BASIS.npz',SHA256=sha(folder/'PARTIAL_BASIS.npz'),native_status=status,not_a_certificate=True)
+            except (gp.GurobiError,AttributeError,AssertionError):result['partial_basis']=None
         proof_start=time.perf_counter()
         if status==2:
             x=np.asarray(m.getAttr('X'));pi=np.asarray(m.getAttr('Pi'));rc=np.asarray(m.getAttr('RC'))

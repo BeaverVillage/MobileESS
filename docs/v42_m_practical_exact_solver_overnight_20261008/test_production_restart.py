@@ -76,6 +76,18 @@ def run():
         trial.state['incumbent']['replay_SHA256']=sha(rp);rejected('STORED_REPLAY_FAIL')
         atomic(rp,dict(PASS=True));trial.state['incumbent']['replay_SHA256']=sha(rp);rejected('FRESH_REPLAY_FAILURE')
         c.RUN=oldrun
-    atomic(OUT/'PRODUCTION_RESTART_TESTS.json',dict(PASS=True,optimize_calls=0,unresolved_recovery_keeps_OPEN_domain=True,failed_attempt_bytes_archived=True,inflight_recovery_keeps_OPEN_domain=True,checkpoint_reload_identical=True,crash_safe_recovery_intent_tests=crash_checks,incumbent_identity_tests=incumbent_checks,both_children_always_preserved=True,deterministic_pseudocost_rank=True,ranking_does_not_prune=True,live_M0_duplicate_guard_PASS=True,owned_M0_observed_alive_at_test=observed,unrelated_A_stage_excluded=True,UTC=stamp()))
+    with tempfile.TemporaryDirectory() as temp:
+        oldrun=c.RUN;c.RUN=Path(temp);trial=ExactBB(identity,'1/2','1',dict(fixture_integer=True));trial.begin(trial.select())
+        p=c.RUN/'external_nodes/0000';p.mkdir(parents=True);basis=p/'PARTIAL_BASIS.npz'
+        np.savez_compressed(basis,VBasis=np.array([-1,0],np.int8),CBasis=np.array([-1],np.int8))
+        partial=dict(result,partial_basis=dict(file=basis.name,SHA256=sha(basis),native_status=9,not_a_certificate=True))
+        trial.apply(0,partial);atomic(p/'RESULT.json',partial);c.recover_unresolved(trial,0)
+        resumed_basis=c.retry_basis_source(trial,trial.select());assert resumed_basis.exists() and trial.audit()['global_OPEN_min_LB_exact']=='1/2'
+        trial.state['failed_attempt_history'][0]['result']['fixing_hash']='tampered'
+        try:c.retry_basis_source(trial,trial.select())
+        except AssertionError:pass
+        else:raise AssertionError('BASIS_FROM_DIFFERENT_DOMAIN_ACCEPTED')
+        c.RUN=oldrun
+    atomic(OUT/'PRODUCTION_RESTART_TESTS.json',dict(PASS=True,optimize_calls=0,unresolved_recovery_keeps_OPEN_domain=True,failed_attempt_bytes_archived=True,inflight_recovery_keeps_OPEN_domain=True,checkpoint_reload_identical=True,crash_safe_recovery_intent_tests=crash_checks,incumbent_identity_tests=incumbent_checks,partial_LP_basis_preserved_without_bound_claim=True,basis_wrong_fixing_history_rejected=True,both_children_always_preserved=True,deterministic_pseudocost_rank=True,ranking_does_not_prune=True,live_M0_duplicate_guard_PASS=True,owned_M0_observed_alive_at_test=observed,unrelated_A_stage_excluded=True,UTC=stamp()))
     print('PRODUCTION_RESTART_TESTS_PASS_OPTIMIZE_0')
 if __name__=='__main__':run()
