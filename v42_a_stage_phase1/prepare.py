@@ -96,11 +96,21 @@ def freeze():
         sources.append(p)
     sources+=list((ROOT/'v42_a_stage_phase1').glob('*.py'))+[ROOT/'tests/test_v42_a_stage_phase1.py',ROOT/'.gitattributes']
     sources=list(dict.fromkeys(p.resolve() for p in sources))
-    # Every repo code byte must also be present in the pre-execution commit.
+    # New source files use -text and must match the committed bytes. Inherited
+    # legacy files can have Git's configured checkout newline conversion;
+    # their ACTUAL bytes already must match PR168's immutable source receipt.
+    filtered_legacy=[]
     for p in sources:
         if p.is_relative_to(ROOT):
             committed=subprocess.check_output(['git','show',head+':'+p.relative_to(ROOT).as_posix()],cwd=ROOT)
-            if committed!=p.read_bytes():raise PermissionError('UNCOMMITTED_EXECUTION_SOURCE:'+str(p))
+            if committed!=p.read_bytes():
+                relative=p.relative_to(ROOT).as_posix()
+                working_blob=subprocess.check_output(['git','hash-object',str(p)],cwd=ROOT,text=True).strip()
+                committed_blob=subprocess.check_output(['git','rev-parse',head+':'+relative],cwd=ROOT,text=True).strip()
+                if relative.startswith('v42_a_stage_phase1/') or working_blob!=committed_blob:
+                    raise PermissionError('UNCOMMITTED_EXECUTION_SOURCE:'+str(p))
+                filtered_legacy.append(dict(actual_executed_bytes=record(p),committed_filtered_blob=committed_blob,
+                    original_PR168_actual_source_bytes_unchanged=True))
     archive=STATIC/('EXECUTED_SOURCE_'+head+'.zip')
     with zipfile.ZipFile(archive,'x',compression=zipfile.ZIP_DEFLATED) as z:
         for i,p in enumerate(sources):z.write(p,('repo/'+p.relative_to(ROOT).as_posix()) if p.is_relative_to(ROOT) else 'external/'+str(i)+'/'+p.name)
@@ -117,6 +127,7 @@ def freeze():
     atomic(OUT/'PHASE1_SOURCE_FREEZE.json',dict(PASS=True,git_head=head,base=BASE,day=DAY,
         execution_sources=permit.document['execution_sources'],additional_gate_receipts=gates_records,
         source_archive=record(archive),source_files=[record(p) for p in sources],
+        legacy_git_checkout_filter_records=filtered_legacy,
         engineering_policy=record(OUT/'PHASE1_ENGINEERING_POLICY.json'),
         native_permit=record(OUT/'CANARY_EXECUTION_PERMIT.json'),native_optimize_calls=0,
         inherited_fast_permit_has_two_dates_but_current_native_wrapper_hardcodes_May19=True))
