@@ -19,6 +19,7 @@ import subprocess
 import sys
 import traceback
 import numpy as np
+import psutil
 import gurobipy as gp
 from v42_pr134_b1.common import atomic, table, now
 from .execution import STRESS_RUN_ORDER, tag_model_for_day, guard_model_optimize, install_gurobi_backstop
@@ -29,13 +30,27 @@ from .solver_policy import apply_policy, validate_frozen_policy
 from .fast_telemetry import FastTelemetry
 from .telemetry import ResourceObservation, native_scalar
 from .stress_runner import (StageBuild, LEX_ORDER, expression_for, model_census,
-    other_heavy_optimizers, GlobalScientificFailure)
+    other_heavy_optimizers as _historical_heavy_optimizers, GlobalScientificFailure)
 
 TRACE_FIELDS = ('date', 'lex_stage', 'iteration', 'active_stay_before', 'inactive_stay_before',
     'active_migration_before', 'inactive_migration_representation', 'LP_status', 'Farkas_or_dual_mode',
     'candidates_scanned', 'improving_candidates', 'candidates_activated', 'rows_added', 'cols_added',
     'nnz_added', 'presolved_rows', 'presolved_cols', 'root_or_LP_runtime', 'valid_bound', 'classification',
-    'minimum_reduced_cost', 'median_activated_reduced_cost')
+    'minimum_reduced_cost', 'median_activated_reduced_cost', 'native_solver_LP_objective', 'valid_bound_scope')
+
+
+def other_heavy_optimizers():
+    """Include parallel successor workers while excluding our serial parent."""
+    rows={row['pid']:row for row in _historical_heavy_optimizers()}
+    own={os.getpid()}|{process.pid for process in psutil.Process().parents()}
+    for process in psutil.process_iter(['pid','cmdline']):
+        try:
+            if process.pid in own:continue
+            command=' '.join(process.info['cmdline'] or [])
+            if 'v42_a_stage_domain_v2.fast_runner' in command:
+                rows[process.pid]=dict(pid=process.pid,command=command)
+        except psutil.Error:continue
+    return [rows[key] for key in sorted(rows)]
 
 
 def _rows(path, rows, fields=None):
@@ -184,8 +199,12 @@ def _pricing_trace(day, component, iteration, build, pricing, record, observatio
         active_migration_before=active.get('migration'),
         inactive_migration_representation=meta.get('inactive_migration_representation', 'LAZY_MATRIX_FREE'),
         LP_status=record['status'], Farkas_or_dual_mode=pricing.get('mode'),
-        root_or_LP_runtime=record['native_seconds'], valid_bound=record['bound'],
+        root_or_LP_runtime=record['native_seconds'], valid_bound=None,
+        native_solver_LP_objective=record['bound'],valid_bound_scope='RESTRICTED_ACTIVE_LP_ONLY',
         presolved_rows=matrix.get('rows'), presolved_cols=matrix.get('columns'))
+    dual=pricing.get('certificate',{}).get('native_certificate',{})
+    if dual.get('PASS') is True and dual.get('mode')=='EXACT_NATIVE_DUAL_BOUND':
+        row['valid_bound']=dual.get('lower_bound')
     for name in ('candidates_scanned', 'improving_candidates', 'candidates_activated', 'rows_added',
             'cols_added', 'nnz_added', 'classification', 'minimum_reduced_cost', 'median_activated_reduced_cost'):
         row[name] = pricing.get(name,pricing.get('trace',{}).get(name))

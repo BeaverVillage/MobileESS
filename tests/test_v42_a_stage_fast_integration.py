@@ -1,5 +1,6 @@
 """Tiny algebra/adapter/report integration; no production models or optimizers."""
 from contextlib import nullcontext
+from dataclasses import replace
 from fractions import Fraction
 from pathlib import Path
 from types import SimpleNamespace
@@ -27,11 +28,21 @@ def snapshot():
 def test_current_lp_replay_relaxes_only_integrality_and_preserves_raw_point():
     original=snapshot();point=np.array([.5]);before=point.copy()
     assert not row_replay(original,point)['PASS']
-    assert lp_replay(original,point)['PASS']
+    assert lp_replay(original,point)['PASS'] is True
     assert original.vtypes.tolist()==['I'] and np.array_equal(point,before)
-    assert not lp_replay(original,np.array([1.1]))['PASS']
+    assert lp_replay(original,np.array([1.1]))['PASS'] is False
     with pytest.raises(ValueError,match='FINITE_ORIGINAL_COLUMN_AXIS_POINT_REQUIRED'):
         lp_replay(original,np.array([np.nan]))
+
+
+@pytest.mark.parametrize('point,expected',[(.5,True),(1.1,False)])
+def test_backend_lp_verification_returns_python_bool_identity(point,expected):
+    backend=Backend();backend.current=replace(snapshot(),vtypes=np.array(['C']))
+    receipt=backend.verify_lp(None,np.array([point]))
+    assert receipt['PASS'] is expected
+    assert type(receipt['PASS']) is bool
+    assert receipt['lp_snapshot_sha256']==backend.current.fingerprint()
+    assert receipt['physical_integer_schedule_claimed'] is False
 
 
 def test_source_manifest_json_hash_matches_common_digest_including_unicode():
@@ -133,6 +144,7 @@ def test_each_lp_iteration_retains_immutable_external_snapshot_bytes(tmp_path,mo
     import v42_pr134_sc.snapshot as descriptor
     import v42_two.contract as objectives
     import v42_integrated.contract as integrated
+    import v42_a_stage_domain_v2.fast_execution as execution
     backend=Backend();backend.data=(None,)*7+(dict(physical_domain_hash='a'*64),)
     backend.ledger=dict(receipt=dict(PASS=True,active_STAY=1,inactive_STAY=1,active_migration=0,
         active_subset_physical=True,active_union_pool_equals_physical=True))
@@ -148,6 +160,8 @@ def test_each_lp_iteration_retains_immutable_external_snapshot_bytes(tmp_path,mo
     monkeypatch.setattr(objectives,'passes',lambda *args:[('P1','rho',0)])
     monkeypatch.setattr(integrated,'physical_authority',lambda:nullcontext())
     monkeypatch.setattr(integrated,'all_transformer_rows',lambda old:old)
+    current={'identity':'1'*64}
+    monkeypatch.setattr(execution,'current_fast_permit',lambda:SimpleNamespace(identity=current['identity']))
     def capture(*args):
         Path(args[-1]).write_bytes(b'TINY_IMMUTABLE_DESCRIPTOR');return dict(units=[])
     monkeypatch.setattr(descriptor,'capture',capture)
@@ -160,3 +174,56 @@ def test_each_lp_iteration_retains_immutable_external_snapshot_bytes(tmp_path,mo
     assert all(record(v['path'])==v for v in receipts)
     assert first.metadata['lp_snapshot_sha256']!=first.metadata['original_integer_snapshot_sha256']
     assert len(first.metadata['objective_sha256'])==64
+    current['identity']='2'*64
+    repaired=backend._native('2025-05-19',one,native,root,dict(PASS=True))
+    assert {v['path'] for v in receipts}.isdisjoint({v['path'] for v in repaired.metadata['static_artifacts']})
+    assert all('EXECUTION_'+('1'*16) in v['path'] for v in receipts)
+    assert all('EXECUTION_'+('2'*16) in v['path'] for v in repaired.metadata['static_artifacts'])
+    assert all(record(v['path'])==v for v in receipts)
+
+
+def test_requalification_subtracts_actual_prior_runtime_without_budget_extension(tmp_path,monkeypatch):
+    import v42_a_stage_domain_v2.fast_qualify as module
+    root=tmp_path/'source';out=tmp_path/'new';old=tmp_path/'old';static=tmp_path/'external'
+    for path in (root,out,old,static):path.mkdir()
+    monkeypatch.setattr(module,'ROOT',root);monkeypatch.setattr(module,'OUT',out)
+    monkeypatch.setattr(module,'OLD',old);monkeypatch.setattr(module,'STATIC',static)
+    (root/'fixture.py').write_text('value = 1\n')
+    for name in ('FAST_FULL_TESTS.xml','FAST_FINAL_TARGETED.xml'):
+        (static/name).write_text('<testsuite><testcase classname="fixture" name="pure_control" /></testsuite>')
+    for day in ('2025-05-17','2025-05-19'):
+        folder=static/day;folder.mkdir();(folder/'PHYSICAL_DOMAIN_CACHE.json').write_text('{}')
+    (old/'STRESS_RUN_PERMIT.json').write_text(json.dumps(dict(gate_receipts={})))
+    spent=1.3819999694824219
+    previous=out/'REJECTED_FAST_CANARY_ATTEMPT_01/MAY17_CANARY';previous.mkdir(parents=True)
+    (previous/'FAST_RESULT.json').write_text(json.dumps(dict(native_seconds=spent)))
+    def command(args,**kwargs):
+        if args[0]=='rg':return 'fixture.py\n' if kwargs['cwd']==root else ''
+        if '--name-only' in args:return 'fixture.py\n'
+        if 'rev-parse' in args:return 'a'*40+'\n'
+        return ''
+    monkeypatch.setattr(module.subprocess,'check_output',command)
+    monkeypatch.setattr(module,'solver_policy',lambda native:dict(PASS=True,scope='SYNTHETIC_NO_NATIVE_METADATA'))
+    captured={}
+    def create(*args,**kwargs):
+        captured.update(kwargs)
+        return SimpleNamespace(identity='b'*64,document=dict(run_order=['2025-05-17','2025-05-19']))
+    monkeypatch.setattr(module,'create_fast_run_permit',create)
+    module.qualify()
+    freeze=json.loads((out/'CANARY_SOURCE_FREEZE.json').read_text())
+    assert captured['native_budget_seconds']==300.-spent==298.6180000305176
+    assert spent+captured['native_budget_seconds']==300.
+    assert freeze['previous_rejected_native_seconds']==spent
+    assert freeze['native_budget_per_canary']==captured['native_budget_seconds']
+    assert freeze['cumulative_May17_budget_across_attempts']==300.
+
+
+def test_heavy_worker_inventory_detects_parallel_fast_worker_and_excludes_serial_parent(monkeypatch):
+    import v42_a_stage_domain_v2.fast_runner as runner
+    monkeypatch.setattr(runner,'_historical_heavy_optimizers',lambda:[dict(pid=300,command='historical native worker')])
+    monkeypatch.setattr(runner.os,'getpid',lambda:101)
+    monkeypatch.setattr(runner.psutil,'Process',lambda:SimpleNamespace(parents=lambda:[SimpleNamespace(pid=100)]))
+    processes=[SimpleNamespace(pid=pid,info=dict(cmdline=['python','-m','v42_a_stage_domain_v2.fast_runner']))
+        for pid in (100,101,200)]
+    monkeypatch.setattr(runner.psutil,'process_iter',lambda fields:processes)
+    assert [row['pid'] for row in runner.other_heavy_optimizers()]==[200,300]

@@ -35,7 +35,9 @@ def frozen_grid_priority(coefficients,resources):
 
 
 def lp_replay(snapshot,point):
-    return row_replay(replace(snapshot,vtypes=np.full(len(snapshot.vtypes),'C')),point)
+    result=row_replay(replace(snapshot,vtypes=np.full(len(snapshot.vtypes),'C')),point)
+    result['PASS']=bool(result['PASS'])
+    return result
 
 
 class Backend(ExactBackend):
@@ -91,6 +93,9 @@ class Backend(ExactBackend):
         from v42_integrated.contract import physical_authority,all_transformer_rows
         import v42_boundary.model as boundary
         start=perf_counter()
+        from .fast_execution import current_fast_permit
+        permit=current_fast_permit()
+        if permit is not None:static=static/('EXECUTION_'+permit.identity[:16])
         static=static/'rho'/folder.name
         static.mkdir(parents=True,exist_ok=True)
         class Context:
