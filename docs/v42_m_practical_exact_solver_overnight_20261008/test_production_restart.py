@@ -8,6 +8,13 @@ def run():
     identity=dict(fixture='interrupted and unresolved root coverage')
     bb=ExactBB(identity,'1/2','1',dict(fixture_integer=True));n=bb.select();bb.begin(n)
     result=dict(identity=identity,fixing_hash=n['fixing_hash'],proof_checked=True,LP_status='UNRESOLVED',certified_LB=None,optimal_LP_certificate_PASS=False,exact_infeasibility_PASS=False,witness=None,branch_variable=None)
+    normalized=clean(dict(result,parameters=dict(BestBdStop=float('inf'),BestObjStop=-float('inf'))))
+    metadata_trial=ExactBB(identity,'1/2','1',dict(fixture_integer=True));metadata_trial.begin(metadata_trial.select());metadata_trial.apply(0,normalized)
+    with tempfile.TemporaryDirectory() as temp:
+        receipt=Path(temp)/'RESULT.json';atomic(receipt,normalized)
+        assert core.digest(read(receipt))==metadata_trial.state['nodes']['0']['result_digest']
+        checkpoint=Path(temp)/'CHECKPOINT.json';metadata_trial.save(checkpoint)
+        assert core.digest(ExactBB.load(checkpoint,identity).state)==core.digest(metadata_trial.state)
     bb.apply(0,result);before=bb.audit()
     with tempfile.TemporaryDirectory() as temp:
         oldrun=c.RUN;c.RUN=Path(temp)
@@ -88,6 +95,6 @@ def run():
         except AssertionError:pass
         else:raise AssertionError('BASIS_FROM_DIFFERENT_DOMAIN_ACCEPTED')
         c.RUN=oldrun
-    atomic(OUT/'PRODUCTION_RESTART_TESTS.json',dict(PASS=True,optimize_calls=0,unresolved_recovery_keeps_OPEN_domain=True,failed_attempt_bytes_archived=True,inflight_recovery_keeps_OPEN_domain=True,checkpoint_reload_identical=True,crash_safe_recovery_intent_tests=crash_checks,incumbent_identity_tests=incumbent_checks,partial_LP_basis_preserved_without_bound_claim=True,basis_wrong_fixing_history_rejected=True,both_children_always_preserved=True,deterministic_pseudocost_rank=True,ranking_does_not_prune=True,live_M0_duplicate_guard_PASS=True,owned_M0_observed_alive_at_test=observed,unrelated_A_stage_excluded=True,UTC=stamp()))
+    atomic(OUT/'PRODUCTION_RESTART_TESTS.json',dict(PASS=True,optimize_calls=0,infinite_default_parameter_metadata_normalized_before_digest=True,unresolved_recovery_keeps_OPEN_domain=True,failed_attempt_bytes_archived=True,inflight_recovery_keeps_OPEN_domain=True,checkpoint_reload_identical=True,crash_safe_recovery_intent_tests=crash_checks,incumbent_identity_tests=incumbent_checks,partial_LP_basis_preserved_without_bound_claim=True,basis_wrong_fixing_history_rejected=True,both_children_always_preserved=True,deterministic_pseudocost_rank=True,ranking_does_not_prune=True,live_M0_duplicate_guard_PASS=True,owned_M0_observed_alive_at_test=observed,unrelated_A_stage_excluded=True,UTC=stamp()))
     print('PRODUCTION_RESTART_TESTS_PASS_OPTIMIZE_0')
 if __name__=='__main__':run()

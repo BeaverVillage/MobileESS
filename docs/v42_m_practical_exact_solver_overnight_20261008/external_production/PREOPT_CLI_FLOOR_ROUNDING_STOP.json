@@ -1,0 +1,6 @@
+{
+  "UTC": "2026-10-07T18:44:09.466169+00:00",
+  "error": "Traceback (most recent call last):\n  File \"C:\\v42_m1_exact_solver_redesign_20261008\\docs\\v42_m_practical_exact_solver_overnight_20261008\\external_controller.py\", line 252, in <module>\n    try:run(a)\n        ^^^^^^\n  File \"C:\\v42_m1_exact_solver_redesign_20261008\\docs\\v42_m_practical_exact_solver_overnight_20261008\\external_controller.py\", line 228, in run\n    RUN.mkdir(exist_ok=True);oracle=oracle_code.LPOracle();bb=start_queue(oracle,args);checkpoint=RUN/'OPEN_CHECKPOINT.json';begin=time.perf_counter();start_count=bb.state['processed']\n                                                              ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\v42_m1_exact_solver_redesign_20261008\\docs\\v42_m_practical_exact_solver_overnight_20261008\\external_controller.py\", line 169, in start_queue\n    assert F.from_float(args.initial_lb)<=F.from_float(registered),'INITIAL_LB_EXCEEDS_REGISTERED_GLOBAL_AUTHORITY'\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: INITIAL_LB_EXCEEDS_REGISTERED_GLOBAL_AUTHORITY\n",
+  "optimize_calls": 0,
+  "reason": "PowerShell unquoted numeric CLI literal rounded the initial floor above its registered authority. Guard correctly rejected before optimize. Next invocation passes exact decimal as a quoted string."
+}
