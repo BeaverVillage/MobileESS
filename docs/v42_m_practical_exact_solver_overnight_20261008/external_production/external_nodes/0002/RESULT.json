@@ -20,25 +20,25 @@
       1
     ]
   ],
-  "LP_status": "UNRESOLVED",
-  "native_status": 9,
-  "LP_objective": null,
-  "certified_LB": null,
-  "optimal_LP_certificate_PASS": false,
+  "LP_status": "OPTIMAL",
+  "native_status": 2,
+  "LP_objective": 0.5687150439906785,
+  "certified_LB": "999392780111908717248116812583184776425507741616427251373021564268011213/1766847064778384329583297500742918515827483896875618958121606201292619776",
+  "optimal_LP_certificate_PASS": true,
   "exact_infeasibility_PASS": false,
   "proof_checked": true,
-  "Runtime": 900.0739998817444,
-  "Work": 1431.1966086665486,
-  "IterCount": 21489.0,
-  "BarIterCount": 0,
-  "setup_wall_seconds": 0.7308675000094809,
-  "peak_RSS": 1618735104,
-  "basis_supplied": true,
-  "basis_source": "external_nodes/0000/BASIS.npz",
-  "branch_variable": null,
-  "branch_is_original_binary": false,
-  "raw_fractional_branch_value": null,
-  "fractional_binary_count": null,
+  "Runtime": 159.94400000572205,
+  "Work": 301.14856676350104,
+  "IterCount": 0.0,
+  "BarIterCount": 73,
+  "setup_wall_seconds": 0.5093622999847867,
+  "peak_RSS": 1999138816,
+  "basis_supplied": false,
+  "basis_source": null,
+  "branch_variable": 306016,
+  "branch_is_original_binary": true,
+  "raw_fractional_branch_value": 0.3741065073433287,
+  "fractional_binary_count": 7453,
   "witness": null,
   "receipt": "external_nodes/0002/RESULT.json",
   "parameters": {
@@ -77,7 +77,7 @@
     "ConcurrentMIP": 1,
     "ConcurrentMethod": -1,
     "CoverCuts": -1,
-    "Crossover": 2,
+    "Crossover": 0,
     "CrossoverBasis": -1,
     "CutAggPasses": -1,
     "CutPasses": -1,
@@ -88,7 +88,7 @@
     "DisplayInterval": 5,
     "DistributedMIPJobs": 0,
     "DualImpliedCuts": -1,
-    "DualReductions": 0,
+    "DualReductions": 1,
     "Dummy": "",
     "FeasRelaxBigM": 1000000.0,
     "FeasibilityTol": 1e-08,
@@ -112,14 +112,14 @@
     "ImproveStartTime": null,
     "ImproveStartWork": null,
     "InfProofCuts": -1,
-    "InfUnbdInfo": 1,
+    "InfUnbdInfo": 0,
     "InheritParams": -1,
     "IntFeasTol": 1e-08,
     "IntegralityFocus": 0,
     "IterationLimit": null,
     "JSONSolDetail": 0,
     "JobID": "",
-    "LPWarmStart": 1,
+    "LPWarmStart": 0,
     "LazyConstraints": 0,
     "LicenseID": 2845475,
     "LiftProjectCuts": -1,
@@ -134,7 +134,7 @@
     "MarkowitzTol": 0.0078125,
     "MasterKnapsackCuts": -1,
     "MemLimit": null,
-    "Method": 1,
+    "Method": 2,
     "MinRelNodes": -1,
     "MixingCuts": -1,
     "ModKCuts": -1,
@@ -156,7 +156,7 @@
     "NodefileStart": null,
     "NonConvex": -1,
     "NormAdjust": -1,
-    "NumericFocus": 3,
+    "NumericFocus": 0,
     "OBBT": -1,
     "ObjNumber": 0,
     "ObjPassNumber": -1,
@@ -308,42 +308,49 @@
     "rho_column": 239826,
     "objective": "minimize rho_max"
   },
-  "phases": [],
+  "phases": [
+    {
+      "Runtime": 2.0949997901916504,
+      "literal": "Presolve time: 2.09s"
+    },
+    {
+      "Runtime": 159.89399981498718,
+      "literal": "Barrier solved model in 73 iterations and 159.88 seconds (298.32 work units)"
+    },
+    {
+      "Runtime": 159.89399981498718,
+      "literal": "Optimal objective 5.68715044e-01"
+    }
+  ],
   "callback_errors": [],
   "exception": null,
   "bounds_SHA256": "23fbc4ff78dcd1ab697c14d149c8523dca70f336ed5596798b569976a1825dcf",
-  "partial_basis": {
-    "file": "PARTIAL_BASIS.npz",
-    "SHA256": "cb396a44fdfbe33542074660677cb0e27f06a53be47aeedb0abc6f08fb3e52cf",
-    "native_status": 9,
-    "not_a_certificate": true
-  },
-  "Kappa": 1.1256856673177652e+16,
+  "Kappa": null,
   "KappaExact": null,
-  "unresolved_point": {
-    "file": "UNRESOLVED_POINT.npz",
-    "SHA256": "6ab4cde8e24fd61eeb849b7a3d482901bb973648408f0904679b068f0486aee1",
-    "not_a_certificate": true,
-    "not_an_incumbent": true
-  },
-  "unresolved_relaxed_replay": {
+  "LP_primal_replay": {
     "PASS": false,
     "finite": true,
-    "max_constraint_violation": 58093423973.62045,
-    "max_bound_violation": 54084891009.689156,
+    "max_constraint_violation": 1.364844592899317e-08,
+    "max_bound_violation": 0.0,
     "max_integrality_violation": null,
-    "objective": -4660.656339402718
+    "objective": 0.5687150439906785
   },
-  "proof_wall_seconds": 9.00006853044033e-07,
+  "LB_certificate_SHA256": "556ab931b0ad1feb4e0985a4d0d940157caf7760e685d81dd4f93faf6b5fb1f1",
+  "basis_output_SHA256": null,
+  "crossover_disabled_no_basis": true,
+  "raw_noninteger_binary_count": 9321,
+  "branch_dual_support": 0.00015951639779204112,
+  "branch_score_is_heuristic_only": true,
+  "branch_name": "node_activity[MESS04,IDC01,96]",
+  "proof_wall_seconds": 3.9319941999856383,
   "parent_basis_available": true,
+  "saved_nonoptimal_parent_basis_omitted_as_unstable": true,
   "dual_start_supplied": false,
   "dual_start_accepted": false,
-  "basis_evidence": [
-    "LP warm-start: use basis"
-  ],
-  "basis_accepted": true,
+  "basis_evidence": [],
+  "basis_accepted": false,
   "warnings": [
     "Warning: Model contains large matrix coefficient range"
   ],
-  "total_node_wall_seconds": 901.22566310002
+  "total_node_wall_seconds": 164.45419670001138
 }
