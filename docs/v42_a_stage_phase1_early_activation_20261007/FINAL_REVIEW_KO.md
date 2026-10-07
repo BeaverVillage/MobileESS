@@ -6,7 +6,7 @@
 
 실제 heavy 실행은608.5489초에서 보수적인 조사 기준으로 종료되어900초를 소진하지 않았다. 이전 raw 해는 확장 모델에 그대로 포함되고 같은 Phi를 유지한다는 독립 replay가 PASS했다. 따라서6.73e-7 증가가 실제 최적값 증가를 증명하지 않는다. 세 번의 stagnation 조건도 충족되지 않았다.
 
-이 발견 뒤 코드의 경미한 증가 처리만 보완했다. 이전 해의 포함 witness가 통과하면 다음 반복으로 진행하며, raw Phi를 바꾸거나 tolerance를 완화하지 않는다. 고정16/24 규칙과 세 번1% stagnation 규칙은 유지한다. 현재 코드124개 tests와 저장된 May19 witness replay는 PASS, 수정된 루프의 새로운 May19 native 검증은 미실행이다. 모든21개 실제 native 호출의 소스는ba1c9b2... archive이며, 현재 수정 코드는 기존 source permit에서 거부된다. 추가 실행에는 별도의 새 source freeze/예산이 필요하다.
+이 발견 뒤 경미한 증가 처리와 미복원 후보 처리를 보완했다. 이전 해의 포함 witness가 통과하면 다음 반복으로 진행하며, raw Phi를 바꾸거나 tolerance를 완화하지 않는다. 후보가 없는 부분 배치 뒤에도 같은 dual로 남은 클래스를 탐색하고, native positive support로 복원되지 않는 migration은 정확 prefix 가격으로 순차 복원한다. 고정16/24 규칙과 세 번1% stagnation 규칙은 유지한다. 현재 코드127개 tests와 저장된 May19 witness replay는 PASS, 수정된 루프의 새로운 May19 native 검증은 미실행이다. 모든21개 실제 native 호출의 소스는ba1c9b2... archive이며, 현재 수정 코드는 기존 source permit에서 거부된다. 추가 실행에는 별도의 새 source freeze/예산이 필요하다.
 
 1. **Exact base HEAD?** 92b8cc679e115673e0a29c71d0797013c4e08e57
 

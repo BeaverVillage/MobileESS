@@ -204,7 +204,7 @@ def review(pr_url):
     text+=f"분류: **{r['classification']}**. Stop: {r.get('stop_reason','gate reached')}.\n\n"
     text+='이번900초 실험은 PR172의600초 결과를 수정하거나 연장하지 않았다. 검증된 구체적 경로만 활성화했으며, pool 후보는 모두 보존했다. 양의 Phi나 시간/크기 종료는 complete-domain infeasibility 증거가 아니다. LP closure와 integer closure, production acceptance는 별도다.\n\n'
     text+='실제 heavy 실행은608.5489초에서 보수적인 조사 기준으로 종료되어900초를 소진하지 않았다. 이전 raw 해는 확장 모델에 그대로 포함되고 같은 Phi를 유지한다는 독립 replay가 PASS했다. 따라서6.73e-7 증가가 실제 최적값 증가를 증명하지 않는다. 세 번의 stagnation 조건도 충족되지 않았다.\n\n'
-    text+='이 발견 뒤 코드의 경미한 증가 처리만 보완했다. 이전 해의 포함 witness가 통과하면 다음 반복으로 진행하며, raw Phi를 바꾸거나 tolerance를 완화하지 않는다. 고정16/24 규칙과 세 번1% stagnation 규칙은 유지한다. 현재 코드124개 tests와 저장된 May19 witness replay는 PASS, 수정된 루프의 새로운 May19 native 검증은 미실행이다. 모든21개 실제 native 호출의 소스는ba1c9b2... archive이며, 현재 수정 코드는 기존 source permit에서 거부된다. 추가 실행에는 별도의 새 source freeze/예산이 필요하다.\n\n'
+    text+='이 발견 뒤 경미한 증가 처리와 미복원 후보 처리를 보완했다. 이전 해의 포함 witness가 통과하면 다음 반복으로 진행하며, raw Phi를 바꾸거나 tolerance를 완화하지 않는다. 후보가 없는 부분 배치 뒤에도 같은 dual로 남은 클래스를 탐색하고, native positive support로 복원되지 않는 migration은 정확 prefix 가격으로 순차 복원한다. 고정16/24 규칙과 세 번1% stagnation 규칙은 유지한다. 현재 코드127개 tests와 저장된 May19 witness replay는 PASS, 수정된 루프의 새로운 May19 native 검증은 미실행이다. 모든21개 실제 native 호출의 소스는ba1c9b2... archive이며, 현재 수정 코드는 기존 source permit에서 거부된다. 추가 실행에는 별도의 새 source freeze/예산이 필요하다.\n\n'
     for i,(q,a) in enumerate(zip(questions,answers),1):text+=f'{i}. **{q}?** {a}\n\n'
     text+='실행 종료 후 새 native solve는 수행하지 않았다. 다른 날짜 및 full A1/Planning/Actual/Fresh는 실행하지 않았다. 최종 HEAD/remote/clean-tree 검증은 외부 출판 영수증이 고정하며, 각 native 실행 소스와 archive 해시는 NATIVE_RUN_SOURCES.csv에 별도로 고정한다.\n'
     (OUT/'FINAL_REVIEW_KO.md').write_text(text,encoding='utf8',newline='\n')

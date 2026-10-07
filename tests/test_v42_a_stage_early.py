@@ -103,3 +103,31 @@ def test_prior_point_witness_rejects_nonincluded_row_or_weight():
     assert not witness['PASS']
     prior['weights']=tuple(w*2 for w in prior['weights'])
     with pytest.raises(ValueError,match='WEIGHT'):inclusion_witness(prior,changed,descriptor,after,0)
+
+@pytest.mark.parametrize('N',(1,3))
+def test_exact_migration_recovery_finds_negative_without_positive_oracle_support(N):
+    from v42_a_stage_early.recovery import omitted_migration_witness
+    from v42_a_stage_early.candidate import physical_price
+    data,g,keys=block_fixture(N);job=data[1]['j0'];domain=physical_domain(job,data[2]['j0'],data[3])
+    start,source,cp,physical,dest,gpu_count,taus=next(b for b in domain.blocks if b[2]-b[0]<job.service_slots)
+    tau=taus[0];tx=domain.cache.transfer(source,dest,job.gpu,tau);end=tx.restart+job.service_slots-(cp-start)
+    axes={k:i for i,k in enumerate(keys)};pi=np.zeros(len(keys))
+    for k,i in axes.items():
+        if k[0]=='GPU':pi[i]=10.
+    for site,lo,hi in [(source,start,cp),(dest,tx.restart,end)]:
+        for t in range(lo,hi):pi[axes['GPU',site,t]]=0.
+    epsilon=Fraction(1,100000000)
+    option,price,scanned=omitted_migration_witness(job,data[4]['j0'],data[0],domain,axes,pi,N,1,frozenset(),epsilon,Budget())
+    assert option is not None and option.migrated and price < -epsilon and scanned>0
+    direct,_=physical_price(option,job,data[4]['j0'],data[0],axes,pi,N,1)
+    assert direct==price
+    result=validate(dict(snapshot=(block:=native_block(data,'c',g,keys))[0],B=block[1],units=block[3],graph=g),
+        job,data[2]['j0'],data[3],domain,data[4]['j0'],data[0],axes,pi,N,1,option,'c')
+    assert result['native_local_replay']['PASS']
+
+def test_exact_migration_recovery_no_negative_does_not_claim_fractional_closure():
+    from v42_a_stage_early.recovery import omitted_migration_witness
+    data,g,keys=block_fixture(1);job=data[1]['j0'];domain=physical_domain(job,data[2]['j0'],data[3])
+    option,price,scanned=omitted_migration_witness(job,data[4]['j0'],data[0],domain,{k:i for i,k in enumerate(keys)},np.zeros(len(keys)),1,0,
+        frozenset(),Fraction(1,100000000),Budget())
+    assert option is None and price is None and scanned==domain.count-len(domain.stays)

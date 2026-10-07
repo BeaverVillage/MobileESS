@@ -110,8 +110,12 @@ def recover(cache,data,domains,ledger,key,coupling_pi,potential,oracle_point,eps
         price,_=physical_price(option,job,data[4][uid],data[0],axes,coupling_pi,count,potential)
         if price < -epsilon:candidates.append((price,option.initial_site,option.start,repr(option),option))
     budget.remaining()
-    if not candidates:return None
-    option=min(candidates) [-1]
+    if not candidates:
+        from .recovery import omitted_migration_witness
+        option,price,scanned=omitted_migration_witness(job,data[4][uid],data[0],domain,axes,coupling_pi,count,potential,
+            ledger['migration_pools'][key].active_keys,epsilon,budget)
+        if option is None:return None
+    else:option=min(candidates)[-1]
     return validate(cache,job,data[2][uid],data[3],domain,data[4][uid],data[0],axes,coupling_pi,count,potential,option,key)
 
 def expanded_graph(active, option, job, domain, retained):

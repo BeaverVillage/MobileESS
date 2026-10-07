@@ -17,6 +17,13 @@ from .candidate import recover
 def worker_price(task):
     want,pi,folder,started,limit=task
     budget=Budget(started=started,native_limit=limit);native=Native(budget)
+    try:return _worker_price(want,pi,folder,native)
+    except Exception as error:
+        # An error after optimize must still deliver every persisted call to
+        # the parent, including its charged Runtime and available raw arrays.
+        return dict(PASS=False,error=type(error).__name__+': '+str(error),calls=native.calls,resources=native.resources)
+
+def _worker_price(want,pi,folder,native):
     cache=load_cache(want);full,B=cache['snapshot'],cache['B']
     if full.matrix.shape[1]==0:
         raw=dict(X=np.zeros(0),Pi=np.zeros(full.matrix.shape[0]))
@@ -33,9 +40,10 @@ def worker_price(task):
     return dict(PASS=certificate['PASS'],certificate=certificate,point=raw['X'],local_pi=raw['Pi'],
         calls=native.calls,resources=native.resources)
 
-def partial(native,executor,workers,original,master,raw,data,domains,ledger,axes,local_rows,owned,folder,start_index=0,full_sweep=False):
+def partial(native,executor,workers,original,master,raw,data,domains,ledger,axes,local_rows,owned,folder,start_index=0,full_sweep=False,max_classes=None):
     required={r['class_id']:r for r in read(HISTORY/'BLOCK_PRICING_ORACLE_VERIFICATION.json')['records']}
     roster=sorted(required);order=roster if full_sweep else roster[start_index:]+roster[:start_index]
+    if max_classes is not None:order=order[:max_classes]
     pi=projected_global_pi(master,raw['Pi']) if master else np.asarray(raw['Pi']).copy()
     if not master:
         pi[(original.senses=='<') & (pi>0)]=0;pi[(original.senses=='>') & (pi<0)]=0
@@ -76,15 +84,18 @@ def partial(native,executor,workers,original,master,raw,data,domains,ledger,axes
             active_price=true_objective(AB,coupling_pi,raw['X'][cols])
             delta=Fraction(cert['exact_lower_bound'])-active_price
             point_delta=true_objective(cache['B'],coupling_pi,response['point'])-Fraction(current['exact_lower_bound'])
-            candidate=recover(cache,data,domains,ledger,key,coupling_pi,current['exact_lower_bound'],response['point'],epsilon,native.budget)
-            if candidate:
-                if not candidate['price'] < -epsilon:raise ValueError('NONNEGATIVE_COLUMN_ACTIVATION')
-                negative.append(candidate)
+            potential=Fraction(cert['exact_lower_bound']) < Fraction(current['exact_lower_bound'])-epsilon
             receipt=dict(class_id=key,complete_STAY=required[key]['full_physical_STAY'],complete_migration=required[key]['full_physical_migration'],
                 minimum_rc_lower_bound=str(delta),block_point_rc=str(point_delta),certificate=cert,
                 active_local_lower_bound=current['exact_lower_bound'],global_coupling_pi=tuple(map(float,coupling_pi)),
-                local_raw_pi=tuple(map(float,response['local_pi'])),
-                status='VALID_NEGATIVE_CONCRETE_COLUMN' if candidate else 'NEGATIVE_BLOCK_UNMATERIALIZED' if point_delta < -epsilon else 'NO_CONCRETE_NEGATIVE_RECOVERED',
+                local_raw_pi=tuple(map(float,response['local_pi'])),candidate=None,
+                status='NEGATIVE_BLOCK_UNMATERIALIZED' if potential else 'NO_CONCRETE_NEGATIVE_RECOVERED')
+            atomic(Path(folder)/'B'/key[:12]/'EXACT_PRICING.json',serial(receipt))
+            candidate=recover(cache,data,domains,ledger,key,coupling_pi,current['exact_lower_bound'],response['point'],epsilon,native.budget) if potential else None
+            if candidate:
+                if not candidate['price'] < -epsilon:raise ValueError('NONNEGATIVE_COLUMN_ACTIVATION')
+                negative.append(candidate)
+            receipt.update(status='VALID_NEGATIVE_CONCRETE_COLUMN' if candidate else receipt['status'],
                 candidate=None if candidate is None else dict(candidate,option=asdict(candidate['option']),price=str(candidate['price'])))
             receipts.append(receipt)
             atomic(Path(folder)/'B'/key[:12]/'EXACT_PRICING.json',serial(receipt))

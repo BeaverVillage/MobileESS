@@ -137,13 +137,14 @@ def run():
                     if not p1result['PASS']:raise ValueError('ORIGINAL_P1_RAW_REPLAY_FAIL')
                     while len(stable_classes)<150:
                         pricefolder=p1folder/('Q'+str(len(batches)))
-                        priced,negative=partial(native,executor,workers,original,None,praw,data,domains,ledger,axes,local_rows,owned,pricefolder,p1cursor)
+                        priced,negative=partial(native,executor,workers,original,None,praw,data,domains,ledger,axes,local_rows,owned,pricefolder,p1cursor,max_classes=150-len(stable_classes))
                         batches.append(dict(stage='P1',iteration=p1iteration,**{k:v for k,v in priced.items() if k not in ('receipts','class_ids')}))
                         p1cursor=priced['next_index']
                         if negative:stable_classes.clear();break
                         stable_classes.update(priced['class_ids'])
-                        if priced['negative_blocks_unmaterialized']:raise BudgetStop('P1_NEGATIVE_BLOCK_UNMATERIALIZED_CLOSURE_PENDING')
                     if len(stable_classes)==150:
+                        if any(b.get('negative_blocks_unmaterialized',0) for b in batches if b['stage']=='P1' and b['iteration']==p1iteration):
+                            raise BudgetStop('P1_NEGATIVE_BLOCK_UNMATERIALIZED_AFTER_COMPLETE_RECOVERY')
                         priced,negative=partial(native,executor,workers,original,None,praw,data,domains,ledger,axes,local_rows,owned,p1folder/'FINAL',full_sweep=True)
                         finalclosure=closure(original,praw,global_rows,axes,n,priced);result['LP_PRICING_CLOSED']=finalclosure['PASS']
                         if finalclosure['PASS']:break
@@ -152,9 +153,12 @@ def run():
                     currentstate=(base,descriptor,data,domains,ledger,base_axes,n,grows,local_rows,owned)
                     data,ledger,original,descriptor,global_rows,local_rows,owned,axes=activate(currentstate,negative,'P'+str(p1iteration),p1folder,activations)
                 break
-            priced,negative=partial(native,executor,workers,original,master,raw,data,domains,ledger,axes,local_rows,owned,folder,cursor)
-            batches.append(dict(stage='PHASE_I',iteration=iteration,**{k:v for k,v in priced.items() if k not in ('receipts','class_ids')}))
-            cursor=priced['next_index']
+            scanned_classes=set();negative=[];price_folder=folder
+            while not negative and len(scanned_classes)<150:
+                priced,negative=partial(native,executor,workers,original,master,raw,data,domains,ledger,axes,local_rows,owned,price_folder,cursor,max_classes=150-len(scanned_classes))
+                batches.append(dict(stage='PHASE_I',iteration=iteration,**{k:v for k,v in priced.items() if k not in ('receipts','class_ids')}))
+                cursor=priced['next_index'];scanned_classes.update(priced['class_ids'])
+                price_folder=folder/('Q'+str(len(batches)))
             if stagnated(relative,len(negative)):
                 result['classification']='PHASE1_ACTIVATION_STAGNATION';break
             if not negative:raise BudgetStop('BOUNDED_PRICING_NO_CONCRETE_COLUMN_RECOVERED')
