@@ -152,6 +152,7 @@ def audit_checkpoint(bb,A,d):
             if r.get('branch_variable') is not None:
                 j=r['branch_variable'];assert j in binary and j not in dict(node['fixings']) and float(x[j])==r['raw_fractional_branch_value'] and x[j] not in (0,1)
         elif r['LP_status']=='INFEASIBLE':
+            assert r['native_status']==3
             cert=read(folder/'INFEASIBILITY_CERTIFICATE.json');assert sha(folder/'INFEASIBILITY_CERTIFICATE.json')==r['infeasibility_certificate_SHA256']
             with np.load(folder/'FARKAS_PROOF.npz') as z:ray=z['FarkasDual']
             computed,_,_,_=hc.exact_bounded_lagrangian(CSC,dict(e,objective=np.zeros_like(d['objective']),constant=np.array(0.)),-ray)
@@ -169,6 +170,22 @@ def audit_checkpoint(bb,A,d):
             assert full_replay(A,d,x)['PASS']
         checks.append(dict(node_id=node['id'],PASS=True,LP_status=r['LP_status']))
     atomic(RUN/'RESTART_AUDIT.json',dict(PASS=True,UTC=stamp(),certificates_independently_recomputed=True,coverage=bb.audit(),node_checks=checks,audit_optimize_calls=0))
+
+def consume_checked(bb,node_id,result,A,d):
+    """Recompute a saved/new proof before it changes the durable OPEN queue."""
+    from node_proof_guards import conflicts_with_known_witness
+    node=bb.state['nodes'][str(node_id)]
+    with np.load(RUN/bb.state['incumbent']['point']) as z:known=z['x']
+    if conflicts_with_known_witness(node,result,known):
+        atomic(RUN/'EXACT_NODE_INFEASIBILITY_VS_KNOWN_WITNESS.json',dict(node_id=node_id,fixings=node['fixings'],infeasibility_receipt=result,claim_accepted=False,domain_retained_OPEN=True))
+        raise AssertionError('EXACT_NODE_PROOF_CONTRADICTS_VALIDATED_INCUMBENT_RETAIN_OPEN_STOP')
+    witness=result.get('witness')
+    if witness is not None and F(witness['objective_exact'])<F(bb.audit()['global_OPEN_min_LB_exact']):
+        atomic(RUN/'VALIDATED_WITNESS_VS_REGISTERED_GLOBAL_LB.json',dict(node_id=node_id,witness=witness,global_LB=bb.audit()['global_OPEN_min_LB_exact'],claim_accepted=False,previous_bounds_retained=True))
+        raise AssertionError('WITNESS_CONFLICTS_WITH_REGISTERED_GLOBAL_LB_RETAIN_OPEN_STOP')
+    trial=copy.deepcopy(bb);trial.apply(node_id,result)
+    audit_checkpoint(trial,A,d)
+    return trial
 
 def start_queue(oracle,args):
     finish_pending_recoveries()
@@ -196,7 +213,7 @@ def start_queue(oracle,args):
         if F.from_float(float(center[239826]))<=F(bb.state['UB']):bb.state['UB']=str(F.from_float(float(center[239826])));bb.state['incumbent']=incumbent
         if bb.state['in_flight'] is not None:
             n=bb.state['nodes'][str(bb.state['in_flight'])];p=RUN/'external_nodes'/f"{n['id']:04d}"/'RESULT.json'
-            if p.exists():bb.apply(n['id'],read(p))
+            if p.exists():bb=consume_checked(bb,n['id'],read(p),oracle.A,oracle.d)
             else:assert args.recover_node==n['id'],'EXPLICIT_INFLIGHT_RECOVERY_REQUIRED'
     elif args.import_m0:
         assert not checkpoint.exists() and not existing_m0_alive(),'REGISTERED_M0_STILL_RUNNING_NO_DUPLICATE'
@@ -268,11 +285,7 @@ def run(args):
             if node is None:break
             oracle.choose_branch=chooser(bb,oracle.d);bb.begin(node);bb.save(checkpoint)
             result=oracle.solve(node)
-            from node_proof_guards import conflicts_with_known_witness
-            with np.load(RUN/bb.state['incumbent']['point']) as z:known=z['x']
-            if conflicts_with_known_witness(node,result,known):
-                atomic(RUN/'EXACT_NODE_INFEASIBILITY_VS_KNOWN_WITNESS.json',dict(node_id=node['id'],fixings=node['fixings'],full_original_incumbent_replay_PASS=True,infeasibility_receipt=result,claim_accepted=False,domain_retained_OPEN=True));raise AssertionError('EXACT_NODE_PROOF_CONTRADICTS_VALIDATED_INCUMBENT_RETAIN_OPEN_STOP')
-            bb.apply(node['id'],result);bb.save(checkpoint)
+            bb=consume_checked(bb,node['id'],result,oracle.A,oracle.d);bb.save(checkpoint)
             atomic(RUN/'OPEN_COVERAGE.json',bb.audit());atomic(RUN/'NODE_LEDGER.json',bb.state['ledger'])
             table(RUN/'NODE_LEDGER.csv',[{k:r.get(k) for k in ['node_id','parent','depth','LP_status','certified_LB','effective_LB','Runtime','Work','basis_supplied','basis_accepted','fractional_binary_count','branch_name','state','prune_reason']} for r in bb.state['ledger']])
             atomic(RUN/'PSEUDOCOSTS.json',pseudocosts(bb))

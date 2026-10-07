@@ -57,7 +57,7 @@ class LPOracle:
         # Barrier Crossover=0 is the same algorithm as the completed historical
         # OPTIMAL original C3A LP. This cold path supplies no start information.
         m.Params.Method=2;m.Params.Crossover=0;m.Params.LPWarmStart=0
-        m.Params.NumericFocus=0;m.Params.DualReductions=1;m.Params.InfUnbdInfo=1
+        m.Params.NumericFocus=0;m.Params.DualReductions=1;m.Params.InfUnbdInfo=0
         m.Params.TimeLimit=bounded_limit(1800 if node['parent'] is None else 900)
         m.Params.LogFile=str(folder/'LP.log');m.update();identity=self.objective_identity();assert identity['PASS'],'OBJECTIVE_IDENTITY_FAILED_STOP_NODE_OPTIMIZE_0'
         settings=parameters(m);setup=time.perf_counter()-t0

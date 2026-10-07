@@ -12,7 +12,7 @@ def run():
         e=dict(oracle.d,types=np.full(oracle.A.shape[1],'C'),lower=oracle.d['lower'].copy(),upper=oracle.d['upper'].copy())
         for col,value in node['fixings']:e['lower'][col]=e['upper'][col]=value
         m=oracle.m;m.setAttr('LB',oracle.variables,e['lower'].tolist());m.setAttr('UB',oracle.variables,e['upper'].tolist());m.update()
-        cfg=dict(Method=2,Crossover=0,LPWarmStart=0,NumericFocus=0,DualReductions=1,InfUnbdInfo=1,TimeLimit=bounded_limit(900))
+        cfg=dict(Method=2,Crossover=0,LPWarmStart=0,NumericFocus=0,DualReductions=1,InfUnbdInfo=0,TimeLimit=bounded_limit(900))
         for k,v in cfg.items():m.setParam(k,v)
         B,transport=arrays(m);assert (B!=oracle.A).nnz==0 and all(np.array_equal(e[k],transport[k]) for k in e)
         assert oracle.objective_identity()['PASS'] and not oracle.calls
