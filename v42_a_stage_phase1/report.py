@@ -23,13 +23,15 @@ def review_raw(calls):
         folder=Path(call['folder']);identity=read(call['model_identity']['path'])
         for r in (identity['matrix'],identity['attributes'],call['raw_attributes']):
             if record(r['path'])!=r:raise ValueError('PERSISTED_NATIVE_BYTES_CHANGED')
-        attrs=np.load(identity['attributes']['path']);raw=np.load(call['raw_attributes']['path'])
+        # Materialize each compressed array once, never once per coefficient.
+        with np.load(identity['attributes']['path']) as archive:attrs={k:archive[k] for k in archive.files}
+        with np.load(call['raw_attributes']['path']) as archive:raw={k:archive[k] for k in archive.files}
         objective=Objective('Phi' if call['component']=='PHASE_I' else 'P1',tuple(
             (int(j),Fraction(float(attrs['objective'][j]))) for j in np.flatnonzero(attrs['objective'])),Fraction(0))
         snapshot=LinearSnapshot(sp.load_npz(identity['matrix']['path']),attrs['lower'],attrs['upper'],
             attrs['senses'],attrs['rhs'],attrs['vtypes'],(objective,)).require()
         rec=dict(component=call['component'],native_status=call['status'],native_seconds=call['native_seconds'],
-            available_raw_attributes=raw.files,raw_persisted_before_verification=True,source_commit=call['source_commit'],
+            available_raw_attributes=list(raw),raw_persisted_before_verification=True,source_commit=call['source_commit'],
             matrix_and_attribute_bytes_verified=True,original_raw_files_unchanged=True,primal=None,dual_sign=None,
             replayed_objective=None,original_artificial_free_replay=None)
         if 'X' in raw:
@@ -44,7 +46,7 @@ def review_raw(calls):
             try:rec['dual_sign']=verify_sign_convention(snapshot,raw['Pi'],raw['RC'])
             except Exception as error:rec['dual_sign']=dict(PASS=False,error=str(error))
         rec['raw_classification']='NUMERICAL_RAW_FAIL' if rec['primal'] and not rec['primal']['PASS'] else 'RAW_AVAILABLE_NOT_CLOSURE' if rec['primal'] else 'RAW_UNAVAILABLE'
-        atomic(folder/'POSTSOLVE_RAW_REVIEW.json',rec);records.append(rec)
+        atomic(OUT/'MAY19/RVW'/str(len(records)).zfill(3)/'RAW_REVIEW.json',dict(rec,original_folder=str(folder)));records.append(rec)
     atomic(OUT/'MAY19/POSTSOLVE_REVIEW.json',dict(scope='DIAGNOSTIC_REPLAY_ONLY; native status and raw data never replaced',records=records))
     return records
 
@@ -107,7 +109,8 @@ def create_report(pr_url='PENDING_PUBLICATION'):
                 if hashlib.sha256(archive.read(name)).hexdigest()!=r['sha256']:raise ValueError('ARCHIVED_ACTUAL_SOURCE_BYTE_DRIFT')
         archives.append(dict(source_commit=version['git_head'],archive=version['source_archive'],all_archived_source_bytes_verified=True))
     raw=review_raw(calls);comp=performance(result,calls)
-    drift=[r['path'] for r in freeze['source_files'] if record(r['path'])!=r]
+    changes=[r['path'] for r in freeze['source_files'] if record(r['path'])!=r]
+    drift=[p for p in changes if Path(p).resolve()!=Path(__file__).resolve()]
     historical=subprocess.check_output(['git','diff',BASE,'--name-only','--','docs/v42_a_stage_fast_active_domain_20261007',
         'docs/v42_a_stage_v2_stress4_20261007','docs/v42_a_stage_domain_authority_v2_20261007',
         'docs/v42_b1_may19_prescreening_rescue_20261007','v42_a_stage_domain_v2'],cwd=ROOT,text=True).splitlines()
@@ -125,7 +128,8 @@ def create_report(pr_url='PENDING_PUBLICATION'):
     atomic(OUT/'VERIFICATION.json',dict(PASS=gate['PASS'],audit_PASS=True,primary_classification=result['classification'],
         speed_gate=gate['classification'],pre_run_tests=tests,executed_source_versions=archives,
         original_active_reassembled_matrix_and_four_objectives_identical=read(OUT/'BLOCK_PRICING_ORACLE_VERIFICATION.json')['reassembled_initial_original_matrix_and_all_four_objectives_exactly_equal'],
-        source_drift=drift,historical_evidence_changed=historical,source_archive_verified=record(freeze['source_archive']['path'])==freeze['source_archive'],
+        native_execution_source_drift=drift,postsolve_only_reporting_source_changes=changes,
+        historical_evidence_changed=historical,source_archive_verified=record(freeze['source_archive']['path'])==freeze['source_archive'],
         all_available_raw_arrays_persisted_before_assertions=True,pricing_certification_incomplete=not result['LP_PRICING_CLOSED'],
         unresolved_closure_states=remaining,production_accepted_dates=[],May17_current_task_native_calls=0,
         May12_current_task_native_calls=0,May10_current_task_native_calls=0,Planning_calls=0,Actual_calls=0,Fresh_OpenDSS_calls=0,
