@@ -264,10 +264,13 @@ def start_queue(oracle,args):
     bb.save(checkpoint);return bb
 
 def run(args):
+    assert args.resume and args.max_nodes==1 and args.seconds<=900,'REGISTERED_ACCURACY_EXPERIMENT_IS_ONE_FRESH_CHILD_ONLY'
+    assert not args.import_m0 and args.recover_node is None and not args.recover_all_unresolved and not args.reuse_archived_root,'NO_ROOT_OR_DOMAIN_RERUN_IN_ACCURACY_EXPERIMENT'
     assert not existing_m0_alive(),'REGISTERED_M0_STILL_RUNNING_NO_DUPLICATE'
     from owned_solver_guard_v3 import owned_controller_alive
     assert owned_controller_alive() is None,'OWNED_EXTERNAL_CONTROLLER_STILL_RUNNING_NO_DUPLICATE'
     assert read(OUT/'BARRIER_ACCURACY_EXECUTION_GATE.json')['PASS'],'BARRIER_ACCURACY_GATE_REQUIRED'
+    assert not (RUN/'BARRIER_ACCURACY_ONCE.json').exists(),'ACCURACY_EXPERIMENT_ALREADY_STARTED_NO_REPEAT'
     atomic(RUN/'BARRIER_ACCURACY_ONCE.json',dict(UTC=stamp(),new_root_optimize_calls=0,Method=2,Crossover=0,BarConvTol=1e-12))
     RUN.mkdir(exist_ok=True);oracle=oracle_code.LPOracle();bb=start_queue(oracle,args);checkpoint=RUN/'OPEN_CHECKPOINT.json';begin=time.perf_counter();start_count=bb.state['processed']
     oracle.checkpoint_hook=lambda:bb.save(checkpoint)
