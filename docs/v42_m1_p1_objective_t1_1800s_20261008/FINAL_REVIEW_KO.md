@@ -42,3 +42,5 @@ Root relaxation 완료=True, nonroot 관측=False. Root relaxation 이후 구간
 PR175 비교: Runtime 1800.032000 → 1800.043000초, Work 3258.255542082 → 3350.742200053, 노드 1.0 → 1.0, 정수 해 0 → 0. 기존 root 완료 240.89100003242493초 → 이번 233.91200017929077. Crossover 187.2 → 85.34초, 최초 MIPNODE 326.78200006484985 → 340.25999999046326초. 비교 원문은 VS_PR175_ZERO_OBJECTIVE.json에 저장한다. 기존 zero-objective 실행은 원래 과학적 목적을 보존하지 못한 기록으로 남기며 이를 올바른 P1 목적 실행이라고 해석하지 않는다.
 
 요청한 단일 1800초 실행을 마쳤다. 추가 solve나 MIPFocus=1, May/A2/M2/P2 실험은 실행하지 않는다.
+
+Draft PR: [#177](https://github.com/BeaverVillage/MobileESS/pull/177), PR175 위에 적층. 최종 40자리 HEAD는 PR 본문의 `Final HEAD`와 최종 대화에 기록한다.
