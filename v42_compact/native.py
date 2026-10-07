@@ -72,6 +72,8 @@ def prepare(context):
 def build(context,data,*,stage=Stage.A1,mess_p=None,mess_q=None):
     bundle,jobs,bounds,r,raw,graphs,prep=data;started=perf_counter()
     m=gp.Model('V42_COMPACT_STATE_AIDC');m.Params.OutputFlag=0
+    from v42_a_stage_domain_v2.execution import tag_model_for_day
+    tag_model_for_day(m,bundle,require_day=False)
     tail=max(b.latest_completion for b in bounds.values());known={};risk={};gpurows={};riskrows={}
     fixedrisk=defaultdict(float)
     for uid,row in raw.items():

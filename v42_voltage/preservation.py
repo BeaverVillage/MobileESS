@@ -14,6 +14,8 @@ ARCHITECTURE_CHANGES={'.gitattributes','README.md','v42_native/coordinator.py','
 
 
 def assert_authorized(path,current_sha,previous_sha=None):
+    from v42_a_stage_domain_v2.supersession import assert_successor as v2_successor
+    if v2_successor(path,current_sha,previous_sha):return
     from v42_integrated.supersession import assert_successor as integrated_successor
     if integrated_successor(path,current_sha,previous_sha):return
     from v42_thermal.supersession import assert_successor
@@ -87,7 +89,9 @@ def assert_snapshot(rows):
     for row in rows:
         path=row['path'];base=blobs[path];lf=base.replace(b'\r\n',b'\n')
         variants=(base,lf,lf.replace(b'\n',b'\r\n'))
-        assert row['sha256'] in {hashlib.sha256(v).hexdigest() for v in variants},'HISTORICAL_RECEIPT_DRIFT:'+path
+        if row['sha256'] not in {hashlib.sha256(v).hexdigest() for v in variants}:
+            from v42_a_stage_domain_v2.supersession import assert_historical_source
+            assert assert_historical_source(path,row['sha256']),'HISTORICAL_RECEIPT_DRIFT:'+path
         current=(ROOT/path).read_bytes()
         if current not in variants:assert_authorized(path,sha(ROOT/path),row['sha256'])
     return True

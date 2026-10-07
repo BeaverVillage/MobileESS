@@ -77,6 +77,8 @@ def resolve(name):
     module,attribute=name.split(':');return getattr(importlib.import_module(module),attribute)
 
 def supervise(stage,worker,validator,payload,folder,seconds=600.):
+    from v42_a_stage_domain_v2.execution import require_action_authorized
+    require_action_authorized(payload,stage,require_day=False)
     require(stage in STAGE_SECONDS and 0<seconds<=STAGE_SECONDS[stage],'STAGE_HARD_BUDGET')
     folder=Path(folder);folder.mkdir(parents=True,exist_ok=False);start=monotonic()
     # Source import/hash setup is charged too. worker/validator are trusted repo entrypoints.

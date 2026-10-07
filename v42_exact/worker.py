@@ -19,6 +19,8 @@ def freeze_check():
     if any(n=='v42_dw' or n.startswith('v42_dw.') for n in sys.modules):raise ValueError('DW_IMPORTED')
 
 def optimize(m,variables,objectives,controls,bindings,data):
+    from v42_a_stage_domain_v2.execution import require_action_authorized
+    require_action_authorized(data[0],'A1')
     phases=[];telemetry=[];events={};first=[None];last=[-1.];next_checkpoint=[0];targets=[60,300,600,1800,3600]
     m.Params.Threads=1;m.Params.Seed=20260929;m.Params.MIPGap=.005;m.Params.TimeLimit=3600
     m.Params.OutputFlag=1;m.Params.LogFile=str(LOCAL/'gurobi.log')

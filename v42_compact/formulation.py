@@ -49,7 +49,9 @@ def contributions(j,graph,v):
     return use
 
 def intervention(j,v):
-    return [gp.quicksum(v['q'].values()),gp.quicksum((s-j.reference_start)*x for (k,s),x in v['y'].items()),
+    # On the historical domain s>=reference, this is coefficient-identical.
+    # V2 admits earlier starts: displacement remains a nonnegative magnitude.
+    return [gp.quicksum(v['q'].values()),gp.quicksum(abs(s-j.reference_start)*x for (k,s),x in v['y'].items()),
         gp.quicksum(int(k!=j.reference_site)*x for (k,s),x in v['y'].items())]
 
 def add_resources(m,use,r):

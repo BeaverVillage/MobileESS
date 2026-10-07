@@ -2,8 +2,10 @@
 import sys,shutil,pickle,gzip
 import numpy as np,scipy.sparse as sp
 from .common import *
+from v42_a_stage_domain_v2.execution import require_action_authorized
 
 def main(shell):
+    require_action_authorized(DAY,'A1')
     from v42_pr134_b1 import native,replay as fixed
     from v42_pr134_b1.worker import physical_validation
     from v42_pr134_b1.common import identity
@@ -56,7 +58,10 @@ def main(shell):
     import gurobipy as gp
     model_class=gp.Model
     class NoOptimize(model_class):
-        def optimize(self,*a,**kw):raise PermissionError('ACTUAL_FRESH_NATIVE_REOPTIMIZATION_FORBIDDEN')
+        def optimize(self,*a,**kw):
+            from v42_a_stage_domain_v2.execution import guard_model_optimize
+            guard_model_optimize(self)
+            raise PermissionError('ACTUAL_FRESH_NATIVE_REOPTIMIZATION_FORBIDDEN')
     gp.Model=NoOptimize
     try:
         plan=target/'PLANNING_FREEZE';plan.mkdir();fixed.freeze_planning(PRODUCTION,DAY,output,plan,freeze)

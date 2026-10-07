@@ -4,6 +4,7 @@ All byte states use an exact rational quantum derived from payload and
 nominal bottleneck rates. No pair x transfer-start binary exists.
 """
 from collections import defaultdict,Counter
+from dataclasses import replace
 from fractions import Fraction
 from functools import reduce
 from math import gcd,lcm
@@ -26,12 +27,17 @@ def authority(j,g,r):
     if units>1e8:raise ValueError('EXACT_BYTE_QUANTUM_NUMERIC_RANGE_UNSUPPORTED')
     return pairs,float(quantum),units,{key:float(min(B,Fraction(x))/quantum) for key,x in rates.items()}
 
-def add_job(m,j,g,r,*,compress=False,optional=False,eliminate_depart=None,eliminate_arrive=None,share_links=None,eliminate_f0=None,eliminate_state=None,byte_scale=1.):
+def add_job(m,j,g,r,*,compress=False,optional=False,eliminate_depart=None,eliminate_arrive=None,share_links=None,eliminate_f0=None,eliminate_state=None,byte_scale=1.,preserve_stay_flow=False):
     depart=compress if eliminate_depart is None else eliminate_depart
     arrive=compress if eliminate_arrive is None else eliminate_arrive
     link=compress if share_links is None else share_links
     f0_removed=compress if eliminate_f0 is None else eliminate_f0
     state_removed=compress if eliminate_state is None else eliminate_state
+    if preserve_stay_flow and not g.events['w']:
+        if optional:raise ValueError('OPTIONAL_TRACK_REQUIRES_MIGRATION_DOMAIN')
+        # Activation may identify a currently unique STAY. Its engineering
+        # fixed marker must not discard the retained source-flow authority.
+        return compact_job(m,j,replace(g,fixed=None))
     if g.fixed:return compact_job(m,j,g)
     if not g.events['w']:
         if optional:raise ValueError('OPTIONAL_TRACK_REQUIRES_MIGRATION_DOMAIN')
@@ -164,8 +170,15 @@ def stay(m,j,g,N,*,compress=False,starts=None,eliminate_f0=None,eliminate_state=
             x=m.addVar(lb=0,ub=N,vtype=typ,name=f'F0_count[{j.uid},{k},{key[1]}]');v['f0'][key]=x
             m.addConstr(x==y[k,s],name='fixed_duration_count_finish')
     states=sorted({(k,t) for k,s in keys for t in range(s,s+j.service_slots)})
+    # Exact same finite incidence; avoid rescanning every site's full support
+    # at every slot when V2 restores long reference-tail start intervals.
+    from bisect import bisect_left, bisect_right
+    bysite=defaultdict(list)
+    for k,s in keys:bysite[k].append(s)
+    bysite={k:sorted(ss) for k,ss in bysite.items()}
     for k,t in states:
-        expr=gp.quicksum(x for (site,s),x in y.items() if site==k and s<=t<s+j.service_slots)
+        ss=bysite[k];a=bisect_left(ss,t-j.service_slots+1);b=bisect_right(ss,t)
+        expr=gp.quicksum(y[k,s] for s in ss[a:b])
         if state_removed:v['r0'][k,t]=expr
         else:
             x=m.addVar(lb=0,ub=N,name=f'R0_count[{j.uid},{k},{t}]');v['r0'][k,t]=x

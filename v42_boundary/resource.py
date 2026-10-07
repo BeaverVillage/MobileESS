@@ -9,6 +9,8 @@ from v42_may01.projection import write_solver_file
 def main():
     require(not (OUT/'MAY01_RESOURCE_RECHECK.json').exists(),'RESOURCE_RECHECK_ALREADY_SEALED')
     b=read(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json');jobs=[j for j in b['known_population'] if j['planning_eligible']]
+    from v42_a_stage_domain_v2.execution import require_action_authorized,tag_model_for_day
+    require_action_authorized(b,'FEASIBILITY_LP')
     windows=read(OUT/'KNOWN_TS_SERVICE_BOUNDARY_AUDIT.json')['windows']
     ts={j['job_id']:dict(TS_slots=j['latest_start']-j['reference_start']) for j in windows}
     rows=known_bounds(jobs,ts,max_active=b['WAN']['maximum_active_transfers'])
@@ -19,6 +21,7 @@ def main():
         r['necessary_GPU_lower_bound']=r['known_GPU_lower_bound']+r['minimum_anonymous_CC4_GPU']
         r['capacity_excess_GPU']=max(0.,r['necessary_GPU_lower_bound']-780)
     started=perf_counter();m=gp.Model('BOUNDARY_NECESSARY_RESOURCE');m.Params.OutputFlag=0
+    tag_model_for_day(m,b)
     try:
         service=bind_service(m,b['C0_Q50'],k,e.Q10,e.Q90)
         for r in rows:m.addConstr(r['known_GPU_lower_bound']+service['gpu'][r['Dday_slot']]<=780,name='capacity')

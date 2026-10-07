@@ -18,6 +18,8 @@ def main():
     # Preserve the earlier, looser test verbatim as a stage-specific receipt.
     (OUT/'MAY01_RESOURCE_LOOSE_RELAXATION.json').write_bytes((OUT/'MAY01_RESOURCE_FEASIBILITY_V42_FINAL.json').read_bytes())
     b=read(OUT/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json');jobs=[j for j in b['known_population'] if j['planning_eligible'] and j['service_slots']>0]
+    from v42_a_stage_domain_v2.execution import require_action_authorized,tag_model_for_day
+    require_action_authorized(b,'FEASIBILITY_LP')
     require(all(j['can_timeshift'] is False for j in jobs),'ZERO_TS_DOMAIN')
     first={};trace=[]
     for r in jobs:
@@ -31,6 +33,7 @@ def main():
         trace.append(dict(job_id=j.uid,first_checkpoint_slot=cp if points else None,relaxed_migration_candidate=cp<=117,
             nominal_start=j.reference_start,nominal_end=j.reference_start+j.service_slots,GPU=j.gpu))
     start=perf_counter();m=gp.Model('V42_FINAL_CHECKPOINT_WAN_RESOURCE_SUPERSET');m.Params.OutputFlag=0
+    tag_model_for_day(m,b)
     try:
         z={j['job_uid']:m.addVar(lb=0,ub=1,name='relaxed_migration['+j['job_uid']+']') for j in jobs if first[j['job_uid']]<=117}
         # Hall suffix inequalities for unit-length transfers on one network-wide

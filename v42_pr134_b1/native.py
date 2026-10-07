@@ -10,6 +10,9 @@ from collections import Counter
 import scipy.sparse as sp
 import gurobipy as gp
 from .common import *
+from v42_a_stage_domain_v2.execution import require_action_authorized,guard_model_optimize,guarded_optimize
+from v42_a_stage_domain_v2.status import initial_domain_status,close_feasibility,require_production_domain_accepted
+from v42_a_stage_domain_v2.telemetry import FutureRunTelemetry
 
 def date_route(function):
     tree=ast.parse(inspect.getsource(function));changed=[]
@@ -123,7 +126,9 @@ def build_static(bundle,input_folder,output,progress):
                 family=name.split('[')[0] if name else 'row_'+Path(frame.f_code.co_filename).parent.name+'_'+str(frame.f_lineno)
                 if family not in codes:codes[family]=len(labels);labels.append(family)
                 rows.append(codes[family]);return super().addConstr(*args,**kw)
-            def optimize(self,*args,**kw):raise PermissionError('STATIC_MODEL_OPTIMIZE_FORBIDDEN')
+            def optimize(self,*args,**kw):
+                guard_model_optimize(self)
+                raise PermissionError('STATIC_MODEL_OPTIMIZE_FORBIDDEN')
         gp.Model=ObservedModel
         from v42_integrated.contract import all_transformer_rows
         import v42_boundary.model as boundary
@@ -169,13 +174,18 @@ def build_static(bundle,input_folder,output,progress):
     return data,descriptor,a,z,mapping,projected,coeff,power,idle,swing,materialize
 
 def run_a1(bundle,input_folder,output,progress):
+    require_action_authorized(bundle,'A1')
+    domain_status=initial_domain_status(authority='PR134_HISTORICAL')
     from v42_integrated.contract import physical_authority
     from v42_pr134_sc.build import replay
     from v42_pr134_sc.snapshot import certify
     with physical_authority():
         data,descriptor,a,z,mapping,objectives,coeff,power,idle,swing,materialize=build_static(bundle,input_folder,output,progress)
+        domain_status=initial_domain_status(hard_physical_domain_defined=data[7].get('domain_authority')=='AIDC_A_STAGE_DOMAIN_AUTHORITY_V2',
+            authority=data[7].get('domain_authority','PR134_HISTORICAL'))
         progress(dict(phase='MATERIALIZE_COMPRESSED_NATIVE'))
-        m=materialize.model('A2SC');variables=m.getVars();spent=0.;results=[];locks=[];last_point=None;selected=None;controls=None
+        m=materialize.model('A2SC',day=bundle['day']);variables=m.getVars();spent=0.;results=[];locks=[];last_point=None;selected=None;controls=None
+        diagnostics=FutureRunTelemetry(m,day=bundle['day'])
         m.Params.OutputFlag=1;m.Params.LogToConsole=0;m.Params.LogFile=str(output/'A1_SOLVE.log')
         for k,v in SETTINGS.items():m.setParam(k,v)
         for i,e in enumerate(objectives):
@@ -183,8 +193,10 @@ def run_a1(bundle,input_folder,output,progress):
             if remaining<=0:raise ValueError('DATE_TIMEOUT')
             expr=gp.LinExpr(e['coefficients'],[variables[j] for j in e['indices']])+e['constant']
             m.setObjective(expr);m.Params.TimeLimit=remaining;last=[-1.];callback_errors=[]
+            diagnostics.begin_objective(e['name'],group=e.get('group'),remaining_seconds=remaining)
             def callback(model,where):
                 try:
+                    diagnostics.callback(model,where,gp.GRB)
                     if where==gp.GRB.Callback.POLLING:return
                     elapsed=float(model.cbGet(gp.GRB.Callback.RUNTIME))
                     if elapsed-last[0]<1:return
@@ -196,7 +208,8 @@ def run_a1(bundle,input_folder,output,progress):
                         if abs(ub)<1e90 and abs(lb)<1e90 and abs(ub)>1e-12:value['gap']=abs(ub-lb)/abs(ub)
                     progress(value)
                 except Exception as error:callback_errors.append(str(error))
-            m.optimize(callback);spent+=m.Runtime
+            guarded_optimize(m,bundle,callback);spent+=m.Runtime
+            diagnostics.finish_objective(m)
             def attr(name):
                 try:return float(getattr(m,name))
                 except (AttributeError,gp.GurobiError):return None
@@ -212,8 +225,12 @@ def run_a1(bundle,input_folder,output,progress):
                 lock_vio=max((sum(c*point[j] for j,c in zip(lock['original_indices'],lock['original_coefficients']))+lock['constant']-lock['rhs'] for lock in locks),default=0.)
                 result.update(original_rows=original,physical=cert,prior_lock_max_violation=max(0,lock_vio),raw_point=record(output/f'PASS_{i+1}_RAW_POINT.npz'))
                 if original['PASS'] and cert['PASS'] and lock_vio<=1e-5:result['valid_UB']=result['objective'];last_point=point
+            if result.get('valid_UB') is not None:domain_status=close_feasibility(domain_status,result['physical'])
+            result['domain_status']=dict(domain_status)
+            result['scientific_full_domain_optimal']=False
             results.append(result);atomic(output/f'PASS_{i+1}_RECEIPT.json',result)
-            atomic(output/'A1_SOLVE_RESULT.json',dict(accepted=False,passes=results,total_runtime=spent,total_TimeLimit=BUDGET))
+            atomic(output/'A1_SOLVE_RESULT.json',dict(accepted=False,domain_status=domain_status,scientific_full_domain_optimal=False,
+                future_run_diagnostics=diagnostics.receipt(),passes=results,total_runtime=spent,total_TimeLimit=BUDGET))
             if callback_errors:raise ValueError('CALLBACK_IMPLEMENTATION_FAILURE:'+str(callback_errors[0]))
             if m.Status==gp.GRB.TIME_LIMIT:raise ValueError('DATE_TIMEOUT')
             if m.Status in (gp.GRB.INFEASIBLE,gp.GRB.INF_OR_UNBD):raise ValueError('NATIVE_INFEASIBLE_NOT_INDEPENDENTLY_PROVEN')
@@ -236,7 +253,12 @@ def run_a1(bundle,input_folder,output,progress):
         it=(pcc-intercepts)/slopes;total=(it-idle*caps)/swing;q=pcc*np.tan(np.arccos(.95))
         if np.any(total>caps+1e-5) or np.any(total<known-1e-5):raise ValueError('PLANNING_GPU_POWER_IDENTITY')
         np.savez_compressed(output/'PLANNING_PHYSICAL.npz',sites=np.array(sites),PCC_P_kw=pcc,PCC_Q_kvar=q,IT_kw=it,GPU=total,known_GPU=known)
-        atomic(output/'A1_FREEZE.json',dict(PASS=True,accepted=True,arm='B1',day=bundle['day'],selected_jobs=selected,physical=results[-1]['physical'],passes=results,
+        atomic(output/'A1_ACTIVE_DOMAIN_RESULT.json',dict(PASS=True,accepted=False,arm='B1',day=bundle['day'],selected_jobs=selected,physical=results[-1]['physical'],passes=results,
+            domain_status=domain_status,scientific_full_domain_optimal=False,future_run_diagnostics=diagnostics.receipt(),
             cumulative_native_runtime=spent,all_MESS_PQ_zero=True,old_partial_start_used=False,scientific_base=BASE,compression_exactness=True))
-        atomic(output/'A1_SOLVE_RESULT.json',dict(accepted=True,passes=results,total_runtime=spent,total_TimeLimit=BUDGET));m.dispose()
-        return dict(PASS=True,folder=str(output),physical=results[-1]['physical'],passes=results)
+        atomic(output/'A1_SOLVE_RESULT.json',dict(accepted=False,domain_status=domain_status,scientific_full_domain_optimal=False,
+            future_run_diagnostics=diagnostics.receipt(),passes=results,total_runtime=spent,total_TimeLimit=BUDGET));m.dispose()
+        # Four restricted native optima never close an omitted migration pool.
+        # A later accepted proof interface is required before any plan freeze.
+        require_production_domain_accepted(domain_status)
+        return dict(PASS=True,accepted=True,domain_status=domain_status,folder=str(output),physical=results[-1]['physical'],passes=results)

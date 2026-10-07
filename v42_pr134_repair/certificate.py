@@ -6,6 +6,8 @@ from .static_gate import arrays
 from .original_diagnosis import exact_ray
 
 def run(day):
+    from v42_a_stage_domain_v2.execution import require_action_authorized,tag_model_for_day
+    require_action_authorized(day,'FEASIBILITY_LP')
     target=CASE/day;out=OUT/(label(day)+'_ORIGINAL_BOUND_COMPLETE_CERTIFICATE.json')
     if out.exists():raise PermissionError('CERTIFICATE_ATTEMPT_ALREADY_RECORDED')
     diagnostic=read(OUT/(label(day)+'_ORIGINAL_NATIVE_DIAGNOSIS.json'))
@@ -13,6 +15,7 @@ def run(day):
     rows=np.array(diagnostic['IIS_rows']);a,z=arrays(target,'A0');columns=np.unique(a[rows].indices);small=a[rows][:,columns]
     iz=dict(lb=z['lb'][columns],ub=z['ub'][columns],rhs=z['rhs'][rows],sense=z['sense'][rows])
     m=gp.Model('SAVED_ORIGINAL_IIS_ALL_ORIGINAL_BOUNDS');m.Params.OutputFlag=0
+    tag_model_for_day(m,day)
     x=m.addMVar(len(columns),lb=iz['lb'],ub=iz['ub']);m.addMConstr(small,x,iz['sense'],iz['rhs']);m.update()
     m.Params.Threads=1;m.Params.Method=1;m.Params.InfUnbdInfo=1;m.Params.DualReductions=0
     m.Params.TimeLimit=max(0,BUDGET-diagnostic['diagnostic_budget_used']);m.Params.LogFile=str(target/'BOUND_COMPLETE_CERTIFICATE.log')

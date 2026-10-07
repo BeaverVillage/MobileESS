@@ -10,6 +10,8 @@ import numpy as np
 import gurobipy as gp
 from .common import *
 def main(day):
+    from v42_a_stage_domain_v2.execution import require_action_authorized,tag_model_for_day
+    require_action_authorized(day,'FEASIBILITY_LP')
     import psutil
     for p in psutil.process_iter(['pid','name','cmdline']):
         if p.pid==psutil.Process().pid:continue
@@ -28,6 +30,7 @@ def main(day):
         while True:
             candidates=[row for row in pool if row['option_id'] in admitted and int(row['rank_same_site'])<=rank]
             m=gp.Model('NECESSARY_RESOURCE_DOMAIN_MASTER');m.Params.OutputFlag=0
+            tag_model_for_day(m,day)
             for key,value in SETTINGS.items():m.setParam(key,value)
             m.Params.TimeLimit=600.;m.Params.InfUnbdInfo=1;m.Params.DualReductions=0
             tail=max(b.latest_completion for b in bounds.values());occ=defaultdict(gp.LinExpr);y={};activation={};classes={};card={}

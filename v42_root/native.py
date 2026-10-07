@@ -13,6 +13,8 @@ from v42_boundary.generator import Generator
 from v42_job_capability import Option,validate
 from v42_sparse.config import settings
 from v42_sparse.runtime import coefficient_vector
+from v42_a_stage_domain_v2.execution import tag_model_for_day
+from v42_a_stage_domain_v2.status import initial_domain_status
 
 def bind(m,row,x,coefficient):
     if isinstance(x,gp.Var):m.chgCoeff(row,x,coefficient)
@@ -21,24 +23,25 @@ def bind(m,row,x,coefficient):
         if x.getConstant():m._root_binding_constants[row]+=coefficient*x.getConstant()
     elif x:m._root_binding_constants[row]+=coefficient*x
 
-def local_units(m,jobs,bounds,r,graphs,classes,kind,context=None):
+def local_units(m,jobs,bounds,r,graphs,classes,kind,context=None,*,preserve_singleton_mixed_flow=()):
     tail=max(b.latest_completion for b in bounds.values());started=perf_counter()
     context=context or Context()
     units=[];class_for={u:key for key,us in classes.items() for u in us};generator=Generator(r,tail)
     cfg=settings(kind)
+    retained_flow=set(preserve_singleton_mixed_flow)
     def push(uid,v,*,members=None,optional=False,stay_count=False,unit_id=None):
-        units.append(dict(id=unit_id or uid,uid=uid,members=members or [uid],v=v,optional=optional,stay_count=stay_count,class_key=class_for[uid],canonical_post_tie=kind not in ('F2A','F2B','F2C') and not cfg['tie']))
+        units.append(dict(id=unit_id or uid,uid=uid,members=members or [uid],v=v,optional=optional,stay_count=stay_count,retained_mixed_flow=uid in retained_flow,class_key=class_for[uid],canonical_post_tie=kind not in ('F2A','F2B','F2C') and not cfg['tie']))
     aggregate=cfg['aggregate'];compress=cfg['aux']
     options=dict(eliminate_depart=compress or cfg['depart'],eliminate_arrive=compress or cfg['arrive'],share_links=compress or cfg['link'],eliminate_f0=compress or cfg['f0'],eliminate_state=compress or cfg['state'],byte_scale=2.**20 if cfg['scale_wan'] else 1.)
     if not aggregate:
         for i,(uid,j) in enumerate(sorted(jobs.items())):
-            push(uid,factor.add_job(m,j,graphs[uid],r,**options))
+            push(uid,factor.add_job(m,j,graphs[uid],r,preserve_stay_flow=uid in retained_flow,**options))
             if i%20==0:context.progress(dict(phase='LOCAL_UNITS',formulation=kind,jobs_complete=i+1,jobs_required=len(jobs),seconds=perf_counter()-started))
     else:
         for index,(key,us) in enumerate(sorted(classes.items())):
             uid=us[0];j=jobs[uid];g=graphs[uid];N=len(us)
             if N==1 or g.fixed:
-                for u in us:push(u,factor.add_job(m,jobs[u],graphs[u],r,**options))
+                for u in us:push(u,factor.add_job(m,jobs[u],graphs[u],r,preserve_stay_flow=u in retained_flow,**options))
                 continue
             stays=tuple((k,s) for k,s in g.events['y'] if s+j.service_slots<=bounds[uid].latest_completion and generator.fits(k,s,j.service_slots,j.gpu))
             sj=replace(j,uid='CLASS_'+key[:12]);sv=factor.stay(m,sj,g,N,starts=stays,eliminate_f0=options['eliminate_f0'],eliminate_state=options['eliminate_state'])
@@ -63,6 +66,7 @@ def build(context,data,kind):
         return m,units,o,c,b
     bundle,jobs,bounds,r,raw,graphs,old,prep=data;started=perf_counter();cfg=settings(kind);compress=cfg['aux'];aggregate=cfg['aggregate']
     m=gp.Model('V42_ROOT_EXACT_'+kind);m.Params.OutputFlag=0;m._root_binding_constants=defaultdict(float)
+    tag_model_for_day(m,bundle,require_day=False)
     tail=max(b.latest_completion for b in bounds.values());known={};risk={};gpurows={};riskrows={};fixedrisk=defaultdict(float)
     for uid,row in raw.items():
         if uid not in jobs:
@@ -76,7 +80,8 @@ def build(context,data,kind):
     wanrows={(l,t):m.addConstr(gp.LinExpr()<=(rate-r.fixed_wan.get((l,t),0))/byte_scale,name='physical_WAN') for (l,t),rate in r.wan_capacities.items()}
     active={t:m.addConstr(gp.LinExpr()<=r.max_active_transfers-r.fixed_transfers.get(t,0),name='physical_ACTIVE') for t in range(r.control_end)}
     primary,timing,controls=grid(m,bundle,known,risk,stage=Stage.A1);m.update();grid_seconds=perf_counter()-started;global_vars=m.NumVars
-    classes=prep['classes'];units=local_units(m,jobs,bounds,r,graphs,classes,kind,context)
+    classes=prep['classes'];units=local_units(m,jobs,bounds,r,graphs,classes,kind,context,
+        preserve_singleton_mixed_flow=prep.get('preserve_singleton_mixed_flow',()))
     metrics=[gp.LinExpr() for _ in range(3)];finish_groups=defaultdict(list);representative={};runtime_vectors={};tie=gp.LinExpr();rank=0
     process=psutil.Process();peak=process.memory_info().rss
     for index,unit in enumerate(units):
@@ -110,8 +115,10 @@ def build(context,data,kind):
     runtime_counts={}
     for key,xs in sorted(finish_groups.items()):
         klass,site,end=key;uid=representative[key];j=jobs[uid]
-        x=m.addVar(lb=0,ub=len(classes[klass]),name=f'finish_count[{klass[:12]},{site},{end}]');runtime_counts[key]=x
-        m.addConstr(x==gp.quicksum(xs),name='exact_Runtime_finish_count')
+        from v42_a_stage_domain_v2.runtime_projection import finish_count
+        x=finish_count(m,xs,len(classes[klass]),f'finish_count[{klass[:12]},{site},{end}]',
+                       direct=prep.get('domain_authority')=='AIDC_A_STAGE_DOMAIN_AUTHORITY_V2')
+        runtime_counts[key]=x
         for target,a in runtime_vectors[key]:bind(m,riskrows[target],x,-a)
     for row,a in m._root_binding_constants.items():row.RHS-=a
     m.update();peak=max(peak,process.memory_info().rss);family_indices=defaultdict(set);seen=set()
@@ -121,9 +128,16 @@ def build(context,data,kind):
                 variables=[x] if isinstance(x,gp.Var) else [x.getVar(i) for i in range(x.size())] if isinstance(x,gp.LinExpr) else []
                 for variable in variables:
                     if variable.index not in seen:family_indices[family].add(variable.index);seen.add(variable.index)
-    family_indices['Runtime_finish_count']={x.index for x in runtime_counts.values()}
+    family_indices['Runtime_finish_count']={x.index for x in runtime_counts.values() if isinstance(x,gp.Var)}
     counts={n:len(ids) for n,ids in family_indices.items()};row_density=np.diff(m.getA().indptr)
     stats=dict(formulation=kind,features=cfg,jobs_complete=len(jobs),all_jobs_complete=True,scientific_classes=len(classes),aggregation=aggregate,aggregation_mode='exact staying-path integer histogram plus individually service-preserving optional migration lanes' if aggregate else 'none',columns=m.NumVars,binaries=m.NumBinVars,integers=m.NumIntVars-m.NumBinVars,continuous=m.NumVars-m.NumIntVars,constraints=m.NumConstrs,nonzeros=m.NumNZs,max_row_density=int(row_density.max()),family_counts=counts,logical_units=len(units),global_variables=global_vars,Runtime_finish_counts=len(runtime_counts),model_build_seconds=perf_counter()-started,grid_seconds=grid_seconds,peak_observed_RSS_bytes=peak,quadratic_constraints=m.NumQConstrs,quadratic_objective=m.NumQNZs,SOS=m.NumSOS,general_constraints=m.NumGenConstrs,original_tie_in_MILP=cfg['tie'],canonical_post_tie=not cfg['tie'],complete_domains=True)
+    stats.update(complete_domains=prep.get('full_migration_domain_active',True),
+        aidc_domain_authority=prep.get('domain_authority','PR134_HISTORICAL'),
+        domain_status=initial_domain_status(hard_physical_domain_defined=prep.get('domain_authority')=='AIDC_A_STAGE_DOMAIN_AUTHORITY_V2',
+            authority=prep.get('domain_authority','PR134_HISTORICAL')),
+        scientific_full_domain_optimal=False,
+        optimization_scope='restricted_domain_optimum' if not prep.get('full_migration_domain_active',True) else 'historical_active_domain')
+    m._v42_domain_status=stats['domain_status']
     dump(kind+'_MODEL_STATS.json',stats);atomic(context.folder/(kind+'_MODEL_COMPLETE.json'),stats)
     levels=primary+[('CC4_reference_deviation',timing['deviation'])]+list(zip(('migration_count','shift_slots','prestart_changes'),metrics))
     if cfg['tie']:levels.append(('physical_event_tie',tie))

@@ -1,0 +1,46 @@
+{
+  "PASS": true,
+  "module": "v42_a_stage_domain_v2.lexstage",
+  "method": "Fresh canonical CSR snapshot containing identical original rows, bounds, variable types and objective coefficients, plus the exact current-run ordered prior locks.",
+  "lexicographic_order": [
+    "rho",
+    "migration_count",
+    "shift_magnitude",
+    "prestart_relocation"
+  ],
+  "historical_objective_locks_allowed": false,
+  "current_run_independent_evidence_required": true,
+  "rho_lock": "Original binary64 native objective <= newly solved rho plus inherited 1e-7",
+  "integer_component_lock": "Objective = newly independently proven exact integer optimum",
+  "nonzero_migration_lock_preserved": true,
+  "migration_forced_zero_without_current_proof": false,
+  "same_original_linear_matrix": true,
+  "same_original_bounds_and_variable_types": true,
+  "same_objective_values": true,
+  "exact_locked_integer_feasible_set": true,
+  "proof": "No original term is changed. Appending the actual ordered lock rows defines exactly the original model with those prior locks. Any further zero projection has its own independently verified proof and exact zero lift.",
+  "corruption_rejected": [
+    "Wrong lex prefix",
+    "Missing independently verified new-run receipt",
+    "Noninteger integer lock",
+    "Noncanonical sparse matrix",
+    "Nonrepresentable merged integer objective coefficient"
+  ],
+  "validation": "tests/test_v42_a_stage_v2_lexstage.py",
+  "native_optimization_calls_for_this_proof": 0,
+  "stress_date_optimization_for_this_proof": 0,
+  "integer_domain_closure_proven": false,
+  "source_identity": [
+    {
+      "path": "v42_a_stage_domain_v2/lexstage.py",
+      "sha256": "f2b527e617e18f0d0f214aad8a25f33e51366b17666d37f32fdf4843f7c3eee5",
+      "bytes": 20470
+    },
+    {
+      "path": "tests/test_v42_a_stage_v2_lexstage.py",
+      "sha256": "8d447a63e4654f2f3b0b06ec88325c41f6176bbfbdee9650ca1190fb991da239",
+      "bytes": 13118
+    }
+  ],
+  "source_identity_scope": "Owned proof modules and focused tests. Final run manifest separately binds integration/native authority sources."
+}

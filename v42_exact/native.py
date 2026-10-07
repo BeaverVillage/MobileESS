@@ -8,9 +8,11 @@ from v42_compact.formulation import add_job,intervention
 from v42_compact.native import grid,completion_risk
 from v42_native.voltage import Stage
 from v42_final.reserve import risk_exposure
+from v42_a_stage_domain_v2.execution import tag_model_for_day
 def build(context,data,formulation):
     bundle,jobs,bounds,r,raw,graphs,original,prep=data;started=perf_counter()
     m=gp.Model('V42_COMPACT_STATE_AIDC');m.Params.OutputFlag=0
+    tag_model_for_day(m,bundle,require_day=False)
     tail=max(b.latest_completion for b in bounds.values());known={};risk={};gpurows={};riskrows={}
     fixedrisk=defaultdict(float)
     for uid,row in raw.items():

@@ -9,11 +9,14 @@ from time import perf_counter
 def main():
     require(not (OUT/'MAY01_RESOURCE_FEASIBILITY_V42_FINAL.json').exists(),'NO_SILENT_RESOURCE_RECHECK')
     bundle=read(OUT/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json')
+    from v42_a_stage_domain_v2.execution import require_action_authorized,tag_model_for_day
+    require_action_authorized(bundle,'FEASIBILITY_LP')
     jobs=[r for r in bundle['known_population'] if r['planning_eligible']]
     require(all(r['can_timeshift'] is False for r in jobs),'NECESSARY_CHECK_REQUIRES_ACTUAL_ZERO_TS_DOMAIN')
     require(bundle['C0_binding']=='LIFETIME_GPUH_EXECUTION_LAG_CONVOLUTION','NO_OLD_SAME_HOUR_GPU_BINDING')
     require(bundle['runtime_reserve_gamma']==read(OUT/'RUNTIME_RESERVE_CALIBRATION.json')['gamma_90'],'FROZEN_GAMMA')
     LOCAL.mkdir(exist_ok=True);start=perf_counter();m=gp.Model('V42_FINAL_NECESSARY_RESOURCE');m.Params.OutputFlag=0
+    tag_model_for_day(m,bundle)
     try:
         z={j['job_uid']:m.addVar(lb=0,ub=1,name='relaxed_migration['+j['job_uid']+']') for j in jobs}
         m.addConstr(gp.quicksum(z.values())<=120,name='LOOSE_ONE_TRANSFER_PER_SLOT_COUNT')

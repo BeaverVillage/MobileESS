@@ -8,10 +8,17 @@ from v42_job_capability import build_domain,resources_used,resource_limit
 from .contracts import require,digest
 from .solver import optimize,size
 from .service import service_identity,NativeServiceBoundary
+from v42_a_stage_domain_v2.execution import day_from_authority,require_action_authorized,tag_model_for_day
 
 
-def solve(stage,deadline,jobs,boundaries,resources,grid_builder,incumbent=None,*,seconds_authority=None,progress=None):
+def solve(stage,deadline,jobs,boundaries,resources,grid_builder,incumbent=None,*,seconds_authority=None,progress=None,day=None):
     require(stage in ('A1','A2') and deadline.stage==stage,'AIDC_STAGE');started=perf_counter()
+    # Deadline metadata is present in native requests; synthetic fixtures have
+    # no production date and are explicitly independent of these identities.
+    day=day_from_authority(day if day is not None else deadline)
+    if day is not None:require_action_authorized(day,stage)
+    elif any(j.duration_authority!='EXPLICIT_TEST_SERVICE' for j in jobs.values()):
+        raise PermissionError('A_STAGE_PRODUCTION_DAY_REQUIRED')
     require(set(jobs)==set(boundaries),'JOB_SERVICE_AUTHORITY_AXIS')
     require(seconds_authority is not None and set(seconds_authority)==set(jobs),'EXACT_SERVICE_SECONDS_AUTHORITY_REQUIRED')
     domains={};screens=[]
@@ -24,6 +31,7 @@ def solve(stage,deadline,jobs,boundaries,resources,grid_builder,incumbent=None,*
     domain=digest({u:[asdict(o) for o in opts] for u,opts in domains.items()})
     if incumbent:require(incumbent['domain_sha256']==domain,'A1_A2_DOMAIN_DRIFT')
     generated=perf_counter();model=gp.Model('V42_NATIVE_'+stage);model.Params.OutputFlag=0
+    if day is not None:tag_model_for_day(model,day)
     use=defaultdict(gp.LinExpr);z={}
     try:
         for u,opts in domains.items():

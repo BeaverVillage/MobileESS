@@ -132,6 +132,8 @@ def solve_a1(context,bundle,ledger):
         require(domains[uid],'EMPTY_ADMITTED_DOMAIN:'+uid);screens.append(dict(uid=uid,**audit));attempts+=audit['attempted_complete_options']
         for o in domains[uid]:service_identity(seconds[uid],j.gpu,o.segments,120)
     generated=perf_counter();m=gp.Model('V42_TEMPORAL_A1');m.Params.OutputFlag=0;use=defaultdict(gp.LinExpr);z={}
+    from v42_a_stage_domain_v2.execution import tag_model_for_day
+    tag_model_for_day(m,bundle)
     try:
         for uid,opts in domains.items():
             context.check()
@@ -144,7 +146,7 @@ def solve_a1(context,bundle,ledger):
         known={(s,t):use['GPU',s,t]+resources.fixed_gpu.get((s,t),0) for s in resources.capacities for t in range(120)}
         primary,timing,controls=grid_binding(m,bundle,known,domains,z,raw,stage=Stage.A1)
         later=[('migration_count',gp.quicksum(int(o.migrated)*z[u,i] for u,opts in domains.items() for i,o in enumerate(opts))),
-            ('shift_slots',gp.quicksum((o.start-jobs[u].reference_start)*z[u,i] for u,opts in domains.items() for i,o in enumerate(opts))),
+            ('shift_slots',gp.quicksum(abs(o.start-jobs[u].reference_start)*z[u,i] for u,opts in domains.items() for i,o in enumerate(opts))),
             ('prestart_changes',gp.quicksum(int(o.initial_site!=jobs[u].reference_site)*z[u,i] for u,opts in domains.items() for i,o in enumerate(opts))),
             ('tie',gp.quicksum((i+1)*z[u,i] for u,opts in domains.items() for i in range(len(opts))))]
         objectives=objective_order(primary,timing['deviation'],later);stats=assert_milp(m)

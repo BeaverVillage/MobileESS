@@ -34,6 +34,8 @@ def run():
             assert thermal['transformer_current_authority_sha256']==NORMALAMPS
             print('A1_FULL_SOURCE_REGENERATION',flush=True)
             started=time.perf_counter();data=prepare();bundle=data[0]
+            from v42_a_stage_domain_v2.execution import require_action_authorized
+            require_action_authorized(bundle,'A1')
             assert len(data[1])==1499 and bundle['day']=='2025-05-01'
             issue=pd.Timestamp(bundle['issue_time'])
             assert all(r['known_at_issue'] and pd.Timestamp(r['submit_time'])<=issue and pd.Timestamp(r['issue_time'])==issue for r in bundle['known_population'])

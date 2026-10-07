@@ -55,7 +55,10 @@ def run():
     import gurobipy as gp
     original_model=gp.Model; row_labels=[]; row_codes=array('H'); label_codes={}
     class StaticModel(original_model):
-        def optimize(self,*a,**kw):raise PermissionError('STATIC_OPTIMIZE_FORBIDDEN')
+        def optimize(self,*a,**kw):
+            from v42_a_stage_domain_v2.execution import guard_model_optimize
+            guard_model_optimize(self)
+            raise PermissionError('STATIC_OPTIMIZE_FORBIDDEN')
         def addConstr(self,*a,**kw):
             n=kw.get('name',a[1] if len(a)>1 else '')
             frame=sys._getframe(1)

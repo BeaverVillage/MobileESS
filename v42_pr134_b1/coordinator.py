@@ -124,6 +124,9 @@ def result_or_error(root,freeze,cp,day,stage,req,exit_code):
     save_checkpoint(root,cp);return 'FAIL'
 
 def run(root):
+    # This revision is a formulation/static-audit task. A campaign must be
+    # separately authorized and preregistered after the new domain review.
+    raise PermissionError('A_STAGE_CAMPAIGN_NOT_AUTHORIZED_FOR_DOMAIN_V2_REVIEW')
     root=Path(root).resolve();freeze=read(root/'B1_PRODUCTION_FREEZE_MANIFEST.json');verify_freeze(freeze)
     lock=(root/'COORDINATOR.lock').open('a+b');lock.seek(0)
     if not lock.read(1):lock.write(b'0');lock.flush()

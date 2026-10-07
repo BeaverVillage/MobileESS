@@ -1,0 +1,30 @@
+{
+  "authority": "AIDC_A_STAGE_DOMAIN_AUTHORITY_V2",
+  "representation": "(start,source,checkpoint,physical seconds,destination,GPU,all valid transfer timestamps)",
+  "distinct_timestamps_merged_as_duplicates": false,
+  "deterministic": true,
+  "full_path_options_materialized": false,
+  "reconstruct": "unchanged Generator.transfer plus full Option membership",
+  "preserved": [
+    "checkpoint phase",
+    "source/destination masks",
+    "payload",
+    "WAN paths/rates",
+    "restart",
+    "remaining service",
+    "carryout",
+    "Runtime completion",
+    "GPU/grid incidence"
+  ],
+  "block_counts": {
+    "10": 1666044,
+    "12": 994224,
+    "17": 143,
+    "19": 1710374
+  },
+  "completeness": "all physical timestamp multiplicities retained; closure not inferred from current activation",
+  "feasibility_rescue": "independent exact Farkas pricing",
+  "improvement": "separate feasible-model objective pricing",
+  "LP_native_direction_coverage_required": true,
+  "integer_closure_proven": false
+}

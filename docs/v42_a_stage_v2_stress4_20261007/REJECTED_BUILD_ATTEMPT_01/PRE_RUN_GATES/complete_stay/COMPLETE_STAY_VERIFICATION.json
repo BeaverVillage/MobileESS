@@ -1,0 +1,65 @@
+{
+  "PASS": true,
+  "authority": "AIDC_A_STAGE_DOMAIN_AUTHORITY_V2",
+  "production_activation_policy": "Complete physically valid STAY support active in every eligible class; proven histogram scopes retain compact counts, singleton mixed graphs retain the original event-flow representation.",
+  "unrestricted_histogram_replacement_adopted": false,
+  "all_scopes_complete_physical_stay_support": true,
+  "same_integer_stay_schedules": true,
+  "same_exact_class_cardinality": true,
+  "same_service": true,
+  "same_Runtime": true,
+  "same_CC4": true,
+  "same_grid_coefficients": true,
+  "same_P1_and_P2_per_integer_schedule": true,
+  "histogram_scope": {
+    "reference": "Already accepted factor.stay fixed-duration count formulation",
+    "same_integer_projection": true,
+    "same_LP_projection_of_extended_histogram": true,
+    "finish": "f0[site,start+D]=y[site,start]",
+    "occupancy": "r0[site,t]=sum(y[site,start] for start<=t<start+D)",
+    "cardinality": "sum(STAY y)+sum(selected individual migration lanes)=exact N",
+    "proof": "Unique linear lift; auxiliary bounds follow from nonnegative counts and exact cardinality; assign exactly each count of identical members to whole-gang complete options."
+  },
+  "singleton_mixed_flow_scope": {
+    "original_event_flow_equations_retained": true,
+    "original_native_LP_representation_retained_on_the_new_support": true,
+    "histogram_substitution": false,
+    "same_LP_projection_as_histogram": false,
+    "counterexample_preserved_and_not_relabelled": true,
+    "integer_stay_proof": "With zero migration, one binary start and one binary source finish plus nonnegative source balances yield one uninterrupted source interval at the same site. full_service=D forces end=start+D. All hard-valid intervals are explicitly in the complete augmented support; all original resource/grid/Runtime bindings remain unchanged.",
+    "support_change_claim": "The new physical support intentionally enlarges the old restricted domain; equality to the old S0 feasible set is not asserted."
+  },
+  "independent_tiny_audits": {
+    "brute_force_fixture_cases": 32,
+    "complete_options_compared_with_full_attributes": 294,
+    "retained_original_flow_start_finish_assignments_examined": 90,
+    "integer_stay_schedules_passing_every_original_local_resource_row": 9,
+    "canonical_physical_stay_schedules": 9,
+    "integer_schedule_sets_exact_equal": true,
+    "migration_checkpoint_WAN_restart_attributes_unchanged": true,
+    "release_and_completion_tails_past_control_end_included": true,
+    "test_file": "tests/test_v42_a_stage_domain_v2_bruteforce.py"
+  },
+  "native_optimization_calls_for_this_proof": 0,
+  "stress_date_optimization_for_this_proof": 0,
+  "physical_trajectory_pricing_is_full_native_LP_closure": false,
+  "integer_domain_closure_proven": false,
+  "source_identity": [
+    {
+      "path": "v42_a_stage_domain_v2/stay_projection.py",
+      "sha256": "8a773935aaadd343e4536735432e2c40b39e989470af5e0d5c3ca1da4e12e6f7",
+      "bytes": 11950
+    },
+    {
+      "path": "tests/test_v42_a_stage_stay_projection.py",
+      "sha256": "59c86e0bcd4ca67a68a854dd9a8745893585a86b5ced7d4cf5fc40ed01d41bca",
+      "bytes": 10571
+    },
+    {
+      "path": "tests/test_v42_a_stage_domain_v2_bruteforce.py",
+      "sha256": "86b360d6cc806c65299bc627addaa08d49d55d9601c2229f3eaa774206582f2a",
+      "bytes": 13228
+    }
+  ],
+  "source_identity_scope": "Owned proof modules and focused tests. Final run manifest separately binds integration/native authority sources."
+}
