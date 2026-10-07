@@ -226,9 +226,10 @@ def manifest():
     collect(read(HISTORY/'BLOCK_PRICING_ORACLE_VERIFICATION.json'))
     external[str(ROOT/'publication_early.py')]=record(ROOT/'publication_early.py')
     for p in STATIC.rglob('*'):
-        if p.is_file() and p.name!='FINAL_PUBLICATION_RECEIPT.json':external[str(p)]=record(p)
+        if p.is_file() and p.name not in ('FINAL_PUBLICATION_RECEIPT.json','PR_BODY.md'):external[str(p)]=record(p)
     atomic(OUT/'SHA256_MANIFEST.json',dict(PASS=True,namespace_files=files,external_immutable_records=list(external.values()),
         self_excluded=True,final_publication_receipt_external_to_avoid_self_commit_hash_cycle=True,
+        mutable_GitHub_publication_body_excluded=True,
         inherited_scientific_authority_unchanged=True))
 
 if __name__=='__main__':
