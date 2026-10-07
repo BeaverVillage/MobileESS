@@ -1,10 +1,10 @@
 # May B1 독립 매시간 점검
 
-2026-10-06T18:34:47.446356+00:00 · B1_PR134_SC_202505_20261006T183422_4fb25507
+2026-10-07T00:34:36.498284+00:00 · B1_PR134_SC_202505_20261006T183422_4fb25507
 
-PASS 0/31 · TIMEOUT 0/31 · FAIL 0/31 · pending 31
+PASS 19/31 · TIMEOUT 2/31 · FAIL 2/31 · pending 8
 
-현재 2025-05-01 / A1 · coordinator alive True · worker alive True · heartbeat age 0.429401159286499
+현재 2025-05-24 / A1 · coordinator alive True · worker alive True · heartbeat age 0.628371000289917
 
 조치: []
 
