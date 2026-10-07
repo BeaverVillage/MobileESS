@@ -82,6 +82,8 @@ Basis supplied/accepted는 {summary['external']['basis_supplied']}/{summary['ext
 
 ## 현재 proof 상태와 재시작
 
+`fractional_binaries`는 각 저장된 LP 점점의 통계입니다. 특히 Crossover=0 barrier의 interior point를 최적 simplex vertex의 fractionality와 같다고 해석하지 않습니다. 기본 raw LP 잔차가 있는 점에서 큰 fractional count만으로 추가 integrality gap이나 infeasibility를 증명하지 않았습니다.
+
 생성 노드 {summary['external']['generated_nodes']}, 처리 {summary['external']['processed_nodes']}, OPEN {len(summary['external']['OPEN_ids'])}, unresolved OPEN {summary['external']['unresolved_retained_OPEN']}. pruning counts: `{summary['external']['prune_counts']}`. 양쪽 자식을 모두 유지하고 전역 LB를 모든 OPEN의 최솟값으로 계산합니다. heuristic 분기 점수는 pruning 근거가 아닙니다.
 
 `selected_external_controller.py`와 `OPEN_CHECKPOINT.json`은 실제 OPEN 큐 복구를 지원합니다. `package_audit.py`는 native optimize를 차단하고 원본 배열의 모든 인증/현재 incumbent/fixing-history/SHA를 독립 감사합니다. volatile arithmetic cache는 감사의 동일 수학 입력만 재사용하며 재시작 시 비웁니다. 원래 oracle의 첫 인증 계산은 캐시하지 않습니다. 원본 증명 파일과 모든 입력 hash/replay는 계속 확인합니다. native Gurobi tree는 재시작 가능하다고 주장하지 않습니다.
