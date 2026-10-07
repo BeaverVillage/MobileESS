@@ -23,12 +23,12 @@
     "optimal_LP_certificate_PASS": false,
     "exact_infeasibility_PASS": false,
     "proof_checked": true,
-    "Runtime": 1800.0060000419617,
-    "Work": 2761.2832186411647,
-    "IterCount": 273536.0,
+    "Runtime": 1800.00200009346,
+    "Work": 4989.892885474587,
+    "IterCount": 166650.0,
     "BarIterCount": 0,
-    "setup_wall_seconds": 0.5185571000329219,
-    "peak_RSS": 1483587584,
+    "setup_wall_seconds": 0.6026799000101164,
+    "peak_RSS": 1848102912,
     "basis_supplied": false,
     "basis_source": null,
     "branch_variable": null,
@@ -130,7 +130,7 @@
       "MarkowitzTol": 0.0078125,
       "MasterKnapsackCuts": -1,
       "MemLimit": null,
-      "Method": 1,
+      "Method": 0,
       "MinRelNodes": -1,
       "MixingCuts": -1,
       "ModKCuts": -1,
@@ -304,24 +304,50 @@
       "rho_column": 239826,
       "objective": "minimize rho_max"
     },
-    "phases": [
-      {
-        "Runtime": 1.9779999256134033,
-        "literal": "Presolve time: 1.98s"
-      }
-    ],
+    "phases": [],
     "callback_errors": [],
     "exception": null,
     "bounds_SHA256": "16144c430d1818ac25f0c54acc2aef85e9843c5934ba3e4212acddbfb6351d2a",
-    "partial_basis": null,
-    "proof_wall_seconds": 1.400010660290718e-06,
-    "basis_evidence": [],
+    "partial_basis": {
+      "file": "PARTIAL_BASIS.npz",
+      "SHA256": "45449074ef8a0aa321c3fd82b8d8584b4c4178ccf2a2b39715757ca9c98ddaed",
+      "native_status": 9,
+      "not_a_certificate": true
+    },
+    "proof_wall_seconds": 1.300009898841381e-06,
+    "basis_evidence": [
+      "LP warm-start: use start vectors",
+      "Primal warm-start: 71164 superbasic variables."
+    ],
     "basis_accepted": false,
     "warnings": [
       "Warning: Model contains large matrix coefficient range",
+      "Warning: Markowitz tolerance tightened to 0.03125",
       "Warning: Markowitz tolerance tightened to 0.0625"
     ],
-    "total_node_wall_seconds": 1800.6211083999951,
+    "total_node_wall_seconds": 1800.8171858999995,
+    "primal_start": {
+      "supplied": true,
+      "source": "docs\\v42_m_practical_exact_solver_overnight_20261008\\runs\\native_production_initial\\ROOT_POINT.npz",
+      "SHA256": "cc3ff82b095023aca501c3fa3575b40c8a43455445fa3c008b21378219ee30fc",
+      "original_relaxed_replay": {
+        "PASS": true,
+        "finite": true,
+        "max_constraint_violation": 5.710529740593308e-10,
+        "max_bound_violation": 0.0,
+        "max_integrality_violation": null,
+        "objective": 0.5687116104049198
+      },
+      "accepted": true,
+      "root_Method": 0,
+      "not_a_MIP_start": true,
+      "not_a_tree_resume": true
+    },
+    "receipt_oracle_source": {
+      "file": "primal_recovery_oracle.py",
+      "SHA256": "68c672cbd0f4f96af0b3f4d5a035dff71a8058da959392c7fa6aa7315616fc23",
+      "registered_parent_file_SHA256": "75d4d3b1a668aebb8fc0f9aef6b7bf095e4667c9b810658892132bdc2f5435c6"
+    },
     "parent": null,
     "depth": 0,
     "node_branch_variable": null,
