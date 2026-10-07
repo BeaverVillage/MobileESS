@@ -28,7 +28,7 @@ def freeze():
     if (OUT/'PRIMAL_DUAL_SOURCE_FREEZE.json').exists():raise PermissionError('PRIMAL_DUAL_SOURCE_ALREADY_FROZEN')
     parent=cg_verify();old=read(OUT/'PRIMAL_REPAIR_V2_RESULT.json');budget=Budget();budget.remaining()
     if old.get('accepted'):raise PermissionError('SHIFT_ALREADY_CERTIFIED_SKIP_REPAIR_CONTINUATION')
-    sources=[Path(r['path']) for r in parent['source_files']]+[Path(__file__),ROOT/'v42_a_stage_primal/query.py']
+    sources=[Path(r['path']) for r in parent['source_files']]+[Path(__file__),ROOT/'v42_a_stage_primal/query.py',ROOT/'v42_a_stage_primal/__init__.py',ROOT/'tests/test_v42_a_stage_primal_proposals.py']
     sources=list(dict.fromkeys(p.resolve() for p in sources));head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     tree=subprocess.check_output(['git','ls-tree','-r',head],cwd=ROOT,text=True);blobs={l.split('\t',1)[1]:l.split()[2] for l in tree.splitlines()}
     for p in sources:
