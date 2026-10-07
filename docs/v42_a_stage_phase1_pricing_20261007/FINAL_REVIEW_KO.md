@@ -93,7 +93,7 @@ A는 과거 PR165 S_A zero-objective restricted feasibility LP입니다. B는 CO
 
 39. **final commit SHA?** 실제 native executed HEAD=3c7fe3a097dc733c5514078894f5ee09cae20004. 최종 publication HEAD/clean/remote match는 [외부 FINAL_PUBLICATION_RECEIPT.json](C:\Users\kjw39\Documents\Codex\2026-10-07\v42-a-stage-phase1-static\FINAL_PUBLICATION_RECEIPT.json)을 권위로 사용합니다. 보고서가 자신의 최종 commit hash를 포함하는 순환 참조를 만들지 않습니다.
 
-40. **Draft PR URL?** PENDING_PUBLICATION
+40. **Draft PR URL?** https://github.com/BeaverVillage/MobileESS/pull/172
 
 실행 원본: MAY19/NATIVE_CALLS.json, NATIVE_RUN_SOURCES.csv, ROUND_000/NATIVE_RESULT.json, POSTSOLVE_REVIEW.json. 모델/원본 NPZ/가중치/cache/source ZIP은 external SHA receipt로 연결합니다.
 첫 receipt 저장 경로가 Windows 한계를 넘은 오류는 ATTEMPT_001에 보존했습니다. C1 continuation은 이미 최적인 master/첫 block raw를 재사용하고 prior native/pricing ledger를 이어받았습니다. Native budget/weights/policy/physics를 reset하거나 추가하지 않았습니다.
