@@ -61,31 +61,35 @@ def construction():
     print('PHASE1_CONSTRUCTION_PASS',master.snapshot.matrix.shape,len(master.weights),flush=True)
 
 
-def test_receipts():
-    xml=STATIC/'PRE_RUN_TESTS.xml';root=ET.parse(xml).getroot()
+def test_receipts(suffix=''):
+    xml=STATIC/('PRE_RUN'+suffix+'_TESTS.xml');root=ET.parse(xml).getroot()
     suites=root.findall('testsuite') if root.tag=='testsuites' else [root]
     count=sum(int(s.get('tests','0')) for s in suites)
     failures=sum(int(s.get('failures','0'))+int(s.get('errors','0')) for s in suites)
     names=[t.get('name') for s in suites for t in s.findall('testcase')]
     if failures or not count:raise PermissionError('ACTUAL_SYNTHETIC_TESTS_REQUIRED')
     proof=dict(PASS=True,tests=count,failures=failures,junit=record(xml),
-        test_source=record(ROOT/'tests/test_v42_a_stage_phase1.py'),native_May19_canary_started=False,
+        test_source=record(ROOT/'tests/test_v42_a_stage_phase1.py'),native_May19_canary_started=bool(suffix),
+        qualification_before_continuation_native=bool(suffix),
         qualification_uses_explicit_tiny_fixture_models=True)
-    atomic(OUT/'SYNTHETIC_TESTS.json',dict(proof,cases_A_to_J=True,test_cases=names))
-    atomic(OUT/'MUTATION_TESTS.json',dict(proof,mutations=['dual sign','false zero','artificial sign',
+    atomic(OUT/('SYNTHETIC_TESTS'+suffix+'.json'),dict(proof,cases_A_to_J=True,test_cases=names))
+    atomic(OUT/('MUTATION_TESTS'+suffix+'.json'),dict(proof,mutations=['dual sign','false zero','artificial sign',
         'original RHS','hidden negative member','missing full block','forged lower bound','changed global Pi',
         'false speed acceptance','budget exhausted'],false_closure_rejected=True))
-    atomic(OUT/'PHASE1_DUAL_SIGN_VERIFICATION.json',dict(proof,
+    atomic(OUT/('PHASE1_DUAL_SIGN_VERIFICATION'+suffix+'.json'),dict(proof,
         all_senses_and_fixed_bounds=True,convention='min: RC=c-A.T@Pi; <=Pi<=0, >=Pi>=0; original bound residuals retained',
         raw_pi_never_overwritten=True))
-    atomic(OUT/'PHASE1_REDUCED_COST_VERIFICATION.json',dict(proof,
+    atomic(OUT/('PHASE1_REDUCED_COST_VERIFICATION'+suffix+'.json'),dict(proof,
         rounded_native_objective_and_original_binary64_rational_cost_both_certified=True,
         complete_block_minimum_is_lower_upper_interval_until_gap_certified=True,
         bound_without_attaining_point_does_not_claim_exact_optimum=True))
 
 
-def freeze():
-    if (OUT/'PHASE1_SOURCE_FREEZE.json').exists():raise PermissionError('SOURCE_FREEZE_ALREADY_EXISTS')
+def freeze(suffix=''):
+    if suffix not in ('','_CONTINUATION_001'):raise PermissionError('EXPLICIT_SOURCE_VERSION_REQUIRED')
+    freeze_path=OUT/('PHASE1_SOURCE_FREEZE'+suffix+'.json')
+    permit_path=OUT/('CANARY_EXECUTION_PERMIT'+suffix+'.json')
+    if freeze_path.exists():raise PermissionError('SOURCE_FREEZE_ALREADY_EXISTS')
     head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     old=read(HISTORY/'CANARY_EXECUTION_PERMIT.json');old_root=Path(old['checkpoint']['worktree']) if isinstance(old.get('checkpoint'),dict) and 'worktree' in old['checkpoint'] else ROOT.parent/'a-stage-domain-v2'
     sources=[]
@@ -114,8 +118,9 @@ def freeze():
     archive=STATIC/('EXECUTED_SOURCE_'+head+'.zip')
     with zipfile.ZipFile(archive,'x',compression=zipfile.ZIP_DEFLATED) as z:
         for i,p in enumerate(sources):z.write(p,('repo/'+p.relative_to(ROOT).as_posix()) if p.is_relative_to(ROOT) else 'external/'+str(i)+'/'+p.name)
-    gates=['SYNTHETIC_TESTS.json','MUTATION_TESTS.json','PHASE1_DUAL_SIGN_VERIFICATION.json',
-        'PHASE1_REDUCED_COST_VERIFICATION.json','BLOCK_PRICING_ORACLE_VERIFICATION.json','PHASE1_CONSTRUCTION_VERIFICATION.json']
+    gates=[name+suffix+'.json' for name in ('SYNTHETIC_TESTS','MUTATION_TESTS','PHASE1_DUAL_SIGN_VERIFICATION',
+        'PHASE1_REDUCED_COST_VERIFICATION')]+['BLOCK_PRICING_ORACLE_VERIFICATION.json','PHASE1_CONSTRUCTION_VERIFICATION.json']
+    if suffix:gates+=['CONTINUATION_AUTHORITY.json']
     gates_records=[record(OUT/p) for p in gates]
     if not all(read(r['path']).get('PASS') is True for r in gates_records):raise PermissionError('PHASE1_PRE_RUN_GATE_REQUIRED')
     qualification=read(OUT/'BLOCK_PRICING_ORACLE_VERIFICATION.json')
@@ -123,16 +128,16 @@ def freeze():
         if record(r['path'])!=r:raise PermissionError('QUALIFIED_PRODUCER_SOURCE_DRIFT')
     permit=create_fast_run_permit({k:r['path'] for k,r in old['gate_receipts'].items()},sources,
         old['solver_policy']['path'],old['activation_policy']['path'],native_budget_seconds=300,
-        output=OUT/'CANARY_EXECUTION_PERMIT.json',checkpoint=dict(git_head=head,exact_base=BASE,day=DAY,phase1_only=True))
-    atomic(OUT/'PHASE1_SOURCE_FREEZE.json',dict(PASS=True,git_head=head,base=BASE,day=DAY,
+        output=permit_path,checkpoint=dict(git_head=head,exact_base=BASE,day=DAY,phase1_only=True))
+    atomic(freeze_path,dict(PASS=True,git_head=head,base=BASE,day=DAY,
         execution_sources=permit.document['execution_sources'],additional_gate_receipts=gates_records,
         source_archive=record(archive),source_files=[record(p) for p in sources],
         legacy_git_checkout_filter_records=filtered_legacy,
         engineering_policy=record(OUT/'PHASE1_ENGINEERING_POLICY.json'),
-        native_permit=record(OUT/'CANARY_EXECUTION_PERMIT.json'),native_optimize_calls=0,
+        native_permit=record(permit_path),native_optimize_calls=0,
         inherited_fast_permit_has_two_dates_but_current_native_wrapper_hardcodes_May19=True))
     from .native import Native
-    Native().verify()
+    Native(permit_path=permit_path,freeze_path=freeze_path).verify()
     print('PHASE1_SOURCE_FROZEN',head,len(sources),flush=True)
 
 

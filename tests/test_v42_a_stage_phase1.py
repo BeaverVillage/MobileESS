@@ -266,3 +266,30 @@ def test_native_wrapper_persists_each_available_attribute_before_bad_replay(tmp_
     assert not verify_sign_convention(master.snapshot,-raw['Pi'],raw['RC'])['PASS']
     assert (folder/'NATIVE_RESULT.json').exists() and (folder/'MODEL_IDENTITY.json').exists()
     with pytest.raises(PermissionError,match='LP_ONLY'):obj.solve(master.snapshot,folder,'MILP')
+
+
+def test_windows_atomic_receipt_paths_remain_under_max_path(tmp_path):
+    from v42_a_stage_phase1.runner import block_folder
+    from v42_a_stage_phase1.setup import OUT
+    from v42_pr134_b1.common import atomic,read
+    key='a'*64
+    folder=block_folder(OUT/'MAY19/C1/R0',key)
+    for name in ('INDEPENDENT_DUAL_SIGN_AND_RAW_REPLAY.json','EXACT_COMPLETE_BLOCK_CERTIFICATE.json'):
+        temporary=folder/(name+'.123456.'+'a'*32+'.tmp')
+        assert len(str(temporary))<260
+    actual=block_folder(tmp_path/'C1/R0',key)/'EXACT_COMPLETE_BLOCK_CERTIFICATE.json'
+    atomic(actual,dict(class_id=key,PASS=True))
+    assert read(actual)['class_id']==key and actual.parent.name==key[:12]
+
+
+def test_continuation_restores_cumulative_budget_and_rejects_reset(tmp_path,monkeypatch):
+    from v42_pr134_b1.common import atomic
+    import v42_a_stage_phase1.continuation as module
+    monkeypatch.setattr(module,'OUT',tmp_path)
+    calls=[dict(native_seconds=268.62),dict(native_seconds=.203)]
+    atomic(tmp_path/'MAY19/NATIVE_CALLS.json',dict(calls=calls,cumulative_native_seconds=268.823))
+    atomic(tmp_path/'MAY19/PHASE1_RESULT.json',dict(native_seconds=268.823,pricing_wall_seconds=5.37))
+    _,used,wall=module.prior_ledger()
+    assert abs(used-268.823)<1e-8 and wall==5.37
+    atomic(tmp_path/'MAY19/NATIVE_CALLS.json',dict(calls=calls,cumulative_native_seconds=0))
+    with pytest.raises(ValueError,match='LEDGER_MISMATCH'):module.prior_ledger()

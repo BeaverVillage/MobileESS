@@ -38,6 +38,12 @@ def load_cache(qualified):
     return cache
 
 
+def block_folder(round_folder,key):
+    # Full class identity stays in every receipt. A checked unique digest
+    # prefix leaves room for common.atomic's Windows temporary suffix.
+    return Path(round_folder)/'B'/key[:12]
+
+
 def projected_global_pi(master,raw):
     pi=np.asarray(raw).copy();weights={r:w for r,w in zip(master.artificial_rows,master.weights)}
     for row in master.global_rows:
@@ -60,6 +66,7 @@ def full_pricing(native,*args,**kwargs):
 def _full_pricing(native,original,master,raw,descriptor,data,domains,ledger,axes,global_variables,global_rows,local_rows,owned,round_folder,*,zero=False):
     before=perf_counter();qualified=read(OUT/'BLOCK_PRICING_ORACLE_VERIFICATION.json')
     required={r['class_id']:r for r in qualified['records']}
+    if len({key[:12] for key in required})!=len(required):raise ValueError('BLOCK_PATH_PREFIX_COLLISION')
     certificates=[];negative=[];min_stay=[];min_migration=[];records=[]
     pi=np.zeros(original.matrix.shape[0]) if zero else projected_global_pi(master,raw['Pi']) if master else np.asarray(raw['Pi']).copy()
     if master is None:
@@ -93,7 +100,7 @@ def _full_pricing(native,original,master,raw,descriptor,data,domains,ledger,axes
             native_result=None
         else:
             priced=price_snapshot(full,B,coupling_pi)
-            folder=round_folder/'BLOCKS'/key
+            folder=block_folder(round_folder,key)
             native_result,point_raw=native.solve(priced,folder,'LOCAL_PRICING')
             if native_result['status']==gp.GRB.INFEASIBLE:raise ValueError('PHASE_I_IMPLEMENTATION_INVALID_FULL_LOCAL_BLOCK_INFEASIBLE')
             if native_result['status']!=gp.GRB.OPTIMAL or not all(n in point_raw for n in ('X','Pi','RC')):
@@ -122,7 +129,7 @@ def _full_pricing(native,original,master,raw,descriptor,data,domains,ledger,axes
             local_raw_pi=tuple(map(float,local_pi)),global_coupling_pi=tuple(map(float,coupling_pi)),
             full_mixed_fractional_finish_coverage=True,heuristic_path_prefix_used=False)
         certificates.append(receipt);records.append({k:v for k,v in receipt.items() if k!='certificate'})
-        folder=round_folder/'BLOCKS'/key;folder.mkdir(parents=True,exist_ok=True)
+        folder=block_folder(round_folder,key);folder.mkdir(parents=True,exist_ok=True)
         atomic(folder/'EXACT_COMPLETE_BLOCK_CERTIFICATE.json',serial(receipt))
         if want['full_physical_STAY']:min_stay.append(delta)
         if want['full_physical_migration']:min_migration.append(delta)
@@ -208,15 +215,16 @@ def speed_gate(result,native):
         actual_master_size_check_includes_auxiliaries=True,integer_domain_closure=False,production_accepted=False)
 
 
-def run():
-    native=Native();native.verify()
-    if (OUT/'MAY19/PHASE1_STARTED.json').exists():raise PermissionError('PHASE1_CANARY_ALREADY_STARTED_NO_AUTOMATIC_RERUN')
+def run(*,resumed_native=None):
+    native=Native() if resumed_native is None else resumed_native;native.verify()
+    resumed=resumed_native is not None
+    if not resumed and (OUT/'MAY19/PHASE1_STARTED.json').exists():raise PermissionError('PHASE1_CANARY_ALREADY_STARTED_NO_AUTOMATIC_RERUN')
     base,descriptor,data,domains,ledger,axes,n=load_initial()
     global_rows,local_rows,owned=row_partition(base,descriptor,n,axes.values())
     base_global_rows,base_axes=global_rows,dict(axes)
     original=base;master=elastic_master(original,global_rows)
     frozen_weights={row:weight for row,weight in zip(master.artificial_rows,master.weights)}
-    atomic(OUT/'MAY19/PHASE1_STARTED.json',dict(day=DAY,source_freeze=record(OUT/'PHASE1_SOURCE_FREEZE.json'),native_budget=POLICY['cumulative_native_seconds']))
+    if not resumed:atomic(OUT/'MAY19/PHASE1_STARTED.json',dict(day=DAY,source_freeze=record(native.freeze_path),native_budget=POLICY['cumulative_native_seconds']))
     point,local_replay=constructed_point(original,descriptor,data,n,tuple(r for rr in local_rows.values() for r in rr))
     auxiliary,aux_replay=artificial_point(master,point)
     if not local_replay['PASS'] or not aux_replay['PASS']:raise ValueError('PHASE_I_IMPLEMENTATION_INVALID_INITIAL_CONSTRUCTION')
@@ -229,14 +237,15 @@ def run():
             or construction['phase1_snapshot_sha256']!=master.snapshot.fingerprint()):
         raise PermissionError('PREREGISTERED_PHASE1_WEIGHTS_CHANGED')
     trace=[];activations=[];models=[];pricing_times=[];p1trace=[];batch=POLICY['batch_initial']
-    result=dict(day=DAY,source_commit=read(OUT/'PHASE1_SOURCE_FREEZE.json')['git_head'],classification=None,
+    result=dict(day=DAY,source_commit=read(native.freeze_path)['git_head'],classification=None,
+        first_solve_source_commit=read(OUT/'PHASE1_SOURCE_FREEZE.json')['git_head'],resumed_from_persisted_master=resumed,
         ACTIVE_DOMAIN_FEASIBLE=False,FULL_LP_FEASIBILITY_CLOSED=False,FULL_LP_DOMAIN_INFEASIBLE=False,
         LP_PRICING_CLOSED=False,INTEGER_DOMAIN_CLOSURE_PROVEN=False,PRODUCTION_ACCEPTED=False,
         activation_rounds=0,artificials_in_original_or_production=0,initial_phi=None)
     try:
         for iteration in range(POLICY['max_phase1_rounds']):
-            folder=OUT/'MAY19'/('ROUND_'+str(iteration).zfill(3));before_counts=ledger['receipt']
-            rec,raw=native.solve(master.snapshot,folder,'PHASE_I')
+            folder=(OUT/'MAY19/C1'/('R'+str(iteration))) if resumed else OUT/'MAY19'/('ROUND_'+str(iteration).zfill(3));before_counts=ledger['receipt']
+            rec,raw=native.cached_master(master.snapshot,folder) if resumed and iteration==0 else native.solve(master.snapshot,folder,'PHASE_I')
             row={k:None for k in FIELDS};row.update(iteration=iteration,
                 active_cols_before=original.matrix.shape[1],active_rows_before=original.matrix.shape[0],active_nnz_before=original.matrix.nnz,
                 active_stay_before=before_counts['active_STAY'],active_migration_before=before_counts['active_migration'],

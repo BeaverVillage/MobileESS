@@ -21,8 +21,9 @@ class BudgetStop(RuntimeError):pass
 
 
 class Native:
-    def __init__(self):
-        doc=read(OUT/'CANARY_EXECUTION_PERMIT.json')
+    def __init__(self,*,permit_path=None,freeze_path=None):
+        self.freeze_path=Path(freeze_path) if freeze_path is not None else OUT/'PHASE1_SOURCE_FREEZE.json'
+        doc=read(permit_path if permit_path is not None else OUT/'CANARY_EXECUTION_PERMIT.json')
         self.permit=FastRunPermit(json.dumps(doc,sort_keys=True,separators=(',',':'),allow_nan=False))
         self.policy=read(HISTORY/'SOLVER_POLICY.json')
         self.native_seconds=0.;self.pricing_wall_seconds=0.;self.pricing_started=None;self.calls=[];self.resources=[]
@@ -30,7 +31,7 @@ class Native:
 
     def verify(self):
         self.permit.verify()
-        freeze=read(OUT/'PHASE1_SOURCE_FREEZE.json')
+        freeze=read(self.freeze_path)
         for r in freeze['additional_gate_receipts']:
             if record(r['path'])!=r or read(r['path']).get('PASS') is not True:raise PermissionError('PHASE1_GATE_BYTE_DRIFT')
         if read(OUT/'PHASE1_ENGINEERING_POLICY.json')!=POLICY:raise PermissionError('PHASE1_POLICY_DRIFT')
@@ -66,8 +67,8 @@ class Native:
             row_identity='CURRENT_EXACT_CSR_ROW_INDEX_AND_COEFFICIENT_HASH',
             column_identity='CURRENT_EXACT_CSR_COLUMN_INDEX_AND_COEFFICIENT_HASH',
             matrix=record(static/'MATRIX.npz'),attributes=record(static/'ATTRIBUTES.npz'),
-            source_commit=read(OUT/'PHASE1_SOURCE_FREEZE.json')['git_head'],
-            source_manifest=record(OUT/'PHASE1_SOURCE_FREEZE.json'),bound_variables_relaxed=False,
+            source_commit=read(getattr(self,'freeze_path',OUT/'PHASE1_SOURCE_FREEZE.json'))['git_head'],
+            source_manifest=record(getattr(self,'freeze_path',OUT/'PHASE1_SOURCE_FREEZE.json')),bound_variables_relaxed=False,
             FarkasDual_access=False,solver_policy_unchanged=True)
         atomic(folder/'MODEL_IDENTITY.json',identity)
         try:remaining=self.remaining()
