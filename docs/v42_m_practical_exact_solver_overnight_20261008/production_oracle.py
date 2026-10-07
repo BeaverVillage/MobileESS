@@ -1,6 +1,7 @@
 """Production original-domain LP oracle, forked from registered M0 without modifying M0."""
 from practical_support import *
 from fractions import Fraction as F
+SCIENTIFIC=authority.SCIENTIFIC
 OUT=OUT/"external_production"
 raw_table=table
 def table(n,rows,fields=None):return raw_table(OUT/n,rows)
