@@ -19,6 +19,15 @@ def build():
         keys=['folder','status','objective','ObjBound','native_seconds','Work','NodeCount','peak_RSS_bytes','max_factor_nnz','max_factor_memory_GB']
         w=csv.DictWriter(f,fieldnames=keys,extrasaction='ignore');w.writeheader();w.writerows(results)
     case=read('P2_CASE_RESULT.json') if (OUT/'P2_CASE_RESULT.json').exists() else None
+    if (OUT/'P2_CG_RESULT.json').exists():case=read('P2_CG_RESULT.json')
+    recovery=read('CERTIFICATE_RECOVERY/REPAIRED_NODE_BOUND.json') if (OUT/'CERTIFICATE_RECOVERY/REPAIRED_NODE_BOUND.json').exists() else None
+    trajectories=list(csv.DictReader((OUT/'PHASE1_ITERATION_TRACE.csv').open(encoding='utf8')))
+    closed=read('M19/FROZEN64/ALL_REMAINING_ROWS/NATIVE_RESULT.json');identity=read('M19/FROZEN64/ALL_REMAINING_ROWS/MODEL_IDENTITY.json')
+    trajectories.append(dict(solve=19,Phi=0,exact_Phi='0',row_closed=True,rows=identity['rows'],cols=identity['cols'],nnz=identity['nnz'],
+        added_rows='ALL_REMAINING',Runtime=closed['native_seconds'],Work=closed['Work'],factor_nnz=closed['max_factor_nnz'],
+        factor_memory_GB=closed['max_factor_memory_GB'],separation_seconds='ANALYTIC_ALL_ROWS_PRESENT',elapsed_wall=frozen['elapsed_wall_seconds']))
+    with (OUT/'COMPLETE_PHASE1_MASTER_TRAJECTORY.csv').open('w',newline='',encoding='utf8') as f:
+        w=csv.DictWriter(f,fieldnames=list(trajectories[0]));w.writeheader();w.writerows(trajectories)
     classification=case['classification'] if case else integer['classification']
     text=f'''# Overnight A-stage practical exact solver
 
@@ -37,7 +46,7 @@ Pure physical path lambdas fail to represent the original fractional native migr
 | Frozen64 expanded original | 1,046,444 | 362,044 | 14,820,623 |
 | Frozen64 full hybrid, artificial-free | 739,158 | 82,458 | 13,797,701 |
 | Initial reduced Phase-I | 58,842 | 97,566 | 1,377,612 |
-| Closed full Phase-I with artificials | 739,158 | 777,882 | see closure identity |
+| Closed full Phase-I with artificials | {identity['rows']:,} | {identity['cols']:,} | {identity['nnz']:,} |
 | P1 original integer control | 1,046,444 | 362,044 | 14,820,623 |
 | Complete relevant MIG=0 integer domain | 732,455 | 255,356 | 23,972,931 |
 | Same integer domain with inherited valid cuts | 732,618 | 255,356 | 23,979,160 |
@@ -46,7 +55,7 @@ Pure physical path lambdas fail to represent the original fractional native migr
 
 The exact PR178 batch was activated once: 32 STAY + 32 migration. No repricing or reselection preceded materiality. Phi before `{frozen['Phi_before']}`; certified Phi after **0**, reduction **100%**. S0 through S18 each returned raw Phi=0 but failed omitted-row closure; none was treated as scientific zero. `PHASE1_ITERATION_TRACE.csv` records every master solve, added rows, runtime, work and factor memory. All violated omitted rows above 1e-6 were added. After measured small-cut tail behavior, all remaining original rows were promoted in the same experiment. The final all-row solve took 137.900s; original expanded artificial-free replay had maximum row violation 9.095e-13 and zero bound violation. All artificials were removed before P1. Positive-Phi adaptive pricing was unnecessary; no stagnation classification was made.
 
-Phase-I total native time **{frozen['native_seconds']:.3f}s**, Work **{frozen['Work']:.3f}**, recorded wall through closure **{frozen['elapsed_wall_seconds']:.3f}s**. Maximum factor 17.73M nnz / 0.5GB. The intentional source-bound architecture handoff and earlier segment remain archived; there was no candidate reset.
+Phase-I total native time **{frozen['native_seconds']:.3f}s**, Work **{frozen['Work']:.3f}**, recorded wall through closure **{frozen['elapsed_wall_seconds']:.3f}s**. There were **20 actual master solves**: 19 reduced solves and one all-row continuation. The historical `master_solves=19` field retains the first segment's count; `COMPLETE_PHASE1_MASTER_TRAJECTORY.csv` includes the continuation. Maximum factor 17.73M nnz / 0.5GB. The intentional source-bound architecture handoff and earlier segment remain archived; there was no candidate reset.
 
 ## Original P1 closure and global integer gap
 
@@ -63,6 +72,10 @@ The first full-domain Shift control produced UB950 / native bound946. Independen
 A complete-domain objective partition Shift≤949 OR Shift≥950 was preserved. The left native search processed 2,009 nodes in 1,186.011s / Work2,220.580 without a new primal, terminating at its component allocation with current ObjBound948. It was not called infeasible. A separate recovery combines that current verified full-domain bound with the analytic right-child LB950, yielding stage LB948 / UB950. The actual Gurobi CSR, boxes, types, senses, RHS and objectives were independently read back and matched exactly. This is the repository's current-native complete-integer-model bound authority, **not an independent rational MIP dual proof**. [Gurobi ObjBound contract](https://docs.gurobi.com/projects/optimizer/en/current/reference/attributes/model.html#objbound) defines the post-solve bound, including objective-integrality rounding.
 
 The continuing exact-Z architecture adds Z=the inherited integer affine objective, preserving the original LP projection and integer schedules. Both Z=k and Z≥k+1 children remain recorded. A feasible fixed-value case plus the full-domain lower bound certifies the integer optimum; proven current full-domain integer infeasibility advances k; a time-limited case stays open. Checkpoints are written every ten native nodes or five minutes. Prestart follows only a certified Shift lock. Current final-case result: `{None if case is None else {k:v for k,v in case.items() if k in ('A1_accepted','classification','migration_count','shift_magnitude','prestart_relocation','stop_reason')}}`.
+
+Independent LP certificate recovery subsequently diagnosed four exact negative reduced costs of -1/1125899906842624 on unbounded variables. Full original-row upper-box propagation still left 7,104 unbounded global variables. A separate certificate dual proposal sets four legal Pi components to zero; raw Pi, solver points and native bounds remain unchanged. The complete interval Lagrangian bound was recomputed successfully: `{None if recovery is None else recovery.get('valid_LB')}`. Both old LP children are now closed in a separate restored queue, with parent-inherited global LP LB899.1914018481151; neither child is pruned. This repairs the numerical certificate obstruction and does not certify an integer optimum or replace the stronger current native integer LB948. The actual original-row LP child runtimes were 8.58s and 9.61s (median9.095s, interpolated p909.507s); the sample has only two children.
+
+Prepared weighted integer histogram capacity rounding adds 23 valid rows / 1,225 nnz to the inherited 163-cut model. It preserves every original integer schedule and objective and strengthens only the LP relaxation. Its exact formula is sum(floor(g/d)*y)<=floor(R/d), derived from the actual nonnegative integer GPU binding. `WEIGHTED_CG_BUILD_VERIFICATION.json` records static preparation; native application is claimed only if a later `P2_CG_STARTED.json` and completed native results exist. No solver parameter sweep is used.
 
 ## Conditional canaries and measured totals
 
