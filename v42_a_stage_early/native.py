@@ -33,7 +33,7 @@ class Native:
     def remaining(self):return self.budget.remaining()
 
     def solve(self,snapshot,folder,component):
-        if component not in ('PHASE_I','ORIGINAL_P1','LOCAL_PRICING'):raise PermissionError('PHASE1_LP_ONLY_AUTHORIZATION')
+        if component not in ('PHASE_I','LOCAL_PRICING'):raise PermissionError('PHASE1_LP_ONLY_AUTHORIZATION')
         self.verify();remaining=self.remaining();folder=Path(folder);folder.mkdir(parents=True,exist_ok=True)
         build_started=perf_counter()
         model,objectives=materialize(snapshot,DAY)

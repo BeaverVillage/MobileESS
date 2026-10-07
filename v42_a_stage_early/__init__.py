@@ -1,2 +1,2 @@
-"""May19-only Early Activation V2 over immutable PR172 scientific producers."""
-BASE = '92b8cc679e115673e0a29c71d0797013c4e08e57'
+"""Single corrected PR174 May19 rerun; scientific producers unchanged."""
+BASE = "5d88890fe7ade1afff6f9faf69cc914aa69567e0"

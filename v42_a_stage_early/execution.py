@@ -27,7 +27,7 @@ def verify():
     return freeze
 
 def authorize(day, action):
-    if day != DAY or action not in ('OPTIMIZE','A1','P1','FEASIBILITY_LP'):
+    if day != DAY or action not in ('OPTIMIZE','FEASIBILITY_LP'):
         raise PermissionError('EARLY_MAY19_LP_ONLY')
     return day
 
@@ -35,7 +35,7 @@ def guard(model, day):
     scope = current()
     if scope is None or scope[0] is not model or scope[1] != DAY or day != DAY:
         raise PermissionError('EARLY_EXACT_NATIVE_MODEL_REQUIRED')
-    if model.NumIntVars != 0 or scope[2] not in ('PHASE_I','LOCAL_PRICING','ORIGINAL_P1'):
+    if model.NumIntVars != 0 or scope[2] not in ('PHASE_I','LOCAL_PRICING'):
         raise PermissionError('EARLY_LP_ONLY')
     scope[3]()  # live shared/parent reservation budget guard
 
