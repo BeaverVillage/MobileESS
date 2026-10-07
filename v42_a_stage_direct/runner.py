@@ -22,6 +22,8 @@ def run():
     verify();budget=Budget();budget.remaining()
     if (OUT/'DIRECT_STARTED.json').exists():raise PermissionError('DIRECT_ALREADY_STARTED')
     prior=read(OUT/'PRIMAL_REPAIR_V2_RESULT.json')
+    if (OUT/'PRIMAL_DUAL_RESULT.json').exists() and read(OUT/'PRIMAL_DUAL_RESULT.json').get('accepted'):
+        prior=read(OUT/'PRIMAL_DUAL_RESULT.json')
     build=read(OUT/'LEX_FULL_BUILD_VERIFICATION.json')
     with gzip.open(build['state']['path'],'rb') as f:p=pickle.load(f)
     original=p['snapshot'];physical=Physical(p['state'],original)
