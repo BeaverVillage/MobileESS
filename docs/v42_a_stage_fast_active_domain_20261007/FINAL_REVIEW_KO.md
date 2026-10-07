@@ -36,8 +36,8 @@ SPEED_GATE=SPEED_GATE_FAIL. 전체 native LP pricing 및 integer-domain closure 
 32. 새 4단계 active integer-solved 날짜0개. 두 날짜는 제한 LP diagnostic만 수행했습니다.
 33. full-domain closure proven 날짜0개.
 34. production accepted 날짜0개. Planning/Actual/Fresh0회.
-35. 최종 정확한 HEAD는 publication 시 외부 FINAL_PUBLICATION_RECEIPT.json과 최종 응답으로 제공합니다(자기참조 hash 없음).
-36. Draft PR URL은 publication receipt와 최종 응답으로 제공합니다.
+35. 최종 정확한 publication HEAD는 [외부 FINAL_PUBLICATION_RECEIPT.json](C:/Users/kjw39/Documents/Codex/2026-10-07/v42-a-stage-fast-active-static/FINAL_PUBLICATION_RECEIPT.json)의 `final_head`, PR #168의 `headRefOid`, 최종 응답에 기록합니다. 이 문서를 포함한 commit SHA를 같은 문서 안에 넣는 자기참조를 피하여 외부 receipt로 확정합니다. Canary 실행 source는 별도 동결한 `0f28a361374bb77fc04f3c239004f231b6147a40`입니다.
+36. [Draft PR #168](https://github.com/BeaverVillage/MobileESS/pull/168). Base는 PR166의 `codex/v42-may19-practical-prescreening-rescue`, exact head `1e2d819406081af5b4bbee6fab3c4b5c3e102b2b`입니다.
 
 현재 행렬에서 replay한 May17 incumbent 지원: rho=0.6653690555462561, migration=0.0, shift=105102.0. 이는 새 최적값/새 bound/새 lex lock이 아닙니다.
 
