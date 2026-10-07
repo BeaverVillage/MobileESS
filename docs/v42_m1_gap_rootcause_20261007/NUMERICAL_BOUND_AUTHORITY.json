@@ -1,0 +1,345 @@
+{
+  "LB_ref": 0.5687116003498334,
+  "UB_ref": 0.6694159238756877,
+  "approximate_LP_proxy": 0.568711942993466,
+  "PR167_numerical_audit": {
+    "classification": "CAPTURED_BARRIER_POINT_HAS_RAW_NUMERICAL_RESIDUALS_AND_A_WEAK_NATIVE_LP_BOUND",
+    "PASS": true,
+    "optimize_calls": 0,
+    "native_model_build_calls": 0,
+    "source_hashes": {
+      "C:\\v42_m1_root_gap_attribution_20261007\\docs\\v42_m1_ultracompact_exact_20261006\\C3A_A.npz": "45cd48423b8d7f19fed376b71e181277f559c9e71527c17f9322d0100f7f0df8",
+      "C:\\v42_m1_root_gap_attribution_20261007\\docs\\v42_m1_ultracompact_exact_20261006\\C3A_DATA.npz": "20aba68ffb3c4e29b0c9644d05e10ef33417ab92f6083edfb8906d6be8cb0467",
+      "C:\\v42_m1_root_gap_attribution_20261007\\docs\\v42_m1_root_gap_attribution_20261007\\PURE_LP_POINT.npz": "f4641b0ea6e947db95144b74b22df4b49494c3b7c2c1469506b1fc458ccc747a",
+      "C:\\v42_m1_root_gap_attribution_20261007\\docs\\v42_m1_root_gap_attribution_20261007\\PURE_LP_RESULT.json": "6039503a0ae0a1f73b14c9c476aa6f7498304e2ae9937dce9db560643ec2b0c8"
+    },
+    "all_input_hashes_unchanged": true,
+    "native_status": 2,
+    "native_primal_objective": 0.568711942993466,
+    "native_ObjBound": -97.99221036430035,
+    "independent_raw_point_replay": {
+      "PASS": false,
+      "max_row_violation": 2.805600374244932e-08,
+      "max_bound_violation": 0.0,
+      "objective": 0.568711942993466
+    },
+    "native_LP_bound_not_relabelled_as_primal_objective": true,
+    "native_bound_matching_barrier_log_iterations": [
+      {
+        "iteration": 8,
+        "primal_printed": 0.726732034,
+        "dual_printed": -97.9922104,
+        "primal_residual_printed": 31.2,
+        "dual_residual_printed": 2.61e-12,
+        "time_printed": 30,
+        "raw_line": "   8   7.26732034e-01 -9.79922104e+01  3.12e+01 2.61e-12  1.69e-02    30s"
+      },
+      {
+        "iteration": 8,
+        "primal_printed": 0.726732034,
+        "dual_printed": -97.9922104,
+        "primal_residual_printed": 31.2,
+        "dual_residual_printed": 2.61e-12,
+        "time_printed": 28,
+        "raw_line": "   8   7.26732034e-01 -9.79922104e+01  3.12e+01 2.61e-12  1.69e-02    28s"
+      }
+    ],
+    "bound_retention_inference": "Native ObjBound matches printed barrier iteration 8 dual objective. The final captured Pi has inequality-sign violations. Retention of an earlier conservative dual bound is supported; the internal bound-update threshold is not observed or asserted.",
+    "internal_attribute_bug_not_assumed": true,
+    "finite_bounds": {
+      "all_finite": true,
+      "minimum_lower": -1569.2564486451708,
+      "maximum_upper": 1634.2583673960216,
+      "absolute_bound_max": 1634.2583673960216,
+      "free_or_native_infinity_bounds": 0
+    },
+    "captured_dual": {
+      "wrong_sign_inequality_duals": 14502,
+      "maximum_wrong_sign": 7.3852625055621445e-06,
+      "by_row_family": {
+        "no_simultaneous_charge": {
+          "count": 31,
+          "max_violation": 2.278482626736302e-17,
+          "sum_abs_violation": 1.0485986465844157e-16
+        },
+        "no_simultaneous_discharge": {
+          "count": 34,
+          "max_violation": 2.278482626736302e-17,
+          "sum_abs_violation": 8.525260295213691e-17
+        },
+        "PCS16": {
+          "count": 539,
+          "max_violation": 3.0687997984813365e-16,
+          "sum_abs_violation": 1.7901887384737125e-14
+        },
+        "connected_Pdis": {
+          "count": 31,
+          "max_violation": 9.823942186610946e-17,
+          "sum_abs_violation": 1.019568375086194e-15
+        },
+        "connected_Pch": {
+          "count": 24,
+          "max_violation": 9.823924653972653e-17,
+          "sum_abs_violation": 9.854456777126543e-16
+        },
+        "voltage_upper": {
+          "count": 8035,
+          "max_violation": 7.3852625055621445e-06,
+          "sum_abs_violation": 0.000863171840093211
+        },
+        "voltage_lower": {
+          "count": 1523,
+          "max_violation": 3.192531083793691e-06,
+          "sum_abs_violation": 6.720967210105591e-05
+        },
+        "transformer_kVA": {
+          "count": 84,
+          "max_violation": 7.620788163500582e-11,
+          "sum_abs_violation": 1.29124050040107e-10
+        },
+        "line_thermal_face": {
+          "count": 4201,
+          "max_violation": 2.2307235623401884e-13,
+          "sum_abs_violation": 7.401735242464513e-11
+        }
+      },
+      "c_minus_ATPi_vs_reported_RC_max": 2.3741319716434973e-09,
+      "Pi_rhs_plus_constant": 0.6633054209444817,
+      "uncorrected_lagrangian_float": 0.5687341845489077,
+      "reported_RC_bound_expression_float": 0.5687474590938686,
+      "those_uncorrected_values_are_not_valid_dual_certificates": true
+    },
+    "independently_valid_exact_certificate": {
+      "lower_bound": 0.5671374761409242,
+      "exact_rational": "250511296261353252293082893681936998732457532150788146129617331549029865/441711766194596082395824375185729628956870974218904739530401550323154944",
+      "dyadic_accumulation_exponent": 337,
+      "matrix_nonzeros": 5351612,
+      "nonzero_dual_products_evaluated": 3951717,
+      "columns_with_exact_residual_and_bound_min": 306040,
+      "exact_pi_rhs_and_constant": 0.6632680106085022,
+      "exact_bound_correction": -0.0961305344675779,
+      "valid_for_all_C3A_relaxed_feasible_points": true,
+      "valid_for_original_integer_points": true,
+      "precision": "Exact Python integer dyadic products/sums and Fraction final ratio; lower float outward-rounded"
+    },
+    "exact_bound_correction_by_column_family_float": {
+      "route_flow": -1.325220464619753e-11,
+      "SOC": -0.09455796179361214,
+      "charge_mode": -5.684134389920473e-15,
+      "Pch": -1.6829261316645842e-11,
+      "Pdis": -4.313245085411528e-11,
+      "Q": -4.1030160022330145e-10,
+      "injection_P": -0.00045559544125386357,
+      "injection_Q": -0.0011169711541518992,
+      "rho_max": -7.465654029470443e-11,
+      "response_transformer_P": 1.826047934016745e-10,
+      "response_transformer_Q": -7.35866280839979e-11,
+      "response_line_correction": -7.117553914809668e-12,
+      "response_line_P": -1.5530973448655494e-09,
+      "response_line_Q": -4.067442510143041e-09,
+      "node_activity": -1.742923710702964e-12
+    },
+    "top20_negative_bound_corrections": [
+      {
+        "column": 110775,
+        "name": "SOC[MESS02,66]",
+        "lower": 440.0,
+        "upper": 1080.0,
+        "X": 1079.9999996178053,
+        "exact_residual_rounded": -2.1888417074266604e-05,
+        "exact_bound_term_rounded": -0.02363949044020793
+      },
+      {
+        "column": 51939,
+        "name": "SOC[MESS01,66]",
+        "lower": 440.0,
+        "upper": 1080.0,
+        "X": 1079.999999702259,
+        "exact_residual_rounded": -2.1888417073430535e-05,
+        "exact_bound_term_rounded": -0.023639490439304977
+      },
+      {
+        "column": 228498,
+        "name": "SOC[MESS04,66]",
+        "lower": 440.0,
+        "upper": 1080.0,
+        "X": 1079.9999997525729,
+        "exact_residual_rounded": -2.188841707339181e-05,
+        "exact_bound_term_rounded": -0.023639490439263153
+      },
+      {
+        "column": 169692,
+        "name": "SOC[MESS03,66]",
+        "lower": 440.0,
+        "upper": 1080.0,
+        "X": 1079.9999996625957,
+        "exact_residual_rounded": -2.1888417070458154e-05,
+        "exact_bound_term_rounded": -0.023639490436094805
+      },
+      {
+        "column": 238958,
+        "name": "injection_Q[STA03,67]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -1.0702309509724728e-06,
+        "exact_residual_rounded": 1.7390584960634723e-08,
+        "exact_bound_term_rounded": -2.7290287595187765e-05
+      },
+      {
+        "column": 239610,
+        "name": "injection_Q[STA10,67]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -1.0139960977539886e-06,
+        "exact_residual_rounded": 1.730178604584449e-08,
+        "exact_bound_term_rounded": -2.7150939325520496e-05
+      },
+      {
+        "column": 239797,
+        "name": "injection_Q[STA12,67]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -419.93782530330503,
+        "exact_residual_rounded": 1.7138577267694615e-08,
+        "exact_bound_term_rounded": -2.6894822897933304e-05
+      },
+      {
+        "column": 238492,
+        "name": "injection_Q[IDC10,67]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -4.897622829957982e-06,
+        "exact_residual_rounded": 1.7102774731172173e-08,
+        "exact_bound_term_rounded": -2.6838639536617613e-05
+      },
+      {
+        "column": 239704,
+        "name": "injection_Q[STA11,67]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -1.2501101309680962e-06,
+        "exact_residual_rounded": 1.7098834074326304e-08,
+        "exact_bound_term_rounded": -2.6832455635450332e-05
+      },
+      {
+        "column": 239517,
+        "name": "injection_Q[STA09,67]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -1.4253432709665503e-06,
+        "exact_residual_rounded": 1.702045153783017e-08,
+        "exact_bound_term_rounded": -2.6709453334592607e-05
+      },
+      {
+        "column": 238585,
+        "name": "injection_Q[IDC11,67]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -1.5643508959328756e-06,
+        "exact_residual_rounded": 1.6825228455439312e-08,
+        "exact_bound_term_rounded": -2.6403098253626366e-05
+      },
+      {
+        "column": 238678,
+        "name": "injection_Q[IDC12,67]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -295.9288818609793,
+        "exact_residual_rounded": 1.6702542100718948e-08,
+        "exact_bound_term_rounded": -2.621057190032067e-05
+      },
+      {
+        "column": 239331,
+        "name": "injection_Q[STA07,67]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -2.0535338762783795e-06,
+        "exact_residual_rounded": 1.629124186702499e-08,
+        "exact_bound_term_rounded": -2.556513635626716e-05
+      },
+      {
+        "column": 239238,
+        "name": "injection_Q[STA06,67]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -1.6593392047070665e-06,
+        "exact_residual_rounded": 1.6067383701118877e-08,
+        "exact_bound_term_rounded": -2.5213845485837108e-05
+      },
+      {
+        "column": 239424,
+        "name": "injection_Q[STA08,67]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -3.328041316308372e-06,
+        "exact_residual_rounded": 1.552461011051085e-08,
+        "exact_bound_term_rounded": -2.436209452862117e-05
+      },
+      {
+        "column": 238957,
+        "name": "injection_Q[STA03,66]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -9.454399787500734e-07,
+        "exact_residual_rounded": 1.5210460143286528e-08,
+        "exact_bound_term_rounded": -2.3869112666712736e-05
+      },
+      {
+        "column": 239609,
+        "name": "injection_Q[STA10,66]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -8.295764928334393e-07,
+        "exact_residual_rounded": 1.5130383565986565e-08,
+        "exact_bound_term_rounded": -2.3743451981399335e-05
+      },
+      {
+        "column": 239796,
+        "name": "injection_Q[STA12,66]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -419.93782793643646,
+        "exact_residual_rounded": 1.498142475896687e-08,
+        "exact_bound_term_rounded": -2.350969741290118e-05
+      },
+      {
+        "column": 238491,
+        "name": "injection_Q[IDC10,66]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -5.784118002338801e-06,
+        "exact_residual_rounded": 1.4949062452655e-08,
+        "exact_bound_term_rounded": -2.345891265502825e-05
+      },
+      {
+        "column": 239703,
+        "name": "injection_Q[STA11,66]",
+        "lower": -1569.2564486451708,
+        "upper": 1569.2564486451708,
+        "X": -1.0947960618068464e-06,
+        "exact_residual_rounded": 1.494814893734498e-08,
+        "exact_bound_term_rounded": -2.345747911523707e-05
+      }
+    ],
+    "derivation": "For clipped row multipliers with correct inequality signs, LB=ObjCon+pi^T rhs+sum_j min_{lower_j<=z<=upper_j}(c-A^T pi)_j z. All products, sums, residual signs and bound choices are computed exactly as dyadic rationals. This supplies a global continuous LP lower bound without primal feasibility or a solve. Clipping changes only the mathematical certificate, never the model or native solver.",
+    "best_existing_C3A_valid_native_LB": 0.5687116003498334,
+    "certificate_improves_existing_valid_LB": false,
+    "recommended_reporting": "Retain all three separate: approximate barrier ObjVal, actual native LP ObjBound, and independent exact Lagrangian certificate. For any integer-set-preserving C3S, existing C3A native valid LB remains valid. Numerical raw FAIL remains explicit. Do not claim material LB improvement from the barrier primal objective.",
+    "future_round_certificate_inputs": "Augmented immutable CSR/RHS/senses/bounds/objective and captured Pi for every added row are sufficient; no new optimization or parameter change.",
+    "primary_documentation": [
+      {
+        "title": "Gurobi 13 Model Attributes: ObjBound",
+        "url": "https://docs.gurobi.com/projects/optimizer/en/current/reference/attributes/model.html#objbound",
+        "support": "ObjBound is the best known objective bound; LP ObjBound/ObjBoundC coincide; available after solve."
+      },
+      {
+        "title": "Gurobi 13 Linear Constraint Attributes: Pi",
+        "url": "https://docs.gurobi.com/projects/optimizer/en/current/reference/attributes/constraintlinear.html#pi",
+        "support": "For minimization, <= row duals are nonpositive and >= row duals nonnegative."
+      }
+    ],
+    "runtime_seconds": 5.328716399992118
+  },
+  "every_new_LB_requires_separate_certificate": true,
+  "tolerance": 1e-08
+}
