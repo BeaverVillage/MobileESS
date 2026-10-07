@@ -14,7 +14,7 @@ from v42_a_stage_phase1.core import primal_replay
 from .policy import OUT,STATIC,POLICY
 
 def run(native,strong,original,warm,physical,locks,folder):
-    stages=[];budget=Budget()
+    stages=[];budget=Budget();weighted=read(OUT/'CONDITIONAL_CANARY_GATE.json')['May19_engine']=='WEIGHTED_CG'
     for name in ('shift_magnitude','prestart_relocation'):
         locked,lockproof=rebuild_locked_snapshot(strong,locks);extended,definition=define(locked,name);Z=definition['Z_column']
         obj=extended.objective(name);query=replace(extended,objectives=(obj,)+tuple(o for o in extended.objectives if o.name!=name))
@@ -37,7 +37,12 @@ def run(native,strong,original,warm,physical,locks,folder):
             node=dict(id=serial-1,status='OPEN',restriction='WHOLE_STAGE' if whole else 'Z='+str(value),valid_LB=LB)
             if not whole:node.update(both_children_preserved=True,left=dict(restriction='Z='+str(value),status='OPEN'),right=dict(restriction='Z>='+str(value+1),valid_LB=value+1,status='OPEN'))
             ledger.append(node);checkpoint();problem=query if whole else fix_case(query,Z,value)
-            native.warm_point=np.r_[warm,best] if whole else None;native.warm_basis=None;native.queue_checkpoint=record(sf/'CHECKPOINT.json')
+            if whole and weighted:
+                lo=query.lower.copy();hi=query.upper.copy();lo[Z]=value;hi[Z]=round(best)-1
+                problem=replace(query,lower=lo,upper=hi).require()
+                node.update(both_children_preserved=True,left=dict(restriction='Z<=UB-1',status='OPEN'),right=dict(restriction='Z>=UB',valid_LB=round(best),status='PRUNED_BOUND'))
+                checkpoint()
+            native.warm_point=np.r_[warm,best] if whole and not weighted else None;native.warm_basis=None;native.queue_checkpoint=record(sf/'CHECKPOINT.json')
             native.budget=Allocation(POLICY['control_allocation_seconds'] if whole else POLICY['case_allocation_seconds'])
             try:r,raw=native.solve(problem,nf,'P2')
             finally:native.budget=budget
@@ -51,10 +56,10 @@ def run(native,strong,original,warm,physical,locks,folder):
                     val=float(objective_value(original,x[:Z],name))
                     if val<=best+1e-5:best=val;warm=x[:Z]
             if r['status']==3:
-                if whole:raise ValueError('CANARY_WHOLE_STAGE_INFEASIBLE_DESPITE_VALID_PRIMAL')
-                LB=value+1;node['left']['status']='FATHOMED_NATIVE_FULL_INTEGER_INFEASIBILITY'
+                if whole and not weighted:raise ValueError('CANARY_WHOLE_STAGE_INFEASIBLE_DESPITE_VALID_PRIMAL')
+                LB=round(node['right']['valid_LB']) if whole else value+1;node['left']['status']='FATHOMED_NATIVE_FULL_INTEGER_INFEASIBILITY'
             elif r['status'] in (2,9,11) and r['native_error'] is None and r['ObjBound'] is not None and math.isfinite(r['ObjBound']):
-                LB=max(LB,float(r['ObjBound']) if whole else min(float(r['ObjBound']),value+1));node['status']='PRIMAL_FOUND' if primal else 'OPEN_BOUNDED'
+                LB=max(LB,min(float(r['ObjBound']),node['right']['valid_LB']) if whole and weighted else float(r['ObjBound']) if whole else min(float(r['ObjBound']),value+1));node['status']='PRIMAL_FOUND' if primal else 'OPEN_BOUNDED'
             else:raise RuntimeError('CANARY_COMPLETE_INTEGER_CASE_NOT_CERTIFIABLY_BOUNDED')
             atomic(nf/'INTEGER_BOUND_PROVENANCE.json',dict(PASS=True,native_result=record(nf/'NATIVE_RESULT.json'),
                 actual_full_model=record(nf/'INDEPENDENT_COMPILED_MODEL_VERIFICATION.json'),

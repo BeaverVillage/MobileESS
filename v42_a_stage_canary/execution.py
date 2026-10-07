@@ -12,7 +12,8 @@ def verify():
         if sha(p)!=h:raise PermissionError('CANARY_SOURCE_DRIFT:'+p)
     for r in f['gate_receipts']:
         if record(r['path'])!=r or read(r['path']).get('PASS') is not True:raise PermissionError('CANARY_GATE_DRIFT')
-    if not read(OVERNIGHT/'P2_CASE_RESULT.json').get('A1_accepted'):raise PermissionError('MAY19_A1_ACCEPTANCE_REQUIRED')
+    gate=read(OUT/'CONDITIONAL_CANARY_GATE.json')
+    if record(gate['May19_A1']['path'])!=gate['May19_A1'] or not read(gate['May19_A1']['path']).get('A1_accepted'):raise PermissionError('MAY19_A1_ACCEPTANCE_REQUIRED')
     return f
 def authorize(day,action):
     s=current()

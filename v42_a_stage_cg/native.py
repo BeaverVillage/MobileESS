@@ -14,7 +14,7 @@ from v42_a_stage_domain_v2.solver_policy import apply_policy
 from v42_a_stage_domain_v2.fast_telemetry import FastTelemetry
 from v42_a_stage_domain_v2.telemetry import native_scalar
 from v42_a_stage_domain_v2.postsolve_review import internal_attempts
-from .policy import OUT,STATIC,DAY,POLICY,OVERNIGHT
+from .policy import OUT,STATIC,DAY,POLICY
 from v42_a_stage_phase1.setup import HISTORY
 from v42_a_stage_compact_rowgen.resources import sample
 
@@ -23,10 +23,8 @@ from v42_a_stage_early.native import BudgetStop
 
 
 class Native:
-    def __init__(self, budget,day):
-        global DAY
-        DAY=day
-        self.freeze_path=OUT/'CANARY_SOURCE_FREEZE.json'
+    def __init__(self, budget):
+        self.freeze_path=OUT/'CG_SOURCE_FREEZE.json'
         self.policy=read(HISTORY/'SOLVER_POLICY.json')
         self.budget=budget
         self.native_seconds=0.;self.calls=[];self.resources=[];self.system_samples=[]
@@ -36,7 +34,7 @@ class Native:
     def remaining(self):return self.budget.remaining()
 
     def solve(self,snapshot,folder,component):
-        if component not in ('PHASE_I','ORIGINAL_P1','INTEGER_CONTROL','NODE_LP','LOCAL_PRICING','P2'):raise PermissionError('PHASE1_LP_ONLY_AUTHORIZATION')
+        if component not in ('INTEGER_CONTROL','NODE_LP','LOCAL_PRICING','P2'):raise PermissionError('PHASE1_LP_ONLY_AUTHORIZATION')
         self.verify();remaining=self.remaining();folder=Path(folder);folder.mkdir(parents=True,exist_ok=True)
         build_started=perf_counter()
         model,objectives=materialize(snapshot,DAY)
@@ -105,11 +103,11 @@ class Native:
                 if w==gp.GRB.Callback.MIP:
                     nodes=float(m.cbGet(gp.GRB.Callback.MIP_NODCNT))
                     if nodes-last_checkpoint[1]>=10 or perf_counter()-last_checkpoint[0]>=300:
-                        atomic(folder/'INFLIGHT_BEST_BOUND_CHECKPOINT.json',dict(day=DAY,component=component,
+                        atomic(folder/'INFLIGHT_BEST_BOUND_CHECKPOINT.json',dict(component=component,
                             processed_native_nodes=nodes,callback_bound=float(m.cbGet(gp.GRB.Callback.MIP_OBJBND)),
                             callback_incumbent=float(m.cbGet(gp.GRB.Callback.MIP_OBJBST)),
                             source=identity['source_manifest'],model_identity=record(folder/'MODEL_IDENTITY.json'),
-                            external_queue=getattr(self,'queue_checkpoint',None),deadline=read(OVERNIGHT/'OVERNIGHT_START.json'),
+                            external_queue=getattr(self,'queue_checkpoint',None),deadline=read(OUT/'OVERNIGHT_START.json'),
                             callback_bound_is_progress_only=True,original_incumbent_preserved=True))
                         last_checkpoint[:]=[perf_counter(),nodes]
                 if w==gp.GRB.Callback.MIPSOL and getattr(self,'incumbent_callback',None) is not None:

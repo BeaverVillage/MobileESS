@@ -56,6 +56,9 @@ def run(native,state,expanded,p1,day):
     atomic(folder/'P2/MIGRATION_CERTIFICATE.json',proof);locks.append(LexLock('migration_count',Fraction(0),True,sha(folder/'P2/MIGRATION_CERTIFICATE.json')))
     strong,cuts=strengthen_histogram_capacity(z,z,zp.descriptor,zs['data'],np.arange(z.matrix.shape[1],dtype=np.int64))
     atomic(folder/'P2/INHERITED_INTEGER_STRENGTHENING.json',cuts)
+    if read(OUT/'CONDITIONAL_CANARY_GATE.json')['May19_engine']=='WEIGHTED_CG':
+        from v42_a_stage_cg.cuts import strengthen
+        strong,cg=strengthen(z,strong,cuts);atomic(folder/'P2/WEIGHTED_CG_BUILD_VERIFICATION.json',cg)
     from .cases import run as exact_cases
     results,warm=exact_cases(native,strong,z,warm,zp,locks,folder)
     path=STATIC/day/'FINAL_VALIDATED_A1_POINT.npz';np.savez_compressed(path,X=warm)
