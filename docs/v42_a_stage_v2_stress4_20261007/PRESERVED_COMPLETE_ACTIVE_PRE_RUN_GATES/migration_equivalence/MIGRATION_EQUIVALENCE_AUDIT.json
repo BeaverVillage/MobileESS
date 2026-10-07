@@ -1,0 +1,88 @@
+{
+  "PASS": true,
+  "scope": "scientific candidate identity; no coefficient aliases inferred from price or exact certificate effect",
+  "canonical_pool_semantic_candidate_removals": 0,
+  "heuristic_dominance_removals": 0,
+  "per_date": {
+    "2025-05-10": {
+      "classes": 575,
+      "canonical_blocks": 1666044,
+      "exact_paths": 93239460,
+      "source_input": {
+        "path": "C:\\v42_pr134_sc_execution_20261007\\stages\\2025-05-10\\A1\\1\\output\\DATA.pkl",
+        "sha256": "ea3347db9e06b9ab5ce770c0e6df1d124565327dcbd711c7bae2a9249f0a8747",
+        "bytes": 13673157
+      },
+      "resource_identity_sha256": "0df4537b08debb158285c0d7fec45e03295e0d13b8e2f322194abd1f33a26228",
+      "physical_pool_sha256": "f51ec805f3b88c4d13db9eb104ad61a14a6deac914cd5bae5e84e2b23847ef79"
+    },
+    "2025-05-12": {
+      "classes": 130,
+      "canonical_blocks": 994224,
+      "exact_paths": 50756904,
+      "source_input": {
+        "path": "C:\\v42_pr134_sc_execution_20261007\\stages\\2025-05-12\\A1\\1\\output\\DATA.pkl",
+        "sha256": "4333346c50ff05f6a326bc477c23a1b389386766311ec8ed91d79636c7421bfb",
+        "bytes": 15176260
+      },
+      "resource_identity_sha256": "2fa0ea1a86078c6b29c9334e9b8aafbfb0d170f1397464dc7b3da84ddb93f80a",
+      "physical_pool_sha256": "f594f2ef239d5c1e9d5015647e1c03f6b4a50597ca8502a1b2b63d590727567a"
+    },
+    "2025-05-17": {
+      "classes": 80,
+      "canonical_blocks": 143,
+      "exact_paths": 15145,
+      "source_input": {
+        "path": "C:\\v42_pr134_sc_execution_20261007\\stages\\2025-05-17\\A1\\1\\output\\DATA.pkl",
+        "sha256": "5dc899bbeb7004f24659d91054d38d7383e35d892bae1a8cbac6d9ada1e8a543",
+        "bytes": 4125799
+      },
+      "resource_identity_sha256": "eaf9c28ab81e3f78695bf56401a9be04952121a378dc983dc6d8099a509436bb",
+      "physical_pool_sha256": "afd6288304a34fe63086babafd82b6000f2d022088a3c8cbb87d8ae25a75dac5"
+    },
+    "2025-05-19": {
+      "classes": 150,
+      "canonical_blocks": 1710374,
+      "exact_paths": 97724022,
+      "source_input": {
+        "path": "C:\\v42_pr134_sc_execution_20261007\\stages\\2025-05-19\\A1\\1\\output\\DATA.pkl",
+        "sha256": "24d9a235aac85aa03ce27084a5b8953fe29df66761506dabce39a0678f27cf2d",
+        "bytes": 25861913
+      },
+      "resource_identity_sha256": "c3f7f20224e8db9b8b02fe4d878998462148c8e520816a0945f9a509aa56919e",
+      "physical_pool_sha256": "af7b2629f316d9d9cd872224802d7bdeace1e8b73fee5ea327a2bbf9699415ca"
+    }
+  },
+  "injectivity_proof": [
+    "Scientific class cardinality row distinguishes different classes. Within one class GPU is positive and service quantity is fixed.",
+    "Source GPU occupancy identifies source site and start/checkpoint boundaries. An empty RUNNING source prefix has fixed event start and checkpoint equal to that start.",
+    "Destination GPU occupancy has positive remaining work and identifies destination site, restart, and completion.",
+    "Active-transfer incidence is exactly the interval [transfer_start,transfer_end); distinct transfer timestamps therefore differ in a scientific row even during zero-rate WAN waiting.",
+    "Fixed prescribed WAN path and deterministic full-rate transfer reconstruct exact payload, per-link per-time WAN coefficients, transfer end, restart, and remaining service.",
+    "The causal checkpoint adapter uniquely reconstructs physical checkpoint seconds from job/start/control checkpoint.",
+    "Identical completion/site and GPU incidence preserve unchanged Runtime, grid, CC4 interfaces. P2 reference displacement and relocation metadata are retained.",
+    "Therefore no two distinct canonical complete migration options of one class are exact duplicates across all scientific rows; no candidate is removed by certificate-support grouping or priority."
+  ],
+  "objective_reference": "unchanged migration count, absolute shift magnitude around frozen R0, prestart relocation count",
+  "no_new_migration_scientific_authority": true,
+  "checkpoint_payload_WAN_restart_service_carryout_Runtime_grid_unchanged": true,
+  "native_models_built": 0,
+  "optimize_calls": 0,
+  "source_producers": [
+    {
+      "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-07\\a-stage-domain-v2\\v42_a_stage_domain_v2\\domain.py",
+      "sha256": "1b93465a1564a514a27bf01e4cf193f569f1a292edb4ade3d6796bb6e109f8d6",
+      "bytes": 17990
+    },
+    {
+      "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-07\\a-stage-domain-v2\\v42_boundary\\generator.py",
+      "sha256": "ca1e89cd6c899a72b14d0877df4f2c068d67c6153f9e9eab9a021027a32d8579",
+      "bytes": 10575
+    },
+    {
+      "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-07\\a-stage-domain-v2\\v42_job_capability.py",
+      "sha256": "0f72fce6ed40883293028f280aaec8f8582b1cd290d558451e0dc75a98669255",
+      "bytes": 21472
+    }
+  ]
+}
