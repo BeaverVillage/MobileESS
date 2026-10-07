@@ -39,7 +39,7 @@ def preflight():
     rho=read(OUT/'THRESHOLD_AUTHORITY.json')['rho_column'];threshold=sparse.csr_matrix(([1.],([0],[rho])),shape=(1,A.shape[1]))
     B=sparse.vstack([A,threshold,C],format='csr')
     e=dict(d,objective=np.zeros(A.shape[1]),constant=np.array(0.))
-    e.update(rhs=np.r_[d['rhs'],T1,rhs],sense=np.r_[d['sense'],'<',np.full(C.shape[0],'<')],row_names=np.r_[d['row_names'],'TARGET_RHO_T1',names])
+    e.update(rhs=np.r_[d['rhs'],T1,rhs],sense=np.concatenate([d['sense'],['<'],np.full(C.shape[0],'<')]),row_names=np.concatenate([d['row_names'],['TARGET_RHO_T1'],names]))
     assert (B[:A.shape[0]]!=A).nnz==0
     for field in ('names','lower','upper','types'):assert np.array_equal(e[field],d[field])
     assert (int((e['types']=='B').sum()),int((e['types']=='C').sum()))==(9322,296718)
