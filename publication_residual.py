@@ -80,7 +80,7 @@ def audit():
     roster={r['class_id']:r for r in read(HISTORY/'BLOCK_PRICING_ORACLE_VERIFICATION.json')['records']}
     activation=list(csvlib.DictReader((OUT/'ACTIVATED_COLUMNS.csv').open(encoding='utf8')))
     candidate_checks=[];query_checks=[];potentials=[];reconstructions=[];witnesses=[];diagnostics=[];class_records=[]
-    valid=set();last_optimal=None
+    valid=set();last_optimal=None;queried_classes=set()
     for folder in sorted((OUT/'M19').glob('R*'),key=lambda p:int(p.name[1:])):
         if not folder.is_dir():continue
         master=elastic_master(original,grows,weights_by_row=row_weights)
@@ -118,6 +118,7 @@ def audit():
         byclass={}
         for p in query_paths:byclass.setdefault(read(p)['class_id'],[]).append(p)
         for p in recovery_paths:byclass.setdefault(read(p)['class_id'],[])
+        queried_classes.update(byclass)
         round_candidates=[]
         if byclass:
             pi=projected_global_pi(master,raw['Pi']);cp=np.asarray([pi[r] for r in axes.values()])
@@ -151,6 +152,26 @@ def audit():
             receipt=read(pricing)
             chosen=select(round_candidates,receipt['targeted_migration_search_completed'])
             if [c['candidate_id'] for c in chosen]!=[c['candidate_id'] for c in receipt['selected_candidates']]:raise ValueError('DETERMINISTIC_DIVERSIFIED_SELECTION_AUDIT_FAIL')
+            expansion_stop=folder/'EXPANSION_STOP.json'
+            if expansion_stop.exists() and 'cols' in read(expansion_stop):
+                proposed=data;planned_ledger=ledger
+                for c in chosen:
+                    uid=data[7]['classes'][c['class_id']][0]
+                    graph=expanded_graph(proposed[5][uid],c['option'],data[1][uid],domains[uid],uid in data[7]['preserve_singleton_mixed_flow'])
+                    proposed,planned_ledger=update_graph(proposed,domains,c['class_id'],graph)
+                planned,pdesc,pgrows,_,_,_=assemble_original(base,base_grows,n,base_axes,proposed)
+                stop=read(expansion_stop)
+                if (planned.matrix.shape[0],planned.matrix.shape[1],planned.matrix.nnz)!=(stop['rows'],stop['cols'],stop['nnz']):raise ValueError('UNCOMMITTED_BATCH_SIZE_RECONSTRUCTION_FAIL')
+                pmaster=elastic_master(planned,pgrows,weights_by_row=row_weights)
+                pwitness,px=inclusion_witness(prior,planned,pdesc,pmaster,n)
+                if not pwitness['PASS']:raise ValueError('UNCOMMITTED_BATCH_PRIOR_INCLUSION_FAIL')
+                np.savez_compressed(STATIC/'UNCOMMITTED_BATCH_INCLUDED_POINT.npz',X=px)
+                atomic(OUT/'UNCOMMITTED_BATCH_AUDIT.json',dict(PASS=True,selected_batch=len(chosen),STAY=sum(c['kind']=='STAY' for c in chosen),
+                    migration=sum(c['kind']=='MIGRATION' for c in chosen),original_rows=stop['rows'],original_cols=stop['cols'],original_nnz=stop['nnz'],
+                    new_columns=stop['cols']-original.matrix.shape[1],original_cols_limit=200000,new_columns_limit=100000,
+                    original_snapshot_sha256=planned.fingerprint(),active_counts=planned_ledger['receipt'],committed=False,native_optimize_calls=0,
+                    independently_reconstructed=True,prior_inclusion_witness=pwitness,separate_point=record(STATIC/'UNCOMMITTED_BATCH_INCLUDED_POINT.npz')))
+                del planned,pmaster,pdesc,px,proposed
         selected=[a for a in activation if a['iteration']==folder.name[1:]]
         candidates_by_id={c['candidate_id']:c for c in round_candidates}
         for a in selected:
@@ -179,7 +200,7 @@ def audit():
     atomic(OUT/'VERIFICATION.json',verification)
     atomic(OUT/'RAW_AND_CANDIDATE_AUDIT.json',dict(PASS=True,raw=raw_checks,queries=query_checks,candidates=candidate_checks,potentials=potentials))
     atomic(OUT/'MASTER_SOLVE_DIAGNOSTICS.json',dict(PASS=True,solves=diagnostics,prior_inclusion_witnesses=witnesses))
-    atomic(OUT/'TARGETED_CLASS_AUDIT.json',dict(PASS=True,classes=class_records,unique_classes_queried=len(byclass) if byclass else 0,
+    atomic(OUT/'TARGETED_CLASS_AUDIT.json',dict(PASS=True,classes=class_records,unique_classes_queried=len(queried_classes),
         note='Complete native subset pricing is distinct from bounded physical recovery. Unmaterialized negative-block counts are unresolved negative-query directions, not an exhaustive physical negative census.'))
     table(OUT/'ACTUAL_NATIVE_MODEL_SIZE_TRACE.csv',[dict(component=c['component'],folder=c['folder'],rows=c['rows'],cols=c['cols'],nnz=c['nnz'],factor_nnz=c['max_factor_nnz'],factor_memory_GB=c['max_factor_memory_GB'],RSS=c['peak_RSS_bytes']) for c in calls],
         ['component','folder','rows','cols','nnz','factor_nnz','factor_memory_GB','RSS'])

@@ -1,7 +1,7 @@
 """Generate the bounded experiment report from durable, audited receipts."""
 from fractions import Fraction
-from v42_pr134_b1.common import read
-from v42_a_stage_residual.policy import OUT,STATIC
+from v42_pr134_b1.common import read,table
+from v42_a_stage_residual.policy import OUT,STATIC,HISTORY
 
 def run():
     r=read(OUT/'PHASE1_RESULT.json');v=read(OUT/'VERIFICATION.json');freeze=read(OUT/'SOURCE_FREEZE.json')
@@ -9,6 +9,16 @@ def run():
     current=OUT/'M19/R0/POSTSOLVE_ATTRIBUTION/RESIDUAL_ATTRIBUTION.json'
     a=read(current if current.exists() else OUT/'HISTORICAL_OPTIMAL_R2/RESIDUAL_ATTRIBUTION.json')
     audit=read(OUT/'TARGETED_CLASS_AUDIT.json')['classes']
+    roster={x['class_id']:x for x in read(HISTORY/'BLOCK_PRICING_ORACLE_VERIFICATION.json')['records']}
+    summaries=[]
+    for x in audit:
+        known=roster[x['class_id']];compact=x.get('compact_migration_recovery',{})
+        summaries.append(dict(class_id=x['class_id'],cardinality=known['cardinality'],STAY_query_completed=True,
+            migration_query_completed=bool(x['migration_native_query']),migration_analytical_no_support=not x['migration_native_query'],
+            physical_migration_paths_covered_by_native_query=known['full_physical_migration'],compact_blocks_covered_by_native_query=known['full_compact_blocks'],
+            compact_physical_blocks_examined=compact.get('blocks_examined',0),compact_physical_paths_evaluated=compact.get('paths_evaluated',0),
+            migration_native_support_paths_examined=x['migration_support_paths_examined'],valid_negative_STAY=x['STAY_valid_negative'],valid_negative_migration=x['migration_valid_negative']))
+    table(OUT/'TARGETED_CLASS_SUMMARY.csv',summaries,list(summaries[0]) if summaries else ['class_id'])
     compact=[x.get('compact_migration_recovery',{}) for x in audit]
     stats={k:sum(c.get(k,0) for c in compact) for k in ('blocks_examined','paths_evaluated','exact_tail_terms_evaluated','nonnegative_blocks_pruned','physical_paths_covered_by_exact_pruning')}
     fmt=lambda x:format(float(Fraction(x)),'.17g')
@@ -35,8 +45,11 @@ May19 한 번, cumulative 1200초, Threads=1/native, pricing worker {r['selected
     text+=f'''
 확정 activation rounds: {r['activation_rounds']}. 실제 활성화 STAY {r['activated_STAY']}, migration {r['activated_migration']}. Batch는 completed targeted migration 조회와 bounded physical recovery 후에만 선택했다. 최대64, migration 최대32; 검증된 migration이 남는 동안 STAY 최대32. 정확한 class+coupling 효과를 deduplicate하고 residual score→exact rc→identity로 결정한다.
 
+이번 batch가 확정되지 않은 경우 before/after Phi 감소율은 미측정이다. 선택한 후보 수를 활성화 수로 보고하거나 NONMATERIAL로 해석하지 않는다.
+
 조회한 unique classes {r['unique_classes_queried']}; 완료된 STAY native queries {r['STAY_queries_completed']}, migration native queries {r['migration_queries_completed']}; concrete recovery 완료 class-rounds {r['recovery_classes_completed']}.
-독립 검증된 negative concrete STAY {r['negative_STAY']}, migration {r['negative_migration']}. Unmaterialized negative-query directions {r['unmaterialized_negative_blocks']}.
+Migration이 없는 {sum(x['migration_analytical_no_support'] for x in summaries)}개 class도 조회를 생략 처리하지 않고 complete physical domain의 no-migration support를 별도로 기록했다. Migration native queries의 algebraic full-domain coverage는 physical paths {sum(x['physical_migration_paths_covered_by_native_query'] for x in summaries):,}, compact blocks {sum(x['compact_blocks_covered_by_native_query'] for x in summaries):,}이다. 이것은 그 경로들을 개별 열로 전수 enumerate했다는 뜻이 아니다. Class별 값은 `TARGETED_CLASS_SUMMARY.csv`에 있다.
+독립 검증된 negative concrete STAY {r['negative_STAY']}, migration {r['negative_migration']}. Unmaterialized negative-query directions {r['unmaterialized_negative_blocks']}. Quota 밖의 미회수 physical negative block 전수 개수는 UNKNOWN이다.
 Compact physical recovery: blocks examined {stats['blocks_examined']}, paths evaluated {stats['paths_evaluated']}, exact reusable tail terms {stats['exact_tail_terms_evaluated']}, exact nonnegative block pruning {stats['nonnegative_blocks_pruned']}, covered physical paths by exact pruning {stats['physical_paths_covered_by_exact_pruning']}. Native-point-supported physical migration paths additionally examined {sum(x.get('migration_support_paths_examined',0) for x in audit)}.
 
 각 migration-capable target class의 full compact MIGRATION-only LP(q-sum=N)를 STAY-only LP(q-sum=0)보다 먼저 풀었다. 임시 조회 제약은 scientific model을 변경하거나 후보를 삭제하지 않는다. Native query의 물리 경로 전체 coverage와 bounded concrete recovery의 개별 경로 검사 수를 구분한다. Class당 최대4 STAY·2 migration recovery는 수집 quota이며 domain closure가 아니다. Unmaterialized 값은 음수 인증 bound가 있지만 물리 concrete witness를 회수하지 못한 query 방향 수다. 모든 물리 음수 block의 전수 개수는 미측정이다. Quota 밖의 negative directions도 삭제하지 않는다.
@@ -56,7 +69,7 @@ Compact physical recovery: blocks examined {stats['blocks_examined']}, paths eva
     text+='\n| Top original row | Time | Node | Weighted artificial | Cumulative share |\n|---|---:|---|---:|---:|\n'
     for x in a['top_rows'][:16]:text+=f"| {x['row']} | {x['time']} | {x['node']} | {fmt(x['weighted_artificial'])} | {100*x['cumulative_positive_share']:.9f}% |\n"
     text+=f'''
-GPU/Runtime/WAN/CC4/grid별 직접 artificial attribution: `{a['by_coupling_category']}`. 해당 전압 행은 공유 global grid 행이므로 workload class/AIDC별 독점적 인과 Phi 배분은 식별되지 않는다. 정확한 node/site mapping과 원래 resource-binding 계수로 계산한 heuristic influence를 별도 보고한다. `RESIDUAL_ATTRIBUTION.json`의 모든150개 class 순위와 target IDs, `RESIDUAL_ROWS.csv`, `TARGETED_CLASS_AUDIT.json`에 세부 근거가 있다. Influence는 순위에만 쓰며, admissibility는 original physical membership/local primal/coupling/exact rc<-1e-8의 독립 PASS에만 따른다.
+GPU/Runtime/WAN/CC4/grid별 직접 artificial attribution: `{a['by_coupling_category']}`. GPU/Runtime/WAN/CC4 직접 row-family artificial contribution은 각각0이며, 모두 GRID에 속한다. 해당 전압 행은 공유 global grid 행이므로 workload class/AIDC별 독점적 인과 Phi 배분은 식별되지 않는다. 정확한 node/site mapping과 원래 resource-binding 계수로 계산한 heuristic influence를 별도 보고한다. `RESIDUAL_ATTRIBUTION.json`의 모든150개 class 순위와 target IDs, `RESIDUAL_ROWS.csv`, `TARGETED_CLASS_AUDIT.json`에 세부 근거가 있다. Influence는 순위에만 쓰며, admissibility는 original physical membership/local primal/coupling/exact rc<-1e-8의 독립 PASS에만 따른다.
 
 최종 original active 모델 rows/cols/nnz: {r['final_original_model']['rows']:,} / {r['final_original_model']['cols']:,} / {r['final_original_model']['nnz']:,}.
 Master 및 pricing의 실제 rows/cols/nnz·factor·RSS는 `ACTUAL_NATIVE_MODEL_SIZE_TRACE.csv`, master auxiliary sizes는 `MODEL_SIZE_TRACE.csv`에 있다. 최대 factor nnz {r['maximum_factor_nnz']:,}; 최대 factor memory {r['maximum_factor_memory_GB']} GB.
@@ -66,12 +79,16 @@ Native calls {r['native_calls']}; 모든 native Runtime 합 {r['native_seconds']
 
 '''
     if r['classification']=='PHASE1_RESIDUAL_DIRECTED_NONMATERIAL':text+='첫 diversified batch의 Phi 감소가1% 미만이므로 요청대로 이 Phase-I pricing architecture의 추가 알고리즘 투자를 중단했다. 두 번째 batch 및 추가 native 실행은 하지 않았다.\n'
-    elif r['classification']=='PHASE1_TRACTABILITY_FAIL':text+='1200초/engineering 제한 내 materiality 판단을 완료하지 못했다. 전체 scientific domain infeasibility 증명이나 NONMATERIAL 결론으로 해석하지 않는다. 추가 실행 없이 중단했다.\n'
+    elif r['classification']=='PHASE1_TRACTABILITY_FAIL':
+        text+='1200초/engineering 제한 내 materiality 판단을 완료하지 못했다. 전체 scientific domain infeasibility 증명이나 NONMATERIAL 결론으로 해석하지 않는다. 추가 실행 없이 중단했다.\n'
+        if (OUT/'UNCOMMITTED_BATCH_AUDIT.json').exists():
+            p=read(OUT/'UNCOMMITTED_BATCH_AUDIT.json')
+            text+=f"\n확정하지 않은64-column batch의 independently reconstructed original 모델은 rows/cols/nnz {p['original_rows']:,}/{p['original_cols']:,}/{p['original_nnz']:,}이다. 64개 concrete class column은 원래 native primitive/lane 모델로 확장되므로 native 변수64개 증가와 같지 않다. Native 열 증가 {p['new_columns']:,}은 구현에서 사전 고정한100,000 증가 제한을, 전체 {p['original_cols']:,}열은200,000 active 열 제한을 넘는다. 두 제한 모두 초과했다. Factor 제한이나1200초 소진으로 중단한 것이 아니다. 이 모델에 native solve를 하지 않았으며 factor memory와 실제 solve 가능성은 미측정이다. 이전 R0 optimal point의 동일-Phi inclusion witness는 이 미확정 모델에서도 PASS이다. `UNCOMMITTED_BATCH_AUDIT.json`에 근거를 보존했다.\n"
     else:text+='지정된 decision/budget gate에서 중단했다. 자동 후속 실행은 없다.\n'
     (OUT/'FINAL_REVIEW_KO.md').write_text(text,encoding='utf8',newline='\n')
     body=f'''Tests one May19 residual-directed, migration-inclusive Phase-I experiment stacked on [Draft PR176](https://github.com/BeaverVillage/MobileESS/pull/176), exact base `1b34350663b972aeeaeb3a1c20596cbc0dd34b65`.
 
-Result: **{r['classification']}**. Initial Phi `{r.get('initial_phi')}` → final certified Phi `{r['final_certified_phi']}`; zero `{r['ACTIVE_DOMAIN_FEASIBLE']}`. Activated {r['activated_STAY']} STAY / {r['activated_migration']} migration across {r['activation_rounds']} batches. {r['accounted_seconds']:.6f}s accounted, {r['native_seconds']:.6f}s native Runtime, Work {r['Work']:.12f}.
+Result: **{r['classification']} / {r['scientific_status']}**. Initial Phi `{r.get('initial_phi')}`; zero `{r['ACTIVE_DOMAIN_FEASIBLE']}`. Selected64 (32 STAY/32 migration) but expanded native columns reached362,044, exceeding preregistered engineering caps (200,000 total /100,000 growth). **No activation committed, no re-solve, no measured Phi reduction; NONMATERIAL is not established.** Activated {r['activated_STAY']} STAY / {r['activated_migration']} migration across {r['activation_rounds']} committed rounds. {r['accounted_seconds']:.6f}s accounted, {r['native_seconds']:.6f}s native Runtime, Work {r['Work']:.12f}.
 
 Migration-only exact compact pricing precedes STAY for each target. Independent physical/local/coupling/exact-negative-price checks govern admission; deterministic residual ranking governs up-to64 selection. Original science, frozen Phi weights, tolerances and full domain are retained; all48 prior activations remain. One1200s budget, Threads1, max4 workers, no reset/sweep/followup. No P1 or other dates/pipelines/production.
 
