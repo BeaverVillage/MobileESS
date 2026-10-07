@@ -194,7 +194,7 @@ def main():
         f"| {r['family']} | {r['status']} | {r['runtime']:.3f} | {r['native_LB']:.12f} | {r['valid_global_LB']:.12f} |"
         for r in records)
     cut_text = ', '.join(f'{k} {v}개' for k,v in family_counts.items())
-    pr = args.pr_url or 'Draft PR 생성 전: 이 문서가 포함된 commit으로 생성한 후 URL을 보완한다.'
+    pr = f'[Draft PR #{args.pr_url.rsplit("/",1)[-1]}]({args.pr_url})' if args.pr_url else 'Draft PR 생성 전: 이 문서가 포함된 commit으로 생성한 후 URL을 보완한다.'
     answers = [
         '예. 사용자 지시에 따라 정확한 대상 프로세스만 종료했고 재시작하지 않았다.',
         'PID 72696, Python311/python.exe, `run_one.py --run`, cwd `C:/v42_m1_c3_native_1h_20261007`. 프로세스 생성 UTC 06:56:49.758725, solver 시작 06:56:57.606972, 종료 07:37:07.492493(16:37:07 KST). Graceful IPC가 없어 identity 확인 뒤 해당 PID만 terminate했다.',
@@ -251,7 +251,8 @@ def main():
              '| 계열 | native Status | Runtime(s) | native LB | 기존 LB와 max한 global LB |\n'
              '|---|---:|---:|---:|---:|\n'+selective_text+'\n\n'
              'Status 9는 TIME_LIMIT 진단이다. 각 TimeLimit=300, Threads=1이며 다른 원래 discrete 계열은 continuous다. '
-             '이 표의 LB는 native partial-MILP ObjBound에 1e−8을 차감한 convention이며 exact rational dual certificate가 아니다. '
+             '`native LB` 열은 실제 partial-MILP ObjBound이다. 마지막 global LB 열에만 '
+             '`max(기존 LB, nextafter(native LB−1e−8, −∞))` convention을 적용했고, exact rational dual certificate로 부르지 않는다. '
              'TimeLimit 설정 300초와 실제 Runtime을 분리했다. Gurobi는 종료에 필요한 속성 계산으로 Runtime이 설정 시간을 넘을 수 있다고 명시한다 '
              '([공식 TimeLimit 문서](https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#timelimit)). '
              '세부 row/bound 및 복원한 integrality 오차는 개별 RESULT JSON에 남겼다.\n')

@@ -142,7 +142,7 @@ Baseline 큰/작은 signed violation 판정 1e−8 기준: aggregate connected 2
 
 ## 35. 최종 commit / Draft PR
 
-Base Draft PR #162 exact head `1d922c91eb27056a5ccc79c92ef18146707099ab`. Branch `codex/v42-m1-root-gap-attribution-20261007`. Draft PR: Draft PR 생성 전: 이 문서가 포함된 commit으로 생성한 후 URL을 보완한다.
+Base Draft PR #162 exact head `1d922c91eb27056a5ccc79c92ef18146707099ab`. Branch `codex/v42-m1-root-gap-attribution-20261007`. Draft PR: [Draft PR #167](https://github.com/BeaverVillage/MobileESS/pull/167)
 
 최종 commit은 이 검토 문서를 포함한 Draft PR의 최종 HEAD로 식별한다. 파일에 자기 자신의 commit SHA를 넣을 수 없으므로 실제 SHA는 PR body와 최종 응답에 기록하고 Git HEAD와 대조한다.
 
@@ -153,4 +153,4 @@ Base Draft PR #162 exact head `1d922c91eb27056a5ccc79c92ef18146707099ab`. Branch
 | node_activity | 9 | 300.128 | 0.568711610350 | 0.568711600350 |
 | charge_mode | 9 | 300.208 | 0.568711610515 | 0.568711600515 |
 
-Status 9는 TIME_LIMIT 진단이다. 각 TimeLimit=300, Threads=1이며 다른 원래 discrete 계열은 continuous다. 이 표의 LB는 native partial-MILP ObjBound에 1e−8을 차감한 convention이며 exact rational dual certificate가 아니다. TimeLimit 설정 300초와 실제 Runtime을 분리했다. Gurobi는 종료에 필요한 속성 계산으로 Runtime이 설정 시간을 넘을 수 있다고 명시한다 ([공식 TimeLimit 문서](https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#timelimit)). 세부 row/bound 및 복원한 integrality 오차는 개별 RESULT JSON에 남겼다.
+Status 9는 TIME_LIMIT 진단이다. 각 TimeLimit=300, Threads=1이며 다른 원래 discrete 계열은 continuous다. `native LB` 열은 실제 partial-MILP ObjBound이다. 마지막 global LB 열에만 `max(기존 LB, nextafter(native LB−1e−8, −∞))` convention을 적용했고, exact rational dual certificate로 부르지 않는다. TimeLimit 설정 300초와 실제 Runtime을 분리했다. Gurobi는 종료에 필요한 속성 계산으로 Runtime이 설정 시간을 넘을 수 있다고 명시한다 ([공식 TimeLimit 문서](https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#timelimit)). 세부 row/bound 및 복원한 integrality 오차는 개별 RESULT JSON에 남겼다.
