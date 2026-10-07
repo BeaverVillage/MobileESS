@@ -91,11 +91,14 @@ def pseudocosts(bb):
 def chooser(bb,d):
     stats=pseudocosts(bb);all_means=[float(np.mean(v)) for by_value in stats.values() for v in by_value.values() if v]
     default=float(np.mean(all_means)) if all_means and max(all_means)>0 else 1.
-    def choose(eligible,x):
+    def choose(eligible,x,support=None):
         material=[j for j in eligible if min(abs(float(x[j])),abs(1-float(x[j])))>1e-8];candidates=material or eligible
+        support_maximum=max((float(support[k]) for k in candidates),default=0.) if support is not None else 0.
         def rank(j):
             v=float(x[j]);s=stats.get(j,{0:[],1:[]});down=(float(np.mean(s[0])) if s[0] else default)*abs(v);up=(float(np.mean(s[1])) if s[1] else default)*abs(1-v)
-            score=min(down,up)+.1*max(down,up);family=0 if str(d['names'][j]).startswith(('node_activity[','charge_mode[')) else 1
+            score=min(down,up)+.1*max(down,up)
+            if support_maximum>0:score*=max(1e-6,float(support[j])/support_maximum)
+            family=0 if str(d['names'][j]).startswith(('node_activity[','charge_mode[')) else 1
             return (-score,-min(abs(v),abs(1-v)),family,j)
         return min(candidates,key=rank)
     return choose
@@ -280,7 +283,7 @@ def run(args):
                 continue
             if bb.audit()['global_gap']<=.005:break
         audit_checkpoint(bb,oracle.A,oracle.d)
-        atomic(RUN/'RESULT.json',dict(UTC=stamp(),coverage=bb.audit(),processed=bb.state['processed'],processed_this_session=bb.state['processed']-start_count,wall_seconds=time.perf_counter()-begin,LP_calls_this_session=len(oracle.calls),restartable_OPEN_queue=True,pruning_counts={reason:sum(r['prune_reason']==reason for r in bb.state['ledger']) for reason in ['EXACT_LP_INFEASIBILITY','CERTIFIED_LB_AT_LEAST_VALIDATED_UB','INTEGER_REPLAY_PASS_AND_CERTIFIED_OPTIMUM']},strong_branching='Not performed: current measured LP cost does not justify extra probes',root_recovery_Method='RETAIN_EXISTING_ARCHIVED_ROOT_PROOF',child_Method=2,child_Crossover=0,child_start='cold; prior nonoptimal parent basis numerically unstable',heuristic_branch_rank='deterministic measured pseudocost with fractionality and original family tie-break',unresolved_domains_retained=True))
+        atomic(RUN/'RESULT.json',dict(UTC=stamp(),coverage=bb.audit(),processed=bb.state['processed'],processed_this_session=bb.state['processed']-start_count,wall_seconds=time.perf_counter()-begin,LP_calls_this_session=len(oracle.calls),restartable_OPEN_queue=True,pruning_counts={reason:sum(r['prune_reason']==reason for r in bb.state['ledger']) for reason in ['EXACT_LP_INFEASIBILITY','CERTIFIED_LB_AT_LEAST_VALIDATED_UB','INTEGER_REPLAY_PASS_AND_CERTIFIED_OPTIMUM']},strong_branching='Not performed: current measured LP cost does not justify extra probes',root_recovery_Method='RETAIN_EXISTING_ARCHIVED_ROOT_PROOF',child_Method=2,child_Crossover=0,child_start='cold; prior nonoptimal parent basis numerically unstable',heuristic_branch_rank='measured pseudocost times normalized current exact-certificate dual row support (heuristic only), fractionality and original-family tie-break',unresolved_domains_retained=True))
     finally:bb.save(checkpoint);oracle.close()
 
 if __name__=='__main__':

@@ -123,7 +123,10 @@ class LPOracle:
             values=x[self.binary];distance=np.minimum(np.abs(values),np.abs(1-values));result['fractional_binary_count']=int(np.count_nonzero(distance>1e-8));result['raw_noninteger_binary_count']=int(np.count_nonzero((values!=0)&(values!=1)))
             fixed={j for j,v in node['fixings']};eligible=[int(j) for j in self.binary if int(j) not in fixed and x[j] not in (0,1)]
             if eligible:
-                j=self.choose_branch(eligible,x) if hasattr(self,'choose_branch') else min(eligible,key=lambda j:(-min(abs(float(x[j])),abs(1-float(x[j]))),j))
+                support=np.zeros(self.A.shape[1]);support[self.binary]=np.asarray(abs(self.A[:,self.binary]).T@abs(clipped)).ravel()
+                j=self.choose_branch(eligible,x,support) if hasattr(self,'choose_branch') else min(eligible,key=lambda j:(-min(abs(float(x[j])),abs(1-float(x[j]))),j))
+                result['branch_dual_support']=float(support[j])
+                result['branch_score_is_heuristic_only']=True
                 result.update(branch_variable=j,branch_name=str(self.d['names'][j]),branch_is_original_binary=True,raw_fractional_branch_value=float(x[j]))
             elif np.all((values==0)|(values==1)):
                 if self.reader is None:self.reader=hc.physical_reader()
@@ -138,10 +141,16 @@ class LPOracle:
             if ray is None:
                 result.update(LP_status='UNRESOLVED',infeasibility_ray_unavailable=True)
             else:
-                result.update(infeasibility_ray_available_but_not_pruned_in_cold_barrier=True,LP_status='UNRESOLVED')
+                zero=dict(d,objective=np.zeros_like(d['objective']),constant=np.array(0.))
+                certificate,clipped,residual,terms=hc.exact_bounded_lagrangian(self.CSC,zero,-ray)
+                positive=F(certificate['exact_rational'])>0
+                np.savez_compressed(folder/'FARKAS_PROOF.npz',FarkasDual=ray,clipped_Pi=clipped)
+                certificate.update(PASS=positive,proof_kind='Exact positive bounded Lagrangian for mathematical zero; contradiction',native_objective_unchanged=True,original_model_identity=self.identity,fixing_hash=node['fixing_hash'])
+                write(receipt.relative_to(OUT).parent/'INFEASIBILITY_CERTIFICATE.json',certificate)
+                result.update(LP_status='INFEASIBLE' if positive else 'UNRESOLVED',exact_infeasibility_PASS=positive,infeasibility_certificate_SHA256=sha(folder/'INFEASIBILITY_CERTIFICATE.json'))
         result['proof_wall_seconds']=time.perf_counter()-proof_start
         log=(folder/'LP.log').read_text(encoding='utf-8',errors='replace');basis_lines=[l for l in log.splitlines() if re.search(r'warm.start|basis',l,re.I)]
-        result.update(parent_basis_available=parent_basis_path.exists(),saved_nonoptimal_parent_basis_omitted_as_unstable=True,dual_start_supplied=False,dual_start_accepted=False,basis_evidence=basis_lines,basis_accepted=basis_supplied and any('LP warm-start: use basis' in l for l in basis_lines) and not any(re.search(r'ignored|invalid|discard',l,re.I) for l in basis_lines),warnings=[l for l in log.splitlines() if re.search(r'warning|numerical trouble|unscaled.*violation|quad precision',l,re.I)],total_node_wall_seconds=time.perf_counter()-t0)
+        result.update(parent_basis_available=parent_basis_path.exists(),saved_nonoptimal_parent_basis_omitted_as_unstable=parent_basis_path.exists(),dual_start_supplied=False,dual_start_accepted=False,basis_evidence=basis_lines,basis_accepted=basis_supplied and any('LP warm-start: use basis' in l for l in basis_lines) and not any(re.search(r'ignored|invalid|discard',l,re.I) for l in basis_lines),warnings=[l for l in log.splitlines() if re.search(r'warning|numerical trouble|unscaled.*violation|quad precision',l,re.I)],total_node_wall_seconds=time.perf_counter()-t0)
         # Exactly the same normalized receipt is written and passed to the
         # controller. Default infinite parameter sentinels become JSON null;
         # this changes metadata only and keeps the saved result digest stable.
