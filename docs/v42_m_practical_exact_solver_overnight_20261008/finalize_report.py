@@ -90,6 +90,8 @@ Primal 개입 {summary['primal_interventions']}회. restricted neighborhood ObjB
 
 ## 자원, 검증 및 한계
 
+선정된 external 프로세스의 Windows lifetime peak와 완료 receipt의 관측치를 합친 known peak RSS는 **{summary['resources']['peak_known_RSS_including_selected_Windows_lifetime_peak']} bytes**입니다. `OWNED_RESOURCE_MONITOR_RESULT.json`의 PID/creation-time/cwd/script를 결속해 build/LP/replay/audit 구간을 관측했습니다. 과거 종료된 프로세스에서 solve 바깥의 미관측 peak는 사후 복원할 수 없으며, 이 한계를 0으로 표시하지 않습니다.
+
 Native production의 raw derived LB에 CLI 소수 반올림 문제가 있었으나 그 값을 전역 ledger에 채택하지 않았습니다. `DERIVED_GLOBAL_LB_CORRECTION.json`과 독립 감사의 정확한 native ObjBound를 사용합니다. 또 과거 cold-dual receipt의 infinite parameter sentinel 정규화 오류는 원본 checkpoint byte를 보존하고 optimize=0으로 고쳤습니다. 모델이나 수학적 bound를 바꾸는 복구는 아닙니다.
 
 완료 receipt Native Runtime 합계 **{summary['resources']['completed_receipt_native_Runtime_sum']:.3f}s**, Work 합계 **{summary['resources']['completed_receipt_Work_sum']:.3f}**, 완료 receipt peak RSS **{summary['resources']['peak_completed_receipt_RSS']} bytes**. 새 완료 optimize 호출 {summary['resources']['new_completed_optimize_calls']}. 보고 시점 task wall **{summary['resources']['wall_elapsed_from_immutable_start']:.3f}s**. 고정 시작 `{result['immutable_deadline']['task_start_UTC']}`, deadline `{result['immutable_deadline']['deadline_UTC']}`. build/replay/audit/Git 게시도 이 한 기한에 포함됩니다.
