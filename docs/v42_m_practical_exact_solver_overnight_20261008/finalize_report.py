@@ -10,6 +10,10 @@ def run():
     audit=read(OUT/'PACKAGE_AUDIT.json');assert audit['PASS'] and audit['optimize_calls']==0
     assert audit['checkpoint_SHA256']==sha(OUT/'external_production/OPEN_CHECKPOINT.json')
     summarize_progress.run();summary=read(OUT/'ARCHITECTURE_COMPARISON.json')
+    checks=read(OUT/'FINAL_TEST_RUNS.json');assert checks['PASS'] and checks['optimize_calls']==0
+    monitor=read(OUT/'OWNED_RESOURCE_MONITOR_RESULT.json');assert monitor['PASS']
+    summary['resources']['selected_process_lifetime_resources']=monitor
+    summary['resources']['peak_known_RSS_including_selected_Windows_lifetime_peak']=max(summary['resources']['peak_completed_receipt_RSS'],monitor['Windows_lifetime_peak_wset'],monitor['observed_peak_RSS'])
     decision=read(OUT/'FINAL_BACKEND_DECISION.json')
     allowed={'M_PRACTICAL_SOLVER_P1_GAP_LE_0P5','M_PRACTICAL_SOLVER_P1_ACCEPTED','M_EXTERNAL_BB_PROMISING_GAP_REMAINS','M_NATIVE_BB_PROMISING_GAP_REMAINS','M_EXACT_BB_TRACTABILITY_FAIL','M_NUMERICAL_INCONCLUSIVE'}
     assert decision['classification'] in allowed
