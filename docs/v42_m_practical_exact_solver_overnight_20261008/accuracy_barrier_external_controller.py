@@ -185,6 +185,7 @@ def consume_checked(bb,node_id,result,A,d):
         raise AssertionError('WITNESS_CONFLICTS_WITH_REGISTERED_GLOBAL_LB_RETAIN_OPEN_STOP')
     trial=copy.deepcopy(bb);trial.apply(node_id,result)
     audit_checkpoint(trial,A,d)
+    trial.state['ledger'][-1]['accepted_UTC']=stamp()
     return trial
 
 def start_queue(oracle,args):
