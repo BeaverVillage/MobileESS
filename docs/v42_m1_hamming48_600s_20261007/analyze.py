@@ -123,17 +123,32 @@ def main():
     write('UB_COMPARISON.json',compare)
     gap=dict(UB_original=original,UB_old=UB,UB_new=newUB,LB_valid=LB,global_LB_changed=False,neighborhood_ObjBound_used_as_global_LB=False,absolute_improvement=delta,relative_UB_improvement=delta/UB,gap_new=(newUB-LB)/newUB,gap_new_percent=100*(newUB-LB)/newUB,original_absolute_separation=original-LB,current_starting_separation=UB-LB,additional_poor_incumbent_attribution=delta,cumulative_poor_incumbent_attribution=original-newUB,fraction_original_separation_removed=(original-newUB)/(original-LB),fraction_current_remaining_separation_removed=delta/(UB-LB),remaining_separation=newUB-LB,remaining_difference_is_not_proven_integrality_gap=True)
     write('GAP_UPDATE.json',gap)
+    # A saved 300s checkpoint of THIS 600s run; no counterfactual solve is launched.
+    with (OUT/'INCUMBENT_TRACE.csv').open(encoding='utf-8',newline='') as stream:trace=list(csv.DictReader(stream))
+    checkpoint=dict(PASS=True,scope='Existing saved MIPSOL events with native_Runtime<=300 within this one 600s optimize call',counterfactual_300s_run_equivalence_claimed=False,optimize_calls_added=0,valid_UB=UB,point='PR170 center',checks=[])
+    reader=hc.physical_reader()
+    for event in sorted((v for v in trace if float(v['native_Runtime'])<=300 and float(v['rho'])<UB),key=lambda v:float(v['rho'])):
+        path=OUT/event['point']
+        with np.load(path) as z:point=z['x'].copy()
+        raw=hc.replay(A,d,point,True);physical=reader.check(point,A,d);H=int(np.count_nonzero((point[free]>.5)!=(center[free]>.5)))
+        passing=bool(raw['PASS'] and physical['PASS'] and np.array_equal(point[fixed],center[fixed]) and H<=48)
+        checkpoint['checks'].append(dict(event=event['event'],point=event['point'],SHA256=sha(path),native_Runtime=float(event['native_Runtime']),objective=float(d['objective']@point),Hamming_distance=H,PASS=passing,original_C3A=raw,physical=physical))
+        if passing:
+            checkpoint.update(valid_UB=float(d['objective']@point),point=event['point'],native_Runtime=float(event['native_Runtime']),Hamming_distance=H);break
+    checkpoint['additional_valid_gain_after_300_seconds']=checkpoint['valid_UB']-newUB
+    write('IN_RUN_300S_CHECKPOINT.json',checkpoint)
+    compare['same_600s_run_verified_300s_checkpoint']=checkpoint['valid_UB'];compare['additional_valid_gain_after_300_seconds']=checkpoint['additional_valid_gain_after_300_seconds'];compare['checkpoint_does_not_claim_counterfactual_300s_run_equivalence']=True
+    write('UB_COMPARISON.json',compare)
     if delta>=.001 and result['HAMMING_BOUNDARY_ACTIVE']:
         recommendation=f'새 valid UB={newUB} 중심에서 동일 슬롯/2100 B/params/600초로 radius만64로 늘리는 단일 primal 실험을 사전등록할 것. 이 작업에서는 실행하지 않는다.'
         rationale='Material improvement와 radius48 경계 활성의 동시 관찰. 전역 최적성 또는 반경만의 인과성은 증명되지 않았다.'
     elif delta>=.001:
         recommendation=f'새 valid UB={newUB} 중심에서 동일 슬롯/Hamming48/params/600초의 단일 recenter primal 실험을 사전등록할 것. 이 작업에서는 실행하지 않는다.'
-        rationale='Material improvement이며 경계는 비활성이므로 반경 확대 대신 새 검증 해 주변의 primal 탐색을 한 번만 제안한다.'
+        rationale=f'Material improvement ΔUB={delta}, 직전300초 gain 대비{delta/prior_gain}배이다. H={result["H_best"]}로 경계와 한 비트 차이이며 TIME_LIMIT로 종료했다. 새 검증 해를 중심으로 같은 제한을 유지한 한 번의 탐색을 추천하지만 local/global 최적성이나 포화를 주장하지 않는다.'
     else:
         recommendation='추가 primal solve 전에 이번 최선 검증 해와 기존 PR169/170 LB·grid 근거를 함께 사용해 남은 separation을 설명할 critical discrete/time block을 읽기 전용으로 재진단할 것. 새 optimize나 formulation 변경 없이 한 진단 작업만 추천하며 여기서는 실행하지 않는다.'
         rationale='이번 추가 개선은 material 기준 미만이거나0이다. 같은 primal 예산의 반복을 자동 제안하지 않고 남은 구조를 기존 근거로 진단한다. 이것은 전역 포화 증명이 아니다.'
     write('NEXT_ACTION_RECOMMENDATION.json',dict(count=1,executed=False,recommendation=recommendation,center_UB=newUB,center_point='BEST_VALID_POINT.npz',center_point_SHA256=sha(OUT/'BEST_VALID_POINT.npz'),rationale=rationale))
-    with (OUT/'INCUMBENT_TRACE.csv').open(encoding='utf-8',newline='') as stream:trace=list(csv.DictReader(stream))
     result['strict_improvement_events_excluding_initial']=sum(r['is_new_incumbent']=='True' and r['previous_best']!='' for r in trace)
     result['number_of_improving_incumbents']=result['strict_improvement_events_excluding_initial']
     write('RESULT.json',result)
