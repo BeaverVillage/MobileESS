@@ -1,0 +1,105 @@
+
+Gurobi 13.0.2 (win64) logging started Wed Oct  7 10:36:21 2026
+
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Set parameter TimeLimit to value 3600
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  3600
+MIPGap  0.005
+Method  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 3731730 rows, 2738613 columns and 27743601 nonzeros (Min)
+Model fingerprint: 0xe8e47e59
+Model has 1 linear objective coefficients
+Variable types: 1779213 continuous, 959400 integer (930588 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 5e+06]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 5e+06]
+  RHS range        [1e-07, 5e+06]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Presolve removed 873253 rows and 100090 columns
+Presolve time: 4.66s
+
+Explored 0 nodes (0 simplex iterations) in 6.84 seconds (14.71 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+Set parameter TimeLimit to value 3593.15700006485
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  3593.15700006485
+MIPGap  0.005
+Method  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+           Constraints          |            Bounds           |  Runtime
+      Min       Max     Guess   |   Min       Max     Guess   |
+--------------------------------------------------------------------------
+        0   3520512         -         0   3603042         -           0s
+        0        56         -         0       111         -          17s
+        2        56         -         0       111         -          20s
+        5        56         -         0       111         -          25s
+        8        56         -         0       111         -          30s
+       11        56        56         0       111         -          35s
+       14        56        56         0       111         -          40s
+       17        56        56         0       111         -          46s
+       20        56        56         0       111         -          50s
+       23        55        55         0       108         -          56s
+       27        53        50         0       102         -          61s
+       32        52        50         0        99         -          66s
+       37        52        50         0        99         -          70s
+       43        52        50         0        99         -          75s
+       49        52        52         0        99         -          81s
+       52        52        52         0        99         -          86s
+       52        52        52         0        99         -          90s
+       52        52        52         0        99         -          95s
+       52        52        52         0        99        99         100s
+       52        52        52         0        99        99         106s
+       52        52        52         0        99        99         110s
+       52        52        52         4        99        99         115s
+       52        52        52        10        99        99         121s
+       52        52        52        16        99        99         126s
+       52        52        52        21        99        99         130s
+       52        52        52        27        99        99         135s
+       52        52        52        33        99        99         141s
+       52        52        52        39        99        99         146s
+       52        52        52        45        99        99         151s
+       52        52        52        50        99        99         155s
+       52        52        52        56        99        99         160s
+       52        52        52        62        99        99         166s
+       52        52        52        67        99        99         170s
+       52        52        52        73        99        99         175s
+       52        52        52        79        99        99         180s
+       52        52        52        85        99        99         185s
+       52        52        52        91        99        99         191s
+       52        52        52        97        99        99         196s
+       52        52        52        99        99        99         198s
+
+IIS computed: 52 constraints, 99 bounds
+IIS runtime: 197.60 seconds (89.60 work units)
+Warning: linear constraint 0 and linear constraint 1 have the same name "known_GPU_binding"

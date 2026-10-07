@@ -1,0 +1,86 @@
+
+Gurobi 13.0.2 (win64) logging started Wed Oct  7 10:34:30 2026
+
+Set parameter OutputFlag to value 1
+Set parameter LogToConsole to value 0
+Set parameter TimeLimit to value 3600
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  3600
+MIPGap  0.005
+Method  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 701771 rows, 25809 columns and 12653654 nonzeros (Min)
+Model fingerprint: 0x20b3bbd7
+Model has 1 linear objective coefficients
+Variable types: 23208 continuous, 2601 integer (1677 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 3e+05]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 3e+05]
+  RHS range        [1e-07, 1e+06]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Presolve removed 688485 rows and 15972 columns
+Presolve time: 1.18s
+Presolved: 13286 rows, 9837 columns, 197736 nonzeros
+Variable types: 6806 continuous, 3031 integer (2073 binary)
+Performing another presolve...
+Presolve removed 7274 rows and 2599 columns
+Presolve time: 0.36s
+
+Root relaxation: infeasible, 1173 iterations, 0.01 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 infeasible    0               - infeasible      -     -    2s
+
+Explored 1 nodes (1173 simplex iterations) in 2.13 seconds (4.58 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+Set parameter TimeLimit to value 3.5978659999370575e+03
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  3.5978659999370575e+03
+MIPGap  0.005
+Method  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+           Constraints          |            Bounds           |  Runtime
+      Min       Max     Guess   |   Min       Max     Guess   |
+--------------------------------------------------------------------------
+        0    580742         -         0     35256         -           0s
+        0       155         -         0        86         -          13s
+        4       154         -         0        85         -          15s
+       37       154       154         0        85         -          20s
+       98       153       153         0        85         -          25s
+      150       150       150         0        85         -          30s
+      150       150       150        35        85        85          35s
+      150       150       150        85        85        85          39s
+
+IIS computed: 150 constraints, 85 bounds
+IIS runtime: 39.23 seconds (50.94 work units)
+Warning: linear constraint 0 and linear constraint 1 have the same name "known_GPU_binding"

@@ -1,0 +1,100 @@
+{
+  "BASELINE_FEASIBLE_WITNESS_PASS": true,
+  "raw_point_axis_exact_match": true,
+  "full_row_replay": {
+    "PASS": true,
+    "original_authority_tolerance": 1e-05,
+    "all_rows_replayed": 9133426,
+    "all_columns_replayed": 7449002,
+    "max_row_violation": 5.975753551989982e-07,
+    "max_bound_violation": 0.0,
+    "max_integrality_residual": 0.0,
+    "violations_over_authority": 0,
+    "worst_row_index": 521154,
+    "worst_row_family": "line_thermal_face",
+    "raw_point_rounded_or_clipped": false
+  },
+  "physical": {
+    "PASS": true,
+    "jobs": 1499,
+    "old_validator_PASS": true,
+    "deterministic_WAN_PASS": true,
+    "full_service_and_carryout_PASS": true,
+    "rack_gang_PASS": true,
+    "physical_capacity_max_violation": 0,
+    "grid_max_violation": 5.975753550879759e-07,
+    "CC4_max_violation": 2.085016603814438e-10,
+    "Runtime_max_violation": 0,
+    "failed": [],
+    "limitation": "Native reserve anonymous site headroom is additionally checked by independent linear residual evaluation; no Actual AC run is executed.",
+    "independent_known_GPU_max_violation": 0.0,
+    "independent_Runtime_binding_max_violation": 1.0658141036401503e-13,
+    "independent_reserve_headroom_max_violation": 0.0,
+    "solver_max_violation": 5.975753551989982e-07,
+    "P1_rho": 0.6715878825912354,
+    "validation_seconds": 9.861163699999452,
+    "artificial_physical_slack": 0,
+    "model_defined_scientific_objective_snapshot": {
+      "rho": 0.6715878825912354,
+      "reserve_shortfall": 89830.0,
+      "CC4_reference_deviation": 2.4103995715269106,
+      "migration_count": 0.0,
+      "shift_slots": 727.0,
+      "prestart_changes": 231.0
+    },
+    "artificial_scientific_slack": 0,
+    "reserve_shortfall_semantics": "P2 is the inherited model-defined reserve shortfall quantity, not an introduced feasibility-relaxation slack; unoptimized level snapshots are not claimed lexicographic optima",
+    "all_phase_grid": {
+      "PASS": true,
+      "maximum_violations": {
+        "voltage": 3.07292584711405e-08,
+        "line_current": 5.975753550879759e-07,
+        "transformer_current": 0.0,
+        "transformer_kVA": 0.0
+      },
+      "min_voltage_pu": 0.98202260217481,
+      "max_voltage_pu": 1.0500000146329802,
+      "transformer_current_authority_sha256": "0cffff2af474221a7a5693f3c2b7a83026bd1522de2d3f66032c1757b9735d51",
+      "voltage_band": [
+        0.95,
+        1.05
+      ],
+      "margin_pu": 0.0,
+      "all_transformer_phases_audited": true
+    }
+  },
+  "original_final_locks": [
+    {
+      "component": "rho",
+      "point_value": 0.6715878825912354,
+      "original_lock_rhs": 0.6715878825912354,
+      "PASS": true
+    },
+    {
+      "component": "migration_count",
+      "point_value": 0.0,
+      "original_lock_rhs": 1e-08,
+      "PASS": true
+    },
+    {
+      "component": "shift_magnitude",
+      "point_value": 727.0,
+      "original_lock_rhs": 727.00000001,
+      "PASS": true
+    },
+    {
+      "component": "prestart_relocation",
+      "point_value": 231.0,
+      "original_lock_rhs": 231.00000001,
+      "PASS": true
+    }
+  ],
+  "accepted_control_max_difference": 0.0,
+  "accepted_selected_jobs_equal": true,
+  "original_raw_point": {
+    "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-03\\single-worker-single-thread-a1-m1\\SINGLE_THREAD_LOCAL\\A1_FINAL_POINT.npz",
+    "sha256": "7aef8451b6ba4dd430ae9b07466816191e02c3b9c35114345bde87c53ccbfa5c",
+    "bytes": 27799475
+  },
+  "optimization_calls": 0
+}

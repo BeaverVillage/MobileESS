@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B1 · 5월 캠페인</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f6fa;color:#142033;font-family:Segoe UI,Malgun Gothic,sans-serif}
+main{max-width:660px;margin:36px auto;padding:0 24px}header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+h1{font-size:26px;margin:0 0 8px}p{margin:0;color:#64748b;font-size:14px}.badge{color:white;background:#059669;border-radius:20px;padding:8px 15px;font-size:14px;font-weight:600}
+.card{background:white;border-radius:16px;padding:22px;margin-bottom:15px}.row{display:flex;justify-content:space-between;align-items:center}.muted{color:#64748b;font-size:13px}
+.count{font-size:22px;font-weight:700}.track{height:9px;border-radius:5px;background:#e7ecf3;margin:15px 0 10px;overflow:hidden}.bar{height:100%;background:#2563eb;transition:width .4s}
+h2{margin:0 0 8px;font-size:24px}.detail{color:#2563eb;font-size:15px}.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:20px}
+.step{padding:9px 2px;border-radius:7px;background:#f1f5f9;color:#64748b;font-size:12px;text-align:center}.step.active{background:#eff6ff;color:#2563eb;font-weight:600}.step.pass{background:#ecfdf5;color:#059669}.step.fail{background:#fef2f2;color:#dc2626}
+.budget{margin-top:12px;font-size:18px}.remaining{font-size:23px;font-weight:700}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:24px}
+.metric strong{display:block;font-size:23px;margin-top:6px;font-weight:500;font-variant-numeric:tabular-nums}footer{display:flex;justify-content:space-between;padding:8px 2px 28px;color:#64748b;font-size:12px}
+#reason{color:#dc2626;font-size:13px;margin-bottom:15px}@media(max-width:480px){main{padding:0 14px;margin:22px auto}.card{padding:18px}.step{font-size:10px}h1{font-size:23px}.metrics{gap:4px}.metric strong{font-size:20px}}
+.build{border-top:1px solid #e7ecf3;margin-top:18px;padding-top:16px}.build .track{margin:10px 0}.build-title{font-size:14px;font-weight:600}.build-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.build-item{font-size:11px;color:#94a3b8}.build-item.active{color:#2563eb;font-weight:600}.build-item.pass{color:#059669}.bar.unknown{width:25%;animation:pulse 1.4s infinite alternate}@keyframes pulse{to{opacity:.25}}
+</style>
+</head>
+<body><main>
+<header><div><h1>B1 · 5월 캠페인</h1><p>2025.05.01 — 05.31</p><p id="run" style="font-size:11px;margin-top:5px;overflow-wrap:anywhere"></p></div><span id="status" class="badge">연결 중</span></header>
+<section class="card"><div class="row"><span class="muted">전체 진행</span><strong id="count" class="count">— / 31일</strong></div><div class="track"><div id="bar" class="bar" style="width:0"></div></div><span id="summary" class="muted">상태 확인 중</span></section>
+<section class="card"><h2 id="day">—</h2><div id="detail" class="detail">작업 확인 중</div><div id="steps" class="steps"></div>
+<div id="build" class="build" hidden><div class="row"><span id="build-label" class="build-title"></span><strong id="build-percent"></strong></div><div class="track"><div id="build-bar" class="bar"></div></div><div id="build-detail" class="muted"></div><div id="build-scope" class="muted" style="font-size:11px;margin-top:4px"></div><div id="build-list" class="build-list"></div></div></section>
+<section class="card"><div class="row muted"><span>A-stage 예산</span><span>3,600 s</span></div><div class="row budget"><span id="used">사용 — s</span><strong id="remaining" class="remaining">남은 — s</strong></div>
+<div class="row" style="margin-top:18px"><span class="muted">현재 최대 선로부하율</span><strong id="loading" style="font-size:25px;color:#2563eb">해 대기</strong></div><div id="loading-note" class="muted" style="font-size:11px;margin-top:4px"></div>
+<div class="metrics"><div class="metric"><span class="muted">현재 해</span><strong id="inc">—</strong></div><div class="metric"><span class="muted">하한 · BestBd</span><strong id="bound">—</strong></div><div class="metric"><span class="muted">최적성 Gap</span><strong id="gap">—</strong></div></div><div id="solver-note" class="muted" style="white-space:pre-line;margin-top:12px"></div></section>
+<div id="reason"></div><footer><span id="ram">RAM —</span><span id="updated">갱신 —</span></footer>
+</main>
+<script>
+const $=id=>document.getElementById(id),fmt=n=>Math.round(n).toLocaleString('ko-KR');
+let busy=false,lastReceived=null;
+async function refresh(){if(busy)return;busy=true;const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),900);try{
+const response=await fetch('/api/status',{cache:'no-store',signal:controller.signal});if(!response.ok)throw Error();const s=await response.json();lastReceived=Date.now();
+$('status').textContent=s.status;$('status').style.background=s.tone;$('count').textContent=s.completed+' / 31일';
+$('run').textContent=s.run_id;
+$('summary').textContent='완료 '+s.completed+'일 · timeout '+s.timeout+'일 · 실패 '+s.failed+'일 · 남은 '+s.pending+'일';
+if(s.reused_days?.length)$('summary').textContent+=' · 완료일 재사용 '+s.reused_days.map(day=>day.slice(5).replace('-','/')).join(', ');
+$('bar').style.width=(100*s.completed/31)+'%';$('day').textContent=s.day;$('detail').textContent=s.detail;
+$('used').textContent='사용 '+fmt(s.used)+' s';$('remaining').textContent='남은 '+fmt(s.remaining)+' s';
+$('inc').textContent=s.incumbent;$('bound').textContent=s.bound;$('gap').textContent=s.gap;
+$('solver-note').textContent=s.solver_note||'';
+$('loading').textContent=s.line_loading?.text||'해 대기';$('loading-note').textContent=s.line_loading?.note||'';
+$('ram').textContent='RAM '+s.ram;$('reason').textContent=s.reason;
+$('steps').replaceChildren(...s.steps.map(step=>{const e=document.createElement('span');e.className='step '+step.style;e.textContent=step.label;return e;}));
+const b=s.build;$('build').hidden=!b?.visible;if(b){$('build-label').textContent='모델 수립 · '+b.label;$('build-percent').textContent=b.current_percent===null?'단계 완료 '+Math.round(b.percent)+'%':b.percent.toFixed(1)+'%';$('build-bar').className='bar';$('build-bar').style.width=b.percent+'%';$('build-detail').textContent=b.detail;$('build-scope').textContent=b.percent_scope+' · 실제 완료 기준';$('build-list').replaceChildren(...b.steps.map(step=>{const e=document.createElement('span');e.className='build-item '+step.state;e.textContent=(step.state==='pass'?'✓ ':step.state==='active'?'● ':'○ ')+step.label+(step.percent===null?'':' ('+step.percent.toFixed(1)+'%)');return e;}));}
+}catch(e){$('status').textContent='상태 수신 지연';$('status').style.background='#d97706';}finally{clearTimeout(timeout);busy=false;}}
+function displayClock(){const age=lastReceived===null?null:(Date.now()-lastReceived)/1000,clock=new Date().toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour12:false});$('updated').textContent='화면 '+clock+' · '+(age===null?'연결 중':age>2?'수신 지연 '+Math.floor(age)+'초':'1초 주기');}
+setInterval(refresh,1000);setInterval(displayClock,1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();displayClock();}});
+refresh();displayClock();
+</script></body></html>

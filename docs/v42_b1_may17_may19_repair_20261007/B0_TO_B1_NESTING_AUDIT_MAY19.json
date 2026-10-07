@@ -1,0 +1,1345 @@
+{
+  "day": "2025-05-19",
+  "physical_population_equal": true,
+  "Runtime_GPU_service_mismatches": [],
+  "same_current_C0_Q50": true,
+  "same_current_C0_Q90": true,
+  "same_capacity": true,
+  "same_issue": true,
+  "B0_reference": {
+    "path": "C:\\v42_a1_pr134_supercompact_exact_20261007\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250519\\REFERENCE.json",
+    "sha256": "ed4fb19387868bb7ed72a1bbbc526b99abb5caca88f10dd373de6edf1ec98c38",
+    "bytes": 1590877
+  },
+  "B1_reference": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-19\\common_q90_v3\\COMMON_B0_REFERENCE_JOBS.json",
+    "sha256": "a0b15eeb6efe2811bd1faf7b67ab915f4b443d8d224b55e77df4b109145d7258",
+    "bytes": 1150065,
+    "period": "2025-05-19",
+    "units": "GPU,seconds,issue-origin 900s slots",
+    "role": "Authoritative known-job independent-day reference and exact service",
+    "authority_status": "FROZEN_SOURCE_REUSED"
+  },
+  "B0_rule": "V42_COMMON_FCFS_Q50_NOMINAL_RELEASE_V2",
+  "B1_rule": "PR134_ORIGINAL_R0_REQUESTED_DURATION_REFERENCE_WITH_CURRENT_Q50_SERVICE",
+  "zero_action_embedding": false,
+  "differing_positive_jobs": 1021,
+  "absent_start_site_jobs": 991,
+  "first_counterexample": [
+    {
+      "job_uid": "9017248",
+      "B0_site": "AIDC01",
+      "B1_site": "AIDC10",
+      "B0_start": 0,
+      "B1_start": 78,
+      "GPU": 60,
+      "service_slots": 5,
+      "allowed_starts": [
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "fixed_domain": false,
+      "B0_point_in_domain": false,
+      "reason": "NONZERO_PRESTART_RELOCATION_RELATIVE_TO_PR134_R0;NONZERO_TIMESHIFT_RELATIVE_TO_PR134_R0;B0_START_SITE_ABSENT_COMPLETE_PR134_DOMAIN"
+    },
+    {
+      "job_uid": "9017741",
+      "B0_site": "AIDC01",
+      "B1_site": "AIDC02",
+      "B0_start": 0,
+      "B1_start": 0,
+      "GPU": 8,
+      "service_slots": 2,
+      "allowed_starts": [
+        0
+      ],
+      "fixed_domain": false,
+      "B0_point_in_domain": true,
+      "reason": "NONZERO_PRESTART_RELOCATION_RELATIVE_TO_PR134_R0"
+    },
+    {
+      "job_uid": "9017742",
+      "B0_site": "AIDC02",
+      "B1_site": "AIDC03",
+      "B0_start": 0,
+      "B1_start": 0,
+      "GPU": 8,
+      "service_slots": 2,
+      "allowed_starts": [
+        0
+      ],
+      "fixed_domain": false,
+      "B0_point_in_domain": true,
+      "reason": "NONZERO_PRESTART_RELOCATION_RELATIVE_TO_PR134_R0"
+    },
+    {
+      "job_uid": "9017743",
+      "B0_site": "AIDC02",
+      "B1_site": "AIDC03",
+      "B0_start": 0,
+      "B1_start": 0,
+      "GPU": 8,
+      "service_slots": 2,
+      "allowed_starts": [
+        0
+      ],
+      "fixed_domain": false,
+      "B0_point_in_domain": true,
+      "reason": "NONZERO_PRESTART_RELOCATION_RELATIVE_TO_PR134_R0"
+    },
+    {
+      "job_uid": "9017744",
+      "B0_site": "AIDC02",
+      "B1_site": "AIDC03",
+      "B0_start": 0,
+      "B1_start": 0,
+      "GPU": 8,
+      "service_slots": 2,
+      "allowed_starts": [
+        0
+      ],
+      "fixed_domain": false,
+      "B0_point_in_domain": true,
+      "reason": "NONZERO_PRESTART_RELOCATION_RELATIVE_TO_PR134_R0"
+    }
+  ],
+  "timing_axis": "Both issue-relative slots; day controls use issue slots24..119",
+  "B0_CC4_rule": "capacity queue retains carryout/backlog",
+  "B1_CC4_rule": "cohort temporal Q10/Q90 cumulative envelope and work-conservation",
+  "B0_to_B1_CC4_embedding_proven": false,
+  "C1_grid_embedding_proven": false,
+  "direct_witness_status": "UNAVAILABLE_ZERO_ACTION_DOMAIN_COUNTEREXAMPLE",
+  "scientific_change_to_force_embedding_permitted": false,
+  "optimization_calls": 0,
+  "explanation": "B0 current FCFS Q50 reference is not the PR134 R0 reference. Identical service does not imply identical admitted no-action trajectory. No witness is fabricated or rounded.",
+  "rack_compatibility_equal": true,
+  "C1_endpoint_coefficients_exact_equal": true,
+  "C1_coefficient_mismatches": [],
+  "C1_idle_equal": true,
+  "C1_swing_equal": true,
+  "B0_C1": {
+    "path": "C:\\v42_a1_pr134_supercompact_exact_20261007\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250519\\C1_PLANNING_COEFFICIENTS.csv",
+    "sha256": "560b654bf33726e0df79794fcdaf23d4a96ce1c91049d6c720cc515e570af14c",
+    "bytes": 196153
+  },
+  "B0_power": {
+    "path": "C:\\v42_a1_pr134_supercompact_exact_20261007\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250519\\POWER_AUTHORITY.json",
+    "sha256": "f9c33b7512db8afa725a01c78c44ad67726c6f0c642081da03ae9cc7c2e69476",
+    "bytes": 1839
+  },
+  "B1_electrical_certificate": {
+    "path": "D:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250519\\V41_ELECTRICAL_CERTIFICATE.json",
+    "sha256": "8b3610f666504c6ba60c35aaca6f906edcda1c0df9df7b85f46aa8e4d5c41511",
+    "bytes": 137975
+  },
+  "B0_voltage": [
+    0.95,
+    1.05
+  ],
+  "B1_voltage": {
+    "lower_pu": 0.95,
+    "upper_pu": 1.05
+  },
+  "B0_network_authority": {
+    "capacities": {
+      "AIDC01": 80,
+      "AIDC02": 40,
+      "AIDC03": 80,
+      "AIDC04": 40,
+      "AIDC05": 100,
+      "AIDC06": 80,
+      "AIDC07": 40,
+      "AIDC08": 80,
+      "AIDC09": 40,
+      "AIDC10": 80,
+      "AIDC11": 40,
+      "AIDC12": 80
+    },
+    "rack_compatibility": {
+      "AIDC01": [
+        80
+      ],
+      "AIDC02": [
+        40
+      ],
+      "AIDC03": [
+        80
+      ],
+      "AIDC04": [
+        40
+      ],
+      "AIDC05": [
+        100
+      ],
+      "AIDC06": [
+        80
+      ],
+      "AIDC07": [
+        40
+      ],
+      "AIDC08": [
+        80
+      ],
+      "AIDC09": [
+        40
+      ],
+      "AIDC10": [
+        80
+      ],
+      "AIDC11": [
+        40
+      ],
+      "AIDC12": [
+        80
+      ]
+    },
+    "network_static_complete": true,
+    "electrical_adapter_bound": false,
+    "static_input_metadata": {
+      "OpenDSS_master": {
+        "bytes": 17008,
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Master.dss",
+        "relative_path": "IEEE123Master.dss",
+        "sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969"
+      },
+      "PCC_mapping": {
+        "bytes": 13785,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v35r3e_r1_beam\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+        "relative_path": "Generated_ThreePhase_PCC_v4.dss",
+        "sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719",
+        "original_path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss"
+      },
+      "service_PCC_mapping": {
+        "bytes": 6058,
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\service_node_electrical_mapping_v1.csv",
+        "relative_path": "service_node_electrical_mapping_v1.csv",
+        "sha256": "c3763567f6785f182ab151ca0390918017d4e24c2733f6d72d2304bba416322e"
+      },
+      "line_ratings": {
+        "bytes": 6038,
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_Planning_Line_Ratings_u080.dss",
+        "relative_path": "Generated_Planning_Line_Ratings_u080.dss",
+        "sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302"
+      },
+      "transformer_ratings": {
+        "feeder_manifest_SHA": "1daaf55467089a818b4ed1b00c6e3c17f9f5e18e183c1193c7356af98ad762d6",
+        "runtime_adapter": {
+          "bytes": 38747,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+          "relative_path": "opendss_runtime_adapter.json",
+          "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036"
+        }
+      },
+      "native_allocation_authority": {
+        "bytes": 38747,
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+        "relative_path": "opendss_runtime_adapter.json",
+        "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036"
+      }
+    },
+    "alpha_BG": 1.15,
+    "grid_numeric_coefficients_source": "REGENERATE_APRIL_AFTER_GPU_GATE; NO_MAY_COEFFICIENT_DONOR",
+    "power_authority": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_april_port_from_may_pr\\docs\\v42_april_port_from_may_pipeline\\MAY_PIPELINE\\MAY_POWER_CONVERSION_AUDIT.json",
+      "sha256": "33864bbbcfe359d3b80f33163c299cc61dc6965c1b564f8be30f4bc97595d795",
+      "bytes": 18746
+    }
+  },
+  "B1_electrical_input_refs": [
+    {
+      "bytes": 5265,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\audit\\2025-05-19\\V41R2_B0_IT_PCC.npz",
+      "sha256": "2ba2c3adfe3889180ebbad69463e9056b7b1f5f335b36226360e6e14f6353d99"
+    },
+    {
+      "bytes": 1438,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v24t_thermal_aware_aidc\\V24T_C1_QUASISTATIC_MODEL.json",
+      "relative_path": "V24T_C1_QUASISTATIC_MODEL.json",
+      "sha256": "02a19e6c2d8cb44ec6b90ff1a4c98f21d5e848cda2dc34f2aaf2f959f9e6579e"
+    },
+    {
+      "bytes": 4194,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v28\\thermal.py",
+      "relative_path": "thermal.py",
+      "sha256": "079757208159a19f0b15419a2b1d6037143bae53a8bbddbf317565165d35e196"
+    },
+    {
+      "bytes": 6122,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v28r2\\c1_affine.py",
+      "relative_path": "c1_affine.py",
+      "sha256": "912c870a2c062431cac60f2157f3b4399ad824119facdafbd7ac3f1788c40c13"
+    },
+    {
+      "bytes": 2050,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v39a\\contracts.py",
+      "relative_path": "contracts.py",
+      "sha256": "2e69721fc48495d19bba97d08b1f12d140dfb36d580369fe0d60f062287a1446"
+    },
+    {
+      "bytes": 4101,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v39a\\power.py",
+      "relative_path": "power.py",
+      "sha256": "7b5899b0b0ae15a1d1515e49b6664cef9d9c968d968cabc1bfe40a5c21ae77c5"
+    },
+    {
+      "bytes": 17008,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Master.dss",
+      "relative_path": "IEEE123Master.dss",
+      "sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969"
+    },
+    {
+      "bytes": 13785,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+      "relative_path": "Generated_ThreePhase_PCC_v4.dss",
+      "sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719"
+    },
+    {
+      "bytes": 6456,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\may_2025\\days\\2025-05-19\\aemo_forecast.json",
+      "relative_path": "aemo_forecast.json",
+      "sha256": "7939f96483768fccf78e5b650f7e6ed1c9346b5bfac2030f43161ae5d699755d"
+    },
+    {
+      "bytes": 5265,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\audit\\2025-05-19\\V41R2_B0_IT_PCC.npz",
+      "sha256": "2ba2c3adfe3889180ebbad69463e9056b7b1f5f335b36226360e6e14f6353d99"
+    },
+    {
+      "bytes": 1467,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\artifacts\\v41r2_780gpu_capacity_rebase\\V41R2_780GPU_CAPACITY_AUTHORITY.json",
+      "sha256": "f8200de1092ee0daac6c91798f0f5e24429b203cff4d66baca2eca387affb6e7"
+    },
+    {
+      "bytes": 1054,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\audit\\V41R3_ACTUAL_NATIVE_CONTROL_AUTHORITY.json",
+      "sha256": "b69f45689aa17a963db91b04685419639ec85fbdbb9c9f9815e4cbcf882d677f"
+    },
+    {
+      "bytes": 355,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\audit\\V41R3_BACKGROUND_SCALE_AUTHORITY.json",
+      "sha256": "1bfeca08977c79ab44d9a6b843308197c714c692c26fda0bfff7d14824e13d7d"
+    },
+    {
+      "bytes": 607,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\audit\\V41R3_MESS_POWER_AUTHORITY.json",
+      "sha256": "214a8f847020f284fc043dbb7f7b8576e347de2a140a691a9114a9abc5ac1182"
+    },
+    {
+      "bytes": 4846,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\audit\\2025-05-19\\INPUT_PREPARATION.json",
+      "sha256": "546fe6710ba23e0f39a64c112c6fc4c3b0096725a4c8c3b465db465ddf4641e7"
+    },
+    {
+      "bytes": 814,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\v41r4_io.py",
+      "sha256": "5392cebc82841e811a519f6a2b35963a1da2dfd3f2fb032edf4e65c76c17d55e"
+    },
+    {
+      "bytes": 2874,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r3\\authority.py",
+      "sha256": "6eacdc4338169109a13d54db2406b4259cb3fe8a158b98b46a13416fb57012db"
+    },
+    {
+      "bytes": 3312,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\v41r4_electrical.py",
+      "sha256": "68306d036e7e364f2b208320e1db58ab906b0c721e5194c77e52377de263294c"
+    },
+    {
+      "bytes": 3874,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\mess_physics.py",
+      "relative_path": "dayahead/mess_physics.py",
+      "sha256": "2859bf8124060468d7379f74c9bc0b0f1e6df2e5b4a19774ef00269c1d97cbe3"
+    },
+    {
+      "bytes": 7746,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\electrical_context.py",
+      "relative_path": "dayahead/v28r2/electrical_context.py",
+      "sha256": "fb5c91d65472d60a0737c4193225e0c4b1e68962938a08e658c6142c46aae056"
+    },
+    {
+      "bytes": 4151,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v39a\\power.py",
+      "relative_path": "dayahead/v39a/power.py",
+      "sha256": "ff264b087b2f7c1549121034ee4606a90af55b666ccd4f47314f18d9cc3e010e"
+    },
+    {
+      "bytes": 68067,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v39d\\evaluate.py",
+      "relative_path": "dayahead/v39d/evaluate.py",
+      "sha256": "ea4acc829f91c2fff0498c53b89c9abde0bce06fdddf2bc67f9826cae2e70a8c"
+    },
+    {
+      "bytes": 80,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\__init__.py",
+      "relative_path": "dayahead/v40e/__init__.py",
+      "sha256": "3040f6c3a0144d8c0d8816d1b9e7116ab6224ff002e38e4e8cdb74a5f8a68626"
+    },
+    {
+      "bytes": 12653,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\audit.py",
+      "relative_path": "dayahead/v40e/audit.py",
+      "sha256": "fb5ee2890af8437e9e5cf6876e922caf899c6a956eb74f4ecfdeed249edb30ae"
+    },
+    {
+      "bytes": 13404,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\case_semantics.py",
+      "relative_path": "dayahead/v40e/case_semantics.py",
+      "sha256": "06b9ce77b633b7306e45e659afb286af8c9228eb945581f4b58c81e70f2bc8b2"
+    },
+    {
+      "bytes": 20897,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\electrical.py",
+      "relative_path": "dayahead/v40e/electrical.py",
+      "sha256": "e8f2afc6a94c563d518be1ba72e004977bb0fa91ebc5bb54b575b138aff3262e"
+    },
+    {
+      "bytes": 7806,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\forensic.py",
+      "relative_path": "dayahead/v40e/forensic.py",
+      "sha256": "1b75256418d65d2bb00fc4802121864284874381f4156fd4618e379101e0b2b6"
+    },
+    {
+      "bytes": 7314,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\mapping.py",
+      "relative_path": "dayahead/v40e/mapping.py",
+      "sha256": "6ba0e0903f61f7f08d4548cd108912e6ea351760ff71377df8c13d4065cde403"
+    },
+    {
+      "bytes": 20293,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\neutral_forensic.py",
+      "relative_path": "dayahead/v40e/neutral_forensic.py",
+      "sha256": "1344838b00317c5d0b526c14e0d0aae5a393bef08bbe7cf9510ee03d151dd10c"
+    },
+    {
+      "bytes": 16296,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\neutral_report.py",
+      "relative_path": "dayahead/v40e/neutral_report.py",
+      "sha256": "17591867dfcc2b8be1d1f835aa8e82843eb1bc91dc8444a8c923c8fd5ffe859f"
+    },
+    {
+      "bytes": 4855,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\readback.py",
+      "relative_path": "dayahead/v40e/readback.py",
+      "sha256": "bdb38b93559b56aa6c8e0812c63d125d415e4afc0c04359eb40c2f8c43d05fee"
+    },
+    {
+      "bytes": 5891,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\site_attribution.py",
+      "relative_path": "dayahead/v40e/site_attribution.py",
+      "sha256": "25dbb0bf5a959d2d201ed9688cd019850eecdec7757a1bd9f5eb454a9d320ecd"
+    },
+    {
+      "bytes": 16490,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\smoke.py",
+      "relative_path": "dayahead/v40e/smoke.py",
+      "sha256": "17aa91d7f420b77f32b4bc3fa98b24f55f959a1077d00b57314b176fa7d4245f"
+    },
+    {
+      "bytes": 5401,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40h\\identity.py",
+      "relative_path": "dayahead/v40h/identity.py",
+      "sha256": "b0f1b4280768adef8627134172a30b4f59275343f0fb5c28bd21a05bc8cc50a0"
+    },
+    {
+      "bytes": 4934,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40h\\numerical_context.py",
+      "relative_path": "dayahead/v40h/numerical_context.py",
+      "sha256": "1e2d7b8e139dd84ad0fbb7f972053df468c9b52363687f7cba33e5c48051364f"
+    },
+    {
+      "bytes": 74,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\__init__.py",
+      "relative_path": "dayahead/v40i/__init__.py",
+      "sha256": "44566eafc838098e6a86a25477ea16420325e6759d5d202007746736d9142e52"
+    },
+    {
+      "bytes": 8666,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\authority.py",
+      "relative_path": "dayahead/v40i/authority.py",
+      "sha256": "fa023570a1e68794240b758dc7bb972eb46dfe80d36993464b55ac2b10975fe7"
+    },
+    {
+      "bytes": 13672,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\census.py",
+      "relative_path": "dayahead/v40i/census.py",
+      "sha256": "a4790ebf1f494d0d5653c0d366943b215945a54c34e87583837a7d5d1e8a9f77"
+    },
+    {
+      "bytes": 24340,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\closeout.py",
+      "relative_path": "dayahead/v40i/closeout.py",
+      "sha256": "1567194a1644d1f69b1c90e3415adb8b3a6753acc6ec04f5719a82ed666652ed"
+    },
+    {
+      "bytes": 18416,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\closure.py",
+      "relative_path": "dayahead/v40i/closure.py",
+      "sha256": "6f3ff45ba7b177d1b6bb8f37d1bab140932fc6aff0dd6118db212efdca6726c8"
+    },
+    {
+      "bytes": 18237,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\completed_forensic.py",
+      "relative_path": "dayahead/v40i/completed_forensic.py",
+      "sha256": "f5cb63305fe5f08c57f90984d5282e69807e6e28c76092d45660257c8cdd8ae1"
+    },
+    {
+      "bytes": 23956,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\conditional_forensic.py",
+      "relative_path": "dayahead/v40i/conditional_forensic.py",
+      "sha256": "d227f69891f00d504394eee54175d81e9ebbd768c8e62d7da64533ad04d99b09"
+    },
+    {
+      "bytes": 16370,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\dominance.py",
+      "relative_path": "dayahead/v40i/dominance.py",
+      "sha256": "e4e90c9efbd1789a3b8783a38d7cf77724e0cf835e04ceceeafa88e2eefd1adb"
+    },
+    {
+      "bytes": 30775,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\electrical.py",
+      "relative_path": "dayahead/v40i/electrical.py",
+      "sha256": "dc8df57722410a14a0e30592fe35918cb4dcb4c4b0b0afdfcb189c60c6c591e3"
+    },
+    {
+      "bytes": 25344,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\h100_forensic.py",
+      "relative_path": "dayahead/v40i/h100_forensic.py",
+      "sha256": "ad2e3c052d7477db6be0a5acaa97baff95b28e59a1b190ea7ba4cc5accdfcca7"
+    },
+    {
+      "bytes": 35474,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\may01_forensic.py",
+      "relative_path": "dayahead/v40i/may01_forensic.py",
+      "sha256": "94c40aa1ff047c678e10dc7ffbd82b50f1b7daf47420cec047e3a17fa1e51fc8"
+    },
+    {
+      "bytes": 49817,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\pending_forensic.py",
+      "relative_path": "dayahead/v40i/pending_forensic.py",
+      "sha256": "db203749c113a257a4bc641fcaa8768371a91c30b87e77c3a89914ef62d4af35"
+    },
+    {
+      "bytes": 20866,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\reactive_forensic.py",
+      "relative_path": "dayahead/v40i/reactive_forensic.py",
+      "sha256": "560d6f0c13ee48bb8d6ddd08cc15af819fde1a0ccd02509f173977849c9c973c"
+    },
+    {
+      "bytes": 14153,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\data.py",
+      "relative_path": "dayahead/v41/data.py",
+      "sha256": "796fccf3179be61a1ed4f315e41dfc1142f6993de807a9503e3c9b0eed9dd8f4"
+    },
+    {
+      "bytes": 9211,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\electrical.py",
+      "relative_path": "dayahead/v41/electrical.py",
+      "sha256": "d9bae02cf0c983cbe032ddd990633cf1b23d6b19c6ebc19325fd76894678fb97"
+    },
+    {
+      "bytes": 3858,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\mapper_audit.py",
+      "relative_path": "dayahead/v41/mapper_audit.py",
+      "sha256": "6c7689debba37c25061e1711ea8b12d0526b007b180e77fc9e337d034d4ccd91"
+    },
+    {
+      "bytes": 9444,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\persistence.py",
+      "relative_path": "dayahead/v41/persistence.py",
+      "sha256": "19bfac488d62ae4da4589acc53c0b74f8cf022ea2e86ce7e6d3218d1b7a62615"
+    },
+    {
+      "bytes": 24408,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\preflight.py",
+      "relative_path": "dayahead/v41/preflight.py",
+      "sha256": "e07182edc122b12edcefafb3623d2c49185467fdf23a758446732361388491cb"
+    },
+    {
+      "bytes": 6519,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41\\reserve.py",
+      "relative_path": "dayahead/v41/reserve.py",
+      "sha256": "f0b6fd207321599f8903ac842025907a0f12b10b9aa41cf7aca79344c8e090ba"
+    },
+    {
+      "bytes": 7620,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r2\\authority.py",
+      "relative_path": "dayahead/v41r2/authority.py",
+      "sha256": "641e3244a621b0aa560fce88df124c735bedb44e8a06ed4a07827856a6e2b431"
+    },
+    {
+      "bytes": 11668,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r2\\prepare.py",
+      "relative_path": "dayahead/v41r2/prepare.py",
+      "sha256": "ae7e1a34cbc9c8b1c457b1f87d66e5b1e57983829c3d79aab7ae224ae4306b21"
+    },
+    {
+      "bytes": 3979,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r2\\reference.py",
+      "relative_path": "dayahead/v41r2/reference.py",
+      "sha256": "9b981c854575a6fe4777e52908be85d2f5edd927c655b8c417b57302c040c075"
+    },
+    {
+      "bytes": 69,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r3\\__init__.py",
+      "relative_path": "dayahead/v41r3/__init__.py",
+      "sha256": "703ba0343ebc43cda8179df5f41e9a5d6543a9ccebb5e13c12e94cdf58b0e3c9"
+    },
+    {
+      "bytes": 2874,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r3\\authority.py",
+      "relative_path": "dayahead/v41r3/authority.py",
+      "sha256": "6eacdc4338169109a13d54db2406b4259cb3fe8a158b98b46a13416fb57012db"
+    },
+    {
+      "bytes": 4926,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r3\\candidates.py",
+      "relative_path": "dayahead/v41r3/candidates.py",
+      "sha256": "4f4dd4337ea7021ac1dd94920cf00f2c8fade1d79e92ce3ec356159fc73747c9"
+    },
+    {
+      "bytes": 2347,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v41r3\\native_actual.py",
+      "relative_path": "dayahead/v41r3/native_actual.py",
+      "sha256": "d22e5cb4d8c4aeed1b76e18b6725794086fe80868d31853554471ffc80e607a8"
+    },
+    {
+      "bytes": 2630,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\pfr\\contracts\\FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json",
+      "relative_path": "FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json",
+      "sha256": "5fd67c25b7e3df89a19cba6bcaab348f2e0a3f72f85ac47e34c4b7935307e650"
+    },
+    {
+      "bytes": 10254,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\grid_background_v16_2.py",
+      "relative_path": "grid_background_v16_2.py",
+      "sha256": "85d0e7f566ff90cc0124d5af7465e9586d1a34d9a396985aab4654f93302fb74"
+    },
+    {
+      "bytes": 29183,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\full_ieee123_g11_v16_1.py",
+      "relative_path": "full_ieee123_g11_v16_1.py",
+      "sha256": "5dac427fbf0b2b3381a576c4eac96e6dfa445a690f40d90732b590bde6ee7c8e"
+    },
+    {
+      "bytes": 47353,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\run_v16_3_correction.py",
+      "relative_path": "run_v16_3_correction.py",
+      "sha256": "d34976f963095dca9fdfe0abaaa1e45d1adc5e86c50696151c12eeafd6f60a1d"
+    },
+    {
+      "bytes": 34946,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\run_v16_3_voltage_candidate.py",
+      "relative_path": "run_v16_3_voltage_candidate.py",
+      "sha256": "10ab0ed968084ea10f41035847d42df0ed73a4b6cb0456f50637b1f2032ee335"
+    },
+    {
+      "bytes": 18609,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v28r2\\electrical_subproblem.py",
+      "relative_path": "electrical_subproblem.py",
+      "sha256": "7fe0aa865f849ff1ffc49f3d49519e0df2931a1c1f8cff1ae7f5416ca1e22221"
+    },
+    {
+      "bytes": 20271,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40e\\electrical.py",
+      "relative_path": "electrical.py",
+      "sha256": "15a4d2936fd7a5e1c1d4502913f98038e5da781ce2660a5c98055ede73911882"
+    },
+    {
+      "bytes": 5592,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40h\\electrical.py",
+      "relative_path": "electrical.py",
+      "sha256": "95cc6dd8764d801deca67604fbff6c0f284aad6628de1549f45e2853f376521d"
+    },
+    {
+      "bytes": 4934,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40h\\numerical_context.py",
+      "relative_path": "numerical_context.py",
+      "sha256": "1e2d7b8e139dd84ad0fbb7f972053df468c9b52363687f7cba33e5c48051364f"
+    },
+    {
+      "bytes": 14255,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\FROZEN_CALIBRATION_STATES.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/FROZEN_CALIBRATION_STATES.parquet",
+      "sha256": "0fba7277ca043d20ca53e4ab4035b671cd31db8cbc3587038c6b66fabb5cbf09"
+    },
+    {
+      "bytes": 12700794,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_APRIL_FULL_BUS_PHASE_SENSITIVITY.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_APRIL_FULL_BUS_PHASE_SENSITIVITY.parquet",
+      "sha256": "b316bc7316bdd42cfaba2f05e6386ed2d1151cf4f0c34119564b15b101112c53"
+    },
+    {
+      "bytes": 2305380,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_APRIL_LOCAL_SENSITIVITY.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_APRIL_LOCAL_SENSITIVITY.parquet",
+      "sha256": "41eba629845ffdb70a55cba29c39121b7667e5a4acfc5b27c24d0b74a10f3309"
+    },
+    {
+      "bytes": 853486,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f"
+    },
+    {
+      "bytes": 853486,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "relative_path": "V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f"
+    },
+    {
+      "bytes": 26512,
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\work\\Mobile_ESS_Integrated_Rebuild_20260731\\src\\build_power_v70_3ph.py",
+      "relative_path": "build_power_v70_3ph.py",
+      "sha256": "aa81880e956e03a3195a316eae95687088772f5c2171abed7e215e1bab083a82"
+    },
+    {
+      "bytes": 4320,
+      "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\bus_ids.npy",
+      "relative_path": "bus_ids.npy",
+      "sha256": "7cad8bec82a1efd0bf55f3d566f1f2faff5b2be4bd058d957481a858fac771f4"
+    },
+    {
+      "bytes": 390,
+      "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\load_archetype_cluster_id.npy",
+      "relative_path": "load_archetype_cluster_id.npy",
+      "sha256": "27cbb7e41785d14c79635de662093442561c54162614f14418a6b961f5691f92"
+    },
+    {
+      "bytes": 27179,
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\work\\power_side_p4f12_review_20260731_201553\\p4f1_artifact_cleanup\\p4f1_full_artifact_manifest.json",
+      "relative_path": "p4f1_full_artifact_manifest.json",
+      "sha256": "7780cc3cd19a7f1dcf8e2d6a35d2872f7742bee200873b69a6c806df557624b5"
+    },
+    {
+      "bytes": 1700,
+      "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\pv_capacity_kw.npy",
+      "relative_path": "pv_capacity_kw.npy",
+      "sha256": "2d39c325249c12045bed10825bfaa345d708883e6d7eba2954f6c36181464636"
+    },
+    {
+      "bytes": 56836,
+      "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\integrated_rebuild\\current\\02_power_preprocess\\jemena_mvar\\jemena_q_over_p_lookup.csv.gz",
+      "relative_path": "jemena_q_over_p_lookup.csv.gz",
+      "sha256": "32143c7717e1cf37947d6d390bf7d7b518e7fbd852d719fa456e2b9a054f3e60"
+    },
+    {
+      "bytes": 40466,
+      "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\integrated_rebuild\\current\\02_power_preprocess\\jemena_feeders\\jemena_cluster_residual_lookup.csv.gz",
+      "relative_path": "jemena_cluster_residual_lookup.csv.gz",
+      "sha256": "159242ca2c198954c32a145a1776bf5dbc15eb896666c83dc93a2c444ca5e1ae"
+    },
+    {
+      "bytes": 38747,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+      "relative_path": "opendss_runtime_adapter.json",
+      "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036"
+    },
+    {
+      "bytes": 2630,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\pfr\\contracts\\FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json",
+      "relative_path": "FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json",
+      "sha256": "5fd67c25b7e3df89a19cba6bcaab348f2e0a3f72f85ac47e34c4b7935307e650"
+    },
+    {
+      "bytes": 7314,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40e\\mapping.py",
+      "relative_path": "mapping.py",
+      "sha256": "6ba0e0903f61f7f08d4548cd108912e6ea351760ff71377df8c13d4065cde403"
+    },
+    {
+      "bytes": 10254,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\grid_background_v16_2.py",
+      "relative_path": "grid_background_v16_2.py",
+      "sha256": "85d0e7f566ff90cc0124d5af7465e9586d1a34d9a396985aab4654f93302fb74"
+    },
+    {
+      "bytes": 29183,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\full_ieee123_g11_v16_1.py",
+      "relative_path": "full_ieee123_g11_v16_1.py",
+      "sha256": "5dac427fbf0b2b3381a576c4eac96e6dfa445a690f40d90732b590bde6ee7c8e"
+    },
+    {
+      "bytes": 47353,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\run_v16_3_correction.py",
+      "relative_path": "run_v16_3_correction.py",
+      "sha256": "d34976f963095dca9fdfe0abaaa1e45d1adc5e86c50696151c12eeafd6f60a1d"
+    },
+    {
+      "bytes": 34946,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\run_v16_3_voltage_candidate.py",
+      "relative_path": "run_v16_3_voltage_candidate.py",
+      "sha256": "10ab0ed968084ea10f41035847d42df0ed73a4b6cb0456f50637b1f2032ee335"
+    },
+    {
+      "bytes": 18609,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v28r2\\electrical_subproblem.py",
+      "relative_path": "electrical_subproblem.py",
+      "sha256": "7fe0aa865f849ff1ffc49f3d49519e0df2931a1c1f8cff1ae7f5416ca1e22221"
+    },
+    {
+      "bytes": 20271,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40e\\electrical.py",
+      "relative_path": "electrical.py",
+      "sha256": "15a4d2936fd7a5e1c1d4502913f98038e5da781ce2660a5c98055ede73911882"
+    },
+    {
+      "bytes": 5592,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40h\\electrical.py",
+      "relative_path": "electrical.py",
+      "sha256": "95cc6dd8764d801deca67604fbff6c0f284aad6628de1549f45e2853f376521d"
+    },
+    {
+      "bytes": 4934,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40h\\numerical_context.py",
+      "relative_path": "numerical_context.py",
+      "sha256": "1e2d7b8e139dd84ad0fbb7f972053df468c9b52363687f7cba33e5c48051364f"
+    },
+    {
+      "bytes": 14255,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\FROZEN_CALIBRATION_STATES.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/FROZEN_CALIBRATION_STATES.parquet",
+      "sha256": "0fba7277ca043d20ca53e4ab4035b671cd31db8cbc3587038c6b66fabb5cbf09"
+    },
+    {
+      "bytes": 12700794,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_APRIL_FULL_BUS_PHASE_SENSITIVITY.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_APRIL_FULL_BUS_PHASE_SENSITIVITY.parquet",
+      "sha256": "b316bc7316bdd42cfaba2f05e6386ed2d1151cf4f0c34119564b15b101112c53"
+    },
+    {
+      "bytes": 2305380,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_APRIL_LOCAL_SENSITIVITY.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_APRIL_LOCAL_SENSITIVITY.parquet",
+      "sha256": "41eba629845ffdb70a55cba29c39121b7667e5a4acfc5b27c24d0b74a10f3309"
+    },
+    {
+      "bytes": 853486,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f"
+    },
+    {
+      "bytes": 853486,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "relative_path": "V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f"
+    },
+    {
+      "bytes": 6456,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\may_2025\\days\\2025-05-19\\aemo_forecast.json",
+      "relative_path": "aemo_forecast.json",
+      "sha256": "7939f96483768fccf78e5b650f7e6ed1c9346b5bfac2030f43161ae5d699755d"
+    },
+    {
+      "bytes": 13785,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+      "relative_path": "MobileESS_v28r2_heavy_backend/dayahead/artifacts/v16_2/Generated_ThreePhase_PCC_v4.dss",
+      "sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719"
+    },
+    {
+      "bytes": 6038,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_Planning_Line_Ratings_u080.dss",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/opendss_assets/Generated_Planning_Line_Ratings_u080.dss",
+      "sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302"
+    },
+    {
+      "bytes": 13761,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_ThreePhase_PCC_v3.dss",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/opendss_assets/Generated_ThreePhase_PCC_v3.dss",
+      "sha256": "3c3e27020e266dc8f1c4e28e90d49f298d6ca741ef6b54599e44265882cd747c"
+    },
+    {
+      "bytes": 8289,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Loads.DSS",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/opendss_assets/IEEE123Loads.DSS",
+      "sha256": "fd28f52836205506a1980b52c5a7e12ca585aa626c52a6249502c1c3b2fc2255"
+    },
+    {
+      "bytes": 17008,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Master.dss",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/opendss_assets/IEEE123Master.dss",
+      "sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969"
+    },
+    {
+      "bytes": 1861,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Regulators.DSS",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/opendss_assets/IEEE123Regulators.DSS",
+      "sha256": "cd6ad77980dc018631ce39faab528afce40b0b9a50a6bc1c9ac8049ffb8207d7"
+    },
+    {
+      "bytes": 11971,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEELineCodes.DSS",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/opendss_assets/IEEELineCodes.DSS",
+      "sha256": "be95f7afaf3e342b132ff2ef20a2b150e3b9966626cbf95eb47f5e9820953c40"
+    },
+    {
+      "bytes": 733662,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\tmp_env_1.npz",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/opendss_assets/tmp_env_1.npz",
+      "sha256": "5aaaaa55384dd33012645a73e56e1bd4723ecc4f8541dde6adac59a463a5eca3"
+    },
+    {
+      "bytes": 733662,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\tmp_env_3.npz",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/opendss_assets/tmp_env_3.npz",
+      "sha256": "68245f0ce304673c5e4481dabcaee1fbcd0da80729a9264ffb3c08e086d3d899"
+    },
+    {
+      "bytes": 733662,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\tmp_env_5.npz",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/opendss_assets/tmp_env_5.npz",
+      "sha256": "65a81d79604039e3695a1e733cd29eb67105f2d8daf78a2856a4d46fb7d5377e"
+    },
+    {
+      "bytes": 1005,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\bus_phase_mask_contract.json",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/bus_phase_mask_contract.json",
+      "sha256": "936c250b07261874a3595c626c6aa158bbf59692ef23cef94a3a233285539e93"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\compiled_bus_ids.npy",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/compiled_bus_ids.npy",
+      "sha256": "33427648f3f3705392d1c45572f9303d4fa81b2348a35c0411be7a3454873340"
+    },
+    {
+      "bytes": 521,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\compiled_bus_phase_mask.npy",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/compiled_bus_phase_mask.npy",
+      "sha256": "4f3b5dea7237d4cb5461b4b8735b7825be8249ba035d35224308ba446ff7d59b"
+    },
+    {
+      "bytes": 2017,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\dataset_contract.json",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/dataset_contract.json",
+      "sha256": "c8631f0658075e4d62addeaa0804c134ce4e51ec61ebba0a883013d626e33c3b"
+    },
+    {
+      "bytes": 9992,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\Generated_PhasePV.dss",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/Generated_PhasePV.dss",
+      "sha256": "fb4149c6c79de49cd059a7d5b7dc5142ab405948a1876a24e94252019b392562"
+    },
+    {
+      "bytes": 372,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\mapping_freeze_contract.json",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/mapping_freeze_contract.json",
+      "sha256": "f5343f6f9aef8aff9da85ff754ef7d9df8b1ea73a0888ac44c41677133c970dc"
+    },
+    {
+      "bytes": 38747,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/opendss_runtime_adapter.json",
+      "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036"
+    },
+    {
+      "bytes": 4276,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\power_bus_axis_exact_contract.json",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/power_bus_axis_exact_contract.json",
+      "sha256": "ee322c930333f5e0631bef1e84af35d117eb5758340dde35721257e091096d3e"
+    },
+    {
+      "bytes": 652,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\power_to_compiled_bus_index.npy",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/power_to_compiled_bus_index.npy",
+      "sha256": "41ef656d4cbfeb329b1fdcf92b4ec0a8e98300455e1387e324d4422875da565f"
+    },
+    {
+      "bytes": 2045,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\root_power_sign_contract.json",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/root_power_sign_contract.json",
+      "sha256": "d4571cd8b47e181cd12705561b8838ddd9fcc4adb0f9ee759ecba099141e7e93"
+    },
+    {
+      "bytes": 270,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\runtime_adapter_full_scan_audit.json",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/runtime_adapter_full_scan_audit.json",
+      "sha256": "2fcd06408a73aff28e4d6b03adc55d464acedfa420a6f483f9686e8908219c84"
+    },
+    {
+      "bytes": 886,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\runtime_adapter_gate.json",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/runtime_adapter_gate.json",
+      "sha256": "3907200a38dd7456d9c04467e302d16a64ead4595f4fbd4ff25dd77eff9d0c13"
+    },
+    {
+      "bytes": 6058,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\service_node_electrical_mapping_v1.csv",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/service_node_electrical_mapping_v1.csv",
+      "sha256": "c3763567f6785f182ab151ca0390918017d4e24c2733f6d72d2304bba416322e"
+    },
+    {
+      "bytes": 1390,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\time_contract_audit.json",
+      "relative_path": "tmp/c12_exact_sources_repo_cleanup/c12_exact_sources/v2038_parent/Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038/reference/power_v70_p4f_contract/time_contract_audit.json",
+      "sha256": "c17924611d26f88fb032a39206c7722056be81e557b5026422a8f6cc6e12434e"
+    },
+    {
+      "bytes": 17008,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Master.dss",
+      "relative_path": "IEEE123Master.dss",
+      "sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969"
+    },
+    {
+      "bytes": 13785,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+      "relative_path": "Generated_ThreePhase_PCC_v4.dss",
+      "sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719"
+    },
+    {
+      "bytes": 29183,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\full_ieee123_g11_v16_1.py",
+      "relative_path": "full_ieee123_g11_v16_1.py",
+      "sha256": "5dac427fbf0b2b3381a576c4eac96e6dfa445a690f40d90732b590bde6ee7c8e"
+    },
+    {
+      "bytes": 47353,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\run_v16_3_correction.py",
+      "relative_path": "run_v16_3_correction.py",
+      "sha256": "d34976f963095dca9fdfe0abaaa1e45d1adc5e86c50696151c12eeafd6f60a1d"
+    },
+    {
+      "bytes": 34946,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\run_v16_3_voltage_candidate.py",
+      "relative_path": "run_v16_3_voltage_candidate.py",
+      "sha256": "10ab0ed968084ea10f41035847d42df0ed73a4b6cb0456f50637b1f2032ee335"
+    },
+    {
+      "bytes": 18609,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v28r2\\electrical_subproblem.py",
+      "relative_path": "electrical_subproblem.py",
+      "sha256": "7fe0aa865f849ff1ffc49f3d49519e0df2931a1c1f8cff1ae7f5416ca1e22221"
+    },
+    {
+      "bytes": 20271,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40e\\electrical.py",
+      "relative_path": "electrical.py",
+      "sha256": "15a4d2936fd7a5e1c1d4502913f98038e5da781ce2660a5c98055ede73911882"
+    },
+    {
+      "bytes": 5592,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40h\\electrical.py",
+      "relative_path": "electrical.py",
+      "sha256": "95cc6dd8764d801deca67604fbff6c0f284aad6628de1549f45e2853f376521d"
+    },
+    {
+      "bytes": 4934,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40h\\numerical_context.py",
+      "relative_path": "numerical_context.py",
+      "sha256": "1e2d7b8e139dd84ad0fbb7f972053df468c9b52363687f7cba33e5c48051364f"
+    },
+    {
+      "bytes": 14255,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\FROZEN_CALIBRATION_STATES.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/FROZEN_CALIBRATION_STATES.parquet",
+      "sha256": "0fba7277ca043d20ca53e4ab4035b671cd31db8cbc3587038c6b66fabb5cbf09"
+    },
+    {
+      "bytes": 12700794,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_APRIL_FULL_BUS_PHASE_SENSITIVITY.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_APRIL_FULL_BUS_PHASE_SENSITIVITY.parquet",
+      "sha256": "b316bc7316bdd42cfaba2f05e6386ed2d1151cf4f0c34119564b15b101112c53"
+    },
+    {
+      "bytes": 2305380,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_APRIL_LOCAL_SENSITIVITY.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_APRIL_LOCAL_SENSITIVITY.parquet",
+      "sha256": "41eba629845ffdb70a55cba29c39121b7667e5a4acfc5b27c24d0b74a10f3309"
+    },
+    {
+      "bytes": 853486,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f"
+    },
+    {
+      "bytes": 853486,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "relative_path": "V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f"
+    },
+    {
+      "bytes": 6038,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_Planning_Line_Ratings_u080.dss",
+      "relative_path": "Generated_Planning_Line_Ratings_u080.dss",
+      "sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302"
+    },
+    {
+      "bytes": 38747,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+      "relative_path": "opendss_runtime_adapter.json",
+      "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036"
+    },
+    {
+      "bytes": 34946,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\run_v16_3_voltage_candidate.py",
+      "relative_path": "run_v16_3_voltage_candidate.py",
+      "sha256": "10ab0ed968084ea10f41035847d42df0ed73a4b6cb0456f50637b1f2032ee335"
+    },
+    {
+      "bytes": 6855,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v28r2\\opendss_backend.py",
+      "relative_path": "opendss_backend.py",
+      "sha256": "55ad4be7175088ea24dbb611313635736f182f4d945f6f9b416b2ddec2c29956"
+    },
+    {
+      "bytes": 7314,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40e\\mapping.py",
+      "relative_path": "mapping.py",
+      "sha256": "6ba0e0903f61f7f08d4548cd108912e6ea351760ff71377df8c13d4065cde403"
+    },
+    {
+      "bytes": 6058,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\service_node_electrical_mapping_v1.csv",
+      "relative_path": "service_node_electrical_mapping_v1.csv",
+      "sha256": "c3763567f6785f182ab151ca0390918017d4e24c2733f6d72d2304bba416322e"
+    },
+    {
+      "bytes": 29183,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\full_ieee123_g11_v16_1.py",
+      "relative_path": "full_ieee123_g11_v16_1.py",
+      "sha256": "5dac427fbf0b2b3381a576c4eac96e6dfa445a690f40d90732b590bde6ee7c8e"
+    },
+    {
+      "bytes": 47353,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\run_v16_3_correction.py",
+      "relative_path": "run_v16_3_correction.py",
+      "sha256": "d34976f963095dca9fdfe0abaaa1e45d1adc5e86c50696151c12eeafd6f60a1d"
+    },
+    {
+      "bytes": 34946,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\run_v16_3_voltage_candidate.py",
+      "relative_path": "run_v16_3_voltage_candidate.py",
+      "sha256": "10ab0ed968084ea10f41035847d42df0ed73a4b6cb0456f50637b1f2032ee335"
+    },
+    {
+      "bytes": 18609,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v28r2\\electrical_subproblem.py",
+      "relative_path": "electrical_subproblem.py",
+      "sha256": "7fe0aa865f849ff1ffc49f3d49519e0df2931a1c1f8cff1ae7f5416ca1e22221"
+    },
+    {
+      "bytes": 20271,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40e\\electrical.py",
+      "relative_path": "electrical.py",
+      "sha256": "15a4d2936fd7a5e1c1d4502913f98038e5da781ce2660a5c98055ede73911882"
+    },
+    {
+      "bytes": 5592,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40h\\electrical.py",
+      "relative_path": "electrical.py",
+      "sha256": "95cc6dd8764d801deca67604fbff6c0f284aad6628de1549f45e2853f376521d"
+    },
+    {
+      "bytes": 4934,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40h\\numerical_context.py",
+      "relative_path": "numerical_context.py",
+      "sha256": "1e2d7b8e139dd84ad0fbb7f972053df468c9b52363687f7cba33e5c48051364f"
+    },
+    {
+      "bytes": 14255,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\FROZEN_CALIBRATION_STATES.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/FROZEN_CALIBRATION_STATES.parquet",
+      "sha256": "0fba7277ca043d20ca53e4ab4035b671cd31db8cbc3587038c6b66fabb5cbf09"
+    },
+    {
+      "bytes": 12700794,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_APRIL_FULL_BUS_PHASE_SENSITIVITY.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_APRIL_FULL_BUS_PHASE_SENSITIVITY.parquet",
+      "sha256": "b316bc7316bdd42cfaba2f05e6386ed2d1151cf4f0c34119564b15b101112c53"
+    },
+    {
+      "bytes": 2305380,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_APRIL_LOCAL_SENSITIVITY.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_APRIL_LOCAL_SENSITIVITY.parquet",
+      "sha256": "41eba629845ffdb70a55cba29c39121b7667e5a4acfc5b27c24d0b74a10f3309"
+    },
+    {
+      "bytes": 853486,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f"
+    },
+    {
+      "bytes": 853486,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "relative_path": "V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f"
+    },
+    {
+      "bytes": 38747,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+      "relative_path": "opendss_runtime_adapter.json",
+      "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036"
+    },
+    {
+      "bytes": 29183,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\full_ieee123_g11_v16_1.py",
+      "relative_path": "full_ieee123_g11_v16_1.py",
+      "sha256": "5dac427fbf0b2b3381a576c4eac96e6dfa445a690f40d90732b590bde6ee7c8e"
+    },
+    {
+      "bytes": 47353,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\run_v16_3_correction.py",
+      "relative_path": "run_v16_3_correction.py",
+      "sha256": "d34976f963095dca9fdfe0abaaa1e45d1adc5e86c50696151c12eeafd6f60a1d"
+    },
+    {
+      "bytes": 34946,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\run_v16_3_voltage_candidate.py",
+      "relative_path": "run_v16_3_voltage_candidate.py",
+      "sha256": "10ab0ed968084ea10f41035847d42df0ed73a4b6cb0456f50637b1f2032ee335"
+    },
+    {
+      "bytes": 18609,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v28r2\\electrical_subproblem.py",
+      "relative_path": "electrical_subproblem.py",
+      "sha256": "7fe0aa865f849ff1ffc49f3d49519e0df2931a1c1f8cff1ae7f5416ca1e22221"
+    },
+    {
+      "bytes": 20271,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40e\\electrical.py",
+      "relative_path": "electrical.py",
+      "sha256": "15a4d2936fd7a5e1c1d4502913f98038e5da781ce2660a5c98055ede73911882"
+    },
+    {
+      "bytes": 5592,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40h\\electrical.py",
+      "relative_path": "electrical.py",
+      "sha256": "95cc6dd8764d801deca67604fbff6c0f284aad6628de1549f45e2853f376521d"
+    },
+    {
+      "bytes": 4934,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\v40h\\numerical_context.py",
+      "relative_path": "numerical_context.py",
+      "sha256": "1e2d7b8e139dd84ad0fbb7f972053df468c9b52363687f7cba33e5c48051364f"
+    },
+    {
+      "bytes": 14255,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\FROZEN_CALIBRATION_STATES.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/FROZEN_CALIBRATION_STATES.parquet",
+      "sha256": "0fba7277ca043d20ca53e4ab4035b671cd31db8cbc3587038c6b66fabb5cbf09"
+    },
+    {
+      "bytes": 12700794,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_APRIL_FULL_BUS_PHASE_SENSITIVITY.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_APRIL_FULL_BUS_PHASE_SENSITIVITY.parquet",
+      "sha256": "b316bc7316bdd42cfaba2f05e6386ed2d1151cf4f0c34119564b15b101112c53"
+    },
+    {
+      "bytes": 2305380,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_APRIL_LOCAL_SENSITIVITY.parquet",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_APRIL_LOCAL_SENSITIVITY.parquet",
+      "sha256": "41eba629845ffdb70a55cba29c39121b7667e5a4acfc5b27c24d0b74a10f3309"
+    },
+    {
+      "bytes": 853486,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "relative_path": "dayahead/artifacts/v40g_segment_integration/april_joint_authority/V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f"
+    },
+    {
+      "bytes": 853486,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v40g_segment_integration\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "relative_path": "V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f"
+    },
+    {
+      "bytes": 16616,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\may_2025\\days\\2025-05-19\\gfs_d1_weather.parquet",
+      "relative_path": "gfs_d1_weather.parquet",
+      "sha256": "2e33e47ee94352b3f46e2b8f1abf2b75238d4813f5713cae43d8200b55496e66"
+    }
+  ],
+  "B0_background_refs": [
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v37_r4a_per_day_aidc\\days\\2025-05-19\\V37_R4A_D1_SNAPSHOT.parquet",
+      "sha256": "c5c785c3e9fc86985164cc80158b9911a22e5a7f211dd16eb7e0c4cff88e192b",
+      "bytes": 40263
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\데이터 센터\\NLR HPC Kestrel Jobs Data\\esif.hpc.kestrel.job-anon.zip",
+      "bytes": 731139558,
+      "sha256": "3a90f9ac40991712f8718c686fa7b05d7a303a44a87ed1a8f21b403c11efd26f"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\may_2025\\days\\2025-05-19\\aemo_forecast.json",
+      "sha256": "7939f96483768fccf78e5b650f7e6ed1c9346b5bfac2030f43161ae5d699755d",
+      "bytes": 6456
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\may_2025\\days\\2025-05-19\\gfs_d1_weather.parquet",
+      "sha256": "2e33e47ee94352b3f46e2b8f1abf2b75238d4813f5713cae43d8200b55496e66",
+      "bytes": 16616
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250519\\DERIVED_AEMO_ACTUAL.parquet",
+      "sha256": "ed7587659a15eac3d57bb0524087376ec9bf4b5dc845d1c6b62d47e074343d16",
+      "bytes": 4277
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250519\\DERIVED_NOAA_ACTUAL.parquet",
+      "sha256": "560b77e719586144b161706ec2f2fe504b3615441313272abce08cc5ef98f0ef",
+      "bytes": 14332
+    },
+    {
+      "bytes": 6069925,
+      "exists": true,
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\AEMO\\Realized demand\\PUBLIC_ARCHIVE#DISPATCHREGIONSUM#FILE01#202505010000.zip",
+      "sha256": "89a3d7b9d793d164adeeeef7c4234f3a6a512aa63236ff0d1a3193d3d5eb5186"
+    },
+    {
+      "bytes": 185111,
+      "exists": true,
+      "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\AEMO\\AEMO Rooftop PV — forecast + actual\\Actual\\PUBLIC_ARCHIVE#ROOFTOP_PV_ACTUAL#FILE01#202505010000.zip",
+      "sha256": "2a1d641d2447d7ddc7926690185058f508dde91657be84a3acfbdc6810cff65e"
+    },
+    {
+      "bytes": 489907,
+      "exists": true,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v24t_thermal_aware_aidc\\V24T_MELBOURNE_ACTUAL_WEATHER_HOURLY.parquet",
+      "sha256": "f9582754d309bf5d8444206a526869f4579020d1a45c011e02bf00ff3852cf52"
+    }
+  ],
+  "electrical_comparison_scope": "C1 numeric coefficients/idle/swing/racks exact; native B1 affine grid and B0 FreshAC are different mathematical representations. Non-nesting already follows from required job start/site counterexamples."
+}

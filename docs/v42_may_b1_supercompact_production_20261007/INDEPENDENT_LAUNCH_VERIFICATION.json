@@ -1,0 +1,197 @@
+{
+  "PASS": true,
+  "run_id": "B1_PR134_SC_202505_20261006T183422_4fb25507",
+  "processes": {
+    "coordinator": {
+      "PID": 24456,
+      "created": 1791311673.9449573,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_pr134_b1.host",
+        "coordinator",
+        "C:\\v42_pr134_sc_execution_20261007"
+      ],
+      "parent": 2648,
+      "priority": 32
+    },
+    "worker": {
+      "PID": 49140,
+      "created": 1791311674.8033435,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_pr134_b1.worker",
+        "C:\\v42_pr134_sc_execution_20261007\\stages\\2025-05-01\\A1\\1\\request.json"
+      ],
+      "parent": 24456,
+      "priority": 32
+    },
+    "monitor": {
+      "PID": 41292,
+      "created": 1791311675.8489833,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_pr134_b1.host",
+        "monitor",
+        "C:\\v42_pr134_sc_execution_20261007"
+      ],
+      "parent": 2648,
+      "priority": 32
+    }
+  },
+  "ancestry": {
+    "coordinator": [
+      {
+        "PID": 24456,
+        "created": 1791311673.9449573,
+        "name": "python.exe",
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_pr134_b1.host",
+          "coordinator",
+          "C:\\v42_pr134_sc_execution_20261007"
+        ]
+      },
+      {
+        "PID": 2648,
+        "name": "svchost.exe",
+        "command_unavailable": true
+      },
+      {
+        "PID": 1588,
+        "name": "services.exe",
+        "command_unavailable": true
+      },
+      {
+        "PID": 1512,
+        "name": "wininit.exe",
+        "command_unavailable": true
+      }
+    ],
+    "worker": [
+      {
+        "PID": 49140,
+        "created": 1791311674.8033435,
+        "name": "python.exe",
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_pr134_b1.worker",
+          "C:\\v42_pr134_sc_execution_20261007\\stages\\2025-05-01\\A1\\1\\request.json"
+        ]
+      },
+      {
+        "PID": 24456,
+        "created": 1791311673.9449573,
+        "name": "python.exe",
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_pr134_b1.host",
+          "coordinator",
+          "C:\\v42_pr134_sc_execution_20261007"
+        ]
+      },
+      {
+        "PID": 2648,
+        "name": "svchost.exe",
+        "command_unavailable": true
+      },
+      {
+        "PID": 1588,
+        "name": "services.exe",
+        "command_unavailable": true
+      },
+      {
+        "PID": 1512,
+        "name": "wininit.exe",
+        "command_unavailable": true
+      }
+    ],
+    "monitor": [
+      {
+        "PID": 41292,
+        "created": 1791311675.8489833,
+        "name": "python.exe",
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_pr134_b1.host",
+          "monitor",
+          "C:\\v42_pr134_sc_execution_20261007"
+        ]
+      },
+      {
+        "PID": 2648,
+        "name": "svchost.exe",
+        "command_unavailable": true
+      },
+      {
+        "PID": 1588,
+        "name": "services.exe",
+        "command_unavailable": true
+      },
+      {
+        "PID": 1512,
+        "name": "wininit.exe",
+        "command_unavailable": true
+      }
+    ]
+  },
+  "resource_policy": {
+    "coordinator": {
+      "CPU_priority": 32,
+      "MemoryPriority": 5,
+      "execution_speed_throttling": false,
+      "throttle_control_mask": 0
+    },
+    "worker": {
+      "CPU_priority": 32,
+      "MemoryPriority": 5,
+      "execution_speed_throttling": false,
+      "throttle_control_mask": 0
+    },
+    "monitor": {
+      "CPU_priority": 32,
+      "MemoryPriority": 5,
+      "execution_speed_throttling": false,
+      "throttle_control_mask": 0
+    }
+  },
+  "app_close_experiment_performed": false,
+  "Codex_owned_process": false,
+  "TaskScheduler_owned": true,
+  "monitor_run_connected": true,
+  "snapshot_changes_each_second": true,
+  "old_read_only_monitors_retired": [
+    {
+      "PID": 28232,
+      "created": 1791245478.0076725,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-X",
+        "utf8",
+        "C:\\v42_vnext2_execution_20261005_final\\web_monitor_20261005\\server.py"
+      ],
+      "parent": 7052,
+      "priority": 32
+    }
+  ]
+}
