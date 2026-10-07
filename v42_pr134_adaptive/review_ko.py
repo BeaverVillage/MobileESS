@@ -1,0 +1,57 @@
+"""Generate the requested 27-answer review from exported diagnostic authority."""
+from .common import *
+
+def main():
+    d17=read(OUT/'MAY17_MINIMAL_DOMAIN.json');d19=read(OUT/'MAY19_MINIMAL_DOMAIN.json');v=read(OUT/'VERIFICATION.json')
+    publication=read(OUT/'PUBLICATION_RECEIPT.json') if (OUT/'PUBLICATION_RECEIPT.json').exists() else None
+    publication_answer=('27. **commit / Draft PR:** 구현 commit `'+publication['diagnostic_implementation_commit']+'`, lossless artifact commit `'+publication['lossless_artifact_archive_commit']+'`. [Draft PR #'+str(publication['draft_PR'])+']('+publication['url']+'). 이후 publication-only commit의 최종 head는 PR의 headRefOid 및 이 대화의 최종 전달을 따른다.') if publication else '27. **commit / Draft PR:** PR163 exact head 위의 별도 `codex/v42-adaptive-minimal-prescreening` branch로 제출한다. 최종 commit과 생성된 Draft PR URL은 이 대화의 최종 전달 및 publication receipt를 따른다.'
+    lines=[
+        '# 최소 adaptive prescreening 검증 결과',
+        '',
+        '**최종 분류: '+v['overall_classification']+'**. 날짜별 분류는 May17·May19 모두 `UNRESOLVED`다.',
+        'May17의 작은 확장 도메인은 전체 A1 정수 feasibility와 독립 물리 검사를 통과했다. 그러나 33개 클래스가 최소라는 증명은 완성되지 않았다. May19의 최소 정수-feasible 도메인도 아직 증명하지 못했다.',
+        '따라서 `ADAPTIVE_MINIMAL_PRESCREENING_V1`을 동결하거나 production에 적용하지 않았다. 정상 네 목적함수, Planning freeze, fixed Actual, Fresh OpenDSS를 새로 실행하지 않았다.',
+        '',
+        '구현 base는 PR163 `fe0f5cf253bb08e3f96fe1e2c0af677e8b541144`, 과학 base는 PR134 `52ef855a59144a7c561df44b81dc2ad265babdbd`다. 이전 production source `b99f2778e47f8bfee22b4eb54f14af8eb9a2e3d1` 및 scientific SHA `8c1173caca09b9c32707b9f8a4ff38e4998ffb90926dd7f22595e24ea58b28eb`를 보존했다.',
+        '',
+        '## 요청한 27개 답변',
+        '',
+        '1. **May17 S0 실패 원인:** 고정된 R0 도메인과 서비스/클래스 수를 유지하면 초기 issue 슬롯 GPU 용량을 만족할 수 없다. known_GPU_binding 26행, class_exact_cardinality 48행, 원래 bounds의 정확한 모순 여유101이 원래 허용 잔차 약0.00116보다 크다. 전체 물리 후보 우주가 불가능하다는 뜻은 아니다.',
+        '2. **May19 S0 실패 원인:** D-day 슬롯1·2(native known 축25·26)의 node-phase239 전압 상한, 초기 CC4_CDF_U[0,2], site partition/headroom, 고정 known-job 도메인이 충돌한다. 정확한 모순 여유518.466이 허용 잔차4.39182보다 크다. 사이트별 민감도 부호를 가격에 그대로 사용했으며, 모든 사이트의 부하 증가가 전압을 낮춘다고 가정하지 않았다.',
+        '3. **생략된 물리 후보:** May17 112,812개, May19 86,143,284개. May19는 STAY156,900개와 migration85,986,384개이며 1,709,376개 lossless 레코드로 표현한다. 모든 transfer start를 보존한 lazy block이며 샘플이 아니다.',
+        '4. **원래 Farkas를 깨는 후보:** May17 66,756개, May19 9,233,723개. May17 neutral44,561/worsening1,495, May19 neutral76,909,561/worsening0, UNKNOWN0. 전수 rational 가격과 독립 물리/WAN 검사를 통과했다.',
+        '5. **May17 첫 LP feasible shell:** S2 same-site rank7. rank1–6은 모든 물리 same-site 후보를 포함한 필요조건 외부 모델에서도 정확한 LP 모순을 독립 검증했다.',
+        '6. **May17 첫 MIP feasible shell:** 동일 rank7의 33개 클래스·35개 STAY 시간 옵션 집합. 전체 원래 행/경계/정수성과 독립 GPU/rack/gang, 서비스, Runtime, WAN, grid 검사 PASS. LP1.547초, MIP2.463초,1node인 zero-objective 진단이며 정상 네 목적 최적화가 아니다.',
+        '7. **May19 첫 LP feasible shell:** 아직 확인하지 못했다. 5개 옵션 및 27개 옵션 제한 모델은 각각 native LP INFEASIBLE이었다. 후자는 raw 수치 상태만 신뢰하지 않고 원래 signed rows와 전체 물리 경로 지지로 모순을 정확히 보완해 독립 검증했다. 최신38개 옵션 모델은 LP600.020초 TIME_LIMIT,208,596iterations,1193.30Work, valid witness0이며 INFEASIBLE로 분류하지 않았다.',
+        '8. **May19 첫 MIP feasible shell:** 아직 확인하지 못했다. full LP가 먼저 통과해야 MIP를 실행한다.',
+        '9. **추가 클래스:** May17 진단33개, May19 최신 진단26개. 최종 최소 도메인으로 채택한 수는 아직 없다.',
+        '10. **추가 시작 옵션:** May17 35개, May19 최신38개. May19의 마지막11개는 동일한 이미 확장된 클래스 안에서 하나의 검증된 support certificate를 깨는 최소 필요 batch로 계산했다. 이것은 전체 A1의 최소성 증명이 아니다.',
+        '11. **추가 다른 사이트/배치 옵션:** 두 날짜0. same-reference-site 시간 변경만 복원했다.',
+        '12. **새 migration 옵션:** 두 날짜0. 기존 S0 checkpoint/WAN/migration 경로는 전부 유지했고 새로운 migration 권한을 만들지 않았다.',
+        '13. **raw 변수 증가:** May17 25,809→25,879(+70, 약0.2712%). May19 2,738,613→2,739,814(+1,201, 약0.04386%).',
+        '14. **raw binary 증가:** May17 1,677→1,677(+0). May19 930,588→930,864(+276, 약0.02966%).',
+        '15. **raw 행 증가:** May17 701,771→701,806(+35, 약0.00499%). May19 3,731,730→3,734,330(+2,600, 약0.06967%).',
+        '16. **raw nnz 증가:** May17 12,653,654→12,657,196(+3,542, 약0.02799%). May19 27,743,601→27,751,453(+7,852, 약0.02830%).',
+        '17. **압축/presolved 크기:** 동일 exact reducer와 독립 양방향 FULL_LP verifier PASS. May17 compressed rows144,568 유지, cols23,089→23,124(+35), binary1,675 유지, nnz3,241,610→3,245,082(+3,472). May19 rows3,028,050→3,028,072(+22), cols2,684,461→2,684,543(+82), binary929,216→929,270(+54), nnz18,244,129→18,247,889(+3,760). native presolve/root는 MODEL_SIZE_COMPARISON.csv의 실제 logs를 따른다. S0의 비교 가능한 root/presolved 측정이 없는 항목은 증가율을 만들지 않았다.',
+        '18. **CC4 변경:** NO. 원래 forecast/cohort 의미, global 계수/RHS/sense/경계를 정확히 비교했다.',
+        '19. **전압 기준 변경:** NO. 정확한 원래 physical_authority의 RHS를 유지했다.',
+        '20. **GPU 용량 변경:** NO. immutable GPU와 rack/gang, active transfer 권한까지 독립 확인했다.',
+        '21. **서비스/Runtime 변경:** NO. 같은 job/class membership, count, GPU, Q50 서비스, Runtime, completion ceiling, 원래 reference fields를 유지했다.',
+        '22. **미래 정보 사용:** NO. issue-time known causality와 원래 입력만 사용했다. R0 reference start는 생성된 반사실 FCFS 배치 기준으로 유지하면서, 사용자 허가에 따라 unprotected PENDING의 prescreen 하한만 복원했다.',
+        '23. **27개 PASS는 S0 유지:** YES. 모든 stored raw solution을 원래 전체 행/경계/정수성에 replay했고135개 causal 영수증 SHA/identity PASS. 기존 FreshAC2,592/2,592 수렴, 물리위반0, PQ repair0을 보존했다. 재solve/재FreshAC0.',
+        '24. **May17 최종 feasibility:** 제한된35개 옵션 집합의 full integer/physical feasibility는 PASS. 최소성은 UNRESOLVED. ALL same-site rank7 후보에서32개 이하 클래스 가능성을 zero-objective로 검사했으나600.006초 TIME_LIMIT, witness0,51,012nodes였으므로33을 최소라고 단정하지 않았다. 조건부 admitted-pool 최소33/35/5/125를 전체 우주의 최소로 일반화하지 않았다.',
+        '25. **May19 최종 feasibility:** 최소 integer-feasible 도메인 미확인, UNRESOLVED. 전체86,143,284개 물리 옵션을 새 certificate support로 다시 가격해 full-pool lower-bound margin −297,682.354를 확인했다. 이 certificate가 full universe를 배제할 수 없으므로 PRESCREENING_ONLY_INSUFFICIENT를 주장하지 않는다. 반대로 negative support margin을 feasible witness로 사용하지 않는다.',
+        '26. **일반 adaptive 규칙:** S0 witness PASS면 즉시STOP/재사용. 그렇지 않으면 독립 exact infeasibility를 요구하고 causal physical pool을 lazy 전수 가격한다. signed certificate-breaking 옵션만 same-site nearest rank부터 작은 필요 batch로 복원하고 fresh LP→MIP→전체 행/물리→동일 exact 압축을 검증한다. 필요하면 같은 사이트 뒤 compatible-site/prestart, 마지막으로 원래 허가된 migration을 검사한다. 양쪽 날짜 integer feasibility와 전체 최소성 증명이 완료되기 전 정상 목적/production gate는 닫힌다. 날짜별 후보 리스트를 코드에 하드코딩하지 않았다.',
+        publication_answer,
+        '',
+        '## 보존·정정·한계',
+        '',
+        '기존 production2,455개 파일(6,210,862,349bytes) 및 source closure417개 파일의 SHA 변경0을 확인했다. May10/May12, M-stage, B&P, P2, B2/B3, 반복 Windows 예약, 메모리 보호·RAM/paging 대기는 실행하지 않았다.',
+        '초기3개 옵션 May17 진단은 physical_authority 컨텍스트 누락으로 전압 RHS가1ULP 달라져 authority에서 제외했다. 정확한 컨텍스트로 다시 생성한11개 및35개 옵션 모델은 global numeric 비교0difference였다. 초기 resource master가 RUNNING checkpoint pause 이후 GPU를 강제한 오류는 중단·제외하고 guaranteed prefix만 사용하는 V2로 정정했다. 첫 point replay 및 압축 verifier의 누락된 metadata 오류는 raw point/행렬을 보존하고 고쳤으며 미검증 결과를 PASS로 사용하지 않았다.',
+        'May19의 global/local 경계는 row_v42_root 첫 행으로 정정한 뒤 동일 static bytes를 optimize 전에 재감사했다. 동적 next-selection index가 갱신되는 문제는 예전 입력을 pre-solve SHA와 동일한 bytes로 복구해 별도 기록하고, 이후 모든 회차에 immutable SELECTED_DOMAIN_INPUT.json을 사용했다. 탐욕 방식의65개 옵션 static capture는 solve하지 않고 제외했으며 exact 필요 cover의38개 옵션만 검사했다.',
+        'Native diagnostic settings는 원래 Threads1/Method1/Seed20260929/tolerances/defaults를 유지한다. 각 fresh LP/MIP600초 한도와 모든 actual runtime/Work를 기록했다. TIME_LIMIT을 INFEASIBLE로 바꾸지 않았다. 이전 point/basis/lock/native clock을 가져오지 않았다. static/proof 작업이 동시 실행된 측정은 controlled 성능 benchmark가 아니므로 속도 개선이나 one-hour solvability를 주장하지 않는다.',
+        '',
+        '전체 CSV는 로컬 required filename으로 존재하고 Git에는 lossless gzip을 저장한다. 압축/원문 SHA와 완전한 logical multiplicity는 ARTIFACT_ARCHIVE_INDEX.json 및 전수 verifier에 기록했다. raw native 행렬/axis/points/rays는 case 디렉터리에서 SHA로 보존하고 상세 영수증/logs/최소성 반증 probe를 이 문서 namespace에 제출한다.',
+    ]
+    (OUT/'FINAL_REVIEW_KO.md').write_text('\n'.join(lines)+'\n',encoding='utf8',newline='\n')
+if __name__=='__main__':main()
