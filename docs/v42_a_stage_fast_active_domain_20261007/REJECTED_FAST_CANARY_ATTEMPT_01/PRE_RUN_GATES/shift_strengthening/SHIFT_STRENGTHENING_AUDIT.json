@@ -1,0 +1,78 @@
+{
+  "PASS": true,
+  "scientific_capacities_changed": false,
+  "date_specific_cuts": false,
+  "fitted_or_heuristic_cuts": false,
+  "adopted_family": "EXACT_WHOLE_GANG_INTEGER_COUNT_CAPACITY_ROUNDING",
+  "module": "v42_a_stage_domain_v2.lexstage.exact_gpu_count_rounding",
+  "production_helper": "v42_a_stage_domain_v2.strengthening.strengthen_histogram_capacity",
+  "production_independent_verifier": "Checks actual source and current projected known-GPU binding equations, retained bounds/types/objectives, actual fixed-history RHS, unchanged capacity, every integer histogram incidence/coefficient, zero mapping, and appended inequality against source/proof hashes.",
+  "production_adoption_scope": "Already verified histogram count units or STAY-only units. Optional migration lanes and mixed singleton flow units are excluded even under zero migration in this first adopted family.",
+  "production_no_vacuous_or_duplicate_cuts": true,
+  "validity_conditions": [
+    "All selected count variables are binary/integer and count whole jobs occupying the same site/time.",
+    "Each selected whole job requires an integer GPU gang of at least g_min>0.",
+    "Residual capacity is the unchanged integer capacity after fixed physical occupancy; other occupancy is nonnegative.",
+    "Use already verified histogram/STAY-only count variables only; retain mixed singleton flow unchanged."
+  ],
+  "inequality": "sum(selected integer whole-job counts)<=floor(residual_GPU_capacity/g_min)",
+  "proof": "g_min*sum(counts)<=sum(actual GPU occupancy)<=unchanged residual capacity. Since sum(counts) is integer, rounding down the right side is valid for every integer feasible schedule.",
+  "tiny_complete_STAY_fixture": {
+    "class_exact_cardinality": 2,
+    "service_slots": 1,
+    "GPU_per_job": 2,
+    "site_GPU_capacity": 3,
+    "hard_valid_starts": [
+      0,
+      2
+    ],
+    "reference_start": 0,
+    "slot_1": "Immutable fixed occupancy fills capacity, so start1 is hard-invalid",
+    "original_LP_shift_bound": 1,
+    "strengthened_LP_shift_bound": 2,
+    "root_bound_improvement": 1,
+    "original_integer_optimum": 2,
+    "strengthened_integer_optimum": 2,
+    "all_integer_allocations_checked": true
+  },
+  "other_families_investigated": {
+    "class_supply_equalities": "Already exact class cardinality; retained.",
+    "release_deadline_windows": "Already encoded by complete physical support; no new wall.",
+    "cumulative_interval_capacity": "Summing inherited physical GPU inequalities is valid but offers no independent LP strengthening; not added.",
+    "Hall_assignment_feasibility": "No general multi-duration GPU/gang Hall facet proved in this task; not adopted.",
+    "conflict_clique": "The adopted whole-gang threshold family gives a valid one-slot clique when g_min>capacity/2.",
+    "unavoidable_displacement_lower_bound": "Independent per-class minimum displacement is valid but commonly zero with preserved no-action anchors; no unsupported fitted bound added."
+  },
+  "native_Gurobi_optimize_calls_for_audit": 0,
+  "tiny_scipy_LP_calls": 2,
+  "tiny_scipy_MIP_calls": 1,
+  "tiny_fixture_time_limit_seconds_each": 2,
+  "stress_date_optimization_for_this_audit": 0,
+  "validation": [
+    "tests/test_v42_a_stage_v2_lexstage.py",
+    "tests/test_v42_a_stage_v2_strengthening.py"
+  ],
+  "source_identity": [
+    {
+      "path": "v42_a_stage_domain_v2/lexstage.py",
+      "sha256": "f2b527e617e18f0d0f214aad8a25f33e51366b17666d37f32fdf4843f7c3eee5",
+      "bytes": 20470
+    },
+    {
+      "path": "tests/test_v42_a_stage_v2_lexstage.py",
+      "sha256": "8d447a63e4654f2f3b0b06ec88325c41f6176bbfbdee9650ca1190fb991da239",
+      "bytes": 13118
+    },
+    {
+      "path": "v42_a_stage_domain_v2/strengthening.py",
+      "sha256": "25085224dfb1e5697da94d5a3585aa0e2c94998728317c5460811dcd6e05aca4",
+      "bytes": 16469
+    },
+    {
+      "path": "tests/test_v42_a_stage_v2_strengthening.py",
+      "sha256": "968a53a2472700b6d0b4271cb8e14847628ac0069e0bd4b662a2fc47164ccfd9",
+      "bytes": 9441
+    }
+  ],
+  "source_identity_scope": "Owned proof modules and focused tests. Final run manifest separately binds integration/native authority sources."
+}
