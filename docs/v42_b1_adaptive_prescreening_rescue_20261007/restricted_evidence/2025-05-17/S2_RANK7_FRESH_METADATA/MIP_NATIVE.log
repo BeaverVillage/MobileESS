@@ -1,0 +1,58 @@
+
+Gurobi 13.0.2 (win64) logging started Wed Oct  7 12:19:38 2026
+
+Set parameter LogFile to value "C:\v42_b1_adaptive_prescreening_rescue_20261007\2025-05-17\S2_RANK7_FRESH_METADATA\MIP_NATIVE.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  600
+MIPGap  0.005
+Method  1
+Seed  20260929
+Threads  1
+
+Optimize a model with 701806 rows, 25879 columns and 12657196 nonzeros (Min)
+Model fingerprint: 0x1641c08d
+Model has 0 linear objective coefficients
+Variable types: 23243 continuous, 2636 integer (1677 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 3e+05]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 3e+05]
+  RHS range        [1e-07, 1e+06]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Presolve removed 688701 rows and 16021 columns
+Presolve time: 1.26s
+Presolved: 13105 rows, 9858 columns, 193269 nonzeros
+Variable types: 6805 continuous, 3053 integer (2073 binary)
+Performing another presolve...
+Presolve removed 7200 rows and 2598 columns
+Presolve time: 0.35s
+
+Root relaxation: objective 0.000000e+00, 2611 iterations, 0.08 seconds (0.20 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.00000    0    9          -    0.00000      -     -    2s
+     0     0    0.00000    0    7          -    0.00000      -     -    2s
+H    0     0                       0.0000000    0.00000  0.00%     -    2s
+     0     0    0.00000    0    7    0.00000    0.00000  0.00%     -    2s
+
+Cutting planes:
+  Gomory: 2
+  MIR: 6
+
+Explored 1 nodes (2629 simplex iterations) in 2.45 seconds (4.69 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 1: 0 
+
+Optimal solution found (tolerance 5.00e-03)
+Best objective 0.000000000000e+00, best bound 0.000000000000e+00, gap 0.0000%
