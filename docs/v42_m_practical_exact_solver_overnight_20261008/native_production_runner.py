@@ -55,6 +55,7 @@ def run(args):
         atomic(folder/'NEIGHBORHOOD.json',dict(radius=args.radius,slots=[64,84],free=free.tolist(),fixed=fixed.tolist(),free_names=d['names'][free].tolist(),H0_start_PASS=True,continuous_bounds_original=True,restricted_bound_never_global=True))
     limit=bounded_limit(args.seconds);settings=dict(SETTINGS,TimeLimit=limit)
     if not restricted:settings.update(Cuts=0,Heuristics=0,CutPasses=0)
+    if args.kind=='production':settings['VarBranch']=2 # One evidence-selected maximum-infeasibility architecture; no sweep.
     resources.phase='BUILD';begin=time.perf_counter();m=build(B,e);m.ModelName=f'ORIGINAL_C3A_P1_{args.name}'
     for k,v in settings.items():m.setParam(k,v)
     m.Params.OutputFlag=1;m.Params.LogToConsole=0;m.Params.LogFile=str(folder/'NATIVE_SOLVER.log')
@@ -105,6 +106,7 @@ def run(args):
                 if phase and times[phase] is None:times[phase]=t;events.append(dict(event=phase,Runtime=t,Work=w,literal=line));resources.phase=phase
             elif where==gp.GRB.Callback.MIP:
                 n=float(model.cbGet(gp.GRB.Callback.MIP_NODCNT));left=float(model.cbGet(gp.GRB.Callback.MIP_NODLFT));bd=finite(model.cbGet(gp.GRB.Callback.MIP_OBJBND))
+                if n>0:resources.phase='NONROOT_SEARCH'
                 if (left>=2 or n>1) and times['first_branch_observed'] is None:times['first_branch_observed']=t;events.append(dict(event='first_branch_observed',Runtime=t,node_count=n,nodes_left=left,exact_branch_timestamp=False))
                 if t-last>=10 or n!=last_nodes:
                     last=t;last_nodes=n;trace.append(dict(UTC=stamp(),Runtime=t,Work=w,node_count=n,nodes_left=left,solutions=int(model.cbGet(gp.GRB.Callback.MIP_SOLCNT)),ObjBst=finite(model.cbGet(gp.GRB.Callback.MIP_OBJBST)),BestBd=bd,iterations=float(model.cbGet(gp.GRB.Callback.MIP_ITRCNT)),cuts=int(model.cbGet(gp.GRB.Callback.MIP_CUTCNT))));table(folder/'BOUND_NODE_TRAJECTORY.csv',trace)
@@ -120,7 +122,8 @@ def run(args):
                 if times['first_MIPNODE'] is None:times['first_MIPNODE']=t
                 if n>0 and times['first_nonroot'] is None:times['first_nonroot']=t
                 if not node_events or node_events[-1]['node_count']!=n:
-                    node_events.append(dict(Runtime=t,Work=w,node_count=n,LP_status=s,observed_node_callback=True));table(folder/'OBSERVED_NODE_LEDGER.csv',node_events)
+                    j=int(model.cbGet(gp.GRB.Callback.MIPNODE_BRVAR))
+                    node_events.append(dict(Runtime=t,Work=w,node_count=n,LP_status=s,observed_node_callback=True,branch_variable_index=j,branch_name=str(d['names'][j]) if 0<=j<len(d['names']) else None,original_branch_type=str(d['types'][j]) if 0<=j<len(d['types']) else None));table(folder/'OBSERVED_NODE_LEDGER.csv',node_events)
                 if n==0 and s==gp.GRB.OPTIMAL and not (folder/'ROOT_POINT.npz').exists():point_save(folder/'ROOT_POINT.npz',np.asarray(model.cbGetNodeRel(variables)))
             elif where==gp.GRB.Callback.MIPSOL:
                 x=np.asarray(model.cbGetSolution(variables));i=len(incumbents)+1;p=folder/'incumbents'/f'{i:05d}.npz';point_save(p,x)
