@@ -9,10 +9,12 @@ from fractions import Fraction as Q
 from collections import defaultdict
 import numpy as np,scipy.sparse as sp,gurobipy as gp,psutil
 from .common import *
+from v42_a_stage_domain_v2.execution import require_action_authorized,guarded_optimize,tag_model_for_day
 
 def make(day,pool,rank):
     d=load(day);jobs,bounds,r,graphs,classes=d[1],d[2],d[3],d[5],d[7]['classes']
     m=gp.Model('ALL_RANK_PHYSICAL_PREFIX_OUTER_MASTER');m.Params.OutputFlag=0
+    tag_model_for_day(m,day)
     for k,v in SETTINGS.items():m.setParam(k,v)
     m.Params.TimeLimit=600;m.Params.InfUnbdInfo=1;m.Params.DualReductions=0
     prefix=min(t for (link,t),cap in r.wan_capacities.items() if cap>0)
@@ -65,6 +67,7 @@ def snapshot_ray(m,folder):
     if not result['PASS']:raise ValueError('ALL_RANK_PREFIX_PROOF_FAILED')
 
 def main(day):
+    require_action_authorized(day,'FEASIBILITY_LP')
     folder=CASE/day/'ALL_PHYSICAL_RANK_MINIMUM_PROBES';folder.mkdir(parents=True,exist_ok=True)
     if (folder/'RESULT.json').exists():raise PermissionError('NO_DUPLICATE_PROBE')
     for p in psutil.process_iter(['pid','name','cmdline']):
@@ -79,7 +82,7 @@ def main(day):
         maximum_displacement=max(int(x['abs_delta_start']) for x in selected),sum_displacement=sum(int(x['abs_delta_start']) for x in selected))
     trace=[];PASS=True
     for k in range(1,rank):
-        f=folder/('RANK_'+str(k));f.mkdir(exist_ok=True);m,ob,acts,opts=make(day,pool,k);lp=m.relax();lp.optimize()
+        f=folder/('RANK_'+str(k));f.mkdir(exist_ok=True);m,ob,acts,opts=make(day,pool,k);lp=m.relax();guarded_optimize(lp,day)
         event=dict(kind='earlier_rank_outer_LP',rank=k,options=len(opts),status=lp.Status,runtime=lp.Runtime,Work=lp.Work)
         if lp.Status==gp.GRB.INFEASIBLE:snapshot_ray(lp,f)
         else:PASS=False
@@ -92,10 +95,10 @@ def main(day):
             f=folder/('PROBE_'+name);f.mkdir(exist_ok=True);m,ob,acts,opts=make(day,pool,rank)
             for k,v in locks.items():m.addConstr(ob[k]==v)
             m.addConstr(ob[name]<=target-1);m.update();m.Params.LogFile=str(f/'NATIVE.log');m.Params.OutputFlag=1
-            lp=m.relax();lp.optimize();event=dict(kind='strictly_better_domain_outer_feasibility',rank=rank,name=name,target=target,LP_status=lp.Status,LP_runtime=lp.Runtime,LP_Work=lp.Work)
+            lp=m.relax();guarded_optimize(lp,day);event=dict(kind='strictly_better_domain_outer_feasibility',rank=rank,name=name,target=target,LP_status=lp.Status,LP_runtime=lp.Runtime,LP_Work=lp.Work)
             if lp.Status==gp.GRB.INFEASIBLE:snapshot_ray(lp,f);proved=True
             elif lp.Status==gp.GRB.OPTIMAL:
-                m.optimize();event.update(MIP_status=m.Status,MIP_runtime=m.Runtime,MIP_Work=m.Work,nodes=m.NodeCount,solutions=m.SolCount)
+                guarded_optimize(m,day);event.update(MIP_status=m.Status,MIP_runtime=m.Runtime,MIP_Work=m.Work,nodes=m.NodeCount,solutions=m.SolCount)
                 proved=m.Status==gp.GRB.INFEASIBLE
                 if m.SolCount:atomic(f/'BETTER_NECESSARY_SELECTION.json',[x for x in opts if acts[x['option_id']].X>.5])
             else:proved=False

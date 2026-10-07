@@ -7,11 +7,15 @@ There is no Actual optimizer, trajectory repair, or MESS dispatch path.
 from pathlib import Path
 from types import SimpleNamespace
 from .common import *
+from v42_a_stage_domain_v2.execution import require_action_authorized
+from v42_a_stage_domain_v2.status import require_production_domain_accepted
 
 
 def freeze_planning(root, day, a1_folder, output, freeze):
+    require_action_authorized(day,'PLANNING_FREEZE')
     import numpy as np
     result=read(a1_folder/'A1_FREEZE.json')
+    require_production_domain_accepted(result.get('domain_status'))
     if not result['PASS'] or not result['accepted'] or result['day'] != day or result['arm'] != 'B1':
         raise ValueError('NEW_ACCEPTED_A1_REQUIRED')
     with np.load(a1_folder/'PLANNING_PHYSICAL.npz') as z:
@@ -60,6 +64,7 @@ def build_day(path, expected_identity):
 
 
 def actual(planning, expected_identity, output):
+    require_action_authorized(expected_identity,'ACTUAL')
     import numpy as np
     aidc=build_day(planning/'V42_DAYAHEAD_DECISION_FREEZE.json',expected_identity)
     # Exact historical B1 fixed-decision materialization: no B0 FCFS replay and
@@ -76,6 +81,7 @@ def actual(planning, expected_identity, output):
 
 
 def fresh(root,day,planning,actual_folder,output,freeze,progress):
+    require_action_authorized(day,'FRESH_AC')
     import numpy as np
     import pandas as pd
     from v42_regcontrol.authority import source,compile_verified,assert_inventory

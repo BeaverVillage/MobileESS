@@ -19,7 +19,10 @@ def optimization_receipt(phases,events,lex_complete):
 
 def worker(context,payload):
     for row in payload['sources']:require(sha(row['path'])==row['sha256'],'COMPACT_SOURCE_DRIFT')
-    data=prepare(context);context.check();m,variables,objectives,controls=build(context,data)
+    data=prepare(context);context.check()
+    from v42_a_stage_domain_v2.execution import require_action_authorized
+    if payload['mode']!='BUILD_ONLY':require_action_authorized(data[0],'A1')
+    m,variables,objectives,controls=build(context,data)
     try:
         if payload['mode']=='BUILD_ONLY':return
         m.Params.MIPGap=.001;m.Params.Threads=1;m.Params.Seed=20260929

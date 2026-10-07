@@ -1,0 +1,63 @@
+{
+  "authority": "AIDC_A_STAGE_DOMAIN_AUTHORITY_V2",
+  "PASS": true,
+  "status_fields_required_on_every_new_authority_result": [
+    "HARD_PHYSICAL_DOMAIN_DEFINED",
+    "ACTIVE_DOMAIN_SUBSET",
+    "FEASIBILITY_CLOSED",
+    "LP_PRICING_CLOSED",
+    "INTEGER_DOMAIN_CLOSURE_PROVEN",
+    "PRODUCTION_DOMAIN_ACCEPTED"
+  ],
+  "initial_new_authority_status": {
+    "HARD_PHYSICAL_DOMAIN_DEFINED": true,
+    "ACTIVE_DOMAIN_SUBSET": true,
+    "FEASIBILITY_CLOSED": false,
+    "LP_PRICING_CLOSED": false,
+    "INTEGER_DOMAIN_CLOSURE_PROVEN": false,
+    "PRODUCTION_DOMAIN_ACCEPTED": false
+  },
+  "production_domain_optimality_certified": false,
+  "root_LP_reduced_cost_can_certify_integer_domain_closure": false,
+  "feasible_restricted_domain_can_certify_integer_domain_closure": false,
+  "four_restricted_objective_optima_can_certify_integer_domain_closure": false,
+  "future_integer_certificate_kinds": [
+    "COMPLETE_FINITE_DOMAIN_ACTIVATION",
+    "EXACT_BRANCH_AND_PRICE_DOMAIN_CLOSURE",
+    "OTHER_VALID_INTEGER_DOMAIN_CERTIFICATE"
+  ],
+  "integer_proof_requirements": [
+    "Hard physical scientific domain defined",
+    "Complete scientific omitted domain explicitly covered",
+    "Independent verifier reports PASS for the actual certificate",
+    "Scientific authority and evidence SHA256 identities retained",
+    "A bare integer-closure Boolean is rejected"
+  ],
+  "production_acceptance_additional_requirements": [
+    "FEASIBILITY_CLOSED is true",
+    "INTEGER_DOMAIN_CLOSURE_PROVEN is true",
+    "Independent physical verification PASS",
+    "All unchanged scientific objectives certified"
+  ],
+  "current_integer_certificate": null,
+  "current_production_acceptance": false,
+  "native_B1_freeze_behavior": "Fail closed with PRODUCTION_DOMAIN_CLOSURE_REQUIRED; retain explicitly unaccepted active-domain result instead of A1_FREEZE",
+  "historical_evidence_policy": "Historical PR134/163/165/166 files remain read-only; historical native binding is labelled PR134_HISTORICAL",
+  "implementation": "v42_a_stage_domain_v2/status.py",
+  "unit_test_file": "tests/test_v42_a_stage_domain_v2_execution.py",
+  "future_run_instrumentation": {
+    "implemented": true,
+    "executed_for_production": false,
+    "records": [
+      "Per-objective and P1/P2 stage wall/native timing and remaining budget",
+      "Native coefficient/bound/RHS/objective ranges and structural scalar sizes",
+      "Passive simplex/barrier/root-node callback observations",
+      "Inherited Method/Crossover/NumericFocus/ScaleFlag/BarHomogeneous settings",
+      "Available postsolve Kappa and numerical violations"
+    ],
+    "extra_optimize_calls": 0,
+    "solver_method_changes": false,
+    "KappaExact_computed": false,
+    "callback_observation_is_not_isolated_root_LP_timing": true
+  }
+}

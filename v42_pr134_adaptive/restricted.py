@@ -10,6 +10,7 @@ from v42_compact.graph import Graph
 from v42_job_capability import Option,validate
 from v42_pr134_b1.native import bind,objective_list,sc_namespace
 from .common import *
+from v42_a_stage_domain_v2.execution import require_action_authorized,guarded_optimize
 
 def expand(data,selected):
     bundle,jobs,bounds,r,raw,graphs,old,prep=data
@@ -80,6 +81,7 @@ def build(day,selected,folder):
     return m,data,units,levels,controls,bindings,census
 
 def execute(day,selected,tag):
+    require_action_authorized(day,'FEASIBILITY_MIP')
     raise PermissionError('DIRECT_MUTABLE_PROTOTYPE_DISABLED; use build_only then solve_snapshot with immutable input and fresh identity')
     folder=CASE/day/tag
     if (folder/'RESULT.json').exists():raise PermissionError('NO_DUPLICATE_RESTRICTED_SOLVE')
@@ -94,7 +96,7 @@ def execute(day,selected,tag):
     for key,value in SETTINGS.items():m.setParam(key,value)
     m.Params.TimeLimit=600.;m.Params.OutputFlag=1;m.Params.LogFile=str(folder/'MIP_NATIVE.log')
     m.update();lp=m.relax();lp.Params.InfUnbdInfo=1;lp.Params.DualReductions=0;lp.Params.LogFile=str(folder/'LP_NATIVE.log')
-    lp.optimize()
+    guarded_optimize(lp,day)
     result=dict(day=day,tag=tag,selected=selected,census=census,LP_status=lp.Status,LP_runtime=lp.Runtime,LP_Work=lp.Work,LP_iterations=lp.IterCount,
         LP_primal_residual=lp.ConstrVio if lp.SolCount else None,MIP_status=None,MIP_runtime=0.,classification='UNRESOLVED')
     if lp.Status==gp.GRB.INFEASIBLE:
@@ -103,7 +105,7 @@ def execute(day,selected,tag):
     elif lp.Status==gp.GRB.OPTIMAL and lp.SolCount:
         np.savez_compressed(folder/'LP_RAW_POINT.npz',values=np.array(lp.getAttr('X')))
         lp.dispose();lp=None
-        m.optimize()
+        guarded_optimize(m,day)
         result.update(MIP_status=m.Status,MIP_runtime=m.Runtime,MIP_Work=m.Work,nodes=m.NodeCount,solutions=m.SolCount,
             primal_residual=m.ConstrVio if m.SolCount else None,integer_residual=m.IntVio if m.SolCount else None)
         if m.SolCount:

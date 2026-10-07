@@ -27,6 +27,8 @@ def exact_ray(a,z,ray):
         arithmetic='Exact fractions of binary64 snapshot coefficients, bounds, RHS and raw native ray; no residual dropping')
 
 def run(day):
+    from v42_a_stage_domain_v2.execution import require_action_authorized,tag_model_for_day
+    require_action_authorized(day,'FEASIBILITY_MIP')
     for d in DAYS:
         if not read(OUT/(label(d)+'_MODEL_IDENTITY.json'))['PASS']:raise PermissionError('THREE_MODEL_STATIC_GATE')
     if not read(OUT/('B0_TO_B1_NESTING_AUDIT_'+label(day)+'.json'))['direct_witness_status'].startswith('UNAVAILABLE'):raise PermissionError('WITNESS_BRANCH_MUST_BE_EXPLICIT')
@@ -34,6 +36,7 @@ def run(day):
     if receipt.exists():raise PermissionError('ONE_ORIGINAL_DIAGNOSTIC_ALREADY_RECORDED')
     a,z=arrays(target,'A0');names=dict(np.load(target/'ORIGINAL_NATIVE_NAMES.npz'))
     m=gp.Model('PR134_ORIGINAL_FULL_'+day);m.Params.OutputFlag=0
+    tag_model_for_day(m,day)
     x=m.addMVar(a.shape[1],lb=z['lb'],ub=z['ub'],vtype=z['vtype'],obj=z['obj']);m.addMConstr(a,x,z['sense'],z['rhs']);m.update()
     m.setAttr('VarName',names['vars'].tolist());m.setAttr('ConstrName',names['rows'].tolist());m.update()
     for key,v in SETTINGS.items():m.setParam(key,v)

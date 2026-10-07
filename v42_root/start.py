@@ -30,6 +30,8 @@ def assignments(unit,selected,data):
     return mapping(j,graphs[u],r,selected[u])
 
 def validate_source(m,units,data,controls,bindings,levels):
+    from v42_a_stage_domain_v2.execution import require_action_authorized
+    require_action_authorized(data[0],'FEASIBILITY_MIP')
     audit=read(OUT/'MIP_START_AUTHORITY_AUDIT.json');c=None;receipt=None
     if audit['physical_precheck_PASS']:
         start=time.perf_counter();selected=physical_options(read(LOCAL/'REFERENCE_PLAN.json'));m.update();c=m.copy();cv=c.getVars();fixed={}

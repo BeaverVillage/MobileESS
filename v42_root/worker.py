@@ -18,6 +18,12 @@ def source_freeze():
         if any(sha(ROOT/n)!=h for n,h in d['source_sha256'].items()):raise ValueError('EXACTNESS_SOURCE_DRIFT')
 
 def optimize(m,units,levels,controls,bindings,data,start_receipt):
+    from v42_a_stage_domain_v2.execution import require_action_authorized
+    from v42_a_stage_domain_v2.status import initial_domain_status,close_feasibility
+    require_action_authorized(data[0],'A1')
+    domain_status=dict(getattr(m,'_v42_domain_status',initial_domain_status()))
+    from v42_a_stage_domain_v2.telemetry import FutureRunTelemetry
+    diagnostics=FutureRunTelemetry(m,day=data[0]['day'])
     if (LOCAL/'PRIMARY_STARTED.json').exists():raise ValueError('NO_PRIMARY_RETRY')
     phases=[];telemetry=[];spent=0.;first=[None];primary_cert=None;targets=[60,300,600,1200,1800,3600];next_target=[0];latest={};begin_all=perf_counter();peak=[psutil.Process().memory_info().rss]
     m.Params.Threads=1;m.Params.Seed=20260929;m.Params.MIPGap=.005;m.Params.OutputFlag=1;m.Params.LogFile=str(LOCAL/'A1_GUROBI.log')
@@ -26,8 +32,10 @@ def optimize(m,units,levels,controls,bindings,data,start_receipt):
         remaining=3600-spent
         if remaining<=0:break
         m.setObjective(expr);m.Params.TimeLimit=remaining;m.update();last=[-1.];begin=perf_counter()
+        diagnostics.begin_objective(name,group='P1' if name=='rho' else 'P2',remaining_seconds=remaining)
         atomic(LOCAL/'ACTIVE_OPTIMIZATION.json',dict(active=True,started_monotonic=monotonic(),remaining_budget_seconds=remaining,spent_before_call_seconds=spent,level=name))
         def cb(model,where):
+            diagnostics.callback(model,where,gp.GRB)
             elapsed=spent+perf_counter()-begin;state={};peak[0]=max(peak[0],psutil.Process().memory_info().rss)
             if where==gp.GRB.Callback.PRESOLVE:state=dict(phase='PRESOLVE',presolve_rows_removed=model.cbGet(gp.GRB.Callback.PRE_ROWDEL),presolve_columns_removed=model.cbGet(gp.GRB.Callback.PRE_COLDEL))
             elif where==gp.GRB.Callback.SIMPLEX:state=dict(phase='SIMPLEX',simplex_objective=model.cbGet(gp.GRB.Callback.SPX_OBJVAL),simplex_iterations=model.cbGet(gp.GRB.Callback.SPX_ITRCNT),simplex_primal_infeasibility=model.cbGet(gp.GRB.Callback.SPX_PRIMINF),simplex_dual_infeasibility=model.cbGet(gp.GRB.Callback.SPX_DUALINF))
@@ -44,6 +52,7 @@ def optimize(m,units,levels,controls,bindings,data,start_receipt):
                 if hit:
                     row['target_seconds']=targets[next_target[0]];next_target[0]+=1;telemetry.append(row);atomic(LOCAL/'A1_TELEMETRY.json',telemetry)
         m.optimize(cb);call_wall=perf_counter()-begin;spent+=call_wall
+        diagnostics.finish_objective(m)
         atomic(LOCAL/'ACTIVE_OPTIMIZATION.json',dict(active=False,total_optimize_seconds=spent,level=name))
         phase=clean(dict(level=name,status=m.Status,incumbent=m.ObjVal if m.SolCount else None,best_bound=m.ObjBound,gap=m.MIPGap if m.SolCount else None,nodes=m.NodeCount,native_Runtime_seconds=m.Runtime,optimize_call_wall_seconds=call_wall));phases.append(phase)
         atomic(LOCAL/'A1_PARTIAL_RESULT.json',dict(passes=phases,optimization_wall_seconds=spent,first_incumbent_seconds=first[0]))
@@ -54,7 +63,10 @@ def optimize(m,units,levels,controls,bindings,data,start_receipt):
             dump('MAY_A1_PHYSICAL_VALIDATION.json',cert);atomic(LOCAL/'A1_SELECTED_PHYSICAL.json',selected);atomic(LOCAL/'A1_CONTROLS.json',ctrl)
             if name=='rho':
                 primary_cert=cert;dump('P1_PHYSICAL_VALIDATION.json',cert)
-                if cert['PASS'] and phase['gap'] is not None and phase['gap']<=.005:atomic(LOCAL/'P1_ACCEPTED_A1.json',dict(physical=selected,controls=ctrl,P1=phase,validation=cert))
+                if cert['PASS'] and phase['gap'] is not None and phase['gap']<=.005:
+                    domain_status=close_feasibility(domain_status,cert)
+                    atomic(LOCAL/'P1_ACTIVE_DOMAIN_A1.json',dict(physical=selected,controls=ctrl,P1=phase,validation=cert,
+                        domain_status=domain_status,accepted=False,scientific_full_domain_optimal=False))
             if not cert['PASS']:break
         if m.Status!=gp.GRB.OPTIMAL:break
         if len(phases)<len(levels):m.addConstr(expr<=m.ObjVal+(1e-7 if name=='rho' else 1e-8))
@@ -65,6 +77,10 @@ def optimize(m,units,levels,controls,bindings,data,start_receipt):
     start_receipt['accepted_by_Gurobi']=True if re.search(r'Loaded user MIP start|User MIP start produced solution',log) else False if start_receipt['available'] else None;dump('MIP_START_RECEIPT.json',start_receipt)
     receipt=dict(passes=phases,optimization_wall_seconds=spent,total_protocol_wall_seconds=perf_counter()-begin_all,first_incumbent_seconds=first[0],peak_observed_RSS_bytes=peak[0],lex_complete=len(phases)==len(levels) and phases[-1]['status']==gp.GRB.OPTIMAL,P1_A1_ACCEPTED=accepted,settings=read(OUT/'PREREGISTRATION.json')['solver'],MIP_start=start_receipt,root_relaxation=dict(objective_rounded=float(root[1]),iterations=int(root[2]),seconds=float(root[3])) if root else None,presolve=dict(seconds=float(presolve[1]),rows=int(presolve[2]),columns=int(presolve[3]),nonzeros=int(presolve[4])) if presolve else None,globality='P1 bounds cover the complete original PR102 physical integer feasible set; later bounds apply only under inherited scientific lexicographic locks; no restricted columns',build_and_validation_excluded=True,exactly_one_primary=True,latest_callback=latest)
     receipt['cuts_log_sections']=[s.strip() for s in re.findall(r'Cutting planes:\s*\n(.*?)(?:\n\s*\n|\nExplored)',log,re.S)]
+    receipt.update(domain_status=domain_status,scientific_full_domain_optimal=False,
+        future_run_diagnostics=diagnostics.receipt(),
+        P1_A1_ACTIVE_DOMAIN_QUALIFIED=accepted,P1_A1_ACCEPTED=False,
+        globality='Restricted active-domain bounds only; integer closure of the scientific omitted universe is not proven.')
     if m.SolCount:
         receipt['final_incumbent_P1_rho']=dense_value(levels[0][1],np.asarray(m.getAttr('X')))
         receipt['original_P1_global_gap']=(abs(receipt['final_incumbent_P1_rho']-phases[0]['best_bound'])/abs(receipt['final_incumbent_P1_rho'])) if phases[0]['best_bound'] is not None and receipt['final_incumbent_P1_rho'] else (0 if receipt['final_incumbent_P1_rho']==phases[0]['best_bound']==0 else None)

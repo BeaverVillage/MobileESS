@@ -75,7 +75,10 @@ def capture_baseline():
     import v42_boundary.model as boundary
     original_model=gp.Model
     class StaticModel(original_model):
-        def optimize(self,*a,**k):raise PermissionError('SNAPSHOT_CAPTURE_OPTIMIZE_FORBIDDEN')
+        def optimize(self,*a,**k):
+            from v42_a_stage_domain_v2.execution import guard_model_optimize
+            guard_model_optimize(self)
+            raise PermissionError('SNAPSHOT_CAPTURE_OPTIMIZE_FORBIDDEN')
     gp.Model=StaticModel
     class Context:
         folder=LOCAL

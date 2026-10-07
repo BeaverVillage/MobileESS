@@ -3,7 +3,10 @@ import sys,gzip,pickle,time
 import numpy as np,scipy.sparse as sp
 import gurobipy as gp,psutil
 from .common import *
+from v42_a_stage_domain_v2.execution import require_action_authorized,guarded_optimize
+from v42_a_stage_domain_v2.status import initial_domain_status
 def main(day,tag):
+    require_action_authorized(day,'FEASIBILITY_LP')
     folder=CASE/day/tag
     if any((folder/name).exists() for name in ('RESULT.json','SOLVE_START.json','LP_RAW_POINT.npz','MIP_RAW_POINT.npz','RAW_FARKAS.npz')):raise PermissionError('NO_DUPLICATE_OR_PARTIAL_NATIVE_TEST; use fresh identity/static clone only')
     static=read(folder/'STATIC_ONLY.json')
@@ -16,14 +19,14 @@ def main(day,tag):
     atomic(folder/'SOLVE_START.json',dict(started=now(),matrix=static['matrix'],solver=SETTINGS,native_limit_each=600,objective='ZERO_FEASIBILITY',
         partial_checkpoint_loaded=False,incumbent_loaded=False,basis_loaded=False,old_native_clock_loaded=False))
     a=sp.load_npz(folder/'EXPANDED_MATRIX.npz');z=dict(np.load(folder/'EXPANDED_ATTRIBUTES.npz'))
-    result=dict(day=day,tag=tag,LP_status=None,MIP_status=None,classification='UNRESOLVED',selected=read(folder/'DOMAIN_AUTHORITY_AUDIT.json')['selected'],census=read(folder/'CENSUS.json'))
+    result=dict(day=day,tag=tag,LP_status=None,MIP_status=None,classification='UNRESOLVED',domain_status=initial_domain_status(),selected=read(folder/'DOMAIN_AUTHORITY_AUDIT.json')['selected'],census=read(folder/'CENSUS.json'))
     for relaxed in (True,False):
         prefix='LP' if relaxed else 'MIP';m=gp.Model('FRESH_CAPTURED_A1_'+prefix);m.Params.OutputFlag=0
         x=m.addMVar(a.shape[1],lb=z['lb'],ub=z['ub'],vtype='C' if relaxed else z['vtype']);m.addMConstr(a,x,z['sense'],z['rhs']);m.setObjective(0.);m.update()
         for key,value in SETTINGS.items():m.setParam(key,value)
         m.Params.TimeLimit=600.;m.Params.OutputFlag=1;m.Params.LogFile=str(folder/(prefix+'_NATIVE.log'))
         if relaxed:m.Params.InfUnbdInfo=1;m.Params.DualReductions=0
-        m.optimize();result.update({prefix+'_status':m.Status,prefix+'_runtime':m.Runtime,prefix+'_Work':m.Work,prefix+'_solutions':m.SolCount,
+        guarded_optimize(m,day);result.update({prefix+'_status':m.Status,prefix+'_runtime':m.Runtime,prefix+'_Work':m.Work,prefix+'_solutions':m.SolCount,
                                    prefix+'_iterations':m.IterCount,prefix+'_nodes':m.NodeCount})
         if m.SolCount:
             raw=np.array(m.getAttr('X'));np.savez_compressed(folder/(prefix+'_RAW_POINT.npz'),values=raw)

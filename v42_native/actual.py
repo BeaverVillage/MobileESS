@@ -91,6 +91,8 @@ def run_dday_actual(frozen_day_ahead_plan, realized_inputs, backend: ActualBacke
     require(local_q_repair is False, 'ACTUAL_LOCAL_Q_REPAIR_FORBIDDEN')
     require(full_reoptimization is False, 'ACTUAL_FULL_REOPTIMIZATION_FORBIDDEN')
     require(isinstance(frozen_day_ahead_plan,FrozenDayAheadPlan), 'VERIFIED_DAYAHEAD_FREEZE_REQUIRED')
+    from v42_a_stage_domain_v2.execution import require_action_authorized
+    require_action_authorized(frozen_day_ahead_plan.plan,'ACTUAL',require_day=False)
     frozen=frozen_day_ahead_plan
     frozen.verify()
     require(isinstance(realized_inputs,dict) and

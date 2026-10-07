@@ -13,6 +13,8 @@ from v42_boundary.generator import Generator
 from v42_job_capability import Option,validate
 from v42_sparse.config import settings
 from v42_sparse.runtime import coefficient_vector
+from v42_a_stage_domain_v2.execution import tag_model_for_day
+from v42_a_stage_domain_v2.status import initial_domain_status
 
 def bind(m,row,x,coefficient):
     if isinstance(x,gp.Var):m.chgCoeff(row,x,coefficient)
@@ -63,6 +65,7 @@ def build(context,data,kind):
         return m,units,o,c,b
     bundle,jobs,bounds,r,raw,graphs,old,prep=data;started=perf_counter();cfg=settings(kind);compress=cfg['aux'];aggregate=cfg['aggregate']
     m=gp.Model('V42_ROOT_EXACT_'+kind);m.Params.OutputFlag=0;m._root_binding_constants=defaultdict(float)
+    tag_model_for_day(m,bundle,require_day=False)
     tail=max(b.latest_completion for b in bounds.values());known={};risk={};gpurows={};riskrows={};fixedrisk=defaultdict(float)
     for uid,row in raw.items():
         if uid not in jobs:
@@ -124,6 +127,13 @@ def build(context,data,kind):
     family_indices['Runtime_finish_count']={x.index for x in runtime_counts.values()}
     counts={n:len(ids) for n,ids in family_indices.items()};row_density=np.diff(m.getA().indptr)
     stats=dict(formulation=kind,features=cfg,jobs_complete=len(jobs),all_jobs_complete=True,scientific_classes=len(classes),aggregation=aggregate,aggregation_mode='exact staying-path integer histogram plus individually service-preserving optional migration lanes' if aggregate else 'none',columns=m.NumVars,binaries=m.NumBinVars,integers=m.NumIntVars-m.NumBinVars,continuous=m.NumVars-m.NumIntVars,constraints=m.NumConstrs,nonzeros=m.NumNZs,max_row_density=int(row_density.max()),family_counts=counts,logical_units=len(units),global_variables=global_vars,Runtime_finish_counts=len(runtime_counts),model_build_seconds=perf_counter()-started,grid_seconds=grid_seconds,peak_observed_RSS_bytes=peak,quadratic_constraints=m.NumQConstrs,quadratic_objective=m.NumQNZs,SOS=m.NumSOS,general_constraints=m.NumGenConstrs,original_tie_in_MILP=cfg['tie'],canonical_post_tie=not cfg['tie'],complete_domains=True)
+    stats.update(complete_domains=prep.get('full_migration_domain_active',True),
+        aidc_domain_authority=prep.get('domain_authority','PR134_HISTORICAL'),
+        domain_status=initial_domain_status(hard_physical_domain_defined=prep.get('domain_authority')=='AIDC_A_STAGE_DOMAIN_AUTHORITY_V2',
+            authority=prep.get('domain_authority','PR134_HISTORICAL')),
+        scientific_full_domain_optimal=False,
+        optimization_scope='restricted_domain_optimum' if not prep.get('full_migration_domain_active',True) else 'historical_active_domain')
+    m._v42_domain_status=stats['domain_status']
     dump(kind+'_MODEL_STATS.json',stats);atomic(context.folder/(kind+'_MODEL_COMPLETE.json'),stats)
     levels=primary+[('CC4_reference_deviation',timing['deviation'])]+list(zip(('migration_count','shift_slots','prestart_changes'),metrics))
     if cfg['tie']:levels.append(('physical_event_tie',tie))

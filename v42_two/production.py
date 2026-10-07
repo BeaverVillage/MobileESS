@@ -36,6 +36,8 @@ def run(mode):
     class CaseContext(Context):
         def __init__(self):self.folder=folder
     data=prepare()
+    from v42_a_stage_domain_v2.execution import require_action_authorized
+    require_action_authorized(data[0],'A1')
     m,units,legacy,controls,bindings=build(CaseContext(),data,'F2-CRA');m.update();m._two_caps=data[3].capacities
     before=dict(columns=m.NumVars,rows=m.NumConstrs,nonzeros=m.NumNZs,binaries=m.NumBinVars,integers=m.NumIntVars-m.NumBinVars,fingerprint=hex(m.Fingerprint))
     groups=aidc_groups(legacy,units,data);m.update()

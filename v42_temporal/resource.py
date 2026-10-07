@@ -23,6 +23,8 @@ def known_bounds(jobs,ts,*,begin=24,end=120,max_active=1):
 def main():
     require(not (OUT/'MAY01_TS_CC4_RESOURCE_FEASIBILITY.json').exists(),'RESOURCE_ALREADY_SEALED')
     b=read(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json');jobs=[j for j in b['known_population'] if j['planning_eligible']]
+    from v42_a_stage_domain_v2.execution import require_action_authorized,tag_model_for_day
+    require_action_authorized(b,'FEASIBILITY_LP')
     ts=pd.read_csv(OUT/'TS_HIERARCHICAL_BACKOFF_LEDGER.csv',dtype={'job_id':str}).set_index('job_id').to_dict('index')
     require(sum(b['capacities'].values())==780 and b['runtime_reserve_gamma']==2.423057443558147,'FROZEN_CAPACITY_GAMMA')
     e=pd.read_csv(OUT/'CC4_SERVICE_TIMING_ENVELOPE.csv');k=pd.read_csv(OLD/'CC4_EXECUTION_LAG_KERNEL.csv').kappa.to_numpy()
@@ -35,6 +37,7 @@ def main():
         r['capacity_excess_GPU']=max(0.,r['necessary_GPU_lower_bound']-780)
     worst=max(rows,key=lambda r:r['necessary_GPU_lower_bound']);point_fail=worst['capacity_excess_GPU']>1e-8
     LOCAL.mkdir(exist_ok=True);start=perf_counter();m=gp.Model('V42_TS_CC4_NECESSARY');m.Params.OutputFlag=0
+    tag_model_for_day(m,b)
     try:
         service=bind_service(m,q,k,e.Q10,e.Q90)
         for r in rows:m.addConstr(r['known_GPU_lower_bound']+service['gpu'][r['Dday_slot']]<=780,name=f'capacity[{r["Dday_slot"]}]')

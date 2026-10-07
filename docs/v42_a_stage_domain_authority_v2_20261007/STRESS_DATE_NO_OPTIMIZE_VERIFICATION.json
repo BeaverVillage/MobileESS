@@ -1,0 +1,86 @@
+{
+  "PASS": true,
+  "review_date": "2026-10-07",
+  "scope": "Formulation implementation, matrix-free audits and short tests only",
+  "blocked_stress_dates": [
+    "2025-05-10",
+    "2025-05-12",
+    "2025-05-17",
+    "2025-05-19"
+  ],
+  "failure_reason": "STRESS_DATE_OPTIMIZATION_NOT_AUTHORIZED",
+  "production_optimization_calls": 0,
+  "stress_date_native_optimization_calls": 0,
+  "historical_27_PASS_date_reoptimization_calls": 0,
+  "new_31_day_campaigns_launched": 0,
+  "stress_date_Planning_freeze_calls": 0,
+  "stress_date_Actual_executions": 0,
+  "stress_date_Fresh_OpenDSS_executions": 0,
+  "scheduled_optimizers_created": 0,
+  "guard_override_environment_or_CLI_flag": null,
+  "guard_architecture": {
+    "date_normalization": "Explicit scientific day metadata, native date/time objects and source-local ISO timestamps",
+    "conflicting_identity": "A stress date in either identity fails closed; other date conflicts are rejected",
+    "explicit_production_entrypoint_guard": true,
+    "native_model_day_tags": true,
+    "Model_optimize_safety_backstop": true,
+    "copy_relax_fixed_day_tag_propagation": true,
+    "presolve_blocked_for_tagged_stress_models": true,
+    "static_model_construction_or_matrix_free_census_authorizes_optimization": false,
+    "missing_date_at_production_boundary": "A_STAGE_PRODUCTION_DAY_REQUIRED",
+    "monthly_B1_campaign_entrypoint": "A_STAGE_CAMPAIGN_NOT_AUTHORIZED_FOR_DOMAIN_V2_REVIEW"
+  },
+  "explicit_protected_routes": [
+    "v42_pr134_b1.native.run_a1",
+    "v42_pr134_b1.worker.execute",
+    "v42_pr134_b1.coordinator.run",
+    "v42_pr134_b1.replay.freeze_planning/actual/fresh",
+    "v42_pr134_adaptive.solve_snapshot.main",
+    "v42_pr134_adaptive.capacity_master.main",
+    "v42_pr134_adaptive.minimum_probe.main",
+    "v42_pr134_adaptive.restricted.execute",
+    "v42_pr134_may19.solve.main",
+    "v42_pr134_may19.production.main",
+    "v42_pr134_repair.original_diagnosis.run",
+    "v42_pr134_repair.certificate.run",
+    "v42_root.worker.optimize",
+    "v42_root.start.validate_source",
+    "v42_exact.worker.optimize",
+    "v42_native.aidc.solve",
+    "v42_native.supervision.supervise/stage_worker.main",
+    "v42_native.planning.freeze_day_ahead_plan",
+    "v42_native.actual.run_dday_actual",
+    "v42_two.production/v42_bootstrap.a1/v42_voltage.a1/v42_single_thread.a1/v42_integrated.a1",
+    "v42_final.resource_check/checkpoint_resource_check",
+    "v42_temporal.resource/v42_boundary.resource"
+  ],
+  "inherited_tagged_model_routes": [
+    "v42_root.native.build and copied/relaxed diagnostics/start checks",
+    "v42_exact.native.build",
+    "v42_compact.native.build and execute.worker",
+    "v42_boundary.model.solve",
+    "v42_temporal.native.solve"
+  ],
+  "other_optimizer_source_audit": {
+    "scipy_optimize_milp": "v42_job_capability.solve_joint is explicitly SYNTHETIC_ONLY, uses EXPLICIT_TEST_SERVICE fixtures and is not a production date entrypoint",
+    "production_non_Gurobi_optimizer_found_in_target_routes": false,
+    "historical_frozen_result_files_changed_by_guard_work": false
+  },
+  "short_validation": {
+    "command": "python -m pytest tests/test_v42_a_stage_domain_v2_execution.py -q",
+    "tests_passed": 47,
+    "tests_failed": 0,
+    "latest_elapsed_seconds": 0.89,
+    "underlying_optimizer_backend_calls_by_guard_tests": 0,
+    "method": "Sentinel/mock blocked attempts plus direct production entrypoint rejection before files, model builds or solver access",
+    "covers": [
+      "All four dates and P1/P2/LP/MIP/A1/Planning/Actual/Fresh stages",
+      "Blocked timestamp and conflicting identity metadata",
+      "Direct, copied, relaxed and fixed model backstop; blocked presolve",
+      "Feasibility and root LP pricing never imply integer closure",
+      "Bare closure booleans and failed independent verifiers rejected",
+      "Passive future timing/conditioning instrumentation"
+    ]
+  },
+  "limitation": "This is implementation and interception evidence, not a feasibility or optimality certificate for any production date"
+}

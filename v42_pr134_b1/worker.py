@@ -1,6 +1,7 @@
 """Isolated date/stage process, causal immutable receipt or explicit failure."""
 import sys,traceback
 from .common import *
+from v42_a_stage_domain_v2.execution import require_action_authorized
 
 def physical_validation(fresh):
     s=fresh['summary']
@@ -10,6 +11,7 @@ def physical_validation(fresh):
         and not fresh['Planning_tap_replay'] and all(fresh[k]==0 for k in ('Actual_reoptimization','local_PQ_repair','global_PQ_repair')))
 
 def execute(request):
+    require_action_authorized(request,request.get('stage','A1'))
     root=Path(request['root']).resolve();freeze=read(root/'B1_PRODUCTION_FREEZE_MANIFEST.json');verify_freeze(freeze)
     day,stage=request['day'],request['stage'];expected=identity(freeze,day,stage)
     if request['identity']!=expected or set(request['dependencies'])!=set(STAGES[:STAGES.index(stage)]):raise PermissionError('CAUSAL_STAGE_IDENTITY')
@@ -29,7 +31,10 @@ def execute(request):
         import gurobipy as gp
         original=gp.Model
         class NoOptimization(original):
-            def optimize(self,*a,**kw):raise PermissionError('ACTUAL_OR_FRESH_REOPTIMIZATION_FORBIDDEN')
+            def optimize(self,*a,**kw):
+                from v42_a_stage_domain_v2.execution import guard_model_optimize
+                guard_model_optimize(self)
+                raise PermissionError('ACTUAL_OR_FRESH_REOPTIMIZATION_FORBIDDEN')
         gp.Model=NoOptimization
     if stage=='A1':
         from .native import run_a1

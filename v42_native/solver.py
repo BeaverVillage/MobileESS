@@ -4,6 +4,9 @@ from time import perf_counter
 import gurobipy as gp
 from gurobipy import GRB
 from .contracts import require
+from v42_a_stage_domain_v2.execution import guard_model_optimize,day_from_authority,tag_model_for_day
+from v42_a_stage_domain_v2.status import initial_domain_status
+from v42_a_stage_domain_v2.telemetry import FutureRunTelemetry
 
 
 def size(model):
@@ -27,7 +30,13 @@ def optimize(model, objectives, deadline, incumbent=None, *, diagnostic_quadrati
     A non-optimal solve preserves its incumbent/bound and stops lex refinement;
     it never invents an optimum or silently resets the time budget.
     """
+    guard_model_optimize(model)
+    day=day_from_authority(deadline)
+    if day is not None:tag_model_for_day(model,day)
+    guard_model_optimize(model)
     deadline.check();model.update()
+    diagnostics=FutureRunTelemetry(model,day=getattr(model,'_v42_a_stage_day',None))
+    domain_status=dict(getattr(model,'_v42_domain_status',initial_domain_status()))
     applied=0
     if incumbent is not None:
         for v in model.getVars():
@@ -38,6 +47,7 @@ def optimize(model, objectives, deadline, incumbent=None, *, diagnostic_quadrati
         warm_start_accepted=False,warm_start_initial_objective=None)
     messages=[];passes=[];saved=None;started=perf_counter();last_progress=[-1.]
     def callback(m,where):
+        diagnostics.callback(m,where,GRB)
         now=perf_counter()-started
         if where==GRB.Callback.MESSAGE:
             message=m.cbGet(GRB.Callback.MSG_STRING).strip()
@@ -78,7 +88,9 @@ def optimize(model, objectives, deadline, incumbent=None, *, diagnostic_quadrati
             deadline.check();model.setObjective(obj,GRB.MINIMIZE);model.update()
             if not diagnostic_quadratic:assert_milp(model)
             model.Params.TimeLimit=deadline.remaining
+            diagnostics.begin_objective(name,remaining_seconds=deadline.remaining)
             model.optimize(callback)
+            diagnostics.finish_objective(model)
             row=dict(level=name,status=model.Status,solve_seconds=model.Runtime,nodes=model.NodeCount,
                 objective=float(model.ObjVal) if model.SolCount else None,
                 bound=float(model.ObjBound) if model.IsMIP else (float(model.ObjVal) if model.SolCount else None),
@@ -88,6 +100,8 @@ def optimize(model, objectives, deadline, incumbent=None, *, diagnostic_quadrati
                 saved=dict(values={v.VarName:float(v.X) for v in model.getVars()},
                            objectives={n:float(gp.LinExpr(o).getValue()) for n,o in objectives},
                            lex_complete=False)
+                saved['domain_status']=dict(domain_status)
+                saved['scientific_full_domain_optimal']=False
             if model.Status!=GRB.OPTIMAL:break
             if len(passes)==len(objectives):saved['lex_complete']=True
             tolerance=1e-7 if name=='rho' else 1e-8
@@ -95,6 +109,7 @@ def optimize(model, objectives, deadline, incumbent=None, *, diagnostic_quadrati
     except TimeoutError:
         pass
     receipt=dict(**events,warm_start_values_applied=applied,warm_start_messages=messages,
+        domain_status=domain_status,scientific_full_domain_optimal=False,future_run_diagnostics=diagnostics.receipt(),
         passes=passes,solve_wall_seconds=perf_counter()-started,model_size=size(model),
         root_timing_note='Callback first root observation, not an invented isolated root-LP duration; null if presolve solves model',
         warm_start_node_reduction=None,warm_start_node_reduction_reason='No second native cold run authorized; no causal speedup claimed',

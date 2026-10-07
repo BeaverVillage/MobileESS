@@ -34,6 +34,10 @@ def project(m,v,families):
                 expr=gp.quicksum(z for (s,a),z in enter.items() if s==k and a<=t)-gp.quicksum(z for (s,a),z in leave.items() if s==k and a<=t)
                 derived[x.index]=expr
     n=gp.Model('bounded_exact_projection');n.Params.OutputFlag=0
+    source_day=getattr(m,'_v42_a_stage_day',None)
+    if source_day is not None:
+        from v42_a_stage_domain_v2.execution import tag_model_for_day
+        tag_model_for_day(n,source_day)
     retained={x.index:n.addVar(lb=x.LB,ub=x.UB,vtype=x.VType,name=x.VarName) for x in oldvars if x.index not in derived}
     def convert(expr):
         e=gp.LinExpr(expr);result=gp.LinExpr(e.getConstant())

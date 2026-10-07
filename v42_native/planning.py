@@ -82,6 +82,8 @@ class FrozenDayAheadPlan:
 
 
 def freeze_day_ahead_plan(final_plan, output, *, grid_sha):
+    from v42_a_stage_domain_v2.execution import require_action_authorized
+    require_action_authorized(final_plan,'PLANNING_FREEZE',require_day=False)
     validate_plan(final_plan)
     require(final_plan['grid_anchor']['grid_sha'] == grid_sha, 'BACKEND_GRID_SHA_MISMATCH')
     doc = dict(schema_version=SCHEMA_VERSION, plan=final_plan,

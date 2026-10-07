@@ -33,6 +33,8 @@ def run():
             initial=json.loads((OUT/'A1_INITIAL_SOURCE_DATA_HASH_AUDIT.json').read_text(encoding='utf8'))
             assert sha(LOCAL/'DATA.pkl')==initial['source_data_cache_sha256'], 'ONLY_THIS_TASK_NEW_SOURCE_CACHE_ALLOWED'
         data=prepare(); bundle=data[0]
+        from v42_a_stage_domain_v2.execution import require_action_authorized
+        require_action_authorized(bundle,'A1')
         assert len(data[1])==1499 and bundle['day']=='2025-05-01'
         issue=pd.Timestamp(bundle['issue_time'])
         assert all(r['known_at_issue'] and pd.Timestamp(r['submit_time'])<=issue and pd.Timestamp(r['issue_time'])==issue for r in bundle['known_population'])

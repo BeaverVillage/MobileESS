@@ -2,6 +2,8 @@
 import sys,pickle,gzip,time
 import numpy as np,scipy.sparse as sp,gurobipy as gp
 from .common import *
+from v42_a_stage_domain_v2.execution import require_action_authorized,guarded_optimize,tag_model_for_day
+from v42_a_stage_domain_v2.status import initial_domain_status
 
 def materialize(folder,relaxed):
     comp=folder/'COMPACT';proof=read(comp/'COMPRESSION_VERIFICATION.json')
@@ -10,6 +12,7 @@ def materialize(folder,relaxed):
         if sha(proof[k]['path'])!=proof[k]['sha256']:raise PermissionError('COMPACT_SHA_DRIFT')
     a=sp.load_npz(comp/'A2SC_MATRIX.npz');z=dict(np.load(comp/'A2SC_ATTRIBUTES.npz'))
     m=gp.Model('MAY19_RESCUE_'+('LP' if relaxed else 'MIP'));m.Params.OutputFlag=0
+    tag_model_for_day(m,DAY)
     x=m.addMVar(a.shape[1],lb=z['lb'],ub=z['ub'],vtype='C' if relaxed else z['vtype'])
     m.addMConstr(a,x,z['sense'],z['rhs'])
     m.setObjective(0.);m.update()
@@ -41,6 +44,7 @@ def physical(folder,point,audit):
     return cert
 
 def main(shell):
+    require_action_authorized(DAY,'FEASIBILITY_LP')
     folder=CASE/shell
     if any((folder/n).exists() for n in ('SOLVE_START.json','RESULT.json','LP_RAW_POINT.npz','MIP_RAW_POINT.npz')):raise PermissionError('NO_DUPLICATE_OR_PARTIAL_NATIVE_SOLVE')
     other_heavy();static=read(folder/'STATIC_ONLY.json')
@@ -48,7 +52,7 @@ def main(shell):
         if sha(static[k]['path'])!=static[k]['sha256']:raise PermissionError('STATIC_SHA_DRIFT')
     atomic(folder/'SOLVE_START.json',dict(started_UTC=now(),process=process(),LP_SETTINGS=LP_SETTINGS,MIP_SETTINGS=MIP_SETTINGS,
            original_clock_loaded=False,previous_point_or_basis_loaded=False,normal_objective=False,base=BASE))
-    r=dict(day=DAY,shell=shell,classification='UNRESOLVED',LP=None,MIP=None,integer_witness_PASS=False,original_full_replay_PASS=False)
+    r=dict(day=DAY,shell=shell,classification='UNRESOLVED',domain_status=initial_domain_status(),LP=None,MIP=None,integer_witness_PASS=False,original_full_replay_PASS=False)
     for relaxed in (True,False):
         prefix='LP' if relaxed else 'MIP';m=materialize(folder,relaxed);settings=LP_SETTINGS if relaxed else MIP_SETTINGS
         for k,v in settings.items():m.setParam(k,v)
@@ -65,7 +69,7 @@ def main(shell):
             if where==gp.GRB.Callback.MIP:
                 v.update(nodes=model.cbGet(gp.GRB.Callback.MIP_NODCNT),incumbent=model.cbGet(gp.GRB.Callback.MIP_OBJBST),bound=model.cbGet(gp.GRB.Callback.MIP_OBJBND))
             atomic(CASE/'PROGRESS.json',v)
-        m.optimize(callback)
+        guarded_optimize(m,DAY,callback)
         def attr(name):
             try:return float(getattr(m,name))
             except (AttributeError,gp.GurobiError):return None

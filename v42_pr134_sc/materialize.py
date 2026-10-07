@@ -7,9 +7,12 @@ import scipy.sparse as sp
 from .common import *
 from .build import census
 
-def model(name):
+def model(name,*,day=None):
     a=sp.load_npz(LOCAL/(name+'_MATRIX.npz'));z=attributes(name)
     m=gp.Model('CURRENT_PR134_'+name);m.Params.OutputFlag=0
+    if day is not None:
+        from v42_a_stage_domain_v2.execution import tag_model_for_day
+        tag_model_for_day(m,day)
     x=m.addMVar(a.shape[1],lb=z['lb'],ub=z['ub'],vtype=z['vtype'])
     m.addMConstr(a,x,z['sense'],z['rhs'])
     ex=gp.LinExpr()

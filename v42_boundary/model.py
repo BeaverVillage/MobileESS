@@ -55,6 +55,8 @@ def solve(context):
     with Path(seal['path']).open('rb') as f:bundle,jobs,windows,seconds,r,raw,domains,g=pickle.load(f)
     require(len(domains)==1499 and read(OUT/'MAY01_RESOURCE_RECHECK.json')['PASS'],'COMPLETE_DOMAIN_RESOURCE_GATES')
     loaded=perf_counter();m=gp.Model('V42_BOUNDARY_A1_COMPLETE_OPTIONS');m.Params.OutputFlag=0
+    from v42_a_stage_domain_v2.execution import tag_model_for_day
+    tag_model_for_day(m,bundle)
     try:
         H=r.control_end;tail=max(b.latest_completion for b in windows.values());known={};gpurow={};risk={};riskrow={}
         fixedrisk=defaultdict(float)
