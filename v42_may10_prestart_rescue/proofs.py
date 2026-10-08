@@ -98,3 +98,14 @@ def cutoff_global_bound(ub, cutoff, subquery_lb, *, complete_domain, objective_i
     if L > U:
         raise ValueError('SUBQUERY_BOUND_CONFLICTS_WITH_VALIDATED_UB')
     return min(U, L)
+
+
+def integer_bound_review(ub, raw_lb):
+    """Inherited ceil(LB-1e-6) policy, without changing any native tolerance."""
+    import math
+    if raw_lb > ub + 1e-5:
+        raise ValueError('GLOBAL_BOUND_CONFLICTS_WITH_ORIGINAL_VALIDATED_UB')
+    lower=min(ub,math.ceil(raw_lb-1e-6))
+    gap=(ub-lower)/max(abs(ub),1e-12)
+    return dict(global_LB=lower,global_gap=gap,accepted=gap<=.005,
+        exact_integer_optimality=lower==ub)

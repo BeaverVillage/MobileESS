@@ -65,3 +65,11 @@ May12 보호 대상 PID/생성 시각/executable/cwd/parent chain은 `MAY12_PROT
 2. 남은 matrix의 동일한 행 및 정확하게 자명한 zero rows만 제거한다. 575개 class coverage와 모든 목적의 coefficient/constant 및 lock을 대조한다.
 3. 시작 사이트/시각의 전체 선택 집합과 time-window capacity, shift budget으로부터 필수 relocation 하한을 증명한다. 소규모 전수 검증과 실제 계수 대조가 통과한 cut만 후보에 포함한다.
 4. 원본 feasible UB60과 cutoff PRE<=59의 보완 partition을 명시해 전체 영역 bound authority를 검증한다. 제한된 candidate infeasibility 또는 partial LP를 전역 인증으로 승격하지 않는다.
+
+## 신규 고정 실험 측정
+
+최종 신규 raw model/runtime/root/presolve/Work 비교는 FINAL_REVIEW_KO.md 및 NATIVE_LOG_COMPARISON.json에 있다. Source LP는 objective0으로 완료했고 raw X/Pi/RC와 원본 행 잔차 재계산을 통과했다. 분수 original integer 좌표36개는 15 singleton native-flow 클래스와 2 histogram 클래스에 속한다. Global integer 좌표의 분수는 0개다. Histogram 두 개의 SHIFT mass는 30.9739065554 + 39.8167811010이며 모두 기준 사이트 AIDC11/AIDC10에 머무른다. 이는 이 LP point에서 SHIFT74의 약95.66%를 두 분수 histogram이 사용하는 관측이며, 정수 optimum이나 단독 causality 증거는 아니다. 기존 UB60은 relocation60개 중 시간 이동도 있는9개 작업의 총 SHIFT74를 원본 입력 reference로 독립 재구성했다.
+
+압축 단독 auto MIP는 새 UB60 start를 사용했으나 483.047초의 TIME_LIMIT 중 second presolve468.28초를 사용하고 완료된 root 없이 global bound0으로 끝났다. 기존 certified LB2를 그대로 보존했다. 따라서 zero-column/동일 행 축소만으로 두 번째 presolve가 해결된 것이 아니다. Combined B2는 conservative 설정과 cover를 함께 사용하여 first presolve6.45초, second9.39초, root objective2/71.13초/factor360MB로 진입했다. 두 효과를 분리한 MIP ablation은 없다. Root2는 기존 LB2를 재사용한 행이며 새로운 수학적 하한이 아니다. Root cut/branch의 낮은 bound는 전처리와 독립적으로 남는 병목이다.
+
+최종 전체 원본 영역 UB/LB/gap은 60/2/96.666667%이며, 새 native 총 3389.202000초다. Scientific status INCONCLUSIVE, 최종 검토 category PRESTART_COMPRESSION_RUNTIME_IMPROVED. 초기 문서의 RESOURCE_ISOLATION_PENDING은 May12의 자연 종료 후 해제된 역사적 상태이며, 기존 May12는 수정/중단하지 않았다.

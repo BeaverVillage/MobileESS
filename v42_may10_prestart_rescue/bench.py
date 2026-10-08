@@ -196,7 +196,7 @@ def run():
             atomic(OUT/'FINAL_BENCHMARK_STATUS.json',dict(**proof,classification=(
                 'PRESTART_EXACT_OPTIMALITY_PROVED' if proof['exact_integer_optimality'] else
                 'PRESTART_GLOBAL_GAP_ACCEPTED' if proof['accepted'] else
-                'PRESTART_BOUND_IMPROVED_NOT_ACCEPTED' if best['LB']>2 else 'PRESTART_TRACTABILITY_FAIL'),
+                'PRESTART_BOUND_IMPROVED_NOT_ACCEPTED' if __import__('math').ceil(best['LB']-1e-6)>2 else 'PRESTART_TRACTABILITY_FAIL'),
                 best_UB_source=best['source'],wall_seconds=time.perf_counter()-started))
             if proof['accepted']:break
         del attrs
