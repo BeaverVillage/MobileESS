@@ -7,7 +7,7 @@ import sys
 import time
 
 from v42_pr134_b1.common import atomic, read, process, same_process, now
-from .coordinator import AXIS, counts, key, load_manifest, runtime_path
+from .coordinator import AXIS, counts, key, load_manifest, runtime_path, read_actives, worker_snapshot
 
 
 def optional_json(path, default=None):
@@ -35,6 +35,14 @@ def view(root):
                           dates={key(arm, day): dict(arm=arm, day=day, status='PENDING', attempts=0)
                                  for arm, day in AXIS})
     active = optional_json(root / 'ACTIVE.json', live.get('active', {}))
+    try:
+        actives = read_actives(root)
+        workers = [worker_snapshot(row) for row in actives.values()]
+    except (OSError, ValueError, PermissionError, KeyError):
+        actives, workers = {}, []
+    worker_slots = [next((row for row in workers if row['arm'] == 'B2' and row.get('worker_slot', 1) == slot),
+                        dict(worker_slot=slot, arm='B2', day=None, PID=None, phase='IDLE',
+                             worker_alive=False, progress={}, resource={}, heartbeat={})) for slot in range(1, 4)]
     progress = live.get('progress', {})
     report_age = None
     if active.get('request'):
@@ -78,6 +86,8 @@ def view(root):
         Coordinator_PID=heartbeat.get('process', {}).get('PID'),
         Worker_PID=active.get('worker', {}).get('PID'),
         worker_identity=active.get('worker'), worker_alive=worker_alive, coordinator_alive=alive,
+        workers=workers, worker_slots=worker_slots, Worker_PIDs=[row['PID'] for row in workers],
+        B1_parallel_workers=1, B2_parallel_workers=3,
         Monitor_PID=monitor.get('PID'), watchdog=watchdog,
         solver_phase=first_value(progress, 'phase', 'solver_phase'),
         Native_Runtime_seconds=native, wall_seconds=wall, remaining_seconds=remaining,

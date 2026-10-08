@@ -15,7 +15,7 @@ import pytest
 
 from v42_may_campaign import coordinator as co, execution, worker
 from v42_may_campaign.budget import BudgetStop
-from v42_may_campaign.common import ROOT, atomic, read, sha, LockBusy
+from v42_may_campaign.common import ROOT, atomic, read, sha, LockBusy, exclusive_lock
 from v42_may_campaign.preflight import native_zero
 
 
@@ -28,11 +28,12 @@ def campaign():
     manifest = dict(run_id='FAKE_NATIVE_ZERO_' + root.name, Python=sys.executable,
                     input_folders={}, axis=[dict(arm=a, day=d) for a, d in co.AXIS])
     for arm in ('B1', 'B2'):
-        folder = root / 'inputs' / arm / co.DAYS[0]
-        folder.mkdir(parents=True)
-        atomic(folder / 'INPUT_IDENTITY.json', dict(arm=arm, day=co.DAYS[0], fixture_only=True))
-        atomic(folder / 'NATIVE_INPUT.json', dict(arm=arm, day=co.DAYS[0], fixture_only=True))
-        manifest['input_folders'][arm + '/' + co.DAYS[0]] = str(folder)
+        for day in co.DAYS[:4]:
+            folder = root / 'inputs' / arm / day
+            folder.mkdir(parents=True)
+            atomic(folder / 'INPUT_IDENTITY.json', dict(arm=arm, day=day, fixture_only=True))
+            atomic(folder / 'NATIVE_INPUT.json', dict(arm=arm, day=day, fixture_only=True))
+            manifest['input_folders'][arm + '/' + day] = str(folder)
     atomic(root / 'CAMPAIGN_MANIFEST.json', manifest)
     prior_environment = {name: os.environ.get(name) for name in ('TEMP', 'TMP', 'PYTHONDONTWRITEBYTECODE', 'PYTHONUTF8')}
     prior_temp = tempfile.tempdir
@@ -84,7 +85,7 @@ def fake_adapters(campaign, stage=fake_stage, operations=fake_operations):
             patch.object(co, 'load_manifest', return_value=manifest), \
             patch.object(execution, 'verify_manifest', return_value=manifest), \
             patch.object(worker, 'RUNTIME', root / 'locks'), \
-            patch.object(worker, 'assert_no_other_native_worker'), native_zero() as denied:
+            patch.object(worker, 'assert_no_other_native_worker', return_value=[]), native_zero() as denied:
         yield denied
 
 
@@ -114,6 +115,12 @@ def test_pass_receipt_is_immutable_with_ledger_inclusive_wall_and_terminal_heart
     assert receipt['fields']['certified_gap'] == .002
     assert receipt['fields']['case_sha'] == 'FAKE_CASE_SHA'
     assert receipt['input_SHA'] == sha(Path(request['input_folder']) / 'NATIVE_INPUT.json')
+    assert receipt['own_tmp'] == str(request_path.parent / 'tmp')
+    assert receipt['worker_slot'] == request['worker_slot']
+    admission = read(receipt['admission']['path'])
+    assert sha(receipt['admission']['path']) == receipt['admission']['sha256']
+    assert admission['Threads'] == 1 and admission['P2_calls'] == 0
+    assert admission['B1_parallel_workers'] == 1 and admission['B2_parallel_workers'] == 3
     records = {Path(row['path']).name: row for row in receipt['files']}
     assert {'incumbent.npz', 'CERTIFICATE.json', 'FRESH_AC.json', 'NATIVE_RUNTIME_LEDGER.json'} <= set(records)
     assert all(sha(row['path']) == row['sha256'] for row in records.values())
@@ -197,3 +204,245 @@ def test_process_guard_requires_python_module_not_text_in_read_only_shell_comman
     with patch.object(worker.psutil, 'process_iter', return_value=[other]):
         with pytest.raises(LockBusy, match='OTHER_CAMPAIGN_WORKER_PID'):
             worker.assert_no_other_native_worker()
+
+
+def dispatched_request(campaign, arm, day, slot=1):
+    root, manifest = campaign
+    path, request = co.new_request(root, manifest, arm, day)
+    request['worker_slot'] = slot
+    request['worker_command'] = co.default_worker_command(manifest, path)
+    atomic(path, request)
+    return path, request
+
+
+def process_fixture(request_path, pid):
+    request = read(request_path)
+    return SimpleNamespace(pid=pid, info=dict(name='python.exe', cmdline=request['worker_command']))
+
+
+def test_three_same_run_b2_workers_admitted_during_popen_to_actives_window(campaign):
+    root, _ = campaign
+    own = worker.psutil.Process().pid
+    paths = [dispatched_request(campaign, 'B2', day, i + 1)[0]
+             for i, day in enumerate(co.DAYS[:3])]
+    request = read(paths[0])
+    assert not (root / 'ACTIVES.json').exists()
+    peers = [process_fixture(paths[i], own + i + 100) for i in (1, 2)]
+    with patch.object(worker.psutil, 'process_iter', return_value=peers):
+        actual = worker.assert_no_other_native_worker(request)
+    assert [(r['worker_slot'], r['day']) for r in actual] == [(2, co.DAYS[1]), (3, co.DAYS[2])]
+
+
+@pytest.mark.parametrize('other', ['duplicate_date', 'duplicate_slot', 'fourth_worker',
+                                    'B1_overlap', 'other_run', 'manifest_drift',
+                                    'bad_command', 'cross_date_output', 'P2', 'Threads'])
+def test_parallel_b2_admission_rejects_unscoped_or_duplicate_peers(campaign, other):
+    root, _ = campaign
+    own = worker.psutil.Process().pid
+    first_path, first = dispatched_request(campaign, 'B2', co.DAYS[0], 1)
+    second_path, second = dispatched_request(campaign, 'B2', co.DAYS[1], 2)
+    peers = [process_fixture(second_path, own + 100)]
+    if other == 'duplicate_date':
+        # A second PID using the exact same date's persisted dispatch.
+        peers = [process_fixture(first_path, own + 100)]
+    elif other == 'duplicate_slot':
+        second['worker_slot'] = 1
+    elif other == 'fourth_worker':
+        third, _ = dispatched_request(campaign, 'B2', co.DAYS[2], 3)
+        fourth, _ = dispatched_request(campaign, 'B2', co.DAYS[3], 2)
+        peers += [process_fixture(third, own + 101), process_fixture(fourth, own + 102)]
+    elif other == 'B1_overlap':
+        b1, _ = dispatched_request(campaign, 'B1', co.DAYS[0], 1)
+        peers = [process_fixture(b1, own + 100)]
+    elif other == 'other_run':
+        second['run_id'] = 'UNAPPROVED_OTHER_RUN'
+    elif other == 'manifest_drift':
+        second['manifest_SHA'] = '0' * 64
+    elif other == 'bad_command':
+        second['worker_command'] += ['--unapproved-option']
+    elif other == 'cross_date_output':
+        second['output'] = first['output']
+    elif other == 'P2':
+        second['P2_calls'] = 1
+    elif other == 'Threads':
+        second['Threads'] = 3
+    atomic(second_path, second)
+    with patch.object(worker.psutil, 'process_iter', return_value=peers):
+        with pytest.raises(LockBusy):
+            worker.assert_no_other_native_worker(first)
+
+
+@pytest.mark.parametrize('module', ['v42_a_stage_canary.runner', 'v42_m1_anytime.runner',
+                                   'v42_pr134_b1.worker', 'v42_may12_rescue.sweep'])
+def test_external_historical_scientific_workers_rejected_in_parallel_scope(campaign, module):
+    own = worker.psutil.Process().pid
+    _, request = dispatched_request(campaign, 'B2', co.DAYS[0], 1)
+    external = SimpleNamespace(pid=own + 100, info=dict(name='python.exe',
+        cmdline=['python.exe', '-B', '-m', module, 'external-request.json']))
+    with patch.object(worker.psutil, 'process_iter', return_value=[external]):
+        with pytest.raises(LockBusy, match='OTHER_SCIENTIFIC_WORKER_PID'):
+            worker.assert_no_other_native_worker(request)
+
+
+def test_direct_script_historical_worker_is_rejected(campaign):
+    own = worker.psutil.Process().pid
+    _, request = dispatched_request(campaign, 'B2', co.DAYS[0], 1)
+    external = SimpleNamespace(pid=own + 100, info=dict(name='python.exe',
+        cmdline=['python.exe', str(ROOT / 'v42_m1_anytime/runner.py')]))
+    with patch.object(worker.psutil, 'process_iter', return_value=[external]):
+        with pytest.raises(LockBusy, match='OTHER_SCIENTIFIC_WORKER_PID'):
+            worker.assert_no_other_native_worker(request)
+
+
+def test_b1_remains_single_with_b1_or_b2_peer(campaign):
+    own = worker.psutil.Process().pid
+    _, request = dispatched_request(campaign, 'B1', co.DAYS[0], 1)
+    paths = [dispatched_request(campaign, arm, co.DAYS[1], slot)[0]
+             for arm, slot in [('B1', 1), ('B2', 2)]]
+    for path in paths:
+        with patch.object(worker.psutil, 'process_iter', return_value=[process_fixture(path, own + 100)]):
+            with pytest.raises(LockBusy):
+                worker.assert_no_other_native_worker(request)
+
+
+def test_global_admission_mutex_is_released_while_independent_b2_slots_are_owned(campaign):
+    root, _ = campaign
+    _, first = dispatched_request(campaign, 'B2', co.DAYS[0], 1)
+    _, second = dispatched_request(campaign, 'B2', co.DAYS[1], 2)
+    _, third = dispatched_request(campaign, 'B2', co.DAYS[2], 3)
+    _, fourth = dispatched_request(campaign, 'B2', co.DAYS[3], 1)
+    with patch.object(worker, 'RUNTIME', root / 'locks'), \
+            patch.object(worker, 'assert_no_other_native_worker', return_value=[]):
+        with worker.native_worker_admission(first):
+            # A brief mutex, rather than a lifetime global serialization gate.
+            with exclusive_lock(root / 'locks/NATIVE_WORKER.lock'):
+                pass
+            with worker.native_worker_admission(second), worker.native_worker_admission(third):
+                with pytest.raises(LockBusy, match='LIVE_OS_LOCK'), worker.native_worker_admission(fourth):
+                    pytest.fail('A fourth global scientific slot cannot be acquired')
+            with worker.native_worker_admission(second):
+                pass  # OS slot ownership is released when that worker exits.
+        with worker.native_worker_admission(fourth):
+            pass
+
+
+def test_date_lock_rejects_duplicate_even_if_claimed_slot_differs(campaign):
+    root, _ = campaign
+    _, request = dispatched_request(campaign, 'B2', co.DAYS[0], 1)
+    duplicate = dict(request, worker_slot=2)
+    with patch.object(worker, 'RUNTIME', root / 'locks'), \
+            patch.object(worker, 'assert_no_other_native_worker', return_value=[]):
+        with worker.native_worker_admission(request):
+            with pytest.raises(LockBusy, match='WORKER.lock'), worker.native_worker_admission(duplicate):
+                pytest.fail('A duplicated arm/date cannot enter another slot')
+
+
+def test_b1_holds_all_global_slots_even_if_process_inventory_is_temporarily_empty(campaign):
+    root, _ = campaign
+    _, b1 = dispatched_request(campaign, 'B1', co.DAYS[0], 1)
+    _, b2 = dispatched_request(campaign, 'B2', co.DAYS[0], 3)
+    with patch.object(worker, 'RUNTIME', root / 'locks'), \
+            patch.object(worker, 'assert_no_other_native_worker', return_value=[]):
+        with worker.native_worker_admission(b1):
+            with pytest.raises(LockBusy, match='SLOT_3.lock'), worker.native_worker_admission(b2):
+                pytest.fail('B1 and B2 cannot overlap')
+
+
+def test_worker_temp_ledger_and_artifact_paths_remain_separate_for_b2_dates(campaign):
+    _, manifest = campaign
+    requests = [dispatched_request(campaign, 'B2', day, i + 1)
+                for i, day in enumerate(co.DAYS[:3])]
+    observed = []
+    def check_temp(request, budget, progress):
+        expected = str(Path(request['result']).parent / 'tmp')
+        observed.append((os.environ['TEMP'], os.environ['TMP'], tempfile.gettempdir(),
+                         str(budget.path)))
+        assert observed[-1][:3] == (expected,) * 3
+        return fake_stage(request, budget, progress)
+    with fake_adapters(campaign, stage=check_temp) as denied:
+        for path, request in requests:
+            assert worker.run(path) == 0
+    assert denied == []
+    assert len({row[0] for row in observed}) == 3
+    assert len({row[3] for row in observed}) == 3
+    for path, request in requests:
+        receipt = read(request['result'])
+        assert receipt['Native_calls'] == receipt['Native_Runtime'] == 0
+        assert all(Path(row['path']).resolve().is_relative_to(path.parent.resolve())
+                   for row in receipt['files'])
+
+
+def test_duplicate_worker_cannot_write_heartbeat_error_or_result_of_live_attempt(campaign):
+    path, request = dispatched_request(campaign, 'B2', co.DAYS[0], 1)
+    atomic(request['progress'], dict(fixture_only=True, phase='LIVE_ORIGINAL_WORKER'))
+    before = sha(request['progress'])
+    with exclusive_lock(path.parent / 'WORKER.lock'):
+        with pytest.raises(LockBusy, match='WORKER.lock'):
+            worker.run(path)
+    assert sha(request['progress']) == before
+    assert not Path(request['error']).exists()
+    assert not Path(request['result']).exists()
+    assert not (path.parent / 'HEARTBEAT.json').exists()
+
+
+@pytest.mark.parametrize('name', ['progress', 'error', 'output', 'result'])
+def test_worker_rejects_cross_date_write_path_before_artifact_mutation(campaign, name):
+    first, request = dispatched_request(campaign, 'B2', co.DAYS[0], 1)
+    second, other = dispatched_request(campaign, 'B2', co.DAYS[1], 2)
+    request[name] = other[name]
+    atomic(first, request)
+    with pytest.raises(PermissionError, match='OUTPUT_ISOLATION'):
+        worker.run(first)
+    assert not Path(request['result']).exists()
+    assert not Path(other['result']).exists()
+    assert not Path(request['error']).exists()
+    assert not Path(other['error']).exists()
+
+
+def test_native_entry_rechecks_external_workers_after_initial_admission(campaign):
+    _, request = dispatched_request(campaign, 'B2', co.DAYS[0], 1)
+    own = worker.psutil.Process().pid
+    external = SimpleNamespace(pid=own + 100, info=dict(name='python.exe',
+        cmdline=['python.exe', '-m', 'v42_pr134_b1.worker', 'historical-request.json']))
+    model = SimpleNamespace(Params=SimpleNamespace(Threads=1))
+    token = execution._active.set(dict(request=request, worker_slot=1, fixture_only=True))
+    try:
+        with patch.object(worker.psutil, 'process_iter', return_value=[]):
+            with execution.native_scope(model, 'P1', 'M'):
+                execution.guard(model)
+        with patch.object(worker.psutil, 'process_iter', return_value=[external]):
+            with execution.native_scope(model, 'P1', 'M'):
+                with pytest.raises(LockBusy, match='OTHER_SCIENTIFIC_WORKER_PID'):
+                    execution.guard(model)
+    finally:
+        execution._active.reset(token)
+
+
+def test_admission_mutex_wait_includes_dispatch_wall_and_stops_before_stage(campaign):
+    root, _ = campaign
+    path, request = dispatched_request(campaign, 'B2', co.DAYS[0], 1)
+    with patch.object(worker, 'RUNTIME', root / 'locks'), \
+            patch.object(worker, 'assert_no_other_native_worker', return_value=[]), \
+            exclusive_lock(root / 'locks/NATIVE_WORKER.lock'):
+        with pytest.raises(BudgetStop, match='ADMISSION'), worker.native_worker_admission(
+                request, started=time.perf_counter() - 5401):
+            pytest.fail('Admission synchronization cannot extend a date wall ceiling')
+    assert not (path.parent / 'NATIVE_WORKER_ADMISSION.json').exists()
+    assert not (path.parent / 'NATIVE_RUNTIME_LEDGER.json').exists()
+
+
+def test_admission_mutex_wait_rechecks_external_worker_and_releases_own_handles(campaign):
+    root, _ = campaign
+    path, request = dispatched_request(campaign, 'B2', co.DAYS[0], 1)
+    checks = [[], [], LockBusy('OTHER_SCIENTIFIC_WORKER_PID:FAKE_NATIVE_ZERO')]
+    with patch.object(worker, 'RUNTIME', root / 'locks'), \
+            patch.object(worker, 'assert_no_other_native_worker', side_effect=checks), \
+            exclusive_lock(root / 'locks/NATIVE_WORKER.lock'):
+        with pytest.raises(LockBusy, match='OTHER_SCIENTIFIC_WORKER_PID'), \
+                worker.native_worker_admission(request):
+            pytest.fail('An external worker appearing while waiting must deny admission')
+    assert not (path.parent / 'NATIVE_WORKER_ADMISSION.json').exists()
+    with exclusive_lock(root / 'locks/NATIVE_WORKER.lock'):
+        pass
+    with exclusive_lock(path.parent / 'WORKER.lock'):
+        pass

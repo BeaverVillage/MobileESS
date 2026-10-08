@@ -21,7 +21,7 @@ class DateBudget:
         self.clock = clock
         self.started = clock() if started is None else started
         self.wall_limit, self.native_limit, self.final_reserve = wall_limit, native_limit, final_reserve
-        self.calls, self.costs, self.inflight = [], [], None
+        self.calls, self.costs, self.admission_failures, self.inflight = [], [], [], None
         self.progress, self.latest = progress or (lambda value: None), {}
         self.native_used = 0.
         self.persist()
@@ -57,7 +57,8 @@ class DateBudget:
     def persist(self):
         atomic(self.path, dict(wall_ceiling_seconds=self.wall_limit, Native_ceiling_seconds=self.native_limit,
             inclusive_T0=self.started, UTC=now(), wall_seconds=self.wall(), measured_Native_Runtime=self.native_used,
-            calls=self.calls, costs=self.costs, inflight=self.inflight, P2_calls=0, historical_costs_reused=False))
+            calls=self.calls, costs=self.costs, admission_failures=self.admission_failures,
+            inflight=self.inflight, P2_calls=0, historical_costs_reused=False))
 
     @contextmanager
     def cost(self, kind, label, *, track=None):
@@ -82,12 +83,15 @@ class DateBudget:
             raise BudgetStop('FINAL_VERIFICATION_RESERVE_REQUIRED')
         model.Params.Threads = 1
         model.Params.TimeLimit = limit
+        native_temp = d_path(self.path.parent / 'tmp' / 'gurobi')
+        native_temp.mkdir(parents=True, exist_ok=True)
+        model.Params.NodefileDir = str(native_temp)
         model.Params.LogFile = str(self.path.parent / f'{len(self.calls):04d}_{track}_{component}_NATIVE.log')
         start = self.clock()
         row = dict(component=component, track=track, label=label, requested_seconds=requested_seconds,
                    effective_TimeLimit=limit, started_wall_seconds=self.wall(), UTC=now(), status='IN_FLIGHT')
         self.inflight = row; self.latest = {}; self.persist()
-        error = None
+        error = None; entered_native = False
         last_progress = [-float('inf')]
         import gurobipy as gp
         def observe(m, where):
@@ -104,6 +108,7 @@ class DateBudget:
         try:
             with native_scope(model, component, track):
                 guard(model)
+                entered_native = True
                 model.optimize(observe)
         except BaseException as exc:
             error = str(exc)
@@ -114,13 +119,23 @@ class DateBudget:
                     return getattr(model, key)
                 except (gp.GurobiError, AttributeError):
                     return default
-            runtime = attr('Runtime')
-            unknown = runtime is None or not math.isfinite(float(runtime)) or runtime < 0
-            consumed = limit if unknown else float(runtime)
-            row.update(status='FAILED' if error else 'FINISHED', error=error, Native_Runtime=consumed,
-                runtime_unavailable=unknown, Native_Work=attr('Work'), Native_status=attr('Status'),
-                SolCount=attr('SolCount', 0), Native_BestBd=attr('ObjBound'),
-                optimize_wall_seconds=self.clock() - start, finished_wall_seconds=self.wall())
-            self.calls.append(row); self.inflight = None; self.latest = {}
-            self.charge(consumed)
-            self.progress(dict(phase=component, Native_BestBd=row['Native_BestBd'], **self.snapshot()))
+            self.inflight = None; self.latest = {}
+            if not entered_native:
+                # Reused pricing models can still expose the previous solve's
+                # Runtime/bound. A denied admission performed no Native call.
+                row.update(status='ADMISSION_DENIED', error=error, entered_native=False,
+                    Native_Runtime=0., admission_wall_seconds=self.clock() - start,
+                    finished_wall_seconds=self.wall())
+                self.admission_failures.append(row); self.persist()
+                self.progress(dict(phase=component, admission_denied=True, **self.snapshot()))
+            else:
+                runtime = attr('Runtime')
+                unknown = runtime is None or not math.isfinite(float(runtime)) or runtime < 0
+                consumed = limit if unknown else float(runtime)
+                row.update(status='FAILED' if error else 'FINISHED', error=error, entered_native=True,
+                    Native_Runtime=consumed, runtime_unavailable=unknown, Native_Work=attr('Work'),
+                    Native_status=attr('Status'), SolCount=attr('SolCount', 0), Native_BestBd=attr('ObjBound'),
+                    optimize_wall_seconds=self.clock() - start, finished_wall_seconds=self.wall())
+                self.calls.append(row)
+                self.charge(consumed)
+                self.progress(dict(phase=component, Native_BestBd=row['Native_BestBd'], **self.snapshot()))

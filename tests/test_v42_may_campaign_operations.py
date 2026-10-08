@@ -18,6 +18,32 @@ from dayahead.v28r2 import opendss_mapping as mapping
 from dayahead.v28r2.trajectory import FrozenTrajectory
 
 
+def test_original_context_file_paths_are_distinct_and_never_change_scientific_state(tmp_path):
+    inventory = dict(RegControl_count=7, CapControl_count=0, initial_taps=[1.] * 7)
+    paths, records, engines = [], [], []
+    for day in ('2025-05-01', '2025-05-02', '2025-05-03'):
+        data_path = [str(tmp_path)]
+        def directory(value=None, data_path=data_path):
+            if value is not None:
+                data_path[0] = value
+            return data_path[0]
+        engine = SimpleNamespace(Basic=SimpleNamespace(DataPath=directory))
+        engines.append(engine)
+        output = tmp_path / day / 'FRESH'
+        result = op.isolated_compile(lambda: (engine, {}, inventory), output, records)
+        assert result[0] is engine and result[2] is inventory
+        paths.append(Path(engine.Basic.DataPath()))
+    assert len(set(paths)) == 3
+    assert inventory == dict(RegControl_count=7, CapControl_count=0, initial_taps=[1.] * 7)
+    assert all(row['scientific_control_settings_changed'] is False for row in records)
+
+
+def test_engine_rejecting_private_directory_is_not_accepted(tmp_path):
+    engine = SimpleNamespace(Basic=SimpleNamespace(DataPath=lambda *args: str(tmp_path / 'shared')))
+    with pytest.raises(ValueError, match='DATA_PATH_ISOLATION'):
+        op.isolated_compile(lambda: (engine, {}, {}), tmp_path / 'own', [])
+
+
 def fixture_stage(tmp_path, arm):
     root = tmp_path / arm
     folder, result, source = root / 'input', root / 'output', root / 'stage'
@@ -263,8 +289,13 @@ def test_full_original_96_slot_backend_with_native_zero_mock_engine(tmp_path, mo
         def validate_native_engine(self, engine):
             assert engine in engines
     def compile_engine():
+        data_path = [str(tmp_path)]
+        def directory(value=None):
+            if value is not None:
+                data_path[0] = value
+            return data_path[0]
         engine = SimpleNamespace(
-            Basic=SimpleNamespace(ClearAll=lambda: None, Version=lambda: 'mock-native-zero'),
+            Basic=SimpleNamespace(ClearAll=lambda: None, Version=lambda: 'mock-native-zero', DataPath=directory),
             Circuit=SimpleNamespace(AllNodeNames=lambda: ['bus.1'], AllBusMagPu=lambda: [1.], Losses=lambda: [0., 0.]),
             Solution=SimpleNamespace(SolveSnap=lambda: None, Converged=lambda: True, ControlActionsDone=lambda: True),
             Loads=Elements([f'MESS_CHG_STA{i:02d}' for i in range(1, 25)]),

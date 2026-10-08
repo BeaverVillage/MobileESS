@@ -28,7 +28,8 @@ def manifest_fixture():
     manifest = dict(schema='V42_MAY_B1_B2_P1_CAMPAIGN_V1', run_id='FAKE_NATIVE_ZERO_' + root.name,
         axis=[dict(arm=a, day=d) for a, d in common.AXIS], frozen=True,
         policy=dict(Threads=1, wall_seconds=5400, native_seconds=5400, P2_calls=0,
-                    failed_date_retries=0, B1_gap=.005, B2_gap=.03),
+                    failed_date_retries=0, B1_gap=.005, B2_gap=.03,
+                    B1_parallel_workers=1, B2_parallel_workers=3),
         sources={name: sha(common.ROOT / name) for name in common.required_source_names()},
         input_folders={}, gates={})
     for arm, day in common.AXIS:
@@ -187,3 +188,46 @@ def test_read_only_monitor_can_inspect_unfrozen_placeholder_without_opening_work
     assert common.verify_manifest(save(root, manifest), require_preflight=False) == manifest
     with pytest.raises(PermissionError, match='COMPLETE_CAMPAIGN_AND_SCIENTIFIC_SOURCE_SHA'):
         common.verify_manifest(root / 'CAMPAIGN_MANIFEST.json')
+
+
+@pytest.mark.parametrize('policy,value', [('B1_parallel_workers', 3), ('B2_parallel_workers', 1),
+                                          ('B2_parallel_workers', 4), ('Threads', 3)])
+def test_exact_parallel_policy_required_before_authorization(manifest_fixture, policy, value):
+    root, manifest = manifest_fixture
+    manifest['policy'][policy] = value
+    with pytest.raises(PermissionError, match='CAMPAIGN_POLICY_DRIFT'):
+        common.verify_manifest(save(root, manifest))
+
+
+def test_parallel_b2_gate_is_mandatory(manifest_fixture):
+    root, manifest = manifest_fixture
+    assert len(common.REQUIRED_GATES) == 10
+    del manifest['gates']['PARALLEL_B2']
+    with pytest.raises(PermissionError, match='ALL_NEW_CAMPAIGN_GATES_REQUIRED'):
+        common.verify_manifest(save(root, manifest))
+
+
+@pytest.mark.parametrize('arm,slot', [('B1', 2), ('B1', 3), ('B2', 0), ('B2', 4),
+                                     ('B2', True), ('B2', None)])
+def test_worker_scoped_parallel_permit_rejects_invalid_slot(manifest_fixture, arm, slot):
+    root, manifest = manifest_fixture
+    _, request = coordinator.new_request(root, manifest, arm, common.DAYS[0])
+    request['worker_slot'] = slot
+    with pytest.raises(PermissionError, match='WORKER_SLOT_REQUIRED'), execution.worker_scope(request):
+        pytest.fail('Invalid worker slot must not open a scientific permit')
+    assert execution.current() is None
+
+
+def test_b2_third_slot_scoped_permit_stays_p1_and_own_date(manifest_fixture):
+    root, manifest = manifest_fixture
+    _, request = coordinator.new_request(root, manifest, 'B2', common.DAYS[0])
+    request['worker_slot'] = 3
+    with execution.worker_scope(request):
+        assert execution.current()['worker_slot'] == 3
+        assert execution.authorize(request['day'], 'P1') == request['day']
+        with pytest.raises(PermissionError, match='P1_ONLY'):
+            execution.authorize(request['day'], 'P2')
+        with pytest.raises(PermissionError, match='DATE_CONFLICT'):
+            execution.authorize(common.DAYS[1], 'P1')
+        with pytest.raises(PermissionError, match='AIDC_OPTIMIZATION_FORBIDDEN'):
+            execution.authorize(request['day'], 'A1')

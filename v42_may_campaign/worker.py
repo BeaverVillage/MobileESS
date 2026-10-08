@@ -1,13 +1,14 @@
 """One fresh date attempt; all science is delegated to the existing A/M ports."""
 from pathlib import Path
 from datetime import datetime, timezone
+from contextlib import contextmanager, ExitStack
 import argparse
 import threading
 import time
 import traceback
 import psutil
 from .common import (RUNTIME, atomic, read, record, now, process, sha,
-                     d_path, environment, exclusive_lock, LockBusy)
+                     d_path, environment, exclusive_lock, LockBusy, worker_slot)
 from .execution import worker_scope
 from .budget import DateBudget, BudgetStop
 
@@ -41,8 +42,60 @@ def canonical(value):
     return value
 
 
-def assert_no_other_native_worker():
-    # Monitors and this campaign's Coordinator/Watchdog are read-only parents.
+def _peer_request(args, request):
+    """Validate a live peer from its persisted exact dispatch, not ACTIVES.
+
+    ACTIVES is written after Popen and can lag a real worker. The persisted
+    request and actual command close that window without accepting a second
+    run, another input folder, or a reused arm/date/slot.
+    """
+    from .coordinator import command_matches, validate_request
+    position = args.index('-m')
+    if len(args) != position + 3:
+        raise LockBusy('OTHER_CAMPAIGN_WORKER_MALFORMED_COMMAND')
+    path = Path(args[-1]).resolve()
+    root = Path(request['root']).resolve()
+    if not path.is_relative_to(root / 'dates') or path.name != 'request.json':
+        raise LockBusy('OTHER_CAMPAIGN_WORKER_DIFFERENT_RUN')
+    try:
+        peer = read(path)
+        arm, day = peer['arm'], peer['day']
+        attempt = root / 'dates' / arm / day
+        if (arm != 'B2' or request['arm'] != 'B2'
+                or peer['run_id'] != request['run_id']
+                or Path(peer['root']).resolve() != root
+                or Path(peer['manifest']).resolve() != root / 'CAMPAIGN_MANIFEST.json'
+                or peer['manifest_SHA'] != request['manifest_SHA']
+                or path != attempt / 'request.json'
+                or not command_matches(peer.get('worker_command'), args)):
+            raise LockBusy('OTHER_CAMPAIGN_WORKER_SCOPE_CONFLICT')
+        manifest = read(root / 'CAMPAIGN_MANIFEST.json')
+        if sha(root / 'CAMPAIGN_MANIFEST.json') != request['manifest_SHA']:
+            raise LockBusy('OTHER_CAMPAIGN_WORKER_MANIFEST_DRIFT')
+        validate_request(root, manifest, peer)
+        slot = worker_slot(peer)
+        if (peer.get('Threads') != 1 or peer.get('P2_calls') != 0
+                or peer.get('wall_budget_seconds') != 5400
+                or peer.get('native_budget_seconds') != 5400
+                or any(Path(peer[name]).resolve() != attempt / filename
+                       for name, filename in (('output', 'output'), ('progress', 'progress.json'),
+                                              ('result', 'RESULT.json'), ('error', 'error.json')))):
+            raise LockBusy('OTHER_CAMPAIGN_WORKER_POLICY_OR_OUTPUT_CONFLICT')
+        if day == request['day']:
+            raise LockBusy('DUPLICATE_CAMPAIGN_ARM_DATE')
+        if slot == worker_slot(request):
+            raise LockBusy('DUPLICATE_CAMPAIGN_WORKER_SLOT')
+        return peer
+    except (KeyError, OSError, ValueError, PermissionError) as error:
+        raise LockBusy('OTHER_CAMPAIGN_WORKER_UNVERIFIED_REQUEST:' + str(path)) from error
+
+
+def assert_no_other_native_worker(request=None):
+    # Only same approved run B2 peers may coexist. Coordinator/Watchdog and
+    # monitors are read-only parents and do not occupy scientific slots.
+    peers = []
+    slots = {worker_slot(request)} if request is not None else set()
+    dates = {request['day']} if request is not None else set()
     for candidate in psutil.process_iter(['pid', 'cmdline', 'name']):
         if candidate.pid == psutil.Process().pid:
             continue
@@ -52,32 +105,97 @@ def assert_no_other_native_worker():
                 continue
             module = args[args.index('-m') + 1] if '-m' in args and len(args) > args.index('-m') + 1 else ''
             if module == 'v42_may_campaign.worker':
-                raise LockBusy('OTHER_CAMPAIGN_WORKER_PID:' + str(candidate.pid))
-            if (module.startswith(('v42_a_stage', 'v42_m1_')) or module == 'v42_pr134_b1.worker'):
+                if request is None:
+                    raise LockBusy('OTHER_CAMPAIGN_WORKER_PID:' + str(candidate.pid))
+                peer = _peer_request(args, request)
+                slot = worker_slot(peer)
+                if slot in slots or peer['day'] in dates:
+                    raise LockBusy('DUPLICATE_CAMPAIGN_PEER_SLOT_OR_DATE')
+                peers.append(dict(PID=candidate.pid, arm=peer['arm'], day=peer['day'],
+                                  worker_slot=slot, request=str(Path(args[-1]).resolve()), command=args))
+                slots.add(slot); dates.add(peer['day'])
+                if len(peers) >= 3:
+                    raise LockBusy('CAMPAIGN_B2_MAX_THREE_WORKERS')
+                continue
+            historical = ('v42_a_stage', 'v42_m1_', 'v42_may12_rescue')
+            scripts = [Path(arg) for arg in args if isinstance(arg, str) and arg.lower().endswith('.py')]
+            script_worker = any(any(part.startswith(historical) for part in script.parts)
+                                or 'v42_pr134_b1' in script.parts and script.stem == 'worker'
+                                or 'v42_may_campaign' in script.parts and script.stem == 'worker'
+                                for script in scripts)
+            if (module.startswith(historical) or module == 'v42_pr134_b1.worker' or script_worker):
                 raise LockBusy('OTHER_SCIENTIFIC_WORKER_PID:' + str(candidate.pid))
         except psutil.Error:
             continue
+    return peers
+
+
+@contextmanager
+def native_worker_admission(request, *, date_owned=False, started=None):
+    """Hold one B2 slot (all slots for B1) and the date's lifetime OS lock."""
+    slot = worker_slot(request)
+    root = d_path(request['root'])
+    attempt = root / 'dates' / request['arm'] / request['day']
+    if started is None:
+        dispatch = max(0., (datetime.now(timezone.utc)
+                           - datetime.fromisoformat(request['started_UTC'])).total_seconds())
+        started = time.perf_counter() - dispatch
+    def check():
+        if time.perf_counter() - started >= 5400:
+            raise BudgetStop('DATE_WALL_BUDGET_EXHAUSTED_DURING_NATIVE_ADMISSION')
+        assert_no_other_native_worker(request)
+    # Detect an incompatible historical worker before waiting on its older
+    # lifetime global lock. All current workers hold this mutex only briefly.
+    check()
+    with ExitStack() as owned:
+        with exclusive_lock(RUNTIME / 'NATIVE_WORKER.lock', wait=True, check=check):
+            if not date_owned:
+                owned.enter_context(exclusive_lock(attempt / 'WORKER.lock'))
+            for number in ((1, 2, 3) if request['arm'] == 'B1' else (slot,)):
+                owned.enter_context(exclusive_lock(RUNTIME / 'native_slots' / f'SLOT_{number}.lock'))
+            peers = assert_no_other_native_worker(request)
+            receipt = dict(schema='V42_MAY_NATIVE_WORKER_ADMISSION_V2', PASS=True,
+                run_id=request['run_id'], arm=request['arm'], day=request['day'], worker_slot=slot,
+                root=str(root), manifest_SHA=request['manifest_SHA'], worker=process(), peers=peers or [],
+                B1_parallel_workers=1, B2_parallel_workers=3, Threads=1, P2_calls=0,
+                own_tmp=str(attempt / 'tmp'), admitted_UTC=now())
+            atomic(attempt / 'NATIVE_WORKER_ADMISSION.json', receipt)
+        yield receipt
 
 
 def run(request_path):
     started = time.perf_counter()
     request_path = d_path(request_path)
     request = read(request_path)
+    root = d_path(request['root'])
+    attempt = d_path(request['result']).parent
+    if (request_path != attempt / 'request.json'
+            or attempt != root / 'dates' / request['arm'] / request['day']
+            or any(d_path(request[name]) != attempt / filename
+                   for name, filename in (('output', 'output'), ('progress', 'progress.json'),
+                                          ('result', 'RESULT.json'), ('error', 'error.json')))):
+        raise PermissionError('WORKER_ARM_DATE_OUTPUT_ISOLATION')
+    # Acquire before heartbeat/progress/error/result writes, and retain through
+    # terminal persistence. A duplicate process cannot damage a live attempt.
+    with exclusive_lock(attempt / 'WORKER.lock'):
+        if Path(request['result']).exists():
+            raise PermissionError('COMPLETED_ATTEMPT_NEVER_REEXECUTED')
+        return _run_locked(request_path, request, started)
+
+
+def _run_locked(request_path, request, started):
     # Include Coordinator request persistence, process dispatch and Python
     # startup in the same date's wall ceiling, before model construction.
     dispatch_seconds = max(0., (datetime.now(timezone.utc) - datetime.fromisoformat(request['started_UTC'])).total_seconds())
     date_started = started - dispatch_seconds
-    root = d_path(request['root']); environment(root)
+    root = d_path(request['root'])
     attempt = d_path(request['result']).parent
     output = d_path(request['output'])
-    if (request_path != attempt / 'request.json' or output != attempt / 'output'
-            or attempt != root / 'dates' / request['arm'] / request['day']):
-        raise PermissionError('WORKER_ARM_DATE_OUTPUT_ISOLATION')
-    if Path(request['result']).exists():
-        raise PermissionError('COMPLETED_ATTEMPT_NEVER_REEXECUTED')
+    environment(attempt)
     identity = {k: request[k] for k in ('run_id', 'arm', 'day')}
     worker = process(); stop = threading.Event(); mutex = threading.RLock()
-    state = dict(phase='INPUT_IDENTITY_VERIFICATION', worker=worker, **identity)
+    state = dict(phase='INPUT_IDENTITY_VERIFICATION', worker=worker,
+                 worker_slot=request.get('worker_slot'), **identity)
     def progress(value):
         with mutex:
             state.update(canonical(value), timestamp_UTC=now())
@@ -95,8 +213,10 @@ def run(request_path):
         from .coordinator import validate_request, load_manifest, TERMINAL
         manifest = load_manifest(root)
         validate_request(root, manifest, request)
-        with exclusive_lock(RUNTIME / 'NATIVE_WORKER.lock'), worker_scope(request):
-            assert_no_other_native_worker()
+        with worker_scope(request), native_worker_admission(
+                request, date_owned=True, started=date_started) as admission:
+            result.update(worker_slot=admission['worker_slot'], own_tmp=admission['own_tmp'],
+                          admission=record(attempt / 'NATIVE_WORKER_ADMISSION.json'))
             budget = DateBudget(attempt / 'NATIVE_RUNTIME_LEDGER.json', started=date_started, progress=progress)
             from . import a_stage, m_stage
             stage = a_stage if request['arm'] == 'B1' else m_stage

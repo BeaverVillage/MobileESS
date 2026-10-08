@@ -1,19 +1,19 @@
 {
   "PASS": true,
-  "UTC": "2026-10-08T17:03:44.219225+00:00",
+  "UTC": "2026-10-08T17:36:53.729392+00:00",
   "scope": "Native=0 implementation preflight; actual campaign startup is a separate receipt",
   "historical_HEAD": "e43bab57aac210546ebd7012be426f00b7f97311",
   "historical_blocked_audit_preserved": true,
   "new_regression": {
     "PASS": true,
-    "passed": 213,
+    "passed": 299,
     "skipped": 0,
     "failed": 0,
     "Native_calls": 0,
     "receipt": {
       "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\NEW_CAMPAIGN_ZERO_NATIVE_REGRESSION.json",
-      "sha256": "348fcb92ffa1acf83482343bd0dd681cd820c5cf1c9537d681fffe71478cdaf2",
-      "bytes": 25037
+      "sha256": "c208f814842801ae2b5117ee744eb29fc1d9969e570f60b6598135ab3bc49727",
+      "bytes": 36151
     }
   },
   "existing_regression": {
@@ -351,8 +351,26 @@
   },
   "Windows_probe": {
     "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\WINDOWS_PROCESS_PERSISTENCE_PROBE.json",
-    "sha256": "f237d2f95636b87bb3550a3b34f9e39883f1dec4a969adf667020682603a6774",
-    "bytes": 10490
+    "sha256": "34d869693fcfadb60c9229c4998e34046b786624a75625b965b92458b610f928",
+    "bytes": 12557
+  },
+  "parallel_B2": {
+    "PASS": true,
+    "policy": {
+      "B1_parallel_workers": 1,
+      "B2_parallel_workers": 3
+    },
+    "Native_zero_transition_tests": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\B2_THREE_WORKER_NATIVE_ZERO_TESTS.json",
+      "sha256": "f360c17a55bc9323656ca97d9a5adec1378b5ed049317cfc083f6a3c47ff99ab",
+      "bytes": 11573
+    },
+    "actual_three_process_models_and_license_sessions": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\B2_PARALLEL_PROCESS_ISOLATION_AUDIT.json",
+      "sha256": "4260d53efb877ab5dc739dee9b5662ce18b2afa7a7f2c558e740e7096f4075f2",
+      "bytes": 5093
+    },
+    "actual_three_parallel_Native": "NOT_YET_OBSERVED"
   },
   "logoff_persistence": "LOGOFF_PERSISTENCE_NOT_PROVEN",
   "actual_B1_B2_transition": "NOT_YET_OBSERVED",
@@ -363,5 +381,5 @@
     "sha256": "d86afde6a0d9cc41804e9e4a0231f93d2c7705649c030c554fdbd14e824c98df",
     "bytes": 25801
   },
-  "test_temp_resolution": "D:/MobileESS_v42/tmp/campfinal02; no OS long-path/security policy changes"
+  "test_temp_resolution": "D:/MobileESS_v42/tmp/campfinalparallel02; no OS long-path/security policy changes"
 }

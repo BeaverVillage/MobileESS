@@ -8,6 +8,7 @@ import ast
 import inspect
 import textwrap
 from pathlib import Path
+import os
 import numpy as np
 from .common import ROOT, DAYS, atomic, read, record, digest, sha, d_path
 from .a_routing import InputDirectory, rebound
@@ -294,6 +295,25 @@ def _summary_pass(summary, converged):
             and summary.get('schedule_mutation_count') == 0)
 
 
+def isolated_compile(original, output, compilations):
+    """Keep the original independent engine and route only its file directory."""
+    sandbox = d_path(Path(output) / 'OPENDSS_SANDBOX')
+    sandbox.mkdir(parents=True, exist_ok=True)
+    previous = Path.cwd()
+    try:
+        engine, adapter, inventory = original()
+        engine.Basic.DataPath(str(sandbox))
+        actual = Path(engine.Basic.DataPath()).resolve()
+        if actual != sandbox:
+            raise ValueError('OPENDSS_DATE_DATA_PATH_ISOLATION_FAILURE')
+        compilations.append(dict(PID=os.getpid(), context_index=len(compilations) + 1,
+            data_path=str(actual), source_initial_inventory_SHA=digest(inventory),
+            original_compiler_reused=True, scientific_control_settings_changed=False))
+        return engine, adapter, inventory
+    finally:
+        os.chdir(previous)
+
+
 def fresh(request, planning, actual_folder, source_folder, output, progress=None):
     from v42_pr134_b1 import replay
     from v42_regcontrol.authority import source
@@ -331,8 +351,17 @@ def fresh(request, planning, actual_folder, source_folder, output, progress=None
         _campaign_apply=apply_mapping, _campaign_applied=applied,
         _campaign_mess_zero=bool(np.all(mess['P_kw'] == 0) and np.all(mess['Q_kvar'] == 0)))
     namespace['build_day'] = rebound(replay.build_day, namespace)
-    result = _fresh_port(replay.fresh, namespace)(InputDirectory(request['day'], request['input_folder']),
-        request['day'], planning, actual_folder, output, {}, progress)
+    from v42_regcontrol import authority
+    from unittest.mock import patch
+    compilations = []
+    original_compile = authority.compile_verified
+    with patch.object(authority, 'compile_verified', lambda: isolated_compile(original_compile, output, compilations)):
+        result = _fresh_port(replay.fresh, namespace)(InputDirectory(request['day'], request['input_folder']),
+            request['day'], planning, actual_folder, output, {}, progress)
+    atomic(output / 'OPENDSS_PROCESS_CONTEXT_ISOLATION.json', dict(PASS=True,
+        arm=request['arm'], day=request['day'], PID=os.getpid(), compilations=compilations,
+        scope='One independent Worker process and date; original NewContext compiler',
+        common_output_writes=0, original_backend_body_unchanged=True))
     if (opendss_backend.run_fresh_opendss.__code__ is not original_backend_code
             or sha(before['path']) != before['sha256']):
         raise ValueError('FRESH_ORIGINAL_BODY_OR_FROZEN_MESS_MUTATION')

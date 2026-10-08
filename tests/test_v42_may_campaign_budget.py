@@ -83,3 +83,44 @@ def test_exception_records_measured_runtime_once(tmp_path, ports):
     with pytest.raises(RuntimeError): budget.native_optimize(Broken(c, 7), track='A')
     assert budget.used() == 7 and len(budget.calls) == 1
     assert budget.calls[0]['status'] == 'FAILED'
+
+
+def test_parallel_dates_never_share_native_logs_or_node_files(tmp_path, ports):
+    clocks = [Clock() for _ in range(3)]
+    models = [Model(clock, 1) for clock in clocks]
+    for index, (clock, model) in enumerate(zip(clocks, models), 1):
+        folder = tmp_path / f'2025-05-{index:02d}'
+        budget = b.DateBudget(folder / 'ledger.json', clock=clock)
+        budget.native_optimize(model, track='M')
+        assert model.Params.Threads == 1
+        assert model.Params.NodefileDir == str(folder / 'tmp' / 'gurobi')
+    assert len({model.Params.LogFile for model in models}) == 3
+    assert len({model.Params.NodefileDir for model in models}) == 3
+
+
+def test_denied_reused_model_does_not_charge_previous_solve(tmp_path, ports, monkeypatch):
+    c = Clock(); budget = b.DateBudget(tmp_path/'ledger.json', clock=c)
+    model = Model(c, 11.)
+    budget.native_optimize(model, track='A')
+    def deny(model): raise PermissionError('FOREIGN_WORKER_ADMISSION_DENIED')
+    monkeypatch.setattr(b, 'guard', deny)
+    with pytest.raises(PermissionError, match='ADMISSION_DENIED'):
+        budget.native_optimize(model, track='A')
+    ledger = read(tmp_path/'ledger.json')
+    assert model.calls == 1 and budget.used() == 11. and len(ledger['calls']) == 1
+    denied = ledger['admission_failures'][0]
+    assert denied['Native_Runtime'] == 0. and denied['entered_native'] is False
+    assert 'Native_BestBd' not in denied and 'SolCount' not in denied
+    assert ledger['inflight'] is None
+
+
+def test_denied_fresh_model_never_quarantines_unentered_native(tmp_path, ports, monkeypatch):
+    c = Clock(); budget = b.DateBudget(tmp_path/'ledger.json', clock=c)
+    model = Model(c, None)
+    def deny(model): raise PermissionError('DENIED_BEFORE_NATIVE')
+    monkeypatch.setattr(b, 'guard', deny)
+    with pytest.raises(PermissionError): budget.native_optimize(model, track='M')
+    assert model.calls == 0 and budget.used() == 0. and budget.calls == []
+    monkeypatch.setattr(b, 'guard', lambda model: None)
+    budget.native_optimize(Model(c, 7.), track='M')
+    assert budget.used() == 7. and len(budget.calls) == 1

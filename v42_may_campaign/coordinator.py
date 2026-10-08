@@ -1,4 +1,4 @@
-"""Serial B1 then B2 campaign using the established atomic/PID/checkpoint ports.
+"""Single-worker B1 then three-worker B2 with durable date/slot identities.
 
 No optimizer is implemented here. A worker executes one independent arm/date.
 A dead attempt is terminal, never retried; a live orphan is adopted by identity.
@@ -119,20 +119,63 @@ def ensure_phase(checkpoint, arm):
         raise PermissionError('B2_CANNOT_BEGIN_BEFORE_ALL_B1_TERMINAL')
 
 
+def worker_limit(arm):
+    return 1 if arm == 'B1' else 3
+
+
+def read_actives(root):
+    path = Path(root) / 'ACTIVES.json'
+    if path.is_file():
+        value = read(path)
+        if value.get('schema') != 'V42_MAY_ACTIVE_WORKER_SLOTS_V2' or not isinstance(value.get('workers'), dict):
+            raise PermissionError('ACTIVE_WORKER_SLOTS_SCHEMA_REQUIRED')
+        return value['workers']
+    legacy = Path(root) / 'ACTIVE.json'
+    value = read(legacy) if legacy.is_file() else {}
+    return {key(value['arm'], value['day']): value} if value.get('request') else {}
+
+
+def persist_actives(root, manifest, actives):
+    ordered = {name: actives[name] for name in sorted(actives)}
+    atomic(root / 'ACTIVES.json', dict(schema='V42_MAY_ACTIVE_WORKER_SLOTS_V2',
+           run_id=manifest['run_id'], workers=ordered, updated_UTC=now()))
+    atomic(root / 'ACTIVE.json', next(iter(ordered.values()), {}))
+
+
+def validate_slots(checkpoint, actives):
+    arms = {a['arm'] for a in actives.values()}
+    if len(arms) > 1:
+        raise PermissionError('B1_B2_WORKER_OVERLAP_FORBIDDEN')
+    if not arms:
+        return
+    arm = next(iter(arms)); ensure_phase(checkpoint, arm)
+    slots = [a.get('worker_slot', 1) for a in actives.values()]
+    if (len(slots) > worker_limit(arm) or len(set(slots)) != len(slots)
+            or any(type(slot) is not int or not 1 <= slot <= worker_limit(arm) for slot in slots)):
+        raise PermissionError('WORKER_SLOT_LIMIT_OR_DUPLICATE')
+
+
 def validate_request(root, manifest, request):
     if request.get('run_id') != manifest['run_id'] or (request.get('arm'), request.get('day')) not in AXIS:
         raise PermissionError('WORKER_REQUEST_RUN_ARM_DATE_DRIFT')
     if Path(request['root']).resolve() != Path(root).resolve():
         raise PermissionError('WORKER_REQUEST_ROOT_DRIFT')
+    if Path(request['manifest']).resolve() != Path(root).resolve() / 'CAMPAIGN_MANIFEST.json':
+        raise PermissionError('WORKER_REQUEST_MANIFEST_PATH_DRIFT')
     expected_input = manifest.get('input_folders', {}).get(
         key(request['arm'], request['day']), str(Path(root) / 'inputs' / request['arm'] / request['day']))
     if Path(request['input_folder']).resolve() != Path(expected_input).resolve():
         raise PermissionError('ARM_DATE_INPUT_FOLDER_MIXING')
-    for name in ('output', 'progress', 'result', 'error'):
-        if not Path(request[name]).resolve().is_relative_to(Path(root).resolve()):
-            raise PermissionError('WORKER_REQUEST_OUTPUT_ESCAPES_RUNTIME')
+    attempt = Path(root).resolve() / 'dates' / request['arm'] / request['day']
+    for name, filename in (('output', 'output'), ('progress', 'progress.json'),
+                           ('result', 'RESULT.json'), ('error', 'error.json')):
+        if Path(request[name]).resolve() != attempt / filename:
+            raise PermissionError('ARM_DATE_OUTPUT_PATH_MIXING:' + name)
     if request.get('manifest_SHA') != sha(Path(root) / 'CAMPAIGN_MANIFEST.json'):
         raise PermissionError('WORKER_REQUEST_MANIFEST_SHA_DRIFT')
+    slot = request.get('worker_slot')
+    if type(slot) is not int or not 1 <= slot <= worker_limit(request['arm']):
+        raise PermissionError('WORKER_REQUEST_SLOT_OUTSIDE_ARM_LIMIT')
     for name in ('INPUT_IDENTITY.json', 'CASE_IDENTITY.json', 'INDEPENDENT_AIDC_IDENTITY.json', 'B2_FIXED_AIDC.json'):
         path = Path(request['input_folder']) / name
         if path.is_file():
@@ -192,62 +235,102 @@ def matching_live_worker(request_path):
     return matches[0] if matches else None
 
 
-def recover_active(root, manifest, checkpoint):
-    path = root / 'ACTIVE.json'
-    active = read(path) if path.is_file() else {}
-    if active.get('request'):
-        request_path = Path(active['request']).resolve()
-        if not request_path.is_relative_to(root):
-            raise PermissionError('ACTIVE_REQUEST_ESCAPES_RUNTIME')
-        request = read(request_path)
+def recovery_requests(root, manifest, checkpoint, persisted):
+    """Validate every row before recovery can adopt or persist any worker.
+
+    A valid request for another date is still invalid for this checkpoint row.
+    Check the complete map first so a later bad row cannot leave a correctly
+    running peer partially adopted or its durable checkpoint changed.
+    """
+    root = Path(root).resolve()
+    requests = {}
+    for arm, day in AXIS:
+        name = key(arm, day)
+        row = checkpoint['dates'][name]
+        if (row.get('arm'), row.get('day')) != (arm, day):
+            raise PermissionError('CHECKPOINT_REQUEST_ROW_ARM_DATE_DRIFT')
+        canonical = root / 'dates' / arm / day / 'request.json'
+        active = persisted.get(name, {})
+        supplied = row.get('request')
+        if row['status'] == 'RUNNING' and not supplied:
+            raise PermissionError('CHECKPOINT_RUNNING_REQUEST_MISSING:' + name)
+        if supplied and Path(supplied).resolve() != canonical:
+            raise PermissionError('CHECKPOINT_REQUEST_PATH_NOT_CANONICAL:' + name)
+        if active:
+            if (active.get('arm'), active.get('day')) != (arm, day):
+                raise PermissionError('ACTIVES_REQUEST_ARM_DATE_DRIFT')
+            if Path(active['request']).resolve() != canonical:
+                raise PermissionError('ACTIVES_REQUEST_PATH_NOT_CANONICAL:' + name)
+        needs_request = bool(supplied or active or row['status'] == 'RUNNING')
+        if not needs_request and row['status'] == 'PENDING':
+            needs_request = canonical.is_file()
+        if not needs_request:
+            continue
+        if not canonical.is_file():
+            raise PermissionError('CHECKPOINT_REQUEST_CANONICAL_FILE_MISSING:' + name)
+        request = read(canonical)
+        if (request.get('arm'), request.get('day')) != (arm, day):
+            raise PermissionError('CHECKPOINT_REQUEST_ARM_DATE_DRIFT:' + name)
         validate_request(root, manifest, request)
-        ensure_phase(checkpoint, request['arm'])
-        row = checkpoint['dates'][key(request['arm'], request['day'])]
+        slot = request.get('worker_slot', 1)
+        for owner in (row, active):
+            if 'worker_slot' in owner and (type(owner['worker_slot']) is not int or owner['worker_slot'] != slot):
+                raise PermissionError('CHECKPOINT_REQUEST_WORKER_SLOT_DRIFT:' + name)
         worker = active.get('worker', {})
         if same_process(worker) and not command_matches(request.get('worker_command'), worker.get('command')):
             raise PermissionError('ACTIVE_PROCESS_COMMAND_DOES_NOT_MATCH_REQUEST')
-        if not same_process(worker):
-            worker = matching_live_worker(request_path) or {}
-        if same_process(worker):
-            if row['status'] in TERMINAL:
-                raise PermissionError('LIVE_WORKER_FOR_TERMINAL_DATE')
-            row.update(status='RUNNING', attempts=1, request=str(request_path),
-                       started_UTC=request['started_UTC'])
-            active.update(worker=worker, arm=request['arm'], day=request['day'], adopted=True)
-            atomic(path, active)
-            save_checkpoint(root, checkpoint)
-            return active
-    # A checkpoint may precede ACTIVE persistence. Find its exact live request
-    # before declaring an interrupted attempt terminal; never spawn it again.
-    for row in checkpoint['dates'].values():
-        # request.json precedes the durable RUNNING checkpoint. An OS crash
-        # in that short window must not turn the same arm/date into attempt 2.
+        requests[name] = request
+    if set(persisted) - set(checkpoint['dates']):
+        raise PermissionError('ACTIVES_CHECKPOINT_DATE_KEY_DRIFT')
+    return requests
+
+
+def recover_actives(root, manifest, checkpoint):
+    """Adopt every exact live worker, including each Popen/persistence gap."""
+    persisted = read_actives(root)
+    document = root / 'ACTIVES.json'
+    if document.is_file() and read(document).get('run_id') != manifest['run_id']:
+        raise PermissionError('ACTIVES_RUN_ID_DRIFT')
+    requests = recovery_requests(root, manifest, checkpoint, persisted)
+    recovered = {}
+    for name, row in checkpoint['dates'].items():
         attempt = root / 'dates' / row['arm'] / row['day']
         if row['status'] == 'PENDING' and attempt.exists():
             request_path = attempt / 'request.json'
             if not request_path.is_file():
                 row.update(status='IMPLEMENTATION_FAILURE', attempts=1,
                            error='INTERRUPTED_BEFORE_ATOMIC_REQUEST', finished_UTC=now())
-                save_checkpoint(root, checkpoint)
-                export(root, manifest, checkpoint)
+                save_checkpoint(root, checkpoint); export(root, manifest, checkpoint)
                 continue
             row.update(status='RUNNING', attempts=1, request=str(request_path))
+        if row['status'] in TERMINAL:
+            if same_process(persisted.get(name, {}).get('worker', {})):
+                raise PermissionError('LIVE_WORKER_FOR_TERMINAL_DATE')
+            continue
         if row['status'] != 'RUNNING':
             continue
-        request = read(row['request'])
-        validate_request(root, manifest, request)
+        request = requests[name]
         ensure_phase(checkpoint, request['arm'])
         row['started_UTC'] = request['started_UTC']
-        worker = matching_live_worker(row['request'])
-        if worker:
-            active = dict(arm=row['arm'], day=row['day'], request=row['request'], worker=worker,
-                          started_UTC=row.get('started_UTC'), adopted=True)
-            atomic(path, active)
-            return active
-        finish_attempt(root, manifest, checkpoint, row, request, None, interrupted=True)
-    if active and not same_process(active.get('worker', {})):
-        atomic(path, {})
-    return {}
+        active = persisted.get(name, {})
+        worker = active.get('worker', {})
+        if not same_process(worker):
+            worker = matching_live_worker(row['request']) or {}
+        if same_process(worker):
+            slot = request.get('worker_slot', 1)
+            recovered[name] = dict(arm=row['arm'], day=row['day'], request=row['request'],
+                worker=worker, worker_slot=slot, started_UTC=request['started_UTC'], adopted=True)
+            row.update(attempts=1, worker_slot=slot)
+        else:
+            finish_attempt(root, manifest, checkpoint, row, request, None, interrupted=True)
+    validate_slots(checkpoint, recovered)
+    save_checkpoint(root, checkpoint); persist_actives(root, manifest, recovered)
+    return recovered
+
+
+def recover_active(root, manifest, checkpoint):
+    """Compatibility reader for the primary worker; recovery itself is plural."""
+    return next(iter(recover_actives(root, manifest, checkpoint).values()), {})
 
 
 def finish_attempt(root, manifest, checkpoint, row, request, exit_code, *, interrupted=False):
@@ -354,51 +437,102 @@ def export(root, manifest, checkpoint):
           ['day', 'arm', 'status', 'error', 'result_SHA', 'error_SHA', 'finished_UTC'])
 
 
-def snapshot(root, manifest, checkpoint, active=None):
-    active_path = root / 'ACTIVE.json'
-    active = read(active_path) if active_path.is_file() else active or {}
-    progress = {}
-    if active.get('request'):
-        request = read(active['request'])
-        progress_path = Path(request['progress'])
-        if progress_path.is_file():
-            try:
-                progress = read(progress_path)
-            except (OSError, ValueError):
-                pass
-    telemetry = dict(RSS=None, CPU_seconds=None, CPU_percent=None,
-                     RAM_available=psutil.virtual_memory().available, RAM_total=psutil.virtual_memory().total,
-                     information_only=True)
-    if same_process(active.get('worker', {})):
+def worker_snapshot(active):
+    request = read(active['request'])
+    def optional(path):
+        try:
+            return read(path) if Path(path).is_file() else {}
+        except (OSError, ValueError):
+            return {}
+    progress = optional(request['progress'])
+    heartbeat_path = Path(request['result']).parent / 'HEARTBEAT.json'
+    heartbeat = optional(heartbeat_path)
+    telemetry = dict(RSS=None, CPU_seconds=None, CPU_percent=None, information_only=True)
+    alive = same_process(active.get('worker', {}))
+    if alive:
         try:
             identity = (active['worker']['PID'], active['worker']['created'])
-            worker = _telemetry_processes.get(identity)
-            if worker is None:
-                _telemetry_processes.clear()
-                worker = psutil.Process(identity[0])
-                _telemetry_processes[identity] = worker
+            worker = _telemetry_processes.setdefault(identity, psutil.Process(identity[0]))
             cpu = worker.cpu_times()
             telemetry.update(RSS=worker.memory_info().rss, CPU_seconds=cpu.user + cpu.system,
                              CPU_percent=worker.cpu_percent(interval=None))
         except psutil.Error:
             pass
+    def take(*names):
+        return next((progress[n] for n in names if progress.get(n) is not None), None)
+    wall = take('wall_seconds', 'Wall_Time', 'wall_elapsed_seconds')
+    if wall is None:
+        wall = max(0., time.time() - datetime.fromisoformat(active['started_UTC']).timestamp())
+    return dict(active, PID=active.get('worker', {}).get('PID'), worker_alive=alive,
+        phase=progress.get('phase', 'DISPATCHED'), progress=progress, heartbeat=heartbeat,
+        heartbeat_timestamp_UTC=heartbeat.get('timestamp_UTC'),
+        UB=take('UB'), independent_Global_LB=take('independent_Global_LB', 'Certified_Global_LB'),
+        Certified_Gap=take('certified_gap', 'Certified_Gap'),
+        Native_Runtime_seconds=take('Native_Runtime', 'Native_Runtime_seconds'),
+        wall_seconds=wall, remaining_seconds=max(0., 5400. - wall), resource=telemetry)
+
+
+def snapshot(root, manifest, checkpoint, active=None):
+    actives = read_actives(root)
+    if not actives and active and active.get('request'):
+        actives = {key(active['arm'], active['day']): active}
+    workers = [worker_snapshot(a) for a in actives.values()]
+    primary = workers[0] if workers else {}
+    active = actives.get(key(primary.get('arm'), primary.get('day')), {}) if primary else {}
+    slots = [next((row for row in workers if row['arm'] == 'B2' and row.get('worker_slot', 1) == slot),
+                  dict(worker_slot=slot, arm='B2', day=None, PID=None, worker_alive=False,
+                       phase='WAITING_FOR_B1' if counts(checkpoint, 'B1')['completed'] != 31 else 'IDLE',
+                       progress={}, resource={}, heartbeat={})) for slot in range(1, 4)]
     totals = counts(checkpoint)
     heartbeat = dict(timestamp_UTC=now(), run_id=manifest['run_id'], process=process(),
-                     state=checkpoint['state'], active=active, healthy_solver_kill=False)
+        state=checkpoint['state'], active=active, workers=actives, healthy_solver_kill=False)
     atomic(root / 'COORDINATOR_HEARTBEAT.json', heartbeat)
+    telemetry = dict(RSS=sum(row['resource'].get('RSS') or 0 for row in workers),
+        CPU_seconds=sum(row['resource'].get('CPU_seconds') or 0 for row in workers),
+        CPU_percent=sum(row['resource'].get('CPU_percent') or 0 for row in workers),
+        RAM_available=psutil.virtual_memory().available, RAM_total=psutil.virtual_memory().total,
+        information_only=True)
     value = dict(run_id=manifest['run_id'], state=checkpoint['state'], campaign_started=True,
-                 current_phase=active.get('arm'), current_day=active.get('day'),
-                 Coordinator_PID=heartbeat['process']['PID'], Worker_PID=active.get('worker', {}).get('PID'),
-                 active=active, progress=progress, totals=totals, B1=counts(checkpoint, 'B1'), B2=counts(checkpoint, 'B2'),
-                 completed_arm_dates=totals['completed'], day_rows=list(checkpoint['dates'].values()),
-                 target_Global_Gap=0.005 if active.get('arm') == 'B1' else 0.03,
-                 wall_budget_seconds=5400, native_budget_seconds=5400, P2_calls=0, Threads=1,
-                 terminal_date_retries=0, B2_requires_all_B1_terminal=True,
-                 resource=telemetry, last_error=checkpoint.get('last_error'), timestamp_UTC=now(),
-                 heartbeat=heartbeat, monitor_port=manifest.get('monitor_port', 8793))
+        current_phase=primary.get('arm') or pending_phase(checkpoint), current_day=primary.get('day'),
+        Coordinator_PID=heartbeat['process']['PID'], Worker_PID=primary.get('PID'),
+        active=active, actives=actives, workers=workers, worker_slots=slots,
+        B1_worker=next((row for row in workers if row['arm'] == 'B1'), None),
+        progress=primary.get('progress', {}), totals=totals, B1=counts(checkpoint, 'B1'), B2=counts(checkpoint, 'B2'),
+        completed_arm_dates=totals['completed'], day_rows=list(checkpoint['dates'].values()),
+        target_Global_Gap=.005 if primary.get('arm') == 'B1' else .03,
+        wall_budget_seconds=5400, native_budget_seconds=5400, P2_calls=0, Threads=1,
+        B1_parallel_workers=1, B2_parallel_workers=3, terminal_date_retries=0,
+        B2_requires_all_B1_terminal=True, resource=telemetry, last_error=checkpoint.get('last_error'),
+        timestamp_UTC=now(), heartbeat=heartbeat, monitor_port=manifest.get('monitor_port', 8793))
     atomic(root / 'CAMPAIGN_STATUS.json', value)
-    transition_evidence(root, checkpoint, active, progress)
+    first = actives.get(key('B2', DAYS[0]), active)
+    first_progress = next((row['progress'] for row in workers if row['arm'] == first.get('arm') and row['day'] == first.get('day')), {})
+    transition_evidence(root, checkpoint, first, first_progress)
+    parallel_evidence(root, checkpoint, actives, workers)
     return value
+
+
+def parallel_evidence(root, checkpoint, actives, workers):
+    path = root / 'B2_THREE_WORKER_PARALLEL_VERIFICATION.json'
+    value = read(path) if path.is_file() else dict(native_zero_tests=dict(PASS=False, status='NO_TEST_RECEIPT_CONNECTED'),
+        actual_parallel=dict(status='NOT_YET_OBSERVED'))
+    live = [row for row in workers if row['arm'] == 'B2' and row['worker_alive']]
+    value.update(run_id=checkpoint['run_id'], B1_terminal_count=counts(checkpoint, 'B1')['completed'],
+        B2_active_dates=[row['day'] for row in live], B2_live_workers=len(live), updated_UTC=now())
+    actual = value.get('actual_parallel', {})
+    if len(live) == 3 and actual.get('status') != 'OBSERVED':
+        ensure_phase(checkpoint, 'B2')
+        actual = dict(status='OBSERVED', observed_UTC=now(),
+            workers=[dict(worker_slot=row['worker_slot'], day=row['day'], worker=row['worker'],
+                input_SHA=sha(Path(read(row['request'])['input_folder']) / 'NATIVE_INPUT.json'),
+                started_UTC=row['started_UTC'], heartbeat=row['heartbeat']) for row in live])
+    if actual.get('status') == 'OBSERVED':
+        for observed in actual['workers']:
+            matching = next((row for row in workers if row['worker'] == observed['worker']), None)
+            if matching and matching['heartbeat'] and not observed.get('heartbeat'):
+                observed['heartbeat'] = matching['heartbeat']
+        value['actual_parallel'] = actual
+    atomic(path, value)
 
 
 def transition_evidence(root, checkpoint, active, progress=None):
@@ -445,7 +579,7 @@ def transition_evidence(root, checkpoint, active, progress=None):
     return evidence
 
 
-def new_request(root, manifest, arm, day):
+def new_request(root, manifest, arm, day, *, worker_slot=1):
     attempt = root / 'dates' / arm / day
     attempt.mkdir(parents=True, exist_ok=False)
     inputs = manifest.get('input_folders', {}).get(key(arm, day), str(root / 'inputs' / arm / day))
@@ -454,7 +588,8 @@ def new_request(root, manifest, arm, day):
                    result=str(attempt / 'RESULT.json'), error=str(attempt / 'error.json'),
                    manifest=str(root / 'CAMPAIGN_MANIFEST.json'), manifest_SHA=sha(root / 'CAMPAIGN_MANIFEST.json'),
                    started_UTC=now(), wall_budget_seconds=5400, native_budget_seconds=5400,
-                   target_gap=0.005 if arm == 'B1' else 0.03, Threads=1, P2_calls=0)
+                   target_gap=0.005 if arm == 'B1' else 0.03, Threads=1, P2_calls=0,
+                   worker_slot=worker_slot)
     atomic(attempt / 'request.json', request)
     return attempt / 'request.json', request
 
@@ -462,6 +597,78 @@ def new_request(root, manifest, arm, day):
 def default_worker_command(manifest, request_path):
     return [manifest.get('Python', manifest.get('python_executable', sys.executable)),
             '-B', '-X', 'utf8', '-m', 'v42_may_campaign.worker', str(request_path)]
+
+
+def pending_phase(checkpoint):
+    if counts(checkpoint, 'B1')['completed'] != 31:
+        return 'B1'
+    return 'B2' if counts(checkpoint, 'B2')['completed'] != 31 else None
+
+
+def reap_finished(root, manifest, checkpoint, actives, children):
+    completed = []
+    for name, active in list(actives.items()):
+        child = children.get(name)
+        if same_process(active.get('worker', {})):
+            continue
+        if child is not None and child.poll() is None:
+            # A transient PID query failure must not free a living OS child.
+            continue
+        request = read(active['request'])
+        if active['arm'] == 'B2':
+            parallel_evidence(root, checkpoint, actives, [worker_snapshot(a) for a in actives.values()])
+        finish_attempt(root, manifest, checkpoint, checkpoint['dates'][name], request,
+                       child.wait() if child is not None else None)
+        del actives[name]; children.pop(name, None); completed.append(name)
+    if completed:
+        persist_actives(root, manifest, actives)
+    return completed
+
+
+def dispatch_available(root, manifest, checkpoint, actives, children, command_factory):
+    """Fill only free slots, preserving the pending date's original order."""
+    validate_slots(checkpoint, actives)
+    arm = pending_phase(checkpoint)
+    if arm is None:
+        return []
+    ensure_phase(checkpoint, arm)
+    if any(active['arm'] != arm for active in actives.values()):
+        raise PermissionError('LIVE_WORKER_ARM_DIFFERS_FROM_PENDING_PHASE')
+    free = [slot for slot in range(1, worker_limit(arm) + 1)
+            if slot not in {active.get('worker_slot', 1) for active in actives.values()}]
+    pending = [row for row in checkpoint['dates'].values()
+               if row['arm'] == arm and row['status'] == 'PENDING' and row['attempts'] == 0]
+    started = []
+    for slot, row in zip(free, pending):
+        day = row['day']; name = key(arm, day)
+        request_path, request = new_request(root, manifest, arm, day, worker_slot=slot)
+        validate_request(root, manifest, request)
+        command = command_factory(manifest, request_path)
+        request['worker_command'] = command; atomic(request_path, request)
+        row.update(status='RUNNING', attempts=1, worker_slot=slot,
+                   request=str(request_path), started_UTC=request['started_UTC'])
+        save_checkpoint(root, checkpoint)
+        child = None
+        try:
+            with (request_path.parent / 'stdout.log').open('ab') as stdout, (request_path.parent / 'stderr.log').open('ab') as stderr:
+                child = subprocess.Popen(command, cwd=ROOT, stdout=stdout, stderr=stderr)
+                identity = process(child.pid)
+        except (OSError, psutil.Error) as error:
+            if child is not None and child.poll() is None:
+                identity = matching_live_worker(request_path)
+                if not identity:
+                    raise PermissionError('LAUNCHED_WORKER_IDENTITY_UNRESOLVED') from error
+            else:
+                atomic(request['error'], dict(classification='IMPLEMENTATION_FAILURE',
+                                             error=str(error), type=type(error).__name__, UTC=now()))
+                identity = {}
+        actives[name] = dict(arm=arm, day=day, request=str(request_path), worker=identity,
+            worker_slot=slot, started_UTC=request['started_UTC'], adopted=False)
+        if child is not None:
+            children[name] = child
+        persist_actives(root, manifest, actives)
+        started.append(name)
+    return started
 
 
 def run(root, *, worker_command=None, verify=True, poll_seconds=0.5):
@@ -472,12 +679,17 @@ def run(root, *, worker_command=None, verify=True, poll_seconds=0.5):
         if not acquired:
             return 0
         checkpoint = load_checkpoint(root, manifest)
-        active = recover_active(root, manifest, checkpoint)
-        checkpoint['state'] = 'RUNNING'
-        save_checkpoint(root, checkpoint)
-        stop = threading.Event()
-        mutex = threading.RLock()
-
+        recovery_requests(root, manifest, checkpoint, read_actives(root))
+        for name, row in checkpoint['dates'].items():
+            if row['status'] in TERMINAL and row.get('result'):
+                request = read(row['request'])
+                if sha(row['result']) != row['result_SHA'] or not receipt_valid(
+                        root, manifest, request, read(row['result'])):
+                    raise PermissionError('COMPLETED_RESULT_SHA_DRIFT:' + name)
+        actives = recover_actives(root, manifest, checkpoint)
+        children = {}
+        checkpoint['state'] = 'RUNNING'; save_checkpoint(root, checkpoint)
+        stop = threading.Event(); mutex = threading.RLock()
         def ticker():
             while not stop.wait(1):
                 try:
@@ -485,77 +697,18 @@ def run(root, *, worker_command=None, verify=True, poll_seconds=0.5):
                         snapshot(root, manifest, checkpoint)
                 except Exception as error:
                     atomic(root / 'STATUS_EXCEPTION.json', dict(UTC=now(), error=str(error)))
-
-        thread = threading.Thread(target=ticker, daemon=True)
-        thread.start()
+        thread = threading.Thread(target=ticker, daemon=True); thread.start()
         try:
-            snapshot(root, manifest, checkpoint)
-            for arm, day in AXIS:
-                row = checkpoint['dates'][key(arm, day)]
-                if row['status'] in TERMINAL:
-                    if row.get('result'):
-                        request = read(row['request'])
-                        if sha(row['result']) != row['result_SHA'] or not receipt_valid(
-                                root, manifest, request, read(row['result'])):
-                            raise PermissionError('COMPLETED_RESULT_SHA_DRIFT:' + key(arm, day))
-                    continue
-                ensure_phase(checkpoint, arm)
-                child = None
-                if active and same_process(active.get('worker', {})):
-                    if (active['arm'], active['day']) != (arm, day):
-                        raise PermissionError('LIVE_ORPHAN_DIFFERS_FROM_NEXT_ARM_DATE')
-                    request_path = Path(active['request'])
-                    request = read(request_path)
-                elif row['status'] == 'RUNNING' or row.get('attempts', 0):
-                    request = read(row['request'])
-                    finish_attempt(root, manifest, checkpoint, row, request, None, interrupted=True)
-                    atomic(root / 'ACTIVE.json', {})
-                    active = {}
-                    continue
-                else:
-                    request_path, request = new_request(root, manifest, arm, day)
-                    validate_request(root, manifest, request)
-                    row.update(status='RUNNING', attempts=1, request=str(request_path), started_UTC=request['started_UTC'])
-                    command = command_factory(manifest, request_path)
-                    request['worker_command'] = command
-                    atomic(request_path, request)
-                    with mutex:
-                        save_checkpoint(root, checkpoint)
-                    try:
-                        with (request_path.parent / 'stdout.log').open('ab') as stdout, (request_path.parent / 'stderr.log').open('ab') as stderr:
-                            child = subprocess.Popen(command, cwd=ROOT,
-                                                     stdout=stdout, stderr=stderr)
-                            worker = process(child.pid)
-                    except (OSError, psutil.Error) as error:
-                        if child and child.poll() is None:
-                            # Never kill a launched worker when the identity
-                            # query races; the exact command can recover it.
-                            worker = matching_live_worker(request_path)
-                            if not worker:
-                                raise PermissionError('LAUNCHED_WORKER_IDENTITY_UNRESOLVED') from error
-                        else:
-                            atomic(request['error'], dict(classification='IMPLEMENTATION_FAILURE',
-                                                         error=str(error), type=type(error).__name__, UTC=now()))
-                            worker = {}
-                    active = dict(arm=arm, day=day, request=str(request_path), worker=worker,
-                                  started_UTC=request['started_UTC'], adopted=False)
-                    atomic(root / 'ACTIVE.json', active)
-                snapshot(root, manifest, checkpoint, active)
-                while same_process(active.get('worker', {})):
-                    if child is not None and child.poll() is not None:
-                        break
-                    time.sleep(poll_seconds)
-                code = child.wait() if child is not None else None
+            while pending_phase(checkpoint) is not None or actives:
                 with mutex:
-                    finish_attempt(root, manifest, checkpoint, row, request, code)
-                    atomic(root / 'ACTIVE.json', {})
-                    active = {}
+                    reap_finished(root, manifest, checkpoint, actives, children)
+                    dispatch_available(root, manifest, checkpoint, actives, children, command_factory)
                     snapshot(root, manifest, checkpoint)
+                if pending_phase(checkpoint) is not None or actives:
+                    time.sleep(poll_seconds)
             with mutex:
-                checkpoint['state'] = 'COMPLETE'
-                checkpoint['finished_UTC'] = now()
-                save_checkpoint(root, checkpoint)
-                export(root, manifest, checkpoint)
+                checkpoint.update(state='COMPLETE', finished_UTC=now())
+                save_checkpoint(root, checkpoint); export(root, manifest, checkpoint)
                 snapshot(root, manifest, checkpoint)
             return 0
         except BaseException as error:
@@ -566,8 +719,7 @@ def run(root, *, worker_command=None, verify=True, poll_seconds=0.5):
                                                        UTC=now(), process=process()))
             raise
         finally:
-            stop.set()
-            thread.join(timeout=3)
+            stop.set(); thread.join(timeout=3)
 
 
 if __name__ == '__main__':

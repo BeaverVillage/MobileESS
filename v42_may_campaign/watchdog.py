@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 from v42_pr134_b1.common import atomic, read, same_process, now, process, sha
-from .coordinator import counts, load_manifest, runtime_path
+from .coordinator import counts, load_manifest, runtime_path, read_actives
 
 
 def task_name(manifest, role):
@@ -26,9 +26,11 @@ def run(root):
     checkpoint = optional(root / 'CHECKPOINT.json')
     heartbeat = optional(root / 'COORDINATOR_HEARTBEAT.json')
     active = optional(root / 'ACTIVE.json')
+    actives = read_actives(root)
     host = optional(root / 'COORDINATOR_HOST.json')
     coordinator_alive = same_process(heartbeat.get('process', {})) or same_process(host.get('process', {}))
     worker_alive = same_process(active.get('worker', {}))
+    workers_alive = {name: same_process(row.get('worker', {})) for name, row in actives.items()}
     age = (max(0.0, datetime.now(timezone.utc).timestamp() - datetime.fromisoformat(heartbeat['timestamp_UTC']).timestamp())
            if heartbeat.get('timestamp_UTC') else None)
     actions = []
@@ -51,6 +53,8 @@ def run(root):
             sha_failures.append(name)
     value = dict(UTC=now(), run_id=manifest['run_id'], process=process(),
                  coordinator_alive=coordinator_alive, worker_alive=worker_alive,
+                 workers_alive=workers_alive, active_worker_count=sum(workers_alive.values()),
+                 B1_parallel_workers=1, B2_parallel_workers=3,
                  current_phase=active.get('arm'), current_day=active.get('day'),
                  heartbeat_age_seconds=age, healthy_solver_kill=False,
                  solver_settings_changed=False, terminal_date_retries=0,

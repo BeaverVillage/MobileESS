@@ -3,6 +3,8 @@ from pathlib import Path
 from contextlib import contextmanager
 import os
 import msvcrt
+import time
+import errno
 from v42_pr134_b1.common import atomic, table, read, sha, record, digest, now, process, same_process
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,7 +13,7 @@ DAYS = tuple(f'2025-05-{n:02d}' for n in range(1, 32))
 AXIS = tuple((arm, day) for arm in ('B1', 'B2') for day in DAYS)
 REQUIRED_GATES = frozenset(('A_STAGE_MAY31', 'M_STAGE_MAY31', 'B2_INDEPENDENT_AIDC',
     'ORDER_AND_FAILURE_ISOLATION', 'WALL_NATIVE_BUDGET', 'ORIGINAL_PHYSICAL_AND_CERTIFICATES',
-    'MONITOR', 'INDEPENDENT_PROCESS_PERSISTENCE', 'REGRESSION'))
+    'MONITOR', 'INDEPENDENT_PROCESS_PERSISTENCE', 'REGRESSION', 'PARALLEL_B2'))
 SCIENTIFIC_SOURCES = frozenset((
     'v42_pr134_b1/common.py', 'v42_pr134_b1/coordinator.py',
     'v42_pr134_b1/native.py', 'v42_pr134_b1/inputs.py', 'v42_pr134_b1/replay.py',
@@ -44,6 +46,7 @@ def d_path(path):
 
 
 def environment(root=None):
+    """Set process-local temporary storage; workers pass their own attempt."""
     temp = d_path((Path(root) if root else RUNTIME) / 'tmp')
     temp.mkdir(parents=True, exist_ok=True)
     os.environ.update(TEMP=str(temp), TMP=str(temp), PYTHONDONTWRITEBYTECODE='1', PYTHONUTF8='1')
@@ -57,7 +60,7 @@ class LockBusy(RuntimeError):
 
 
 @contextmanager
-def exclusive_lock(path):
+def exclusive_lock(path, *, wait=False, check=None):
     path = d_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     stream = path.open('a+b')
@@ -66,16 +69,31 @@ def exclusive_lock(path):
         if path.stat().st_size == 0:
             stream.write(b'0'); stream.flush()
         stream.seek(0)
-        try:
-            msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
-            acquired = True
-        except OSError as error:
-            raise LockBusy('LIVE_OS_LOCK:' + str(path)) from error
+        while not acquired:
+            if check is not None:
+                check()
+            try:
+                msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
+                acquired = True
+            except OSError as error:
+                if not wait or error.errno not in (errno.EACCES, errno.EAGAIN, errno.EDEADLK):
+                    raise LockBusy('LIVE_OS_LOCK:' + str(path)) from error
+                # Only the short admission mutex waits. Slot/date locks fail
+                # closed immediately and remain owned until worker exit.
+                time.sleep(.025)
         yield stream
     finally:
         if acquired:
             stream.seek(0); msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
         stream.close()
+
+
+def worker_slot(request):
+    slot = request.get('worker_slot')
+    if (type(slot) is not int or request.get('arm') not in ('B1', 'B2')
+            or slot not in (1, 2, 3) or request['arm'] == 'B1' and slot != 1):
+        raise PermissionError('CAMPAIGN_WORKER_SLOT_REQUIRED')
+    return slot
 
 
 def required_source_names():
@@ -164,7 +182,8 @@ def verify_manifest(path, require_preflight=True):
         raise PermissionError('B1_ALL_THEN_B2_AXIS_REQUIRED')
     policy = doc.get('policy', {})
     expected = dict(Threads=1, wall_seconds=5400, native_seconds=5400, P2_calls=0,
-                    failed_date_retries=0, B1_gap=.005, B2_gap=.03)
+                    failed_date_retries=0, B1_gap=.005, B2_gap=.03,
+                    B1_parallel_workers=1, B2_parallel_workers=3)
     if any(policy.get(k) != value for k, value in expected.items()):
         raise PermissionError('CAMPAIGN_POLICY_DRIFT')
     sources = doc.get('sources', {})

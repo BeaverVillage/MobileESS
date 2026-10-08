@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 import shutil
 import sys
+import time
 import uuid
+from contextlib import ExitStack
 from unittest.mock import patch
 
 import pytest
@@ -23,6 +25,11 @@ def campaign():
     manifest = dict(run_id='FAKE_NATIVE_ZERO_' + root.name, Python=sys.executable,
                     monitor_port=8793, axis=[dict(arm=a, day=d) for a, d in co.AXIS])
     atomic(root / 'CAMPAIGN_MANIFEST.json', manifest)
+    for arm, day in co.AXIS:
+        folder = root / 'inputs' / arm / day
+        folder.mkdir(parents=True)
+        atomic(folder / 'INPUT_IDENTITY.json', dict(arm=arm, day=day, Native_calls=0))
+        atomic(folder / 'NATIVE_INPUT.json', dict(arm=arm, day=day, fixture_only=True))
     try:
         yield root, manifest
     finally:
@@ -40,8 +47,9 @@ def complete_b1(checkpoint, through=31):
 def request(campaign, arm, day):
     root, manifest = campaign
     folder = root / 'inputs' / arm / day
-    folder.mkdir(parents=True)
+    folder.mkdir(parents=True, exist_ok=True)
     atomic(folder / 'INPUT_IDENTITY.json', dict(arm=arm, day=day, Native_calls=0))
+    atomic(folder / 'NATIVE_INPUT.json', dict(arm=arm, day=day, fixture_only=True))
     path, req = co.new_request(root, manifest, arm, day)
     return path, req
 
@@ -67,14 +75,21 @@ def test_b1_31_terminal_failures_permit_b2(campaign):
 
 
 FAKE_WORKER = r'''
-import datetime, hashlib, json, os, pathlib, sys
+import datetime, hashlib, json, os, pathlib, sys, time
 request_path = pathlib.Path(sys.argv[1]); r = json.loads(request_path.read_text())
-root = pathlib.Path(r['root']); marker = root / 'FAKE_WORKER_ACTIVE'
-if marker.exists(): raise RuntimeError('MULTIPLE_FAKE_WORKERS')
+root = pathlib.Path(r['root']); marker = root / ('FAKE_WORKER_ACTIVE_'+r['arm']+'_'+str(r['worker_slot']))
+if marker.exists(): raise RuntimeError('MULTIPLE_FAKE_WORKERS_IN_SAME_SLOT')
 marker.write_text(str(os.getpid()))
 try:
-    with (root / 'FAKE_EXECUTION_ORDER.jsonl').open('a') as order:
-        order.write(json.dumps(dict(arm=r['arm'],day=r['day'],pid=os.getpid(),Native_calls=0))+'\n')
+    order_lock=root/'FAKE_ORDER_LOCK'
+    while True:
+        try:
+            fd=os.open(order_lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY);os.close(fd);break
+        except FileExistsError: time.sleep(.005)
+    try:
+        with (root / 'FAKE_EXECUTION_ORDER.jsonl').open('a') as order:
+            order.write(json.dumps(dict(arm=r['arm'],day=r['day'],slot=r['worker_slot'],pid=os.getpid(),Native_calls=0))+'\n')
+    finally: order_lock.unlink()
     output = pathlib.Path(r['output']); output.mkdir()
     payload = output / 'fake_payload.json'; payload.write_text(json.dumps(dict(arm=r['arm'],day=r['day'],fake=True,Native_calls=0)))
     status = 'TIME_LIMIT_NO_VALID_INCUMBENT' if r['arm']=='B1' and r['day']=='2025-05-05' else 'PASS'
@@ -93,15 +108,18 @@ def fake_factory(root):
     return lambda manifest, request_path: [sys.executable, '-B', str(path), str(request_path)]
 
 
-def test_62_serial_arm_dates_failure_continues_and_completed_are_not_rerun(campaign):
+def test_62_b1_single_b2_three_failure_continues_and_completed_are_not_rerun(campaign):
     root, manifest = campaign
     for arm, day in co.AXIS:
         folder = root / 'inputs' / arm / day
-        folder.mkdir(parents=True)
+        folder.mkdir(parents=True, exist_ok=True)
         atomic(folder / 'INPUT_IDENTITY.json', dict(arm=arm, day=day, Native_calls=0))
+        atomic(folder / 'NATIVE_INPUT.json', dict(arm=arm, day=day, fixture_only=True))
     assert co.run(root, worker_command=fake_factory(root), verify=False, poll_seconds=0.01) == 0
     rows = [json.loads(line) for line in (root / 'FAKE_EXECUTION_ORDER.jsonl').read_text().splitlines()]
-    assert [(r['arm'], r['day']) for r in rows] == list(co.AXIS)
+    assert [(r['arm'], r['day']) for r in rows[:31]] == list(co.AXIS[:31])
+    assert sorted((r['arm'], r['day']) for r in rows[31:]) == list(co.AXIS[31:])
+    assert all(r['slot'] == 1 for r in rows[:31]) and all(1 <= r['slot'] <= 3 for r in rows[31:])
     assert all(r['Native_calls'] == 0 for r in rows)
     checkpoint = read(root / 'CHECKPOINT.json')
     assert checkpoint['state'] == 'COMPLETE'
@@ -131,7 +149,8 @@ def test_transition_automatically_starts_b2_after_last_b1_terminal(campaign):
     co.save_checkpoint(root, checkpoint)
     assert co.run(root, worker_command=fake_factory(root), verify=False, poll_seconds=0.01) == 0
     rows = [json.loads(line) for line in (root / 'FAKE_EXECUTION_ORDER.jsonl').read_text().splitlines()]
-    assert [(r['arm'], r['day']) for r in rows[:2]] == [('B1', co.DAYS[-1]), ('B2', co.DAYS[0])]
+    assert (rows[0]['arm'], rows[0]['day']) == ('B1', co.DAYS[-1])
+    assert sorted((r['arm'], r['day']) for r in rows[1:4]) == [('B2', day) for day in co.DAYS[:3]]
     assert len(rows) == 32
     assert co.counts(read(root / 'CHECKPOINT.json'), 'B1')['completed'] == 31
 
@@ -311,3 +330,243 @@ def test_worker_nested_fields_are_exported_with_distinct_bound_and_fresh_ac_time
     assert runtime['wall_seconds'] == '123' and runtime['Native_Runtime_seconds'] == '90'
     assert runtime['Fresh_AC_seconds'] == '20'
     assert ac['Fresh_AC_status'] == 'PASS' and ac['Fresh_AC_max_line_loading'] == '2.1'
+
+
+PARALLEL_FAKE_WORKER = r'''
+import hashlib,json,os,pathlib,sys,time,datetime,psutil
+path=pathlib.Path(sys.argv[1]);r=json.loads(path.read_text());root=pathlib.Path(r['root'])
+p=psutil.Process();identity=dict(PID=p.pid,created=p.create_time(),command=p.cmdline(),parent=p.ppid(),priority=int(p.nice()))
+def atomic(path,value):
+    path=pathlib.Path(path);path.parent.mkdir(parents=True,exist_ok=True)
+    tmp=path.with_name(path.name+'.'+str(os.getpid())+'.tmp');tmp.write_text(json.dumps(value))
+    for retry in range(200):
+        try: os.replace(tmp,path);break
+        except PermissionError: time.sleep(.005)
+    else: raise RuntimeError('FAKE_ATOMIC_REPLACE_FAILED')
+start=root/'FAKE_STARTS'/(r['arm']+'_'+r['day']+'.json')
+atomic(start,dict(worker=identity,worker_slot=r['worker_slot'],Native_calls=0))
+release=root/'FAKE_RELEASES'/(r['arm']+'_'+r['day']+'.json');begin=time.monotonic()
+while not release.exists() and time.monotonic()-begin<20:
+    stamp=datetime.datetime.now(datetime.timezone.utc).isoformat()
+    atomic(path.parent/'HEARTBEAT.json',dict(worker=identity,timestamp_UTC=stamp,phase='FAKE_P1',Native_calls=0))
+    atomic(r['progress'],dict(worker=identity,timestamp_UTC=stamp,phase='FAKE_P1',UB=1.,independent_Global_LB=.99,certified_gap=.01,Native_Runtime=0.,Wall_Time=time.monotonic()-begin))
+    time.sleep(.025)
+status=json.loads(release.read_text())['status'] if release.exists() else 'IMPLEMENTATION_FAILURE'
+output=pathlib.Path(r['output']);output.mkdir()
+payload=output/'FAKE_PAYLOAD.json';atomic(payload,dict(arm=r['arm'],day=r['day'],Native_calls=0))
+atomic(r['result'],dict(identity={k:r[k] for k in ('run_id','arm','day')},status=status,PASS=status=='PASS',Native_calls=0,files=[dict(path=str(payload),sha256=hashlib.sha256(payload.read_bytes()).hexdigest())],finished_UTC=datetime.datetime.now(datetime.timezone.utc).isoformat()))
+'''
+
+
+def parallel_factory(root):
+    path = root / 'parallel_fake_worker.py'
+    path.write_text(PARALLEL_FAKE_WORKER, encoding='utf-8')
+    return lambda manifest, request_path: [sys.executable, '-B', str(path), str(request_path)]
+
+
+def wait_until(check, seconds=5):
+    until = time.monotonic() + seconds
+    while time.monotonic() < until:
+        if check():
+            return
+        time.sleep(.025)
+    raise AssertionError('FAKE_WORKER_OBSERVATION_TIMEOUT')
+
+
+def release_fake(root, active, status='PASS'):
+    atomic(root / 'FAKE_RELEASES' / (active['arm'] + '_' + active['day'] + '.json'), dict(status=status))
+
+
+def cleanup_fake(root, actives, children):
+    for active in actives.values():
+        release_fake(root, active)
+    for child in children.values():
+        code = child.wait(timeout=10)
+        assert code == 0, (Path(child.args[-1]).parent / 'stderr.log').read_text()
+
+
+def started_three(campaign):
+    root, manifest = campaign
+    checkpoint = co.load_checkpoint(root, manifest)
+    complete_b1(checkpoint)
+    co.save_checkpoint(root, checkpoint)
+    actives, children = {}, {}
+    factory = parallel_factory(root)
+    names = co.dispatch_available(root, manifest, checkpoint, actives, children, factory)
+    assert names == [co.key('B2', day) for day in co.DAYS[:3]]
+    wait_until(lambda: all((root / 'FAKE_STARTS' / ('B2_' + day + '.json')).exists() for day in co.DAYS[:3]))
+    return checkpoint, actives, children, factory
+
+
+def test_b1_thirty_terminal_starts_zero_b2_then_thirtyone_starts_three(campaign):
+    root, manifest = campaign
+    checkpoint = co.load_checkpoint(root, manifest); complete_b1(checkpoint, 30)
+    actives, children = {}, {}; factory = parallel_factory(root)
+    try:
+        co.dispatch_available(root, manifest, checkpoint, actives, children, factory)
+        assert len(actives) == 1 and all(a['arm'] == 'B1' for a in actives.values())
+        assert not list((root / 'dates' / 'B2').glob('*')) if (root / 'dates' / 'B2').exists() else True
+        active = next(iter(actives.values())); release_fake(root, active)
+        wait_until(lambda: bool(co.reap_finished(root, manifest, checkpoint, actives, children)))
+        assert co.counts(checkpoint, 'B1')['completed'] == 31
+        co.dispatch_available(root, manifest, checkpoint, actives, children, factory)
+        assert len(actives) == 3 and {a['worker_slot'] for a in actives.values()} == {1, 2, 3}
+        wait_until(lambda: all((Path(a['request']).parent / 'HEARTBEAT.json').exists() for a in actives.values()))
+        value = co.snapshot(root, manifest, checkpoint)
+        transition = read(root / 'B1_TO_B2_TRANSITION_VERIFICATION.json')
+        assert transition['actual_transition'].get('B2_first_day') == co.DAYS[0], [
+            (a['worker'], co.process(a['worker']['PID'])) for a in actives.values()]
+        assert transition['actual_transition']['input_SHA'] == sha(root / 'inputs/B2/2025-05-01/NATIVE_INPUT.json')
+        assert transition['actual_transition']['first_heartbeat']
+        assert len(value['worker_slots']) == 3
+    finally:
+        cleanup_fake(root, actives, children)
+
+
+def test_three_b2_workers_completion_fills_vacant_slot_and_monitor_exposes_each(campaign):
+    root, manifest = campaign
+    checkpoint, actives, children, factory = started_three(campaign)
+    try:
+        untouched = {name: a['worker'] for name, a in actives.items() if a['worker_slot'] != 1}
+        release_fake(root, actives[co.key('B2', co.DAYS[0])])
+        wait_until(lambda: bool(co.reap_finished(root, manifest, checkpoint, actives, children)))
+        assert co.dispatch_available(root, manifest, checkpoint, actives, children, factory) == [co.key('B2', co.DAYS[3])]
+        assert actives[co.key('B2', co.DAYS[3])]['worker_slot'] == 1
+        assert all(actives[name]['worker'] == identity for name, identity in untouched.items())
+        wait_until(lambda: (Path(actives[co.key('B2', co.DAYS[3])]['request']).parent / 'HEARTBEAT.json').exists())
+        co.snapshot(root, manifest, checkpoint)
+        view = monitor.view(root)
+        assert {r['worker_slot'] for r in view['worker_slots']} == {1, 2, 3}
+        assert {r['day'] for r in view['worker_slots']} == set(co.DAYS[1:4])
+        assert len(set(view['Worker_PIDs'])) == 3
+        assert all(r['worker_alive'] and r['heartbeat_timestamp_UTC'] and r['resource']['RSS'] for r in view['worker_slots']), [
+            (r['worker'], co.process(r['PID']), r['worker_alive'], r.get('heartbeat_timestamp_UTC')) for r in view['worker_slots']]
+        assert all(r['UB'] == 1 and r['independent_Global_LB'] == .99 and r['Certified_Gap'] == .01 for r in view['worker_slots'])
+    finally:
+        cleanup_fake(root, actives, children)
+
+
+def test_one_b2_failure_is_terminal_other_two_keep_running_and_next_date_starts(campaign):
+    root, manifest = campaign
+    checkpoint, actives, children, factory = started_three(campaign)
+    try:
+        identities = {name: a['worker'] for name, a in actives.items() if a['worker_slot'] != 1}
+        first = co.key('B2', co.DAYS[0]); release_fake(root, actives[first], 'INPUT_FAILURE')
+        wait_until(lambda: bool(co.reap_finished(root, manifest, checkpoint, actives, children)))
+        assert checkpoint['dates'][first]['status'] == 'INPUT_FAILURE'
+        assert checkpoint['dates'][first]['attempts'] == 1
+        assert all(co.same_process(identity) and actives[name]['worker'] == identity for name, identity in identities.items())
+        co.dispatch_available(root, manifest, checkpoint, actives, children, factory)
+        assert co.key('B2', co.DAYS[3]) in actives and first not in actives
+        assert all(checkpoint['dates'][name]['attempts'] == 1 for name in actives)
+    finally:
+        cleanup_fake(root, actives, children)
+
+
+def test_restart_adopts_all_three_even_when_actives_persistence_is_missing(campaign):
+    root, manifest = campaign
+    checkpoint, actives, children, factory = started_three(campaign)
+    try:
+        identities = {name: a['worker'] for name, a in actives.items()}
+        (root / 'ACTIVES.json').unlink(); atomic(root / 'ACTIVE.json', {})
+        checkpoint['dates'][co.key('B2', co.DAYS[1])].update(status='PENDING', attempts=0)
+        with patch.object(co.subprocess, 'Popen', side_effect=AssertionError('RESTART_DUPLICATE')):
+            recovered = co.recover_actives(root, manifest, checkpoint)
+            assert co.dispatch_available(root, manifest, checkpoint, recovered, {}, factory) == []
+        assert set(recovered) == set(identities)
+        assert all(a['adopted'] and a['worker'] == identities[name] for name, a in recovered.items())
+        assert all(checkpoint['dates'][name]['attempts'] == 1 for name in recovered)
+        assert len(read(root / 'ACTIVES.json')['workers']) == 3
+    finally:
+        cleanup_fake(root, actives, children)
+
+
+def test_duplicate_slot_and_cross_arm_overlap_are_denied(campaign):
+    root, manifest = campaign
+    checkpoint = co.load_checkpoint(root, manifest); complete_b1(checkpoint)
+    duplicated = {co.key('B2', day): dict(arm='B2', day=day, worker_slot=1) for day in co.DAYS[:2]}
+    with pytest.raises(PermissionError, match='WORKER_SLOT_LIMIT_OR_DUPLICATE'):
+        co.validate_slots(checkpoint, duplicated)
+    with pytest.raises(PermissionError, match='B1_B2_WORKER_OVERLAP'):
+        co.validate_slots(checkpoint, dict(duplicated, **{'B1/2025-05-31': dict(arm='B1', day=co.DAYS[-1], worker_slot=1)}))
+
+
+@pytest.mark.parametrize('corruption,expected', [
+    ('checkpoint_pointer', 'CHECKPOINT_REQUEST_PATH_NOT_CANONICAL'),
+    ('request_arm', 'CHECKPOINT_REQUEST_ARM_DATE_DRIFT'),
+    ('request_day', 'CHECKPOINT_REQUEST_ARM_DATE_DRIFT'),
+    ('request_output', 'ARM_DATE_OUTPUT_PATH_MIXING'),
+    ('request_progress', 'ARM_DATE_OUTPUT_PATH_MIXING'),
+    ('request_result', 'ARM_DATE_OUTPUT_PATH_MIXING'),
+    ('request_error', 'ARM_DATE_OUTPUT_PATH_MIXING'),
+    ('request_manifest', 'WORKER_REQUEST_MANIFEST_PATH_DRIFT'),
+    ('request_root', 'WORKER_REQUEST_ROOT_DRIFT'),
+    ('request_run_id', 'WORKER_REQUEST_RUN_ARM_DATE_DRIFT'),
+    ('request_missing_slot', 'WORKER_REQUEST_SLOT_OUTSIDE_ARM_LIMIT'),
+    ('checkpoint_missing_request', 'CHECKPOINT_RUNNING_REQUEST_MISSING'),
+    ('checkpoint_slot', 'CHECKPOINT_REQUEST_WORKER_SLOT_DRIFT'),
+    ('active_request_pointer', 'ACTIVES_REQUEST_PATH_NOT_CANONICAL'),
+    ('active_slot', 'CHECKPOINT_REQUEST_WORKER_SLOT_DRIFT'),
+])
+def test_restart_rejects_cross_date_or_request_identity_before_any_peer_mutation(campaign, corruption, expected):
+    root, manifest = campaign
+    checkpoint, actives, children, factory = started_three(campaign)
+    names = [co.key('B2', day) for day in co.DAYS[:3]]
+    victim, peer = names[1], names[2]
+    paths = {name: Path(active['request']) for name, active in actives.items()}
+    original = {name: path.read_bytes() for name, path in paths.items()}
+    identities = {name: active['worker'] for name, active in actives.items()}
+    try:
+        # The later row is corrupted while an earlier, correctly live peer is
+        # eligible for adoption. The entire recovery must fail before writes.
+        if corruption == 'checkpoint_pointer':
+            checkpoint['dates'][victim]['request'] = str(paths[peer])
+        elif corruption == 'checkpoint_missing_request':
+            del checkpoint['dates'][victim]['request']
+        elif corruption == 'checkpoint_slot':
+            checkpoint['dates'][victim]['worker_slot'] = actives[peer]['worker_slot']
+        elif corruption.startswith('active_'):
+            tampered = json.loads(json.dumps(actives))
+            if corruption == 'active_request_pointer':
+                tampered[victim]['request'] = str(paths[peer])
+            else:
+                tampered[victim]['worker_slot'] = actives[peer]['worker_slot']
+            co.persist_actives(root, manifest, tampered)
+        else:
+            value = read(paths[victim])
+            field = corruption.removeprefix('request_')
+            if field == 'arm':
+                value[field] = 'B1'
+            elif field == 'day':
+                value[field] = co.DAYS[2]
+            elif field == 'manifest':
+                alternate = root / 'alternate_manifest.json'
+                alternate.write_bytes((root / 'CAMPAIGN_MANIFEST.json').read_bytes())
+                value[field] = str(alternate)
+            elif field == 'root':
+                value[field] = str(root.parent)
+            elif field == 'run_id':
+                value[field] = 'DIFFERENT_CAMPAIGN_RUN'
+            elif field == 'missing_slot':
+                del value['worker_slot']
+            else:
+                value[field] = read(paths[peer])[field]
+            atomic(paths[victim], value)
+        co.save_checkpoint(root, checkpoint)
+        before = {name: (root / name).read_bytes() for name in ('CHECKPOINT.json', 'ACTIVE.json', 'ACTIVES.json')}
+        with ExitStack() as forbid:
+            for function in ('matching_live_worker', 'finish_attempt', 'persist_actives', 'save_checkpoint'):
+                forbid.enter_context(patch.object(co, function, side_effect=AssertionError('MUTATION_OR_ADOPTION_BEFORE_COMPLETE_IDENTITY_CHECK')))
+            forbid.enter_context(patch.object(co.subprocess, 'Popen', side_effect=AssertionError('WRONG_DATE_DUPLICATE_LAUNCH')))
+            with pytest.raises(PermissionError, match=expected):
+                co.recover_actives(root, manifest, checkpoint)
+        assert all((root / name).read_bytes() == contents for name, contents in before.items())
+        assert all(co.same_process(identity) for identity in identities.values())
+        assert all(actives[name]['worker'] == identity for name, identity in identities.items())
+        assert paths[names[0]].read_bytes() == original[names[0]]
+        assert paths[peer].read_bytes() == original[peer]
+        assert all(checkpoint['dates'][name]['attempts'] == 1 for name in names)
+    finally:
+        for name, path in paths.items():
+            path.write_bytes(original[name])
+        cleanup_fake(root, actives, children)

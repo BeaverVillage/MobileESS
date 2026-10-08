@@ -2,7 +2,7 @@
 from contextvars import ContextVar
 from contextlib import contextmanager
 from pathlib import Path
-from .common import verify_manifest, read, sha
+from .common import verify_manifest, sha, worker_slot
 
 _active = ContextVar('v42_may_campaign_permit', default=None)
 _model = ContextVar('v42_may_campaign_native_model', default=None)
@@ -16,13 +16,23 @@ def current():
 
 @contextmanager
 def worker_scope(request):
+    slot = worker_slot(request)
     manifest_path = Path(request['manifest'])
     manifest = verify_manifest(manifest_path)
+    root = Path(request['root']).resolve()
     key = request['arm'] + '/' + request['day']
     if (request['run_id'] != manifest['run_id'] or key not in manifest['input_folders']
+            or manifest_path.resolve() != root / 'CAMPAIGN_MANIFEST.json'
+            or request.get('manifest_SHA') != sha(manifest_path)
             or Path(request['input_folder']).resolve() != Path(manifest['input_folders'][key]).resolve()):
         raise PermissionError('WORKER_MANIFEST_DATE_ARM_IDENTITY')
-    token = _active.set(dict(request=request, manifest=manifest, manifest_sha=sha(manifest_path)))
+    expected = dict(Threads=1, P2_calls=0, wall_budget_seconds=5400,
+                    native_budget_seconds=5400,
+                    target_gap=.005 if request['arm'] == 'B1' else .03)
+    if any(request.get(name) != value for name, value in expected.items()):
+        raise PermissionError('WORKER_MANIFEST_POLICY_IDENTITY')
+    token = _active.set(dict(request=dict(request), manifest=manifest,
+                            manifest_sha=request['manifest_SHA'], worker_slot=slot))
     try:
         yield
     finally:
@@ -57,6 +67,11 @@ def guard(model):
         raise PermissionError('CAMPAIGN_THREADS_ONE_REQUIRED')
     if context['request']['arm'] == 'B2' and scope.get('track') == 'A':
         raise PermissionError('B2_AIDC_OPTIMIZATION_FORBIDDEN')
+    if context.get('worker_slot') is not None:
+        # Recheck actual processes before each Native entry. This also rejects
+        # an external historical worker launched after our initial admission.
+        from .worker import assert_no_other_native_worker
+        assert_no_other_native_worker(context['request'])
 
 
 @contextmanager

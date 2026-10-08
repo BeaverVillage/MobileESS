@@ -9,9 +9,9 @@ The approved entry point is `v42_may_campaign`. It binds the existing May12 A-st
 | B1 | May12 complete pricing, integer recovery, full-domain bound | Optimized | P/Q zero | ≤0.5% |
 | B2 | Adaptive role-exchange LNS and exact LP dual certificate | Independently regenerated FCFS/Q50, fixed | Optimized | ≤3% |
 
-All 31 B1 dates must have terminal receipts before B2 May01 can start. B1 PASS is not required for transition. Every terminal date has one attempt; failure proceeds to the next date. An interrupted Worker without a valid terminal result is preserved and classified. A surviving Worker is adopted by exact PID, creation time and command identity. OS locks prevent a second Coordinator or Native Worker.
+All 31 B1 dates run sequentially through one Worker and must have terminal receipts before B2 can start. B1 PASS is not required for transition. B2 uses three independent Worker slots, initially assigned May01, May02 and May03. A completed or failed slot automatically receives the next unstarted date while the other slots continue. Every terminal date has one attempt. An interrupted Worker without a valid terminal result is preserved and classified. Surviving Workers are adopted by exact PID, creation time and command identity. OS locks exclude a second Coordinator, duplicate dates, B1/B2 overlap and more than three B2 Workers. There is no automatic single-worker fallback.
 
-Each arm/date has a 5,400-second inclusive optimization/certification wall clock, starting at Coordinator dispatch, and 5,400 seconds of measured cumulative Native runtime. All Native calls use Threads=1 and the remaining wall/native budget with validation reserve. P2 and B2 AIDC optimization are forbidden. Fresh D-day AC is separately measured after P1 acceptance and never extends its optimization budget.
+Each arm/date has a 5,400-second inclusive optimization/certification wall clock, starting at Coordinator dispatch, and 5,400 seconds of measured cumulative Native runtime. All Native calls use Threads=1 and the remaining wall/native budget with validation reserve. Worker processes have separate dated inputs, outputs, caches, TEMP/TMP, Gurobi NodefileDir, logs and Native ledgers. Original OpenDSS NewContext engines use each date's private D output directory. P2 and B2 AIDC optimization are forbidden. Fresh D-day AC is separately measured after P1 acceptance and never extends its optimization budget.
 
 ## Original implementation reuse
 
@@ -28,7 +28,7 @@ Runtime evidence resides at `D:\MobileESS_v42\runtime\v42_may_campaign\candidate
 
 `TRAFFIC_AXIS_COMPATIBILITY_AUDIT.json` checks all 31 original days and both arms' byte-preserving input copies. The format error was confusing logical forecast-bundle SHA with NPZ file-container SHA. Original 288 five-minute forecast samples map to the 96 route departure slots using the existing `departure * 3` rule. SafeETA, 600-second connection delay, ceiling-to-slots and traction energy are unchanged. No interpolation, missing-route creation, travel-time change or constraint relaxation is used.
 
-`B1_TO_B2_TRANSITION_VERIFICATION.json` separates Native=0 transition tests from the actual transition. The Coordinator automatically appends B2 Worker identity, input SHA, start time and first heartbeat when B2 May01 starts. Its actual status remains `NOT_YET_OBSERVED` until that event.
+`B1_TO_B2_TRANSITION_VERIFICATION.json` separates Native=0 transition tests from the actual transition. The Coordinator automatically appends B2 Worker identity, input SHA, start time and first heartbeat when B2 May01 starts. `B2_THREE_WORKER_PARALLEL_VERIFICATION.json` records three-slot allocation, failure isolation, restart adoption, date/output/ledger isolation and actual parallel observations separately. Actual status remains `NOT_YET_OBSERVED` until those events occur. A separate three-process Native=0 audit verifies simultaneous Gurobi environment/full-model admission and resource observations; it does not claim three Native optimization calls have already occurred.
 
 ## Windows ownership and monitoring
 
@@ -40,7 +40,7 @@ New monitor: <http://127.0.0.1:8793/>. The HTML and status API are tested for cu
 
 ## Startup and resume
 
-Only a frozen manifest with all nine new preflight gates, complete source SHA coverage and all 62 dated input trees can authorize Native. Live checkpoint/results are written under the runtime folder and are not committed as changing Git artifacts.
+Only a frozen manifest with all ten new preflight gates, including `PARALLEL_B2`, complete source SHA coverage and all 62 dated input trees can authorize Native. Live checkpoint/results are written under the runtime folder and are not committed as changing Git artifacts.
 
 The registered tasks launch `pythonw.exe -B -X utf8 -m v42_may_campaign.host <coordinator|monitor|watchdog> <runtime-root>`. Running the owned Coordinator task resumes the checkpoint. It never reruns a terminal arm/date. The monitor is read-only and the browser can close without affecting calculation. The Coordinator performs the B1→B2 transition itself and requires neither Codex nor an AI automation.
 
