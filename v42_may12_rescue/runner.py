@@ -33,9 +33,18 @@ def run(resume_pre_native_gate=False,resume_incomplete_pricing=False,resume_veri
     started=perf_counter();native=None;timings={};decision=dict(PASS=False,classification='MAY12_PHASE1_RECOVERED_P1_INCONCLUSIVE')
     if (OUT/'NEW_RUN_STARTED.json').exists():
         if resume_verified_batch:
-            previous=read(OUT/'PRE_IMPLEMENTATION_BOUNDARY1/FINAL_DECISION.json');calls=read(OUT/'NEW_NATIVE_CALLS.json')
+            pointer=OUT/'LATEST_BATCH_PRICING_CHECKPOINT.json'
+            if pointer.exists():
+                receipt=read(pointer)['decision']
+                if record(receipt['path'])!=receipt:raise ValueError('BATCH_PRICING_RESUME_DECISION_DRIFT')
+                previous=read(receipt['path'])
+                permitted=previous['classification']=='MAY12_RESOURCE_PENDING'
+            else:
+                previous=read(OUT/'PRE_IMPLEMENTATION_BOUNDARY1/FINAL_DECISION.json')
+                permitted=previous.get('error')=="PermissionError('MAY12_FROZEN_SOURCE_REQUIRED')"
+            calls=read(OUT/'NEW_NATIVE_CALLS.json')
             marker=read(OUT/'PRE_IMPLEMENTATION_BOUNDARY1/IMPLEMENTATION_BOUNDARY_REQUEST.json')
-            if (previous.get('error')!="PermissionError('MAY12_FROZEN_SOURCE_REQUIRED')"
+            if (not permitted
                 or marker['reason']!='INTENTIONAL_BETWEEN_SOLVE_IMPLEMENTATION_BOUNDARY'
                 or previous['new_native_seconds']!=calls['actual_Runtime'] or previous['new_native_calls']!=len(calls['calls'])):
                 raise PermissionError('ONLY_PRESERVED_IMPLEMENTATION_BOUNDARY_RESUME')
@@ -149,7 +158,23 @@ def run(resume_pre_native_gate=False,resume_incomplete_pricing=False,resume_veri
                 trajectory[-1]['additional_exact_negative_STAY_columns']=batch['additional_negative_concrete_STAY_columns']
                 trajectory[-1]['batch_STAY_verification_wall_seconds']=batch['wall_seconds']
                 atomic(OUT/'P1_TRAJECTORY.json',dict(trajectory=trajectory))
-            native.remaining();prior_fingerprint=s.fingerprint();state,warm=activate(state,negative,raw['X'],folder,max_batch=130)
+            native.remaining();prior_fingerprint=s.fingerprint();transition=folder/'ACTIVATED_NEXT_STATE.json'
+            if transition.exists():
+                saved=read(transition)
+                if (saved['from_compact_sha256']!=prior_fingerprint or saved['prior_raw']!=rec['raw_attributes']
+                    or record(saved['state']['path'])!=saved['state'] or record(saved['witness']['path'])!=saved['witness']):
+                    raise ValueError('ACTIVATED_TRANSITION_CHECKPOINT_INPUT_OR_BYTES_DRIFT')
+                with gzip.open(saved['state']['path'],'rb') as f:stored=pickle.load(f)
+                state,warm=stored['state'],stored['warm']
+                if state['compact'].fingerprint()!=saved['to_compact_sha256'] or state['reference'].fingerprint()!=saved['to_reference_sha256']:
+                    raise ValueError('ACTIVATED_TRANSITION_CHECKPOINT_MATRIX_DRIFT')
+            else:
+                state,warm=activate(state,negative,raw['X'],folder,max_batch=130)
+                path=STATIC/(folder.parent.name+'_NEXT_'+folder.name+'.pkl.gz')
+                with gzip.open(path,'xb',compresslevel=1) as f:pickle.dump(dict(state=state,warm=warm),f,protocol=5)
+                atomic(transition,dict(PASS=True,from_compact_sha256=prior_fingerprint,to_compact_sha256=state['compact'].fingerprint(),
+                    to_reference_sha256=state['reference'].fingerprint(),prior_raw=rec['raw_attributes'],state=record(path),
+                    witness=record(folder/'ACTIVATION.json'),source=record(active_freeze()),no_budget_reset=True))
             if state['compact'].fingerprint()==prior_fingerprint:raise ValueError('UNRESOLVED_EXACT_NEGATIVE_DIRECTION_ALREADY_IN_ACTIVE_MATRIX')
             inclusion=exact_replay(state['reference'],expanded_point(state,warm))
             atomic(folder/'EXACT_ACTIVATED_INCLUSION_ROW_REPLAY.json',inclusion)

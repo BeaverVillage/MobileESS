@@ -81,3 +81,17 @@ def test_git_receipt_requires_reviewed_script_dependency_and_cwd(tmp_path,monkey
     assert native.is_read_only_host_monitor(process)
     dependency.write_text('unreviewed new audit')
     assert not native.is_read_only_host_monitor(process)
+
+def test_read_only_registry_checks_module_cwd_and_all_source_bytes(tmp_path,monkeypatch):
+    import v42_may12_rescue.native as native
+    from v42_pr134_b1.common import atomic,record
+    root=tmp_path/'repo';root.mkdir();source=root/'mapping.py';dependency=root/'common.py'
+    source.write_text('reviewed optimize-forbidden entrypoint');dependency.write_text('reviewed common')
+    out=tmp_path/'reports';monkeypatch.setattr(native,'OUT',out)
+    atomic(out/'READ_ONLY_EXTERNAL_ENTRYPOINTS/mapping.json',dict(PASS=True,module='v42_group_branching.mapping',
+        cwd=str(root),sources=[record(source),record(dependency)],entrypoint_forbids_optimize=True))
+    process=dict(argv=['python','-u','-m','v42_group_branching.mapping'],cwd=str(root))
+    assert native.is_read_only_host_monitor(process)
+    process['argv'][-1]='v42_group_branching.run';assert not native.is_read_only_host_monitor(process)
+    process['argv'][-1]='v42_group_branching.mapping';dependency.write_text('unreviewed')
+    assert not native.is_read_only_host_monitor(process)

@@ -50,6 +50,11 @@ def is_read_only_host_monitor(process):
             and Path(process.get('cwd','')).resolve()==Path(r['cwd']).resolve()):return True
     try:i=argv.index('-m')
     except ValueError:return False
+    for evidence in sorted((OUT/'READ_ONLY_EXTERNAL_ENTRYPOINTS').glob('*.json')):
+        r=read(evidence)
+        if (r.get('PASS') is True and r['entrypoint_forbids_optimize'] is True
+            and argv[i+1:i+2]==[r['module']] and Path(process.get('cwd','')).resolve()==Path(r['cwd']).resolve()
+            and all(record(source['path'])==source for source in r['sources'])):return True
     if argv[i+1:i+3]==['v42_pr134_b1.host','monitor']:return True
     if argv[i+1:i+2]==['v42_b2_root_validation.analysis']:
         # Accept only independently inspected versions. A changed entrypoint
