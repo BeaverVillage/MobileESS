@@ -22,7 +22,8 @@ def freeze(epoch=None):
         execution_sources={str(q):sha(q) for q in sources},source_archive=record(archive),
         budget=record(OUT/'CONTINUATION_BUDGET.json'),policy=POLICY,
         historical_PR180=record(historical_receipt),
-        runtime_limit_clarification=record(OUT/'RUNTIME_LIMIT_USER_CLARIFICATION.json') if (OUT/'RUNTIME_LIMIT_USER_CLARIFICATION.json').exists() else None))
+        runtime_limit_clarification=record(OUT/'RUNTIME_LIMIT_USER_CLARIFICATION.json') if (OUT/'RUNTIME_LIMIT_USER_CLARIFICATION.json').exists() else None,
+        memory_user_override=record(OUT/'MEMORY_GUARDS_USER_OVERRIDE.json') if (OUT/'MEMORY_GUARDS_USER_OVERRIDE.json').exists() else None))
     if epoch is not None:atomic(OUT/'ACTIVE_SOURCE_FREEZE.json',dict(PASS=True,receipt=record(p)))
     print('NEW_SOURCE_FROZEN',head,len(sources),flush=True)
 if __name__=='__main__':

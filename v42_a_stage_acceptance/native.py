@@ -17,7 +17,7 @@ from v42_a_stage_domain_v2.postsolve_review import internal_attempts
 from .policy import OUT,STATIC,POLICY
 DAY=None
 from v42_a_stage_phase1.setup import HISTORY
-from v42_a_stage_compact_rowgen.resources import sample
+from .memory import sample
 
 
 from v42_a_stage_early.native import BudgetStop
@@ -62,6 +62,11 @@ class Native:
         if not actual['PASS']:
             model.dispose();raise ValueError('ACTUAL_NATIVE_MODEL_NOT_EXACT_ORIGINAL_MATRIX')
         effective=apply_policy(model,self.policy,gp)
+        model.setParam('MemLimit',float('inf'));model.setParam('SoftMemLimit',float('inf'))
+        atomic(folder/'MEMORY_LIMITS_DISABLED.json',dict(PASS=True,
+            MemLimit=str(model.Params.MemLimit),SoftMemLimit=str(model.Params.SoftMemLimit),
+            automatic_memory_stop=False,allocation_cap=False,telemetry_only=True,
+            authority=record(OUT/'MEMORY_GUARDS_USER_OVERRIDE.json')))
         self.live_model=model
         if component=='NODE_LP':
             model.setParam('InfUnbdInfo',1);effective['InfUnbdInfo']=1
@@ -120,7 +125,6 @@ class Native:
                 if not self.system_samples or time()-self.system_samples[-1]['unix']>=2:
                     s=dict(unix=time(),**sample());self.system_samples.append(s)
                     atomic(folder/'SYSTEM_MEMORY.json',dict(samples=self.system_samples))
-                    if s['unsafe']:m.terminate()
                 try:self.remaining()
                 except BudgetStop:m.terminate()
             except Exception as error:

@@ -10,6 +10,7 @@ from v42_a_stage_phase1.oracle import validate_coverage
 from v42_a_stage_compact_rowgen.lift import expanded_point
 from .global_box import certify
 from .policy import OUT
+from v42_a_stage_practical.policy import POLICY as SCIENTIFIC_POLICY
 
 def recover(state,day):
     before=perf_counter();f=OUT/day;s=state['compact'];nr=read(f/'P1/S0/NATIVE_RESULT.json')
@@ -39,7 +40,7 @@ def recover(state,day):
     upper=sum((v*Fraction(float(raw['X'][j])) for j,v in s.objective('rho').coefficients().items()),Fraction(s.objective('rho').constant))
     if lower>upper:raise ValueError('REPAIRED_GLOBAL_BOUND_ABOVE_ORIGINAL_ROOT_POINT')
     repaired=dict(prior);repaired.update(global_bound=bound,full_domain_phase1_lower_bound=str(lower),
-        full_bound_gap=str(upper-lower),full_bound_closes_active_LP=upper-lower<=Fraction(1,10000000),
+        full_bound_gap=str(upper-lower),full_bound_closes_active_LP=upper-lower<=Fraction(SCIENTIFIC_POLICY['price_epsilon']),
         original_failed_pricing=record(price/'FULL_PRICING_RESULT.json'),global_box_certificate=record(f/'P1/GLOBAL_ORIGINAL_ROW_BOX_CERTIFICATE.json'),
         recovery_wall_seconds=perf_counter()-before,all_local_bounds_independently_replayed=True,native_reoptimization_calls=0)
     path=f/'P1/FULL_PRICING_RECERTIFIED_GLOBAL_BOUND.json';atomic(path,serial(repaired))

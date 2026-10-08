@@ -11,3 +11,4 @@ POLICY=dict(schema='A_STAGE_FOURDAY_GLOBAL_GAP_CONTINUATION_V1',Threads=1,worker
     run_order=DAYS,source_and_historical_receipts_immutable=True,physics_tolerance_objective_changes=False,
     zero_Phi_before_P1=True,full_domain_bound_required=True,row_promotion_after=19,
     activation_batch=64,stagnation_rounds=3,stagnation_fraction=.01)
+POLICY.update(memory_limits_enabled=False,automatic_memory_stop=False,memory_telemetry_only=True)

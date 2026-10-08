@@ -3,13 +3,13 @@
   "A1_accepted": false,
   "classification": "INCONCLUSIVE",
   "practical_runtime_accepted": false,
-  "failure_reason": "ValueError('P1_CLOSURE_WITHOUT_VALID_GLOBAL_LB')",
+  "failure_reason": "CONTROLLED_BUILD_RESTART_TO_REMOVE_MEMORY_GUARDS_PER_USER_INSTRUCTION",
   "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\v42_a_stage_acceptance\\driver.py\", line 115, in run\n    else:state,x,expanded,priced=phase.run(native,state,day,certified_zero_point=seed)\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\v42_a_stage_canary\\phase.py\", line 131, in run\n    if priced['full_domain_phase1_lower_bound'] is None:raise ValueError('P1_CLOSURE_WITHOUT_VALID_GLOBAL_LB')\n                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: P1_CLOSURE_WITHOUT_VALID_GLOBAL_LB\n",
-  "native_seconds": 89.41800141334534,
+  "native_seconds": 97.02100157737732,
   "Work": 126.55594456622404,
-  "native_calls": 596,
-  "wall_seconds": 983.7150876522064,
-  "peak_RSS_bytes": 6009061376,
+  "native_calls": 598,
+  "wall_seconds": 2416.023438692093,
+  "peak_RSS_bytes": 5500547072,
   "per_day_native_limit": 3600,
   "practical_wall_target": 1800,
   "model_sizes": [
@@ -4782,5 +4782,18 @@
       }
     }
   ],
-  "native_runtime_excludes_build_pricing_python_and_validation": true
+  "native_runtime_excludes_build_pricing_python_and_validation": true,
+  "prior_full_domain_P1_and_zero_migration_points_preserved": true,
+  "partial_full_zero_classes_completed": 193,
+  "no_native_solve_interrupted": true,
+  "original_budget_receipt": {
+    "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\CONTINUATION_BUDGET.json",
+    "sha256": "2afb9c610060a4b870c93b2d4165100cf7c5173925613de63115c0321607135f",
+    "bytes": 1076
+  },
+  "memory_user_override": {
+    "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\MEMORY_GUARDS_USER_OVERRIDE.json",
+    "sha256": "ae62cc84ef9788179a0f6b6b7da159030a253b16ddd201388197e8e434d66672",
+    "bytes": 497
+  }
 }

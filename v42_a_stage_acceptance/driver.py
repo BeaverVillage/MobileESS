@@ -11,7 +11,7 @@ from .budget import Budget
 from .native import Native
 from .execution import verify
 from .physical import Physical
-from v42_a_stage_compact_rowgen.resources import sample
+from .memory import sample
 
 def route(day):
     import v42_a_stage_canary.policy as p
@@ -72,7 +72,7 @@ def run(day,resume=False):
     if day not in DAYS:raise PermissionError('ONLY_FOUR_REQUESTED_A_STAGE_DAYS')
     folder=OUT/day;folder.mkdir(parents=True,exist_ok=True)
     if (folder/'STARTED.json').exists() and not resume:raise PermissionError('DAY_ALREADY_EXECUTED_USE_PRESERVED_CHECKPOINT')
-    if resume and not (day==DAYS[1] and resume in (True,'p2') or day==DAYS[2] and resume=='global-bound'):
+    if resume and not (day==DAYS[1] and resume in (True,'p2') or day==DAYS[2] and resume in ('global-bound','p2')):
         raise PermissionError('ONLY_CURRENT_VERIFIED_SAME_DAY_FAILURE_CHECKPOINT')
     if day!=DAYS[0]:
         if not read(OUT/DAYS[0]/'A1_RESULT.json').get('A1_accepted'):raise PermissionError('MAY19_FINAL_A1_ACCEPTANCE_REQUIRED')
@@ -97,7 +97,6 @@ def run(day,resume=False):
     result=dict(day=day,A1_accepted=False,classification='INCONCLUSIVE',practical_runtime_accepted=False)
     timings={}
     try:
-        if sample()['unsafe']:raise RuntimeError('SYSTEM_RAM_COMMIT_RESERVE_BEFORE_DAY_BUILD')
         if day==DAYS[0]:result.update(may19(native))
         else:
             prep,phase=route(day);seed=None
@@ -105,7 +104,7 @@ def run(day,resume=False):
                 b=read(folder/'INITIAL_VERIFICATION.json')
                 if record(b['state']['path'])!=b['state']:raise ValueError('ORIGINAL_CHECKPOINT_STATE_DRIFT')
                 with gzip.open(b['state']['path'],'rb') as stream:state=pickle.load(stream)
-                nr=read(folder/('PHASE_I/S19/NATIVE_RESULT.json' if resume=='global-bound' else 'PHASE_I/S15/NATIVE_RESULT.json'))
+                nr=read(folder/('PHASE_I/S19/NATIVE_RESULT.json' if day==DAYS[2] else 'PHASE_I/S15/NATIVE_RESULT.json'))
                 if record(nr['raw_attributes']['path'])!=nr['raw_attributes']:raise ValueError('LAST_PHASE_I_RAW_POINT_DRIFT')
                 seed=np.load(nr['raw_attributes']['path'])['X'][:state['compact'].matrix.shape[1]]
             else:
@@ -132,7 +131,7 @@ def run(day,resume=False):
         calls=previous+native.calls
         result.update(native_seconds=sum(c.get('native_seconds') or 0 for c in calls),Work=sum(c.get('Work') or 0 for c in calls),
             native_calls=len(calls),wall_seconds=time()-read(folder/'STARTED.json')['actual_start_unix'],
-            peak_RSS_bytes=max([c.get('peak_RSS_bytes') or 0 for c in calls]+[s['A_process_RSS_bytes'] for s in samples]+
+            peak_RSS_bytes=max([c.get('peak_RSS_bytes') or 0 for c in calls]+[s.get('A_process_RSS_bytes') or 0 for s in samples]+
                 [read(p).get('peak_RSS_bytes',0) or 0 for p in folder.glob('ATTEMPT*_RESULT.json')],default=0),
             per_day_native_limit=3600,practical_wall_target=POLICY['practical_end_to_end_target_seconds'],
             model_sizes=[dict(component=c['component'],identity=c['model_identity']) for c in calls],timings=timings,
