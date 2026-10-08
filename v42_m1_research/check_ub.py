@@ -107,8 +107,12 @@ def validate_candidate(case, point):
     c3 = matrix_replay(case.A, case.d, x)
     if not c3.get('finite'):
         return dict(PASS=False, C3A=c3, case_sha=case.case_sha, repairs=0)
-    if c3['checked_binary_columns'] != 9322:
-        raise ValueError('ORIGINAL_C3A_BINARY_AXIS_MUST_HAVE_9322_COLUMNS')
+    expected_binary_count = getattr(case, 'identity', {}).get('binary_count', 9322)
+    if type(expected_binary_count) is not int or expected_binary_count < 0:
+        raise ValueError('ORIGINAL_C3A_BINARY_COUNT_AUTHORITY_INVALID')
+    if c3['checked_binary_columns'] != expected_binary_count:
+        raise ValueError('ORIGINAL_C3A_BINARY_AXIS_MUST_HAVE_9322_COLUMNS' if expected_binary_count == 9322
+                         else 'ORIGINAL_C3A_BINARY_AXIS_COUNT_AUTHORITY_DRIFT')
     original = case.lift(x)
     row_names = np.asarray(case.original_d['row_names']).astype(str)
     tight = np.array([n.split('[', 1)[0] in ('flow', 'terminal_location', 'voltage_lower', 'voltage_upper',
@@ -124,7 +128,9 @@ def validate_candidate(case, point):
     return dict(PASS=bool(passed), case_sha=case.case_sha, point_sha256=before,
                 objective=full_objective, C3A=c3, original_full_matrix=full,
                 physical=physics, original_objective_bit_equal=objective_equal,
-                all_9322_original_C3A_binaries_correspond=True, original_integer_axis_checked=True,
+                all_9322_original_C3A_binaries_correspond=expected_binary_count == 9322,
+                all_original_C3A_binaries_correspond=True,
+                expected_original_binary_count=expected_binary_count, original_integer_axis_checked=True,
                 frozen_AIDC_and_grid='all original matrix rows, axes and coefficients checked',
                 raw_point_unchanged=unchanged, repairs=0, rounding=0, clipping=0,
                 scientific_tolerances_unchanged=True, validation_wall_seconds=perf_counter()-started)

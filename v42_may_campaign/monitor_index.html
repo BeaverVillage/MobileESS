@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B1 → B2 · 5월 P1 캠페인</title>
+<!-- Existing PR134 monitor layout and one-second read-only fetch are reused. -->
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f6fa;color:#142033;font-family:Segoe UI,Malgun Gothic,sans-serif}
+main{max-width:1120px;margin:30px auto;padding:0 24px}header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+h1{font-size:26px;margin:0 0 8px}p{margin:0;color:#64748b;font-size:14px}.badge{color:white;background:#d97706;border-radius:20px;padding:8px 15px;font-size:14px;font-weight:600}
+.card{background:white;border-radius:16px;padding:22px;margin-bottom:15px}.row{display:flex;justify-content:space-between;align-items:center}.muted{color:#64748b;font-size:13px}
+.count{font-size:22px;font-weight:700}.track{height:9px;border-radius:5px;background:#e7ecf3;margin:15px 0 10px;overflow:hidden}.bar{height:100%;background:#2563eb;transition:width .4s}
+h2{margin:0 0 8px;font-size:23px}.detail{color:#2563eb;font-size:15px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:20px}
+.metric strong{display:block;font-size:22px;margin-top:6px;font-weight:500;font-variant-numeric:tabular-nums}.metric small{display:block;color:#64748b;margin-top:5px;font-size:11px}
+.tables{display:grid;grid-template-columns:1fr 1fr;gap:16px}.table-wrap{max-height:540px;overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid #eef1f5}th{position:sticky;top:0;background:white}.pass{color:#059669}.timeout{color:#b45309}.fail{color:#dc2626}.active{color:#2563eb;font-weight:600}
+footer{display:flex;justify-content:space-between;padding:8px 2px 28px;color:#64748b;font-size:12px}#reason{color:#dc2626;font-size:13px;overflow-wrap:anywhere;margin-bottom:15px}#run{font-size:11px;margin-top:5px;overflow-wrap:anywhere}
+@media(max-width:720px){main{padding:0 14px;margin:22px auto}.card{padding:18px}.metrics{grid-template-columns:repeat(2,1fr);gap:16px}.metric strong{font-size:19px}.tables{grid-template-columns:1fr}h1{font-size:22px}}
+</style>
+</head>
+<body><main>
+<header><div><h1>B1 → B2 · 5월 P1 캠페인</h1><p>2025.05.01 — 05.31 · 비교군별 독립 입력</p><p id="run"></p></div><span id="status" class="badge">연결 중</span></header>
+<section class="card"><div class="row"><span class="muted">전체 종료 arm/date</span><strong id="count" class="count">— / 62</strong></div><div class="track"><div id="bar" class="bar" style="width:0"></div></div><p id="summary">상태 확인 중</p><p id="order" style="margin-top:8px">B1 31일 전체가 종료된 후 B2를 시작합니다. 실패·시간 제한 날짜는 반복하지 않습니다.</p></section>
+<section class="card"><h2 id="day">—</h2><div id="detail" class="detail">작업 확인 중</div>
+<div class="metrics">
+<div class="metric"><span class="muted">Native Runtime</span><strong id="native">—</strong><small>Native 누적 최대 5,400초</small></div>
+<div class="metric"><span class="muted">최적화 Wall Time</span><strong id="wall">—</strong><small>모델 생성·인증·replay 포함 5,400초</small></div>
+<div class="metric"><span class="muted">남은 최적화 시간</span><strong id="remaining">—</strong><small>Fresh AC는 별도 평가 단계</small></div>
+<div class="metric"><span class="muted">목표 Certified Gap</span><strong id="target">B1 0.5% / B2 3%</strong><small>Threads=1 · P2 호출=0</small></div>
+<div class="metric"><span class="muted">현재 UB</span><strong id="ub">—</strong></div>
+<div class="metric"><span class="muted">Native BestBd</span><strong id="bound">—</strong><small>Native 보고 하한</small></div>
+<div class="metric"><span class="muted">독립 인증 Global LB</span><strong id="global-lb">—</strong></div>
+<div class="metric"><span class="muted">Certified Gap</span><strong id="gap">—</strong></div>
+<div class="metric"><span class="muted">Planning 최대 선로 부하율</span><strong id="planning">—</strong></div>
+<div class="metric"><span class="muted">Fresh AC 최대 선로 부하율</span><strong id="ac">—</strong></div>
+<div class="metric"><span class="muted">전압 / 전류 / 변압기 위반</span><strong id="violations">—</strong></div>
+<div class="metric"><span class="muted">CPU / Worker RSS</span><strong id="resource">—</strong><small>관찰 전용</small></div>
+</div><p id="process" style="margin-top:20px;white-space:pre-line"></p><p id="heartbeat" style="margin-top:8px"></p></section>
+<div id="reason"></div>
+<div class="tables"><section class="card"><h2>B1 <span id="b1-count" class="muted">0 / 31</span></h2><p>AIDC 최적화 ON · MESS OFF</p><div class="table-wrap"><table><thead><tr><th>날짜</th><th>종료 상태</th><th>오류</th></tr></thead><tbody id="b1-rows"></tbody></table></div></section>
+<section class="card"><h2>B2 <span id="b2-count" class="muted">0 / 31</span></h2><p>독립 비최적화 AIDC 고정 · MESS 최적화 ON</p><div class="table-wrap"><table><thead><tr><th>날짜</th><th>종료 상태</th><th>오류</th></tr></thead><tbody id="b2-rows"></tbody></table></div></section></div>
+<footer><span id="ram">RAM —</span><span id="updated">갱신 —</span></footer>
+</main>
+<script>
+const $=id=>document.getElementById(id),number=n=>typeof n==='number'&&Number.isFinite(n)?n.toLocaleString('ko-KR',{maximumFractionDigits:7}):'—',seconds=n=>number(n)+(typeof n==='number'?' s':''),percent=n=>typeof n==='number'&&Number.isFinite(n)?number(n*100)+'%':'—';
+let busy=false,lastReceived=null;
+function dateRows(id,rows){$(id).replaceChildren(...rows.map(r=>{const tr=document.createElement('tr');tr.className=r.status==='PASS'?'pass':r.status.startsWith('TIME_LIMIT_')?'timeout':r.status==='RUNNING'?'active':r.status==='PENDING'?'':'fail';for(const v of [r.day.slice(5),r.status,r.error||r.summary?.error||'']){const td=document.createElement('td');td.textContent=v;tr.append(td);}return tr;}));}
+async function refresh(){if(busy)return;busy=true;const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),900);try{
+const response=await fetch('/api/status',{cache:'no-store',signal:controller.signal});if(!response.ok)throw Error();const s=await response.json();lastReceived=Date.now();
+$('status').textContent=s.status;$('status').style.background=s.tone;$('count').textContent=s.completed+' / 62';$('bar').style.width=(100*s.completed/62)+'%';$('run').textContent=s.run_id;
+$('summary').textContent='PASS '+s.totals.PASS+' · TIMEOUT '+s.totals.TIMEOUT+' · FAIL '+s.totals.FAIL+' · 남은 '+s.totals.pending;
+$('order').textContent=s.B2_ready?'B1 31일 종료 완료 → '+(s.transition.actual_transition?.status==='OBSERVED'?'B2 시작 확인':'B2 첫 실행 준비')+' · 실패 날짜 무반복': 'B1 '+s.B1.completed+'/31일 종료 → B1 전체 종료 후 B2 시작 · 실패 날짜 무반복';
+$('day').textContent=(s.current_phase||'다음 실행 대기')+(s.current_day?' · '+s.current_day:'');$('detail').textContent=s.solver_phase||s.state;
+$('native').textContent=seconds(s.Native_Runtime_seconds);$('wall').textContent=seconds(s.wall_seconds);$('remaining').textContent=seconds(s.remaining_seconds);$('target').textContent=s.current_phase?percent(s.target_gap):'B1 0.5% / B2 3%';
+$('ub').textContent=number(s.UB);$('bound').textContent=number(s.Native_BestBd);$('global-lb').textContent=number(s.independent_Global_LB);$('gap').textContent=percent(s.Certified_Gap);
+$('planning').textContent=percent(s.Planning_max_line_loading);$('ac').textContent=percent(s.Fresh_AC_max_line_loading);$('violations').textContent=[s.voltage_violations,s.current_violations,s.transformer_violations].map(number).join(' / ');
+$('resource').textContent=(typeof s.resource.CPU_percent==='number'?number(s.resource.CPU_percent)+'%':'—')+' / '+(typeof s.resource.RSS==='number'?number(s.resource.RSS/2**30)+' GB':'—');
+$('process').textContent='Coordinator PID '+(s.Coordinator_PID??'—')+' · Worker PID '+(s.Worker_PID??'—')+' · Worker alive '+s.worker_alive+'\n'+(s.worker_identity?'생성시각 '+new Date(s.worker_identity.created*1000).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}):'');
+$('heartbeat').textContent='Heartbeat '+seconds(s.heartbeat_age_seconds)+' 전 · Solver 마지막 보고 '+seconds(s.solver_report_age_seconds)+' 전 · 마지막 업데이트 '+(s.last_update_UTC||'—');
+$('b1-count').textContent=s.B1.completed+' / 31';$('b2-count').textContent=s.B2.completed+' / 31';dateRows('b1-rows',s.date_tables.B1);dateRows('b2-rows',s.date_tables.B2);
+$('ram').textContent='RAM 여유 '+(typeof s.resource.RAM_available==='number'?number(s.resource.RAM_available/2**30)+' GB':'—');$('reason').textContent=s.last_error?JSON.stringify(s.last_error):'';
+}catch(e){$('status').textContent='상태 수신 지연';$('status').style.background='#d97706';}finally{clearTimeout(timeout);busy=false;}}
+function displayClock(){const age=lastReceived===null?null:(Date.now()-lastReceived)/1000,clock=new Date().toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour12:false});$('updated').textContent='화면 '+clock+' · '+(age===null?'연결 중':age>2?'수신 지연 '+Math.floor(age)+'초':'1초 주기');}
+setInterval(refresh,1000);setInterval(displayClock,1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden){refresh();displayClock();}});refresh();displayClock();
+</script></body></html>

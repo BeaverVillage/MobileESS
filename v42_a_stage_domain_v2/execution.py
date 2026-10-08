@@ -165,6 +165,9 @@ def require_action_authorized(authority, action='OPTIMIZE', *, require_day=True)
         day = _native_day.get()
     if day is None and require_day:
         raise PermissionError('A_STAGE_PRODUCTION_DAY_REQUIRED')
+    from v42_may_campaign.execution import current as campaign_current, authorize as campaign_authorize
+    if campaign_current() is not None:
+        return campaign_authorize(day, action)
     from v42_unified.execution import authorize_if_active
     integration_day=authorize_if_active(day,action)
     if integration_day is not None:
@@ -250,6 +253,10 @@ def tag_model_for_day(model, authority, *, require_day=True):
 
 
 def guard_model_optimize(model):
+    from v42_may_campaign.execution import current as campaign_current, guard as campaign_guard
+    if campaign_current() is not None:
+        campaign_guard(model)
+        return
     from v42_unified.execution import guard_operational_optimize
     guard_operational_optimize()
     # Tagged native models are always guarded, including direct optimize calls.

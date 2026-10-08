@@ -23,7 +23,7 @@ def _restricted_bound(model):
         return None
 
 
-def binary_inventory(d):
+def binary_inventory(d, *, expected_count=9322):
     columns = np.flatnonzero(d['types'] != 'C')
     inventory = []
     for j in columns:
@@ -35,7 +35,9 @@ def binary_inventory(d):
         inventory.append(dict(column=int(j), name=name, family=family, unit=fields[0],
                               site=fields[1] if family == 'node_activity' else None,
                               slot=int(fields[-1])))
-    if len(inventory) != 9322:
+    if type(expected_count) is not int or expected_count < 0:
+        raise ValueError('C3A_ORIGINAL_BINARY_COUNT_AUTHORITY_INVALID')
+    if len(inventory) != expected_count:
         raise ValueError('C3A_ORIGINAL_BINARY_MAPPING_COUNT_DRIFT')
     return inventory
 
