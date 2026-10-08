@@ -4,6 +4,7 @@ from pathlib import Path
 from fractions import Fraction
 from .policy import ROOT,OUT,STATIC,OLDOUT,DAY
 from .audit import file_digest,processes
+from .execution import active_freeze
 from v42_pr134_b1.common import read,record,atomic,sha,table
 
 def preserve():
@@ -103,7 +104,7 @@ Exception/미완료 사유: {decision.get('error',decision.get('reason','없음'
     (OUT/'FINAL_REVIEW_KO.md').write_text(report,encoding='utf8')
     files=[record(p) for p in sorted(OUT.rglob('*')) if p.is_file() and p.name!='SHA256_MANIFEST.json']
     artifacts=[record(p) for p in sorted(STATIC.rglob('*')) if p.is_file()]
-    atomic(OUT/'SHA256_MANIFEST.json',dict(PASS=True,outputs=files,large_local_artifacts=artifacts,source_manifest=record(OUT/'SOURCE_FREEZE.json'),
+    atomic(OUT/'SHA256_MANIFEST.json',dict(PASS=True,outputs=files,large_local_artifacts=artifacts,source_manifest=record(active_freeze()),
         large_binary_payloads_preserved_on_D_not_committed=True,manifest_excludes_itself=True))
     print('MAY12_FINAL_REPORT',decision['classification'],runtime['new_native_Runtime'],flush=True)
 if __name__=='__main__':run()

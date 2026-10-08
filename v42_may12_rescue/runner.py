@@ -6,6 +6,7 @@ from dataclasses import replace
 import numpy as np
 from .policy import ROOT,OUT,STATIC,DAY,OLDOUT
 from .native import create
+from .execution import active_freeze
 from .contract import decide
 from v42_pr134_b1.common import read,record,atomic
 from v42_a_stage_phase1.core import primal_replay,verify_sign_convention
@@ -21,17 +22,24 @@ def checkpoint(name,state,raw=None):
     with gzip.open(p,'xb',compresslevel=1) as f:pickle.dump(dict(state=state,raw=raw),f,protocol=5)
     return record(p)
 
-def run(resume_pre_native_gate=False):
+def run(resume_pre_native_gate=False,resume_incomplete_pricing=False):
     started=perf_counter();native=None;timings={};decision=dict(PASS=False,classification='MAY12_PHASE1_RECOVERED_P1_INCONCLUSIVE')
     if (OUT/'NEW_RUN_STARTED.json').exists():
-        old=read(OUT/'PRE_NATIVE_START_GATE_FAILURE1/FINAL_DECISION.json')
-        if not resume_pre_native_gate or old['new_native_calls']!=0 or old['new_native_seconds']!=0:
-            raise PermissionError('ONE_NEW_MAY12_EXPERIMENT_ONLY')
-        if (OUT/'NEW_NATIVE_CALLS.json').exists() and read(OUT/'NEW_NATIVE_CALLS.json')['calls']:
-            raise PermissionError('CANNOT_RESET_ACTUAL_NATIVE_BUDGET')
-        atomic(OUT/'RESUME_PRE_NATIVE_GATE.json',dict(PID=os.getpid(),source=record(OUT/'SOURCE_FREEZE.json'),
-            no_previous_native_call=True,native_budget_not_reset=True,previous_gate_failure=record(OUT/'PRE_NATIVE_START_GATE_FAILURE1/FINAL_DECISION.json')))
-    else:atomic(OUT/'NEW_RUN_STARTED.json',dict(PID=os.getpid(),source=record(OUT/'SOURCE_FREEZE.json'),native_budget=3600,automatic_followup=False))
+        if resume_incomplete_pricing:
+            previous=read(OUT/'PRE_PRICING_START_GATE_FAILURE2/FINAL_DECISION.json')
+            if previous['classification']!='MAY12_RESOURCE_PENDING' or previous['new_native_calls']!=7:
+                raise PermissionError('ONLY_PRESERVED_PARTIAL_PRICING_CHECKPOINT_RESUME')
+            atomic(OUT/'RESUME_PARTIAL_PRICING.json',dict(PID=os.getpid(),source=record(active_freeze()),
+                prior_Runtime=previous['new_native_seconds'],prior_calls=7,no_budget_reset=True))
+        else:
+            old=read(OUT/'PRE_NATIVE_START_GATE_FAILURE1/FINAL_DECISION.json')
+            if not resume_pre_native_gate or old['new_native_calls']!=0 or old['new_native_seconds']!=0:
+                raise PermissionError('ONE_NEW_MAY12_EXPERIMENT_ONLY')
+            if (OUT/'NEW_NATIVE_CALLS.json').exists() and read(OUT/'NEW_NATIVE_CALLS.json')['calls']:
+                raise PermissionError('CANNOT_RESET_ACTUAL_NATIVE_BUDGET')
+            atomic(OUT/'RESUME_PRE_NATIVE_GATE.json',dict(PID=os.getpid(),source=record(active_freeze()),
+                no_previous_native_call=True,native_budget_not_reset=True,previous_gate_failure=record(OUT/'PRE_NATIVE_START_GATE_FAILURE1/FINAL_DECISION.json')))
+    else:atomic(OUT/'NEW_RUN_STARTED.json',dict(PID=os.getpid(),source=record(active_freeze()),native_budget=3600,automatic_followup=False))
     try:
         from .prepare import route
         route()
@@ -47,7 +55,14 @@ def run(resume_pre_native_gate=False):
         del p;gc.collect();trajectory=[]
         for round_no in range(20):
             native.remaining();s=state['compact'];folder=OUT/'P1'/f'S{round_no}'
-            before=perf_counter();rec,raw=native.solve(s,folder,'ORIGINAL_P1')
+            before=perf_counter()
+            if resume_incomplete_pricing and round_no==0:
+                rec=read(folder/'NATIVE_RESULT.json');identity=read(rec['model_identity']['path'])
+                if identity['original_snapshot_sha256']!=s.fingerprint() or record(rec['raw_attributes']['path'])!=rec['raw_attributes']:
+                    raise ValueError('P1_MASTER_CHECKPOINT_MATRIX_OR_RAW_DRIFT')
+                raw=dict(np.load(rec['raw_attributes']['path']))
+                atomic(folder/'CACHED_MASTER_REUSE.json',dict(PASS=True,original=record(folder/'NATIVE_RESULT.json'),new_native_calls=0,budget_not_reset=True))
+            else:rec,raw=native.solve(s,folder,'ORIGINAL_P1')
             if rec['status']!=2 or not all(k in raw for k in ('X','Pi','RC')):raise RuntimeError('P1_LP_NOT_OPTIMAL')
             replay=primal_replay(s,raw['X']);sign=verify_sign_convention(s,raw['Pi'],raw['RC'])
             ex=expanded_point(state,raw['X']);original=primal_replay(state['reference'],ex)
@@ -73,7 +88,7 @@ def run(resume_pre_native_gate=False):
                 bound=dict(PASS=True,exact_LB=L,LB=float(Fraction(L)),scope='FULL_ORIGINAL_MAY12_P1_LP_RELAXATION',
                     original_objective_identity=str(s.objective('rho')),ObjCon=str(s.objective('rho').constant),full_130_class_certificates=closure,
                     finite_original_bound_support_and_exact_dual_sign=True,roundoff_transport_correction=True,
-                    restricted_master_ObjBound_not_used=True,source=record(OUT/'SOURCE_FREEZE.json'))
+                    restricted_master_ObjBound_not_used=True,source=record(active_freeze()))
                 atomic(OUT/'P1_FULL_DOMAIN_BOUND_CERTIFICATE.json',bound)
                 break
             if not negative:raise RuntimeError('UNRESOLVED_EXACT_PRICING_INTERVAL_WITHOUT_VERIFIED_NEGATIVE_SUPPORT')
@@ -128,7 +143,7 @@ def run(resume_pre_native_gate=False):
                 selected_jobs=v['selected_jobs'],controls=v['controls'],globals=v['globals'],
                 physical=record(OUT/'ORIGINAL_PHYSICAL_REPLAY.json'),global_bound=record(OUT/'P1_FULL_DOMAIN_BOUND_CERTIFICATE.json'),
                 acceptance=record(OUT/'P1_ONLY_ACCEPTANCE_CONTRACT.json'),scientific_input=record(OLDOUT/DAY/'INITIAL_VERIFICATION.json'),
-                source=record(OUT/'SOURCE_FREEZE.json'),downstream_executed=False)
+                source=record(active_freeze()),downstream_executed=False)
             atomic(OUT/'P1_ONLY_FREEZE.json',freeze)
             decision.update(PASS=True,classification='MAY12_P1_ONLY_ACCEPTED',P1=acceptance)
         else:decision.update(P1=acceptance,reason='GLOBAL_INTEGER_GAP_NOT_ACCEPTED')
@@ -145,4 +160,4 @@ def run(resume_pre_native_gate=False):
         print('MAY12_FINAL_DECISION',decision['classification'],decision['new_native_seconds'],decision.get('error'),flush=True)
 if __name__=='__main__':
     import sys
-    run('--resume-pre-native-gate' in sys.argv)
+    run('--resume-pre-native-gate' in sys.argv,'--resume-incomplete-pricing' in sys.argv)

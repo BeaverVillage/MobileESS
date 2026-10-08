@@ -91,8 +91,12 @@ def run():
 def freeze():
     head=subprocess.check_output(['git','-C',str(ROOT),'rev-parse','HEAD'],text=True).strip()
     sources={str(p):sha(p) for p in sorted(ROOT.rglob('*.py')) if not any(x in p.parts for x in ('artifacts','tmp','.git'))}
-    atomic(OUT/'SOURCE_FREEZE.json',dict(PASS=True,schema='MAY12_P1_ONLY_EXACT_RESCUE_V1',git_head=head,
+    epoch=1
+    while (OUT/f'SOURCE_FREEZE_EPOCH{epoch}.json').exists():epoch+=1
+    path=OUT/f'SOURCE_FREEZE_EPOCH{epoch}.json'
+    atomic(path,dict(PASS=True,schema='MAY12_P1_ONLY_EXACT_RESCUE_V1',git_head=head,
         execution_sources=sources,plan=record(OUT/'NATIVE_PLAN.json'),historical_source_head='1b891dbe5b1dd454d89b657efec7cba469c0cf94'))
+    atomic(OUT/'ACTIVE_SOURCE_FREEZE.json',dict(receipt=record(path),epoch=epoch))
     print('MAY12_NEW_SOURCE_FROZEN',head,len(sources))
 if __name__=='__main__':
     import sys

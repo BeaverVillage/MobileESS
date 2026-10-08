@@ -2,7 +2,7 @@
 from time import perf_counter
 import os
 from .policy import OUT,STATIC,DAY
-from .execution import verify,native_scope
+from .execution import verify,native_scope,active_freeze
 from .audit import processes
 from v42_pr134_b1.common import atomic,read
 from v42_a_stage_early.native import BudgetStop
@@ -43,16 +43,38 @@ def is_read_only_host_monitor(process):
     argv=process.get('argv') or []
     try:i=argv.index('-m')
     except ValueError:return False
-    return argv[i+1:i+3]==['v42_pr134_b1.host','monitor']
+    if argv[i+1:i+3]==['v42_pr134_b1.host','monitor']:return True
+    if argv[i+1:i+2]==['v42_b2_root_validation.analysis']:
+        from pathlib import Path
+        from v42_pr134_b1.common import record
+        evidence=OUT/'PRE_PRICING_START_GATE_FAILURE2/READ_ONLY_M1_ANALYSIS_IDENTITY.json'
+        if not evidence.exists():return False
+        r=read(evidence)
+        return (r['optimize_forbidden_by_entrypoint'] is True and record(r['source']['path'])==r['source']
+            and Path(process.get('cwd','')).resolve()==Path(r['source']['path']).parents[1].resolve())
+    return False
 
 def create():
     import v42_a_stage_acceptance.native as inherited
     inherited.OUT=OUT;inherited.STATIC=STATIC;inherited.verify=verify;inherited.native_scope=native_scope
-    inherited.active_freeze=lambda:OUT/'SOURCE_FREEZE.json';inherited.sample=sample
+    inherited.active_freeze=active_freeze;inherited.sample=sample
     b=Budget()
     class Native(inherited.Native):
         def solve(self,snapshot,folder,component):
             if component not in ('ORIGINAL_P1','LOCAL_PRICING','INTEGER_CONTROL'):raise PermissionError('P1_ONLY_NATIVE_COMPONENTS')
+            from pathlib import Path
+            from v42_pr134_b1.common import record
+            import numpy as np
+            folder=Path(folder)
+            if component=='LOCAL_PRICING' and (folder/'NATIVE_RESULT.json').exists():
+                self.verify();saved=read(folder/'NATIVE_RESULT.json')
+                identity=read(saved['model_identity']['path'])
+                if identity['original_snapshot_sha256']!=snapshot.fingerprint() or record(saved['raw_attributes']['path'])!=saved['raw_attributes']:
+                    raise ValueError('COMPLETE_PRICING_CHECKPOINT_MATRIX_OR_RAW_DRIFT')
+                if saved['status']!=2 or not any(c['folder']==str(folder) for c in self.calls):
+                    raise ValueError('UNACCOUNTED_OR_INCOMPLETE_NATIVE_CHECKPOINT')
+                atomic(folder/'CACHED_NATIVE_REUSE.json',dict(PASS=True,original=record(folder/'NATIVE_RESULT.json'),new_native_calls=0,budget_not_reset=True))
+                return saved,dict(np.load(saved['raw_attributes']['path']))
             start_gate();b.call_start=b.used
             b.call_cap=60 if component=='LOCAL_PRICING' else 600 if component=='ORIGINAL_P1' else max(0.,3600-b.used-30)
             started=perf_counter()
@@ -63,4 +85,9 @@ def create():
                     actual_Work=sum(c.get('Work') or 0 for c in self.calls),sequential=True,old_native_Runtime=233.89299654960632,
                     latest_native_build_solve_and_persist_wall=perf_counter()-started))
     n=Native(b,DAY);b.native=n
+    if (OUT/'NEW_NATIVE_CALLS.json').exists():
+        old=read(OUT/'NEW_NATIVE_CALLS.json');n.calls=old['calls']
+        used=sum(c['native_seconds'] or 0 for c in n.calls)
+        if used!=old['actual_Runtime']:raise ValueError('PRIOR_NEW_NATIVE_BUDGET_IDENTITY_DRIFT')
+        b.used=n.native_seconds=used
     return n

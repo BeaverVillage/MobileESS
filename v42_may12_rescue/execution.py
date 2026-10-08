@@ -5,8 +5,14 @@ from .policy import ROOT,OUT,STATIC,DAY
 from v42_pr134_b1.common import read,record,sha
 _scope=ContextVar('may12_rescue_native_scope',default=None)
 def current():return _scope.get()
+def active_freeze():
+    pointer=OUT/'ACTIVE_SOURCE_FREEZE.json'
+    if not pointer.exists():return OUT/'SOURCE_FREEZE.json'
+    r=read(pointer)['receipt']
+    if record(r['path'])!=r:raise PermissionError('MAY12_ACTIVE_SOURCE_POINTER_DRIFT')
+    return r['path']
 def verify():
-    f=read(OUT/'SOURCE_FREEZE.json')
+    f=read(active_freeze())
     if f.get('schema')!='MAY12_P1_ONLY_EXACT_RESCUE_V1' or not f.get('PASS'):raise PermissionError('MAY12_FROZEN_SOURCE_REQUIRED')
     for p,h in f['execution_sources'].items():
         if sha(p)!=h:raise PermissionError('MAY12_EXECUTED_SOURCE_DRIFT:'+p)
