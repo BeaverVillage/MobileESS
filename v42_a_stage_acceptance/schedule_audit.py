@@ -5,6 +5,15 @@ import numpy as np
 from v42_pr134_b1.common import read,record,atomic
 from .policy import OUT,OLD
 
+def original_schedule_metrics(jobs,selected,values):
+    if set(jobs)!=set(selected):raise ValueError('ORIGINAL_JOB_POPULATION_CHANGED')
+    metrics=dict(migration_count=sum(o['checkpoint']>=0 for o in selected.values()),
+        shift_magnitude=sum(abs(o['start']-jobs[uid].reference_start) for uid,o in selected.items()),
+        prestart_relocation=sum(o['initial_site']!=jobs[uid].reference_site for uid,o in selected.items()))
+    residuals={k:abs(float(Fraction(values[k]))-v) for k,v in metrics.items()}
+    if max(residuals.values(),default=0)>1e-5:raise ValueError('INDEPENDENT_ORIGINAL_SCHEDULE_OBJECTIVES_MISMATCH')
+    return metrics,residuals
+
 def run(day):
     f=OUT/day;freeze=read(f/'FROZEN_A1.json');selected=freeze['selected_jobs']
     if day=='2025-05-19':
@@ -14,11 +23,7 @@ def run(day):
         build=read(f/'INITIAL_VERIFICATION.json')
         with gzip.open(build['state']['path'],'rb') as stream:data=pickle.load(stream)['data']
     jobs=data[1]
-    if set(jobs)!=set(selected):raise ValueError('ORIGINAL_JOB_POPULATION_CHANGED')
-    metrics=dict(migration_count=sum(o['checkpoint']>=0 for o in selected.values()),
-        shift_magnitude=sum(abs(o['start']-jobs[uid].reference_start) for uid,o in selected.items()),
-        prestart_relocation=sum(o['initial_site']!=jobs[uid].reference_site for uid,o in selected.items()))
-    residuals={k:abs(float(Fraction(freeze['exact_objective_values'][k]))-v) for k,v in metrics.items()}
+    metrics,residuals=original_schedule_metrics(jobs,selected,freeze['exact_objective_values'])
     phys=read(freeze['physical']['path']);rho=phys['physical']['P1_rho']
     passed=phys['PASS'] and max(residuals.values(),default=0)<=1e-5 and rho==freeze['objective_values']['rho']
     if not passed:raise ValueError('INDEPENDENT_ORIGINAL_SCHEDULE_OBJECTIVES_MISMATCH')

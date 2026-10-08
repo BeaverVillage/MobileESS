@@ -19,6 +19,8 @@ def freeze(day,state,original,point,physical,locks,certificates):
     if not replay['PASS'] or not rows['PASS']:raise ValueError('FINAL_COMPLETE_ORIGINAL_A1_REPLAY_FAILED')
     values={name:objective_value(original,point,name) for name in ('rho','migration_count','shift_magnitude','prestart_relocation')}
     if set(replay['selected_jobs'])!=set(state['data'][1]):raise ValueError('ORIGINAL_JOB_POPULATION_RECONSTRUCTION_REQUIRED')
+    from .schedule_audit import original_schedule_metrics
+    original_schedule_metrics(state['data'][1],replay['selected_jobs'],values)
     atomic(f/'FINAL_PHYSICAL_REPLAY.json',replay);atomic(f/'FINAL_SEQUENTIAL_LOCKS.json',dict(PASS=True,proof=lockproof,replay=rows))
     sites=sorted(state['data'][3].capacities);controls=np.asarray(replay['controls']);coeff=physical.coeff
     power=np.asarray([[controls[t,coeff[t].control_names.index('aidc_load_kw['+site+']')] for site in sites] for t in range(len(controls))])

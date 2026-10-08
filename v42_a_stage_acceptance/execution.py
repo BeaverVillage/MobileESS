@@ -32,6 +32,8 @@ def guard(model,day):
             raise PermissionError('MAY19_SHIFT_ACCEPTANCE_BEFORE_PRESTART_ONLY')
     else:
         if not read(OUT/DAYS[0]/'A1_RESULT.json').get('A1_accepted'):raise PermissionError('ACTUAL_MAY19_A1_ACCEPTANCE_REQUIRED')
+        if not read(OUT/DAYS[0]/'INDEPENDENT_ORIGINAL_SCHEDULE_OBJECTIVES.json')['PASS']:
+            raise PermissionError('MAY19_INDEPENDENT_ORIGINAL_SCHEDULE_AUDIT_REQUIRED')
         for prior in DAYS[1:DAYS.index(day)]:
             if not (OUT/prior/'RESULT.json').exists():raise PermissionError('FOURDAY_REQUESTED_ORDER_REQUIRED')
         if not read(folder/'INITIAL_VERIFICATION.json')['PASS']:raise PermissionError('DAY_SPECIFIC_INPUT_BUILD_REQUIRED')

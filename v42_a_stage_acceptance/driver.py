@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 from v42_pr134_b1.common import read,record,atomic,sha
 from v42_a_stage_domain_v2.lexstage import LexLock
-from .policy import ROOT,OUT,STATIC,OLD,DAYS,BASE
+from .policy import ROOT,OUT,STATIC,OLD,DAYS,BASE,POLICY
 from .budget import Budget
 from .native import Native
 from .execution import verify
@@ -64,7 +64,7 @@ def may19(native):
     certificates=[record(OLD/'P1_FULL_DOMAIN_INTEGER_GAP_CERTIFICATE.json'),mig['certificate'],accepted['gap_certificate'],stages[0]['certificate']]
     result=freeze(DAYS[0],state,s,warm,physical,locks,certificates)
     result.update(historical_certificates_reused=True,fresh_end_to_end_runtime_measured=False,
-        practical_runtime_accepted=False,practical_failure_reason='PR180_REUSABLE_CERTIFICATES_DO_NOT_PROVE_30_MINUTE_END_TO_END_RUNTIME')
+        practical_runtime_accepted=False,practical_failure_reason='PR180_REUSABLE_CERTIFICATES_DO_NOT_PROVE_FRESH_END_TO_END_RUNTIME')
     return result
 
 def run(day,resume=False):
@@ -94,6 +94,7 @@ def run(day,resume=False):
         source=record(native.freeze_path),one_native_process=True,old_PR180_attempt_not_resumed=True,
         prior_native_seconds=budget.native_seconds,continuation_budget_not_reset=True))
     result=dict(day=day,A1_accepted=False,classification='INCONCLUSIVE',practical_runtime_accepted=False)
+    timings={}
     try:
         if sample()['unsafe']:raise RuntimeError('SYSTEM_RAM_COMMIT_RESERVE_BEFORE_DAY_BUILD')
         if day==DAYS[0]:result.update(may19(native))
@@ -106,27 +107,45 @@ def run(day,resume=False):
                 nr=read(folder/'PHASE_I/S15/NATIVE_RESULT.json')
                 if record(nr['raw_attributes']['path'])!=nr['raw_attributes']:raise ValueError('LAST_PHASE_I_RAW_POINT_DRIFT')
                 seed=np.load(nr['raw_attributes']['path'])['X'][:state['compact'].matrix.shape[1]]
-            else:state=prep.prepare(day)
+            else:
+                before=perf_counter();state=prep.prepare(day);timings['initial_model_build_seconds']=perf_counter()-before
             if resume=='p2':
                 if not read(folder/'INTEGER_RESULT.json')['P1_accepted']:raise PermissionError('PREVIOUSLY_VALIDATED_P1_REQUIRED')
                 p=read(folder/'P1_RESULT.json')['full_pricing']
                 if record(p['path'])!=p:raise ValueError('FULL_PRICING_CHECKPOINT_DRIFT')
                 priced=read(p['path']);expanded=None
-            else:state,x,expanded,priced=phase.run(native,state,day,certified_zero_point=seed)
+            else:
+                before=perf_counter();state,x,expanded,priced=phase.run(native,state,day,certified_zero_point=seed)
+                timings['Phase_I_P1_LP_and_full_pricing_wall_seconds']=perf_counter()-before
             from .integer import run as integer
             result.update(integer(native,state,expanded,priced,day,resume=resume=='p2'))
-            result.update(fresh_end_to_end_runtime_measured=True,historical_certificates_reused=False,
-                practical_runtime_accepted=time()-started<=1800)
-    except Exception as e:result.update(failure_reason=repr(e),traceback=traceback.format_exc())
+            result.update(fresh_end_to_end_runtime_measured=True,historical_certificates_reused=False)
+        from .schedule_audit import run as audit_schedule
+        before=perf_counter();audit_schedule(day);timings['independent_schedule_objective_audit_seconds']=perf_counter()-before
+    except Exception as e:result.update(A1_accepted=False,classification='INCONCLUSIVE',failure_reason=repr(e),traceback=traceback.format_exc())
     finally:
         stop.set();observer.join(timeout=3)
         calls=previous+native.calls
         result.update(native_seconds=sum(c.get('native_seconds') or 0 for c in calls),Work=sum(c.get('Work') or 0 for c in calls),
             native_calls=len(calls),wall_seconds=time()-read(folder/'STARTED.json')['actual_start_unix'],
-            peak_RSS_bytes=max([c.get('peak_RSS_bytes') or 0 for c in native.calls]+[s['A_process_RSS_bytes'] for s in samples],default=0),
-            per_day_native_limit=3600,practical_wall_target=1800,
-            model_sizes=[dict(component=c['component'],identity=c['model_identity']) for c in native.calls],
-            native_runtime_excludes_build_pricing_python_and_validation=True)
+            peak_RSS_bytes=max([c.get('peak_RSS_bytes') or 0 for c in calls]+[s['A_process_RSS_bytes'] for s in samples]+
+                [read(p).get('peak_RSS_bytes',0) or 0 for p in folder.glob('ATTEMPT*_RESULT.json')],default=0),
+            per_day_native_limit=3600,practical_wall_target=POLICY['practical_end_to_end_target_seconds'],
+            model_sizes=[dict(component=c['component'],identity=c['model_identity']) for c in calls],timings=timings,
+            native_Runtime_includes_in_solver_callbacks=True,native_Runtime_excludes_outside_solver_build_and_validation=True)
+        complete_schedule=folder/'INDEPENDENT_ORIGINAL_SCHEDULE_OBJECTIVES.json'
+        result['practical_runtime_accepted']=bool(result.get('A1_accepted') and result.get('fresh_end_to_end_runtime_measured') and
+            complete_schedule.exists() and read(complete_schedule)['PASS'] and result['wall_seconds']<=result['practical_wall_target'])
+        atomic(folder/'END_TO_END_60_MINUTE_RUNTIME_AUDIT.json',dict(PASS=result['practical_runtime_accepted'],
+            kind='PRACTICAL_RUNTIME_ACCEPTANCE',limit_seconds=result['practical_wall_target'],
+            end_to_end_wall_seconds=result['wall_seconds'],original_start_unix=read(folder/'STARTED.json')['actual_start_unix'],
+            complete_schedule_validation=record(complete_schedule) if complete_schedule.exists() else None,
+            fresh_end_to_end_runtime_measured=result.get('fresh_end_to_end_runtime_measured',False),
+            all_failed_attempts_and_resume_delays_included=True,native_seconds=result['native_seconds'],
+            user_clarification=record(OUT/'RUNTIME_LIMIT_USER_CLARIFICATION.json')))
+        result['complete_end_to_end_runtime_audit']=record(folder/'END_TO_END_60_MINUTE_RUNTIME_AUDIT.json')
+        if result.get('A1_accepted') and not result['practical_runtime_accepted']:
+            result.setdefault('practical_failure_reason','COMPLETE_END_TO_END_WALL_EXCEEDS_3600_SECONDS')
         if not result.get('A1_accepted'):result['practical_runtime_accepted']=False
         if result.get('A1_accepted') and result['practical_runtime_accepted']:result['classification']='PRACTICAL_RUNTIME_ACCEPTED'
         atomic(folder/'NATIVE_CALLS.json',dict(calls=calls));atomic(folder/'RESULT.json',result)

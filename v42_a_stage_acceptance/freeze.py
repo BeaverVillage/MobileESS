@@ -13,11 +13,16 @@ def freeze(epoch=None):
     with zipfile.ZipFile(archive,'x',compression=zipfile.ZIP_DEFLATED) as z:
         for source in sources:z.write(source,source.relative_to(ROOT).as_posix())
     historical={str(q):sha(q) for q in OLD.rglob('*') if q.is_file()}
-    atomic(OUT/'HISTORICAL_PR180_BYTE_PRESERVATION_START.json',dict(PASS=True,base=BASE,files=historical))
+    historical_receipt=OUT/'HISTORICAL_PR180_BYTE_PRESERVATION_START.json'
+    if historical_receipt.exists():
+        if read(historical_receipt)!=dict(PASS=True,base=BASE,files=historical):
+            raise ValueError('HISTORICAL_PR180_BYTES_CHANGED_BETWEEN_SOURCE_EPOCHS')
+    else:atomic(historical_receipt,dict(PASS=True,base=BASE,files=historical))
     atomic(p,dict(PASS=True,schema=POLICY['schema'],git_head=head,base=BASE,
         execution_sources={str(q):sha(q) for q in sources},source_archive=record(archive),
         budget=record(OUT/'CONTINUATION_BUDGET.json'),policy=POLICY,
-        historical_PR180=record(OUT/'HISTORICAL_PR180_BYTE_PRESERVATION_START.json')))
+        historical_PR180=record(historical_receipt),
+        runtime_limit_clarification=record(OUT/'RUNTIME_LIMIT_USER_CLARIFICATION.json') if (OUT/'RUNTIME_LIMIT_USER_CLARIFICATION.json').exists() else None))
     if epoch is not None:atomic(OUT/'ACTIVE_SOURCE_FREEZE.json',dict(PASS=True,receipt=record(p)))
     print('NEW_SOURCE_FROZEN',head,len(sources),flush=True)
 if __name__=='__main__':
