@@ -123,6 +123,7 @@ def inspect(campaign, *, source_checker=source_audit, task_reader=task_status, o
         workers.append(dict(arm=arm,day=day,slot=slot,worker=identity,alive=live,identity_PASS=scoped,
             phase=progress.get('phase'),heartbeat=hb,heartbeat_age_seconds=age(hb.get('timestamp_UTC')),
             progress_age_seconds=age(progress.get('timestamp_UTC')),progress=progress,runtime=runtime,resource=resource,
+            completed_stage_costs=ledger.get('costs',[]),
             Native_log_tails={p.name:tail(p,3000) for p in sorted(attempt.glob('*_NATIVE.log'))[-2:]},
             stdout_tail=tail(attempt/'stdout.log',6000),stderr_tail=tail(attempt/'stderr.log',6000),
             low_CPU_or_unchanged_gap_is_not_error=True))
@@ -286,7 +287,7 @@ def write_reports(storage, health, previous, actions):
     atomic(storage/'B1_TO_B2_TRANSITION_VERIFICATION.json',dict(health['transition'],maintenance_observed_UTC=checked,
         transition_performed_by='Independent OS Coordinator'))
     atomic(storage/'MAINTENANCE_STATE.json',state)
-    table(storage/'FAILURE_ROOT_CAUSE.csv',causes,['UTC','arm','day','status','category','error','result_SHA','diagnosis','retries'])
+    table(storage/'FAILURE_ROOT_CAUSE.csv',causes,['UTC','arm','day','status','category','error','result_SHA','diagnosis','retries','resolved_UTC','resolution_SHA'])
     repairs=list(csv.DictReader((storage/'AUTO_REPAIR_LEDGER.csv').open(encoding='utf-8'))) if (storage/'AUTO_REPAIR_LEDGER.csv').is_file() else []
     repairs.append(dict(UTC=checked,action=state['last_action'],git_before=head,git_after=head,code_modified=False,
         restart_actions=json.dumps(actions),Native_calls=0,validation='Frozen SHA/checkpoint/PID/ledger observed; no candidate code deployed'))

@@ -3,6 +3,7 @@ from datetime import datetime,timezone,timedelta
 from types import SimpleNamespace
 import copy, json, os, subprocess, sys, time
 import pytest
+from contextlib import nullcontext
 from v42_may_campaign.common import atomic,read,sha,process,same_process,LockBusy
 from v42_may_campaign.coordinator import AXIS,TERMINAL
 from v42_may_maintenance import check,session,monitor,resolution
@@ -202,3 +203,45 @@ def test_pending_version_release_prevents_automation_completion(case,tmp_path,mo
     health['B1']['completed']=31;health['B2']['completed']=31
     atomic(storage/'MAINTENANCE_STATE.json',dict(pending_releases=['unvalidated_version']))
     assert not check.write_reports(storage,health,{},[])['completion_ready']
+
+
+def test_dead_coordinator_recovery_validates_then_starts_only_host(case,monkeypatch):
+    c,m,cp,inspect=case;h=inspect();h['coordinator'].update(alive=False,process={})
+    h['issues']=[dict(code='COORDINATOR_DEAD')];events=[]
+    import v42_may_campaign.common as original_common
+    import v42_may_campaign.coordinator as original_coordinator
+    monkeypatch.setattr(original_common,'verify_manifest',lambda *args:events.append('manifest'))
+    monkeypatch.setattr(original_coordinator,'load_checkpoint',lambda *args:cp)
+    monkeypatch.setattr(original_coordinator,'recovery_requests',lambda *args:events.append('checkpoint_and_peers'))
+    monkeypatch.setattr(check,'reuse_registered_task',lambda *args,**kw:events.append('registration'))
+    monkeypatch.setattr(check,'run_task',lambda name:events.append(name))
+    before=(c/'CHECKPOINT.json').read_bytes();actions=check.recover_dead_hosts(c,h)
+    assert events==['manifest','checkpoint_and_peers','registration','own_C']
+    assert [a['action'] for a in actions]==['START_VERIFIED_DEAD_COORDINATOR']
+    assert (c/'CHECKPOINT.json').read_bytes()==before and not actions[0]['healthy_workers_terminated']
+
+
+def test_original_recovery_rejection_starts_no_os_task(case,monkeypatch):
+    c,m,cp,inspect=case;h=inspect();h['coordinator'].update(alive=False,process={});h['issues']=[dict(code='COORDINATOR_DEAD')]
+    import v42_may_campaign.common as original_common
+    import v42_may_campaign.coordinator as original_coordinator
+    monkeypatch.setattr(original_common,'verify_manifest',lambda *args:True)
+    monkeypatch.setattr(original_coordinator,'load_checkpoint',lambda *args:cp)
+    def reject(*args):raise PermissionError('unverified peer identity')
+    monkeypatch.setattr(original_coordinator,'recovery_requests',reject)
+    monkeypatch.setattr(check,'run_task',lambda name:pytest.fail('unsafe OS task restart'))
+    with pytest.raises(PermissionError,match='unverified peer'):check.recover_dead_hosts(c,h)
+
+
+def test_root_cause_resolution_preserves_result_and_csv_evidence(tmp_path,monkeypatch):
+    storage=tmp_path/'resolution';storage.mkdir();original=tmp_path/'RESULT.json';atomic(original,dict(status='TIME_LIMIT_NO_VALID_INCUMBENT'))
+    receipt=original.read_bytes();proof=tmp_path/'proof.json';atomic(proof,dict(root_cause='Expected finite budget exhaustion',
+        original_results_preserved=True,source_evidence=[dict(path=str(original),sha256=sha(original))]))
+    cause=dict(arm='B1',day='2025-05-01',result_SHA=sha(original),status='TIME_LIMIT_NO_VALID_INCUMBENT')
+    atomic(storage/'MAINTENANCE_STATE.json',dict(pending_issues={'test':dict(kind='TERMINAL_TRIAGE',issue=cause,status='OPEN')}))
+    check.table(storage/'FAILURE_ROOT_CAUSE.csv',[cause],list(cause))
+    monkeypatch.setattr(resolution,'check_lock',lambda *args:nullcontext())
+    assert resolution.resolve(storage,'test_token','test',proof)['status']=='RESOLVED_CLASSIFIED'
+    row=next(check.csv.DictReader((storage/'FAILURE_ROOT_CAUSE.csv').open(encoding='utf-8')))
+    assert row['diagnosis']=='Expected finite budget exhaustion' and row['resolution_SHA']==sha(proof)
+    assert original.read_bytes()==receipt and row['status']=='TIME_LIMIT_NO_VALID_INCUMBENT'
