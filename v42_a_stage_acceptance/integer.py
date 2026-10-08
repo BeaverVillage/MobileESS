@@ -15,11 +15,18 @@ from .physical import Physical
 from v42_a_stage_canary.zero import build as zero_model
 from .policy import OUT,STATIC,POLICY
 
-def run(native,state,expanded,p1,day):
+def run(native,state,expanded,p1,day,resume=False):
     folder=OUT/day;typed,typeproof=restore_types(state,state['global_types']);physical=Physical(state,typed)
     atomic(folder/'INTEGER_BUILD_VERIFICATION.json',typeproof)
     native.warm_point=expanded;native.budget=native.parent_budget.allocation(1200)
-    rec,raw=native.solve(typed,folder/'INTEGER_CONTROL','INTEGER_CONTROL');candidate=None
+    if resume:
+        identity=read(folder/'INTEGER_CONTROL/MODEL_IDENTITY.json')
+        if identity['original_snapshot_sha256']!=typed.fingerprint():raise ValueError('CACHED_TYPED_P1_MODEL_MISMATCH')
+        rec=read(folder/'INTEGER_CONTROL/NATIVE_RESULT.json')
+        if record(rec['raw_attributes']['path'])!=rec['raw_attributes']:raise ValueError('P1_INTEGER_RAW_CHECKPOINT_DRIFT')
+        raw=dict(np.load(rec['raw_attributes']['path']))
+    else:rec,raw=native.solve(typed,folder/'INTEGER_CONTROL','INTEGER_CONTROL')
+    candidate=None
     if 'X' in raw:
         verification=physical.verify(raw['X']);atomic(folder/'P1_FULL_ORIGINAL_A1_REPLAY.json',verification)
         if verification['PASS']:
@@ -35,7 +42,12 @@ def run(native,state,expanded,p1,day):
     locks=[LexLock('rho',Fraction(candidate['exact_UB']),True,sha(folder/'INTEGER_RESULT.json'),Fraction(1e-7))]
     locked,_=rebuild_locked_snapshot(typed,locks);mig=locked.objective('migration_count')
     query=replace(locked,objectives=(mig,)+tuple(o for o in locked.objectives if o.name!=mig.name));native.warm_point=raw['X'];native.budget=native.parent_budget.allocation(300)
-    mrec,mraw=native.solve(query,folder/'P2/MIGRATION_ACTIVE_PROBE','P2');migration_zero=False;oldwarm=raw['X']
+    if resume:
+        mrec=read(folder/'P2/MIGRATION_ACTIVE_PROBE/NATIVE_RESULT.json')
+        if record(mrec['raw_attributes']['path'])!=mrec['raw_attributes']:raise ValueError('MIGRATION_RAW_CHECKPOINT_DRIFT')
+        mraw=dict(np.load(mrec['raw_attributes']['path']))
+    else:mrec,mraw=native.solve(query,folder/'P2/MIGRATION_ACTIVE_PROBE','P2')
+    migration_zero=False;oldwarm=raw['X']
     if 'X' in mraw:
         v=physical.verify(mraw['X']);rows=primal_replay(locked,mraw['X']);val=float(objective_value(typed,mraw['X'],'migration_count'))
         migration_zero=v['PASS'] and rows['PASS'] and abs(val)<=1e-5

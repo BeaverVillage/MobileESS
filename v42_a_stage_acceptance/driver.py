@@ -80,8 +80,9 @@ def run(day,resume=False):
     started=time();budget=Budget(day);native=Native(budget,day)
     previous=read(folder/'NATIVE_CALLS.json')['calls'] if resume else []
     if resume:
-        atomic(folder/'ATTEMPT0_RESULT.json',read(folder/'RESULT.json'))
-        atomic(folder/'ATTEMPT0_NATIVE_CALLS.json',dict(calls=previous))
+        attempt='1' if resume=='p2' else '0'
+        atomic(folder/('ATTEMPT'+attempt+'_RESULT.json'),read(folder/'RESULT.json'))
+        atomic(folder/('ATTEMPT'+attempt+'_NATIVE_CALLS.json'),dict(calls=previous))
     samples=[];stop=threading.Event()
     def resources():
         while not stop.is_set():
@@ -89,7 +90,7 @@ def run(day,resume=False):
             atomic(folder/'WHOLE_DAY_RESOURCES.json',dict(samples=samples))
             stop.wait(2)
     observer=threading.Thread(target=resources,daemon=True);observer.start()
-    atomic(folder/('RESUME_1_STARTED.json' if resume else 'STARTED.json'),dict(PASS=True,day=day,actual_start_unix=started,budget=record(OUT/'CONTINUATION_BUDGET.json'),
+    atomic(folder/('RESUME_2_STARTED.json' if resume=='p2' else 'RESUME_1_STARTED.json' if resume else 'STARTED.json'),dict(PASS=True,day=day,actual_start_unix=started,budget=record(OUT/'CONTINUATION_BUDGET.json'),
         source=record(native.freeze_path),one_native_process=True,old_PR180_attempt_not_resumed=True,
         prior_native_seconds=budget.native_seconds,continuation_budget_not_reset=True))
     result=dict(day=day,A1_accepted=False,classification='INCONCLUSIVE',practical_runtime_accepted=False)
@@ -106,9 +107,14 @@ def run(day,resume=False):
                 if record(nr['raw_attributes']['path'])!=nr['raw_attributes']:raise ValueError('LAST_PHASE_I_RAW_POINT_DRIFT')
                 seed=np.load(nr['raw_attributes']['path'])['X'][:state['compact'].matrix.shape[1]]
             else:state=prep.prepare(day)
-            state,x,expanded,priced=phase.run(native,state,day,certified_zero_point=seed)
+            if resume=='p2':
+                if not read(folder/'INTEGER_RESULT.json')['P1_accepted']:raise PermissionError('PREVIOUSLY_VALIDATED_P1_REQUIRED')
+                p=read(folder/'P1_RESULT.json')['full_pricing']
+                if record(p['path'])!=p:raise ValueError('FULL_PRICING_CHECKPOINT_DRIFT')
+                priced=read(p['path']);expanded=None
+            else:state,x,expanded,priced=phase.run(native,state,day,certified_zero_point=seed)
             from .integer import run as integer
-            result.update(integer(native,state,expanded,priced,day))
+            result.update(integer(native,state,expanded,priced,day,resume=resume=='p2'))
             result.update(fresh_end_to_end_runtime_measured=True,historical_certificates_reused=False,
                 practical_runtime_accepted=time()-started<=1800)
     except Exception as e:result.update(failure_reason=repr(e),traceback=traceback.format_exc())
@@ -126,4 +132,4 @@ def run(day,resume=False):
         atomic(folder/'NATIVE_CALLS.json',dict(calls=calls));atomic(folder/'RESULT.json',result)
         print('FOURDAY_RESULT',day,result['classification'],result.get('failure_reason'),result['native_seconds'],result['wall_seconds'],flush=True)
     gc.collect();return result
-if __name__=='__main__':run(sys.argv[1],resume='--resume' in sys.argv[2:])
+if __name__=='__main__':run(sys.argv[1],resume='p2' if '--resume-p2' in sys.argv[2:] else '--resume' in sys.argv[2:])

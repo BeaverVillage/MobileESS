@@ -1,0 +1,96 @@
+
+Gurobi 13.0.2 (win64) logging started Thu Oct  8 11:09:23 2026
+
+Set parameter LogFile to value "C:\Users\kjw39\Documents\Codex\2026-10-08\a-stage-acceptance-fourday\docs\v42_a_stage_acceptance_fourday_20261008\2025-05-17\INTEGER_CONTROL\NATIVE_SOLVER.log"
+Set parameter TimeLimit to value 1200
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  1200
+MIPGap  0.005
+Method  2
+MIPFocus  3
+NodeMethod  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 692247 rows, 19221 columns and 12634730 nonzeros (Min)
+Model fingerprint: 0xf6903724
+Model has 1 linear objective coefficients
+Variable types: 17154 continuous, 2067 integer (60 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 3e+05]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 3e+05]
+  RHS range        [1e-07, 1e+06]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint R55 by 1.000000000
+
+Found heuristic solution: objective 0.7092588
+Presolve removed 686603 rows and 13602 columns
+Presolve time: 1.19s
+Presolved: 5644 rows, 5619 columns, 176080 nonzeros
+Variable types: 3546 continuous, 2073 integer (53 binary)
+Performing another presolve...
+Presolve removed 3675 rows and 2120 columns
+Presolve time: 0.27s
+Root relaxation presolve removed 101 rows and 1 columns
+Root relaxation presolved: 1868 rows, 3583 columns, 47591 nonzeros
+
+Root barrier log...
+
+Ordering time: 0.00s
+
+Barrier statistics:
+ AA' NZ     : 8.877e+04
+ Factor NZ  : 1.514e+05 (roughly 3 MB of memory)
+ Factor Ops : 1.593e+07 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   4.41628151e+01 -4.21973578e+03  3.57e+03 7.89e-05  4.56e+00     3s
+   1   4.02759782e+01 -2.68010454e+03  1.63e+03 1.07e-02  1.75e+00     3s
+   2   1.18484282e+01 -1.18430825e+03  4.95e+02 4.60e-05  5.08e-01     3s
+   3   1.26432645e+00 -2.82858495e+02  2.47e+01 1.56e-16  4.67e-02     3s
+   4   7.10692934e-01 -4.72021690e+01  2.26e-01 9.02e-17  5.52e-03     3s
+   5   7.04600594e-01 -3.80041050e+00  1.64e-02 4.25e-17  5.15e-04     3s
+   6   6.94379932e-01  6.04529290e-02  1.79e-03 7.26e-16  7.24e-05     3s
+   7   6.73417679e-01  5.89915618e-01  4.50e-04 8.40e-19  9.53e-06     3s
+   8   6.65529940e-01  6.59199387e-01  1.33e-04 1.42e-17  7.23e-07     3s
+   9   6.65502312e-01  6.62363589e-01  9.48e-05 4.25e-19  3.58e-07     3s
+  10   6.65434034e-01  6.65340285e-01  5.03e-13 8.25e-17  1.07e-08     3s
+  11   6.65369238e-01  6.65366543e-01  1.71e-13 4.43e-16  3.08e-10     3s
+  12   6.65368978e-01  6.65368771e-01  3.70e-13 3.15e-19  2.36e-11     3s
+  13   6.65368956e-01  6.65368955e-01  2.39e-13 2.60e-14  6.15e-14     3s
+
+Barrier solved model in 13 iterations and 2.62 seconds (4.73 work units)
+Optimal objective 6.65368956e-01
+
+Crossover time: 0.01 seconds (0.01 work units)
+
+Root relaxation: objective 6.653690e-01, 3374 iterations, 0.10 seconds (0.23 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+H    0     0                       0.6653690    0.66537  0.00%     -    2s
+     0     0    0.66537    0   12    0.66537    0.66537  0.00%     -    2s
+
+Explored 1 nodes (3374 simplex iterations) in 2.75 seconds (4.84 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 3: 0.665369 0.709259 0.709259 
+
+Optimal solution found (tolerance 5.00e-03)
+Best objective 6.653689555463e-01, best bound 6.653689555463e-01, gap 0.0000%
+
+User-callback calls 365, time in user-callback 0.02 sec
