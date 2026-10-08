@@ -1,0 +1,136 @@
+{
+  "PASS": true,
+  "UTC": "2026-10-08T17:41:21.280926+00:00",
+  "scope": "Actual independent campaign startup observation; not completed date results",
+  "source_HEAD": "26110125d32f7fe16703ca2df8a187c70322d89b",
+  "run_id": "candidate_20261009_implementation01",
+  "actual_campaign_started": true,
+  "first_arm": "B1",
+  "first_day": "2025-05-01",
+  "observed_model_stage": "A_FRESH_DATE_DATA",
+  "Native_calls_at_startup": 0,
+  "Coordinator": {
+    "PID": 88076,
+    "created": 1791481140.211152,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "v42_may_campaign.host",
+      "coordinator",
+      "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01"
+    ],
+    "parent": 2648,
+    "priority": 32
+  },
+  "Worker": {
+    "PID": 87160,
+    "created": 1791481142.9061146,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "v42_may_campaign.worker",
+      "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\dates\\B1\\2025-05-01\\request.json"
+    ],
+    "parent": 88076,
+    "priority": 32
+  },
+  "Monitor": {
+    "PID": 21688,
+    "created": 1791481003.8736079,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "v42_may_campaign.host",
+      "monitor",
+      "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01"
+    ],
+    "parent": 2648,
+    "priority": 32
+  },
+  "started_UTC": "2026-10-08T17:39:02.886872+00:00",
+  "input_SHA": "365824518d8b3d380b6e2cc72a78d19d27ce8d39d304acdc8ffc5b5806b342fc",
+  "tasks": {
+    "coordinator": {
+      "name": "MobileESS_V42_B1B2_P1_20261009_Implementation01_Coordinator",
+      "state": "Running",
+      "logon_type": "Interactive",
+      "last_task_result": 267009,
+      "last_run_utc": "2026-10-08T17:39:00.0000000Z"
+    },
+    "monitor": {
+      "name": "MobileESS_V42_B1B2_P1_20261009_Implementation01_Monitor",
+      "state": "Running",
+      "logon_type": "Interactive",
+      "last_task_result": 267009,
+      "last_run_utc": "2026-10-08T17:36:43.0000000Z"
+    },
+    "watchdog": {
+      "name": "MobileESS_V42_B1B2_P1_20261009_Implementation01_Watchdog",
+      "state": "Ready",
+      "logon_type": "Interactive",
+      "last_task_result": 0,
+      "last_run_utc": "2026-10-08T17:39:00.0000000Z"
+    }
+  },
+  "changed_worker_heartbeat": true,
+  "changed_monitor_status": true,
+  "observed_worker_CPU_advancement": true,
+  "process_ancestry": "Task Scheduler Schedule service PID2648; no Codex ancestor",
+  "actual_Coordinator_job": {
+    "in_any_job": true,
+    "limit_flags": 0,
+    "kill_on_job_close": false,
+    "breakaway_ok": false,
+    "silent_breakaway_ok": false,
+    "query_scope": "CURRENT_PROCESS_IMMEDIATE_JOB; membership tests any job",
+    "limit_flags_hex": "0x0"
+  },
+  "parent_exit_probe": "PASS",
+  "Codex_app_close_experiment_performed": false,
+  "logoff_persistence": "LOGOFF_PERSISTENCE_NOT_PROVEN",
+  "policy": {
+    "Threads": 1,
+    "wall_seconds": 5400,
+    "native_seconds": 5400,
+    "P2_calls": 0,
+    "failed_date_retries": 0,
+    "B1_gap": 0.005,
+    "B2_gap": 0.03,
+    "B1_parallel_workers": 1,
+    "B2_parallel_workers": 3
+  },
+  "new_regression_passed": 299,
+  "existing_regression_passed": 680,
+  "existing_regression_skipped": 12,
+  "existing_skip_is_not_PASS": true,
+  "actual_B1_B2_transition": "NOT_YET_OBSERVED",
+  "actual_B2_three_parallel_Native": "NOT_YET_OBSERVED",
+  "future_transition_observer": "Independent OS Coordinator",
+  "simultaneous_three_original_models_and_licensed_Env_sessions": "PASS_NATIVE_ZERO",
+  "traffic_31_original_days": "PASS_NATIVE_ZERO",
+  "monitor_URL": "http://127.0.0.1:8793/",
+  "browser_visual": "NOT_TESTED",
+  "browser_reason": "Browser tool permission verification unavailable; restriction not bypassed",
+  "old_tasks_changed": 0,
+  "old_completed_results_and_ledgers_preserved": true,
+  "startup_receipt": {
+    "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\INDEPENDENT_LAUNCH_VERIFICATION.json",
+    "sha256": "843b18691fefd438e8d68c318054cc8e6fadeb82def13bf6059ce2efd6b2d544",
+    "bytes": 101341
+  },
+  "monitor_receipt": {
+    "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\MONITOR_STARTUP_CHECK.json",
+    "sha256": "9a10746422432ff1f80f54dd64964ae4d8bf6010f124aafb5a8f4b066e7ec9db",
+    "bytes": 643
+  },
+  "runtime_root": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01"
+}
