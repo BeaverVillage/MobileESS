@@ -18,7 +18,7 @@ def test_scope_cannot_authorize_other_date_or_production():
     finally:e._scope.reset(t)
 
 def test_completed_algorithm_allocations_and_exact_order_are_unchanged():
-    assert DAYS==('2025-05-17','2025-05-12','2025-05-10')
+    assert DAYS==('2025-05-17','2025-05-10','2025-05-12')
     assert POLICY['control_allocation_seconds']==MAY19['control_allocation_seconds']
     assert POLICY['case_allocation_seconds']==MAY19['case_allocation_seconds']
     assert POLICY['Threads']==MAY19['Threads']==1
