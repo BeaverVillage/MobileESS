@@ -1,0 +1,64 @@
+{
+  "day": "2025-05-10",
+  "component": "prestart_relocation",
+  "cases": [
+    {
+      "name": "B0_SOURCE_LP",
+      "snapshot_sha256": "84f517309ddaa693f4c1f582f9a490dbc8a33c42ec0fa74c98d4678004ed4178",
+      "seconds": 90,
+      "relax": true,
+      "presolve": -1
+    },
+    {
+      "name": "B1_COMPACT_LP",
+      "snapshot_sha256": "479acbf3c632c46e4726774ed4fcadfe5afb780d9089bb48b5606d7c17e9849c",
+      "seconds": 90,
+      "relax": true,
+      "presolve": -1
+    },
+    {
+      "name": "B2_CUTS_LP",
+      "snapshot_sha256": "717a40938d4b9b35b47d1c60dcddf2d3d5b072606d9db8bac4b4312e0501d316",
+      "seconds": 90,
+      "relax": true,
+      "presolve": -1
+    },
+    {
+      "name": "B1_COMPACT_MIP",
+      "snapshot_sha256": "479acbf3c632c46e4726774ed4fcadfe5afb780d9089bb48b5606d7c17e9849c",
+      "seconds": 480,
+      "relax": false,
+      "presolve": -1
+    },
+    {
+      "name": "B2_CUTS_MIP",
+      "snapshot_sha256": "717a40938d4b9b35b47d1c60dcddf2d3d5b072606d9db8bac4b4312e0501d316",
+      "seconds": 2100,
+      "relax": false,
+      "presolve": 1
+    },
+    {
+      "name": "B3_CUTOFF_MIP",
+      "snapshot_sha256": "6d3d1f9ba10936d51a3a8e6214381f4081c2e92852988f0562bc6f589f629956",
+      "seconds": 660,
+      "relax": false,
+      "presolve": 1
+    }
+  ],
+  "planned_native_seconds": 3510,
+  "reserve_seconds": 90,
+  "Threads": 1,
+  "simultaneous_native_calls": 1,
+  "parameter_sweep": false,
+  "success_gap": 0.005,
+  "stop_if_full_domain_gap_accepted": true,
+  "B0_MIP_is_saved_original_baseline_no_rerun": true,
+  "LP_candidates_are_diagnostics_not_integer_feasibility_claims": true,
+  "B1_auto_presolve_B2_conservative_is_separate_algorithmic_candidate": true,
+  "B3_full_original_integer_partition_PRE_le_59_complement_PRE_ge_60": true,
+  "incumbent_UB60_preserved": true,
+  "no_memory_limit_or_memory_stop": true,
+  "original_physics_objectives_tolerances_unchanged": true,
+  "source_exact_base": "1b891dbe5b1dd454d89b657efec7cba469c0cf94",
+  "gurobi_parameter_reference": "https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html"
+}
