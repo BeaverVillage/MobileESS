@@ -1,0 +1,347 @@
+{
+  "label": "MESS02_FULL96_MILP_PRICING",
+  "unit": "MESS02",
+  "kind": "MILP",
+  "build": {
+    "unit": "MESS02",
+    "kind": "MILP",
+    "rows": 35823,
+    "columns": 61080,
+    "nnz": 310877,
+    "binary_columns": 2331,
+    "build_wall_seconds": 0.25338760000886396,
+    "all_original_local_matrix_nonzeros_retained": true,
+    "full_96_slot_domain_preserved": true,
+    "presolve": "ORIGINAL_SOLVER_DEFAULT_NO_EXTRA_PRESOLVE_CALL",
+    "solver_parameters": {
+      "Threads": 1,
+      "FeasibilityTol": 1e-08,
+      "OptimalityTol": 1e-08,
+      "IntFeasTol": 1e-08,
+      "MIPGap": 0.005
+    },
+    "finite_memory_limits": false,
+    "native_optimize_calls": 0
+  },
+  "native": {
+    "track": "PRICING",
+    "label": "MESS02_FULL96_MILP_PRICING",
+    "case_sha": "cb3e1c040e2e52308995708b60e7451ca43d73a2dacfeb4a18c8e8e1cfb8293a",
+    "allocated_native_seconds": 75.0,
+    "requested_seconds": 75.0,
+    "started_wall_seconds": 1018.4539761000196,
+    "started_utc": "2026-10-08T15:03:22.357402+00:00",
+    "parameters": {
+      "Threads": 1,
+      "MIPGap": 0.005,
+      "FeasibilityTol": 1e-08,
+      "OptimalityTol": 1e-08,
+      "IntFeasTol": 1e-08
+    },
+    "log": "D:\\MobileESS_V42\\runtime\\v42_m1_anytime_gap_frontier\\anytime_may01_20261008_frontier02_continuation\\019_PRICING_MESS02_FULL96_MILP_PRICING_NATIVE.log",
+    "state": "FINISHED",
+    "Native_Runtime": 17.682000160217285,
+    "runtime_unavailable": false,
+    "Native_Work": 25.316494087438105,
+    "optimize_wall_seconds": 17.682526400021743,
+    "process_CPU_seconds": 16.390625,
+    "finished_wall_seconds": 1036.1391182999942,
+    "finished_utc": "2026-10-08T15:03:40.042720+00:00",
+    "status": 2,
+    "SolCount": 3,
+    "error": null,
+    "peak_Gurobi_memory_GB": 1.150188508,
+    "native_objective_diagnostic": -0.011096646570424383,
+    "restricted_or_native_ObjBound_diagnostic": -0.01111453824193806,
+    "native_bound_is_Global_LB": false,
+    "presolve_callback_span_seconds": 0.4141673000412993,
+    "presolve_span_is_not_exact_Runtime": true,
+    "process_RSS_bytes_at_solve_end": 1389064192
+  },
+  "native_optimize_wall_seconds": 17.688832899963018,
+  "native_ObjBound_global_authority": false,
+  "integer_pricing_closure": false,
+  "candidate_column": {
+    "source": "MESS02_FULL96_MILP_PRICING",
+    "unit": "MESS02",
+    "admission": {
+      "PASS": true,
+      "unit": "MESS02",
+      "case_sha": "cb3e1c040e2e52308995708b60e7451ca43d73a2dacfeb4a18c8e8e1cfb8293a",
+      "local_C3A": {
+        "PASS": true,
+        "finite": true,
+        "rows": 35823,
+        "columns": 61080,
+        "checked_discrete_columns": 2331,
+        "checked_binary_columns": 2331,
+        "maximum_observed_row_violation": 2.7549731385079212e-09,
+        "maximum_outward_row_upper": 3.139393471612877e-09,
+        "max_bound_violation": 0.0,
+        "max_integrality_violation": 0.0,
+        "integer_pattern_exact": true,
+        "exact_binary_0_1": true,
+        "affine_tolerance": 1e-08,
+        "bound_tolerance": 1e-08,
+        "integrality_tolerance": 1e-08,
+        "close_exact_dyadic_checks": 0,
+        "failing_rows": [],
+        "objective": 0.0
+      },
+      "global_UB": false,
+      "grid_coupling_replayed": false,
+      "repairs": 0,
+      "rounding": 0,
+      "clipping": 0,
+      "native_optimize_calls": 0,
+      "original_FULL_unit_integer_gate": {
+        "PASS": true,
+        "checked_discrete_columns": 52090,
+        "checked_binary_columns": 52090,
+        "integer_pattern_exact": true,
+        "exact_binary_0_1": true
+      },
+      "original_FULL_local_rows": {
+        "PASS": true,
+        "finite": true,
+        "rows": 51527,
+        "columns": 58895,
+        "checked_discrete_columns": 52090,
+        "checked_binary_columns": 52090,
+        "maximum_observed_row_violation": 2.7549731385079212e-09,
+        "maximum_outward_row_upper": 3.139393471612877e-09,
+        "max_bound_violation": 0.0,
+        "max_integrality_violation": 0.0,
+        "integer_pattern_exact": true,
+        "exact_binary_0_1": true,
+        "affine_tolerance": 1e-06,
+        "bound_tolerance": 1e-08,
+        "integrality_tolerance": 1e-08,
+        "close_exact_dyadic_checks": 0,
+        "failing_rows": [],
+        "objective": 0.0
+      },
+      "original_96_slot_physics": {
+        "PASS": true,
+        "original_route_SOC_PCS": {
+          "PASS": true,
+          "violations": [],
+          "max_exact_circle_ratio": 1.0000000000000044,
+          "mobility_energy_kwh": 439.98861678732436
+        },
+        "original_charge_mode_connection": {
+          "charge_mode_and_connection_PASS": true,
+          "charge_mode_and_connection_violations": []
+        },
+        "selected_move_arcs": [
+          {
+            "unit": "MESS01",
+            "route_id": "STA01:IDC01:59",
+            "source": "STA01",
+            "depart": 59,
+            "destination": "IDC01",
+            "connect": 61,
+            "energy_kwh": 4.143844516387135
+          },
+          {
+            "unit": "MESS01",
+            "route_id": "IDC01:STA01:68",
+            "source": "IDC01",
+            "depart": 68,
+            "destination": "STA01",
+            "connect": 70,
+            "energy_kwh": 9.694922828490641
+          },
+          {
+            "unit": "MESS01",
+            "route_id": "STA01:IDC01:87",
+            "source": "STA01",
+            "depart": 87,
+            "destination": "IDC01",
+            "connect": 89,
+            "energy_kwh": 4.19380437027898
+          },
+          {
+            "unit": "MESS01",
+            "route_id": "IDC01:STA01:93",
+            "source": "IDC01",
+            "depart": 93,
+            "destination": "STA01",
+            "connect": 95,
+            "energy_kwh": 9.688621326683442
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "STA12:IDC02:0",
+            "source": "STA12",
+            "depart": 0,
+            "destination": "IDC02",
+            "connect": 2,
+            "energy_kwh": 24.61593052553887
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "IDC02:IDC04:2",
+            "source": "IDC02",
+            "depart": 2,
+            "destination": "IDC04",
+            "connect": 4,
+            "energy_kwh": 18.796623726655618
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "IDC04:IDC12:4",
+            "source": "IDC04",
+            "depart": 4,
+            "destination": "IDC12",
+            "connect": 7,
+            "energy_kwh": 27.637794620597717
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "IDC12:IDC01:7",
+            "source": "IDC12",
+            "depart": 7,
+            "destination": "IDC01",
+            "connect": 9,
+            "energy_kwh": 3.1664149130668324
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "IDC01:STA10:9",
+            "source": "IDC01",
+            "depart": 9,
+            "destination": "STA10",
+            "connect": 12,
+            "energy_kwh": 27.56480565266085
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "STA10:IDC06:16",
+            "source": "STA10",
+            "depart": 16,
+            "destination": "IDC06",
+            "connect": 18,
+            "energy_kwh": 20.158484292461658
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "IDC06:IDC10:23",
+            "source": "IDC06",
+            "depart": 23,
+            "destination": "IDC10",
+            "connect": 24,
+            "energy_kwh": 4.0668504506975145
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "IDC10:IDC07:32",
+            "source": "IDC10",
+            "depart": 32,
+            "destination": "IDC07",
+            "connect": 35,
+            "energy_kwh": 38.793370900445595
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "IDC07:STA07:35",
+            "source": "IDC07",
+            "depart": 35,
+            "destination": "STA07",
+            "connect": 37,
+            "energy_kwh": 5.563360330493681
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "STA07:IDC12:37",
+            "source": "STA07",
+            "depart": 37,
+            "destination": "IDC12",
+            "connect": 42,
+            "energy_kwh": 48.94842871987307
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "IDC12:STA04:42",
+            "source": "IDC12",
+            "depart": 42,
+            "destination": "STA04",
+            "connect": 45,
+            "energy_kwh": 34.70797436956021
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "STA04:IDC04:50",
+            "source": "STA04",
+            "depart": 50,
+            "destination": "IDC04",
+            "connect": 53,
+            "energy_kwh": 13.118505373611782
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "IDC04:STA03:55",
+            "source": "IDC04",
+            "depart": 55,
+            "destination": "STA03",
+            "connect": 58,
+            "energy_kwh": 22.336857063240238
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "STA03:STA12:59",
+            "source": "STA03",
+            "depart": 59,
+            "destination": "STA12",
+            "connect": 63,
+            "energy_kwh": 55.751132211266935
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "STA12:IDC03:69",
+            "source": "STA12",
+            "depart": 69,
+            "destination": "IDC03",
+            "connect": 71,
+            "energy_kwh": 2.05222168563522
+          },
+          {
+            "unit": "MESS02",
+            "route_id": "IDC03:STA12:84",
+            "source": "IDC03",
+            "depart": 84,
+            "destination": "STA12",
+            "connect": 86,
+            "energy_kwh": 3.2442655845770685
+          },
+          {
+            "unit": "MESS04",
+            "route_id": "STA06:IDC01:61",
+            "source": "STA06",
+            "depart": 61,
+            "destination": "IDC01",
+            "connect": 64,
+            "energy_kwh": 29.77486553181208
+          },
+          {
+            "unit": "MESS04",
+            "route_id": "IDC01:STA06:89",
+            "source": "IDC01",
+            "depart": 89,
+            "destination": "STA06",
+            "connect": 92,
+            "energy_kwh": 31.969537793289184
+          }
+        ],
+        "repairs": 0,
+        "native_optimize_calls": 0
+      },
+      "point_sha256": "7efa82fd9cd704d6d6d7658a3e113cf439fcf52d5bf578f38d1c1fe763bd7453",
+      "raw_point_unchanged": true,
+      "validation_wall_seconds": 1.3496645000413992,
+      "eligibility": "LOCAL_TRAJECTORY_COLUMN_ONLY_REQUIRES_GLOBAL_RECOURSE_AND_FULL_REPLAY_FOR_UB"
+    },
+    "path": "D:\\MobileESS_V42\\runtime\\v42_m1_anytime_gap_frontier\\anytime_may01_20261008_frontier02_continuation\\007_L4_00\\MESS02_MILP_RAW_COLUMN.npz",
+    "sha256": "2a05631383f3958ab3c81964bc8fed44296d28e10da9d687c5cb833cb499f396"
+  }
+}
