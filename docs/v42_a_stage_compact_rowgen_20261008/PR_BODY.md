@@ -1,0 +1,11 @@
+May19 reaches certified Phi=0 after activating the exact PR178 frozen 32 STAY + 32 migration batch and closing every original row. Original P1 LP closure covers all 150 classes and the full STAY/migration domain. The full-domain rational LB is 0.7302103658992288; validated original integer UB is 0.7302103660786277. Certified P1 gap is 2.4568102215371033e-8%, below 0.5%.
+
+The exact hybrid preserves the inherited fractional LP, including native migration directions absent from a pure physical path hull. Integers restore original N lanes and types. Full original physical/grid replay, complete pricing, actual Gurobi matrix/box/type/RHS/objective read-back, exhaustive branch siblings, source archives and immutable cumulative budget receipts are retained.
+
+P2 migration count is globally certified zero. SHIFT remains INCONCLUSIVE at full-domain LB948 / original validated UB950; PRESTART was not run. The final original-objective cutoff search processed 35,082 nodes in 11,765.704s / Work19,307.524 without a primal and stopped at the immutable budget's reporting reserve. Interrupted status11 is not infeasibility. May19 four-objective A1 is not accepted; the 90-minute canary trigger closed before acceptance, so May17/12/10 were not run.
+
+Final classification: A_PRACTICAL_SOLVER_P1_GAP_LE_0P5. Total native 22,085.305s / Work46,168.981 across 202 calls; maximum observed per-process RSS9,705,512,960 bytes; maximum factor27.47M nnz / 0.6GB. Threads=1 throughout, original physics/tolerances/hierarchy retained, no permanent candidate deletion, no M-lane changes, and no production/Planning/Actual/Fresh AC.
+
+Validation includes bounded STAY/migration projection and coupling equivalence, original integer type/zero-migration projection fixtures, both-child objective partitions, rational full-domain P1 pricing, original physical replay, and all 12 executed source archive audits. [Detailed report and complete trajectories](docs/v42_a_stage_compact_rowgen_20261008/REPORT.md).
+
+Stacked on PR178 exact e8c7634002cb6249ef79aacd585017b3cfaf0bd2. Immutable UTC start 2026-10-07 16:53:17; deadline 2026-10-08 00:53:17. Final HEAD/remote/clean-tree handoff is recorded after the final commit outside the worktree to avoid a self-referential hash.

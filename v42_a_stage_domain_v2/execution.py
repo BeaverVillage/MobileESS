@@ -165,6 +165,30 @@ def require_action_authorized(authority, action='OPTIMIZE', *, require_day=True)
         day = _native_day.get()
     if day is None and require_day:
         raise PermissionError('A_STAGE_PRODUCTION_DAY_REQUIRED')
+    from v42_a_stage_cg.execution import current as cg_current, authorize as cg_authorize
+    if cg_current() is not None:
+        return cg_authorize(day, action)
+    from v42_a_stage_lexcases.execution import current as cases_current, authorize as cases_authorize
+    if cases_current() is not None:
+        return cases_authorize(day, action)
+    from v42_a_stage_lexrefine.execution import current as refine_current, authorize as refine_authorize
+    if refine_current() is not None:
+        return refine_authorize(day, action)
+    from v42_a_stage_lexfull.execution import current as fulllex_current, authorize as fulllex_authorize
+    if fulllex_current() is not None:
+        return fulllex_authorize(day, action)
+    from v42_a_stage_lex.execution import current as lex_current, authorize as lex_authorize
+    if lex_current() is not None:
+        return lex_authorize(day, action)
+    from v42_a_stage_bnp.execution import current as bnp_current, authorize as bnp_authorize
+    if bnp_current() is not None:
+        return bnp_authorize(day, action)
+    from v42_a_stage_practical.execution import current as practical_current, authorize as practical_authorize
+    if practical_current() is not None:
+        return practical_authorize(day, action)
+    from v42_a_stage_compact_rowgen.execution import current as compact_current, authorize as compact_authorize
+    if compact_current() is not None:
+        return compact_authorize(day, action)
     from v42_a_stage_residual.execution import current as residual_current, authorize as residual_authorize
     if residual_current() is not None:
         return residual_authorize(day, action)
@@ -220,6 +244,38 @@ def guard_model_optimize(model):
     day = getattr(model, '_v42_a_stage_day', None)
     context_day = _native_day.get()
     effective_day=day if day is not None else context_day
+    from v42_a_stage_cg.execution import current as cg_current, guard as cg_guard
+    if cg_current() is not None:
+        cg_guard(model, effective_day)
+        return
+    from v42_a_stage_lexcases.execution import current as cases_current, guard as cases_guard
+    if cases_current() is not None:
+        cases_guard(model, effective_day)
+        return
+    from v42_a_stage_lexrefine.execution import current as refine_current, guard as refine_guard
+    if refine_current() is not None:
+        refine_guard(model, effective_day)
+        return
+    from v42_a_stage_lexfull.execution import current as fulllex_current, guard as fulllex_guard
+    if fulllex_current() is not None:
+        fulllex_guard(model, effective_day)
+        return
+    from v42_a_stage_lex.execution import current as lex_current, guard as lex_guard
+    if lex_current() is not None:
+        lex_guard(model, effective_day)
+        return
+    from v42_a_stage_bnp.execution import current as bnp_current, guard as bnp_guard
+    if bnp_current() is not None:
+        bnp_guard(model, effective_day)
+        return
+    from v42_a_stage_practical.execution import current as practical_current, guard as practical_guard
+    if practical_current() is not None:
+        practical_guard(model, effective_day)
+        return
+    from v42_a_stage_compact_rowgen.execution import current as compact_current, guard as compact_guard
+    if compact_current() is not None:
+        compact_guard(model, effective_day)
+        return
     from v42_a_stage_residual.execution import current as residual_current, guard as residual_guard
     if residual_current() is not None:
         residual_guard(model, effective_day)
