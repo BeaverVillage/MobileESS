@@ -21,10 +21,17 @@ def checkpoint(name,state,raw=None):
     with gzip.open(p,'xb',compresslevel=1) as f:pickle.dump(dict(state=state,raw=raw),f,protocol=5)
     return record(p)
 
-def run():
+def run(resume_pre_native_gate=False):
     started=perf_counter();native=None;timings={};decision=dict(PASS=False,classification='MAY12_PHASE1_RECOVERED_P1_INCONCLUSIVE')
-    if (OUT/'NEW_RUN_STARTED.json').exists():raise PermissionError('ONE_NEW_MAY12_EXPERIMENT_ONLY')
-    atomic(OUT/'NEW_RUN_STARTED.json',dict(PID=os.getpid(),source=record(OUT/'SOURCE_FREEZE.json'),native_budget=3600,automatic_followup=False))
+    if (OUT/'NEW_RUN_STARTED.json').exists():
+        old=read(OUT/'PRE_NATIVE_START_GATE_FAILURE1/FINAL_DECISION.json')
+        if not resume_pre_native_gate or old['new_native_calls']!=0 or old['new_native_seconds']!=0:
+            raise PermissionError('ONE_NEW_MAY12_EXPERIMENT_ONLY')
+        if (OUT/'NEW_NATIVE_CALLS.json').exists() and read(OUT/'NEW_NATIVE_CALLS.json')['calls']:
+            raise PermissionError('CANNOT_RESET_ACTUAL_NATIVE_BUDGET')
+        atomic(OUT/'RESUME_PRE_NATIVE_GATE.json',dict(PID=os.getpid(),source=record(OUT/'SOURCE_FREEZE.json'),
+            no_previous_native_call=True,native_budget_not_reset=True,previous_gate_failure=record(OUT/'PRE_NATIVE_START_GATE_FAILURE1/FINAL_DECISION.json')))
+    else:atomic(OUT/'NEW_RUN_STARTED.json',dict(PID=os.getpid(),source=record(OUT/'SOURCE_FREEZE.json'),native_budget=3600,automatic_followup=False))
     try:
         from .prepare import route
         route()
@@ -136,4 +143,6 @@ def run():
             timings=timings,old_native_seconds=233.89299654960632,P2_executed=False,automatic_followup=False)
         atomic(OUT/'FINAL_DECISION.json',decision)
         print('MAY12_FINAL_DECISION',decision['classification'],decision['new_native_seconds'],decision.get('error'),flush=True)
-if __name__=='__main__':run()
+if __name__=='__main__':
+    import sys
+    run('--resume-pre-native-gate' in sys.argv)

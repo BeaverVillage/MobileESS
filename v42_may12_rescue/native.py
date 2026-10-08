@@ -34,11 +34,16 @@ def start_gate():
     for p in processes():
         if p['pid']==os.getpid():continue
         args=' '.join(p['argv'] or [])
-        # Read-only host monitor is not a native optimization run.
-        if ' host monitor ' not in ' '+args+' ' and any(x in args for x in ('v42_', 'm1-', 'mess-')):other.append(p)
+        if not is_read_only_host_monitor(p) and any(x in args for x in ('v42_', 'm1-', 'mess-')):other.append(p)
     atomic(OUT/'RESOURCE_START_GATE.json',dict(PASS=not other,other_possible_native_workers=other,
         no_processes_modified=True,RAM_threshold=False,own_PID=os.getpid(),observed=processes()))
     if other:raise BudgetStop('MAY12_RESOURCE_PENDING_OTHER_NATIVE_WORKERS')
+
+def is_read_only_host_monitor(process):
+    argv=process.get('argv') or []
+    try:i=argv.index('-m')
+    except ValueError:return False
+    return argv[i+1:i+3]==['v42_pr134_b1.host','monitor']
 
 def create():
     import v42_a_stage_acceptance.native as inherited
