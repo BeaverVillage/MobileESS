@@ -1,0 +1,187 @@
+{
+  "source_BASE": "3100039d19a22ec407713f36a9e978b2e96533a8",
+  "objective_identity": {
+    "PASS": true,
+    "authority_commit": "1d922c91eb27056a5ccc79c92ef18146707099ab",
+    "authority_file": "docs/v42_m1_ultracompact_exact_20261006/C3A_DATA.npz",
+    "authority_file_SHA256": "20aba68ffb3c4e29b0c9644d05e10ef33417ab92f6083edfb8906d6be8cb0467",
+    "independent_git_blob_reader": true,
+    "no_builder_import": true,
+    "no_zero_normalization": true,
+    "no_tolerance": true,
+    "checks": {
+      "objective_dtype_shape_bytes_identical": true,
+      "constant_dtype_shape_bytes_identical": true,
+      "names_dtype_shape_bytes_identical": true,
+      "minimize": true
+    },
+    "details": {
+      "objective": {
+        "source_dtype": "float64",
+        "candidate_dtype": "float64",
+        "source_shape": [
+          306040
+        ],
+        "candidate_shape": [
+          306040
+        ],
+        "source_SHA256": "d6761e4a352d4d6bd2208033e9357a24f126a133c92e544e73d50e003f740b0b",
+        "candidate_SHA256": "d6761e4a352d4d6bd2208033e9357a24f126a133c92e544e73d50e003f740b0b"
+      },
+      "constant": {
+        "source_dtype": "float64",
+        "candidate_dtype": "float64",
+        "source_shape": [],
+        "candidate_shape": [],
+        "source_SHA256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+        "candidate_SHA256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+      },
+      "names": {
+        "source_dtype": "<U32",
+        "candidate_dtype": "<U32",
+        "source_shape": [
+          306040
+        ],
+        "candidate_shape": [
+          306040
+        ],
+        "source_SHA256": "a9613e108820333920047d0bacc98fa34690db8c83a5d099a870e22e213ddf8a",
+        "candidate_SHA256": "a9613e108820333920047d0bacc98fa34690db8c83a5d099a870e22e213ddf8a"
+      }
+    },
+    "objective_hash_definition": "SHA256(raw objective float64 C-order bytes || raw scalar ObjCon float64 bytes); variable-axis hash separately verified",
+    "source_objective_SHA256": "0e2ee6d3d0a1ff628b24c04f453eccf08583b22dbe2dd2d23571caa5afa38335",
+    "candidate_objective_SHA256": "0e2ee6d3d0a1ff628b24c04f453eccf08583b22dbe2dd2d23571caa5afa38335",
+    "source_variable_axis_SHA256": "a9613e108820333920047d0bacc98fa34690db8c83a5d099a870e22e213ddf8a",
+    "ObjCon_bits_hex": "0000000000000000",
+    "rho_column": 239826,
+    "objective": "minimize rho_max"
+  },
+  "rows": 582808,
+  "columns": 306040,
+  "nnz": 5351612,
+  "variable_families": {
+    "route_flow": 207736,
+    "SOC": 380,
+    "charge_mode": 384,
+    "Pch": 8942,
+    "Pdis": 8942,
+    "Q": 8942,
+    "injection_P": 2263,
+    "injection_Q": 2237,
+    "rho_max": 1,
+    "response_transformer_P": 288,
+    "response_transformer_Q": 288,
+    "response_line_correction": 25152,
+    "response_line_P": 15708,
+    "response_line_Q": 15839,
+    "node_activity": 8938
+  },
+  "row_families": {
+    "flow": 8942,
+    "connected_Pch": 8942,
+    "connected_Pdis": 8942,
+    "no_simultaneous_charge": 8942,
+    "no_simultaneous_discharge": 8942,
+    "PCS16": 89420,
+    "energy_balance": 384,
+    "injection_P_binding": 2263,
+    "injection_Q_binding": 2237,
+    "voltage_upper": 20733,
+    "voltage_lower": 9603,
+    "response_transformer_P_binding": 288,
+    "response_transformer_Q_binding": 288,
+    "response_line_correction_binding": 25152,
+    "line_thermal_face": 324871,
+    "response_line_P_binding": 9096,
+    "response_line_Q_binding": 9227,
+    "transformer_kVA": 35790,
+    "node_activity_link": 8746
+  },
+  "root_fields": {
+    "x": [
+      306040
+    ],
+    "Pi": [
+      582808
+    ],
+    "RC": [
+      306040
+    ]
+  },
+  "root_source": "D:\\v42_m1_physics_strengthened_20261008\\repo\\docs\\v42_m1_joint_formulation_20261008\\runs\\ORIGINAL\\LP_POINT_DUAL.npz",
+  "root_source_SHA256": "7c7e2db497b6f7d41d978a42eb492baa2249138615fc3360f62143f37b8e2325",
+  "root_receipt": {
+    "label": "ORIGINAL",
+    "UTC": "2026-10-08T02:30:14.102569+00:00",
+    "native_status": 2,
+    "status_name": "OPTIMAL",
+    "Runtime": 511.5699999332428,
+    "Work": 481.2747797601205,
+    "IterCount": 0.0,
+    "BarIterCount": 112,
+    "setup_wall_seconds": 2.0721828999812715,
+    "total_wall_seconds": 526.8290820999537,
+    "rows": 582808,
+    "columns": 306040,
+    "nnz": 5351612,
+    "native_LP_objective": 0.568711942993466,
+    "raw_native_ObjBound": -97.99221036430035,
+    "valid_LB": 0.5671374761409242,
+    "certificate_loss": 0.0015744668525417005,
+    "optimal_certificate_PASS": true,
+    "objective_identity_PASS": true,
+    "original_integer_projection_unchanged": true,
+    "optimize_calls": 1,
+    "peak_sampled_RSS": 2324496384,
+    "Windows_lifetime_peak_wset": 2324504576,
+    "memory_before": {
+      "total": 34049220608,
+      "available": 17779064832,
+      "percent": 47.8,
+      "used": 16270155776,
+      "free": 17779064832
+    },
+    "callback_errors": [],
+    "exception": null,
+    "valid_LB_exact": "250511296261353252293082893681936998732457532150788146129617331549029865/441711766194596082395824375185729628956870974218904739530401550323154944",
+    "independent_exact_certificate_PASS": true,
+    "raw_strengthened_LP_replay": {
+      "PASS": false,
+      "finite": true,
+      "max_constraint_violation": 2.805600374244932e-08,
+      "max_bound_violation": 0.0,
+      "max_integrality_violation": null,
+      "objective": 0.568711942993466
+    },
+    "original_rows_relaxed_replay": {
+      "PASS": false,
+      "finite": true,
+      "max_constraint_violation": 2.805600374244932e-08,
+      "max_bound_violation": 0.0,
+      "max_integrality_violation": null,
+      "objective": 0.568711942993466
+    },
+    "fractional_original_binary_count": 7454,
+    "original_binaries": 9322,
+    "numerical_warnings": [
+      "Warning: Model contains large matrix coefficient range"
+    ],
+    "factor_memory_log": [
+      " AA' NZ     : 3.785e+07",
+      " Factor NZ  : 5.717e+07 (roughly 700 MB of memory)",
+      " Factor Ops : 3.116e+10 (roughly 2 seconds per iteration)"
+    ],
+    "NATIVE_LOG_SHA256": "bf8b458cc3b799dd9b6d8c2310e328d64ff9673525cd1140d3f762b61b0bfdaf"
+  },
+  "scientific_input_SHAs": {
+    "C3A_A.npz": "45cd48423b8d7f19fed376b71e181277f559c9e71527c17f9322d0100f7f0df8",
+    "C3A_DATA.npz": "20aba68ffb3c4e29b0c9644d05e10ef33417ab92f6083edfb8906d6be8cb0467",
+    "C3A_VALID_START.npz": "be02767838a1fe17b932c390303e5307e1c8385ba130fe9c36a7cb69804c54e5"
+  },
+  "archived_global_LB": 0.5687116104049206,
+  "archived_valid_UB": 0.6284141956452488,
+  "target_LB_for_0p5pct": 0.6252721246670225,
+  "M1_ACCEPTED": false,
+  "all_new_native_optimize_calls": 0
+}
