@@ -1,0 +1,48 @@
+{
+  "candidate": "B",
+  "registered_before_native_optimize": true,
+  "justification": "A exactness PASS but root TIME_LIMIT at configured 600s with barrier deterioration; choose previously registered distinct fleet/time/grid Boolean-product RLT, not another aggregate-count parameterization.",
+  "fleet": [
+    "MESS01",
+    "MESS02",
+    "MESS03",
+    "MESS04"
+  ],
+  "slots": [
+    76,
+    77,
+    78,
+    79
+  ],
+  "selectors": [
+    "charge_mode[MESS01,76]",
+    "charge_mode[MESS02,76]",
+    "charge_mode[MESS03,76]",
+    "charge_mode[MESS04,76]",
+    "node_activity[MESS01,IDC01,77]",
+    "node_activity[MESS02,IDC01,77]",
+    "node_activity[MESS03,IDC01,77]",
+    "node_activity[MESS04,IDC01,77]"
+  ],
+  "scientific_objective": "minimize original rho_max",
+  "settings": {
+    "Threads": 1,
+    "Method": 2,
+    "NodeMethod": 1,
+    "Crossover": 0,
+    "MIPFocus": 3,
+    "MIPGap": 0.005,
+    "FeasibilityTol": 1e-08,
+    "OptimalityTol": 1e-08,
+    "IntFeasTol": 1e-08,
+    "Seed": 20260929,
+    "DegenMoves": 0,
+    "BarConvTol": 1e-08,
+    "TimeLimit": 600
+  },
+  "independent_exactness_receipt_SHA256": "e2dd51a2b04c851b7a30062d44096566f41facb871abf18b47653f7aa22e02e7",
+  "expected_native_calls": 1,
+  "TimeLimit": 600,
+  "no_parameter_sweep": true,
+  "stop_if_materiality_fails": true
+}
