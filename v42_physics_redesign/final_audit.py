@@ -25,6 +25,11 @@ def main():
         p = OLD_ZF / name
         assert p.stat().st_size == receipt['bytes'] and sha(p) == receipt['sha256'], name
     assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=OLD_ZF/'repo', text=True).strip() == stop['source_git_HEAD']
+    copied = read(REPORTS/'PREVIOUS_CERTIFICATE_COPY_RECEIPT.json')
+    assert copied['PASS'] and copied['originals_read_only']
+    for receipt in copied['files']:
+        assert sha(WORK/receipt['destination']) == receipt['sha256']
+        assert sha(receipt['source']) == receipt['sha256']
     gate = read(WORK / 'checkpoints/ROOT_EQUIVALENCE_GATE.json')
     assert gate['PASS']
     assert gate['temporal_rows_sha256'] == sha(WORK/'artifacts/TEMPORAL_VALID_ROWS.npz')
@@ -59,6 +64,7 @@ def main():
         scientific_inputs_byte_identical=True, scientific_SHA256=scientific,
         previous_ZF_preserved_file_count=len(stop['preserved_files']),
         previous_ZF_all_files_byte_identical=True, previous_ZF_HEAD_unchanged=True,
+        previous_completed_certificate_copies_byte_identical=True,
         independent_proofs_PASS=True, tiny_fixture_HiGHS_calls=100,
         tiny_fixture_wall_seconds=fixture['controller_wall_seconds'],
         new_ROOT_Runtime=None, new_ROOT_Work=None, charged_native_Runtime=0,
