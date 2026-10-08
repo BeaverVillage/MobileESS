@@ -1,0 +1,1335 @@
+{
+  "UTC": "2026-10-08T00:52:26.538907+00:00",
+  "classification": "M_EXACT_BB_TRACTABILITY_FAIL",
+  "decision": {
+    "UTC": "2026-10-08T00:44:17.608119+00:00",
+    "classification": "M_EXACT_BB_TRACTABILITY_FAIL",
+    "optimize_calls": 0,
+    "scientific_objective": "minimize rho",
+    "scientific_model_modifications": 0,
+    "selected_backend": "external checkpointable exact best-bound B&B with cold barrier child LPs",
+    "selection_is_measured_reference_candidate_not_target_acceptance": true,
+    "current_bounds": {
+      "LB": 0.5687116104049206,
+      "UB": 0.6306505800203936,
+      "gap": 0.09821440204410836,
+      "initial_LB": 0.5687116003498334,
+      "initial_UB": 0.6306505800203936,
+      "LB_gain": 1.0055087207305746e-08,
+      "UB_gain": 0.0
+    },
+    "comparison": {
+      "cold_children": {
+        "attempts": 53,
+        "OPTIMAL": 52,
+        "median_Runtime": 197.5659999847412,
+        "p90_Runtime": 275.12900004386904,
+        "certified_OPTIMAL_nodes_per_native_Runtime_hour": 17.193699795833616,
+        "raw_original_relaxed_replay_PASS": 1,
+        "max_original_row_violation": 5.334702217063558e-05,
+        "median_native_objective_to_exact_bound_loss": 0.0031157596757308004,
+        "peak_RSS": 2085220352,
+        "fractional_binaries": {
+          "min": 6861,
+          "median": 7926.0,
+          "max": 9318
+        }
+      },
+      "native_control": {
+        "source": "runs/cuts0_control/RESULT.json",
+        "backend": "native",
+        "name": "cuts0_control",
+        "status": 9,
+        "Runtime": 1800.1829998493195,
+        "Work": 3803.5252811277314,
+        "nodes": 2.0,
+        "nodes_per_runtime_hour": 3.9995933750083523,
+        "root_LP_seconds": 221.92,
+        "root_processing_end": 237.75600004196167,
+        "first_nonroot": 286.80200004577637,
+        "post_root_seconds": 1562.4269998073578,
+        "peak_RSS": 2539651072,
+        "cuts_generated": [],
+        "valid_UB": 0.6306505800203936,
+        "accepted_LB": 0.5687116104049206,
+        "scientific_replay_and_independent_audit_PASS": true,
+        "new_optimize_calls": 1
+      },
+      "native_production": {
+        "source": "runs/native_production_initial/RESULT.json",
+        "backend": "native",
+        "name": "native_production_initial",
+        "status": 11,
+        "Runtime": 3603.0950000286102,
+        "Work": 7504.217134146692,
+        "nodes": 1.0,
+        "nodes_per_runtime_hour": 0.9991410162572495,
+        "root_LP_seconds": 205.05,
+        "root_processing_end": 220.43099999427795,
+        "first_nonroot": null,
+        "post_root_seconds": 3382.6640000343323,
+        "peak_RSS": 2368479232,
+        "cuts_generated": [],
+        "valid_UB": 0.6306505800203936,
+        "accepted_LB": 0.5687116104049206,
+        "scientific_replay_and_independent_audit_PASS": true,
+        "new_optimize_calls": 1
+      },
+      "production_tail_LP_attempts_per_controller_wall_hour": 15.960997068049803,
+      "production_tail_setup_excluded": true
+    },
+    "recommended_configuration": "재시작 가능한 external best-bound OPEN 큐와 cold child LP(Method=2, Crossover=0, LPWarmStart=0, BarConvTol=1e-8, Threads=1, 기존 오차/Seed), 원본 행렬에 대한 OPTIMAL 후 exact dyadic bounded-Lagrangian 인증, full incumbent replay, 양쪽 binary 자식 보존 및 crash-safe ledger. 현재는 측정된 후속 조사용 production candidate이며 0.5% 달성에 실용적인 solver로 승인하지 않음.",
+    "remaining_bottleneck": "native는 ROOT 완료 후 실질적인 tree/bound 진전이 없었다. cold barrier는 새 자식 52개를 OPTIMAL로 끝냈지만 중앙값 약 198초와 인증값 손실 중앙값 약 0.0031을 보였고, 원본 injection_P/Q의 stationarity 잔차와 넓은 경계가 그 손실을 주도했다. inherited global floor를 넘는 노드 LB나 exact fathoming이 전혀 없어 gap 9.821440204%가 유지되었다. warm child 2개는 basis가 수용됐어도 큰 잔차/Kappa와 TIME_LIMIT 때문에 속도 개선 근거가 되지 못했다.",
+    "next_action": "저장된 OPTIMAL LP 쌍대 벡터에 대해 injection_P/Q와 연결된 PCS 등식 블록의 stationarity 잔차를 함께 보정하고, 원본 목적함수·행렬·경계를 그대로 사용해 exact bounded-Lagrangian 인증이 inherited LB를 넘는지 검사하는 optimize=0 파일럿을 정확히 한 번 사전 등록한다. 이번 작업에서는 실행하지 않는다.",
+    "next_action_count": 1,
+    "next_action_executed": false,
+    "proof_state": {
+      "complete_OPEN_partition": true,
+      "OPEN": 54,
+      "unresolved_OPEN": [
+        53
+      ],
+      "exact_fathomed": 0,
+      "full_original_incumbent_replay_PASS": true
+    },
+    "evidence_SHA256": {
+      "PACKAGE_AUDIT.json": "8f12f40f26fdfba2085e8aa623dcf914509aa1252ed65860008d016e6908e075",
+      "ARCHITECTURE_COMPARISON.json": "52a08459ede4d9e67c1abe3ada5e46fdf34b23f2e0d63da622c7b85072a933ab",
+      "CERTIFICATE_LOSS_ATTRIBUTION.json": "91e7f13be651b3a03bdaf769dbbbf3ec90a454da1cbe6676ffba5dd3e00ec461",
+      "INJECTION_DUAL_REPAIR_CHECK.json": "fef8e8ee414fb8dc2f849b1f9eae0eaffdab2f7cd134158cfaf19a6ed1015a22"
+    }
+  },
+  "scientific_base_PR": 177,
+  "scientific_base_HEAD": "b86486a6f58d6c39a1ea4ff2c7e984372b6087a5",
+  "scientific_authority_PR": 162,
+  "identity": {
+    "scientific": "1d922c91eb27056a5ccc79c92ef18146707099ab",
+    "A_SHA256": "45cd48423b8d7f19fed376b71e181277f559c9e71527c17f9322d0100f7f0df8",
+    "DATA_SHA256": "20aba68ffb3c4e29b0c9644d05e10ef33417ab92f6083edfb8906d6be8cb0467",
+    "objective": "0e2ee6d3d0a1ff628b24c04f453eccf08583b22dbe2dd2d23571caa5afa38335",
+    "binary_columns_SHA256": "9cf79e0b9c98a06c183ab28d1987320e2ce1614592b1b38f714db7ea063bc328",
+    "rows": 582808,
+    "columns": 306040,
+    "nnz": 5351612,
+    "root_relaxation": "Only original B types relaxed to C",
+    "node_changes": "Only inherited original B LB=UB=0/1",
+    "pruning_tolerance": "0"
+  },
+  "objective_identity_PASS": true,
+  "objective": "minimize rho",
+  "scientific_model_modifications": 0,
+  "initial": {
+    "LB": 0.5687116003498334,
+    "UB": 0.6306505800203936,
+    "gap": 0.09821441798809942
+  },
+  "final": {
+    "LB": 0.5687116104049206,
+    "UB": 0.6306505800203936,
+    "gap": 0.09821440204410836,
+    "initial_LB": 0.5687116003498334,
+    "initial_UB": 0.6306505800203936,
+    "LB_gain": 1.0055087207305746e-08,
+    "UB_gain": 0.0
+  },
+  "full_original_incumbent_replay_PASS": true,
+  "complete_OPEN_coverage": {
+    "PASS": true,
+    "complete_root_partition": true,
+    "expanded_parents_have_both_children": true,
+    "generated": 107,
+    "expanded": 53,
+    "OPEN": [
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62
+    ],
+    "exactly_fathomed": [],
+    "unresolved_OPEN": [
+      53
+    ],
+    "global_OPEN_min_LB_exact": "2561249396700875/4503599627370496",
+    "validated_UB_exact": "88756178661901/140737488355328",
+    "global_gap": 0.09821440204410836,
+    "all_other_generated_leaves_exactly_fathomed": true,
+    "global_bound_authority": "Complete binary partitions, exact terminal certificates, inherited valid bounds; min over ALL OPEN leaves including unsolved/unresolved/in-flight leaves"
+  },
+  "stages": {
+    "M0": "기존 ROOT의 수치 정체를 보존하고 운영자 중단. 기존 OPTIMAL ROOT의 정확한 인증을 재사용하여 새 ROOT 재실행 없이 20개 자식 벤치마크 및 OPEN 후속 탐색 완료.",
+    "M1": "600s 기존 canary 반복 없이 Cuts=0/Heuristics=0 native 대조 1회와 external 성능을 비교.",
+    "M2": "양쪽 자식, best-bound, 정확한 인증, fixing SHA, checkpoint, crash-safe 복구 및 volatile 독립 감사 캐시를 패키징.",
+    "M3": "native production 1회가 첫 60분 동안 유효 bound/tree 진전을 보이지 않아 clean stop 후 external로 전환.",
+    "M4": "조건부 primal 개입 0회. 노드의 실제 LB 상승 또는 exact fathoming이 없으면 실행하지 않는 등록 gate 적용.",
+    "M5": "fractional family와 현재 쌍대 row support 분석 후 certified pseudocost/fractionality/dual relevance로 분기 순서 조정. pruning에는 사용하지 않음.",
+    "M6": "P1 0.5% 목표 및 inherited acceptance가 없으면 P2 실행하지 않음. 원본 energy/count 목적함수와 기존 lock만 사전 준비.",
+    "M7": "재시작 가능한 전체 OPEN proof ledger, full original replay, source identity, 독립 감사 CLI 및 exactness fixture 제공.",
+    "M8": "M_EXACT_BB_TRACTABILITY_FAIL"
+  },
+  "native_runs": [
+    {
+      "UTC": "2026-10-07T17:38:47.283577+00:00",
+      "name": "cuts0_control",
+      "kind": "control",
+      "Status": 9,
+      "Runtime": 1800.1829998493195,
+      "Work": 3803.5252811277314,
+      "NodeCount": 2.0,
+      "SolCount": 1,
+      "IterCount": 181531.0,
+      "BarIterCount": 49,
+      "ObjVal": 0.6306505800203936,
+      "ObjBound": 0.5687116104049206,
+      "optimize_calls": 1,
+      "callback_errors": [],
+      "exception": null,
+      "stop_reason": null,
+      "wall_optimize_seconds": 1800.6148674000287,
+      "build_seconds": 2.8367452999809757,
+      "times": {
+        "presolve_end": 14.672999858856201,
+        "barrier_start": 40.19700002670288,
+        "barrier_end": 156.00600004196167,
+        "crossover_start": 156.24499988555908,
+        "crossover_end": 237.29900002479553,
+        "root_complete": 237.75600004196167,
+        "first_MIPNODE": 242.54699993133545,
+        "first_nonroot": 286.80200004577637,
+        "first_branch_observed": 254.2279999256134,
+        "first_incumbent": 0.026000022888183594
+      },
+      "phase_events": [
+        {
+          "event": "presolve_end",
+          "Runtime": 14.672999858856201,
+          "Work": 24.166080239580005,
+          "literal": "Presolve time: 14.57s"
+        },
+        {
+          "event": "barrier_start",
+          "Runtime": 40.19700002670288,
+          "Work": 25.411119771080006,
+          "literal": "Barrier statistics:"
+        },
+        {
+          "event": "barrier_end",
+          "Runtime": 156.00600004196167,
+          "Work": 25.411119771080006,
+          "literal": "Barrier solved model in 49 iterations and 155.99 seconds (281.23 work units)"
+        },
+        {
+          "event": "crossover_start",
+          "Runtime": 156.24499988555908,
+          "Work": 25.411119771080006,
+          "literal": "Root crossover log..."
+        },
+        {
+          "event": "crossover_end",
+          "Runtime": 237.29900002479553,
+          "Work": 25.411119771080006,
+          "literal": "Crossover time: 81.27 seconds (132.36 work units)"
+        },
+        {
+          "event": "root_complete",
+          "Runtime": 237.75600004196167,
+          "Work": 25.411119771080006,
+          "literal": "Root relaxation: objective 5.687116e-01, 180009 iterations, 221.92 seconds (388.57 work units)"
+        },
+        {
+          "event": "first_branch_observed",
+          "Runtime": 254.2279999256134,
+          "node_count": 0.0,
+          "nodes_left": 2.0,
+          "exact_branch_timestamp": false
+        }
+      ],
+      "restricted": false,
+      "native_tree_restart_supported": false,
+      "bound_authority": {
+        "PASS": true,
+        "reasons": [],
+        "global_LB_candidate": 0.5687116104049206,
+        "authority": "Inherited full original native MILP certificate contract; not an exact rational external LP certificate"
+      },
+      "valid_UB": 0.6306505800203936,
+      "old_UB": 0.6306505800203936,
+      "UB_improvement": 0.0,
+      "peak_RSS": 2539651072,
+      "all_incumbent_events_saved": 1,
+      "improving_valid_candidates": 0,
+      "objective_identity_after_PASS": true,
+      "severe_numerical_warnings": [],
+      "start_acceptance_evidence": [
+        "Loaded user MIP start with objective 0.630651"
+      ],
+      "native_tree_not_restartable": true,
+      "available_native_node_ledger": "All observed MIPNODE counts; Gurobi does not expose every internal node proof through this interface",
+      "cut_summary": [],
+      "global_gap": 0.09821440204410836,
+      "raw_derived_global_LB": 0.5687116104049206,
+      "accepted_global_LB": 0.5687116104049206,
+      "raw_receipt_source": "runs/cuts0_control/RESULT.json",
+      "raw_receipt_SHA256": "a7780e8db4d000f6094c16255d0ea362e84956f0460aa7da78867509bc0cdf05"
+    },
+    {
+      "UTC": "2026-10-07T18:42:56.531635+00:00",
+      "name": "native_production_initial",
+      "kind": "production",
+      "Status": 11,
+      "Runtime": 3603.0950000286102,
+      "Work": 7504.217134146692,
+      "NodeCount": 1.0,
+      "SolCount": 1,
+      "IterCount": 180009.0,
+      "BarIterCount": 49,
+      "ObjVal": 0.6306505800203936,
+      "ObjBound": 0.5687116104049206,
+      "optimize_calls": 1,
+      "callback_errors": [],
+      "exception": null,
+      "stop_reason": "FIRST_HOUR_NO_MATERIAL_BOUND_OR_TREE_PROGRESS",
+      "wall_optimize_seconds": 3603.4887555000023,
+      "build_seconds": 2.5445020000333898,
+      "times": {
+        "presolve_end": 14.23199987411499,
+        "barrier_start": 38.098999977111816,
+        "barrier_end": 144.51399993896484,
+        "crossover_start": 144.731999874115,
+        "crossover_end": 219.98799991607666,
+        "root_complete": 220.43099999427795,
+        "first_MIPNODE": 220.47499990463257,
+        "first_nonroot": null,
+        "first_branch_observed": 222.71099996566772,
+        "first_incumbent": 0.019999980926513672
+      },
+      "phase_events": [
+        {
+          "event": "presolve_end",
+          "Runtime": 14.23199987411499,
+          "Work": 24.166080239580005,
+          "literal": "Presolve time: 14.14s"
+        },
+        {
+          "event": "barrier_start",
+          "Runtime": 38.098999977111816,
+          "Work": 25.411119771080006,
+          "literal": "Barrier statistics:"
+        },
+        {
+          "event": "barrier_end",
+          "Runtime": 144.51399993896484,
+          "Work": 25.411119771080006,
+          "literal": "Barrier solved model in 49 iterations and 144.50 seconds (281.23 work units)"
+        },
+        {
+          "event": "crossover_start",
+          "Runtime": 144.731999874115,
+          "Work": 25.411119771080006,
+          "literal": "Root crossover log..."
+        },
+        {
+          "event": "crossover_end",
+          "Runtime": 219.98799991607666,
+          "Work": 25.411119771080006,
+          "literal": "Crossover time: 75.45 seconds (132.36 work units)"
+        },
+        {
+          "event": "root_complete",
+          "Runtime": 220.43099999427795,
+          "Work": 25.411119771080006,
+          "literal": "Root relaxation: objective 5.687116e-01, 180009 iterations, 205.05 seconds (388.57 work units)"
+        },
+        {
+          "event": "first_branch_observed",
+          "Runtime": 222.71099996566772,
+          "node_count": 0.0,
+          "nodes_left": 2.0,
+          "exact_branch_timestamp": false
+        }
+      ],
+      "restricted": false,
+      "native_tree_restart_supported": false,
+      "bound_authority": {
+        "PASS": true,
+        "reasons": [],
+        "global_LB_candidate": 0.5687116104049206,
+        "authority": "Inherited full original native MILP certificate contract; not an exact rational external LP certificate"
+      },
+      "valid_UB": 0.6306505800203936,
+      "old_UB": 0.6306505800203936,
+      "UB_improvement": 0.0,
+      "peak_RSS": 2368479232,
+      "all_incumbent_events_saved": 1,
+      "improving_valid_candidates": 0,
+      "objective_identity_after_PASS": true,
+      "severe_numerical_warnings": [],
+      "start_acceptance_evidence": [
+        "Loaded user MIP start with objective 0.630651"
+      ],
+      "native_tree_not_restartable": true,
+      "available_native_node_ledger": "All observed MIPNODE counts; Gurobi does not expose every internal node proof through this interface",
+      "cut_summary": [],
+      "global_gap": 0.09821440204410765,
+      "raw_derived_global_LB": 0.568711610404921,
+      "accepted_global_LB": 0.5687116104049206,
+      "raw_receipt_source": "runs/native_production_initial/RESULT.json",
+      "raw_receipt_SHA256": "4bd1ca72254a0136a388bacb8317385a7492161f98c88e9fdc9a006abbc67436"
+    }
+  ],
+  "external": {
+    "by_configuration": {
+      "Method2_Crossover0_BarConvTol1e-08": {
+        "attempts": 53,
+        "OPTIMAL": 52,
+        "median_Runtime": 197.5659999847412,
+        "p90_Runtime": 275.12900004386904,
+        "certified_OPTIMAL_nodes_per_native_Runtime_hour": 17.193699795833616,
+        "raw_original_relaxed_replay_PASS": 1,
+        "max_original_row_violation": 5.334702217063558e-05,
+        "median_native_objective_to_exact_bound_loss": 0.0031157596757308004,
+        "peak_RSS": 2085220352,
+        "fractional_binaries": {
+          "min": 6861,
+          "median": 7926.0,
+          "max": 9318
+        }
+      },
+      "Method1_Crossover2_BarConvTol1e-08": {
+        "attempts": 2,
+        "OPTIMAL": 0,
+        "median_Runtime": 900.0584999322891,
+        "p90_Runtime": 900.0708998918533,
+        "certified_OPTIMAL_nodes_per_native_Runtime_hour": 0.0,
+        "raw_original_relaxed_replay_PASS": 0,
+        "max_original_row_violation": 58093423973.62045,
+        "median_native_objective_to_exact_bound_loss": null,
+        "peak_RSS": 1618735104,
+        "fractional_binaries": {
+          "min": null,
+          "median": null,
+          "max": null
+        }
+      },
+      "Method2_Crossover0_BarConvTol1e-12": {
+        "attempts": 1,
+        "OPTIMAL": 0,
+        "median_Runtime": 190.3880000114441,
+        "p90_Runtime": 190.3880000114441,
+        "certified_OPTIMAL_nodes_per_native_Runtime_hour": 0.0,
+        "raw_original_relaxed_replay_PASS": 0,
+        "max_original_row_violation": 1.1559510193492883e-07,
+        "median_native_objective_to_exact_bound_loss": null,
+        "peak_RSS": 1986670592,
+        "fractional_binaries": {
+          "min": null,
+          "median": null,
+          "max": null
+        }
+      }
+    },
+    "completed_child_LP_attempts": 56,
+    "OPTIMAL_children": 52,
+    "median_child_Runtime": 198.12299990653992,
+    "p90_child_Runtime": 288.595999956131,
+    "child_statuses": {
+      "OPTIMAL": 52,
+      "INFEASIBLE": 0,
+      "UNRESOLVED": 4
+    },
+    "basis_supplied": 2,
+    "basis_accepted": 2,
+    "warmstart_speedup_demonstrated": false,
+    "OPEN_ids": [
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106
+    ],
+    "generated_nodes": 107,
+    "processed_nodes": 54,
+    "prune_counts": {
+      "EXACT_LP_INFEASIBILITY": 0,
+      "CERTIFIED_LB_AT_LEAST_VALIDATED_UB": 0,
+      "INTEGER_REPLAY_PASS_AND_CERTIFIED_OPTIMUM": 0
+    },
+    "unresolved_retained_OPEN": [
+      53
+    ],
+    "unresolved_native_receipts": [
+      {
+        "node_id": 53,
+        "native_status": 11,
+        "LP_status": "UNRESOLVED",
+        "Runtime": 101.61299991607666,
+        "Work": 191.61093214460064,
+        "retained_OPEN": true,
+        "receipt_SHA256": "c5a34463b687e4b3b5698140bc5ed0ff27378be1a5c3062f4d96d72854471816"
+      }
+    ]
+  },
+  "external_session_wall_throughput": {
+    "barrier_accuracy_one_child_result.json": {
+      "LP_calls": 1,
+      "wall_seconds": 337.13400479999837,
+      "LP_attempts_per_controller_wall_hour": 10.678246479869827,
+      "setup_excluded": true
+    },
+    "cold_barrier_20node_result.json": {
+      "LP_calls": 20,
+      "wall_seconds": 4937.5450786,
+      "LP_attempts_per_controller_wall_hour": 14.582145348314471,
+      "setup_excluded": true
+    },
+    "production_tail_1_result.json": {
+      "LP_calls": 33,
+      "wall_seconds": 7443.144027500006,
+      "LP_attempts_per_controller_wall_hour": 15.960997068049803,
+      "setup_excluded": true
+    }
+  },
+  "resources": {
+    "completed_receipt_native_Runtime_sum": 23681.52499938011,
+    "completed_receipt_Work_sum": 46878.21640596972,
+    "peak_completed_receipt_RSS": 2999205888,
+    "new_completed_optimize_calls": 61,
+    "wall_elapsed_from_immutable_start": 28731.70795,
+    "seconds_until_immutable_deadline": 68.29205,
+    "sum_Runtime_is_not_wall": "Earlier M0 overlaps native runs and began before night; its incomplete native Runtime/Work excluded from this sum and reported separately.",
+    "M0_partial": {
+      "UTC": "2026-10-07T18:43:43.389814+00:00",
+      "operator_reason": "PREREGISTERED_INFEASIBLE_CROSSOVER_CLEANUP_HANDOFF",
+      "native_final_status": null,
+      "native_Status_unavailable": true,
+      "not_claimed_native_INTERRUPTED": true,
+      "last_observed_simplex": {
+        "iterations": 625946,
+        "objective": 111.78113,
+        "primal_infeasibility": 302879700.0,
+        "dual_infeasibility": 0.0,
+        "seconds": 8671.0,
+        "literal": "  625946    1.1178113e+02   3.028797e+08   0.000000e+00   8671s"
+      },
+      "owned_process": {
+        "PID": 5360,
+        "create_time": 1791389943.9465685,
+        "cwd": "C:\\v42_m1_exact_solver_redesign_20261008",
+        "cmdline": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "docs\\v42_m1_exact_solver_redesign_20261008\\external_bb.py"
+        ],
+        "memory": {
+          "rss": 830402560,
+          "vms": 3039227904,
+          "num_page_faults": 3394131,
+          "peak_wset": 2132680704,
+          "wset": 830402560,
+          "peak_paged_pool": 463624,
+          "paged_pool": 454536,
+          "peak_nonpaged_pool": 73552,
+          "nonpaged_pool": 73296,
+          "pagefile": 3039227904,
+          "peak_pagefile": 3039227904,
+          "private": 3039227904
+        },
+        "cpu": {
+          "user": 8424.53125,
+          "system": 49.84375,
+          "children_user": 0.0,
+          "children_system": 0.0
+        },
+        "checkpoint_SHA256": "51eb71888fb975b9300280b8f8317fac2b19f0ce254d0b7b9411edb7c2e8fbb4"
+      },
+      "registered_attempt_file_SHA256": {
+        "OPEN_CHECKPOINT.json": "51eb71888fb975b9300280b8f8317fac2b19f0ce254d0b7b9411edb7c2e8fbb4",
+        "EXTERNAL_MODEL_AUTHORITY.json": "3d6ab8d5c4b911ab1a8864a364f21371d85f8eef6d8d94be7d131eb181087513",
+        "external_nodes/0000/LP.log": "9aa4d4720d36065d1f3ab909e0626a11ef0f496953e72d36908bb586818186d4",
+        "external_nodes/0000/OPTIMIZE_ONCE.json": "98cea196c6ad56b708fbc3d50bd1f74a211dd8caa5c73f98ba101a1f0ba27ec5"
+      },
+      "OPEN_checkpoint_retained": true,
+      "root_OPTIMAL": false,
+      "exact_node_certificates": 0,
+      "valid_LB_UB_unchanged": true,
+      "original_M0_source_unchanged": true,
+      "A_stage_untouched": true,
+      "no_concurrent_duplicate_root": true
+    },
+    "selected_process_lifetime_resources": {
+      "PASS": true,
+      "UTC": "2026-10-08T00:38:56.642917+00:00",
+      "provenance": {
+        "PID": 50480,
+        "create_time": 1791412402.2157767,
+        "script": "C:\\v42_m1_exact_solver_redesign_20261008\\docs\\v42_m_practical_exact_solver_overnight_20261008\\selected_external_controller.py",
+        "cmdline": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "docs\\v42_m_practical_exact_solver_overnight_20261008\\selected_external_controller.py",
+          "--resume",
+          "--center",
+          "docs\\v42_m_practical_exact_solver_overnight_20261008\\runs\\native_production_initial\\BEST_VALID_POINT.npz",
+          "--initial-lb",
+          "0.5687116104049206",
+          "--seconds",
+          "7530",
+          "--session",
+          "production_tail_1"
+        ],
+        "cwd": "C:\\v42_m1_exact_solver_redesign_20261008",
+        "observer_start_UTC": "2026-10-07T22:39:54.047261+00:00",
+        "optimize_calls": 0,
+        "process_mutations": 0
+      },
+      "samples": 476,
+      "last": {
+        "UTC": "2026-10-08T00:38:41.639514+00:00",
+        "PID": 50480,
+        "seconds_since_process_creation": 7519.423737287521,
+        "RSS": 1183502336,
+        "Windows_lifetime_peak_wset": 2085228544,
+        "CPU_user": 7300.203125,
+        "CPU_system": 82.921875
+      },
+      "observed_peak_RSS": 2060976128,
+      "Windows_lifetime_peak_wset": 2085228544,
+      "optimize_calls": 0,
+      "process_mutations": 0,
+      "scope": "Windows OS peak working set since this selected solver process creation includes build, LP, replay and audit; observer itself began later",
+      "older_closed_process_outside_solve_peak_not_reconstructable": true
+    },
+    "peak_known_RSS_including_selected_Windows_lifetime_peak": 2999205888
+  },
+  "tests": {
+    "ARCHIVED_IMPORT_BASIS_TESTS.json": {
+      "PASS": true,
+      "optimize_calls": 0,
+      "existing_OPTIMAL_root_certificate_recomputed": true,
+      "historical_nonpassing_primal_not_accepted_as_LB": true,
+      "same_domain_nonoptimal_basis_is_hint_only": true,
+      "basis_bytes_SHA_identical": true,
+      "both_children_preserved": true,
+      "unresolved_first_child_kept_OPEN": true,
+      "next_unprocessed_sibling_selected": true,
+      "registered_floor_not_decreased": true,
+      "UTC": "2026-10-08T00:40:23.360668+00:00"
+    },
+    "CHECKED_RECEIPT_CONSUMPTION_TESTS.json": {
+      "PASS": true,
+      "optimize_calls": 0,
+      "same_consumption_guard_used_for_new_and_saved_inflight_receipt": true,
+      "failure_tests": [
+        {
+          "case": "INDEPENDENT_CERTIFICATE_AUDIT_FAIL",
+          "PASS": true,
+          "durable_queue_unchanged": true,
+          "previous_bounds_retained": true
+        },
+        {
+          "case": "EXACT_INFEASIBILITY_VS_KNOWN_WITNESS",
+          "PASS": true,
+          "durable_queue_unchanged": true,
+          "previous_bounds_retained": true
+        },
+        {
+          "case": "CANDIDATE_BELOW_REGISTERED_GLOBAL_FLOOR",
+          "PASS": true,
+          "durable_queue_unchanged": true,
+          "previous_bounds_retained": true
+        }
+      ],
+      "valid_proof_preserves_both_children": true,
+      "independent_audit_precedes_durable_queue_mutation": true,
+      "UTC": "2026-10-08T00:40:25.261773+00:00"
+    },
+    "DUAL_SUPPORT_BRANCH_TESTS.json": {
+      "PASS": true,
+      "optimize_calls": 0,
+      "vanishing_support_charge_binary_not_prioritized_over_material_node_binary": true,
+      "zero_support_reverts_original_rank": true,
+      "deterministic_ranking": true,
+      "both_children_preserved": true,
+      "heuristic_score_never_prunes": true,
+      "UTC": "2026-10-08T00:40:24.688710+00:00"
+    },
+    "INJECTION_DUAL_REPAIR_TESTS.json": {
+      "PASS": true,
+      "tests": 2,
+      "optimize_calls": 0
+    },
+    "NODE_PROOF_GUARD_TESTS.json": {
+      "PASS": true,
+      "optimize_calls": 0,
+      "UTC": "2026-10-07T19:43:27.330021+00:00",
+      "root_conflict_stops": true,
+      "child_containing_accepted_witness_conflict_stops": true,
+      "other_child_not_falsely_flagged": true,
+      "unverified_infeasibility_never_pruned": true,
+      "OPEN_preserved_on_conflict": true
+    },
+    "OWNED_CONTROLLER_GUARD_TESTS.json": {
+      "PASS": true,
+      "optimize_calls": 0,
+      "current_owned_controller_observed": null,
+      "own_parallel_controller_blocks_start": true,
+      "unrelated_A_stage_excluded": true,
+      "UTC": "2026-10-08T00:40:24.185370+00:00"
+    },
+    "PRODUCTION_RESTART_TESTS.json": {
+      "PASS": true,
+      "optimize_calls": 0,
+      "infinite_default_parameter_metadata_normalized_before_digest": true,
+      "unresolved_recovery_keeps_OPEN_domain": true,
+      "failed_attempt_bytes_archived": true,
+      "inflight_recovery_keeps_OPEN_domain": true,
+      "checkpoint_reload_identical": true,
+      "crash_safe_recovery_intent_tests": [
+        {
+          "stage": "AFTER_INTENT",
+          "PASS": true,
+          "OPEN_retained": true,
+          "archive_bytes_identical": true,
+          "recovery_idempotent": true
+        },
+        {
+          "stage": "AFTER_ARCHIVE",
+          "PASS": true,
+          "OPEN_retained": true,
+          "archive_bytes_identical": true,
+          "recovery_idempotent": true
+        },
+        {
+          "stage": "AFTER_CHECKPOINT",
+          "PASS": true,
+          "OPEN_retained": true,
+          "archive_bytes_identical": true,
+          "recovery_idempotent": true
+        }
+      ],
+      "incumbent_identity_tests": [
+        {
+          "case": "POINT_SHA_TAMPER",
+          "rejected": true,
+          "OPEN_unchanged": true
+        },
+        {
+          "case": "RHO_UB_MISMATCH",
+          "rejected": true,
+          "OPEN_unchanged": true
+        },
+        {
+          "case": "REPLAY_SHA_TAMPER",
+          "rejected": true,
+          "OPEN_unchanged": true
+        },
+        {
+          "case": "STORED_REPLAY_FAIL",
+          "rejected": true,
+          "OPEN_unchanged": true
+        },
+        {
+          "case": "FRESH_REPLAY_FAILURE",
+          "rejected": true,
+          "OPEN_unchanged": true
+        }
+      ],
+      "partial_LP_basis_preserved_without_bound_claim": true,
+      "basis_wrong_fixing_history_rejected": true,
+      "both_children_always_preserved": true,
+      "deterministic_pseudocost_rank": true,
+      "ranking_does_not_prune": true,
+      "live_M0_duplicate_guard_PASS": true,
+      "owned_M0_observed_alive_at_test": false,
+      "unrelated_A_stage_excluded": true,
+      "UTC": "2026-10-08T00:40:14.176339+00:00"
+    },
+    "PROOF_AUDIT_CACHE_TESTS.json": {
+      "PASS": true,
+      "tests": 3,
+      "optimize_calls": 0,
+      "immutable_scientific_arrays_changed": false
+    },
+    "PROTOCOL_TESTS.json": {
+      "PASS": true,
+      "optimize_calls": 0,
+      "tests": [
+        "Full-domain valid native bound eligible",
+        "Restricted bound never global even with TIME_LIMIT",
+        "Native bound contradicting independently validated UB rejected",
+        "Objective/domain identity failure rejected",
+        "NUMERIC status rejected",
+        "Callback error cannot certify LB",
+        "Severe numerical warning rejected",
+        "Advisory coefficient range is recorded but is not itself solver failure",
+        "Immutable task receipt start gives exactly 28800s, reserve subtracts without resetting",
+        "H64 exact prior axes, H=0 center, original matrix/objective and continuous bounds retained"
+      ],
+      "UTC": "2026-10-08T00:40:13.297381+00:00"
+    }
+  },
+  "primal_interventions": 0,
+  "P2_executed": false,
+  "P2_preparation": {
+    "UTC": "2026-10-07T17:59:46.751275+00:00",
+    "optimize_calls": 0,
+    "P1_scientific_objective_unchanged": true,
+    "conditional_only": true,
+    "P1_target_not_yet_reached": true,
+    "P2_executed": false,
+    "contract_git_path": "docs/v42_single_worker_single_thread_a1_m1/M1_OBJECTIVE_CONTRACT.json",
+    "contract_scientific_commit": "1d922c91eb27056a5ccc79c92ef18146707099ab",
+    "contract_SHA256": "27b0c6542ea97649ac239a110cfc70bca46aaec3a97472cd6e69662f58f7f2ee",
+    "P2_order": [
+      "movement_energy",
+      "movement_count"
+    ],
+    "P1_lock_epsilon": 1e-07,
+    "component_lock_epsilon": 1e-08,
+    "projected_objectives_SHA256": "0e50ff6670fd3ec9ce5b97504c89f57f1737f4dbd901e65fda2cbfa42b124bb8",
+    "independent_inverse_identity": {
+      "axes_SHA256": "eae23c568d4ec77b689593e2040608fae7a0f417c37e6a4bb75ac46fc8ee958f",
+      "elimination_SHA256": "bac4329a3e0bb78c120bdfdd971e5915bbba1369a9df5e491bfb04047cf7a998",
+      "original_compact_columns": 325781,
+      "selected_columns": 306040,
+      "all_alias_weights_exactly_one": true
+    },
+    "components": [
+      {
+        "source_terms": 198986,
+        "native_omitted_zero_terms": 0,
+        "nonzero_C3A_coefficients": 198986,
+        "nonrepresentable_count": 0,
+        "examples": [],
+        "binary64_exact": true,
+        "component": "movement_energy",
+        "constant_exact": "0",
+        "independent_full_vector_value": 95.27190474246622,
+        "projected_C3A_value": 95.27190474246622,
+        "difference": 0.0,
+        "independent_inverse_within_1e_8": true
+      },
+      {
+        "source_terms": 198986,
+        "native_omitted_zero_terms": 0,
+        "nonzero_C3A_coefficients": 198986,
+        "nonrepresentable_count": 0,
+        "examples": [],
+        "binary64_exact": true,
+        "component": "movement_count",
+        "constant_exact": "0",
+        "independent_full_vector_value": 7.0,
+        "projected_C3A_value": 7.0,
+        "difference": 0.0,
+        "independent_inverse_within_1e_8": true
+      }
+    ],
+    "ready_if_P1_accepted": true,
+    "gate": "Fresh original full replay, unchanged P1 objective identity and full global domain coverage at gap <=0.005, followed by inherited v42_integrated.certificate.make acceptance. P2 cannot begin before this gate."
+  },
+  "root_import": {
+    "lower_bound": 0.5671374761409242,
+    "exact_rational": "250511296261353252293082893681936998732457532150788146129617331549029865/441711766194596082395824375185729628956870974218904739530401550323154944",
+    "dyadic_accumulation_exponent": 337,
+    "matrix_nonzeros": 5351612,
+    "nonzero_dual_products_evaluated": 3951717,
+    "columns_with_exact_residual_and_bound_min": 306040,
+    "exact_pi_rhs_and_constant": 0.6632680106085022,
+    "exact_bound_correction": -0.0961305344675779,
+    "valid_for_all_supplied_matrix_relaxed_feasible_points": true,
+    "valid_for_original_integer_points_if_all_added_rows_independently_valid": true,
+    "precision": "Exact Python integer dyadic products/sums and Fraction final ratio; lower float outward-rounded",
+    "UTC": "2026-10-07T19:39:02.353608+00:00",
+    "optimize_calls": 0,
+    "source_status": 2,
+    "archived_completed_LP_only": true,
+    "source_identity_SHA256": "deb60815f706c54132b5ac7f8ae487288f18091ca15c7c12ea368ba7eb78dff6",
+    "source_result_SHA256": "6039503a0ae0a1f73b14c9c476aa6f7498304e2ae9937dce9db560643ec2b0c8",
+    "source_point_SHA256": "f4641b0ea6e947db95144b74b22df4b49494c3b7c2c1469506b1fc458ccc747a",
+    "new_root_solve_claimed": false,
+    "new_basis_claimed": false,
+    "source_primal_replay": {
+      "PASS": false,
+      "max_row_violation": 2.805600374244932e-08,
+      "max_bound_violation": 0.0,
+      "objective": 0.568711942993466
+    },
+    "primal_objective_not_promoted_as_LB": true,
+    "original_objective_identity_PASS": true
+  },
+  "numerical_conditioning": {
+    "UTC": "2026-10-07T18:01:48.361848+00:00",
+    "optimize_calls": 0,
+    "model_builds": 0,
+    "objective_identity_PASS": true,
+    "A_SHA256": "45cd48423b8d7f19fed376b71e181277f559c9e71527c17f9322d0100f7f0df8",
+    "DATA_SHA256": "20aba68ffb3c4e29b0c9644d05e10ef33417ab92f6083edfb8906d6be8cb0467",
+    "raw": {
+      "rows": 582808,
+      "cols": 306040,
+      "nnz": 5351612,
+      "binaries": 9322,
+      "continuous": 296718,
+      "coefficient_range": {
+        "nonzero": 5351612,
+        "absolute_min": 1.0006451962467139e-13,
+        "absolute_max": 392.3141121612922
+      },
+      "RHS_range": {
+        "nonzero": 443437,
+        "absolute_min": 1.6543612251060553e-24,
+        "absolute_max": 1634.6421340053842
+      },
+      "lower_bound_range": {
+        "nonzero": 71097,
+        "absolute_min": 3.248202479804666e-08,
+        "absolute_max": 1569.2564486451708
+      },
+      "upper_bound_range": {
+        "nonzero": 306040,
+        "absolute_min": 4.457606901440015e-08,
+        "absolute_max": 1634.2583673960216
+      },
+      "all_bounds_finite": true,
+      "free_columns": 0,
+      "zero_objective_columns": 306039,
+      "nonzero_matrix_coefficients_at_most_1e_10": 51484
+    },
+    "exact_duplicated_rows": {
+      "count": 0,
+      "fraction": 0.0,
+      "by_family": {},
+      "definition": "Identical raw CSR indices/coefficients, RHS binary64 and sense; no approximate or scaled row equivalence claimed"
+    },
+    "highly_connected_original_columns": [
+      {
+        "column": 239826,
+        "name": "rho_max",
+        "type": "C",
+        "nnz": 324871,
+        "objective": 1.0
+      },
+      {
+        "column": 239800,
+        "name": "injection_Q[STA12,70]",
+        "type": "C",
+        "nnz": 650,
+        "objective": 0.0
+      },
+      {
+        "column": 237563,
+        "name": "injection_P[STA12,70]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 237565,
+        "name": "injection_P[STA12,72]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 237569,
+        "name": "injection_P[STA12,76]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 237570,
+        "name": "injection_P[STA12,77]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 237573,
+        "name": "injection_P[STA12,80]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 239802,
+        "name": "injection_Q[STA12,72]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 239803,
+        "name": "injection_Q[STA12,73]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 239804,
+        "name": "injection_Q[STA12,74]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 239805,
+        "name": "injection_Q[STA12,75]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 239807,
+        "name": "injection_Q[STA12,77]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 239808,
+        "name": "injection_Q[STA12,78]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 239810,
+        "name": "injection_Q[STA12,80]",
+        "type": "C",
+        "nnz": 648,
+        "objective": 0.0
+      },
+      {
+        "column": 237562,
+        "name": "injection_P[STA12,69]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 237564,
+        "name": "injection_P[STA12,71]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 237566,
+        "name": "injection_P[STA12,73]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 237567,
+        "name": "injection_P[STA12,74]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 237568,
+        "name": "injection_P[STA12,75]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 237571,
+        "name": "injection_P[STA12,78]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 237572,
+        "name": "injection_P[STA12,79]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 238495,
+        "name": "injection_Q[IDC10,70]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 238961,
+        "name": "injection_Q[STA03,70]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 238963,
+        "name": "injection_Q[STA03,72]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 239799,
+        "name": "injection_Q[STA12,69]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 239801,
+        "name": "injection_Q[STA12,71]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 239806,
+        "name": "injection_Q[STA12,76]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 239809,
+        "name": "injection_Q[STA12,79]",
+        "type": "C",
+        "nnz": 647,
+        "objective": 0.0
+      },
+      {
+        "column": 236711,
+        "name": "injection_P[STA03,70]",
+        "type": "C",
+        "nnz": 646,
+        "objective": 0.0
+      },
+      {
+        "column": 236713,
+        "name": "injection_P[STA03,72]",
+        "type": "C",
+        "nnz": 646,
+        "objective": 0.0
+      }
+    ],
+    "existing_points": [
+      {
+        "name": "native_control_root",
+        "point_SHA256": "cc3ff82b095023aca501c3fa3575b40c8a43455445fa3c008b21378219ee30fc",
+        "total": 306040,
+        "exactly_at_bound": 226239,
+        "within_1e_8_of_bound": 226239,
+        "within_1e_8_fraction": 0.7392465037250032,
+        "fractional_binaries_1e_8": 6992,
+        "rho": 0.5687116104049198
+      },
+      {
+        "name": "native_production_root",
+        "point_SHA256": "cc3ff82b095023aca501c3fa3575b40c8a43455445fa3c008b21378219ee30fc",
+        "total": 306040,
+        "exactly_at_bound": 226239,
+        "within_1e_8_of_bound": 226239,
+        "within_1e_8_fraction": 0.7392465037250032,
+        "fractional_binaries_1e_8": 6992,
+        "rho": 0.5687116104049198
+      },
+      {
+        "name": "archived_no_crossover_OPTIMAL_LP",
+        "point_SHA256": "f4641b0ea6e947db95144b74b22df4b49494c3b7c2c1469506b1fc458ccc747a",
+        "total": 306040,
+        "exactly_at_bound": 13224,
+        "within_1e_8_of_bound": 85340,
+        "within_1e_8_fraction": 0.27885243758985756,
+        "fractional_binaries_1e_8": 7454,
+        "rho": 0.568711942993466,
+        "exact_zero_RC": 18469,
+        "RC_within_1e_8": 232334,
+        "RC_within_1e_8_fraction": 0.7591622010194746
+      }
+    ],
+    "existing_logs": [
+      {
+        "name": "registered_M0_external",
+        "log_SHA256_at_snapshot": "9c2cc81bf9ad182523b2ac34624de10085895eaed6033bfaec6303e6e7291e56",
+        "mutable_at_snapshot": true,
+        "warnings_and_restarts": [
+          "Warning: Model contains large matrix coefficient range",
+          "Restart crossover...",
+          "Warning: 1 variables dropped from basis",
+          "Warning: switch to quad precision",
+          "Warning: 1 variables dropped from basis"
+        ],
+        "presolve_and_root_summary": [
+          "Presolve time: 2.02s",
+          "Presolved: 407278 rows, 307881 columns, 4438421 nonzeros",
+          " Factor NZ  : 5.720e+07 (roughly 700 MB of memory)",
+          " Factor Ops : 3.122e+10 (roughly 1 second per iteration)",
+          "Barrier solved model in 202 iterations and 725.94 seconds (1031.49 work units)"
+        ],
+        "Kappa": null,
+        "KappaExact": null,
+        "reason": "No new solve or attribute request; neither value appears in saved receipts/logs."
+      },
+      {
+        "name": "native_control",
+        "log_SHA256_at_snapshot": "9a3d5375ef5790ab089e9c3fa39c40c5f2cd0c3062b8375267e7488626f1ae01",
+        "mutable_at_snapshot": false,
+        "warnings_and_restarts": [
+          "Warning: Model contains large matrix coefficient range"
+        ],
+        "presolve_and_root_summary": [
+          "Presolve time: 14.57s",
+          "Presolved: 407856 rows, 287699 columns, 4511774 nonzeros",
+          "Root relaxation presolved: 371367 rows, 306760 columns, 4067060 nonzeros",
+          " Factor NZ  : 5.291e+07 (roughly 700 MB of memory)",
+          " Factor Ops : 2.762e+10 (roughly 1 second per iteration)",
+          "Barrier solved model in 49 iterations and 155.99 seconds (281.23 work units)",
+          "Crossover time: 81.27 seconds (132.36 work units)",
+          "Root relaxation: objective 5.687116e-01, 180009 iterations, 221.92 seconds (388.57 work units)"
+        ],
+        "Kappa": null,
+        "KappaExact": null,
+        "reason": "No new solve or attribute request; neither value appears in saved receipts/logs."
+      },
+      {
+        "name": "native_production",
+        "log_SHA256_at_snapshot": "cb30c61222d0a1619279b3b41398ccb89a99f9fa41d1a0a592695a52707243a1",
+        "mutable_at_snapshot": true,
+        "warnings_and_restarts": [
+          "Warning: Model contains large matrix coefficient range"
+        ],
+        "presolve_and_root_summary": [
+          "Presolve time: 14.14s",
+          "Presolved: 407856 rows, 287699 columns, 4511774 nonzeros",
+          "Root relaxation presolved: 371367 rows, 306760 columns, 4067060 nonzeros",
+          " Factor NZ  : 5.291e+07 (roughly 700 MB of memory)",
+          " Factor Ops : 2.762e+10 (roughly 1 second per iteration)",
+          "Barrier solved model in 49 iterations and 144.50 seconds (281.23 work units)",
+          "Crossover time: 75.45 seconds (132.36 work units)",
+          "Root relaxation: objective 5.687116e-01, 180009 iterations, 205.05 seconds (388.57 work units)"
+        ],
+        "Kappa": null,
+        "KappaExact": null,
+        "reason": "No new solve or attribute request; neither value appears in saved receipts/logs."
+      }
+    ],
+    "inference": "Poorly scaled coefficients and substantial bound/zero-reduced-cost degeneracy are plausible contributors. The registered M0 log directly records crossover restart, a dropped basis variable and quad precision. Exact cause of native post-branch internal work remains unobserved.",
+    "new_Kappa_solve": false,
+    "scientific_formulation_unchanged": true
+  },
+  "independent_package_audit_SHA256": "8f12f40f26fdfba2085e8aa623dcf914509aa1252ed65860008d016e6908e075",
+  "immutable_deadline": {
+    "task_start_UTC": "2026-10-07T16:53:34.812972+00:00",
+    "deadline_UTC": "2026-10-08T00:53:34.812972+00:00",
+    "wall_budget_seconds": 28800,
+    "start_authority": "Windows attachment creation UTC: earliest observed receipt of this overnight request",
+    "task_attachment_SHA256": "39c66ad25905382c07e308e307a8b7fab51696a01e3fe0fba87c963d9b5e6ea8",
+    "existing_M0_process_PID": 5360,
+    "existing_M0_worktree": "C:\\v42_m1_exact_solver_redesign_20261008",
+    "existing_M0_base": "b86486a6f58d6c39a1ea4ff2c7e984372b6087a5",
+    "deadline_immutable": true,
+    "A_stage_untouched": true
+  },
+  "reporting_git_HEAD": "f4c3b3248328f4efe76f849dd80852301ba4a973",
+  "final_publication_HEAD_policy": "Final commit HEAD, remote match and clean tree verified after report commit; reported in PR body and chat to avoid a self-referential commit hash",
+  "Draft_PR_URL": "https://github.com/BeaverVillage/MobileESS/pull/179",
+  "native_tree_restartable": false,
+  "external_OPEN_queue_restartable": true
+}

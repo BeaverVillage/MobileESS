@@ -1,0 +1,68 @@
+{
+  "PASS": true,
+  "optimize_calls": 0,
+  "infinite_default_parameter_metadata_normalized_before_digest": true,
+  "unresolved_recovery_keeps_OPEN_domain": true,
+  "failed_attempt_bytes_archived": true,
+  "inflight_recovery_keeps_OPEN_domain": true,
+  "checkpoint_reload_identical": true,
+  "crash_safe_recovery_intent_tests": [
+    {
+      "stage": "AFTER_INTENT",
+      "PASS": true,
+      "OPEN_retained": true,
+      "archive_bytes_identical": true,
+      "recovery_idempotent": true
+    },
+    {
+      "stage": "AFTER_ARCHIVE",
+      "PASS": true,
+      "OPEN_retained": true,
+      "archive_bytes_identical": true,
+      "recovery_idempotent": true
+    },
+    {
+      "stage": "AFTER_CHECKPOINT",
+      "PASS": true,
+      "OPEN_retained": true,
+      "archive_bytes_identical": true,
+      "recovery_idempotent": true
+    }
+  ],
+  "incumbent_identity_tests": [
+    {
+      "case": "POINT_SHA_TAMPER",
+      "rejected": true,
+      "OPEN_unchanged": true
+    },
+    {
+      "case": "RHO_UB_MISMATCH",
+      "rejected": true,
+      "OPEN_unchanged": true
+    },
+    {
+      "case": "REPLAY_SHA_TAMPER",
+      "rejected": true,
+      "OPEN_unchanged": true
+    },
+    {
+      "case": "STORED_REPLAY_FAIL",
+      "rejected": true,
+      "OPEN_unchanged": true
+    },
+    {
+      "case": "FRESH_REPLAY_FAILURE",
+      "rejected": true,
+      "OPEN_unchanged": true
+    }
+  ],
+  "partial_LP_basis_preserved_without_bound_claim": true,
+  "basis_wrong_fixing_history_rejected": true,
+  "both_children_always_preserved": true,
+  "deterministic_pseudocost_rank": true,
+  "ranking_does_not_prune": true,
+  "live_M0_duplicate_guard_PASS": true,
+  "owned_M0_observed_alive_at_test": false,
+  "unrelated_A_stage_excluded": true,
+  "UTC": "2026-10-08T00:40:14.176339+00:00"
+}

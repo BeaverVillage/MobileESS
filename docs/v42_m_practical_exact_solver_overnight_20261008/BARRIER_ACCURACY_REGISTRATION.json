@@ -1,0 +1,32 @@
+{
+  "UTC": "2026-10-07T21:14:08.520750+00:00",
+  "executed": false,
+  "optimize_calls": 0,
+  "condition": "Complete the bounded 20-node cold barrier benchmark, retain every OPEN leaf, observe original LP replay residual failures and/or material LP-objective to exact-certificate loss, and have at least 1200 s before the publication reserve.",
+  "experiment": "Exactly one fresh best-bound unprocessed child LP. No new ROOT LP and no repeat of the same child domain.",
+  "change_only_from_current_cold_configuration": {
+    "BarConvTol_old": 1e-08,
+    "BarConvTol_new": 1e-12
+  },
+  "TimeLimit": 900,
+  "Threads": 1,
+  "fixed_FeasibilityTol": 1e-08,
+  "fixed_OptimalityTol": 1e-08,
+  "fixed_IntFeasTol": 1e-08,
+  "all_physics_domain_objective_bounds_and_types_unchanged_except_original_binary_node_fixings": true,
+  "source_evidence": {
+    "first_child_Runtime": 167.97899985313416,
+    "first_child_original_max_row_violation": 5.243376399732824e-08,
+    "first_child_native_objective": 0.5687144446115007,
+    "first_child_exact_certified_LB": 0.5660308617937916,
+    "first_child_bound_gap": 0.002683582817709085
+  },
+  "no_parameter_sweep": true,
+  "no_new_cuts_or_threshold": true,
+  "comparison": "Report original residual and exact certificate loss on the new child; different fixing domains do not support a paired speedup claim.",
+  "acceptance": "Only OPTIMAL LP with independently recomputed original-array exact certificate updates a node LB; other outcomes remain OPEN.",
+  "objective_identity_failure_stop_optimize_0": true,
+  "immutable_deadline_SHA256": "09e376acb7353f9095f9268ecbc24907b7b296a515a5bd20c38411c74f1c16b7",
+  "official_barrier_accuracy": "https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#barconvtol",
+  "source_preflight_SHA256": "a55206207d838808c9df030c765209573b5b3b4e6be36cf79d923d21abc08773"
+}
