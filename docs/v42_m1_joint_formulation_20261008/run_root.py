@@ -16,6 +16,7 @@ def run(label):
         assert proof['matrix_SHA256']==sha(OUT/f'{label}_ADDED_MATRIX.npz') and proof['data_SHA256']==sha(OUT/f'{label}_DATA.npz') and proof['spec_SHA256']==sha(OUT/f'{label}_SPEC.json')
     if label=='B':assert read(OUT/'A_MATERIALITY_GATE.json')['PASS'] is False
     folder=OUT/'runs'/label;folder.mkdir(parents=True,exist_ok=True);assert not (folder/'OPTIMIZE_ONCE.json').exists()
+    runner_source=Path(__file__).read_bytes();(folder/'RUNNER_SOURCE.py').write_bytes(runner_source)
     A,d,n=arrays_for(label);original,od,_=load();identity=objective_identity(original,od)
     assert d['objective'][:n].tobytes()==od['objective'].tobytes() and d['constant'].tobytes()==od['constant'].tobytes() and np.array_equal(d['names'][:n],od['names'])
     assert not np.any(d['objective'][n:].view(np.uint64));e=dict(d,types=np.full(A.shape[1],'C'))
@@ -27,7 +28,13 @@ def run(label):
     m.Params.LogToConsole=0;m.Params.OutputFlag=1;m.Params.LogFile=str(folder/'NATIVE_SOLVER.log');m.update()
     actual,transport=arrays(m);assert actual.shape==A.shape and (actual!=A).nnz==0
     for key in e:assert np.array_equal(e[key],transport[key]),('NATIVE_TRANSPORT_CHANGED',key)
-    assert m.ModelSense==1;native_identity=verifier.verify(ROOT,dict(names=transport['names'][:n],objective=transport['objective'][:n],constant=transport['constant']),int(m.ModelSense));assert native_identity['PASS']
+    # NumPy widens the unified string dtype when longer auxiliary names are
+    # appended. Verify actual native original strings before canonicalizing
+    # ONLY their storage dtype to the original axis dtype; no truncation.
+    assert np.array_equal(transport['names'][:n],od['names'])
+    original_native_names=np.asarray(transport['names'][:n],dtype=od['names'].dtype)
+    assert np.array_equal(original_native_names,transport['names'][:n])
+    assert m.ModelSense==1;native_identity=verifier.verify(ROOT,dict(names=original_native_names,objective=transport['objective'][:n],constant=transport['constant']),int(m.ModelSense));assert native_identity['PASS']
     atomic(folder/'MODEL_IDENTITY.json',dict(PASS=True,objective=native_identity,original_A_SHA256=sha(hc.PARENT/'C3A_A.npz'),original_DATA_SHA256=sha(hc.PARENT/'C3A_DATA.npz'),new_variable_objective_exact_positive_zero=True,original_variable_axis_prefix_identical=True,only_root_B_relaxation=True,rows=A.shape[0],columns=A.shape[1],nnz=A.nnz))
     atomic(folder/'SOLVER_PARAMETERS.json',prior.parameters(m));setup=time.perf_counter()-begin;rss=[];stop=threading.Event();events=[];errors=[];last=-30.
     def monitor():
@@ -36,7 +43,7 @@ def run(label):
     def guarded(model,*args,**kwargs):
         nonlocal calls
         assert model is m and calls==0;assert read(OUT/'BOUNDED_EXACTNESS_TESTS.json')['PASS'];assert native_identity['PASS']
-        with (folder/'OPTIMIZE_ONCE.json').open('x',encoding='utf-8') as f:json.dump(dict(label=label,optimize_calls=1,UTC=stamp(),source_commit=git('rev-parse','HEAD'),runner_source_SHA256=sha(Path(__file__)),TimeLimit=600,Threads=1,original_scientific_objective=True),f,indent=2)
+        with (folder/'OPTIMIZE_ONCE.json').open('x',encoding='utf-8') as f:json.dump(dict(label=label,optimize_calls=1,UTC=stamp(),source_commit=git('rev-parse','HEAD'),runner_source_SHA256=hashlib.sha256(runner_source).hexdigest(),TimeLimit=600,Threads=1,original_scientific_objective=True),f,indent=2)
         calls+=1;return original_optimize(model,*args,**kwargs)
     gp.Model.optimize=guarded
     def callback(model,where):
