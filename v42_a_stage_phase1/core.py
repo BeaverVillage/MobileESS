@@ -177,7 +177,7 @@ This is a safe lower bound, not an assertion of exact native optimality.
         if (rlo < 0 and (not math.isfinite(upper[j]) or upper[j] >= 1e100)
                 or rhi > 0 and (not math.isfinite(lower[j]) or lower[j] <= -1e100)):
             exact = Fraction(float(c[j]))-sum((Fraction(float(a.data[k]))*Fraction(float(pi[a.indices[k]]))
-                for k in range(lo,hi)),Fraction(0))
+                for k in range(lo,hi) if a.data[k]!=0 and pi[a.indices[k]]!=0),Fraction(0))
             value = float(exact)
             rlo = value if Fraction(value) <= exact else np.nextafter(value,-np.inf)
             rhi = value if Fraction(value) >= exact else np.nextafter(value,np.inf)
@@ -190,7 +190,7 @@ This is a safe lower bound, not an assertion of exact native optimality.
                     candidates.append(np.nextafter(r*b, -np.inf))
         total = np.nextafter(total+min(candidates), -np.inf)
     # Exact rational dot for RHS is modest on the compact coupling axes.
-    rhs_exact = sum((Fraction(float(x))*Fraction(float(y)) for x, y in zip(pi, rhs)), Fraction(0))
+    rhs_exact = sum((Fraction(float(x))*Fraction(float(y)) for x, y in zip(pi, rhs) if x!=0 and y!=0), Fraction(0))
     rhs_float = float(rhs_exact)
     if Fraction(rhs_float) > rhs_exact: rhs_float = np.nextafter(rhs_float, -np.inf)
     return float(np.nextafter(total+rhs_float, -np.inf))

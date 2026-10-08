@@ -4,8 +4,8 @@ from v42_pr134_b1.common import atomic,record,sha,read
 from .policy import ROOT,OUT,STATIC,POLICY,BASE,OLD
 from .budget import establish
 
-def freeze():
-    establish();p=OUT/'CONTINUATION_SOURCE_FREEZE.json'
+def freeze(epoch=None):
+    establish();p=OUT/('CONTINUATION_SOURCE_FREEZE.json' if epoch is None else 'SOURCE_FREEZE_EPOCH_'+str(epoch)+'.json')
     if p.exists():raise PermissionError('CONTINUATION_SOURCE_ALREADY_FROZEN')
     head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     names=subprocess.check_output(['git','ls-files','*.py'],cwd=ROOT,text=True).splitlines()
@@ -13,10 +13,19 @@ def freeze():
     with zipfile.ZipFile(archive,'x',compression=zipfile.ZIP_DEFLATED) as z:
         for source in sources:z.write(source,source.relative_to(ROOT).as_posix())
     historical={str(q):sha(q) for q in OLD.rglob('*') if q.is_file()}
-    atomic(OUT/'HISTORICAL_PR180_BYTE_PRESERVATION_START.json',dict(PASS=True,base=BASE,files=historical))
+    historical_receipt=OUT/'HISTORICAL_PR180_BYTE_PRESERVATION_START.json'
+    if historical_receipt.exists():
+        if read(historical_receipt)!=dict(PASS=True,base=BASE,files=historical):
+            raise ValueError('HISTORICAL_PR180_BYTES_CHANGED_BETWEEN_SOURCE_EPOCHS')
+    else:atomic(historical_receipt,dict(PASS=True,base=BASE,files=historical))
     atomic(p,dict(PASS=True,schema=POLICY['schema'],git_head=head,base=BASE,
         execution_sources={str(q):sha(q) for q in sources},source_archive=record(archive),
         budget=record(OUT/'CONTINUATION_BUDGET.json'),policy=POLICY,
-        historical_PR180=record(OUT/'HISTORICAL_PR180_BYTE_PRESERVATION_START.json')))
+        historical_PR180=record(historical_receipt),
+        runtime_limit_clarification=record(OUT/'RUNTIME_LIMIT_USER_CLARIFICATION.json') if (OUT/'RUNTIME_LIMIT_USER_CLARIFICATION.json').exists() else None,
+        memory_user_override=record(OUT/'MEMORY_GUARDS_USER_OVERRIDE.json') if (OUT/'MEMORY_GUARDS_USER_OVERRIDE.json').exists() else None))
+    if epoch is not None:atomic(OUT/'ACTIVE_SOURCE_FREEZE.json',dict(PASS=True,receipt=record(p)))
     print('NEW_SOURCE_FROZEN',head,len(sources),flush=True)
-if __name__=='__main__':freeze()
+if __name__=='__main__':
+    import sys
+    freeze(None if len(sys.argv)==1 else sys.argv[1])

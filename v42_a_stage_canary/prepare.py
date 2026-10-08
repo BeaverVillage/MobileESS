@@ -25,7 +25,7 @@ def prepare(day):
     if day not in DAYS:raise PermissionError('REQUESTED_CANARY_ORDER_ONLY')
     folder=OUT/day;folder.mkdir(parents=True,exist_ok=True);static=STATIC/day;static.mkdir(parents=True,exist_ok=True)
     if (folder/'INITIAL_VERIFICATION.json').exists():raise PermissionError('CANARY_ALREADY_PREPARED')
-    t=perf_counter();frozen_data,frozen=load_frozen(day);expected=read(ROOT/'docs/v42_a_stage_v2_stress4_20261007/STATIC_SOURCE_DATA_IDENTITY.json')['dates'][day]
+    build_started=perf_counter();frozen_data,frozen=load_frozen(day);expected=read(ROOT/'docs/v42_a_stage_v2_stress4_20261007/STATIC_SOURCE_DATA_IDENTITY.json')['dates'][day]
     inputs=PRODUCTION/'inputs'/day;bundle=read(inputs/'NATIVE_INPUT.json')
     if record(frozen/'DATA.pkl')['sha256']!=expected['DATA_file']['sha256'] or record(inputs/'NATIVE_INPUT.json')['sha256']!=expected['frozen_native_input']['sha256'] or digest(asdict(frozen_data[3]))!=expected['resources_sha256'] or digest(bundle)!=digest(frozen_data[0]):raise ValueError('FROZEN_SCIENTIFIC_CANARY_IDENTITY_DRIFT')
     _,native,coeff,*_=bind(bundle,inputs,static/'BASE')
@@ -104,6 +104,6 @@ def prepare(day):
     receipt=dict(PASS=True,day=day,state=record(path),input=record(inputs/'NATIVE_INPUT.json'),frozen_data=record(frozen/'DATA.pkl'),
         rows=state['compact'].matrix.shape[0],cols=state['compact'].matrix.shape[1],nnz=state['compact'].matrix.nnz,
         original_integer_snapshot=base.fingerprint(),all_classes=len(roster),source_builders_same_as_May19=True,
-        projection_proofs=state['projection_proofs'],build_seconds=perf_counter()-t,solver_retuning=False)
+        projection_proofs=state['projection_proofs'],build_seconds=perf_counter()-build_started,solver_retuning=False)
     atomic(folder/'INITIAL_VERIFICATION.json',receipt);print('CANARY_PREPARED',day,receipt['rows'],receipt['cols'],flush=True)
     return state

@@ -1,0 +1,50 @@
+........................................................................ [ 19%]
+........................................................................ [ 38%]
+........................................................................ [ 57%]
+........................................................................ [ 76%]
+.......F.F.............................................................. [ 95%]
+................                                                         [100%]
+================================== FAILURES ===================================
+_____ test_external_byte_receipt_detects_corruption_and_unattested_files ______
+
+tmp_path = WindowsPath('D:/v42_may12_p1_exact_rescue_20261008/tmp/may12_rescue/suite/test_external_byte_receipt_det0')
+
+    def test_external_byte_receipt_detects_corruption_and_unattested_files(tmp_path):
+        out = tmp_path/'docs'; source = tmp_path.parent/(tmp_path.name+'_external_input.pkl')
+        source.write_bytes(b'frozen')
+        try:
+            expected = report.record(source)
+            write(out/'INPUT.json', {'input':expected})
+            assert report.verify_external_artifacts(out, tmp_path, tmp_path/'static')['PASS']
+            source.write_bytes(b'corrupt')
+            verification = report.verify_external_artifacts(out, tmp_path, tmp_path/'static')
+>           assert not verification['PASS']
+E           assert not True
+
+tests\test_v42_a_stage_stress_report.py:128: AssertionError
+_________ test_report_rechecks_distinct_gates_and_frozen_source_bytes _________
+
+tmp_path = WindowsPath('D:/v42_may12_p1_exact_rescue_20261008/tmp/may12_rescue/suite/test_report_rechecks_distinct_0')
+
+    def test_report_rechecks_distinct_gates_and_frozen_source_bytes(tmp_path):
+        out = tmp_path/'docs'; sources = {}; gates = {}
+        for name in report.REQUIRED_RUN_SOURCE_NAMES:
+            source = tmp_path/'v42_a_stage_domain_v2'/name
+            source.parent.mkdir(exist_ok=True)
+            source.write_text('# frozen source\n', encoding='utf8')
+            sources[str(source.resolve())] = report.record(source)['sha256']
+        for name in report.REQUIRED_STRESS_GATES:
+            path = out/(name+'.json'); write(path, {'PASS':True})
+            gates[name] = report.record(path)
+        write(out/'PERMIT.json', dict(schema='A_STAGE_V2_STRESS4_VERIFIED_PERMIT_V1',
+              run_order=list(report.DAYS), other_27_dates_authorized=False,
+              actual_reoptimization_authorized=False, execution_sources=sources, gate_receipts=gates))
+        first = report.verify_execution_freeze(out, tmp_path)
+>       assert first['PASS'] and len(first['gate_checks']) == 12
+E       assert (False)
+
+tests\test_v42_a_stage_stress_report.py:161: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_v42_a_stage_stress_report.py::test_external_byte_receipt_detects_corruption_and_unattested_files
+FAILED tests/test_v42_a_stage_stress_report.py::test_report_rechecks_distinct_gates_and_frozen_source_bytes
+2 failed, 374 passed in 28.64s

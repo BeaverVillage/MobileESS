@@ -1,0 +1,91 @@
+
+Gurobi 13.0.2 (win64) logging started Thu Oct  8 16:36:45 2026
+
+Set parameter LogFile to value "D:\v42_may12_p1_exact_rescue_20261008\docs\v42_may12_p1_exact_rescue_20261008\P1\S0\PRICE\B\14a370675c42\NATIVE_SOLVER.log"
+Set parameter TimeLimit to value 60
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  60
+MIPGap  0.005
+Method  2
+MIPFocus  3
+NodeMethod  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 13960 rows, 14069 columns and 62058 nonzeros (Min)
+Model fingerprint: 0x3c09e819
+Model has 936 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e+00, 8e+04]
+  Objective range  [4e-10, 6e-05]
+  Bounds range     [1e+00, 8e+04]
+  RHS range        [1e+00, 8e+04]
+
+Presolve removed 6946 rows and 3244 columns
+Presolve time: 0.02s
+Presolved: 7014 rows, 10825 columns, 45647 nonzeros
+
+Ordering time: 0.01s
+
+Barrier statistics:
+ Dense cols : 25
+ AA' NZ     : 4.481e+04
+ Factor NZ  : 1.770e+05 (roughly 9 MB of memory)
+ Factor Ops : 6.926e+06 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0  -5.31425085e-02 -1.77744322e+00  5.30e+03 9.97e-03  3.96e-01     0s
+   1  -3.32505622e-02 -1.18415696e+00  3.30e+03 2.44e-06  2.18e-01     0s
+   2  -3.97981530e-03 -8.80340756e-01  3.83e+02 2.89e-06  3.82e-02     0s
+   3  -7.67268381e-04 -2.01255520e-01  7.44e+01 3.92e-06  7.17e-03     0s
+   4  -2.49699049e-04 -4.15000548e-02  2.35e+01 1.65e-06  1.75e-03     0s
+   5  -2.60047630e-05 -1.24517829e-02  1.13e+00 1.43e-06  2.89e-04     0s
+   6  -1.62249204e-05 -5.30023561e-03  9.38e-02 5.85e-07  1.07e-04     0s
+   7  -1.80762201e-05 -5.64334245e-04  3.51e-05 7.23e-08  1.08e-05     0s
+   8  -3.57961156e-05 -4.36755089e-04  1.36e-07 5.41e-08  7.93e-06     0s
+   9  -5.11004506e-05 -3.11183139e-04  5.57e-08 3.36e-08  5.15e-06     0s
+  10  -6.52035115e-05 -2.67727848e-04  1.81e-08 2.74e-08  4.01e-06     0s
+  11  -6.84569195e-05 -2.41021591e-04  1.51e-08 2.35e-08  3.41e-06     0s
+  12  -6.95006535e-05 -1.99082679e-04  1.32e-08 1.72e-08  2.56e-06     0s
+  13  -7.51503885e-05 -1.84884327e-04  7.93e-09 1.49e-08  2.17e-06     0s
+  14  -7.69506217e-05 -1.56958388e-04  6.38e-09 1.06e-08  1.58e-06     0s
+  15  -8.31843702e-05 -1.43652499e-04  2.79e-09 8.58e-09  1.20e-06     0s
+  16  -8.65301462e-05 -1.15230562e-04  1.40e-09 3.82e-09  5.68e-07     0s
+  17  -9.00794176e-05 -1.01292112e-04  3.14e-10 1.55e-09  2.22e-07     0s
+  18  -9.05111377e-05 -9.72696517e-05  2.43e-10 8.34e-10  1.34e-07     0s
+  19  -9.14020022e-05 -9.59032461e-05  1.44e-10 7.39e-10  8.91e-08     0s
+  20  -9.26414324e-05 -9.49559128e-05  3.04e-11 6.07e-10  4.58e-08     0s
+  21  -9.31135476e-05 -9.33906957e-05  9.30e-12 3.17e-09  5.48e-09     0s
+  22  -9.32168931e-05 -9.32476048e-05  6.58e-12 3.29e-10  6.08e-10     0s
+  23  -9.32413011e-05 -9.32414599e-05  1.72e-13 3.40e-10  3.14e-12     0s
+
+Barrier solved model in 23 iterations and 0.14 seconds (0.20 work units)
+Optimal objective -9.32413011e-05
+
+Crossover log...
+
+    2019 DPushes remaining with DInf 1.1038547e+00                 0s
+       0 DPushes remaining with DInf 5.3448754e-01                 0s
+
+     243 PPushes remaining with PInf 6.9941797e-04                 0s
+       0 PPushes remaining with PInf 0.0000000e+00                 0s
+
+  Push phase complete: Pinf 0.0000000e+00, Dinf 1.6084092e+00      0s
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+    1891   -9.3241401e-05   0.000000e+00   1.608409e+00      0s
+Crossover time: 0.03 seconds (0.03 work units)
+    2215   -9.3241401e-05   0.000000e+00   0.000000e+00      0s
+
+Solved in 2215 iterations and 0.17 seconds (0.23 work units)
+Optimal objective -9.324140143e-05
+
+User-callback calls 2826, time in user-callback 0.02 sec

@@ -1,0 +1,16 @@
+{
+  "PASS": false,
+  "classification": "MAY12_PHASE1_RECOVERED_P1_INCONCLUSIVE",
+  "error": "PermissionError('MAY12_FROZEN_SOURCE_REQUIRED')",
+  "traceback": "Traceback (most recent call last):\n  File \"D:\\v42_may12_p1_exact_rescue_20261008\\v42_may12_rescue\\runner.py\", line 93, in run\n    priced,negative=full_pricing(native,s,None,raw,None,state['data'],state['domains'],state['ledger'],state['axes'],state['n'],state['grows'],local,owned,folder/'PRICE')\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_may12_p1_exact_rescue_20261008\\v42_a_stage_canary\\pricing.py\", line 59, in full_pricing\n    native_result,point_raw=native.solve(priced,folder,'LOCAL_PRICING')\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_may12_p1_exact_rescue_20261008\\v42_may12_rescue\\native.py\", line 88, in solve\n    try:return super().solve(snapshot,folder,component)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_may12_p1_exact_rescue_20261008\\v42_a_stage_acceptance\\native.py\", line 41, in solve\n    self.verify();remaining=self.remaining();folder=Path(folder);folder.mkdir(parents=True,exist_ok=True)\n    ^^^^^^^^^^^^^\n  File \"D:\\v42_may12_p1_exact_rescue_20261008\\v42_a_stage_acceptance\\native.py\", line 36, in verify\n    def verify(self):return verify()\n                            ^^^^^^^^\n  File \"D:\\v42_may12_p1_exact_rescue_20261008\\v42_may12_rescue\\execution.py\", line 16, in verify\n    if f.get('schema')!='MAY12_P1_ONLY_EXACT_RESCUE_V1' or not f.get('PASS'):raise PermissionError('MAY12_FROZEN_SOURCE_REQUIRED')\n                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nPermissionError: MAY12_FROZEN_SOURCE_REQUIRED\n",
+  "new_wall_seconds": 978.0283356999862,
+  "new_native_seconds": 32.57300090789795,
+  "new_Work": 35.84502282217376,
+  "new_native_calls": 131,
+  "timings": {
+    "recovered_activation_build_seconds": 161.43107929994585
+  },
+  "old_native_seconds": 233.89299654960632,
+  "P2_executed": false,
+  "automatic_followup": false
+}

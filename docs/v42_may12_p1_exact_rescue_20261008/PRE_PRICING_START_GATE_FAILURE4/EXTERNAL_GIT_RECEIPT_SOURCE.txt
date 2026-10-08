@@ -1,0 +1,40 @@
+import sys
+sys.path.insert(0,'D:/v42_m1_b2_root_validation_20261008/repo')
+from v42_physics_redesign.common import *
+from v42_b2_root_validation.package import audit,check_package,DEST,BASE185
+
+checks=audit();packaged=check_package()
+def command(*args):return subprocess.check_output(args,cwd=ROOT,text=True).strip()
+pr=json.loads(command('gh','api','repos/BeaverVillage/MobileESS/pulls/187'))
+head=command('git','rev-parse','HEAD')
+refs={line.split()[1]:line.split()[0] for line in command('git','ls-remote','--heads','origin',
+    'refs/heads/codex/v42-m1-b2-root-validation-20261008',
+    'refs/heads/codex/v42-m1-physics-strengthened-redesign').splitlines()}
+assert head==pr['head']['sha']==refs['refs/heads/codex/v42-m1-b2-root-validation-20261008']
+assert head==command('git','rev-parse','origin/codex/v42-m1-b2-root-validation-20261008')
+assert pr['base']['sha']==BASE185==refs['refs/heads/codex/v42-m1-physics-strengthened-redesign']
+assert pr['base']['ref']=='codex/v42-m1-physics-strengthened-redesign' and pr['draft']
+assert pr['state']=='open' and command('git','status','--porcelain')==''
+m=read(DEST/'SHA256_MANIFEST.json')
+prefix=DEST.relative_to(ROOT).as_posix()+'/'
+entries={prefix+n:v['sha256'] for n,v in m['files'].items()}
+entries.update({n:v['sha256'] for n,v in m['source_modules'].items()})
+for n in ('.gitattributes',prefix+'SHA256_MANIFEST.json'):entries[n]=sha(ROOT/n)
+assert set(command('git','diff','--name-only',BASE185,'HEAD').splitlines())==set(entries)
+for n,value in entries.items():
+    assert hashlib.sha256(subprocess.check_output(['git','show','HEAD:'+n],cwd=ROOT)).hexdigest()==value
+subprocess.run(['git','diff',BASE185,'HEAD','--check'],cwd=ROOT,check=True)
+decision=read(DEST/'B2_ROOT_FINAL_DECISION.json')
+write(REPORTS/'GIT_COMPLETION.json',dict(PASS=True,final_HEAD=head,Draft_PR_URL=pr['html_url'],
+    isDraft=pr['draft'],base_HEAD=pr['base']['sha'],base_branch=pr['base']['ref'],
+    remote_HEAD_equals_local=True,remote_PR_HEAD_equals_local=True,clean_working_tree=True,
+    committed_blobs_match_manifest=True,committed_scope_files=len(entries),
+    inherited_PR185_unchanged=checks['inherited'],packaged_evidence=packaged,
+    classification=decision['classification'],Runtime=decision['Runtime'],Work=decision['Work'],
+    native_optimize_calls=decision['native_optimize_calls'],postprocessing_native_calls=0,
+    native_LP_objective=decision['native_LP_objective'],exact_certified_LB=decision['exact_certified_LB'],
+    Delta_LB_B2_minus_old=decision['Delta_LB_B2_minus_old'],
+    final_valid_global_LB=decision['new_valid_global_LB'],valid_global_LB_improvement=0,
+    UB=decision['new_UB'],global_gap_percent=decision['global_gap_percent'],
+    Material_Gate_PASS=False,M1_ACCEPTED=False,next_action_executed=False))
+print('FINAL_GIT_PASS',head,pr['html_url'],'clean=True remote=True native=1')

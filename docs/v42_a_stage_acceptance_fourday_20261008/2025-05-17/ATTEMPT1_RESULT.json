@@ -1,0 +1,682 @@
+{
+  "day": "2025-05-17",
+  "A1_accepted": false,
+  "classification": "INCONCLUSIVE",
+  "practical_runtime_accepted": false,
+  "failure_reason": "TypeError('arg 5 (closure) must be tuple')",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\v42_a_stage_acceptance\\driver.py\", line 111, in run\n    result.update(integer(native,state,expanded,priced,day))\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\v42_a_stage_acceptance\\integer.py\", line 44, in run\n    zs,z=zero_model(state,typed,day);zp=Physical(zs,z);warm=warm_reindex(state,zs,oldwarm,state['n'])\n                                        ^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\v42_a_stage_acceptance\\physical.py\", line 21, in __init__\n    _,_,self.coeff,*_=bind(state['data'][0],Path('C:/v42_pr134_sc_execution_20261007/inputs')/day,STATIC/day/'PHYSICAL_REPLAY')\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\v42_pr134_b1\\native.py\", line 42, in bind\n    coeff=types.FunctionType(original.native_coefficients.__code__,dict(original.native_coefficients.__globals__,DAY=bundle['day']))(certificate)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: arg 5 (closure) must be tuple\n",
+  "native_seconds": 7.637000322341919,
+  "Work": 19.810630110803924,
+  "native_calls": 99,
+  "wall_seconds": 643.074545621872,
+  "peak_RSS_bytes": 2438975488,
+  "per_day_native_limit": 3600,
+  "practical_wall_target": 1800,
+  "model_sizes": [
+    {
+      "component": "ORIGINAL_P1",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\MODEL_IDENTITY.json",
+        "sha256": "cf1f3ce6882d36a53a174bae209a543191d6bab7e6946374be6ea9455fffbd2d",
+        "bytes": 1332
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\03fe450b4fd9\\MODEL_IDENTITY.json",
+        "sha256": "0fdfaab8ceea82552a501ad295fecf7642c8594d209acd5091389d3d309a2553",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\0407ef7870cc\\MODEL_IDENTITY.json",
+        "sha256": "117e67587d77dcf8212e7eb6a7d666b2fd6bc01b226135b9e46065f9517ceb4b",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\057467dc4789\\MODEL_IDENTITY.json",
+        "sha256": "33fb4911e59cc55cd529729a669ad8810fbb237cd8f5a6297a03987d609cc875",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\09e9b6c36fcb\\MODEL_IDENTITY.json",
+        "sha256": "db4d89d0a8ee1a8fab0b6a9863b9575f3233c2ceab268197e352a7e6ad984aa8",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\0a9fcd3c3bde\\MODEL_IDENTITY.json",
+        "sha256": "489cad1e79b0068dc569bd53403501de6984673d0285b73932416a6592aa059c",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\0fde7cf005bc\\MODEL_IDENTITY.json",
+        "sha256": "a09ac2051d079d5cd0235d7a1fb9ea39c62fee48150a2e568d475a9abfc6a8f5",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\14a78a41dbeb\\MODEL_IDENTITY.json",
+        "sha256": "dfd268fc7be5c03b4df4b122f7b33d624253baf734e0a1ba721957166deb22ef",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\17b4c9107c06\\MODEL_IDENTITY.json",
+        "sha256": "984ae28dd2cbc5107c1dfab3bd8b915c09994946b77c743ff1a3b99aa11ad8b5",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\1a7cd9444429\\MODEL_IDENTITY.json",
+        "sha256": "27829c48778d13ffd02aeecb186ff01c4368a428b8bac5c40db8d5e9c8dd51c7",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\1dbb6c93ed3e\\MODEL_IDENTITY.json",
+        "sha256": "76c7b536911b66ce9208cf0fda89ac56e927fee673c077774e02f5650301210c",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\221cebe16503\\MODEL_IDENTITY.json",
+        "sha256": "cd71d59800c28e8a23c0d14c504e6f8784c413d84e8a7595708c4df2ff06993d",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\23e95d4cf8a5\\MODEL_IDENTITY.json",
+        "sha256": "ee2c1ebb8baaa620817ad3511736641cda2a79c29449ab679d952265d06524b8",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\259e18c5372a\\MODEL_IDENTITY.json",
+        "sha256": "75c975992f102f6273ef37843e5fd162ff6b32376a14d5880668780a2c81f3d6",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\2ae7ca64b1f4\\MODEL_IDENTITY.json",
+        "sha256": "f6400df2282d7b6090135e718f59ac37fb1b52cf3379846bc5118822d8ad2f1c",
+        "bytes": 1370
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\2bd419845946\\MODEL_IDENTITY.json",
+        "sha256": "a845841caec7f837f6509b5f26810f3118f2e9c09bdca5e3cef38c4a747a4039",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\2c170ac1b388\\MODEL_IDENTITY.json",
+        "sha256": "042b6550bb5fb7d243d315a34ccc8e5c90958a9d8f014c5faf61d9bcd63b7dc9",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\2c3d378ef973\\MODEL_IDENTITY.json",
+        "sha256": "1aec90cd0246b0ee128339268bae304df3c1df9cc02b95923a4baae11c9cac3d",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\2c4fc46fe7f7\\MODEL_IDENTITY.json",
+        "sha256": "a3368933597da33ed80f59bc6e6edf08b13fe3b3db405967796109e4a43de480",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\2f72ebe73be4\\MODEL_IDENTITY.json",
+        "sha256": "a2f090d26f6d86cb8a80928fe999988303e7427e0c742eef45940e24ab26a3f5",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\35863b75d650\\MODEL_IDENTITY.json",
+        "sha256": "b6bf9605ec0525390e3521c5128d14c8529a2efd7017d72a807429900a2ad722",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\36b443e7d6b7\\MODEL_IDENTITY.json",
+        "sha256": "bb1ea754b99a0cb568b7ddcb531ac5f194e507e8ce6d6ace8167044c578ec928",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\39e74cecef49\\MODEL_IDENTITY.json",
+        "sha256": "60b1971317c115970988d9ad0e0d5324a7b1172b80160e025c483ac019ec2af5",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\42faa584a60a\\MODEL_IDENTITY.json",
+        "sha256": "cf18eb865919077ad36cfb64d552687a11201298f17f33042872e6c25e4cc690",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\4471d4e9af3b\\MODEL_IDENTITY.json",
+        "sha256": "dd88c9d2c1b834fe54338dda13b4a3b396e4dd9aea6aa3aa58bb399deba334cc",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\447b7edcd2d9\\MODEL_IDENTITY.json",
+        "sha256": "f5f21fc115fe82cac8acfdbd6d1ddac41d1270d4c56c9618b63a1c54d6300f28",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\451e9f2df63b\\MODEL_IDENTITY.json",
+        "sha256": "59d0bce1acbdf80969d74cb44b832d4eab2f3782930ff589cf5c9b5b1a541c86",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\4643bda15bc5\\MODEL_IDENTITY.json",
+        "sha256": "2e50d984ac348ca1337dbe1d701d36fa8a70e8c5a733102a72ec05966ed49857",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\480001c203fd\\MODEL_IDENTITY.json",
+        "sha256": "407aaea88bb7ea4c5a9ef3903df7fbb87c378b4d35d84a7d44859678d8134a06",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\48389439e57b\\MODEL_IDENTITY.json",
+        "sha256": "43ead9593e2de92f4bb2a47866b80e54eb0f75424a1d86a70935b1ce0b4b1f17",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\487b0fb9ceeb\\MODEL_IDENTITY.json",
+        "sha256": "066194428cd84ab0525f85fc99521467ece1279d01b3697c5a293ac6d35da9a8",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\4928d16e6c98\\MODEL_IDENTITY.json",
+        "sha256": "2ab9fb6108f719aeff726e6bdcc1feba170e3fbba73529dc7aea955f359b6d9f",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\51ef1fc8f9da\\MODEL_IDENTITY.json",
+        "sha256": "e36656edc45e97fac8e91a0703e03017d1d977efbff13205f16ca5a0a3bb9b97",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\532cf4ad4e31\\MODEL_IDENTITY.json",
+        "sha256": "ed524391ebc1939caf2546f6de009c486b0b1684f21df48ecedfc39d87cb60c5",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\605600636779\\MODEL_IDENTITY.json",
+        "sha256": "ba4ea0564570ac8ee4dfe69796dfb4e2c70671b715810effb6e3786f5bd06479",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\6684dd865d8b\\MODEL_IDENTITY.json",
+        "sha256": "2820bd18eb60bb4cb5fc364cd02375aa07bd14c7ae5b3c7c59e84bb2c0d9683c",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\66c0af9c7f59\\MODEL_IDENTITY.json",
+        "sha256": "6bbf9a7d8a853ca71c4b91a83ae468cdb28721d388288b13120adebff0cd8c7c",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\6a1beb43f955\\MODEL_IDENTITY.json",
+        "sha256": "e0c5e75f4dd58e5bdb88be7483fed82106202f83dde1a930a9159ed29b68a25c",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\6b369151c9ee\\MODEL_IDENTITY.json",
+        "sha256": "2f8775976aae399e53b7df5983e3fa8a3441ffcef747429487f005454738a18f",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\6d53bfebd742\\MODEL_IDENTITY.json",
+        "sha256": "714165774546f2241a0dd9e6585ea8f2e6be54b6837b7ecfe53b51368a7299aa",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\6f6ef2d1ce84\\MODEL_IDENTITY.json",
+        "sha256": "bc932c7ed63500c090fb7c4396076d1eee6c204ea6c61ea32cd0a8fc87e5195f",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\7052c1173b22\\MODEL_IDENTITY.json",
+        "sha256": "54c5c5c0d24d091c5815a6419c142194f1f2302feffa7b6e5bd04a9baed5c768",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\71fdc765e1c2\\MODEL_IDENTITY.json",
+        "sha256": "270371adb621e5bf669c01082f6031e2a000ff074dce6ea89e0e81d704dd9be2",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\763d3dd0a5c1\\MODEL_IDENTITY.json",
+        "sha256": "d50e0c6becb0d19f5e0ffd9ef4b5b6b29b122186e9d876b480a1f4f4d339f44c",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\7a465ac8f4dd\\MODEL_IDENTITY.json",
+        "sha256": "6469d8fa40535f7852ad2d509e1d00737aad1686c26ec8a066a95a433197b1a0",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\809c98087497\\MODEL_IDENTITY.json",
+        "sha256": "495d820da1d4548e6fe3177893aa60caa6bc334dddbb7470b3e4e7d5cf0c760a",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\80c10b381ca5\\MODEL_IDENTITY.json",
+        "sha256": "d99d39a833ab02a6295a1cce5803ea7afae0c28649a0cdc1450c5658f09c94b0",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\811a227ccd11\\MODEL_IDENTITY.json",
+        "sha256": "391189979e4d971feaafa268b3e4c4c1573ceb8d37a36dc8b6d79728b9726326",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\83e4c9a7d4e4\\MODEL_IDENTITY.json",
+        "sha256": "73e1b35d5b5008397f1b5ec3f50357caaa3e7fd0f7aad61287762f29f6562047",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\891e18e41200\\MODEL_IDENTITY.json",
+        "sha256": "d77f3f013fd4e0b52cbc7e2685657018376cc3ce94ff47b239f4c441eac37cba",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\89439b02949f\\MODEL_IDENTITY.json",
+        "sha256": "a2b1b23de689e82193cc434067af4c6a9ceb5264884a8fc779ad8ef601713a25",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\8a3ff39a3ef1\\MODEL_IDENTITY.json",
+        "sha256": "2feb51a201fbe2a4177a94aadac5cec5c91432c441468689f1ede2493105b0e2",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\8b15909584e8\\MODEL_IDENTITY.json",
+        "sha256": "3bfa7a8f9b9205d2e8ba6140809f5ef1e754cd741ba5fc41e5b7bf5a8eb1b3a4",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\8cb8efdd34ce\\MODEL_IDENTITY.json",
+        "sha256": "8d9cfa6693399d042c97be36860ef9e51263ed384a305e52e504e3fbd332b9cc",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\9a1a830fd178\\MODEL_IDENTITY.json",
+        "sha256": "158d7e2a91b1d7af6e43ee40ef85470de5e201d3135e3662354cb4a78a80339d",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\a341abd46616\\MODEL_IDENTITY.json",
+        "sha256": "116d055fd65d013547004e585983678b0e1028176e1897d72a5cab0b05342981",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\afdfbc808e3c\\MODEL_IDENTITY.json",
+        "sha256": "dbeb797365f63cedc8dc979117f88372a77d165ef856a8a531c2e6da06da2769",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\b00d16f4f380\\MODEL_IDENTITY.json",
+        "sha256": "81b86a2114a4d740004aa9db99d8c01d60f9bfa7efca8f3924c1f4a9c0eaecea",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\b24d344726c0\\MODEL_IDENTITY.json",
+        "sha256": "2ae4b2f00e490edab68f63f2ee9970217924aaa4d84d8ebc44c4e74c352c5c8f",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\b25a4a3771e1\\MODEL_IDENTITY.json",
+        "sha256": "f44af87f390b88655812e521c94e8ed0d091f924beacb24365731d588ccabc37",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\b28688010067\\MODEL_IDENTITY.json",
+        "sha256": "c55c2fd0547ea4a0eeb4cabf0de4caabffa9007b6182a127f627cd5828f79613",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\b3374c4f055e\\MODEL_IDENTITY.json",
+        "sha256": "0e94f720ce59c039921ce950d6618772d2393b3e8c1dcca37dcab0f0d7651e76",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\b423bea1bee3\\MODEL_IDENTITY.json",
+        "sha256": "c6bdfaeb0c133f989b392b342c25e4f88b1b5988df1c9c741d2ae09721a2880b",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\b4938b42d132\\MODEL_IDENTITY.json",
+        "sha256": "85c183ac11515eaec68dce3cf323078a4fb214f684a7fca796b67194ab829b18",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\c1ae75ae7de3\\MODEL_IDENTITY.json",
+        "sha256": "592005dc7151a1804db43433be83ed291d5da215f36da4aacca2754578877be4",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\c5da7e82cbf6\\MODEL_IDENTITY.json",
+        "sha256": "4476fc0c7ecfb09be7ff159dd9ea174ba0ad73722c8c76672e9b5182ac917a6b",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\c849561b9331\\MODEL_IDENTITY.json",
+        "sha256": "d16790ba354b77ac44ce0735b2f67538394ab9173a64bdc881b4ca16f683743c",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\d2fe04f99d67\\MODEL_IDENTITY.json",
+        "sha256": "ec95db21d70b09d7877ed95a2230b061874f776d5c8bfa37f00fda0974cb0c6f",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\d933c1332729\\MODEL_IDENTITY.json",
+        "sha256": "72410222e83bb6ad83cfd9fde7ad99d91ebf0c418847b5df328b4a3b125476ab",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\dbda4c5f4fa2\\MODEL_IDENTITY.json",
+        "sha256": "b883931b78ba1606fa6d2218c3a58dc6a4229f4bc64c3b517d3a177c79d44be2",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\decc8989b1a8\\MODEL_IDENTITY.json",
+        "sha256": "31e8fcb44d5975691b8f1eae3286f858fa1d7828ffa5245fe4a61cda56ab10b4",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\e904aae41fb0\\MODEL_IDENTITY.json",
+        "sha256": "664602bbc66cd1dddf12deb77113effdcd5de85e6391a0c91996e0e620e36bf3",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\eaae7ddc5b27\\MODEL_IDENTITY.json",
+        "sha256": "d7bd9872aae37cfe6866bf332f3f468e7779983fadd945715ae5cc0719d965ed",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\ef6837f4752e\\MODEL_IDENTITY.json",
+        "sha256": "7dc8e76d6f4a5d7b3b918599040d7c5a720bdc1205af954d03ccbd2a695d8a51",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\efc9b4015a07\\MODEL_IDENTITY.json",
+        "sha256": "ff72aa4022d24739431670e046d46b28a750e9061e49b93feb7f762df40e9ed8",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\f008a4981a5d\\MODEL_IDENTITY.json",
+        "sha256": "c29835c2150d974f6cd560ee1d5aff8a623b8b2ab26fb62bca6d5b531b9e1610",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\f0a282e9010c\\MODEL_IDENTITY.json",
+        "sha256": "303c8f41c82edf2624de7ba9a4e6fe846c380e5cb99b76de883998985b0679f6",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\f0f279bce750\\MODEL_IDENTITY.json",
+        "sha256": "6c6831fc41b68f71490f764c8fbdea6b876a0833615ff7e0eedf250c5bc63446",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\f2f9998fe1ea\\MODEL_IDENTITY.json",
+        "sha256": "cb2c030181521341e90662810c8ffe9dd66aaa5de0fda9cf386b302c7b1f0a4d",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\f57bdcaa6124\\MODEL_IDENTITY.json",
+        "sha256": "6ca4b99661b55145dd73965c08582ed221704e780cc29d5f3ecf7ae26f19d3b3",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "LOCAL_PRICING",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P1\\S0\\PRICE\\B\\faa7cc83ed2a\\MODEL_IDENTITY.json",
+        "sha256": "cfdecbd368ca2f396ec131bd17c28d4502398264f26e5ece5c3d3cf57356a542",
+        "bytes": 1365
+      }
+    },
+    {
+      "component": "INTEGER_CONTROL",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\INTEGER_CONTROL\\MODEL_IDENTITY.json",
+        "sha256": "b5d172a69f7bc5d8d8b15459099773413839dea582f5e8a31579b351a85ac0ba",
+        "bytes": 1354
+      }
+    },
+    {
+      "component": "P2",
+      "identity": {
+        "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-17\\P2\\MIGRATION_ACTIVE_PROBE\\MODEL_IDENTITY.json",
+        "sha256": "676ab87fd5af57eee80e325bd12983f50d47fc6a5114648cd1e3f99b25004379",
+        "bytes": 1363
+      }
+    }
+  ],
+  "native_runtime_excludes_build_pricing_python_and_validation": true
+}

@@ -14,7 +14,21 @@ from v42_a_stage_domain_v2.execution import require_action_authorized,guard_mode
 from v42_a_stage_domain_v2.status import initial_domain_status,close_feasibility,require_production_domain_accepted
 from v42_a_stage_domain_v2.telemetry import FutureRunTelemetry
 
+_coefficient_constructor=None
+
+def original_coefficients_for_day(original,certificate,day):
+    """Keep the immutable original constructor across repeated bindings."""
+    global _coefficient_constructor
+    if _coefficient_constructor is None:
+        candidate=original.native_coefficients
+        if candidate.__code__.co_freevars:raise ValueError('ORIGINAL_COEFFICIENT_CONSTRUCTOR_REQUIRED')
+        _coefficient_constructor=candidate
+    source=_coefficient_constructor
+    return types.FunctionType(source.__code__,dict(source.__globals__,DAY=day),
+        argdefs=source.__defaults__)(certificate)
+
 def date_route(function):
+    if getattr(function,'_v42_dynamic_bundle_day_routed',False):return function
     tree=ast.parse(inspect.getsource(function));changed=[]
     class Route(ast.NodeTransformer):
         def visit_Constant(self,node):
@@ -25,7 +39,8 @@ def date_route(function):
     tree=Route().visit(tree);ast.fix_missing_locations(tree)
     if len(changed)!=1:raise ValueError('DATE_ROUTING_SOURCE_SHAPE')
     ns=dict(function.__globals__);exec(compile(tree,inspect.getfile(function),'exec'),ns)
-    return ns[function.__name__]
+    routed=ns[function.__name__];routed._v42_dynamic_bundle_day_routed=True
+    return routed
 
 def bind(bundle,input_folder,output):
     import v42_root.common as common
@@ -39,7 +54,7 @@ def bind(bundle,input_folder,output):
     common.OUT=data.OUT=native.OUT=output;common.LOCAL=data.LOCAL=native.LOCAL=output
     # Original accepted C1 and power implementation, constants, weather hashes.
     certificate,power,idle,swing=temporal.load_power(bundle)
-    coeff=types.FunctionType(original.native_coefficients.__code__,dict(original.native_coefficients.__globals__,DAY=bundle['day']))(certificate)
+    coeff=original_coefficients_for_day(original,certificate,bundle['day'])
     temporal.native_coefficients=original.native_coefficients=lambda _certificate:coeff
     boundary.load_power=lambda _bundle:(certificate,power,idle,swing)
     boundary.native_coefficients=lambda _certificate:coeff

@@ -32,6 +32,10 @@ def full_pricing(native,original,master,raw,descriptor,data,domains,ledger,axes,
             if j<global_variables:c[j]=float(v)
     global_bound=interval_box_bound(original.matrix[g,:global_variables],c,pi[g],
         original.lower[:global_variables],original.upper[:global_variables],original.rhs[g])
+    if global_bound is None:
+        from v42_a_stage_acceptance.global_box import certify
+        global_bound,proof=certify(original,global_rows,global_variables,pi,c,axes.values())
+        atomic(Path(round_folder)/'ORIGINAL_ROW_GLOBAL_BOX_CERTIFICATE.json',proof)
     coupling_pi=np.asarray([pi[row] for row in axes.values()])
     aggregate_bound=None if global_bound is None else Fraction(global_bound)
     epsilon=Fraction(POLICY['price_epsilon'])

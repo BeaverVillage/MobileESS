@@ -1,0 +1,142 @@
+{
+  "day": "2025-05-10",
+  "prepared_for_future_runs": true,
+  "matrix_geometry": {
+    "NumVars": 14501.0,
+    "NumConstrs": 14248.0,
+    "NumNZs": 74604.0,
+    "NumBinVars": 0.0,
+    "NumIntVars": 0.0,
+    "MaxCoeff": 305175.78125,
+    "MinCoeff": 1.0,
+    "MaxBound": 305175.78125,
+    "MinBound": 1.0,
+    "MaxRHS": 305175.78125,
+    "MinRHS": 1.0,
+    "MaxObjCoeff": 0.0,
+    "MinObjCoeff": 0.0
+  },
+  "solver_settings": {
+    "Method": 2.0,
+    "Crossover": -1.0,
+    "NumericFocus": 0.0,
+    "ScaleFlag": -1.0,
+    "BarHomogeneous": -1.0,
+    "Presolve": -1.0,
+    "Threads": 1.0,
+    "Seed": 20260929.0,
+    "FeasibilityTol": 1e-06,
+    "OptimalityTol": 1e-06,
+    "IntFeasTol": 1e-05
+  },
+  "objective_stage_timings": [
+    {
+      "objective": "LOCAL_PRICING",
+      "group": "LP",
+      "begin_wall_seconds": 0.0002806999837048352,
+      "cumulative_native_seconds": 0,
+      "available_seconds": 3512.3509981632233,
+      "wall_seconds": 0.7615885999985039,
+      "native_seconds": 0.5099999904632568,
+      "numerical_quality": {
+        "Runtime": 0.5099999904632568,
+        "Work": 0.33332491300957723,
+        "IterCount": 8441.0,
+        "BarIterCount": 14.0,
+        "NodeCount": 0.0,
+        "Kappa": 23241175.90123101,
+        "ConstrVio": 0.0,
+        "BoundVio": 0.0,
+        "IntVio": null,
+        "DualVio": 0.0,
+        "ComplVio": 0.0
+      }
+    }
+  ],
+  "root_and_solver_observations": [
+    {
+      "objective": "LOCAL_PRICING",
+      "group": "LP",
+      "callback_kind": "BARRIER",
+      "objective_wall_seconds": 0.3013755999854766,
+      "total_wall_seconds": 0.30166040000040084,
+      "BARRIER_ITRCNT": 0.0,
+      "BARRIER_PRIMINF": 196566.1471905644,
+      "BARRIER_DUALINF": 8.462320060739566,
+      "BARRIER_COMPL": 8.50133811250391,
+      "root_node_confirmed": false
+    }
+  ],
+  "dropped_samples": 0,
+  "synthetic_root_duration_claimed": false,
+  "exact_condition_number_computed": false,
+  "solver_methods_changed": false,
+  "extra_relaxations_or_optimization_calls": 0,
+  "note": "Simplex/barrier callback observations do not isolate root LP time; Kappa is null without an available basis. KappaExact is not computed.",
+  "events": {
+    "presolve_rows_removed": 5136.0,
+    "presolve_columns_removed": 1966.0,
+    "barrier_first_observed_native_seconds": 0.09599995613098145,
+    "barrier_last_observed_native_seconds": 0.29600000381469727,
+    "barrier_iterations_last_observed": 14.0,
+    "crossover_first_observed_native_seconds": 0.30100011825561523
+  },
+  "incumbent_and_bound_history": [],
+  "resource_samples": [
+    {
+      "day": "2025-05-10",
+      "objective": "LOCAL_PRICING",
+      "phase": "NATIVE_OPTIMIZE",
+      "wall_seconds": 0.001981500012334436,
+      "RSS_bytes": 3590189056,
+      "available_RAM_bytes": 11321483264,
+      "peak_RSS_bytes": 3590189056,
+      "observational_only": true
+    },
+    {
+      "day": "2025-05-10",
+      "objective": "LOCAL_PRICING",
+      "phase": "NATIVE_OPTIMIZE",
+      "wall_seconds": 0.5155951000051573,
+      "RSS_bytes": 3591344128,
+      "available_RAM_bytes": 11329708032,
+      "peak_RSS_bytes": 3591344128,
+      "observational_only": true
+    }
+  ],
+  "peak_RSS_bytes": 3591344128,
+  "presolve": {
+    "seconds": 0.04
+  },
+  "presolved_matrix": {
+    "rows": 9112,
+    "columns": 12535,
+    "nnz": 57986
+  },
+  "root_relaxation": null,
+  "barrier": {
+    "iterations": 14,
+    "seconds": 0.3
+  },
+  "crossover": {
+    "seconds": 0.2
+  },
+  "numerical_warnings": [],
+  "root_algorithm": "frozen Method=2 barrier policy; actual observations and unavailable phases remain explicit",
+  "callback_errors": [],
+  "fill_in": {
+    "ordering_seconds": 0.02,
+    "factor_nnz": 325500.0,
+    "factor_memory_printed": 11.0,
+    "factor_memory_unit": "MB",
+    "factor_operations": 19410000.0,
+    "barrier_iterations": 14,
+    "barrier_seconds": 0.3,
+    "crossover_seconds": 0.2,
+    "root_completed": true,
+    "inferred_missing_values": false,
+    "native_barrier_iterations": 14.0,
+    "Work": 0.33332491300957723,
+    "peak_RSS_bytes": 3591344128
+  }
+}
