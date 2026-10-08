@@ -1,6 +1,6 @@
 {
-  "UTC": "2026-10-07T19:52:47.481548+00:00",
-  "state": "RUNNING",
+  "UTC": "2026-10-08T00:44:17.628164+00:00",
+  "state": "RESULTS_FINALIZED_AND_INDEPENDENTLY_AUDITED",
   "immutable_deadline_UTC": "2026-10-08T00:53:34.812972+00:00",
   "draft_PR": "https://github.com/BeaverVillage/MobileESS/pull/179",
   "base_PR": 177,
@@ -11,27 +11,22 @@
   "current_valid_UB": 0.6306505800203936,
   "current_gap": 0.09821440204410836,
   "completed": [
-    "Original 600s canary preserved, not repeated",
-    "One 1800s Cuts=0 control independently audited",
-    "Production VarBranch=2 stopped cleanly at 3603.095s without nonroot completion",
-    "Registered M0 numerical handoff retained original root OPEN and raw receipts",
-    "Cold dual root TIME_LIMIT 1800.006s, digest normalization audited and repaired without solving",
-    "Primal PStart root TIME_LIMIT 1800.002s, partial genuine LP basis saved",
-    "Solver-free exactness/restart/tamper/incumbent guard fixtures PASS",
-    "P2 scientific objectives prepared exactly without executing"
+    "M0 기존 ROOT 증거 보존 및 archived OPTIMAL 인증 재사용",
+    "M1 native Cuts=0 control 1회",
+    "M2 crash-safe exact OPEN controller와 독립 감사",
+    "M3 native 60분 무진전 clean stop",
+    "M4 조건부 primal gate 미충족으로 0회",
+    "M5 exact dual support와 certified pseudocost 분기 순서",
+    "M6 목표 미달로 P2 실행 0회 및 inherited authority 준비",
+    "M7 final fixtures와 전체 package independent audit PASS",
+    "M8 최종 classification 및 보고서 확정"
   ],
-  "current_process": {
-    "unified_session": 29255,
-    "script": "numeric_external_controller.py",
-    "root_Method": 0,
-    "NumericFocus": 3,
-    "root_TimeLimit": 1800,
-    "child_Method": 1,
-    "root_complete_primal_start": true
-  },
-  "next_registered_action_if_numeric_root_unresolved": "Explicitly reuse independently verified archived OPTIMAL original C3A root proof without a fresh root solve; preserve existing global floor and both binary children; attach saved same-domain basis when available, otherwise complete clipped row DStart. Evaluate actual child LPs before backend/M4 decision.",
+  "current_process": null,
+  "next_registered_action_if_numeric_root_unresolved": null,
   "primal_interventions_executed": 0,
   "P2_executed": false,
   "A_stage_untouched": true,
-  "do_not_finish_after_one_failure": true
+  "do_not_finish_after_one_failure": true,
+  "classification": "M_EXACT_BB_TRACTABILITY_FAIL",
+  "remaining_work": "Git publication verification is recorded in the final PR body and chat after committing these immutable package bytes."
 }

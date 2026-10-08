@@ -1,0 +1,43 @@
+{
+  "PASS": false,
+  "UTC": "2026-10-08T00:39:36.562061+00:00",
+  "optimize_calls": 0,
+  "fixtures": [
+    {
+      "test": "docs/v42_m1_exact_solver_redesign_20261008/test_exact_bb.py",
+      "source_SHA256": "e3ace244f09787d82cbc7d144059e118afad099f5441c7c9cb3e0dbe5f335120",
+      "exit_code": 0,
+      "wall_seconds": 0.5466023000190035,
+      "stdout": "EXACTNESS_FIXTURES_PASS_ZERO_NATIVE_SOLVES 3\n",
+      "stderr": "",
+      "native_optimize_forbidden": true
+    },
+    {
+      "test": "docs/v42_m_practical_exact_solver_overnight_20261008/test_protocol.py",
+      "source_SHA256": "9441a5245fdeda408e469f023eb65880ee4c2c18d15a0b4025e20cabce4a9fd8",
+      "exit_code": 0,
+      "wall_seconds": 1.2034729000297375,
+      "stdout": "PROTOCOL_TESTS_PASS 10 OPTIMIZE_0\n",
+      "stderr": "",
+      "native_optimize_forbidden": true
+    },
+    {
+      "test": "docs/v42_m_practical_exact_solver_overnight_20261008/test_production_restart.py",
+      "source_SHA256": "9561e08f6a70c3e07da4b6ce529975bc3bd885f45ec4fa3b4a59c0c81c4448b8",
+      "exit_code": 0,
+      "wall_seconds": 0.9175516999675892,
+      "stdout": "PRODUCTION_RESTART_TESTS_PASS_OPTIMIZE_0\n",
+      "stderr": "",
+      "native_optimize_forbidden": true
+    },
+    {
+      "test": "docs/v42_m_practical_exact_solver_overnight_20261008/test_archived_import.py",
+      "source_SHA256": "6ba57452625309e0966ba6b9cbf9498db5082b094b6fcba093467f1e6cefde90",
+      "exit_code": 1,
+      "wall_seconds": 4.93452279997291,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"<frozen runpy>\", line 291, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\v42_m1_exact_solver_redesign_20261008\\docs\\v42_m_practical_exact_solver_overnight_20261008\\test_archived_import.py\", line 27, in <module>\n    if __name__=='__main__':run()\n                            ^^^^^\n  File \"C:\\v42_m1_exact_solver_redesign_20261008\\docs\\v42_m_practical_exact_solver_overnight_20261008\\test_archived_import.py\", line 20, in run\n    assert receipt['basis_output_SHA256']==selected['result']['partial_basis']['SHA256']\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+      "native_optimize_forbidden": true
+    }
+  ]
+}
