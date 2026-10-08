@@ -1,0 +1,123 @@
+
+Gurobi 13.0.2 (win64) logging started Thu Oct  8 13:47:10 2026
+
+Set parameter LogFile to value "D:\v42_m1_route_mode_benders_20261008\logs\recourse_005.log"
+Set parameter NodefileDir to value "D:\v42_m1_route_mode_benders_20261008\tmp"
+Set parameter LogToConsole to value 0
+Set parameter OutputFlag to value 1
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  120
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0.005
+OptimalityTol  1e-08
+Method  2
+Crossover  2
+DegenMoves  0
+MIPFocus  3
+NodeMethod  1
+DualReductions  0
+InfUnbdInfo  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 582808 rows, 306040 columns and 5351612 nonzeros (Min)
+Model fingerprint: 0xc7871365
+Model has 1 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [3e-08, 2e+03]
+  RHS range        [2e-24, 2e+03]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Presolve time: 0.82s
+Presolved: 26029 rows, 5157 columns, 191329 nonzeros
+
+Ordering time: 0.04s
+
+Barrier statistics:
+ Dense cols : 721
+ AA' NZ     : 2.357e+05
+ Factor NZ  : 3.649e+05 (roughly 16 MB of memory)
+ Factor Ops : 2.210e+07 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   2.73808736e+02 -4.81518038e+03  2.61e+03 4.26e-06  2.35e+01     1s
+   1   2.74003239e+02 -1.05785727e+04  1.31e+03 9.98e-03  5.35e+00     1s
+   2   2.52569369e+02 -9.01000103e+03  1.20e+03 1.18e-11  1.54e+01     1s
+   3   2.13829230e+01 -4.14350382e+03  9.74e+01 1.50e-14  1.32e+00     1s
+   4   1.79992212e+00 -1.32613777e+03  3.82e+00 1.20e-07  8.62e-02     1s
+   5   1.02234352e+00 -3.95456051e+02  1.07e-01 1.90e-08  1.30e-02     1s
+   6   1.00029958e+00 -1.76124767e+01  1.68e-03 9.70e-10  5.85e-04     1s
+   7   9.99942232e-01  1.47488619e-01  1.06e-07 4.47e-11  2.67e-05     1s
+   8   9.80944772e-01  1.41771477e-01  5.29e-08 4.42e-11  2.63e-05     1s
+   9   8.16288575e-01  1.82570625e-02  3.10e-08 3.67e-11  2.50e-05     1s
+  10   7.46245001e-01  1.34065362e-01  1.94e-08 2.84e-11  1.92e-05     1s
+  11   7.32129861e-01  1.63978511e-01  1.73e-08 2.66e-11  1.78e-05     1s
+  12   7.26959756e-01  1.95537136e-01  1.67e-08 2.46e-11  1.66e-05     1s
+  13   7.00885205e-01  2.63622657e-01  1.41e-08 1.96e-11  1.37e-05     1s
+  14   6.74531617e-01  2.87639060e-01  1.17e-08 1.81e-11  1.21e-05     1s
+  15   6.57427856e-01  3.26482465e-01  8.83e-09 1.59e-11  1.04e-05     1s
+  16   6.51172368e-01  3.49420618e-01  7.56e-09 1.47e-11  9.45e-06     1s
+  17   6.49821292e-01  3.54739609e-01  7.24e-09 1.44e-11  9.24e-06     1s
+  18   6.48136691e-01  3.86690302e-01  6.75e-09 1.27e-11  8.19e-06     1s
+  19   6.41215734e-01  4.33239279e-01  4.31e-09 1.01e-11  6.51e-06     1s
+  20   6.38275809e-01  4.50913942e-01  3.66e-09 9.14e-12  5.87e-06     1s
+  21   6.37231998e-01  5.16279470e-01  3.38e-09 5.70e-12  3.79e-06     1s
+  22   6.34660929e-01  5.43708769e-01  1.22e-09 4.30e-12  2.85e-06     1s
+  23   6.33789105e-01  5.92547663e-01  8.19e-10 1.90e-12  1.29e-06     1s
+  24   6.33210628e-01  6.15103313e-01  5.92e-10 7.71e-13  5.67e-07     1s
+  25   6.32321809e-01  6.25837026e-01  1.49e-10 2.67e-13  2.03e-07     1s
+  26   6.32018976e-01  6.31234451e-01  1.57e-10 2.88e-14  2.46e-08     1s
+  27   6.31962455e-01  6.31888063e-01  5.85e-10 2.35e-12  2.35e-09     1s
+  28   6.31960835e-01  6.31956930e-01  4.41e-10 2.67e-11  1.43e-10     2s
+  29   6.31960781e-01  6.31960751e-01  1.09e-10 1.99e-11  9.35e-13     2s
+  30   6.31960768e-01  6.31960768e-01  3.42e-13 2.51e-15  2.39e-15     2s
+
+Barrier solved model in 30 iterations and 1.54 seconds (1.39 work units)
+Optimal objective 6.31960768e-01
+
+Crossover log...
+
+      84 DPushes remaining with DInf 0.0000000e+00                 2s
+       0 DPushes remaining with DInf 0.0000000e+00                 2s
+
+     357 PPushes remaining with PInf 4.8316739e-08                 2s
+       0 PPushes remaining with PInf 0.0000000e+00                 2s
+
+  Push phase complete: Pinf 0.0000000e+00, Dinf 1.3298078e-17      2s
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+     442    6.3196077e-01   0.000000e+00   0.000000e+00      2s
+Crossover time: 0.06 seconds (0.05 work units)
+     442    6.3196077e-01   0.000000e+00   0.000000e+00      2s
+
+Solved in 442 iterations and 2.27 seconds (1.91 work units)
+Optimal objective  6.319607680e-01
+Discarded solution information
+Set parameter Threads to value 1
+Set parameter Method to value 2
+Set parameter NodeMethod to value 1
+Set parameter Crossover to value 2
+Set parameter MIPFocus to value 3
+Set parameter MIPGap to value 0.005
+Set parameter FeasibilityTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter Seed to value 20260929
+Set parameter DegenMoves to value 0
+Set parameter BarConvTol to value 1e-08
+Set parameter TimeLimit to value 120
+Set parameter DualReductions to value 0
+Set parameter InfUnbdInfo to value 1

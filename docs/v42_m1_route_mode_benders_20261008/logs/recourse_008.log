@@ -1,0 +1,115 @@
+
+Gurobi 13.0.2 (win64) logging started Thu Oct  8 13:47:39 2026
+
+Set parameter LogFile to value "D:\v42_m1_route_mode_benders_20261008\logs\recourse_008.log"
+Set parameter NodefileDir to value "D:\v42_m1_route_mode_benders_20261008\tmp"
+Set parameter LogToConsole to value 0
+Set parameter OutputFlag to value 1
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  120
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0.005
+OptimalityTol  1e-08
+Method  2
+Crossover  2
+DegenMoves  0
+MIPFocus  3
+NodeMethod  1
+DualReductions  0
+InfUnbdInfo  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 582808 rows, 306040 columns and 5351612 nonzeros (Min)
+Model fingerprint: 0xf6b1ff94
+Model has 1 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [3e-08, 2e+03]
+  RHS range        [2e-24, 2e+03]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Presolve time: 0.77s
+Presolved: 25786 rows, 5106 columns, 189903 nonzeros
+
+Ordering time: 0.03s
+
+Barrier statistics:
+ Dense cols : 731
+ AA' NZ     : 2.111e+05
+ Factor NZ  : 3.313e+05 (roughly 16 MB of memory)
+ Factor Ops : 1.647e+07 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   2.75824131e+02 -4.89758272e+03  2.59e+03 4.88e-06  2.36e+01     1s
+   1   2.76044204e+02 -1.06652370e+04  1.30e+03 8.64e-03  5.17e+00     1s
+   2   4.54970699e+00 -8.69556529e+03  6.92e+02 5.40e-05  6.62e+00     1s
+   3   9.35965811e-01 -2.51276038e+03  6.74e+01 8.07e-07  6.71e-01     1s
+   4   7.57717259e-01 -8.53718429e+02  2.02e+01 9.64e-08  1.97e-01     1s
+   5   7.51311815e-01 -8.02289977e+02  1.43e+01 8.55e-08  1.45e-01     1s
+   6   7.10849466e-01 -6.46863553e+02  6.61e+00 5.37e-08  7.34e-02     1s
+   7   7.02520807e-01 -5.12587853e+02  1.93e+00 3.22e-08  3.05e-02     1s
+   8   6.79423587e-01 -3.39220941e+02  8.33e-01 1.70e-08  1.55e-02     1s
+   9   6.59531932e-01 -2.50558731e+02  1.24e-02 1.16e-08  8.00e-03     1s
+  10   6.59009548e-01 -7.10872471e-01  1.78e-06 4.61e-11  4.33e-05     1s
+  11   6.47802491e-01  1.41337943e-01  3.45e-07 5.93e-11  1.60e-05     1s
+  12   6.44667989e-01  2.26255974e-01  2.78e-07 6.33e-11  1.32e-05     1s
+  13   6.42807436e-01  3.27201415e-01  2.16e-07 4.53e-11  9.98e-06     1s
+  14   6.38757450e-01  3.50049990e-01  1.35e-07 4.11e-11  9.13e-06     1s
+  15   6.38266519e-01  4.68941570e-01  1.23e-07 4.58e-11  5.35e-06     1s
+  16   6.34563038e-01  6.01939038e-01  5.13e-08 3.68e-11  1.03e-06     1s
+  17   6.33130252e-01  6.17010135e-01  2.63e-08 7.26e-11  5.10e-07     1s
+  18   6.32582278e-01  6.25134725e-01  1.67e-08 1.75e-11  2.35e-07     1s
+  19   6.31844405e-01  6.30060710e-01  3.34e-09 1.79e-11  5.64e-08     1s
+  20   6.31652169e-01  6.31618316e-01  2.03e-10 1.49e-11  1.08e-09     1s
+  21   6.31649964e-01  6.31649654e-01  4.01e-11 4.39e-11  1.12e-11     1s
+  22   6.31649961e-01  6.31649955e-01  2.40e-12 2.28e-12  1.59e-13     1s
+
+Barrier solved model in 22 iterations and 1.31 seconds (1.26 work units)
+Optimal objective 6.31649961e-01
+
+Crossover log...
+
+      84 DPushes remaining with DInf 0.0000000e+00                 1s
+       0 DPushes remaining with DInf 0.0000000e+00                 1s
+
+     328 PPushes remaining with PInf 0.0000000e+00                 1s
+       0 PPushes remaining with PInf 0.0000000e+00                 1s
+
+  Push phase complete: Pinf 0.0000000e+00, Dinf 1.3909823e-16      1s
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+     415    6.3164996e-01   0.000000e+00   0.000000e+00      1s
+Crossover time: 0.05 seconds (0.03 work units)
+     415    6.3164996e-01   0.000000e+00   0.000000e+00      2s
+
+Solved in 415 iterations and 2.01 seconds (1.76 work units)
+Optimal objective  6.316499582e-01
+Discarded solution information
+Set parameter Threads to value 1
+Set parameter Method to value 2
+Set parameter NodeMethod to value 1
+Set parameter Crossover to value 2
+Set parameter MIPFocus to value 3
+Set parameter MIPGap to value 0.005
+Set parameter FeasibilityTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter Seed to value 20260929
+Set parameter DegenMoves to value 0
+Set parameter BarConvTol to value 1e-08
+Set parameter TimeLimit to value 120
+Set parameter DualReductions to value 0
+Set parameter InfUnbdInfo to value 1
