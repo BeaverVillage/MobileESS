@@ -72,7 +72,8 @@ def run(day,resume=False):
     if day not in DAYS:raise PermissionError('ONLY_FOUR_REQUESTED_A_STAGE_DAYS')
     folder=OUT/day;folder.mkdir(parents=True,exist_ok=True)
     if (folder/'STARTED.json').exists() and not resume:raise PermissionError('DAY_ALREADY_EXECUTED_USE_PRESERVED_CHECKPOINT')
-    if resume and day!=DAYS[1]:raise PermissionError('ONLY_ACTUAL_MAY17_INTERFACE_FAILURE_CHECKPOINT')
+    if resume and not (day==DAYS[1] and resume in (True,'p2') or day==DAYS[2] and resume=='global-bound'):
+        raise PermissionError('ONLY_CURRENT_VERIFIED_SAME_DAY_FAILURE_CHECKPOINT')
     if day!=DAYS[0]:
         if not read(OUT/DAYS[0]/'A1_RESULT.json').get('A1_accepted'):raise PermissionError('MAY19_FINAL_A1_ACCEPTANCE_REQUIRED')
         for prior in DAYS[1:DAYS.index(day)]:
@@ -90,7 +91,7 @@ def run(day,resume=False):
             atomic(folder/'WHOLE_DAY_RESOURCES.json',dict(samples=samples))
             stop.wait(2)
     observer=threading.Thread(target=resources,daemon=True);observer.start()
-    atomic(folder/('RESUME_2_STARTED.json' if resume=='p2' else 'RESUME_1_STARTED.json' if resume else 'STARTED.json'),dict(PASS=True,day=day,actual_start_unix=started,budget=record(OUT/'CONTINUATION_BUDGET.json'),
+    atomic(folder/('RESUME_GLOBAL_BOUND_STARTED.json' if resume=='global-bound' else 'RESUME_2_STARTED.json' if resume=='p2' else 'RESUME_1_STARTED.json' if resume else 'STARTED.json'),dict(PASS=True,day=day,actual_start_unix=started,budget=record(OUT/'CONTINUATION_BUDGET.json'),
         source=record(native.freeze_path),one_native_process=True,old_PR180_attempt_not_resumed=True,
         prior_native_seconds=budget.native_seconds,continuation_budget_not_reset=True))
     result=dict(day=day,A1_accepted=False,classification='INCONCLUSIVE',practical_runtime_accepted=False)
@@ -104,12 +105,15 @@ def run(day,resume=False):
                 b=read(folder/'INITIAL_VERIFICATION.json')
                 if record(b['state']['path'])!=b['state']:raise ValueError('ORIGINAL_CHECKPOINT_STATE_DRIFT')
                 with gzip.open(b['state']['path'],'rb') as stream:state=pickle.load(stream)
-                nr=read(folder/'PHASE_I/S15/NATIVE_RESULT.json')
+                nr=read(folder/('PHASE_I/S19/NATIVE_RESULT.json' if resume=='global-bound' else 'PHASE_I/S15/NATIVE_RESULT.json'))
                 if record(nr['raw_attributes']['path'])!=nr['raw_attributes']:raise ValueError('LAST_PHASE_I_RAW_POINT_DRIFT')
                 seed=np.load(nr['raw_attributes']['path'])['X'][:state['compact'].matrix.shape[1]]
             else:
                 before=perf_counter();state=prep.prepare(day);timings['initial_model_build_seconds']=perf_counter()-before
-            if resume=='p2':
+            if resume=='global-bound':
+                from .bound_recovery import recover
+                expanded,priced=recover(state,day)
+            elif resume=='p2':
                 if not read(folder/'INTEGER_RESULT.json')['P1_accepted']:raise PermissionError('PREVIOUSLY_VALIDATED_P1_REQUIRED')
                 p=read(folder/'P1_RESULT.json')['full_pricing']
                 if record(p['path'])!=p:raise ValueError('FULL_PRICING_CHECKPOINT_DRIFT')
@@ -151,4 +155,4 @@ def run(day,resume=False):
         atomic(folder/'NATIVE_CALLS.json',dict(calls=calls));atomic(folder/'RESULT.json',result)
         print('FOURDAY_RESULT',day,result['classification'],result.get('failure_reason'),result['native_seconds'],result['wall_seconds'],flush=True)
     gc.collect();return result
-if __name__=='__main__':run(sys.argv[1],resume='p2' if '--resume-p2' in sys.argv[2:] else '--resume' in sys.argv[2:])
+if __name__=='__main__':run(sys.argv[1],resume='global-bound' if '--resume-global-bound' in sys.argv[2:] else 'p2' if '--resume-p2' in sys.argv[2:] else '--resume' in sys.argv[2:])
