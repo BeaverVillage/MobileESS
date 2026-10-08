@@ -1,0 +1,135 @@
+{
+  "day": "2025-05-17",
+  "prepared_for_future_runs": true,
+  "matrix_geometry": {
+    "NumVars": 38342.0,
+    "NumConstrs": 16184.0,
+    "NumNZs": 283371.0,
+    "NumBinVars": 0.0,
+    "NumIntVars": 0.0,
+    "MaxCoeff": 305175.78125,
+    "MinCoeff": 2.829290664775296e-12,
+    "MaxBound": 305175.78125,
+    "MinBound": 1.0,
+    "MaxRHS": 1064300.537109375,
+    "MinRHS": 9.779945149232007e-08,
+    "MaxObjCoeff": 1.0,
+    "MinObjCoeff": 4.76837158203125e-07
+  },
+  "solver_settings": {
+    "Method": 2.0,
+    "Crossover": -1.0,
+    "NumericFocus": 0.0,
+    "ScaleFlag": -1.0,
+    "BarHomogeneous": -1.0,
+    "Presolve": -1.0,
+    "Threads": 1.0,
+    "Seed": 20260929.0,
+    "FeasibilityTol": 1e-06,
+    "OptimalityTol": 1e-06,
+    "IntFeasTol": 1e-05
+  },
+  "objective_stage_timings": [
+    {
+      "objective": "PHASE_I",
+      "group": "LP",
+      "begin_wall_seconds": 0.0003578000469133258,
+      "cumulative_native_seconds": 0,
+      "available_seconds": 3599.1159999370575,
+      "wall_seconds": 0.3301884999964386,
+      "native_seconds": 0.21000003814697266,
+      "numerical_quality": {
+        "Runtime": 0.21000003814697266,
+        "Work": 0.550828335315661,
+        "IterCount": 4878.0,
+        "BarIterCount": 15.0,
+        "NodeCount": 0.0,
+        "Kappa": 1840856.726439135,
+        "ConstrVio": 0.0,
+        "BoundVio": 0.0,
+        "IntVio": null,
+        "DualVio": 0.0,
+        "ComplVio": 0.0
+      }
+    }
+  ],
+  "root_and_solver_observations": [
+    {
+      "objective": "PHASE_I",
+      "group": "LP",
+      "callback_kind": "BARRIER",
+      "objective_wall_seconds": 0.1905292000155896,
+      "total_wall_seconds": 0.19089020002866164,
+      "BARRIER_ITRCNT": 0.0,
+      "BARRIER_PRIMINF": 1334751.0506374268,
+      "BARRIER_DUALINF": 352.6848187860296,
+      "BARRIER_COMPL": 3040.8835799054123,
+      "root_node_confirmed": false
+    }
+  ],
+  "dropped_samples": 0,
+  "synthetic_root_duration_claimed": false,
+  "exact_condition_number_computed": false,
+  "solver_methods_changed": false,
+  "extra_relaxations_or_optimization_calls": 0,
+  "note": "Simplex/barrier callback observations do not isolate root LP time; Kappa is null without an available basis. KappaExact is not computed.",
+  "events": {
+    "presolve_rows_removed": 141.0,
+    "presolve_columns_removed": 156.0,
+    "barrier_first_observed_native_seconds": 0.11699986457824707,
+    "barrier_last_observed_native_seconds": 0.1659998893737793,
+    "barrier_iterations_last_observed": 15.0,
+    "crossover_first_observed_native_seconds": 0.16700005531311035
+  },
+  "incumbent_and_bound_history": [],
+  "resource_samples": [
+    {
+      "day": "2025-05-17",
+      "objective": "PHASE_I",
+      "phase": "NATIVE_OPTIMIZE",
+      "wall_seconds": 0.0016386000206694007,
+      "RSS_bytes": 1063030784,
+      "available_RAM_bytes": 17691803648,
+      "peak_RSS_bytes": 1063030784,
+      "observational_only": true
+    }
+  ],
+  "peak_RSS_bytes": 1063030784,
+  "presolve": {
+    "seconds": 0.07
+  },
+  "presolved_matrix": {
+    "rows": 3538,
+    "columns": 8605,
+    "nnz": 65654
+  },
+  "root_relaxation": null,
+  "barrier": {
+    "iterations": 15,
+    "seconds": 0.17
+  },
+  "crossover": {
+    "seconds": 0.02
+  },
+  "numerical_warnings": [
+    "Warning: Model contains large matrix coefficient range",
+    "to avoid numerical issues."
+  ],
+  "root_algorithm": "frozen Method=2 barrier policy; actual observations and unavailable phases remain explicit",
+  "callback_errors": [],
+  "fill_in": {
+    "ordering_seconds": 0.01,
+    "factor_nnz": 148100.0,
+    "factor_memory_printed": 5.0,
+    "factor_memory_unit": "MB",
+    "factor_operations": 13910000.0,
+    "barrier_iterations": 15,
+    "barrier_seconds": 0.17,
+    "crossover_seconds": 0.02,
+    "root_completed": true,
+    "inferred_missing_values": false,
+    "native_barrier_iterations": 15.0,
+    "Work": 0.550828335315661,
+    "peak_RSS_bytes": 1063030784
+  }
+}

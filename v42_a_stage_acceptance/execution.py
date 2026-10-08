@@ -4,8 +4,15 @@ from v42_pr134_b1.common import read,record,sha
 from .policy import OUT,OLD,DAYS,POLICY
 _scope=ContextVar('a_stage_acceptance_native',default=None)
 def current():return _scope.get()
+def active_freeze():
+    pointer=OUT/'ACTIVE_SOURCE_FREEZE.json'
+    if pointer.exists():
+        r=read(pointer)['receipt']
+        if record(r['path'])!=r:raise PermissionError('CURRENT_SOURCE_EPOCH_POINTER_DRIFT')
+        return r['path']
+    return OUT/'CONTINUATION_SOURCE_FREEZE.json'
 def verify():
-    f=read(OUT/'CONTINUATION_SOURCE_FREEZE.json')
+    f=read(active_freeze())
     if not f.get('PASS') or f['schema']!=POLICY['schema']:raise PermissionError('CONTINUATION_SOURCE_FREEZE_REQUIRED')
     for p,h in f['execution_sources'].items():
         if sha(p)!=h:raise PermissionError('CONTINUATION_SOURCE_DRIFT:'+p)
@@ -25,6 +32,8 @@ def guard(model,day):
             raise PermissionError('MAY19_SHIFT_ACCEPTANCE_BEFORE_PRESTART_ONLY')
     else:
         if not read(OUT/DAYS[0]/'A1_RESULT.json').get('A1_accepted'):raise PermissionError('ACTUAL_MAY19_A1_ACCEPTANCE_REQUIRED')
+        if not read(OUT/DAYS[0]/'INDEPENDENT_ORIGINAL_SCHEDULE_OBJECTIVES.json')['PASS']:
+            raise PermissionError('MAY19_INDEPENDENT_ORIGINAL_SCHEDULE_AUDIT_REQUIRED')
         for prior in DAYS[1:DAYS.index(day)]:
             if not (OUT/prior/'RESULT.json').exists():raise PermissionError('FOURDAY_REQUESTED_ORDER_REQUIRED')
         if not read(folder/'INITIAL_VERIFICATION.json')['PASS']:raise PermissionError('DAY_SPECIFIC_INPUT_BUILD_REQUIRED')

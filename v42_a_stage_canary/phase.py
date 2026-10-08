@@ -8,13 +8,18 @@ from v42_a_stage_phase1.core import elastic_master,phase_objective,primal_replay
 from v42_a_stage_compact_rowgen.rowgen import restricted,certified_separate
 from v42_a_stage_compact_rowgen.assembly import partition,build,compact_inverse
 from v42_a_stage_compact_rowgen.lift import expanded_point
-from v42_a_stage_phase1.backend import update_graph,artificial_point
+from v42_a_stage_phase1.backend import update_graph,artificial_point as point_with_replay
 from v42_a_stage_early.progress import capture,inclusion_witness
 from .policy import OUT,POLICY
 from .pricing import full_pricing
 from .targeted import targeted
 from v42_a_stage_practical.attribution import analyze
 from v42_a_stage_early.candidate import expanded_graph
+
+def artificial_point(master,point):
+    lifted,replay=point_with_replay(master,point)
+    if not replay['PASS']:raise ValueError('ARTIFICIAL_POINT_INDEPENDENT_REPLAY_FAILED')
+    return lifted
 
 def activate(state,negative,x,folder):
     G=state['grows'];master=elastic_master(state['reference'],G)
@@ -36,7 +41,7 @@ def activate(state,negative,x,folder):
         full_native_LP_kernel_support=True,physical_integer_column_claim=False,candidate_deletion=False))
     return new,inverse
 
-def run(native,state,day):
+def run(native,state,day,certified_zero_point=None):
     G=state['grows'];folder=OUT/day;included=set(range(len(G),state['compact'].matrix.shape[0]))|set(state['axes'].values())
     prior=state['prior_compact'];s=state['compact'];activity=s.matrix@prior-s.rhs
     nonzero=np.diff(s.matrix.indptr[:len(G)+1])>0
@@ -45,7 +50,14 @@ def run(native,state,day):
     contributions=np.zeros(len(G))
     for i,w,x in zip(full.artificial_rows,full.weights,p[s.matrix.shape[1]:]):contributions[i]+=float(w)*x
     included.update(np.argsort(-contributions,kind='stable')[:50]);phase_traces=[];stagnation=0;activation_round=0;bestPhi=None
-    while True:
+    if certified_zero_point is not None:
+        x=np.asarray(certified_zero_point);allmaster=elastic_master(s,G)
+        zero=verify_zero(allmaster,artificial_point(allmaster,x))
+        ex=expanded_point(state,x);rep=primal_replay(state['reference'],ex)
+        if not zero['PASS'] or not rep['PASS']:raise ValueError('PHASE_I_CHECKPOINT_ZERO_NOT_VERIFIED')
+        atomic(folder/'PHASE_I_ZERO_CERTIFICATE.json',dict(PASS=True,zero=zero,full_original_replay=rep,
+            Phi=0.,activation_rounds=0,independently_replayed_checkpoint=True,native_reoptimization_calls=0))
+    while certified_zero_point is None:
         native.remaining();s=state['compact'];rows=tuple(sorted(included));r=restricted(s,rows)
         global_rows=tuple(j for j,i in enumerate(rows) if i<len(G));master=elastic_master(r,global_rows)
         f=folder/'PHASE_I'/('S'+str(len(phase_traces)));f.mkdir(parents=True,exist_ok=True)

@@ -1,0 +1,99 @@
+
+Gurobi 13.0.2 (win64) logging started Thu Oct  8 15:00:32 2026
+
+Set parameter LogFile to value "C:\Users\kjw39\Documents\Codex\2026-10-08\a-stage-may10-prestart-exact-rescue\docs\v42_may10_prestart_exact_rescue_20261008\NATIVE\B2_CUTS_LP\SOLVER.log"
+Set parameter TimeLimit to value 90
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  90
+MIPGap  0.005
+Method  2
+MIPFocus  3
+NodeMethod  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 551789 rows, 818482 columns and 63620861 nonzeros (Min)
+Model fingerprint: 0xd7bb4e91
+Model has 695240 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 7e+01]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+02]
+  RHS range        [9e-08, 3e+03]
+
+Presolve removed 519168 rows and 17654 columns (presolve time = 5s)...
+Presolve removed 522067 rows and 18378 columns
+Presolve time: 7.50s
+Presolved: 29722 rows, 801800 columns, 9780056 nonzeros
+
+Ordering time: 0.50s
+
+Barrier statistics:
+ AA' NZ     : 1.896e+06
+ Factor NZ  : 3.479e+06 (roughly 360 MB of memory)
+ Factor Ops : 1.543e+09 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   7.97947306e+10 -1.22950974e+05  1.31e+11 1.33e-04  1.38e+04    10s
+   1   3.16963490e+10 -4.19965395e+05  5.19e+10 2.67e-02  5.61e+03    10s
+   2   9.12872041e+09 -4.53398108e+05  1.49e+10 2.35e-02  1.66e+03    11s
+   3   1.64063681e+09 -5.33298394e+05  2.69e+09 1.16e-02  3.09e+02    12s
+   4   3.35033788e+08 -4.69968391e+05  5.48e+08 7.13e-03  6.37e+01    13s
+   5   3.70519533e+07 -2.10593644e+05  6.07e+07 4.77e-04  7.20e+00    13s
+   6   1.33115472e+07 -1.32462899e+05  2.18e+07 1.37e-04  2.61e+00    14s
+   7   3.18756327e+06 -7.31851170e+04  5.22e+06 8.51e-06  6.51e-01    15s
+   8   7.47381234e+05 -4.37527933e+04  1.22e+06 9.63e-07  1.64e-01    15s
+   9   2.30203006e+05 -2.48986024e+04  3.77e+05 2.19e-16  5.62e-02    16s
+  10   1.98748149e+05 -1.46076325e+04  3.25e+05 1.80e-16  4.37e-02    16s
+  11   8.10081298e+04 -9.01088580e+03  1.33e+05 1.25e-16  1.98e-02    17s
+  12   2.95132617e+04 -5.33025569e+03  4.83e+04 1.94e-16  8.58e-03    18s
+  13   1.11572074e+04 -3.01333649e+03  1.83e+04 1.28e-16  3.94e-03    18s
+  14   4.60326345e+03 -1.86485337e+03  7.53e+03 1.68e-16  2.02e-03    19s
+  15   1.56151470e+03 -1.13544212e+03  2.55e+03 3.05e-16  1.01e-03    20s
+  16   1.33984861e+03 -1.00291396e+03  2.19e+03 1.35e-16  8.85e-04    20s
+  17   5.71312664e+02 -7.37888100e+02  9.32e+02 1.89e-16  5.72e-04    21s
+  18   2.52664002e+02 -5.54142744e+02  4.10e+02 1.36e-16  3.98e-04    21s
+  19   1.02068230e+02 -4.03835305e+02  1.64e+02 1.38e-16  2.74e-04    22s
+  20   7.19022005e+01 -3.40602625e+02  1.14e+02 1.45e-16  2.29e-04    23s
+  21   4.73883722e+01 -2.65257106e+02  7.43e+01 1.22e-16  1.77e-04    24s
+  22   3.88112070e+01 -2.00151998e+02  6.03e+01 1.85e-16  1.36e-04    24s
+  23   2.20090914e+01 -1.11533614e+02  3.28e+01 7.67e-10  7.73e-05    25s
+  24   1.52365543e+01 -7.27109053e+01  2.17e+01 9.91e-10  5.14e-05    25s
+  25   8.37172532e+00 -5.54696186e+01  1.04e+01 9.09e-10  3.82e-05    26s
+  26   3.14861308e+00 -2.81581513e+01  1.88e+00 7.92e-10  1.93e-05    27s
+  27   2.11280928e+00 -1.52253630e+01  1.85e-01 5.19e-10  1.08e-05    28s
+  28   2.08229356e+00 -1.94311077e+00  1.35e-01 1.15e-10  2.47e-06    28s
+  29   2.00000004e+00  1.31994521e+00  1.91e-06 1.32e-11  4.23e-07    29s
+  30   2.00000000e+00  1.99931868e+00  1.24e-06 2.70e-16  4.23e-10    29s
+  31   2.00000000e+00  1.99999932e+00  7.93e-09 3.56e-16  4.23e-13    30s
+  32   2.00000000e+00  2.00000000e+00  2.91e-11 2.88e-16  4.23e-16    31s
+
+Barrier solved model in 32 iterations and 30.60 seconds (42.94 work units)
+Optimal objective 2.00000000e+00
+
+  Building initial crossover basis                                35s
+  Building initial crossover basis                                40s
+  Building initial crossover basis                                45s
+  Building initial crossover basis                                50s
+  Building initial crossover basis                                55s
+  Building initial crossover basis                                61s
+  Building initial crossover basis                                66s
+  Building initial crossover basis                                70s
+  Building initial crossover basis                                75s
+  Building initial crossover basis                                80s
+  Building initial crossover basis                                85s
+  Building initial crossover basis                                90s
+Crossover changed status from Optimal to Time Limit
+
+Stopped in 0 iterations and 90.40 seconds (119.32 work units)
+Time limit reached
+
+User-callback calls 3372, time in user-callback 0.04 sec

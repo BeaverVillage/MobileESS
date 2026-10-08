@@ -13,6 +13,7 @@ def build(original,typed,day):
     roster=read(OUT/day/'BLOCK_PRICING_ORACLE_VERIFICATION.json')['records'];n=original['n'];G=len(original['grows']);axes=original['axes']
     if {r['class_id'] for r in roster}!=set(original['data'][7]['classes']):raise ValueError('COMPLETE_CLASS_COVERAGE_REQUIRED')
     parts=[];global_parts=[typed.matrix[:G,:n].tocsr()];units=[];offset=n;lower=[];upper=[];types=[];senses=[];rhs=[];receipts=[];graphs=dict(original['data'][5])
+    axis_rows=np.asarray(tuple(axes.values()),dtype=np.int64)
     terms={name:[] for name in ('migration_count','shift_magnitude','prestart_relocation')};constants={name:Fraction(0) for name in terms}
     for i,r in enumerate(sorted(roster,key=lambda r:r['class_id'])):
         key=r['class_id'];members=original['data'][7]['classes'][key];uid=members[0];cache=load_cache(r)
@@ -20,7 +21,7 @@ def build(original,typed,day):
         if len(members)>1:
             hist=next((v for v in u if v['stay_count']),None)
             if hist is not None and set(hist['v']['y'])!={(site,start) for start,site in original['domains'][uid].stays}:raise ValueError('FULL_INDEPENDENT_STAY_DOMAIN_COVERAGE_FAIL')
-        coo=B.tocoo();global_parts.append(sp.csr_matrix((coo.data,([list(axes.values())[j] for j in coo.row],coo.col)),shape=(G,s.matrix.shape[1])))
+        coo=B.tocoo();global_parts.append(sp.csr_matrix((coo.data,(axis_rows[coo.row],coo.col)),shape=(G,s.matrix.shape[1])))
         parts.append(s.matrix);lower.extend(s.lower);upper.extend(s.upper);types.extend(s.vtypes);senses.extend(s.senses);rhs.extend(s.rhs)
         for name in terms:
             o=s.objective(name);terms[name].extend((offset+j,v) for j,v in o.coefficients().items());constants[name]+=Fraction(o.constant)
