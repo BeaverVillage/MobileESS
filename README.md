@@ -22,5 +22,14 @@ May01 M1 point, bounds, or the historical 27-day campaign acceptance.
 
 See the [Korean integration report](docs/v42_integration_20261008/INTEGRATION_REPORT_KO.md)
 and [completed-M handoff contract](docs/v42_integration_20261008/FINAL_M_HANDOFF_KO.md).
-Generate the ignored `V42_INTEGRATION_READY.json` after a clean final commit with
-`python -m v42_unified.delivery`; it records that exact integration HEAD.
+Generate the integration-only ignored `V42_INTEGRATION_READY.json` after a clean
+final commit with `python -m v42_unified.delivery`; it records that exact HEAD.
+After the authorized May01 research, use `python -m v42_m1_research.delivery_ready`
+to include its separate costs, final proofs, tests and unresolved scientific state.
+
+The separate May01 M1 research runner is `./Start-V42-M1-Research.ps1`.
+Its default is an optimize=0 baseline replay. `-Execute -RunId <new-id>` explicitly
+starts one new bounded research ledger (LB 3,600 + UB 1,800, total 5,400 Native
+seconds). A run ID cannot be reused to reset a ledger. This runner preserves the
+production evidence backend and the distinct May12 anchor. For completed results,
+proof scope, and remaining gap, see the [Korean M1 research review](docs/v42_m1_joint_gap_research/FINAL_REVIEW_KO.md).
