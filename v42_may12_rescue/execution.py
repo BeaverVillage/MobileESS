@@ -16,7 +16,7 @@ def verify():
     if f.get('schema')!='MAY12_P1_ONLY_EXACT_RESCUE_V1' or not f.get('PASS'):raise PermissionError('MAY12_FROZEN_SOURCE_REQUIRED')
     for p,h in f['execution_sources'].items():
         if sha(p)!=h:raise PermissionError('MAY12_EXECUTED_SOURCE_DRIFT:'+p)
-    if record(OUT/'NATIVE_PLAN.json')!=f['plan']:raise PermissionError('MAY12_IMMUTABLE_PLAN_DRIFT')
+    if record(f['plan']['path'])!=f['plan']:raise PermissionError('MAY12_IMMUTABLE_PLAN_DRIFT')
     return f
 def authorize(day,action):
     s=current()

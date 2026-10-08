@@ -16,7 +16,8 @@ def certify(original,global_rows,n,pi,c,excluded_rows):
         return x
     for j in np.flatnonzero([infinite(l) or infinite(u) for l,u in zip(lower,upper)]):
         lo,hi=A.indptr[j:j+2]
-        rc=Fraction(float(c[j]))-sum((Fraction(float(A.data[k]))*Fraction(float(pg[A.indices[k]])) for k in range(lo,hi)),Fraction())
+        rc=Fraction(float(c[j]))-sum((Fraction(float(A.data[k]))*Fraction(float(pg[A.indices[k]]))
+            for k in range(lo,hi) if A.data[k]!=0 and pg[A.indices[k]]!=0),Fraction())
         direction='upper' if rc<0 and infinite(upper[j]) else 'lower' if rc>0 and infinite(lower[j]) else None
         if direction is None:continue
         choices=[]

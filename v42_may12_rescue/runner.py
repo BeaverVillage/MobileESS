@@ -1,5 +1,5 @@
 """One cumulative sequential recovery experiment; never optimize P2."""
-import gzip,pickle,gc,traceback,os
+import gzip,pickle,gc,traceback,os,itertools
 from fractions import Fraction
 from time import perf_counter
 from dataclasses import replace
@@ -19,13 +19,30 @@ from v42_a_stage_lexfull.runner import objective_value
 
 def checkpoint(name,state,raw=None):
     p=STATIC/(name+'.pkl.gz')
+    if p.exists() and 'compact' in state:
+        with gzip.open(p,'rb') as f:old=pickle.load(f)
+        if (old['state']['compact'].fingerprint()!=state['compact'].fingerprint()
+            or old['state']['reference'].fingerprint()!=state['reference'].fingerprint()
+            or set(old['raw'])!=set(raw) or any(not np.array_equal(old['raw'][k],raw[k]) for k in raw)):
+            raise ValueError('COMPLETED_P1_STATE_CHECKPOINT_DRIFT')
+        return record(p)
     with gzip.open(p,'xb',compresslevel=1) as f:pickle.dump(dict(state=state,raw=raw),f,protocol=5)
     return record(p)
 
-def run(resume_pre_native_gate=False,resume_incomplete_pricing=False):
+def run(resume_pre_native_gate=False,resume_incomplete_pricing=False,resume_verified_batch=False):
     started=perf_counter();native=None;timings={};decision=dict(PASS=False,classification='MAY12_PHASE1_RECOVERED_P1_INCONCLUSIVE')
     if (OUT/'NEW_RUN_STARTED.json').exists():
-        if resume_incomplete_pricing:
+        if resume_verified_batch:
+            previous=read(OUT/'PRE_IMPLEMENTATION_BOUNDARY1/FINAL_DECISION.json');calls=read(OUT/'NEW_NATIVE_CALLS.json')
+            marker=read(OUT/'PRE_IMPLEMENTATION_BOUNDARY1/IMPLEMENTATION_BOUNDARY_REQUEST.json')
+            if (previous.get('error')!="PermissionError('MAY12_FROZEN_SOURCE_REQUIRED')"
+                or marker['reason']!='INTENTIONAL_BETWEEN_SOLVE_IMPLEMENTATION_BOUNDARY'
+                or previous['new_native_seconds']!=calls['actual_Runtime'] or previous['new_native_calls']!=len(calls['calls'])):
+                raise PermissionError('ONLY_PRESERVED_IMPLEMENTATION_BOUNDARY_RESUME')
+            atomic(OUT/'RESUME_VERIFIED_STAY_BATCH.json',dict(PID=os.getpid(),source=record(active_freeze()),
+                prior_Runtime=previous['new_native_seconds'],prior_calls=previous['new_native_calls'],no_budget_reset=True,
+                completed_pricing_and_master_reused=True,scientific_parameters_unchanged=True))
+        elif resume_incomplete_pricing:
             pointer=OUT/'LATEST_PARTIAL_PRICING_CHECKPOINT.json'
             previous_receipt=read(pointer)['decision'] if pointer.exists() else record(OUT/'PRE_PRICING_START_GATE_FAILURE2/FINAL_DECISION.json')
             if record(previous_receipt['path'])!=previous_receipt:raise ValueError('PARTIAL_PRICING_DECISION_DRIFT')
@@ -56,7 +73,7 @@ def run(resume_pre_native_gate=False,resume_incomplete_pricing=False):
         # Admit all independently verified current negative supports in one
         # preregistered batch; keep the historical failed 64-column attempt.
         before=perf_counter();cache=OUT/'RECOVERED_ACTIVATED_STATE.json'
-        if resume_incomplete_pricing and cache.exists():
+        if (resume_incomplete_pricing or resume_verified_batch) and cache.exists():
             saved=read(cache)
             if saved['failure_payload']!=r or record(saved['state']['path'])!=saved['state']:
                 raise ValueError('RECOVERED_ACTIVATED_STATE_BYTE_DRIFT')
@@ -73,9 +90,10 @@ def run(resume_pre_native_gate=False,resume_incomplete_pricing=False):
                 no_native_call=True,source=record(active_freeze())))
         timings['recovered_activation_build_seconds']=perf_counter()-before
         del p;gc.collect();trajectory=[]
-        for round_no in range(20):
-            native.remaining();s=state['compact'];folder=OUT/'P1'/f'S{round_no}'
+        for round_no in itertools.count():
+            native.remaining();s=state['compact'];folder=OUT/('P1_BATCH' if resume_verified_batch and round_no>=2 else 'P1')/f'S{round_no}'
             before=perf_counter()
+            calls_before=len(native.calls)
             if resume_incomplete_pricing and round_no==0:
                 rec=read(folder/'NATIVE_RESULT.json');identity=read(rec['model_identity']['path'])
                 if identity['original_snapshot_sha256']!=s.fingerprint() or record(rec['raw_attributes']['path'])!=rec['raw_attributes']:
@@ -83,15 +101,28 @@ def run(resume_pre_native_gate=False,resume_incomplete_pricing=False):
                 raw=dict(np.load(rec['raw_attributes']['path']))
                 atomic(folder/'CACHED_MASTER_REUSE.json',dict(PASS=True,original=record(folder/'NATIVE_RESULT.json'),new_native_calls=0,budget_not_reset=True))
             else:rec,raw=native.solve(s,folder,'ORIGINAL_P1')
+            master_reused=len(native.calls)==calls_before
             if rec['status']!=2 or not all(k in raw for k in ('X','Pi','RC')):raise RuntimeError('P1_LP_NOT_OPTIMAL')
             replay=primal_replay(s,raw['X']);sign=verify_sign_convention(s,raw['Pi'],raw['RC'])
             ex=expanded_point(state,raw['X']);original=primal_replay(state['reference'],ex)
             if not replay['PASS'] or not sign['PASS'] or not original['PASS']:raise ValueError('ORIGINAL_P1_PRIMAL_DUAL_REPLAY_FAILED')
+            from .exact import replay as exact_replay
+            dyadic=exact_replay(state['reference'],ex)
+            if not dyadic['PASS']:raise ValueError('ORIGINAL_P1_EXACT_DYADIC_ROW_REPLAY_FAILED')
             atomic(folder/'ORIGINAL_PRIMAL_DUAL_REPLAY.json',dict(PASS=True,compact=replay,original=original,sign=sign))
+            atomic(folder/'EXACT_ORIGINAL_ROW_REPLAY.json',dyadic)
             local,owned=partition(s,state['metas'],state['grows'])
             beforeprice=perf_counter()
-            priced,negative=full_pricing(native,s,None,raw,None,state['data'],state['domains'],state['ledger'],state['axes'],state['n'],state['grows'],local,owned,folder/'PRICE')
+            if resume_verified_batch and round_no==0:
+                from .completed_pricing import restore
+                priced,negative=restore(state,folder/'PRICE',raw)
+                atomic(folder/'COMPLETE_PRICING_REUSE.json',dict(PASS=True,exact_bounds_reverified=True,
+                    original_native_raw_replayed=True,completed_native_calls_recharged=False,
+                    original_full_pricing=record(folder/'PRICE/FULL_PRICING_RESULT.json')))
+            else:
+                priced,negative=full_pricing(native,s,None,raw,None,state['data'],state['domains'],state['ledger'],state['axes'],state['n'],state['grows'],local,owned,folder/'PRICE')
             trajectory.append(dict(round=round_no,LP_objective=rec['objective'],native_Runtime=rec['native_seconds'],Work=rec['Work'],
+                master_solve_reused=master_reused,actual_new_master_Runtime=0 if master_reused else rec['native_seconds'],
                 full_domain_LB=None if priced['full_domain_phase1_lower_bound'] is None else float(Fraction(priced['full_domain_phase1_lower_bound'])),
                 pricing_classes=priced['classes'],negative_blocks=priced['negative_blocks'],closed=priced['no_negative_omitted_block_certified'],
                 pricing_wall_seconds=perf_counter()-beforeprice,round_wall_seconds=perf_counter()-before))
@@ -112,8 +143,17 @@ def run(resume_pre_native_gate=False,resume_incomplete_pricing=False):
                 atomic(OUT/'P1_FULL_DOMAIN_BOUND_CERTIFICATE.json',bound)
                 break
             if not negative:raise RuntimeError('UNRESOLVED_EXACT_PRICING_INTERVAL_WITHOUT_VERIFIED_NEGATIVE_SUPPORT')
-            native.remaining();state,warm=activate(state,negative,raw['X'],folder,max_batch=130)
-        else:raise RuntimeError('PREREGISTERED_MAX_20_P1_ROUNDS_REACHED')
+            if resume_verified_batch and round_no>=1:
+                from .stay_batch import augment
+                negative,batch=augment(state,negative,folder/'PRICE',folder)
+                trajectory[-1]['additional_exact_negative_STAY_columns']=batch['additional_negative_concrete_STAY_columns']
+                trajectory[-1]['batch_STAY_verification_wall_seconds']=batch['wall_seconds']
+                atomic(OUT/'P1_TRAJECTORY.json',dict(trajectory=trajectory))
+            native.remaining();prior_fingerprint=s.fingerprint();state,warm=activate(state,negative,raw['X'],folder,max_batch=130)
+            if state['compact'].fingerprint()==prior_fingerprint:raise ValueError('UNRESOLVED_EXACT_NEGATIVE_DIRECTION_ALREADY_IN_ACTIVE_MATRIX')
+            inclusion=exact_replay(state['reference'],expanded_point(state,warm))
+            atomic(folder/'EXACT_ACTIVATED_INCLUSION_ROW_REPLAY.json',inclusion)
+            if not inclusion['PASS']:raise ValueError('EXACT_PRIOR_POINT_INCLUSION_ROW_REPLAY_FAILED')
         before=perf_counter();typed,typeproof=restore_types(state,state['global_types'])
         atomic(OUT/'ORIGINAL_INTEGER_TYPE_RESTORATION.json',typeproof);timings['integer_model_restore_seconds']=perf_counter()-before
         import v42_a_stage_acceptance.physical as physical_module
@@ -180,4 +220,4 @@ def run(resume_pre_native_gate=False,resume_incomplete_pricing=False):
         print('MAY12_FINAL_DECISION',decision['classification'],decision['new_native_seconds'],decision.get('error'),flush=True)
 if __name__=='__main__':
     import sys
-    run('--resume-pre-native-gate' in sys.argv,'--resume-incomplete-pricing' in sys.argv)
+    run('--resume-pre-native-gate' in sys.argv,'--resume-incomplete-pricing' in sys.argv,'--resume-verified-batch' in sys.argv)

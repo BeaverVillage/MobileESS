@@ -73,7 +73,7 @@ def create():
             from v42_pr134_b1.common import record
             import numpy as np
             folder=Path(folder)
-            if component=='LOCAL_PRICING' and (folder/'NATIVE_RESULT.json').exists():
+            if component in ('LOCAL_PRICING','ORIGINAL_P1') and (folder/'NATIVE_RESULT.json').exists():
                 self.verify();saved=read(folder/'NATIVE_RESULT.json')
                 identity=read(saved['model_identity']['path'])
                 if identity['original_snapshot_sha256']!=snapshot.fingerprint() or record(saved['raw_attributes']['path'])!=saved['raw_attributes']:

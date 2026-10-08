@@ -94,8 +94,10 @@ def freeze():
     epoch=1
     while (OUT/f'SOURCE_FREEZE_EPOCH{epoch}.json').exists():epoch+=1
     path=OUT/f'SOURCE_FREEZE_EPOCH{epoch}.json'
+    plan=read(OUT/'ACTIVE_NATIVE_PLAN.json')['receipt'] if (OUT/'ACTIVE_NATIVE_PLAN.json').exists() else record(OUT/'NATIVE_PLAN.json')
+    if record(plan['path'])!=plan:raise ValueError('ACTIVE_NATIVE_PLAN_BYTE_DRIFT')
     atomic(path,dict(PASS=True,schema='MAY12_P1_ONLY_EXACT_RESCUE_V1',git_head=head,
-        execution_sources=sources,plan=record(OUT/'NATIVE_PLAN.json'),historical_source_head='1b891dbe5b1dd454d89b657efec7cba469c0cf94'))
+        execution_sources=sources,plan=plan,historical_source_head='1b891dbe5b1dd454d89b657efec7cba469c0cf94'))
     atomic(OUT/'ACTIVE_SOURCE_FREEZE.json',dict(receipt=record(path),epoch=epoch))
     print('MAY12_NEW_SOURCE_FROZEN',head,len(sources))
 if __name__=='__main__':
