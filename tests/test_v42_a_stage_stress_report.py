@@ -120,7 +120,7 @@ def test_external_byte_receipt_detects_corruption_and_unattested_files(tmp_path)
     out = tmp_path/'docs'; source = tmp_path.parent/(tmp_path.name+'_external_input.pkl')
     source.write_bytes(b'frozen')
     try:
-        expected = report.record(source)
+        expected = report.record(source, tmp_path)
         write(out/'INPUT.json', {'input':expected})
         assert report.verify_external_artifacts(out, tmp_path, tmp_path/'static')['PASS']
         source.write_bytes(b'corrupt')
@@ -153,7 +153,7 @@ def test_report_rechecks_distinct_gates_and_frozen_source_bytes(tmp_path):
         sources[str(source.resolve())] = report.record(source)['sha256']
     for name in report.REQUIRED_STRESS_GATES:
         path = out/(name+'.json'); write(path, {'PASS':True})
-        gates[name] = report.record(path)
+        gates[name] = report.record(path, tmp_path)
     write(out/'PERMIT.json', dict(schema='A_STAGE_V2_STRESS4_VERIFIED_PERMIT_V1',
           run_order=list(report.DAYS), other_27_dates_authorized=False,
           actual_reoptimization_authorized=False, execution_sources=sources, gate_receipts=gates))

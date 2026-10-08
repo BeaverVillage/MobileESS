@@ -1,0 +1,41 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_____ test_saved_may12_artificial_free_p1_activation_preserves_old_point ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002679CEBA390>
+tmp_path = WindowsPath('D:/v42_may12_p1_exact_rescue_20261008/tmp/may12_rescue/before_fix/test_saved_may12_artificial_fr0')
+
+    def test_saved_may12_artificial_free_p1_activation_preserves_old_point(monkeypatch,tmp_path):
+        r=read(OUT/'WITNESS_FAILURE_REPRODUCTION.json')['payload']
+        assert record(r['path'])==r
+        with gzip.open(r['path'],'rb') as f:p=pickle.load(f)
+        import v42_a_stage_canary.phase as phase
+        # The rebuilt matrix/descriptor come from actual independently reconstructed
+        # May12 data. Avoid another expensive full native static reconstruction.
+        monkeypatch.setattr(phase,'build',lambda *a,**kw:p['new'])
+        monkeypatch.setattr(phase,'update_graph',lambda data,domains,key,graph:(data,p['old']['ledger']))
+>       new,mapped=phase.activate(p['old'],p['negative'],p['raw']['X'],tmp_path)
+
+tests\test_v42_may12_actual_witness_regression.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_a_stage_canary\phase.py:33: in activate
+    witness,mapped=inclusion_witness(prior,new['reference'],new['reference_descriptor'],nm,state['n'])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+previous = {'Phi': Fraction(0, 1), 'descriptor': {'units': [{'canonical_post_tie': True, 'class_key': '015998080c10bc04a7495d40ac...1', '8891512', ...], ...}, ...]}, 'original_columns': 616146, 'raw_X': array([58.,  0.,  0., ...,  0.,  0.,  0.]), ...}
+original = LinearSnapshot(matrix=<Compressed Sparse Row sparse matrix of dtype 'float64'
+	with 15266204 stored elements and shape...ction(1, 1)), (620563, Fraction(1, 1)), (620564, Fraction(1, 1)), (620565, Fraction(1, 1))), constant=Fraction(0, 1))))
+descriptor = {'units': [{'canonical_post_tie': True, 'class_key': '015998080c10bc04a7495d40ac2d74fdfe1e8f483a6d041395d4f458322745b6...S_0212a537a620_LANE_2', 'members': ['8891507', '8891508', '8891509', '8891510', '8891511', '8891512', ...], ...}, ...]}
+master = ElasticMaster(original=LinearSnapshot(matrix=<Compressed Sparse Row sparse matrix of dtype 'float64'
+	with 15266204 st...1, 1), Fraction(1, 1), Fraction(1, 1), Fraction(1, 1), Fraction(1, 1), Fraction(1, 1), Fraction(1, 1), Fraction(1, 1)))
+global_variables = 17845
+
+    def inclusion_witness(previous,original,descriptor,master,global_variables):
+        if tuple(previous['weights'])!=tuple(master.weights) or tuple(previous['signs'])!=tuple(master.artificial_signs):
+>           raise ValueError('PRIOR_WITNESS_FROZEN_ARTIFICIAL_WEIGHT_OR_SIGN_DRIFT')
+E           ValueError: PRIOR_WITNESS_FROZEN_ARTIFICIAL_WEIGHT_OR_SIGN_DRIFT
+
+v42_a_stage_early\progress.py:19: ValueError
+=========================== short test summary info ===========================
+FAILED tests/test_v42_may12_actual_witness_regression.py::test_saved_may12_artificial_free_p1_activation_preserves_old_point
+1 failed in 33.03s

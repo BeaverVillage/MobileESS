@@ -1,0 +1,236 @@
+{
+  "PASS": true,
+  "scope": "HISTORICAL_RECOVERY_ONLY_NOT_NEW_ACCEPTANCE",
+  "actual_source_HEAD": "1b891dbe5b1dd454d89b657efec7cba469c0cf94",
+  "source_freeze": {
+    "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\SOURCE_FREEZE_EPOCH_5.json",
+    "sha256": "708b21aa8fe7ab45f0e41456eada3d50f3c97ed888ad0dcad86b7d17f184ff57",
+    "bytes": 148188
+  },
+  "old_result": {
+    "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-12\\RESULT.json",
+    "sha256": "db22a9d0abf907c8d7d3a61510220c362b5d6e32f770dbd8ec973738edb9921b",
+    "bytes": 114950
+  },
+  "old_traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\v42_a_stage_acceptance\\driver.py\", line 121, in run\n    before=perf_counter();state,x,expanded,priced=phase.run(native,state,day,certified_zero_point=seed)\n                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\v42_a_stage_canary\\phase.py\", line 136, in run\n    state,_=activate(state,negative,raw['X'],f)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\v42_a_stage_canary\\phase.py\", line 33, in activate\n    witness,mapped=inclusion_witness(prior,new['reference'],new['reference_descriptor'],nm,state['n'])\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\v42_a_stage_early\\progress.py\", line 19, in inclusion_witness\n    raise ValueError('PRIOR_WITNESS_FROZEN_ARTIFICIAL_WEIGHT_OR_SIGN_DRIFT')\nValueError: PRIOR_WITNESS_FROZEN_ARTIFICIAL_WEIGHT_OR_SIGN_DRIFT\n",
+  "solver_failure": false,
+  "python_verifier_failure": true,
+  "failed_function": "v42_a_stage_early.progress.inclusion_witness",
+  "failed_line": 19,
+  "caller": "v42_a_stage_canary.phase.activate:33",
+  "historical_native_calls": 285,
+  "historical_native_seconds": 233.89299654960632,
+  "historical_Work": 327.44561993108914,
+  "historical_wall_seconds": 2093.9435081481934,
+  "last_native_solve": {
+    "folder": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-12\\P1\\S0\\PRICE\\B\\fff0bb815e7f",
+    "component": "LOCAL_PRICING",
+    "status": 2.0,
+    "objective": -0.0017399230587681704,
+    "ObjBound": -0.0017399230587681704,
+    "native_seconds": 0.002000093460083008,
+    "cumulative_native_seconds": 233.89299654960632,
+    "NodeCount": 0.0,
+    "SolCount": 1.0,
+    "MIPGap": null,
+    "Work": 0.000618810147539491,
+    "IterCount": 0.0,
+    "BarIterCount": 0.0,
+    "raw_attributes": {
+      "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\v42-a-stage-acceptance-fourday-static\\2025-05-12\\P1\\S0\\PRICE\\B\\fff0bb815e7f\\NATIVE_RAW.npz",
+      "sha256": "a6eb297c4336e3ad00b64d75025dd7d71495cc51a743029dee60fc476d4844d8",
+      "bytes": 2928
+    },
+    "raw_attribute_errors": {
+      "FarkasDual": "Unable to retrieve attribute 'FarkasDual'"
+    },
+    "native_error": null,
+    "all_available_attributes_persisted_before_assertions": true,
+    "model_identity": {
+      "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-12\\P1\\S0\\PRICE\\B\\fff0bb815e7f\\MODEL_IDENTITY.json",
+      "sha256": "357d6a065d12c42380901f62902cbc7ee3cf7a99152565cc50db14a39cb84949",
+      "bytes": 1365
+    },
+    "build_and_snapshot_seconds": 0.27199600654421374,
+    "source_commit": "1b891dbe5b1dd454d89b657efec7cba469c0cf94",
+    "internal_barrier_attempts": [],
+    "max_factor_nnz": null,
+    "max_factor_memory_GB": null,
+    "peak_RSS_bytes": 5240475648,
+    "presolved_matrix": null,
+    "telemetry": {
+      "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-12\\P1\\S0\\PRICE\\B\\fff0bb815e7f\\NATIVE_TELEMETRY.json",
+      "sha256": "b08f7250f96841dde04cec7d7499dd36dad3360d463aaf79228f948fe2473756",
+      "bytes": 2982
+    }
+  },
+  "last_master_solve": {
+    "folder": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-12\\P1\\S0",
+    "component": "ORIGINAL_P1",
+    "status": 2.0,
+    "objective": 0.669016628961261,
+    "ObjBound": 0.669016628961261,
+    "native_seconds": 2.257999897003174,
+    "cumulative_native_seconds": 221.21099877357483,
+    "NodeCount": 0.0,
+    "SolCount": 1.0,
+    "MIPGap": null,
+    "Work": 8.505210843906887,
+    "IterCount": 8319.0,
+    "BarIterCount": 37.0,
+    "raw_attributes": {
+      "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\v42-a-stage-acceptance-fourday-static\\2025-05-12\\P1\\S0\\NATIVE_RAW.npz",
+      "sha256": "fbee88c4e9375e2a1c8530c49c3252c73b7ee22df085dc13f900bc0e8453ecbb",
+      "bytes": 3748229
+    },
+    "raw_attribute_errors": {
+      "FarkasDual": "Unable to retrieve attribute 'FarkasDual'"
+    },
+    "native_error": null,
+    "all_available_attributes_persisted_before_assertions": true,
+    "model_identity": {
+      "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-12\\P1\\S0\\MODEL_IDENTITY.json",
+      "sha256": "cad6b8631bd7181b6273a1d32d97f1fe5be07451fe10ee71f8bdbe9c18709a32",
+      "bytes": 1332
+    },
+    "build_and_snapshot_seconds": 4.614745202998165,
+    "source_commit": "1b891dbe5b1dd454d89b657efec7cba469c0cf94",
+    "internal_barrier_attempts": [
+      {
+        "ordering_seconds": 0.06,
+        "ordering_log_line": 37,
+        "factor_nnz": 879600.0,
+        "factor_memory_printed": 30.0,
+        "factor_memory_unit": "MB",
+        "factor_memory_GB": 0.03,
+        "factor_log_line": 42,
+        "factor_operations": 256500000.0,
+        "factor_operations_log_line": 43,
+        "barrier_iterations": 37,
+        "solver_reported_elapsed_seconds": 1.79,
+        "barrier_log_line": 87
+      }
+    ],
+    "max_factor_nnz": 879600.0,
+    "max_factor_memory_GB": 0.03,
+    "peak_RSS_bytes": 6402605056,
+    "presolved_matrix": {
+      "rows": 18983,
+      "columns": 31837,
+      "nnz": 203831
+    },
+    "telemetry": {
+      "path": "C:\\Users\\kjw39\\Documents\\Codex\\2026-10-08\\a-stage-acceptance-fourday\\docs\\v42_a_stage_acceptance_fourday_20261008\\2025-05-12\\P1\\S0\\NATIVE_TELEMETRY.json",
+      "sha256": "8e0d216c96ad4ed5369f5153cdd30898606479229826ee9966b1de5cde0c9998",
+      "bytes": 5091
+    }
+  },
+  "last_validated_original_primal_phase1": {
+    "PASS": true,
+    "zero": {
+      "PASS": true,
+      "replayed_phi": "5942749/9223372036854775808",
+      "certified_zero_tolerance": "1/100000000",
+      "original_rows_and_bounds": {
+        "PASS": true,
+        "max_row_violation": 1.1368683772161603e-13,
+        "max_bound_violation": 0.0,
+        "tolerance": 1e-06,
+        "rows": 751197,
+        "columns": 70801,
+        "raw_point_rounded_or_clipped": false
+      },
+      "artificial_free_original_point": true,
+      "exact_arithmetic_zero": false,
+      "INTEGER_DOMAIN_CLOSURE_PROVEN": false
+    },
+    "full_original_replay": {
+      "PASS": true,
+      "max_row_violation": 1.1368683772161603e-13,
+      "max_bound_violation": 0.0,
+      "tolerance": 1e-06,
+      "rows": 1144718,
+      "columns": 616146,
+      "raw_point_rounded_or_clipped": false
+    },
+    "Phi": 0.0,
+    "activation_rounds": 3
+  },
+  "last_restricted_P1_primal": {
+    "trajectory": [
+      {
+        "Runtime": 2.257999897003174,
+        "Work": 8.505210843906887,
+        "objective": 0.669016628961261,
+        "valid_LB": "1332710561663097991641875/2417851639229258349412352",
+        "row_closed": true,
+        "pricing_closed": false
+      }
+    ]
+  },
+  "last_certified_Phi": "5942749/9223372036854775808",
+  "original_point_integer_feasibility_not_yet_proven": true,
+  "P1_was_started": true,
+  "P2_was_not_started": true,
+  "phase1_activation_rounds": 3,
+  "phase1_activations": [
+    {
+      "solve": 19,
+      "STAY": 32,
+      "migration": 32,
+      "classes": 28,
+      "selected": 64
+    },
+    {
+      "solve": 20,
+      "STAY": 32,
+      "migration": 32,
+      "classes": 29,
+      "selected": 64
+    },
+    {
+      "solve": 21,
+      "STAY": 32,
+      "migration": 32,
+      "classes": 27,
+      "selected": 64
+    }
+  ],
+  "complete_pricing_classes": 130,
+  "negative_blocks_verified": 92,
+  "negative_blocks_not_yet_activated": 92,
+  "previous_full_domain_LB": "1332710561663097991641875/2417851639229258349412352",
+  "previous_full_domain_LB_float": 0.5511961693761854,
+  "previous_restricted_LP_value": 0.669016628961261,
+  "closure": false,
+  "protected_processes_observed": [
+    {
+      "pid": 9788,
+      "creation": 1791442747.970138,
+      "cwd": "D:\\v42_may12_p1_exact_rescue_20261008",
+      "argv": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-u",
+        "-m",
+        "v42_may12_rescue.audit"
+      ],
+      "rss": 142344192
+    },
+    {
+      "pid": 41292,
+      "creation": 1791311675.8489833,
+      "cwd": "C:\\v42_a1_pr134_supercompact_exact_20261007",
+      "argv": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_pr134_b1.host",
+        "monitor",
+        "C:\\v42_pr134_sc_execution_20261007"
+      ],
+      "rss": 8388608
+    }
+  ],
+  "other_processes_signalled_or_modified": false
+}
