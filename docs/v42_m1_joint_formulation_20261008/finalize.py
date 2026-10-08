@@ -16,6 +16,7 @@ def finish():
             assert marker['optimize_calls']==r['optimize_calls']==1 and marker['TimeLimit']==600 and marker['Threads']==1
             assert read(folder/'MODEL_IDENTITY.json')['PASS'] and r['objective_identity_PASS']
             assert r['NATIVE_LOG_SHA256']==sha(folder/'NATIVE_SOLVER.log')
+            assert marker['runner_source_SHA256']==sha(folder/'RUNNER_SOURCE.py')
             for k,v in SETTINGS.items():assert parameters[k]==v,(k,parameters[k],v)
         native_calls=len(receipts);passed=[g['label'] for g in gates if g['PASS']]
         canary=read(OUT/'CANARY_RESULT.json') if (OUT/'CANARY_RESULT.json').exists() else None
@@ -79,7 +80,7 @@ def write_report(s,rs):
     for r in rs:line(f'|{r["label"]}|{r["rows"]} / {r["columns"]} / {r["nnz"]}|{r["status_name"]}|{r["Runtime"]:.3f} / {r["Work"]:.3f}|{fmt(r["native_LP_objective"])}|{fmt(r["valid_LB"])}|{fmt(r["certificate_loss"])}|{r.get("fractional_original_binary_count","N/A")}|{max(r["peak_sampled_RSS"],r.get("Windows_lifetime_peak_wset") or 0)/2**30:.3f}|')
     line();line('|후보|Paired certified ΔLB|Inherited/baseline 최선 대비|Native objective 증가|Material gate|');line('|---|---:|---:|---:|---|')
     for g in s['materiality_gates']:line(f'|{g["label"]}|{fmt(g["paired_certified_Delta_LB"])}|{fmt(g["improvement_over_best_original_or_inherited"])}|{fmt(g["native_objective_gain"])}|{g["PASS"]}|')
-    line();line('Gate는 사전 등록대로 fresh original exact LB와 inherited valid LB 중 더 큰 값을 candidate exact LB가 0.001 이상 넘어야 한다. 요청의 paired certified ΔLB도 별도로 보고한다. 이 보수적 gate는 인증 손실을 baseline의 약함으로 숨기지 않는다. raw LP primal은 original tolerance replay와 따로 보고하며, 실패하더라도 sign-correct exact dual이 보장하는 하한과 정수 UB를 혼동하지 않는다.')
+    line();line('Gate는 사전 등록대로 fresh original exact LB와 inherited valid LB 중 더 큰 값을 candidate exact LB가 0.001 이상 넘어야 한다. 요청의 paired certified ΔLB도 별도로 보고한다. 이 보수적 gate는 인증 손실을 baseline의 약함으로 숨기지 않는다. raw LP primal은 original tolerance replay와 따로 보고하며, 실패하더라도 sign-correct exact dual이 보장하는 하한과 정수 UB를 혼동하지 않는다. baseline의 raw native ObjBound는 약 -97.9922로 반환됐으며 새 LB에 사용하지 않았다. OPTIMAL label과 native objective도 수치 인증을 대신하지 않는다.')
     line();line('## 비용과 fractional grid support')
     for r in rs:
         line();line(f'{r["label"]}: setup {r["setup_wall_seconds"]:.3f}s, optimize+certificate 전체 wall {r["total_wall_seconds"]:.3f}s, barrier iterations {r["BarIterCount"]}. Factor memory 로그: '+ '; '.join(r['factor_memory_log'])+'. Numerical warnings: '+ '; '.join(r['numerical_warnings'])+'.')
