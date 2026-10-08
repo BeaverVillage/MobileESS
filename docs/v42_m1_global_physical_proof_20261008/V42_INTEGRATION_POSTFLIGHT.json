@@ -1,0 +1,97 @@
+{
+  "checked_at_UTC": "2026-10-08 11:20:50 UTC",
+  "status": "INTEGRATION_VALIDATION_BLOCKED_HANDOFF",
+  "v42_base_HEAD": "3019dd59ee70241407dc6f9e70016de1e67d9385",
+  "base_readiness_verified": true,
+  "readiness_receipt_git_ignored_by_design": true,
+  "M_delta_HEAD": "854024f6e16c408886a46937dc6868bb8457b274",
+  "temporary_candidate_HEAD": "d53d8b6fb4626dc203dee6559e4a0b4708da9745",
+  "temporary_worktree": "D:\\v42_m1_verified_delta_integration_20261008",
+  "content_merge_conflicts": 0,
+  "common_tests": {
+    "passed": 420,
+    "skipped": 12,
+    "failed": 2,
+    "PASS": false,
+    "native_optimize_calls": 0,
+    "failure_reason": "V42_CONFIG canonical workspace differs from separate temporary worktree",
+    "failed_tests": [
+      {
+        "test": "tests/test_v42_unified.py::test_default_config_is_d_only_and_no_new_native",
+        "when": "call"
+      },
+      {
+        "test": "tests/test_v42_unified.py::test_single_pipeline_stage_order_warm_start_and_no_false_pending_completion",
+        "when": "call"
+      }
+    ]
+  },
+  "native_build_only_PASS": true,
+  "M_source_checker": {
+    "PASS": false,
+    "first_failure": "check_source_cutoff.py:240 requires merge-base(BASE,HEAD)==BASE",
+    "actual_merge_base": "52ef855a59144a7c561df44b81dc2ad265babdbd",
+    "reason": "v42 selectively imported original authorities rather than merging PR188 ancestry"
+  },
+  "missing_required_prior_evidence": [
+    "docs/v42_m1_b2_root_validation_20261008/artifacts/TEMPORAL_VALID_ROWS.npz",
+    "docs/v42_m1_b2_root_validation_20261008/artifacts/TEMPORAL_VALID_ROW_DATA.npz",
+    "docs/v42_m1_group_branching_20261008/artifacts/source_authority/ROUTE_TABLE.json.gz",
+    "docs/v42_m1_gap_rootcause_20261007/source_authority/FULL_A.npz",
+    "docs/v42_m1_gap_rootcause_20261007/source_authority/FULL_DATA.npz",
+    "docs/v42_m1_gap_rootcause_20261007/source_authority/DATA.pkl",
+    "docs/v42_m1_route_mode_benders_20261008/artifacts/BEST_VALID_POINT.npz",
+    "docs/v42_m1_joint_formulation_20261008/SHA256_MANIFEST.json",
+    "docs/v42_m1_route_mode_benders_20261008/SHA256_MANIFEST.json",
+    "docs/v42_m1_physics_strengthened_20261008/SHA256_MANIFEST.json",
+    "docs/v42_m1_b2_root_validation_20261008/SHA256_MANIFEST.json",
+    "docs/v42_m1_group_branching_20261008/SHA256_MANIFEST.json"
+  ],
+  "missing_prior_evidence_count": 12,
+  "scientific_M_result_remains": "INCONCLUSIVE/NOT_PROVEN",
+  "scientific_M_checks_in_original_M_worktree_PASS": true,
+  "additional_native_optimize_calls": 0,
+  "scientific_native_runtime_unchanged": 1213.108999967575,
+  "entire_AM_integration_regression_PASS": false,
+  "full_A_M_physical_replays_after_delta": "NOT_RUN after required gate failures",
+  "readiness_or_checker_bypassed": false,
+  "existing_v42_workspace_written": false,
+  "v42_push_attempted": false,
+  "force_merge_or_push": false,
+  "M1_ACCEPTED": false,
+  "production_calls": 0,
+  "P2_calls": 0,
+  "downstream_calls": 0,
+  "future_development_base": "v42",
+  "archived_files": {
+    "AM_REGRESSION.xml": {
+      "sha256": "6a7f37bfbe23ad9ccb96d9028d9852edc4eefbbc9a5ad1abfd9a2ea814872a35",
+      "bytes": 62552
+    },
+    "BASE_READINESS.json": {
+      "sha256": "1682e4e061d88865b21ca701f545562c15599e6c14e1899dc0b2d305c44bafcf",
+      "bytes": 8918
+    },
+    "COMPLETED_M_HANDOFF_AT_854024f6.json": {
+      "sha256": "c2f7c6815988959ac4afd3629b56372a229ea217e84ca995dcba54ea2da8ff48",
+      "bytes": 35867
+    },
+    "INDEPENDENT_INTEGRATION_SCOPE_AUDIT.json": {
+      "sha256": "eddff6be8d3da5cb7f3e125067ce0111b64e666e547bb9ed2e263999f46a151c",
+      "bytes": 27788
+    },
+    "NATIVE_BUILD_ONLY.json": {
+      "sha256": "9c394f91266b574d1028f86a3c5674a2343f93fb3695d6d7bec888aa8c6d09cd",
+      "bytes": 1354
+    },
+    "SOURCE_CUTOFF_CHECK.log": {
+      "sha256": "86ede66d2b8d1cae65e43215bc4e65ac6aaa3243a7ba354944e25d7c16c513ec",
+      "bytes": 625
+    },
+    "ZERO_NATIVE_COMMON_TESTS.json": {
+      "sha256": "a1c681830eb5125ac66480b22f61a45f133f7e13a255158069e5f4758c665dde",
+      "bytes": 44937
+    }
+  },
+  "final_remote_v42_observation": "3019dd59ee70241407dc6f9e70016de1e67d9385"
+}

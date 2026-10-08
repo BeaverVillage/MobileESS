@@ -1,0 +1,998 @@
+{
+  "schema": "M1_GAP_ROOT_CAUSE_READONLY_V1",
+  "PASS": true,
+  "source_head": "4b19e85089171729a3225529a40cb00bf31f43d5",
+  "newly_invoked_native_optimize_calls": 0,
+  "original_scientific_model_modified": false,
+  "previous_evidence_modified": false,
+  "known_bound_gap": {
+    "existing_global_LB": 0.5687116104049206,
+    "validated_UB": 0.6284141956452488,
+    "known_absolute_bound_gap": 0.05970258524032823,
+    "known_relative_bound_gap_percent": 9.500515051068552,
+    "target_relative_gap_percent": 0.5,
+    "required_LB_for_current_UB": 0.6252721246670225,
+    "required_LB_increase": 0.05656051426210196,
+    "integer_optimum_known": false,
+    "true_integrality_gap_known": false,
+    "valid_inference": "Known UB/LB gap also contains incumbent quality and certificate losses; it is not a measured true integrality gap",
+    "original_integer_feasibility_at_exact_rho_3_5": "Not resolved by the saved ROOT/child points or current A/B certificates"
+  },
+  "numerical_certification": {
+    "original_ROOT": {
+      "native_objective": 0.568711942993466,
+      "raw_wrong_sign_count": 14502,
+      "raw_point_strict_relaxed_replay": {
+        "PASS": false,
+        "finite": true,
+        "max_constraint_violation": 2.805600374244932e-08,
+        "max_bound_violation": 0.0,
+        "max_integrality_violation": null,
+        "objective": 0.568711942993466
+      },
+      "raw_primal_not_integer_or_LB": true,
+      "stationarity_vs_saved_RC_max": 2.3741319716434973e-09,
+      "native_proxy_minus_inherited_GlobalLB_is_not_same_certificate_loss": true,
+      "authority_scope": "ROOT native objective is a saved LP point diagnostic; the inherited Global LB comes from its preserved native-MILP bound authority, not a same-point independently exact ROOT certificate",
+      "nativeROOT_minus_inherited_GlobalLB_comparison": 3.325885453708821e-07,
+      "comparison_share_of_required_LB_increase_percent": 0.0005880224918565338,
+      "inherited_global_bound_authority_is_not_reclassified_as_exact_ROOT_dual": true,
+      "same_point_independent_exact_ROOT_certificate_loss": null,
+      "inherited_global_LB": 0.5687116104049206
+    },
+    "B2_ROOT": {
+      "native_objective": 0.5687138902579907,
+      "native_ObjBound": -52.55404077294537,
+      "native_ObjBound_accepted": false,
+      "raw_constraint_violation": 6.398198681978329e-08,
+      "raw_dual_violation": 1.3171883815252371e-05,
+      "raw_complementarity_violation": 1.1611380623041047e-06,
+      "sign_cone_projected_exact_LB": 0.5659508784310822,
+      "raw_wrong_sign_count": 20566,
+      "original_binding_equality_unit_pivots": 4500,
+      "injection_stationarity_before_repair": 3.0810546047395257e-08,
+      "injection_stationarity_after_repair": 4.2323519160022857e-22,
+      "equality_repaired_exact_LB": 0.5667436728775703,
+      "equality_repair_gain": 0.0007927944464881653,
+      "remaining_native_minus_repaired": 0.001970217380420358,
+      "global_LB_after_projection_or_repair": 0.5687116104049206,
+      "all_306040_finite_box_terms_exactly_accounted": true
+    },
+    "child_loss_decomposition_is_float_diagnostic": true,
+    "exact_child_bounds_supported_by_preserved_independent_certificates": true,
+    "numerical_losses_do_not_account_for_required_LB_increase": "Observed B2 exact certificate losses and child diagnostics do not demonstrate the required0.05656 LB increase; originalROOT comparison is not a same-certificate loss"
+  },
+  "structural_LP_diagnostics": {
+    "threshold": "1e-8 < value < 1-1e-8 for binary and route 0/1 fractionality; family tables also preserve 1e-6 and1e-4 counts",
+    "original_ROOT_families": [
+      {
+        "family": "route_flow",
+        "columns": "207736",
+        "original_binary_count": "0",
+        "fractional_binary_count": "0",
+        "fractional_01_continuous_count": "140502",
+        "min": "5.571942787979237e-13",
+        "max": "0.27072070200826176",
+        "zero_RC_le_1e8": "138254"
+      },
+      {
+        "family": "SOC",
+        "columns": "380",
+        "original_binary_count": "0",
+        "fractional_binary_count": "0",
+        "fractional_01_continuous_count": "0",
+        "min": "689.1316895014058",
+        "max": "1079.9999997525729",
+        "zero_RC_le_1e8": "376"
+      },
+      {
+        "family": "charge_mode",
+        "columns": "384",
+        "original_binary_count": "384",
+        "fractional_binary_count": "384",
+        "fractional_01_continuous_count": "0",
+        "min": "0.4900310154874572",
+        "max": "0.992995987216796",
+        "zero_RC_le_1e8": "384"
+      },
+      {
+        "family": "node_activity",
+        "columns": "8938",
+        "original_binary_count": "8938",
+        "fractional_binary_count": "7070",
+        "fractional_01_continuous_count": "0",
+        "min": "6.804056016948659e-10",
+        "max": "0.282476989954849",
+        "zero_RC_le_1e8": "8810"
+      }
+    ],
+    "B2_ROOT": {
+      "fractional_binary_count": 8019,
+      "family": [
+        {
+          "family": "node_activity",
+          "columns": 8938,
+          "fractional_count": 7635,
+          "positive_support": 7635,
+          "fractional_count_by_diagnostic_threshold": {
+            "1e-08": 7635,
+            "1e-06": 7062,
+            "0.0001": 6951
+          },
+          "positive_support_by_diagnostic_threshold": {
+            "1e-08": 7635,
+            "1e-06": 7062,
+            "0.0001": 6951
+          },
+          "min": 2.182461528204118e-09,
+          "max": 0.2793032874775065
+        },
+        {
+          "family": "charge_mode",
+          "columns": 384,
+          "fractional_count": 384,
+          "positive_support": 384,
+          "fractional_count_by_diagnostic_threshold": {
+            "1e-08": 384,
+            "1e-06": 384,
+            "0.0001": 384
+          },
+          "positive_support_by_diagnostic_threshold": {
+            "1e-08": 384,
+            "1e-06": 384,
+            "0.0001": 384
+          },
+          "min": 0.4891930986877682,
+          "max": 0.9953049806554406
+        },
+        {
+          "family": "route_flow",
+          "columns": 207736,
+          "fractional_count": 140264,
+          "positive_support": 140264,
+          "fractional_count_by_diagnostic_threshold": {
+            "1e-08": 140264,
+            "1e-06": 139522,
+            "0.0001": 136092
+          },
+          "positive_support_by_diagnostic_threshold": {
+            "1e-08": 140264,
+            "1e-06": 139522,
+            "0.0001": 136092
+          },
+          "min": 1.9038013335234132e-12,
+          "max": 0.2683589307717395
+        },
+        {
+          "family": "SOC",
+          "columns": 380,
+          "fractional_count": 0,
+          "positive_support": 380,
+          "fractional_count_by_diagnostic_threshold": null,
+          "positive_support_by_diagnostic_threshold": {
+            "1e-08": 380,
+            "1e-06": 380,
+            "0.0001": 380
+          },
+          "min": 689.2473603269173,
+          "max": 1079.9999984738283
+        },
+        {
+          "family": "Pch",
+          "columns": 8942,
+          "fractional_count": 0,
+          "positive_support": 8942,
+          "fractional_count_by_diagnostic_threshold": null,
+          "positive_support_by_diagnostic_threshold": {
+            "1e-08": 8942,
+            "1e-06": 6110,
+            "0.0001": 6108
+          },
+          "min": 1.0070404680916179e-08,
+          "max": 76.0327875430011
+        },
+        {
+          "family": "Pdis",
+          "columns": 8942,
+          "fractional_count": 0,
+          "positive_support": 8942,
+          "fractional_count_by_diagnostic_threshold": null,
+          "positive_support_by_diagnostic_threshold": {
+            "1e-08": 8942,
+            "1e-06": 7236,
+            "0.0001": 6484
+          },
+          "min": 1.4994432819157765e-08,
+          "max": 47.70373057764936
+        },
+        {
+          "family": "Q",
+          "columns": 8942,
+          "fractional_count": 0,
+          "positive_support": 8930,
+          "fractional_count_by_diagnostic_threshold": null,
+          "positive_support_by_diagnostic_threshold": {
+            "1e-08": 8930,
+            "1e-06": 8456,
+            "0.0001": 6987
+          },
+          "min": -105.28099393913499,
+          "max": 94.15424378595503
+        },
+        {
+          "family": "injection_P",
+          "columns": 2263,
+          "fractional_count": 0,
+          "positive_support": 2253,
+          "fractional_count_by_diagnostic_threshold": null,
+          "positive_support_by_diagnostic_threshold": {
+            "1e-08": 2253,
+            "1e-06": 2024,
+            "0.0001": 1677
+          },
+          "min": -233.91670835092884,
+          "max": 190.24066673284415
+        },
+        {
+          "family": "injection_Q",
+          "columns": 2237,
+          "fractional_count": 0,
+          "positive_support": 2237,
+          "fractional_count_by_diagnostic_threshold": null,
+          "positive_support_by_diagnostic_threshold": {
+            "1e-08": 2237,
+            "1e-06": 2203,
+            "0.0001": 1752
+          },
+          "min": -419.97780773858346,
+          "max": 373.56113262745714
+        }
+      ],
+      "original_relaxed_row_replay": {
+        "PASS": false,
+        "finite": true,
+        "max_constraint_violation": 6.398198681978329e-08,
+        "max_bound_violation": 0.0,
+        "max_integrality_violation": null,
+        "objective": 0.5687138902579907
+      },
+      "original_FULL_relaxed_row_replay": {
+        "PASS": false,
+        "finite": true,
+        "max_constraint_violation": 6.398198681978329e-08,
+        "max_bound_violation": 0.0,
+        "max_integrality_violation": null,
+        "objective": 0.5687138902579907
+      },
+      "rho": 0.5687138902579907,
+      "integer_incumbent": false
+    },
+    "PR188_children": [
+      {
+        "candidate": "C01",
+        "fixed_value": 0,
+        "fixed_variable": "charge_mode[MESS02,77]",
+        "native_objective": 0.568711703524698,
+        "native_delta_from_B2": -2.186733292663945e-06,
+        "certified_child_LB": 0.5684336505580461,
+        "native_minus_certified": 0.0002780529666519538,
+        "raw_wrong_sign_count": 15242,
+        "finite_bound_loss_sum_float_diagnostic": 0.0002737881209704466,
+        "Q_finite_bound_loss_float_diagnostic": 0.0002627399547776605,
+        "Q_share_of_finite_bound_loss": 0.9596470213768744,
+        "row_residual_term_float_diagnostic": 4.264845681516429e-06,
+        "fractional_binary_count": 7445,
+        "fractional_family": [
+          {
+            "family": "node_activity",
+            "columns": 8938,
+            "fractional_count": 7062,
+            "positive_support": 7062,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 7062,
+              "1e-06": 6910,
+              "0.0001": 6786
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 7062,
+              "1e-06": 6910,
+              "0.0001": 6786
+            },
+            "min": 2.6102592241212003e-10,
+            "max": 0.2932762477501883
+          },
+          {
+            "family": "charge_mode",
+            "columns": 384,
+            "fractional_count": 383,
+            "positive_support": 383,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 383,
+              "1e-06": 383,
+              "0.0001": 383
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 383,
+              "1e-06": 383,
+              "0.0001": 383
+            },
+            "min": 0.0,
+            "max": 0.993830360834751
+          },
+          {
+            "family": "route_flow",
+            "columns": 207736,
+            "fractional_count": 138590,
+            "positive_support": 138590,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 138590,
+              "1e-06": 135964,
+              "0.0001": 135756
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 138590,
+              "1e-06": 135964,
+              "0.0001": 135756
+            },
+            "min": 2.296315322053924e-13,
+            "max": 0.27731859277645793
+          }
+        ],
+        "reallocation_from_B2": [
+          {
+            "family": "Pch",
+            "columns_changed_above_1e8": 8940,
+            "L1_change": 2403.840766060504,
+            "maximum_change": 8.986778794713715
+          },
+          {
+            "family": "Pdis",
+            "columns_changed_above_1e8": 8939,
+            "L1_change": 2172.501216882369,
+            "maximum_change": 8.587009295065034
+          },
+          {
+            "family": "Q",
+            "columns_changed_above_1e8": 8937,
+            "L1_change": 5708.841443747128,
+            "maximum_change": 34.76458354371425
+          },
+          {
+            "family": "SOC",
+            "columns_changed_above_1e8": 380,
+            "L1_change": 1821.143518545089,
+            "maximum_change": 17.658657251942145
+          },
+          {
+            "family": "charge_mode",
+            "columns_changed_above_1e8": 384,
+            "L1_change": 3.822615099651271,
+            "maximum_change": 0.49456043050590376
+          },
+          {
+            "family": "injection_P",
+            "columns_changed_above_1e8": 2250,
+            "L1_change": 2206.5477770027387,
+            "maximum_change": 44.91843684335004
+          },
+          {
+            "family": "injection_Q",
+            "columns_changed_above_1e8": 2237,
+            "L1_change": 2895.035965651724,
+            "maximum_change": 82.78079877232176
+          },
+          {
+            "family": "node_activity",
+            "columns_changed_above_1e8": 7426,
+            "L1_change": 13.131779466233214,
+            "maximum_change": 0.08831142513248556
+          },
+          {
+            "family": "rho_max",
+            "columns_changed_above_1e8": 1,
+            "L1_change": 2.186733292663945e-06,
+            "maximum_change": 2.186733292663945e-06
+          },
+          {
+            "family": "route_flow",
+            "columns_changed_above_1e8": 140034,
+            "L1_change": 15.517067689699676,
+            "maximum_change": 0.08831145675534777
+          }
+        ],
+        "original_relaxed_replay": {
+          "PASS": true,
+          "finite": true,
+          "max_constraint_violation": 6.190248313941993e-09,
+          "max_bound_violation": 0.0,
+          "max_integrality_violation": null,
+          "objective": 0.568711703524698
+        },
+        "integer_incumbent": false,
+        "diagnostic_scope": "Saved LP point reallocation; original route_flow columns are continuous, never mislabeled binary"
+      },
+      {
+        "candidate": "C01",
+        "fixed_value": 1,
+        "fixed_variable": "charge_mode[MESS02,77]",
+        "native_objective": 0.5687273753088552,
+        "native_delta_from_B2": 1.348505086451457e-05,
+        "certified_child_LB": 0.5653577972412814,
+        "native_minus_certified": 0.003369578067573764,
+        "raw_wrong_sign_count": 19203,
+        "finite_bound_loss_sum_float_diagnostic": 0.0033362082450158373,
+        "Q_finite_bound_loss_float_diagnostic": 0.0019023787537946243,
+        "Q_share_of_finite_bound_loss": 0.5702218249225607,
+        "row_residual_term_float_diagnostic": 3.33698225579153e-05,
+        "fractional_binary_count": 7878,
+        "fractional_family": [
+          {
+            "family": "node_activity",
+            "columns": 8938,
+            "fractional_count": 7495,
+            "positive_support": 7495,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 7495,
+              "1e-06": 7037,
+              "0.0001": 6906
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 7495,
+              "1e-06": 7037,
+              "0.0001": 6906
+            },
+            "min": 1.4083541012042127e-09,
+            "max": 0.4169276440138621
+          },
+          {
+            "family": "charge_mode",
+            "columns": 384,
+            "fractional_count": 383,
+            "positive_support": 384,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 383,
+              "1e-06": 383,
+              "0.0001": 383
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 384,
+              "1e-06": 384,
+              "0.0001": 384
+            },
+            "min": 0.46255673324037966,
+            "max": 1.0
+          },
+          {
+            "family": "route_flow",
+            "columns": 207736,
+            "fractional_count": 140095,
+            "positive_support": 140095,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 140095,
+              "1e-06": 138489,
+              "0.0001": 136005
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 140095,
+              "1e-06": 138489,
+              "0.0001": 136005
+            },
+            "min": 1.4326988420991614e-12,
+            "max": 0.4169276383788772
+          }
+        ],
+        "reallocation_from_B2": [
+          {
+            "family": "Pch",
+            "columns_changed_above_1e8": 8363,
+            "L1_change": 3389.992648395132,
+            "maximum_change": 42.45972088787822
+          },
+          {
+            "family": "Pdis",
+            "columns_changed_above_1e8": 8880,
+            "L1_change": 5170.487806480269,
+            "maximum_change": 40.28207141882626
+          },
+          {
+            "family": "Q",
+            "columns_changed_above_1e8": 8897,
+            "L1_change": 17796.732082886858,
+            "maximum_change": 100.96055406338633
+          },
+          {
+            "family": "SOC",
+            "columns_changed_above_1e8": 380,
+            "L1_change": 5325.9857349073845,
+            "maximum_change": 70.83302229109188
+          },
+          {
+            "family": "charge_mode",
+            "columns_changed_above_1e8": 384,
+            "L1_change": 6.811346785644381,
+            "maximum_change": 0.5054395694940963
+          },
+          {
+            "family": "injection_P",
+            "columns_changed_above_1e8": 2238,
+            "L1_change": 2378.260090523285,
+            "maximum_change": 40.118813090840604
+          },
+          {
+            "family": "injection_Q",
+            "columns_changed_above_1e8": 2235,
+            "L1_change": 3760.598192512016,
+            "maximum_change": 39.51143763496157
+          },
+          {
+            "family": "node_activity",
+            "columns_changed_above_1e8": 7070,
+            "L1_change": 50.236798700161756,
+            "maximum_change": 0.2573462199183125
+          },
+          {
+            "family": "rho_max",
+            "columns_changed_above_1e8": 1,
+            "L1_change": 1.348505086451457e-05,
+            "maximum_change": 1.348505086451457e-05
+          },
+          {
+            "family": "route_flow",
+            "columns_changed_above_1e8": 139784,
+            "L1_change": 62.99001266790139,
+            "maximum_change": 0.2573462199510924
+          }
+        ],
+        "original_relaxed_replay": {
+          "PASS": false,
+          "finite": true,
+          "max_constraint_violation": 3.445910223831561e-08,
+          "max_bound_violation": 0.0,
+          "max_integrality_violation": null,
+          "objective": 0.5687273753088552
+        },
+        "integer_incumbent": false,
+        "diagnostic_scope": "Saved LP point reallocation; original route_flow columns are continuous, never mislabeled binary"
+      },
+      {
+        "candidate": "C02",
+        "fixed_value": 0,
+        "fixed_variable": "node_activity[MESS01,STA12,67]",
+        "native_objective": 0.5687169097681644,
+        "native_delta_from_B2": 3.019510173674078e-06,
+        "certified_child_LB": 0.5665825046503802,
+        "native_minus_certified": 0.002134405117784177,
+        "raw_wrong_sign_count": 20176,
+        "finite_bound_loss_sum_float_diagnostic": 0.0020973992990995496,
+        "Q_finite_bound_loss_float_diagnostic": 0.0020869692862917513,
+        "Q_share_of_finite_bound_loss": 0.9950271687359311,
+        "row_residual_term_float_diagnostic": 3.700581868456183e-05,
+        "fractional_binary_count": 7717,
+        "fractional_family": [
+          {
+            "family": "node_activity",
+            "columns": 8938,
+            "fractional_count": 7333,
+            "positive_support": 7333,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 7333,
+              "1e-06": 6887,
+              "0.0001": 6871
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 7333,
+              "1e-06": 6887,
+              "0.0001": 6871
+            },
+            "min": 0.0,
+            "max": 0.3579517951836043
+          },
+          {
+            "family": "charge_mode",
+            "columns": 384,
+            "fractional_count": 384,
+            "positive_support": 384,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 384,
+              "1e-06": 384,
+              "0.0001": 384
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 384,
+              "1e-06": 384,
+              "0.0001": 384
+            },
+            "min": 0.4832343712294307,
+            "max": 0.9952425488908695
+          },
+          {
+            "family": "route_flow",
+            "columns": 207736,
+            "fractional_count": 140001,
+            "positive_support": 140001,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 140001,
+              "1e-06": 139430,
+              "0.0001": 135950
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 140001,
+              "1e-06": 139430,
+              "0.0001": 135950
+            },
+            "min": 0.0,
+            "max": 0.3579427730184835
+          }
+        ],
+        "reallocation_from_B2": [
+          {
+            "family": "Pch",
+            "columns_changed_above_1e8": 8839,
+            "L1_change": 2647.033009754419,
+            "maximum_change": 16.462465074187083
+          },
+          {
+            "family": "Pdis",
+            "columns_changed_above_1e8": 8927,
+            "L1_change": 4975.598683049742,
+            "maximum_change": 47.70372039762084
+          },
+          {
+            "family": "Q",
+            "columns_changed_above_1e8": 8937,
+            "L1_change": 18732.345927754286,
+            "maximum_change": 105.28099393913499
+          },
+          {
+            "family": "SOC",
+            "columns_changed_above_1e8": 380,
+            "L1_change": 3181.101668990057,
+            "maximum_change": 24.733164986720112
+          },
+          {
+            "family": "charge_mode",
+            "columns_changed_above_1e8": 384,
+            "L1_change": 1.1838228920739509,
+            "maximum_change": 0.019097176293864537
+          },
+          {
+            "family": "injection_P",
+            "columns_changed_above_1e8": 2251,
+            "L1_change": 2604.6178237991808,
+            "maximum_change": 28.269711743115977
+          },
+          {
+            "family": "injection_Q",
+            "columns_changed_above_1e8": 2236,
+            "L1_change": 6847.65372885905,
+            "maximum_change": 90.94293374519555
+          },
+          {
+            "family": "node_activity",
+            "columns_changed_above_1e8": 7143,
+            "L1_change": 44.160109102153314,
+            "maximum_change": 0.2683589298187954
+          },
+          {
+            "family": "rho_max",
+            "columns_changed_above_1e8": 1,
+            "L1_change": 3.019510173674078e-06,
+            "maximum_change": 3.019510173674078e-06
+          },
+          {
+            "family": "route_flow",
+            "columns_changed_above_1e8": 139873,
+            "L1_change": 50.79402119034768,
+            "maximum_change": 0.2683589295759875
+          }
+        ],
+        "original_relaxed_replay": {
+          "PASS": false,
+          "finite": true,
+          "max_constraint_violation": 5.6376840529281935e-08,
+          "max_bound_violation": 0.0,
+          "max_integrality_violation": null,
+          "objective": 0.5687169097681644
+        },
+        "integer_incumbent": false,
+        "diagnostic_scope": "Saved LP point reallocation; original route_flow columns are continuous, never mislabeled binary"
+      },
+      {
+        "candidate": "C02",
+        "fixed_value": 1,
+        "fixed_variable": "node_activity[MESS01,STA12,67]",
+        "native_objective": 0.5687572829311925,
+        "native_delta_from_B2": 4.339267320185858e-05,
+        "certified_child_LB": 0.5686641323317673,
+        "native_minus_certified": 9.315059942527348e-05,
+        "raw_wrong_sign_count": 14121,
+        "finite_bound_loss_sum_float_diagnostic": 9.055199148944088e-05,
+        "Q_finite_bound_loss_float_diagnostic": 9.011522772702298e-05,
+        "Q_share_of_finite_bound_loss": 0.9951766520511166,
+        "row_residual_term_float_diagnostic": 2.598607935754568e-06,
+        "fractional_binary_count": 7176,
+        "fractional_family": [
+          {
+            "family": "node_activity",
+            "columns": 8938,
+            "fractional_count": 6792,
+            "positive_support": 6795,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 6792,
+              "1e-06": 6637,
+              "0.0001": 6605
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 6795,
+              "1e-06": 6642,
+              "0.0001": 6610
+            },
+            "min": 2.141728830529604e-11,
+            "max": 1.0
+          },
+          {
+            "family": "charge_mode",
+            "columns": 384,
+            "fractional_count": 384,
+            "positive_support": 384,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 384,
+              "1e-06": 384,
+              "0.0001": 384
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 384,
+              "1e-06": 384,
+              "0.0001": 384
+            },
+            "min": 0.47397378513746147,
+            "max": 0.9950484859413118
+          },
+          {
+            "family": "route_flow",
+            "columns": 207736,
+            "fractional_count": 135444,
+            "positive_support": 135446,
+            "fractional_count_by_diagnostic_threshold": {
+              "1e-08": 135444,
+              "1e-06": 135113,
+              "0.0001": 134380
+            },
+            "positive_support_by_diagnostic_threshold": {
+              "1e-08": 135446,
+              "1e-06": 135117,
+              "0.0001": 134384
+            },
+            "min": 1.2073735901262306e-13,
+            "max": 0.9999999968174133
+          }
+        ],
+        "reallocation_from_B2": [
+          {
+            "family": "Pch",
+            "columns_changed_above_1e8": 8939,
+            "L1_change": 3750.9978189306566,
+            "maximum_change": 58.65755787700322
+          },
+          {
+            "family": "Pdis",
+            "columns_changed_above_1e8": 8938,
+            "L1_change": 6636.799327239294,
+            "maximum_change": 62.17193462704155
+          },
+          {
+            "family": "Q",
+            "columns_changed_above_1e8": 8937,
+            "L1_change": 36734.940856128174,
+            "maximum_change": 296.7802163594398
+          },
+          {
+            "family": "SOC",
+            "columns_changed_above_1e8": 380,
+            "L1_change": 3637.4557466734036,
+            "maximum_change": 66.50695947515601
+          },
+          {
+            "family": "charge_mode",
+            "columns_changed_above_1e8": 384,
+            "L1_change": 0.8710945432070153,
+            "maximum_change": 0.02311464829859855
+          },
+          {
+            "family": "injection_P",
+            "columns_changed_above_1e8": 2252,
+            "L1_change": 4617.928025434371,
+            "maximum_change": 98.64704315275083
+          },
+          {
+            "family": "injection_Q",
+            "columns_changed_above_1e8": 2237,
+            "L1_change": 6206.276086363771,
+            "maximum_change": 80.25681589430837
+          },
+          {
+            "family": "node_activity",
+            "columns_changed_above_1e8": 7627,
+            "L1_change": 99.03339859432346,
+            "maximum_change": 0.7316410701812046
+          },
+          {
+            "family": "rho_max",
+            "columns_changed_above_1e8": 1,
+            "L1_change": 4.339267320185858e-05,
+            "maximum_change": 4.339267320185858e-05
+          },
+          {
+            "family": "route_flow",
+            "columns_changed_above_1e8": 140329,
+            "L1_change": 99.3576805959571,
+            "maximum_change": 0.7316410756184557
+          }
+        ],
+        "original_relaxed_replay": {
+          "PASS": false,
+          "finite": true,
+          "max_constraint_violation": 2.543797563703265e-07,
+          "max_bound_violation": 0.0,
+          "max_integrality_violation": null,
+          "objective": 0.5687572829311925
+        },
+        "integer_incumbent": false,
+        "diagnostic_scope": "Saved LP point reallocation; original route_flow columns are continuous, never mislabeled binary"
+      }
+    ],
+    "certified_scalar_domain_pairs": [
+      {
+        "candidate": "C01",
+        "certified_sibling_min_LB": 0.5653577972412814,
+        "global_LB": 0.5687116104049206,
+        "global_delta": 0.0,
+        "raw_native_sibling_min_diagnostic": 0.568711703524698,
+        "raw_native_sibling_min_minus_existing_LB": 9.311977744452804e-08,
+        "raw_native_numbers_not_exact_global_bounds": true
+      },
+      {
+        "candidate": "C02",
+        "certified_sibling_min_LB": 0.5665825046503802,
+        "global_LB": 0.5687116104049206,
+        "global_delta": 0.0,
+        "raw_native_sibling_min_diagnostic": 0.5687169097681644,
+        "raw_native_sibling_min_minus_existing_LB": 5.299363243782551e-06,
+        "raw_native_numbers_not_exact_global_bounds": true
+      }
+    ],
+    "prior_scalar_binary_domains_checked": 2,
+    "prior_LP_children_with_certified_bounds": 4,
+    "selected_C03_domain_pairs_not_run": 1,
+    "prior_global_integer_search_tree_coverage": "Not provided by these scalar childLP experiments",
+    "observed_effect": "Fixing one original mode or location causes redistribution across all four MESS and thousands of route/P/Q/SOC coordinates, with native rho changes only2.19e-6 to4.34e-5",
+    "raw_native_B2_minus_original_ROOT": 1.947264524737591e-06,
+    "raw_difference_not_certified_B2_strengthening": true,
+    "original_C3A_already_contains_full_96_slot_route_SOC_PCS_grid": true
+  },
+  "current_global_support_certificate": {
+    "selected_weight_label": "B2_ACTIVE_ALL_SECURITY",
+    "original_archived_thermal_rows_observed": 101,
+    "selected_source_rows": 1000,
+    "D_exact_3_5_lower": 0.01309516056232032,
+    "route_PCS_terminal_only_sum_U_upper": 0.22013385276203984,
+    "suffix_SOC_sum_U_upper": 0.04450248238934866,
+    "SOC_suffix_energy_per_vehicle_upper_kwh": 320.0,
+    "SOC_suffix_absolute_support_upper_reduction": 0.17563137037269116,
+    "SOC_suffix_support_upper_reduction_percent": 79.78389882747614,
+    "D_minus_sum_U_lower": -0.03140732182702834,
+    "safe_support_LB": 0.5685926778989181,
+    "safe_support_LB_minus_existing_global_LB": -0.00011893250600247818,
+    "global_LB_update": 0.0,
+    "status": "NOT_PROVEN",
+    "exact_arithmetic": "IEEE754 source dyadics; rational affine closure, PCS vertices and DAG edge potentials; outward presentation",
+    "analytical_relaxation_contains_original_integer_feasible_set": true,
+    "remaining_SOC_relaxation_loss_unknown": true,
+    "valid_inference": "SOC banking was a major capacity-relaxation weakness, but the selected scalar grid necessity still has0.0314073 excess support capacity atc=3/5",
+    "current_capacity_demand_ratio": 3.398391503300766
+  },
+  "next_bottleneck": {
+    "count": 1,
+    "action": "Resolve a joint multi-time location/mode/PQ cover over the critical66..95 window against all4 original vehicles, using the alreadyregistered vehicle and cutoff results; retain full-domain coverage rather than repeat onebinary LP pivots",
+    "justification": [
+      "The selected scalar necessary condition is weaker than its valid SOC-aware capacity upper bound by0.03140732182702834",
+      "Previous mode/location siblings permit reallocation in135444..140095 fractional routeflows while certified sibling minima remain belowexistingLB",
+      "Saved original ROOT objective is only3.33e-7 above the inherited GlobalLB, while targetLB gain is0.0565605142621019; this is a diagnostic comparison, not same-certificate loss"
+    ],
+    "experiment_executed_by_this_audit": false,
+    "new_experiment_authorized_by_this_audit": false
+  },
+  "precision_notes": [
+    "Every finite-bound-loss family decomposition copied from PR188 is floating diagnostic, not an exact loss proof",
+    "Saved raw LP objectives are comparison diagnostics; their differences do not establish certified LB improvements",
+    "Only source-certified mathematical bounds and validated integer UB remain authoritative",
+    "OriginalROOT native objective minus inherited GlobalLB is an authority-scope comparison, never an independently exact same-point ROOT certificate loss"
+  ],
+  "sources": {
+    "original_raw_point_audit": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_physics_strengthened_20261008\\ROOT_RAW_POINT_AUDIT.json",
+      "sha256": "9988d7da935a646c48758747209233e0018321b8219f66444ef109f0c989b23f",
+      "bytes": 840
+    },
+    "original_fractional_family_census": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_physics_strengthened_20261008\\ROOT_VARIABLE_FAMILY_DIAGNOSTIC.csv",
+      "sha256": "a8df5073e0aafc338ff51ffdbb1d86d6882de0a42dac51f4536139d1094e3be4",
+      "bytes": 1148
+    },
+    "original_root_primal_dual_RC": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_joint_formulation_20261008\\runs\\ORIGINAL\\LP_POINT_DUAL.npz",
+      "sha256": "7c7e2db497b6f7d41d978a42eb492baa2249138615fc3360f62143f37b8e2325",
+      "bytes": 7434282
+    },
+    "global_LB_validation": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_gap_rootcause_20261007\\LB_VALIDATION.json",
+      "sha256": "fa661f4ae2ebd602e2fc48308ac0c9a5da3cbf210b381e9bb9bfe25000127dd0",
+      "bytes": 27233
+    },
+    "B2_native_result": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_b2_root_validation_20261008\\B2_ROOT_NATIVE_RESULT.json",
+      "sha256": "0ad29f649ced35f842082081e901081066e01e55c8cde0e9f458680f35952f87",
+      "bytes": 1064
+    },
+    "B2_exact_bound": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_b2_root_validation_20261008\\B2_ROOT_LB_CERTIFICATE.json",
+      "sha256": "908a5b48ca578ebda89956ae2f2be9c5f043404526b61dda69ae269ebb0ba7ba",
+      "bytes": 4385
+    },
+    "B2_saved_raw": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_b2_root_validation_20261008\\B2_ROOT_RAW.npz",
+      "sha256": "da895ca9110a802f85f8069a54717a2e5b36b03b60441b61cebf1df2c6e0d060",
+      "bytes": 11397259
+    },
+    "B2_equality_repair": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_group_branching_20261008\\DUAL_CERTIFICATION_REPAIR_AUDIT.json",
+      "sha256": "8f52c56c2dd08894638154c5141b6a50597c2d8eb27fafa84d9320c61ceb9c3a",
+      "bytes": 3522
+    },
+    "PR188_child_numeric": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_group_branching_20261008\\CHILD_NUMERICAL_AUDIT.json",
+      "sha256": "0817b81cbf544604a6b7eedfecfe8c6659a554d2897f11587e8f1c4b81fb5f8d",
+      "bytes": 14632
+    },
+    "PR188_fractional_reallocation": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_group_branching_20261008\\FRACTIONAL_SOLUTION_COMPARISON.json",
+      "sha256": "664d558fcf69023350a2eecc94b2655284d08eb609814c63dc6f66f2fdb3e786",
+      "bytes": 3217596
+    },
+    "PR188_child_results": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_group_branching_20261008\\CHILD_LP_RESULTS.csv",
+      "sha256": "aa1b957ca4dc7ef4777ca72f194a2bc7f2c426d216c540d7467d089940072b69",
+      "bytes": 1697
+    },
+    "PR188_C01_pair": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_group_branching_20261008\\C01_CONTINUED_PAIR_RESULT.json",
+      "sha256": "754cf53b7a8030becbc3041610fdfc31bb04690ef872f90b4c5403fbf29b4ce9",
+      "bytes": 5460
+    },
+    "PR188_C02_pair": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_group_branching_20261008\\C02_PAIR_RESULT.json",
+      "sha256": "43fb8a1f0bb326acaf33eaf6a3180e3daf933d67701c5157904d247badc6fd98",
+      "bytes": 5561
+    },
+    "PR188_final_decision": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_group_branching_20261008\\FINAL_DECISION.json",
+      "sha256": "e0112ee6a434d092a5d57e4d52baece74be01a97d23c06df192b1683880e5a9f",
+      "bytes": 1869
+    },
+    "current_grid_demand": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_global_physical_proof_20261008\\GRID_DEMAND_CERTIFICATE.json",
+      "sha256": "db9b2860f61e0ba49b1e2c293fe6c5ee563765b7605b19888740580ecb798f3c",
+      "bytes": 4625
+    },
+    "current_capacity_bounds": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_global_physical_proof_20261008\\MESS_CAPACITY_UPPER_BOUNDS.json",
+      "sha256": "83bfd95ceff85d3929beb6c0683d64baaa1a96148cc4df1b0757f39d45eb4e12",
+      "bytes": 37107
+    },
+    "current_source_identity": {
+      "path": "D:\\v42_m1_global_physical_proof_20261008\\docs\\v42_m1_global_physical_proof_20261008\\SOURCE_IDENTITY.json",
+      "sha256": "3aea7a311a7cfa6e4ef258cdeb69e551e91e87aafb27bdb2e5cd192946582b9b",
+      "bytes": 7544
+    }
+  }
+}
