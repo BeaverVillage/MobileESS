@@ -161,6 +161,41 @@ def check_covers(exact, row_weights, groups, polygons, reached, sites, initial):
         assert not contradiction, "TEMPORAL_HALL_CONTRADICTION_REQUIRES_GLOBAL_REVIEW"
 
 
+def check_time_bounds(audit, exact, rewards, reached, sites, initial, by_slot):
+    singles = {}
+    for record in audit["per_slot_bounds"]:
+        slot = int(record["slot"])
+        assert F(record["demand_exact"]) == by_slot[slot]
+        total = F(0)
+        for unit in initial:
+            upper = max(rewards[unit, site, slot] for site in sites if (site, slot) in reached[unit])
+            singles[unit, slot] = upper
+            assert F(record["vehicle_bounds"][unit]["upper_exact"]) == upper
+            total += upper
+        assert F(record["total_upper_exact"]) == total and F(record["slack_exact"]) == total - by_slot[slot]
+        assert record["contradiction"] == (by_slot[slot] > total)
+        assert not record["contradiction"]
+    bridges = {tuple(record["slots"]): record["reachable_origin_masks"] for record in exact["bridge_reachability"]}
+    for record in audit["two_time_bounds"]:
+        first, second = map(int, record["slots"])
+        masks = bridges[first, second]
+        total = F(0)
+        for unit in initial:
+            both_dispatch = max(rewards[unit, origin, first] + rewards[unit, dest, second]
+                for origin_index, origin in enumerate(sites) if (origin, first) in reached[unit]
+                for dest_index, dest in enumerate(sites) if masks[dest_index] & (1 << origin_index))
+            actual = F(record["vehicle_bounds"][unit]["upper_exact"])
+            assert actual == both_dispatch
+            # A source schedule may travel at one critical time. Its reward is
+            # bounded by the other single-time bound, which must also be covered.
+            assert actual >= max(singles[unit, first], singles[unit, second], F(0)), "PAIRED_STAY_BOUND_OMITS_TRAVELLING_SCHEDULES"
+            total += actual
+        required = by_slot[first] + by_slot[second]
+        assert F(record["demand_exact"]) == required and F(record["total_upper_exact"]) == total
+        assert record["contradiction"] == (required > total)
+        assert not record["contradiction"]
+
+
 def main():
     import gurobipy as gp
     gp.Model.optimize = lambda *a, **k: (_ for _ in ()).throw(AssertionError("TEMPORAL_CHECKER_OPTIMIZE_FORBIDDEN"))
@@ -185,6 +220,7 @@ def main():
     assert sum(demand_by_time.values()) <= total
     check_bridges(exact, sites, outgoing)
     check_covers(exact, row_weights, groups, polygons, reached, sites, initial)
+    check_time_bounds(audit, exact, rewards, reached, sites, initial, demand_by_time)
     # The supplied maximizing paths are lower witnesses for R, not upper proofs.
     for path in exact["maximizing_relaxed_paths"]:
         unit, position, value = path["MESS"], (initial[path["MESS"]], 0), F(0)

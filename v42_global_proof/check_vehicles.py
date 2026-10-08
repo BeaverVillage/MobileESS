@@ -21,7 +21,7 @@ def dyadic(value):
 
 def original_projection(AA, d, dd, unit):
     units = [str(name).split("[", 1)[1].split(",", 1)[0] if "[" in str(name) else "" for name in d["names"]]
-    columns = np.array([j for j, value in enumerate(units) if value == unit], dtype=int)
+    columns = np.array([j for j, value in enumerate(units) if value == unit], dtype=np.intp)
     belongs = set(map(int, columns))
     rows = []
     for i, name in enumerate(dd["row_names"]):
@@ -69,13 +69,14 @@ def main():
     start = time.perf_counter()
     A, d, T, AA, dd, unused = load_sources()
     demand = read(OUT / "GRID_DEMAND_CERTIFICATE.json")["selected"]
-    exact_path = Path(demand["exact_artifact"]["path"])
+    exact_path = OUT / Path(demand["exact_artifact"]["path"]).name
     assert exact_path.resolve().is_relative_to(OUT.resolve())
     assert sha(exact_path) == demand["exact_artifact"]["sha256"]
     exact = json.loads(gzip.decompress(exact_path.read_bytes()))
     weights = {int(item["column"]): F(item["coefficient"]) for item in exact["weights"]}
     registration = read(OUT / "EXPERIMENT_PREREGISTRATION.json")
     checks, covered_binary_columns = [], set()
+    incumbent_support_total = F(0)
     for unit in ("MESS01", "MESS02", "MESS03", "MESS04"):
         folder = OUT / "vehicles" / unit
         columns, rows, matrix, data = original_projection(AA, d, dd, unit)
@@ -114,18 +115,36 @@ def main():
                 incumbent = incumbent_replay(matrix, data, archive["x"].copy(), objective, weights, columns)
             assert incumbent["PASS"] == result["local_incumbent_replay"]["PASS"]
             assert F(result["incumbent_support_exact_evaluation"]) == F(incumbent["original_exact_support"])
+            assert incumbent["PASS"], "VEHICLE_INCUMBENT_SCIENTIFIC_REPLAY_FAILED"
+            incumbent_support_total += F(incumbent["original_exact_support"])
         if result.get("ObjBound") is not None:
             assert dyadic(result["numerical_support_upper_after_conversion"]) >= dyadic(result["ObjBound"]) + correction
         checks.append(dict(PASS=True, MESS=unit, source_columns=len(columns), original_physical_rows=len(rows),
             original_binaries=len(binaries), original_B2_rows=families.get("temporal_reachability", 0),
             exact_objective_rounding_allowance=str(correction), incumbent_replay=incumbent,
             numerical_Status=result["Status"], native_Runtime=result["Runtime"], numerical_Work=result["Work"],
+            observed_sampled_peak_RSS_bytes=result["peak_RSS_bytes"],
+            RSS_measurement_scope="Lower bound from periodic process RSS samples; not an OS lifetime peak",
             analytical_capacity_upper_remains_authority=True, numerical_bound_never_exact_proof=True))
     assert covered_binary_columns == set(map(int, np.flatnonzero(d["types"] == "B"))), "NOT_ALL_9322_ORIGINAL_BINARIES_COVERED"
+    capacity = read(OUT / "MESS_CAPACITY_UPPER_BOUNDS.json")["selected"]
+    analytical_upper = F(capacity["sum_U_exact"])
+    scalar_demand = F(demand["D_exact"])
+    all_incumbents = all(item["incumbent_replay"] is not None for item in checks)
     output = dict(PASS=True, vehicles=checks, all_original_9322_binary_columns_covered=True,
         all_unit_private_physical_rows_preserved=True, exact_support_to_binary64_conversion_certified=True,
         grid_coupling_removed_is_a_valid_projection_relaxation=True,
         analytical_uppers_remain_authoritative=True, numerical_MIP_bounds_not_exact_certificates=True,
+        scalar_certificate_strength=dict(selected_label=demand["label"],
+            exact_D=str(scalar_demand), exact_analytical_sum_U=str(analytical_upper),
+            all_four_scientifically_valid_original_vehicle_incumbents=all_incumbents,
+            exact_evaluation_sum_incumbent_support=str(incumbent_support_total),
+            analytical_upper_minus_scientific_incumbents_exact=str(analytical_upper - incumbent_support_total),
+            scientific_incumbent_support_minus_D_exact=str(incumbent_support_total - scalar_demand),
+            scalar_contradiction_still_fails=all_incumbents and incumbent_support_total >= scalar_demand,
+            implication="For these fixed support weights, capacity relaxation looseness cannot bridge the demand deficit; independent vehicle incumbents already support more than D",
+            limitation="These are separate vehicle schedules. Combined grid feasibility is not checked and this is not a global cutoff counterexample",
+            scientific_feasibility_tolerance=1e-8, exact_primal_feasibility_certificate=False),
         native_optimize_calls=0, controller_wall_seconds=time.perf_counter() - start)
     write(OUT / "INDEPENDENT_VEHICLE_CHECK.json", output)
     print(json.dumps(dict(PASS=True, native_optimize_calls=0, controller_wall_seconds=output["controller_wall_seconds"])), flush=True)

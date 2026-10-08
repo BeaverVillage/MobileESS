@@ -14,6 +14,8 @@ def main():
     ac=read(OUT/'INDEPENDENT_GRID_CAPACITY_CHECK.json');assert ac['PASS']
     bc=read(OUT/'INDEPENDENT_TEMPORAL_CHECK.json');assert bc['PASS']
     vc=read(OUT/'INDEPENDENT_VEHICLE_CHECK.json');assert vc['PASS']
+    exactlocal=read(OUT/'EXACT_LOCAL_CAPACITY_LOWER_WITNESSES.json')
+    exactlocalcheck=read(OUT/'INDEPENDENT_LOCAL_EXACT_WITNESS_CHECK.json');assert exactlocalcheck['PASS']
     vehicle=read(OUT/'VEHICLE_NATIVE_RESULTS.json');assert vehicle['budget_PASS']
     results=capacity['comparisons'];new_lb=max([LB]+[r['certified_lower_bound_from_support'] for r in results])
     feasible=independent['classification']=='FEASIBLE_COUNTEREXAMPLE'
@@ -29,9 +31,13 @@ def main():
     runtime=cutoff['Runtime']+vehicle['Runtime_sum'];work=cutoff['Work']+vehicle['Work_sum']
     assert cutoff['native_runtime_budget_PASS'] and runtime<=3600
     D=F(A['selected']['D_exact']);U=F(capacity['selected']['sum_U_exact'])
+    exact_capacity_lower=F(exactlocal['sum_support_exact']);assert exact_capacity_lower>D
+    lower_by_unit={r['MESS']:r for r in exactlocal['vehicles']}
     native_by_unit={r['MESS']:r for r in vehicle['vehicles']};vehicle_details=[]
     for r in capacity['selected']['vehicles']:
         n=native_by_unit[r['MESS']];data=dict(r,numerical_native=n)
+        data.update(exact_physical_capacity_lower=lower_by_unit[r['MESS']]['support_exact'],
+            exact_upper_minus_exact_capacity_lower=str(F(r['U_exact'])-F(lower_by_unit[r['MESS']]['support_exact'])))
         if n.get('local_incumbent_replay',{}).get('PASS'):
             lower=F(n['incumbent_support_exact_evaluation'])
             data.update(numerical_feasible_support_lower=float(lower),exact_DP_minus_numerical_feasible_support=float(F(r['U_exact'])-lower),
@@ -39,11 +45,17 @@ def main():
         vehicle_details.append(data)
     write(OUT/'VEHICLE_CAPACITY_GAP_DIAGNOSIS.json',dict(PASS=True,vehicles=vehicle_details,
         selected_grid_label=A['selected_label'],all_exact_upper_bounds_remain_analytical=True,
-        native_MIP_ObjBound_is_not_an_independently_exact_upper_bound=True))
+        native_MIP_ObjBound_is_not_an_independently_exact_upper_bound=True,
+        exact_vehicle_lower_sum=str(exact_capacity_lower),exact_vehicle_lower_sum_minus_D=str(exact_capacity_lower-D),
+        selected_grid_direction_is_proven_too_weak=True,exact_private_physics_not_global_grid_feasibility=True))
     write(OUT/'GLOBAL_INFEASIBILITY_PROOF.json',dict(status='CERTIFIED' if positive or temporal_positive else 'NOT_PROVEN',
         classification=classification,question='Does any original4MESS96slot integer plan achieve rho_max<=3/5?',
         exact_target='3/5',method_A=dict(D_exact=str(D),sum_U_exact=str(U),D_minus_sum_U_exact=str(D-U),
-            strict_contradiction=positive,independent_checker='INDEPENDENT_GRID_CAPACITY_CHECK.json'),
+            strict_contradiction=positive,independent_checker='INDEPENDENT_GRID_CAPACITY_CHECK.json',
+            exact_physical_vehicle_capacity_lower_sum=str(exact_capacity_lower),
+            fixed_support_direction_weakness_certified=True,
+            weakness_checker='INDEPENDENT_LOCAL_EXACT_WITNESS_CHECK.json',
+            local_witness_is_not_global_counterexample=True),
         method_B=dict(status=temporal['classification'],strict_contradiction=temporal_positive,
             independent_checker='INDEPENDENT_TEMPORAL_CHECK.json'),
         method_C=dict(Status=cutoff['Status'],SolCount=cutoff['SolCount'],NodeCount=cutoff['NodeCount'],
@@ -70,43 +82,59 @@ def main():
         controller_wall_sum_is_not_elapsed_parallel_span=True,
         CPU_seconds=cutoff['controller_CPU_seconds']+sum(r['CPU_seconds'] for r in vehicle['vehicles']),
         RSS=dict(cutoff_peak_bytes=cutoff['observed_peak_RSS_bytes'],vehicle_peak_bytes={r['MESS']:r['peak_RSS_bytes'] for r in vehicle['vehicles']}),
+        RSS_measurement_scope='Periodically sampled process RSS maxima; lower bounds on process lifetime peaks',
+        analysis_CPU_seconds='NOT_MEASURED_AGGREGATELY',analysis_peak_RSS='NOT_MEASURED_AGGREGATELY',
         RAM_based_automatic_stop=False,MemLimit='default infinity',SoftMemLimit='default infinity',
         optimize_zero_analytical_DP_native_calls=0,unspent_budget_seconds=3600-runtime,
         no_reruns=True,other_tasks_untouched=True))
     trajectory=read(OUT/'CUTOFF_TRAJECTORY.json');last=trajectory['trajectory'][-1] if trajectory['trajectory'] else {}
     soc_improvement=sum(r.get('suffix_SOC_improvement',0) for r in capacity['selected']['vehicles'])
-    report=[f'# M1 전역 가능성 검증 결과\n\n판정: **{classification}**. `rho_max ≤ 0.60`인 원본 정수 운전계획의 존재 여부는 '+
+    report=[
+        f'# M1 전역 가능성 검증 결과\n\n판정: **{classification}**. `rho_max ≤ 0.60`인 원본 정수 운전계획의 존재 여부는 '+
         ('독립 replay를 통과한 반례로 확인했다.' if feasible else '전역 모순으로 부정했다.' if positive or temporal_positive else '이번 증거로 확정하지 못했다. **NOT_PROVEN**을 유지한다.'),
-        f'기존 Global LB **{LB:.16f}**, UB **{UB:.16f}** → LB **{new_lb:.16f}**, UB **{new_ub:.16f}**. 인증 Gap **{gap:.12f}%**, 목표0.5%, **M1_ACCEPTED={str(accepted).lower()}**. production·P2·downstream은 모두0회다.',
-        '\n## 원본 동결과 인증 범위\n',
-        f'PR188 exact HEAD `{BASE}`에서 D: 독립 worktree로 시작했다. C3A582,808행/306,040열/5,351,612nnz, 원본9,322binary,4MESS/24서비스지점/96×15분을 보존했다. 기존B2651행을 그대로 덧붙였다. 목적은 원래 `min rho_max`, ObjCon+0, objective SHA256 `0e2ee6d3d0a1ff628b24c04f453eccf08583b22dbe2dd2d23571caa5afa38335`다. 원본 계수·bounds·types·변수축·frozen A1·RouteTable·ML traffic authority를 exactHEAD Git blob 및 SHA로 대조했다.',
-        '기존UB의 C3A·B2·전체inverse Route/SOC/PCS/PQ/Grid/A1 replay는 producer와 별도checker에서PASS다. nativecutoff는 원본MILP를 복원하고 `rho_cutoff_0p60` 한 행만 추가했다. 원본 binary를 LP로 바꾸거나경로·시점·차량배정을 고정하지 않았다. 모든새파일은 신규namespace에 있으며 기존 archivedevidence와 다른A/M프로세스를 수정하거나중단하지 않았다.',
-        '저장된ROOT/PR167·169·179·182·187·188 계통행·primal/dual/RC 증거를 재사용했다. historical95행 시작정보와 실제저장101thermal descriptor 및B2active100행의 차이를 숨기지 않는다. sourcecensus를 기준으로 사용했고, allsecurity후보는 활성 voltage/transformer도 포함한다. 과거fractional해의 물리위반은 이번전역결론의 증명이 아니다.',
-        '\n## A: Grid–Mobility Capacity Conflict\n',
-        f'선택방향 `{A["selected_label"]}`에서 `support ≥ D(3/5)`의 **D={float(D):.16f}**. 원본 inequality에 비음수 multiplier를 곱하고 모든 grid binding등식을 affine RHS까지 정확히 소거했다. frozen grid/AIDC 상수는 그대로 포함한다. 원시Pi를 유효dual이라고가정하지 않고 inequalitysign cone을 새로검사했다. dyadic원본계수와 유리수3/5로 계산한 exact분수와 outwardbinary64 표시를 함께저장한다.',
-        f'원본96슬롯 경로/준비시간/PCS/charge-discharge mode와 terminalenergy를 포함한 DP 상한에 SOC66/terminalSOC로부터 나온 suffix소비≤320kWh를 추가했다. **ΣU={float(U):.16f}**, **D−ΣU={float(D-U):.16f}**. SOCsuffix는 이전route/terminal상한을 합계{soc_improvement:.16f}만큼줄였으나 엄밀한양의모순이 성립하지 않는다. 중간SOC전체조건을 완전히푼상한이라고 주장하지 않는다.',
-        '|MESS|엄밀DP상한U|NativeStatus|수치maxincumbent|수치MIP상한|\n|---|---:|---:|---:|---:|']
+        f'기존 Global LB **{LB:.16f}**, UB **{UB:.16f}**에서 LB **{new_lb:.16f}**, UB **{new_ub:.16f}**로 비교한다. Gap은 **{gap:.12f}%**, 목표는 **0.5%**이며 **M1_ACCEPTED={str(accepted).lower()}**다. production·P2·downstream 실행은 모두 0회다.',
+        '## 원본 모델 동결과 증거 범위',
+        f'PR #188 exact HEAD `{BASE}`에서 D:의 독립 worktree로 시작했다. 원본 C3A의 582,808행, 306,040열, 5,351,612개 비영 계수와 9,322개 binary를 보존했다. 4대 MESS, 24개 서비스 지점, 96개 15분 슬롯 및 기존 B2 651행도 유지했다. 목적함수는 원래의 `min rho_max`, ObjCon은 +0이다. Objective SHA256은 `0e2ee6d3d0a1ff628b24c04f453eccf08583b22dbe2dd2d23571caa5afa38335`다.',
+        '원본 계수·bounds·types·변수축, frozen A1, Route Table, 교통 ML authority를 exact HEAD의 Git blob과 SHA256으로 대조했다. 기존 UB의 C3A·B2·원본 inverse Route/SOC/PCS/PQ/Grid/A1 replay는 작성기와 독립 checker에서 모두 PASS다. 원본 cutoff 진단 모델에는 `rho_cutoff_0p60` 한 행만 추가했다. 원본 binary와 경로·시점·차량 선택 영역은 그대로 유지했다.',
+        'ROOT 및 PR167·169·179·182·187·188의 저장된 계통 행·primal·dual·RC 증거를 재사용했다. 지시의 과거 시작점은 95개 활성 thermal 행이었지만, 현재 저장된 thermal descriptor는 101개이고 B2의 활성 행 목록은 100개다. 실제 source census를 기준으로 분석했고 전압·변압기 제약도 함께 검토했다. 과거의 특정 fractional point가 물리적으로 위반됐다는 사실을 전역 불가능성 증명으로 사용하지 않았다. 기존 증거와 다른 A/M 작업·프로세스는 보존했다.',
+        '## A: 계통 요구량과 차량 지원능력',
+        f'선택한 방향 `{A["selected_label"]}`의 필요조건은 `weighted support ≥ D(3/5)`이며, **D={float(D):.16f}**다. 원본 부등식의 sign cone에 맞는 비음수 multiplier를 사용하고, 모든 grid binding 등식을 affine RHS까지 정확히 소거했다. Frozen grid/AIDC 상수도 포함했다. 원시 Pi를 유효한 dual certificate라고 가정하지 않았다. Binary64 원본 계수의 dyadic 값과 유리수 `3/5`로 exact 연산하고, 표시값은 outward rounding했다.',
+        f'차량별 analytical 상한은 원본 96슬롯 경로, 이동·연결 준비 시간, 이동 중 P/Q=0, PCS 및 charge/discharge mode를 반영한다. Terminal energy 등식에 `SOC66 ≤ 1080`, terminal SOC `760`을 적용하면 차량마다 suffix `E[66,96) ≤ 320 kWh`가 된다. 이를 더한 **ΣU={float(U):.16f}**이며 **D−ΣU={float(D-U):.16f}**다. SOC suffix는 이전 route/terminal 상한을 합계 **{soc_improvement:.16f}**, 약 **79.8%** 줄였지만 양의 모순은 성립하지 않았다. 그 밖의 모든 중간 SOC 조건까지 풀어서 얻은 상한이라고 주장하지 않는다.',
+        f'선택한 scalar 방향의 한계는 별도의 exact 하한 witness로 확인했다. 4개의 독립 차량 물리 모델에서 정확히 가능한 지원량의 합계는 **{float(exact_capacity_lower):.16f}**로, D보다 **{float(exact_capacity_lower-D):.16f}** 크다. 따라서 이 방향의 Method A에서 각 차량의 진짜 최대 지원량을 완벽히 계산하더라도 `Σmax ≥ 이 하한 > D`가 된다. 같은 가중치와 독립 차량 capacity 합계만으로는 불가능성 모순을 만들 수 없다.',
+        '이 witness는 각 차량이 초기 위치에서 96슬롯 정차하는 계획이다. 0–65슬롯의 충전은 원본 에너지 계수로 계산한 exact rational 약 16.11685 kW, 66–95슬롯의 방전은 32 kW이며 |Q|는 최대 392 kvar다. SOC는 760에서 약 1012.63158까지 증가한 뒤 정확히 760으로 돌아온다. 모든 원본 차량 물리 제약과 B2 행을 exact rational로 검사했고, 별도 checker가 frozen inverse를 복원해 원본 FULL 물리 제약과 binary STAY arc도 다시 검증했다.',
+        '**이 4개 witness는 독립 private physics capacity 하한이다. 차량 간 coupled grid 제약을 만족하는 전역 운전계획이라는 주장이나 `rho_max ≤ 0.60`의 feasible counterexample 주장은 아니다.**',
+        '| MESS | 엄밀 DP 상한 U | Exact 차량 물리 하한 | Native status | 수치 incumbent support | 수치 MIP 상한 |\n|---|---:|---:|---:|---:|---:|'
+    ]
     for r in capacity['selected']['vehicles']:
         n=native_by_unit[r['MESS']]
-        report.append(f'|{r["MESS"]}|{r["U_upper"]:.16f}|{n["Status"]}|{n.get("incumbent_support_float")}|{n.get("numerical_support_upper_after_conversion")}|')
-    report += ['\n차량별native모델은 각차량의 모든원본physical행·경계·정수선택·96슬롯SOC·PCS와B2행을 유지했다. maximize의incumbent는지원능력상한이 아니다. native ObjBound도 독립exact tree증명이 없으므로 A3에채택하지 않았다. adopt한U는 별도checker가 polygonvertex/모든DAGedge potential/에너지등식으로 검증한엄밀상한이다. 수치incumbent와DP간차이는 `VEHICLE_CAPACITY_GAP_DIAGNOSIS.json`에서각차량별로분리한다.',
-        '\n## B: Multi-Time Route/SOC Conflict\n',
-        f'원본시간확장그래프53,626arc(이동51,322/STAY2,304),24지점 및4초기위치를검사했다. positive지원요구{temporal["positive_demand_row_count"]}행, critical시점{len(temporal["critical_slots"])}개. 단일시점모순{temporal["pointwise_contradiction_count"]}건, 두시점{temporal["two_time_test_count"]}조합중모순{temporal["two_time_contradiction_count"]}건이다. 모든차량의대체가능성을합산했다. 실제도달불가능한site쌍은존재하지만4대전체모순은증명하지못했다.',
-        f'별도unit-multiplier필요량={temporal["necessary_support_inequality"]["demand"]:.12f}, SOC완화route상한={temporal["necessary_support_inequality"]["route_capacity_upper"]:.12f}. 이스케일은A의weighted방향과달라서숫자를직접비교하지않는다. 특정reward최대경로의SOC실패는상한느슨함의진단이며모든정수운전계획의불가능성을뜻하지않는다. F⊆R 및PCSoutward·transitPQ=0·pairreachability를독립checker가검증했다.',
-        '\n## C: Original Cutoff Cross-Check\n',
-        f'단일full-domaincutoff native상태={cutoff["Status"]}, SolCount={cutoff["SolCount"]}, NodeCount={cutoff["NodeCount"]}, Runtime={cutoff["Runtime"]:.6f}s, Work={cutoff["Work"]:.9f}. 독립판정={independent["classification"]}. 마지막관측open노드={last.get("unexplored_nodes")}. 실제분기변수전체목록은Gurobi callback에서노출하지않으므로미측정으로기록했다. NodeCount/로그/원시callback을실제처리영역증거로보존하며미처리영역을임의로제외하지않았다.',
-        'TIME_LIMIT/noincumbent는불가능성이아니다. INFEASIBLE의수치MIP판정도독립exact모순과구분한다. solverStatus/최대처리노드/미해결영역은 `ORIGINAL_CUTOFF_RESULT.json`, native로그및trajectory에있다. native RHSbinary64(0.6)는3/5보다1/45035996273704960작다. 이것만으로exactdecimal경계불가능성을주장하지않는다.',
-        '\n## 수치 손실과 구조적 완화, 다음 병목\n',
-        f'새A/Bcertificate는exact분수연산으로gridstationarity·상수·rowcone을검사한다. 표시의outwardrounding만남으며D−ΣU의부호는exact로검사했다. 따라서이번실패를dual수치오차만으로설명할수없다. 기존GlobalLB와knownUB사이의gap은정수최적값미확정인상태의인증범위이며trueintegralitygap으로단정하지않는다. 0.5%를위해필요한LB는{UB*.995:.16f}, 추가개선은{max(0.,UB*.995-new_lb):.16f}다.',
-        '다음실험에서먼저해결할병목은 **단일weightedgrid지원방향의분리강도**다. 정확한SOCsuffix가상한을크게줄여도grid요구와4대capacity의엄밀모순이남지않았다. 서로다른line/time의요구를한스칼라합으로합치는과정에서상호충돌이상쇄될수있다. native미완료와분리강도실패를구분하고, 이번실패알고리즘을production으로승격하지않는다. 추가실험은이번예산에서자동실행하지않는다.',
-        '\n## 실행 예산과 재현\n',
-        f'신규native{cutoff["native_calls"]+vehicle["native_calls"]}회, 누적Runtime **{runtime:.6f}s /3,600s**, Work{work:.9f}. cutoff최대1,200s, 각차량최대600s를지켰다. 등록TimeLimit1180/575s와time-onlybudgetreserve를사용했다. Threads=1/worker, 차량maxworkers=2. CPU/RSS/NativeRuntime/Work/ControllerWall을분리했고MemLimit/SoftMemLimit과RAM자동중단은추가하지않았다. A/B및checker의nativeoptimize는0회다.',
-        '전체certificates는독립checker가검증했고잘못된sign/constant/types/objective/cutoff/supportuppermutation을거부했다. `python -m v42_global_proof.check_source_cutoff`, `python -m v42_global_proof.check_grid_capacity`, `python -m v42_global_proof.check_temporal`, `python -m v42_global_proof.check_vehicles`는저장증거검사만수행한다. 소비된ONCEtoken을삭제하거나cutoff/vehicles를재실행하지않는다.',
-        '\n## Git 및 v42 후속 기준\n',
-        '검증된신규변경만기존M브랜치에먼저commit하고PR188 exactHEAD위DraftPR로게시한다. 이후origin/v42의 V42_INTEGRATION_READY.json 및최종HEAD를확인한다. 준비완료시별도임시worktree에서신규namespace변경만반영하고A/M통합회귀전체PASS와무충돌인경우에만fast-forwardpush한다. 미준비/충돌/검증미통과면handoff문서로MHEAD·파일·결과·적용법을게시한다. force merge/push나실패알고리즘의production승격은없다. 이후개발기준은단일v42다. 최종Git/통합상태는handoff와최종대화에기록한다.']
+        report[-1] += '\n' + f'| {r["MESS"]} | {r["U_upper"]:.16f} | {lower_by_unit[r["MESS"]]["support_lower"]:.16f} | {n["Status"]} | {n.get("incumbent_support_float")} | {n.get("numerical_support_upper_after_conversion")} |'
+    report += [
+        '차량별 native 진단 모델에는 해당 차량의 모든 원본 physical 행·bounds·정수 선택, 96슬롯 SOC·PCS 및 B2 행을 유지했다. Maximize의 incumbent는 지원능력 상한이 아니다. Native ObjBound도 독립 exact search-tree 증명이 없으므로 A3에 채택하지 않았다. 위 U는 별도 checker가 PCS polygon vertex, 모든 DAG edge potential, 원본 에너지 등식으로 검증한 analytical 상한이다. Native incumbent의 tolerance 기반 replay와 exact rational feasible witness를 구분했고, 차량별 capacity gap은 `VEHICLE_CAPACITY_GAP_DIAGNOSIS.json`에 기록했다.',
+        '## B: 여러 시점의 Route/SOC 충돌',
+        f'원본 시간 확장 그래프의 53,626개 arc, 즉 이동 51,322개와 STAY 2,304개, 24개 지점 및 4개 초기 위치를 검사했다. 양의 지원 요구는 {temporal["positive_demand_row_count"]}행이고 critical 시점은 {len(temporal["critical_slots"])}개다. 단일 시점 모순은 {temporal["pointwise_contradiction_count"]}건, 두 시점 {temporal["two_time_test_count"]}개 조합에서 모순은 {temporal["two_time_contradiction_count"]}건이다. 4대의 상호 대체 가능성을 포함해 계산했다.',
+        f'별도 unit-multiplier 필요량은 **{temporal["necessary_support_inequality"]["demand"]:.12f}**, SOC를 완화한 route 상한은 **{temporal["necessary_support_inequality"]["route_capacity_upper"]:.12f}**다. 이 가중치의 스케일은 A와 달라 숫자를 직접 비교하지 않는다. 실제 도달이 불가능한 site 쌍은 있지만, 전체 4대가 모든 요구를 만족할 수 없다는 전역 모순은 증명하지 못했다. 특정 reward 최대 경로의 SOC 실패도 그 경로의 진단에 한정된다. F⊆R, PCS의 보수적 처리, transit P/Q=0, 두 시점 reachability는 독립 checker가 검증했다.',
+        '## C: 원본 Cutoff MILP 교차검증',
+        f'단일 full-domain cutoff native 결과는 status **{cutoff["Status"]}**, SolCount **{cutoff["SolCount"]}**, NodeCount **{cutoff["NodeCount"]}**, Runtime **{cutoff["Runtime"]:.6f}s**, Work **{cutoff["Work"]:.9f}**다. 독립 분류는 **{independent["classification"]}**이며, 마지막 callback의 unexplored-node 관측값은 **{last.get("unexplored_nodes")}**다.',
+        'NodeCount와 callback의 open-node 관측은 solver의 처리 상태다. 이것만으로 원본 전체 정수 영역을 종결했다고 판단하지 않는다. Gurobi callback은 모든 실제 분기 변수의 목록을 제공하지 않으므로 그 목록과 미해결 정수 영역의 크기는 미측정으로 기록했다. 미완료 상태에서는 배제되지 않은 원본 cutoff 정수 영역이 남는다. 원본 9,322개 binary와 모든 차량 결합을 유지한 결과이며, 미처리 영역을 임의로 제외하거나 정수 영역을 축소하지 않았다.',
+        'TIME_LIMIT/no incumbent는 불가능성 증명이 아니다. INFEASIBLE이라는 수치 MIP 판정도 독립 exact 모순과 구분한다. Native RHS의 binary64(0.6)는 exact `3/5`보다 `1/45035996273704960` 작다. 이 미세하게 더 좁은 cutoff만으로 exact decimal 경계의 불가능성을 주장하지 않는다. 원시 상태·로그·trajectory·replay는 `ORIGINAL_CUTOFF_RESULT.json`과 관련 저장 파일에 보존했다.',
+        '## 수치 인증 손실과 구조적 완화',
+        f'현재 known UB/LB gap은 **{gap:.12f}%**다. 원본 정수 최적값과 UB의 최적성이 아직 확정되지 않았으므로, 이 gap 전체를 진정한 integrality gap이라고 단정하지 않는다. 기존 UB에서 목표 0.5%를 만족하려면 LB **{UB*.995:.16f}**가 필요하고, 현재 값에서 추가 상승량은 **{max(0.,UB*.995-new_lb):.16f}**다.',
+        '저장된 B2 native LP 목적 진단값은 0.5687138902579907이다. Sign projection의 exact LB는 0.5659508784310822이며, 원본 binding 등식 4,500개의 multiplier repair 이후 exact LB는 0.5667436728775703이다. Native 값과 repair certificate의 진단 차이 0.001970217380420358가 남는다. 이는 목표에 필요한 LB 상승 0.05656051426210196의 약 3.48%다. Native LP 값 자체는 exact optimum이나 검증된 UB가 아니다. 따라서 관측된 인증 손실을 해소하는 것만으로 목표를 채운다는 근거는 없다.',
+        '기존 ROOT native 목적값 0.568711942993466과 inherited Global LB의 차이 약 3.33e−7은 서로 다른 authority 범위의 비교다. 같은 ROOT point에 대한 독립 exact certificate의 측정된 인증 손실이 아니다. Inherited Global LB는 기존 원본 native MILP bound 계약을 보존한 값이며 이번 작업에서 새 exact rational ROOT bound로 재분류하지 않았다.',
+        'B2 저장 LP에는 8,019개 분수 binary와 140,264개 분수 continuous route flow가 있었다. 이전 단일 mode/location 분기 이후에도 135,444–140,095개 분수 route flow가 남았고, 수천 개의 P/Q·SOC·경로 좌표를 다시 배분했다. 두 sibling pair의 인증된 전역 LB 상승은 0이었다. Native sibling 최소값의 진단 상승도 약 9.31e−8과 5.30e−6에 머물렀다. Child certificate의 finite-bound 손실과 Q 기여는 floating diagnostic이며 exact loss proof로 취급하지 않았다. 출처 SHA와 수치·구조 구분은 `GAP_ROOT_CAUSE_AUDIT.json`에 정리했다.',
+        '새 A/B certificate는 dyadic source와 exact rational 연산으로 상수·계수·row sign cone을 검사했다. D−ΣU의 부호도 exact로 판정했다. 또한 독립 exact 차량 하한이 D를 넘으므로 선택된 A 방향의 실패는 표시 rounding이나 남은 SOC 상한의 느슨함만으로 설명할 수 없다.',
+        '다음에 먼저 해결할 병목은 **66–95 critical 구간에서 4대 전체의 location/mode/PQ 선택을 함께 포괄하는 multi-time cover**다. 서로 다른 line/time 요구를 하나의 scalar 합으로 합치면 상호 충돌이 상쇄될 수 있다. 이번에 확인한 방향의 한계와 원본 native search의 미완료를 구분한다. 추가 실험은 이번 예산에서 자동 실행하지 않고, 실패한 방법을 production으로 승격하지 않는다.',
+        '## 실행 예산과 재현',
+        f'신규 native 호출은 **{cutoff["native_calls"]+vehicle["native_calls"]}회**, 누적 Runtime은 **{runtime:.6f}s / 3,600s**, Work는 **{work:.9f}**다. 원본 cutoff 최대 1,200s, 차량별 최대 600s를 지켰다. 등록한 TimeLimit은 cutoff 1,180s와 차량별 575s이며 시간 예산 reserve를 사용했다. Threads=1/worker, 차량 동시 worker 최대 2개다.',
+        'CPU·RSS·Native Runtime·Work·Controller Wall을 분리해 기록했다. MemLimit/SoftMemLimit과 RAM 기반 자동 중단은 추가하지 않았다. A/B 작성기와 독립 checker의 native optimize 호출은 0회다. RSS는 주기적으로 관측한 최대값이며 process lifetime의 실제 최고치와 같다고 주장하지 않는다. 전체 수치는 `NATIVE_RUNTIME_LEDGER.json`에 있다.',
+        '원본 모델·cutoff·계통 capacity·temporal·차량·exact local witness를 각각 독립 checker가 검증했다. 저장된 증거만 재검사하는 명령은 다음과 같다. 소비된 ONCE token을 삭제하거나 native cutoff/vehicle 실험을 재실행하지 않는다.\n\n```text\npython -m v42_global_proof.check_source_cutoff\npython -m v42_global_proof.check_grid_capacity\npython -m v42_global_proof.check_temporal\npython -m v42_global_proof.check_vehicles\npython -m v42_global_proof.check_local_exact_witness\n```',
+        '## Git 및 v42 후속 기준',
+        '검증된 신규 M 변경을 먼저 commit하고 PR188 exact HEAD 위의 stacked Draft PR로 게시한다. 이후 origin/v42의 `V42_INTEGRATION_READY.json`과 최종 HEAD를 확인한다. 준비 완료 시 별도 임시 worktree에서 신규 namespace 변경만 반영하고, A/M 통합 회귀가 모두 PASS이며 충돌이 없을 때만 fast-forward push한다. 미준비·충돌·검증 미통과 상태에서는 M HEAD·파일·결과·적용 방법을 handoff 문서에 남긴다. Force merge/push와 실패 방법의 production 승격은 하지 않는다. 이후 개발 기준은 단일 v42이며, 실제 Git·통합 상태는 handoff와 최종 대화에 기록한다.'
+    ]
     (OUT/'FINAL_REVIEW_KO.md').write_text('\n\n'.join(report)+'\n',encoding='utf-8')
     write(OUT/'FINAL_SCIENTIFIC_VERIFICATION.json',dict(PASS=True,classification=classification,
         independent_source_cutoff=True,independent_grid_capacity=True,independent_temporal=True,independent_vehicle=True,
+        independent_exact_local_physics=True,fixed_scalar_direction_weakness_certified=True,
         original_sources_unchanged=True,budget_PASS=True,Global_LB=new_lb,UB=new_ub,M1_ACCEPTED=accepted,
         all_required_certificates_present=True,new_native_calls=0))
     print('FINAL_SCIENTIFIC_VERIFICATION_PASS',classification,runtime,gap,flush=True)

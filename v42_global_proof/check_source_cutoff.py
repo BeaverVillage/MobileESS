@@ -118,7 +118,15 @@ def check_native_arrays(dd, candidate, cutoff_name="rho_cutoff_0p60"):
     expected = expected_cutoff_data(dd, cutoff_name)
     for key in ("objective", "constant", "names", "lower", "upper", "types", "rhs", "sense", "row_names"):
         assert key in candidate, "NATIVE_ARRAY_MISSING:" + key
-        same_array(expected[key], candidate[key], "native_" + key)
+        if key == "row_names":
+            # Gurobi returns Python strings; NumPy selects their actual maximum
+            # width, whereas the source archive reserves a wider Unicode buffer.
+            # Verify every identifier first, then compare in the source encoding.
+            assert np.asarray(candidate[key]).dtype.kind == "U"
+            assert np.array_equal(expected[key], candidate[key]), "native_row_names_IDENTIFIERS_CHANGED"
+            same_array(expected[key], np.asarray(candidate[key], dtype=expected[key].dtype), "native_" + key)
+        else:
+            same_array(expected[key], candidate[key], "native_" + key)
     assert np.count_nonzero(candidate["types"] == "B") == 9322
     return {key: array_sha(candidate[key]) for key in expected if key in candidate}
 
@@ -216,6 +224,7 @@ def check_identity_receipt(receipt, A, T, dd, native_hashes):
     return dict(PASS=True, expected_native_counts=required,
                 native_CSR_receipts_match_independent_source=True,
                 saved_native_arrays_bit_identical=True,
+                row_identifier_comparison="All strings exact; Unicode allocation width canonicalized to source dtype",
                 cutoff_column=RHO, cutoff_rhs_binary64_hex=np.float64(CUTOFF).tobytes().hex())
 
 

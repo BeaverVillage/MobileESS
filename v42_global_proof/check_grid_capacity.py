@@ -36,9 +36,9 @@ def split_name(name):
 
 
 def gz(receipt):
-    path = Path(receipt["path"])
-    if not path.is_absolute():
-        path = OUT / path
+    # Recorded absolute execution paths are provenance. Replay the committed
+    # artifact in this checkout by its namespace-local name and immutable hash.
+    path = OUT / Path(receipt["path"]).name
     assert path.resolve().is_relative_to(OUT.resolve()), "CERTIFICATE_OUTSIDE_NEW_NAMESPACE"
     assert sha(path) == receipt["sha256"], "EXACT_ARTIFACT_HASH_CHANGED"
     return json.loads(gzip.decompress(path.read_bytes()))
@@ -292,6 +292,8 @@ def dispatch_sources(A, d, edges, alias):
         if local not in cache:
             cache[local] = (corners(local + ((F(1), F(0), F(0)),)),
                             corners(local + ((F(-1), F(0), F(0)),)))
+            disconnected = tuple((a, b, F(0)) for a, b, c in planes[key]) + local[len(planes[key]):]
+            assert corners(disconnected) == {(F(0), F(0))}, "PCS_DOES_NOT_FORCE_ZERO_POWER_DURING_TRAVEL"
         polygons[key] = cache[local]
     energy = defaultdict(lambda: defaultdict(F))
     rhs = defaultdict(F)
