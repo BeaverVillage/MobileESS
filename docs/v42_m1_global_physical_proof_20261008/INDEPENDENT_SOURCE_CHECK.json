@@ -1,0 +1,129 @@
+{
+  "PASS": true,
+  "exact_base": "4b19e85089171729a3225529a40cb00bf31f43d5",
+  "source_archives": {
+    "docs/v42_m1_ultracompact_exact_20261006/C3A_A.npz": {
+      "sha256": "45cd48423b8d7f19fed376b71e181277f559c9e71527c17f9322d0100f7f0df8",
+      "bytes": 19750636
+    },
+    "docs/v42_m1_ultracompact_exact_20261006/C3A_DATA.npz": {
+      "sha256": "20aba68ffb3c4e29b0c9644d05e10ef33417ab92f6083edfb8906d6be8cb0467",
+      "bytes": 3157594
+    },
+    "docs/v42_m1_ultracompact_exact_20261006/C3A_VALID_START.npz": {
+      "sha256": "be02767838a1fe17b932c390303e5307e1c8385ba130fe9c36a7cb69804c54e5",
+      "bytes": 357278
+    },
+    "docs/v42_m1_b2_root_validation_20261008/artifacts/TEMPORAL_VALID_ROWS.npz": {
+      "sha256": "13e7f99897505e4b0e3134c923173925259971df218ec463e95f153b354e4536",
+      "bytes": 4596
+    },
+    "docs/v42_m1_b2_root_validation_20261008/artifacts/TEMPORAL_VALID_ROW_DATA.npz": {
+      "sha256": "318f3b4d19e9b2e228368bc405dd7b26cf862c9d7bbb3a8ebde15c71f6f536d7",
+      "bytes": 451
+    }
+  },
+  "original_counts": {
+    "rows": 582808,
+    "columns": 306040,
+    "nnz": 5351612,
+    "binaries": 9322
+  },
+  "B2_counts": {
+    "rows": 651,
+    "columns": 306040,
+    "nnz": 1302
+  },
+  "source_objective_SHA256": "0e2ee6d3d0a1ff628b24c04f453eccf08583b22dbe2dd2d23571caa5afa38335",
+  "baseline_UB_replay": {
+    "PASS": true,
+    "finite": true,
+    "max_constraint_violation": 2.2737367544323206e-13,
+    "max_bound_violation": 0.0,
+    "max_integrality_violation": 0.0,
+    "maximum_B2_violation": 0.0,
+    "rho": 0.6284141956452488,
+    "cutoff_satisfied_without_tolerance": false,
+    "full_frozen_physical_replay": {
+      "PASS": true,
+      "C3_residual": {
+        "finite": true,
+        "max_constraint_residual": 2.2737367544323206e-13,
+        "max_bound_residual": 0.0,
+        "max_integrality_residual": 0.0,
+        "objective": 0.6284141956452488
+      },
+      "original_physical_audit": {
+        "PASS": true,
+        "raw": {
+          "PASS": true,
+          "finite": true,
+          "max_constraint_violation": 2.2737367544323206e-13,
+          "max_bound_violation": 0.0,
+          "max_integrality_violation": 0.0,
+          "objective": 0.6284141956452488,
+          "integer_pattern_exact": true,
+          "route_equality_max_residual": 0.0,
+          "affine_postsolve_tolerance": 1e-06,
+          "bound_and_route_tolerance": 1e-08
+        },
+        "exhaustive_grid": {
+          "PASS": true,
+          "checked_rows": 673920,
+          "ambiguous_exact_checks": 0,
+          "maximum_upper": 7.747306802545936e-15,
+          "tolerance": 1e-08
+        },
+        "objective": 0.6284141956452488,
+        "route_SOC_PCS": {
+          "PASS": true,
+          "violations": [],
+          "max_exact_circle_ratio": 0.9855300806005145,
+          "mobility_energy_kwh": 95.2719047424662
+        },
+        "mode_connection": {
+          "charge_mode_and_connection_PASS": true,
+          "charge_mode_and_connection_violations": []
+        },
+        "original_grid_physics": "All original voltage/line-current/NormalAmps/transformer-kVA affine rows exhaustively checked.",
+        "repairs": 0
+      },
+      "saved_inverse_certificate_used": true,
+      "C2_model_rebuilt": false,
+      "route_auxiliary_inverse_max_difference": 0.0,
+      "start_repaired": false,
+      "physical_start_max_difference": null,
+      "new_incumbent_inverse_mapping": "Frozen PR162 route-auxiliary mapping; raw C3 point retained unchanged",
+      "objective": 0.6284141956452488
+    },
+    "raw_vector_unchanged": true,
+    "independent_original_sparse_row_replay": true,
+    "scientific_tolerance": 1e-08
+  },
+  "tamper_tests": {
+    "PASS": true,
+    "rejected_mutations": [
+      {
+        "mutation": "types",
+        "rejected": true,
+        "reason": "native_types_BITS_CHANGED"
+      },
+      {
+        "mutation": "objective",
+        "rejected": true,
+        "reason": "native_objective_BITS_CHANGED"
+      },
+      {
+        "mutation": "rhs",
+        "rejected": true,
+        "reason": "native_rhs_BITS_CHANGED"
+      }
+    ],
+    "TIME_LIMIT_no_incumbent": "NOT_PROVEN",
+    "INF_OR_UNBD": "NOT_PROVEN",
+    "numerical_INFEASIBLE_never_exact_certificate": true
+  },
+  "native_optimize_calls": 0,
+  "independent_of_new_source_and_cutoff_producers": true,
+  "controller_wall_seconds": 4.440571199986152
+}
