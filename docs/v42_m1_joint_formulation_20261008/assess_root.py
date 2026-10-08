@@ -32,7 +32,7 @@ def support():
                     mode=names.get(f'charge_mode[{unit},{t}]')
                     physical.append(dict(point=label,column=j,name=str(d['names'][j]),unit=unit,retained_slot=t,family=fam,value=float(x[j]),bound_fractionality=float(min(abs(x[j]),abs(1-x[j]))) if d['types'][j]=='B' else None,associated_node_activity=float(x[activity]) if activity is not None else None,associated_charge_mode=float(x[mode]) if mode is not None else None))
         for g in selection['grid_rows']:
-            i=g['row'];cols=A.indices[A.indptr[i]:A.indptr[i+1]];coeffs=A.data[A.indptr[i]:A.indptr[i+1]];lhs=float(A.getrow(i)@x);rhs=float(d['rhs'][i]);sense=str(d['sense'][i]);slack=rhs-lhs if sense=='<' else lhs-rhs if sense=='>' else -abs(lhs-rhs)
+            i=g['row'];cols=A.indices[A.indptr[i]:A.indptr[i+1]];coeffs=A.data[A.indptr[i]:A.indptr[i+1]];lhs=float((A.getrow(i)@x).item());rhs=float(d['rhs'][i]);sense=str(d['sense'][i]);slack=rhs-lhs if sense=='<' else lhs-rhs if sense=='>' else -abs(lhs-rhs)
             rows.append(dict(point=label,original_row_id=i,row_name=str(d['row_names'][i]),sense=sense,retained_variable_slot=g['slot'],physical_line_id='NOT_RETAINED_IN_C3A_GENERIC_ROW_NAMES',rhs=rhs,lhs=lhs,feasible_signed_slack=slack,Pi=float(pi[i]) if pi is not None else None,nonzeros=len(cols),source='Original C3A row unchanged; slot inferred from retained variable names, possibly affected by frozen aliases'))
             for j,a in zip(cols,coeffs):
                 if abs(float(a*x[j]))<1e-10:continue

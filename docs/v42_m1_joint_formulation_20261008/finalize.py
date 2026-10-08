@@ -34,8 +34,8 @@ def finish():
         elif any((r['native_LP_objective']-base['native_LP_objective'])>=.001 for r in candidates) or not all(r['optimal_certificate_PASS'] for r in receipts):classification='JOINT_FORMULATION_NUMERICAL_INCONCLUSIVE'
         else:classification='JOINT_FORMULATION_EXACT_BUT_WEAK'
         if passed:
-            selected=max(passed,key=lambda s:read(OUT/f'runs/{s}/RESULT.json')['valid_LB']);reason='Certified material improvement, with full cost reported; production practicality remains subject to bounded canary results.'
-        else:selected='ORIGINAL_C3A_RETAINED';reason='Neither candidate demonstrated the required certified gain within the registered root budget; additional overhead has no validated production benefit.'
+            selected=max(passed,key=lambda s:read(OUT/f'runs/{s}/RESULT.json')['valid_LB']);reason='인증된 material gain과 실제 비용을 함께 보고한다. production 적합성은 bounded canary 결과로 추가 판단한다.'
+        else:selected='ORIGINAL_C3A_RETAINED';reason='두 후보 모두 등록된 ROOT 예산 안에서 요구된 인증 gain을 입증하지 못했다. 추가 계산 비용의 production 이점을 확인하지 못해 원본 C3A를 유지한다.'
         support()
         scope=git('diff','--name-only',BASE);assert all(s.startswith('docs/v42_m1_joint_formulation_20261008/') for s in scope.splitlines())
         audit=dict(PASS=True,source_base_HEAD=BASE,scope_only_new_artifact_directory=True,scientific_authority_A_SHA256=sha(hc.PARENT/'C3A_A.npz'),scientific_authority_DATA_SHA256=sha(hc.PARENT/'C3A_DATA.npz'),original_objective_hash=read(OUT/'ROOT_WINDOW_SELECTION.json')['identity']['source_objective_SHA256'],every_native_call_preregistered_and_guarded=True,native_root_calls=len(receipts),native_canary_calls=canary['optimize_calls'],native_total_calls=native_calls,dual_recovery_optimize_calls=0,old_54_node_tree_resumed=False,old_overnight_deadline_reused=False,A_stage_modified=False,May_M2_P2_executed=False,original_UB_full_replay_PASS=True,all_added_rows_independently_checked=True,all_original_integer_patterns_preserved=True,miniature_not_claimed_to_prove_full_model_alone=True)
@@ -43,6 +43,10 @@ def finish():
         comparison=[]
         for r in receipts:
             row={k:r.get(k) for k in ['label','status_name','rows','columns','nnz','Runtime','Work','BarIterCount','setup_wall_seconds','total_wall_seconds','native_LP_objective','valid_LB','certificate_loss','fractional_original_binary_count','peak_sampled_RSS','Windows_lifetime_peak_wset']}
+            row.update(configured_TimeLimit=600,solver_stop_overshoot_seconds=max(0,r['Runtime']-600),root_completed=r['status_name']=='OPTIMAL')
+            diagnostic=OUT/f'runs/{r["label"]}/UNRESOLVED_POINT_DIAGNOSTIC.json'
+            if diagnostic.exists():
+                z=read(diagnostic);row.update(unresolved_primal_objective=z['raw_primal_objective'],unresolved_fractional_original_binary_count=z['fractional_original_binary_count'],unresolved_point_accepted_as_bound=False)
             if r['label']!='ORIGINAL':row.update({k:read(OUT/f'{r["label"]}_MATERIALITY_GATE.json')[k] for k in ['paired_certified_Delta_LB','improvement_over_best_original_or_inherited','native_objective_gain']})
             comparison.append(row)
         table(OUT/'ROOT_COMPARISON.csv',comparison)
@@ -78,6 +82,11 @@ def write_report(s,rs):
     line();line('|모형|행 / 열 / nnz|상태|Runtime s / Work|Native objective|Exact LB|인증 손실|Fractional B|Peak RSS GiB|');line('|---|---|---|---:|---:|---:|---:|---:|---:|')
     def fmt(v):return 'N/A' if v is None else f'{v:.12f}'
     for r in rs:line(f'|{r["label"]}|{r["rows"]} / {r["columns"]} / {r["nnz"]}|{r["status_name"]}|{r["Runtime"]:.3f} / {r["Work"]:.3f}|{fmt(r["native_LP_objective"])}|{fmt(r["valid_LB"])}|{fmt(r["certificate_loss"])}|{r.get("fractional_original_binary_count","N/A")}|{max(r["peak_sampled_RSS"],r.get("Windows_lifetime_peak_wset") or 0)/2**30:.3f}|')
+    for r in rs:
+        folder=OUT/'runs'/r['label'];diagnostic=folder/'UNRESOLVED_POINT_DIAGNOSTIC.json'
+        if diagnostic.exists():
+            z=read(diagnostic);line();line(f'{r["label"]} unresolved point의 raw rho={z["raw_primal_objective"]:.12f}, fractional original binaries={z["fractional_original_binary_count"]}, original relaxed replay PASS={z["original_relaxed_replay"]["PASS"]}, strengthened relaxed replay PASS={z["strengthened_relaxed_replay"]["PASS"]}. 이는 최적 목적값·LB·정수 UB가 아니며 채택하지 않았다.')
+        if r['Runtime']>600:line();line(f'{r["label"]}의 설정 한도는 정확히 600초다. 초과 실측 시간 {r["Runtime"]-600:.3f}초는 solver의 iteration 중단·반환 시점에 생겼다. 한도 증액이나 재실행은 없었다.')
     line();line('|후보|Paired certified ΔLB|Inherited/baseline 최선 대비|Native objective 증가|Material gate|');line('|---|---:|---:|---:|---|')
     for g in s['materiality_gates']:line(f'|{g["label"]}|{fmt(g["paired_certified_Delta_LB"])}|{fmt(g["improvement_over_best_original_or_inherited"])}|{fmt(g["native_objective_gain"])}|{g["PASS"]}|')
     line();line('Gate는 사전 등록대로 fresh original exact LB와 inherited valid LB 중 더 큰 값을 candidate exact LB가 0.001 이상 넘어야 한다. 요청의 paired certified ΔLB도 별도로 보고한다. 이 보수적 gate는 인증 손실을 baseline의 약함으로 숨기지 않는다. raw LP primal은 original tolerance replay와 따로 보고하며, 실패하더라도 sign-correct exact dual이 보장하는 하한과 정수 UB를 혼동하지 않는다. baseline의 raw native ObjBound는 약 -97.9922로 반환됐으며 새 LB에 사용하지 않았다. OPTIMAL label과 native objective도 수치 인증을 대신하지 않는다.')
@@ -85,11 +94,13 @@ def write_report(s,rs):
     for r in rs:
         line();line(f'{r["label"]}: setup {r["setup_wall_seconds"]:.3f}s, optimize+certificate 전체 wall {r["total_wall_seconds"]:.3f}s, barrier iterations {r["BarIterCount"]}. Factor memory 로그: '+ '; '.join(r['factor_memory_log'])+'. Numerical warnings: '+ '; '.join(r['numerical_warnings'])+'.')
     line();line('`CRITICAL_GRID_ROW_COMPARISON.csv`는 원본 critical row ID의 sense-correct slack/Pi를 비교한다. `CRITICAL_WINDOW_FRACTIONAL_SUPPORT.csv`는 unit/site/retained-slot의 Pch/Pdis/Q와 node/mode fractionality, `CRITICAL_GRID_NONZERO_CONTRIBUTIONS.csv`는 실제 원본 row coefficient 기여를 보존한다. frozen C3A generic row 이름에는 물리 line ID가 없으며 retained-variable slot은 alias representative일 수 있다. 따라서 물리 line/time 식별자를 추측해 만들지 않았다. incomplete root의 unresolved point는 certificate/UB로 사용하지 않는다.')
+    line();line('실제 조건부 source 범위는 A 3514행/14805열, B 6806행/28243열이다. 원본의 rho를 직접 포함하는 행은 324871개이며 각 후보의 source에는 그중 두 thermal 행만 있다. 7 upper-voltage, 1 lower-voltage, 4 transformer 행은 rho에 대한 효과가 원본 전기 binding을 통해 전파된다. 새 continuous 변수는 A 133254개, B 225952개이고 모두 objective 0이다. `ACTUAL_COUPLING_SCOPE.json`과 `ACTUAL_BOUNDARY_SOC_ENERGY_ROWS.json`에 실제 coupling과 boundary energy 식을 보존했다. 이 제한된 블록은 전체 joint integer hull을 표현하지 않는다.')
     line();line('## 알고리즘 선택과 중단')
     line();line(s['selection_reason']);line();line(f'Canary executed: {s["canary"].get("executed",False)}, optimize calls: {s["canary"]["optimize_calls"]}. native 총 호출 {s["native_total_optimize_calls"]}. old tree, A-stage, M2/P2/May 실행은 0이다.')
     if not s['canary'].get('executed',False):line();line('인증된 material gain gate를 통과하지 않아 900초 MIP canary를 실행하지 않았다. 원본 정수 projection exactness와 LP strength/practicality는 별개다. 9-term aggregate는 시간별 mode/location의 joint integrality 정보를 많이 남기고, 81/625-term 상세 count는 크기가 폭증한다. 선택 RLT는 더 많은 결합을 강제하지만 예산 내 종료·유효 gain이 입증돼야 production으로 채택할 수 있다.')
+    line();line('두 강화 LP의 최적값과 certified Delta는 미확정이다. 이번 실험이 입증한 병목은 추가 fill/factor 비용과 예산 내 ROOT 종료 실패다. A에서는 barrier 목적값·잔차가 크게 악화되는 구간을 관측했으나 solver가 explicit numerical-trouble 경고를 출력하지는 않았다. bounded fixture 검증은 실제 C3A 데이터의 축소 실험이 아니므로 물리 숫자에 대한 일반화 한계도 있다. 96-slot exactness의 근거는 compiled 계수 검증과 전체 정수 projection 증명이다.')
     line();line(f'새 global LB gain {s["valid_LB"]-s["old_LB"]:.16g}, UB gain {s["old_UB"]-s["valid_UB"]:.16g}. 0.5% gap에는 현재 UB에서 LB ≥ {s["required_LB_for_point5_percent"]:.13f}가 필요하다. 이번 작업은 production 성공이나 0.5% 달성을 주장하지 않는다.')
-    line();line('다음 권고 한 가지: 추가 solve 전에, 저장된 강화 ROOT point/dual과 원본 행렬만 사용해 critical joint block의 fractional support를 분리하는 exact valid inequality를 도출하고, 독립 계수·projection 증명 및 arithmetic-only separation 효과를 먼저 확인한다. 이번 작업에서 실행하지 않는다.')
+    line();line('다음 권고 한 가지: 추가 solve 전에, 저장된 원본 OPTIMAL ROOT point/dual·강화모형의 미완료 point·원본 행렬만 사용해 critical joint block의 fractional support를 분리하는 exact valid inequality를 도출하고, 독립 계수·projection 증명 및 arithmetic-only separation 효과를 먼저 확인한다. 이번 작업에서 실행하지 않는다.')
     line();line('## Git와 증거')
     line();line('변경 범위는 `docs/v42_m1_joint_formulation_20261008/`뿐이다. PR179 원본 문서/행렬/old checkpoint는 수정하지 않았다. `.gitattributes`로 새 증거 파일의 raw byte를 보존하고 `SHA256_MANIFEST.json`으로 모든 산출물을 검증한다. 최종 HEAD, Draft PR URL, remote equality와 clean tree는 publication 이후 `GIT_COMPLETION.json` 및 최종 사용자 답변에 기록한다. commit 자신의 hash를 같은 commit 파일에 넣는 순환 참조는 만들지 않는다.')
     (OUT/'FINAL_REVIEW_KO.md').write_text('\n'.join(text)+'\n',encoding='utf-8',newline='\n')
