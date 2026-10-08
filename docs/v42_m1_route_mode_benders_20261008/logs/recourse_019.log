@@ -1,0 +1,96 @@
+
+Gurobi 13.0.2 (win64) logging started Thu Oct  8 13:48:51 2026
+
+Set parameter LogFile to value "D:\v42_m1_route_mode_benders_20261008\logs\recourse_019.log"
+Set parameter NodefileDir to value "D:\v42_m1_route_mode_benders_20261008\tmp"
+Set parameter LogToConsole to value 0
+Set parameter OutputFlag to value 1
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  120
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0.005
+OptimalityTol  1e-08
+Method  2
+Crossover  2
+DegenMoves  0
+MIPFocus  3
+NodeMethod  1
+DualReductions  0
+InfUnbdInfo  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 582808 rows, 306040 columns and 5351612 nonzeros (Min)
+Model fingerprint: 0xc1574eda
+Model has 1 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [3e-08, 2e+03]
+  RHS range        [2e-24, 2e+03]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Presolve time: 0.77s
+Presolved: 22574 rows, 4388 columns, 168169 nonzeros
+
+Ordering time: 0.03s
+
+Barrier statistics:
+ Dense cols : 653
+ AA' NZ     : 2.923e+05
+ Factor NZ  : 3.921e+05 (roughly 15 MB of memory)
+ Factor Ops : 2.767e+07 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   2.84829677e+02 -4.41169178e+03  2.75e+03 7.73e-06  2.49e+01     1s
+   1   2.84829246e+02 -1.04045028e+04  1.38e+03 7.99e-03  5.45e+00     1s
+   2   3.00837766e+00 -8.31222745e+03  6.39e+02 5.07e-15  3.64e+00     1s
+   3   1.06334783e+00 -2.47862706e+03  1.23e+02 3.30e-15  6.93e-01     1s
+   4   7.76934521e-01 -5.77224246e+02  1.22e+01 5.12e-13  7.83e-02     1s
+   5   7.23520121e-01 -3.04182092e+02  6.73e+00 9.07e-16  4.04e-02     1s
+   6   6.81656434e-01 -1.82957501e+02  1.87e+00 3.68e-16  1.39e-02     1s
+   7   6.70548957e-01 -9.02830987e+01  8.00e-01 1.43e-16  5.63e-03     1s
+   8   6.58305821e-01 -5.72637315e+01  3.45e-02 7.33e-17  2.17e-03     1s
+   9   6.57485737e-01 -1.84428074e+00  5.84e-03 2.32e-13  9.67e-05     1s
+  10   6.50479305e-01 -9.34684028e-02  8.63e-04 6.04e-14  2.75e-05     1s
+  11   6.44957024e-01  3.11293856e-01  4.99e-04 6.11e-16  1.23e-05     1s
+  12   6.39824291e-01  4.66357678e-01  3.25e-04 1.07e-14  6.37e-06     1s
+  13   6.36590610e-01  5.00207632e-01  2.25e-04 1.11e-14  4.99e-06     1s
+  14   6.32417980e-01  6.07378068e-01  1.08e-04 2.55e-15  9.17e-07     1s
+  15   6.30242183e-01  6.23403434e-01  4.83e-05 1.07e-15  2.50e-07     1s
+  16   6.28923440e-01  6.27630816e-01  1.34e-05 2.15e-15  4.71e-08     1s
+  17   6.28425851e-01  6.28348444e-01  2.35e-07 1.75e-14  3.00e-09     1s
+  18   6.28415823e-01  6.28413323e-01  3.20e-08 8.83e-12  9.71e-11     1s
+  19   6.28414197e-01  6.28414181e-01  2.84e-09 4.10e-13  7.82e-13     1s
+
+Barrier solved model in 19 iterations and 1.27 seconds (1.24 work units)
+Optimal objective 6.28414197e-01
+
+Crossover log...
+
+     337 DPushes remaining with DInf 0.0000000e+00                 1s
+       0 DPushes remaining with DInf 0.0000000e+00                 1s
+
+     697 PPushes remaining with PInf 1.5838506e-06                 1s
+       0 PPushes remaining with PInf 0.0000000e+00                 1s
+
+  Push phase complete: Pinf 0.0000000e+00, Dinf 1.2201792e-16      1s
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+    1036    6.2841420e-01   0.000000e+00   0.000000e+00      1s
+Crossover time: 0.07 seconds (0.06 work units)
+    1036    6.2841420e-01   0.000000e+00   0.000000e+00      2s
+
+Solved in 1036 iterations and 1.99 seconds (1.76 work units)
+Optimal objective  6.284141956e-01
