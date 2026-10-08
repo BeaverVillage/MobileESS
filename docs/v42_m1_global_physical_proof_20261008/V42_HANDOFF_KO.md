@@ -22,7 +22,7 @@ Method B의 단일 시점·두 시점·Hall 검사는 전체 4대의 모순을 �
 
 후속 개발 기준은 단일 `v42`다. 통합 준비가 완료된 뒤 최신 `origin/v42`의 실제 HEAD와 `V42_INTEGRATION_READY.json`의 완료 상태·검증 범위를 먼저 확인한다. 그 HEAD에서 **별도 임시 worktree**를 만든다. 기존 M 실험 worktree에서 solver를 다시 실행하거나 다른 작업의 checkout을 바꾸지 않는다.
 
-검증된 M delta는 아래 세 commit이며 모두 PR #188 exact HEAD 이후 신규 namespace만 추가한다. PR #188 자체나 다른 A/M 변경을 이번 delta로 중복 적용하지 않는다.
+검증된 과학적 M delta는 아래 세 commit이며 모두 PR #188 exact HEAD 이후 신규 namespace만 추가한다. 이후 handoff 기록과 바이트 보존 commit도 같은 namespace에만 변경한다. PR #188 자체나 다른 A/M 변경을 이번 delta로 중복 적용하지 않는다.
 
 ```text
 91f0351f81a52b4ea5bceb6692d96f03ee56b917
@@ -30,7 +30,7 @@ ffaedbb59239bdfdcdfa9f5a12b5cde7b2f3ffdc
 a1a0b25df0daf2aca9512937516c073ddde01c97
 ```
 
-임시 worktree에서 위 commit들을 순서대로 cherry-pick한다. 충돌이 발생하면 통합을 중지하고 handoff를 갱신한다. Handoff 기록 commit은 필요에 따라 별도로 적용할 수 있다. 원래 과학 모델의 source hash와 기존 authority가 동일해야 한다.
+Draft PR 본문의 최종 M HEAD를 고정하고, PR #188 exact HEAD 이후 그 M HEAD까지의 **전체 M commit 범위**를 임시 worktree에 순서대로 cherry-pick한다. 과학적 commit 이후의 줄바꿈 바이트 보존 변경도 포함해야 저장 artifact와 manifest의 SHA가 checkout 후 일치한다. 예를 들어 고정한 M ref를 대상으로 `git cherry-pick 4b19e85089171729a3225529a40cb00bf31f43d5..M_REF`를 사용한다. 충돌이 발생하면 통합을 중지하고 handoff를 갱신한다. 원래 과학 모델의 source hash와 기존 authority가 동일해야 한다.
 
 저장된 M 증거의 재검사는 아래 명령으로 수행한다. 모든 checker의 native optimize 호출은 0회다. **`cutoff`와 `vehicles` producer를 재실행하지 않고 ONCE token을 삭제하지 않는다.**
 
