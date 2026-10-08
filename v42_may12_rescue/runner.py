@@ -26,11 +26,16 @@ def run(resume_pre_native_gate=False,resume_incomplete_pricing=False):
     started=perf_counter();native=None;timings={};decision=dict(PASS=False,classification='MAY12_PHASE1_RECOVERED_P1_INCONCLUSIVE')
     if (OUT/'NEW_RUN_STARTED.json').exists():
         if resume_incomplete_pricing:
-            previous=read(OUT/'PRE_PRICING_START_GATE_FAILURE2/FINAL_DECISION.json')
-            if previous['classification']!='MAY12_RESOURCE_PENDING' or previous['new_native_calls']!=7:
+            pointer=OUT/'LATEST_PARTIAL_PRICING_CHECKPOINT.json'
+            previous_receipt=read(pointer)['decision'] if pointer.exists() else record(OUT/'PRE_PRICING_START_GATE_FAILURE2/FINAL_DECISION.json')
+            if record(previous_receipt['path'])!=previous_receipt:raise ValueError('PARTIAL_PRICING_DECISION_DRIFT')
+            previous=read(previous_receipt['path']);accounted=read(OUT/'NEW_NATIVE_CALLS.json')
+            if (previous['classification']!='MAY12_RESOURCE_PENDING' or previous['new_native_calls']!=len(accounted['calls'])
+                or previous['new_native_seconds']!=accounted['actual_Runtime'] or (OUT/'P1_TRAJECTORY.json').exists()):
                 raise PermissionError('ONLY_PRESERVED_PARTIAL_PRICING_CHECKPOINT_RESUME')
             atomic(OUT/'RESUME_PARTIAL_PRICING.json',dict(PID=os.getpid(),source=record(active_freeze()),
-                prior_Runtime=previous['new_native_seconds'],prior_calls=7,no_budget_reset=True))
+                prior_Runtime=previous['new_native_seconds'],prior_calls=previous['new_native_calls'],
+                previous_decision=previous_receipt,no_budget_reset=True))
         else:
             old=read(OUT/'PRE_NATIVE_START_GATE_FAILURE1/FINAL_DECISION.json')
             if not resume_pre_native_gate or old['new_native_calls']!=0 or old['new_native_seconds']!=0:

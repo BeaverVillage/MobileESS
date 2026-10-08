@@ -47,3 +47,22 @@ def test_actual_monitor_command_is_not_native_worker():
     assert is_read_only_host_monitor(p)
     p['argv'][5]='run';assert not is_read_only_host_monitor(p)
     p['argv'][4]='v42_may12_rescue.runner';p['argv'][5]='monitor';assert not is_read_only_host_monitor(p)
+
+def test_reviewed_postprocessor_versions_and_source_drift(tmp_path,monkeypatch):
+    import v42_may12_rescue.native as native
+    from v42_pr134_b1.common import atomic,record
+    root=tmp_path/'repo';source=root/'v42_b2_root_validation/analysis.py'
+    source.parent.mkdir(parents=True);source.write_text('old reviewed version')
+    out=tmp_path/'reports';monkeypatch.setattr(native,'OUT',out)
+    old=record(source)
+    atomic(out/'PRE_PRICING_START_GATE_FAILURE2/READ_ONLY_M1_ANALYSIS_IDENTITY.json',
+        dict(source=old,optimize_forbidden_by_entrypoint=True))
+    process=dict(argv=['python','-u','-m','v42_b2_root_validation.analysis'],cwd=str(root))
+    assert native.is_read_only_host_monitor(process)
+    source.write_text('new reviewed version')
+    assert not native.is_read_only_host_monitor(process)
+    atomic(out/'PRE_PRICING_START_GATE_FAILURE3/READ_ONLY_M1_ANALYSIS_IDENTITY.json',
+        dict(source=record(source),optimize_forbidden_by_entrypoint=True))
+    assert native.is_read_only_host_monitor(process)
+    process['cwd']=str(tmp_path/'another_repo')
+    assert not native.is_read_only_host_monitor(process)

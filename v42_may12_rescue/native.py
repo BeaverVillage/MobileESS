@@ -47,11 +47,13 @@ def is_read_only_host_monitor(process):
     if argv[i+1:i+2]==['v42_b2_root_validation.analysis']:
         from pathlib import Path
         from v42_pr134_b1.common import record
-        evidence=OUT/'PRE_PRICING_START_GATE_FAILURE2/READ_ONLY_M1_ANALYSIS_IDENTITY.json'
-        if not evidence.exists():return False
-        r=read(evidence)
-        return (r['optimize_forbidden_by_entrypoint'] is True and record(r['source']['path'])==r['source']
-            and Path(process.get('cwd','')).resolve()==Path(r['source']['path']).parents[1].resolve())
+        # Accept only independently inspected versions. A changed entrypoint
+        # remains blocked until reviewed; its old receipt is never overwritten.
+        for evidence in sorted(OUT.glob('PRE_PRICING_START_GATE_FAILURE*/READ_ONLY_M1_ANALYSIS_IDENTITY.json')):
+            r=read(evidence)
+            if (r['optimize_forbidden_by_entrypoint'] is True and record(r['source']['path'])==r['source']
+                and Path(process.get('cwd','')).resolve()==Path(r['source']['path']).parents[1].resolve()):return True
+        return False
     return False
 
 def create():
