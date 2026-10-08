@@ -1,0 +1,55 @@
+{
+  "PASS": true,
+  "scope": "Rational bounded C3A-type 2-MESS/4-slot/2-site time-DAG physical fixture; actual 96-slot C3A separately checked against generic algebra",
+  "all_route_mode_states": 1024,
+  "feasible_states": 256,
+  "exact_infeasible_states": 768,
+  "feasible_optima_equal_original_A_B": true,
+  "forward_inverse_lifting": true,
+  "exact_primal_dual_and_terminal_SOC_certificates": true,
+  "physical_features": [
+    "2-slot travel time",
+    "travel energy debit",
+    "boundary and terminal SOC",
+    "charge/discharge exclusive modes",
+    "continuous P/Q",
+    "PCS diamond",
+    "joint grid support",
+    "robust differential Q voltage bounds"
+  ],
+  "best_integer_objective_exact": "7/16",
+  "bounded_root_comparison": [
+    {
+      "label": "ORIGINAL",
+      "objective_exact": "7/16",
+      "certificate_strategy": "RATIONALIZED_NATIVE_DUAL",
+      "native_rationalized_certificate_exact": "7/16",
+      "native_rationalization_loss": 0.0
+    },
+    {
+      "label": "A",
+      "objective_exact": "7/16",
+      "certificate_strategy": "RATIONALIZED_NATIVE_DUAL",
+      "native_rationalized_certificate_exact": "7/16",
+      "native_rationalization_loss": 0.0
+    },
+    {
+      "label": "B",
+      "objective_exact": "7/16",
+      "certificate_strategy": "EXACT_ORIGINAL_DUAL_ZERO_EXTENSION",
+      "native_rationalized_certificate_exact": "12405827810035699780213087680784352735203830089824702414778206590274762525/28357863756732859114494007527496897537389482386264505342400769057456367904",
+      "native_rationalization_loss": 2.600984126496347e-05
+    }
+  ],
+  "negative_tests": [
+    "A_BAD_PHYSICAL_COEFFICIENT_REJECTED",
+    "A_ARBITRARY_PERSPECTIVE_BOUND_REJECTED",
+    "B_BAD_PHYSICAL_COEFFICIENT_REJECTED",
+    "B_ARBITRARY_PERSPECTIVE_BOUND_REJECTED",
+    "OMITTED_FEASIBLE_COUNT_WORD_REJECTED"
+  ],
+  "native_Gurobi_optimize_calls": 0,
+  "bounded_HiGHS_LP_calls": 1027,
+  "full_horizon_proof": "VALIDITY_PROOF_KO.md",
+  "native_solver_forbidden": true
+}
