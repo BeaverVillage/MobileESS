@@ -46,7 +46,8 @@ def solve(snapshot,name,seconds,*,relax=False,presolve=-1,warm=None,validate=Non
         raise PermissionError('NATIVE_PLAN_CHANGED_AFTER_SOURCE_FREEZE')
     if record(OUT/'NEW_NATIVE_CONTINUATION_BUDGET.json')['sha256']!=freeze['budget_sha256']:
         raise PermissionError('NATIVE_BUDGET_CHANGED_AFTER_SOURCE_FREEZE')
-    authorize_case(plan,name,snapshot.fingerprint(),seconds,relax,presolve,previous)
+    ordered_previous=[c for c in previous if c.get('entered_native_solver',True)]
+    authorize_case(plan,name,snapshot.fingerprint(),seconds,relax,presolve,ordered_previous)
     consumed=sum(c['Runtime'] for c in previous)
     limit=min(float(seconds),budget['native_limit_seconds']-consumed-30.)
     if limit<=0:raise PermissionError('NEW_NATIVE_BUDGET_EXHAUSTED_NO_RESET')
@@ -100,7 +101,11 @@ def solve(snapshot,name,seconds,*,relax=False,presolve=-1,warm=None,validate=Non
     atomic(folder/'CALL_ENTERED.json',dict(unix=time.time(),case=name,TimeLimit=limit,
         source_commit=freeze['git_head'],predeclared_plan_sha256=freeze['plan_sha256'],
         native_call_may_not_be_retried=True))
-    try:model.optimize(callback)
+    def budget_check():
+        if budget['native_limit_seconds']-consumed<=0:raise PermissionError('NATIVE_BUDGET_EXHAUSTED')
+    try:
+        from .execution import native_scope
+        with native_scope(model,name,budget_check):model.optimize(callback)
     except Exception as exception:error=repr(exception)
     finally:stop.set();observer.join(timeout=3)
     attrs={};errors={}
@@ -121,6 +126,7 @@ def solve(snapshot,name,seconds,*,relax=False,presolve=-1,warm=None,validate=Non
         callback_errors=callback_errors,peak_RSS_bytes=max((s['RSS'] for s in samples),default=0),
         build_and_readback_seconds=entered-build,actual_model=record(folder/'ACTUAL_MODEL_VERIFICATION.json'),
         source_commit=freeze['git_head'],native_Runtime_includes_callbacks=True,
+        entered_native_solver=True,
         relaxation_only=relax,requested_TimeLimit=limit,parameters=record(folder/'PARAMETERS.json'))
     atomic(folder/'MEMORY_TELEMETRY.json',dict(samples=samples,metrics_only=True))
     atomic(folder/'RESULT.json',result)

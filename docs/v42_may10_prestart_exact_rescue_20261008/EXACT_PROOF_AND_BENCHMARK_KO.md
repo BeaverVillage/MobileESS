@@ -44,3 +44,5 @@ MemLimit/SoftMemLimit는 무한대다. RSS는 관측만 하며 메모리 사용�
 대규모 신규 실행은 기존 May12가 살아 있는 동안 시작 gate로 보류했다. 대상 PID76188은 외부 조작 없이 자연 종료했고 기존 실행 session exit0을 읽기만 했다. 기존 결과는 `INCONCLUSIVE`, `PRIOR_WITNESS_FROZEN_ARTIFICIAL_WEIGHT_OR_SIGN_DRIFT`다. 이 작업은 May12를 종료/중단/재시작/수정하지 않는다. 선행 root-cause 문서의 RESOURCE_ISOLATION_PENDING은 초기 상태이며, 자연 종료 후 새 독립 namespace에서만 대규모 rebuild와 제한 benchmark를 수행한다.
 
 준비 중 발견한 cutoff sense 연결 오류는 native 호출 전에 수정하고 전용 테스트를 추가했다. 실패한 준비 log도 새 static namespace에 보존했다. 실패한 scientific 후보를 통과로 표시하지 않는다.
+
+첫 source epoch의 LP 두 호출은 기존 stress guard에서 `STRESS_DATE_OPTIMIZATION_NOT_AUTHORIZED`로 거부되어 실제 native Runtime/Work가 모두 0이었다. 세 번째 모델 준비 도중 새 May10 프로세스만 식별해 중단했다. 두 거부 receipt, 원래 ledger/source freeze와 원래 실행 소스 archive를 보존했다. 예산과 모델/설정/사전 순서는 바꾸지 않았다. 새 May10/PRESTART의 정확한 model 객체·compiled receipt·source freeze·budget/Threads/no-RAM-limit에 한정하는 ContextVar 권한을 기존 backstop에 연결했다. May12 및 P1/Planning/Actual/Fresh AC는 이 권한으로 실행할 수 없다. Guard 연결·복사된 다른 model·다른 날짜·production action 거부 테스트를 포함해 374개 A-stage 테스트가 통과한 후 source epoch 2를 고정한다. 두 pre-solver 거부는 실제 optimize 실행 횟수와 분리해 보고한다.

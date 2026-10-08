@@ -80,7 +80,7 @@ def freeze():
         archived_sources_directory=str(archive),source_count=len(sources),
         plan_sha256=record(OUT/'BENCHMARK_PLAN.json')['sha256'],
         budget_sha256=record(OUT/'NEW_NATIVE_CONTINUATION_BUDGET.json')['sha256'],
-        may12_mutated=False,source_epoch=1))
+        may12_mutated=False,source_epoch=2 if (OUT/'NATIVE_SOURCE_FREEZE_GUARD_FAILURE_ATTEMPT0.json').exists() else 1))
     print('NEW_NATIVE_SOURCE_FROZEN',githead,len(sources),flush=True)
 
 
