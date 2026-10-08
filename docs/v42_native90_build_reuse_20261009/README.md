@@ -4,6 +4,8 @@ The superseded `candidate_20261009_implementation01` is held permanently after
 the user's restart request. Worker 87160 accepted CTRL_BREAK and exited without
 forced termination. Its original ledger, results, logs, source and input files
 are preserved. It is not a solver TIME_LIMIT or a completed campaign date.
+Its ledger contains zero Native calls. The superseded Wall policy had not
+terminated this Worker; the recorded reason remains the user's restart request.
 
 `v42_may_campaign_native90` is an isolated implementation version. The original
 974 scientific/campaign sources remain byte identical to the old manifest.
@@ -50,6 +52,30 @@ automatic termination. A May01 preparation exceeding 1.5 times the matching
 validation reference requests investigation; CPU/I/O/counters and read-only
 profiles decide whether computation is progressing. These are warning thresholds.
 
+The replacement May01 Worker actually completed full preparation and independent
+verification in 1,098.75 seconds (18m19s), with peak RSS 11,317,313,536 bytes.
+This is 1.4535 times the Native=0 reference; it is recorded as a performance
+comparison, not hidden or attributed to memory leakage. Fresh DATA took 246.29s,
+complete physical-cache validation 151.73s, active graph 0.58s, matrix snapshot
+1.34s, original matrix assembly 89.11s and compact class assembly 198.05s.
+All 117 full blocks were rebuilt. File completion timestamps show the first-to-
+last full-block interval was 201.50s versus 172.98s in validation; these intervals
+exclude the first block's construction and are not claimed as whole-stage times.
+The unchanged producer's build scope took 790.70s versus 599.87s in validation.
+Final state persistence and verification are included in full preparation.
+
+The new Worker has therefore completed the same full scientific model in less
+than half of the old unfinished preparation's observed 39m05s. An exact completed
+old-to-new speed ratio is unavailable. A 125s nonblocking production profile and
+5s CPU/RSS/I/O samples are preserved under `diagnostics/RESTARTED_MAY01`; two
+sampling failures are explicitly recorded. The observed compute moved from
+physical-cache verification to original grid/model/matrix construction and full
+blocks. The checkpoint bottleneck did not recur during the verified cache hit.
+The frozen implementation SHA is
+`2f593ce282d9b784000b7eb10aba012961e4641101447fee32c0577a75e72d97`.
+The aggregate of all 117 independently recalculated original domain hashes is
+`6b0653a27a404edf580f78aa5f0990e9dfa3a2106543525588f427053ad2b898`.
+
 ## Native time contract
 
 Only measured Gurobi optimize Runtime is accumulated, including failed calls.
@@ -83,3 +109,32 @@ The new hourly prompt names only that run, holds a maintenance lock across a Cod
 turn, investigates actual build performance and applies validated improvements at
 safe boundaries. It must never restart the held old run or stop a progressing
 Worker merely because a diagnostic threshold was reached.
+
+Windows Task Scheduler owns Coordinator 80920, Monitor 82992 and May01 Worker
+93216 independently of Codex. The periodic Watchdog is registered and executing
+its one-minute checks; its PID changes each invocation. The monitor is
+`http://127.0.0.1:8793/`. All indexed old evidence files still match their stop-time
+SHAs and the old Native ledger is unchanged. Actual Native calls began only after
+the preparation gate passed: the first TimeLimit was 5,400s, and all first 129
+completed calls used exactly the remaining measured Native budget.
+
+The existing hourly Codex automation is ACTIVE with a one-hour recurrence and an
+explicit new-run prompt. Its first actual timer dispatch began at 04:10:35 KST on
+October 9, in a distinct scheduled Codex thread. The earlier manual prompt smoke
+test is separately labeled; it is not represented as a timer dispatch. Scheduled
+checks use the run's own whole-turn OS lock. The explicit initial schedule anchor
+was advanced for an actual timer test while retaining the hourly interval.
+The first actual scheduled Codex turn completed at 04:15:06 KST with a PASS
+audit, zero duplicate Workers, zero old-run restarts and zero Worker restarts.
+Its 147.57s read-only observation measured a 135.7s CPU increase and a transition
+from Pricing to integer optimization. The whole-turn lock was released.
+The app's recorded next dispatch is October 9 at 05:07:46 KST (the nominal
+hourly anchor is 05:06; the saved dispatch includes scheduling offset).
+
+May01 subsequently completed PASS: UB 0.6718471055537026, exact certified LB
+0.6715871456570585, certified gap 0.0386933%, and total Native Runtime 97.472s
+across 130 calls. Fresh AC converged in all 96 slots with maximum line loading
+67.6826%, no physical violations and 2.462s engine elapsed time. The complete
+Actual/Fresh evaluation took 8.308s; total Worker Wall was 27m49s. Coordinator
+automatically advanced to B1 May02, Worker 80192, without a manual restart.
+These are May01 results, not a claim that the remaining 61 dates are certified.
