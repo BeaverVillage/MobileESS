@@ -57,6 +57,8 @@ Basis supplied/accepted는 2/2입니다. 두 warm child는 구조적 basis를 �
 
 생성 노드 107, 처리 54, OPEN 54, unresolved OPEN [53]. pruning counts: `{'EXACT_LP_INFEASIBILITY': 0, 'CERTIFIED_LB_AT_LEAST_VALIDATED_UB': 0, 'INTEGER_REPLAY_PASS_AND_CERTIFIED_OPTIMUM': 0}`. 양쪽 자식을 모두 유지하고 전역 LB를 모든 OPEN의 최솟값으로 계산합니다. heuristic 분기 점수는 pruning 근거가 아닙니다.
 
+마지막 cold node 53은 고정 게시 예비 시간에 도달한 callback이 종료해 native status **11 (INTERRUPTED)**, Runtime **101.613s**입니다. 이 노드를 native TIME_LIMIT(9)로 바꿔 기록하지 않으며 인증 없이 OPEN에 보존했습니다.
+
 `selected_external_controller.py`와 `OPEN_CHECKPOINT.json`은 실제 OPEN 큐 복구를 지원합니다. `package_audit.py`는 native optimize를 차단하고 원본 배열의 모든 인증/현재 incumbent/fixing-history/SHA를 독립 감사합니다. volatile arithmetic cache는 감사의 동일 수학 입력만 재사용하며 재시작 시 비웁니다. 원래 oracle의 첫 인증 계산은 캐시하지 않습니다. 원본 증명 파일과 모든 입력 hash/replay는 계속 확인합니다. native Gurobi tree는 재시작 가능하다고 주장하지 않습니다.
 
 Primal 개입 0회. restricted neighborhood ObjBound를 전역 LB로 사용한 사례는 없습니다. P2 목적함수 energy→count와 inherited `P1_EPS=1e-7`, `COMPONENT_EPS=1e-8`만 준비했으며 acceptance gate 없이 실행하지 않았습니다.
@@ -67,7 +69,7 @@ Primal 개입 0회. restricted neighborhood ObjBound를 전역 LB로 사용한 �
 
 Native production의 raw derived LB에 CLI 소수 반올림 문제가 있었으나 그 값을 전역 ledger에 채택하지 않았습니다. `DERIVED_GLOBAL_LB_CORRECTION.json`과 독립 감사의 정확한 native ObjBound를 사용합니다. 또 과거 cold-dual receipt의 infinite parameter sentinel 정규화 오류는 원본 checkpoint byte를 보존하고 optimize=0으로 고쳤습니다. 모델이나 수학적 bound를 바꾸는 복구는 아닙니다.
 
-완료 receipt Native Runtime 합계 **23681.525s**, Work 합계 **46878.216**, 완료 receipt peak RSS **2999205888 bytes**. 새 완료 optimize 호출 61. 보고 시점 task wall **28243.091s**. 고정 시작 `2026-10-07T16:53:34.812972+00:00`, deadline `2026-10-08T00:53:34.812972+00:00`. build/replay/audit/Git 게시도 이 한 기한에 포함됩니다.
+완료 receipt Native Runtime 합계 **23681.525s**, Work 합계 **46878.216**, 완료 receipt peak RSS **2999205888 bytes**. 새 완료 optimize 호출 61. 보고 시점 task wall **28731.708s**. 고정 시작 `2026-10-07T16:53:34.812972+00:00`, deadline `2026-10-08T00:53:34.812972+00:00`. build/replay/audit/Git 게시도 이 한 기한에 포함됩니다.
 
 기존 M0는 야간 시작 전부터 실행되었고 native 최종 status/Runtime/Work가 없어 partial elapsed 및 process CPU/RSS를 `M0_OPERATOR_ABORTED.json`에 별도로 보존했습니다. partial lifetime을 새 완료 Runtime 합계에 더하지 않았습니다. 기존 archived ROOT의 251.318s/481.275 Work 역시 이번 새 실행 비용에서 제외했습니다. 따라서 Runtime 합계는 wall과 같지 않습니다.
 
@@ -81,4 +83,4 @@ Native production의 raw derived LB에 CLI 소수 반올림 문제가 있었으�
 
 ## Git 전달
 
-[Draft PR179](https://github.com/BeaverVillage/MobileESS/pull/179), PR177 위에 stacked. 이 파일의 reporting HEAD는 `b3a6082b5d54d49e821b44d3ad30758fad845ab6`이며 final commit HEAD·remote match·clean tree는 보고서 commit/push 후 PR 본문과 최종 답변에서 확인합니다. 자체 commit SHA를 자기 파일에 삽입하는 순환을 만들지 않습니다. SHA256_MANIFEST.json은 모든 최종 package 파일의 raw bytes를 결속합니다.
+[Draft PR179](https://github.com/BeaverVillage/MobileESS/pull/179), PR177 위에 stacked. 이 파일의 reporting HEAD는 `f4c3b3248328f4efe76f849dd80852301ba4a973`이며 final commit HEAD·remote match·clean tree는 보고서 commit/push 후 PR 본문과 최종 답변에서 확인합니다. 자체 commit SHA를 자기 파일에 삽입하는 순환을 만들지 않습니다. SHA256_MANIFEST.json은 모든 최종 package 파일의 raw bytes를 결속합니다.
