@@ -41,12 +41,17 @@ def start_gate():
 
 def is_read_only_host_monitor(process):
     argv=process.get('argv') or []
+    from pathlib import Path
+    from v42_pr134_b1.common import record
+    for evidence in sorted(OUT.glob('PRE_PRICING_START_GATE_FAILURE*/READ_ONLY_GIT_RECEIPT_IDENTITY.json')):
+        r=read(evidence)
+        if (r['script_argument'] in argv and r['dependency_forbids_optimize'] is True
+            and record(r['source']['path'])==r['source'] and record(r['dependency']['path'])==r['dependency']
+            and Path(process.get('cwd','')).resolve()==Path(r['cwd']).resolve()):return True
     try:i=argv.index('-m')
     except ValueError:return False
     if argv[i+1:i+3]==['v42_pr134_b1.host','monitor']:return True
     if argv[i+1:i+2]==['v42_b2_root_validation.analysis']:
-        from pathlib import Path
-        from v42_pr134_b1.common import record
         # Accept only independently inspected versions. A changed entrypoint
         # remains blocked until reviewed; its old receipt is never overwritten.
         for evidence in sorted(OUT.glob('PRE_PRICING_START_GATE_FAILURE*/READ_ONLY_M1_ANALYSIS_IDENTITY.json')):

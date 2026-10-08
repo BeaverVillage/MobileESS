@@ -55,7 +55,22 @@ def run(resume_pre_native_gate=False,resume_incomplete_pricing=False):
         state=p['old'];negative=p['negative'];raw=p['raw']
         # Admit all independently verified current negative supports in one
         # preregistered batch; keep the historical failed 64-column attempt.
-        before=perf_counter();state,warm=activate(state,negative,raw['X'],OUT/'P1/RECOVERED_ACTIVATION',max_batch=130)
+        before=perf_counter();cache=OUT/'RECOVERED_ACTIVATED_STATE.json'
+        if resume_incomplete_pricing and cache.exists():
+            saved=read(cache)
+            if saved['failure_payload']!=r or record(saved['state']['path'])!=saved['state']:
+                raise ValueError('RECOVERED_ACTIVATED_STATE_BYTE_DRIFT')
+            with gzip.open(saved['state']['path'],'rb') as f:stored=pickle.load(f)
+            state=stored['state'];warm=stored['warm']
+            if (state['compact'].fingerprint()!=saved['compact_sha256'] or state['reference'].fingerprint()!=saved['reference_sha256']
+                or record(saved['inclusion']['path'])!=saved['inclusion']):raise ValueError('RECOVERED_ACTIVATED_STATE_MATRIX_OR_WITNESS_DRIFT')
+        else:
+            state,warm=activate(state,negative,raw['X'],OUT/'P1/RECOVERED_ACTIVATION',max_batch=130)
+            path=STATIC/'RECOVERED_ACTIVATED_STATE.pkl.gz'
+            with gzip.open(path,'xb',compresslevel=1) as f:pickle.dump(dict(state=state,warm=warm),f,protocol=5)
+            atomic(cache,dict(PASS=True,state=record(path),failure_payload=r,compact_sha256=state['compact'].fingerprint(),
+                reference_sha256=state['reference'].fingerprint(),inclusion=record(OUT/'P1/RECOVERED_ACTIVATION/ACTIVATION.json'),
+                no_native_call=True,source=record(active_freeze())))
         timings['recovered_activation_build_seconds']=perf_counter()-before
         del p;gc.collect();trajectory=[]
         for round_no in range(20):

@@ -66,3 +66,18 @@ def test_reviewed_postprocessor_versions_and_source_drift(tmp_path,monkeypatch):
     assert native.is_read_only_host_monitor(process)
     process['cwd']=str(tmp_path/'another_repo')
     assert not native.is_read_only_host_monitor(process)
+
+def test_git_receipt_requires_reviewed_script_dependency_and_cwd(tmp_path,monkeypatch):
+    import v42_may12_rescue.native as native
+    from v42_pr134_b1.common import atomic,record
+    script=tmp_path/'tmp/final_git_receipt.py';script.parent.mkdir()
+    dependency=tmp_path/'repo/package.py';dependency.parent.mkdir()
+    script.write_text('reviewed git receipt');dependency.write_text('reviewed optimize-forbidden audit')
+    out=tmp_path/'reports';monkeypatch.setattr(native,'OUT',out)
+    atomic(out/'PRE_PRICING_START_GATE_FAILURE4/READ_ONLY_GIT_RECEIPT_IDENTITY.json',
+        dict(source=record(script),dependency=record(dependency),script_argument=str(script),
+            dependency_forbids_optimize=True,cwd=str(dependency.parent)))
+    process=dict(argv=['python',str(script)],cwd=str(dependency.parent))
+    assert native.is_read_only_host_monitor(process)
+    dependency.write_text('unreviewed new audit')
+    assert not native.is_read_only_host_monitor(process)
