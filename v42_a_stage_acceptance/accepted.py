@@ -7,6 +7,7 @@ from v42_a_stage_lexfull.runner import objective_value
 from v42_a_stage_domain_v2.lexstage import rebuild_locked_snapshot
 from v42_a_stage_phase1.core import primal_replay
 from .policy import OUT,STATIC
+from .execution import active_freeze
 
 def freeze(day,state,original,point,physical,locks,certificates):
     f=OUT/day
@@ -29,7 +30,7 @@ def freeze(day,state,original,point,physical,locks,certificates):
         control_names=list(coeff[0].control_names),objective_values={k:float(v) for k,v in values.items()},
         exact_objective_values={k:str(v) for k,v in values.items()},certificates=certificates,
         physical=record(f/'FINAL_PHYSICAL_REPLAY.json'),sequential_locks=record(f/'FINAL_SEQUENTIAL_LOCKS.json'),
-        source=record(OUT/'CONTINUATION_SOURCE_FREEZE.json'),original_model_sha256=original.fingerprint(),
+        source=record(active_freeze()),original_model_sha256=original.fingerprint(),
         scientific_bundle_sha256=digest(state['data'][0]),original_job_ids_sha256=digest(sorted(state['data'][1])),
         original_input=record(Path('C:/v42_pr134_sc_execution_20261007/inputs')/day/'NATIVE_INPUT.json'),
         PR134_freeze_reused=False,physical_rules_changed=False)

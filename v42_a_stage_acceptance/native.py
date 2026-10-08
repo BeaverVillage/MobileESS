@@ -7,7 +7,7 @@ import numpy as np
 import scipy.sparse as sp
 import gurobipy as gp
 from v42_pr134_b1.common import atomic,read,record,digest,table
-from .execution import verify, native_scope
+from .execution import verify, native_scope,active_freeze
 from v42_a_stage_domain_v2.execution import install_gurobi_backstop,guard_model_optimize
 from v42_a_stage_domain_v2.stress_backend import materialize
 from v42_a_stage_domain_v2.solver_policy import apply_policy
@@ -27,7 +27,7 @@ class Native:
     def __init__(self, budget,day):
         global DAY
         DAY=day
-        self.freeze_path=OUT/'CONTINUATION_SOURCE_FREEZE.json'
+        self.freeze_path=active_freeze()
         self.policy=read(HISTORY/'SOLVER_POLICY.json')
         self.budget=budget;self.parent_budget=budget
         self.native_seconds=0.;self.calls=[];self.resources=[];self.system_samples=[]

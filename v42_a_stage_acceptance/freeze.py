@@ -4,8 +4,8 @@ from v42_pr134_b1.common import atomic,record,sha,read
 from .policy import ROOT,OUT,STATIC,POLICY,BASE,OLD
 from .budget import establish
 
-def freeze():
-    establish();p=OUT/'CONTINUATION_SOURCE_FREEZE.json'
+def freeze(epoch=None):
+    establish();p=OUT/('CONTINUATION_SOURCE_FREEZE.json' if epoch is None else 'SOURCE_FREEZE_EPOCH_'+str(epoch)+'.json')
     if p.exists():raise PermissionError('CONTINUATION_SOURCE_ALREADY_FROZEN')
     head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     names=subprocess.check_output(['git','ls-files','*.py'],cwd=ROOT,text=True).splitlines()
@@ -18,5 +18,8 @@ def freeze():
         execution_sources={str(q):sha(q) for q in sources},source_archive=record(archive),
         budget=record(OUT/'CONTINUATION_BUDGET.json'),policy=POLICY,
         historical_PR180=record(OUT/'HISTORICAL_PR180_BYTE_PRESERVATION_START.json')))
+    if epoch is not None:atomic(OUT/'ACTIVE_SOURCE_FREEZE.json',dict(PASS=True,receipt=record(p)))
     print('NEW_SOURCE_FROZEN',head,len(sources),flush=True)
-if __name__=='__main__':freeze()
+if __name__=='__main__':
+    import sys
+    freeze(None if len(sys.argv)==1 else sys.argv[1])

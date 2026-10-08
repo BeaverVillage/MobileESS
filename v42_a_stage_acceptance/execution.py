@@ -4,8 +4,15 @@ from v42_pr134_b1.common import read,record,sha
 from .policy import OUT,OLD,DAYS,POLICY
 _scope=ContextVar('a_stage_acceptance_native',default=None)
 def current():return _scope.get()
+def active_freeze():
+    pointer=OUT/'ACTIVE_SOURCE_FREEZE.json'
+    if pointer.exists():
+        r=read(pointer)['receipt']
+        if record(r['path'])!=r:raise PermissionError('CURRENT_SOURCE_EPOCH_POINTER_DRIFT')
+        return r['path']
+    return OUT/'CONTINUATION_SOURCE_FREEZE.json'
 def verify():
-    f=read(OUT/'CONTINUATION_SOURCE_FREEZE.json')
+    f=read(active_freeze())
     if not f.get('PASS') or f['schema']!=POLICY['schema']:raise PermissionError('CONTINUATION_SOURCE_FREEZE_REQUIRED')
     for p,h in f['execution_sources'].items():
         if sha(p)!=h:raise PermissionError('CONTINUATION_SOURCE_DRIFT:'+p)

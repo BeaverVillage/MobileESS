@@ -19,6 +19,8 @@ def establish():
 class Budget:
     def __init__(self,day):
         self.record=establish();self.day=day;self.native_seconds=0.;self.started=time()
+        prior=OUT/day/'NATIVE_BUDGET_LEDGER.json'
+        if prior.exists():self.native_seconds=read(prior)['charged_native_seconds']
     def remaining(self):
         value=min(self.record['deadline_unix']-time(),3600-self.native_seconds)
         if value<=0:raise BudgetStop('NEW_CONTINUATION_DAY_NATIVE_OR_WALL_BUDGET_EXHAUSTED')

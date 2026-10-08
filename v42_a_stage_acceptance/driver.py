@@ -67,16 +67,21 @@ def may19(native):
         practical_runtime_accepted=False,practical_failure_reason='PR180_REUSABLE_CERTIFICATES_DO_NOT_PROVE_30_MINUTE_END_TO_END_RUNTIME')
     return result
 
-def run(day):
+def run(day,resume=False):
     verify()
     if day not in DAYS:raise PermissionError('ONLY_FOUR_REQUESTED_A_STAGE_DAYS')
     folder=OUT/day;folder.mkdir(parents=True,exist_ok=True)
-    if (folder/'STARTED.json').exists():raise PermissionError('DAY_ALREADY_EXECUTED_USE_PRESERVED_CHECKPOINT')
+    if (folder/'STARTED.json').exists() and not resume:raise PermissionError('DAY_ALREADY_EXECUTED_USE_PRESERVED_CHECKPOINT')
+    if resume and day!=DAYS[1]:raise PermissionError('ONLY_ACTUAL_MAY17_INTERFACE_FAILURE_CHECKPOINT')
     if day!=DAYS[0]:
         if not read(OUT/DAYS[0]/'A1_RESULT.json').get('A1_accepted'):raise PermissionError('MAY19_FINAL_A1_ACCEPTANCE_REQUIRED')
         for prior in DAYS[1:DAYS.index(day)]:
             if not (OUT/prior/'RESULT.json').exists():raise PermissionError('REQUESTED_EXECUTION_ORDER_REQUIRED')
     started=time();budget=Budget(day);native=Native(budget,day)
+    previous=read(folder/'NATIVE_CALLS.json')['calls'] if resume else []
+    if resume:
+        atomic(folder/'ATTEMPT0_RESULT.json',read(folder/'RESULT.json'))
+        atomic(folder/'ATTEMPT0_NATIVE_CALLS.json',dict(calls=previous))
     samples=[];stop=threading.Event()
     def resources():
         while not stop.is_set():
@@ -84,15 +89,24 @@ def run(day):
             atomic(folder/'WHOLE_DAY_RESOURCES.json',dict(samples=samples))
             stop.wait(2)
     observer=threading.Thread(target=resources,daemon=True);observer.start()
-    atomic(folder/'STARTED.json',dict(PASS=True,day=day,actual_start_unix=started,budget=record(OUT/'CONTINUATION_BUDGET.json'),
-        source=record(OUT/'CONTINUATION_SOURCE_FREEZE.json'),one_native_process=True,old_PR180_attempt_not_resumed=True))
+    atomic(folder/('RESUME_1_STARTED.json' if resume else 'STARTED.json'),dict(PASS=True,day=day,actual_start_unix=started,budget=record(OUT/'CONTINUATION_BUDGET.json'),
+        source=record(native.freeze_path),one_native_process=True,old_PR180_attempt_not_resumed=True,
+        prior_native_seconds=budget.native_seconds,continuation_budget_not_reset=True))
     result=dict(day=day,A1_accepted=False,classification='INCONCLUSIVE',practical_runtime_accepted=False)
     try:
         if sample()['unsafe']:raise RuntimeError('SYSTEM_RAM_COMMIT_RESERVE_BEFORE_DAY_BUILD')
         if day==DAYS[0]:result.update(may19(native))
         else:
-            prep,phase=route(day);state=prep.prepare(day)
-            state,x,expanded,priced=phase.run(native,state,day)
+            prep,phase=route(day);seed=None
+            if resume:
+                b=read(folder/'INITIAL_VERIFICATION.json')
+                if record(b['state']['path'])!=b['state']:raise ValueError('ORIGINAL_CHECKPOINT_STATE_DRIFT')
+                with gzip.open(b['state']['path'],'rb') as stream:state=pickle.load(stream)
+                nr=read(folder/'PHASE_I/S15/NATIVE_RESULT.json')
+                if record(nr['raw_attributes']['path'])!=nr['raw_attributes']:raise ValueError('LAST_PHASE_I_RAW_POINT_DRIFT')
+                seed=np.load(nr['raw_attributes']['path'])['X'][:state['compact'].matrix.shape[1]]
+            else:state=prep.prepare(day)
+            state,x,expanded,priced=phase.run(native,state,day,certified_zero_point=seed)
             from .integer import run as integer
             result.update(integer(native,state,expanded,priced,day))
             result.update(fresh_end_to_end_runtime_measured=True,historical_certificates_reused=False,
@@ -100,15 +114,16 @@ def run(day):
     except Exception as e:result.update(failure_reason=repr(e),traceback=traceback.format_exc())
     finally:
         stop.set();observer.join(timeout=3)
-        result.update(native_seconds=native.native_seconds,Work=sum(c.get('Work') or 0 for c in native.calls),
-            native_calls=len(native.calls),wall_seconds=time()-started,
+        calls=previous+native.calls
+        result.update(native_seconds=sum(c.get('native_seconds') or 0 for c in calls),Work=sum(c.get('Work') or 0 for c in calls),
+            native_calls=len(calls),wall_seconds=time()-read(folder/'STARTED.json')['actual_start_unix'],
             peak_RSS_bytes=max([c.get('peak_RSS_bytes') or 0 for c in native.calls]+[s['A_process_RSS_bytes'] for s in samples],default=0),
             per_day_native_limit=3600,practical_wall_target=1800,
             model_sizes=[dict(component=c['component'],identity=c['model_identity']) for c in native.calls],
             native_runtime_excludes_build_pricing_python_and_validation=True)
         if not result.get('A1_accepted'):result['practical_runtime_accepted']=False
         if result.get('A1_accepted') and result['practical_runtime_accepted']:result['classification']='PRACTICAL_RUNTIME_ACCEPTED'
-        atomic(folder/'NATIVE_CALLS.json',dict(calls=native.calls));atomic(folder/'RESULT.json',result)
+        atomic(folder/'NATIVE_CALLS.json',dict(calls=calls));atomic(folder/'RESULT.json',result)
         print('FOURDAY_RESULT',day,result['classification'],result.get('failure_reason'),result['native_seconds'],result['wall_seconds'],flush=True)
     gc.collect();return result
-if __name__=='__main__':run(sys.argv[1])
+if __name__=='__main__':run(sys.argv[1],resume='--resume' in sys.argv[2:])
