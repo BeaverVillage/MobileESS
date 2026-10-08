@@ -10,4 +10,4 @@
 
 성능 개선은 완료된 285회의 native solve와 192 concrete columns/92 pricing directions를 재사용하고, graph union의 ledger를 매 열마다 전체 재계산하던 것을 batch당 한 번으로 줄인 것이다. 실제 130-class ledger와 source matrix 동치성을 확인했다. 새로운 initial build나 23회의 Phase-I를 다시 실행하지 않았다. Basis는 column/row axes가 바뀌므로 호환성 증거 없이 재사용하지 않았다.
 
-추가 개선은 exact sum의 0항 제거, 완료된 full pricing의 Pi/행렬/RAW/hash/유리수 하한 재검증 후 재사용, 활성화된 다음 모델의 immutable checkpoint 재사용이다. 별도 shadow 검증에서 추가 concrete STAY 39,993개를 정확한 음수 가격과 full native A/B/bounds/cardinality 동치성으로 검증했다. 이는 S0의 검증 결과이며 실제 신규 batch 활성화 성공을 뜻하지 않는다. Latest S1 전체 pricing이 76/130에서 다른 실제 native 작업으로 중단됐으므로 S1 dual로 추가 batch를 활성화하지 않았다.
+추가 개선은 exact sum의 0항 제거, 완료된 full pricing의 Pi/행렬/RAW/hash/유리수 하한 재검증 후 재사용, 활성화된 다음 모델의 immutable checkpoint 재사용이다. 별도 shadow 검증에서 추가 concrete STAY 39,993개를 정확한 음수 가격과 full native A/B/bounds/cardinality 동치성으로 검증했다. 실제 추가 batch 활성화는 하지 않았다. S1 전체 pricing은 잠시76/130에서 다른 native 작업으로 중단됐으나, 사용자의 M 단계 종료 후 재개 지시에 따라 저장된 master/activation/pricing을 재사용해 130/130을 완료했다. 음수 블록이 없어 추가 활성화가 필요하지 않았다.

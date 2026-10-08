@@ -13,6 +13,12 @@ def attempt_walls(folder):
     return rows, sum(r['wall_seconds'] for r in rows)
 
 
+def native_call_counts(calls):
+    # Gurobi can round a completed fast optimize Runtime to 0.0 seconds.
+    return dict(total=len(calls),positive_runtime=sum((c.get('native_seconds') or 0)>0 for c in calls),
+        zero_runtime=sum((c.get('native_seconds') or 0)==0 for c in calls))
+
+
 def eligible_bound(value):
     if not all(value.get(k) is True for k in (
             'PASS','complete_native_producer_verified',
@@ -66,7 +72,7 @@ def finish_incomplete_p1():
                 original_row_replay=record(f/'EXACT_ORIGINAL_ROW_REPLAY.json')))
     atomic(OUT/'P1_MASTER_SOLVE_AUDIT.json',dict(PASS=True,trajectory=rows,
         cache_replays_are_not_new_native_solves=True,all_reuse_receipts_preserved=True))
-    last=OUT/'LAST_DRIVER_P1_TRAJECTORY.json'
+    last=OUT/'P1_DRIVER_TRAJECTORY_EPOCH8.json'
     if not last.exists():last.write_bytes((OUT/'P1_TRAJECTORY.json').read_bytes())
     atomic(OUT/'P1_TRAJECTORY.json',dict(trajectory=rows,native_solve_accounting_once=True,
         final_driver_cache_replay_trajectory=record(last)))
@@ -100,22 +106,28 @@ def finish_incomplete_p1():
             reason='No validated original integer UB/global gap certificate',acceptance=record(OUT/'P1_ONLY_ACCEPTANCE_CONTRACT.json')))
     else:
         freeze=read(OUT/'P1_ONLY_FREEZE.json')
+        independent=read(OUT/'INDEPENDENT_INTEGER_VERIFICATION.json')
+        if not independent['PASS']:raise ValueError('INDEPENDENT_INTEGER_REPLAY_REQUIRED_FOR_FREEZE')
         freeze.update(global_bound=record(OUT/'P1_FULL_DOMAIN_BOUND_CERTIFICATE.json'),
             acceptance=record(OUT/'P1_ONLY_ACCEPTANCE_CONTRACT.json'),
-            original_input_and_array_identity=record(OUT/'ORIGINAL_INPUT_AND_ARRAY_IDENTITY.json'))
+            original_input_and_array_identity=record(OUT/'ORIGINAL_INPUT_AND_ARRAY_IDENTITY.json'),
+            independent_integer_replay=record(OUT/'INDEPENDENT_INTEGER_VERIFICATION.json'),
+            final_input_and_array_identity=record(OUT/'ORIGINAL_INPUT_AND_ARRAY_IDENTITY_FINAL.json'),
+            executed_source_provenance=record(OUT/'EXECUTION_EPOCH_AND_BUDGET_PROVENANCE.json'))
         atomic(OUT/'P1_ONLY_FREEZE.json',freeze)
     return bound,rows
 
 
 def regression_receipts():
     r=read(OUT/'PHASE1_REGRESSION_TESTS.json')
-    logs=['REGRESSION_BEFORE_FIX.log','REGRESSION_AFTER_FIX.log','FULL_TESTS_EPOCH6_FINAL.log','EPOCH7_FOCUSED_TESTS.log','POSTRUN_TESTS.log']
+    logs=['REGRESSION_BEFORE_FIX.log','REGRESSION_AFTER_FIX.log','FULL_TESTS_EPOCH6_FINAL.log','EPOCH7_FOCUSED_TESTS.log','POSTRUN_TESTS_FINAL.log']
     r.update(full_scale_saved_matrix_regression_before_fix=True,
         actual_full_scale_STAY_batch=record(OUT/'STAY_BATCH_ACTUAL_VERIFICATION.json'),
         fixture_and_actual_matrix_evidence_separate=True,
         latest_full_suite='389 passed, 1368 deselected in 40.07s',
         execution_epoch7_focused='22 passed in 1.12s',
-        postrun_accounting_and_acceptance='13 passed in 0.24s',
+        postrun_accounting_acceptance_and_JSON_identity='16 passed',
+        independent_full_scale_integer_replay=record(OUT/'INDEPENDENT_INTEGER_VERIFICATION.json'),
         retained_test_logs=[record(STATIC/p) for p in logs])
     atomic(OUT/'PHASE1_REGRESSION_TESTS.json',r)
 

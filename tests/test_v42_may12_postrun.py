@@ -1,5 +1,9 @@
 import json
-from v42_may12_rescue.postrun import attempt_walls,eligible_bound
+from v42_may12_rescue.postrun import attempt_walls,eligible_bound,native_call_counts
+
+
+def test_completed_optimize_calls_with_zero_rounded_runtime_are_counted():
+    assert native_call_counts([dict(native_seconds=0,Work=.01),dict(native_seconds=.003)])==dict(total=2,positive_runtime=1,zero_runtime=1)
 
 
 def test_attempt_walls_include_implementation_boundary_without_recounting_native(tmp_path):
