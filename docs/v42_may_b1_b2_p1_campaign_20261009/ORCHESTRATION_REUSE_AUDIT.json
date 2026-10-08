@@ -1,0 +1,370 @@
+{
+  "schema_version": 1,
+  "audit_type": "READ_ONLY_EXISTING_ORCHESTRATION_REUSE_FEASIBILITY",
+  "timestamp_utc": "2026-10-08T15:45:14.8503876Z",
+  "git_head": "dc15114d450c25394ff174cc0c65056aae40778f",
+  "source_files": [
+    {
+      "path": "D:\\MobileESS_v42\\v42_pr134_b1\\common.py",
+      "sha256": "04dcba88f1ffe041f788d28c395d1a7ca4686561ce051c6ee7afcfa609e1b0f7",
+      "bytes": 4974
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_pr134_b1\\coordinator.py",
+      "sha256": "463b130284f72aa485e413ed504970d34c9996ac32d7b3f422af2d83712a477b",
+      "bytes": 14934
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_pr134_b1\\host.py",
+      "sha256": "461c0030b44119e41ce24b98e70d6a4470d73918c0dbf816cda0a038628aec67",
+      "bytes": 1055
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_pr134_b1\\watchdog.py",
+      "sha256": "a1a40c04b3bc535320e968bedcbdd73a81432dc87af1f9ff715abf25f70445de",
+      "bytes": 3836
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_pr134_b1\\monitor.py",
+      "sha256": "acbfe4d67be74c5d6cc69d4542dc81db09f148101c8dd4951dd6ff11dd6231ca",
+      "bytes": 6269
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_pr134_b1\\monitor_index.html",
+      "sha256": "f13d347396b01a132465dd7be54f9141519d2822cef2d5387bbf043810ca1bbd",
+      "bytes": 7406
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_pr134_b1\\detach.py",
+      "sha256": "6476a510228f3eab454d1faba3fd057e012ecdc38904535fdc2a33632aad617c",
+      "bytes": 10952
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_pr134_b1\\worker.py",
+      "sha256": "14c5a76bf43aa957f0f83fb4cc04a50ce249018317348ca5e6540028a9d60556",
+      "bytes": 4460
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_pr134_b1\\validation.py",
+      "sha256": "f18613df4d8b184ea5580faf810d83a45c1e31ec8cdecd459aa447a72b98504e",
+      "bytes": 10438
+    }
+  ],
+  "campaign_status": "NOT_STARTED_PREFLIGHT_BLOCKED",
+  "campaign_run_id_created": false,
+  "native_optimization_calls_by_this_audit": 0,
+  "new_campaign_coordinator_started": false,
+  "new_campaign_worker_started": false,
+  "new_campaign_scheduler_registered": false,
+  "new_campaign_monitor_started": false,
+  "original_launch_guard_preserved": true,
+  "existing_scientific_algorithm_modified": false,
+  "existing_orchestration_files_modified": false,
+  "new_wrapper_implemented": false,
+  "new_date_arm_checkpoint_implemented": false,
+  "new_monitor_ui_adapter_implemented": false,
+  "new_90_minute_wall_native_budget_adapter_implemented": false,
+  "current_audit_files_are_implementation": false,
+  "direct_reuse_candidates": [
+    {
+      "module": "v42_pr134_b1.common",
+      "functions": [
+        "read",
+        "sha",
+        "record",
+        "digest",
+        "atomic",
+        "table",
+        "process",
+        "same_process",
+        "write_lock",
+        "replace_file",
+        "now"
+      ],
+      "status": "AVAILABLE_EXISTING_IMPLEMENTATION_NOT_YET_CONNECTED_TO_NEW_WRAPPER",
+      "caveat": "common.BUDGET=3600 and identity/verify_freeze are legacy B1-specific. Do not use those unchanged for the new campaign."
+    },
+    {
+      "module": "v42_pr134_b1.detach",
+      "functions": [
+        "powershell",
+        "windows_policy",
+        "ancestry"
+      ],
+      "status": "AVAILABLE_EXISTING_IMPLEMENTATION_NOT_YET_CONNECTED_TO_NEW_WRAPPER",
+      "caveat": "Do not call legacy launch or register unchanged."
+    }
+  ],
+  "existing_verified_patterns": [
+    "OS byte Coordinator lock releases after process failure",
+    "SHA-verified previous checkpoint restoration preserves corrupt bytes",
+    "PID/create-time/full-command identity rejects PID reuse",
+    "ACTIVE request supports adoption of a live orphan Worker",
+    "Causal receipt/dependency SHA validation",
+    "Sequential date execution isolates terminal outcomes",
+    "Read-only localhost HTTP monitor with one-second JSON fetch",
+    "Scheduler service ancestry and resource policy read-only checks"
+  ],
+  "blocked_or_nonreusable_entrypoints": [
+    {
+      "module": "v42_pr134_b1.coordinator",
+      "function": "run",
+      "reason": "Raises A_STAGE_CAMPAIGN_NOT_AUTHORIZED_FOR_DOMAIN_V2_REVIEW before launch. This guard remains unchanged."
+    },
+    {
+      "module": "v42_pr134_b1.worker",
+      "function": "execute",
+      "reason": "Requires action authorization and legacy B1-specific physical receipt. A new explicitly approved arm adapter is required."
+    },
+    {
+      "module": "v42_pr134_b1.detach",
+      "function": "launch",
+      "reason": "Includes old monitor termination, old task disable operations and hardcoded C-drive writes. None were invoked."
+    },
+    {
+      "module": "v42_pr134_b1.detach",
+      "function": "register",
+      "reason": "InteractiveToken does not provide logoff execution. New noninteractive scheduler definition is required."
+    }
+  ],
+  "mandatory_new_wrapper_requirements": [
+    "62 ordered entries: B1 all May01..May31, then B2 all May01..May31. Advance B2 after every B1 entry reaches an honest terminal state regardless of failures.",
+    "Arm/day/source/case/checker SHA identity; no shared or reused B1/B0 schedule in B2.",
+    "Terminal dates are not rerun. Automatic retry count for failed date must be zero, unlike legacy INFRA_RETRIES=2.",
+    "New dedicated D-drive runtime, scheduler names and free monitor port. Preserve old tasks and old monitor.",
+    "Independent Wall <=5400 seconds and cumulative Native <=5400 seconds per arm/day with Threads=1 and P2 calls=0.",
+    "Model generation, search, certificate and independent replay consume Wall budget. TimeLimit is remaining Wall/Native budget minus final validation reserve. Fresh AC is timed separately.",
+    "One live Native Worker globally for this campaign, OS lock, verified live-worker adoption, no healthy solver forced stop.",
+    "New wrapper must preserve original blocked launch and directly call validated A/M algorithms via minimal adapters.",
+    "S4U or equivalent noninteractive Task Scheduler registration/export/start/ancestry evidence; no substitution of InteractiveToken as logoff PASS.",
+    "Monitor shows B1 and B2 separate date tables, Native BestBd versus independent Global LB, certificate gap, Wall/Native budgets, PID, heartbeat and resource telemetry."
+  ],
+  "scheduler_preflight": {
+    "status": "BLOCKED_ACCESS_DENIED",
+    "PASS": false,
+    "source": {
+      "path": "D:\\MobileESS_v42\\runtime\\v42_may_b1_b2_p1_campaign\\scheduler_preflight_20261009\\WINDOWS_S4U_PREFLIGHT.json",
+      "sha256": "026f44bb05f7997f10207f69ade3753a1ac91d65f8daa9e811db8fb1bcfb2658"
+    },
+    "actual_result": {
+      "task": "MobileESS_V42_B1B2_P1_S4U_Preflight_20261009",
+      "user": "S-1-5-21-3366191703-593138269-1024070808-1001",
+      "logon_type": "S4U",
+      "native_optimize_calls": 0,
+      "started": false,
+      "utc": "2026-10-08T15:42:46.5043545Z",
+      "PASS": false,
+      "registered": false,
+      "error": "액세스가 거부되었습니다.\r\n",
+      "hresult": -2146233088,
+      "fully_qualified_error_id": "HRESULT 0x80070005,Register-ScheduledTask",
+      "exception_type": "Microsoft.Management.Infrastructure.CimException"
+    },
+    "registered": false,
+    "started": false,
+    "windows_error": "0x80070005",
+    "no_campaign_launch_after_failure": true,
+    "interactive_fallback_used": false
+  },
+  "existing_windows_snapshot": {
+    "path": "D:\\MobileESS_v42\\docs\\v42_may_b1_b2_p1_campaign_20261009\\WINDOWS_EXISTING_TASK_PROCESS_SNAPSHOT.json",
+    "sha256": "cceff14998a80eeb2a631faf8a44f23260e85cb5a5618f1bccb5293042aa93d5"
+  },
+  "historical_checkpoint_read_only": {
+    "path": "C:\\v42_pr134_sc_execution_20261007\\CHECKPOINT.json",
+    "sha256": "71e9be1e520826241662a0106d2d3f0e6818331e97e39f7803cc26ed1ef0a219",
+    "run_id": "B1_PR134_SC_202505_20261006T183422_4fb25507",
+    "state": "COMPLETE",
+    "counts": {
+      "PASS": 27,
+      "TIMEOUT": 2,
+      "INCONCLUSIVE": 2
+    },
+    "date_rows": [
+      {
+        "day": "2025-05-01",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-02",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-03",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-04",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-05",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-06",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-07",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-08",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-09",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-10",
+        "status": "TIMEOUT",
+        "stage": "A1"
+      },
+      {
+        "day": "2025-05-11",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-12",
+        "status": "TIMEOUT",
+        "stage": "A1"
+      },
+      {
+        "day": "2025-05-13",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-14",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-15",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-16",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-17",
+        "status": "INCONCLUSIVE",
+        "stage": "A1"
+      },
+      {
+        "day": "2025-05-18",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-19",
+        "status": "INCONCLUSIVE",
+        "stage": "A1"
+      },
+      {
+        "day": "2025-05-20",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-21",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-22",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-23",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-24",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-25",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-26",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-27",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-28",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-29",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-30",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      },
+      {
+        "day": "2025-05-31",
+        "status": "PASS",
+        "stage": "VALIDATION"
+      }
+    ],
+    "new_campaign_results_reused": false
+  },
+  "historical_native_zero_regression": {
+    "path": "D:\\MobileESS_v42\\docs\\v42_may_b1_supercompact_production_20261007\\INFRASTRUCTURE_REGRESSION.json",
+    "sha256": "8cbfb6429fc0d8d03f6e3bd4049ab11c6332694213ace6e4b62cb91800da32b1",
+    "original_receipt": {
+      "PASS": true,
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "native_optimization_calls": 0,
+      "scientific_inputs_changed": false,
+      "identity_and_payload_tamper_rejected": true,
+      "timeout_continues_next_date": true,
+      "bounded_retries": 2
+    },
+    "current_campaign_preflight_PASS": false,
+    "scope": "Historical 12-test evidence only. Root will run current Native=0 regressions separately. The new wrapper is not implemented or tested."
+  },
+  "AGENTS_discovered_in_repo_or_D_ancestor": false,
+  "audit_mutations": {
+    "documentation_files_written": [
+      "D:\\MobileESS_v42\\docs\\v42_may_b1_b2_p1_campaign_20261009\\WINDOWS_EXISTING_TASK_PROCESS_SNAPSHOT.json",
+      "D:\\MobileESS_v42\\docs\\v42_may_b1_b2_p1_campaign_20261009\\ORCHESTRATION_REUSE_AUDIT.json"
+    ],
+    "scheduler_changes": 0,
+    "process_changes": 0,
+    "source_changes": 0,
+    "native_solve_calls": 0
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "schema": "V42_B2_INDEPENDENT_AIDC_GENERATION_AUDIT_V1",
+  "generated_utc": "2026-10-08T15:45:41.391071+00:00",
+  "Git_HEAD_observed": "dc15114d450c25394ff174cc0c65056aae40778f",
+  "status": "NOT_EXECUTED_SOURCE_REUSE_ROUTE_IDENTIFIED",
+  "PASS": false,
+  "input_generation_executed": false,
+  "generated_days": 0,
+  "generated_reference_artifacts": [],
+  "B2_campaign_started": false,
+  "Native_optimize_calls_this_audit": 0,
+  "AIDC_optimization_calls_this_audit": 0,
+  "B2_AIDC_optimization_zero_call_execution_proof": "NOT_AVAILABLE_NO_B2_EXECUTION",
+  "zero_call_interpretation": "No optimizer or input-generation function was invoked by this source auditor. This is not evidence that an executed B2 worker avoided AIDC optimization.",
+  "independent_generation_contract": {
+    "input": "Same-day original causal Planning population, capacities, rack compatibility, current frozen Q50 service, current frozen CC4 forecast and same-day original C1/weather authority",
+    "prohibited_sources": [
+      "B0 result/reference/schedule files as B2 schedule input",
+      "B1 optimized schedule or A1/M1 handoff",
+      "May01 UB/LB/point/column artifacts for another date"
+    ],
+    "rules": "Reuse current common grid-blind FCFS/Q50 nominal release rules, reconstruct inside each B2 date/arm and independently validate SHA, population, time, sites, PCC and service/capacity/racks.",
+    "AIDC_schedule_optimization": false,
+    "MESS_optimization": "ON only after all required preflight gates pass"
+  },
+  "current_common_authority": {
+    "path": "D:\\MobileESS_v42\\v42_capacity\\reference.py",
+    "relative_path": "v42_capacity/reference.py",
+    "sha256": "2baf1e03c9328676d94a1dc83bc6b75143e385efa988cc24c333eab1bf73df04",
+    "api": "build_reference(jobs,capacities,compatibility,issue_time=...)",
+    "source_based_finding": "QUEUE_RULE V42_COMMON_FCFS_Q50_NOMINAL_RELEASE_V2. Rejects future/grid fields; retains immutable request rows; RUNNING issue placement uses physical issue capacity; expired RUNNING has zero future nominal Q50 reservation; strict PENDING FCFS has no backfill ahead of unresolved predecessor. Returns population/reference digest and optimizer_calls=0.",
+    "executed_for_this_campaign": false
+  },
+  "superseded_reference": {
+    "path": "D:\\MobileESS_v42\\v42_april_b0_v2\\reference.py",
+    "relative_path": "v42_april_b0_v2/reference.py",
+    "sha256": "4ef4c83a6d2d6dfa49cb7d17ce01fb29b136ab28cf06bd53315153c93743462c",
+    "api": "build_reference(...)",
+    "source_based_finding": "V1 reserves expired RUNNING jobs indefinitely. Current holdout producer imports capacity V2; historical V1 must not silently replace the current common authority.",
+    "executed_for_this_campaign": false
+  },
+  "source_based_generation_chain": [
+    {
+      "path": "D:\\MobileESS_v42\\v42_holdout\\inputs.py",
+      "relative_path": "v42_holdout/inputs.py",
+      "sha256": "50aeeb98fce23a8a7149aa265f2758d3256a020e49aa10aceaf8c66f8c933577",
+      "api": "requests(spec), cc4(), coefficients(day,p,spec), main()",
+      "source_based_finding": "Causal raw request/snapshot projection, frozen Q50 inference, existing modelability classification, original calendar/output routing and same-day C1/weather paths generate Planning inputs. Outer producer also writes monthly outputs; no function in this audit was invoked.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_capacity\\reference.py",
+      "relative_path": "v42_capacity/reference.py",
+      "sha256": "2baf1e03c9328676d94a1dc83bc6b75143e385efa988cc24c333eab1bf73df04",
+      "api": "build_reference(...)",
+      "source_based_finding": "Can be called directly on B2 same-day original causal known_population; no B0 result file is required.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_modelable\\power.py",
+      "relative_path": "v42_modelable/power.py",
+      "sha256": "fc8abd5308cf34e2e8f204852948cfa976f4d79d181f034d3e18e81ba10b4511",
+      "api": "known_occupancy(...)",
+      "source_based_finding": "Existing reference row to 96-slot site occupancy transformation.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_capacity\\queue.py",
+      "relative_path": "v42_capacity/queue.py",
+      "sha256": "b5b8780ca9399bb1506920574bf025c9d5cfe1955d81814664a4a99ceeb8d381",
+      "api": "allocate(...), conservation(...)",
+      "source_based_finding": "Existing capacity-admitted CC4 anonymous allocation and exact GPU-hour conservation.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_capacity\\planning.py",
+      "relative_path": "v42_capacity/planning.py",
+      "sha256": "ab4559c6f936da723e3fb315bdeb8b67aa10d7391d70cecfca4849b57e6c8cf7",
+      "api": "main() arithmetic after reference generation",
+      "source_based_finding": "Computes known occupancy plus anonymous CC4; IT=idle*capacity+swing*total GPU; PCC=slope*IT+intercept; Q=P*tan(acos(.95)). Writes current common reference authority shared by B0/B1/B2/B3, optimizer_calls=0. Outer loop is April and consumes prebuilt Planning inputs.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_holdout\\calendar_adapter.py",
+      "relative_path": "v42_holdout/calendar_adapter.py",
+      "sha256": "e86237bf9473427f4638a019b4943c429a2947d81be50683d41105031ac458d5",
+      "api": "producer(name, OUT=..., PRIOR=...)",
+      "source_based_finding": "Existing May calendar adapter changes only month/date literal, 30-to-31-day loop and output roots of capacity planning/replay; no computational statement or input-field rule is changed.",
+      "executed_for_this_campaign": false
+    }
+  ],
+  "validation_not_yet_executed": [
+    "Source SHA and same-day Planning/Actual input identity",
+    "Independent generated population/reference SHA",
+    "Exact job/time/site/service/rack/capacity preservation",
+    "Fixed AIDC PCC power/control-axis SHA and units",
+    "Absence of B0/B1 result reads in B2 generation execution trace",
+    "Runtime evidence of AIDC optimize calls=0"
+  ],
+  "source_sha256": {
+    "v42_capacity/reference.py": "2baf1e03c9328676d94a1dc83bc6b75143e385efa988cc24c333eab1bf73df04",
+    "v42_capacity/queue.py": "b5b8780ca9399bb1506920574bf025c9d5cfe1955d81814664a4a99ceeb8d381",
+    "v42_capacity/planning.py": "ab4559c6f936da723e3fb315bdeb8b67aa10d7391d70cecfca4849b57e6c8cf7",
+    "v42_modelable/power.py": "fc8abd5308cf34e2e8f204852948cfa976f4d79d181f034d3e18e81ba10b4511",
+    "v42_holdout/inputs.py": "50aeeb98fce23a8a7149aa265f2758d3256a020e49aa10aceaf8c66f8c933577",
+    "v42_holdout/calendar_adapter.py": "e86237bf9473427f4638a019b4943c429a2947d81be50683d41105031ac458d5",
+    "v42_april_b0_v2/reference.py": "4ef4c83a6d2d6dfa49cb7d17ce01fb29b136ab28cf06bd53315153c93743462c"
+  },
+  "new_reference_rule_implemented": false,
+  "existing_source_files_modified": false,
+  "blocking_context": "Required OS independent S4U task installation failed with 0x80070005 ACCESS_DENIED; root instructed audit-only and no new adapters."
+}
