@@ -165,6 +165,9 @@ def require_action_authorized(authority, action='OPTIMIZE', *, require_day=True)
         day = _native_day.get()
     if day is None and require_day:
         raise PermissionError('A_STAGE_PRODUCTION_DAY_REQUIRED')
+    from v42_a_stage_acceptance.execution import current as continuation_current, authorize as continuation_authorize
+    if continuation_current() is not None:
+        return continuation_authorize(day, action)
     from v42_a_stage_cg.execution import current as cg_current, authorize as cg_authorize
     if cg_current() is not None:
         return cg_authorize(day, action)
@@ -244,6 +247,10 @@ def guard_model_optimize(model):
     day = getattr(model, '_v42_a_stage_day', None)
     context_day = _native_day.get()
     effective_day=day if day is not None else context_day
+    from v42_a_stage_acceptance.execution import current as continuation_current, guard as continuation_guard
+    if continuation_current() is not None:
+        continuation_guard(model, effective_day)
+        return
     from v42_a_stage_cg.execution import current as cg_current, guard as cg_guard
     if cg_current() is not None:
         cg_guard(model, effective_day)
