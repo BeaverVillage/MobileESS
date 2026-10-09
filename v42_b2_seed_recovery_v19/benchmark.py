@@ -5,8 +5,9 @@ import argparse
 from .common import read,atomic,record,sha,digest,now,same_process
 from .policy import VERSION,MANIFEST,source_files,MODEL_FIELDS
 
-def prepare(root,*,code_commit,diagnostics=False,diagnostic_attempt=1):
-    campaign=Path(root).resolve();root=campaign/(f'feasibility_diagnostics_v19_{diagnostic_attempt:02d}' if diagnostics else 'initialization_benchmark_v19_01')
+def prepare(root,*,code_commit,diagnostics=False,diagnostic_attempt=1,benchmark_attempt=1):
+    if not isinstance(benchmark_attempt,int) or not 1<=benchmark_attempt<=99:raise ValueError('INVALID_BENCHMARK_ATTEMPT')
+    campaign=Path(root).resolve();root=campaign/(f'feasibility_diagnostics_v19_{diagnostic_attempt:02d}' if diagnostics else f'initialization_benchmark_v19_{benchmark_attempt:02d}')
     if (root/MANIFEST).exists():raise PermissionError('BENCHMARK_NEVER_RESET_OR_OVERWRITTEN')
     previous=campaign/'initialization_benchmark_v18r2_01'
     previous_cp=read(previous/'CHECKPOINT_V18R2.json')
@@ -35,6 +36,7 @@ def prepare(root,*,code_commit,diagnostics=False,diagnostic_attempt=1):
     doc['previous_initialization_benchmark']=record(previous_result)
     doc['initialization_native_limit_seconds']=120. if diagnostics else 1500.
     doc['diagnostics_only']=diagnostics
+    doc['attempt_id']=f'seed_policy_v19_{benchmark_attempt:02d}'
     if diagnostics:
         doc['canary_days']=['2025-05-03']
         doc['input_folders']={'2025-05-03':old['input_folders']['2025-05-03']}
@@ -89,5 +91,5 @@ def run(request,budget,progress):
     return result
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('root');p.add_argument('--code-commit',required=True);p.add_argument('--diagnostics',action='store_true');p.add_argument('--diagnostic-attempt',type=int,default=1)
-    a=p.parse_args();root,doc=prepare(a.root,code_commit=a.code_commit,diagnostics=a.diagnostics,diagnostic_attempt=a.diagnostic_attempt);print(root);print(doc['execution_SHA'])
+    p=argparse.ArgumentParser();p.add_argument('root');p.add_argument('--code-commit',required=True);p.add_argument('--diagnostics',action='store_true');p.add_argument('--diagnostic-attempt',type=int,default=1);p.add_argument('--benchmark-attempt',type=int,default=1)
+    a=p.parse_args();root,doc=prepare(a.root,code_commit=a.code_commit,diagnostics=a.diagnostics,diagnostic_attempt=a.diagnostic_attempt,benchmark_attempt=a.benchmark_attempt);print(root);print(doc['execution_SHA'])

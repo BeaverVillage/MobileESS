@@ -11,12 +11,13 @@ from .policy import VERSION,MANIFEST,ATTEMPT,verify_manifest,verify_request
 
 
 def request_for(root,manifest,day,slot):
-    attempt=root/'dates/B2'/day/'attempts'/ATTEMPT;attempt.mkdir(parents=True,exist_ok=True)
+    attempt_id=manifest.get('attempt_id',ATTEMPT)
+    attempt=root/'dates/B2'/day/'attempts'/attempt_id;attempt.mkdir(parents=True,exist_ok=True)
     request=dict(root=str(root),run_id=manifest['run_id'],arm='B2',day=day,worker_slot=slot,Threads=1,
         P2_calls=0,native_budget_seconds=5400,wall_budget_seconds=None,target_gap=.03,
         input_folder=manifest['input_folders'][day],manifest=str(root/MANIFEST),manifest_SHA=sha(root/MANIFEST),
         implementation_SHA=manifest['execution_SHA'],algorithm_version=VERSION,policy_version=VERSION,
-        attempt_id=ATTEMPT,started_UTC=now(),input_authority_root=str(root),
+        attempt_id=attempt_id,started_UTC=now(),input_authority_root=str(root),
         stationary_dispatch_seed=True)
     request.update({k:str(attempt/name) for k,name in
         (('output','output'),('progress','progress.json'),('result','RESULT.json'),('error','error.json'))})
@@ -74,7 +75,7 @@ def run(root):
                     canary_failed=canary_failed or not canary_results[day]
                     cp['canary_results']=canary_results
                     if canary_failed:
-                        cp['state']='CANARY_FAILED_REMAINING_DATES_HELD'
+                        cp['state']='BENCHMARK_DATE_FAILED_CONTINUING_VALIDATION' if manifest.get('benchmark_initialization_only') else 'CANARY_FAILED_REMAINING_DATES_HELD'
                     if len(canary_results)==len(manifest['canary_days']) and not canary_failed:
                         if manifest.get('benchmark_initialization_only'):
                             cp.update(state='INITIALIZATION_BENCHMARK_COMPLETE',canary_PASS=True)
@@ -92,7 +93,7 @@ def run(root):
                 with (path.parent/'stdout.log').open('ab') as stdout,(path.parent/'stderr.log').open('ab') as stderr:
                     child=subprocess.Popen(command,cwd=ROOT,stdout=stdout,stderr=stderr)
                 children[day]=(child,request);workers[day]=request
-                cp['dates']['B2/'+day].update(status='RUNNING',current_attempt=ATTEMPT,request=str(path),worker_slot=slot)
+                cp['dates']['B2/'+day].update(status='RUNNING',current_attempt=request['attempt_id'],request=str(path),worker_slot=slot)
             cp.update(workers={day:dict(PID=c.pid,request=str(Path(r['result']).parent/'request.json')) for day,(c,r) in children.items()},UTC=now())
             atomic(root/'CHECKPOINT_V19.json',cp)
             atomic(root/'COORDINATOR_V19_HEARTBEAT.json',dict(process=process(),timestamp_UTC=now(),state=cp['state']))

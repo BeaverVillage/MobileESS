@@ -112,11 +112,12 @@ def verify_request(request):
         prior = read(request['manifest']).get('prior_attempts',{}).get(request['day'],{})
         conservative_runtime(prior,root=request['root'],day=request['day'])
     doc = verify_manifest(request['manifest'])
-    expected = Path(request['root']).resolve()/'dates'/'B2'/request['day']/'attempts'/ATTEMPT
+    attempt=doc.get('attempt_id',ATTEMPT)
+    expected = Path(request['root']).resolve()/'dates'/'B2'/request['day']/'attempts'/attempt
     if (request['arm'] != 'B2' or request['day'] not in doc['input_folders']
             or request['run_id'] != doc['run_id'] or request['manifest_SHA'] != sha(request['manifest'])
             or request['implementation_SHA'] != doc['execution_SHA'] or request['algorithm_version'] != VERSION
-            or request['attempt_id'] != ATTEMPT or Path(request['input_folder']).resolve() != Path(doc['input_folders'][request['day']]).resolve()
+            or request['attempt_id'] != attempt or Path(request['input_folder']).resolve() != Path(doc['input_folders'][request['day']]).resolve()
             or any(request.get(k) != v for k,v in dict(Threads=1,P2_calls=0,native_budget_seconds=5400,
                 wall_budget_seconds=None,target_gap=.03).items())
             or any(Path(request[k]).resolve() != expected/name for k,name in

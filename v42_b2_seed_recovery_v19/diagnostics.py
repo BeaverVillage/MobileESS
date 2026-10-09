@@ -44,7 +44,7 @@ def category(name):
     if family=='energy_balance':return 'SOC time coupling'
     if family in ('no_simultaneous_charge','no_simultaneous_discharge','charge_mode'):return 'Charging/discharging exclusivity'
     if family.startswith('PCS'):return 'PCS kVA'
-    if family in ('flow','terminal_location','arc'):return 'Route flow'
+    if family in ('flow','terminal_location','arc','route_flow'):return 'Route flow'
     if family.startswith(('connected_','node_activity')):return 'ETA/connectivity'
     if family.startswith(('injection_P','injection_Q')):return 'Fixed AIDC PCC power'
     return 'Auxiliary reconstruction'
