@@ -22,7 +22,7 @@ from v42_b3_joint.operations_bridge import SourceOperationsBridge
 from v42_b3_joint.source_coordinator import SourceCoordinator, output_document, verify_output
 from v42_b3_joint.source_runtime import RealStageContext, SourceRegistry, source_input_identity, jsonable
 from .admission import (read, record, checked, source_seal, execution_permit,
-                        validate_request, publish_qualification)
+                        validate_request, publish_qualification, scientific_run_id)
 from .reuse import B1A1ReuseBridge
 from .ledger import CumulativeStageLedger
 from .diagnostic import native_zero_diagnostic
@@ -185,7 +185,7 @@ def setup(request, seal, pipeline):
     registry = SourceRegistry(request["code_root"], seal["files"])
     # Original constructors are resolved only within the admitted source scope.
     provisional = RealStageContext(StageRequest("A1", authority), inputs, pipeline / "A1",
-        canonical(bundle), registry, object(), {}, seal["source_sha"], request["run_id"])
+        canonical(bundle), registry, object(), {}, seal["source_sha"], scientific_run_id(request))
     with registry.execution_scope(provisional):
         load = registry.callable("v42_temporal/native.py", "load_power")
         certificate, _, _, _ = load(bundle)
@@ -206,7 +206,7 @@ def setup(request, seal, pipeline):
     grid = InjectionAuthority(registry, authority, validity_json=canonical(validity))
     def factory(stage_request, packets, output):
         return RealStageContext(stage_request, inputs, output, canonical(bundle), registry, grid,
-                                packets, seal["source_sha"], request["run_id"])
+                                packets, seal["source_sha"], scientific_run_id(request))
     return authority, factory, b1, inputs
 
 
@@ -247,7 +247,8 @@ def run(request_path):
     seal = read(request["source_seal"]) if request.get("source_seal") else source_seal(code_root)
     pipeline = envelope / "PIPELINE"
     identity = {"run_id": request["run_id"], "arm": "B3", "day": request["day"],
-                "attempt_id": request["attempt_id"], "worker_slot": 1, "source_SHA": seal["source_sha"]}
+                "attempt_id": request["attempt_id"], "worker_slot": 1, "source_SHA": seal["source_sha"],
+                "scientific_run_id": scientific_run_id(request)}
     heartbeat = {"identity": identity, "worker": {"PID": os.getpid()}, "stage": "ADMISSION", "phase": "SOURCE_ADMISSION"}
     heartbeat_lock = threading.Lock()
     stopped = threading.Event()
@@ -275,6 +276,13 @@ def run(request_path):
     try:
         # One campaign-wide OS lease covers the entire date pipeline.
         with singleton(Path(request["campaign_root"]) / "autonomous" / "B3_SINGLE_WORKER.lock"), execution_permit(request, seal), (native_zero_diagnostic() if request.get("prepare_only") is True else nullcontext()):
+            result["source_checked"] = True
+            binding_path = envelope / "B3_RUN_ID_BINDING.json"
+            atomic(binding_path, {"PASS": True, "campaign_run_id": request["run_id"],
+                "scientific_run_id": scientific_run_id(request), "encoding": "ORIGINAL_ASCII_TOKEN_API_V1",
+                "campaign_run_id_sha256": hashlib.sha256(request["run_id"].encode()).hexdigest(),
+                "numeric_scientific_constants_changed": False})
+            result["run_id_binding"] = record(binding_path)
             if request.get("prepare_only") is not True:
                 no_active_b2(request)
             atomic(envelope / "B3_SOURCE_ADMISSION.json", {"PASS": True, "identity": identity,
@@ -333,7 +341,8 @@ def run(request_path):
                     result["production_qualification"] = publish_qualification(pipeline, seal["source_sha"],
                         request.get("qualification_output", str(Path(request["campaign_root"]) / "autonomous" / "B3_PRODUCTION_QUALIFICATION.json")))
     except Exception as error:
-        result.update(failure_class=type(error).__name__, reason=str(error), traceback=traceback.format_exc())
+        result.update(status="FAIL", PASS=False, failure_class=type(error).__name__, reason=str(error), traceback=traceback.format_exc())
+        result["source_global_integrity_block"] = str(error).startswith(("B3_SOURCE_SEAL_", "SOURCE_FILE_SHA_DRIFT"))
     finally:
         stopped.set()
         thread.join(timeout=2)

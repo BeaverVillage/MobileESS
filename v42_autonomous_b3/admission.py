@@ -1,8 +1,8 @@
 """Evidence-bound canary admission and explicit production promotion.
 
-The first real May01 canary is authorized by the user's saved instruction.
-Every subsequent date requires that canary's completed, source-matched stage
-and Actual/Fresh receipts. Booleans never substitute for those artifacts.
+Each May date can run as a scoped real canary until one date completes all
+source-matched stages and Actual/Fresh validation. Failed dates do not promote
+production or prevent the next independent date's canary execution.
 """
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -11,6 +11,8 @@ from fractions import Fraction
 from pathlib import Path
 import hashlib
 import json
+import math
+import re
 
 from v42_b3_joint.contracts import canonical, digest, require, require_sha
 from v42_b3_joint.source_coordinator import output_from_document
@@ -90,11 +92,22 @@ def validate_request(request):
     return root, output
 
 
+def scientific_run_id(request):
+    """Bind the transport campaign identity to the original ASCII token API."""
+    original = request["run_id"]
+    require(isinstance(original, str) and original, "B3_CAMPAIGN_RUN_ID_REQUIRED")
+    alias = original if re.fullmatch(r"[A-Za-z0-9_-]{1,100}", original) else (
+        re.sub(r"[^A-Za-z0-9_-]", "_", original)[:87] + "_" + hashlib.sha256(original.encode()).hexdigest()[:12])
+    require(request.get("scientific_run_id", alias) == alias, "B3_SCIENTIFIC_RUN_ID_BINDING_DRIFT")
+    return alias
+
+
 def verify_qualification(path, source_sha):
     qualification = read(path)
+    day = qualification.get("qualified_day", qualification.get("day"))
     require(qualification.get("schema") == "B3_REAL_CANARY_QUALIFICATION_V1" and
             qualification.get("source_sha") == source_sha and
-            qualification.get("day") == "2025-05-01" and qualification.get("worker_count") == 1 and
+            day in DAYS and qualification.get("day", day) == day and qualification.get("worker_count") == 1 and
             qualification.get("evidence_kind") == "SOURCE", "REAL_SOURCE_MATCHED_B3_CANARY_REQUIRED")
     root = Path(qualification["canary_output"]).resolve()
     for receipt in qualification["artifacts"]:
@@ -103,11 +116,13 @@ def verify_qualification(path, source_sha):
     require(checkpoint.get("status") == "COMPLETE" and checkpoint.get("inflight") is None and
             checkpoint.get("completed") == ["A1", "M1", "A2", "M2"] and
             checkpoint["identity"]["evidence_kind"] == "SOURCE" and
-            checkpoint["identity"]["source_sha"] == source_sha, "B3_CANARY_FULL_PIPELINE_INCOMPLETE")
+            checkpoint["identity"]["source_sha"] == source_sha and checkpoint["identity"]["day"] == day,
+            "B3_CANARY_FULL_PIPELINE_INCOMPLETE")
     for stage in ("A1", "M1", "A2", "M2"):
         out = output_from_document(read(root / stage / "B3_SOURCE_STAGE_OUTPUT.json"))
         require(out.sha == checkpoint["result_shas"][stage] and out.evidence_kind == "SOURCE" and
-                out.request.authority.source_sha == source_sha,
+                out.request.authority.source_sha == source_sha and out.request.authority.day == day and
+                out.request.stage == stage,
                 "B3_CANARY_STAGE_SHA_OR_SOURCE_DRIFT")
         physical, bounds = out.physical_evidence, out.global_evidence
         require(physical.get("original_integer_physical_verified") is True and
@@ -120,6 +135,13 @@ def verify_qualification(path, source_sha):
         require(0 <= lower <= upper and (upper == 0 or (upper - lower) / upper <= target),
                 "B3_CANARY_EXACT_GAP_NOT_ACCEPTED")
         ledger = json.loads(out.ledger_receipt)
+        require(ledger.get("source_sha") == source_sha and ledger.get("day") == day and
+                ledger.get("stage") == stage and ledger.get("native_limit_seconds") == 5400 and
+                ledger.get("P2_calls") == 0 and ledger.get("Threads") == 1 and
+                ledger.get("wall_limit_seconds") is None and
+                type(ledger.get("measured_native_runtime")) in (float, int) and
+                math.isfinite(ledger["measured_native_runtime"]) and 0 <= ledger["measured_native_runtime"] <= 5400,
+                "B3_CANARY_ORIGINAL_STAGE_NATIVE_ACCOUNTING_REQUIRED")
         if stage == "A1":
             reuse = out.source_packet.get("b1_reuse", {})
             require(ledger["native_call_count"] == 0 and ledger["measured_native_runtime"] == 0 and
@@ -136,6 +158,36 @@ def verify_qualification(path, source_sha):
     return qualification
 
 
+def qualification_status(path, source_sha, *, seal=None, code_root=None):
+    """Classify evidence without turning a failed day's evidence into a gate."""
+    if seal is not None:
+        try:
+            seal = read(seal) if isinstance(seal, (str, Path)) else seal
+            validate_seal(seal, code_root or seal["root"])
+            require(seal["source_sha"] == source_sha, "B3_CURRENT_SOURCE_IDENTITY_DRIFT")
+        except Exception as error:
+            return {"status": "GLOBAL_SOURCE_INTEGRITY_FAILURE", "qualified": False,
+                    "global_source_block": True, "reason": str(error)}
+    if path is None or not Path(path).is_file():
+        return {"status": "ABSENT", "qualified": False, "global_source_block": False}
+    # A source repair retains the previous qualification at its original path.
+    # The new source's fully verified qualification has a separate identity.
+    candidate = Path(path).with_name(Path(path).stem + "." + source_sha + ".json")
+    if candidate.is_file():
+        path = candidate
+    try:
+        document = read(path)
+        if document.get("source_sha") != source_sha:
+            return {"status": "SOURCE_MISMATCH", "qualified": False, "global_source_block": False}
+        qualification = verify_qualification(path, source_sha)
+        return {"status": "QUALIFIED", "qualified": True, "global_source_block": False,
+                "qualified_day": qualification.get("qualified_day") or qualification.get("day"),
+                "qualification": record(path)}
+    except Exception as error:
+        return {"status": "INVALID_DAY_EVIDENCE", "qualified": False, "global_source_block": False,
+                "reason": str(error)}
+
+
 def publish_qualification(output, source_sha, destination):
     output, destination = Path(output).resolve(), Path(destination).resolve()
     artifacts = [record(output / "B3_SOURCE_CHECKPOINT.json"),
@@ -143,8 +195,9 @@ def publish_qualification(output, source_sha, destination):
                  record(output / "B3_SOURCE_VALIDATION.json")]
     artifacts += [record(output / stage / "B3_SOURCE_STAGE_OUTPUT.json")
                   for stage in ("A1", "M1", "A2", "M2")]
+    day = read(output / "B3_SOURCE_CHECKPOINT.json")["identity"]["day"]
     document = {"schema": "B3_REAL_CANARY_QUALIFICATION_V1", "source_sha": source_sha,
-                "day": "2025-05-01", "worker_count": 1, "evidence_kind": "SOURCE",
+                "day": day, "qualified_day": day, "worker_count": 1, "evidence_kind": "SOURCE",
                 "canary_output": str(output), "artifacts": artifacts}
     # Validate the fully materialized receipt before atomic publication.
     temporary = destination.with_name(destination.name + ".candidate")
@@ -152,8 +205,17 @@ def publish_qualification(output, source_sha, destination):
     temporary.write_text(canonical(document) + "\n", encoding="utf-8")
     verify_qualification(temporary, source_sha)
     if destination.exists():
-        require(read(destination) == document, "CANARY_QUALIFICATION_NEVER_OVERWRITTEN")
-        temporary.unlink()
+        try:
+            verify_qualification(destination, source_sha)
+            temporary.unlink()
+            return record(destination)
+        except (ValueError, KeyError, OSError):
+            preserved_destination = destination
+            destination = destination.with_name(destination.stem + "." + source_sha + ".json")
+            require(not destination.exists(), "CANARY_QUALIFICATION_NEVER_OVERWRITTEN")
+            # The old artifact and all its recorded paths remain intact.
+            require(preserved_destination != destination, "QUALIFICATION_SOURCE_IDENTITY_REQUIRED")
+            replace_file(temporary, destination)
     else:
         replace_file(temporary, destination)
     return record(destination)
@@ -173,7 +235,6 @@ def execution_permit(request, seal):
     root, _ = validate_request(request)
     validate_seal(seal, root)
     if request.get("canary") is True:
-        require(request["day"] == "2025-05-01", "FIRST_CANARY_MAY01_REQUIRED")
         mode = "USER_AUTHORIZED_REAL_CANARY"
     else:
         verify_qualification(request["qualification"], seal["source_sha"])

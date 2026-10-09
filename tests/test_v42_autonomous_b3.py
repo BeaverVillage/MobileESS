@@ -11,8 +11,9 @@ from unittest.mock import patch
 from v42_b3_joint.contracts import canonical, digest
 from v42_b3_joint.policy import require_production_authorization
 from v42_autonomous_b3.admission import (checked, record, validate_request, verify_qualification,
-                                        execution_permit, source_seal, validate_seal)
-from v42_autonomous_b3.reuse import compare_original_identity
+                                        execution_permit, source_seal, validate_seal, qualification_status,
+                                        scientific_run_id, publish_qualification)
+from v42_autonomous_b3.reuse import compare_original_identity, graph_compiler_equivalence, GRAPH_CACHE_COMPILERS, B1A1ReuseBridge
 from v42_autonomous_b3.ledger import prior_prefix
 from v42_autonomous_b3.worker import b1_origin, original_domain_sha
 from v42_autonomous_b3.diagnostic import native_zero_diagnostic
@@ -21,6 +22,13 @@ from v42_a_stage_domain_v2 import AUTHORITY as ORIGINAL_DOMAIN_AUTHORITY
 
 
 class AdmissionTests(unittest.TestCase):
+    def scoped_request(self, root, day="2025-05-02"):
+        for name in ("v42_b3_joint/source_coordinator.py", "v42_autonomous_b3/worker.py"):
+            path = root / name; path.parent.mkdir(parents=True, exist_ok=True); path.write_text("original")
+        return dict(arm="B3", day=day, worker_slot=1, code_root=str(root),
+                    output=str(root / "runtime/b3" / day / "attempt"), campaign_root=str(root / "campaign"),
+                    attempt_id="a", run_id="campaign", canary=True), source_seal(root)
+
     def test_boolean_flags_do_not_open_gate(self):
         import v42_b3_joint.policy as policy
         before = policy.B3_NATIVE_EXECUTION_AUTHORIZED
@@ -73,6 +81,74 @@ class AdmissionTests(unittest.TestCase):
             path.write_text(canonical(document))
             with self.assertRaisesRegex(ValueError, "FULL_PIPELINE_INCOMPLETE"):
                 verify_qualification(path, digest("s"))
+
+    def test_failed_first_canary_allows_next_scoped_date_without_promotion(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder); request, seal = self.scoped_request(root)
+            previous = root / "may01_failed"; previous.mkdir()
+            (previous / "B3_SOURCE_CHECKPOINT.json").write_text(canonical(dict(status="FAILED")))
+            qualification = root / "qualification.json"
+            qualification.write_text(canonical(dict(schema="B3_REAL_CANARY_QUALIFICATION_V1",
+                source_sha=seal["source_sha"], day="2025-05-01", worker_count=1, evidence_kind="SOURCE",
+                canary_output=str(previous), artifacts=[])))
+            status = qualification_status(qualification, seal["source_sha"], seal=seal, code_root=root)
+            self.assertEqual(status["status"], "INVALID_DAY_EVIDENCE")
+            self.assertFalse(status["qualified"])
+            with execution_permit(request, seal) as permit:
+                self.assertEqual(permit.day, "2025-05-02")
+                self.assertEqual(permit.mode, "USER_AUTHORIZED_REAL_CANARY")
+            with execution_permit(dict(request, day="2025-05-31"), seal) as permit:
+                self.assertEqual(permit.day, "2025-05-31")
+            with self.assertRaisesRegex(ValueError, "FULL_PIPELINE_INCOMPLETE"):
+                with execution_permit(dict(request, canary=False, qualification=str(qualification)), seal):
+                    pass
+            self.assertEqual(qualification_status(None, seal["source_sha"])["status"], "ABSENT")
+            (root / "v42_autonomous_b3/worker.py").write_text("corrupt")
+            status = qualification_status(qualification, seal["source_sha"], seal=seal, code_root=root)
+            self.assertEqual(status["status"], "GLOBAL_SOURCE_INTEGRITY_FAILURE")
+            self.assertTrue(status["global_source_block"])
+            with self.assertRaisesRegex(ValueError, "SOURCE_SEAL_FILE_DRIFT"):
+                with execution_permit(request, seal):
+                    pass
+
+    def test_source_mismatch_and_fake_later_day_qualification_never_promote(self):
+        with TemporaryDirectory() as folder:
+            path = Path(folder) / "qualification.json"
+            path.write_text(canonical(dict(source_sha=digest("old_source"))))
+            self.assertEqual(qualification_status(path, digest("new_source"))["status"], "SOURCE_MISMATCH")
+            path.write_text(canonical(dict(schema="B3_REAL_CANARY_QUALIFICATION_V1", source_sha=digest("new_source"),
+                day="2025-05-21", qualified_day="2025-05-21", worker_count=1, evidence_kind="FAKE_SOURCE_TEST")))
+            self.assertEqual(qualification_status(path, digest("new_source"))["status"], "INVALID_DAY_EVIDENCE")
+
+    def test_publication_binds_completed_checkpoint_day_then_runs_verifier(self):
+        # Tests publication plumbing only; a mocked verifier does not prove a
+        # real SOURCE canary, and this temporary artifact is never promoted.
+        with TemporaryDirectory() as folder:
+            root = Path(folder); pipeline = root / "pipeline"; pipeline.mkdir()
+            (pipeline / "B3_SOURCE_CHECKPOINT.json").write_text(canonical(dict(identity=dict(day="2025-05-23"))))
+            for name in ("B3_SOURCE_ACTUAL_RESULT.json", "B3_SOURCE_VALIDATION.json"):
+                (pipeline / name).write_text("{}")
+            for stage in ("A1", "M1", "A2", "M2"):
+                (pipeline / stage).mkdir(); (pipeline / stage / "B3_SOURCE_STAGE_OUTPUT.json").write_text("{}")
+            def verify(path, source):
+                document = json.loads(Path(path).read_text())
+                self.assertEqual(document["qualified_day"], "2025-05-23")
+                self.assertEqual(document["day"], "2025-05-23")
+                return document
+            with patch("v42_autonomous_b3.admission.verify_qualification", side_effect=verify) as verifier:
+                receipt = publish_qualification(pipeline, digest("source"), root / "qualification.json")
+                self.assertEqual(verifier.call_count, 1)
+                checked(receipt)
+
+    def test_scientific_run_alias_preserves_valid_ids_and_binds_transport_identity(self):
+        self.assertEqual(scientific_run_id(dict(run_id="valid_run-01")), "valid_run-01")
+        original = "may2025_b2_b3_fresh_20261009T172421_999933+0000"
+        alias = scientific_run_id(dict(run_id=original))
+        self.assertRegex(alias, r"^[A-Za-z0-9_-]{1,100}$")
+        self.assertNotEqual(alias, scientific_run_id(dict(run_id=original.replace("+", ":"))))
+        self.assertEqual(scientific_run_id(dict(run_id=original, scientific_run_id=alias)), alias)
+        with self.assertRaisesRegex(ValueError, "SCIENTIFIC_RUN_ID_BINDING_DRIFT"):
+            scientific_run_id(dict(run_id=original, scientific_run_id="arbitrary_other_campaign"))
 
 
 class OriginalIdentityTests(unittest.TestCase):
@@ -176,6 +252,43 @@ class DiagnosticTests(unittest.TestCase):
                     require_production_authorization("NATIVE_OPTIMIZE")
             self.assertIs(gp.Model, Model)
             self.assertIs(gp.read, read_model)
+
+
+class GraphCompilerTests(unittest.TestCase):
+    def registry(self, root):
+        for relative in GRAPH_CACHE_COMPILERS:
+            path = root / relative; path.parent.mkdir(parents=True, exist_ok=True); path.write_text(relative)
+        return SimpleNamespace(root=root, source_manifest={name: record(root / name)["sha256"] for name in GRAPH_CACHE_COMPILERS})
+
+    def test_exact_blob_equivalence_admits_graphs_without_native(self):
+        with TemporaryDirectory() as folder:
+            registry = self.registry(Path(folder))
+            with patch("v42_autonomous_b3.reuse.subprocess.check_output", side_effect=lambda command, **kw:
+                       (registry.root / command[-1].split(":", 1)[1]).read_bytes()):
+                proof = graph_compiler_equivalence(registry, "a" * 40)
+            self.assertTrue(proof["PASS"])
+            self.assertEqual(proof["Native_calls"], 0)
+            self.assertEqual(len(proof["compiler_files"]), 8)
+
+    def test_unproven_graph_cache_rebuilds_and_current_source_corruption_blocks(self):
+        with TemporaryDirectory() as folder:
+            registry = self.registry(Path(folder))
+            with patch("v42_autonomous_b3.reuse.subprocess.check_output", return_value=b"different compiler"):
+                proof = graph_compiler_equivalence(registry, "a" * 40)
+            self.assertFalse(proof["PASS"])
+            self.assertTrue(proof["fresh_original_graphs_required"])
+            context = SimpleNamespace(source_registry=registry, output=Path(folder),
+                request=SimpleNamespace(authority=SimpleNamespace(day="2025-05-01")), producer_source_sha=digest("source"))
+            bridge = B1A1ReuseBridge(Path(folder) / "b1")
+            with patch.object(bridge, "_cache_packet", return_value=dict(origin_commit="a" * 40)), \
+                 patch("v42_autonomous_b3.reuse.graph_compiler_equivalence", return_value=proof):
+                self.assertFalse(bridge._seed_input_cache(context, {}, object(), Path(folder)))
+            document = json.loads((Path(folder) / "B1_GRAPH_COMPILER_EQUIVALENCE.json").read_text())
+            self.assertFalse(document["graph_cache_reused"])
+            self.assertEqual(document["Native_calls"], 0)
+            (registry.root / GRAPH_CACHE_COMPILERS[0]).write_text("corrupt current source")
+            with self.assertRaisesRegex(ValueError, "SOURCE_FILE_SHA_DRIFT"):
+                graph_compiler_equivalence(registry, "a" * 40)
 
 
 class PriorNativeTests(unittest.TestCase):

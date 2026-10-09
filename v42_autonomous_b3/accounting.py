@@ -25,7 +25,7 @@ def collect_native_accounting(pipeline, identity, previous_attempts=()):
                 require(ledger.is_file() and seal.is_file(), "PARTIAL_NATIVE_LEDGER_IDENTITY_QUARANTINE")
                 document, metadata = read(ledger), read(seal)
                 require(metadata["stage"] == stage and metadata["day"] == identity["day"] and
-                        metadata["run_id"] == identity["run_id"] and metadata["native_limit_seconds"] == 5400 and
+                        metadata["run_id"] == identity.get("scientific_run_id", identity["run_id"]) and metadata["native_limit_seconds"] == 5400 and
                         document["Native_ceiling_seconds"] == 5400 and
                         document["budget_basis"] == "MEASURED_NATIVE_RUNTIME_ONLY",
                         "STAGE_NATIVE_ACCOUNTING_IDENTITY_DRIFT")

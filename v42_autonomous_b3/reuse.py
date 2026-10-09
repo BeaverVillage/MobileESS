@@ -10,12 +10,44 @@ from pathlib import Path
 import gzip
 import json
 import pickle
+import hashlib
+import re
+import subprocess
 
 from v42_b3_joint.a_source import ASourceBridge, A_SOURCE, BuildProfile, _restore_source_globals, _scientific
 from v42_b3_joint.contracts import canonical, digest, require
 from v42_b3_joint.model_mapping import aidc_from_source
 from v42_b3_joint.source_runtime import SourceStageOutput, jsonable
 from .admission import read, record, checked
+
+GRAPH_CACHE_COMPILERS = ("v42_root/data.py", "v42_root/common.py", "v42_exact/support.py", "v42_exact/common.py",
+    "v42_compact/graph.py", "v42_compact/common.py", "v42_boundary/generator.py", "v42_job_capability.py")
+
+
+def graph_compiler_equivalence(registry, producer_commit):
+    """Admit cached graphs only from exact original compiler Git blobs."""
+    require(isinstance(producer_commit, str) and re.fullmatch(r"[0-9a-f]{40}", producer_commit),
+            "B1_ORIGINAL_GRAPH_COMPILER_COMMIT_REQUIRED")
+    compilers = []
+    for relative in GRAPH_CACHE_COMPILERS:
+        current = record(registry.root / relative)
+        require(current["sha256"] == registry.source_manifest[relative], "SOURCE_FILE_SHA_DRIFT:" + relative)
+        try:
+            blob = subprocess.check_output(["git", "-C", str(registry.root), "show", producer_commit + ":" + relative],
+                                           stderr=subprocess.PIPE)
+        except (subprocess.CalledProcessError, FileNotFoundError) as error:
+            return {"PASS": False, "Native_calls": 0, "producer_commit": producer_commit,
+                    "reason": "ORIGINAL_GRAPH_COMPILER_BLOB_UNAVAILABLE:" + type(error).__name__,
+                    "compiler_files": compilers, "fresh_original_graphs_required": True}
+        historical = hashlib.sha256(blob).hexdigest()
+        if historical != current["sha256"]:
+            return {"PASS": False, "Native_calls": 0, "producer_commit": producer_commit,
+                    "reason": "ORIGINAL_GRAPH_COMPILER_BYTES_DIFFER:" + relative,
+                    "compiler_files": compilers, "fresh_original_graphs_required": True}
+        compilers.append({"relative": relative, "original_blob_sha256": historical,
+                          "original_blob_bytes": len(blob), "current": current})
+    return {"PASS": True, "Native_calls": 0, "producer_commit": producer_commit,
+            "compiler_files": compilers, "fresh_original_graphs_required": False}
 
 
 def compare_original_identity(fresh, old, prepare, domain_digest):
@@ -50,7 +82,7 @@ class B1A1ReuseBridge(ASourceBridge):
     def _cache_packet(self, context):
         if not self.reuse_input_cache:
             return None
-        self._verify_origin(context)
+        _, _, origin = self._verify_origin(context)
         receipt_path = self.b1_output / "STATIC/DOMAIN" / context.request.authority.day / "PHYSICAL_DOMAIN_CACHE.json"
         document = read(receipt_path)
         require(document.get("PASS") is True and document.get("scientific_candidates_removed") == 0,
@@ -66,6 +98,7 @@ class B1A1ReuseBridge(ASourceBridge):
                     "B1_A1_DOMAIN_COMPILER_SOURCE_MISMATCH:" + relative)
         return {"day": context.request.authority.day, "authority_sha": context.request.authority.sha,
                 "producer_source_sha": context.producer_source_sha, "output": str(self.b1_output),
+                "origin_commit": origin["git_head"],
                 "DATA": document["frozen_DATA"], "producer_sources": document["producer_sources"],
                 "inputs": read(self.b1_output / "A_NATIVE_SOURCE_FREEZE.json")["inputs"],
                 "protected_receipts": [record(receipt_path), document["cache"], document["frozen_DATA"]]}
@@ -75,6 +108,16 @@ class B1A1ReuseBridge(ASourceBridge):
         if packet is None:
             return False
         registry = context.source_registry
+        proof = graph_compiler_equivalence(registry, packet["origin_commit"])
+        proof.update(day=context.request.authority.day, source_sha=context.producer_source_sha,
+                     graph_cache_reused=False)
+        proof_path = context.output / "B1_GRAPH_COMPILER_EQUIVALENCE.json"
+        proof_path.write_text(canonical(proof) + "\n", encoding="utf-8")
+        if proof["PASS"] is not True:
+            # DATA graphs are freshly reconstructed by the unchanged producer.
+            # Complete physical-cache hashes and final full matrix/domain
+            # comparison remain mandatory on this path.
+            return False
         def admitted(actual_request, source):
             require(Path(source).resolve() == self.b1_output, "B1_A1_INPUT_CACHE_SOURCE_DRIFT")
             for receipt in packet["protected_receipts"]:
@@ -88,7 +131,10 @@ class B1A1ReuseBridge(ASourceBridge):
         # signatures before copying input graphs. No model/point/dual is seeded.
         seed = registry.rebind("v42_may_build_v6.input_cache", "seed_input_cache",
                                globals={"verify_cache_authority": admitted})
-        return seed(request, source_data_module, base)
+        reused = seed(request, source_data_module, base)
+        proof["graph_cache_reused"] = reused
+        proof_path.write_text(canonical(proof) + "\n", encoding="utf-8")
+        return reused
 
     def _domain_cache(self, context, request, fresh_data, check=lambda: None, progress=None):
         packet = self._cache_packet(context)
@@ -181,6 +227,19 @@ class B1A1ReuseBridge(ASourceBridge):
             # Reload the fresh Native-zero comparison artifact at every handoff.
             equivalence = read(checked(reuse["equivalence_receipt"], context.output))
             require(equivalence == reuse["equivalence"], "B1_A1_FRESH_MODEL_EQUIVALENCE_RECEIPT_DRIFT")
+            if reuse.get("graph_compiler_proof"):
+                proof = read(checked(reuse["graph_compiler_proof"], context.output))
+                require(proof["Native_calls"] == 0 and proof["source_sha"] == context.producer_source_sha and
+                        proof["producer_commit"] == source["git_head"], "B1_GRAPH_COMPILER_RECEIPT_IDENTITY_DRIFT")
+                if proof["graph_cache_reused"]:
+                    require(proof["PASS"] is True and len(proof["compiler_files"]) == len(GRAPH_CACHE_COMPILERS),
+                            "B1_GRAPH_COMPILER_CACHE_ADMISSION_REQUIRED")
+                    for row in proof["compiler_files"]:
+                        current = checked(row["current"], context.source_registry.root)
+                        require(current == context.source_registry.root / row["relative"] and
+                                row["current"]["sha256"] == row["original_blob_sha256"] ==
+                                context.source_registry.source_manifest[row["relative"]],
+                                "B1_GRAPH_COMPILER_SOURCE_HANDOFF_DRIFT")
         return result, freeze, source
 
     def execute(self, context, ledger, progress=None):
@@ -225,6 +284,9 @@ class B1A1ReuseBridge(ASourceBridge):
                      "equivalence": equivalence, "equivalence_receipt": record(eq_path),
                      "origin_receipts": [record(self.b1_output / name) for name in
                          ("A_RESULT.json", "B1_P1_FREEZE.json", "A_PREPARE_RECEIPT.json", "A_NATIVE_SOURCE_FREEZE.json")]}
+            graph_proof = context.output / "B1_GRAPH_COMPILER_EQUIVALENCE.json"
+            if graph_proof.is_file():
+                reuse["graph_compiler_proof"] = record(graph_proof)
             packet = {"source_stage": "A1", "authority_sha": context.request.authority.sha,
                       "decision_sha": decision.sha, "original_model_sha": model_sha,
                       "planning_arrays": planning, "selected_jobs": jsonable(replay["selected_jobs"]),

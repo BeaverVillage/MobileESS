@@ -98,7 +98,8 @@ class SourceCoordinator:
         require(path.resolve().is_relative_to(self.root), "COORDINATOR_PATH_ESCAPE")
         temporary = path.with_name(path.name + ".tmp")
         temporary.write_text(canonical(value) + "\n", encoding="utf-8")
-        temporary.replace(path)
+        from v42_pr134_b1.common import replace_file
+        replace_file(temporary, path)
 
     def run(self, authority, *, operations_factory=None, realized_inputs=None, actual_backend=None, progress=None):
         request = StageRequest("A1", authority)
