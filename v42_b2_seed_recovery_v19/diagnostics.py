@@ -4,6 +4,38 @@ import re
 import numpy as np
 from .common import atomic,now
 
+def bounded_iis(case,model,out,seconds=15.):
+    """IIS is analysis, not an optimize call; never invent its Native Runtime.
+
+    Runtime is documented as the most recent optimization Runtime, so record
+    separate measured wall time rather than charging a stale Runtime twice.
+    """
+    import time
+    from collections import Counter
+    old={k:getattr(model.Params,k) for k in ('TimeLimit','InfUnbdInfo','DualReductions')}
+    started=time.perf_counter()
+    try:
+        model.Params.TimeLimit=seconds;model.Params.InfUnbdInfo=0;model.Params.DualReductions=1
+        model.computeIIS()
+        flags=model.getAttr('IISConstr');lb=model.getAttr('IISLB');ub=model.getAttr('IISUB')
+        rows=[dict(index=i,name=str(case.d['row_names'][i]),category=category(case.d['row_names'][i]),
+            sense=str(case.d['sense'][i]),rhs=float(case.d['rhs'][i])) for i,value in enumerate(flags) if value]
+        bounds=[dict(index=j,name=str(case.d['names'][j]),category=category(case.d['names'][j]),
+            lower_in_IIS=bool(lb[j]),upper_in_IIS=bool(ub[j]),lower=model.getVars()[j].LB,
+            upper=model.getVars()[j].UB) for j in range(len(lb)) if lb[j] or ub[j]]
+        result=dict(rows=rows,bounds=bounds,categories=dict(Counter(r['category'] for r in rows)),
+            IISMinimal=bool(model.IISMinimal),scope='THIS_FIXED_CANDIDATE_ORIGINAL_ROW_SUBSYSTEM_ONLY',
+            original_model_case_SHA=case.case_sha,Native_Runtime='UNKNOWN',
+            diagnostic_wall_seconds=time.perf_counter()-started,TimeLimit=seconds,
+            original_FULL_MILP_infeasibility_claimed=False,diagnostic_point_never_admitted=True)
+        atomic(out/'IIS_DIAGNOSTIC.json',result);model.write(str(out/'CONFLICT.ilp'))
+        return result
+    except Exception as exc:
+        atomic(out/'IIS_UNAVAILABLE.json',dict(error=repr(exc),Native_Runtime='UNKNOWN',
+            diagnostic_wall_seconds=time.perf_counter()-started,TimeLimit=seconds));return None
+    finally:
+        for key,value in old.items():setattr(model.Params,key,value)
+
 def category(name):
     family=str(name).removeprefix('FIXED_').split('[',1)[0]
     if family.startswith('voltage_'):return 'Voltage upper/lower'

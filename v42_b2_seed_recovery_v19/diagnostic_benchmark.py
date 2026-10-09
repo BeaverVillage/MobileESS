@@ -9,7 +9,7 @@ from v42_m1_hybrid.blocks import matrix_sha
 from v42_bootstrap.m1 import native_inputs
 from v42_b2_seed_recovery_v18.initialization import values_for
 from .common import read,atomic,record
-from .diagnostics import diagnose_model
+from .diagnostics import diagnose_model,bounded_iis
 
 def diagnostic_subsystem(case,description,ids,values,source):
     """An IIS search subsystem only. Feasible points are NEVER admitted here.
@@ -82,11 +82,15 @@ def run(request,budget,progress):
                 reason='NATIVE_FARKAS_FOR_AN_INFEASIBLE_SUBSYSTEM; INITIALIZER_ALWAYS_RETAINS_ALL_ROWS'))
             if progress:progress(dict(phase='V18_CANDIDATE_FARKAS_'+name))
             diagnose_model(candidate,model,budget,out,model.getAttr('VType'),seconds=15.,run_phase_one=name=='00')
+            if not (out/'FARKAS_DIAGNOSTIC.json').exists():
+                if progress:progress(dict(phase='V18_CANDIDATE_IIS_'+name))
+                bounded_iis(candidate,model,out,seconds=15.)
             summaries.append(dict(candidate=name,kind=description['kind'],status=read(out/'DIAGNOSTIC_STATUS.json'),
+                IIS=read(out/'IIS_DIAGNOSTIC.json') if (out/'IIS_DIAGNOSTIC.json').exists() else None,
                 Farkas=read(out/'FARKAS_DIAGNOSTIC.json') if (out/'FARKAS_DIAGNOSTIC.json').exists() else None))
         finally:model.dispose()
     atomic(output/'V18_CANDIDATE_CAUSE_ANALYSIS.json',dict(candidates=summaries,Native_Runtime=budget.used(),
         Native_calls=len(budget.calls),diagnostics_only=True,original_FULL_MILP_infeasibility_claimed=False))
-    return dict(PASS=all(s['Farkas'] is not None for s in summaries),status='DIAGNOSTICS_COMPLETED',
+    return dict(PASS=all(s['Farkas'] is not None or s['IIS'] is not None for s in summaries),status='DIAGNOSTICS_COMPLETED',
         diagnostics_only=True,Native_Runtime=budget.used(),Native_calls=len(budget.calls),UB=None,
         first_FULL_pass_wall_seconds=None,Adaptive_entered=False,LB=None,Global_Gap=None)
