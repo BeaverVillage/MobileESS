@@ -1,0 +1,19 @@
+........................................................................ [ 73%]
+.........................F                                               [100%]
+================================== FAILURES ===================================
+_ test_production_proof_scope_lazy_hooks_promote_warm_and_restore_original_aliases _
+tests\test_v42_autonomous_b2_f1_state.py:460: in test_production_proof_scope_lazy_hooks_promote_warm_and_restore_original_aliases
+    with worker.proof_scope(request,dict(execution_SHA=env.manifest['execution_SHA'])):
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\contextlib.py:137: in __enter__
+    return next(self.gen)
+v42_autonomous_b2\worker.py:98: in proof_scope
+    from . import canonical_stream,dw_native,pricing_box,f1_state,f1_basis,pricing_cache,rmp_presolve
+v42_autonomous_b2\rmp_presolve.py:41: in <module>
+    _RAW_OPTIMIZE=inspect.getattr_static(gp.Model,'optimize')
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\inspect.py:1853: in getattr_static
+    raise AttributeError(attr)
+E   AttributeError: optimize
+- generated xml file: D:\v42_full_lp_warmstart_readonly_review_20261010_01\SOURCE31_F1_NATIVE_DENIED_TEST_RESULT.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_v42_autonomous_b2_f1_state.py::test_production_proof_scope_lazy_hooks_promote_warm_and_restore_original_aliases
+1 failed, 97 passed in 6.24s

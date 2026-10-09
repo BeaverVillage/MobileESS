@@ -1,0 +1,25 @@
+{
+  "schema": "V42_SOURCE30_CLI_DUPLICATE_BUDGET_IDENTITY_NATIVE0_PROOF",
+  "UTC": "2026-10-09T21:36:13.703118+00:00",
+  "PASS": true,
+  "source": {
+    "path": "D:\\v42run30\\v42_autonomous_b2\\worker.py",
+    "sha256": "4f975b58a0692e75bc0c70b68e5948142330700cabdd883aee5143a91ec27ab0",
+    "bytes": 16990
+  },
+  "code_root": "D:\\v42run30",
+  "method": "Compile unchanged worker module AST as __main__ with only CLI execution block omitted; instantiate DateBudget without __init__; call original guard before model checks.",
+  "canonical_class_module": "v42_autonomous_b2.worker",
+  "CLI_class_module": "__main__",
+  "same_class": false,
+  "same_optimize_function_object": false,
+  "optimize_bytecode_equal": true,
+  "scope_wrapped_and_closure_identity_unchanged": true,
+  "exact_reproduced_guard": "RMP_PRESOLVE_ORIGINAL_BUDGET_OR_SCOPE_CLOSURE_DRIFT",
+  "Native_optimize_calls": 0,
+  "real_Native_model_constructions": 0,
+  "modelattempts": [],
+  "worker_budget_constructor_or_ledger_writes": 0,
+  "production_changes": 0,
+  "minimal_repair": "Dispatch CLI through canonical v42_autonomous_b2.worker.run so budget and guard bind the same exact approved ReceiptDateBudget class; retain strict guards."
+}
