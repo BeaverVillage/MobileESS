@@ -1,0 +1,29 @@
+{
+  "evidence_kind": "SOURCE_CODE_AND_LIGHTWEIGHT_FIXTURES",
+  "scientific_certified": false,
+  "real_full_model_validation": "NOT_RUN",
+  "production_authorized": false,
+  "counts": {
+    "actual_native_optimize": 0,
+    "actual_OpenDSS": 0,
+    "actual_FULL_model_build": 0,
+    "actual_complete_domain_build": 0,
+    "actual_pricing_optimize": 0,
+    "B3_production_workers_started": 0
+  },
+  "status": "ACTUAL_FRESH_AC_BRIDGE_IMPLEMENTED",
+  "source": [
+    "v42_native.planning.freeze_day_ahead_plan",
+    "v42_native.actual.run_dday_actual",
+    "native90.operations.freeze_planning/actual_sources/actual/fresh"
+  ],
+  "final_decisions": "A2 AIDC + M2 MESS; all four source model/result/certificate SHAs independently replayed before freeze and resume",
+  "actual_default_semantics": "Original V39E_FROZEN_DA_FIXED_REPLAY source materializer; realized background load/PV checked against same-day original parquet, source fixed AIDC state bound explicitly",
+  "unknown_arrivals": "Existing causal policy/interface identity is preserved; no new unknown-job scheduling algorithm or retrospective repair is introduced",
+  "repair_P": false,
+  "repair_Q": false,
+  "actual_new_MILP": false,
+  "Fresh": "Original source 96-slot OpenDSS path retains NormalAmps/Autonomous RegControl and independently records physical violations; Planning gap PASS does not imply Fresh PASS",
+  "resume": "Saved original freeze and Actual physical/result/Fresh identities are rechecked; partial/inflight execution quarantines, no repeated Fresh call",
+  "fake_fresh_scientific_promotion": false
+}

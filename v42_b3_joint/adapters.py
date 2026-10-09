@@ -325,12 +325,18 @@ def prepare_source_binding(request):
 
 
 class NativeStageAdapter:
-    """Source-linked production placeholder with a pre-import unconditional gate."""
+    """Concrete source bridge dispatcher with a closed production entry."""
 
     def prepare(self, request):
         return prepare_source_binding(request)
 
     def execute(self, request, budget):
         require_production_authorization(action="NATIVE_STAGE_ADAPTER")
-        # Even replacing the policy function cannot introduce a solver import.
-        raise PermissionError("B3_NATIVE_ADAPTER_IMPLEMENTATION_REQUIRES_SEPARATE_REVIEW")
+        return self.execute_source(request, budget)
+
+    def execute_source(self, context, ledger, progress=None):
+        context.source_registry.admit(context, "STAGE_ADAPTER")
+        from .a_source import ASourceBridge
+        from .m_source import MSourceBridge
+        bridge = ASourceBridge() if context.request.stage.startswith("A") else MSourceBridge()
+        return bridge.execute(context, ledger, progress)

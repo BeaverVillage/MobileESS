@@ -1,0 +1,92 @@
+{
+  "evidence_kind": "SOURCE_CODE_AND_LIGHTWEIGHT_FIXTURES",
+  "scientific_certified": false,
+  "real_full_model_validation": "NOT_RUN",
+  "production_authorized": false,
+  "counts": {
+    "actual_native_optimize": 0,
+    "actual_OpenDSS": 0,
+    "actual_FULL_model_build": 0,
+    "actual_complete_domain_build": 0,
+    "actual_pricing_optimize": 0,
+    "B3_production_workers_started": 0
+  },
+  "improvements": [
+    {
+      "original": "v42_job_capability.validate",
+      "optimized": "V6 ConstructionChecks/routed_validate",
+      "calculation": "Reuse immutable Boundary.require; preserve original other validation/WAN/transfer checks",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "inapplicable": "M stages have no AIDC Option optimization",
+      "equivalence": "V6 B1 evidence is reference only; B3 complete equivalence NOT_RUN",
+      "CPU_memory_runtime": "Repeated construction work removed; B3 measured full performance/RSS NOT_RUN"
+    },
+    {
+      "original": "resources_used + resource_limit",
+      "optimized": "V6 ConstructionChecks GPU prefix",
+      "calculation": "Prefix count immutable GPU violations at original 1e-9 threshold, original WAN/active checks; before/after Resources equality",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "inapplicable": "MESS SOC/PCS/resources are distinct",
+      "equivalence": "V6 B1 evidence is reference only; B3 complete equivalence NOT_RUN",
+      "CPU_memory_runtime": "Repeated construction work removed; B3 measured full performance/RSS NOT_RUN"
+    },
+    {
+      "original": "v42_exact.support.prune R1 set union",
+      "optimized": "V6 interval_projection",
+      "calculation": "Union overlapping intervals per destination; preserve holes/tail/all states",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "inapplicable": "M route flow graph is distinct",
+      "equivalence": "V6 B1 evidence is reference only; B3 complete equivalence NOT_RUN",
+      "CPU_memory_runtime": "Repeated construction work removed; B3 measured full performance/RSS NOT_RUN"
+    },
+    {
+      "original": "repeated checkpoint_records",
+      "optimized": "V6 checkpoint_memo",
+      "calculation": "Scoped immutable source checkpoint reuse; original state and complete candidate roster",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "inapplicable": "M source constructor has no same A checkpoint operation",
+      "equivalence": "V6 B1 evidence is reference only; B3 complete equivalence NOT_RUN",
+      "CPU_memory_runtime": "Repeated construction work removed; B3 measured full performance/RSS NOT_RUN"
+    },
+    {
+      "original": "duplicate A model/equivalence builds",
+      "optimized": "V6 inherited exact construction + B3 one independent source replay",
+      "calculation": "Use original source objects and avoid redundant execute-side typed model/physical replay; independent acceptance always reruns",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "inapplicable": "Fixed M1 P/Q prohibits A1 FULL/grid/RHS reuse in A2",
+      "equivalence": "V6 B1 evidence is reference only; B3 complete equivalence NOT_RUN",
+      "CPU_memory_runtime": "Repeated construction work removed; B3 measured full performance/RSS NOT_RUN"
+    },
+    {
+      "original": "same-day input/domain generation",
+      "optimized": "V6 input_cache/physical cache B3 source admission",
+      "calculation": "Rehash original files and exact Job/Resource/Boundary semantics plus full domain hash; new model/bounds/ledger every stage",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "inapplicable": "Different day/producer/boundary/resource; M full matrices cannot transfer between fixed A inputs",
+      "equivalence": "V6 B1 evidence is reference only; B3 complete equivalence NOT_RUN",
+      "CPU_memory_runtime": "Repeated construction work removed; B3 measured full performance/RSS NOT_RUN"
+    }
+  ],
+  "source": "Exact V6 namespace from reference HEAD with unchanged lower source dependencies",
+  "A2_new_fixed_PQ_grid_and_RHS": true,
+  "source_globals_restored_on_exception": true,
+  "real_baseline_optimized_equivalence_and_performance": "NOT_RUN"
+}

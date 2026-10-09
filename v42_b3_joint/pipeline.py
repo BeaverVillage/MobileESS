@@ -69,3 +69,8 @@ class MockPipeline:
 
 def run_production(*args, **kwargs):
     require_production_authorization("CAMPAIGN")
+    from .source_coordinator import SourceCoordinator
+    from .contracts import require
+    coordinator = kwargs.pop("coordinator")
+    require(isinstance(coordinator, SourceCoordinator), "SOURCE_COORDINATOR_REQUIRED")
+    return coordinator.run(*args, **kwargs)
