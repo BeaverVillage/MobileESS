@@ -1,0 +1,51 @@
+{
+  "evidence_kind": "SOURCE_CODE_AND_LIGHTWEIGHT_FIXTURES",
+  "scientific_certified": false,
+  "real_full_model_validation": "NOT_RUN",
+  "production_authorized": false,
+  "counts": {
+    "actual_native_optimize": 0,
+    "actual_OpenDSS": 0,
+    "actual_FULL_model_build": 0,
+    "actual_complete_domain_build": 0,
+    "actual_pricing_optimize": 0,
+    "B3_production_workers_started": 0
+  },
+  "stages": {
+    "A1": {
+      "source": "V6 complete A-stage",
+      "fixed": "MESS OFF",
+      "optimized": "complete original AIDC domain",
+      "gap": "1/200"
+    },
+    "M1": {
+      "source": "native90 FULL/Compact/C3A Hybrid",
+      "fixed": "entire optimized A1",
+      "optimized": "entire original MESS",
+      "gap": "3/100"
+    },
+    "A2": {
+      "source": "V6 complete A-stage + original A2 grid",
+      "fixed": "entire optimized M1",
+      "optimized": "complete original AIDC domain",
+      "gap": "1/200"
+    },
+    "M2": {
+      "source": "fresh native90 FULL/Compact/C3A Hybrid",
+      "fixed": "entire optimized A2",
+      "optimized": "entire original MESS",
+      "gap": "3/100"
+    }
+  },
+  "objective": "min rho_max",
+  "P2_calls": 0,
+  "Threads": 1,
+  "authority": "InjectionAuthority pins coefficient SHAs, phase/PCC/control mapping, kW/kvar units, original signs, validity domain, independent source checker and dynamic transformer rows",
+  "original_solver_policy": "Source base policy retained with explicit versioned B3 May precision adapter: A PHASE_I/ORIGINAL_P1 on all 31 days, Phase I Presolve=0 with original Method=2, every M Native entry uses precision. Original integrality/Heuristics/replay tolerance unchanged. policy.parameters is the historical default contract; ledger is the effective Native settings authority",
+  "numerical_policy_version": "B3_MAY_PRECISION_ORIGINAL_ROWS_V1",
+  "source_input_sha_basis": "digest({NATIVE_INPUT.json:raw SHA256,WINDOWS.json:raw SHA256}); bundle JSON must match original NATIVE_INPUT.json at SOURCE admission",
+  "physical_domain_sha_basis": "Original v42_a_stage_domain_v2.domain.digest(sorted UID to domain.sha roster) must equal source DATA[7].physical_domain_hash and Authority.physical_domain_sha; each M stage also verifies its fresh route/FULL/Compact/C3A fingerprint",
+  "cross_stage_context": "Same input folder, canonical original bundle, grid authority object, producer/source SHA, day and run_id required",
+  "IEEE8500_interface": "Inject original coefficient constructor/checker, GridAuthority/voltage/current/transformer builders, validity and ActualBackend. No feeder node/voltage-row counts hardcoded in new bridges. Original experiment remains 12 AIDC/4 MESS/96 slots",
+  "original_matrices_or_physical_equations_reimplemented": false
+}

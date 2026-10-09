@@ -1,0 +1,54 @@
+{
+  "evidence_kind": "SOURCE_CODE_AND_LIGHTWEIGHT_FIXTURES",
+  "scientific_certified": false,
+  "real_full_model_validation": "NOT_RUN",
+  "production_authorized": false,
+  "counts": {
+    "actual_native_optimize": 0,
+    "actual_OpenDSS": 0,
+    "actual_FULL_model_build": 0,
+    "actual_complete_domain_build": 0,
+    "actual_pricing_optimize": 0,
+    "B3_production_workers_started": 0
+  },
+  "status": "M2_FIXED_AIDC_BINDING_IMPLEMENTED",
+  "bridge": "v42_b3_joint/m_source.py:MSourceBridge",
+  "source_constructor": "v42_may_campaign_native90.m_model.build_case",
+  "source_solver": "v42_may_campaign_native90.m_stage.run + original anytime primal/dual hybrid",
+  "fixed": [
+    "A2 selected jobs/placement/migration/time",
+    "GPU",
+    "IT/PCC P/Q",
+    "Runtime/CC4",
+    "original A2 model/decision/physical SHA"
+  ],
+  "optimized": [
+    "arc",
+    "charge_mode",
+    "Pch",
+    "Pdis",
+    "Q",
+    "SOC",
+    "rho_max"
+  ],
+  "fresh_each_stage": [
+    "FULL CSR/objective/RHS/sense/bounds/types",
+    "Compact",
+    "C3A",
+    "strict point",
+    "exact dual",
+    "Native ledger"
+  ],
+  "stage_routing_before_construction": true,
+  "B2_FCFS_calls": 0,
+  "Q_only_restriction": false,
+  "M1_candidate": "Reconstruct original primary M1 values in NEW A2-bound FULL matrix; original strict integer/physical replay admits or rejects candidate. No M1 certificate/runtime copied",
+  "independent_verification": [
+    "verify_case",
+    "verify_transport",
+    "_strict_ub",
+    "check_rational_dual_certificate",
+    "point_vector_sha256"
+  ],
+  "M1_LB_UB_or_Runtime_reused": false
+}

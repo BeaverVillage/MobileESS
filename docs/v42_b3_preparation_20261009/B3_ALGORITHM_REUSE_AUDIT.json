@@ -1,0 +1,856 @@
+{
+  "schema": "V42_B3_ALGORITHM_REUSE_AUDIT_V1",
+  "date_kst": "2026-10-09",
+  "base_git_sha": "5ab907e384a5384f1505f851385f4953220f6634",
+  "worktree": "D:\\MobileESS_v42_B3_prep",
+  "status": "STATIC_SOURCE_AND_INPUT_LINKAGE_IMPLEMENTED",
+  "method": "Python stdlib AST and SHA256 only. No production source import, solve, pricing, domain construction or OpenDSS.",
+  "source_api_count": 39,
+  "distinct_source_files": 25,
+  "source_apis": [
+    {
+      "file": "v42_a_stage_domain_v2/domain.py",
+      "symbol": "physical_domain",
+      "signature": "(job, bound, resources, gen=None, hard_release=None)",
+      "source_sha256": "1b93465a1564a514a27bf01e4cf193f569f1a292edb4ade3d6796bb6e109f8d6",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Complete original STAY and migration physical domain",
+      "line": 65,
+      "reuse_classification": "LOWER_ALGORITHM_REUSABLE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_a_stage_domain_v2/domain.py",
+      "symbol": "contains",
+      "signature": "(job, bound, resources, domain, option)",
+      "source_sha256": "1b93465a1564a514a27bf01e4cf193f569f1a292edb4ade3d6796bb6e109f8d6",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Original hard-valid option membership",
+      "line": 151,
+      "reuse_classification": "LOWER_ALGORITHM_REUSABLE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_a_stage_canary/phase.py",
+      "symbol": "run",
+      "signature": "(native, state, day, certified_zero_point=None)",
+      "source_sha256": "a4b59e2e802a3f42c922481666eb1f6f244477d5016454208bd2c5f112b6875a",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Phase I zero and P1 closure algorithm",
+      "line": 42,
+      "reuse_classification": "LOWER_ALGORITHM_REUSABLE_WITH_STAGE_BOUND_STATE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_a_stage_canary/pricing.py",
+      "symbol": "full_pricing",
+      "signature": "(native, original, master, raw, descriptor, data, domains, ledger, axes, global_variables, global_rows, local_rows, owned, round_folder, *, zero=False)",
+      "source_sha256": "429b75f242696ba0a06f78e818ee6c3cd13bfe9f004f6b48e51fe0d4fd368e40",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Complete local block pricing and original global exact bound",
+      "line": 19,
+      "reuse_classification": "LOWER_ALGORITHM_REUSABLE_WITH_FRESH_FIXED_INPUT_BLOCKS",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_a_stage_practical/integer_model.py",
+      "symbol": "restore_types",
+      "signature": "(state, global_types)",
+      "source_sha256": "44e31914aadc70fca841564daeaf1a8470a3f729d8077cda826da252ad4e8aaf",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Restore original native integer types and preserve rows",
+      "line": 16,
+      "reuse_classification": "LOWER_ALGORITHM_REUSABLE_WITH_FRESH_STATE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_a_stage_acceptance/native.py",
+      "symbol": "Native.solve",
+      "signature": "(self, snapshot, folder, component)",
+      "source_sha256": "cf725c1ecfff6d5d8744b13e30ca24e0bb8e056c1a195e3af0858a43204daf82",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Native snapshot solver adapter",
+      "line": 39,
+      "reuse_classification": "DEFERRED_NATIVE_ADAPTER_NO_IMPORT",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_a_stage_acceptance/physical.py",
+      "symbol": "Physical.verify",
+      "signature": "(self, x)",
+      "source_sha256": "856f823a8d80b6f6fe4994eef55e26bb1655e23e47905ee34f3a550f5ec99695",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Original A rows and job/GPU/grid physical replay",
+      "line": 22,
+      "reuse_classification": "A2_FIXED_MESS_MATERIALIZER_ADAPTATION_REQUIRED",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_pr134_sc/snapshot.py",
+      "symbol": "certify",
+      "signature": "(descriptor, data, x, row_certificate, coefficients)",
+      "source_sha256": "fb0eaa65db86f13fa2bcdad0424ffe5126b1510f1084470c41e9f50b0cb3f921",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Original individual job and grid source replay",
+      "line": 31,
+      "reuse_classification": "LOWER_VERIFIER_REUSABLE_SOURCE_DESCRIPTOR_REQUIRED",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_may_recovery_v5/a_stage.py",
+      "symbol": "prepare",
+      "signature": "(request, progress=None)",
+      "source_sha256": "63306b9775a787e2ab10fb11703bbec99c7914e5bf683ef337ac87d63c8a1a63",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Fresh date original state, complete-domain roster and source routing",
+      "line": 93,
+      "reuse_classification": "A1_PREPARATION_REUSABLE_A2_FIXED_MESS_GAP",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_may_recovery_v5/a_stage.py",
+      "symbol": "run",
+      "signature": "(request, budget, progress=None)",
+      "source_sha256": "63306b9775a787e2ab10fb11703bbec99c7914e5bf683ef337ac87d63c8a1a63",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Source-routed P1-only A phase/pricing/integer orchestration",
+      "line": 579,
+      "reuse_classification": "A1_ALGORITHM_REUSABLE_A2_FIXED_MESS_GAP",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_may_recovery_v5/a_stage.py",
+      "symbol": "_planning",
+      "signature": "(state, verification, power, output)",
+      "source_sha256": "63306b9775a787e2ab10fb11703bbec99c7914e5bf683ef337ac87d63c8a1a63",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Original AIDC PCC/IT/GPU materializer",
+      "line": 550,
+      "reuse_classification": "A2_NONZERO_MESS_REJECTED_BY_SOURCE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_native/aidc.py",
+      "symbol": "solve",
+      "signature": "(stage, deadline, jobs, boundaries, resources, grid_builder, incumbent=None, *, seconds_authority=None, progress=None, day=None)",
+      "source_sha256": "8321137f3d04cec19c7bf063ac3fb71b4c3dc973a936ec520b938ee03cb6a264",
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "role": "Complete-option A builder and GPU/grid callback",
+      "line": 14,
+      "reuse_classification": "LEGACY_P2_ORCHESTRATION_NOT_B3_ACCEPTANCE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_may_campaign_native90/m_model.py",
+      "symbol": "build_case",
+      "signature": "(payload, request, progress=None)",
+      "source_sha256": "758fbb11c07c52ac10895da63bf3bd6049dd5d94cb19e6b606589f25b5889dde",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Same-day fixed AIDC payload to original full/compact/C3A source model",
+      "line": 435,
+      "reuse_classification": "INPUT_API_REUSABLE_M2_STAGE_ROUTING_REQUIRED",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_may_campaign_native90/m_model.py",
+      "symbol": "verify_case",
+      "signature": "(case)",
+      "source_sha256": "758fbb11c07c52ac10895da63bf3bd6049dd5d94cb19e6b606589f25b5889dde",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Original matrix/box/objective/transport state integrity",
+      "line": 554,
+      "reuse_classification": "LOWER_VERIFIER_REUSABLE_WITH_NEW_STAGE_CASE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_may_campaign_native90/m_model.py",
+      "symbol": "verify_transport",
+      "signature": "(compact, presolve)",
+      "source_sha256": "758fbb11c07c52ac10895da63bf3bd6049dd5d94cb19e6b606589f25b5889dde",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Independent exact FULL/Compact/presolve transport proof",
+      "line": 141,
+      "reuse_classification": "LOWER_VERIFIER_REUSABLE_NOT_RUN",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_may_campaign_native90/m_stage.py",
+      "symbol": "run",
+      "signature": "(request, budget, progress)",
+      "source_sha256": "12f2a75996c4ec17654fda2205fbf139dfc702fb03923b22c4551bea9f2133b4",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "P1-only 3 percent anytime primal-dual orchestration",
+      "line": 179,
+      "reuse_classification": "B2_FCFS_PRODUCER_BYPASS_AND_STAGE_ROUTING_REQUIRED",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_hybrid/blocks.py",
+      "symbol": "build_blocks",
+      "signature": "(case)",
+      "source_sha256": "9c9ee88e31af36f51cfcec71816c718e60de02774efec88019375bc6dba2282d",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Original unit trajectory and coupling decomposition",
+      "line": 73,
+      "reuse_classification": "LOWER_ALGORITHM_REUSABLE_WITH_NEW_CASE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_hybrid/pricing.py",
+      "symbol": "make_prices",
+      "signature": "(case, decomp, full_dual)",
+      "source_sha256": "b5d907fac13080484c7dc36c87cf78661d1c2b74793739f991985d3f32c5b5a3",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Signed original multirow coupling prices",
+      "line": 45,
+      "reuse_classification": "LOWER_ALGORITHM_REUSABLE_WITH_NEW_CASE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_hybrid/pricing.py",
+      "symbol": "run_pricing",
+      "signature": "(case, decomp, prices, ledger, output, *, seconds_per_unit=120, lp_seconds=90, mode='MILP_AND_LP')",
+      "source_sha256": "b5d907fac13080484c7dc36c87cf78661d1c2b74793739f991985d3f32c5b5a3",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Full 96-slot local trajectory MILP/LP pricing",
+      "line": 246,
+      "reuse_classification": "DEFERRED_NATIVE_PRICING_NO_IMPORT",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_hybrid/pricing.py",
+      "symbol": "run_lp_prices",
+      "signature": "(case, decomp, prices, ledger, output, *, lp_seconds=60)",
+      "source_sha256": "b5d907fac13080484c7dc36c87cf78661d1c2b74793739f991985d3f32c5b5a3",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Local complete-domain LP trajectory pricing",
+      "line": 376,
+      "reuse_classification": "DEFERRED_NATIVE_PRICING_NO_IMPORT",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_hybrid/dw.py",
+      "symbol": "run",
+      "signature": "(case, decomp, columns, ledger, output, *, seconds=30)",
+      "source_sha256": "111f49ab1e63a7b4ec90a413a3d1b116e0561a7cc407bd301ad1c38bbdc5f88f",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Restricted master with original row dual transport",
+      "line": 84,
+      "reuse_classification": "DEFERRED_NATIVE_MASTER_NO_IMPORT",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_hybrid/verify.py",
+      "symbol": "verify_decomposition",
+      "signature": "(case, decomposition)",
+      "source_sha256": "889193e86fc75b9fda94cecbcc4de36b223da52abae65e18885a7cc6fffe9a48",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Independent original decomposition coverage",
+      "line": 55,
+      "reuse_classification": "LOWER_VERIFIER_REUSABLE_WITH_NEW_CASE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_hybrid/verify.py",
+      "symbol": "verify_global_lagrangian_bound",
+      "signature": "(case, decomposition, coupling_dual, unit_duals, *, nonunit_dual=None)",
+      "source_sha256": "889193e86fc75b9fda94cecbcc4de36b223da52abae65e18885a7cc6fffe9a48",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Original full-domain global exact dual bound",
+      "line": 110,
+      "reuse_classification": "LOWER_VERIFIER_REUSABLE_WITH_NEW_CASE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_hybrid/verify.py",
+      "symbol": "verify_rmp_pricing_lower_bounds",
+      "signature": "(case, decomposition, full_rmp_dual, unit_duals, convexity_duals)",
+      "source_sha256": "889193e86fc75b9fda94cecbcc4de36b223da52abae65e18885a7cc6fffe9a48",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Independent RMP missing-column lower-bound admission",
+      "line": 276,
+      "reuse_classification": "LOWER_VERIFIER_REUSABLE_WITH_NEW_CASE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_anytime/core.py",
+      "symbol": "schedule_choice",
+      "signature": "(history, iteration, wall)",
+      "source_sha256": "78a00beaf605125f6b996b49ef662402d6ab3f6d27d8bfe275e0b606a62caf17",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Existing primal-dual adaptive scheduler",
+      "line": 174,
+      "reuse_classification": "LOWER_ALGORITHM_REUSABLE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_anytime/algorithms.py",
+      "symbol": "ub_trial",
+      "signature": "(case, point, method, ordinal, ledger, frontier, path, limit, grid, *, context=None)",
+      "source_sha256": "1ba142fa2baea50c7f4acf6412d9fe9b6e21d9a731b2be06e24b31ac49ccc25c",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Original-row primal route/mode/P/Q/SOC neighborhood",
+      "line": 99,
+      "reuse_classification": "DEFERRED_NATIVE_UB_NO_IMPORT",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_anytime/algorithms.py",
+      "symbol": "lp_round",
+      "signature": "(case, decomp, dual, ledger, frontier, path, method, kind='LP_ONLY', *, context=None)",
+      "source_sha256": "1ba142fa2baea50c7f4acf6412d9fe9b6e21d9a731b2be06e24b31ac49ccc25c",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Complete-domain exact lower-bound pricing round",
+      "line": 156,
+      "reuse_classification": "DEFERRED_NATIVE_LB_NO_IMPORT",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_anytime/algorithms.py",
+      "symbol": "feedback_master",
+      "signature": "(case, decomp, point, ledger, path, *, context=None)",
+      "source_sha256": "1ba142fa2baea50c7f4acf6412d9fe9b6e21d9a731b2be06e24b31ac49ccc25c",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Current strict-UB trajectory to original restricted master",
+      "line": 195,
+      "reuse_classification": "DEFERRED_NATIVE_MASTER_NO_IMPORT",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_research/check_lb.py",
+      "symbol": "check_rational_dual_certificate",
+      "signature": "(A, d, multipliers, *, lower=None, upper=None, source_rows=None, case_sha=None)",
+      "source_sha256": "6c87483c677e015c966da3b5f76277968ed7a3412166a081b807bb60b65570d8",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Independent exact original-row global dual certificate",
+      "line": 94,
+      "reuse_classification": "LOWER_VERIFIER_REUSABLE_WITH_NEW_CASE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_research/check_ub.py",
+      "symbol": "validate_candidate",
+      "signature": "(case, point)",
+      "source_sha256": "92ebe7d05225b91921ce910638ea4325279962f6efee2cbfb3503e87aab34b6e",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Original rows, exact integrality and physics candidate admission",
+      "line": 103,
+      "reuse_classification": "LOWER_VERIFIER_REUSABLE_WITH_NEW_CASE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_research/check_ub.py",
+      "symbol": "physical_replay",
+      "signature": "(case, original_point)",
+      "source_sha256": "92ebe7d05225b91921ce910638ea4325279962f6efee2cbfb3503e87aab34b6e",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Unchanged original route/SOC/PCS and charge-mode validator",
+      "line": 72,
+      "reuse_classification": "DEFERRED_PHYSICAL_REPLAY_NO_IMPORT",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_m1_hybrid/final_verify.py",
+      "symbol": "_strict_ub",
+      "signature": "(case, path, evidence)",
+      "source_sha256": "2fdd456498ca3e14b7f036258176da825e65dbdaf6739390082370313f07023e",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Raw point exact original UB and physical admission",
+      "line": 129,
+      "reuse_classification": "LOWER_VERIFIER_REUSABLE_WITH_NEW_CASE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_native/mess.py",
+      "symbol": "solve",
+      "signature": "(stage, deadline, sites, initial_sites, routes, battery, horizon, grid_builder, incumbent=None, *, mode='MILP', diagnostic=False, progress=None, strengthening_hook=None)",
+      "source_sha256": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Original route flow/Pch/Pdis/Q/SOC/PCS builder",
+      "line": 77,
+      "reuse_classification": "BUILDER_REUSABLE_LEGACY_P2_SOLVER_NOT_B3_ACCEPTANCE",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_native/mess.py",
+      "symbol": "validate",
+      "signature": "(result, sites, routes, battery, horizon, tolerance=1e-05)",
+      "source_sha256": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec",
+      "stages": [
+        "M1",
+        "M2"
+      ],
+      "role": "Original route continuity, energy, PCS and connection replay",
+      "line": 161,
+      "reuse_classification": "DEFERRED_PHYSICAL_REPLAY_NO_IMPORT",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_integrated/contract.py",
+      "symbol": "physical_authority",
+      "signature": "()",
+      "source_sha256": "5b120d3ef9647ab8189baeb33abbe83e4a374845083ed39bcf066e66879c8e17",
+      "stages": [
+        "A1",
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "role": "Original NormalAmps and zero-margin voltage authority scope",
+      "line": 25,
+      "reuse_classification": "SOURCE_AUTHORITY_REUSABLE_NO_GLOBAL_MUTATION_NOW",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_integrated/contract.py",
+      "symbol": "all_transformer_rows",
+      "signature": "(builder, binding_rows=None)",
+      "source_sha256": "5b120d3ef9647ab8189baeb33abbe83e4a374845083ed39bcf066e66879c8e17",
+      "stages": [
+        "A1",
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "role": "Original complete 120 transformer phase-current rows",
+      "line": 44,
+      "reuse_classification": "SOURCE_GRID_ROWS_REUSABLE_NOT_RUN",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_may_campaign_native90/budget.py",
+      "symbol": "DateBudget.native_optimize",
+      "signature": "(self, model, callback=None, *, component='P1', track='A', label='', requested_seconds=None)",
+      "source_sha256": "6626d770f9259df1a7f9aa7bc736ceaae43fbff9cc732b4579080533a083f4f8",
+      "stages": [
+        "A1",
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "role": "Measured native-only runtime accounting reference",
+      "line": 82,
+      "reuse_classification": "REFERENCE_ONLY_B3_USES_INDEPENDENT_MOCK_LEDGERS",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_native/planning.py",
+      "symbol": "freeze_day_ahead_plan",
+      "signature": "(final_plan, output, *, grid_sha)",
+      "source_sha256": "8ae74c945abf935e89f2830d8580b4835e54884415cee78a6d1f783e8e3d99ae",
+      "stages": [
+        "A1",
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "role": "Existing immutable day-ahead source plan freeze",
+      "line": 84,
+      "reuse_classification": "DEFERRED_ORIGINAL_PLAN_SCHEMA_MAPPING",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    },
+    {
+      "file": "v42_native/actual.py",
+      "symbol": "run_dday_actual",
+      "signature": "(frozen_day_ahead_plan, realized_inputs, backend: ActualBackend, output, *, local_p_repair=False, local_q_repair=False, full_reoptimization=False)",
+      "source_sha256": "a830c6f31a74bdb686514ff0f6d721712fd0ae9e9bca1b4df0435188b1a28a9a",
+      "stages": [
+        "A1",
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "role": "Existing frozen controls Actual and single Fresh AC path",
+      "line": 82,
+      "reuse_classification": "DEFERRED_ACTUAL_AND_OPENDSS_NO_IMPORT",
+      "status": "STATIC_SIGNATURE_PASS",
+      "source_imported": false,
+      "source_called": false,
+      "scientific_equivalence": "NOT_RUN",
+      "native_calls": 0,
+      "model_builds": 0
+    }
+  ],
+  "implemented": {
+    "input_bindings": [
+      "A1 original authority and MESS optimization OFF",
+      "M1 fixed immutable A1 AIDC job/PCC/IT/resource packet",
+      "A2 fixed immutable M1 route/location/Pch/Pdis/Q/SOC/initial-final/move-energy packet",
+      "M2 fixed immutable A2 AIDC packet and separately admitted M1 warm-start metadata"
+    ],
+    "array_mapping": "Only 12x96 to 96x12 and 4x96/4x97 to 96x4/97x4 permutations; no new power, battery, network, forecast or GPU equations.",
+    "content_binding": [
+      "authority_sha",
+      "request_sha",
+      "fixed_input_sha",
+      "complete immutable decision SHA",
+      "pinned source API file SHA and AST signature"
+    ],
+    "native_adapter": "Unconditional policy gate before inspection, import, source invocation or build; no callable loader in the adapter.",
+    "original_validation_linkage": "Every source input descriptor declares pinned original complete-domain/global-LB/integer-restore/job-grid replay interfaces for A, and exact original transport/global dual/strict UB/route-SOC-PCS-charge-mode replay interfaces for M. Plans contain original_model_sha/fixed_input_sha/decision_sha/verifier_source_sha packet requirements and refuse to treat producer PASS as independent source evidence. None of those source verifiers has been invoked.",
+    "warm_start": "Caller eligibility and feasibility fields are MOCK contract claims only. selected_for_future_native is unconditionally false, actual_feasibility_status is NOT_RUN, and no raw point is admitted without the pending original verifier bridge."
+  },
+  "reuse_findings": {
+    "A": "Reuse complete original domain, source phase/P1 and all-block pricing, original integer restore and independent row/job/grid replay. recovery_v5 is the current dated P1-only algorithm reference.",
+    "M": "Reuse same-day native90 CampaignMCase payload builder and original transport proof; source anytime primal-dual uses hybrid original trajectory decomposition/pricing/RMP/strict UB/exact dual checks. Full movement/Pch/Pdis/Q/SOC/charge-mode families remain present.",
+    "native90": "Existing independent native-only Runtime accounting is a reference; new B3 mock ledger must never access or reuse active B1/B2 ledger state."
+  },
+  "legacy_not_reused": [
+    {
+      "file": "v42_unified/pipeline.py",
+      "function": "require_stage",
+      "reason": "A1 P1_ONLY exception only. M1/A2/M2 require original_P2_certificate_PASS. B3 implements a separate versioned P1-only acceptance; no legacy PASS bypass."
+    },
+    {
+      "file": "v42_unified/policy.py",
+      "class_name": "Policy",
+      "reason": "Common .005 gap and practical wall criterion do not implement B3 M1/M2 .03 and native-only independent budgets."
+    },
+    {
+      "file": "v42_native/aidc.py",
+      "function": "solve",
+      "reason": "Requires rho + reserve_shortfall and sends P2/tie objectives to legacy optimize. Reuse domain/grid source APIs only through future isolated P1 orchestrator."
+    },
+    {
+      "file": "v42_native/mess.py",
+      "function": "solve",
+      "reason": "Native builder contains all movement/P/Q/SOC physics, but legacy optimize receives reserve_shortfall/movement/tie objectives. Existing native90 build_case captures P1 matrix without optimize; B3 must preserve that P1-only separation."
+    },
+    {
+      "file": "v42_m1_hybrid/case.py",
+      "function": "load_case",
+      "reason": "Pinned BASE_HEAD/CASE_SHA and May01 strict point; writes case/cache reports. Never the loader for new A1/A2 anchors or dates."
+    },
+    {
+      "file": "v42_m1_research/case.py",
+      "function": "load_case",
+      "reason": "Explicit May01 1499-job/4-unit/96-slot/9322-binary historical case; immutable algorithms are reusable, historic point/LB/UB/runtime are not."
+    },
+    {
+      "file": "v42_may_campaign_native90/inputs.py",
+      "function": "generate_b2",
+      "reason": "Independently constructs FCFS/Q50 B2 AIDC reference, which would overwrite the meaning of fixed optimized A1/A2. New descriptor preserves A1/A2 decisions and must feed admitted source payload directly."
+    }
+  ],
+  "unresolved_interfaces": {
+    "A1": [
+      "Original same-day bundle/cutoff/source resource/electrical arrays remain source-bound future inputs; native construction and original materialization have not been executed."
+    ],
+    "A2": [
+      "F2-CRA preparation assumes MESS OFF; source-bound fixed M1 controls must be inserted into original grid before global A2 model/pricing state exists.",
+      "Original _planning rejects non-AIDC controls and writes zero MESS. A2 original physical replay and power materialization must support the exact fixed M1 packet.",
+      "A2 closure/LB/UB must be regenerated for its fixed M1 input; A1 or historical results cannot certify it."
+    ],
+    "M1": [
+      "Admit fixed optimized A1 into same-day source bundle/planning payload without generate_b2 FCFS.",
+      "Original job-option, GPU/known_gpu, native bundle and route/control mapping must be verified; source descriptor never invents these fields.",
+      "Verify supplied PCC Q against unchanged source power-factor authority."
+    ],
+    "M2": [
+      "Same fixed A2 payload requirements as M1.",
+      "Source m_model hardcodes M1 in deadline/native solve/grid/voltage and B2 provenance. Add isolated B3 M2 routing before real model creation.",
+      "Warm-start contract flags do not establish original feasibility. A raw M1 point must independently replay under fixed A2 and new original case axis; every prepared descriptor withholds native admission regardless of contract eligibility."
+    ]
+  },
+  "heavy_validation_status": "DEFERRED_RESOURCE_PROTECTION",
+  "native_optimize_calls": 0,
+  "OpenDSS_calls": 0,
+  "FULL_model_builds": 0,
+  "physical_domain_builds": 0,
+  "pricing_calls": 0,
+  "scientific_equivalence": "REAL_MODEL_EQUIVALENCE_NOT_RUN",
+  "exact_stage_certificates": "NOT_RUN",
+  "Actual_Fresh_AC": "NOT_RUN",
+  "global_joint_MILP_optimality_claimed": false,
+  "production_authorized": false,
+  "limitation": "Static/source linkage and mock contracts cannot prove original FULL/Compact/C3A equivalence, source-bound A2/M2 native integration, stage Global Gap or production readiness."
+}
