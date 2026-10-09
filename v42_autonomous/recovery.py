@@ -152,6 +152,22 @@ class LeaseBusy(RuntimeError):
     pass
 
 
+class HeartbeatObservationDeferred(RuntimeError):
+    """An owned volatile heartbeat could not be read; no evidence was admitted."""
+    def __init__(self, path, error):
+        self.observation = dict(path=str(Path(path).resolve()), error=repr(error),
+            reason=str(error), errno=error.errno, winerror=getattr(error, 'winerror', None),
+            error_class=type(error).__name__,
+            cause_classification=('WINDOWS_SHARING_OR_LOCK_VIOLATION' if getattr(error, 'winerror', None) in (32, 33)
+                                  else 'WINDOWS_ACCESS_DENIED_CAUSE_UNRESOLVED'))
+        super().__init__('OWNED_WORKER_HEARTBEAT_READ_DEFERRED:' + self.observation['reason'])
+
+
+class HeartbeatObservationRead(dict):
+    """A row result with a real, owned heartbeat read; no persisted evidence flag."""
+    pass
+
+
 class SourceBlocked(PermissionError):
     """A shared source or environment failure blocks future Native admission."""
 
@@ -1019,16 +1035,55 @@ def mark_finished(root, queue_id, result_path):
         return row
 
 
-def _frozen_observation(root, queue_id, kind, path):
+def _frozen_observation(root, queue_id, kind, path, *, raw=None):
     """Capture mutable progress once into immutable recovery evidence."""
     path = Path(path)
-    raw = path.read_bytes()
+    raw = path.read_bytes() if raw is None else raw
     snapshot = Path(root) / 'recovery_evidence' / queue_id / (kind + '_' + uuid.uuid4().hex + '.json')
     document = dict(observed_UTC=now(), source_path=str(path.resolve()),
                     source_sha256=hashlib.sha256(raw).hexdigest(),
                     snapshot=json.loads(raw.decode('utf-8-sig')))
     atomic(snapshot, document)
     return record(snapshot)
+
+
+def _owned_worker_heartbeat(root, worker, row, request, path):
+    attempt = Path(root).resolve() / 'dates' / row['arm'] / row['date'] / 'attempts' / request['attempt_id']
+    receipt = row['retry_request_receipt']
+    expected = attempt / 'HEARTBEAT.json' if row['arm'] == 'B2' else Path(request['output']).resolve() / 'HEARTBEAT.json'
+    b3_output = (Path(row['repair_code_root']).resolve() / 'runtime/b3' / request['run_id'] / row['date'] / request['attempt_id']) if row['arm'] == 'B3' else None
+    if (row['arm'] not in ('B2', 'B3') or request.get('arm') != row['arm']
+            or request.get('day') != row['date']
+            or request.get('attempt_id') != row['retry_attempt_id']
+            or request.get('implementation_SHA') != row['repair_source_SHA']
+            or Path(request['result']).resolve().parent != attempt
+            or Path(worker['request']).resolve() != attempt / 'request.json'
+            or Path(receipt['path']).resolve() != attempt / 'request.json'
+            or record(receipt['path']) != receipt or path != expected
+            or b3_output is not None and Path(request['output']).resolve() != b3_output):
+        raise PermissionError('WORKER_HEARTBEAT_OBSERVATION_OWNERSHIP_OR_SEAL_DRIFT')
+
+
+def _read_worker_heartbeat(root, worker, row, request, path):
+    """Only an exact sealed worker heartbeat may defer a Windows access failure.
+
+    The errno alone cannot prove an atomic replacement race. Preserve that
+    uncertainty; persistent access failures belong to operational observation
+    history, never to a fabricated empty heartbeat or Native accounting.
+    """
+    path = Path(path).resolve()
+    _owned_worker_heartbeat(root, worker, row, request, path)
+    try:
+        raw = path.read_bytes()
+    except FileNotFoundError:
+        return None, None
+    except PermissionError as error:
+        if (sys.platform != 'win32' or error.errno != 13
+                or getattr(error, 'winerror', None) not in (None, 5, 32, 33)
+                or not error.filename or Path(error.filename).resolve() != path):
+            raise
+        raise HeartbeatObservationDeferred(path, error) from error
+    return json.loads(raw.decode('utf-8-sig')), raw
 
 
 def sync_worker(root, worker):
@@ -1043,11 +1098,13 @@ def sync_worker(root, worker):
     attempt = Path(request['result']).parent
     heartbeat_path = attempt / 'HEARTBEAT.json' if row['arm'] == 'B2' else Path(request['output']) / 'HEARTBEAT.json'
     progress_path = Path(request['progress'])
-    heartbeat = read(heartbeat_path, {})
+    heartbeat, heartbeat_raw = _read_worker_heartbeat(root, worker, row, request, heartbeat_path)
+    if heartbeat is None:
+        return row
     progress = read(progress_path, {})
     if (heartbeat.get('timestamp_UTC', '') <= row.get('dispatched_UTC', '')
             or progress.get('attempt_id', progress.get('identity', {}).get('attempt_id')) != request['attempt_id']):
-        return row
+        return HeartbeatObservationRead(row)
     if row['arm'] == 'B2':
         model_path = Path(request['output']) / 'V19_MODEL_IDENTITY_VERIFICATION.json'
         ledger_path = attempt / 'NATIVE_RUNTIME_LEDGER.json'
@@ -1057,7 +1114,7 @@ def sync_worker(root, worker):
         native_progress = (type(progress.get('Native_Runtime')) in (int, float)
                            and progress['Native_Runtime'] > ledger.get('measured_Native_Runtime', math.inf))
         if model.get('PASS') is not True or not (new_calls or ledger.get('inflight') and native_progress):
-            return row
+            return HeartbeatObservationRead(row)
         paths = [('model', model_path), ('ledger', ledger_path), ('progress', progress_path), ('heartbeat', heartbeat_path)]
     else:
         output = Path(request['output'])
@@ -1068,12 +1125,13 @@ def sync_worker(root, worker):
         ledger = read(ledger_path, {})
         if (admitted.get('PASS') is not True or admitted.get('source_sha') != row['repair_source_SHA']
                 or stage not in ('M1', 'A2', 'M2') or not ledger.get('calls')):
-            return row
+            return HeartbeatObservationRead(row)
         paths = [('admission', admission), ('ledger', ledger_path), ('progress', progress_path), ('heartbeat', heartbeat_path)]
-    receipts = [_frozen_observation(root, queue_id, kind, path) for kind, path in paths]
+    receipts = [_frozen_observation(root, queue_id, kind, path,
+                    raw=heartbeat_raw if kind == 'heartbeat' else None) for kind, path in paths]
     evidence = dict(source_admission_PASS=True, model_generation_PASS=True, Native_entered=True,
                     heartbeat_progress_PASS=True, ledger_progress_PASS=True, receipts=receipts)
-    return mark_verified(root, queue_id, evidence)
+    return HeartbeatObservationRead(mark_verified(root, queue_id, evidence))
 
 
 def reconcile_workers(root):

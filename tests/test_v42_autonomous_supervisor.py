@@ -38,6 +38,69 @@ def test_cycle_survives_real_operator_queue_lock_and_keeps_all_three_workers(tmp
     s.cycle(tmp_path,{},cp)
     assert cp['workers']==workers and cp['dates']['B2/'+DAYS[0]]['status']=='PASS'
 
+def test_cycle_heartbeat_access_failure_keeps_all_workers_and_other_dates_observed(tmp_path,monkeypatch):
+    cp=checkpoint()
+    for slot,day in enumerate(DAYS[3:6],1):
+        key='B2/'+day;cp['dates'][key].update(status='RUNNING',Native_Runtime=40.+slot)
+        cp['workers'][key]=dict(day=day,arm='B2',worker_slot=slot,PID=100+slot,created=10.+slot,request='sealed_'+str(slot)+'.json')
+    workers=deepcopy(cp['workers']);dates=deepcopy(cp['dates']);calls=[]
+    fault_key='B2/'+DAYS[4];fault_path=tmp_path/'HEARTBEAT.json';failed=True;missing=False
+    def observe(root,worker):
+        calls.append(worker['day'])
+        if failed and worker['day']==DAYS[4]:
+            raise r.HeartbeatObservationDeferred(fault_path,PermissionError(13,'fixture Windows access denied',str(fault_path)))
+        if missing and worker['day']==DAYS[4]:return dict(verification_status='WORKER_ENTERED')
+        return r.HeartbeatObservationRead(dict(verification_status='WORKER_ENTERED'))
+    monkeypatch.setattr(s,'same_process',lambda worker:True);monkeypatch.setattr(r,'sync_worker',observe)
+    monkeypatch.setattr(s,'dispatch',lambda *a:pytest.fail('HEALTHY_WORKER_REPLACED'))
+    r.atomic(tmp_path/'RECOVERY_QUEUE.json',dict(entries=[]))
+    queue_bytes=(tmp_path/'RECOVERY_QUEUE.json').read_bytes()
+    for iteration in range(3):
+        s.cycle(tmp_path,{},cp)
+        assert calls[-3:]==list(DAYS[3:6])
+        assert cp['workers']==workers and cp['dates']==dates
+        assert cp['worker_observation_errors'][fault_key]['consecutive_failures']==iteration+1
+    error=cp['worker_observation_errors'][fault_key]
+    assert error['status']=='PERSISTENT_WORKER_HEARTBEAT_IO_ERROR'
+    assert error['original_read_error']['errno']==13 and error['original_read_error']['path']==str(fault_path.resolve())
+    assert len(cp['worker_observation_error_history'])==2
+    failed=False;missing=True;s.cycle(tmp_path,{},cp)
+    assert cp['worker_observation_errors'][fault_key]==error and len(cp['worker_observation_error_history'])==2
+    missing=False;s.cycle(tmp_path,{},cp)
+    assert not cp['worker_observation_errors'] and len(cp['worker_observation_error_history'])==3
+    assert cp['worker_observation_error_history'][-1]['observation_resolved_UTC']
+    assert cp['worker_observation_error_history'][-1]['original_read_error']==error['original_read_error']
+    assert cp['workers']==workers and cp['dates']==dates
+    assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==queue_bytes
+
+
+def test_cycle_never_swallows_general_permission_or_global_source_failure(tmp_path,monkeypatch):
+    cp=checkpoint();key='B2/'+DAYS[4]
+    cp['workers'][key]=dict(day=DAYS[4],arm='B2',worker_slot=1,PID=101,request='sealed.json')
+    cp['dates'][key].update(status='RUNNING',Native_Runtime=31.)
+    before=deepcopy(cp);monkeypatch.setattr(s,'same_process',lambda worker:True)
+    for error in (PermissionError(13,'sealed manifest inaccessible','manifest.json'),r.SourceBlocked('GLOBAL_SOURCE_INTEGRITY_FAILURE:shared')):
+        monkeypatch.setattr(r,'sync_worker',lambda *a:(_ for _ in ()).throw(error))
+        with pytest.raises(PermissionError) as caught:s.cycle(tmp_path,{},cp)
+        assert caught.value is error and cp['workers']==before['workers'] and cp['dates']==before['dates']
+        assert 'worker_observation_errors' not in cp
+
+
+def test_clean_heartbeat_for_different_attempt_cannot_resolve_previous_worker_fault(tmp_path):
+    cp=checkpoint();key='B2/'+DAYS[4]
+    worker=dict(PID=101,created=11.,request='original-request.json',recovery_queue_id='original-queue')
+    error=r.HeartbeatObservationDeferred(tmp_path/'HEARTBEAT.json',PermissionError(13,'original denied',str(tmp_path/'HEARTBEAT.json')))
+    s.record_heartbeat_observation_error(cp,key,worker,error)
+    original=deepcopy(cp['worker_observation_errors'][key]);history=deepcopy(cp['worker_observation_error_history'])
+    newer=dict(worker,PID=102,created=12.,request='new-request.json',recovery_queue_id='new-queue')
+    assert s.resolve_heartbeat_observation_error(cp,key,newer) is False
+    assert cp['worker_observation_errors'][key]==original and cp['worker_observation_error_history']==history
+    assert s.resolve_heartbeat_observation_error(cp,key,worker) is True
+    assert not cp['worker_observation_errors']
+    assert cp['worker_observation_error_history'][-1]['resolution']=='CLEAN_OWNED_HEARTBEAT_READ_FOR_SAME_WORKER_IDENTITY'
+    assert cp['worker_observation_error_history'][-1]['original_read_error']==original['original_read_error']
+
+
 def test_failure_quarantine_and_budget_terminal_do_not_block_sweep():
     cp=checkpoint()
     for row in cp['dates'].values():row['status']='PASS'

@@ -435,9 +435,37 @@ def advance_sweeps(cp):
         transition(cp,arm+'_COMPLETE' if all_pass else arm+'_SWEEP_COMPLETE_WITH_FAILURES')
         if arm=='B2':transition(cp,'B3_STARTING');transition(cp,'B3_RUNNING')
 
+def record_heartbeat_observation_error(cp,key,worker,error):
+    """Preserve observation faults separately from scientific status/accounting."""
+    errors=cp.setdefault('worker_observation_errors',{})
+    identity={name:worker.get(name) for name in ('PID','created','request','recovery_queue_id')}
+    previous=errors.get(key)
+    consecutive=previous['consecutive_failures']+1 if previous and previous['worker_identity']==identity else 1
+    status='PERSISTENT_WORKER_HEARTBEAT_IO_ERROR' if consecutive>=3 else 'DEFERRED_WORKER_HEARTBEAT_IO_OBSERVATION'
+    entry=dict(status=status,worker_identity=identity,consecutive_failures=consecutive,
+        first_seen_UTC=previous['first_seen_UTC'] if previous and consecutive>1 else now(),
+        last_seen_UTC=now(),original_read_error=previous['original_read_error'] if previous and consecutive>1 else dict(error.observation),
+        last_read_error=dict(error.observation),scientific_status_and_native_accounting_unchanged=True,
+        counter_basis='CONSECUTIVE_ACCESS_FAILURES_WITHOUT_MATCHING_CLEAN_HEARTBEAT_READ')
+    errors[key]=entry
+    if not previous or previous['status']!=status or previous['worker_identity']!=identity:
+        cp.setdefault('worker_observation_error_history',[]).append(dict(key=key,**entry))
+
+
+def resolve_heartbeat_observation_error(cp,key,worker):
+    previous=cp.get('worker_observation_errors',{}).get(key)
+    identity={name:worker.get(name) for name in ('PID','created','request','recovery_queue_id')}
+    if previous and previous['worker_identity']!=identity:return False
+    if previous:
+        cp['worker_observation_errors'].pop(key)
+        cp.setdefault('worker_observation_error_history',[]).append(dict(key=key,**previous,
+            observation_resolved_UTC=now(),resolution='CLEAN_OWNED_HEARTBEAT_READ_FOR_SAME_WORKER_IDENTITY'))
+    return bool(previous)
+
+
 def cycle(root,manifest,cp):
     """One durable scheduling cycle; individual failures remain local."""
-    from .recovery import LeaseBusy,queue,dispatch_ready,sync_worker,common_failure
+    from .recovery import LeaseBusy,HeartbeatObservationDeferred,HeartbeatObservationRead,queue,dispatch_ready,sync_worker,common_failure
     root=Path(root)
     adopt_intents(cp)
     initialize_history(cp)
@@ -451,8 +479,11 @@ def cycle(root,manifest,cp):
         except LeaseBusy:cp['recovery_adoption_pending']=True
     for key,worker in list(cp['workers'].items()):
         if same_process(worker):
-            try:sync_worker(root,worker)
+            try:
+                observation=sync_worker(root,worker)
+                if isinstance(observation,HeartbeatObservationRead):resolve_heartbeat_observation_error(cp,key,worker)
             except LeaseBusy:pass
+            except HeartbeatObservationDeferred as error:record_heartbeat_observation_error(cp,key,worker,error)
             continue
         try:
             collect(root,cp,key,worker)

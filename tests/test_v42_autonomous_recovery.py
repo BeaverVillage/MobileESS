@@ -590,23 +590,150 @@ def test_orphaned_live_recovery_is_adopted_without_relaunch(tmp_path,monkeypatch
 
 
 def test_native_progress_gets_immutable_snapshot_receipts(tmp_path,monkeypatch):
-    failure,repair=packet(tmp_path,monkeypatch)
-    with r.repair_lease(tmp_path,token='test'):
-        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
-    r.mark_dispatched(tmp_path,row['queue_id'],'new',r.identity(),source_SHA='b'*64)
-    request=r.read(row['retry_request_receipt']['path']);attempt=Path(request['result']).parent
-    request.update(output=str(attempt/'output'),progress=str(attempt/'progress.json'))
-    r.atomic(row['retry_request_receipt']['path'],request)
-    r.atomic(attempt/'output/V19_MODEL_IDENTITY_VERIFICATION.json',{'PASS':True})
-    r.atomic(attempt/'NATIVE_RUNTIME_LEDGER.json',dict(measured_Native_Runtime=10.,inflight={'status':'IN_FLIGHT'},calls=[]))
-    r.atomic(attempt/'progress.json',dict(attempt_id='new',Native_Runtime=11.))
-    r.atomic(attempt/'HEARTBEAT.json',dict(timestamp_UTC='2099-01-01T00:00:00+00:00'))
-    worker=dict(r.identity(),request=row['retry_request_receipt']['path'],recovery_queue_id=row['queue_id'])
+    worker,attempt=heartbeat_packet(tmp_path,monkeypatch)
     synced=r.sync_worker(tmp_path,worker)
     assert synced['verification_status']=='NATIVE_PROGRESS_VERIFIED'
     receipts=synced['verification']['receipts']
     r.atomic(attempt/'progress.json',dict(attempt_id='new',Native_Runtime=12.))
     assert all(r.record(receipt['path'])==receipt for receipt in receipts)
+
+
+def heartbeat_packet(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    request_path=Path(repair['retry_request_receipt']['path'])
+    request=r.read(request_path);attempt=request_path.parent
+    request.update(output=str(attempt/'output'),progress=str(attempt/'progress.json'))
+    r.atomic(request_path,request);repair['retry_request_receipt']=r.record(request_path)
+    with r.repair_lease(tmp_path,token='heartbeat-test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='heartbeat-test')
+    r.mark_dispatched(tmp_path,row['queue_id'],'new',r.identity(),source_SHA='b'*64)
+    r.atomic(attempt/'output/V19_MODEL_IDENTITY_VERIFICATION.json',dict(PASS=True))
+    r.atomic(attempt/'NATIVE_RUNTIME_LEDGER.json',dict(measured_Native_Runtime=10.,inflight={'status':'IN_FLIGHT'},calls=[]))
+    r.atomic(attempt/'progress.json',dict(attempt_id='new',Native_Runtime=11.))
+    r.atomic(attempt/'HEARTBEAT.json',dict(timestamp_UTC='2099-01-01T00:00:00+00:00'))
+    return dict(r.identity(),request=str(request_path),recovery_queue_id=row['queue_id']),attempt
+
+
+@pytest.mark.parametrize('winerror',[None,5,32,33])
+def test_owned_windows_heartbeat_access_failure_defers_without_evidence_or_budget_changes(tmp_path,monkeypatch,winerror):
+    worker,attempt=heartbeat_packet(tmp_path,monkeypatch);heartbeat=attempt/'HEARTBEAT.json'
+    before=(tmp_path/'RECOVERY_QUEUE.json').read_bytes();native=(attempt/'NATIVE_RUNTIME_LEDGER.json').read_bytes()
+    original=Path.read_bytes
+    def denied(path):
+        if path.resolve()==heartbeat.resolve():
+            error=PermissionError(13,'fixture access denied',str(path));error.winerror=winerror;raise error
+        return original(path)
+    monkeypatch.setattr(Path,'read_bytes',denied);monkeypatch.setattr(r.sys,'platform','win32')
+    with pytest.raises(r.HeartbeatObservationDeferred) as caught:r.sync_worker(tmp_path,worker)
+    assert isinstance(caught.value.__cause__,PermissionError)
+    assert caught.value.observation['path']==str(heartbeat.resolve())
+    assert caught.value.observation['errno']==13 and caught.value.observation['winerror']==winerror
+    assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==before
+    assert (attempt/'NATIVE_RUNTIME_LEDGER.json').read_bytes()==native
+    assert not (tmp_path/'recovery_evidence').exists()
+    monkeypatch.setattr(Path,'read_bytes',original)
+    assert r.sync_worker(tmp_path,worker)['verification_status']=='NATIVE_PROGRESS_VERIFIED'
+
+
+@pytest.mark.parametrize('tamper',['request_seal','heartbeat_path','source','winerror','non_windows'])
+def test_heartbeat_defer_never_admits_unowned_or_nonmatching_access_failure(tmp_path,monkeypatch,tamper):
+    worker,attempt=heartbeat_packet(tmp_path,monkeypatch);heartbeat=attempt/'HEARTBEAT.json'
+    row=next(x for x in r.queue(tmp_path)['entries'] if x['queue_id']==worker['recovery_queue_id'])
+    request=r.read(worker['request'])
+    if tamper=='request_seal':r.atomic(worker['request'],dict(request,unexpected_change=True))
+    elif tamper=='heartbeat_path':heartbeat=tmp_path/'outside/HEARTBEAT.json';r.atomic(heartbeat,{})
+    elif tamper=='source':request=dict(request,implementation_SHA='wrong')
+    original=Path.read_bytes
+    def denied(path):
+        if path.resolve()==heartbeat.resolve():
+            error=PermissionError(13,'fixture denied',str(path));error.winerror=34 if tamper=='winerror' else 5;raise error
+        return original(path)
+    monkeypatch.setattr(Path,'read_bytes',denied)
+    monkeypatch.setattr(r.sys,'platform','linux' if tamper=='non_windows' else 'win32')
+    with pytest.raises(PermissionError) as caught:r._read_worker_heartbeat(tmp_path,worker,row,request,heartbeat)
+    assert not isinstance(caught.value,r.HeartbeatObservationDeferred)
+
+
+def test_permission_on_sealed_request_and_invalid_heartbeat_json_stay_strict(tmp_path,monkeypatch):
+    worker,attempt=heartbeat_packet(tmp_path,monkeypatch);request=Path(worker['request'])
+    original=r.read
+    def denied(path,*args,**kwargs):
+        if Path(path).resolve()==request.resolve():raise PermissionError(13,'sealed request denied',str(path))
+        return original(path,*args,**kwargs)
+    monkeypatch.setattr(r,'read',denied)
+    with pytest.raises(PermissionError):r.sync_worker(tmp_path,worker)
+    monkeypatch.setattr(r,'read',original)
+    (attempt/'HEARTBEAT.json').write_text('{invalid',encoding='utf-8')
+    with pytest.raises(json.JSONDecodeError):r.sync_worker(tmp_path,worker)
+    assert r.queue(tmp_path)['entries'][0]['verification_status']=='WORKER_ENTERED'
+
+
+def test_absent_heartbeat_is_explicitly_unavailable_and_not_a_clean_read(tmp_path,monkeypatch):
+    worker,attempt=heartbeat_packet(tmp_path,monkeypatch)
+    (attempt/'HEARTBEAT.json').unlink()
+    before=(tmp_path/'RECOVERY_QUEUE.json').read_bytes()
+    observation=r.sync_worker(tmp_path,worker)
+    assert not isinstance(observation,r.HeartbeatObservationRead)
+    assert observation['verification_status']=='WORKER_ENTERED'
+    assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==before
+    assert not (tmp_path/'recovery_evidence').exists()
+
+
+def test_b3_heartbeat_requires_exact_sealed_own_runtime_output(tmp_path,monkeypatch):
+    attempt=tmp_path/'dates/B3/2025-05-08/attempts/new'
+    code=tmp_path/'code';output=code/'runtime/b3/run/2025-05-08/new'
+    request=dict(arm='B3',day='2025-05-08',attempt_id='new',run_id='run',implementation_SHA='b'*64,
+        result=str(attempt/'RESULT.json'),output=str(output))
+    path=attempt/'request.json';r.atomic(path,request)
+    row=dict(arm='B3',date=request['day'],retry_attempt_id='new',repair_source_SHA='b'*64,
+        repair_code_root=str(code),retry_request_receipt=r.record(path))
+    heartbeat=output/'HEARTBEAT.json';r.atomic(heartbeat,dict(stage='M1',timestamp_UTC='2099'))
+    worker=dict(request=str(path))
+    observed,raw=r._read_worker_heartbeat(tmp_path,worker,row,request,heartbeat)
+    assert observed['stage']=='M1' and isinstance(raw,bytes)
+    wrong=tmp_path/'other/HEARTBEAT.json';r.atomic(wrong,dict(stage='M1'))
+    with pytest.raises(PermissionError,match='OWNERSHIP_OR_SEAL_DRIFT'):
+        r._read_worker_heartbeat(tmp_path,worker,row,request,wrong)
+
+
+def test_heartbeat_snapshot_is_the_same_single_read_that_was_parsed(tmp_path,monkeypatch):
+    worker,attempt=heartbeat_packet(tmp_path,monkeypatch);heartbeat=attempt/'HEARTBEAT.json'
+    original=Path.read_bytes;first=original(heartbeat);reads=[]
+    def replaced_after_read(path):
+        raw=original(path)
+        if path.resolve()==heartbeat.resolve():
+            reads.append(raw)
+            heartbeat.write_text(json.dumps(dict(timestamp_UTC='2100-01-01T00:00:00+00:00')),encoding='utf-8')
+        return raw
+    monkeypatch.setattr(Path,'read_bytes',replaced_after_read)
+    synced=r.sync_worker(tmp_path,worker)
+    assert len(reads)==1 and reads[0]==first
+    frozen=[r.read(row['path']) for row in synced['verification']['receipts']]
+    observed=next(row for row in frozen if row['source_path']==str(heartbeat.resolve()))
+    assert observed['source_sha256']==r.hashlib.sha256(first).hexdigest()
+    assert observed['snapshot']['timestamp_UTC'].startswith('2099-')
+    assert r.read(heartbeat)['timestamp_UTC'].startswith('2100-')
+
+
+@pytest.mark.skipif(r.sys.platform!='win32',reason='Actual Windows file-sharing reproduction')
+def test_actual_windows_exclusive_heartbeat_lock_defers_and_recovers_without_native(tmp_path,monkeypatch):
+    import ctypes
+    from ctypes import wintypes
+    worker,attempt=heartbeat_packet(tmp_path,monkeypatch);heartbeat=attempt/'HEARTBEAT.json'
+    kernel=ctypes.WinDLL('kernel32',use_last_error=True)
+    kernel.CreateFileW.argtypes=(wintypes.LPCWSTR,wintypes.DWORD,wintypes.DWORD,wintypes.LPVOID,wintypes.DWORD,wintypes.DWORD,wintypes.HANDLE)
+    kernel.CreateFileW.restype=wintypes.HANDLE
+    kernel.CloseHandle.argtypes=(wintypes.HANDLE,);kernel.CloseHandle.restype=wintypes.BOOL
+    handle=kernel.CreateFileW(str(heartbeat),0x80000000,0,None,3,0,None)
+    assert handle!=ctypes.c_void_p(-1).value
+    before=(tmp_path/'RECOVERY_QUEUE.json').read_bytes()
+    try:
+        with pytest.raises(r.HeartbeatObservationDeferred) as caught:r.sync_worker(tmp_path,worker)
+        assert caught.value.observation['errno']==13
+        assert caught.value.observation['cause_classification'] in ('WINDOWS_SHARING_OR_LOCK_VIOLATION','WINDOWS_ACCESS_DENIED_CAUSE_UNRESOLVED')
+        assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==before
+    finally:assert kernel.CloseHandle(handle)
+    assert r.sync_worker(tmp_path,worker)['verification_status']=='NATIVE_PROGRESS_VERIFIED'
 
 
 def test_repair_manifest_cannot_drop_original_native_carry(tmp_path,monkeypatch):
