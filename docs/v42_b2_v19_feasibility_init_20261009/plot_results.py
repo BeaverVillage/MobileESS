@@ -12,7 +12,10 @@ plt.rcParams.update({'font.family':['Malgun Gothic','DejaVu Sans'],'axes.unicode
 def save(fig,name):
     figures=HERE/'figures';figures.mkdir(exist_ok=True)
     fig.savefig(figures/(name+'.png'),dpi=180,bbox_inches='tight')
-    fig.savefig(figures/(name+'.svg'),bbox_inches='tight');plt.close(fig)
+    vector=figures/(name+'.svg')
+    fig.savefig(vector,bbox_inches='tight')
+    vector.write_text('\n'.join(line.rstrip() for line in vector.read_text(encoding='utf-8').splitlines())+'\n',encoding='utf-8')
+    plt.close(fig)
 
 def main():
     data=json.loads((HERE/'MEASURED_COMPARISON.json').read_text(encoding='utf-8'))
