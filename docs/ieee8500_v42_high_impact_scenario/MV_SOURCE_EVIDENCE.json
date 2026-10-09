@@ -1,0 +1,76 @@
+{
+  "sources": [
+    {
+      "id": "IEEE1547",
+      "url": "https://standards.ieee.org/ieee/1547/5915/",
+      "supports": "interconnection/interoperability, reactive voltage control, abnormal conditions, power quality, islanding, tests",
+      "status": "FETCH_UNVERIFIED",
+      "error_type": "HTTPError"
+    },
+    {
+      "id": "NREL_ISLANDING_2022",
+      "url": "https://www.nrel.gov/docs/fy22osti/77782.pdf",
+      "supports": "islanding requirements need coordinated protection and validation, not only steady-state AC",
+      "status": "FETCH_UNVERIFIED",
+      "error_type": "URLError"
+    },
+    {
+      "id": "EATON_CA202003EN",
+      "url": "https://www.eaton.com/content/dam/eaton/products/utility-and-grid-solutions/transformer/pad-mounted-transformer/Eaton-Pad-mounted-Transformer-Brochure-EN-US.pdf",
+      "supports": "catalog 750kVA and 5.75% impedance; delta-wye grounded neutral option; ±7.5% impedance tolerance",
+      "status": "FETCH_UNVERIFIED",
+      "error_type": "TimeoutError"
+    },
+    {
+      "id": "ELSCO_TX750",
+      "url": "https://elscotransformers.com/transformers/dry-type-transformers/750-kva-12470-delta-to-480y-277/",
+      "supports": "commercial 750kVA 12470V delta to 480Y/277 transformer voltage/topology feasibility only",
+      "status": "RETAINED",
+      "final_url": "https://elscotransformers.com/transformers/dry-type-transformers/750-kva-12470-delta-to-480y-277/",
+      "bytes": 164961,
+      "relative_path": "docs/ieee8500_v42_high_impact_scenario/mv_sources/ELSCO_TX750.html",
+      "sha256": "0c0def5ff97abe0c96b1f8db09bf490b9ff7d3e2ed891b44e6a163dc11dc23c2"
+    },
+    {
+      "id": "DYNAPOWER_MPS125",
+      "url": "https://dynapower.com/wp-content/uploads/2021/12/MPS-125_Datasheet_Dec2021.pdf",
+      "supports": "commercial 480V three-phase 125kVA/125kW module, 150A RMS; not a certified exact mobile600kVA product",
+      "status": "FETCH_UNVERIFIED",
+      "error_type": "HTTPError"
+    },
+    {
+      "id": "DYNAPOWER_PARALLELING",
+      "url": "https://dynapower.com/products/energy-storage/mps-125-energy-storage-inverter/",
+      "supports": "manufacturer allows multiple125kW modules to be paralleled; five modules625kVA conceptual basis for600kVA limit",
+      "status": "FETCH_UNVERIFIED",
+      "error_type": "HTTPError"
+    },
+    {
+      "id": "EPRI_NEUTRAL",
+      "url": "https://opendss.epri.com/OpenDSSNeutralRules.html",
+      "supports": "explicit neutral node and grounding impedance must agree; grounded node0 is an ideal grounding assumption",
+      "status": "RETAINED",
+      "final_url": "https://opendss.epri.com/OpenDSSNeutralRules.html",
+      "bytes": 19731,
+      "relative_path": "docs/ieee8500_v42_high_impact_scenario/mv_sources/EPRI_NEUTRAL.html",
+      "sha256": "5e96ad83e9a65a63bfd026a77cfbb6cded452c1c9c9d779b952cebc7dfea2161"
+    },
+    {
+      "id": "EPRI_TX_PROPERTIES",
+      "url": "https://opendss.epri.com/Properties16.html",
+      "supports": "3phase winding kV is line-line; XHL is reactance not impedance magnitude; losses/resistances explicit",
+      "status": "RETAINED",
+      "final_url": "https://opendss.epri.com/Properties16.html",
+      "bytes": 36747,
+      "relative_path": "docs/ieee8500_v42_high_impact_scenario/mv_sources/EPRI_TX_PROPERTIES.html",
+      "sha256": "3ea3c8a5389f57850ed5d465611888ea3eb4b8612aa67b4f692161c3c3ea1acb"
+    }
+  ],
+  "retrieval_date_KST": "2026-10-10",
+  "source_type": "manufacturer/EPRI/IEEE/NREL public-primary; no field hardware certification",
+  "primary_web_fact_extraction": {
+    "relative_path": "docs/ieee8500_v42_high_impact_scenario/MV_PRIMARY_WEB_FACTS.json",
+    "sha256": "8c87ff9eb4d1f2a564bc26a920ea19097d26048ae726c092d60a59c813c0f95b",
+    "scope": "reviewed extraction, NOT original full source byte SHA"
+  }
+}

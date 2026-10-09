@@ -1,0 +1,91 @@
+{
+  "schema": "DISPERSED_JOINT_PLACEMENT_V1",
+  "service_count": 24,
+  "AIDC_count": 12,
+  "STA_count": 12,
+  "MESS_count": 6,
+  "original_traffic_service_IDs_fixed": true,
+  "AIDC_physical_buses_fixed": false,
+  "old_mappings_mutated": false,
+  "domain_counts": {
+    "AIDC_MV": 606,
+    "STA_MV": 606,
+    "STA_LV": 1177
+  },
+  "source_tree_region_sha256": "01fa31958a59ccb73425f6d46a39aadebd45e0385b8a092306216cfdfb5f6558",
+  "candidate_csv_sha256": {
+    "AIDC_MV_CANDIDATES.csv": "8dc3e659555d346043a1edefa8a107d29b7e9617e34c7cad5e1459412887f50c",
+    "STA_MV_LV_CANDIDATES.csv": "f5ece2d415a941ad876c8c621f8b73e466f0a12bffee0cfbdcf61dfad3bde7bb"
+  },
+  "topology_regions_frozen_before_current_AC_scores": true,
+  "region_count": 8,
+  "dispersion_hard_constraints": {
+    "role_max_per_region": 4,
+    "combined_max_per_region": 6,
+    "each_role_min_regions": 4,
+    "combined_min_regions": 6
+  },
+  "C0": "old PR197 mapping,12LV STA retained as reference; new dispersion not retrospectively imposed",
+  "C1": {
+    "STA_even_IDs": "MV_3PH",
+    "STA_odd_IDs": "LV_SPLIT_240",
+    "MV_count": 6,
+    "LV_count": 6,
+    "allocation_rule": "frozen service parity, independent of AC or final policy outcomes"
+  },
+  "C2": {
+    "STA_all": "MV_3PH",
+    "MV_count": 12,
+    "LV_count": 0,
+    "fallback": "report no witness; do not silently change counts"
+  },
+  "C3": "unverified future dedicated primary line design only; no new primary conductors instantiated",
+  "required_direction_pairs": 276,
+  "required_direction_axes": 552,
+  "traffic_pair_axis_tolerance_km": 0.001,
+  "common_transform": {
+    "proper_rotation_schedule_degrees": [
+      -168.2442350516839,
+      135.0,
+      0.0,
+      90.0,
+      180.0,
+      270.0,
+      15.0,
+      30.0,
+      45.0,
+      60.0,
+      75.0,
+      105.0,
+      120.0,
+      150.0,
+      165.0,
+      195.0,
+      210.0,
+      225.0,
+      240.0,
+      255.0,
+      285.0,
+      300.0,
+      315.0,
+      330.0,
+      345.0
+    ],
+    "positive_uniform_scale": 0.0011642948290067979,
+    "shared_centroid_translation": true,
+    "reflection": false,
+    "per_site_rotation": false
+  },
+  "algorithm": "full-domain bitset CSP, exact pair arc consistency and hard global regional cardinality/coverage propagation",
+  "geometry_only_seed_priority": "old-position common-scale squared distance then lexical bus",
+  "score_priority_rule": "site score descending from preregistered multi-line/time capacity-bounded AC sensitivities, then geometry distance and lexical bus",
+  "each_angle_search_node_limit": 200000,
+  "each_angle_search_seconds_limit": 45,
+  "stopping_rule": "first complete exact-audited dispersed witness; no global placement optimality claim",
+  "no_witness_claim": "UNKNOWN broader proper-transform feasibility if bounded search exhausted",
+  "scores_must_be_saved_before_scored_selection": true,
+  "B1_B2_B3_outcomes_used": false,
+  "Native_policy_calls": 0,
+  "field_GIS_access_protection_and_physical_ETA": "UNVERIFIED engineering proxy; physical/AC gates remain required",
+  "final_dispatch_or_single_scenario_frozen": false
+}
