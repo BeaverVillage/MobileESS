@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 HERE=Path(__file__).resolve().parent
-plt.rcParams.update({'font.family':'Malgun Gothic','axes.unicode_minus':False,'font.size':10})
+plt.rcParams.update({'font.family':['Malgun Gothic','DejaVu Sans'],'axes.unicode_minus':False,'font.size':10})
 
 def save(fig,name):
     figures=HERE/'figures';figures.mkdir(exist_ok=True)
@@ -27,6 +27,7 @@ def main():
             bar=ax.bar(i,value,color='#176f73' if r['FULL_PASS'] else '#a9adb6',hatch=None if r['FULL_PASS'] else '//')
             ax.text(i,value,f'{value:.2f}s'+(' (초기해 없음)' if not r['FULL_PASS'] else ''),ha='center',va='bottom',fontsize=8)
         ax.set_xticks(range(len(rows)),labels,rotation=25,ha='right');ax.set_ylabel('seconds');ax.set_title(title)
+        ax.set_xlim(-.6,len(rows)-.4)
         ax.margins(y=.2);ax.grid(axis='y',alpha=.2);ax.set_axisbelow(True)
     fig.suptitle('V42 B2 초기해 실측 — 실패 시 종료까지 사용시간 표시, 보장된 개선값 아님')
     fig.tight_layout();save(fig,'01_first_full_time')
@@ -58,7 +59,7 @@ def main():
         sites=list(dict.fromkeys(v['location']));codes=[sites.index(s) for s in v['location']]
         axes[row,3].step(t,codes,where='post',color='#41546c');axes[row,3].set_yticks(range(len(sites)),sites);axes[row,3].set_ylabel('연결 장소 / 이동')
         for ax in axes[row]:ax.set_xlim(0,24);ax.set_xlabel('시간 (hour)');ax.grid(alpha=.2)
-    fig.suptitle('May03 원본 FULL 검증 통과 초기해 · P=Pdis−Pch · clipping/rounding/repair 없음\npoint SHA '+dispatch['selected_point_SHA'][:20])
+    fig.suptitle('May03 원본 FULL 검증 통과 초기해 · P=Pdis-Pch · clipping/rounding/repair 없음\npoint SHA '+dispatch['selected_point_SHA'][:20])
     fig.tight_layout(rect=(0,0,1,.95));save(fig,'04_may03_vehicle_dispatch')
 
 if __name__=='__main__':main()

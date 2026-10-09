@@ -90,8 +90,8 @@ const day=v=>v?v.replace('2025-',''):'날짜 대기';
 let snapshot=null,received=null,busy=false,failed=false;
 const openWorkers=new Set();
 function el(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}
-function status(value){return value?.startsWith('TIME_LIMIT_')?'시간 제한':({PASS:'성공',RUNNING:'실행 중',PENDING:'대기',HELD_FOR_CANARY:'May01 확인 대기',CANARY_PENDING:'검증 실행 대기',TIMEOUT:'시간 제한',IMPLEMENTATION_FAILURE:'구현 오류',INPUT_FAILURE:'입력 오류',PHYSICAL_FAILURE:'물리 실패',FRESH_AC_FAILURE:'AC 실패',STOPPED:'중단'})[value]||value||'대기';}
-function statusClass(v){return v==='PASS'?'pass':v==='RUNNING'?'running':['PENDING','HELD_FOR_CANARY','CANARY_PENDING'].includes(v)?'':v==='TIMEOUT'?'warn':'fail';}
+function status(value){return value?.startsWith('TIME_LIMIT_')?'시간 제한':({INITIALIZATION_BENCHMARK_FULL_PASS:'초기해 FULL 통과',NO_FULL_VALIDATED_INITIAL_POINT:'초기해 미확보',PASS:'성공',RUNNING:'실행 중',PENDING:'대기',HELD_FOR_CANARY:'May01 확인 대기',CANARY_PENDING:'검증 실행 대기',TIMEOUT:'시간 제한',IMPLEMENTATION_FAILURE:'구현 오류',INPUT_FAILURE:'입력 오류',PHYSICAL_FAILURE:'물리 실패',FRESH_AC_FAILURE:'AC 실패',STOPPED:'중단'})[value]||value||'대기';}
+function statusClass(v){return ['PASS','INITIALIZATION_BENCHMARK_FULL_PASS'].includes(v)?'pass':v==='RUNNING'?'running':['PENDING','HELD_FOR_CANARY','CANARY_PENDING'].includes(v)?'':v==='TIMEOUT'?'warn':'fail';}
 function pairs(target,rows){target.replaceChildren(...rows.flatMap(([k,v])=>[el('div',k,'k'),el('div',v,'v')]));}
 function stage(w){
  if(w.display_waiting)return -1;
@@ -103,7 +103,7 @@ function stage(w){
 }
 function phaseLabel(w){
  if(w.display_waiting)return w.waiting_reason||'날짜 배정 대기';
- if(w.worker_result_received)return '결과 수신 · 다음 날짜 준비';
+ if(w.worker_result_received)return w.initialization_benchmark?.status==='INITIALIZATION_BENCHMARK_FULL_PASS'?'초기해 FULL 통과 · 시험 종료':w.initialization_benchmark?'초기해 미확보 · 시험 종료':'결과 수신 · 다음 날짜 준비';
  if(w.bound_status?.phase_label)return w.bound_status.phase_label;
  const s=stage(w);
  if(s===0)return w.build?.current||'모델 생성';
@@ -173,7 +173,7 @@ function render(){
  $('b1-total').replaceChildren(el('span',String(s.B1.PASS)),el('small',' / 31일'));
  $('b2-total').replaceChildren(el('span',String(b.completed)),el('small',' / 31일'));
  const pending=s.actual_comparison.rows.filter(r=>['PENDING','HELD_FOR_CANARY','CANARY_PENDING'].includes(r.B2_status)).length;
- $('b2-counts').textContent='성공 '+b.PASS+' · 실패 '+(b.FAIL||0)+' · 시간 제한 '+(b.TIMEOUT||0)+' · 대기 '+pending;
+ $('b2-counts').textContent=s.initialization_summary?'FULL 초기해 '+s.initialization_summary.FULL_PASS+' / '+s.initialization_summary.total+' · 실패 '+s.initialization_summary.failed:'성공 '+b.PASS+' · 실패 '+(b.FAIL||0)+' · 시간 제한 '+(b.TIMEOUT||0)+' · 대기 '+pending;
  $('worker-total').replaceChildren(el('span',String(live)),el('small',' / '+(s.parallel_workers||1)));
  const done=b.completed===31,issue=!!g?.error||!s.coordinator_alive&&!done;
  $('overview').className='overview '+(issue?'error':'');

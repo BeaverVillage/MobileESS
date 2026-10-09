@@ -129,6 +129,12 @@ def view(root):
         slots.append(worker)
     heartbeat = optional(root/f'COORDINATOR_V{version}_HEARTBEAT.json')
     alive = same_process(heartbeat.get('process',{}))
+    initial_summary=None
+    if manifest.get('benchmark_initialization_only'):
+        measured=[w for w in workers if w['day'] in manifest['canary_days'] and w.get('worker_result_received')]
+        passed=sum(w.get('UB') is not None for w in measured)
+        initial_summary=dict(FULL_PASS=passed,failed=len(measured)-passed,
+            completed=len(measured),total=len(manifest['canary_days']))
     return display.clean(dict(run_id=manifest['run_id'],state=cp['state'],
         algorithm_version=manifest['schema'],display_version=VERSION,runtime_root=str(root),
         coordinator_alive=alive,canary_PASS=bool(cp.get('canary_PASS')),parallel_workers=cp.get('parallel_workers',1),
@@ -137,6 +143,7 @@ def view(root):
         B2_validation_detail=dict(PASS=True,status=cp['state'],error=None),
         actual_comparison=comparison(cp['dates']),last_error=cp.get('last_error'),
         source_SHA=manifest['execution_SHA'],telemetry_only=True,
+        initialization_summary=initial_summary,
         benchmark_initialization_only=manifest.get('benchmark_initialization_only',False)))
 
 

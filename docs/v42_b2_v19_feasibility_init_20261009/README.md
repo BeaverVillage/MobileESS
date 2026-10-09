@@ -8,7 +8,7 @@ V18의 `values_for()`는 0~95 슬롯의 연결 상태만 만들고, 원본 C3A�
 
 ```mermaid
 flowchart TD
-    A[같은 날짜 원본 FULL / C3A 생성] --> B[F1 기존 stationary Dispatch LP]
+    A[같은 날짜 원본 FULL / C3A 생성] --> B[F1 원본 FULL 정수 표현 고정 stationary LP]
     B --> G{원본 FULL 정수 · 96슬롯 물리 검증 PASS?}
     G -->|예| Z[case.point 직접 채택 · 측정 종료]
     G -->|아니오| C[F1 보완: 종단 위치를 복구한 충전 모드 고정 LP]
@@ -47,3 +47,5 @@ Farkas 진단 LP 네 시도는 각각 별도 root/attempt/source SHA로 보존�
 - 최종 실제 May03/04 성능, FULL 검증, 원본 SHA와 Q1~Q10은 `FINAL_REVIEW_KO.md`에 기록합니다.
 - 공식 캠페인 결과·B0/B1·V17·V18R2는 보존합니다. May02를 재실행하지 않습니다.
 - 실행 코드와 결과는 별도 V19 branch/source SHA/attempt로 구분합니다. 초기해 이후 Adaptive/UB/LB/Pricing/RMP 소스는 수정하지 않습니다.
+
+최종 실측: May03 Native 4.480초 / May04 6.674초, 모두 F1 LP 1회와 FULL PASS. [최종 검토](FINAL_REVIEW_KO.md)에서 모든 시도·누적 회계·동결 증명을 확인합니다.
