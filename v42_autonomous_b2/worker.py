@@ -46,7 +46,15 @@ def assert_peers(request):
         try:
             args=p.cmdline();module=args[args.index('-m')+1] if '-m' in args else ''
             if module=='v42_autonomous_b2.worker':
-                peer=read(args[-1]);verify_request(peer)
+                peer=read(args[-1]);peer_manifest=read(peer['manifest'])
+                # Different repaired deployments may coexist on different
+                # dates. Verify each against its own immutable source root.
+                if (peer['run_id']!=request['run_id'] or peer['manifest_SHA']!=sha(peer['manifest'])
+                    or peer['implementation_SHA']!=peer_manifest['execution_SHA']):
+                    raise PermissionError('PEER_SOURCE_OR_RUN_IDENTITY_DRIFT')
+                peer_root=Path(p.cwd())
+                if any(sha(peer_root/n)!=s for n,s in peer_manifest['execution_sources'].items()):
+                    raise PermissionError('PEER_OWN_IMMUTABLE_SOURCE_DRIFT')
                 if peer['day'] in seen or peer['worker_slot'] in slots:raise PermissionError('DUPLICATE_B2_DAY_OR_SLOT')
                 seen.add(peer['day']);slots.add(peer['worker_slot'])
             elif module.endswith('.worker') and module.startswith(('v42_may','v42_b2','v42_m1','v42_a_stage','v42_autonomous_b3')):
@@ -57,8 +65,17 @@ def assert_peers(request):
 @contextmanager
 def worker_scope(request):
     from v42_b2_seed_recovery_v19 import execution
-    with patch.object(execution,'verify_request',verify_request),patch.object(execution,'assert_peers',assert_peers):
-        with execution.worker_scope(request) as m:yield m
+    from v42_may_campaign import execution as legacy
+    manifest=verify_request(request)
+    # Budget creation is the first action after admission, before peer-sensitive
+    # Native entry. A denied peer guard therefore still has measured accounting.
+    token=legacy._active.set(dict(request=dict(request),manifest=manifest,
+        manifest_sha=request['manifest_SHA'],worker_slot=request['worker_slot']))
+    before=legacy.guard
+    with patch.object(execution,'assert_peers',assert_peers):
+        legacy.guard=execution.guard
+        try:yield manifest
+        finally:legacy.guard=before;legacy._active.reset(token)
 
 def run(path):
     from v42_b2_seed_recovery_v19 import worker as original

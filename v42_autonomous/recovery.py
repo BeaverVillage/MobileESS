@@ -482,7 +482,7 @@ def _dispatch_ready(root, arm, slot, manifest):
                        'utf8', '-m', module, str(path)]
             with (path.parent / 'stdout.log').open('ab') as out, (path.parent / 'stderr.log').open('ab') as err:
                 child = subprocess.Popen(command, cwd=row['repair_code_root'], stdout=out, stderr=err,
-                                         creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+                                         creationflags=(subprocess.CREATE_NO_WINDOW|subprocess.NORMAL_PRIORITY_CLASS) if os.name == 'nt' else 0)
             worker = identity(child.pid)
         worker.update(request=str(path), worker_slot=slot, arm=arm, day=row['date'],
                       source_commit=row['repair_commit_SHA'], source_SHA=row['repair_source_SHA'],

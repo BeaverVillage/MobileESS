@@ -63,7 +63,7 @@ def dispatch(root,manifest,cp,arm,day,slot):
     atomic(root/'SUPERVISOR_STATE.json',cp)
     with (path.parent/'stdout.log').open('ab') as out,(path.parent/'stderr.log').open('ab') as err:
         child=subprocess.Popen(command,cwd=manifest['code_root'],stdout=out,stderr=err,
-            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform=='win32' else 0)
+            creationflags=(subprocess.CREATE_NO_WINDOW|subprocess.NORMAL_PRIORITY_CLASS) if sys.platform=='win32' else 0)
     cp['workers'][key].update(process(child.pid),launch_intent=False,source_SHA=request.get('implementation_SHA'),
         source_commit=manifest['source_commit'])
     atomic(root/'SUPERVISOR_STATE.json',cp)
@@ -82,6 +82,7 @@ def adopt_intents(cp):
         if matches:w.update(process(matches[0]),launch_intent=False)
 
 def run(root):
+    if sys.platform=='win32':psutil.Process().nice(psutil.NORMAL_PRIORITY_CLASS)
     root=Path(root).resolve();manifest=read(root/'AUTONOMOUS_MANIFEST.json')
     if manifest['B2_workers']!=3 or manifest['B3_workers']!=1:raise PermissionError('WORKER_COUNT_DRIFT')
     with exclusive_lock(root/'AUTONOMOUS_SUPERVISOR.lock'):
@@ -105,6 +106,18 @@ def run(root):
             limit=3 if arm=='B2' else 1
             for slot in range(1,limit+1):
                 if slot in {w['worker_slot'] for w in cp['workers'].values()}:continue
+                other=[]
+                own={w.get('PID') for w in cp['workers'].values()}
+                for p in psutil.process_iter(['name']):
+                    if p.pid in own or (p.info['name'] or '').lower() not in ('python.exe','pythonw.exe'):continue
+                    try:
+                        a=p.cmdline();module=a[a.index('-m')+1] if '-m' in a else ''
+                        if module.endswith('.worker') and module.startswith(('v42_may','v42_b2','v42_m1','v42_a_stage','v42_autonomous_b3')):
+                            other.append(process(p.pid))
+                    except psutil.Error:continue
+                if other:
+                    cp['dispatch_wait']=dict(reason='EXTERNAL_SCIENTIFIC_WORKER_ACTIVE',workers=other,UTC=now())
+                    continue
                 # Verified repair attempts get the next free slot ahead of new days.
                 from .recovery import dispatch_ready
                 retry=dispatch_ready(root,arm,slot,manifest)
