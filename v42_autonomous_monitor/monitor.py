@@ -296,6 +296,34 @@ def initial_solution(output, day, bound, ledger, phase=None):
     return result
 
 
+def current_phase(ledger, progress, heartbeat, live, launch_intent=False):
+    """Display the current admitted Native call instead of a stale callback.
+
+    Keep both original phase reports for audit. A persisted inflight receipt
+    alone never claims an active solver after its owning process has exited.
+    """
+    raw_progress = progress.get('phase')
+    raw_heartbeat = heartbeat.get('phase')
+    phase = raw_progress or raw_heartbeat or ('START_REQUESTED' if launch_intent else 'UNKNOWN')
+    source = ('WORKER_PROGRESS' if raw_progress else 'WORKER_HEARTBEAT' if raw_heartbeat
+              else 'SUPERVISOR_LAUNCH_STATE')
+    inflight = ledger.get('inflight')
+    inflight = inflight if isinstance(inflight, dict) else {}
+    unknown = (ledger.get('budget_basis') == 'CONSERVATIVE_LOST_CALL_WINDOW'
+               or any(call.get('runtime_unavailable') for call in ledger.get('calls', [])))
+    active = (live and not unknown and finite(ledger.get('measured_Native_Runtime'))
+              and inflight.get('status') == 'IN_FLIGHT')
+    native = dict(active=bool(active), track=inflight.get('track'), label=inflight.get('label'),
+                  component=inflight.get('component'), status=inflight.get('status'),
+                  entered_UTC=inflight.get('UTC'), ledger_UTC=ledger.get('UTC'))
+    label = next((inflight.get(name) for name in ('label', 'track', 'component')
+                  if isinstance(inflight.get(name), str) and inflight[name].strip()), None)
+    if active and label:
+        phase, source = label, 'NATIVE_RUNTIME_LEDGER_INFLIGHT'
+    return dict(phase=phase, phase_source=source, raw_progress_phase=raw_progress,
+                raw_heartbeat_phase=raw_heartbeat, native_phase=native)
+
+
 def worker_view(key, worker, epoch):
     arm, day = key.split('/', 1)
     request = request_for(worker)
@@ -317,7 +345,8 @@ def worker_view(key, worker, epoch):
         bound = b2_bound(output, day)
         ledger_path = attempt / 'NATIVE_RUNTIME_LEDGER.json' if attempt else None
     ledger = read(ledger_path)
-    phase = progress.get('phase') or heartbeat.get('phase') or ('START_REQUESTED' if worker.get('launch_intent') else 'UNKNOWN')
+    phase_view = current_phase(ledger, progress, heartbeat, live, worker.get('launch_intent', False))
+    phase = phase_view['phase']
     resource = {}
     if live:
         try:
@@ -330,6 +359,8 @@ def worker_view(key, worker, epoch):
     return dict(slot=request.get('worker_slot', worker.get('worker_slot')), arm=arm, day=day,
                 PID=identity.get('PID'), alive=live, status='RUNNING' if live else 'PROCESS_ENDED',
                 stage=stage, phase=phase, initial_solution_verified=bound.get('UB') is not None,
+                phase_source=phase_view['phase_source'], raw_progress_phase=phase_view['raw_progress_phase'],
+                raw_heartbeat_phase=phase_view['raw_heartbeat_phase'], native_phase=phase_view['native_phase'],
                 initial_solution=initial_solution(output, day, bound, ledger, phase),
                 heartbeat_UTC=timestamp, heartbeat_age_seconds=age(timestamp, epoch),
                 bounds=bound, runtime=runtime(ledger, progress), resource=resource,
@@ -393,6 +424,8 @@ def view(root, epoch=None):
                             attempts=original.get('attempt_count'), current_attempt=original.get('current_attempt'))
             if live:
                 row[arm]['initial_solution'] = live['initial_solution']
+                row[arm].update({name: live[name] for name in
+                    ('phase', 'phase_source', 'raw_progress_phase', 'raw_heartbeat_phase', 'native_phase')})
             elif arm == 'B2' and request.get('output'):
                 ledger = read(Path(request['result']).parent / 'NATIVE_RUNTIME_LEDGER.json') if request.get('result') else {}
                 row[arm]['initial_solution'] = initial_solution(request['output'], day, bound, ledger)

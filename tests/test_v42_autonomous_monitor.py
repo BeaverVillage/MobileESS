@@ -47,6 +47,75 @@ def test_inflight_native_requires_matching_completed_ledger():
     assert stale['remaining_Native'] == 5390
 
 
+@pytest.mark.parametrize('label,track,component,expected', [
+    ('002_U3_00', 'U3', 'P1', '002_U3_00'),
+    (None, 'PRICING', 'P1', 'PRICING'),
+    (None, None, 'FEASIBILITY_LP', 'FEASIBILITY_LP')])
+def test_current_native_phase_prefers_measured_inflight_receipt(label, track, component, expected):
+    ledger = dict(measured_Native_Runtime=20., inflight=dict(
+        status='IN_FLIGHT', component=component, track=track, label=label, UTC='2026-10-09T18:00:00+00:00'))
+    observed = monitor.current_phase(ledger, dict(phase='P1'), dict(phase='M_ADAPTIVE_U2'), True)
+    assert observed['phase'] == expected
+    assert observed['phase_source'] == 'NATIVE_RUNTIME_LEDGER_INFLIGHT'
+    assert observed['raw_progress_phase'] == 'P1'
+    assert observed['raw_heartbeat_phase'] == 'M_ADAPTIVE_U2'
+    assert observed['native_phase']['active'] is True
+
+
+@pytest.mark.parametrize('live,measured,status,basis', [
+    (False, 20., 'IN_FLIGHT', 'MEASURED_NATIVE_RUNTIME_ONLY'),
+    (True, None, 'IN_FLIGHT', 'MEASURED_NATIVE_RUNTIME_ONLY'),
+    (True, 20., 'FINISHED', 'MEASURED_NATIVE_RUNTIME_ONLY'),
+    (True, 20., 'IN_FLIGHT', 'CONSERVATIVE_LOST_CALL_WINDOW')])
+def test_stale_or_unmeasured_inflight_does_not_claim_active_native(live, measured, status, basis):
+    ledger = dict(measured_Native_Runtime=measured, budget_basis=basis,
+                  inflight=dict(status=status, label='002_U3_00', component='P1'))
+    observed = monitor.current_phase(ledger, dict(phase='P1'), dict(phase='P1'), live)
+    assert observed['phase'] == 'P1'
+    assert observed['phase_source'] == 'WORKER_PROGRESS'
+    assert not observed['native_phase']['active']
+
+
+def test_three_worker_cached_api_uses_current_native_labels_and_preserves_raw_phases(tmp_path, monkeypatch):
+    cp = production(tmp_path)
+    cases = [('2025-05-07', '002_U3_00', 'U3'),
+             ('2025-05-08', '001_U2_00', 'U2'),
+             ('2025-05-09', 'MESS04_FULL96_LP_PRICING', 'PRICING')]
+    for slot, (day, label, track) in enumerate(cases, 1):
+        attempt = tmp_path/'dates'/'B2'/day/'attempt'
+        request = write(attempt/'request.json', dict(result=str(attempt/'RESULT.json'),
+            output=str(attempt/'output'), progress=str(attempt/'progress.json'),
+            worker_slot=slot, attempt_id='current'))
+        write(attempt/'progress.json', dict(phase='P1', Native_Runtime=25., Native_Runtime_completed=20.))
+        write(attempt/'HEARTBEAT.json', dict(phase='P1'))
+        write(attempt/'NATIVE_RUNTIME_LEDGER.json', dict(measured_Native_Runtime=20.,
+            calls=[dict(component='P1', Native_Runtime=20.)],
+            inflight=dict(component='P1', track=track, label=label, status='IN_FLIGHT')))
+        cp['workers']['B2/'+day] = dict(request=request, PID=100+slot, created=1, command=['worker'])
+        cp['dates']['B2/'+day].update(status='RUNNING', request=request)
+    write(tmp_path/'SUPERVISOR_STATE.json', cp)
+    monkeypatch.setattr(monitor, 'alive', lambda owner: bool(owner.get('PID')))
+    monkeypatch.setattr(monitor.psutil, 'Process', lambda pid: SimpleNamespace(
+        memory_info=lambda: SimpleNamespace(rss=1), cpu_times=lambda: (1, 0)))
+    before = {p: p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+    cache = Snapshot(tmp_path)
+    cache.refresh()
+    code, payload = cache.get()
+    assert code == 200
+    api = json.loads(payload)
+    for worker, (day, label, track) in zip(api['workers'], cases):
+        assert worker['day'] == day and worker['stage'] == 'M'
+        assert worker['phase'] == label and worker['native_phase']['track'] == track
+        assert worker['raw_heartbeat_phase'] == 'P1' and worker['raw_progress_phase'] == 'P1'
+        assert worker['runtime']['Native_Runtime'] == 25.
+        assert worker['runtime']['remaining_Native'] == 5375.
+        assert worker['bounds']['UB'] is None and worker['bounds']['gap'] is None
+        assert not worker['initial_solution_verified']
+        row = next(row for row in api['rows'] if row['day'] == day)
+        assert row['B2']['phase'] == label and row['B2']['raw_heartbeat_phase'] == 'P1'
+    assert before == {p: p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+
+
 def test_recycled_pid_is_not_live(monkeypatch):
     proc = SimpleNamespace(is_running=lambda: True, create_time=lambda: 20,
                            cmdline=lambda: ['python', 'worker'])
