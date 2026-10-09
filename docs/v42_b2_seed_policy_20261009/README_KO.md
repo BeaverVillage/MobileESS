@@ -51,3 +51,7 @@ http://127.0.0.1:8793/ 모니터는 별도 V18 읽기 전용 코드로 V17 journ
 ## 검증
 
 기존 회귀를 포함한 정책/시간 제한/예산 이월/인증/명시적 실패 테스트165개 PASS. 새 V18 표시 회귀3개와 기존 인증 표시9개 PASS. Node 오프라인 DOM 실행에서 워커 카드3개/Actual31행/May01 단독 검증 상태를 확인했다. 경량 테스트에는 대형 Native optimize가 없다. 실제 May01은 별도 원본 모델 실측이다. 최종 결과와 재개 여부는 MAY01_MEASURED_RESULT.json에 기록한다.
+
+## May01 V17 종료 실측
+
+Seed는900.6959998607635초, 독립 하한 LP는300.3159999847412초에 반환했다. 초기 FULL 검증 UB=.6426752324712284이며 seed는 이 UB를 개선하지 못했다. 기존 LB 인증기는 자유 helper 변수48547개의 무한 경계를 거부해 EXACT_BOX_CERTIFICATE_REQUIRES_FINITE_COEFFICIENTS_AND_BOUNDS로 종료했다. 독립 LB/Global Gap은 UNKNOWN이고 Adaptive에 진입하지 않았다. 누적4538.197999954224초, 잔여861.8020000457764초를 보존했다. May02..31은 보류됐다. V17 캡 정책/초기해 확보는 실측됐으나 인증→Adaptive 전체 경로는 아직 성공하지 못했다. 후속 V18은 별도 브랜치/PR에서 구현한다.
