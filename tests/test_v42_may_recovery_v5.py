@@ -182,3 +182,26 @@ def test_original_failed_checkpoint_and_receipts_are_preserved(campaign):
         assert row['status']=='PENDING' and row['attempts']==0
         assert row['original_attempt']['status']=='IMPLEMENTATION_FAILURE'
         assert row['original_attempt']['original_Native_Runtime']==12.5
+
+
+def test_three_v5_peer_paths_and_slots_are_admitted_but_same_date_rejected(campaign,monkeypatch):
+    from types import SimpleNamespace
+    from v42_may_recovery_v5 import worker
+    root,m,cp=campaign
+    requests=[]
+    for slot,day in enumerate(co.DAYS[:3],1):
+        path,r=co.new_request(root,m,'B2',day,worker_slot=slot)
+        r['worker_command']=co.default_worker_command(m,path);atomic(path,r)
+        requests.append((path,r))
+    class Candidate:
+        def __init__(self,pid,args):self.pid=pid;self.info={'pid':pid,'name':'python.exe'};self.args=args
+        def cmdline(self):return self.args
+    candidates=[Candidate(slot,r['worker_command']) for slot,(_,r) in enumerate(requests[1:],2)]
+    monkeypatch.setattr(worker.psutil,'process_iter',lambda attrs:candidates)
+    monkeypatch.setattr(worker.psutil,'Process',lambda:SimpleNamespace(pid=1))
+    peers=worker.assert_no_other_native_worker(requests[0][1])
+    assert {p['worker_slot'] for p in peers}=={2,3}
+    assert len({p['day'] for p in peers})==2
+    own=requests[0][1]
+    with pytest.raises(worker.LockBusy,match='DUPLICATE'):
+        worker._peer_request(own['worker_command'],own)
