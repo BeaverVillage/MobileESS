@@ -11,3 +11,5 @@ V10은 사용자가 요청한 B1 May31만 새 attempt recovery_v10_01로 재실�
 B1 1워커, B2 3워커, Threads=1, P2=0, 5400초 Native 누적 예산을 유지한다. B2는 31일 종료 후 새 버전의 Native=0 FULL 비교 게이트를 통과해야 시작한다. V9 Coordinator는 HOLD에서 자연 종료했고 진행 중인 Native Worker를 중단하지 않았다.
 
 경량 회귀 228개 PASS, UI DOM PASS. 운영 실행의 실제 상태는 PRODUCTION_MAY31_RESTART.json과 localhost:8793 모니터에서 확인한다.
+
+운영 재실행 최종 결과: May31 PASS, B1 전체 31/31 PASS. UB 0.6612200947908031, 독립 LB 0.6612200946112171, 인증 Gap 2.7159795618573685e-8%. 새 Native 209.622초와 이전 194.442초를 합한 날짜 누적 Native는 404.064초다. INTEGER_CONTROL 실제 진입에서 고정밀도 전달이 확인됐고, status 11은 독립 인증 목표 달성에 따른 정상 중단이다. Fresh AC 96/96 수렴, 물리 위반 0. B2는 별도 Native=0 FULL 동치성 게이트를 진행 중이며 아직 B2 Native 결과는 없다. 최종 증거는 PRODUCTION_MAY31_FINAL_VERIFICATION.json에 기록했다.
