@@ -1,4 +1,4 @@
-"""Native-denied guard and original-code-path tests for production V31."""
+"""Native-denied guards for the single original FULL LP / strict PDHG entry."""
 import importlib.util
 import json
 from pathlib import Path
@@ -10,6 +10,7 @@ from scipy import sparse
 
 from v42_autonomous_b2.f1_basis import transport_basis,Scope
 from v42_autonomous_b2 import f1_state as v27
+from v42_autonomous_b2 import f1_basis as basis
 
 spec = importlib.util.spec_from_file_location('v28_v27_test_helpers',
     Path(__file__).resolve().with_name('test_v42_autonomous_b2_f1_state.py'))
@@ -19,6 +20,16 @@ deny_real_gurobi_models = base.deny_real_gurobi_models
 
 @pytest.fixture
 def env(tmp_path,monkeypatch):
+    original_model=base.Model
+    class DiagnosticModel(original_model):
+        def __init__(self,*args,**kwargs):
+            super().__init__(*args,**kwargs)
+            self.Params.Crossover=-1
+            self.Params.PDHGAbsTol=1e-6
+            self.Params.PDHGRelTol=1e-6
+            self.Params.PDHGConvTol=1e-6
+            self.Params.PDHGGPU=0
+    monkeypatch.setattr(base,'Model',DiagnosticModel)
     e = base.env.__wrapped__(tmp_path,monkeypatch)
     e.scope = Scope(e.request,e.code,writer=base.write)
     return e
@@ -92,21 +103,25 @@ def lp_kwargs(env,**overrides):
     kwargs.update(overrides);return kwargs
 
 
-def test_method_zero_selected_only_after_original_reset_at_exact_one_delegate(env):
+def test_method_six_selected_only_after_original_reset_at_exact_one_delegate(env):
     full=admitted_basis(env)
     assert full.Params.Method==1 and full.Params.LPWarmStart==1
     calls=[];original=env.budget.native_optimize
     def actual(model,*args,**kwargs):
         calls.append((model.Params.Method,model.Params.LPWarmStart,model.Params.Threads,
-                      model.Params.TimeLimit,{k:getattr(model.Params,k) for k in v27.PRECISION}))
+                      model.Params.TimeLimit,{k:getattr(model.Params,k) for k in v27.PRECISION},
+                      basis._pdhg_parameters(model),model.Params.Crossover))
         return original(model,*args,**kwargs)
     env.budget.native_optimize=actual
     proxy=env.scope._budget_proxy(env.case,env.budget)
     proxy.native_optimize(full,**lp_kwargs(env))
-    assert calls==[(0,2,1,300.,v27.PRECISION)] and len(env.budget.calls)==2
+    assert calls==[(6,2,1,300.,v27.PRECISION,dict(
+        PDHGAbsTol=1e-9,PDHGRelTol=0.,PDHGConvTol=1e-9,PDHGGPU=0),-1)] and len(env.budget.calls)==2
     receipt=json.loads((env.output/'F1_FULL_LP_COMPUTATIONAL_ENTRY.json').read_text())
     assert receipt['Native_call_completed'] and receipt['completed_original_Native_call']['Native_Runtime']==300.
     assert receipt['actual_parameters']['LPWarmStart']==2
+    assert receipt['extra_PDHG_parameters_restored_to_original_model'] is True
+    assert basis._pdhg_parameters(full)==dict(PDHGAbsTol=1e-6,PDHGRelTol=1e-6,PDHGConvTol=1e-6,PDHGGPU=0)
     with pytest.raises(PermissionError,match='EXACT_ORIGINAL_FULL_LP'):
         proxy.native_optimize(full,**lp_kwargs(env))
     assert len(calls)==1
@@ -172,7 +187,7 @@ def test_actual_original_full_lp_bytecode_builder_reset_delegate_dispose_and_che
     original_code=original.__code__
     dual,cert=env.scope.full_lp_adapter(rebound_original,env.case,env.budget)
     assert rebound_original.__code__ is original_code
-    assert full.disposed and full.Params.Method==0 and full.Params.LPWarmStart==2
+    assert full.disposed and full.Params.Method==6 and full.Params.LPWarmStart==2
     assert len(env.budget.calls)==2 and env.budget.calls[-1]['requested_seconds']==300.
     # Original y<=1 means original optimum x=1. Independent full-box proof1
     # is retained; the adapter never treats a fixed-box objective as proof.
@@ -195,6 +210,8 @@ def test_builder_receipt_plans_presolved_start_without_claiming_presolved_basis_
     assert full.Params.Method==1 and full.Params.LPWarmStart==1
     assert receipt['LPWarmStart_at_builder_return']==1
     assert receipt['LPWarmStart_at_approved_Native_entry']==2
+    assert receipt['Method_at_approved_Native_entry']==6
+    assert receipt['original_Crossover']==-1
     assert receipt['original_basis_installed_before_Native_entry'] is True
     assert receipt['original_basis_to_presolved_start_transport_planned'] is True
     assert receipt['original_unpresolved_basis_computational_start'] is False
@@ -205,11 +222,13 @@ def test_builder_receipt_plans_presolved_start_without_claiming_presolved_basis_
 
 
 @pytest.mark.parametrize('changed',[
-    ('LPWarmStart',0),('LPWarmStart',1),('Method',1),('Threads',2)])
+    ('LPWarmStart',0),('LPWarmStart',1),('Method',1),('Threads',2),
+    ('PDHGAbsTol',1e-6),('PDHGRelTol',1e-6),('PDHGConvTol',1e-6),
+    ('PDHGGPU',1),('Crossover',0)])
 def test_completed_original_native_cost_remains_recorded_when_post_parameters_tampered(env,changed):
     full=admitted_basis(env);original=env.budget.native_optimize
     def completed_then_tampered(model,*args,**kwargs):
-        assert model.Params.Method==0 and model.Params.LPWarmStart==2
+        assert model.Params.Method==6 and model.Params.LPWarmStart==2
         returned=original(model,*args,**kwargs)
         setattr(model.Params,*changed)
         return returned
@@ -222,3 +241,126 @@ def test_completed_original_native_cost_remains_recorded_when_post_parameters_ta
     receipt=json.loads((env.output/'F1_FULL_LP_COMPUTATIONAL_ENTRY.json').read_text())
     assert receipt['Native_call_completed'] is False
     assert receipt['actual_parameters']['LPWarmStart']==2
+
+
+@pytest.mark.parametrize('changed',[
+    ('PDHGAbsTol',1e-3),('PDHGRelTol',1.),('PDHGConvTol',1e-3),('PDHGGPU',1),('Crossover',2)])
+def test_original_extra_settings_drift_denied_before_single_delegate(env,changed):
+    full=admitted_basis(env);setattr(full.Params,*changed)
+    with pytest.raises(PermissionError,match='ORIGINAL_RESET_OR_RECEIPT_DRIFT'):
+        env.scope._budget_proxy(env.case,env.budget).native_optimize(full,**lp_kwargs(env))
+    assert len(env.budget.calls)==1 and full.Params.Method==1
+
+
+@pytest.mark.parametrize('version',[(12,0,3),(13,0,0),(13,0,1),(14,0,2),(13,1,0)])
+def test_unsupported_or_unfixed_dual_start_backend_denied_without_native(env,monkeypatch,version):
+    import gurobipy as gp
+    env.case.d['upper'][1]=1.;base.capture(env)
+    full=base.Model(env.case,fixed=False)
+    monkeypatch.setattr(gp.gurobi,'version',lambda:version)
+    with pytest.raises(PermissionError,match='SUPPORTED_PDHG_BACKEND_REQUIRED'):
+        env.scope.install(full,env.case,env.budget)
+    assert len(env.budget.calls)==1 and full.Params.Method==1
+
+
+def test_original_crossover_disabled_denies_eligible_start(env):
+    env.case.d['upper'][1]=1.;base.capture(env)
+    full=base.Model(env.case,fixed=False);full.Params.Crossover=0
+    with pytest.raises(PermissionError,match='ORIGINAL_ENABLED_CROSSOVER'):
+        env.scope.install(full,env.case,env.budget)
+    assert len(env.budget.calls)==1 and not env.scope.installed
+
+
+def test_extra_pdhg_settings_are_model_local_and_fallback_unchanged(env):
+    full=admitted_basis(env);other=base.Model(env.case,fixed=False)
+    before=basis._pdhg_parameters(other)
+    env.scope._budget_proxy(env.case,env.budget).native_optimize(full,**lp_kwargs(env))
+    assert basis._pdhg_parameters(other)==before and other.Params.Method==1
+    assert other.Params.LPWarmStart==-1 and other.Params.Crossover==-1
+    assert basis._pdhg_parameters(full)==before
+
+
+def test_unknown_original_first_progress_inflight_survives_exception_and_extra_restore(env):
+    full=admitted_basis(env);original=basis._pdhg_parameters(full)
+    def failed_first_progress(model,*args,**kwargs):
+        env.budget.inflight=dict(kwargs,status='IN_FLIGHT')
+        env.budget.persist()
+        raise PermissionError('ORIGINAL_FIRST_PROGRESS_DENIED_BEFORE_TRY')
+    env.budget.native_optimize=failed_first_progress
+    with pytest.raises(PermissionError,match='ORIGINAL_FIRST_PROGRESS_DENIED'):
+        env.scope._budget_proxy(env.case,env.budget).native_optimize(full,**lp_kwargs(env))
+    ledger=json.loads(env.budget.path.read_text())
+    assert len(env.budget.calls)==1 and ledger['inflight']==env.budget.inflight
+    assert ledger['inflight']['status']=='IN_FLIGHT'
+    assert ledger['measured_Native_Runtime']==4.25
+    assert basis._pdhg_parameters(full)==original
+    assert json.loads((env.output/'F1_FULL_LP_COMPUTATIONAL_ENTRY.json').read_text())['Native_call_completed'] is False
+
+
+def test_mutable_cache_cannot_rebind_sealed_original_extra_settings(env):
+    full=admitted_basis(env)
+    env.scope._pdhg_original['PDHGGPU']=1;env.scope._original_crossover=0
+    full.Params.PDHGGPU=1;full.Params.Crossover=0
+    with pytest.raises(PermissionError,match='ORIGINAL_RESET_OR_RECEIPT_DRIFT'):
+        env.scope._budget_proxy(env.case,env.budget).native_optimize(full,**lp_kwargs(env))
+    assert len(env.budget.calls)==1
+
+
+def test_parameter_setup_readback_failure_restores_all_extra_values_before_native(env):
+    full=admitted_basis(env);original=basis._pdhg_parameters(full)
+    class RefuseStrictRelative(SimpleNamespace):
+        def __setattr__(self,key,value):
+            if key=='PDHGRelTol' and value==0.:value=1e-6
+            return super().__setattr__(key,value)
+    full.Params=RefuseStrictRelative(**vars(full.Params))
+    with pytest.raises(PermissionError,match='ACTUAL_COMPUTATIONAL_PARAMETERS_DRIFT'):
+        env.scope._budget_proxy(env.case,env.budget).native_optimize(full,**lp_kwargs(env))
+    assert len(env.budget.calls)==1 and env.budget.inflight is None
+    assert basis._pdhg_parameters(full)==original
+
+
+def test_post_delegate_cache_mutation_cannot_mask_crossover_tampering(env):
+    full=admitted_basis(env);original=env.budget.native_optimize
+    def tamper(model,*args,**kwargs):
+        result=original(model,*args,**kwargs)
+        env.scope._original_crossover=0;model.Params.Crossover=0
+        env.scope._pdhg_original['PDHGGPU']=1
+        return result
+    env.budget.native_optimize=tamper
+    with pytest.raises(PermissionError,match='COMPLETED_CALL_PARAMETER_DRIFT'):
+        env.scope._budget_proxy(env.case,env.budget).native_optimize(full,**lp_kwargs(env))
+    assert len(env.budget.calls)==2 and env.budget.calls[-1]['Native_Runtime']==300.
+    assert basis._pdhg_parameters(full)['PDHGGPU']==0
+
+
+@pytest.mark.parametrize('pi',[None,[float('nan')],[float('inf')],[0.,0.]])
+def test_original_full_lp_missing_or_nonfinite_pi_keeps_original_zero_candidate(env,monkeypatch,pi):
+    from v42_may_campaign_native90.a_routing import rebound
+    env.case.d['upper'][1]=1.;base.capture(env)
+    full=base.Model(env.case,fixed=False,pi=pi);full.Runtime=300.
+    full.Status=11;full.SolCount=0;env.case.bundle=dict(day='2025-05-01')
+    original=env.original_functions['FULL_LP']
+    bound=rebound(original,dict(original.__globals__,
+        _model=lambda case,continuous=False:(full,{}),atomic=base.write))
+    monkeypatch.setattr(v27,'_ORIGINAL_FUNCTIONS',dict(env.original_functions,F1=v27._ORIGINAL_FUNCTIONS['F1']))
+    _,cert=env.scope.full_lp_adapter(bound,env.case,env.budget)
+    selection=json.loads((env.output/'F1_FULL_DOMAIN_LB_SELECTION.json').read_text())
+    original_candidate=next(c for c in selection['candidates'] if c['kind']=='ORIGINAL_FULL_LP')
+    assert original_candidate['certificate']['exact_bound']=='0'
+    assert cert['F1_Native_objective_used'] is False and full.disposed
+    assert len(env.budget.calls)==2 and env.budget.calls[-1]['Native_status']==11
+
+
+def test_nonoptimal_native_status_with_finite_pi_still_uses_original_exact_checker(env,monkeypatch):
+    from v42_may_campaign_native90.a_routing import rebound
+    env.case.d['upper'][1]=1.;base.capture(env)
+    full=base.Model(env.case,fixed=False,pi=(1.,));full.Runtime=300.
+    full.Status=11;full.SolCount=0;env.case.bundle=dict(day='2025-05-01')
+    original=env.original_functions['FULL_LP']
+    bound=rebound(original,dict(original.__globals__,
+        _model=lambda case,continuous=False:(full,{}),atomic=base.write))
+    monkeypatch.setattr(v27,'_ORIGINAL_FUNCTIONS',dict(env.original_functions,F1=v27._ORIGINAL_FUNCTIONS['F1']))
+    _,cert=env.scope.full_lp_adapter(bound,env.case,env.budget)
+    assert cert['exact_bound']=='1' and cert['native_objective_used'] is False
+    assert cert['F1_Native_objective_used'] is False and full.disposed
+    assert len(env.budget.calls)==2 and env.budget.calls[-1]['Native_status']==11

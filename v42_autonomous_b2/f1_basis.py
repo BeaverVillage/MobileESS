@@ -1,8 +1,8 @@
-"""Current-attempt original basis / primal simplex computational start.
+"""Current-attempt original basis / strictly toleranced PDHG start.
 
 Inherit the unchanged V27 source, FULL promotion, Native receipts and
 independent checker. Only a proved complete original basis selects
-Method0/LPWarmStart2 at the exact original Native call. Installation keeps
+Method6/LPWarmStart2 at the exact original Native call. Installation keeps
 Method1/LPWarmStart1 until that entry; fallback retains Method1 and 300s.
 """
 import copy
@@ -10,6 +10,31 @@ import math
 
 import numpy as np
 from v42_autonomous_b2 import f1_state as v27
+
+
+def _pdhg_parameters(model):
+    return {key:getattr(model.Params,key) for key in
+        ('PDHGAbsTol','PDHGRelTol','PDHGConvTol','PDHGGPU')}
+
+
+def _pdhg_precision_exact(value):
+    # Literal values, not a mutable policy dictionary, are the authority.
+    return value == dict(PDHGAbsTol=1e-9,PDHGRelTol=0.,PDHGConvTol=1e-9,PDHGGPU=0)
+
+
+def _backend_version():
+    """Read installed API capabilities without constructing an environment/model."""
+    import gurobipy as gp
+    version=tuple(gp.gurobi.version())
+    # 13.0.2 fixes a PDHG dual-start sign bug. Other major/minor releases
+    # require new explicit qualification rather than silently changing backend.
+    if (len(version)!=3 or version[:2]!=(13,0) or version[2]<2
+            or getattr(gp.GRB,'METHOD_PDHG',None)!=6
+            or getattr(gp.GRB.Callback,'PDHG',None)!=10
+            or any(getattr(gp.GRB.Param,key,None)!=key for key in
+                ('PDHGAbsTol','PDHGRelTol','PDHGConvTol','PDHGGPU','Crossover'))):
+        raise PermissionError('F1_V33_SUPPORTED_PDHG_BACKEND_REQUIRED')
+    return version
 
 
 def transport_basis(*, vbasis, cbasis, point, lower, upper, types,
@@ -84,6 +109,9 @@ class Scope(v27.Scope):
         self._primal_model = None
         self._primal_basis = None
         self._primal_receipt = None
+        self._pdhg_original = None
+        self._original_crossover = None
+        self._pdhg_backend = None
         self._full_lp_entered = False
 
     def install(self, model, case, budget):
@@ -96,13 +124,18 @@ class Scope(v27.Scope):
             fixed_values=state.fixed_values,rows=case.A.shape[0])
         if not decision['eligible']:
             return super().install(model,case,budget)
+        backend = _backend_version()
         model.update()
         before = v27.verify_native_math(model,case)
         if model.Params.Threads != 1:
             raise PermissionError('F1_ORIGINAL_THREADS_ONE_REQUIRED')
         precision = {k:getattr(model.Params,k) for k in v27.PRECISION}
+        pdhg_original = _pdhg_parameters(model)
+        crossover = model.Params.Crossover
+        if crossover not in (-1,1,2,3,4):
+            raise PermissionError('F1_V33_ORIGINAL_ENABLED_CROSSOVER_REQUIRED')
         # Original fresh-LP bytecode sets Method1 after its builder returns.
-        # Method0 is selected only at its exact scoped Native call entry.
+        # Method6 is selected only at its exact scoped Native call entry.
         model.Params.Method = 1
         model.setAttr('VBasis',model.getVars(),decision['vbasis'].tolist())
         model.setAttr('CBasis',model.getConstrs(),decision['cbasis'].tolist())
@@ -110,15 +143,21 @@ class Scope(v27.Scope):
         model.update()
         if (before != v27.verify_native_math(model,case)
                 or precision != {k:getattr(model.Params,k) for k in v27.PRECISION}
+                or pdhg_original != _pdhg_parameters(model)
+                or model.Params.Crossover != crossover
                 or model.Params.Threads != 1 or model.Params.Method != 1
                 or model.Params.LPWarmStart != 1):
             raise PermissionError('F1_V28_BASIS_INSTALL_MATH_OR_PRECISION_DRIFT')
-        receipt = dict(schema='V42_V31_CURRENT_ATTEMPT_ORIGINAL_BASIS_PRESOLVED_PRIMAL',
+        receipt = dict(schema='V42_V33_CURRENT_ATTEMPT_ORIGINAL_BASIS_PRESOLVED_PDHG',
             PASS=True,case_sha=case.case_sha,binding=state.binding,
             original_math_roundtrip=before,mode='COMPLETE_SAME_ATTEMPT_ORIGINAL_BASIS',
-            LPWarmStart=1,Method_at_builder_return=1,Method_at_approved_Native_entry=0,
+            LPWarmStart=1,Method_at_builder_return=1,Method_at_approved_Native_entry=6,
             LPWarmStart_at_builder_return=1,LPWarmStart_at_approved_Native_entry=2,
             Threads=1,original_precision_unchanged=True,
+            original_Crossover=crossover,original_PDHG_parameters=pdhg_original,
+            PDHG_parameters_at_approved_Native_entry=dict(
+                PDHGAbsTol=1e-9,PDHGRelTol=0.,PDHGConvTol=1e-9,PDHGGPU=0),
+            Gurobi_version=list(backend),PDHG_parameters_model_local_only=True,
             original_F1_required_seconds=120.,original_full_LP_required_seconds=300.,
             total_native_cap_seconds=5400,Native_calls_added=0,
             original_full_LP_not_removed=True,performance_benefit_claimed=False,
@@ -131,6 +170,9 @@ class Scope(v27.Scope):
         self.installed = True
         self._primal_model = model
         self._primal_basis = decision
+        self._pdhg_original = pdhg_original
+        self._original_crossover = crossover
+        self._pdhg_backend = backend
         self.write('F1_FULL_LP_WARMSTART.json',receipt)
         self._primal_receipt = v27._record(self._owned('F1_FULL_LP_WARMSTART.json'))
         return receipt
@@ -161,9 +203,17 @@ class Scope(v27.Scope):
                     if model is not scope._primal_model:
                         raise PermissionError('F1_V28_INSTALLED_CURRENT_MODEL_REQUIRED')
                     state = scope.verify_state(case,budget)
-                    if (v27._record(scope._owned('F1_FULL_LP_WARMSTART.json')) != scope._primal_receipt
-                            or model.Params.Threads != 1 or model.Params.Method != 1
-                            or model.Params.LPWarmStart != 1):
+                    if v27._record(scope._owned('F1_FULL_LP_WARMSTART.json')) != scope._primal_receipt:
+                        raise PermissionError('F1_V28_ORIGINAL_RESET_OR_RECEIPT_DRIFT')
+                    sealed_start = v27._read(scope._owned('F1_FULL_LP_WARMSTART.json'))
+                    original_pdhg = copy.deepcopy(sealed_start['original_PDHG_parameters'])
+                    original_crossover = sealed_start['original_Crossover']
+                    original_backend = tuple(sealed_start['Gurobi_version'])
+                    if (model.Params.Threads != 1 or model.Params.Method != 1
+                            or model.Params.LPWarmStart != 1
+                            or _pdhg_parameters(model) != original_pdhg
+                            or model.Params.Crossover != original_crossover
+                            or _backend_version() != original_backend):
                         raise PermissionError('F1_V28_ORIGINAL_RESET_OR_RECEIPT_DRIFT')
                     v27.verify_native_math(model,case)
                     # Reconstruct from sealed original state every time. The
@@ -182,30 +232,64 @@ class Scope(v27.Scope):
                         setattr(model.Params,key,val)
                     model.Params.TimeLimit = min(float(requested),budget.remaining())
                     # Use the verified original basis to derive/crush starts
-                    # on the presolved FULL LP. Gurobi may construct a new
-                    # presolved basis; its identity is not claimed unchanged.
-                    model.Params.LPWarmStart = 2
-                    model.Params.Method = 0
-                    actual = dict(Method=int(model.Params.Method),LPWarmStart=int(model.Params.LPWarmStart),
-                        Threads=int(model.Params.Threads),TimeLimit=float(model.Params.TimeLimit),
-                        precision={k:getattr(model.Params,k) for k in v27.PRECISION})
-                    if (actual['Method'] != 0 or actual['LPWarmStart'] != 2 or actual['Threads'] != 1
-                            or actual['precision'] != v27.PRECISION
-                            or not 0 < actual['TimeLimit'] <= requested <= 300.):
-                        raise PermissionError('F1_V28_ACTUAL_COMPUTATIONAL_PARAMETERS_DRIFT')
-                    scope.write('F1_FULL_LP_COMPUTATIONAL_ENTRY.json',dict(
-                        schema='V42_V31_APPROVED_FULL_LP_PRESOLVED_NATIVE_ENTRY',status='ABOUT_TO_DELEGATE',
-                        Native_call_completed=False,call_index=before,original_call=kwargs,
-                        actual_parameters=actual,original_math_roundtrip=v27.verify_native_math(model,case),
-                        basis_start_receipt=scope._primal_receipt,state_packet=state.packet,
-                        Native_calls_added=0,performance_benefit_claimed=False))
-                returned = budget.native_optimize(model,callback,**kwargs)
+                    # on the presolved FULL LP for PDHG. Crossover is unchanged;
+                    # no presolved-basis identity or performance is claimed.
+                    try:
+                        model.Params.LPWarmStart = 2
+                        model.Params.Method = 6
+                        model.Params.PDHGAbsTol = 1e-9
+                        model.Params.PDHGRelTol = 0.
+                        model.Params.PDHGConvTol = 1e-9
+                        model.Params.PDHGGPU = 0
+                        actual = dict(Method=int(model.Params.Method),LPWarmStart=int(model.Params.LPWarmStart),
+                            Threads=int(model.Params.Threads),TimeLimit=float(model.Params.TimeLimit),
+                            Crossover=model.Params.Crossover,PDHG_parameters=_pdhg_parameters(model),
+                            Gurobi_version=list(_backend_version()),
+                            precision={k:getattr(model.Params,k) for k in v27.PRECISION})
+                        if (actual['Method'] != 6 or actual['LPWarmStart'] != 2 or actual['Threads'] != 1
+                                or not _pdhg_precision_exact(actual['PDHG_parameters'])
+                                or actual['Crossover'] != original_crossover
+                                or tuple(actual['Gurobi_version']) != original_backend
+                                or actual['precision'] != v27.PRECISION
+                                or not 0 < actual['TimeLimit'] <= requested <= 300.):
+                            raise PermissionError('F1_V28_ACTUAL_COMPUTATIONAL_PARAMETERS_DRIFT')
+                        scope.write('F1_FULL_LP_COMPUTATIONAL_ENTRY.json',dict(
+                            schema='V42_V33_APPROVED_FULL_LP_PRESOLVED_PDHG_NATIVE_ENTRY',status='ABOUT_TO_DELEGATE',
+                            Native_call_completed=False,call_index=before,original_call=kwargs,
+                            actual_parameters=actual,original_math_roundtrip=v27.verify_native_math(model,case),
+                            basis_start_receipt=scope._primal_receipt,state_packet=state.packet,
+                            Native_calls_added=0,performance_benefit_claimed=False))
+                    except BaseException:
+                        for key,value in original_pdhg.items():
+                            setattr(model.Params,key,value)
+                        raise
+                try:
+                    returned = budget.native_optimize(model,callback,**kwargs)
+                    if scope._primal_model is not None:
+                        if (model.Params.Method != 6 or model.Params.LPWarmStart != 2
+                                or model.Params.Threads != 1
+                                or not _pdhg_precision_exact(_pdhg_parameters(model))
+                                or model.Params.Crossover != original_crossover
+                                or _backend_version() != original_backend
+                                or {k:getattr(model.Params,k) for k in v27.PRECISION} != v27.PRECISION):
+                            raise PermissionError('F1_V28_COMPLETED_CALL_PARAMETER_DRIFT')
+                finally:
+                    if scope._primal_model is not None:
+                        # Only this owned original FULL-LP model receives the
+                        # extra PDHG settings. Restore them even if the original
+                        # first progress fails before its accounting try/finally.
+                        # Its inflight/unknown ledger is preserved verbatim.
+                        for key,value in original_pdhg.items():
+                            setattr(model.Params,key,value)
+                        if _pdhg_parameters(model) != original_pdhg:
+                            raise PermissionError('F1_V33_MODEL_LOCAL_PDHG_RESTORATION_REQUIRED')
                 if len(budget.calls) != before + 1 or budget.inflight is not None:
                     raise PermissionError('F1_V28_EXACTLY_ONE_COMPLETED_FULL_LP_CALL_REQUIRED')
                 if scope._primal_model is not None:
                     call = copy.deepcopy(budget.calls[-1])
-                    if (model.Params.Method != 0 or model.Params.LPWarmStart != 2
+                    if (model.Params.Method != 6 or model.Params.LPWarmStart != 2
                             or model.Params.Threads != 1
+                            or model.Params.Crossover != original_crossover
                             or {k:getattr(model.Params,k) for k in v27.PRECISION} != v27.PRECISION
                             or call.get('effective_TimeLimit') != model.Params.TimeLimit
                             or call.get('precision_parameters') != v27.PRECISION):
@@ -213,6 +297,8 @@ class Scope(v27.Scope):
                     scope._ledger(budget)
                     entry = v27._read(scope._owned('F1_FULL_LP_COMPUTATIONAL_ENTRY.json'))
                     entry.update(status='COMPLETED',Native_call_completed=True,
+                        extra_PDHG_parameters_restored_to_original_model=True,
+                        restored_PDHG_parameters=_pdhg_parameters(model),
                         completed_original_Native_call=call)
                     scope.write('F1_FULL_LP_COMPUTATIONAL_ENTRY.json',entry)
                 return returned
