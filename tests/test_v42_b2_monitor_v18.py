@@ -2,6 +2,19 @@ import json
 from pathlib import Path
 from v42_b2_monitor_v18 import monitor
 
+def test_separate_zero_start_initialization_benchmark_is_selected(tmp_path):
+    nested=tmp_path/'initialization_benchmark_v18r2_01'
+    root,attempt=fixture(nested)
+    cp=json.loads((root/'CHECKPOINT_V17.json').read_text())
+    manifest=json.loads((root/'CONTINUATION_V17_MANIFEST.json').read_text())
+    manifest.update(benchmark_initialization_only=True,canary_days=['2025-05-01'])
+    write(root/'CHECKPOINT_V18R2.json',cp)
+    write(root/'CONTINUATION_V18R2_MANIFEST.json',manifest)
+    write(attempt/'NATIVE_RUNTIME_LEDGER.json',dict(measured_Native_Runtime=0,calls=[],inflight=None))
+    value=monitor.view(tmp_path)
+    assert value['benchmark_initialization_only'] and value['runtime_root']==str(nested)
+    assert value['workers'][0]['Native_Runtime_seconds']==0
+
 
 def write(path,value):
     path.parent.mkdir(parents=True,exist_ok=True)

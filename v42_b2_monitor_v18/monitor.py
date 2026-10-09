@@ -48,12 +48,14 @@ def worker_view(root, day, row, epoch):
     worker.update(UB=None, independent_Global_LB=None, Certified_Gap=None)
     worker = enrich(worker)
     output = Path(request['output'])
-    if worker['UB'] is None and (output/'STATIONARY_DISPATCH_REPLAY.json').is_file():
+    seed_certificate=output/'BENCHMARK_FULL_CERTIFICATE.json'
+    if not seed_certificate.exists():seed_certificate=output/'STATIONARY_DISPATCH_REPLAY.json'
+    if worker['UB'] is None and seed_certificate.is_file():
         identity = optional(output/'SCIENTIFIC_CASE_IDENTITY.json')
         try:
             if identity.get('arm') != 'B2' or identity.get('day') != day:
                 raise ValueError('CURRENT_DAY_CASE_REQUIRED')
-            evidence = certificate(output/'STATIONARY_DISPATCH_REPLAY.json',output,identity['case_sha'],'UB')
+            evidence = certificate(seed_certificate,output,identity['case_sha'],'UB')
             worker['UB'] = evidence['value']
             worker['bound_status'].update(UB_reason='같은 날짜 FULL 물리·정수 검증 통과',UB_certificate=evidence)
             worker['global_gap_display']['reason'] = '검증된 초기해 확보 · 독립 LB 인증 대기'
@@ -77,6 +79,11 @@ def view(root):
     cp = co.read(root/f'CHECKPOINT_V{version}.json')
     manifest = co.read(root/f'CONTINUATION_V{version}_MANIFEST.json')
     workers = [worker_view(root,day,row,time.time()) for day,row in cp.get('workers',{}).items()]
+    if manifest.get('benchmark_initialization_only'):
+        for day in manifest['canary_days']:
+            row=cp['dates']['B2/'+day]
+            if day not in cp.get('workers',{}) and row.get('request') and row.get('result'):
+                workers.append(worker_view(root,day,row,time.time()))
     slots = []
     for slot in range(1,4):
         worker = next((w for w in workers if w['worker_slot']==slot),None)
@@ -98,7 +105,8 @@ def view(root):
         B1=co.counts(cp,'B1'),B2=co.counts(cp,'B2'),workers=workers,worker_slots=slots,
         B2_validation_detail=dict(PASS=True,status=cp['state'],error=None),
         actual_comparison=comparison(cp['dates']),last_error=cp.get('last_error'),
-        source_SHA=manifest['execution_SHA'],telemetry_only=True))
+        source_SHA=manifest['execution_SHA'],telemetry_only=True,
+        benchmark_initialization_only=manifest.get('benchmark_initialization_only',False)))
 
 
 def run(root):
