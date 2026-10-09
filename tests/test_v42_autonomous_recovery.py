@@ -290,3 +290,171 @@ def test_repair_manifest_cannot_drop_original_native_carry(tmp_path,monkeypatch)
     monkeypatch.setattr(r.subprocess,'run',lambda *a,**k:type('Result',(),{'stdout':'c'*40 if 'rev-parse' in a[0] else ''})())
     with pytest.raises(PermissionError,match='CUMULATIVE_BUDGET_CARRY_REQUIRED'):
         r._verify_dispatch(row,request)
+
+
+def b3_result(folder, runtimes, *, source='a'*64, prior=None, entered=True):
+    """Real persisted stage evidence; no optimization is needed for accounting."""
+    ledgers, identities, counts, states = {}, {}, {}, {}
+    for stage, value in runtimes.items():
+        if not entered:
+            counts[stage], states[stage] = 0, 'NOT_ENTERED'
+            continue
+        path=folder/'PIPELINE'/stage/'NATIVE_RUNTIME_LEDGER.json'
+        rows=[] if value==0 else [dict(entered_native=True,Native_Runtime=value,runtime_unavailable=False)]
+        if prior is not None:
+            rows=json.loads(json.dumps(prior['calls'][stage]))
+            extra=value-prior['runtime'][stage]
+            if extra:
+                rows.append(dict(entered_native=True,Native_Runtime=extra,runtime_unavailable=False))
+        r.atomic(path,dict(measured_Native_Runtime=value,inflight=None,calls=rows,
+            Native_ceiling_seconds=5400,wall_ceiling_seconds=None,P2_calls=0,budget_basis='MEASURED_NATIVE_RUNTIME_ONLY'))
+        identity=path.with_name('NATIVE_RUNTIME_LEDGER_IDENTITY.json')
+        r.atomic(identity,dict(stage=stage,day='2025-05-08',source_sha=source,input_sha='d'*64,native_limit_seconds=5400))
+        ledgers[stage],identities[stage]=r.record(path),r.record(identity)
+        counts[stage],states[stage]=len(rows),'MEASURED'
+    return dict(PASS=False,status='FAIL',Native_Runtime=sum(runtimes.values()),failed_stage='M2',
+        stage_native_runtime=runtimes,stage_native_calls=counts,stage_native_accounting=states,
+        stage_native_ledger_receipts=ledgers,stage_native_ledger_identity_receipts=identities,native_runtime_state='KNOWN')
+
+
+def b3_packet(tmp_path,monkeypatch,*,runtimes=None,entered=True):
+    failure,repair=packet(tmp_path,monkeypatch)
+    costs=dict(A1=0.,M1=3500.,A2=2600.,M2=20.) if runtimes is None else runtimes
+    folder=tmp_path/'b3_original'
+    result=b3_result(folder,costs,entered=entered)
+    result['failed_stage']='M2' if entered else 'ADMISSION'
+    r.atomic(folder/'RESULT.json',result)
+    failure.update(arm='B3',failed_stage=result['failed_stage'],original_native_runtime=sum(costs.values()),
+        original_result_receipt=r.record(folder/'RESULT.json'))
+    if entered:
+        failure['original_ledger_receipt']=result['stage_native_ledger_receipts']['M2']
+    else:
+        failure.pop('original_ledger_receipt',None)
+    path=tmp_path/'dates/B3/2025-05-08/attempts/new/request.json'
+    request=dict(arm='B3',day='2025-05-08',attempt_id='new',worker_slot=1,
+        result=str(path.parent/'RESULT.json'),repair_source_SHA='b'*64,implementation_SHA='b'*64,source_SHA='b'*64,
+        source_seal=str(tmp_path/'source_seal.json'),
+        previous_attempts=[str(folder)])
+    r.atomic(path,request)
+    repair.update(worker_module='v42_autonomous_b3.worker',retry_request_receipt=r.record(path))
+    return failure,repair
+
+
+def test_b3_aggregate_above_one_stage_cap_preserves_four_independent_budgets(tmp_path,monkeypatch):
+    failure,repair=b3_packet(tmp_path,monkeypatch)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    assert row['original_native_runtime']==6120.
+    assert row['remaining_native_seconds']==5380.
+    assert row['remaining_native_seconds_by_stage']==dict(A1=5400.,M1=1900.,A2=2800.,M2=5380.)
+    assert row['native_budget_scope']=='B3_STAGE_ISOLATED'
+    assert set(row['original_stage_ledger_receipts'])==set(r.B3_STAGES)
+
+
+@pytest.mark.parametrize('stage',['M1','M2'])
+def test_b3_any_exhausted_rerun_stage_blocks_retry(tmp_path,monkeypatch,stage):
+    costs=dict(A1=0.,M1=3500.,A2=2600.,M2=20.);costs[stage]=5400.
+    failure,repair=b3_packet(tmp_path,monkeypatch,runtimes=costs)
+    with r.repair_lease(tmp_path,token='test'):
+        with pytest.raises(PermissionError,match='EXHAUSTED_NATIVE_BUDGET'):
+            r.enqueue(tmp_path,failure,repair,lease_token='test')
+
+
+def test_b3_stage_unknown_blocks_even_when_aggregate_is_numeric(tmp_path,monkeypatch):
+    failure,repair=b3_packet(tmp_path,monkeypatch)
+    path=Path(failure['original_result_receipt']['path']);doc=r.read(path)
+    doc['stage_native_accounting']['M2']='UNKNOWN';doc['stage_native_runtime']['M2']=None
+    r.atomic(path,doc);failure['original_result_receipt']=r.record(path)
+    with r.repair_lease(tmp_path,token='test'):
+        with pytest.raises(PermissionError,match='UNKNOWN_NATIVE_RUNTIME'):
+            r.enqueue(tmp_path,failure,repair,lease_token='test')
+
+
+def test_b3_result_total_must_equal_sum_of_measured_stages(tmp_path,monkeypatch):
+    failure,repair=b3_packet(tmp_path,monkeypatch)
+    path=Path(failure['original_result_receipt']['path']);doc=r.read(path);doc['Native_Runtime']+=1
+    r.atomic(path,doc);failure.update(original_native_runtime=doc['Native_Runtime'],original_result_receipt=r.record(path))
+    with r.repair_lease(tmp_path,token='test'):
+        with pytest.raises(PermissionError,match='AGGREGATE_STAGE_NATIVE_ACCOUNTING'):
+            r.enqueue(tmp_path,failure,repair,lease_token='test')
+
+
+def test_b3_result_stage_cost_must_equal_its_ledger(tmp_path,monkeypatch):
+    failure,repair=b3_packet(tmp_path,monkeypatch)
+    path=Path(failure['original_result_receipt']['path']);doc=r.read(path)
+    doc['stage_native_runtime']['A2']+=1;doc['Native_Runtime']+=1
+    r.atomic(path,doc);failure.update(original_native_runtime=doc['Native_Runtime'],original_result_receipt=r.record(path))
+    with r.repair_lease(tmp_path,token='test'):
+        with pytest.raises(PermissionError,match='STAGE_MEASURED_NATIVE_ACCOUNTING'):
+            r.enqueue(tmp_path,failure,repair,lease_token='test')
+
+
+def test_b3_inflight_ledger_is_unknown_even_with_finite_recorded_cost(tmp_path,monkeypatch):
+    failure,repair=b3_packet(tmp_path,monkeypatch)
+    result_path=Path(failure['original_result_receipt']['path']);result=r.read(result_path)
+    ledger_path=Path(result['stage_native_ledger_receipts']['A2']['path']);ledger=r.read(ledger_path)
+    ledger['inflight']={'status':'IN_FLIGHT'};r.atomic(ledger_path,ledger)
+    result['stage_native_ledger_receipts']['A2']=r.record(ledger_path);r.atomic(result_path,result)
+    failure['original_result_receipt']=r.record(result_path)
+    with r.repair_lease(tmp_path,token='test'):
+        with pytest.raises(PermissionError,match='UNKNOWN_NATIVE_RUNTIME'):
+            r.enqueue(tmp_path,failure,repair,lease_token='test')
+
+
+def test_b3_stage_identity_from_another_day_is_rejected(tmp_path,monkeypatch):
+    failure,repair=b3_packet(tmp_path,monkeypatch)
+    result_path=Path(failure['original_result_receipt']['path']);result=r.read(result_path)
+    identity_path=Path(result['stage_native_ledger_identity_receipts']['A2']['path']);identity=r.read(identity_path)
+    identity['day']='2025-05-09';r.atomic(identity_path,identity)
+    result['stage_native_ledger_identity_receipts']['A2']=r.record(identity_path);r.atomic(result_path,result)
+    failure['original_result_receipt']=r.record(result_path)
+    with r.repair_lease(tmp_path,token='test'):
+        with pytest.raises(PermissionError,match='STAGE_LEDGER_SCIENTIFIC_IDENTITY'):
+            r.enqueue(tmp_path,failure,repair,lease_token='test')
+
+
+def test_b3_explicit_not_entered_failure_does_not_require_invented_ledger(tmp_path,monkeypatch):
+    failure,repair=b3_packet(tmp_path,monkeypatch,runtimes={stage:0. for stage in r.B3_STAGES},entered=False)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    assert row['original_stage_ledger_receipts']=={}
+    assert row['remaining_native_seconds'] is None
+    assert all(value==5400 for value in row['remaining_native_seconds_by_stage'].values())
+
+
+def b3_terminal(tmp_path,row,*,break_prefix=False):
+    original=r.read(row['original_result_receipt']['path'])
+    prior=r.b3_stage_accounting(original,day=row['date'],source=row['original_source_SHA'])
+    request=r.read(row['retry_request_receipt']['path']);path=Path(request['result'])
+    final=b3_result(path.parent,dict(A1=0.,M1=3501.,A2=2602.,M2=23.),source='b'*64,prior=prior)
+    if break_prefix:
+        ledger_path=Path(final['stage_native_ledger_receipts']['M1']['path'])
+        ledger=r.read(ledger_path);ledger['calls'][0]['changed_prior_call']=True;r.atomic(ledger_path,ledger)
+        final['stage_native_ledger_receipts']['M1']=r.record(ledger_path)
+    final.update(identity=dict(day=row['date'],arm='B3',attempt_id='new'),source_sha='b'*64,
+        PASS=True,status='PASS',stages={stage:dict(native_seconds=value,
+            original_integer_physical_verified=True,independent_global_verified=True)
+            for stage,value in final['stage_native_runtime'].items()})
+    r.atomic(path,final)
+    return path
+
+
+def test_b3_terminal_above_aggregate_cap_is_valid_with_preserved_stage_prefixes(tmp_path,monkeypatch):
+    failure,repair=b3_packet(tmp_path,monkeypatch)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    result=b3_terminal(tmp_path,row)
+    final=r.mark_finished(tmp_path,row['queue_id'],result)
+    assert final['verification_status']=='RECOVERY_PASS'
+    assert final['final_Native_Runtime']==6126.
+    assert final['final_remaining_native_seconds_by_stage']['M1']==1899.
+
+
+def test_b3_terminal_cannot_replace_prior_calls_with_equal_cost_calls(tmp_path,monkeypatch):
+    failure,repair=b3_packet(tmp_path,monkeypatch)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    result=b3_terminal(tmp_path,row,break_prefix=True)
+    final=r.mark_finished(tmp_path,row['queue_id'],result)
+    assert final['verification_status']=='QUARANTINE_TERMINAL_ACCOUNTING'
+    assert final['final_PASS'] is False

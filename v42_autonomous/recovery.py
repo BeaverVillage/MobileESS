@@ -26,6 +26,82 @@ REQUIRED_FAILURE = ('date', 'arm', 'failed_stage', 'failure_class',
 REQUIRED_VALIDATION = ('regression_PASS', 'original_matrix_domain_PASS',
                        'original_physical_integer_PASS', 'original_objective_PASS',
                        'independent_validation_PASS')
+B3_STAGES = ('A1', 'M1', 'A2', 'M2')
+
+
+def _measured(value):
+    return type(value) in (int, float) and math.isfinite(value) and value >= 0
+
+
+def b3_stage_accounting(result, *, day, source, previous=None):
+    """Check four cumulative stage ledgers without imposing an aggregate cap.
+
+    The worker seals explicit NOT_ENTERED states. A missing or interrupted
+    ledger is never inferred to have cost zero. Prior calls are compared as
+    exact prefixes, so a retry cannot drop or count them a second time.
+    """
+    runtime = result.get('stage_native_runtime')
+    counts = result.get('stage_native_calls')
+    states = result.get('stage_native_accounting')
+    ledgers = result.get('stage_native_ledger_receipts')
+    identities = result.get('stage_native_ledger_identity_receipts')
+    if (not all(isinstance(value, dict) for value in (runtime, counts, states, ledgers, identities))
+            or any(set(value) != set(B3_STAGES) for value in (runtime, counts, states))
+            or not set(ledgers).issubset(B3_STAGES) or set(identities) != set(ledgers)):
+        raise PermissionError('B3_COMPLETE_STAGE_NATIVE_ACCOUNTING_REQUIRED')
+    if (any(states[stage] not in ('MEASURED', 'NOT_ENTERED') or not _measured(runtime[stage])
+            or type(counts[stage]) is not int or counts[stage] < 0 for stage in B3_STAGES)
+            or result.get('native_runtime_state') not in (None, 'KNOWN')):
+        raise PermissionError('UNKNOWN_NATIVE_RUNTIME_NO_AUTOMATIC_RETRY')
+    prior_roots = []
+    request_receipt = result.get('request')
+    if request_receipt:
+        if record(request_receipt['path']) != request_receipt:
+            raise PermissionError('B3_ACCOUNTING_REQUEST_RECEIPT_SHA_DRIFT')
+        prior_roots = [Path(value).resolve() / 'PIPELINE' for value in read(request_receipt['path']).get('previous_attempts', [])]
+    calls = {}
+    for stage in B3_STAGES:
+        if states[stage] == 'NOT_ENTERED':
+            if runtime[stage] != 0 or counts[stage] != 0 or stage in ledgers:
+                raise PermissionError('B3_NOT_ENTERED_STAGE_ACCOUNTING_DRIFT')
+            calls[stage] = []
+        else:
+            if stage not in ledgers or record(ledgers[stage]['path']) != ledgers[stage] or record(identities[stage]['path']) != identities[stage]:
+                raise PermissionError('B3_STAGE_LEDGER_RECEIPT_SHA_DRIFT')
+            path = Path(ledgers[stage]['path']).resolve()
+            if (path.name != 'NATIVE_RUNTIME_LEDGER.json' or path.parent.name != stage
+                    or path.parent.parent.name != 'PIPELINE'
+                    or Path(identities[stage]['path']).resolve() != path.with_name('NATIVE_RUNTIME_LEDGER_IDENTITY.json')):
+                raise PermissionError('B3_STAGE_LEDGER_PATH_IDENTITY_DRIFT')
+            ledger, identity_doc = read(path), read(identities[stage]['path'])
+            source_matches = identity_doc.get('source_sha') == source or (
+                _sha(identity_doc.get('source_sha'), 64) and any(path.is_relative_to(value) for value in prior_roots))
+            if (identity_doc.get('stage') != stage or identity_doc.get('day') != day
+                    or not source_matches or identity_doc.get('native_limit_seconds') != 5400
+                    or not _sha(identity_doc.get('input_sha'), 64)):
+                raise PermissionError('B3_STAGE_LEDGER_SCIENTIFIC_IDENTITY_DRIFT')
+            rows = ledger.get('calls')
+            if (not isinstance(rows, list) or ledger.get('inflight') is not None or ledger.get('quarantined')
+                    or ledger.get('actual_cumulative_Native_Runtime') == 'UNKNOWN'
+                    or any(row.get('runtime_unavailable') or row.get('entered_native') is not True
+                           or not _measured(row.get('Native_Runtime')) for row in rows)):
+                raise PermissionError('UNKNOWN_NATIVE_RUNTIME_NO_AUTOMATIC_RETRY')
+            if (ledger.get('Native_ceiling_seconds') != 5400 or ledger.get('wall_ceiling_seconds') is not None
+                    or ledger.get('P2_calls') != 0 or ledger.get('budget_basis') != 'MEASURED_NATIVE_RUNTIME_ONLY'
+                    or not _measured(ledger.get('measured_Native_Runtime'))
+                    or not math.isclose(sum(row['Native_Runtime'] for row in rows), runtime[stage], rel_tol=0, abs_tol=1e-9)
+                    or ledger['measured_Native_Runtime'] != runtime[stage] or len(rows) != counts[stage]):
+                raise PermissionError('B3_STAGE_MEASURED_NATIVE_ACCOUNTING_DRIFT')
+            calls[stage] = rows
+        if previous is not None:
+            prior = previous['calls'][stage]
+            if calls[stage][:len(prior)] != prior or runtime[stage] < previous['runtime'][stage]:
+                raise PermissionError('B3_CUMULATIVE_STAGE_NATIVE_PREFIX_REQUIRED')
+    if (not _measured(result.get('Native_Runtime'))
+            or not math.isclose(sum(runtime.values()), result['Native_Runtime'], rel_tol=0, abs_tol=1e-9)):
+        raise PermissionError('B3_AGGREGATE_STAGE_NATIVE_ACCOUNTING_DRIFT')
+    return dict(runtime=runtime, calls=calls, counts=counts, states=states,
+                ledgers=ledgers, identities=identities, total=result['Native_Runtime'])
 
 
 def now():
@@ -244,22 +320,35 @@ def enqueue(root, failure, repair, *, lease_token):
     limit = failure.get('native_budget_seconds', 5400)
     if isinstance(limit, bool) or limit != 5400:
         raise ValueError('RECOVERY_NATIVE_BUDGET_REQUIRED')
-    if consumed >= limit:
+    if failure['arm'] == 'B2' and consumed >= limit:
         raise PermissionError('EXHAUSTED_NATIVE_BUDGET_NO_AUTOMATIC_RETRY')
     original_receipts = {}
-    for name in ('original_result_receipt', 'original_ledger_receipt'):
+    receipt_names = ('original_result_receipt', 'original_ledger_receipt') if failure['arm'] == 'B2' or failure.get('original_ledger_receipt') else ('original_result_receipt',)
+    for name in receipt_names:
         receipt = failure.get(name)
         if not receipt or record(receipt['path']) != receipt:
             raise PermissionError('ORIGINAL_FAILURE_RECEIPT_REQUIRED:' + name)
         original_receipts[name] = receipt
     original_result = read(original_receipts['original_result_receipt']['path'])
-    ledger = read(original_receipts['original_ledger_receipt']['path'])
-    measured = ledger.get('measured_Native_Runtime', ledger.get('measured_native_runtime'))
-    if (original_result.get('PASS') is True or original_result.get('Native_Runtime') != consumed
-            or measured != consumed or ledger.get('inflight') is not None
-            or ledger.get('quarantined') or ledger.get('actual_cumulative_Native_Runtime') == 'UNKNOWN'
-            or any(call.get('runtime_unavailable') for call in ledger.get('calls', []))):
+    ledger = read(original_receipts['original_ledger_receipt']['path']) if 'original_ledger_receipt' in original_receipts else {}
+    if original_result.get('PASS') is True or original_result.get('Native_Runtime') != consumed:
         raise PermissionError('ORIGINAL_MEASURED_FAILURE_BUDGET_REQUIRED')
+    stage_accounting = None
+    if failure['arm'] == 'B3':
+        stage_accounting = b3_stage_accounting(original_result, day=failure['date'], source=failure['original_source_SHA'])
+        if (failure['failed_stage'] not in (*B3_STAGES, 'ADMISSION', 'ACTUAL', 'VALIDATION')
+                or original_result.get('failed_stage') != failure['failed_stage']
+                or ('original_ledger_receipt' in original_receipts and
+                    original_receipts['original_ledger_receipt'] not in stage_accounting['ledgers'].values())):
+            raise PermissionError('B3_ORIGINAL_FAILED_STAGE_IDENTITY_REQUIRED')
+        if any(value >= limit for value in stage_accounting['runtime'].values()):
+            raise PermissionError('EXHAUSTED_NATIVE_BUDGET_NO_AUTOMATIC_RETRY')
+    else:
+        measured = ledger.get('measured_Native_Runtime', ledger.get('measured_native_runtime'))
+        if (measured != consumed or ledger.get('inflight') is not None
+                or ledger.get('quarantined') or ledger.get('actual_cumulative_Native_Runtime') == 'UNKNOWN'
+                or any(call.get('runtime_unavailable') for call in ledger.get('calls', []))):
+            raise PermissionError('ORIGINAL_MEASURED_FAILURE_BUDGET_REQUIRED')
     commit, source = repair.get('repair_commit_SHA'), repair.get('repair_source_SHA')
     if (not _sha(commit, 40) or not _sha(source, 64)
             or source == failure['original_source_SHA'] or not repair.get('repair_reason')):
@@ -320,12 +409,22 @@ def enqueue(root, failure, repair, *, lease_token):
                    verification_status='READY_VERIFIED_REPAIR', queued_UTC=now(),
                    validation_receipt=receipt, source_files=sources,
                    native_budget_seconds=limit,
-                   remaining_native_seconds=limit - consumed,
+                   remaining_native_seconds=limit - consumed if stage_accounting is None else (
+                       limit - stage_accounting['runtime'][failure['failed_stage']]
+                       if failure['failed_stage'] in B3_STAGES else None),
                    **original_receipts,
                    worker_module=repair.get('worker_module',
                        'v42_b2_seed_recovery_v19.worker' if failure['arm'] == 'B2' else 'v42_autonomous_b3.worker'),
                    retry_request_receipt=request_receipt, repair_code_root=str(Path(code_root).resolve()))
         row['retry_request_receipts_by_slot'] = alternatives
+        if stage_accounting is not None:
+            row.update(native_budget_scope='B3_STAGE_ISOLATED',
+                       original_stage_native_runtime=stage_accounting['runtime'],
+                       original_stage_native_calls=stage_accounting['counts'],
+                       original_stage_native_accounting=stage_accounting['states'],
+                       original_stage_ledger_receipts=stage_accounting['ledgers'],
+                       original_stage_ledger_identity_receipts=stage_accounting['identities'],
+                       remaining_native_seconds_by_stage={stage:limit-value for stage,value in stage_accounting['runtime'].items()})
         _verify_dispatch(row, request)
         for alternate in alternatives.values():
             _verify_dispatch(dict(row, retry_request_receipt=alternate), read(alternate['path']))
@@ -374,7 +473,7 @@ def _verify_dispatch(row, request):
     if (record(row['retry_request_receipt']['path']) != row['retry_request_receipt']
             or any(record(r['path']) != r for r in row['source_files'])
             or any(record(row[name]['path']) != row[name] for name in
-                   ('original_result_receipt', 'original_ledger_receipt'))
+                   ('original_result_receipt', 'original_ledger_receipt') if name in row)
             or record(row['validation_receipt']['path']) != row['validation_receipt']):
         raise PermissionError('RECOVERY_SEALED_EVIDENCE_DRIFT')
     validation = read(row['validation_receipt']['path'])
@@ -405,9 +504,15 @@ def _verify_dispatch(row, request):
     else:
         # B3 carries each optimization stage separately. The real ledger
         # verifies the full prior call prefix, source identity and 5400 cap.
+        accounting = b3_stage_accounting(read(row['original_result_receipt']['path']),
+            day=row['date'], source=row['original_source_SHA'])
+        if (accounting['runtime'] != row['original_stage_native_runtime']
+                or accounting['ledgers'] != row['original_stage_ledger_receipts']
+                or accounting['identities'] != row['original_stage_ledger_identity_receipts']):
+            raise PermissionError('B3_SEALED_STAGE_NATIVE_ACCOUNTING_DRIFT')
         originals = [Path(value).resolve() for value in request.get('previous_attempts', [])]
-        ledger = Path(row['original_ledger_receipt']['path']).resolve()
-        if not any(ledger.is_relative_to(value / 'PIPELINE') for value in originals):
+        if any(not any(Path(receipt['path']).resolve().is_relative_to(value / 'PIPELINE') for value in originals)
+                for receipt in accounting['ledgers'].values()):
             raise PermissionError('B3_REPAIR_PRIOR_STAGE_ACCOUNTING_REQUIRED')
     if module == 'v42_b2_seed_recovery_v19.worker':
         if request.get('implementation_SHA') != row['repair_source_SHA']:
@@ -426,13 +531,15 @@ def _verify_dispatch(row, request):
     else:
         # B3's sealed worker admits A1 reuse and the original full model itself;
         # the retry request must bind this immutable source seal explicitly.
-        if request.get('repair_source_SHA') != row['repair_source_SHA']:
+        if (not request.get('source_seal') or request.get('repair_source_SHA') != row['repair_source_SHA']
+                or request.get('implementation_SHA') != row['repair_source_SHA']
+                or request.get('source_SHA') != row['repair_source_SHA']):
             raise PermissionError('B3_RETRY_EXPLICIT_SOURCE_SEAL_REQUIRED')
         verifier = ('import json,sys; from pathlib import Path; '
                     'from v42_autonomous_b3.admission import source_seal,validate_seal,validate_request,execution_permit; '
                     'r=json.load(open(sys.argv[1],encoding="utf-8-sig")); '
                     'validate_request(r); s=source_seal(Path.cwd()); validate_seal(s,Path.cwd()); '
-                    'assert s["source_sha"]==r["repair_source_SHA"]; '
+                    'assert s["source_sha"]==r["repair_source_SHA"]==r["implementation_SHA"]==r["source_SHA"]; '
                     'permit=execution_permit(r,s); permit.__enter__(); permit.__exit__(None,None,None)')
     subprocess.run([sys.executable.replace('pythonw.exe', 'python.exe'), '-B', '-X', 'utf8',
                     '-c', verifier, row['retry_request_receipt']['path'], row['repair_commit_SHA']],
@@ -595,13 +702,27 @@ def _finish_row(row, result_path):
                 or result.get('benchmark_initialization_only') or result.get('scientific_PASS') is not True):
             row.update(verification_status='QUARANTINE_TERMINAL_POLICY', final_PASS=False)
             return row
-    elif result.get('PASS') is True:
+    else:
+        try:
+            prior = b3_stage_accounting(read(row['original_result_receipt']['path']),
+                day=row['date'], source=row['original_source_SHA'])
+            final = b3_stage_accounting(result, day=row['date'], source=row['repair_source_SHA'], previous=prior)
+        except (PermissionError, OSError, KeyError, TypeError, ValueError) as error:
+            row.update(verification_status='QUARANTINE_TERMINAL_ACCOUNTING',
+                       final_native_accounting='UNKNOWN_OR_UNVERIFIED', final_PASS=False,
+                       final_accounting_error=str(error))
+            return row
+        row.update(final_native_accounting='MEASURED_STAGE_CUMULATIVE',
+                   final_stage_native_runtime=final['runtime'], final_stage_native_calls=final['counts'],
+                   final_stage_ledger_receipts=final['ledgers'], final_stage_ledger_identity_receipts=final['identities'],
+                   final_remaining_native_seconds_by_stage={stage:max(0.,5400-value) for stage,value in final['runtime'].items()})
         stages = result.get('stages', {})
-        if (set(stages) != {'A1', 'M1', 'A2', 'M2'} or result.get('status') != 'PASS'
-                or request.get('prepare_only') or any(stage.get('native_seconds', -1) < 0
-                or stage.get('native_seconds', 5401) > 5400
+        if result.get('PASS') is True and (set(stages) != set(B3_STAGES) or result.get('status') != 'PASS'
+                or request.get('prepare_only') or any(not _measured(stage.get('native_seconds'))
+                or stage['native_seconds'] > 5400
                 or stage.get('original_integer_physical_verified') is not True
-                or stage.get('independent_global_verified') is not True for stage in stages.values())):
+                or stage.get('independent_global_verified') is not True for stage in stages.values())
+                or any(stages[stage]['native_seconds'] != final['runtime'][stage] for stage in B3_STAGES)):
             row.update(verification_status='QUARANTINE_TERMINAL_POLICY', final_PASS=False)
             return row
     row['verification_status'] = 'RECOVERY_PASS' if row['final_PASS'] and result.get('status') == 'PASS' else 'RECOVERY_FAILED'

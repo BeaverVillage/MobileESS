@@ -96,12 +96,19 @@ def b3_request(root,manifest,day,slot):
         arm='B3',day=day,worker_slot=slot,attempt_id=attempt_id,canary=day==DAYS[0],output=str(output),
         result=str(attempt/'RESULT.json'),progress=str(attempt/'progress.json'),error=str(attempt/'error.json'),
         started_UTC=now(),manifest=str(root/'AUTONOMOUS_MANIFEST.json'))
+    request['b1_campaign_root']=manifest.get('B1_campaign_root',str(root))
     seal=manifest.get('B3_source_seal')
-    if seal:
-        if isinstance(seal,dict):
-            if record(seal['path'])!=seal:raise PermissionError('B3_SOURCE_SEAL_RECEIPT_DRIFT')
-            request['source_seal']=seal['path']
-        else:request['source_seal']=str(seal)
+    if not seal:raise PermissionError('B3_DECLARED_SOURCE_SEAL_REQUIRED')
+    if isinstance(seal,dict):
+        if record(seal['path'])!=seal:raise PermissionError('B3_SOURCE_SEAL_RECEIPT_DRIFT')
+        request['source_seal']=seal['path']
+    else:request['source_seal']=str(seal)
+    sealed=read(request['source_seal'])
+    source=manifest.get('B3_source_SHA',sealed.get('source_sha'))
+    from .recovery import _sha
+    if not _sha(source,64) or sealed.get('source_sha')!=source:
+        raise PermissionError('B3_DECLARED_SOURCE_SHA_DRIFT')
+    request.update(source_SHA=source,implementation_SHA=source)
     qualification=manifest.get('B3_qualification',str(root/'autonomous/B3_PRODUCTION_QUALIFICATION.json'))
     if isinstance(qualification,dict):
         if record(qualification['path'])!=qualification:raise PermissionError('B3_QUALIFICATION_RECEIPT_DRIFT')
@@ -110,7 +117,15 @@ def b3_request(root,manifest,day,slot):
     if day!=DAYS[0]:request['qualification']=str(qualification)
     path=attempt/'request.json'
     if path.exists():raise PermissionError('B3_REQUEST_NEVER_OVERWRITTEN')
-    atomic(path,request);return path,request
+    atomic(path,request)
+    verifier=('import json,sys; from pathlib import Path; '
+        'from v42_autonomous_b3.admission import validate_request,validate_seal,source_seal; '
+        'r=json.load(open(sys.argv[1],encoding="utf-8-sig")); validate_request(r); '
+        's=json.load(open(r["source_seal"],encoding="utf-8-sig")); validate_seal(s,Path.cwd()); '
+        'assert source_seal(Path.cwd())["source_sha"]==s["source_sha"]==r["implementation_SHA"]==r["source_SHA"]')
+    subprocess.run([sys.executable.replace('pythonw.exe','python.exe'),'-B','-X','utf8','-c',verifier,str(path)],
+        cwd=code_root,check=True,capture_output=True,text=True)
+    return path,request
 
 def dispatch(root,manifest,cp,arm,day,slot):
     key=arm+'/'+day
