@@ -116,6 +116,17 @@ class ExactRowModel:
             if name == 'ObjCon':
                 object.__setattr__(self, '_objective_constant', float(value))
 
+    def optimize(self, callback=None):
+        # The original budget admits this wrapper, while the guarded Native
+        # method receives its owned raw model as self. Carry that exact active
+        # model scope through delegation; the original guard remains active.
+        from v42_may_campaign_native90 import execution
+        scope=execution._model.get()
+        if scope is None or scope.get('model') is not self:
+            raise PermissionError('DW_NATIVE_WRAPPER_ACTIVE_MODEL_SCOPE_REQUIRED')
+        with execution.native_scope(self._model,scope['component'],scope.get('track')):
+            return self._model.optimize(callback)
+
     def addMVar(self, n, **kwargs):
         object.__setattr__(self, '_domain', {k:np.asarray(v).copy() if k in ('lb','ub','obj') else v
                                           for k,v in kwargs.items()})
