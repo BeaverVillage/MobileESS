@@ -36,7 +36,7 @@ def collect(root,cp,key,worker):
     cp['workers'].pop(key)
 
 def b3_request(root,manifest,day,slot):
-    attempt_id='b3_production_01'
+    attempt_id='b3_production_02'
     attempt=root/'dates/B3'/day/'attempts'/attempt_id
     attempt.mkdir(parents=True,exist_ok=True)
     output=Path(manifest['code_root'])/'runtime/b3'/manifest['run_id']/day/attempt_id
@@ -113,6 +113,14 @@ def run(root):
                     cp['dates'][key].update(status='RUNNING',request=retry['request'],worker_slot=slot)
                     continue
                 day=next_day(cp,arm)
+                if arm=='B3':
+                    # The first real day is the canary. Further Native work is
+                    # admitted only by its completed qualification receipt.
+                    available=(Path(manifest['code_root'])/'v42_autonomous_b3/worker.py').exists()
+                    first=cp['dates']['B3/'+DAYS[0]]
+                    if not available or (day!=DAYS[0] and first['status']!='PASS'):
+                        cp['B3_admission']='WAITING_FOR_IMPLEMENTATION' if not available else 'WAITING_FOR_REAL_CANARY_PASS'
+                        continue
                 if day:dispatch(root,manifest,cp,arm,day,slot)
             cp.update(UTC=now(),parallel_workers=limit)
             atomic(root/'SUPERVISOR_STATE.json',cp)
