@@ -1,0 +1,88 @@
+{
+  "preflight_id": "b1_b2_p1_preflight_20261009",
+  "campaign_run_id": null,
+  "campaign_started": false,
+  "Native_optimize_calls": 0,
+  "UTC": "2026-10-08T15:49:58.221115+00:00",
+  "PASS": false,
+  "state": "BLOCKED_OS_SCHEDULER_AND_UNIMPLEMENTED_DATE_CONNECTIONS",
+  "checks": [
+    {
+      "check": "LATEST_V42_HEAD",
+      "status": "PASS",
+      "observed": "dc15114d450c25394ff174cc0c65056aae40778f"
+    },
+    {
+      "check": "EXISTING_ALGORITHM_REUSE_PATHS",
+      "status": "AUDITED",
+      "evidence": [
+        "A_STAGE_REUSE_AUDIT.json",
+        "M_STAGE_REUSE_AUDIT.json"
+      ]
+    },
+    {
+      "check": "B1_A_STAGE_P1_DATE_CONNECTION",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "check": "B2_M_STAGE_P1_DATE_CONNECTION",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "check": "B2_INDEPENDENT_AIDC_GENERATION",
+      "status": "NOT_EXECUTED"
+    },
+    {
+      "check": "MAY31_HISTORICAL_INPUT_IDENTITY",
+      "status": "PASS_EXISTING_INPUTS_ONLY",
+      "evidence": "MAY31_INPUT_IDENTITY.json"
+    },
+    {
+      "check": "NEW_DATE_ROUTE_GRID_PCC_JOB_AXIS",
+      "status": "NOT_TESTED"
+    },
+    {
+      "check": "NEW_DATE_ORIGINAL_P1_PHYSICAL_CONTRACT_EQUIVALENCE",
+      "status": "NOT_TESTED"
+    },
+    {
+      "check": "NEW_DATE_INDEPENDENT_GLOBAL_LB_UB_CERTIFIERS",
+      "status": "NOT_TESTED"
+    },
+    {
+      "check": "NEW_DATE_90_MINUTE_BUDGET",
+      "status": "POLICY_ONLY_NOT_IMPLEMENTED"
+    },
+    {
+      "check": "NEW_62_AXIS_CHECKPOINT_AND_ZERO_RETRY",
+      "status": "NOT_IMPLEMENTED"
+    },
+    {
+      "check": "NONINTERACTIVE_WINDOWS_TASK_INSTALL",
+      "status": "FAIL",
+      "error": "HRESULT 0x80070005"
+    },
+    {
+      "check": "NEW_MONITOR_HTTP_AND_UI",
+      "status": "NOT_STARTED"
+    },
+    {
+      "check": "B1_COMPLETE_BEFORE_B2_ENFORCEMENT",
+      "status": "POLICY_ONLY_NOT_IMPLEMENTED"
+    },
+    {
+      "check": "EXISTING_COMMON_REGRESSION",
+      "status": "PASS",
+      "passed": 680,
+      "skipped": 12,
+      "failed": 0
+    },
+    {
+      "check": "EXISTING_INFRASTRUCTURE_REGRESSION",
+      "status": "PASS",
+      "tests": 12,
+      "limitation": "Historical 31-date/3600-second/two-infra-retry policy; does not validate requested new policy"
+    }
+  ],
+  "regression_PASS_does_not_imply_campaign_preflight_PASS": true
+}

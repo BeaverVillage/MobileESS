@@ -1,0 +1,255 @@
+{
+  "schema": "V42_M_STAGE_EXISTING_ALGORITHM_REUSE_AUDIT_V1",
+  "generated_utc": "2026-10-08T15:45:41.391071+00:00",
+  "Git_HEAD_observed": "dc15114d450c25394ff174cc0c65056aae40778f",
+  "branch_required": "v42",
+  "audit_status": "SOURCE_AUDIT_COMPLETED_CONNECTOR_NOT_IMPLEMENTED",
+  "campaign_preflight_PASS": false,
+  "campaign_started": false,
+  "blocking_context": {
+    "reported_by_parent": "Required Windows Task Scheduler S4U probe failed with 0x80070005 ACCESS_DENIED",
+    "scheduler_probe_independently_repeated_by_this_auditor": false,
+    "Native_calls_this_audit": 0,
+    "new_algorithm_or_adapter_implemented": false
+  },
+  "current_scientific_May01_case_sha": "cb3e1c040e2e52308995708b60e7451ca43d73a2dacfeb4a18c8e8e1cfb8293a",
+  "priority_implementations": [
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_anytime\\runner.py",
+      "relative_path": "v42_m1_anytime/runner.py",
+      "sha256": "b614beff9c67f06624ee75686e3bc2f4ae85d1ab1d674b889adaefecd3fc9bd8",
+      "api": "baseline(path), execute(run_id)",
+      "source_based_finding": "Existing adaptive loop uses schedule_choice, ub_trial, feedback_master, lp_round and exact certificate frontier. baseline requires historical May01 strict UB, exact LB, completed case SHA and source HEAD. execute requires its historical BASE HEAD; it is not a date-generic B2 runner.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_anytime\\core.py",
+      "relative_path": "v42_m1_anytime/core.py",
+      "sha256": "78a00beaf605125f6b996b49ef662402d6ab3f6d27d8bfe275e0b606a62caf17",
+      "api": "Ledger, Frontier, schedule_choice",
+      "source_based_finding": "Ledger and Frontier write the module-level fixed May01 CASE. Existing ledger enforces Native Runtime ceiling 5400 seconds, Native wall cutoff 4500 seconds and final wall ceiling 5400 seconds. Existing runner starts T0 after baseline preparation, whereas requested per-date budget must include model generation and certification preparation.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Route per-date case identity, output and T0 without resetting failure costs; keep existing scheduling algorithm."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_anytime\\algorithms.py",
+      "relative_path": "v42_m1_anytime/algorithms.py",
+      "sha256": "df6892b7bd767ea13c7c143770d0396d85c76166259862ff826f218660e9be64",
+      "api": "dynamic_grid, select, ub_trial, lp_round, feedback_master",
+      "source_based_finding": "Existing UB/LB logic is reusable, but CASE and original_binary_columns=9322 are fixed. dynamic_grid includes historical FIXED_ROWS. feedback_master loads historical May01 pricing_initial raw unit columns.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Provide same-day projection row authority and same-day independently validated seed/columns; never load historical result/columns for a new date."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_hybrid\\case.py",
+      "relative_path": "v42_m1_hybrid/case.py",
+      "sha256": "16f3493d073daf0ad0eecbc128aefa8333fe00caa716dc55034c64866f191622",
+      "api": "load_case(output)",
+      "source_based_finding": "Calls legacy May01 loader, checks CASE_SHA, loads U2_RAW_POINT.npz and requires the historical exact objective 0.6063186498423855.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_research\\case.py",
+      "relative_path": "v42_m1_research/case.py",
+      "sha256": "ae774bcfc41bd280bf18301edb0e0d0af6250caee9816626f04b7f9919aed42b",
+      "api": "ResearchCase, load_case()",
+      "source_based_finding": "ResearchCase is the existing CSR/domain/graph/lift interface. load_case requires day May01, 1499 jobs, 4 units, 96 slots, 9322 binaries and 24 services, and loads committed matrix/start/alias artifacts.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_hybrid\\final_verify.py",
+      "relative_path": "v42_m1_hybrid/final_verify.py",
+      "sha256": "2fdd456498ca3e14b7f036258176da825e65dbdaf6739390082370313f07023e",
+      "api": "load_case_read_only, _strict_ub",
+      "source_based_finding": "load_case_read_only requires May01 and 1499 jobs, and loads historical admitted UB; direct reuse as a monthly loader is invalid. _strict_ub performs strict exact integer and objective checks but calls the 9322-specific candidate gate.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_native\\mess.py",
+      "relative_path": "v42_native/mess.py",
+      "sha256": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec",
+      "api": "solve(stage, deadline, sites, initial_sites, routes, battery, horizon, grid_builder, incumbent=None, ...), validate(...)",
+      "source_based_finding": "Existing constructor preserves route network, travel energy, connection timing, 96-slot SOC, Pch/Pdis/Q, mutual charge mode and PCS16. It passes five objective pairs rho, reserve_shortfall, movement_kwh, movement_count, tie to optimize.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "P1-only connector must execute rho only, preserve original model rows/variables, and record P2 calls=0. The unmodified default optimize would execute later objectives after optimal rho."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_bootstrap\\m1.py",
+      "relative_path": "v42_bootstrap/m1.py",
+      "sha256": "31279b85f8a69c41d80e0f19feda3cd2c9d7cd6026f1e8a4c5b046034363bae4",
+      "api": "native_inputs(bundle)",
+      "source_based_finding": "SHA verifies original Route Table and forecast SHA, reuses RouteArc/Battery and enforces 4 MESS / 24 sites; no Native optimize occurs inside native_inputs.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Provide each date original Route Table, traffic forecast, battery and initial-site bundle."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_bootstrap\\grid.py",
+      "relative_path": "v42_bootstrap/grid.py",
+      "sha256": "a03e6586807eec716a744aefc109d0db0c9c819a430bb7eb7ef335b85525a9fb",
+      "api": "coefficients(bundle), frozen_grid(...), grid_report(...)",
+      "source_based_finding": "coefficients delegates to source-bound load_power/native_coefficients. frozen_grid reads fixed AIDC controls from anchor and requires source stage A1/A2 voltage authority; its service authority SHA is hardcoded to OLD/MAY01_FINAL_NATIVE_INPUT_BUNDLE.json.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Reuse coefficient/grid builders with a same-day independently generated B2 AIDC anchor, day-specific source namespace and original current physical authority."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_integrated\\build.py",
+      "relative_path": "v42_integrated/build.py",
+      "sha256": "74ae4415d8165cd3101913cac5b20250d0da8184014c0ddf50df234b0330c3b9",
+      "api": "run() grid/capture assembly",
+      "source_based_finding": "Existing scientific FULL assembly uses original mess.solve, F3 compressed affine grid and all_transformer_rows; capture executes no optimizer. Outer run requires A1 freeze and reads historical inputs/start, so it cannot be called directly for B2.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Reuse lower-level original grid assembly; regenerate FULL arrays from same-day inputs rather than patching old matrix."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_sparse\\grid.py",
+      "relative_path": "v42_m1_sparse/grid.py",
+      "sha256": "16912a1661a98f10b6abf034ff92e293e070c140fec42432c3caa677aec19e24",
+      "api": "response, add_compressed(label=M1-F3)",
+      "source_based_finding": "Existing exact affine grid representation with cost-gated response variables; fixed AIDC controls remain constants.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_integrated\\contract.py",
+      "relative_path": "v42_integrated/contract.py",
+      "sha256": "5b120d3ef9647ab8189baeb33abbe83e4a374845083ed39bcf066e66879c8e17",
+      "api": "physical_authority, all_transformer_rows, grid_audit",
+      "source_based_finding": "Preserves zero-margin planning band 0.95..1.05 and current transformer NormalAmps for all 120 phase rows at each slot.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Wrap same-day MESS grid assembly in original accepted physical authority; do not omit dominated MESS transformer current rows."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_supercompact\\formulation.py",
+      "relative_path": "v42_supercompact/formulation.py",
+      "sha256": "183897e4259aaabbbdf7fcc7976adb84147ba04106cbc18bb11f9d3353cfd19f",
+      "api": "Compact(A,d,arcs,initial,H), forward, inverse",
+      "source_based_finding": "Date-independent existing representation changes arc names to route_flow, adds node_activity binaries and preserves explicit original physical mapping.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Use current-day FULL matrix and graph; independently recheck lossless original integer/LP transport for each regenerated case."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_supercompact\\presolve.py",
+      "relative_path": "v42_supercompact/presolve.py",
+      "sha256": "04adf32c1b83fa49631b64bb317c04e207ca534ba7e2af6c2b9eb16b614ba69f",
+      "api": "Presolve(A,d), run, forward, inverse",
+      "source_based_finding": "Existing static exact presolve has no optimizer or historical primal input; all algebraic eliminations record original equations and reject nonrepresentable exact coefficients.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Generate new same-day inverse/retained-axis proof packet; do not copy May01 alias certificates."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_hybrid\\blocks.py",
+      "relative_path": "v42_m1_hybrid/blocks.py",
+      "sha256": "9c9ee88e31af36f51cfcec71816c718e60de02774efec88019375bc6dba2282d",
+      "api": "build_blocks, verify_decomposition",
+      "source_based_finding": "Existing complete four-fleet CSR partition keeps every row/column/nonzero. unit_owner recognizes route_flow/node_activity and dispatch/SOC/mode, but does not recognize FULL arc names.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Supply existing compact representation or verified source-equivalent mapping; passing raw FULL directly would misassign arc columns."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_hybrid\\pricing.py",
+      "relative_path": "v42_m1_hybrid/pricing.py",
+      "sha256": "b5d907fac13080484c7dc36c87cf78661d1c2b74793739f991985d3f32c5b5a3",
+      "api": "make_prices, build_pricing_model, run_pricing, run_lp_prices, validate_local_column",
+      "source_based_finding": "Existing complete 96-slot local domains, signed multirow prices and source-row verification can accept a correctly constructed case/decomposition. Native local MIP bounds are diagnostic and are not independently certified global bounds.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_hybrid\\verify.py",
+      "relative_path": "v42_m1_hybrid/verify.py",
+      "sha256": "889193e86fc75b9fda94cecbcc4de36b223da52abae65e18885a7cc6fffe9a48",
+      "api": "verify_global_lagrangian_bound, verify_rmp_pricing_lower_bounds",
+      "source_based_finding": "Existing exact inclusion and signed-rational Global LB certification should be reused; phase0 is historical-baseline-specific and must not provide new-date certification.",
+      "executed_for_this_campaign": false
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_research\\check_lb.py",
+      "relative_path": "v42_m1_research/check_lb.py",
+      "sha256": "6c87483c677e015c966da3b5f76277968ed7a3412166a081b807bb60b65570d8",
+      "api": "check_rational_dual_certificate(A,d,multipliers,case_sha=...)",
+      "source_based_finding": "Independent exact weak-duality bound on stored binary64 coefficients and finite box; does not use Native BestBd or producer objective.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Generate same-day exact original-row dual and prove checked domain includes full original integer domain."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_research\\check_ub.py",
+      "relative_path": "v42_m1_research/check_ub.py",
+      "sha256": "499dee9e4e6cf2f81d3166642c44ae771cd09e0e6a7af4d5b8af47e618489abe",
+      "api": "matrix_replay, physical_replay, validate_candidate",
+      "source_based_finding": "Original FULL/compact CSR and untouched native graph physical replay; validate_candidate rejects any compact binary count other than 9322.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Generalize input-axis identity through audited date connector; preserve all original tolerance/integer/raw-point gates."
+    },
+    {
+      "path": "D:\\MobileESS_v42\\v42_m1_research\\ub.py",
+      "relative_path": "v42_m1_research/ub.py",
+      "sha256": "5e88cc58bf0c85611608ae1dd9952318ea780f63aa3cb6661b14f075d01d3e66",
+      "api": "binary_inventory(d)",
+      "source_based_finding": "Requires only charge_mode/node_activity binary families and total binary inventory exactly 9322.",
+      "executed_for_this_campaign": false,
+      "remaining_connector_work": "Provide current-day original compact binary authority; no arbitrary deletion of binaries is allowed."
+    }
+  ],
+  "historical_result_reuse_policy": {
+    "May01_UB_LB_points_and_columns_not_loaded_for_other_dates": true,
+    "existing_algorithms_may_be_called_after_valid_day_adapter": true,
+    "new_solver_or_formulation_implemented": false
+  },
+  "P1_objective_contract": {
+    "requested": "min rho_max",
+    "B2_target_certified_gap": 0.03,
+    "requested_P2_calls": 0,
+    "existing_native_default_objective_pairs": 5,
+    "P1_only_connector_verified": false
+  },
+  "remaining_work": [
+    "Independent per-date B2 input and common FCFS/Q50 generation with SHA/job/site/time/PCC checks",
+    "Same-day original FULL assembly and source-equivalent compact transport",
+    "Same-day feasible integer seed and dual certificates; no historical UB/LB transfer",
+    "Bind existing adaptive primal-dual/role-exchange loop to case identity, same-day projection/columns and 5400-second inclusive wall budget",
+    "B2 Planning/Actual/Fresh adapter must carry optimized MESS route/PQ/SOC; existing PR134 B1 replay hardcodes MESS OFF",
+    "Native-zero regression and per-date input-axis/physical contract verification before any Native call"
+  ],
+  "source_sha256": {
+    "v42_native/mess.py": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec",
+    "v42_native/solver.py": "e24ece8d6557a5b4dccf30c7743d4aad03fc1157a6bdd70210dbc93385f71d4d",
+    "v42_native/grid.py": "2c623d86e6d1473896873f47bc92bf2140687b5c801d75e31b8c4864e409da9a",
+    "v42_bootstrap/m1.py": "31279b85f8a69c41d80e0f19feda3cd2c9d7cd6026f1e8a4c5b046034363bae4",
+    "v42_bootstrap/grid.py": "a03e6586807eec716a744aefc109d0db0c9c819a430bb7eb7ef335b85525a9fb",
+    "v42_bootstrap/attribution.py": "0e969dbe44a5d324148de1a73c87d282e2db95ec8095854b6c1b976b593a215e",
+    "v42_integrated/build.py": "74ae4415d8165cd3101913cac5b20250d0da8184014c0ddf50df234b0330c3b9",
+    "v42_integrated/contract.py": "5b120d3ef9647ab8189baeb33abbe83e4a374845083ed39bcf066e66879c8e17",
+    "v42_integrated/matrix.py": "4affb8b2910f4440557c503969513fb8d45e1c9c93227ea0bb02772706498ae7",
+    "v42_m1_sparse/grid.py": "16912a1661a98f10b6abf034ff92e293e070c140fec42432c3caa677aec19e24",
+    "v42_supercompact/formulation.py": "183897e4259aaabbbdf7fcc7976adb84147ba04106cbc18bb11f9d3353cfd19f",
+    "v42_supercompact/presolve.py": "04adf32c1b83fa49631b64bb317c04e207ca534ba7e2af6c2b9eb16b614ba69f",
+    "v42_m1_research/case.py": "ae774bcfc41bd280bf18301edb0e0d0af6250caee9816626f04b7f9919aed42b",
+    "v42_m1_research/ub.py": "5e88cc58bf0c85611608ae1dd9952318ea780f63aa3cb6661b14f075d01d3e66",
+    "v42_m1_research/check_ub.py": "499dee9e4e6cf2f81d3166642c44ae771cd09e0e6a7af4d5b8af47e618489abe",
+    "v42_m1_research/check_lb.py": "6c87483c677e015c966da3b5f76277968ed7a3412166a081b807bb60b65570d8",
+    "v42_m1_research/check_joint.py": "19b5f88bc09ecf3964e8e476df1619bb9f6d560363e6f8c6e090c69efed6810a",
+    "v42_m1_research/projection_rows.py": "e1b1961504379d4dc1e8c507bf43746df5bdcf9629e36f4e8a36d9745f9e02b4",
+    "v42_m1_hybrid/case.py": "16f3493d073daf0ad0eecbc128aefa8333fe00caa716dc55034c64866f191622",
+    "v42_m1_hybrid/blocks.py": "9c9ee88e31af36f51cfcec71816c718e60de02774efec88019375bc6dba2282d",
+    "v42_m1_hybrid/ub.py": "a48bacdcd4926376db1136236d026dede533d7ecb18a6586a2754e4b42fa6935",
+    "v42_m1_hybrid/pricing.py": "b5d907fac13080484c7dc36c87cf78661d1c2b74793739f991985d3f32c5b5a3",
+    "v42_m1_hybrid/dw.py": "111f49ab1e63a7b4ec90a413a3d1b116e0561a7cc407bd301ad1c38bbdc5f88f",
+    "v42_m1_hybrid/verify.py": "889193e86fc75b9fda94cecbcc4de36b223da52abae65e18885a7cc6fffe9a48",
+    "v42_m1_hybrid/final_verify.py": "2fdd456498ca3e14b7f036258176da825e65dbdaf6739390082370313f07023e",
+    "v42_m1_anytime/core.py": "78a00beaf605125f6b996b49ef662402d6ab3f6d27d8bfe275e0b606a62caf17",
+    "v42_m1_anytime/runner.py": "b614beff9c67f06624ee75686e3bc2f4ae85d1ab1d674b889adaefecd3fc9bd8",
+    "v42_m1_anytime/algorithms.py": "df6892b7bd767ea13c7c143770d0396d85c76166259862ff826f218660e9be64",
+    "v42_capacity/reference.py": "2baf1e03c9328676d94a1dc83bc6b75143e385efa988cc24c333eab1bf73df04",
+    "v42_capacity/queue.py": "b5b8780ca9399bb1506920574bf025c9d5cfe1955d81814664a4a99ceeb8d381",
+    "v42_capacity/planning.py": "ab4559c6f936da723e3fb315bdeb8b67aa10d7391d70cecfca4849b57e6c8cf7",
+    "v42_modelable/power.py": "fc8abd5308cf34e2e8f204852948cfa976f4d79d181f034d3e18e81ba10b4511",
+    "v42_holdout/inputs.py": "50aeeb98fce23a8a7149aa265f2758d3256a020e49aa10aceaf8c66f8c933577",
+    "v42_holdout/calendar_adapter.py": "e86237bf9473427f4638a019b4943c429a2947d81be50683d41105031ac458d5",
+    "v42_april_b0_v2/reference.py": "4ef4c83a6d2d6dfa49cb7d17ce01fb29b136ab28cf06bd53315153c93743462c",
+    "v42_pr134_b1/inputs.py": "39a703bf2b634e01738f80cf2f1249ac3885ae14a24766618f68f1348d9fb8c7",
+    "v42_pr134_b1/native.py": "2fd8bd912a1aec59c3057128256f2b8c2ac84989c5b485ada412426655a22bfb",
+    "v42_pr134_b1/replay.py": "30ef536092b80d1024bd764a4acb1752b6e41e99824cf5030f41e4edb671360a",
+    "v42_temporal/native.py": "e3325724a2de55f81d97a5d6b19633f6b673bc7821eb31ad6f904695370d4b54"
+  },
+  "source_files_modified": false,
+  "Native_optimize_calls_observed_in_this_audit": 0,
+  "limitations": "Source/API audit only. No scientific cases were generated or solver-dependent preflight executed; this report does not establish monthly B2 readiness."
+}

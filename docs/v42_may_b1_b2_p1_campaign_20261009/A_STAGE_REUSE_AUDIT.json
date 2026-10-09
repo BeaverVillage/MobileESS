@@ -1,0 +1,442 @@
+{
+  "schema": "V42_A_STAGE_ALGORITHM_REUSE_READ_ONLY_AUDIT_V1",
+  "checked_UTC": "2026-10-08T15:45:41.968218+00:00",
+  "git_HEAD": "dc15114d450c25394ff174cc0c65056aae40778f",
+  "implemented": false,
+  "adapter_implemented": false,
+  "new_algorithm_implemented": false,
+  "Native_calls": 0,
+  "optimization_calls": 0,
+  "historical_files_modified": false,
+  "AGENTS_md_discovered_in_repository": false,
+  "campaign_state": "BLOCKED_BEFORE_NATIVE_BY_WINDOWS_SCHEDULER_S4U_ACCESS_DENIED",
+  "scheduler_failure_is_parent_reported": true,
+  "scheduler_reported_hresult": "0x80070005",
+  "scheduler_probe_not_executed_by_this_audit": true,
+  "purpose": "Identify exact existing A-stage P1-only algorithm and minimal routing required. This is not a campaign Preflight PASS or an execution start.",
+  "reuse_functions": [
+    {
+      "function": "produce(root)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_pr134_b1\\inputs.py",
+        "sha256": "39a703bf2b634e01738f80cf2f1249ac3885ae14a24766618f68f1348d9fb8c7",
+        "bytes": 17138
+      },
+      "reference_line": 22,
+      "reused_behavior": "Existing 31-day original R0 + frozen FrozenQ50 + original known_window scientific input producer. It records errors without scientific fallback; no new Q50 refit.",
+      "required_thin_adapter": "Source paths and output namespace must be routed to fresh D: campaign input directories. Do not reuse B0/B1 optimized schedules.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "produce": 22
+      }
+    },
+    {
+      "function": "original_coefficients_for_day(original,certificate,day)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_pr134_b1\\native.py",
+        "sha256": "2fd8bd912a1aec59c3057128256f2b8c2ac84989c5b485ada412426655a22bfb",
+        "bytes": 19862
+      },
+      "reference_line": 19,
+      "reused_behavior": "Rebinds unchanged original coefficient constructor with the same-day DAY authority.",
+      "required_thin_adapter": "Reuse exactly; validate day and coefficient archive SHA before construction.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "original_coefficients_for_day": 19
+      }
+    },
+    {
+      "function": "date_route(function)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_pr134_b1\\native.py",
+        "sha256": "2fd8bd912a1aec59c3057128256f2b8c2ac84989c5b485ada412426655a22bfb",
+        "bytes": 19862
+      },
+      "reference_line": 30,
+      "reused_behavior": "Date timestamp-only AST routing of original planning_grid and physical validation.",
+      "required_thin_adapter": "Reuse route; preserve source shape checks and original physical algebra.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "date_route": 30
+      }
+    },
+    {
+      "function": "bind(bundle,input_folder,output)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_pr134_b1\\native.py",
+        "sha256": "2fd8bd912a1aec59c3057128256f2b8c2ac84989c5b485ada412426655a22bfb",
+        "bytes": 19862
+      },
+      "reference_line": 45,
+      "reused_behavior": "Existing date-aware bundle/window, power, grid and frozen output namespace adapter.",
+      "required_thin_adapter": "Reuse bind for each independent arm/date. All writable output paths must be D:.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "bind": 45
+      }
+    },
+    {
+      "function": "prepare()",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_root\\data.py",
+        "sha256": "8bff2f2968e79c16266be12d7560bda093939d5e75a13e8db8cb27538058867e",
+        "bytes": 3433
+      },
+      "reference_line": 10,
+      "reused_behavior": "Original same-day jobs, bounds, resources, exact support graphs and independently reverified scientific class grouping.",
+      "required_thin_adapter": "Fresh date input through bind; cache identity is input-specific, never a reused old solve.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "prepare": 10
+      }
+    },
+    {
+      "function": "prepare_fast_active(...)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_domain_v2\\active.py",
+        "sha256": "cb888a627a9a955cd5065cf439132604b137c024d2bf30ed6aa2d7eae1dc18ef",
+        "bytes": 23955
+      },
+      "reference_line": 315,
+      "reused_behavior": "Existing finite active graph over complete hard physical STAY/migration pools; active seed ranking does not delete scientific options.",
+      "required_thin_adapter": "Use original ActivePolicy(2,8,0); generate physical domains from that date; do not silently inherit old rescue schedules.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "prepare_fast_active": 315
+      }
+    },
+    {
+      "function": "physical_domain / physical_starts / contains",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_domain_v2\\domain.py",
+        "sha256": "1b93465a1564a514a27bf01e4cf193f569f1a292edb4ade3d6796bb6e109f8d6",
+        "bytes": 17990
+      },
+      "reference_line": 47,
+      "reused_behavior": "Existing hard physical universe and full attribute membership; reference distance is not physical membership.",
+      "required_thin_adapter": "Reuse original job/rack/WAN/service domain without introducing date-specific pruning.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "physical_starts": 47,
+        "physical_domain": 65,
+        "contains": 151
+      }
+    },
+    {
+      "function": "prepare(day)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_canary\\prepare.py",
+        "sha256": "c28e8357e8c650157da97398b0c896a1f6bea54a8b2f012cf55808bef7f1f9e3",
+        "bytes": 8508
+      },
+      "reference_line": 24,
+      "reused_behavior": "Existing original model build, capture, assemble_original, compact build and complete native_block producer.",
+      "required_thin_adapter": "Currently tied to 3 canary dates, 4-day census authority, historical C: DATA/cache and stress identity. Replace only input/namespace/date authority routing; preserve all model construction functions.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "prepare": 24
+      }
+    },
+    {
+      "function": "run(native,state,day,certified_zero_point=None)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_canary\\phase.py",
+        "sha256": "a4b59e2e802a3f42c922481666eb1f6f244477d5016454208bd2c5f112b6875a",
+        "bytes": 11154
+      },
+      "reference_line": 42,
+      "reused_behavior": "Existing Phase I, original row replay, exact complete STAY/migration pricing, original P1 and independently certified LP Global LB.",
+      "required_thin_adapter": "Route OUT/POLICY and per-day history/native budget; do not call four-objective runner. Start from fresh date scientific state.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "run": 42
+      }
+    },
+    {
+      "function": "activate(state,negative,x,folder,max_batch=64)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_canary\\phase.py",
+        "sha256": "a4b59e2e802a3f42c922481666eb1f6f244477d5016454208bd2c5f112b6875a",
+        "bytes": 11154
+      },
+      "reference_line": 25,
+      "reused_behavior": "Existing verified negative support activation with artificial-free prior inclusion proof and compact inverse replay.",
+      "required_thin_adapter": "Preserve original inclusion certificate and batch activation behavior.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "activate": 25
+      }
+    },
+    {
+      "function": "full_pricing(...)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_canary\\pricing.py",
+        "sha256": "429b75f242696ba0a06f78e818ee6c3cd13bfe9f004f6b48e51fe0d4fd368e40",
+        "bytes": 9650
+      },
+      "reference_line": 19,
+      "reused_behavior": "Existing full class native local pricing, exact rational corrected certificates, coverage validator and aggregated Global LB.",
+      "required_thin_adapter": "Route HISTORY to fresh per-date full-block roster; preserve sign, coverage and finite-box certification. All native calls consume one shared date budget.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "full_pricing": 19
+      }
+    },
+    {
+      "function": "certify(...)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_acceptance\\global_box.py",
+        "sha256": "f4c2dfce774e7f8af149be8cb67274b4266b6d5ed923d03b6adfb2f9c27ac183",
+        "bytes": 3721
+      },
+      "reference_line": 7,
+      "reused_behavior": "Existing exact Fraction row-implication bounds used only for independent dual certificate.",
+      "required_thin_adapter": "Reuse certificate-only bounds; never install modified bounds in solver.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "certify": 7
+      }
+    },
+    {
+      "function": "restore_types(state,global_types)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_practical\\integer_model.py",
+        "sha256": "44e31914aadc70fca841564daeaf1a8470a3f729d8077cda826da252ad4e8aaf",
+        "bytes": 2116
+      },
+      "reference_line": 16,
+      "reused_behavior": "Rebuilds original individual migration binary lanes and integer STAY counts, proves rows/coefficients/box/objective unchanged.",
+      "required_thin_adapter": "Reuse original native types, do not integerize the fractional LP SUM kernel.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "restore_types": 16
+      }
+    },
+    {
+      "function": "Physical / Physical.verify(x)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_acceptance\\physical.py",
+        "sha256": "856f823a8d80b6f6fe4994eef55e26bb1655e23e47905ee34f3a550f5ec99695",
+        "bytes": 1574
+      },
+      "reference_line": 11,
+      "reused_behavior": "Existing original row, job, rack/GPU/WAN/service, PCC and signed grid certificate path via snapshot.certify.",
+      "required_thin_adapter": "Constructor input folder is hardcoded C:/v42_pr134_sc_execution_20261007/inputs; route only input/output paths to fresh date runtime.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "Physical": 11,
+        "verify": 22
+      }
+    },
+    {
+      "function": "certify(descriptor,data,point,original,coeff)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_pr134_sc\\snapshot.py",
+        "sha256": "fb0eaa65db86f13fa2bcdad0424ffe5126b1510f1084470c41e9f50b0cb3f921",
+        "bytes": 6152
+      },
+      "reference_line": 31,
+      "reused_behavior": "Existing original scientific descriptor physical checker.",
+      "required_thin_adapter": "Reuse original individual job and electrical physics unchanged.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "certify": 31
+      }
+    },
+    {
+      "function": "original_schedule_metrics(jobs,selected,values)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_acceptance\\schedule_audit.py",
+        "sha256": "c5cf6a85c68a2a3283f9bd106fc3c3a0473613abcf71f10f44f087761ac8b0b7",
+        "bytes": 2371
+      },
+      "reference_line": 8,
+      "reused_behavior": "Independent exact population and original schedule objective consistency checker; computes P2 metrics without optimizing P2.",
+      "required_thin_adapter": "Reuse against independently validated P1 incumbent; metric evaluation is not a P2 native solve.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "original_schedule_metrics": 8
+      }
+    },
+    {
+      "function": "run(...) P1-only integer validation / acceptance / freeze blocks",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_may12_rescue\\runner.py",
+        "sha256": "c124b8e69745b0374f60a0034cadc10801a462f9e33928807f40dc7537b8e8d9",
+        "bytes": 20547
+      },
+      "reference_line": 32,
+      "reused_behavior": "Validated original-type P1 integer incumbent, exact UB and complete full-domain LB acceptance procedure.",
+      "required_thin_adapter": "Whole runner is May12 historical checkpoint recovery and cannot serve 31 fresh dates. Expose/reuse P1-only blocks with fresh per-date state; remove historical witness/checkpoint/runtime assumptions from adapter.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "run": 32
+      }
+    },
+    {
+      "function": "decide(zero,closure,bound,integer,physical)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_may12_rescue\\contract.py",
+        "sha256": "e46544781a679082b4ce334b03359ef61b5bc072ba49a3a039544f20c33ce553",
+        "bytes": 1516
+      },
+      "reference_line": 4,
+      "reused_behavior": "Validated P1-only relative Global Gap <= 0.005, original integer population/physics gate, no P2 optimization.",
+      "required_thin_adapter": "Current classes==130 is May12-specific. Date adapter must validate expected complete class count from that date roster; preserve all other acceptance semantics.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "decide": 4
+      }
+    },
+    {
+      "function": "Native.solve(snapshot,folder,component)",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_acceptance\\native.py",
+        "sha256": "cf725c1ecfff6d5d8744b13e30ca24e0bb8e056c1a195e3af0858a43204daf82",
+        "bytes": 12071
+      },
+      "reference_line": 26,
+      "reused_behavior": "Existing native matrix read-back, raw attribute persistence before validation, single-thread policy, callback incumbent checking and budget ledger.",
+      "required_thin_adapter": "Route source freeze, OUT, STATIC, accepted native components and a fresh combined 5400-second Wall/Native budget with final validation reserve. P2 component forbidden.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "Native": 26,
+        "solve": 39
+      }
+    },
+    {
+      "function": "require_action_authorized / guard_model_optimize",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_domain_v2\\execution.py",
+        "sha256": "bfe637de559ce3961b44b1cc9b92053bcda4a1bc21ff9272fb0c4e48f311284b",
+        "bytes": 16805
+      },
+      "reference_line": 161,
+      "reused_behavior": "Existing immutable scientific authorization and stress model backstop.",
+      "required_thin_adapter": "Add narrow approved campaign frozen-permit dispatch after static gates; do not delete existing stress/production blocks.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "require_action_authorized": 161,
+        "guard_model_optimize": 252
+      }
+    },
+    {
+      "function": "freeze_planning / actual / fresh",
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_pr134_b1\\replay.py",
+        "sha256": "30ef536092b80d1024bd764a4acb1752b6e41e99824cf5030f41e4edb671360a",
+        "bytes": 11201
+      },
+      "reference_line": 14,
+      "reused_behavior": "Existing Planning freeze, fixed decision Actual, source-backed Fresh OpenDSS and physical validation contract.",
+      "required_thin_adapter": "B1 needs accepted P1-only freeze adapter. Existing four-objective A1 acceptance prerequisite cannot be falsely satisfied. Preserve Fresh engine and no-reoptimization semantics.",
+      "adapter_implemented": false,
+      "definition_lines": {
+        "freeze_planning": 14,
+        "actual": 66,
+        "fresh": 83
+      }
+    }
+  ],
+  "forbidden_whole_entrypoints": [
+    {
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_pr134_b1\\native.py",
+        "sha256": "2fd8bd912a1aec59c3057128256f2b8c2ac84989c5b485ada412426655a22bfb",
+        "bytes": 19862
+      },
+      "function": "run_a1",
+      "reason": "Four objectives over historical restricted active domain; production domain acceptance is intentionally blocked."
+    },
+    {
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_a_stage_acceptance\\integer.py",
+        "sha256": "fa5a4671ad99c3db3e872b85c43da8be5c108561b0c9f8dfea600685490c5f35",
+        "bytes": 6369
+      },
+      "function": "run",
+      "reason": "Executes P2 after P1."
+    },
+    {
+      "source": {
+        "path": "D:\\MobileESS_V42\\v42_may12_rescue\\runner.py",
+        "sha256": "c124b8e69745b0374f60a0034cadc10801a462f9e33928807f40dc7537b8e8d9",
+        "bytes": 20547
+      },
+      "function": "run",
+      "reason": "Historical May12 failure witness, OLDOUT/DAY, 130 classes, cached zero/pricing and old runtime assumptions; cannot be used unchanged for fresh May31 inputs."
+    }
+  ],
+  "May12_validated_P1_only_result": {
+    "evidence_role": "HISTORICAL_VALIDATED_ALGORITHM_RESULT_ONLY; not a new campaign certificate",
+    "files": [
+      {
+        "path": "D:\\MobileESS_V42\\docs\\v42_may12_p1_exact_rescue_20261008\\FINAL_DECISION.json",
+        "sha256": "b26af5247bec2abac4e91f56ccbe5f64d0da898efa7c9f01687d4bec0bd143e0",
+        "bytes": 1636
+      },
+      {
+        "path": "D:\\MobileESS_V42\\docs\\v42_may12_p1_exact_rescue_20261008\\P1_ONLY_ACCEPTANCE_CONTRACT.json",
+        "sha256": "ad4f160621e6999cb8bee30705affa2f71b0c83fbfdce522b1fa577239c90841",
+        "bytes": 448
+      },
+      {
+        "path": "D:\\MobileESS_V42\\docs\\v42_may12_p1_exact_rescue_20261008\\P1_FULL_DOMAIN_BOUND_CERTIFICATE.json",
+        "sha256": "82f159d924ac4e17d10f488c2fe7ae0811bb5f2bd431427577ee8a1531e7bc3e",
+        "bytes": 1701
+      },
+      {
+        "path": "D:\\MobileESS_V42\\docs\\v42_may12_p1_exact_rescue_20261008\\P1_ONLY_FREEZE.json",
+        "sha256": "3f213264b6432abac97dd2b01eccd9eaedb246596667be0793e2cdab538b4171",
+        "bytes": 1142466
+      }
+    ],
+    "stored_classification": "MAY12_P1_ONLY_ACCEPTED",
+    "stored_PASS": true,
+    "exact_LB": "5934731355288829/9007199254740992",
+    "LB": 0.6588875395606518,
+    "exact_UB": "742301704257481/1125899906842624",
+    "UB": 0.6592963546281192,
+    "exact_gap": "3682278771019/5938413634059848",
+    "gap": 0.0006200778520881811,
+    "gap_matches_stored_exact": true,
+    "bounds_match_historical_bound_certificate": true,
+    "P2_executed": false,
+    "P2_objectives_optimized": false,
+    "historical_complete_classes_required": 130,
+    "fresh_end_to_end_60_minute_wall_pass_claim": false,
+    "historical_runtime_not_recharged_or_reused": true,
+    "new_date_result_reuse": false
+  },
+  "historical_May31_input_audit": {
+    "path": "D:\\MobileESS_V42\\docs\\v42_may_b1_b2_p1_campaign_20261009\\MAY31_INPUT_IDENTITY.json",
+    "sha256": "70052197b45192be2d113f290f276d914d5fce0b84eb68bcd7e051891c940f01",
+    "bytes": 318122
+  },
+  "historical_May31_payload_identity_all_verified": true,
+  "fresh_campaign_inputs_generated": false,
+  "fresh_campaign_case_SHA": null,
+  "required_pre_native_work_remaining": [
+    "OS scheduler independent execution installation must succeed; 0x80070005 must not be marked PASS.",
+    "Generate separate fresh B1/B2 per-day inputs from original frozen authority on D:.",
+    "Route existing original model/state builders and complete physical class rosters to each date.",
+    "Reuse Phase I/full pricing and original-type integer P1 validation; P2 native calls must remain zero.",
+    "Generalize May12 class-count acceptance to exact per-date roster count.",
+    "Narrow new source-frozen campaign authorization must preserve historical guards.",
+    "Apply one shared per-arm/date 5400-second Wall and Native budget, Threads=1 and validation reserve.",
+    "Run required static regressions and independent physical/LB/UB/SHA checks before any Native call."
+  ],
+  "scientific_contracts_to_preserve": [
+    "P1 min rho_max",
+    "Global Gap <= 0.005",
+    "Original full STAY/migration integer region",
+    "Original job/rack/GPU/WAN/service/PCC/grid constraints",
+    "MESS OFF, P=Q=0 for B1",
+    "Raw incumbent not rounded or clipped",
+    "Independent full-domain Global LB; native restricted BestBd is progress only",
+    "Original individual integer types; fractional LP SUM kernel not integerized",
+    "No P2 optimization",
+    "No old date UB/LB/point/runtime reused as a new certificate"
+  ],
+  "new_campaign_preflight_PASS": false
+}

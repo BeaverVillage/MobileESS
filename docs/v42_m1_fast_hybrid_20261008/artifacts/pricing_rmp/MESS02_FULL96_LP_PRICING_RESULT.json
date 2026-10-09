@@ -1,0 +1,81 @@
+{
+  "label": "MESS02_FULL96_LP_PRICING",
+  "unit": "MESS02",
+  "kind": "LP",
+  "build": {
+    "unit": "MESS02",
+    "kind": "LP",
+    "rows": 35823,
+    "columns": 61080,
+    "nnz": 310877,
+    "binary_columns": 0,
+    "build_wall_seconds": 0.3182927999878302,
+    "all_original_local_matrix_nonzeros_retained": true,
+    "full_96_slot_domain_preserved": true,
+    "presolve": "ORIGINAL_SOLVER_DEFAULT_NO_EXTRA_PRESOLVE_CALL",
+    "solver_parameters": {
+      "Threads": 1,
+      "FeasibilityTol": 1e-08,
+      "OptimalityTol": 1e-08,
+      "IntFeasTol": 1e-08,
+      "MIPGap": 0.005
+    },
+    "finite_memory_limits": false,
+    "native_optimize_calls": 0
+  },
+  "native": {
+    "track": "PRICING",
+    "label": "MESS02_FULL96_LP_PRICING",
+    "case_sha": "cb3e1c040e2e52308995708b60e7451ca43d73a2dacfeb4a18c8e8e1cfb8293a",
+    "requested_seconds": 60.0,
+    "allocated_native_seconds": 60.0,
+    "started_utc": "2026-10-08T13:59:14.410307+00:00",
+    "state": "FINISHED",
+    "parameters": {
+      "Threads": 1,
+      "MIPGap": 0.005,
+      "FeasibilityTol": 1e-08,
+      "OptimalityTol": 1e-08,
+      "IntFeasTol": 1e-08
+    },
+    "log": "D:\\MobileESS_V42\\runtime\\v42_m1_fast_hybrid\\hybrid_may01_20261008_5pct_pilot01\\13_PRICING_MESS02_FULL96_LP_PRICING_NATIVE.log",
+    "Native_Runtime": 5.216000080108643,
+    "measured_Native_Runtime": 5.216000080108643,
+    "runtime_unavailable": false,
+    "Native_Work": 7.042911537219313,
+    "optimize_wall_seconds": 5.217284900019877,
+    "status": 2,
+    "SolCount": 1,
+    "error": null,
+    "peak_Gurobi_memory_GB": 1.15023884,
+    "objective_diagnostic": -0.11676892053144647,
+    "native_ObjBound_diagnostic": -0.11676892053144647,
+    "native_BestBd_is_not_exact_certificate": true,
+    "presolve_callback_count": 36,
+    "presolve_callback_span_seconds": 0.09470969997346401,
+    "presolve_callback_span_is_not_exact_presolve_runtime": true,
+    "historical_ledger_writes": 0,
+    "solver_reported_presolve_seconds_rounded": [],
+    "presolve_included_in_Native_Runtime": true
+  },
+  "native_optimize_wall_seconds": 5.228282700001728,
+  "pricing_closure": false,
+  "rounded_price_native_objective_is_diagnostic_only": true,
+  "dual_evidence": {
+    "path": "D:\\MobileESS_V42\\runtime\\v42_m1_fast_hybrid\\hybrid_may01_20261008_5pct_pilot01\\pricing_rmp\\MESS02_LP_DUAL.npz",
+    "sha256": "53ecb2412b2da39c3b3c3198d05e1bec8cc619a6f31af7c6d21c36257dda5b0c"
+  },
+  "signed_rows_zeroed": 26,
+  "exact_local_price_certificate": {
+    "PASS": true,
+    "exact_bound": "-174753759791208335392337877242763436911782240299947/1496577676626844588240573268701473812127674924007424",
+    "independently_certified_LB": -0.11676892053146755,
+    "weighted_rhs_exact": "-1877223707132699555/18446744073709551616",
+    "box_correction_exact": "-22455279208204910517470582555323699430024236608427/1496577676626844588240573268701473812127674924007424",
+    "residual_nonzero_columns": 14986,
+    "native_ObjBound_used": false,
+    "integer_pricing_closure": false,
+    "check_wall_seconds": 0.6947842999943532
+  },
+  "fresh_dual_adopted": true
+}

@@ -1,0 +1,15 @@
+D:\MobileESS_V42, branch v42, PR #189에서 V42 B1/B2 캠페인을 점검하고 실제 결함과 병목을 복구한다. 모든 shell 호출의 workdir를 D:\MobileESS_V42로 지정한다. 대상 root는 D:\MobileESS_V42\runtime\v42_may_campaign\native90_build_reuse_20261009_01이다. CONTINUATION_V5_MANIFEST.json과 CHECKPOINT_V5.json이 현재 실행의 권위이며 v42_may_recovery_v5 패키지를 사용한다. 원본 CAMPAIGN_MANIFEST.json, BASE_CHECKPOINT_BOUNDARY_V5.json, 실패 결과와 ledger는 보존한다. HOLD.json은 이전 V2 Coordinator의 신규 dispatch 차단용으로 유지한다. 이를 제거하거나 V2 호스트를 복구하지 않는다.
+
+시작할 때 최신 HEAD, 작업 상태, V5 manifest의 run_id, source SHA, 원본 scientific authority 및 모든 validation gate를 확인한다. 신원 또는 SHA 불일치 시 Worker를 만들지 말고 증거를 보존한다. 한 Codex 점검 전체에 유지보수 잠금을 잡는다. 현재 thread id를 CODEX_THREAD_ID로 제공하고 python -B -X utf8 -m v42_may_campaign_native90.maintenance_session begin --storage <root>\hourly_maintenance를 실행한다. 다른 작업이 ACTIVE이면 중복 점검/복구하지 않는다. guardian을 시간 경과로 죽이지 않는다. owner의 실제 종료 증거가 있을 때만 기존 절차로 해제한다. 받은 token을 python -B -X utf8 -m v42_may_recovery_v5.maintenance --root <root> --session-token <token> --recover-dead-hosts에 전달하고 마지막에 maintenance_session end로 해제한다.
+
+B1 22일은 기존 PASS를 유지한다. 사용자가 명시적으로 승인한 각 1회의 새 attempt는 11일, 19일 순서이며 기존 failed RESULT/ledger와 분리돼 있다. 그 뒤 23일부터31일까지 진행한다. B1 31개 날짜 모두 terminal 이후 B2 3 Worker로 자동 전환한다. 이 큐는 OS Coordinator가 수행한다. 추가 실패 날짜 재시도, Worker 재시작, 완료 날짜 덮어쓰기, 예산 초기화를 만들지 않는다. Coordinator/Monitor/Watchdog는 manifest의 RecoveryV5 전용 Windows 작업만 사용한다. 살아 있는 orphan Worker는 동일 PID/생성시각/명령줄로 adoption한다. 정상 Solver를 건드리지 않는다.
+
+Worker PID/입력 SHA/시작시각/Heartbeat, CPU 누적 변화/RSS/I/O/단계 카운터, Solver 로그, Native ledger, 독립 Gap/정수/물리/AC 인증, 모니터 localhost:8793의 실시간 API와 B2 세 슬롯, MAY11_MAY19_RECOVERY_SEQUENCE_V5.json 및 실제 B1→B2 전환 기록을 확인한다. 실제 전환 전에는 Native=0 전환 테스트 PASS와 NOT_YET_OBSERVED를 구분한다. InteractiveToken은 로그인 세션의 실행이며 로그오프 지속성은 NOT_PROVEN이다.
+
+각 날짜의 Gurobi optimize Runtime만 누적 최대5400초, 각 TimeLimit은 잔여 예산이다. 실패 호출도 실제 Runtime을 계상한다. 원본 모델/가격 모델 생성과 optimize 밖 독립 검증/Exact LB/Actual/Fresh AC는 별도 Wall이며 전체 Wall90분 종료 기준은 없다. Runtime 미확인 시 추정/초기화 없이 추가Native를 차단한다. 모니터 시간은 완료된 ledger가 권위이며 경과시간을 모델 완료율로 가장하지 않는다.
+
+모델 생성이 느리면 같은 날짜와 같은 범위의 실측 기준으로 비교한다. 10분 단계 무진행은 진단 기준이지 종료 기준이 아니다. CPU/RSS/I/O/페이징/파일과 카운터를 읽기 전용으로 관측하고 안전한 nonblocking profile로 원인을 찾는다. 11일 생성은402.54→296.64초, 19일은 최종316.59초 대 이전300.88초로 속도 개선을 주장하지 않는다. 19일의 느린 그래프 캐시 검증은 비활성화하고 원본 DATA를 새로 생성한다. 동일 fresh reference의 중복 조립 제거와 Python 프로세스 이름 선별 후 명령줄 안전 검사만 검증된 효율화로 적용돼 있다. 다른 날짜를 May01 벤치마크로 취급하지 않는다.
+
+새 결함이 확인되면 감사만 남기지 말고 별도 버전의 최소 adapter/자료구조 변경으로 복구한다. 현재 Worker가 import하거나 pin한 소스는 수정하지 않는다. 원본 input/job/resource/boundary/class/domain/SHA와 모든 행렬/objective/RHS/sense/bounds/types/정수/물리 replay 동치성, Native=0 회귀와 같은 날짜 성능을 검증한 뒤 안전한 다음 미실행 Worker 경계에서만 적용한다. 과거 해/LB/UB/Native 시간은 이식하지 않는다. 기존 A/M 알고리즘, Gap/Threads1/P2=0, Heuristics0.05 및 Role-Exchange LNS는 유지한다. May11 LP 정밀도만 V5 승인 범위를 따른다. RAM 상한, CPU 감속/sleep, 임의 후보 삭제, 제약 완화, 새 미검증 휴리스틱은 금지한다.
+
+의미 있는 변경/완료/실패/사용자 조치가 필요할 때만 알린다. 정상이고 상태 변화가 없으면 조용히 마친다. 개선 시 commit/push 및 PR189를 갱신한다. COMPLETE이면 마지막 검증 결과를 보존하고 예약을 PAUSED로 전환한다.

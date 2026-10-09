@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mobile ESS · B2 모니터</title>
+<style>
+:root{--ink:#172c3a;--muted:#6b7d89;--line:#dbe4e9;--green:#087e69;--red:#b72e3c;--amber:#9b6409;--bg:#f4f7f8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 "Segoe UI","Malgun Gothic",sans-serif}
+main{max-width:1240px;margin:auto;padding:28px 28px 40px}header,.between{display:flex;justify-content:space-between;align-items:center;gap:16px}
+h1{font-size:25px;letter-spacing:-.8px;margin:0}h2{font-size:18px;letter-spacing:-.5px;margin:0}h3{font-size:18px;margin:0}
+p{margin:0}.muted,.caption{color:var(--muted)}.caption{font-size:12px}a{color:var(--green);text-decoration:none}a:hover{text-decoration:underline}
+header{margin-bottom:20px}header p{margin-top:3px}.right{text-align:right}.live{font-size:12px;font-weight:600;color:var(--green)}
+.live:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:7px}
+.live.warn{color:var(--amber)}.live.error{color:var(--red)}.nav{display:flex;gap:20px;font-size:12px;margin-top:7px}
+.overview,.worker,.panel{border:1px solid var(--line);background:#fff;border-radius:12px}
+.overview{padding:20px 22px;border-left:4px solid var(--green)}.overview.warn{border-left-color:var(--amber)}.overview.error{border-left-color:var(--red)}
+#campaign-title{font-size:19px;font-weight:650;margin-bottom:4px}.summary{display:grid;grid-template-columns:repeat(4,1fr);margin-top:18px;border-top:1px solid var(--line)}
+.summary>div{padding:15px 18px 0 0}.summary-label{font-size:12px;color:var(--muted)}
+.summary-value{font-size:24px;font-weight:650;font-variant-numeric:tabular-nums;margin-top:2px}.summary-value small{font-size:14px;font-weight:400;color:var(--muted)}
+.section-head{margin:26px 0 12px}.section-head .caption{margin-top:3px}.workers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.worker{padding:19px;min-width:0}.worker-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.slot{font-size:12px;color:var(--muted);font-weight:600}.pill{font-size:11px;padding:3px 8px;border-radius:20px;background:#eef3f5;color:#6b7d89;white-space:nowrap}
+.pill.running,.pill.pass{background:#e6f4ee;color:var(--green)}.pill.fail{background:#fdecef;color:var(--red)}.pill.warn{background:#fff3dc;color:var(--amber)}
+.phase{font-size:14px;font-weight:600;margin:4px 0 14px;min-height:22px}.steps{display:flex;gap:5px;margin-bottom:18px}
+.steps span{flex:1;font-size:11px;text-align:center;padding:5px 2px;border-radius:5px;background:#f0f4f6;color:#9aa8b1}
+.steps .active{color:var(--green);background:#e4f2ed;font-weight:650}.steps .done{color:#688f82;background:#f1f7f4}
+.gap-label{font-size:12px;color:var(--muted)}.gap{font-size:31px;font-weight:650;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.gap.wait{font-size:24px;color:#85959f;letter-spacing:-.5px}.gap small{font-size:12px;letter-spacing:0;color:var(--muted);font-weight:400}
+.gap-reason{min-height:19px;margin:2px 0 16px;font-size:11px;color:var(--muted)}
+.time-row{display:flex;justify-content:space-between;gap:8px;font-size:12px}.time-row strong{font-weight:600;font-variant-numeric:tabular-nums}
+.track{background:#edf2f4;height:5px;border-radius:5px;margin:8px 0}.track div{height:100%;background:var(--green);border-radius:5px}
+.health{font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:13px;padding-top:10px;min-height:28px}.health.bad{color:var(--red)}
+details{font-size:12px}summary{cursor:pointer;color:var(--green);user-select:none}summary:hover{text-decoration:underline}
+.worker details{border-top:1px solid var(--line);margin-top:11px;padding-top:10px}
+.kv{display:grid;grid-template-columns:minmax(95px,1fr) minmax(0,1.5fr);gap:7px 12px;margin-top:12px;font-size:11px}
+.kv .k{color:var(--muted)}.kv .v{overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.raw{white-space:pre-wrap;overflow-wrap:anywhere;background:#f6f8f9;padding:12px;border-radius:6px;max-height:240px;overflow:auto;font:11px/1.6 Consolas,monospace}
+.panel{overflow:hidden}.table-scroll{overflow:auto;max-height:575px}table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th{font-size:12px;color:var(--muted);font-weight:600;text-align:left;background:#f7f9fa;position:sticky;top:0;z-index:1;white-space:nowrap}
+th,td{padding:10px 18px;border-bottom:1px solid #e8eef1}tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#f6faf8}
+.numeric{text-align:right}.loading{font-weight:600}.overload,.bad{color:var(--red)}.decrease{color:var(--green)}.increase{color:var(--amber)}
+td .pill{font-size:10px}.table-note{padding:12px 18px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);background:#fcfdfd}
+.alert{border:1px solid #eecbd0;background:#fff0f2;color:var(--red);border-radius:9px;padding:12px 16px;font-size:12px;margin-top:12px;overflow-wrap:anywhere}
+.connection-alert{background:#fff7e8;border-color:#ead7b4;color:var(--amber)}
+footer{font-size:11px;color:var(--muted);margin-top:22px}footer details{margin-top:7px}.mono{font-family:Consolas,monospace;overflow-wrap:anywhere}
+[hidden]{display:none!important}
+@media(max-width:850px){main{padding:20px 16px}.workers{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,1fr)}.worker{padding:18px}.gap-reason{min-height:0}.table-scroll{max-height:600px}th,td{padding:10px 12px}.section-head.between{align-items:flex-start}}
+@media(max-width:480px){header{align-items:flex-start}h1{font-size:21px}.summary-value{font-size:22px}.overview{padding:16px}#campaign-title{font-size:17px}.nav{gap:12px}table{min-width:640px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div><h1>Mobile ESS <span class="muted">/ B2 모니터</span></h1><p class="caption">2025년 5월 · B1 AIDC → B2 MESS</p></div>
+  <div class="right"><div id="connection" class="live" role="status">연결 중</div><div id="updated" class="caption">—</div><nav class="nav"><a href="#workers-heading">워커</a><a href="#actual-heading">Actual 비교</a></nav></div>
+</header>
+<section class="overview" id="overview" aria-label="캠페인 상태">
+  <p id="campaign-title">B2 상태 확인 중</p><p id="campaign-caption" class="caption">최신 캠페인 결과를 읽고 있습니다.</p>
+  <div class="summary">
+    <div><div class="summary-label">B1 성공</div><div id="b1-total" class="summary-value">—</div><p class="caption">Actual 평가 포함</p></div>
+    <div><div class="summary-label">B2 결과 수신</div><div id="b2-total" class="summary-value">—</div><p id="b2-counts" class="caption">—</p></div>
+    <div><div class="summary-label">B2 실행 워커</div><div id="worker-total" class="summary-value">—</div><p class="caption">최대 3개 날짜 병렬 실행</p></div>
+    <div><div class="summary-label">B2 목표 인증 Gap</div><div class="summary-value">3.00<small> %</small></div><p class="caption">날짜별 Native 예산 90분</p></div>
+  </div>
+</section>
+<div id="connection-alert" class="alert connection-alert" role="alert" hidden></div>
+<div id="error" class="alert" role="alert" hidden></div>
+<section aria-labelledby="workers-heading">
+  <div class="section-head"><h2 id="workers-heading">A) B2 워커</h2><p class="caption">세 날짜를 동시에 확인합니다. 인증 Gap은 유효 해와 독립 하한이 확보되면 표시됩니다.</p></div>
+  <div id="workers" class="workers"></div>
+</section>
+<section aria-labelledby="actual-heading">
+  <div class="section-head between"><div><h2 id="actual-heading">B) 날짜별 Actual 최대선로 부하율</h2><p class="caption">B1과 B2의 실제 AC 평가 결과 · 낮을수록 선로 여유가 큽니다.</p></div><span id="actual-counts" class="caption">—</span></div>
+  <div class="panel"><div class="table-scroll"><table aria-label="날짜별 B1 B2 Actual 최대선로 부하율 비교">
+    <thead><tr><th scope="col">날짜</th><th scope="col" class="numeric">B1 Actual</th><th scope="col">B1 결과</th><th scope="col" class="numeric">B2 Actual</th><th scope="col">B2 결과</th><th scope="col" class="numeric">차이 B2 − B1</th></tr></thead>
+    <tbody id="actual-rows"></tbody>
+  </table></div><p class="table-note">96개 Actual AC 슬롯의 선로 상별 전류 / NormalAmps 최대값입니다. 변압기는 제외합니다. 100%가 정격이며, 차이의 단위는 %p입니다. 평가 전 또는 96슬롯 수렴 미확인 값은 —로 표시합니다.</p></div>
+</section>
+<footer><p>1초 자동 갱신 · Native 시간은 최근 Solver 보고의 누적 Runtime(현재 호출 포함)입니다. 보고가 없으면 완료 호출 기록을 표시합니다. 모델 생성·검증 중에는 증가하지 않습니다.</p><details><summary>실행 정보와 원본 상태</summary><div id="run-info" class="kv"></div><pre id="raw-status" class="raw"></pre></details></footer>
+</main>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const valid=v=>typeof v==='number'&&Number.isFinite(v);
+const number=(v,n=2)=>valid(v)?v.toLocaleString('ko-KR',{minimumFractionDigits:n,maximumFractionDigits:n}):'—';
+const pct=v=>valid(v)?number(v*100)+'%':'—';
+const time=v=>!valid(v)?'—':v<60?Math.floor(v)+'초':v<3600?Math.floor(v/60)+'분 '+Math.floor(v%60)+'초':Math.floor(v/3600)+'시간 '+Math.floor(v%3600/60)+'분';
+const day=v=>v?v.replace('2025-',''):'날짜 대기';
+let snapshot=null,received=null,busy=false,failed=false;
+const openWorkers=new Set();
+function el(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}
+function status(value){return value?.startsWith('TIME_LIMIT_')?'시간 제한':({PASS:'성공',RUNNING:'실행 중',PENDING:'대기',TIMEOUT:'시간 제한',IMPLEMENTATION_FAILURE:'구현 오류',INPUT_FAILURE:'입력 오류',PHYSICAL_FAILURE:'물리 실패',FRESH_AC_FAILURE:'AC 실패',STOPPED:'중단'})[value]||value||'대기';}
+function statusClass(v){return v==='PASS'?'pass':v==='RUNNING'?'running':v==='PENDING'?'':v==='TIMEOUT'?'warn':'fail';}
+function pairs(target,rows){target.replaceChildren(...rows.flatMap(([k,v])=>[el('div',k,'k'),el('div',v,'v')]));}
+function stage(w){
+ if(w.display_waiting)return -1;
+ const p=w.phase||'';
+ if(w.worker_result_received||p==='COMPLETE'||p==='DONE')return 3;
+ if(/ACTUAL|FRESH_OPENDSS|PLANNING_FIXED_DECISION_FREEZE/.test(p))return 2;
+ if(w.native_inflight||w.build?.complete||/M_ADAPTIVE|PHASE_I|INTEGER|P1|PRICING|EXACT_LB|M_SAME_DAY/.test(p))return 1;
+ return 0;
+}
+function phaseLabel(w){
+ if(w.display_waiting)return snapshot?.B2_validation_detail?.PASS?'날짜 배정 대기':'모델 비교 검증 대기';
+ if(w.worker_result_received)return '결과 수신 · 다음 날짜 준비';
+ const s=stage(w);
+ if(s===0)return w.build?.current||'모델 생성';
+ if(s===1)return w.native_inflight?'Native 최적화 중':'해·물리·독립 하한 검증 중';
+ if(s===2)return /FRESH_OPENDSS/.test(w.phase)?'Actual AC · 96슬롯 평가 중':'계획 적용 · Actual 평가 준비';
+ return '날짜 완료';
+}
+function workerCard(w){
+ const card=el('article',undefined,'worker'),head=el('div',undefined,'worker-head');
+ head.append(el('span','WORKER '+w.worker_slot,'slot'),el('span',w.display_waiting?'대기':w.worker_result_received?'결과 수신':w.worker_alive?'실행 중':'확인 필요','pill '+(w.display_waiting?'':w.worker_result_received?'pass':w.worker_alive?'running':'fail')));
+ card.append(head,el('h3',w.day||'날짜 대기'),el('p',phaseLabel(w),'phase'));
+ const flow=el('div',undefined,'steps'),current=stage(w);
+ ['모델 생성','최적화','Actual AC','완료'].forEach((t,i)=>flow.append(el('span',t,i<current?'done':i===current?'active':'')));card.append(flow);
+ const certificate=w.global_gap_display||{},gap=certificate.available?certificate.value:null;
+ const gapBox=el('div',undefined,'gap '+(valid(gap)?'':'wait'));
+ gapBox.append(el('span',valid(gap)?pct(gap):'계산 대기'),el('small',' / 목표 3.00%'));
+ card.append(el('p','독립 인증 Global Gap','gap-label'),gapBox,el('p',certificate.reason||'유효 해와 독립 하한 대기','gap-reason'));
+ const used=w.reported_native_runtime_seconds??w.Native_Runtime_seconds,remaining=w.reported_native_remaining_seconds??w.native_remaining_seconds;
+ const native=el('div',undefined,'time-row');native.append(el('span','Native 사용'),el('strong',time(used)+' / 90분'));card.append(native);
+ const track=el('div',undefined,'track'),fill=el('div');fill.style.width=(valid(used)?Math.max(0,Math.min(100,used/5400*100)):0)+'%';track.append(fill);card.append(track);
+ const clocks=el('div',undefined,'time-row');clocks.append(el('span','잔여 '+time(remaining)),el('span','전체 '+time(w.wall_seconds)));card.append(clocks);
+ const bad=!w.display_waiting&&!w.worker_result_received&&(!w.worker_alive||(valid(w.heartbeat_age_seconds)&&w.heartbeat_age_seconds>20));
+ const rss=w.resource?.RSS;
+ card.append(el('p',w.display_waiting?'검증 통과 후 자동 시작':w.worker_result_received?'완료 결과를 Coordinator가 확인 중':(bad?'실행 상태 확인 필요':'Heartbeat '+time(w.heartbeat_age_seconds)+' 전')+' · 메모리 '+number(valid(rss)?rss/2**30:null,1)+' GB','health '+(bad?'bad':'')));
+ const detail=el('details'),summary=el('summary','워커 세부사항'),kv=el('div',undefined,'kv'),build=w.build?.counters||{};
+ detail.open=openWorkers.has(w.worker_slot);detail.addEventListener('toggle',()=>{if(detail.open)openWorkers.add(w.worker_slot);else openWorkers.delete(w.worker_slot);});
+ pairs(kv,[['유효 해 UB',number(w.UB,6)],['독립 하한 LB',number(w.independent_Global_LB,6)],
+ ['모델 생성 시간',time(w.model_preparation_seconds)],['해·물리 검증 시간',time(w.validation_seconds)],
+ ['완료 Native 호출',number(w.Native_calls,0)+(w.native_inflight?' · 호출 실행 중':'')],
+ ['완료 호출 누적 Runtime',time(w.Native_Runtime_seconds)],['Native 시간 근거',w.native_runtime_basis==='SOLVER_CALLBACK_CURRENT_CALL_INCLUDED'?'현재 호출 포함 · Solver 보고':'완료 호출 기록'],
+ ['모델 변수 / 제약식',number(build['변수'],0)+' / '+number(build['제약식'],0)],
+ ['확인된 모델 단계',w.build?number(w.build.confirmed_steps,0)+' / '+number(w.build.total_steps,0):'—'],
+ ['CPU 누적 시간',time(w.resource?.CPU_seconds)],['세부 보고 경과',time(w.solver_report_age_seconds)],
+ ['프로세스 PID',w.PID||'—'],['현재 내부 단계',w.phase||'—'],['최근 보고',w.last_internal_progress_UTC||'—']]);
+ const raw=el('pre',JSON.stringify(w.progress||{},null,2),'raw');detail.append(summary,kv,raw);card.append(detail);return card;
+}
+function renderActual(c){
+ if(!c)return;
+ $('actual-counts').textContent='Actual 확보 B1 '+c.B1_available+'/31 · B2 '+c.B2_available+'/31';
+ $('actual-rows').replaceChildren(...c.rows.map(r=>{
+  const tr=el('tr');tr.append(el('td',day(r.day)));
+  for(const arm of ['B1','B2']){
+   const m=r[arm],td=el('td',m.available?number(m.percent)+'%':'—','numeric loading '+(m.available&&m.percent>100?'overload':''));
+   td.title=m.available?'96/96 AC 수렴 · 선로만 집계 · 결과 SHA 확인':m.reason||'Actual 평가 대기';
+   const st=el('td');st.append(el('span',status(r[arm+'_status']),'pill '+statusClass(r[arm+'_status'])));tr.append(td,st);
+  }
+  const d=r.difference_pp;tr.append(el('td',valid(d)?(d>0?'+':'')+number(d)+' %p':'—','numeric '+(valid(d)?d<0?'decrease':d>0?'increase':'':'')));return tr;
+ }));
+}
+function render(){
+ const s=snapshot,g=s.B2_validation_detail,b=s.B2,live=s.workers.filter(w=>w.worker_alive).length;
+ $('b1-total').replaceChildren(el('span',String(s.B1.PASS)),el('small',' / 31일'));
+ $('b2-total').replaceChildren(el('span',String(b.completed)),el('small',' / 31일'));
+ const pending=s.actual_comparison.rows.filter(r=>r.B2_status==='PENDING').length;
+ $('b2-counts').textContent='성공 '+b.PASS+' · 실패 '+(b.FAIL||0)+' · 시간 제한 '+(b.TIMEOUT||0)+' · 대기 '+pending;
+ $('worker-total').replaceChildren(el('span',String(live)),el('small',' / 3'));
+ const done=b.completed===31,issue=!!g?.error||!s.coordinator_alive&&!done;
+ $('overview').className='overview '+(issue?'error':'');
+ $('campaign-title').textContent=g?.error?'B2 시작 오류':done?'B2 캠페인 종료':!s.coordinator_alive?'Coordinator 실행 상태 확인 필요':!g?.PASS?'B2 시작 준비 중':live?'B2 실행 중 · '+live+'개 날짜 병렬 처리':'B2 날짜 배정 중';
+ $('campaign-caption').textContent=done?'날짜별 성공 여부와 Actual 평가 결과를 아래 표에서 확인하세요.':!g?.PASS?'검증 통과 후 3워커가 자동 시작됩니다.':'모델 생성 → 최적화 → Actual AC 평가 순서로 진행됩니다.';
+ const slots=s.worker_slots||[];$('workers').replaceChildren(...slots.map(workerCard));renderActual(s.actual_comparison);
+ const errors=[];if(g?.error)errors.push('모델 검증: '+JSON.stringify(g.error));if(s.last_error)errors.push('최근 날짜 오류: '+JSON.stringify(s.last_error));
+ const metricErrors=s.actual_comparison.rows.filter(r=>r.B1.error||r.B2.error);if(metricErrors.length)errors.push('Actual 근거 확인 필요: '+metricErrors.map(r=>day(r.day)).join(', '));
+ $('error').hidden=!errors.length;$('error').textContent=errors.join(' · ');
+ pairs($('run-info'),[['Run',s.run_id],['캠페인',s.continuation_version||s.algorithm_version],['모니터',s.display_version],['결과 위치',s.runtime_root]]);
+ $('raw-status').textContent=JSON.stringify({state:s.state,coordinator_alive:s.coordinator_alive,workers:s.workers},null,2);clock();
+}
+function clock(){
+ const age=received===null?null:(Date.now()-received)/1000,stale=failed||age!==null&&age>5;
+ $('connection').textContent=stale?'연결 지연':received===null?'연결 중':'실시간 연결';$('connection').className='live '+(stale?'warn':'');
+ $('updated').textContent=received===null?'—':'수신 '+new Date(received).toLocaleTimeString('ko-KR',{timeZone:'Asia/Seoul',hour12:false})+(stale?' · '+time(age)+' 전':'');
+ $('connection-alert').hidden=!stale;$('connection-alert').textContent='상태 수신이 지연됐습니다. 마지막 수신 값을 유지하고 다시 연결 중입니다.';
+}
+async function refresh(){
+ if(busy)return;busy=true;const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),5000);
+ try{const response=await fetch('/api/status',{cache:'no-store',signal:controller.signal});if(!response.ok)throw Error('HTTP '+response.status);
+  const next=await response.json();if(!next.actual_comparison||!Array.isArray(next.worker_slots))throw Error('B2 monitor data required');
+  snapshot=next;received=Date.now();failed=false;render();
+ }catch(error){failed=true;clock();}finally{clearTimeout(timeout);busy=false;}
+}
+refresh();setInterval(refresh,1000);setInterval(clock,1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+사용자 요청으로 중단된 partial Frontier다. 기존 Native를 재시작하거나 ledger를 reset하지 않는다. 후속 연구는 새 인간 요청·새 Run ID·원래 소비/보수 계상 비용 감사 아래 별도로 사전등록해야 한다. best strict RAW 및 exact dual은 artifacts에 있고 동일 Case SHA에서 독립 replay해야 한다. 미완료 후보·가격 closure·P2·다른 날짜 성능은 승계하지 않는다. PR189에 검증된 이번 연구 코드와 증거를 보존한다.
