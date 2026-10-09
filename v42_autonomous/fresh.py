@@ -24,7 +24,8 @@ def prepare(root, origin, deployment, code_root, commit, *, previous_campaign=No
     for name, expected in prior['execution_sources'].items():
         if sha(code_root / name) != expected:
             raise PermissionError('IMMUTABLE_DEPLOYMENT_DRIFT:' + name)
-    run_id = 'may2025_b2_b3_fresh_' + now().replace('-', '').replace(':', '').replace('.', '_')
+    run_id = ('may2025_b2_b3_fresh_' + now().replace('-', '').replace(':', '')
+              .replace('.', '_').replace('+', '_'))
     authorization = dict(schema='V42_EXPLICIT_FRESH_RESTART', UTC=now(),
         user_instruction=user_instruction,
         new_campaign_root=str(root), prior_campaign_root=str(previous_campaign),
