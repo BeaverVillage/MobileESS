@@ -152,6 +152,30 @@ class LeaseBusy(RuntimeError):
     pass
 
 
+class SourceBlocked(PermissionError):
+    """A shared source or environment failure blocks future Native admission."""
+
+
+def common_failure(error):
+    """Only shared integrity/environment evidence can stop the whole sweep."""
+    if isinstance(error, SourceBlocked) or getattr(error, 'failure_scope', None) in ('SOURCE_GLOBAL', 'ENVIRONMENT_GLOBAL'):
+        return True
+    # CalledProcessError.__str__ embeds the complete verifier program. Its
+    # source-integrity error labels are code, not evidence of this failure.
+    detail = (str(getattr(error, 'stderr', '') or '')+'\n'+str(getattr(error, 'stdout', '') or '')) if isinstance(error,subprocess.CalledProcessError) else str(error)
+    tokens = ('GLOBAL_SOURCE_INTEGRITY_FAILURE', 'GLOBAL_ENVIRONMENT_FAILURE', 'COMMON_ENVIRONMENT_FAILURE',
+        'B3_SOURCE_SEAL_', 'B3_DECLARED_SOURCE_SEAL_', 'B3_DECLARED_SOURCE_SHA_DRIFT',
+        'B3_SCIENTIFIC_RUN_ID_BINDING_DRIFT',
+        'COMPLETE_B3_SOURCE_SEAL_REQUIRED', 'SOURCE_SEAL_IDENTITY_DRIFT', 'SOURCE_SEAL_FILE_DRIFT',
+        'ORIGINAL_SCIENCE_SOURCE_DRIFT', 'CANONICAL_INPUT_PROVENANCE_SOURCE_DRIFT',
+        'V19_SOURCE_OR_POLICY_SEAL_DRIFT', 'V19_ORIGINAL_SCIENTIFIC_SOURCE_DRIFT',
+        'B2_DEPLOYMENT_MANIFEST_RECEIPT_DRIFT', 'B2_DEPLOYMENT_RUN_OR_CODE_ROOT_DRIFT',
+        'RECOVERY_CHECKOUT_COMMIT_DRIFT', 'RECOVERY_IMMUTABLE_CHECKOUT_REQUIRED', 'RECOVERY_SOURCE_FILES_DRIFT')
+    return any(token in detail for token in tokens) or (
+        isinstance(error, (ModuleNotFoundError, ImportError)) or
+        isinstance(error, subprocess.CalledProcessError) and ('ModuleNotFoundError' in detail or 'ImportError:' in detail))
+
+
 @contextmanager
 def os_lock(path):
     """Lock ownership is the open descriptor, never a stale JSON or PID alone."""
@@ -297,6 +321,27 @@ def _sha(value, length):
             and all(char in '0123456789abcdef' for char in value.lower()))
 
 
+def zero_start_authorization(root, packet):
+    if packet.get('restart_from_zero') is not True:
+        return None
+    receipt=packet.get('reset_authorization')
+    if (not receipt or Path(receipt['path']).resolve()!=Path(root).resolve()/'USER_ZERO_START_RETRY_AUTHORIZATION.json'
+            or record(receipt['path'])!=receipt):
+        raise PermissionError('RETRY_ZERO_START_USER_AUTHORIZATION_REQUIRED')
+    document=read(receipt['path'])
+    if (document.get('schema')!='V42_USER_AUTHORIZED_ZERO_START_RETRY_V1'
+            or Path(document.get('campaign_root','')).resolve()!=Path(root).resolve()
+            or document.get('scope')!='VERIFIED_SOURCE_REPAIR_FRESH_DATE_RETRY'
+            or document.get('user_instruction')!='해결하고 재실행할 때는 0초부터 처음부터 다시 돌려야돼. 알지?'
+            or document.get('restart_from_zero') is not True or document.get('native_budget_seconds')!=5400
+            or document.get('B3_native_budget_per_stage_seconds')!=5400
+            or document.get('previous_checkpoint_reuse') is not False
+            or document.get('previous_native_budget_carry') is not False
+            or document.get('old_attempts_and_accounting_preserved') is not True):
+        raise PermissionError('RETRY_ZERO_START_USER_AUTHORIZATION_REQUIRED')
+    return receipt
+
+
 def enqueue(root, failure, repair, *, lease_token):
     """Only a new, verified repair can create a dispatchable retry request.
 
@@ -311,32 +356,43 @@ def enqueue(root, failure, repair, *, lease_token):
     if (failure['arm'] not in ('B2', 'B3')
             or failure['date'] not in {f'2025-05-{n:02d}' for n in range(1, 32)}):
         raise ValueError('RECOVERY_ARM_OR_DATE_INVALID')
+    reset=zero_start_authorization(root,repair)
     consumed = failure['original_native_runtime']
-    if (isinstance(consumed, bool) or not isinstance(consumed, (int, float))
+    if reset is None and (isinstance(consumed, bool) or not isinstance(consumed, (int, float))
             or not math.isfinite(consumed) or consumed < 0
             or failure.get('budget_basis') == 'CONSERVATIVE_LOST_CALL_WINDOW'
             or failure.get('runtime_unknown') or failure.get('quarantined')):
         raise PermissionError('UNKNOWN_NATIVE_RUNTIME_NO_AUTOMATIC_RETRY')
+    if reset is not None and not (_measured(consumed) or consumed is None or consumed=='UNKNOWN'):
+        raise ValueError('RECOVERY_ORIGINAL_HISTORICAL_RUNTIME_REQUIRED')
     limit = failure.get('native_budget_seconds', 5400)
     if isinstance(limit, bool) or limit != 5400:
         raise ValueError('RECOVERY_NATIVE_BUDGET_REQUIRED')
-    if failure['arm'] == 'B2' and consumed >= limit:
+    if reset is None and failure['arm'] == 'B2' and consumed >= limit:
         raise PermissionError('EXHAUSTED_NATIVE_BUDGET_NO_AUTOMATIC_RETRY')
     original_receipts = {}
-    receipt_names = ('original_result_receipt', 'original_ledger_receipt') if failure['arm'] == 'B2' or failure.get('original_ledger_receipt') else ('original_result_receipt',)
+    receipt_names = ('original_result_receipt', 'original_ledger_receipt') if (reset is None and failure['arm'] == 'B2') or failure.get('original_ledger_receipt') else ('original_result_receipt',)
     for name in receipt_names:
         receipt = failure.get(name)
         if not receipt or record(receipt['path']) != receipt:
             raise PermissionError('ORIGINAL_FAILURE_RECEIPT_REQUIRED:' + name)
         original_receipts[name] = receipt
     original_result = read(original_receipts['original_result_receipt']['path'])
-    ledger = read(original_receipts['original_ledger_receipt']['path']) if 'original_ledger_receipt' in original_receipts else {}
-    if original_result.get('PASS') is True or original_result.get('Native_Runtime') != consumed:
+    ledger = read(original_receipts['original_ledger_receipt']['path']) if reset is None and 'original_ledger_receipt' in original_receipts else {}
+    reported=original_result.get('Native_Runtime')
+    if original_result.get('PASS') is True or (reported!=consumed and not (
+            reset is not None and reported in (None,'UNKNOWN') and consumed in (None,'UNKNOWN'))):
         raise PermissionError('ORIGINAL_MEASURED_FAILURE_BUDGET_REQUIRED')
     stage_accounting = None
-    if failure['arm'] == 'B3':
+    if reset is not None:
+        if failure['arm']=='B3':
+            stage_receipts=original_result.get('stage_native_ledger_receipts',{})
+            identity_receipts=original_result.get('stage_native_ledger_identity_receipts',{})
+            if any(record(item['path'])!=item for item in (*stage_receipts.values(),*identity_receipts.values())):
+                raise PermissionError('B3_HISTORICAL_STAGE_LEDGER_RECEIPT_SHA_DRIFT')
+    elif failure['arm'] == 'B3':
         stage_accounting = b3_stage_accounting(original_result, day=failure['date'], source=failure['original_source_SHA'])
-        if (failure['failed_stage'] not in (*B3_STAGES, 'ADMISSION', 'ACTUAL', 'VALIDATION')
+        if (failure['failed_stage'] not in (*B3_STAGES, 'ADMISSION', 'PLANNING_FREEZE', 'ACTUAL', 'VALIDATION')
                 or original_result.get('failed_stage') != failure['failed_stage']
                 or ('original_ledger_receipt' in original_receipts and
                     original_receipts['original_ledger_receipt'] not in stage_accounting['ledgers'].values())):
@@ -374,6 +430,11 @@ def enqueue(root, failure, repair, *, lease_token):
     if not code_root or not request_receipt or record(request_receipt['path']) != request_receipt:
         raise PermissionError('SEALED_FRESH_RETRY_REQUEST_REQUIRED')
     request = read(request_receipt['path'])
+    if request.get('restart_from_zero') is True and reset is None:
+        raise PermissionError('RETRY_ZERO_START_USER_AUTHORIZATION_REQUIRED')
+    if reset is not None and (zero_start_authorization(root,request)!=reset or
+            request.get('previous_attempts',[])!=[] or failure['arm']=='B3' and request.get('previous_attempts')!=[]):
+        raise PermissionError('RETRY_AUTHORIZED_FRESH_ZERO_REQUEST_REQUIRED')
     if (request.get('arm') != failure['arm'] or request.get('day') != failure['date']
             or request.get('attempt_id') == failure['original_attempt_id']
             or not request.get('attempt_id') or Path(request['result']).exists()):
@@ -409,14 +470,26 @@ def enqueue(root, failure, repair, *, lease_token):
                    verification_status='READY_VERIFIED_REPAIR', queued_UTC=now(),
                    validation_receipt=receipt, source_files=sources,
                    native_budget_seconds=limit,
-                   remaining_native_seconds=limit - consumed if stage_accounting is None else (
+                   remaining_native_seconds=limit if reset is not None else limit - consumed if stage_accounting is None else (
                        limit - stage_accounting['runtime'][failure['failed_stage']]
                        if failure['failed_stage'] in B3_STAGES else None),
                    **original_receipts,
                    worker_module=repair.get('worker_module',
                        'v42_b2_seed_recovery_v19.worker' if failure['arm'] == 'B2' else 'v42_autonomous_b3.worker'),
                    retry_request_receipt=request_receipt, repair_code_root=str(Path(code_root).resolve()))
+        row['campaign_root']=str(root)
         row['retry_request_receipts_by_slot'] = alternatives
+        if reset is not None:
+            row.update(restart_from_zero=True,reset_authorization=reset,
+                native_budget_scope='NEW_VERIFIED_REPAIR_ATTEMPT',initial_native_runtime=0.,
+                historical_native_runtime=consumed,historical_runtime_unknown=not _measured(consumed),
+                old_attempts_and_accounting_preserved=True,previous_checkpoint_reuse=False,previous_native_budget_carry=False)
+            if failure['arm']=='B3':
+                row.update(historical_stage_native_runtime=original_result.get('stage_native_runtime'),
+                    historical_stage_ledger_receipts=original_result.get('stage_native_ledger_receipts',{}),
+                    historical_stage_ledger_identity_receipts=original_result.get('stage_native_ledger_identity_receipts',{}),
+                    initial_stage_native_runtime={stage:0. for stage in B3_STAGES},
+                    remaining_native_seconds_by_stage={stage:5400. for stage in B3_STAGES})
         if stage_accounting is not None:
             row.update(native_budget_scope='B3_STAGE_ISOLATED',
                        original_stage_native_runtime=stage_accounting['runtime'],
@@ -470,8 +543,9 @@ def _request_workers(request_path):
 def _verify_dispatch(row, request):
     """Validate inside the immutable repair checkout, using its own imports."""
     code_root = Path(row['repair_code_root']).resolve()
+    if any(record(r['path']) != r for r in row['source_files']):
+        raise SourceBlocked('RECOVERY_SOURCE_FILES_DRIFT')
     if (record(row['retry_request_receipt']['path']) != row['retry_request_receipt']
-            or any(record(r['path']) != r for r in row['source_files'])
             or any(record(row[name]['path']) != row[name] for name in
                    ('original_result_receipt', 'original_ledger_receipt') if name in row)
             or record(row['validation_receipt']['path']) != row['validation_receipt']):
@@ -494,7 +568,18 @@ def _verify_dispatch(row, request):
     allowed = ('v42_b2_seed_recovery_v19.worker', 'v42_autonomous_b2.worker') if row['arm'] == 'B2' else ('v42_autonomous_b3.worker',)
     if module not in allowed:
         raise PermissionError('VERIFIED_REPAIR_WORKER_MODULE_REQUIRED')
-    if row['arm'] == 'B2':
+    if row.get('restart_from_zero'):
+        reset=zero_start_authorization(row['campaign_root'],row)
+        if (zero_start_authorization(row['campaign_root'],request)!=reset
+                or request.get('reset_authorization')!=reset or request.get('previous_attempts',[])!=[]):
+            raise PermissionError('RETRY_AUTHORIZED_FRESH_ZERO_REQUEST_REQUIRED')
+        if row['arm']=='B2':
+            sealed=read(request['manifest'])
+            if row['date'] in sealed.get('prior_attempts',{}):
+                raise PermissionError('B2_ZERO_START_RETRY_MUST_NOT_CARRY_PRIOR_NATIVE')
+        elif request.get('previous_attempts')!=[]:
+            raise PermissionError('B3_ZERO_START_RETRY_MUST_NOT_CARRY_PRIOR_NATIVE')
+    elif row['arm'] == 'B2':
         sealed = read(request['manifest'])
         carried = sealed.get('prior_attempts', {}).get(row['date'], {})
         if (carried.get('Native_Runtime') != row['original_native_runtime']
@@ -597,7 +682,22 @@ def _dispatch_ready(root, arm, slot, manifest):
                 atomic(root / 'RECOVERY_QUEUE.json', doc)
                 return None
         else:
-            _verify_dispatch(row, request)
+            try:
+                _verify_dispatch(row, request)
+            except Exception as error:
+                if common_failure(error):
+                    raise SourceBlocked(str(error)) from error
+                denied = path.parent / 'REPAIR_ADMISSION_FAILURE.json'
+                atomic(denied, dict(arm=arm, day=row['date'], attempt_id=request['attempt_id'],
+                    UTC=now(), status='QUARANTINE', reason=str(error), failure_class=type(error).__name__,
+                    Native_Runtime=row['original_native_runtime'], new_attempt_native_runtime=0.,
+                    before_Popen=True, before_Native=True, original_result_receipt=row['original_result_receipt'],
+                    original_native_accounting_preserved=True))
+                row.update(verification_status='QUARANTINE_REPAIR_ADMISSION',
+                    admission_failure_receipt=record(denied), admission_failed_UTC=now(),
+                    new_attempt_native_runtime=0.)
+                atomic(root / 'RECOVERY_QUEUE.json', doc)
+                return None
             if matches or Path(request['result']).exists():
                 raise PermissionError('RETRY_REQUEST_ALREADY_EXECUTED')
             row.update(verification_status='DISPATCH_INTENT', retry_attempt_id=request['attempt_id'],
@@ -674,12 +774,16 @@ def _finish_row(row, result_path):
     row.update(final_result_receipt=record(result_path), finished_UTC=now(),
                final_result_status=result.get('status'), final_PASS=result.get('PASS') is True,
                final_Native_Runtime=result.get('Native_Runtime'))
+    if (result.get('status')=='PASS') != (result.get('PASS') is True):
+        row.update(verification_status='QUARANTINE_TERMINAL_POLICY',final_PASS=False,
+            final_policy_error='RESULT_PASS_STATUS_DISAGREEMENT')
+        return row
     if row['arm'] == 'B2':
         ledger_path = result_path.parent / 'NATIVE_RUNTIME_LEDGER.json'
         ledger = read(ledger_path, {})
         runtime = ledger.get('measured_Native_Runtime')
         measured = (type(runtime) in (int, float) and math.isfinite(runtime)
-                    and runtime >= row['original_native_runtime']
+                    and runtime >= (0. if row.get('restart_from_zero') else row['original_native_runtime'])
                     and result.get('Native_Runtime') == runtime
                     and ledger.get('inflight') is None
                     and not any(call.get('runtime_unavailable') or call.get('entered_native') is not True
@@ -690,6 +794,7 @@ def _finish_row(row, result_path):
             carried=(ledger.get('prior_attempt') or {}).get('Native_Runtime',0.)
             measured=(type(carried) in (int,float) and carried>=0 and
                 carried+sum(call['Native_Runtime'] for call in ledger.get('calls',[]))==runtime)
+            if row.get('restart_from_zero'):measured=measured and carried==0.
         if ledger_path.exists():
             row['final_ledger_receipt'] = record(ledger_path)
         if not measured:
@@ -704,7 +809,7 @@ def _finish_row(row, result_path):
             return row
     else:
         try:
-            prior = b3_stage_accounting(read(row['original_result_receipt']['path']),
+            prior = None if row.get('restart_from_zero') else b3_stage_accounting(read(row['original_result_receipt']['path']),
                 day=row['date'], source=row['original_source_SHA'])
             final = b3_stage_accounting(result, day=row['date'], source=row['repair_source_SHA'], previous=prior)
         except (PermissionError, OSError, KeyError, TypeError, ValueError) as error:

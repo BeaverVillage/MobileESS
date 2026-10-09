@@ -1,13 +1,20 @@
 """OS-owned dispatch with fixed B2=3/B3=1 and restart adoption."""
 from pathlib import Path
-import argparse, subprocess, sys, time
+import argparse, hashlib, json, re, subprocess, sys, time, uuid
 import psutil
 from v42_b2_seed_recovery_v19.common import read,atomic,record,sha,now,process,same_process,exclusive_lock
 
 DAYS=tuple(f'2025-05-{i:02d}' for i in range(1,32))
 
+def public_status(status):
+    if status in ('PASS','FAIL','QUARANTINE','RETRY_PENDING','PENDING','RUNNING','SOURCE_BLOCKED'):return status
+    if str(status).startswith('QUARANTINE') or 'UNKNOWN' in str(status):return 'QUARANTINE'
+    if status=='RETRY_READY':return 'RETRY_PENDING'
+    return 'FAIL'
+
 def sweep_complete(cp,arm):
-    return all(cp['dates'][arm+'/'+d]['status'] not in ('PENDING','RUNNING','RETRY_READY') for d in DAYS)
+    return all(cp['dates'][arm+'/'+d].get('first_attempt_terminal') is not None or
+        cp['dates'][arm+'/'+d]['status'] not in ('PENDING','RUNNING','RETRY_READY','RETRY_PENDING','SOURCE_BLOCKED') for d in DAYS)
 
 def transition(cp,state):
     if cp['state']==state:return
@@ -15,8 +22,25 @@ def transition(cp,state):
     cp['state']=state
 
 def next_day(cp,arm):
-    pending=[d for d in DAYS if cp['dates'][arm+'/'+d]['status']=='PENDING']
+    pending=[d for d in DAYS if cp['dates'][arm+'/'+d]['status']=='PENDING' and
+        cp['dates'][arm+'/'+d].get('first_attempt_terminal') is None]
     return pending[0] if pending else None
+
+def first_terminal(cp,key,worker=None):
+    row=cp['dates'][key]
+    if row.get('first_attempt_terminal') is not None or (worker or {}).get('recovery_queue_id'):return
+    row['first_attempt_terminal']={field:row.get(field) for field in
+        ('status','worker_status','current_attempt','request','result','result_SHA','Native_Runtime','source_SHA','finished_UTC','failure_receipt')}
+    row['first_attempt_terminal']['recorded_UTC']=now()
+
+def initialize_history(cp):
+    cp.setdefault('first_sweeps_completed',{})
+    for key,row in cp['dates'].items():
+        if not key.startswith(('B2/','B3/')):continue
+        normalized=public_status(row['status'])
+        if normalized!=row['status']:row.update(worker_status=row['status'],status=normalized)
+        if row['status'] not in ('PENDING','RUNNING','RETRY_READY','RETRY_PENDING','SOURCE_BLOCKED'):
+            first_terminal(cp,key)
 
 def collect(root,cp,key,worker):
     request=read(worker['request']);p=Path(request['result'])
@@ -30,8 +54,14 @@ def collect(root,cp,key,worker):
             or worker.get('source_SHA') and source!=worker['source_SHA']):
             row.update(status='QUARANTINE',Native_Runtime=None,
                 terminal_identity_error='RESULT_IDENTITY_OR_SOURCE_DRIFT',result=str(p),result_SHA=sha(p))
+        elif (result.get('status')=='PASS') != (result.get('PASS') is True):
+            row.update(status='QUARANTINE',Native_Runtime=result.get('Native_Runtime'),
+                terminal_policy_error='RESULT_PASS_STATUS_DISAGREEMENT',worker_status=result.get('status'),
+                result=str(p),result_SHA=sha(p),source_SHA=source)
         else:
-            row.update(status=result['status'],result=str(p),result_SHA=sha(p),
+            status=public_status(result['status'])
+            if status!='PASS' and result.get('Native_Runtime') is None:status='QUARANTINE'
+            row.update(status=status,worker_status=result['status'],result=str(p),result_SHA=sha(p),
                 Native_Runtime=result.get('Native_Runtime'),source_SHA=source,
                 finished_UTC=result.get('finished_UTC',result.get('completed_UTC')))
         if worker.get('recovery_queue_id'):
@@ -46,6 +76,7 @@ def collect(root,cp,key,worker):
             status='QUARANTINE',Native_Runtime='UNKNOWN',UTC=now(),reason='WORKER_EXIT_WITHOUT_MEASURED_RESULT'))
         row.update(status='QUARANTINE',Native_Runtime=None,failure_receipt=record(exit_receipt))
     cp['workers'].pop(key)
+    first_terminal(cp,key,worker)
     return True
 
 def b2_request(root,manifest,day,slot):
@@ -60,7 +91,14 @@ def b2_request(root,manifest,day,slot):
     path=Path(deployment['path'] if isinstance(deployment,dict) else deployment).resolve()
     if isinstance(deployment,dict) and record(path)!=deployment:
         raise PermissionError('B2_DEPLOYMENT_MANIFEST_RECEIPT_DRIFT')
-    m=read(path);code_root=manifest.get('B2_code_root',manifest['code_root'])
+    try:m=read(path)
+    except (OSError,ValueError) as error:
+        from .recovery import SourceBlocked
+        raise SourceBlocked('COMMON_ENVIRONMENT_FAILURE:B2_DEPLOYMENT_UNAVAILABLE:'+str(error)) from error
+    code_root=manifest.get('B2_code_root',manifest['code_root'])
+    if not Path(code_root).is_dir():
+        from .recovery import SourceBlocked
+        raise SourceBlocked('COMMON_ENVIRONMENT_FAILURE:B2_CHECKOUT_MISSING')
     module=manifest.get('B2_worker_module','v42_autonomous_b2.worker')
     if module not in ('v42_autonomous_b2.worker','v42_b2_seed_recovery_v19.worker'):
         raise PermissionError('B2_DECLARED_WORKER_MODULE_REQUIRED')
@@ -82,8 +120,12 @@ def b2_request(root,manifest,day,slot):
     verifier_module='v42_autonomous_b2.worker' if module=='v42_autonomous_b2.worker' else 'v42_b2_seed_recovery_v19.policy'
     verifier=('import json,sys; from '+verifier_module+' import verify_request; '
         'r=json.load(open(sys.argv[1],encoding="utf-8-sig")); verify_request(r)')
-    subprocess.run([sys.executable.replace('pythonw.exe','python.exe'),'-B','-X','utf8','-c',verifier,str(request_path)],
-        cwd=code_root,check=True,capture_output=True,text=True)
+    try:
+        subprocess.run([sys.executable.replace('pythonw.exe','python.exe'),'-B','-X','utf8','-c',verifier,str(request_path)],
+            cwd=code_root,check=True,capture_output=True,text=True)
+    except Exception as error:
+        error.request_path=str(request_path)
+        raise
     return request_path,request,module,code_root,manifest.get('B2_source_commit',m['source_commit'])
 
 def b3_request(root,manifest,day,slot):
@@ -93,38 +135,55 @@ def b3_request(root,manifest,day,slot):
     code_root=manifest.get('B3_code_root',manifest['code_root'])
     output=Path(code_root)/'runtime/b3'/manifest['run_id']/day/attempt_id
     request=dict(root=str(root),campaign_root=str(root),code_root=code_root,run_id=manifest['run_id'],
-        arm='B3',day=day,worker_slot=slot,attempt_id=attempt_id,canary=day==DAYS[0],output=str(output),
+        arm='B3',day=day,worker_slot=slot,attempt_id=attempt_id,canary=True,output=str(output),
         result=str(attempt/'RESULT.json'),progress=str(attempt/'progress.json'),error=str(attempt/'error.json'),
         started_UTC=now(),manifest=str(root/'AUTONOMOUS_MANIFEST.json'))
     request['b1_campaign_root']=manifest.get('B1_campaign_root',str(root))
     seal=manifest.get('B3_source_seal')
     if not seal:raise PermissionError('B3_DECLARED_SOURCE_SEAL_REQUIRED')
-    if isinstance(seal,dict):
-        if record(seal['path'])!=seal:raise PermissionError('B3_SOURCE_SEAL_RECEIPT_DRIFT')
-        request['source_seal']=seal['path']
-    else:request['source_seal']=str(seal)
-    sealed=read(request['source_seal'])
+    try:
+        if isinstance(seal,dict):
+            if record(seal['path'])!=seal:raise PermissionError('B3_SOURCE_SEAL_RECEIPT_DRIFT')
+            request['source_seal']=seal['path']
+        else:request['source_seal']=str(seal)
+        sealed=read(request['source_seal'])
+    except (OSError,ValueError) as error:
+        from .recovery import SourceBlocked
+        raise SourceBlocked('GLOBAL_SOURCE_INTEGRITY_FAILURE:B3_SOURCE_SEAL_UNAVAILABLE:'+str(error)) from error
     source=manifest.get('B3_source_SHA',sealed.get('source_sha'))
     from .recovery import _sha
     if not _sha(source,64) or sealed.get('source_sha')!=source:
         raise PermissionError('B3_DECLARED_SOURCE_SHA_DRIFT')
     request.update(source_SHA=source,implementation_SHA=source)
+    run_id=manifest['run_id']
+    safe_id=run_id if re.fullmatch(r'[A-Za-z0-9_-]{1,100}',run_id) else (
+        re.sub(r'[^A-Za-z0-9_-]','_',run_id)[:87]+'_'+hashlib.sha256(run_id.encode()).hexdigest()[:12])
+    request['scientific_run_id']=manifest.get('B3_scientific_run_id',safe_id)
     qualification=manifest.get('B3_qualification',str(root/'autonomous/B3_PRODUCTION_QUALIFICATION.json'))
-    if isinstance(qualification,dict):
-        if record(qualification['path'])!=qualification:raise PermissionError('B3_QUALIFICATION_RECEIPT_DRIFT')
-        qualification=qualification['path']
+    if isinstance(qualification,dict):qualification=qualification['path']
     request['qualification_output']=str(qualification)
-    if day!=DAYS[0]:request['qualification']=str(qualification)
     path=attempt/'request.json'
     if path.exists():raise PermissionError('B3_REQUEST_NEVER_OVERWRITTEN')
-    atomic(path,request)
     verifier=('import json,sys; from pathlib import Path; '
-        'from v42_autonomous_b3.admission import validate_request,validate_seal,source_seal; '
-        'r=json.load(open(sys.argv[1],encoding="utf-8-sig")); validate_request(r); '
+        'from v42_autonomous_b3.admission import validate_request,validate_seal,source_seal,qualification_status,scientific_run_id; '
+        'r=json.load(sys.stdin); validate_request(r); '
         's=json.load(open(r["source_seal"],encoding="utf-8-sig")); validate_seal(s,Path.cwd()); '
-        'assert source_seal(Path.cwd())["source_sha"]==s["source_sha"]==r["implementation_SHA"]==r["source_SHA"]')
-    subprocess.run([sys.executable.replace('pythonw.exe','python.exe'),'-B','-X','utf8','-c',verifier,str(path)],
-        cwd=code_root,check=True,capture_output=True,text=True)
+        'assert source_seal(Path.cwd())["source_sha"]==s["source_sha"]==r["implementation_SHA"]==r["source_SHA"],"GLOBAL_SOURCE_INTEGRITY_FAILURE"; '
+        'print(json.dumps({"qualification_status":qualification_status(r["qualification_output"],s["source_sha"],seal=s,code_root=Path.cwd()),'
+        '"scientific_run_id":scientific_run_id(r)}))')
+    verified=subprocess.run([sys.executable.replace('pythonw.exe','python.exe'),'-B','-X','utf8','-c',verifier],
+        input=json.dumps(request),cwd=code_root,check=True,capture_output=True,text=True)
+    admission=json.loads(verified.stdout)
+    if admission['scientific_run_id']!=request['scientific_run_id']:
+        raise PermissionError('B3_SCIENTIFIC_RUN_ID_BINDING_DRIFT')
+    mode=admission['qualification_status']
+    if mode.get('global_source_block'):
+        from .recovery import SourceBlocked
+        raise SourceBlocked('GLOBAL_SOURCE_INTEGRITY_FAILURE:'+mode.get('reason',''))
+    qualified=mode['status']=='QUALIFIED'
+    request.update(canary=not qualified,qualification_status=mode['status'],qualification_admission=mode)
+    if qualified:request['qualification']=mode['qualification']['path']
+    atomic(path,request)
     return path,request
 
 def dispatch(root,manifest,cp,arm,day,slot):
@@ -144,6 +203,8 @@ def dispatch(root,manifest,cp,arm,day,slot):
     with (path.parent/'stdout.log').open('ab') as out,(path.parent/'stderr.log').open('ab') as err:
         child=subprocess.Popen(command,cwd=code_root,stdout=out,stderr=err,
             creationflags=(subprocess.CREATE_NO_WINDOW|subprocess.NORMAL_PRIORITY_CLASS) if sys.platform=='win32' else 0)
+    cp['workers'][key].update(popen_returned=True,PID=child.pid)
+    atomic(root/'SUPERVISOR_STATE.json',cp)
     cp['workers'][key].update(process(child.pid),launch_intent=False,source_SHA=request.get('implementation_SHA'),
         source_commit=source_commit)
     atomic(root/'SUPERVISOR_STATE.json',cp)
@@ -213,6 +274,7 @@ def adopt_unjournaled_requests(root,cp,manifest):
             ids=attempts if arm=='B2' else {manifest.get('B3_attempt_id','b3_production_02')}
             for attempt_id in ids:
                 path=root/'dates'/arm/day/'attempts'/attempt_id/'request.json'
+                if cp['dates'][key].get('source_blocked_request')==str(path):continue
                 if not path.exists() or str(path.resolve()) in queued:continue
                 request=read(path)
                 if request.get('arm')!=arm or request.get('day')!=day or request.get('attempt_id')!=attempt_id:
@@ -229,6 +291,207 @@ def adopt_unjournaled_requests(root,cp,manifest):
                 cp['dates'][key].update(status='RUNNING',request=str(path),current_attempt=attempt_id)
                 break
 
+def source_registry(manifest):
+    fields=('B2_code_root','B2_source_SHA','B2_source_commit','B2_deployment_manifest','B2_worker_module',
+        'B3_code_root','B3_source_SHA','B3_source_commit','B3_source_seal','B3_scientific_run_id','environment_repair_revision')
+    freeze={field:manifest.get(field) for field in fields}
+    return freeze,hashlib.sha256(json.dumps(freeze,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+
+def block_source(root,manifest,cp,error,*,arm=None,day=None,before_popen=False):
+    freeze,fingerprint=source_registry(manifest)
+    detail=str(error)+'\n'+str(getattr(error,'stderr','') or '')
+    receipt=root/'autonomous'/('SOURCE_BLOCK_'+uuid.uuid4().hex+'.json')
+    document=dict(UTC=now(),reasonCode=type(error).__name__+':'+str(error).split('\n',1)[0],
+        affectedScope='COMMON_SOURCE_OR_ENVIRONMENT_FUTURE_ADMISSION',arm=arm,day=day,
+        reason=detail[:50000],manifestSourceFreeze=freeze,source_registry_SHA=fingerprint,
+        before_Popen=before_popen,new_attempt_native_runtime=0. if before_popen else None,
+        existing_workers_preserved=True)
+    atomic(receipt,document)
+    if cp['state']!='SOURCE_BLOCKED':cp['source_block_resume_state']=cp['state']
+    cp['source_block']=dict(document,receipt=record(receipt))
+    transition(cp,'SOURCE_BLOCKED')
+
+def refresh_retries(root,cp):
+    from .recovery import queue
+    grouped={}
+    for entry in queue(root)['entries']:grouped.setdefault(entry['arm']+'/'+entry['date'],[]).append(entry)
+    for key,entries in grouped.items():
+        if key in cp['workers']:continue
+        row=cp['dates'][key]
+        pending=[entry for entry in entries if entry['verification_status'] in ('READY_VERIFIED_REPAIR','DISPATCH_INTENT')]
+        if pending:
+            if row['status'] not in ('PENDING','RUNNING','RETRY_READY','RETRY_PENDING'):first_terminal(cp,key)
+            row.setdefault('last_terminal_status',row['status'])
+            row.update(status='RETRY_PENDING',retry_queue_ids=[entry['queue_id'] for entry in pending])
+        elif row['status']=='RETRY_PENDING':
+            denied=[entry for entry in entries if entry.get('admission_failure_receipt')]
+            if denied:
+                latest=max(denied,key=lambda entry:entry.get('admission_failed_UTC',''))
+                row.update(status='QUARANTINE',failure_receipt=latest['admission_failure_receipt'],
+                    terminal_recovery_error='REPAIR_ADMISSION_FAILED; ORIGINAL_NATIVE_ACCOUNTING_PRESERVED')
+            else:row['status']=row.get('last_terminal_status','QUARANTINE')
+
+def external_workers(cp):
+    other=[];own={w.get('PID') for w in cp['workers'].values()}
+    for p in psutil.process_iter(['name']):
+        if p.pid in own or (p.info['name'] or '').lower() not in ('python.exe','pythonw.exe'):continue
+        try:
+            args=p.cmdline();module=args[args.index('-m')+1] if '-m' in args else ''
+            if module.endswith('.worker') and module.startswith(('v42_may','v42_b2','v42_m1','v42_a_stage','v42_autonomous_b2','v42_autonomous_b3')):
+                other.append(process(p.pid))
+        except psutil.Error:continue
+    return other
+
+def safe_dispatch(root,manifest,cp,arm,day,slot):
+    """A failed date cannot kill the coordinator or consume another date."""
+    from .recovery import common_failure,_request_workers,_measured
+    key=arm+'/'+day
+    try:
+        dispatch(root,manifest,cp,arm,day,slot)
+        return True
+    except Exception as error:
+        worker=cp['workers'].get(key,{})
+        if worker.get('popen_returned'):
+            # Native may have begun. Keep the launch receipt for real result
+            # collection/adoption; never manufacture a Native-zero failure.
+            cp['recovery_adoption_pending']=True
+            if common_failure(error):block_source(root,manifest,cp,error,arm=arm,day=day)
+            return False
+        request_path=worker.get('request',getattr(error,'request_path',None))
+        if request_path:
+            matches=_request_workers(request_path)
+            if matches:
+                if len(matches)>1:
+                    block_source(root,manifest,cp,PermissionError('GLOBAL_SOURCE_INTEGRITY_FAILURE:DUPLICATE_REQUEST_WORKERS'),arm=arm,day=day)
+                else:worker.update(matches[0],launch_intent=False,popen_returned=True)
+                return False
+        cp['workers'].pop(key,None)
+        row=cp['dates'][key]
+        if common_failure(error):
+            row.update(status='PENDING',source_blocked_request=request_path)
+            block_source(root,manifest,cp,error,arm=arm,day=day,before_popen=True)
+            return False
+        carried=0.
+        if arm=='B2':
+            deployment=manifest.get('B2_deployment_manifest')
+            if deployment:
+                sealed=read(deployment['path'] if isinstance(deployment,dict) else deployment)
+                carried=sealed.get('prior_attempts',{}).get(day,{}).get('Native_Runtime',0.)
+        receipt=root/'dates'/arm/day/('DISPATCH_ADMISSION_FAILURE_'+uuid.uuid4().hex+'.json')
+        status='QUARANTINE' if isinstance(error,PermissionError) else 'FAIL'
+        document=dict(arm=arm,day=day,UTC=now(),status=status,PASS=False,
+            failure_class=type(error).__name__,reason=str(error),stderr=str(getattr(error,'stderr','') or '')[:50000],
+            before_Popen=True,before_Native=True,new_attempt_native_runtime=0.,
+            Native_Runtime=carried if _measured(carried) else None,
+            native_runtime_state='KNOWN' if _measured(carried) else 'UNKNOWN',
+            budget_basis='VERIFIED_PRELAUNCH_NATIVE_ZERO_WITH_PRIOR_ACCOUNTING_PRESERVED',
+            control_source_files=[record(Path(__file__)),record(Path(__file__).with_name('recovery.py'))])
+        atomic(receipt,document)
+        row.update(status=status,Native_Runtime=document['Native_Runtime'],failure_receipt=record(receipt),
+            new_attempt_native_runtime=0.,native_runtime_state=document['native_runtime_state'],finished_UTC=now())
+        first_terminal(cp,key)
+        return False
+
+def advance_sweeps(cp):
+    if cp['workers']:return
+    for arm in ('B2','B3'):
+        if arm in cp['first_sweeps_completed'] or not sweep_complete(cp,arm):continue
+        if arm=='B3' and 'B2' not in cp['first_sweeps_completed']:continue
+        cp['first_sweeps_completed'][arm]=dict(UTC=now(),dates=31,
+            first_attempt_statuses={day:cp['dates'][arm+'/'+day]['first_attempt_terminal']['status'] for day in DAYS})
+        transition(cp,arm+'_FINALIZING')
+        all_pass=all(cp['dates'][arm+'/'+day]['first_attempt_terminal']['status']=='PASS' for day in DAYS)
+        transition(cp,arm+'_COMPLETE' if all_pass else arm+'_SWEEP_COMPLETE_WITH_FAILURES')
+        if arm=='B2':transition(cp,'B3_STARTING');transition(cp,'B3_RUNNING')
+
+def cycle(root,manifest,cp):
+    """One durable scheduling cycle; individual failures remain local."""
+    from .recovery import LeaseBusy,queue,dispatch_ready,sync_worker,common_failure
+    root=Path(root)
+    adopt_intents(cp)
+    initialize_history(cp)
+    if cp['state']=='SOURCE_BLOCKED':
+        _,fingerprint=source_registry(manifest)
+        if fingerprint!=cp.get('source_block',{}).get('source_registry_SHA'):
+            cp.setdefault('source_block_history',[]).append(cp.pop('source_block'))
+            transition(cp,cp.pop('source_block_resume_state','B2_RUNNING'))
+    if cp.pop('recovery_adoption_pending',False):
+        try:adopt_recovery_workers(root,cp)
+        except LeaseBusy:cp['recovery_adoption_pending']=True
+    for key,worker in list(cp['workers'].items()):
+        if same_process(worker):
+            try:sync_worker(root,worker)
+            except LeaseBusy:pass
+            continue
+        try:
+            collect(root,cp,key,worker)
+            row=cp['dates'][key]
+            if row.get('result'):
+                result=read(row['result'])
+                error=PermissionError(str(result.get('reason','')))
+                if result.get('PASS') is not True and common_failure(error):
+                    block_source(root,manifest,cp,error,arm=worker['arm'],day=worker['day'])
+        except Exception as error:
+            receipt=root/'dates'/worker['arm']/worker['day']/('WORKER_COLLECTION_FAILURE_'+uuid.uuid4().hex+'.json')
+            atomic(receipt,dict(worker=worker,status='QUARANTINE',Native_Runtime='UNKNOWN',UTC=now(),
+                reason=str(error),failure_class=type(error).__name__,original_files_preserved=True))
+            cp['dates'][key].update(status='QUARANTINE',Native_Runtime=None,failure_receipt=record(receipt))
+            cp['workers'].pop(key,None);first_terminal(cp,key,worker)
+            if common_failure(error):block_source(root,manifest,cp,error,arm=worker['arm'],day=worker['day'])
+    refresh_retries(root,cp)
+    if cp['state']=='SOURCE_BLOCKED':
+        cp.update(UTC=now(),parallel_workers=0)
+        return
+    advance_sweeps(cp)
+    both=all(arm in cp['first_sweeps_completed'] for arm in ('B2','B3'))
+    if not both:
+        arm='B2' if 'B2' not in cp['first_sweeps_completed'] else 'B3'
+    elif cp['workers']:
+        arms={worker['arm'] for worker in cp['workers'].values()}
+        if len(arms)!=1:
+            block_source(root,manifest,cp,PermissionError('GLOBAL_SOURCE_INTEGRITY_FAILURE:CROSS_ARM_WORKERS'))
+            return
+        arm=next(iter(arms))
+    else:
+        pending=[row for row in queue(root)['entries'] if row['verification_status'] in ('READY_VERIFIED_REPAIR','DISPATCH_INTENT')]
+        pending.sort(key=lambda row:(-row['retry_priority'],row['queued_UTC']))
+        arm=pending[0]['arm'] if pending else None
+    if arm is None:
+        complete=all(row['status']=='PASS' for row in cp['dates'].values())
+        transition(cp,'CAMPAIGN_COMPLETE' if complete else 'CAMPAIGN_SWEEP_COMPLETE_WITH_FAILURES')
+        cp.update(UTC=now(),parallel_workers=0)
+        return
+    if both:transition(cp,arm+'_REPAIRING')
+    limit=3 if arm=='B2' else 1
+    # A first sweep ends at all 31 terminal first attempts. Queued retries can
+    # use free slots while ordinary dates remain, then yield to the next arm.
+    allow_retries=both or not sweep_complete(cp,arm)
+    atomic(root/'SUPERVISOR_STATE.json',cp)
+    for slot in range(1,limit+1):
+        if cp['state']=='SOURCE_BLOCKED':break
+        if slot in {worker['worker_slot'] for worker in cp['workers'].values()}:continue
+        other=external_workers(cp)
+        if other:
+            cp['dispatch_wait']=dict(reason='EXTERNAL_SCIENTIFIC_WORKER_ACTIVE',workers=other,UTC=now())
+            continue
+        retry=None
+        if allow_retries:
+            try:retry=dispatch_ready(root,arm,slot,manifest)
+            except LeaseBusy:
+                cp['dispatch_wait']=dict(reason='RECOVERY_QUEUE_BEING_UPDATED',UTC=now());continue
+            except Exception as error:
+                if common_failure(error):block_source(root,manifest,cp,error,arm=arm)
+                else:cp['dispatch_wait']=dict(reason='RECOVERY_RECONCILIATION_REQUIRED',error=str(error),UTC=now())
+                continue
+        if retry:
+            key=arm+'/'+retry['day'];cp['workers'][key]=retry
+            cp['dates'][key].update(status='RUNNING',request=retry['request'],worker_slot=slot)
+            atomic(root/'SUPERVISOR_STATE.json',cp);continue
+        day=None if both else next_day(cp,arm)
+        if day:safe_dispatch(root,manifest,cp,arm,day,slot)
+    refresh_retries(root,cp)
+    cp.update(UTC=now(),parallel_workers=limit if cp['state']!='SOURCE_BLOCKED' else 0)
+
 def run(root):
     if sys.platform=='win32':psutil.Process().nice(psutil.NORMAL_PRIORITY_CLASS)
     root=Path(root).resolve();manifest=read(root/'AUTONOMOUS_MANIFEST.json')
@@ -240,68 +503,12 @@ def run(root):
         except LeaseBusy:cp['recovery_adoption_pending']=True
         adopt_unjournaled_requests(root,cp,manifest)
         atomic(root/'SUPERVISOR_PROCESS.json',process())
-        while cp['state'] not in ('CAMPAIGN_COMPLETE','CAMPAIGN_COMPLETE_WITH_FAILURES'):
+        while True:
             # Only later attempts read the updated deployment registry. Live
             # workers retain their immutable request, cwd and source seal.
             manifest=read(root/'AUTONOMOUS_MANIFEST.json')
             if manifest['B2_workers']!=3 or manifest['B3_workers']!=1:raise PermissionError('WORKER_COUNT_DRIFT')
-            if cp.pop('recovery_adoption_pending',False):
-                try:adopt_recovery_workers(root,cp)
-                except LeaseBusy:cp['recovery_adoption_pending']=True
-            for key,w in list(cp['workers'].items()):
-                if same_process(w):
-                    try:sync_worker(root,w)
-                    except LeaseBusy:pass
-                    continue
-                collect(root,cp,key,w)
-            arm='B2' if cp['state'].startswith('B2') else 'B3'
-            if sweep_complete(cp,arm) and not cp['workers'] and not recovery_pending(root,arm):
-                transition(cp,arm+'_FINALIZING')
-                all_pass=all(cp['dates'][arm+'/'+d]['status']=='PASS' for d in DAYS)
-                if arm=='B2':
-                    transition(cp,'B2_COMPLETE' if all_pass else 'B2_SWEEP_COMPLETE_WITH_FAILURES')
-                    transition(cp,'B3_STARTING');transition(cp,'B3_RUNNING');arm='B3'
-                else:
-                    both=all(v['status']=='PASS' for v in cp['dates'].values())
-                    transition(cp,'CAMPAIGN_COMPLETE' if both else 'CAMPAIGN_COMPLETE_WITH_FAILURES')
-                    atomic(root/'SUPERVISOR_STATE.json',cp);break
-            limit=3 if arm=='B2' else 1
-            for slot in range(1,limit+1):
-                if slot in {w['worker_slot'] for w in cp['workers'].values()}:continue
-                other=[]
-                own={w.get('PID') for w in cp['workers'].values()}
-                for p in psutil.process_iter(['name']):
-                    if p.pid in own or (p.info['name'] or '').lower() not in ('python.exe','pythonw.exe'):continue
-                    try:
-                        a=p.cmdline();module=a[a.index('-m')+1] if '-m' in a else ''
-                        if module.endswith('.worker') and module.startswith(('v42_may','v42_b2','v42_m1','v42_a_stage','v42_autonomous_b2','v42_autonomous_b3')):
-                            other.append(process(p.pid))
-                    except psutil.Error:continue
-                if other:
-                    cp['dispatch_wait']=dict(reason='EXTERNAL_SCIENTIFIC_WORKER_ACTIVE',workers=other,UTC=now())
-                    continue
-                # Verified repair attempts get the next free slot ahead of new days.
-                from .recovery import dispatch_ready,LeaseBusy
-                try:retry=dispatch_ready(root,arm,slot,manifest)
-                except LeaseBusy:
-                    cp['dispatch_wait']=dict(reason='RECOVERY_QUEUE_BEING_UPDATED',UTC=now())
-                    continue
-                if retry:
-                    key=arm+'/'+retry['day'];cp['workers'][key]=retry
-                    cp['dates'][key].update(status='RUNNING',request=retry['request'],worker_slot=slot)
-                    atomic(root/'SUPERVISOR_STATE.json',cp)
-                    continue
-                day=next_day(cp,arm)
-                if arm=='B3':
-                    # The first real day is the canary. Further Native work is
-                    # admitted only by its completed qualification receipt.
-                    available=(Path(manifest.get('B3_code_root',manifest['code_root']))/'v42_autonomous_b3/worker.py').exists()
-                    first=cp['dates']['B3/'+DAYS[0]]
-                    if not available or (day!=DAYS[0] and first['status']!='PASS'):
-                        cp['B3_admission']='WAITING_FOR_IMPLEMENTATION' if not available else 'WAITING_FOR_REAL_CANARY_PASS'
-                        continue
-                if day:dispatch(root,manifest,cp,arm,day,slot)
-            cp.update(UTC=now(),parallel_workers=limit)
+            cycle(root,manifest,cp)
             atomic(root/'SUPERVISOR_STATE.json',cp)
             atomic(root/'SUPERVISOR_HEARTBEAT.json',dict(process=process(),timestamp_UTC=now(),state=cp['state']))
             time.sleep(2)

@@ -152,7 +152,7 @@ def test_repair_source_files_are_checked_again_before_dispatch(tmp_path, monkeyp
     # Undo only this helper mock so real seal verification runs before any Popen.
     monkeypatch.undo()
     request = r.read(row['retry_request_receipt']['path'])
-    with pytest.raises(PermissionError, match='SEALED_EVIDENCE_DRIFT'):
+    with pytest.raises(PermissionError, match='SOURCE_FILES_DRIFT'):
         r._verify_dispatch(row, request)
 
 
@@ -458,3 +458,85 @@ def test_b3_terminal_cannot_replace_prior_calls_with_equal_cost_calls(tmp_path,m
     final=r.mark_finished(tmp_path,row['queue_id'],result)
     assert final['verification_status']=='QUARANTINE_TERMINAL_ACCOUNTING'
     assert final['final_PASS'] is False
+
+
+def authorize_zero(tmp_path,repair):
+    auth=tmp_path/'USER_ZERO_START_RETRY_AUTHORIZATION.json'
+    r.atomic(auth,dict(schema='V42_USER_AUTHORIZED_ZERO_START_RETRY_V1',campaign_root=str(tmp_path),UTC=r.now(),
+        user_instruction='해결하고 재실행할 때는 0초부터 처음부터 다시 돌려야돼. 알지?',
+        scope='VERIFIED_SOURCE_REPAIR_FRESH_DATE_RETRY',restart_from_zero=True,native_budget_seconds=5400,
+        B3_native_budget_per_stage_seconds=5400,previous_checkpoint_reuse=False,previous_native_budget_carry=False,
+        old_attempts_and_accounting_preserved=True,normal_workers_must_continue=True,applies_to_hourly_verified_repairs=True))
+    receipt=r.record(auth);repair.update(restart_from_zero=True,reset_authorization=receipt)
+    path=Path(repair['retry_request_receipt']['path']);request=r.read(path)
+    request.update(root=str(tmp_path),restart_from_zero=True,reset_authorization=receipt,previous_attempts=[])
+    if request['arm']=='B2':
+        manifest=tmp_path/'ZERO_START_MANIFEST.json';r.atomic(manifest,dict(prior_attempts={}))
+        request['manifest']=str(manifest)
+    r.atomic(path,request);repair['retry_request_receipt']=r.record(path)
+    return receipt
+
+
+def test_zero_start_retry_without_explicit_user_receipt_is_rejected(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    repair['restart_from_zero']=True
+    with r.repair_lease(tmp_path,token='test'):
+        with pytest.raises(PermissionError,match='ZERO_START_USER_AUTHORIZATION'):
+            r.enqueue(tmp_path,failure,repair,lease_token='test')
+
+
+@pytest.mark.parametrize('runtime',[10.,5400.,None,'UNKNOWN'])
+def test_authorized_zero_retry_preserves_known_exhausted_and_unknown_history(tmp_path,monkeypatch,runtime):
+    failure,repair=packet(tmp_path,monkeypatch,runtime=10.)
+    result=Path(failure['original_result_receipt']['path']);ledger=Path(failure['original_ledger_receipt']['path'])
+    original=r.read(result);original['Native_Runtime']=runtime;r.atomic(result,original)
+    doc=r.read(ledger);doc.update(measured_Native_Runtime=runtime,inflight={'status':'IN_FLIGHT'} if runtime is None or runtime=='UNKNOWN' else None)
+    r.atomic(ledger,doc)
+    failure.update(original_native_runtime=runtime,original_result_receipt=r.record(result),original_ledger_receipt=r.record(ledger),
+        runtime_unknown=runtime is None or runtime=='UNKNOWN',quarantined=runtime is None or runtime=='UNKNOWN')
+    before=(result.read_bytes(),ledger.read_bytes());authorize_zero(tmp_path,repair)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    assert row['initial_native_runtime']==0. and row['remaining_native_seconds']==5400.
+    assert row['historical_native_runtime']==runtime
+    assert (result.read_bytes(),ledger.read_bytes())==before
+    request=r.read(row['retry_request_receipt']['path']);final=Path(request['result'])
+    r.atomic(final.parent/'NATIVE_RUNTIME_LEDGER.json',dict(measured_Native_Runtime=1.,inflight=None,prior_attempt=None,
+        calls=[dict(entered_native=True,Native_Runtime=1.,runtime_unavailable=False)]))
+    r.atomic(final,dict(identity=dict(arm='B2',day=row['date'],attempt_id=request['attempt_id']),
+        source_SHA=row['repair_source_SHA'],PASS=True,status='PASS',scientific_PASS=True,Native_Runtime=1.))
+    outcome=r.mark_finished(tmp_path,row['queue_id'],final)
+    assert outcome['verification_status']=='RECOVERY_PASS' and outcome['final_remaining_native_seconds']==5399.
+    assert (result.read_bytes(),ledger.read_bytes())==before
+
+
+def test_authorized_b3_zero_retry_uses_new_stage_budgets_without_old_prefix(tmp_path,monkeypatch):
+    failure,repair=b3_packet(tmp_path,monkeypatch,runtimes=dict(A1=0.,M1=5400.,A2=3000.,M2=100.))
+    old_result=Path(failure['original_result_receipt']['path']);old_bytes=old_result.read_bytes()
+    authorize_zero(tmp_path,repair)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    assert row['initial_stage_native_runtime']=={stage:0. for stage in r.B3_STAGES}
+    assert row['remaining_native_seconds_by_stage']=={stage:5400. for stage in r.B3_STAGES}
+    request=r.read(row['retry_request_receipt']['path']);path=Path(request['result'])
+    result=b3_result(path.parent,dict(A1=0.,M1=1.,A2=2.,M2=3.),source='b'*64)
+    result.update(identity=dict(arm='B3',day=row['date'],attempt_id=request['attempt_id']),source_sha='b'*64,
+        PASS=True,status='PASS',stages={stage:dict(native_seconds=value,original_integer_physical_verified=True,
+            independent_global_verified=True) for stage,value in result['stage_native_runtime'].items()})
+    r.atomic(path,result)
+    assert r.mark_finished(tmp_path,row['queue_id'],path)['verification_status']=='RECOVERY_PASS'
+    assert old_result.read_bytes()==old_bytes
+
+
+def test_daily_retry_admission_failure_preserves_budget_and_other_retry_can_launch(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    monkeypatch.setattr(r,'_verify_dispatch',lambda row,request:(_ for _ in ()).throw(PermissionError('EXHAUSTED_NATIVE_BUDGET_NO_AUTOMATIC_RETRY')))
+    monkeypatch.setattr(r.subprocess,'Popen',lambda *a,**k:pytest.fail('EXHAUSTED_RETRY_LAUNCHED'))
+    assert r.dispatch_ready(tmp_path,'B2',1,{}) is None
+    denied=r.queue(tmp_path)['entries'][0]
+    assert denied['verification_status']=='QUARANTINE_REPAIR_ADMISSION'
+    assert denied['original_native_runtime']==10. and denied['new_attempt_native_runtime']==0.
+    assert r.read(denied['admission_failure_receipt']['path'])['Native_Runtime']==10.
