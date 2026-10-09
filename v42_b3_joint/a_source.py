@@ -20,6 +20,8 @@ import sys
 
 from .contracts import canonical, digest, require, require_sha
 from .model_mapping import aidc_from_source, verify_fixed_mess_packet, verify_planning_arrays
+from .numerical_policy import (VERSION as NUMERICAL_VERSION, bind_apply_precision,
+                               required_settings, settings_metadata, verify_settings_receipt)
 from .source_runtime import SourceStageOutput, jsonable
 
 
@@ -96,6 +98,48 @@ def _scientific(value):
     if isinstance(value, list):
         return [_scientific(item) for item in value]
     return value
+
+
+def _native_numerical_artifact(context, apply_precision, name, value):
+    """Replace the source's May11 annotation with the effective B3 policy.
+
+    This receipt describes source policy application before the ledger admits
+    Native. The ledger owns the final actual entry snapshot and TimeLimit.
+    """
+    if name not in ("MODEL_IDENTITY.json", "SOLVER_PARAMETERS.json"):
+        return value
+    component = value.get("component")
+    receipt = apply_precision.last_receipt
+    day, stage = context.request.authority.day, context.request.stage
+    require(isinstance(receipt, dict) and receipt.get("day") == day and
+            receipt.get("stage") == stage and receipt.get("component") == component and
+            receipt.get("version") == NUMERICAL_VERSION,
+            "A_SOURCE_NUMERICAL_APPLICATION_RECEIPT_DRIFT")
+    verify_settings_receipt(receipt, day=day, stage=stage, component=component)
+    overrides = required_settings(day, stage, component)
+    require(receipt["overrides"] == overrides, "A_SOURCE_NUMERICAL_OVERRIDE_DRIFT")
+    # At source apply_policy, TimeLimit can still be the native Infinity
+    # default. Its finite effective value is written by the original source
+    # separately and authoritatively captured by the ledger at admission.
+    effective = dict(value.get("effective", {key: parameter for key, parameter in
+        receipt["effective_parameters"].items() if key != "TimeLimit"}))
+    require(all(effective.get(key) == parameter for key, parameter in overrides.items()),
+            "A_SOURCE_PERSISTED_NUMERICAL_SETTINGS_DRIFT")
+    if stage.startswith("A") and component == "PHASE_I":
+        require(effective.get("Method") == 2, "A_SOURCE_PHASE_I_ORIGINAL_METHOD_TWO_REQUIRED")
+    metadata = settings_metadata(day, stage, component, effective)
+    metadata["effective_settings_scope"] = "SOURCE_POLICY_APPLICATION_BEFORE_NATIVE_ADMISSION"
+    metadata["Native_entry_authority"] = "B3_SOURCE_STAGE_LEDGER_ACTUAL_PARAMETER_READBACK"
+    metadata["protected_parameters_at_source_application"] = {key: parameter for key, parameter in
+        receipt["protected_parameters"].items() if key != "TimeLimit"}
+    return dict(value, numerical_policy_version=NUMERICAL_VERSION,
+        numerical_policy_sha=metadata["policy_sha"], numerical_policy=metadata,
+        numerical_policy_source_receipt=json.loads(canonical(receipt)),
+        effective_solver_parameters=effective,
+        numerical_precision_override=metadata["numerical_precision_override"],
+        solver_policy_unchanged=metadata["solver_policy_unchanged"],
+        phase_I_original_rows=metadata["phase_I_original_rows"],
+        scientific_acceptance_tolerance_unchanged=True)
 
 
 def _receipt(path):
@@ -361,6 +405,9 @@ class ASourceBridge:
     def _configure(self, context, ledger, progress, profile):
         registry = context.source_registry
         source = registry.resolve(A_SOURCE)
+        apply_precision = bind_apply_precision(
+            registry.callable("v42_a_stage_domain_v2/solver_policy.py", "apply_policy"),
+            stage=context.request.stage, evidence_kind=registry.evidence_kind)
         def atomic(path, value):
             destination = Path(path).resolve()
             require(destination.is_relative_to(context.output / "SOURCE"), "A_SOURCE_ARTIFACT_WRITE_ESCAPE")
@@ -374,6 +421,7 @@ class ASourceBridge:
                     value.update(stage=context.request.stage, request_sha=context.request.request_sha,
                                  fixed_input_sha=context.request.fixed_input_sha,
                                  fixed_MESS_decision_sha=context.request.fixed_mess.sha if context.request.fixed_mess else None)
+                value = _native_numerical_artifact(context, apply_precision, destination.name, value)
             return source.atomic(destination, value)
         bind, coefficient = self._binding(context, profile)
         verify_case = registry.rebind(A_SOURCE, "verify_case", literal_replacements={"B1": "B3"})
@@ -399,7 +447,8 @@ class ASourceBridge:
         native = registry.rebind(A_SOURCE, "_native",
             globals={"_paths": lambda request: self._paths(context, request), "REPOSITORY": registry.root, "atomic": atomic},
             literal_replacements={"B1": "B3"},
-            import_replacements={"execution": SimpleNamespace(native_scope=registry.native_scope, guard=registry.guard)})
+            import_replacements={"execution": SimpleNamespace(native_scope=registry.native_scope, guard=registry.source_model_guard),
+                                 "apply_precision": apply_precision})
         planning = self._planning(context, source)
         run = registry.rebind(A_SOURCE, "run", globals={
             "_paths": lambda request: self._paths(context, request), "prepare": prepare, "_native": native,
@@ -448,7 +497,11 @@ class ASourceBridge:
         paths = {output / "BLOCK_PRICING_ORACLE_VERIFICATION.json",
                  output / "P1_FULL_DOMAIN_BOUND_CERTIFICATE.json",
                  output / "ORIGINAL_INTEGER_TYPE_RESTORATION.json",
-                 output / "P1/INTEGER_CONTROL/MODEL_IDENTITY.json", pricing}
+                 output / "P1/INTEGER_CONTROL/MODEL_IDENTITY.json",
+                 output / "A_NATIVE_CALLS.json", pricing}
+        for call in source.read(output / "A_NATIVE_CALLS.json")["calls"]:
+            folder = Path(call["folder"])
+            paths.update(folder / name for name in ("MODEL_IDENTITY.json", "SOLVER_PARAMETERS.json"))
         roster = source.read(output / "BLOCK_PRICING_ORACLE_VERIFICATION.json")["records"]
         for entry in roster:
             paths.add(Path(entry["external_full_block_cache"]["path"]))
@@ -508,6 +561,7 @@ class ASourceBridge:
                 "planning": raw_result["planning"], "accepted_source": raw_result["freeze"],
                 "complete_domain_hashes": {uid: domain.sha for uid, domain in state["domains"].items()},
                 "original_complete_domain_sha": domain_sha,
+                "numerical_policy_version": NUMERICAL_VERSION,
                 "physical_domain_sha_basis": "ORIGINAL_DATA_7_PHYSICAL_DOMAIN_HASH_COMPLETE_AIDC_ROSTER",
                 "global_bound": _receipt(output / "P1_FULL_DOMAIN_BOUND_CERTIFICATE.json"),
                 "pricing_result": source.read(output / "P1_RESULT.json")["full_pricing"],
@@ -579,6 +633,50 @@ class ASourceBridge:
                 "A_PROOF_ORIGINAL_COMPLETE_GLOBAL_PRICING_FAILED")
         return priced
 
+    def _verify_numerical_artifacts(self, context, output):
+        """Check all source settings receipts, separately from scientific proof."""
+        packet = output.source_packet
+        require(packet.get("numerical_policy_version") == NUMERICAL_VERSION,
+                "A_SOURCE_NUMERICAL_POLICY_VERSION_DRIFT")
+        source = context.source_registry.resolve(A_SOURCE)
+        root = Path(packet["source_output"])
+        calls = source.read(root / "A_NATIVE_CALLS.json")["calls"]
+        require(len(calls) == output.source_result["native_calls"], "A_SOURCE_NUMERICAL_CALL_AXIS_DRIFT")
+        records = []
+        for call in calls:
+            component, folder = call["component"], Path(call["folder"]).resolve()
+            require(folder.is_relative_to(root.resolve()), "A_SOURCE_NUMERICAL_ARTIFACT_ESCAPE")
+            overrides = required_settings(context.request.authority.day, context.request.stage, component)
+            parameters = source.read(folder / "SOLVER_PARAMETERS.json")
+            for name in ("MODEL_IDENTITY.json", "SOLVER_PARAMETERS.json"):
+                document = source.read(folder / name)
+                metadata = document["numerical_policy"]
+                effective = document["effective_solver_parameters"]
+                source_receipt = document["numerical_policy_source_receipt"]
+                verify_settings_receipt(source_receipt, day=context.request.authority.day,
+                    stage=context.request.stage, component=component)
+                expected = settings_metadata(context.request.authority.day, context.request.stage, component, effective)
+                require(document.get("component") == component and
+                        document.get("numerical_policy_version") == NUMERICAL_VERSION and
+                        document.get("numerical_policy_sha") == expected["policy_sha"] and
+                        all(metadata.get(key) == value for key, value in expected.items()) and
+                        document.get("numerical_precision_override") is bool(overrides) and
+                        document.get("solver_policy_unchanged") is (not bool(overrides)) and
+                        document.get("scientific_acceptance_tolerance_unchanged") is True and
+                        all(effective.get(key) == value for key, value in overrides.items()),
+                        "A_SOURCE_NUMERICAL_SETTINGS_RECEIPT_DRIFT")
+                if component == "PHASE_I":
+                    require(effective.get("Method") == 2, "A_SOURCE_PHASE_I_ORIGINAL_METHOD_TWO_REQUIRED")
+            require(parameters["effective"] == parameters["effective_solver_parameters"],
+                    "A_SOURCE_ORIGINAL_EFFECTIVE_NUMERICAL_SETTINGS_DRIFT")
+            identity = source.read(folder / "MODEL_IDENTITY.json")
+            require(parameters["numerical_policy_source_receipt"] == identity["numerical_policy_source_receipt"],
+                    "A_SOURCE_NUMERICAL_SOURCE_APPLICATION_CHANGED")
+            records.append({"component": component, "folder": str(folder),
+                "settings_sha": digest(parameters), "overrides": overrides})
+        return {"version": NUMERICAL_VERSION, "records_sha": digest(records),
+                "source_settings_records": len(records), "Native_entry_settings_authority": "B3_SOURCE_STAGE_LEDGER"}
+
     def _verify_admitted(self, context, output):
         require(output.request == context.request and output.evidence_kind == context.source_registry.evidence_kind,
                 "A_SOURCE_VERIFIER_REQUEST_EVIDENCE_DRIFT")
@@ -587,6 +685,7 @@ class ASourceBridge:
         require(source_root.resolve() == context.output / "SOURCE", "A_SOURCE_VERIFIER_OUTPUT_DRIFT")
         for receipt in packet["proof_input_receipts"]:
             _checked(receipt, source_root)
+        numerical = self._verify_numerical_artifacts(context, output)
         require(packet["source_stage"] == context.request.stage and
                 packet["authority_sha"] == context.request.authority.sha and packet["decision_sha"] == output.aidc.sha and
                 packet["original_model_sha"] == output.model_sha,
@@ -661,6 +760,7 @@ class ASourceBridge:
             "complete_pricing_replay_sha": digest(_scientific(jsonable(priced))), "source_static_verification": jsonable(static),
             "source_original_integer_type_proof": jsonable(types), "joint_global_optimality_claim": False,
             "sealed_source_proof_inputs_sha": digest(packet["proof_input_receipts"]),
+            "numerical_policy_receipts": numerical,
             "evidence_kind": registry.evidence_kind}
         for receipt in packet["proof_input_receipts"]:
             _checked(receipt, source_root)

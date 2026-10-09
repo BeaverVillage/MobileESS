@@ -9,10 +9,13 @@ import ast
 import json
 import unittest
 
-from v42_b3_joint.a_source import ASourceBridge, BuildProfile, A_SOURCE, _BOUND_MODULES, _restore_source_globals, _scientific
+from v42_b3_joint.a_source import (ASourceBridge, BuildProfile, A_SOURCE, _BOUND_MODULES,
+    _restore_source_globals, _scientific, _native_numerical_artifact)
 from v42_b3_joint.contracts import Authority, MESSDecision, StageRequest, canonical, digest
 from v42_b3_joint.grid_binding import InjectionAuthority, fold_fixed_affine_rows
 from v42_b3_joint.model_mapping import verify_fixed_mess_packet
+from v42_b3_joint.numerical_policy import (VERSION as NUMERICAL_VERSION,
+    bind_apply_precision, apply_native_precision)
 from v42_b3_joint.source_runtime import FakeSourceRegistry, RealStageContext, SourceRegistry, jsonable
 
 
@@ -298,6 +301,92 @@ class SourceBridgeTests(unittest.TestCase):
         self.assertIsNone(receipt["speedup_ratio"])
         self.assertEqual(receipt["large_May01_May23_comparison"], "NOT_RUN")
 
+    def test_all_may_a_stages_precision_and_source_artifact_metadata(self):
+        original = dict(Threads=1, Method=2, Seed=20260929, MIPGap=.005, Presolve=-1,
+            Cuts=-1, Heuristics=.05, NumericFocus=0, FeasibilityTol=1e-6, OptimalityTol=1e-6,
+            IntFeasTol=1e-5, NodeMethod=1, MIPFocus=3, Crossover=-1)
+        calls = []
+        class Model:
+            def __init__(self):
+                self.Params = SimpleNamespace(TimeLimit=float("inf"), ScaleFlag=-1)
+            def setParam(self, name, value):
+                setattr(self.Params, name, value)
+        def source_apply(model, policy, gp):
+            calls.append(policy)
+            for name, value in policy.items():
+                model.setParam(name, value)
+            return {name: getattr(model.Params, name) for name in policy}
+        for stage in ("A1", "A2"):
+            for day_number in range(1, 32):
+                day = f"2025-05-{day_number:02d}"
+                context = SimpleNamespace(request=SimpleNamespace(stage=stage, authority=SimpleNamespace(day=day)))
+                precision = bind_apply_precision(source_apply, stage=stage, evidence_kind="FAKE_SOURCE_TEST")
+                for component in ("PHASE_I", "ORIGINAL_P1", "LOCAL_PRICING", "INTEGER_CONTROL"):
+                    with self.subTest(stage=stage, day=day, component=component):
+                        model = Model()
+                        effective = precision(model, original, object(), day=day, component=component)
+                        enabled = component in ("PHASE_I", "ORIGINAL_P1")
+                        self.assertEqual(model.Params.FeasibilityTol, 1e-9 if enabled else 1e-6)
+                        self.assertEqual(model.Params.OptimalityTol, 1e-9 if enabled else 1e-6)
+                        self.assertEqual(model.Params.NumericFocus, 3 if enabled else 0)
+                        self.assertEqual(model.Params.ScaleFlag, 2 if enabled else -1)
+                        self.assertEqual(model.Params.Presolve, 0 if component == "PHASE_I" else -1)
+                        self.assertEqual(model.Params.Method, 2)
+                        self.assertEqual(model.Params.Heuristics, .05)
+                        self.assertEqual(model.Params.IntFeasTol, 1e-5)
+                        stale = {"component": component, "numerical_precision_override": False,
+                                 "solver_policy_unchanged": True, "effective": effective, "TimeLimit": 5400}
+                        parameters = _native_numerical_artifact(context, precision, "SOLVER_PARAMETERS.json", stale)
+                        identity = _native_numerical_artifact(context, precision, "MODEL_IDENTITY.json",
+                            {key: value for key, value in stale.items() if key != "effective"})
+                        for artifact in (parameters, identity):
+                            self.assertEqual(artifact["numerical_policy_version"], NUMERICAL_VERSION)
+                            self.assertEqual(artifact["numerical_precision_override"], enabled)
+                            self.assertEqual(artifact["solver_policy_unchanged"], not enabled)
+                            self.assertEqual(artifact["phase_I_original_rows"], component == "PHASE_I")
+                            self.assertEqual(artifact["numerical_policy"]["built_in_heuristics_active"], True)
+                            self.assertTrue(artifact["scientific_acceptance_tolerance_unchanged"])
+                            self.assertNotIn("TimeLimit", artifact["numerical_policy"]["protected_parameters_at_source_application"])
+                            canonical(artifact)  # Original Infinity default cannot leak into a sealed packet.
+                        changed = dict(stale, effective=dict(effective, FeasibilityTol=1e-6))
+                        if enabled:
+                            with self.assertRaisesRegex(ValueError, "PERSISTED_NUMERICAL_SETTINGS_DRIFT"):
+                                _native_numerical_artifact(context, precision, "SOLVER_PARAMETERS.json", changed)
+        self.assertEqual(len(calls), 31 * 2 * 4)
+
+    def test_source_preflight_and_actual_settings_guard_are_separate(self):
+        a = authority()
+        class Model:
+            def __init__(self):
+                self.Params = SimpleNamespace(Threads=1, Method=2, TimeLimit=float("inf"),
+                    FeasibilityTol=1e-6, OptimalityTol=1e-6, NumericFocus=0, ScaleFlag=-1,
+                    Presolve=-1, Heuristics=.05)
+            def setParam(self, name, value):
+                setattr(self.Params, name, value)
+        def original_apply(model, policy, gp):
+            return {name: getattr(model.Params, name) for name in policy}
+        registry, model = FakeSourceRegistry(), Model()
+        precision = bind_apply_precision(original_apply, stage="A1", evidence_kind="FAKE_SOURCE_TEST")
+        with TemporaryDirectory() as temp:
+            context = RealStageContext(StageRequest("A1", a), Path(temp) / "inputs", Path(temp) / "output",
+                canonical({"day": a.day}), registry, object(), {}, a.source_sha, "preflight")
+            precision(model, {"Method": 2, "Threads": 1}, object(), day=a.day, component="PHASE_I")
+            self.assertFalse(hasattr(model, "_v42_b3_numerical_receipt"))
+            with registry.execution_scope(context), registry.native_scope(model, "PHASE_I", "A"):
+                registry.source_model_guard(model)
+                # A preflight annotation cannot substitute for the ledger's
+                # actual finite-TimeLimit entry receipt.
+                model._v42_b3_numerical_receipt = {"source_preflight_only": True}
+                with self.assertRaisesRegex(ValueError, "RECEIPT_CONTENT_DRIFT"):
+                    registry.guard(model)
+                model.setParam("TimeLimit", 5400.)
+                model._v42_b3_numerical_receipt = apply_native_precision(model,
+                    day=a.day, stage="A1", component="PHASE_I", evidence_kind="FAKE_SOURCE_TEST")
+                registry.guard(model)
+                model.setParam("FeasibilityTol", 1e-6)
+                with self.assertRaisesRegex(ValueError, "ENTRY_SETTINGS_DRIFT"):
+                    registry.guard(model)
+
     def test_v6_contexts_and_fresh_stage_grid_are_actual_source_links(self):
         root = Path(__file__).resolve().parents[1]
         tree = ast.parse((root / "v42_may_build_v6/a_stage.py").read_text(encoding="utf-8-sig"))
@@ -309,6 +398,9 @@ class SourceBridgeTests(unittest.TestCase):
         self.assertIn('"v42_compact.native", "grid"', bridge)
         self.assertIn('"v42_a_stage_canary.pricing", "full_pricing"', bridge)
         self.assertIn('"v42_a_stage_practical/integer_model.py", "restore_types"', bridge)
+        self.assertIn('"v42_a_stage_domain_v2/solver_policy.py", "apply_policy"', bridge)
+        self.assertIn('"apply_precision": apply_precision', bridge)
+        self.assertIn('guard=registry.source_model_guard', bridge)
 
 
 if __name__ == "__main__":

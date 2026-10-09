@@ -12,6 +12,8 @@ from time import perf_counter
 
 from .contracts import canonical, digest, require
 from .policy import STAGES
+from .numerical_policy import (VERSION as NUMERICAL_VERSION, policy_sha,
+    apply_native_precision, assert_native_precision, verify_settings_receipt)
 
 COMPONENTS = frozenset(("P1", "ORIGINAL_P1", "PHASE_I", "INTEGER_CONTROL",
     "NODE_LP", "LOCAL_PRICING", "FEASIBILITY_LP", "FEASIBILITY_MIP", "LP_DUAL",
@@ -31,13 +33,14 @@ class SourceStageLedger:
         self.path = self._path(path or self.output / "NATIVE_RUNTIME_LEDGER.json")
         self.identity_path = self.path.with_name(self.path.stem + "_IDENTITY.json")
         request = context.request
-        self.identity = dict(schema="B3_SOURCE_NATIVE_LEDGER_IDENTITY_V1",
+        self.identity = dict(schema="B3_SOURCE_NATIVE_LEDGER_IDENTITY_V2",
             run_id=context.run_id, day=request.authority.day, stage=self.stage,
             authority_sha=request.authority.sha, input_sha=request.authority.input_sha,
             request_sha=request.request_sha, fixed_input_sha=request.fixed_input_sha,
             source_sha=request.authority.source_sha, native_limit_seconds=5400,
             wall_limit_seconds=None, Threads=1, P2_calls=0,
-            budget_basis="MEASURED_NATIVE_RUNTIME_ONLY")
+            budget_basis="MEASURED_NATIVE_RUNTIME_ONLY",
+            numerical_policy_version=NUMERICAL_VERSION, numerical_policy_sha=policy_sha())
         with self.registry.execution_scope(context):
             source_class = self.registry.callable("v42_may_campaign_native90/budget.py", "DateBudget")
             rebound_init = self.registry.rebind("v42_may_campaign_native90.budget", "DateBudget.__init__",
@@ -101,6 +104,10 @@ class SourceStageLedger:
         for row in document["calls"]:
             require(row.get("component") in COMPONENTS and row.get("entered_native") is True,
                 "NATIVE_LEDGER_CALL_ADMISSION_DRIFT")
+            verify_settings_receipt(row.get("b3_numerical_policy", {}),
+                day=self.context.request.authority.day, stage=self.stage, component=row["component"])
+            require(row["b3_numerical_policy"]["effective_parameters"].get("TimeLimit")
+                == row["effective_TimeLimit"], "NATIVE_LEDGER_NUMERICAL_LIMIT_DRIFT")
             require(not unknown_seen and total < 5400
                 and row.get("effective_TimeLimit") == max(0., 5400 - total),
                 "NATIVE_LEDGER_REMAINING_LIMIT_OR_QUARANTINE_DRIFT")
@@ -123,6 +130,12 @@ class SourceStageLedger:
         require(allowed, "NATIVE_STAGE_TRACK_DRIFT")
         self.registry.admit(self.context, "NATIVE_OPTIMIZE")
         with self.registry.execution_scope(self.context), self.registry.native_scope(model, component, track):
+            settings = apply_native_precision(model, day=self.context.request.authority.day,
+                stage=self.stage, component=component, evidence_kind=self.registry.evidence_kind)
+            require(isinstance(self.budget.inflight, dict), "B3_NUMERICAL_LEDGERED_NATIVE_ENTRY_REQUIRED")
+            self.budget.inflight["b3_numerical_policy"] = json.loads(canonical(settings))
+            model._v42_b3_numerical_receipt = json.loads(canonical(settings))
+            self.budget.persist()
             yield
 
     def _guard(self, model):
@@ -132,6 +145,12 @@ class SourceStageLedger:
             "B3_NATIVE_THREADS_ONE_REQUIRED")
         require(getattr(model, "_v42_a_stage_day", self.context.request.authority.day)
             == self.context.request.authority.day, "B3_NATIVE_MODEL_DATE_DRIFT")
+        receipt = getattr(model, "_v42_b3_numerical_receipt", None)
+        require(isinstance(receipt, dict) and isinstance(self.budget.inflight, dict)
+            and self.budget.inflight.get("b3_numerical_policy") == receipt,
+            "B3_NUMERICAL_LEDGER_ENTRY_RECEIPT_REQUIRED")
+        assert_native_precision(model, receipt, day=self.context.request.authority.day,
+            stage=self.stage, component=self.budget.inflight["component"])
 
     def native_optimize(self, model, callback=None, *, component="P1", track=None,
                         label="", requested_seconds=None):

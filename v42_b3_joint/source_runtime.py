@@ -282,6 +282,32 @@ class SourceRegistry:
         require(scope is not None and scope[0] is context and scope[1] is model,
                 "B3_LEDGERED_NATIVE_MODEL_SCOPE_REQUIRED")
         require(type(model.Params.Threads) is int and model.Params.Threads == 1, "B3_NATIVE_THREADS_ONE_REQUIRED")
+        receipt = getattr(model, "_v42_b3_numerical_receipt", None)
+        if self.evidence_kind == "SOURCE" or receipt is not None:
+            from .numerical_policy import assert_native_precision
+            require(isinstance(receipt, dict), "B3_NUMERICAL_NATIVE_ENTRY_RECEIPT_REQUIRED")
+            assert_native_precision(model, receipt, day=context.request.authority.day,
+                stage=context.request.stage, component=scope[2])
+
+    def source_model_guard(self, model):
+        """Source A preflight before its routed optimize enters DateBudget.
+
+        Actual Gurobi entry still uses guard(), which demands the measured
+        ledger scope and its effective settings receipt.
+        """
+        context, scope = _current.get(), _native.get()
+        require(context is not None and scope is not None and scope[0] is context
+            and scope[1] is model, "B3_SOURCE_MODEL_PREFLIGHT_SCOPE_REQUIRED")
+        self.admit(context, "NATIVE_MODEL_PREFLIGHT")
+        require(type(model.Params.Threads) is int and model.Params.Threads == 1,
+            "B3_NATIVE_THREADS_ONE_REQUIRED")
+        from .numerical_policy import required_settings
+        expected = required_settings(context.request.authority.day, context.request.stage, scope[2])
+        require(all(getattr(model.Params, name, None) == value for name, value in expected.items()),
+            "B3_SOURCE_MODEL_PREFLIGHT_SETTINGS_DRIFT")
+        require(not (context.request.stage.startswith("A") and scope[2] == "PHASE_I")
+            or getattr(model.Params, "Method", None) == 2,
+            "B3_PHASE_I_ORIGINAL_METHOD_TWO_REQUIRED")
 
 
 class FakeSourceRegistry(SourceRegistry):

@@ -147,6 +147,10 @@ def verification():
             "limits": ["No real May01/May23 FULL equivalence", "No real optimization or exact Global gap result",
                        "No real Original physical or Fresh AC result", "No real build performance/RSS comparison"],
             "failure_details": [{"test": str(test), "trace": trace} for test, trace in result.failures + result.errors]}
+        numerical = sys.modules.get("test_v42_b3_numerical_policy")
+        numerical_entries = getattr(numerical, "ENTRY_EVIDENCE", [])
+        report.update(numerical_policy_day_stage_entries=len(numerical_entries),
+            numerical_policy_entry_evidence=numerical_entries)
         write_json("B3_LIGHTWEIGHT_REGRESSION.json", report)
         write_json("B3_SOURCE_API_STATIC_AUDIT.json", {"literal_routes": new_api, "dynamic_routes_requiring_source_routing_tests": dynamic,
             "actual_invocations": 0, "scientific_certified": False})

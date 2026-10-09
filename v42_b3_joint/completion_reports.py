@@ -5,6 +5,7 @@ import json
 
 from .contracts import digest
 from .readiness import readiness
+from .numerical_policy import VERSION as NUMERICAL_VERSION, policy_sha, PRECISION
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs/v42_b3_implementation_completion_20261009"
@@ -63,7 +64,8 @@ def reports():
     write(DOCS, "B3_ORIGINAL_MODEL_MAPPING.json", {**common, "stages": mapping,
         "objective": "min rho_max", "P2_calls": 0, "Threads": 1,
         "authority": "InjectionAuthority pins coefficient SHAs, phase/PCC/control mapping, kW/kvar units, original signs, validity domain, independent source checker and dynamic transformer rows",
-        "original_solver_policy": "Existing V6 A Native policy and native90 M policy reused without changes, including existing V6 May11 PHASE_I/ORIGINAL_P1 precision route; policy.parameters describes default stage contract",
+        "original_solver_policy": "Source base policy retained with explicit versioned B3 May precision adapter: A PHASE_I/ORIGINAL_P1 on all 31 days, Phase I Presolve=0 with original Method=2, every M Native entry uses precision. Original integrality/Heuristics/replay tolerance unchanged. policy.parameters is the historical default contract; ledger is the effective Native settings authority",
+        "numerical_policy_version": NUMERICAL_VERSION,
         "source_input_sha_basis": "digest({NATIVE_INPUT.json:raw SHA256,WINDOWS.json:raw SHA256}); bundle JSON must match original NATIVE_INPUT.json at SOURCE admission",
         "physical_domain_sha_basis": "Original v42_a_stage_domain_v2.domain.digest(sorted UID to domain.sha roster) must equal source DATA[7].physical_domain_hash and Authority.physical_domain_sha; each M stage also verifies its fresh route/FULL/Compact/C3A fingerprint",
         "cross_stage_context": "Same input folder, canonical original bundle, grid authority object, producer/source SHA, day and run_id required",
@@ -97,6 +99,10 @@ def reports():
         "pending_scientific_validation": pending, "counts": counts,
         "campaign_owner": "User-authorized v42 열여섯번째 owns current campaign V7 source/Coordinator version transition; this work never edits active campaign files",
         "latest_commit_location": "Git HEAD of this branch (reports avoid circular self-commit hashing)"}
+    status.update(numerical_policy_version=NUMERICAL_VERSION, numerical_policy_sha=policy_sha(),
+        numerical_policy_day_stage_entries=light.get("numerical_policy_day_stage_entries"),
+        effective_Native_settings_authority="SourceStageLedger calls[].b3_numerical_policy",
+        B3_numerical_full_model_Native_certification="NOT_TESTED")
     write(DOCS, "B3_FINAL_IMPLEMENTATION_STATUS.json", status)
     lower = [p for folder in ROOT.glob("v42_*") if folder.is_dir()
              for p in folder.rglob("*.py") if "__pycache__" not in p.parts]
@@ -170,7 +176,7 @@ PR191의 기존 계약 위에 A1→M1→A2→M2, 원본 Native ledger, Planning�
 
 A2는 원본 control_names/단위/sign/phase/계수 SHA를 검증하여 MESS P와 Q를 상수로 주입합니다. M2는 FCFS 또는 Q-only 경로를 사용하지 않습니다. M1 후보는 새 A2 FULL 모델에서 원본 strict verifier를 통과한 경우만 시작 후보로 사용합니다. 이전 LB/UB/Runtime은 이전하지 않습니다.
 
-DateBudget 원본 함수 본문을 연결했으며 각 단계의 5400초는 실제 optimize Runtime 누적입니다. 실패 호출도 계상하고 unknown/inflight는 격리합니다. 원본 backstop도 정확한 B3 ledger 모델 scope를 확인하며 임시 guard/global/PCS 함수 교체는 예외 시에도 복원합니다. V6 기존 May11 정밀도 정책을 포함한 원본 날짜별 Solver 설정을 재사용합니다.
+DateBudget 원본 함수 본문을 연결했으며 각 단계의 5400초는 실제 optimize Runtime 누적입니다. 실패 호출도 계상하고 unknown/inflight는 격리합니다. 원본 backstop도 정확한 B3 ledger 모델 scope와 최종 설정 receipt를 확인하며 임시 guard/global/PCS 함수 교체는 예외 시에도 복원합니다. B3_MAY_PRECISION_ORIGINAL_ROWS_V1 어댑터가 31일 A Phase I/Original P1 및 M 전체 Native 진입에 고정밀도를 적용하고, A Phase I는 기존 Method=2를 유지하며 Presolve=0으로 원본 행을 풉니다. 원본 수식·물리/정수 제약·검증 허용오차와 Heuristics=0.05는 유지합니다. 0.05는 내장 휴리스틱 활성입니다.
 
 Planning은 A2 AIDC와 M2 MESS 및 네 단계 증명 SHA를 결합합니다. 원본 Actual fixed replay와 Fresh OpenDSS 경로, NormalAmps/RegControl을 연결하고 repair/MILP 재최적화를 차단했습니다. 실제 Fresh 결과는 Planning Gap과 독립입니다. 기본 Actual의 AIDC 상태는 원본 고정 replay 의미에 결속하며 새 unknown-job 알고리즘을 만들지 않았습니다.
 
@@ -183,7 +189,75 @@ Planning은 A2 AIDC와 M2 MESS 및 네 단계 증명 SHA를 결합합니다. 원
 정확한 상태·mapping·검증 경로·source SHA는 이 폴더의 JSON 보고서에, V6 적용성·B2/MESS 개선·측정 범위는 ../v42_b2_b3_build_optimization_20261009/에 기록했습니다. 최신 Commit SHA는 해당 브랜치 Git HEAD로 확인합니다.
 """, encoding="utf-8")
     (BUILD_DOCS / "B2_B3_IMPLEMENTATION_STATUS_KO.md").write_text("# B2/B3 모델 생성 개선\n\nV6 효율적 Option/Resource/GPU interval/R1 projection/checkpoint 및 검증된 동일 날짜 input/domain cache를 B3 A1/A2에 연결했습니다. A2의 새 MESS P/Q Grid/FULL/RHS는 다시 생성하며 원본 source globals를 복원합니다.\n\nB2와 B3 M 단계는 원본 PCS 함수의 동일 bytecode/식과 exact float.hex 계수를 유지하면서 빌드 안의 반복 cos/sin 평가를 줄입니다. 원본 FULL/Compact/C3A는 매번 생성합니다. Route input cache는 반복 동일 입력에만 이득이 있으며 첫 build 속도 개선의 근거로 사용하지 않습니다. 추가 sparse assembly 변경은 중복·동치성이 확인되기 전 적용하지 않았습니다.\n\nB2 PR192의 별도 개발 코드와 테스트17개 PASS를 담당 캠페인 대화에 전달했습니다. 최신 사용자 지시대로 해당 대화가 현재 소스와 V7 정식 전환을 담당하며 실행 중 V6 Worker를 교체하지 않습니다. 별도 branch만 남기는 것을 캠페인 반영 완료로 주장하지 않습니다.\n\n단계별 일곱 구성 phase와 scope SHA의 비교 인터페이스를 구현했습니다. 실제 May01/May23 전체 모델 동치성·비교 성능·RSS는 NOT_RUN이고, B1 성능 수치를 B2/B3로 자동 이전하지 않습니다. 실제 Native/FULL/OpenDSS는 0회이며 B3 Production은 미승인입니다.\n", encoding="utf-8")
+    numerical_reports(light)
     print(json.dumps({"completion_docs": str(DOCS), "build_docs": str(BUILD_DOCS), "lightweight_tests": light["tests_run"]}))
+
+
+def numerical_reports(light):
+    folder = ROOT / "docs/v42_b3_numerical_policy_20261009"
+    reference = Path("D:/MobileESS_V42/docs/v42_may25_recovery_v9_20261009/MAY25_PRECISION_ORIGINAL_ROWS_VERIFICATION.json")
+    original_numerical = Path("D:/MobileESS_V42/v42_may25_recovery_v9/numerical.py")
+    reference_raw = reference.read_bytes()
+    reference_doc = json.loads(reference_raw.decode("utf-8-sig"))
+    reference_sha = hashlib.sha256(reference_raw).hexdigest()
+    require_reference = "27f20fe567c848d1d4d8303fac9015217a26c75e17f03ca73540f856b19c2b4a"
+    if reference_sha != require_reference or hashlib.sha256(original_numerical.read_bytes()).hexdigest() != "bff04f1ed2725eac1ffb79b118616732e59556b9b52e32d1d882b9136eca3169":
+        raise ValueError("REVIEWED_MAY25_NUMERICAL_REFERENCE_SHA_DRIFT")
+    entries = light["numerical_policy_entry_evidence"]
+    if len(entries) != 124 or len({(row["day"], row["stage"]) for row in entries}) != 124:
+        raise ValueError("MAY31_FOUR_STAGE_ENTRY_EVIDENCE_REQUIRED")
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "REFERENCE_MAY25_ORIGINAL_ROWS_VERIFICATION.json").write_bytes(reference_raw)
+    status = dict(version=NUMERICAL_VERSION, policy_sha=policy_sha(), status="NATIVE_ZERO_PARAMETER_REGRESSION_PASS",
+        May_days=31, stages=["A1", "M1", "A2", "M2"], entry_checks=124,
+        focused_tests_total=light["tests_run"], schema_packets=4, evidence_kind="FAKE_SOURCE_TEST",
+        precision=PRECISION, A_precision_components=["PHASE_I", "ORIGINAL_P1"],
+        A_PHASE_I=dict(Presolve=0, original_Method=2), M_all_admitted_P1_components=True,
+        A_other_components="ORIGINAL_PARAMETERS_PRESERVED", original_IntFeasTol_preserved=True,
+        original_Heuristics_preserved=True, original_Heuristics_parameter=0.05,
+        built_in_heuristics_enabled=True, heuristics_disabled=False,
+        scientific_acceptance_tolerance_unchanged=True, model_rows_objective_physics_integer_replay_unchanged=True,
+        original_A_M_source_files_modified_by_this_work=0, active_campaign_mutation_calls=0,
+        actual_Native_optimize_calls=0, actual_FULL_model_builds=0, actual_OpenDSS_calls=0,
+        B3_FULL_model_Native_exact_LB_UB_physical_certification="NOT_TESTED",
+        production_authorized=False, source_production_guard="UNCONDITIONALLY_CLOSED",
+        source_native_ledger_identity="B3_SOURCE_NATIVE_LEDGER_IDENTITY_V2",
+        old_version_resume="REJECT_WITH_IDENTITY_DRIFT_NO_LEDGER_RESET",
+        actual_entry_settings_authority="SourceStageLedger calls[].b3_numerical_policy",
+        A_source_settings_scope="SOURCE_POLICY_APPLICATION_BEFORE_NATIVE_ADMISSION",
+        M_original_constructor_settings_scope="ORIGINAL_PRE_ADMISSION_SETTINGS_NOT_EFFECTIVE_NATIVE_SETTINGS",
+        May25_reference=dict(path=str(reference), sha256=reference_sha, evidence_scope="EXTERNAL_B1_ORIGINAL_ROW_DIAGNOSTIC_ONLY",
+            old_residual=reference_doc["old_primal"]["max_row_violation"],
+            acceptance_tolerance=reference_doc["scientific_tolerance"],
+            diagnostic_residual=reference_doc["primal"]["max_row_violation"],
+            diagnostic_Native_calls=reference_doc["Native_calls"], B3_scientific_promotion=False))
+    write(folder, "B3_NUMERICAL_POLICY_FINAL_STATUS.json", status)
+    write(folder, "B3_MAY_NUMERICAL_POLICY_REGRESSION.json", dict(status=status["status"],
+        evidence_kind="FAKE_SOURCE_TEST", entry_checks=124, entries=entries,
+        actual_Native_optimize_calls=0, actual_FULL_model_builds=0, actual_OpenDSS_calls=0,
+        B3_scientific_certification="NOT_TESTED", production_authorized=False))
+    source = json.loads((DOCS / "B3_SOURCE_SHA_MANIFEST.json").read_text(encoding="utf-8"))["source_manifest"]
+    changed = ["v42_b3_joint/numerical_policy.py", "v42_b3_joint/native_ledger.py", "v42_b3_joint/source_runtime.py",
+        "v42_b3_joint/a_source.py", "v42_b3_joint/verify_completion.py", "v42_b3_joint/completion_reports.py",
+        "tests/test_v42_b3_numerical_policy.py", "tests/test_v42_b3_a_source.py"]
+    write(folder, "B3_MAY_NUMERICAL_POLICY_SOURCE_SHA.json", dict(version=NUMERICAL_VERSION,
+        policy_sha=policy_sha(), source_manifest={name: source[name] for name in changed},
+        complete_source_manifest="../v42_b3_implementation_completion_20261009/B3_SOURCE_SHA_MANIFEST.json",
+        reviewed_v9_source=dict(path=str(original_numerical), sha256="bff04f1ed2725eac1ffb79b118616732e59556b9b52e32d1d882b9136eca3169")))
+    (folder / "B3_MAY_NUMERICAL_POLICY_IMPLEMENTATION_KO.md").write_text(f"""# B3 5월 수치 정책 적용
+
+버전 `{NUMERICAL_VERSION}`. 원본 V9 May25 진단은 2.9715e10 규모 등식의 presolve/postsolve 복원 잔차 3.814697265625e-6이 원본 acceptance 1e-6을 넘었음을 기록합니다. 고정밀도만 또는 Method=1은 실패했고 기존 Method=2+고정밀도+Phase I Presolve=0 진단은 최대 잔차 7.105427357601002e-15로 원본 primal/dual replay를 통과했습니다. 외부 B1 진단을 B3 인증으로 사용하지 않습니다.
+
+B3 A1/A2의 PHASE_I와 ORIGINAL_P1은 5월 31일 모두 FeasibilityTol/OptimalityTol=1e-9, NumericFocus=3, ScaleFlag=2를 적용합니다. Phase I는 Presolve=0과 기존 Method=2를 요구합니다. 다른 A component는 원본 설정을 유지합니다. M1/M2는 모든 수용된 P1 Native 진입에 같은 네 고정밀도 값을 적용하고 기존 Presolve/Method/IntFeasTol은 유지합니다.
+
+원본 행렬·목적·부호·물리/정수 제약·exact LB/UB·replay 허용오차를 변경하지 않습니다. Heuristics=0.05도 변경하지 않으며 **내장 휴리스틱 활성**입니다. 새 휴리스틱을 추가하거나 기존 휴리스틱을 비활성화했다고 주장하지 않습니다.
+
+A 원본 policy 적용 callback과 ModelIdentity/SolverParameters의 May11 예외 메타데이터를 B3 전용 어댑터로 교체했습니다. 최종 Native 설정은 원본 DateBudget이 Threads/TimeLimit을 부여한 뒤 readback하여 ledger `calls[].b3_numerical_policy`에 봉인합니다. 원본 M 생성기 메타데이터의 1e-8은 pre-admission 값이고 최종 Solver 진입 설정의 근거로 사용하지 않습니다. 실제 backstop도 설정 receipt·scope·model을 검증합니다. 이전 ledger 버전은 identity mismatch로 거부하며 예산을 초기화하지 않습니다.
+
+경량 {light['tests_run']}개와 Schema 4개 PASS. 실제 원본 DateBudget의 복제 AST 함수 경로에 Fake Solver를 넣어 **31일×4단계=124 진입**의 설정·메타데이터·예산 전달을 검증했습니다. 추가 fixture는 component별 정책, 원본 Method/Heuristics/integrality, 변조 거부, 재시작 예산, source policy preflight와 최종 backstop을 확인합니다.
+
+이 작업의 실제 Native/FULL/OpenDSS 호출은 0회입니다. 실제 B3 전체 모델·Native·Global Gap·물리 인증은 **NOT_TESTED**이고 **PRODUCTION_NOT_AUTHORIZED**입니다. 현재 B1/B2 Worker·manifest·원본 A/M 소스·HOLD 상태는 수정하지 않았습니다. 완료 commit은 이 브랜치 Git HEAD와 PR191에서 확인합니다.
+""", encoding="utf-8")
 
 
 if __name__ == "__main__":

@@ -11,11 +11,11 @@ PR191의 기존 계약 위에 A1→M1→A2→M2, 원본 Native ledger, Planning�
 
 A2는 원본 control_names/단위/sign/phase/계수 SHA를 검증하여 MESS P와 Q를 상수로 주입합니다. M2는 FCFS 또는 Q-only 경로를 사용하지 않습니다. M1 후보는 새 A2 FULL 모델에서 원본 strict verifier를 통과한 경우만 시작 후보로 사용합니다. 이전 LB/UB/Runtime은 이전하지 않습니다.
 
-DateBudget 원본 함수 본문을 연결했으며 각 단계의 5400초는 실제 optimize Runtime 누적입니다. 실패 호출도 계상하고 unknown/inflight는 격리합니다. 원본 backstop도 정확한 B3 ledger 모델 scope를 확인하며 임시 guard/global/PCS 함수 교체는 예외 시에도 복원합니다. V6 기존 May11 정밀도 정책을 포함한 원본 날짜별 Solver 설정을 재사용합니다.
+DateBudget 원본 함수 본문을 연결했으며 각 단계의 5400초는 실제 optimize Runtime 누적입니다. 실패 호출도 계상하고 unknown/inflight는 격리합니다. 원본 backstop도 정확한 B3 ledger 모델 scope와 최종 설정 receipt를 확인하며 임시 guard/global/PCS 함수 교체는 예외 시에도 복원합니다. B3_MAY_PRECISION_ORIGINAL_ROWS_V1 어댑터가 31일 A Phase I/Original P1 및 M 전체 Native 진입에 고정밀도를 적용하고, A Phase I는 기존 Method=2를 유지하며 Presolve=0으로 원본 행을 풉니다. 원본 수식·물리/정수 제약·검증 허용오차와 Heuristics=0.05는 유지합니다. 0.05는 내장 휴리스틱 활성입니다.
 
 Planning은 A2 AIDC와 M2 MESS 및 네 단계 증명 SHA를 결합합니다. 원본 Actual fixed replay와 Fresh OpenDSS 경로, NormalAmps/RegControl을 연결하고 repair/MILP 재최적화를 차단했습니다. 실제 Fresh 결과는 Planning Gap과 독립입니다. 기본 Actual의 AIDC 상태는 원본 고정 replay 의미에 결속하며 새 unknown-job 알고리즘을 만들지 않았습니다.
 
-경량 테스트 **149개 PASS**, 기존 75개 포함, Schema 4개 PASS, 기존 원본 API 39개 및 신규 literal source route 57개를 확인했습니다. 기존 Preparation 보고서 13개와 SHA 목록을 보존했습니다. Fake source/solver는 소프트웨어 연결 검증이며 과학적 인증으로 승격하지 않습니다.
+경량 테스트 **173개 PASS**, 기존 75개 포함, Schema 4개 PASS, 기존 원본 API 39개 및 신규 literal source route 58개를 확인했습니다. 기존 Preparation 보고서 13개와 SHA 목록을 보존했습니다. Fake source/solver는 소프트웨어 연결 검증이며 과학적 인증으로 승격하지 않습니다.
 
 실제 Native optimize=0, OpenDSS=0, FULL 모델 생성=0, 실제 대규모 domain/pricing=0입니다. 기존 캠페인의 보호 결과는 B3_RESOURCE_ISOLATION_AUDIT.json에 있으며, 이 작업의 활성 소스·Worker·Scheduler·ledger 변경은 0회입니다. 사용자 후속 지시로 B2 현재 캠페인 반영은 별도 담당 대화에 확정 코드/PR192/SHA를 전달했습니다.
 
