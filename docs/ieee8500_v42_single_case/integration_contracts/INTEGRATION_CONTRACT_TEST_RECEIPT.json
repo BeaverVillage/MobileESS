@@ -1,0 +1,40 @@
+{
+  "schema": "IEEE8500_RESEARCH_INTEGRATION_CONTRACT_TEST_RECEIPT_V1",
+  "run_date": "2026-10-09",
+  "command": "python -B -m unittest discover -s tests -p test_ieee8500_v42_integration.py -v",
+  "PASS": true,
+  "exit_code": 0,
+  "tests_run": 16,
+  "test_runtime_seconds": 0.315,
+  "evidence_kind": "FIXTURE_AND_INDEPENDENT_CONTRACT_TESTS_ONLY",
+  "python_version": "3.11.7",
+  "source_hashes": {
+    "ieee8500_v42/integration.py": "62bd42c05e79e2c12e23aa1596e9a94fc8f549c9ab8230d625c23a973bfd8f4d",
+    "tests/test_ieee8500_v42_integration.py": "d2fca9837a15236c31c79e12f39d014e0b0fefdfcc0ae1e8c71d117ed663f122"
+  },
+  "artifacts": {
+    "docs/ieee8500_v42_single_case/LV_PORT_SIMULATION_DESIGN.json": "ea727be28ae4f464379daa2d075c7eda96942f5c728c3bc404129eae7174cf88",
+    "docs/ieee8500_v42_single_case/integration_contracts/RESEARCH_SIMULATION_AUTHORITY.json": "183fcde0664de5eab21d608fd459a4a2852df90e7d5600a7822b51ad7eda0258",
+    "docs/ieee8500_v42_single_case/integration_contracts/RESEARCH_FLEET_CONFIGURATION.json": "738b8f83c02f71fd40ccac345392b92f0c9395036de2cd118f1e032d2d2e076b"
+  },
+  "verified_contracts": [
+    "SHA-bound explicitly authorized research-only 240V split-phase design",
+    "unverified positive limits rejected",
+    "tampered or unapproved authority and larger P/Q/S rejected",
+    "Simulation Design rejected in Production; execute_production always blocked",
+    "actual certificates required rather than Boolean claims for Production",
+    "append-only original variable/row/objective preservation in structural fixture",
+    "nonzero 5kW/3kvar permitted and shared4kvar rejected by3kvar hook row",
+    "independent location eligibility/time/shared-PQ numerical replay",
+    "preserved six initial STA map, scaled original energy fractions",
+    "eta_main0.95 and eta_LV0.90 independent AC-to-battery mapping"
+  ],
+  "Native_calls": 0,
+  "full_model_builds": 0,
+  "B1_B2_B3_solves": 0,
+  "real_FULL_Compact_C3A_equivalence": "NOT_TESTED",
+  "actual_six_unit_and_LV_SOC_Native_adapter": "UNVERIFIED",
+  "continuous_control_domain": "NOT_CERTIFIED_BY_CONTRACT_TESTS",
+  "operational_AC_PASS_claimed": false,
+  "production_ready": false
+}

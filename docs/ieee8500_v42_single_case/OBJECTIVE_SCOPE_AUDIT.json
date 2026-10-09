@@ -1,0 +1,51 @@
+{
+  "schema": "IEEE8500_V42_OBJECTIVE_SOURCE_SCOPE_AUDIT_V1",
+  "source_files": [
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\v42_thermal\\measurement.py",
+      "sha256": "ae33c9217a961f15bdb95a71fdbbf90f132e231df97ad3b26eeb115b665ce6e2"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\v42_native\\grid.py",
+      "sha256": "2c623d86e6d1473896873f47bc92bf2140687b5c801d75e31b8c4864e409da9a"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\full_ieee123_g11_v16_1.py",
+      "sha256": "5dac427fbf0b2b3381a576c4eac96e6dfa445a690f40d90732b590bde6ee7c8e"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_backend.py",
+      "sha256": "55ad4be7175088ea24dbb611313635736f182f4d945f6f9b416b2ddec2c29956"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_mapping.py",
+      "sha256": "7e25e9befd8f80dba8cf1bc8cdba574ad1d77083c3b100430bea63abdfe9af89"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\trajectory.py",
+      "sha256": "e87e06b14d94ad7b958fedb7169341065212086c4f1cf81a4b030be155340355"
+    }
+  ],
+  "canonical_source_objective": {
+    "scope": "ALL_ENABLED_LINE_ORIENTED_PARENT_TERMINAL_NONNEUTRAL_PHASE_ROWS",
+    "numerator": "abs current selected by NodeOrder==ABC(1,2,3)",
+    "denominator": "compiled original Line.NormAmps",
+    "terminals": "parent_bus terminal from source oriented branch roster",
+    "neutral_in_objective": false,
+    "all_terminal_maximum_in_objective": false,
+    "original_topology_root": "150.1/150.2/150.3",
+    "source_phase_edge_rule": "first-two-terminal common node intersection with 1/2/3"
+  },
+  "additional_physical_audit": {
+    "all_terminal_conductors": true,
+    "all_transformer_windings": true,
+    "maximum_must_be_labeled_separately": true,
+    "source_canonical_objective_not_silently_replaced": true
+  },
+  "ieee8500_canonical_phase_mapping": "NOT_CERTIFIED",
+  "identical_min_rho_meaning_ieee123_ieee8500": "NOT_VERIFIED",
+  "native_calls": 0,
+  "OpenDSS_calls": 0,
+  "full_model_builds": 0,
+  "evidence_kind": "READ_ONLY_SOURCE_STATIC_AUDIT"
+}

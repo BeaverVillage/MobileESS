@@ -1,0 +1,58 @@
+{
+  "schema": "IEEE8500_V42_PREREGISTRATION_V1",
+  "day": "2025-05-01",
+  "final_scenario_count": 1,
+  "order": [
+    "source/model consistency",
+    "fixed AIDC and strict geometry/LV eligibility",
+    "full AC constraints",
+    "Job/GPU/QoS/facility capacity",
+    "B0 rho target proximity",
+    "independent reproducibility"
+  ],
+  "selected_only_if_all_hard_gates_pass": true,
+  "target_rho_range": [
+    0.8,
+    0.85
+  ],
+  "target_is_hard_constraint": false,
+  "deterministic_tie_break": "minimum abs(rho_max-0.825), then minimum installed expansion, then lexicographic mapping",
+  "performance_of_B1_B2_B3_used_for_selection": false,
+  "background_scales": [
+    1.0
+  ],
+  "background": "unchanged original static snapshot; no calibration to target",
+  "capacity_screening": [
+    1.0,
+    1.25,
+    1.5
+  ],
+  "workload_multiplier": 1.0,
+  "PV": "original active master inventory; zero newly invented systems",
+  "controls": "ALL_ORIGINAL_SOURCE_AUTONOMOUS_REGCONTROL_AND_CAPCONTROL",
+  "source_voltage_pu": 1.05,
+  "Vmin_pu": 0.95,
+  "Vmax_pu": 1.05,
+  "line_rating": "original compiled NormalAmps; never tuned",
+  "MESS_count": 6,
+  "vehicle_rating": {
+    "Pmax_kW": 450,
+    "PCS_kVA": 600,
+    "Emax_kWh": 1800
+  },
+  "MESS_SOC_policy": "native original input SOC/efficiency constraints require certified six-vehicle adapter",
+  "LV_PCC_output": "UNSET until interface/protection/vehicle-access proof exists",
+  "geometry": "one common proper similarity or affine orientation preserving transform; no reflection; frozen 1m tolerances",
+  "sensitivity": {
+    "signed_positive": "injection",
+    "method": "central AC difference with settled base controls fixed",
+    "auto_comparison": "restore identical settled base then independent original controls",
+    "MV_step_kW": 1.0,
+    "LV_step_kW": 0.1,
+    "nonlinear_step_multiple": 10,
+    "slots": "all 96 for all 24 retained service hosts; static LV engineering diagnostics at peak slot",
+    "physical_permission": "hypothetical test ports only; unverified PCC capabilities never admitted to production"
+  },
+  "production_Native_calls_authorized": false,
+  "fake_solver_allowed": false
+}

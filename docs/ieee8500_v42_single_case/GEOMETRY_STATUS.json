@@ -1,0 +1,137 @@
+{
+  "status": "STOP_FIXED_AIDC_GEOMETRY_INFEASIBLE",
+  "is_final_selection": false,
+  "policy_sha256": "34c117f1ecaca9fd160ce5071dd14b773cae945a82ae5e8fa81b859395c3579d",
+  "common_similarity": {
+    "u": -0.0011398737189343131,
+    "v": -0.0002372137300723277,
+    "translation_x": -1000.2819244675652,
+    "translation_y": 14393.33018392502,
+    "determinant": 1.3555824488519685e-06,
+    "rotation_degrees": -168.2442350516839,
+    "scale_km_per_unknown_native_unit": 0.0011642948290067979,
+    "fit_authority": "12 fixed v3 AIDC anchors only",
+    "anchor_rms_error_km": 2.8687244917799446,
+    "anchor_max_error_km": 5.842869454509365
+  },
+  "fixed_aidc_affine_certificate": {
+    "east_west": {
+      "constraint_count": 66,
+      "feasible_intervals_radians": [],
+      "feasible": false,
+      "irreducible_witness": [
+        {
+          "a": "AIDC02",
+          "b": "AIDC03",
+          "traffic_delta_km": -0.387487772063686,
+          "signed_grid_delta": [
+            -2676.690946490038,
+            -12171.300875300542
+          ]
+        },
+        {
+          "a": "AIDC07",
+          "b": "AIDC11",
+          "traffic_delta_km": 0.5679606362045195,
+          "signed_grid_delta": [
+            5600.514053219929,
+            10577.141769800335
+          ]
+        },
+        {
+          "a": "AIDC11",
+          "b": "AIDC12",
+          "traffic_delta_km": -31.515441645036947,
+          "signed_grid_delta": [
+            -23345.08648574003,
+            14097.866765100509
+          ]
+        }
+      ],
+      "positive_convex_weights": [
+        0.4739314708265087,
+        0.46810856005429,
+        0.0579599691192012
+      ],
+      "weighted_vector_residual": [
+        -4.547473508864641e-13,
+        -5.684341886080801e-13
+      ]
+    },
+    "north_south": {
+      "constraint_count": 66,
+      "feasible_intervals_radians": [],
+      "feasible": false,
+      "irreducible_witness": [
+        {
+          "a": "AIDC09",
+          "b": "AIDC12",
+          "traffic_delta_km": -0.1503122212726593,
+          "signed_grid_delta": [
+            -14739.82465373003,
+            4893.675524499267
+          ]
+        },
+        {
+          "a": "AIDC10",
+          "b": "AIDC12",
+          "traffic_delta_km": 1.9045987559489717,
+          "signed_grid_delta": [
+            4981.026820639847,
+            -940.986368900165
+          ]
+        },
+        {
+          "a": "AIDC11",
+          "b": "AIDC12",
+          "traffic_delta_km": 12.921441284699421,
+          "signed_grid_delta": [
+            23345.08648574003,
+            -14097.866765100509
+          ]
+        }
+      ],
+      "positive_convex_weights": [
+        0.31680315444818713,
+        0.6142251062989824,
+        0.0689717392528305
+      ],
+      "weighted_vector_residual": [
+        -2.2737367544323206e-13,
+        0.0
+      ]
+    },
+    "infeasible_even_for_affine": true
+  },
+  "pair_audit": {
+    "AIDC-AIDC": {
+      "pairs": 66,
+      "violated_pairs": 17,
+      "x_violations": 2,
+      "y_violations": 15
+    },
+    "AIDC-STA": {
+      "pairs": 144,
+      "violated_pairs": 36,
+      "x_violations": 15,
+      "y_violations": 25
+    },
+    "STA-STA": {
+      "pairs": 66,
+      "violated_pairs": 8,
+      "x_violations": 1,
+      "y_violations": 7
+    }
+  },
+  "candidate_count": 1177,
+  "topology_customer_side_count": 1177,
+  "approved_connection_port_count": 0,
+  "selection": {
+    "status": "STOP_FIXED_AIDC_GEOMETRY_INFEASIBLE",
+    "selected": {},
+    "search_nodes": 0
+  },
+  "customer_geography_provenance": "Schematic secondary offsets in source do not establish customer geography",
+  "source_unchanged": true,
+  "operational_result_used_for_selection": false
+}

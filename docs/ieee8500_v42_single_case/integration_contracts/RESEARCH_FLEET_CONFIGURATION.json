@@ -1,0 +1,103 @@
+{
+  "schema": "IEEE8500_SIX_UNIT_RESEARCH_FLEET_CONFIGURATION_V1",
+  "day": "2025-05-01",
+  "status": "RESEARCH_CONFIGURATION_ONLY_ACTUAL_NATIVE_ADAPTER_UNVERIFIED",
+  "fleet_ids": [
+    "MESS01",
+    "MESS02",
+    "MESS03",
+    "MESS04",
+    "MESS05",
+    "MESS06"
+  ],
+  "initial_locations": {
+    "MESS01": "STA01",
+    "MESS02": "STA12",
+    "MESS03": "STA08",
+    "MESS04": "STA06",
+    "MESS05": "STA03",
+    "MESS06": "STA10"
+  },
+  "B2_initial_locations": {
+    "MESS01": "STA01",
+    "MESS02": "STA12",
+    "MESS03": "STA08",
+    "MESS04": "STA06",
+    "MESS05": "STA03",
+    "MESS06": "STA10"
+  },
+  "B3_initial_locations": {
+    "MESS01": "STA01",
+    "MESS02": "STA12",
+    "MESS03": "STA08",
+    "MESS04": "STA06",
+    "MESS05": "STA03",
+    "MESS06": "STA10"
+  },
+  "rating_scale": 1.5,
+  "rating_authority": "USER450KW_600KVA_1800KWH_WITH_ORIGINAL_ENERGY_FRACTIONS",
+  "physical": {
+    "active_power_limit_kw": 450.0,
+    "pcs_kva": 600.0,
+    "capacity_kwh": 1800.0,
+    "energy_min_kwh": 660.0,
+    "energy_max_kwh": 1620.0,
+    "initial_energy_kwh": 1140.0,
+    "terminal_energy_kwh": 1140.0,
+    "charge_efficiency": 0.95,
+    "discharge_efficiency": 0.95
+  },
+  "initial_total_energy_kwh": 6840.0,
+  "nominal_total_capacity_kwh": 10800.0,
+  "original_main_PCS_charge_efficiency": 0.95,
+  "original_main_PCS_discharge_efficiency": 0.95,
+  "LV_auxiliary_interface_efficiency_assumption": 0.9,
+  "LV_AC_to_battery_charge_efficiency": 0.855,
+  "LV_battery_to_AC_discharge_efficiency": 0.855,
+  "AC_port_to_battery_SOC_equation": "deltaE=hours*(eta_main*eta_LV*Pch_AC-Pdis_AC/(eta_main*eta_LV))-original_route_energy_kwh; eta_LV=0.90 at LV dock,1.0 at main PCS",
+  "reactive_power_energy_model": "Original V42 ideal reactive energy semantics retained; additional hardware var/idle losses are not field-certified",
+  "LV_power_ceiling_is_separate_from_vehicle_rating": {
+    "P_import_max_kw": 5.0,
+    "P_export_max_kw": 5.0,
+    "Q_abs_max_kvar": 3.0,
+    "S_max_kva": 6.0,
+    "I_each_hot_max_A": 27.0
+  },
+  "connection_delay_seconds": 600,
+  "original_route_safe_ETA_and_energy_equations_unchanged": true,
+  "original_vehicle_mass_kg": 28000.0,
+  "vehicle_mass_applicability_to_new1800kWh_pack": "UNVERIFIED",
+  "active_original_native_network": "IEEE123",
+  "active_original_native_initial_sites": {
+    "MESS01": "STA01",
+    "MESS02": "STA12",
+    "MESS03": "STA08",
+    "MESS04": "STA06"
+  },
+  "active_original_native_vehicle_count": 4,
+  "actual_six_unit_Native_Actual_Fresh_adapter": "UNVERIFIED",
+  "actual_location_dependent_LV_efficiency_SOC_adapter": "UNVERIFIED",
+  "append_only_port_rows_implement_auxiliary_SOC_losses": false,
+  "SOC_binding_limitation": "Original Native SOC equality applies eta0.95 directly to site AC variables. A verified location-efficiency/source adapter is required; appending a second conflicting SOC equality is not an implementation.",
+  "production_eligible": false,
+  "Native_calls": 0,
+  "full_model_builds": 0,
+  "sources": {
+    "original_six_fleet": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\ieee8500_v42\\data\\research_case\\PAPER_FLEET_BASE_AUTHORITY.json",
+      "sha256": "8fc6add09886cfe662c5a5940b99fd13bd20f89a9ce432fc8a122fc383b3c302"
+    },
+    "LV_design": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\docs\\ieee8500_v42_single_case\\LV_PORT_SIMULATION_DESIGN.json",
+      "sha256": "ea727be28ae4f464379daa2d075c7eda96942f5c728c3bc404129eae7174cf88"
+    },
+    "active_native_input_readonly": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\ieee8500_v42\\data\\workload_flexibility\\NATIVE_INPUT.json",
+      "sha256": "365824518d8b3d380b6e2cc72a78d19d27ce8d39d304acdc8ffc5b5806b342fc"
+    },
+    "original_native_SOC_source": {
+      "path": "v42_native/mess.py",
+      "sha256": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec"
+    }
+  }
+}

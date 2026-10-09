@@ -1,0 +1,96 @@
+{
+  "schema": "IEEE8500_INDEPENDENT_STATIC_MV_HOST_AUDIT_V1",
+  "status": "606_ELECTRICAL_HOSTS_VERIFIED_PHYSICAL_PORTS_UNQUALIFIED",
+  "original_candidate_count": 638,
+  "guarded_candidate_count": 606,
+  "guard_excluded_count": 32,
+  "original_abc_tree_buses": 647,
+  "original_abc_tree_corridors": 646,
+  "root_distance_reconstruction_error_max_ohm": 0.0,
+  "root_distance_q05_ohm": 1.3819547376654384,
+  "original_source_reactor_explicitly_included": true,
+  "native_calls": 0,
+  "OpenDSS_calls": 0,
+  "historical_launcher_imports": 0,
+  "physical_ports_qualified": 0,
+  "selection_executed": false,
+  "final_scenario_frozen": false,
+  "original_hard_host_gates": [
+    "12.47kV within original 0.1 percent tolerance",
+    "exact ABC nodes",
+    "continuous conductor-identity ABC path from feeder head",
+    "source/substation/regulator terminals excluded",
+    "source connected including original Reactor",
+    "source coordinate available",
+    "root impedance >= original638 q05"
+  ],
+  "original_pair_dispersion_audit_thresholds": {
+    "electrical_distance_ohm": 0.9129072401559803,
+    "source_xy_distance_unknown_units": 2221.532547954318,
+    "role": "AUDIT_AND_SCORE_PER_LATEST_USER_SCOPE_NOT_PHYSICAL_INTERCONNECTION_LIMITS"
+  },
+  "original_shape_audit_thresholds": {
+    "E_coord": 0.2,
+    "E_pair": 0.2,
+    "two_nearest_neighbor_retention": 0.5
+  },
+  "joint_selection_hard_gates": [
+    "strict all276 traffic pair signs",
+    "one common frozen proper similarity",
+    "24 distinct PCC buses and service IDs"
+  ],
+  "derating_or_capacity_allowance_assumed": false,
+  "source_manifest_sha256": "fdc6514aeb389cd4101b2331236d7a5d3d791d02cf20276518aa0dbd65867212",
+  "actual_inventory_sha256": "1c003fc627c07ae62ec5825893e77a5344d52ea047b5695421e13a2c27313253",
+  "module_sha256": "dc2481d8ef073adc099bbd97c70d20829aaf3293b0173d7d6cf9060a879d578e",
+  "inputs": [
+    {
+      "copy": "HISTORICAL_LINES.json",
+      "original_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\audit\\lines.json",
+      "original_relative_path": "audit/lines.json",
+      "sha256": "bff0ab47245e05dfc06b0b82963f170285be9ee4f1ff8ee7f874d3c9b8ce81b9"
+    },
+    {
+      "copy": "HISTORICAL_TOPOLOGY_EDGES.json",
+      "original_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\audit\\topology_edges.json",
+      "original_relative_path": "audit/topology_edges.json",
+      "sha256": "fc09ea2e83c9f56be21f2bebdcdeeb9aa824c0e40f2065f113ac1ef6e1ca0538"
+    },
+    {
+      "copy": "PRIMARY_CORRIDORS.json",
+      "original_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\audit\\primary_corridors.json",
+      "original_relative_path": "audit/primary_corridors.json",
+      "sha256": "29ef2de290ff6c8347d364d5ad57d09577a9a27920e0b00cd791462fbf1f08ca"
+    },
+    {
+      "copy": "ORIGINAL_STATIC_FEATURES.json",
+      "original_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\audit\\candidate_pool_static_features.json",
+      "original_relative_path": "audit/candidate_pool_static_features.json",
+      "sha256": "6002a41e4040838965b891ccb0a6ef2b35c50ca27c80cf3d9c3ea66c82a000f1"
+    },
+    {
+      "copy": "METHODOLOGY_INPUTS.json",
+      "original_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\audit\\methodology_inputs.json",
+      "original_relative_path": "audit/methodology_inputs.json",
+      "sha256": "6d00cdbc03a242979f5d118d48687cad8d8887fc54c048a41d9476dec8e9c1ed"
+    },
+    {
+      "copy": "ROOT_DISTANCE_GUARD.json",
+      "original_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\selection_v3_source_proximity\\ROOT_DISTANCE_GUARD_AUDIT.json",
+      "original_relative_path": "selection_v3_source_proximity/ROOT_DISTANCE_GUARD_AUDIT.json",
+      "sha256": "71f2cd0b2d0d52bf9e4f6bf7f4016a7c4434f36802c46861db6d104bc54dcd50"
+    },
+    {
+      "copy": "ORIGINAL_GUARDED_POOL.json",
+      "original_path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\selection_v3_source_proximity\\GUARDED_CANDIDATE_POOL.json",
+      "original_relative_path": "selection_v3_source_proximity/GUARDED_CANDIDATE_POOL.json",
+      "sha256": "32a200745b3affa42e48c8808324a75a5bbeb172e68b9b9c216600b57a9386ad"
+    }
+  ],
+  "known_path_length_incomplete_count": 606,
+  "path_length_note": "DSS Units=0 cannot be converted to km; report known segments and unknown original elements explicitly",
+  "output_sha256": {
+    "MV_AIDC_CANDIDATES.csv": "daf6571aa11111fd0378f8489f2033362dfd061097fe03a8a9cf98fde8c2be0a",
+    "MV_AIDC_EXCLUDED_SOURCE_PROXIMITY.csv": "55f90b33bd46b81e712a32c655ca1eeb4830a3c00ae19141750b5b37d9e4719a"
+  }
+}

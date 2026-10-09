@@ -1,0 +1,63 @@
+{
+  "schema": "JOINT_GEOMETRY_V2_PREREGISTRATION",
+  "authorization": "latest user authorizes joint 12 AIDC + 12 STA electrical reselection",
+  "AIDC_sites_fixed": false,
+  "service_and_traffic_identities_fixed": true,
+  "services": 24,
+  "required_pairs": 276,
+  "traffic_pair_distance_tolerance_km": 0.001,
+  "traffic_axis_zero_tolerance_km": 0.001,
+  "transform": {
+    "u": -0.0011398737189343131,
+    "v": -0.0002372137300723277,
+    "translation_x": -1000.2819244675652,
+    "translation_y": 14393.33018392502,
+    "determinant": 1.3555824488519685e-06,
+    "rotation_degrees": -168.2442350516839,
+    "scale_km_per_unknown_native_unit": 0.0011642948290067979,
+    "fit_authority": "12 fixed v3 AIDC anchors only",
+    "anchor_rms_error_km": 2.8687244917799446,
+    "anchor_max_error_km": 5.842869454509365
+  },
+  "transform_policy": "one frozen proper similarity from v3 diagnostic orientation; all candidates/sites share it unchanged",
+  "orientation_search": "one preregistered orientation only; no global-class infeasibility claim",
+  "strict_inequality_implementation": "integer dense rank difference >= 1, equal-coordinate ties share rank",
+  "hard_source_guards": [
+    "original v3 host eligibility and exclusions",
+    "original continuous ABC path and 12.47kV",
+    "original 638-pool q05 root distance >= 1.3819547376654384 ohm",
+    "24 distinct PCC buses"
+  ],
+  "old_pair_spacing": {
+    "electrical_ohm": 0.9129072401559803,
+    "source_xy_unknown_units": 2221.532547954318,
+    "role": "dispersion audit/tie-break, not a source-verified physical connection rating or hard safety spacing",
+    "reason": "latest scope retains valid source/physical guards; original XY units are unknown and pair thresholds were statistical design choices"
+  },
+  "LV_candidates": 1177,
+  "approved_LV_ports": 0,
+  "STA_mode": "existing MV host fallback geometry only; all access/device/protection gates stay unresolved",
+  "screening_domains": [
+    50,
+    100,
+    "all"
+  ],
+  "domain_expansion_is_predefined": true,
+  "objective": "geometry-first sum squared common-frame anchor distance, rounded 1e-6 km2; lexical bus rank tiny tie-break",
+  "outcome_performance_used": false,
+  "B1_B2_B3_used": false,
+  "first_feasible_screening_result_accepted_for_physical_review": true,
+  "solver": "independent SciPy/HiGHS static binary assignment only; never V42 Native or a physical solver",
+  "solver_time_limit_seconds_per_domain": 45,
+  "solver_threads": 1,
+  "solver_random_seed": 0,
+  "infeasible_or_time_limited_truncated_domain": "UNKNOWN broader feasibility, not global infeasibility",
+  "production_configuration_frozen": false,
+  "production_freeze_requires_user_approval_and_all_physical_gates": true,
+  "candidate_authority": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\\ubb38\uc11c\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\ieee8500_v42\\data\\joint_selection_v2\\MV_GUARDED_CANDIDATES.csv",
+    "sha256": "217b64f229bd8322f24d9b5fe24cd6d8021c6e1d3c89f093ba8960807b0323ec",
+    "candidate_count": 606,
+    "independently_verified_inventory": false
+  }
+}

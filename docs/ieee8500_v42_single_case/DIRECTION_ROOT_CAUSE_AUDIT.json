@@ -1,0 +1,194 @@
+{
+  "status": "STOP_FIXED_AIDC_DIRECTION_CONFLICT_FINAL_SELECTION_HOLD",
+  "diagnostic_phase": "before_scale_or_STA_selection",
+  "fixed_aidc_changed": false,
+  "final_scenario_frozen": false,
+  "all_aidc_pairs": 66,
+  "axis_rows": 132,
+  "raw_axis_conflicts": 115,
+  "diagnostic_fit_axis_conflicts": 17,
+  "diagnostic_fit_pair_conflicts": 17,
+  "allowed_transform": "one global positive-scale proper similarity; diagnostic fit is not accepted",
+  "affine_certificate_role": "outer relaxation; independent row feasibility ignores determinant/orthogonality so infeasibility proves proper similarity impossible",
+  "affine_outer_certificate": {
+    "east_west": {
+      "constraint_count": 66,
+      "feasible_intervals_radians": [],
+      "feasible": false,
+      "irreducible_witness": [
+        {
+          "a": "AIDC02",
+          "b": "AIDC03",
+          "traffic_delta_km": -0.387487772063686,
+          "signed_grid_delta": [
+            -2676.690946490038,
+            -12171.300875300542
+          ]
+        },
+        {
+          "a": "AIDC07",
+          "b": "AIDC11",
+          "traffic_delta_km": 0.5679606362045195,
+          "signed_grid_delta": [
+            5600.514053219929,
+            10577.141769800335
+          ]
+        },
+        {
+          "a": "AIDC11",
+          "b": "AIDC12",
+          "traffic_delta_km": -31.515441645036947,
+          "signed_grid_delta": [
+            -23345.08648574003,
+            14097.866765100509
+          ]
+        }
+      ],
+      "positive_convex_weights": [
+        0.4739314708265087,
+        0.46810856005429,
+        0.0579599691192012
+      ],
+      "weighted_vector_residual": [
+        -4.547473508864641e-13,
+        -5.684341886080801e-13
+      ]
+    },
+    "north_south": {
+      "constraint_count": 66,
+      "feasible_intervals_radians": [],
+      "feasible": false,
+      "irreducible_witness": [
+        {
+          "a": "AIDC09",
+          "b": "AIDC12",
+          "traffic_delta_km": -0.1503122212726593,
+          "signed_grid_delta": [
+            -14739.82465373003,
+            4893.675524499267
+          ]
+        },
+        {
+          "a": "AIDC10",
+          "b": "AIDC12",
+          "traffic_delta_km": 1.9045987559489717,
+          "signed_grid_delta": [
+            4981.026820639847,
+            -940.986368900165
+          ]
+        },
+        {
+          "a": "AIDC11",
+          "b": "AIDC12",
+          "traffic_delta_km": 12.921441284699421,
+          "signed_grid_delta": [
+            23345.08648574003,
+            -14097.866765100509
+          ]
+        }
+      ],
+      "positive_convex_weights": [
+        0.31680315444818713,
+        0.6142251062989824,
+        0.0689717392528305
+      ],
+      "weighted_vector_residual": [
+        -2.2737367544323206e-13,
+        0.0
+      ]
+    },
+    "infeasible_even_for_affine": true
+  },
+  "common_fit": {
+    "u": -0.0011398737189343131,
+    "v": -0.0002372137300723277,
+    "translation_x": -1000.2819244675652,
+    "translation_y": 14393.33018392502,
+    "determinant": 1.3555824488519685e-06,
+    "rotation_degrees": -168.2442350516839,
+    "scale_km_per_unknown_native_unit": 0.0011642948290067979,
+    "fit_authority": "12 fixed v3 AIDC anchors only",
+    "anchor_rms_error_km": 2.8687244917799446,
+    "anchor_max_error_km": 5.842869454509365
+  },
+  "original_DSS_coordinate_authority": {
+    "authority": "original electrical/layout coordinates only",
+    "CRS": null,
+    "EPSG": null,
+    "geographical_units": null,
+    "true_east_north_orientation_verified": false,
+    "source_explicitly_contains_schematic_secondary_offsets": true
+  },
+  "traffic_projection": {
+    "formula_x": "R*cos(mean_lat)*(lon-mean_lon)",
+    "formula_y": "R*(lat-mean_lat)",
+    "angles": "radians",
+    "R_km": 6371.0088,
+    "mean_lat_degrees": -37.81635952411587,
+    "mean_lon_degrees": 144.97452068917497,
+    "cos_mean_lat_positive": true,
+    "max_abs_recomputation_error_km": 2.2364332608049153e-12,
+    "original_lat_lon_join_exact": true
+  },
+  "historical_v3_shape_criteria": {
+    "E_coord": 0.1996973435588948,
+    "E_coord_limit": 0.2,
+    "E_pair": 0.1293899223332357,
+    "E_pair_limit": 0.2,
+    "nearest_neighbor_retention": 0.9166666666666666,
+    "minimum_retention": 0.5,
+    "all_pair_axis_signs_hard_gate": false,
+    "root_guard_q05_ohm": 1.3819547376654384,
+    "old_result_was_topology_only": true
+  },
+  "references": [
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\source\\Buscoords.dss",
+      "sha256": "aa3d71873e595578f8c952dffd16b8cf74d5d811da40e16db8a4f0c72abe8c32"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\source\\AddBusXY.py",
+      "sha256": "8266b15415aef71522c12a50d23e86d63cdb37222c3fb10c943651917c0899bc"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\station_selection_v1\\prepare_sta.py",
+      "sha256": "125fe71ff2216d8585ab59f41a8c031f1cb95da5ba725ef69efcaa7724249578"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\station_selection_v1\\STA_SELECTION_PROCEDURE.md",
+      "sha256": "96ff7426c019ab12054ca8fdb62a2e3230f9c8c30195992210ff2a56d5a45f99"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\station_selection_v1\\FINAL_24_LOCATION_REPORT.md",
+      "sha256": "ca54ddab6223c39247d5b3b45a8f3c7ee0091345222cfc75e26ebd0f01d98651"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\selection_v3_source_proximity\\select_sites.py",
+      "sha256": "f3a78db139f44a5ad5b2e273004f838ac4bf7b97161fe25d055397bec417d1c4"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\selection_v3_source_proximity\\prepare_guard.py",
+      "sha256": "6c49ac7a82f6d181833b0eac136d5eba874f17b433c965d52892ea70f5799664"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\selection_v3_source_proximity\\SELECTION_VALIDATION.json",
+      "sha256": "2ebe05ba072deac6da2cdcce9cd52cfcb61dc3702287e5f57a11f14eab4101dc"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\selection_v3_source_proximity\\GUARDED_SELECTION_FREEZE_MANIFEST.json",
+      "sha256": "bfb3c506b4abf260912f3f69fd43029bb15c6509880499a4164614a246836907"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\station_selection_v1\\SERVICE_REGISTRY_FREEZE_MANIFEST.json",
+      "sha256": "9de5db3ab696aa2d0b1aa0b43ce2f6fd6363fa3f6755550c5aa48f352401f075"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\static_reference\\final_service_nodes_24.csv",
+      "sha256": "30d3100ebdee70ee13025209794e3a890206b5ed8104465c55c4bbf33b91bf79"
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\IEEE8500_scalability_20260910\\static_reference\\v01_reduced48_nodes_v2.csv",
+      "sha256": "5e6517eda54b595f2d79e9d7640b48c1aecdfb06fc3eababbadd0db502deb685"
+    }
+  ]
+}

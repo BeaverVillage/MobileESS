@@ -1,0 +1,569 @@
+{
+  "status": "VOLTAGE_CAUSE_DIAGNOSED_BEFORE_SCALE_SELECTION",
+  "selected_scenario": false,
+  "date_scope": "No May01 temporal/customer authority: source static snapshot only",
+  "original_case": {
+    "background_scale": 1.0,
+    "AIDC_kw": 0,
+    "MESS_kw": 0,
+    "PV_kw": 0,
+    "load_removal_or_relocation": false,
+    "physical_source_changes": false,
+    "solver_policy": {
+      "name": "original_master_unbal_independent_static_controls",
+      "source_pu": 1.05,
+      "feeder_vreg_V": 126.5,
+      "downstream_vreg_V": 125.0,
+      "capacitors": "original enabled states and all nine original CapControls",
+      "actual": "restore original initial states then independently settle controls",
+      "linear_sensitivity": "restore settled base taps/caps; controlmode=off",
+      "solver_only": {
+        "maxiterations": 100,
+        "maxcontroliter": 100,
+        "tolerance": 1e-09
+      },
+      "voltage_base_note": "Preserve original Master voltagebases including 0.208kV; LV Bus base is 0.208/sqrt(3), while original Load/Transformer nameplate is 0.120kV"
+    },
+    "summary": {
+      "converged": true,
+      "control_actions_done": true,
+      "control_queue_size": 0,
+      "iterations": 192,
+      "control_iterations": 5,
+      "rho_max": 1.7542167831069122,
+      "binding_line": "Line.tpx21459660c0",
+      "binding_terminal": 1,
+      "binding_node": 1,
+      "rho_max_all_terminals": 1.754216802561661,
+      "all_terminal_binding_line": "Line.tpx21459660c0",
+      "all_terminal_binding_terminal": 2,
+      "all_terminal_binding_node": 1,
+      "vmin_pu": 0.9114118054461826,
+      "vmax_pu": 1.0499999387507952,
+      "vmin_node": "sx2748781a.2",
+      "vmax_node": "sourcebus.3",
+      "transformer_current_rho_max": 0.40507505207106353,
+      "transformer_kva_rho_max": 0.4080969330182725,
+      "transformer_nameplate_kva_rho_max": 0.44890662632009976,
+      "source_kw": 12047.631739396882,
+      "source_kvar": 1455.1570350818376,
+      "loss_kw": 1274.4617374962163,
+      "loss_kvar": 2828.8215673740265,
+      "load_kw": 10773.170000750217,
+      "load_kvar": 2700.0109119405233,
+      "capacitor_kw": 3.274180926382542e-14,
+      "capacitor_kvar": -4073.675442073534,
+      "balance_residual_kw": 1.1504489521030337e-06,
+      "balance_residual_kvar": -2.1591779386653798e-06,
+      "unrated_line_conductors": 0,
+      "node_voltage_violations_095_105": 216,
+      "line_conductor_overloads": 368,
+      "transformer_conductor_overloads": 0,
+      "transformer_winding_overloads": 0,
+      "transformer_nameplate_winding_overloads": 0,
+      "triplex_implied_neutral_amps_max": 727.8351829329646,
+      "triplex_implied_neutral_binding_line": "Line.tpx227944551c0",
+      "triplex_neutral_ampacity_known": false,
+      "solve_seconds": 0.0962320999824442
+    },
+    "control_state": {
+      "taps": {
+        "feeder_rega": [
+          1.0,
+          1.0125
+        ],
+        "feeder_regb": [
+          1.0,
+          1.0125
+        ],
+        "feeder_regc": [
+          1.0,
+          1.00625
+        ],
+        "vreg2_a": [
+          1.0,
+          1.06875
+        ],
+        "vreg2_b": [
+          1.0,
+          1.0437499999999997
+        ],
+        "vreg2_c": [
+          1.0,
+          1.0062499999999999
+        ],
+        "vreg3_a": [
+          1.0,
+          1.1
+        ],
+        "vreg3_b": [
+          1.0,
+          1.0625
+        ],
+        "vreg3_c": [
+          1.0,
+          1.0062499999999999
+        ],
+        "vreg4_a": [
+          1.0,
+          1.075
+        ],
+        "vreg4_b": [
+          1.0,
+          1.0750000000000002
+        ],
+        "vreg4_c": [
+          1.0,
+          1.03125
+        ]
+      },
+      "capacitors": {
+        "capbank2a": [
+          1
+        ],
+        "capbank2b": [
+          1
+        ],
+        "capbank2c": [
+          1
+        ],
+        "capbank1a": [
+          1
+        ],
+        "capbank1b": [
+          1
+        ],
+        "capbank1c": [
+          1
+        ],
+        "capbank0a": [
+          1
+        ],
+        "capbank0b": [
+          1
+        ],
+        "capbank0c": [
+          1
+        ],
+        "capbank3": [
+          1
+        ]
+      }
+    },
+    "capacitors": [
+      {
+        "name": "capbank2a",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank2b",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank2c",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank1a",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank1b",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank1c",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank0a",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 400.0
+      },
+      {
+        "name": "capbank0b",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 400.0
+      },
+      {
+        "name": "capbank0c",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 400.0
+      },
+      {
+        "name": "capbank3",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 900.0
+      }
+    ]
+  },
+  "counterfactual_case": {
+    "background_scale": 0.552,
+    "AIDC_kw": 0,
+    "MESS_kw": 0,
+    "PV_kw": 0,
+    "policy": "Same original source1.05, original125/126.5 controls, original caps independently auto settled",
+    "purpose": "One causal load-only counterfactual; not historical replay, not a candidate or selection",
+    "summary": {
+      "converged": true,
+      "control_actions_done": true,
+      "control_queue_size": 0,
+      "iterations": 311,
+      "control_iterations": 18,
+      "rho_max": 0.9238250879429329,
+      "binding_line": "Line.tpx21459660c0",
+      "binding_terminal": 1,
+      "binding_node": 1,
+      "rho_max_all_terminals": 0.9238251075946325,
+      "all_terminal_binding_line": "Line.tpx21459660c0",
+      "all_terminal_binding_terminal": 2,
+      "all_terminal_binding_node": 1,
+      "vmin_pu": 0.9872905971494949,
+      "vmax_pu": 1.0500494981849444,
+      "vmin_node": "sx2802481a.1",
+      "vmax_node": "hvmv_sub_hsb.3",
+      "transformer_current_rho_max": 0.21485005038110438,
+      "transformer_kva_rho_max": 0.2201784756192069,
+      "transformer_nameplate_kva_rho_max": 0.24219632318112758,
+      "source_kw": 6359.562235850923,
+      "source_kvar": 113.17140380919263,
+      "loss_kw": 412.7723954157673,
+      "loss_kvar": 856.2162200245953,
+      "load_kw": 5946.789840029191,
+      "load_kvar": 1490.4060231169701,
+      "capacitor_kw": 3.3559941790689294e-07,
+      "capacitor_kvar": -2233.4508368834795,
+      "balance_residual_kw": 7.036578608676791e-08,
+      "balance_residual_kvar": -2.4488932695021504e-06,
+      "unrated_line_conductors": 0,
+      "node_voltage_violations_095_105": 1,
+      "line_conductor_overloads": 0,
+      "transformer_conductor_overloads": 0,
+      "transformer_winding_overloads": 0,
+      "transformer_nameplate_winding_overloads": 0,
+      "triplex_implied_neutral_amps_max": 395.6191742437005,
+      "triplex_implied_neutral_binding_line": "Line.tpx227944551c0",
+      "triplex_neutral_ampacity_known": false,
+      "solve_seconds": 0.21511430002283305
+    },
+    "control_state": {
+      "taps": {
+        "feeder_rega": [
+          1.0,
+          1.0
+        ],
+        "feeder_regb": [
+          1.0,
+          1.0
+        ],
+        "feeder_regc": [
+          1.0,
+          1.0
+        ],
+        "vreg2_a": [
+          1.0,
+          1.0249999999999997
+        ],
+        "vreg2_b": [
+          1.0,
+          1.01875
+        ],
+        "vreg2_c": [
+          1.0,
+          1.00625
+        ],
+        "vreg3_a": [
+          1.0,
+          1.0375
+        ],
+        "vreg3_b": [
+          1.0,
+          1.01875
+        ],
+        "vreg3_c": [
+          1.0,
+          0.99375
+        ],
+        "vreg4_a": [
+          1.0,
+          1.0250000000000001
+        ],
+        "vreg4_b": [
+          1.0,
+          1.0250000000000001
+        ],
+        "vreg4_c": [
+          1.0,
+          1.00625
+        ]
+      },
+      "capacitors": {
+        "capbank2a": [
+          0
+        ],
+        "capbank2b": [
+          0
+        ],
+        "capbank2c": [
+          0
+        ],
+        "capbank1a": [
+          0
+        ],
+        "capbank1b": [
+          0
+        ],
+        "capbank1c": [
+          0
+        ],
+        "capbank0a": [
+          1
+        ],
+        "capbank0b": [
+          1
+        ],
+        "capbank0c": [
+          1
+        ],
+        "capbank3": [
+          1
+        ]
+      }
+    },
+    "capacitors": [
+      {
+        "name": "capbank2a",
+        "states": [
+          0
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank2b",
+        "states": [
+          0
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank2c",
+        "states": [
+          0
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank1a",
+        "states": [
+          0
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank1b",
+        "states": [
+          0
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank1c",
+        "states": [
+          0
+        ],
+        "enabled": true,
+        "total_kvar": 300.0
+      },
+      {
+        "name": "capbank0a",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 400.0
+      },
+      {
+        "name": "capbank0b",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 400.0
+      },
+      {
+        "name": "capbank0c",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 400.0
+      },
+      {
+        "name": "capbank3",
+        "states": [
+          1
+        ],
+        "enabled": true,
+        "total_kvar": 900.0
+      }
+    ]
+  },
+  "original_lowest_node": "sx2748781a.2",
+  "path_decomposition": {
+    "source_to_feeder_output_net_drop_pu": 0.001049047657698532,
+    "primary_path_magnitude_drop_pu": 0.10973615042238072,
+    "service_transformer_hot2_drop_pu": 0.009090651927801563,
+    "triplex_hot2_drop_pu": 0.018712197675760378,
+    "total_source_to_customer_drop_pu": 0.1385880476836412,
+    "primary_known_length_m": 6704.958773999998,
+    "primary_lines_with_unknown_length_units": 10,
+    "primary_sum_tracked_self_r_ohm": 3.1075472056494293,
+    "primary_sum_tracked_self_x_ohm": 4.886597062398468,
+    "phase_identity": "Customer local hot2 crosses CT37 winding3 to original primary phaseA/node1",
+    "path_edges": 127,
+    "path_regulators": [
+      "feeder_rega"
+    ],
+    "interpretation": "Magnitude changes include mutual coupling, regulator boost, different voltage bases; not independent scalar circuit approximation"
+  },
+  "original_lowest_bus_loads": [
+    {
+      "name": "21382813a0a",
+      "buses": [
+        "sx2748781a.1"
+      ],
+      "node_order": [
+        1,
+        0
+      ],
+      "phases": 1,
+      "kv": 0.12,
+      "kw": 1.82609732747078,
+      "kvar": 0.4576631306329099,
+      "model": 1,
+      "delta": false,
+      "vminpu_load_characteristic": 0.88,
+      "vmaxpu_load_characteristic": 1.05,
+      "pf": 0.97,
+      "actual_kw": 1.8260973275003267,
+      "actual_kvar": 0.4576631301340556
+    },
+    {
+      "name": "21382813a0b",
+      "buses": [
+        "sx2748781a.2"
+      ],
+      "node_order": [
+        2,
+        0
+      ],
+      "phases": 1,
+      "kv": 0.12,
+      "kw": 11.4739026725292,
+      "kvar": 2.8756310732682193,
+      "model": 1,
+      "delta": false,
+      "vminpu_load_characteristic": 0.88,
+      "vmaxpu_load_characteristic": 1.05,
+      "pf": 0.97,
+      "actual_kw": 11.473902672644988,
+      "actual_kvar": 2.8756310701065124
+    }
+  ],
+  "source_sha256": {
+    "AddBusXY.py": "8266b15415aef71522c12a50d23e86d63cdb37222c3fb10c943651917c0899bc",
+    "Buscoords.dss": "aa3d71873e595578f8c952dffd16b8cf74d5d811da40e16db8a4f0c72abe8c32",
+    "Capacitors.dss": "cc05836176a6715b121619079eb6cef96e77468a3368c8ed44815f2e9d684dcf",
+    "CapControls.DSS": "562818b4d905f391e88ed58efcd54150d4296d6cfb355f8abac32c969a290348",
+    "CloudTransient.dss": "212c40f5e2ea80ebd9d1ac9dcbef002a1533ce1d9a58bc184f52601e8015e05e",
+    "Feeder_Loads.dss": "a1b80b5b8c1bf1921bc335a7c922f448d1ef90e9d0a0912a5cd4407ba456484a",
+    "Fuses.DSS": "2e98f772e912acb989cbc941ea973492afa9c531d6f2d4bdd19f77e815af1dc3",
+    "Generators.dss": "5fa99bdec0aea52c0f518438eba1be9f693c408047afa794f746b3f717115936",
+    "LineCodes.dss": "af6bfaaf3eeafdd6788532672d66be990721c59e50dd125ffaa2739c979d42f9",
+    "LineCodes2.DSS": "3fec9199a41696a758eaff7065f86a89477f70898b1bee3295de9c74f154121a",
+    "LineGeometry.dss": "85a356720d142bc16a052291d4192e86b4733a8d5c33c5be397f8a4501111c78",
+    "Lines-Geometry.dss": "0dded47d4b81d8772ac092e87d64756cedddffc4e32f20bdb95bdedae3c5e0ac",
+    "Lines.dss": "460eb5e8179bda1926d0d70cf4fc9d8bdd29ab4dd9a101941730749f8a4a663a",
+    "Loads.dss": "4d5b68a8095bbee59a95ba08255f34b74fcf3d89c0e413df2fc669648fb2d18f",
+    "LoadXfmrCodes.dss": "213a3c0478b33a4cb95d82d40e076d1c1ec19b22033e4aa03e6dcdd8b92fa8f9",
+    "LoadXfmrs.dss": "bcb0d10caab6e53d5b5b18b669ebd83f67f79135a478c3079f78a2fdd943122a",
+    "Master-unbal.dss": "59bdb5e9da4bf3c063d7efdfa6b9b1e537d7786533fefa0f2c470cfb2e12622b",
+    "Master.dss": "9bd0e17f33e9ec7e0baa46693abeec069b148cbee8477301d77450f95d601ad8",
+    "Normalized-1s-2900-pts.CSV": "84cad00879be6d8de2ace6b623eabfdb4b8b61342c1455ee7dfcc2dc158633d0",
+    "P174_Run_360kW_PV.DSS": "d9ad5d8e4c4cce8ba81a32154cdc8d6fd1f9f9fb2d28dc19cbe6c6d8f84cded2",
+    "P174_Run_Voltage_Profile.DSS": "0ef327ced60602a46cb8570df68bb30d0859d3c5a70c08f0e43b1c28e530cb70",
+    "Regulators.dss": "041f353f55076feaaf751bbb20551226f8727ddfbdfc5101cf1b1f222da38617",
+    "Run_8500Node.dss": "1d502be6663c4a53b7c5735bc92560a037f3dc9e5955e9772c26c7b1ccdc4ce5",
+    "Run_8500Node_Unbal.dss": "f42a3733e585782d425f2a64f4eb4efd666f35128416cb228671105f8667b5ad",
+    "Run_RecloserSiting.DSS": "1bf21c4598fb8d5f15fb9e65c490001c30d948562b54128b4a4d7aebf84ab2c3",
+    "TplxFaultrate.dss": "db474c123aef3358098c9beec4c020593c0f0094c36a7de54d4bd611c73f8d4d",
+    "Transformers.dss": "cab397f65f5de08c4d82cf794c03c432b404cd5db7db37ff827869db8344b708",
+    "Triplex_Linecodes.dss": "7dfbfc23e19d8930c9e5ac3302bd9e8e9d52aee9c333e3fc80422f15752a886d",
+    "Triplex_Lines.DSS": "abf45521bc05a7f9d5c3fa4c94c4f24f7ea9bc984e7086b303ae4a143d77971d",
+    "UnbalancedLoads.DSS": "72705438556764981d430a9148c84b783f76b977911a2284ffe9295740bddaba",
+    "WireData.dss": "70e2bfd3d7a297ef2bf1d208df4a13fe2b8e581af065b310018d2e38cd0bfbd1"
+  },
+  "source_unchanged": true,
+  "physical_network_voltage_constraint": [
+    0.95,
+    1.05
+  ],
+  "original_load_characteristic": "Model1 constant P/Q, Vminpu0.88; distinct from V42 network voltage lower bound0.95",
+  "load_characteristic_fallback_at_original_lowest_node": false,
+  "lowest_voltage_normalization": {
+    "original_bus_kv_base_ln": 0.12008885599144216,
+    "nominal_hot_V": 120.0,
+    "actual_hot_voltage_V": 109.45040105312692,
+    "original_DSS_base_pu": 0.9114118054461826,
+    "nominal_120V_pu": 0.9120866754427244,
+    "note": "Original Master0.208kV yields120.088856V LN base; original Load/Transformer nameplate120V retained. Both reported, physical policy unchanged."
+  },
+  "default_tolerance_reference": {
+    "tolerance": 0.0001,
+    "vmin_pu": 0.9115150131517161,
+    "strict_minus_default_vmin_pu": -0.00010320770553351455,
+    "purpose": "Prior coarse original-only diagnostic; stricttol1e-9 supersedes for electrical arrays and power balance"
+  },
+  "historical_policy_comparison_scope": "Source1.04,Vreg123.5,CAPBank3OFF are separate historical overrides; provenance in SOURCE_AUTHORITY/historical comparison, not applied in these runs"
+}

@@ -1,0 +1,14 @@
+# 원본 자동제어와 고정제어 국소 민감도 대조
+
+이미 노출된 current V42 B0·역사적 v3 AIDC upstream host diagnostic의 slot 0/9/48/75에서 사전 지정한 첫 MV·첫 LV probe의 P/Q 중앙차분을 독립 재현했다. MV step=±1 kW/kvar, LV split240 step=±0.1 kW/kvar이며 실제 설치/승인된 출력이라는 뜻은 아니다. 원본 source1.05, RegControl12개(Vreg126.5/125), CapControl9개·모든 물리 rating은 그대로이고 수치 tolerance만 1e-9다.
+
+고정제어는 기존 순차 B0에서 정착한 동일 taps/caps를 모든 ± endpoint에 복원했다. 자동제어는 ± endpoint마다 **새 DSS context·원본 Master compile·원본 initial taps/caps**로 각각 시작하여 원본 제어를 정착시켰다. root helper처럼 같은 context에서 original controls만 복원하는 조건도 별도로 측정했다. baseline4+fresh baseline4+endpoint96회의 독립 전력조류가 전부 수렴·ControlActionsDone·빈 control queue였다. Native Solver는 호출하지 않았다.
+
+고정제어가 작은 step에서 안정적이어도 자동제어를 포함한 전역 affine 보증은 아니다. fresh ± endpoint 간 taps/caps가 다른 행은 4/16개이며 자동/fixed derivative 최대 차이는 2.9699418 A/unit(slot0, MV0001, P)다. reused original-state reset과 완전히 새 context의 derivative 차이는 전 행에서 최대 0 A/unit로 일치하여 reset 실패가 원인이 아니다. 상태가 같더라도 순차 baseline과 fresh endpoint의 원본 deadband·정착 이력 차이로 국소 operating point가 다를 수 있다. 모든 행의 자동/fixed/warm 제어상태, 전압·선로전류·변압기 rating maxima와 차이가 CSV/JSON에 기록되어 있고 `ENDPOINT_REGCONTROL_MONITORS.csv`에는 실제 monitoring 전압·원본 band를 기록했다. tap float 비교의 수치 tolerance는 1e-12여서 반올림 흔적을 실제 tap 이동으로 세지 않았다.
+
+- slot 0, MV0001(196-29518), P: fresh ± 상태 차이 {"taps": {"feeder_regc": {"minus": [1.0, 1.0125], "plus": [1.0, 1.00625]}, "vreg2_b": {"minus": [1.0, 1.0374999999999999], "plus": [1.0, 1.0312499999999998]}, "vreg2_c": {"minus": [1.0, 1.0062499999999999], "plus": [1.0, 1.0125]}, "vreg3_b": {"minus": [1.0, 1.06875], "plus": [1.0, 1.0750000000000002]}, "vreg3_c": {"minus": [1.0, 1.0062499999999999], "plus": [1.0, 1.0125]}, "vreg4_c": {"minus": [1.0, 1.03125], "plus": [1.0, 1.0375]}}, "capacitors": {}}; 최대 derivative 차이 2.9699418 A/unit
+- slot 0, MV0001(196-29518), Q: fresh ± 상태 차이 {"taps": {"feeder_regc": {"minus": [1.0, 1.0125], "plus": [1.0, 1.00625]}, "vreg2_b": {"minus": [1.0, 1.0374999999999999], "plus": [1.0, 1.0312499999999998]}, "vreg2_c": {"minus": [1.0, 1.0062499999999999], "plus": [1.0, 1.0125]}, "vreg3_b": {"minus": [1.0, 1.06875], "plus": [1.0, 1.0750000000000002]}, "vreg3_c": {"minus": [1.0, 1.0062499999999999], "plus": [1.0, 1.0125]}, "vreg4_c": {"minus": [1.0, 1.03125], "plus": [1.0, 1.0375]}}, "capacitors": {}}; 최대 derivative 차이 2.969917 A/unit
+- slot 9, MV0001(196-29518), P: fresh ± 상태 차이 {"taps": {"vreg4_a": {"minus": [1.0, 1.0875], "plus": [1.0, 1.0812499999999998]}}, "capacitors": {}}; 최대 derivative 차이 0.387273723 A/unit
+- slot 9, MV0001(196-29518), Q: fresh ± 상태 차이 {"taps": {"vreg4_a": {"minus": [1.0, 1.0875], "plus": [1.0, 1.0812499999999998]}}, "capacitors": {}}; 최대 derivative 차이 0.387273237 A/unit
+
+따라서 후보 영향의 local P/Q 편미분은 같은 정착 제어상태에서만 설명력이 있다. 실제 유한 이동/출력·AIDC PF coupled action은 독립 원본 자동제어 AC로 다시 확인해야 하며 모든 phase 전류/전압/원본 변압기 제한과 새 bottleneck을 끝점에서 확인해야 한다. 이 감사는 설치 port·이동 접근·QoS·WAN 또는 full dispatch 실행 가능성을 인증하지 않는다.
