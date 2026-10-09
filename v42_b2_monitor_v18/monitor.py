@@ -37,6 +37,13 @@ def worker_view(root, day, row, epoch):
         worker_result_received=Path(request['result']).is_file(),
         prior_native_runtime_seconds=(ledger.get('prior_attempt') or {}).get('Native_Runtime',0),
         attempt_id=request['attempt_id'], source_SHA=request['implementation_SHA'])
+    if ledger.get('budget_basis')=='CONSERVATIVE_LOST_CALL_WINDOW':
+        accounted=progress.get('Native_budget_accounted_upper_bound',ledger.get('Native_budget_accounted_upper_bound'))
+        worker.update(Native_Runtime_seconds=None,reported_native_runtime_seconds=accounted,
+            reported_native_remaining_seconds=max(0.,5400-accounted) if display.finite(accounted) else None,
+            native_runtime_basis='CONSERVATIVE_LOST_CALL_WINDOW',actual_cumulative_Native_Runtime='UNKNOWN',
+            current_attempt_measured_Native_Runtime=ledger.get('current_attempt_measured_Native_Runtime'),
+            lost_call_reserved_seconds=(ledger.get('prior_attempt') or {}).get('lost_call_reserved_seconds'))
     # Only file-backed independent certificates may supply these three fields.
     worker.update(UB=None, independent_Global_LB=None, Certified_Gap=None)
     worker = enrich(worker)
@@ -64,7 +71,9 @@ def worker_view(root, day, row, epoch):
 
 def view(root):
     root = Path(root)
-    version=18 if (root/'CHECKPOINT_V18.json').is_file() else 17
+    benchmark=root/'initialization_benchmark_v18r2_01'
+    if (benchmark/'CHECKPOINT_V18R2.json').exists():root=benchmark
+    version='18R2' if (root/'CHECKPOINT_V18R2.json').is_file() else 18 if (root/'CHECKPOINT_V18.json').is_file() else 17
     cp = co.read(root/f'CHECKPOINT_V{version}.json')
     manifest = co.read(root/f'CONTINUATION_V{version}_MANIFEST.json')
     workers = [worker_view(root,day,row,time.time()) for day,row in cp.get('workers',{}).items()]
@@ -85,7 +94,7 @@ def view(root):
     return display.clean(dict(run_id=manifest['run_id'],state=cp['state'],
         algorithm_version=manifest['schema'],display_version=VERSION,runtime_root=str(root),
         coordinator_alive=alive,canary_PASS=bool(cp.get('canary_PASS')),parallel_workers=cp.get('parallel_workers',1),
-        canary_label='May02/03' if version==18 else 'May01',
+        canary_label='May01' if version==17 else 'May02/03',
         B1=co.counts(cp,'B1'),B2=co.counts(cp,'B2'),workers=workers,worker_slots=slots,
         B2_validation_detail=dict(PASS=True,status=cp['state'],error=None),
         actual_comparison=comparison(cp['dates']),last_error=cp.get('last_error'),

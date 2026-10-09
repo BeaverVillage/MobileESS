@@ -46,3 +46,10 @@ May01 V17을 중단하거나 재실행하지 않았다. 자연 종료 뒤 V18의
 기존 회귀를 포함186개 경량 테스트 PASS, 실제 Native optimize0회. case.point 우회, exact3% 경계, FULL 실패/다른case/point 변조 거부, 합법 ETA/SOC 경로, fallback 설정, finite envelope 변조/임의cap 거부를 검사했다. 소형 fixture의 물리 verdict를 대체한 테스트와 실제 FULL 물리 검증을 구분한다.
 
 May01 V17의 실제 불필요 seed 시간은900.696초다. May02/03에서 seed 호출이0이면 생략 사실은 실측할 수 있지만, 같은 날짜 V17 MILP의 반사실적 Runtime을900초로 꾸며 비교하지 않는다. 같은 날짜 V13의 중단된 seed는 각각3285.426/3316.044초 동안 incumbent0개였다. 새 LP 시간·FULL 통과 시점·UB/point SHA·LB/Adaptive/최종Gap·누적 예산 및 원본 모델 동일성을 PERFORMANCE.json에 기록한다.
+
+
+## V18 종료 진단 오류 수정 및 별도 초기해 성능시험
+
+V18의 완료 진단 dict.update에서 SolCount 중복 키 예외가 Runtime 저장보다 먼저 발생했다. May02/03의 해당 호출 Runtime은 UNKNOWN이며 QUARANTINE 기록과 실패 source/결과를 보존한다. V18R2는 Runtime을 먼저 ledger에 영속화하고 선택적 진단 실패와 분리한다.
+
+최신 사용자 지시에 따라 캠페인 예산 이월 재시작에 앞서 별도 initialization_benchmark_v18r2_01에서 May02/03 초기해 성능을 Native 0초부터 실측한다. 원본 캠페인의 예산을 초기화하지 않는다. 첫 원본 FULL 정수·96슬롯 물리 검증 통과까지만 실행하고 LB/Adaptive는 호출하지 않는다. 기존 Adaptive/RMP/Pricing/인증기 파일 SHA는 보존한다. 실패 시 LP 후보 불가능을 FULL MILP 불가능으로 선언하지 않는다. Fallback MILP는 최대900초, MIPFocus1, 최초 feasible exit 후 독립 FULL 검증을 유지한다.

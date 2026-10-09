@@ -136,7 +136,7 @@ function workerCard(w){
  }
 
  const used=w.reported_native_runtime_seconds??w.Native_Runtime_seconds,remaining=w.reported_native_remaining_seconds??w.native_remaining_seconds;
- const native=el('div',undefined,'time-row');native.append(el('span','Native 사용'),el('strong',time(used)+' / 90분'));card.append(native);
+ const native=el('div',undefined,'time-row');native.append(el('span',w.native_runtime_basis==='CONSERVATIVE_LOST_CALL_WINDOW'?'Native 예산 차감 (보수 상한)':'Native 사용'),el('strong',time(used)+' / 90분'));card.append(native);
  const track=el('div',undefined,'track'),fill=el('div');fill.style.width=(valid(used)?Math.max(0,Math.min(100,used/5400*100)):0)+'%';track.append(fill);card.append(track);
  const clocks=el('div',undefined,'time-row');clocks.append(el('span','잔여 '+time(remaining)),el('span','전체 '+time(w.wall_seconds)));card.append(clocks);
  const bad=!w.display_waiting&&!w.worker_result_received&&(!w.worker_alive||(valid(w.heartbeat_age_seconds)&&w.heartbeat_age_seconds>20));
@@ -147,7 +147,7 @@ function workerCard(w){
  pairs(kv,[['유효 해 UB',number(w.UB,6)],['독립 하한 LB',number(w.independent_Global_LB,6)],
  ['모델 생성 시간',time(w.model_preparation_seconds)],['해·물리 검증 시간',time(w.validation_seconds)],
  ['완료 Native 호출',number(w.Native_calls,0)+(w.native_inflight?' · 호출 실행 중':'')],
- ['완료 호출 누적 Runtime',time(w.Native_Runtime_seconds)],['이전 시도 이월',time(w.prior_native_runtime_seconds)],['Attempt',w.attempt_id||'—'],['실행 source SHA',w.source_SHA||'—'],['Native 시간 근거',w.native_runtime_basis==='SOLVER_CALLBACK_CURRENT_CALL_INCLUDED'?'현재 호출 포함 · Solver 보고':'완료 호출 기록'],
+ ['완료 호출 누적 Runtime',time(w.Native_Runtime_seconds)],['이전 시도 이월',time(w.prior_native_runtime_seconds)],['Attempt',w.attempt_id||'—'],['실행 source SHA',w.source_SHA||'—'],['Native 시간 근거',w.native_runtime_basis==='CONSERVATIVE_LOST_CALL_WINDOW'?'실제 누적 UNKNOWN · 실패 실행 전체 시간 예약 차감':w.native_runtime_basis==='SOLVER_CALLBACK_CURRENT_CALL_INCLUDED'?'현재 호출 포함 · Solver 보고':'완료 호출 기록'],
  ['모델 변수 / 제약식',number(build['변수'],0)+' / '+number(build['제약식'],0)],
  ['확인된 모델 단계',w.build?number(w.build.confirmed_steps,0)+' / '+number(w.build.total_steps,0):'—'],
  ['CPU 누적 시간',time(w.resource?.CPU_seconds)],['세부 보고 경과',time(w.solver_report_age_seconds)],
