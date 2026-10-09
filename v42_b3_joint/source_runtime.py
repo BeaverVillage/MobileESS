@@ -114,7 +114,7 @@ class SourceRegistry:
     def admit(self, context, action):
         context.verify_identity()
         require(context.source_registry is self, "SOURCE_REGISTRY_CONTEXT_DRIFT")
-        require_production_authorization("B3_SOURCE_" + action)
+        require_production_authorization("B3_SOURCE_" + action, context=context)
         inputs = source_input_identity(context.input_folder)
         require(inputs["bundle"] == context.original_bundle
                 and inputs["input_sha"] == context.request.authority.input_sha,

@@ -510,7 +510,8 @@ class RealMSourceRoutingTests(unittest.TestCase):
     def test_real_registry_gate_denies_before_any_source_model_import(self):
         fixture = SourceFixture()
         real = SourceRegistry()
-        context = replace(fixture.context, source_registry=real)
+        context = replace(fixture.context, source_registry=real,
+                          output=Path(__file__).resolve().parents[1] / "runtime/b3/FAKE_M_SOURCE/M1")
         with self.assertRaises(PermissionError):
             MSourceBridge().execute(context, FakeLedger(context))
         self.assertEqual(real.audit, [])

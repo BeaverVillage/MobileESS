@@ -681,8 +681,7 @@ class ASourceBridge:
         require(output.request == context.request and output.evidence_kind == context.source_registry.evidence_kind,
                 "A_SOURCE_VERIFIER_REQUEST_EVIDENCE_DRIFT")
         packet = output.source_packet
-        source_root = Path(packet["source_output"])
-        require(source_root.resolve() == context.output / "SOURCE", "A_SOURCE_VERIFIER_OUTPUT_DRIFT")
+        source_root = self._verification_root(context, output)
         for receipt in packet["proof_input_receipts"]:
             _checked(receipt, source_root)
         numerical = self._verify_numerical_artifacts(context, output)
@@ -697,7 +696,7 @@ class ASourceBridge:
             state = pickle.load(stream)
         require(self._domain_authority(context, state) == packet["original_complete_domain_sha"],
                 "A_SOURCE_VERIFIER_ORIGINAL_COMPLETE_DOMAIN_AUTHORITY_DRIFT")
-        verify_case = registry.rebind(A_SOURCE, "verify_case", literal_replacements={"B1": "B3"})
+        verify_case = self._verification_case(context, registry)
         static = verify_case(state)
         require(static.get("PASS") is True, "A_SOURCE_VERIFIER_COMPLETE_DOMAIN_OR_MODEL_FAILED")
         typed, types = registry.callable("v42_a_stage_practical/integer_model.py", "restore_types")(state, state["global_types"])
@@ -713,7 +712,8 @@ class ASourceBridge:
                 packet["grid_anchor"]["pcc_mapping_sha"] == context.request.authority.pcc_mapping_sha and
                 tuple(packet["grid_anchor"]["control_names"]) == tuple(coeff[0].control_names),
                 "A_SOURCE_VERIFIER_GRID_CONTROL_AUTHORITY_DRIFT")
-        Physical, power = self._physical(context, bind, state, context.input_folder, source_root)
+        write_root = self._verification_write_root(context, output)
+        Physical, power = self._physical(context, bind, state, context.input_folder, write_root)
         replay = Physical(state, typed).verify(point)
         require(replay.get("PASS") is True, "A_SOURCE_VERIFIER_INDEPENDENT_PHYSICAL_REPLAY_FAILED")
         require(jsonable(replay["selected_jobs"]) == packet["selected_jobs"] and
@@ -724,10 +724,10 @@ class ASourceBridge:
         # Independently rematerialize the original planning arrays from the
         # reverified integer controls. A sealed saved file alone is not a
         # scientific proof of its PCC/IT/GPU contents.
-        replay_folder = source_root / "STATIC/PLANNING_REPLAY"
+        replay_folder = write_root / "STATIC/PLANNING_REPLAY"
         replay_folder.mkdir(parents=True, exist_ok=True)
         fresh_planning = self._planning(context, source)(state, replay, power, replay_folder)
-        with source.np.load(_checked(fresh_planning, source_root)) as archive:
+        with source.np.load(_checked(fresh_planning, write_root)) as archive:
             recomputed_arrays = {key: jsonable(archive[key]) for key in archive.files}
         require(recomputed_arrays == saved_arrays, "A_SOURCE_VERIFIER_ORIGINAL_PLANNING_ARRAY_REPLAY_DRIFT")
         saved_arrays["time_axis"] = list(context.request.authority.slots)
@@ -767,6 +767,17 @@ class ASourceBridge:
         return {"PASS": True, **output.identity, "physical": physical, "global": global_proof,
                 "physical_evidence": physical, "global_evidence": global_proof,
                 "verifier_source_sha": verifier_sha, "evidence_kind": registry.evidence_kind}
+
+    def _verification_root(self, context, output):
+        root = Path(output.source_packet["source_output"]).resolve()
+        require(root == context.output / "SOURCE", "A_SOURCE_VERIFIER_OUTPUT_DRIFT")
+        return root
+
+    def _verification_write_root(self, context, output):
+        return context.output / "SOURCE"
+
+    def _verification_case(self, context, registry):
+        return registry.rebind(A_SOURCE, "verify_case", literal_replacements={"B1": "B3"})
 
     def verify(self, context, output):
         context.source_registry.admit(context, "A_INDEPENDENT_VERIFY")

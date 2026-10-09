@@ -86,10 +86,12 @@ def verify_output(context, output, bridge, ledger):
 
 
 class SourceCoordinator:
-    def __init__(self, root, context_factory, a_bridge, m_bridge, *, ledger_factory=SourceStageLedger):
+    def __init__(self, root, context_factory, a_bridge, m_bridge, *, ledger_factory=SourceStageLedger,
+                 a1_bridge=None):
         self.root = Path(root).resolve()
         self.context_factory, self.a_bridge, self.m_bridge = context_factory, a_bridge, m_bridge
         self.ledger_factory = ledger_factory
+        self.a1_bridge = a1_bridge or a_bridge
         self.contexts, self.outputs, self.ledgers = {}, {}, {}
 
     def _save(self, path, value):
@@ -140,20 +142,23 @@ class SourceCoordinator:
                         and context.input_folder == first.input_folder
                         and context.original_bundle_json == first.original_bundle_json
                         and context.grid_authority is first.grid_authority, "SOURCE_COORDINATOR_CONTEXT_DRIFT")
-                bridge = self.a_bridge if stage.startswith("A") else self.m_bridge
+                bridge = self.a1_bridge if stage == "A1" else self.a_bridge if stage.startswith("A") else self.m_bridge
                 completed = stage in state["completed"]
                 result_path = context.output / "B3_SOURCE_STAGE_OUTPUT.json"
                 if not completed:
                     require(not context.output.exists(), "UNCOMPLETED_SOURCE_OUTPUT_QUARANTINE")
                     state.update(inflight=stage, status="RUNNING")
                     self._save(state_path, state)
+                    if progress:
+                        progress({"stage": stage, "phase": stage + "_SOURCE_ADMISSION"})
                 ledger = self.ledger_factory(context)
                 if completed:
                     require(result_path.exists(), "COMPLETED_SOURCE_RESULT_MISSING")
                     output = output_from_document(json.loads(result_path.read_text(encoding="utf-8")))
                     require(output.sha == state["result_shas"][stage], "SOURCE_RESULT_PERSISTENCE_SHA_DRIFT")
                 else:
-                    output = bridge.execute(context, ledger, progress)
+                    stage_progress = (lambda value, current=stage: progress(dict(value, stage=current))) if progress else None
+                    output = bridge.execute(context, ledger, stage_progress)
                 verify_output(context, output, bridge, ledger)
                 if not completed:
                     require(not result_path.exists(), "SOURCE_RESULT_EXCLUSIVE_PUBLICATION_REQUIRED")
@@ -170,7 +175,7 @@ class SourceCoordinator:
             if operations_factory is not None:
                 operations = operations_factory(self.contexts["M2"])
                 def validator(req, out):
-                    bridge = self.a_bridge if req.stage.startswith("A") else self.m_bridge
+                    bridge = self.a1_bridge if req.stage == "A1" else self.a_bridge if req.stage.startswith("A") else self.m_bridge
                     return verify_output(self.contexts[req.stage], out, bridge, self.ledgers[req.stage])
                 if state["planning_sha"]:
                     frozen = operations.load_freeze(verify_stage=validator, requests=requests, outputs=outputs)
@@ -178,6 +183,8 @@ class SourceCoordinator:
                 else:
                     state.update(inflight="PLANNING_FREEZE", status="RUNNING")
                     self._save(state_path, state)
+                    if progress:
+                        progress({"stage": "PLANNING_FREEZE", "phase": "PLANNING_FREEZE"})
                     frozen = operations.freeze(requests, outputs, verify_stage=validator)
                     state.update(inflight=None, status="PLANNING_COMPLETE", planning_sha=frozen.sha)
                     self._save(state_path, state)
@@ -191,10 +198,15 @@ class SourceCoordinator:
                 elif realized_inputs is not None:
                     state.update(inflight="ACTUAL_FRESH_AC", status="RUNNING")
                     self._save(state_path, state)
-                    actual = operations.actual(frozen, realized_inputs, backend=actual_backend)
+                    if progress:
+                        progress({"stage": "ACTUAL", "phase": "ACTUAL_FRESH_AC"})
+                    inputs = realized_inputs(operations, frozen) if callable(realized_inputs) else realized_inputs
+                    actual = operations.actual(frozen, inputs, backend=actual_backend)
                     self._save(self.root / "B3_SOURCE_ACTUAL_RESULT.json", jsonable(actual))
                     state.update(inflight="VALIDATION")
                     self._save(state_path, state)
+                    if progress:
+                        progress({"stage": "VALIDATION", "phase": "VALIDATION"})
                     validator(requests[3], outputs[3])
                     validation = operations.validate_actual(frozen, actual)
                     self._save(self.root / "B3_SOURCE_VALIDATION.json", jsonable(validation))

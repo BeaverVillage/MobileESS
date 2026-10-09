@@ -25,8 +25,9 @@ def parameters(stage):
             "IntFeasTol": 1e-5 if stage.startswith("A") else 1e-8}
 
 
-def require_production_authorization(action="NATIVE"):
-    # Deliberately unconditional. Neither environment variables, mutable module
-    # flags, B1/B2 scopes nor a caller-provided Boolean unlock this preparation.
-    # Future execution needs a separately reviewed implementation and evidence.
-    raise PermissionError("B3_PRODUCTION_NOT_AUTHORIZED:" + action)
+def require_production_authorization(action="NATIVE", *, context=None):
+    # A scoped, source-bound permit admits a real qualification canary. Later
+    # dates require the completed canary's sealed scientific/Actual receipts.
+    # Module flags and environment variables still do not grant permission.
+    from v42_autonomous_b3.admission import require_permit
+    return require_permit(action, context=context)
