@@ -1,0 +1,46 @@
+# May 2025 B2/B3 autonomous campaign
+
+This integration combines PR #198's original V19 FULL seed policy with PR #191's original B3 stage and Operations adapters. The latest user instruction explicitly requests a separate restart of every May B2 and B3 date. The old campaign, its results, UNKNOWN accounting and completed B1 results remain preserved.
+
+## Execution ownership
+
+- Official repaired campaign: `D:\v42_may_restart_20261010_02`.
+- Preserved first restart: `D:\v42_may_restart_20261010`. Its interrupted Native calls remain UNKNOWN; the explicit user-requested second restart does not rewrite those ledgers.
+- Preserved original campaign and same-day B1 A1 authority: `D:\MobileESS_V42\runtime\v42_may_campaign\native90_build_reuse_20261009_01`.
+- Supervisor/recovery checkout: `D:\MobileESS_v42_autonomous`, branch `codex/v42-may-b2-b3-autonomous`.
+- Preserved first repaired B2 immutable checkout: `D:\v42run22`, commit `3cee1cc34d6901c1f644714b2e25ef0235a7409d`, execution SHA `f6b1035e0f2961529f3d38550750ec9e751fd113a8c124a5c9cdf64347d579d0`.
+- `AUTONOMOUS_MANIFEST.json` declares future B2/B3 immutable deployments. Each live worker retains its sealed request, checkout and source identity.
+
+`v42_autonomous.fresh` requires an empty destination, verifies all 31 sealed B1 completions and the B2 source map, creates all 62 B2/B3 dates as PENDING, and records the explicit restart authorization. It inherits no previous B2/B3 result or measured runtime. The previous campaign accounting is preserved separately; UNKNOWN never becomes a measured zero.
+
+The first restart exposed a real filesystem-admission defect: the immutable checkout's FULL verifier rejected the separately owned campaign output. The V22 adapter restricts generated proof reads/writes to the exact request-owned date/attempt output while retaining original validator code objects, source roots, arithmetic, FULL/integer/physical checks and read-only input receipts. All three saved seed points passed an independent Native-zero replay before the user-authorized restart. The new execution then independently produced fresh FULL-validated initial solutions for May01/02/03, with actual Native times 7.684/8.274/9.150 seconds and initial UBs 0.642675232471/0.655007499636/0.537800466212. These are initial bounds, not completed-day or final-gap results.
+
+## Scheduling and recovery
+
+The Windows task `MobileESS_V42_May_B2_B3_Autonomous_Supervisor` runs the supervisor independently of this chat and retries its host every five minutes and at login. Its settings preserve normal process priority, add no memory or CPU limits, and allow unlimited task duration. A real supervisor-only restart was verified to adopt the same three May01/02/03 worker PIDs without stopping them. Login restart is configured; a full machine reboot or logged-out execution has not been exercised.
+
+The actual Codex heartbeat automation is `v42-may-b2-b3-autonomous-recovery`, named **V42 May B2 B3 Autonomous Recovery**, with an hourly interval. Its saved prompt targets the new campaign, the correct repository checkout, actual process and Native accounting verification, root-cause code repair, separate immutable deployments, priority retry requests and commit/push/Draft PR records. Normal unchanged progress stays quiet. TIME_LIMIT and timeouts require actual bottleneck/error investigation, code repair, validation and a fresh zero-start priority date retry; increasing TimeLimit or relaxing scientific acceptance is forbidden. Scheduling registration and next-run time are checked against the app scheduler; this does not claim that a scheduled run has already fired.
+
+Recovery requires SHA-bound failed result and historical ledger receipts, a new immutable repair commit and validation receipts. The latest explicit user instruction authorizes repaired date retries from Native zero with no prior checkpoint or Native callprefix inheritance. A sealed USER_ZERO_START_RETRY_AUTHORIZATION receipt binds this exceptional fresh-attempt route; prior measured/UNKNOWN and exhausted accounting remains unchanged as historical evidence. New B2 attempts retain a 5,400-second limit and B3 retains 5,400 seconds per original stage. Without that explicit authorization, cumulative retry accounting still applies. Verified repairs precede ordinary pending dates in the next available slot. Queue launch intents, orphan workers and terminal results are reconciled after a supervisor restart. Actual Native progress is verified independently before a retry is recorded as entered successfully. The process-owned repair guardian rejects a concurrent lease; its real acquisition, exclusion and release were exercised in the new campaign.
+
+## Scientific admission
+
+B2 uses three different-date workers, the original certified internal Threads contract, 5,400 seconds of measured Native budget, 3% independent Global Gap and P2 calls zero. V19's seed success alone cannot produce a final PASS. FULL integer/physical validation, independent bounds, Adaptive optimization, fixed Actual replay, Fresh OpenDSS and final validation remain mandatory.
+
+The added user policy requires all May01–May31 first attempts to continue through individual date failures. After the B2 first sweep and its running workers finish, the supervisor transitions to B3 even if B2 contains FAIL, QUARANTINE or pending repairs. B3 uses exactly one sequential worker. Before production qualification, each next date uses an independently admitted real canary; a failed canary does not hold the remaining dates. Only a completed, source-matched real day's A1/M1/A2/M2, exact gap, integer/physical, Actual/Fresh and validation receipts can qualify subsequent production. A Boolean flag cannot open admission.
+
+B2 priority repairs may use free slots while its first sweep is still running. B2 repairs are deferred during the B3 first sweep. After both first sweeps, the persistent coordinator continues processing evidence-complete repair requests without parallel cross-arm execution. Daily failures preserve their original statuses and artifacts; the public date state distinguishes PASS, FAIL, QUARANTINE and RETRY_PENDING. Shared source-seal corruption or a proven campaign-wide environment failure is separately blocked and recorded for repair.
+
+B3 A1 reads the same-date B1 original A1 stage, never substitutes B1 Actual. Reuse requires fresh FULL/compact matrices, original variable domains/objectives, complete scheduling domains, input and runtime authority comparisons, independent integer/physical and exact bound replay, and zero new A1 Native calls/runtime. Immutable input caches are admitted only after scientific value, compiler byte and complete domain verification. The Native-denied diagnostic cannot publish a complete B3 production qualification.
+
+## Observer and evidence
+
+The independent read-only monitor uses port 8794, a five-second cached snapshot and the explicitly selected supervisor journal. All 31 B1 results must match manifest receipts. Initial solution labels distinguish original model preparation, search, an unvalidated candidate, FULL validation and a real validation failure. Only actual workers and sealed Actual/Fresh results appear; unmeasured or unallocated runtime and uncertified gaps remain UNKNOWN. Historical initialization benchmarks cannot replace production results. HTTP/API responses and JavaScript syntax are verified; browser screen capture is unavailable because the app browser permission-check service could not verify access.
+
+The campaign `autonomous` folder contains runtime verification, supervisor restart/adoption, preserved accounting, repair lease and scheduler receipts. Diagnostic failures and historical attempts remain in their separate folders. Final runtime and diagnostic outcomes are recorded in the accompanying execution receipt; incomplete full campaigns are not reported as completed.
+
+## Receipt return repair and zero-start retries
+
+The first three V22 dates produced FULL-validated seeds, then failed in Adaptive U1 because the V19 budget function persisted the real Native receipt but implicitly returned None. An improved UB entered the original frontier before the caller raised, so the secondary final replay detected a legitimate frontier/point mismatch. The adapter now returns only the just-persisted, identity-checked actual receipt while delegating the original solve and accounting exactly once. Unknown runtime and stale receipts are rejected. All three captured real U1 paths reproduced the failure before repair and passed original FULL/integer/physical/exact UB replay after repair, with no new Native calls and no LB/Gap change; 12 regression checks passed.
+
+The corrected immutable checkout is `D:\v42run23`, commit `88d8a45b102ad16017eac075066bf83f465196b9`, source `e1537556398db3d5a31dee0ac04a5c6ba0613a250398aa7f76489f2468a6aa8b`. The three failures are preserved and three verified fresh zero-start priority retries are queued. All 1,007 original scientific source files and 91 execution sources were checked while binding the repair receipt to the new checkout. Supervisor replacement adopted the unchanged May04/05/06 PIDs. This chat continues until May01/02/03 actually reach final PASS; queue admission and initial FULL seeds do not substitute for that result.
