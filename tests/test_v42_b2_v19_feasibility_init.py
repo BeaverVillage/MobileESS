@@ -66,7 +66,7 @@ def test_first_mipsol_uses_candidate_objective_even_when_prior_solcount_is_zero(
 
 class FakeModel:
     def __init__(self):
-        self.Params=NS();self.Status=9;self.SolCount=0
+        self.Params=NS(Method=-1);self.Status=9;self.SolCount=0
         self.attrs={'LB':[0.]*6,'UB':[1.]*6,'VType':['B']*6,'Obj':[1.,2.,3.,4.,5.,6.]}
     def getVars(self):return list(range(6))
     def getAttr(self,k):return list(self.attrs[k])
@@ -81,6 +81,7 @@ def test_full_admission_and_unrestricted_fallback_restore_original_model(tmp_pat
     c=case();c.output=tmp_path;c.case_sha='case'
     model=FakeModel();point=np.array([1.,0.,1.,0.,0.,0.]);calls=[]
     monkeypatch.setattr(init,'validated_start',lambda *a:None)
+    monkeypatch.setattr(init,'repaired_dispatch',lambda *a:None)
     monkeypatch.setattr(init,'analyze',lambda *a:[dict(name='voltage_upper[0,235]',domain='C3A')])
     monkeypatch.setattr(init,'sensitivity',lambda *a:({'S0':0.,'STA2':1.},0,[]))
     monkeypatch.setattr(init.original,'_model',lambda *a:(model,{}))

@@ -77,6 +77,37 @@ def accepted(case,found,budget,stage):
         M_SEED_optimize_calls=receipt['unrestricted_F5_calls'],unnecessary_seed_MILP_omitted=stage!='F5')
     atomic(receipt_path,receipt);return point
 
+def repaired_dispatch(case,model,variables,budget,peak,baseline_low,baseline_high,progress):
+    """The old fixed LPs failed because slot-96 occupancy was all zero.
+
+    Correct that actual bug before trying progressively larger free-mode MILPs.
+    Every original row/objective is retained, and only FULL gates admission.
+    """
+    from .fixed_pattern import values_for
+    sites,initial,arcs,_,_=case.graph
+    stay={(a[0],a[1]):k for k,a in enumerate(arcs) if a[-1] is None}
+    paths={unit:[stay[site,t] for t in range(96)] for unit,site in initial.items()}
+    for name,charge in (('F1_TERMINAL_REPAIRED_BEFORE_PEAK',lambda u,t:t<peak),
+                        ('F1_TERMINAL_REPAIRED_AFTER_PEAK',lambda u,t:t>=peak)):
+        if budget.remaining()<=300.:break
+        ids,values=values_for(case,paths,charge)
+        low=baseline_low.copy();high=baseline_high.copy();low[ids]=values;high[ids]=values
+        if np.any(low<baseline_low) or np.any(high>baseline_high):raise ValueError('REPAIRED_PATTERN_OUTSIDE_ORIGINAL_BOUNDS')
+        model.reset();model.setAttr('LB',variables,low.tolist());model.setAttr('UB',variables,high.tolist())
+        model.setAttr('VType',variables,['C']*len(variables));model.Params.Method=1;model.update()
+        out=case.output/'FEASIBILITY_STAGES'/name;out.mkdir(parents=True,exist_ok=True)
+        atomic(out/'MODEL_POLICY.json',dict(stage=name,terminal_slot=96,
+            terminal_activity_matches_last_original_arc=True,all_original_rows_and_objective_retained=True,
+            fixed_original_integer_count=len(ids),restriction_applies_only_to_initialization=True))
+        if progress:progress(dict(phase=name))
+        budget.native_optimize(model,component='FEASIBILITY_LP',track=name,label=name,
+            requested_seconds=min(60.,max(0.,budget.remaining()-300.)))
+        atomic(out/'STATUS.json',dict(raw_status=int(model.Status),status=status_name(int(model.Status),True),
+            SolCount=int(model.SolCount),restricted_candidate_only=True,FULL_MILP_infeasibility_claimed=False))
+        found=full_point(case,model,budget,name)
+        if found is not None:return accepted(case,found,budget,name)
+    return None
+
 def initialize(case,budget,progress):
     start=validated_start(case,budget,progress)
     atomic(case.output/'F1_STATUS.json',dict(stage='F1',raw_status=budget.calls[-1].get('Native_status') if budget.calls else None,
@@ -92,6 +123,7 @@ def initialize(case,budget,progress):
         initialization_native_limit_seconds=budget.native_limit,F5_requested_seconds=300.,
         partial_mode_policy='ZERO_OUTSIDE_CRITICAL_SLOTS_THEN_FREE_ALL_96',objective='AUXILIARY_F2_F3_FEASIBILITY_ZERO; ORIGINAL_FULL_UB_REPLAY'))
     model,identity=original._model(case)
+    original_method=model.Params.Method
     variables=model.getVars();baseline_low=np.asarray(model.getAttr('LB'));baseline_high=np.asarray(model.getAttr('UB'))
     original_types=model.getAttr('VType');original_obj=model.getAttr('Obj')
     stages=[('F2_CRITICAL_MODES',120.,dict(stationary=True,free_modes=critical)),
@@ -104,6 +136,9 @@ def initialize(case,budget,progress):
     stages.append(('F3_ALL_ORIGINAL_SITES',120.,dict(sites=case.graph[0],free_modes=range(96))))
     import gurobipy as gp
     try:
+        repaired=repaired_dispatch(case,model,variables,budget,peak,baseline_low,baseline_high,progress)
+        if repaired is not None:return repaired
+        model.Params.Method=original_method
         for stage,seconds,restriction in stages:
             if budget.remaining()<=300:break
             low,high,description=pattern_bounds(case,baseline_low,baseline_high,**restriction)
