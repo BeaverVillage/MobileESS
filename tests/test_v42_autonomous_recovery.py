@@ -196,3 +196,97 @@ def test_presealed_slot_alternatives_use_next_available_worker(tmp_path, monkeyp
     retry = r.dispatch_ready(tmp_path, 'B2', 2, {})
     assert retry['worker_slot'] == 2 and retry['request'] == str(alternative)
     assert r.queue(tmp_path)['entries'][0]['retry_attempt_id'] == 'new_slot2'
+
+
+def terminal_packet(tmp_path, row, *, unknown=False):
+    request=r.read(row['retry_request_receipt']['path'])
+    result=Path(request['result'])
+    ledger=result.parent/'NATIVE_RUNTIME_LEDGER.json'
+    r.atomic(ledger,dict(measured_Native_Runtime=11.,prior_attempt={'Native_Runtime':10.},
+        inflight={'status':'IN_FLIGHT'} if unknown else None,
+        calls=[dict(entered_native=True,Native_Runtime=1.,runtime_unavailable=False)]))
+    r.atomic(result,dict(identity={'day':row['date'],'arm':row['arm'],'attempt_id':request['attempt_id']},
+        source_SHA=row['repair_source_SHA'],PASS=True,status='PASS',scientific_PASS=True,Native_Runtime=11.))
+    return result,ledger
+
+
+def test_terminal_recovery_is_measured_and_never_overwritten(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    result,_=terminal_packet(tmp_path,row)
+    finished=r.mark_finished(tmp_path,row['queue_id'],result)
+    assert finished['verification_status']=='RECOVERY_PASS'
+    assert finished['final_remaining_native_seconds']==5389.
+    assert r.mark_finished(tmp_path,row['queue_id'],result)==finished
+    doc=r.read(result);doc['Native_Runtime']=0.;r.atomic(result,doc)
+    with pytest.raises(PermissionError,match='NEVER_OVERWRITTEN'):
+        r.mark_finished(tmp_path,row['queue_id'],result)
+
+
+def test_terminal_inflight_accounting_stays_quarantined(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    result,_=terminal_packet(tmp_path,row,unknown=True)
+    finished=r.mark_finished(tmp_path,row['queue_id'],result)
+    assert finished['verification_status']=='QUARANTINE_TERMINAL_ACCOUNTING'
+    assert finished['final_PASS'] is False
+
+
+def test_completed_launch_intent_uses_exact_result_instead_of_unknown(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    terminal_packet(tmp_path,row)
+    doc=r.queue(tmp_path);doc['entries'][0].update(verification_status='DISPATCH_INTENT',worker_slot=1)
+    r.atomic(tmp_path/'RECOVERY_QUEUE.json',doc)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    monkeypatch.setattr(r.subprocess,'Popen',lambda *a,**k:pytest.fail('DUPLICATE_COMPLETED_RETRY'))
+    assert r.dispatch_ready(tmp_path,'B2',1,{}) is None
+    assert r.queue(tmp_path)['entries'][0]['verification_status']=='RECOVERY_PASS'
+
+
+def test_orphaned_live_recovery_is_adopted_without_relaunch(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    r.mark_dispatched(tmp_path,row['queue_id'],'new',r.identity(),source_SHA='b'*64)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[r.identity()])
+    monkeypatch.setattr(r.subprocess,'Popen',lambda *a,**k:pytest.fail('ORPHAN_RELAUNCH'))
+    workers=r.reconcile_workers(tmp_path)
+    assert len(workers)==1 and workers[0]['recovery_queue_id']==row['queue_id']
+
+
+def test_native_progress_gets_immutable_snapshot_receipts(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    r.mark_dispatched(tmp_path,row['queue_id'],'new',r.identity(),source_SHA='b'*64)
+    request=r.read(row['retry_request_receipt']['path']);attempt=Path(request['result']).parent
+    request.update(output=str(attempt/'output'),progress=str(attempt/'progress.json'))
+    r.atomic(row['retry_request_receipt']['path'],request)
+    r.atomic(attempt/'output/V19_MODEL_IDENTITY_VERIFICATION.json',{'PASS':True})
+    r.atomic(attempt/'NATIVE_RUNTIME_LEDGER.json',dict(measured_Native_Runtime=10.,inflight={'status':'IN_FLIGHT'},calls=[]))
+    r.atomic(attempt/'progress.json',dict(attempt_id='new',Native_Runtime=11.))
+    r.atomic(attempt/'HEARTBEAT.json',dict(timestamp_UTC='2099-01-01T00:00:00+00:00'))
+    worker=dict(r.identity(),request=row['retry_request_receipt']['path'],recovery_queue_id=row['queue_id'])
+    synced=r.sync_worker(tmp_path,worker)
+    assert synced['verification_status']=='NATIVE_PROGRESS_VERIFIED'
+    receipts=synced['verification']['receipts']
+    r.atomic(attempt/'progress.json',dict(attempt_id='new',Native_Runtime=12.))
+    assert all(r.record(receipt['path'])==receipt for receipt in receipts)
+
+
+def test_repair_manifest_cannot_drop_original_native_carry(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    with r.repair_lease(tmp_path,token='test'):
+        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+    request=r.read(row['retry_request_receipt']['path'])
+    manifest=tmp_path/'repair_manifest.json';r.atomic(manifest,dict(prior_attempts={}))
+    request['manifest']=str(manifest);r.atomic(row['retry_request_receipt']['path'],request)
+    row['retry_request_receipt']=r.record(row['retry_request_receipt']['path'])
+    monkeypatch.undo()
+    monkeypatch.setattr(r.subprocess,'run',lambda *a,**k:type('Result',(),{'stdout':'c'*40 if 'rev-parse' in a[0] else ''})())
+    with pytest.raises(PermissionError,match='CUMULATIVE_BUDGET_CARRY_REQUIRED'):
+        r._verify_dispatch(row,request)

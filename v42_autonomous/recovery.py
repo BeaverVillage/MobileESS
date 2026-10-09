@@ -46,7 +46,8 @@ def atomic(path, value):
     try:
         temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2,
                                         allow_nan=False) + '\n', encoding='utf8')
-        os.replace(temporary, path)
+        from v42_pr134_b1.common import replace_file
+        replace_file(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
 
@@ -394,6 +395,20 @@ def _verify_dispatch(row, request):
     allowed = ('v42_b2_seed_recovery_v19.worker', 'v42_autonomous_b2.worker') if row['arm'] == 'B2' else ('v42_autonomous_b3.worker',)
     if module not in allowed:
         raise PermissionError('VERIFIED_REPAIR_WORKER_MODULE_REQUIRED')
+    if row['arm'] == 'B2':
+        sealed = read(request['manifest'])
+        carried = sealed.get('prior_attempts', {}).get(row['date'], {})
+        if (carried.get('Native_Runtime') != row['original_native_runtime']
+                or carried.get('ledger') != row['original_ledger_receipt']
+                or carried.get('result') != row['original_result_receipt']):
+            raise PermissionError('RECOVERY_ORIGINAL_CUMULATIVE_BUDGET_CARRY_REQUIRED')
+    else:
+        # B3 carries each optimization stage separately. The real ledger
+        # verifies the full prior call prefix, source identity and 5400 cap.
+        originals = [Path(value).resolve() for value in request.get('previous_attempts', [])]
+        ledger = Path(row['original_ledger_receipt']['path']).resolve()
+        if not any(ledger.is_relative_to(value / 'PIPELINE') for value in originals):
+            raise PermissionError('B3_REPAIR_PRIOR_STAGE_ACCOUNTING_REQUIRED')
     if module == 'v42_b2_seed_recovery_v19.worker':
         if request.get('implementation_SHA') != row['repair_source_SHA']:
             raise PermissionError('RETRY_REQUEST_SOURCE_SHA_DRIFT')
@@ -455,7 +470,6 @@ def _dispatch_ready(root, arm, slot, manifest):
                 row['retry_request_receipt'] = alternate
         path = Path(row['retry_request_receipt']['path'])
         request = read(path)
-        _verify_dispatch(row, request)
         # Requests are pre-sealed for a slot; wait for that slot without editing.
         if request['worker_slot'] != slot:
             return None
@@ -465,6 +479,10 @@ def _dispatch_ready(root, arm, slot, manifest):
         if row['verification_status'] == 'DISPATCH_INTENT':
             if matches:
                 worker = matches[0]
+            elif Path(request['result']).exists():
+                _finish_row(row, request['result'])
+                atomic(root / 'RECOVERY_QUEUE.json', doc)
+                return None
             else:
                 row.update(verification_status='QUARANTINE_DISPATCH_INTERRUPTED',
                            Native_Runtime='UNKNOWN', reconciliation_UTC=now(),
@@ -472,6 +490,7 @@ def _dispatch_ready(root, arm, slot, manifest):
                 atomic(root / 'RECOVERY_QUEUE.json', doc)
                 return None
         else:
+            _verify_dispatch(row, request)
             if matches or Path(request['result']).exists():
                 raise PermissionError('RETRY_REQUEST_ALREADY_EXECUTED')
             row.update(verification_status='DISPATCH_INTENT', retry_attempt_id=request['attempt_id'],
@@ -530,6 +549,172 @@ def mark_verified(root, queue_id, evidence):
                    verification=evidence, verified_UTC=now())
         atomic(Path(root) / 'RECOVERY_QUEUE.json', doc)
         return row
+
+
+def _finish_row(row, result_path):
+    """Preserve exact terminal evidence; a broken ledger remains quarantine."""
+    result_path = Path(result_path).resolve()
+    request = read(row['retry_request_receipt']['path'])
+    if result_path != Path(request['result']).resolve():
+        raise PermissionError('RECOVERY_TERMINAL_RESULT_PATH_DRIFT')
+    result = read(result_path)
+    actual_identity = result.get('identity', {})
+    source = result.get('source_SHA', result.get('source_sha', actual_identity.get('source_SHA')))
+    if (actual_identity.get('day') != row['date'] or actual_identity.get('arm') != row['arm']
+            or actual_identity.get('attempt_id') != request['attempt_id']
+            or source != row['repair_source_SHA']):
+        raise PermissionError('RECOVERY_TERMINAL_IDENTITY_OR_SOURCE_DRIFT')
+    row.update(final_result_receipt=record(result_path), finished_UTC=now(),
+               final_result_status=result.get('status'), final_PASS=result.get('PASS') is True,
+               final_Native_Runtime=result.get('Native_Runtime'))
+    if row['arm'] == 'B2':
+        ledger_path = result_path.parent / 'NATIVE_RUNTIME_LEDGER.json'
+        ledger = read(ledger_path, {})
+        runtime = ledger.get('measured_Native_Runtime')
+        measured = (type(runtime) in (int, float) and math.isfinite(runtime)
+                    and runtime >= row['original_native_runtime']
+                    and result.get('Native_Runtime') == runtime
+                    and ledger.get('inflight') is None
+                    and not any(call.get('runtime_unavailable') or call.get('entered_native') is not True
+                                or type(call.get('Native_Runtime')) not in (int,float)
+                                or not math.isfinite(call['Native_Runtime']) or call['Native_Runtime'] < 0
+                                for call in ledger.get('calls', [])))
+        if measured:
+            carried=(ledger.get('prior_attempt') or {}).get('Native_Runtime',0.)
+            measured=(type(carried) in (int,float) and carried>=0 and
+                carried+sum(call['Native_Runtime'] for call in ledger.get('calls',[]))==runtime)
+        if ledger_path.exists():
+            row['final_ledger_receipt'] = record(ledger_path)
+        if not measured:
+            row.update(verification_status='QUARANTINE_TERMINAL_ACCOUNTING',
+                       final_native_accounting='UNKNOWN_OR_UNVERIFIED', final_PASS=False)
+            return row
+        row.update(final_native_accounting='MEASURED_CUMULATIVE',
+                   final_remaining_native_seconds=max(0., row['native_budget_seconds'] - runtime))
+        if result.get('PASS') is True and (runtime > row['native_budget_seconds']
+                or result.get('benchmark_initialization_only') or result.get('scientific_PASS') is not True):
+            row.update(verification_status='QUARANTINE_TERMINAL_POLICY', final_PASS=False)
+            return row
+    elif result.get('PASS') is True:
+        stages = result.get('stages', {})
+        if (set(stages) != {'A1', 'M1', 'A2', 'M2'} or result.get('status') != 'PASS'
+                or request.get('prepare_only') or any(stage.get('native_seconds', -1) < 0
+                or stage.get('native_seconds', 5401) > 5400
+                or stage.get('original_integer_physical_verified') is not True
+                or stage.get('independent_global_verified') is not True for stage in stages.values())):
+            row.update(verification_status='QUARANTINE_TERMINAL_POLICY', final_PASS=False)
+            return row
+    row['verification_status'] = 'RECOVERY_PASS' if row['final_PASS'] and result.get('status') == 'PASS' else 'RECOVERY_FAILED'
+    return row
+
+
+def mark_finished(root, queue_id, result_path):
+    with os_lock(Path(root) / 'RECOVERY_QUEUE.lock'):
+        doc = queue(root)
+        row = next(row for row in doc['entries'] if row['queue_id'] == queue_id)
+        if row['verification_status'] in ('RECOVERY_PASS', 'RECOVERY_FAILED',
+                                          'QUARANTINE_TERMINAL_ACCOUNTING', 'QUARANTINE_TERMINAL_POLICY'):
+            if row.get('final_result_receipt') != record(result_path):
+                raise PermissionError('RECOVERY_TERMINAL_RESULT_NEVER_OVERWRITTEN')
+            return row
+        _finish_row(row, result_path)
+        atomic(Path(root) / 'RECOVERY_QUEUE.json', doc)
+        return row
+
+
+def _frozen_observation(root, queue_id, kind, path):
+    """Capture mutable progress once into immutable recovery evidence."""
+    path = Path(path)
+    raw = path.read_bytes()
+    snapshot = Path(root) / 'recovery_evidence' / queue_id / (kind + '_' + uuid.uuid4().hex + '.json')
+    document = dict(observed_UTC=now(), source_path=str(path.resolve()),
+                    source_sha256=hashlib.sha256(raw).hexdigest(),
+                    snapshot=json.loads(raw.decode('utf-8-sig')))
+    atomic(snapshot, document)
+    return record(snapshot)
+
+
+def sync_worker(root, worker):
+    """Record Native progress without changing the running worker or source."""
+    queue_id = worker.get('recovery_queue_id')
+    if not queue_id:
+        return None
+    row = next(row for row in queue(root)['entries'] if row['queue_id'] == queue_id)
+    if row['verification_status'] != 'WORKER_ENTERED' or not alive(worker):
+        return row
+    request = read(worker['request'])
+    attempt = Path(request['result']).parent
+    heartbeat_path = attempt / 'HEARTBEAT.json' if row['arm'] == 'B2' else Path(request['output']) / 'HEARTBEAT.json'
+    progress_path = Path(request['progress'])
+    heartbeat = read(heartbeat_path, {})
+    progress = read(progress_path, {})
+    if (heartbeat.get('timestamp_UTC', '') <= row.get('dispatched_UTC', '')
+            or progress.get('attempt_id', progress.get('identity', {}).get('attempt_id')) != request['attempt_id']):
+        return row
+    if row['arm'] == 'B2':
+        model_path = Path(request['output']) / 'V19_MODEL_IDENTITY_VERIFICATION.json'
+        ledger_path = attempt / 'NATIVE_RUNTIME_LEDGER.json'
+        model = read(model_path, {})
+        ledger = read(ledger_path, {})
+        new_calls = [call for call in ledger.get('calls', []) if call.get('entered_native') is True]
+        native_progress = (type(progress.get('Native_Runtime')) in (int, float)
+                           and progress['Native_Runtime'] > ledger.get('measured_Native_Runtime', math.inf))
+        if model.get('PASS') is not True or not (new_calls or ledger.get('inflight') and native_progress):
+            return row
+        paths = [('model', model_path), ('ledger', ledger_path), ('progress', progress_path), ('heartbeat', heartbeat_path)]
+    else:
+        output = Path(request['output'])
+        admission = output / 'B3_SOURCE_ADMISSION.json'
+        admitted = read(admission, {})
+        stage = heartbeat.get('stage')
+        ledger_path = output / 'PIPELINE' / str(stage) / 'NATIVE_RUNTIME_LEDGER.json'
+        ledger = read(ledger_path, {})
+        if (admitted.get('PASS') is not True or admitted.get('source_sha') != row['repair_source_SHA']
+                or stage not in ('M1', 'A2', 'M2') or not ledger.get('calls')):
+            return row
+        paths = [('admission', admission), ('ledger', ledger_path), ('progress', progress_path), ('heartbeat', heartbeat_path)]
+    receipts = [_frozen_observation(root, queue_id, kind, path) for kind, path in paths]
+    evidence = dict(source_admission_PASS=True, model_generation_PASS=True, Native_entered=True,
+                    heartbeat_progress_PASS=True, ledger_progress_PASS=True, receipts=receipts)
+    return mark_verified(root, queue_id, evidence)
+
+
+def reconcile_workers(root):
+    """Recover queue-owned workers lost between Popen and supervisor save."""
+    adopted = []
+    with os_lock(Path(root) / 'RECOVERY_QUEUE.lock'):
+        doc = queue(root)
+        changed = False
+        for row in doc['entries']:
+            if row['verification_status'] not in ('DISPATCH_INTENT', 'WORKER_ENTERED', 'NATIVE_PROGRESS_VERIFIED'):
+                continue
+            path = row['retry_request_receipt']['path']
+            matches = _request_workers(path)
+            if len(matches) > 1:
+                raise PermissionError('MULTIPLE_RECOVERY_WORKERS_SAME_REQUEST')
+            if matches:
+                if record(path)!=row['retry_request_receipt']:
+                    raise PermissionError('RECOVERY_ORPHAN_REQUEST_SHA_DRIFT')
+                request = read(path)
+                worker = dict(matches[0], request=path, worker_slot=request['worker_slot'],
+                              arm=row['arm'], day=row['date'], source_commit=row['repair_commit_SHA'],
+                              source_SHA=row['repair_source_SHA'], recovery_queue_id=row['queue_id'])
+                adopted.append(worker)
+                row.update(worker=worker, new_worker_PID=worker['PID'], reconciled_UTC=now())
+                if row['verification_status'] == 'DISPATCH_INTENT':
+                    row['verification_status'] = 'WORKER_ENTERED'
+                changed = True
+            else:
+                request = read(path)
+                if Path(request['result']).exists():
+                    _finish_row(row, request['result'])
+                else:
+                    row.update(verification_status='QUARANTINE_DISPATCH_INTERRUPTED',
+                               final_native_accounting='UNKNOWN', reconciled_UTC=now())
+                changed = True
+        if changed:
+            atomic(Path(root) / 'RECOVERY_QUEUE.json', doc)
+    return adopted
 
 
 def main():
