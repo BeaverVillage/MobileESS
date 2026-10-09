@@ -243,7 +243,7 @@ def runtime(ledger, progress, cap=5400.):
                 calls=len(ledger.get('calls', [])), ledger_present=bool(ledger))
 
 
-def initial_solution(output, day, bound, ledger):
+def initial_solution(output, day, bound, ledger, phase=None):
     """Distinguish a raw feasibility witness from a FULL-validated solution.
 
     Native solution counts/objectives are observations only. They never supply
@@ -262,6 +262,9 @@ def initial_solution(output, day, bound, ledger):
     result = dict(status='SEARCHING', label='초기해 탐색 중',
                   candidate_observed=bool(candidates), scientifically_validated=False,
                   native_candidate_evidence=candidates, proof_reason=None)
+    if (phase in ('M_ORIGINAL_MODEL_BUILD', 'M_EXISTING_COMPACT_STATIC_PRESOLVE', 'MODEL_PREPARATION')
+            and not ledger.get('calls') and not ledger.get('inflight')):
+        result.update(status='MODEL_PREPARATION', label='원본 모델·정적 검증 중')
     if finite(bound.get('UB')):
         result.update(status='FULL_VALIDATED', label='FULL 검증 완료', scientifically_validated=True)
         return result
@@ -317,7 +320,7 @@ def worker_view(key, worker, epoch):
     return dict(slot=request.get('worker_slot', worker.get('worker_slot')), arm=arm, day=day,
                 PID=identity.get('PID'), alive=live, status='RUNNING' if live else 'PROCESS_ENDED',
                 stage=stage, phase=phase, initial_solution_verified=bound.get('UB') is not None,
-                initial_solution=initial_solution(output, day, bound, ledger),
+                initial_solution=initial_solution(output, day, bound, ledger, phase),
                 heartbeat_UTC=timestamp, heartbeat_age_seconds=age(timestamp, epoch),
                 bounds=bound, runtime=runtime(ledger, progress), resource=resource,
                 attempt_id=request.get('attempt_id'), source_SHA=request.get('implementation_SHA', request.get('source_SHA')),

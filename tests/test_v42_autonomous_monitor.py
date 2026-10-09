@@ -238,6 +238,16 @@ def test_initial_candidate_never_becomes_certified_bound(tmp_path):
     assert validated['status'] == 'FULL_VALIDATED' and validated['scientifically_validated']
 
 
+def test_model_preparation_is_distinct_from_native_seed_search(tmp_path):
+    state = monitor.initial_solution(str(tmp_path), '2025-05-01', {},
+        dict(calls=[], inflight=None), 'M_EXISTING_COMPACT_STATIC_PRESOLVE')
+    assert state['status'] == 'MODEL_PREPARATION'
+    assert not state['candidate_observed'] and not state['scientifically_validated']
+    searching = monitor.initial_solution(str(tmp_path), '2025-05-01', {},
+        dict(calls=[], inflight={'component': 'FEASIBILITY_LP'}), 'FEASIBILITY_LP')
+    assert searching['status'] == 'SEARCHING'
+
+
 def test_actual_three_date_replay_failure_bytes_survive_cached_api(tmp_path, monkeypatch):
     fixture = Path(__file__).parent/'fixtures'/'v42_monitor_initial_solution'/'saved_may01_02_03_validation_failure.json'
     saved = json.loads(fixture.read_text(encoding='utf8'))
