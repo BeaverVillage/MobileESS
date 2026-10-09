@@ -1,0 +1,82 @@
+{
+  "schema": "DISPERSED_JOINT_OPERATING_POINT_V1",
+  "BG_candidates": [
+    0.552,
+    0.65,
+    0.75,
+    0.85,
+    0.95
+  ],
+  "installed_GPU": 780,
+  "installed_expansion": "retained high C0/C1/C2 same-job recomputation; hardware-unverified expansion not admitted to final locations",
+  "candidate_families": [
+    "C0_OLD_12LV",
+    "C1_MIXED_6MV_6LV",
+    "C2_12MV"
+  ],
+  "maximum_new_full96_Planning_screen_trials": 10,
+  "C0": "reuse fixed original high-load comparator15 recomputed+16Fresh datasets; no site mutation",
+  "selection_priority": "C2 thenC1 among model-grid/geometry/dispersion eligible Planning targets; closest rho0.8 then lowerBG; no policy effect or Actual selection",
+  "target_rho": [
+    0.75,
+    0.85
+  ],
+  "common_P5_source": 1.04,
+  "common_all12_Vreg": 123.5,
+  "common_CAPBank3_off": true,
+  "MESS_screening": false,
+  "vehicle_units": 6,
+  "vehicle_Pmax_kw": 450,
+  "vehicle_Smax_kva": 600,
+  "vehicle_capacity_kwh": 1800,
+  "vehicle_Emin_kwh": 660,
+  "vehicle_Emax_kwh": 1620,
+  "Einitial_and_Eterminal_kwh": 1140,
+  "interfaces": [
+    "M1_150kW",
+    "M2_300kW",
+    "M3_450kW"
+  ],
+  "MV_Smax_kva": 600,
+  "MV_phase_current_limit_A": 721.6878364870323,
+  "dedicated_transformer_kva": 750,
+  "new_primary_conductors": 0,
+  "MESS_charge_slots": [
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "MESS_discharge_slots": [
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+  ],
+  "Q_kvar": 0.0,
+  "schedule_power_rule": "Pch=min(portPmax,(Emax-Einitial)/(eta_ch*2),(Einitial-Emin)/(eta_ch*2)); Pdis=Pch*eta_ch*eta_dis",
+  "schedule_correction": "exact MV battery headroom formula uses eta_ch denominator; earlier conservative LV-comparator formula preserved; no AC effect chosen timing",
+  "LV_eta": 0.855,
+  "MV_eta": 0.95,
+  "slot0_blocked_entirely": true,
+  "connection_delay_seconds": 600,
+  "original_six_initial_STA_IDs_fixed": true,
+  "stationary_feasible_proxy_schedule": true,
+  "route_distance_and_energy": 0,
+  "traffic_actual_new_PCC_GIS_ETA": "UNVERIFIED; original logical service-road ETA preserved; no new empirical travel claim",
+  "active_interface_selection": "M3 by original vehicle rating and engineering-bound availability; all M1/M2/M3 Planning schedule screens retained; if M3 fails reportFAIL, no Actual retune",
+  "AIDC_control": "0; nonzero96QoS/WAN/checkpoint contract not certified; no job synthesis or scaling",
+  "separate_actual_and_date": "May01 Actual private replay, May02 paired exposed-date engineering validation; no unseen/independent holdout claim",
+  "Actual_failure": "FAIL, no location/BG/GPU/PCS/timing or physical rating changes",
+  "raw_original_AllLine_min_rho_max_unchanged": true,
+  "Native_calls": 0,
+  "field_Production_frozen": false
+}

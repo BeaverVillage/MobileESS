@@ -1,0 +1,61 @@
+{
+  "schema": "HIGH_IMPACT_SCHEDULE_CLARIFICATION_V1",
+  "original_preregistration": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_high_impact_pr\\docs\\ieee8500_v42_high_impact_scenario\\SCENARIO_PREREGISTRATION.json",
+    "sha256": "c61f1ac43beb16f1a92fc4dd6321a1c7b29d57e0c0c485fbaaff62733dacb95c",
+    "bytes": 3456
+  },
+  "user_workload_preservation": "same original UID/GPU_gang/Runtime/submission/requiredGPUh; capacity-specific Reference/Queue/occupancy/C1/PCC replay; no synthetic or arrivals multiplier",
+  "old_idle_only_screen": "preserved historical diagnostic; recomputed-capacity screen supersedes it",
+  "screening_count": "15 historical idle-only AC trials retained; 15 authoritative recomputed trials required by latest user correction; no outcome-based interpolation",
+  "timing_typo": "literal 40slots was a text error; original explicit slots8..15 and68..75 remain authoritative (16 active slots)",
+  "charge_slots": [
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "discharge_slots": [
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+  ],
+  "Q_kvar": 0.0,
+  "movement": false,
+  "route_distance_km": 0.0,
+  "route_energy_kwh": 0.0,
+  "initial_vehicle_locations": {
+    "MESS01": "STA01",
+    "MESS02": "STA12",
+    "MESS03": "STA08",
+    "MESS04": "STA06",
+    "MESS05": "STA03",
+    "MESS06": "STA10"
+  },
+  "connection_delay_seconds": 600,
+  "slot0_blocked_entirely": true,
+  "L0_main_eta": 0.95,
+  "L0_auxiliary_eta": 0.9,
+  "L0_effective_eta": 0.855,
+  "power_rule": "Pdis=min(portPmax*eta_ch*eta_dis,(Einitial-Emin)*eta_dis/2,(Emax-Einitial)*eta_ch*eta_dis/2); Pch=Pdis/(eta_ch*eta_dis)",
+  "charge_cap_correction": "the original formula omitted the coupled charge ceiling; this physical correction is frozen before dispatch AC",
+  "L0_port_P_kw": 5.0,
+  "L0_port_Q_kvar": 3.0,
+  "L0_port_S_kva": 6.0,
+  "L0_each_hot_I_A": 27.0,
+  "mobility_scope": "same original six initial STAs, stationary parking; original ETA/network unchanged, no newly feasible travel claimed",
+  "field_access_GIS_protection": "UNVERIFIED",
+  "MV_interface_selection": "M1/M2/M3 unavailable under complete fixed-AIDC common-proper-rotation domain certificate; L0 preserved comparator only",
+  "AIDC_control": "0; nonzero QoS/WAN/checkpoint/rebound certificate unavailable; no synthetic flex expansion",
+  "no_effect_driven_schedule_tuning": true,
+  "Native_calls": 0
+}

@@ -1,0 +1,23 @@
+# High-impact 별도 시나리오의 원본·날짜 권한
+
+이 분기의 고정 부모는 PR197 `35079f458fc9d87a469ebd79e0e5d2cb7bd5fe1e`다. 부모가 검토한 V42 소스 권한은 `625bbcb8b9a54a00c1660c26d96f7737c2f75457`이며, 이를 현재 원격 HEAD라고 부르지 않는다. 원본 V42 A/M/B 생산자 entrypoint·Native·캠페인·스케줄러는 변경하거나 실행하지 않았다. `SOURCE_AUDIT.json`은 이 작업에서 사용하는 원본 입력 및 순수 참조/큐/C1 계산 소스 8개의 SHA와 부모 Git blob 일치를 기록한다. 이 입력 재현의 PASS는 V42 전체 Native/grid/six-axis 통합 또는 운전 인증의 PASS가 아니다.
+
+검증 날짜는 2025-05-02다. 날짜 선택 규칙은 May01 이후 원본 Forecast/Actual/날씨/Kestrel 입력이 완비된 가장 이른 날짜이며, AC·rho·제어 효과를 비교하기 전에 `DATE_SELECTION_PREREGISTRATION.json`으로 고정했다. 계승 PR193/196/197의 해당 IEEE8500 사전등록 범위에서는 May01만 관측되었다. May02는 IEEE123에서 이미 관측된 날짜이고, 전체 과거 IEEE8500 작업의 비노출을 전수 감사하지 않았다. 따라서 이는 **별도 IEEE8500 engineering 검증일**이며, 전역적으로 처음 보는 holdout이나 새로운 예측 모델의 인과 검증으로 주장하지 않는다.
+
+May02 원본 Planning은 780 installed GPU, 원본 known job 1,532개, 익명 CC4 96구간이다. 원본 private Actual은 같은 known job과 post-issue 원본 1,329개를 합친 고유 UID 2,861개다. raw Kestrel archive의 UID·GPU gang·제출/시작/종료 시각·서비스 시간을 정확히 조인했다. 미래 서비스 시간은 private Environment에만 놓고, 원본 causal FCFS controller의 미래 종료/서비스 시간 접근은 0이다. Planning 참조는 원본 `V42_COMMON_FCFS_Q50_NOMINAL_RELEASE_V2`이며, grid/effect로 job이나 reference site를 선택하지 않는다. 입력 준비에서 job population·GPU gang·서비스 요구·도착량을 합성하거나 배율을 적용하지 않았다.
+
+원본 May02 source input 경로는 `D:/MobileESS_V42/docs/v42_may_b0_zero_margin_holdout/INPUT/BUNDLE/DAY_20250502`다. AEMO Forecast의 D1 cutoff는 `2025-05-01T18:00:00+10:00`; demand issue는 그 이전이고 PV issue는 cutoff와 같다. 원본 48개 30분 평균전력을 96개 15분 구간에 두 번 반복했다. Actual demand는 원본 288개 5분 평균전력을 연속 세 개씩 평균했다. 마지막 5분 값만 뽑지 않았으며 일일 MWh를 보존한다. Actual PV도 48개 30분 값을 두 번 반복한다. GFS는 원본 초기화/lead를 유지하고 NOAA는 원본과 동일하게 구간 시작 시각을 양쪽 관측으로 time-linear 보간한다. 세부 source issue·원자료 archive SHA·추출행·에너지 보존은 `VALIDATION_PLANNING_INPUT_FREEZE.json`, `VALIDATION_ACTUAL_EXOGENOUS_AUDIT.json`, `VALIDATION_SOURCE_SHA256.json`에 있다.
+
+GFS 초기화가 cutoff 이전이라는 것은 확인했지만, 자료 공개 지연을 포함한 실제 D1 입수 가능성은 UNVERIFIED다. 계승 CC4/runtime calibration의 ingestion·선택 시점, 연간 P95/alpha/PV reference의 D1 가용성, 진짜 request version history도 UNVERIFIED이며 source proxy를 완전한 as-of 인증으로 바꾸지 않았다. 원자료에 physical facility site 권한이 없어 원본 grid-blind reference를 유지한다. 날씨·수요·PV·C1·PF·normalization 규칙을 별도 날짜에 맞춰 재학습하지 않았다.
+
+파생 입력은 `ieee8500_v42_high/data/validation/2025-05-02/derived/`에 있다. Planning NPZ는 P5와 같은 `sites, capacities, known_gpu, cc4_gpu, total_gpu, IT_kw, PCC_P_kw, PCC_Q_kvar, demand_mw, pv_mw, gross_factor, pv_factor` 키를 갖는다. Actual은 같은 키 중 `known_gpu, cc4_gpu`를 제외한 private realized 입력이다. 원본 May02 입력 trajectory와 비교한 Planning 최대 오차는 `1.4210854715202004e-14`, Actual은 `0.0`이다. 이는 optimizer 해의 채택이 아니라 동일한 source/queue/C1 입력의 재현 검사다. 입력 배열에는 BG 배율을 적용하지 않았으며 이후 engine에서 BG를 한 번 적용해야 한다. 추가 설치 용량별 FCFS/전력 계산과 engineering inventory의 유효성은 별도 facility 감사 범위다.
+
+private Actual 입력은 source 재현을 위해 준비했지만 AC/effect 평가를 하지 않았다. Actual은 Planning-only BG/GPU/port 선택에 사용할 수 없으며 선택 후 FAIL이면 재선정·재조정을 하지 않는다. 고정 입력 producer의 정확한 최초 bytes는 `INPUT_PRODUCER_FROZEN.py.txt`에 보존했다. 이후 `authority.py`에는 saved-input SHA 및 read-only campaign 감사만 추가했다. 원본 producer SHA와 현재 감사 확장본 SHA는 `SOURCE_AUDIT.json`으로 구분한다.
+
+May02 원본 `NATIVE_INPUT`, `OPERATIONS`, `WINDOWS`, `ROUTE_TABLE.json.gz`, `TRAFFIC_FORECAST.npz`가 기존 B1 input에 존재하며 각 SHA를 `SOURCE_AUDIT.json`에 기록한다. 이는 날짜별 원본 route input의 가용성만 확인한 것이다. 이 감사에서 SUMO replay, Native MESS dispatch 또는 실제 도로·접속 접근권을 인증하지 않았다. 대용량 raw Kestrel/Forecast archive는 중복 복사하지 않았으며 검증된 SHA와 필요한 추출행을 보관했다. 저장 배열·추출행·내부 일치 검사는 offline으로 재현할 수 있지만 원본 archive 전수 재추출에는 해당 read-only 원자료가 필요하다.
+
+`MAY02_NATIVE_REQUEST_IDENTITY_AUDIT.json`은 source B0 bundle와 현재 B1 Native input의 1,532개 known UID, GPU gang, 제출 시각, 164 RUNNING/1,368 PENDING 상태, `V10_Q50_total_seconds`, issue time 및 site별 780 GPU 용량이 정확히 같음을 추가 확인한다. source의 `state_at_D1_cutoff/Q50_total_seconds`와 Native의 `state/V10_Q50_total_seconds`는 명시적 alias로 비교했다. Native rack/site eligibility·flex·A/M stage authority와 실제 build 가능성까지 이 동일성 검사로 인증한 것은 아니다.
+
+캠페인 `CAMPAIGN_BEFORE.json`은 입력 준비가 끝난 뒤 요청받아 잡은 **늦은 snapshot**이다. 전체 작업 시작 시점의 before라고 주장하지 않는다. 원본 소스·manifest·May01/May02 입력 1,178개와 예약 등록을 읽기만 했다. 계승 PR197의 1,137개 권한과 비교하면 `v42_b2_monitor_v18/monitor.py` 하나의 외부 변경을 관측했고 나머지 입력/manifest는 같았다. 최초 좁은 inventory가 B2 경로를 누락한 것은 외부 변경이 아니며 그 capture를 `CAMPAIGN_BEFORE_INITIAL_NARROW_SCOPE.json`에 보존하고 범위를 보완했다. 최종 `CAMPAIGN_PRESERVATION.json`의 late-before/after 비교와 이전 PR197 비교를 구분해야 한다. Worker 진행·신규 외부 파일·예약 상태를 정지시켰거나 보존했다고 확대하지 않는다. 본 작업의 외부 쓰기, worker 중단, scheduler 변경 호출은 모두 0이다.
+
+재검사는 `python -B -X utf8 -m pytest tests/ieee8500_v42_high/test_authority.py -q`와 `python -B -X utf8 -m ieee8500_v42_high.authority source-audit`로 한다. 입력 전체를 다시 생성하는 `all`은 위 external source를 필요로 한다. 이 감사의 AC/Native/FULL 호출은 0이며 현장 GIS·protection·접근권·연속 P/Q와 전체 정책/SOC·Production 인증은 남아 있다.

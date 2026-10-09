@@ -1,0 +1,47 @@
+{
+  "source_review_date_KST": "2026-10-10",
+  "facts": [
+    {
+      "source_id": "IEEE1547",
+      "source_url": "https://standards.ieee.org/ieee/1547/5915/",
+      "reviewed_fact": "IEEE1547-2018 covers DER connection/interoperability, reactive voltage control, abnormal conditions, power quality, islanding and test requirements."
+    },
+    {
+      "source_id": "NREL_ISLANDING_2022",
+      "source_url": "https://research-hub.nlr.gov/en/publications/a-primer-on-the-unintentional-islanding-protection-requirement-in/",
+      "reviewed_fact": "Narang/Gonzalez/Ingram2022, NREL/TP-5D00-77782, explains unintentional islanding requirements of IEEE1547; not site-specific certification."
+    },
+    {
+      "source_id": "EATON_CA202003EN",
+      "source_url": "https://www.eaton.com/content/dam/eaton/products/utility-and-grid-solutions/transformer/pad-mounted-transformer/Eaton-Pad-mounted-Transformer-Brochure-EN-US.pdf",
+      "reviewed_fact": "Table2 includes750kVA. Table3 specifies5.75% impedance for750–2500kVA and standard±7.5% tolerance. Delta-wye LV neutral has removable ground strap."
+    },
+    {
+      "source_id": "ELSCO_TX750",
+      "source_url": "https://elscotransformers.com/transformers/dry-type-transformers/750-kva-12470-delta-to-480y-277/",
+      "reviewed_fact": "Manufacturer product lists750kVA,12470V delta primary,480Y/277V secondary. No this-study purchased unit or test report established."
+    },
+    {
+      "source_id": "DYNAPOWER_MPS125",
+      "source_url": "https://dynapower.com/wp-content/uploads/2021/12/MPS-125_Datasheet_Dec2021.pdf",
+      "reviewed_fact": "Manufacturer datasheet lists480VAC three-phase,125kVA,125kW,150A RMS,60Hz and power factor leading/lagging0–1. Exact vehicle600kVA manufacturer unspecified."
+    },
+    {
+      "source_id": "DYNAPOWER_PARALLELING",
+      "source_url": "https://dynapower.com/products/energy-storage/mps-125-energy-storage-inverter/",
+      "reviewed_fact": "Manufacturer describes125kW modular inverter and allows parallel units. Five-unit625kVA600kVA-limit concept is an engineering inference, not an installed assembly."
+    },
+    {
+      "source_id": "EPRI_NEUTRAL",
+      "source_url": "https://opendss.epri.com/OpenDSSNeutralRules.html",
+      "reviewed_fact": "OpenDSS neutral rules distinguish explicit node0 grounds and implicit neutral impedance. This design models ideal solid LV grounding without field electrode tests."
+    },
+    {
+      "source_id": "EPRI_TX_PROPERTIES",
+      "source_url": "https://opendss.epri.com/Properties16.html",
+      "reviewed_fact": "Three-phase transformer kV uses line-line values. XHL specifies reactance, so magnitude5.75% requires assumedR split and calculatedXHL."
+    }
+  ],
+  "sha_scope": "saved reviewed extraction only; direct raw byte fetch status and original byte SHA are separate in MV_SOURCE_EVIDENCE.json",
+  "field_certification": false
+}

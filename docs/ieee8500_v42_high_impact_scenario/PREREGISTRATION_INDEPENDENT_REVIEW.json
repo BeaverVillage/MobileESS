@@ -1,0 +1,94 @@
+{
+  "schema": "HIGH_SOURCE_SCHEDULE_INDEPENDENT_REVIEW_V1",
+  "reviewed_at_UTC": "2026-10-09T15:40:31.046180+00:00",
+  "inputs": {
+    "ieee8500_v42_high/common.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_high_impact_pr\\ieee8500_v42_high\\common.py",
+      "sha256": "bcc0385ea988dd63532216362a25df7d0434e0130f40173d9813d8075f5b16be",
+      "bytes": 3875
+    },
+    "ieee8500_v42_high/run_all.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_high_impact_pr\\ieee8500_v42_high\\run_all.py",
+      "sha256": "7f30e4cb53481b2060d405404d1bc15f41bcc497653b294b24ef9d8425556c65",
+      "bytes": 3576
+    },
+    "ieee8500_v42_high/screen.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_high_impact_pr\\ieee8500_v42_high\\screen.py",
+      "sha256": "3cdd4046da08a6593591d1c2c2505a8b395e08d0ffca599623d531dbea610d10",
+      "bytes": 7709
+    },
+    "ieee8500_v42_high/schedule.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_high_impact_pr\\ieee8500_v42_high\\schedule.py",
+      "sha256": "91254f32b90b4c5b5dee3ba71c77fae3f7dd1b3979f2826ddb2e5d073e01aa28",
+      "bytes": 6301
+    },
+    "ieee8500_v42_high/engine.py": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_high_impact_pr\\ieee8500_v42_high\\engine.py",
+      "sha256": "9ee137904b678f9c5dc261e7583abfae037ab32ede47f7066e5927c33db8806d",
+      "bytes": 8407
+    },
+    "docs/ieee8500_v42_high_impact_scenario/SCENARIO_PREREGISTRATION.json": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_high_impact_pr\\docs\\ieee8500_v42_high_impact_scenario\\SCENARIO_PREREGISTRATION.json",
+      "sha256": "c61f1ac43beb16f1a92fc4dd6321a1c7b29d57e0c0c485fbaaff62733dacb95c",
+      "bytes": 3456
+    },
+    "docs/ieee8500_v42_high_impact_scenario/SCHEDULE_PREREGISTRATION_CLARIFICATION.json": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_high_impact_pr\\docs\\ieee8500_v42_high_impact_scenario\\SCHEDULE_PREREGISTRATION_CLARIFICATION.json",
+      "sha256": "b57d684c897e9fe2a8fe7c9aa81ddfe53c75963f3c4af299ba5410374d93c1f6",
+      "bytes": 2509
+    }
+  },
+  "Planning_only_BG_selection": true,
+  "finite15_candidate_grid": true,
+  "interpolation_forbidden": true,
+  "Actual_fail_no_retune": true,
+  "held_date": "2025-05-02",
+  "date_rule_frozen_before_AC": true,
+  "globally_pristine_holdout": false,
+  "current_capacity_promotion": "C0 only; C1/C2 remain audited counterfactuals because additional source hardware bounds are unavailable",
+  "C0_to_C1_to_C2_generic_promotion_implemented": false,
+  "preserved_old_idle_only_screen": "fixed_occupancy_AC_preserved; superseded by capacity-specific reference/queue/C1 full replay",
+  "timing_clarification": "40slots text corrected by immutable appendendum to 8 charge + 8 discharge explicit original slots",
+  "independent_schedule": {
+    "units": 6,
+    "source_initial_locations_unchanged": true,
+    "slot0_power_zero": true,
+    "movement": false,
+    "gridblind_timing": true,
+    "eta_charge": 0.855,
+    "eta_discharge": 0.855,
+    "Pcharge_per_unit_kw": 5.0,
+    "Pdischarge_per_unit_kw": 3.6551250000000004,
+    "Einitial_kwh": 1140.0,
+    "Eterminal_kwh": 1140.0,
+    "PCC_S_limit_kva": 6.0,
+    "full96_SOC_formula_independently_checked": true
+  },
+  "meaningful_regressions": {
+    "count": 11,
+    "result": "PASS",
+    "AC_solves": 0,
+    "Native_calls": 0,
+    "root_writers_intercepted": true,
+    "initial_discovered_issue": "computed Pch 5.000000000000001 rejected by unchanged original 5kW interface",
+    "corrected_by_parent": "charge bounded first; discharge recoupled to exact eta; original limit source unchanged"
+  },
+  "pending_saved_AC_review": [
+    "exact1152 port row coverage",
+    "finite conductor/PQ measurements",
+    "actual full-day grid security",
+    "Fresh DSS state equality"
+  ],
+  "limitations": [
+    "The schedule is stationary engineering replay; no MESS Native optimum or dynamic route dispatch",
+    "All phase balance applies to proposed MV PCS; final L0 is split-phase240V original-mode comparator",
+    "AIDC control remains zero until original QoS/checkpoint/WAN/rebound authority is certified",
+    "C1/C2 inventory exclusion differs from literal generic capacity promotion rule and is explicitly disclosed",
+    "Joint all-MV geometry diagnostic does not promote a field/production scenario"
+  ],
+  "overall_scope": "source/date/selection/schedule review; not AC/field or full Native integration certification",
+  "own_Native_calls": 0,
+  "own_AC_solves": 0,
+  "external_campaign_writes": 0,
+  "saved_port_validator_guards_independently_tested": true
+}

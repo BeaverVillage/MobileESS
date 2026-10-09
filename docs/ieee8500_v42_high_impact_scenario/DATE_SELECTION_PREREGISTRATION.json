@@ -1,0 +1,28 @@
+{
+  "schema": "IEEE8500_HIGH_DETERMINISTIC_SEPARATE_DATE_V1",
+  "parent_commit": "35079f458fc9d87a469ebd79e0e5d2cb7bd5fe1e",
+  "development_day": "2025-05-01",
+  "validation_day": "2025-05-02",
+  "selection_rule": "Earliest subsequent May date with existing source inputs; no AC, rho or control-effect ranking",
+  "IEEE8500_prior_exposure_scope": "Inherited PR193/196/197 preregistrations inspected: May01 only; no claim of exhaustive historical global nonexposure",
+  "IEEE123_prior_exposed": true,
+  "globally_pristine_holdout": false,
+  "validation_scope": "Separate IEEE8500 engineering date; inherited fit/as-of uncertainties remain",
+  "Actual_for_BG_GPU_port_selection": false,
+  "retuning_after_Actual_forbidden": true,
+  "baseline_installed_GPU": 780,
+  "workload_multiplier": 1,
+  "BG_scale_applied_to_input_arrays": false,
+  "temporal_rules": {
+    "Forecast_demand": "48 half-hour interval powers repeated2",
+    "Actual_demand": "288 five-minute interval powers averaged3",
+    "PV": "48 half-hour interval powers repeated2",
+    "weather": "GFS at interval start; NOAA time-linear within bracketing observations",
+    "reference": "V42_COMMON_FCFS_Q50_NOMINAL_RELEASE_V2",
+    "actual_jobs": "unchanged causal FCFS controller with private source-observed durations"
+  },
+  "Native_calls": 0,
+  "FULL_builds": 0,
+  "AC_solves": 0,
+  "campaign_writes": 0
+}
