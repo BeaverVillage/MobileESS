@@ -19,3 +19,18 @@ def prepare(request,progress=None):
         from .initialization import initialize
         case.point=initialize(case,request['_budget'],progress)
     return case
+
+def exhausted_seed(case,budget,progress):
+    """F5 already ran inside initialize; never launch another old 900s seed."""
+    from .common import read
+    failure=read(case.output/'INITIALIZATION_FAILURE.json')
+    return None,dict(failure,status='TIME_LIMIT_NO_VALID_INCUMBENT',
+        reason='V19_F1_F5_EXHAUSTED_WITHOUT_ORIGINAL_FULL_VALID_POINT',
+        automatic_retry=False,Native_Runtime=budget.used())
+
+def run(request,budget,progress=None):
+    """Preserve the old case.point handoff and every downstream algorithm byte."""
+    from v42_b2_seed_recovery_v18.m_stage import run as admitted_run
+    from v42_may_campaign_native90.a_routing import rebound
+    return rebound(admitted_run,dict(admitted_run.__globals__,prepare=prepare,
+        seed_integer=exhausted_seed))(request,budget,progress)
