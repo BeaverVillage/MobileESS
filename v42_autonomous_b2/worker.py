@@ -282,4 +282,7 @@ def run(path):
             worker_scope=worker_scope,DateBudget=ReceiptDateBudget))(path)
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('request');a=p.parse_args();raise SystemExit(run(a.request))
+    # -m executes this file as __main__. The production guards import the
+    # canonical module, so its exact Budget class must also own CLI execution.
+    from v42_autonomous_b2.worker import run as canonical_run
+    p=argparse.ArgumentParser();p.add_argument('request');a=p.parse_args();raise SystemExit(canonical_run(a.request))

@@ -7,6 +7,94 @@ from v42_may_campaign_native90.a_routing import rebound
 from v42_may_campaign_native90 import inputs
 from v42_autonomous_b2.worker import CANONICAL
 
+
+def test_module_cli_dispatches_canonical_run_once_with_original_request_and_exit(monkeypatch):
+    import runpy,sys,warnings
+    from v42_autonomous_b2 import worker
+    seen=[];request='D:/native_denied_cli/request with spaces + receipt.json'
+    monkeypatch.setattr(worker,'run',lambda path:seen.append(path) or 17)
+    monkeypatch.setattr(sys,'argv',['v42_autonomous_b2.worker',request])
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore',message=".*found in sys.modules.*",category=RuntimeWarning)
+        with pytest.raises(SystemExit) as result:
+            runpy.run_module('v42_autonomous_b2.worker',run_name='__main__',alter_sys=True)
+    assert result.value.code==17 and seen==[request]
+
+
+def test_module_cli_actual_run_uses_exact_guarded_budget_and_restores_input_alias(monkeypatch):
+    import runpy,sys,warnings,gurobipy as gp
+    from v42_autonomous_b2 import worker,rmp_presolve
+    from v42_b2_seed_recovery_v19 import worker as original
+    seen=[];request='D:/native_denied_cli/unentered_request.json'
+    before=inputs.generate_b2
+    def probe(path):
+        # DateBudget is supplied by the actual run() rebound namespace.
+        assert DateBudget is worker.ReceiptDateBudget
+        assert DateBudget is rmp_presolve.ReceiptDateBudget
+        assert DateBudget.optimize is rmp_presolve._ORIGINAL_RECEIPT_OPTIMIZE
+        assert DateBudget.native_optimize is rmp_presolve._ORIGINAL_NATIVE_OPTIMIZE
+        budget=DateBudget.__new__(DateBudget)
+        # The unchanged strict guard accepts the Budget identity and still
+        # rejects a missing Native model before any constructor/delegate.
+        with pytest.raises(PermissionError,match='RMP_PRESOLVE_EXACT_OWNED_MODEL_TYPES_REQUIRED'):
+            rmp_presolve._delegates(None,budget)
+        assert inputs.generate_b2 is not before and inputs.generate_b2.__code__ is before.__code__
+        seen.append(path)
+        return 0
+    monkeypatch.setattr(original,'run',probe)
+    monkeypatch.setattr(gp,'Model',lambda *a,**k:pytest.fail('REAL_NATIVE_MODEL_FORBIDDEN'))
+    monkeypatch.setattr(sys,'argv',['v42_autonomous_b2.worker',request])
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore',message=".*found in sys.modules.*",category=RuntimeWarning)
+        with pytest.raises(SystemExit) as result:
+            runpy.run_module('v42_autonomous_b2.worker',run_name='__main__',alter_sys=True)
+    assert result.value.code==0 and seen==[request] and inputs.generate_b2 is before
+
+
+def test_fresh_interpreter_cli_keeps_canonical_budget_identity_without_native_or_ledger(tmp_path):
+    import json,subprocess,sys
+    from v42_autonomous_b2 import worker
+    request=str(tmp_path/'unentered request + authority.json')
+    code=r'''
+import json,runpy,sys,warnings
+from unittest.mock import patch
+import gurobipy as gp
+from v42_autonomous_b2 import worker,pricing_cache,rmp_presolve,f1_basis
+from v42_b2_seed_recovery_v19 import worker as original
+real_model=gp.Model;modelattempts=[];nativeattempts=[];seen=[]
+def denied_model(*args,**kwargs):
+    modelattempts.append(True);raise AssertionError('REAL_MODEL_FORBIDDEN')
+def denied_native(*args,**kwargs):
+    nativeattempts.append(True);raise AssertionError('REAL_NATIVE_FORBIDDEN')
+def probe(path):
+    assert DateBudget is worker.ReceiptDateBudget is rmp_presolve.ReceiptDateBudget
+    assert DateBudget.optimize is rmp_presolve._ORIGINAL_RECEIPT_OPTIMIZE
+    assert DateBudget.native_optimize is rmp_presolve._ORIGINAL_NATIVE_OPTIMIZE
+    budget=DateBudget.__new__(DateBudget)
+    try:rmp_presolve._delegates(None,budget)
+    except PermissionError as error:
+        assert str(error)=='RMP_PRESOLVE_EXACT_OWNED_MODEL_TYPES_REQUIRED'
+    else:raise AssertionError('MISSING_MODEL_NOT_DENIED')
+    seen.append(dict(path=path,Budget_module=DateBudget.__module__))
+    return 0
+request=sys.argv[1];before=original.run
+with patch.object(original,'run',probe),patch.object(gp,'Model',side_effect=denied_model),patch.object(real_model,'__init__',side_effect=denied_model),patch.object(real_model,'optimize',side_effect=denied_native):
+    sys.argv=['v42_autonomous_b2.worker',request]
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore',message='.*found in sys.modules.*',category=RuntimeWarning)
+        try:runpy.run_module('v42_autonomous_b2.worker',run_name='__main__',alter_sys=True)
+        except SystemExit as result:assert result.code==0
+        else:raise AssertionError('CLI_DID_NOT_EXIT')
+assert original.run is before and not modelattempts and not nativeattempts
+print(json.dumps(dict(PASS=True,seen=seen,modelattempts=modelattempts,nativeattempts=nativeattempts)))
+'''
+    result=subprocess.run([sys.executable,'-B','-X','utf8','-c',code,request],
+        cwd=worker.ROOT,capture_output=True,text=True,check=True)
+    proof=json.loads(result.stdout)
+    assert proof==dict(PASS=True,seen=[dict(path=request,Budget_module='v42_autonomous_b2.worker')],modelattempts=[],nativeattempts=[])
+    assert not Path(request).exists()
+
+
 def test_provenance_rebound_keeps_original_code_object_and_checks():
     generated=rebound(inputs.generate_b2,dict(inputs.generate_b2.__globals__,ROOT=CANONICAL))
     assert generated.__code__ is inputs.generate_b2.__code__
