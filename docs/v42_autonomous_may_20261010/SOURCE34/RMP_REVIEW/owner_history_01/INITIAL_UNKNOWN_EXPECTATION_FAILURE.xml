@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.402" timestamp="2026-10-10T07:57:06.691723+09:00" hostname="JaewonKim"><testcase classname="tests.test_v42_autonomous_b2_rmp_presolve" name="test_start_install_exception_preserves_original_unknown_runtime_and_disposes" time="0.409"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'START_INSTALL_FAILURE'&#10; Input: 'NATIVE_RUNTIME_UNAVAILABLE_QUARANTINE'">tests\test_v42_autonomous_b2_rmp_presolve.py:563: in fail
+    def fail(self,key,*args):raise RuntimeError('SYNTHETIC_START_INSTALL_FAILURE')
+E   RuntimeError: SYNTHETIC_START_INSTALL_FAILURE
+
+During handling of the above exception, another exception occurred:
+tests\test_v42_autonomous_b2_rmp_presolve.py:566: in test_start_install_exception_preserves_original_unknown_runtime_and_disposes
+    env.runner(env.case,env.decomp,{},env.budget,env.out/'install_failure')
+v42_autonomous_b2\rmp_presolve.py:588: in run
+    return original(case,decomp,columns,BudgetProxy(ledger,write,binding),output,seconds=seconds)
+v42_m1_hybrid\dw.py:90: in run
+    native=ledger.optimize(model,track='RMP',label='ONE_RESTRICTED_MASTER',requested_seconds=seconds)
+v42_autonomous_b2\rmp_presolve.py:515: in optimize
+    returned=self._budget.optimize(model,track=track,label=label,
+v42_autonomous_b2\worker.py:26: in optimize
+    result=super().optimize(model,track=track,label=label,
+v42_b2_seed_recovery_v18\budget.py:106: in optimize
+    return self.native_optimize(model, callback, component='P1', track=track,
+v42_b2_seed_recovery_v19\budget.py:153: in native_optimize
+    if unknown:raise RuntimeError('NATIVE_RUNTIME_UNAVAILABLE_QUARANTINE')
+E   RuntimeError: NATIVE_RUNTIME_UNAVAILABLE_QUARANTINE
+
+During handling of the above exception, another exception occurred:
+tests\test_v42_autonomous_b2_rmp_presolve.py:565: in test_start_install_exception_preserves_original_unknown_runtime_and_disposes
+    with pytest.raises(RuntimeError,match='START_INSTALL_FAILURE'):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'START_INSTALL_FAILURE'
+E    Input: 'NATIVE_RUNTIME_UNAVAILABLE_QUARANTINE'</failure></testcase></testsuite></testsuites>
