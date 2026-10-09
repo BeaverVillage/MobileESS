@@ -1,0 +1,168 @@
+{
+  "schema": "IEEE8500_V42_AEMO_SINGLE_RESEARCH_DRAFT_V1",
+  "day": "2025-05-01",
+  "unseen_day": false,
+  "status": "B0_AC_PHYSICAL_PASS_PRODUCTION_BLOCKED",
+  "selected_research_voltage_policy": "P5",
+  "Production_configuration_frozen": false,
+  "Production_eligible": false,
+  "objective": "original all-active-Line parent-terminal min rho_max",
+  "mapping_sha256": "4a70fd13bf08c8512d30f74e48dfafb46fdddd4e112a3aee92a8191f22cad016",
+  "AIDC": 12,
+  "STA": 12,
+  "MESS": 6,
+  "background_scale": 0.552,
+  "installed_GPU": 780,
+  "population_multiplier": 1,
+  "known_Planning_jobs": 1649,
+  "Actual_jobs": 2498,
+  "flexible_population_and_IT_C1": "original V42; no extra jobs or GPU multiplier",
+  "original_DSS_byte_identity": true,
+  "original_ratings_and_voltage_band": [
+    0.95,
+    1.05
+  ],
+  "Source_pu": 1.04,
+  "all12_RegControl_Vreg_V": 123.5,
+  "all_original_RegControl_bands_limits_delays": true,
+  "CAPBank3": "zero switched step, original object enabled; no CapControl existed",
+  "all9_CapControl_original_logic_threshold_delays": true,
+  "CAPBank0_override_Vmax_V": 7740,
+  "PV_objects": 2354,
+  "research_installed_PV_kw": 1276.9371053808281,
+  "PV_kept_Planning_Actual": true,
+  "LV_port": {
+    "P_abs_kw": 5,
+    "Q_abs_kvar": 3,
+    "S_kva": 6,
+    "I_each_hot_A": 27
+  },
+  "fleet_configuration": {
+    "schema": "IEEE8500_SIX_UNIT_RESEARCH_FLEET_CONFIGURATION_V1",
+    "day": "2025-05-01",
+    "status": "RESEARCH_CONFIGURATION_ONLY_ACTUAL_NATIVE_ADAPTER_UNVERIFIED",
+    "fleet_ids": [
+      "MESS01",
+      "MESS02",
+      "MESS03",
+      "MESS04",
+      "MESS05",
+      "MESS06"
+    ],
+    "initial_locations": {
+      "MESS01": "STA01",
+      "MESS02": "STA12",
+      "MESS03": "STA08",
+      "MESS04": "STA06",
+      "MESS05": "STA03",
+      "MESS06": "STA10"
+    },
+    "B2_initial_locations": {
+      "MESS01": "STA01",
+      "MESS02": "STA12",
+      "MESS03": "STA08",
+      "MESS04": "STA06",
+      "MESS05": "STA03",
+      "MESS06": "STA10"
+    },
+    "B3_initial_locations": {
+      "MESS01": "STA01",
+      "MESS02": "STA12",
+      "MESS03": "STA08",
+      "MESS04": "STA06",
+      "MESS05": "STA03",
+      "MESS06": "STA10"
+    },
+    "rating_scale": 1.5,
+    "rating_authority": "USER450KW_600KVA_1800KWH_WITH_ORIGINAL_ENERGY_FRACTIONS",
+    "physical": {
+      "active_power_limit_kw": 450.0,
+      "pcs_kva": 600.0,
+      "capacity_kwh": 1800.0,
+      "energy_min_kwh": 660.0,
+      "energy_max_kwh": 1620.0,
+      "initial_energy_kwh": 1140.0,
+      "terminal_energy_kwh": 1140.0,
+      "charge_efficiency": 0.95,
+      "discharge_efficiency": 0.95
+    },
+    "initial_total_energy_kwh": 6840.0,
+    "nominal_total_capacity_kwh": 10800.0,
+    "original_main_PCS_charge_efficiency": 0.95,
+    "original_main_PCS_discharge_efficiency": 0.95,
+    "LV_auxiliary_interface_efficiency_assumption": 0.9,
+    "LV_AC_to_battery_charge_efficiency": 0.855,
+    "LV_battery_to_AC_discharge_efficiency": 0.855,
+    "AC_port_to_battery_SOC_equation": "deltaE=hours*(eta_main*eta_LV*Pch_AC-Pdis_AC/(eta_main*eta_LV))-original_route_energy_kwh; eta_LV=0.90 at LV dock,1.0 at main PCS",
+    "reactive_power_energy_model": "Original V42 ideal reactive energy semantics retained; additional hardware var/idle losses are not field-certified",
+    "LV_power_ceiling_is_separate_from_vehicle_rating": {
+      "P_import_max_kw": 5.0,
+      "P_export_max_kw": 5.0,
+      "Q_abs_max_kvar": 3.0,
+      "S_max_kva": 6.0,
+      "I_each_hot_max_A": 27.0
+    },
+    "connection_delay_seconds": 600,
+    "original_route_safe_ETA_and_energy_equations_unchanged": true,
+    "original_vehicle_mass_kg": 28000.0,
+    "vehicle_mass_applicability_to_new1800kWh_pack": "UNVERIFIED",
+    "active_original_native_network": "IEEE123",
+    "active_original_native_initial_sites": {
+      "MESS01": "STA01",
+      "MESS02": "STA12",
+      "MESS03": "STA08",
+      "MESS04": "STA06"
+    },
+    "active_original_native_vehicle_count": 4,
+    "actual_six_unit_Native_Actual_Fresh_adapter": "UNVERIFIED",
+    "actual_location_dependent_LV_efficiency_SOC_adapter": "UNVERIFIED",
+    "append_only_port_rows_implement_auxiliary_SOC_losses": false,
+    "SOC_binding_limitation": "Original Native SOC equality applies eta0.95 directly to site AC variables. A verified location-efficiency/source adapter is required; appending a second conflicting SOC equality is not an implementation.",
+    "production_eligible": false,
+    "Native_calls": 0,
+    "full_model_builds": 0,
+    "sources": {
+      "original_six_fleet": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\ieee8500_v42\\data\\research_case\\PAPER_FLEET_BASE_AUTHORITY.json",
+        "sha256": "8fc6add09886cfe662c5a5940b99fd13bd20f89a9ce432fc8a122fc383b3c302"
+      },
+      "LV_design": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\docs\\ieee8500_v42_single_case\\LV_PORT_SIMULATION_DESIGN.json",
+        "sha256": "ea727be28ae4f464379daa2d075c7eda96942f5c728c3bc404129eae7174cf88"
+      },
+      "active_native_input_readonly": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\ieee8500_v42\\data\\workload_flexibility\\NATIVE_INPUT.json",
+        "sha256": "365824518d8b3d380b6e2cc72a78d19d27ce8d39d304acdc8ffc5b5806b342fc"
+      },
+      "original_native_SOC_source": {
+        "path": "v42_native/mess.py",
+        "sha256": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec"
+      }
+    }
+  },
+  "Planning_input_sha": "1d57f643986eb4135b5fa2de36731f8cdbb72eab74ee5c8caec04497cc812375",
+  "Actual_input_sha": "7509bd8b2c62b29bcc683464eaaa581e150ac6eb5b1201ae20be289634f3e906",
+  "source_authorities": {
+    "V42": "625bbcb8b9a54a00c1660c26d96f7737c2f75457",
+    "PR193": "7d2253c1c9cd6db0720e5930692e55352141a878",
+    "PR62": "cf6d0c86c877e73db09e09eec903f176486d2df1"
+  },
+  "original_source_file_count": 31,
+  "all96_Planning_Actual_Fresh_hard_PASS": true,
+  "validation_rejection": "P4 passedPlanning; rejectedActual1.0500161256pu. Next already registered P5 validated; no new setpoint fitting",
+  "causality": {
+    "Actual_values_in_Planning": 0,
+    "GFS_publication_at_cutoff": "UNVERIFIED",
+    "frozen_annual_normalizer_availability": "UNVERIFIED",
+    "CC4_Runtime_fit_ingestion": "UNVERIFIED"
+  },
+  "unresolved": [
+    "field geolocation/access/protection and LV vehicle interface",
+    "full as-of-D1 calibration/GFS publication evidence",
+    "six-unit Native axis/location-efficiency SOC and ActualSUMO linkage",
+    "continuous automatic-control P/Q certificate and full Native/C3A equivalence"
+  ],
+  "B1_B2_B3_Production_Native_calls": 0,
+  "global_optimality_claim": false,
+  "canonical_research_draft_sha256": "b51ca42ab2e2412f7f9e0387dab3e31a98c997b39104260f86dca7f3536cbae3"
+}

@@ -1,0 +1,72 @@
+{
+  "day": "2025-05-01",
+  "development_day_already_exposed": true,
+  "background_scale": 0.552,
+  "installed_GPU": 780,
+  "population_multiplier": 1,
+  "mapping_sha256": "4a70fd13bf08c8512d30f74e48dfafb46fdddd4e112a3aee92a8191f22cad016",
+  "no_reselection": true,
+  "MESS_units": 6,
+  "B0_MESS_PQ": 0,
+  "LV_port_P_kw": 5,
+  "LV_port_Q_kvar": 3,
+  "LV_port_S_kva": 6,
+  "node_voltage_band": [
+    0.95,
+    1.05
+  ],
+  "policies": {
+    "P0": [
+      1.05,
+      126.5,
+      true
+    ],
+    "P1": [
+      1.04,
+      126.5,
+      true
+    ],
+    "P2": [
+      1.04,
+      123.5,
+      true
+    ],
+    "P3": [
+      1.04,
+      123.5,
+      false
+    ]
+  },
+  "downstream_Vreg": 125.0,
+  "original_RegControl_count": 12,
+  "original_CapControl_count": 9,
+  "source_DSS_changes": 0,
+  "policy_priority": [
+    "P0",
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "policy_selection": "first all96 Planning hard-constraint PASS in frozen minimum-change priority; never use Actual to pick",
+  "Fixed_load_policy": "retain Status=fixed and static original P/Q scaled once by original study BG=.552; no daily shape",
+  "Variable_load_policy": "original P/Q times BG=.552 and shared temporal gross factor from frozen V42 normalization; no new customer profile",
+  "PF_preserved": true,
+  "Jemena_IEEE123_customer_clusters_not_transferred": true,
+  "PV_capacity_rule": "PR62 Generator construction: original native_load_kW times inherited ratio; same nameplate Planning/Actual",
+  "PV_temporal_rule": "current V42 ALPHA_GRID * regional RooftopPV_MW / frozen PV_REFERENCE_MAX_MW; not daily-Actual peak",
+  "Actual_demand_rule": "mean of three raw 5-minute interval-ending powers per15min; PWC energy-preserving; audit prior15min point selection",
+  "forecast_30min_rule": "repeat each30min mean twice as15min PWC; energy preserved",
+  "weather_rule": "GFS Planning, observed NOAA Actual; interval-start axis",
+  "sensitivity_rule": "same24 PCC at new Planning point; fixed-tap centralP/Q distinct from independently resettled automatic boundedPQ",
+  "sensitivity_slots": [
+    0,
+    9,
+    48,
+    75
+  ],
+  "target_lines": "new Planning top20 max96 canonical ratios, deterministic; not policy outcomes",
+  "simultaneous_STA_rule": "only six preserved initial fleet ports; instantaneous counterfactual, not dispatch certificate",
+  "B1_B2_B3_solver_calls": 0,
+  "source_and_Vreg_overlays_user_authorized": true,
+  "final_operational_qualification_requires_all_sources_and_all96_actual_constraints": true
+}

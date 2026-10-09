@@ -1,0 +1,56 @@
+{
+  "source_copies": {
+    "demand": {
+      "original": {
+        "bytes": 6069925,
+        "exists": true,
+        "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\AEMO\\Realized demand\\PUBLIC_ARCHIVE#DISPATCHREGIONSUM#FILE01#202505010000.zip",
+        "sha256": "89a3d7b9d793d164adeeeef7c4234f3a6a512aa63236ff0d1a3193d3d5eb5186"
+      },
+      "copied": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_aemo_voltage_pr\\ieee8500_v42_aemo\\data\\sources\\RAW_DEMAND.zip",
+        "sha256": "89a3d7b9d793d164adeeeef7c4234f3a6a512aa63236ff0d1a3193d3d5eb5186",
+        "bytes": 6069925
+      }
+    },
+    "pv": {
+      "original": {
+        "bytes": 185111,
+        "exists": true,
+        "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\raw데이터\\AEMO\\AEMO Rooftop PV — forecast + actual\\Actual\\PUBLIC_ARCHIVE#ROOFTOP_PV_ACTUAL#FILE01#202505010000.zip",
+        "sha256": "2a1d641d2447d7ddc7926690185058f508dde91657be84a3acfbdc6810cff65e"
+      },
+      "copied": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_aemo_voltage_pr\\ieee8500_v42_aemo\\data\\sources\\RAW_PV.zip",
+        "sha256": "2a1d641d2447d7ddc7926690185058f508dde91657be84a3acfbdc6810cff65e",
+        "bytes": 185111
+      }
+    },
+    "weather": {
+      "original": {
+        "bytes": 489907,
+        "exists": true,
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v40a_bounded_iterative_coopt\\dayahead\\artifacts\\v24t_thermal_aware_aidc\\V24T_MELBOURNE_ACTUAL_WEATHER_HOURLY.parquet",
+        "sha256": "f9582754d309bf5d8444206a526869f4579020d1a45c011e02bf00ff3852cf52"
+      },
+      "copied": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_aemo_voltage_pr\\ieee8500_v42_aemo\\data\\sources\\RAW_WEATHER.parquet",
+        "sha256": "f9582754d309bf5d8444206a526869f4579020d1a45c011e02bf00ff3852cf52",
+        "bytes": 489907
+      }
+    }
+  },
+  "raw_demand_resolution_minutes": 5,
+  "raw_PV_resolution_minutes": 30,
+  "raw_demand_energy_MWh": 116854.60083333333,
+  "new_demand_energy_MWh": 116854.60083333334,
+  "old_end_point_energy_MWh": 116868.92,
+  "old_minus_energy_preserved_MWh": 14.319166666668025,
+  "maximum_point_selection_difference_MW": 121.99333333333288,
+  "correction": "aggregate3 raw5min interval powers; keep unchanged raw data, fixed15min axis and frozen normalization",
+  "power_values_PWC_interval_interpretation_assumption": true,
+  "PV_energy_MWh": 15628.4205,
+  "PV_energy_preserving": true,
+  "weather_interpolation": "original time-linear within-day bracketing observations",
+  "actual_future_values_not_passed_to_Planning": true
+}
