@@ -33,9 +33,13 @@ defect; it does not certify a completed May19 solution. `VALIDATION.json`
 contains the independent results. No production point, ledger, budget or
 completion is transferred. Saved raw values are used only for offline diagnosis.
 
-Validation uses Native=0/P2=0. The seven focused V4 tests plus the existing replay,
+The real May19 reconstruction/replay uses Native=0/P2=0. The seven focused V4 tests plus the existing replay,
 Phase I, compact row generation, maintenance-lock and Native budget regressions
-pass: 72 tests. Initial test-harness attempts used a C-drive temporary path or
+pass: 72 tests. The broader Phase I/compact suites include tiny synthetic
+Gurobi solves outside the campaign. Separately, 24 V4/replay/lock/budget tests
+pass with actual Gurobi optimize blocked by `native_zero_scope`; these are
+the Native=0 regressions. No campaign optimize call is made by maintenance.
+Initial test-harness attempts used a C-drive temporary path or
 a missing D-drive parent; the final run uses an existing, isolated D-drive
 temporary parent and passes. There is no model-preparation speed claim.
 
