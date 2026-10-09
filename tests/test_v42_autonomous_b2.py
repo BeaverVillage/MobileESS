@@ -178,6 +178,63 @@ def test_production_scope_routes_imported_aliases_and_restores_sources(tmp_path)
     assert receipt['pricing_nonunit_box']=='V42_B2_PRICING_FULL_CASE_PROJECTION_BOX_V26'
 
 
+@pytest.mark.parametrize('failure',('pricing','RMP'))
+def test_production_computational_hooks_are_attempt_scoped_lazy_and_close_on_failure(tmp_path,monkeypatch,failure):
+    from contextlib import contextmanager
+    import gurobipy as gp
+    from v42_autonomous_b2 import worker,pricing_cache,rmp_presolve
+    from v42_m1_hybrid import pricing,dw
+    request=proof_request(tmp_path);folder=tmp_path/'inputs';folder.mkdir()
+    for name in ('B2_FIXED_AIDC.json','PLANNING_PHYSICAL.npz','LINKED.json'):
+        (folder/name).write_text('{}',encoding='utf8')
+    linked=worker.record(folder/'LINKED.json')
+    from v42_b2_seed_recovery_v19.common import atomic
+    atomic(folder/'NATIVE_INPUT.json',dict(route_table=linked,electrical_certificate=linked))
+    manifest_path=tmp_path/'MANIFEST.json';manifest_path.write_text('{}',encoding='utf8')
+    request.update(input_folder=str(folder),manifest=str(manifest_path),run_id='hook_only')
+    manifest=dict(execution_SHA='test_lazy_only');events=[]
+    saved_prices=pricing.run_pricing;saved_rmp=dw.run
+    monkeypatch.setattr(gp,'Model',lambda *a,**k:pytest.fail('REAL_NATIVE_MODEL_FORBIDDEN'))
+    class Cache:
+        def scoped_pricing(self,original,output_directory):
+            assert original is saved_prices
+            def run(*args,**kwargs):
+                events.append(('prices',args,kwargs))
+                if kwargs.get('fail'):raise RuntimeError('pricing failure')
+                return 'price receipt'
+            return run
+    @contextmanager
+    def factory(actual_request,actual_manifest,code_root):
+        assert actual_request is request and actual_manifest is manifest and code_root==worker.ROOT
+        events.append(('cache_open',))
+        try:yield Cache()
+        finally:events.append(('cache_close',))
+    def master_factory(original,output_directory,write):
+        assert original is saved_rmp;events.append(('master_open',))
+        def run(*args,**kwargs):
+            events.append(('master',args,kwargs))
+            if failure=='RMP':raise RuntimeError('RMP failure')
+            return 'master receipt'
+        return run
+    monkeypatch.setattr(pricing_cache,'create_scope',factory)
+    monkeypatch.setattr(rmp_presolve,'scoped_runner',master_factory)
+    args=(object(),object(),object(),object(),Path(request['output'])/'round')
+    with pytest.raises(RuntimeError,match=failure+' failure'):
+        with worker.proof_scope(request,manifest):
+            assert events==[]
+            assert pricing.run_pricing(*args,seconds=30)=='price receipt'
+            if failure=='pricing':pricing.run_pricing(*args,fail=True)
+            else:dw.run(*args,seconds=30)
+    assert sum(event[0]=='cache_open' for event in events)==1
+    assert sum(event[0]=='cache_close' for event in events)==1
+    prices=[event for event in events if event[0]=='prices']
+    assert prices[0][1]==args and prices[0][2]==dict(seconds=30)
+    if failure=='RMP':
+        assert sum(event[0]=='master_open' for event in events)==1
+        assert [event for event in events if event[0]=='master'][0][2]==dict(seconds=30)
+    assert pricing.run_pricing is saved_prices and dw.run is saved_rmp
+
+
 def test_production_scope_refuses_input_generation_and_detects_writes(tmp_path):
     from v42_autonomous_b2.worker import proof_scope,record
     from v42_b2_seed_recovery_v19.common import atomic

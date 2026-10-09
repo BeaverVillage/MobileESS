@@ -95,7 +95,7 @@ def proof_scope(request,manifest):
     from v42_m1_hybrid import blocks,pricing,dw,final_verify
     from v42_b2_seed_recovery_v18 import certificate_box
     from v42_b2_seed_recovery_v19.common import atomic
-    from . import canonical_stream,dw_native,pricing_box,f1_state,f1_basis
+    from . import canonical_stream,dw_native,pricing_box,f1_state,f1_basis,pricing_cache,rmp_presolve
     from v42_b2_seed_recovery_v19 import initialization
     routes=proof_routes(request);output=routes['output']
     folder=Path(request['input_folder']).resolve()
@@ -131,6 +131,8 @@ def proof_scope(request,manifest):
         certificate_proof_serialization='V42_B2_CANONICAL_STREAM_V24',
         restricted_master_native_rows='V42_B2_RMP_EXACT_POWER_OF_TWO_ROWS_V25',
         pricing_nonunit_box='V42_B2_PRICING_FULL_CASE_PROJECTION_BOX_V26',
+        current_attempt_projection_reuse='V42_CURRENT_ATTEMPT_PROJECTION_REUSE_V29',
+        restricted_master_computational_presolve='V42_B2_RMP_PRESOLVE0_V30',
         current_attempt_F1_state='V42_V27_CURRENT_ATTEMPT_F1_FULL_LP_START',
         status='ROUTING_ADMITTED')
     atomic(output/'SCOPED_PROOF_PATH_AUTHORITY.json',receipt)
@@ -142,7 +144,11 @@ def proof_scope(request,manifest):
         # routing-only scope does not construct scientific state.
         saved_f1 = initialization.validated_start
         saved_full_lp = m_stage._fresh_lp_dual
+        saved_pricing = pricing.run_pricing
+        saved_dw_run = dw.run
         current_f1_state = [None]
+        current_pricing = [None]
+        current_rmp = [None]
         def state():
             if current_f1_state[0] is None:
                 current_f1_state[0] = f1_basis.Scope(request,ROOT)
@@ -151,6 +157,18 @@ def proof_scope(request,manifest):
             return state().capture(saved_f1,case,budget,progress)
         def current_full_lp(case,budget,progress=None):
             return state().full_lp_adapter(saved_full_lp,case,budget,progress)
+        def current_prices(case,decomp,prices,budget,price_output,**kwargs):
+            if current_pricing[0] is None:
+                cache=stack.enter_context(pricing_cache.create_scope(request,manifest,ROOT))
+                current_pricing[0]=cache.scoped_pricing(saved_pricing,routes['output_directory'])
+            return current_pricing[0](case,decomp,prices,budget,price_output,**kwargs)
+        current_prices.original_pricing=saved_pricing
+        def current_master(case,decomp,columns,budget,master_output,*,seconds=30):
+            if current_rmp[0] is None:
+                current_rmp[0]=rmp_presolve.scoped_runner(saved_dw_run,
+                    routes['output_directory'],routes['write'])
+            return current_rmp[0](case,decomp,columns,budget,master_output,seconds=seconds)
+        current_master.original_run=saved_dw_run
         stack.enter_context(patch.object(initialization,'validated_start',current_f1))
         stack.enter_context(patch.object(m_stage,'_fresh_lp_dual',current_full_lp))
         # Limit the memory-saving serialization adapter to this proof producer.
@@ -166,8 +184,11 @@ def proof_scope(request,manifest):
         stack.enter_context(patch.object(dw,'build_master',dw_native.scoped_builder(
             dw.build_master,routes['output_directory'],routes['write'])))
         stack.enter_context(patch.object(dw,'write',routes['write']))
-        stack.enter_context(patch.object(pricing,'run_pricing',pricing_box.scoped_pricing(
-            pricing.run_pricing,pricing.local_exact_price_bound,routes['output_directory'])))
+        # Admit computational policies lazily at the original calls. One cache
+        # belongs to this ExitStack and closes on every attempt exit; bounds
+        # and full signed checks are still recomputed by the original pricing.
+        stack.enter_context(patch.object(dw,'run',current_master))
+        stack.enter_context(patch.object(pricing,'run_pricing',current_prices))
         # Operations uses D-only routing already; also bind its sole output
         # entry to this request while source ROOT and source SHA checks stay.
         stack.enter_context(patch.object(operations,'d_path',routes['owned']))
