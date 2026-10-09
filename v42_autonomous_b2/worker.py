@@ -95,7 +95,7 @@ def proof_scope(request,manifest):
     from v42_m1_hybrid import blocks,pricing,dw,final_verify
     from v42_b2_seed_recovery_v18 import certificate_box
     from v42_b2_seed_recovery_v19.common import atomic
-    from . import canonical_stream,dw_native,pricing_box,f1_state,f1_basis,pricing_cache,rmp_presolve
+    from . import canonical_stream,dw_native,pricing_box,f1_state,f1_basis,pricing_cache,rmp_presolve,f1_price_seed
     from v42_b2_seed_recovery_v19 import initialization
     routes=proof_routes(request);output=routes['output']
     folder=Path(request['input_folder']).resolve()
@@ -134,6 +134,7 @@ def proof_scope(request,manifest):
         current_attempt_projection_reuse='V42_CURRENT_ATTEMPT_PROJECTION_REUSE_V29',
         restricted_master_computational_presolve='V42_B2_RMP_PRESOLVE0_V30',
         current_attempt_F1_state='V42_V27_CURRENT_ATTEMPT_F1_FULL_LP_START',
+        current_F1_computational_price_seed='V42_V35_PRICE_INPUT_ONLY',
         status='ROUTING_ADMITTED')
     atomic(output/'SCOPED_PROOF_PATH_AUTHORITY.json',receipt)
     def proof_atomic(path,value):
@@ -146,9 +147,11 @@ def proof_scope(request,manifest):
         saved_full_lp = m_stage._fresh_lp_dual
         saved_pricing = pricing.run_pricing
         saved_dw_run = dw.run
+        saved_lp_round = algorithms.lp_round
         current_f1_state = [None]
         current_pricing = [None]
         current_rmp = [None]
+        current_price_seed = [None]
         def state():
             if current_f1_state[0] is None:
                 current_f1_state[0] = f1_basis.Scope(request,ROOT)
@@ -169,6 +172,12 @@ def proof_scope(request,manifest):
                     routes['output_directory'],routes['write'])
             return current_rmp[0](case,decomp,columns,budget,master_output,seconds=seconds)
         current_master.original_run=saved_dw_run
+        def current_round(case,decomp,dual,budget,frontier,price_output,method,kind='LP_ONLY',*,context=None):
+            if current_price_seed[0] is None:
+                current_price_seed[0]=f1_price_seed.scoped_lp_round(saved_lp_round,request,ROOT,
+                    state,routes['output_directory'],routes['write'])
+            return current_price_seed[0](case,decomp,dual,budget,frontier,price_output,method,kind,context=context)
+        current_round.original_lp_round=saved_lp_round
         stack.enter_context(patch.object(initialization,'validated_start',current_f1))
         stack.enter_context(patch.object(m_stage,'_fresh_lp_dual',current_full_lp))
         # Limit the memory-saving serialization adapter to this proof producer.
@@ -189,6 +198,7 @@ def proof_scope(request,manifest):
         # and full signed checks are still recomputed by the original pricing.
         stack.enter_context(patch.object(dw,'run',current_master))
         stack.enter_context(patch.object(pricing,'run_pricing',current_prices))
+        stack.enter_context(patch.object(algorithms,'lp_round',current_round))
         # Operations uses D-only routing already; also bind its sole output
         # entry to this request while source ROOT and source SHA checks stay.
         stack.enter_context(patch.object(operations,'d_path',routes['owned']))
