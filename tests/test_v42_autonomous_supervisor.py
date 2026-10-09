@@ -8,6 +8,36 @@ from v42_autonomous.supervisor import sweep_complete, transition, next_day, DAYS
 def checkpoint():
     return dict(state='B2_RUNNING',workers={},dates={a+'/'+d:dict(status='PENDING') for a in ('B2','B3') for d in DAYS})
 
+
+def test_retry_refresh_real_queue_lock_contention_keeps_every_current_state(tmp_path):
+    cp=checkpoint();cp['dates']['B2/'+DAYS[0]]['status']='PASS'
+    cp['dates']['B2/'+DAYS[1]].update(status='FAIL',Native_Runtime=10.)
+    cp['workers']['B2/'+DAYS[3]]=dict(day=DAYS[3],worker_slot=1,PID=123,request='sealed.json')
+    r.atomic(tmp_path/'RECOVERY_QUEUE.json',dict(entries=[dict(arm='B2',date=DAYS[0],verification_status='READY_VERIFIED_REPAIR')]))
+    before=deepcopy(cp);queue_before=(tmp_path/'RECOVERY_QUEUE.json').read_bytes()
+    with r.os_lock(tmp_path/'RECOVERY_QUEUE.lock'):
+        s.refresh_retries(tmp_path,cp)
+    assert cp==before
+    assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==queue_before
+
+
+def test_cycle_survives_real_operator_queue_lock_and_keeps_all_three_workers(tmp_path,monkeypatch):
+    cp=checkpoint()
+    for slot,day in enumerate(DAYS[3:6],1):
+        key='B2/'+day;cp['dates'][key]['status']='RUNNING'
+        cp['workers'][key]=dict(day=day,arm='B2',worker_slot=slot,PID=100+slot,request='sealed_'+str(slot)+'.json')
+    cp['dates']['B2/'+DAYS[0]].update(status='PASS',Native_Runtime=1.)
+    workers=deepcopy(cp['workers']);monkeypatch.setattr(s,'same_process',lambda worker:True)
+    monkeypatch.setattr(r,'sync_worker',lambda root,worker:(_ for _ in ()).throw(r.LeaseBusy('REAL_OPERATOR_UPDATE')))
+    monkeypatch.setattr(s,'dispatch',lambda *args:pytest.fail('HEALTHY_SLOT_REPLACED'))
+    r.atomic(tmp_path/'RECOVERY_QUEUE.json',dict(entries=[]))
+    with r.os_lock(tmp_path/'RECOVERY_QUEUE.lock'):
+        s.cycle(tmp_path,{},cp)
+    assert cp['state']=='B2_RUNNING' and cp['parallel_workers']==3
+    assert cp['workers']==workers and cp['dates']['B2/'+DAYS[0]]['status']=='PASS'
+    s.cycle(tmp_path,{},cp)
+    assert cp['workers']==workers and cp['dates']['B2/'+DAYS[0]]['status']=='PASS'
+
 def test_failure_quarantine_and_budget_terminal_do_not_block_sweep():
     cp=checkpoint()
     for row in cp['dates'].values():row['status']='PASS'

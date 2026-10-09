@@ -337,9 +337,15 @@ def block_source(root,manifest,cp,error,*,arm=None,day=None,before_popen=False):
     transition(cp,'SOURCE_BLOCKED')
 
 def refresh_retries(root,cp):
-    from .recovery import retire_satisfied_ready
+    from .recovery import retire_satisfied_ready,LeaseBusy
+    try:
+        current_queue=retire_satisfied_ready(root,cp)
+    except LeaseBusy:
+        # An operator may be sealing a verified replacement under this lock.
+        # Keep current PASS/failure/worker state intact and retry next cycle.
+        return
     grouped={}
-    for entry in retire_satisfied_ready(root,cp)['entries']:grouped.setdefault(entry['arm']+'/'+entry['date'],[]).append(entry)
+    for entry in current_queue['entries']:grouped.setdefault(entry['arm']+'/'+entry['date'],[]).append(entry)
     for key,entries in grouped.items():
         if key in cp['workers']:continue
         row=cp['dates'][key]
