@@ -1,0 +1,339 @@
+{
+  "status": "REAL_OPENDSS_ORIGINAL_SOURCE_ONLY_REGRESSION",
+  "production_eligible": false,
+  "scope": "Original unchanged Master-unbal, original static loads, no PV model activated by Master, no AIDC/MESS overlays",
+  "control_policy": {
+    "name": "original_master_unbal_independent_static_controls",
+    "source_pu": 1.05,
+    "feeder_vreg_V": 126.5,
+    "downstream_vreg_V": 125.0,
+    "capacitors": "original enabled states and all nine original CapControls",
+    "actual": "restore original initial states then independently settle controls",
+    "linear_sensitivity": "restore settled base taps/caps; controlmode=off",
+    "solver_only": {
+      "maxiterations": 100,
+      "maxcontroliter": 100,
+      "tolerance": 1e-09
+    },
+    "voltage_base_note": "Preserve original Master voltagebases including 0.208kV; LV Bus base is 0.208/sqrt(3), while original Load/Transformer nameplate is 0.120kV"
+  },
+  "counts": {
+    "buses": 4876,
+    "nodes": 8531,
+    "lines": 3703,
+    "transformers": 1190,
+    "loads": 2354,
+    "regcontrols": 12,
+    "capacitors": 10,
+    "capcontrols": 9
+  },
+  "source_sha256": {
+    "AddBusXY.py": "8266b15415aef71522c12a50d23e86d63cdb37222c3fb10c943651917c0899bc",
+    "Buscoords.dss": "aa3d71873e595578f8c952dffd16b8cf74d5d811da40e16db8a4f0c72abe8c32",
+    "Capacitors.dss": "cc05836176a6715b121619079eb6cef96e77468a3368c8ed44815f2e9d684dcf",
+    "CapControls.DSS": "562818b4d905f391e88ed58efcd54150d4296d6cfb355f8abac32c969a290348",
+    "CloudTransient.dss": "212c40f5e2ea80ebd9d1ac9dcbef002a1533ce1d9a58bc184f52601e8015e05e",
+    "Feeder_Loads.dss": "a1b80b5b8c1bf1921bc335a7c922f448d1ef90e9d0a0912a5cd4407ba456484a",
+    "Fuses.DSS": "2e98f772e912acb989cbc941ea973492afa9c531d6f2d4bdd19f77e815af1dc3",
+    "Generators.dss": "5fa99bdec0aea52c0f518438eba1be9f693c408047afa794f746b3f717115936",
+    "LineCodes.dss": "af6bfaaf3eeafdd6788532672d66be990721c59e50dd125ffaa2739c979d42f9",
+    "LineCodes2.DSS": "3fec9199a41696a758eaff7065f86a89477f70898b1bee3295de9c74f154121a",
+    "LineGeometry.dss": "85a356720d142bc16a052291d4192e86b4733a8d5c33c5be397f8a4501111c78",
+    "Lines-Geometry.dss": "0dded47d4b81d8772ac092e87d64756cedddffc4e32f20bdb95bdedae3c5e0ac",
+    "Lines.dss": "460eb5e8179bda1926d0d70cf4fc9d8bdd29ab4dd9a101941730749f8a4a663a",
+    "Loads.dss": "4d5b68a8095bbee59a95ba08255f34b74fcf3d89c0e413df2fc669648fb2d18f",
+    "LoadXfmrCodes.dss": "213a3c0478b33a4cb95d82d40e076d1c1ec19b22033e4aa03e6dcdd8b92fa8f9",
+    "LoadXfmrs.dss": "bcb0d10caab6e53d5b5b18b669ebd83f67f79135a478c3079f78a2fdd943122a",
+    "Master-unbal.dss": "59bdb5e9da4bf3c063d7efdfa6b9b1e537d7786533fefa0f2c470cfb2e12622b",
+    "Master.dss": "9bd0e17f33e9ec7e0baa46693abeec069b148cbee8477301d77450f95d601ad8",
+    "Normalized-1s-2900-pts.CSV": "84cad00879be6d8de2ace6b623eabfdb4b8b61342c1455ee7dfcc2dc158633d0",
+    "P174_Run_360kW_PV.DSS": "d9ad5d8e4c4cce8ba81a32154cdc8d6fd1f9f9fb2d28dc19cbe6c6d8f84cded2",
+    "P174_Run_Voltage_Profile.DSS": "0ef327ced60602a46cb8570df68bb30d0859d3c5a70c08f0e43b1c28e530cb70",
+    "Regulators.dss": "041f353f55076feaaf751bbb20551226f8727ddfbdfc5101cf1b1f222da38617",
+    "Run_8500Node.dss": "1d502be6663c4a53b7c5735bc92560a037f3dc9e5955e9772c26c7b1ccdc4ce5",
+    "Run_8500Node_Unbal.dss": "f42a3733e585782d425f2a64f4eb4efd666f35128416cb228671105f8667b5ad",
+    "Run_RecloserSiting.DSS": "1bf21c4598fb8d5f15fb9e65c490001c30d948562b54128b4a4d7aebf84ab2c3",
+    "TplxFaultrate.dss": "db474c123aef3358098c9beec4c020593c0f0094c36a7de54d4bd611c73f8d4d",
+    "Transformers.dss": "cab397f65f5de08c4d82cf794c03c432b404cd5db7db37ff827869db8344b708",
+    "Triplex_Linecodes.dss": "7dfbfc23e19d8930c9e5ac3302bd9e8e9d52aee9c333e3fc80422f15752a886d",
+    "Triplex_Lines.DSS": "abf45521bc05a7f9d5c3fa4c94c4f24f7ea9bc984e7086b303ae4a143d77971d",
+    "UnbalancedLoads.DSS": "72705438556764981d430a9148c84b783f76b977911a2284ffe9295740bddaba",
+    "WireData.dss": "70e2bfd3d7a297ef2bf1d208df4a13fe2b8e581af065b310018d2e38cd0bfbd1"
+  },
+  "engine": "DSS C-API Library version 0.14.5 revision 87d85c2622c8281b92255335bc7c09b11191b21d based on OpenDSS SVN 3723 [FPC 3.2.2] (64-bit build) MVMULT INCREMENTAL_Y CONTEXT_API PM 20240329033747; License Status: Open \nDSS-Python version: 0.15.7\nOpenDSSDirect.py version: 0.9.4",
+  "summary": {
+    "converged": true,
+    "control_actions_done": true,
+    "control_queue_size": 0,
+    "iterations": 192,
+    "control_iterations": 5,
+    "rho_max": 1.7542167831069122,
+    "binding_line": "Line.tpx21459660c0",
+    "binding_terminal": 1,
+    "binding_node": 1,
+    "rho_max_all_terminals": 1.754216802561661,
+    "all_terminal_binding_line": "Line.tpx21459660c0",
+    "all_terminal_binding_terminal": 2,
+    "all_terminal_binding_node": 1,
+    "vmin_pu": 0.9114118054461826,
+    "vmax_pu": 1.0499999387507952,
+    "vmin_node": "sx2748781a.2",
+    "vmax_node": "sourcebus.3",
+    "transformer_current_rho_max": 0.40507505207106353,
+    "transformer_kva_rho_max": 0.4080969330182725,
+    "transformer_nameplate_kva_rho_max": 0.44890662632009976,
+    "source_kw": 12047.631739396882,
+    "source_kvar": 1455.1570350818376,
+    "loss_kw": 1274.4617374962163,
+    "loss_kvar": 2828.8215673740265,
+    "load_kw": 10773.170000750217,
+    "load_kvar": 2700.0109119405233,
+    "capacitor_kw": 3.274180926382542e-14,
+    "capacitor_kvar": -4073.675442073534,
+    "balance_residual_kw": 1.1504489521030337e-06,
+    "balance_residual_kvar": -2.1591779386653798e-06,
+    "unrated_line_conductors": 0,
+    "node_voltage_violations_095_105": 216,
+    "line_conductor_overloads": 368,
+    "transformer_conductor_overloads": 0,
+    "transformer_winding_overloads": 0,
+    "transformer_nameplate_winding_overloads": 0,
+    "triplex_implied_neutral_amps_max": 727.8351829329646,
+    "triplex_implied_neutral_binding_line": "Line.tpx227944551c0",
+    "triplex_neutral_ampacity_known": false,
+    "solve_seconds": 0.1026486000046134
+  },
+  "repeat_summary": {
+    "converged": true,
+    "control_actions_done": true,
+    "control_queue_size": 0,
+    "iterations": 192,
+    "control_iterations": 5,
+    "rho_max": 1.7542167831069122,
+    "binding_line": "Line.tpx21459660c0",
+    "binding_terminal": 1,
+    "binding_node": 1,
+    "rho_max_all_terminals": 1.754216802561661,
+    "all_terminal_binding_line": "Line.tpx21459660c0",
+    "all_terminal_binding_terminal": 2,
+    "all_terminal_binding_node": 1,
+    "vmin_pu": 0.9114118054461826,
+    "vmax_pu": 1.0499999387507952,
+    "vmin_node": "sx2748781a.2",
+    "vmax_node": "sourcebus.3",
+    "transformer_current_rho_max": 0.40507505207106353,
+    "transformer_kva_rho_max": 0.4080969330182725,
+    "transformer_nameplate_kva_rho_max": 0.44890662632009976,
+    "source_kw": 12047.631739396882,
+    "source_kvar": 1455.1570350818376,
+    "loss_kw": 1274.4617374962163,
+    "loss_kvar": 2828.8215673740265,
+    "load_kw": 10773.170000750217,
+    "load_kvar": 2700.0109119405233,
+    "capacitor_kw": 3.274180926382542e-14,
+    "capacitor_kvar": -4073.675442073534,
+    "balance_residual_kw": 1.1504489521030337e-06,
+    "balance_residual_kvar": -2.1591779386653798e-06,
+    "unrated_line_conductors": 0,
+    "node_voltage_violations_095_105": 216,
+    "line_conductor_overloads": 368,
+    "transformer_conductor_overloads": 0,
+    "transformer_winding_overloads": 0,
+    "transformer_nameplate_winding_overloads": 0,
+    "triplex_implied_neutral_amps_max": 727.8351829329646,
+    "triplex_implied_neutral_binding_line": "Line.tpx227944551c0",
+    "triplex_neutral_ampacity_known": false,
+    "solve_seconds": 0.09888599999248981
+  },
+  "repeat_control_states_equal": true,
+  "source_bytes_unchanged": true,
+  "regcontrols": [
+    {
+      "name": "feeder_rega",
+      "transformer": "feeder_rega",
+      "winding": 2,
+      "tap_number": 2,
+      "tap_pu": 1.0125,
+      "enabled": true
+    },
+    {
+      "name": "feeder_regb",
+      "transformer": "feeder_regb",
+      "winding": 2,
+      "tap_number": 2,
+      "tap_pu": 1.0125,
+      "enabled": true
+    },
+    {
+      "name": "feeder_regc",
+      "transformer": "feeder_regc",
+      "winding": 2,
+      "tap_number": 1,
+      "tap_pu": 1.00625,
+      "enabled": true
+    },
+    {
+      "name": "vreg2_a",
+      "transformer": "vreg2_a",
+      "winding": 2,
+      "tap_number": 11,
+      "tap_pu": 1.06875,
+      "enabled": true
+    },
+    {
+      "name": "vreg2_b",
+      "transformer": "vreg2_b",
+      "winding": 2,
+      "tap_number": 7,
+      "tap_pu": 1.0437499999999997,
+      "enabled": true
+    },
+    {
+      "name": "vreg2_c",
+      "transformer": "vreg2_c",
+      "winding": 2,
+      "tap_number": 1,
+      "tap_pu": 1.0062499999999999,
+      "enabled": true
+    },
+    {
+      "name": "vreg3_a",
+      "transformer": "vreg3_a",
+      "winding": 2,
+      "tap_number": 16,
+      "tap_pu": 1.1,
+      "enabled": true
+    },
+    {
+      "name": "vreg3_b",
+      "transformer": "vreg3_b",
+      "winding": 2,
+      "tap_number": 10,
+      "tap_pu": 1.0625,
+      "enabled": true
+    },
+    {
+      "name": "vreg3_c",
+      "transformer": "vreg3_c",
+      "winding": 2,
+      "tap_number": 1,
+      "tap_pu": 1.0062499999999999,
+      "enabled": true
+    },
+    {
+      "name": "vreg4_a",
+      "transformer": "vreg4_a",
+      "winding": 2,
+      "tap_number": 12,
+      "tap_pu": 1.075,
+      "enabled": true
+    },
+    {
+      "name": "vreg4_b",
+      "transformer": "vreg4_b",
+      "winding": 2,
+      "tap_number": 12,
+      "tap_pu": 1.0750000000000002,
+      "enabled": true
+    },
+    {
+      "name": "vreg4_c",
+      "transformer": "vreg4_c",
+      "winding": 2,
+      "tap_number": 5,
+      "tap_pu": 1.03125,
+      "enabled": true
+    }
+  ],
+  "capacitors": [
+    {
+      "name": "capbank2a",
+      "states": [
+        1
+      ],
+      "enabled": true,
+      "total_kvar": 300.0
+    },
+    {
+      "name": "capbank2b",
+      "states": [
+        1
+      ],
+      "enabled": true,
+      "total_kvar": 300.0
+    },
+    {
+      "name": "capbank2c",
+      "states": [
+        1
+      ],
+      "enabled": true,
+      "total_kvar": 300.0
+    },
+    {
+      "name": "capbank1a",
+      "states": [
+        1
+      ],
+      "enabled": true,
+      "total_kvar": 300.0
+    },
+    {
+      "name": "capbank1b",
+      "states": [
+        1
+      ],
+      "enabled": true,
+      "total_kvar": 300.0
+    },
+    {
+      "name": "capbank1c",
+      "states": [
+        1
+      ],
+      "enabled": true,
+      "total_kvar": 300.0
+    },
+    {
+      "name": "capbank0a",
+      "states": [
+        1
+      ],
+      "enabled": true,
+      "total_kvar": 400.0
+    },
+    {
+      "name": "capbank0b",
+      "states": [
+        1
+      ],
+      "enabled": true,
+      "total_kvar": 400.0
+    },
+    {
+      "name": "capbank0c",
+      "states": [
+        1
+      ],
+      "enabled": true,
+      "total_kvar": 400.0
+    },
+    {
+      "name": "capbank3",
+      "states": [
+        1
+      ],
+      "enabled": true,
+      "total_kvar": 900.0
+    }
+  ],
+  "rating_semantics": {
+    "lines": "Original NormalAmps, every explicit phase/conductor retained; canonical V42 objective uses source-rooted parent terminal; both ends audited",
+    "triplex": "Original Kron reduction removes neutral; hot1/hot2 are local split labels and have opposite voltage polarity",
+    "transformer_current": "Original NormalAmps is primary line current; secondary denominators transform by original kV and winding kVA ratio",
+    "transformer_winding_kva": "Report both strict original winding kVA nameplate and DSS NormHkVA (defaults to 110%); never substitute the latter for nameplate",
+    "ground_nodes": "Transformer node0 currents are grounded returns; no independent neutral rating provided",
+    "actual_controls": "Each source regression restores original initial state and independently settles original controls"
+  },
+  "validation": "7 unittest real OpenDSS checks passed; tests/test_ieee8500_v42_ac.py; original 96-slot temporal/production feasibility is separate"
+}

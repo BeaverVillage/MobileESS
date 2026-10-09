@@ -1,0 +1,91 @@
+{
+  "status": "INDEPENDENT_CONTROL_DISCONTINUITY_DIAGNOSTIC_COMPLETE",
+  "slots": [
+    0,
+    9,
+    48,
+    75
+  ],
+  "probes": [
+    {
+      "probe_id": "MV0001",
+      "bus": "196-29518",
+      "mode": "MV_3PH",
+      "host_type": "MV_ELECTRICAL_HOST",
+      "primary": "196-29518",
+      "diagnostic_step": 1.0,
+      "engineering_ceiling_kva": "",
+      "physical_port_qualified": false
+    },
+    {
+      "probe_id": "LV0001",
+      "bus": "sx0247160b",
+      "mode": "LV_SPLIT_240",
+      "host_type": "LV_SPLIT_PHASE_DIAGNOSTIC_SUBSET",
+      "primary": "l0247160",
+      "diagnostic_step": 0.1,
+      "engineering_ceiling_kva": "15.0",
+      "physical_port_qualified": false
+    }
+  ],
+  "rows": 16,
+  "endpoint_solves": 96,
+  "fresh_independent_endpoint_contexts": 32,
+  "sequential_base_solves": 4,
+  "fresh_unperturbed_solves": 4,
+  "fresh_endpoint_control_jump_rows": 4,
+  "maximum_reused_vs_fresh_derivative_difference_A_per_unit": 0.0,
+  "tap_comparison_numerical_tolerance": 1e-12,
+  "worst_fresh_vs_fixed_difference_A_per_unit": 2.969941803737413,
+  "worst_row": {
+    "slot": 0,
+    "probe_id": "MV0001",
+    "component": "P",
+    "largest_difference_axis": {
+      "element": "Line.tpx227944551c0",
+      "group": "Triplex",
+      "terminal": 1,
+      "conductor": 1,
+      "node": 1,
+      "normal_amps": 580.0,
+      "enabled": true,
+      "objective_included": true
+    }
+  },
+  "source_pu": 1.05,
+  "source_original_Vreg_and_CapControls_unchanged": true,
+  "numerical_tolerance": 1e-09,
+  "regcontrols_enabled": 12,
+  "capcontrols_enabled": 9,
+  "all_endpoints_converged_and_settled": true,
+  "original_control_state_restored": true,
+  "fixed_result_scope": "local derivative within the same settled tap/cap state only",
+  "automatic_result_scope": "finite perturbation independently settles original controls; discrete/control initialization effects retained",
+  "global_affine_certificate": false,
+  "physical_port_or_dispatch_certificate": false,
+  "Native_calls": 0,
+  "inputs": {
+    "probe_policy": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\docs\\ieee8500_v42_single_case\\joint_selection_v2\\sensitivity\\PREREGISTRATION.json",
+      "sha256": "96c95d2e885887cd2c74c5d347c04b5ac1d1b291ce522c38a504869e7f4e87bb",
+      "bytes": 179792
+    },
+    "source_sequential_controls": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\docs\\ieee8500_v42_single_case\\diagnostics\\capacity_1p0\\CONTROL_STATES.json",
+      "sha256": "e76e1420252fe225ca908644e17c5cc734d861098ab0ffb7b0fe866ef7ccfe77",
+      "bytes": 123160
+    }
+  },
+  "artifacts": {
+    "endpoint_arrays": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\docs\\ieee8500_v42_single_case\\joint_selection_v2\\control_discontinuity\\ALL_ENDPOINT_ARRAYS.npz",
+      "sha256": "1cb7b59e77b46e6d70bba17d2eb3c128658500e56ff59b914e1879ce495d27ad",
+      "bytes": 28695343
+    },
+    "endpoint_states": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\docs\\ieee8500_v42_single_case\\joint_selection_v2\\control_discontinuity\\ENDPOINT_CONTROL_STATES.json",
+      "sha256": "d30c0fb5e49385316a8dceebd141fd005cba361a3648e0625b21c2c62cdbb63a",
+      "bytes": 423978
+    }
+  }
+}

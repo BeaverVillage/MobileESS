@@ -1,0 +1,131 @@
+{
+  "schema": "IEEE8500_V42_COMPARISON_ADMISSION_V1",
+  "day": "2025-05-01",
+  "scenario_sha": "8f1ad20d080ecf04609be7a66fe912983dcb6ce8bf5b6afdd740b4bccc6aa1f6",
+  "arms": [
+    {
+      "arm": "B0",
+      "scenario_sha": "8f1ad20d080ecf04609be7a66fe912983dcb6ce8bf5b6afdd740b4bccc6aa1f6",
+      "aidc_flexibility": false,
+      "mess_flexibility": false,
+      "stages": [],
+      "native_execution_status": "NOT_RUN",
+      "planning_actual_fresh_status": "NOT_RUN"
+    },
+    {
+      "arm": "B1",
+      "scenario_sha": "8f1ad20d080ecf04609be7a66fe912983dcb6ce8bf5b6afdd740b4bccc6aa1f6",
+      "aidc_flexibility": true,
+      "mess_flexibility": false,
+      "stages": [
+        {
+          "stage": "A1",
+          "gap_target": 0.005,
+          "native_runtime_limit_seconds": 5400,
+          "Threads": 1,
+          "P2_calls": 0,
+          "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+          "independent_ledger": true,
+          "bound_or_model_transfer": false
+        }
+      ],
+      "native_execution_status": "NOT_RUN",
+      "planning_actual_fresh_status": "NOT_RUN"
+    },
+    {
+      "arm": "B2",
+      "scenario_sha": "8f1ad20d080ecf04609be7a66fe912983dcb6ce8bf5b6afdd740b4bccc6aa1f6",
+      "aidc_flexibility": false,
+      "mess_flexibility": true,
+      "stages": [
+        {
+          "stage": "M1",
+          "gap_target": 0.03,
+          "native_runtime_limit_seconds": 5400,
+          "Threads": 1,
+          "P2_calls": 0,
+          "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+          "independent_ledger": true,
+          "bound_or_model_transfer": false
+        }
+      ],
+      "native_execution_status": "NOT_RUN",
+      "planning_actual_fresh_status": "NOT_RUN"
+    },
+    {
+      "arm": "B3",
+      "scenario_sha": "8f1ad20d080ecf04609be7a66fe912983dcb6ce8bf5b6afdd740b4bccc6aa1f6",
+      "aidc_flexibility": true,
+      "mess_flexibility": true,
+      "stages": [
+        {
+          "stage": "A1",
+          "gap_target": 0.005,
+          "native_runtime_limit_seconds": 5400,
+          "Threads": 1,
+          "P2_calls": 0,
+          "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+          "independent_ledger": true,
+          "bound_or_model_transfer": false
+        },
+        {
+          "stage": "M1",
+          "gap_target": 0.03,
+          "native_runtime_limit_seconds": 5400,
+          "Threads": 1,
+          "P2_calls": 0,
+          "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+          "independent_ledger": true,
+          "bound_or_model_transfer": false
+        },
+        {
+          "stage": "A2",
+          "gap_target": 0.005,
+          "native_runtime_limit_seconds": 5400,
+          "Threads": 1,
+          "P2_calls": 0,
+          "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+          "independent_ledger": true,
+          "bound_or_model_transfer": false
+        },
+        {
+          "stage": "M2",
+          "gap_target": 0.03,
+          "native_runtime_limit_seconds": 5400,
+          "Threads": 1,
+          "P2_calls": 0,
+          "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+          "independent_ledger": true,
+          "bound_or_model_transfer": false
+        }
+      ],
+      "native_execution_status": "NOT_RUN",
+      "planning_actual_fresh_status": "NOT_RUN"
+    }
+  ],
+  "completed_gates": {},
+  "unresolved_gates": [
+    "single_frozen_scenario",
+    "original_branch_conductor_identity",
+    "all_bus_voltage_and_transformer_winding_authority",
+    "orientation_preserving_mapping",
+    "lv_pcc_and_device_eligibility",
+    "source_causal_job_gpu_rack_wan_qos_capacity",
+    "certified_96_slot_affine_control_domain",
+    "feeder_grid_source_hooks",
+    "six_vehicle_axis_and_original_transport_equivalence",
+    "original_and_added_location_constraints_replay",
+    "independent_planning_actual_fresh_feeder_hooks",
+    "all_96_slots_real_ac_physical_feasibility"
+  ],
+  "production_ready": false,
+  "production_execution": "UNAVAILABLE_PENDING_CERTIFIED_PORT_AND_SEPARATE_APPROVAL",
+  "objective": "min max(line conductor current / original NormalAmps)",
+  "voltage_band_pu": [
+    0.95,
+    1.05
+  ],
+  "joint_global_optimality_claim": false,
+  "native_calls": 0,
+  "full_model_builds": 0
+}

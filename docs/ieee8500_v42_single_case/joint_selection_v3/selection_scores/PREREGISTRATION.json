@@ -1,0 +1,92 @@
+{
+  "schema": "JOINT_CONTROLLABILITY_SCORE_V3",
+  "development_date": "2025-05-01",
+  "already_exposed": true,
+  "earlier_v2_diagnostics_and_preliminary_v3_slot0_known": true,
+  "method_frozen_before_final_score_guided_location_selection": true,
+  "B1_B2_B3_results_used": false,
+  "slots": [
+    0,
+    9,
+    48,
+    75
+  ],
+  "targets": [
+    "line.tpx21459660c0",
+    "line.tpx260595c0",
+    "line.tpx226308719b0",
+    "line.tpx226308710b0",
+    "line.tpx21197413c0",
+    "line.tpx2224230689c0",
+    "line.tpx226308725b0",
+    "line.ln6291242-1",
+    "line.ln5654466-1",
+    "line.ln6321409-1",
+    "line.xj171_48332_sw",
+    "line.ln5513564-1",
+    "line.ln5775442-1",
+    "line.ln5896798-1",
+    "line.ln5714974-1",
+    "line.ln5473414-1",
+    "line.ln5742828-2",
+    "line.ln5742828-1",
+    "line.ln5815900-1",
+    "line.a8735_48332_sw"
+  ],
+  "weighting": "equal20 target lines and equal4 times; no single Triplex target; original source-parent baseline-binding phase",
+  "AIDC_action": "known_only original-UID activeGPU times originalC1*swing footprint bound, PF.95 Q/Pcoupled",
+  "AIDC_bound_is_relaxation": true,
+  "anonymous_CC4_and_installed_idle_in_flex": false,
+  "STA_action": "one common per-time P/Q vector for all20lines, intersected with original local AC-linear voltage/CT/Triplex margins; never separately optimize Q perline",
+  "STA_actions": "P-only uses local positive-P bound; Q-only uses local +/-Q bound; mixed actions use half of each axis-only bound (convex-combination screen), all <=P5/Q3/S6/hot27",
+  "local_bound_certification": "linear settled-control screening only; selected finite nonlinear96slot tests remain mandatory",
+  "STA_hardware": {
+    "P_max_kw": 5.0,
+    "Q_max_kvar": 3.0,
+    "S_max_kva": 6.0,
+    "hot_current_max_A": 27.0
+  },
+  "response_score": "mean over times/lines of (negative predicted dRho magnitude -2*positive predicted dRho); signed benefit allowed negative",
+  "STA_fleet_exposure": 0.5,
+  "STA_fleet_exposure_reason": "6 vehicles/12 STA; heuristic equal exposure, not simultaneous12dock dispatch or a routing guarantee",
+  "original_six_initial_locations": {
+    "MESS01": "STA01",
+    "MESS02": "STA12",
+    "MESS03": "STA08",
+    "MESS04": "STA06",
+    "MESS05": "STA03",
+    "MESS06": "STA10"
+  },
+  "initial_units_assumed_already_connected": true,
+  "mobility_factor": "fraction of6 original initial vehicles whose original departure0 connect-slot<=sampledslot, based on unchanged safeETA plus600s",
+  "mobility_energy_model": "original28000kg traction physics retained as research assumption; no battery-mass reestimate or actualSUMO outcomes",
+  "geometry": "all276pairs/552axis and original sourceguards, LV primaryproxy not certified customergeography",
+  "physical_eligibility": "full-rating and96slot AC tests follow selection; no globalfeasibility inferred from local derivative",
+  "final_model_objective": "UNCHANGED min overall canonical line phase current / original NormalAmps",
+  "global_optimality_claim": false,
+  "known_job_QoS_WAN_dispatch_certified": false,
+  "independent_eval_date": null,
+  "production_ready": false,
+  "frozen_inputs": {
+    "ieee8500_v42\\data\\research_case\\PAPER_FLEET_BASE_AUTHORITY.json": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\ieee8500_v42\\data\\research_case\\PAPER_FLEET_BASE_AUTHORITY.json",
+      "sha256": "8fc6add09886cfe662c5a5940b99fd13bd20f89a9ce432fc8a122fc383b3c302",
+      "bytes": 1418
+    },
+    "docs\\ieee8500_v42_single_case\\FLEXIBLE_WORKLOAD_AUDIT.csv": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\docs\\ieee8500_v42_single_case\\FLEXIBLE_WORKLOAD_AUDIT.csv",
+      "sha256": "f6aef5e244d50440ec9e3fb199922ac6d799b0ed1567489fb8d46ad3f130f31a",
+      "bytes": 2779441
+    },
+    "docs\\ieee8500_v42_single_case\\LV_PORT_SIMULATION_DESIGN.json": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\docs\\ieee8500_v42_single_case\\LV_PORT_SIMULATION_DESIGN.json",
+      "sha256": "ea727be28ae4f464379daa2d075c7eda96942f5c728c3bc404129eae7174cf88",
+      "bytes": 6812
+    },
+    "ieee8500_v42\\data\\traffic_audit\\ROUTE_TABLE.json.gz": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\ieee8500_v42_single_case_pr\\ieee8500_v42\\data\\traffic_audit\\ROUTE_TABLE.json.gz",
+      "sha256": "3a08a7485ccfa153a3cd944132a251e8360002ce479546e943d91a4de2f3fca9",
+      "bytes": 5814550
+    }
+  }
+}

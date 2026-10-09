@@ -1,0 +1,132 @@
+{
+  "schema": "IEEE8500_V42_SINGLE_RESEARCH_CONFIGURATION_V3",
+  "status": "STUDY_CONFIGURATION_DRAFT_BLOCKED",
+  "day": "2025-05-01",
+  "development_date_already_exposed": true,
+  "independent_evaluation_date": null,
+  "source_git_sha": "de6f79cd2cd215f0ed657b99d24b9ac26980ddc1",
+  "source_content_manifest": {
+    "path": "docs/ieee8500_v42_single_case/V42_SOURCE_SHA_MANIFEST.json",
+    "sha256": "e4bb27f90c9ae64040d36dcb37176cf3d16fbb63f61d5a031d7cbad4a73ccc8b"
+  },
+  "source_feeder_manifest": {
+    "path": "ieee8500_v42/data/FEEDER_SOURCE_MANIFEST.json",
+    "sha256": "72b1c9b203504f5434e43999263be3a88eb32d3f3f168e268d3af7903b7650b9"
+  },
+  "objective": "min overall original canonical source-parent phase current / original NormalAmps",
+  "no_original_model_objective_or_rating_relaxation": true,
+  "background_scale": 0.552,
+  "background": "uniform original static snapshot counterfactual, not an observed IEEE8500 daily customer curve",
+  "AIDC_capacity_scale": 1.0,
+  "installed_GPU": 780,
+  "workload_multiplier": 1.0,
+  "PF": 0.95,
+  "PV_active_objects": 0,
+  "source_pu": 1.05,
+  "feeder_Vreg": 126.5,
+  "other_Vreg": 125.0,
+  "voltage_band_pu": [
+    0.95,
+    1.05
+  ],
+  "original_RegControls": 12,
+  "original_CapControls": 9,
+  "original_Capacitors": 10,
+  "automatic_controls": "original controls sequential across96slots; no Planning control states imported in fresh replay",
+  "MESS_count": 6,
+  "service_location_count": 24,
+  "vehicle": {
+    "P_max_kw": 450,
+    "PCS_kva": 600,
+    "nameplate_energy_kwh": 1800,
+    "original_fraction_Emin_kwh": 660,
+    "original_fraction_Emax_kwh": 1620,
+    "initial_and_terminal_energy_kwh": 1140,
+    "original_charge_discharge_efficiency": 0.95,
+    "LV_auxiliary_interface_efficiency_assumption": 0.9,
+    "LV_AC_charge_to_battery_multiplier": 0.855,
+    "LV_AC_export_battery_debit_divisor": 0.855,
+    "mass_kg": 28000,
+    "mass_evidence": "original traffic assumption, not measured1800kWh vehicle",
+    "initial_locations": {
+      "MESS01": "STA01",
+      "MESS02": "STA12",
+      "MESS03": "STA08",
+      "MESS04": "STA06",
+      "MESS05": "STA03",
+      "MESS06": "STA10"
+    }
+  },
+  "LV_station_design": {
+    "docks": 12,
+    "P_charge_kw": 5,
+    "P_discharge_kw": 5,
+    "Q_abs_kvar": 3,
+    "S_kva": 6,
+    "hot_current_A": 27,
+    "voltage_dependent_limit": "S<=27*actual_abs(V1-V2)/1000 kVA",
+    "connection": "120/240V split-phase original customer .1.2 bus",
+    "interpretation": "one redesigned study dock per existing STA; no original transformer or station-count additions",
+    "field_installed": false,
+    "complete_assembly_or_independent_Q_product_certified": false
+  },
+  "mapping": {
+    "path": "docs/ieee8500_v42_single_case/joint_selection_v3/score_selection/JOINT_SERVICE_MAPPING.csv",
+    "sha256": "4a70fd13bf08c8512d30f74e48dfafb46fdddd4e112a3aee92a8191f22cad016"
+  },
+  "source_proximity_guard": "original q05 MVrootimpedance guard retained",
+  "common_coordinate_transform": {
+    "u": -0.0011398737189343131,
+    "v": -0.00023721373007232747,
+    "translation_x": -1000.2819244675629,
+    "translation_y": 14393.330183925018,
+    "rotation_degrees": -168.2442350516839,
+    "determinant": 1.3555824488519685e-06,
+    "uniform_scale": 0.0011642948290067979
+  },
+  "modeled_geometry": "all276pairs and552strictaxis PASS on source/MVprimaryproxy coordinates",
+  "field_geography": "UNVERIFIED; original CRS/unit/compass and exact customer access unknown",
+  "selection_policy": {
+    "path": "docs/ieee8500_v42_single_case/joint_selection_v3/selection_scores/PREREGISTRATION.json",
+    "sha256": "25c370bedf805a89b09ddb3a5c3f34cb0654e9f9617044c89d7f0e1507280b32"
+  },
+  "hardware_design": {
+    "path": "docs/ieee8500_v42_single_case/LV_PORT_SIMULATION_DESIGN.json",
+    "sha256": "ea727be28ae4f464379daa2d075c7eda96942f5c728c3bc404129eae7174cf88"
+  },
+  "B0_archive": {
+    "path": "docs/ieee8500_v42_single_case/joint_selection_v3/selected_ac/bg0p552_gpu1p0/AC_96.npz",
+    "sha256": "e980b8de17b791ca607b45e88ccf8bd1e4e258a60ae4ad91aad505b291626f13"
+  },
+  "B0": {
+    "rho_max": 0.921957507586509,
+    "Vmin": 0.9867032095455411,
+    "Vmax": 1.0527258788867697,
+    "voltage_violation_node_slot_cells": 1373,
+    "original_line_transformer_constraints_PASS": true,
+    "all_original_voltage_constraints_PASS": false
+  },
+  "sampled_LV_commands": {
+    "fixed_endpoints": 9216,
+    "independent_auto_endpoints": 384,
+    "eight_full_rating_commands_per_port_per_slot": true,
+    "all_sampled_local_limits_PASS": true,
+    "all_sampled_hardware_limits_PASS": true,
+    "continuous_domain_certificate": false
+  },
+  "actual_job_dispatch_QoS_WAN_native_window_compatibility": "UNVERIFIED",
+  "six_vehicle_native_route_SOC_location_efficiency_adapter": "UNVERIFIED",
+  "exact_FULL_Compact_C3A_grid_equivalence": "UNVERIFIED",
+  "Actual_SUMO_six_vehicle_and_unseen_day_validation": "NOT_RUN",
+  "original_campaign_mutations": 0,
+  "B1_B2_B3_Native_calls": 0,
+  "production_ready": false,
+  "six_unit_research_fleet_authority": {
+    "path": "docs/ieee8500_v42_single_case/integration_contracts/RESEARCH_FLEET_CONFIGURATION.json",
+    "sha256": "738b8f83c02f71fd40ccac345392b92f0c9395036de2cd118f1e032d2d2e076b"
+  },
+  "simulation_authorization_contract": {
+    "path": "docs/ieee8500_v42_single_case/integration_contracts/RESEARCH_SIMULATION_AUTHORITY.json",
+    "sha256": "183fcde0664de5eab21d608fd459a4a2852df90e7d5600a7822b51ad7eda0258"
+  }
+}

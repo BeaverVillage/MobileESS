@@ -1,0 +1,126 @@
+{
+  "status": "AUTHORIZED_SIMULATION_INTERFACE_DESIGN_NOT_INSTALLED_HARDWARE",
+  "product_anchor": "Schneider Electric XW Pro 6848 NA, 865-6848-21, 120/240V configuration",
+  "inference": "Study envelope conservatively bounded by commercial grid-interactive ratings; arbitrary per-slot Q/DC-DC supervisory integration remains a declared engineering assumption",
+  "source_grid_sell_kw": 6.0,
+  "source_grid_sell_current_A": 27.0,
+  "source_standalone_output_kw_25C": 6.8,
+  "source_standalone_output_kw_40C": 6.0,
+  "source_battery_voltage_nominal_V": 48.0,
+  "source_battery_voltage_range_V": [
+    40.0,
+    64.0
+  ],
+  "source_battery_discharge_current_A": 180.0,
+  "source_battery_charge_current_A": 140.0,
+  "source_bypass_or_relay_current_A_NOT_inverter_output": 60.0,
+  "P_export_max_kw": 5.0,
+  "P_import_max_kw": 5.0,
+  "S_max_kva": 6.0,
+  "Q_abs_max_kvar": 3.0,
+  "I_each_hot_max_A": 27.0,
+  "nominal_AC_voltage_LL_V": 240.0,
+  "nominal_AC_voltage_LN_V": 120.0,
+  "connection": "L1,L2,N,PE; balanced current injection between original bus.1 and bus.2",
+  "stationary_inverter_placement": "One fixed/permanently connected interface at each study STA; vehicle DC dock attachment is a separate unverified engineering design, not a certified mobile use of this product",
+  "AC_model_mode": "LV_SPLIT_240",
+  "DSS_connection": "1phase delta bus.1.2 kv=0.24",
+  "phase_power_rule": "One combined 240V two-hot port; do not apply full P/Q twice to two 120V loads",
+  "independent_LV_leg_modes_authorized_for_this_design": false,
+  "positive_sign": "P>0/Q>0 means injection; DSS Load kW=-P, kvar=-Q",
+  "instantaneous_constraints": [
+    "-5 <= P_kw <= 5",
+    "abs(Q_kvar) <= 3",
+    "P_kw^2+Q_kvar^2 <= 6^2",
+    "sqrt(P_kw^2+Q_kvar^2)*1000/abs(V_hot1-V_hot2) <= 27",
+    "All original line terminal/conductor NormalAmps, transformer winding nameplate kVA, and original node voltage limits remain binding"
+  ],
+  "one_shared_dock_per_STA": true,
+  "aggregate_multiple_vehicle_power_must_obey_same_dock_bound": true,
+  "STA_count_unchanged": true,
+  "MESS_count_unchanged": true,
+  "original_service_transformers_unchanged": true,
+  "original_triplex_and_neutral_unchanged": true,
+  "new_feeder_transformer_count": 0,
+  "vehicle_main_PCS_kw_NOT_LV_port": 450.0,
+  "vehicle_main_PCS_kva_NOT_LV_port": 600.0,
+  "vehicle_main_energy_kwh_NOT_port_output": 1800.0,
+  "DC_interface": "Separate isolated bidirectional DC/DC + BMS interlock, vehicle pack -> regulated 48V interface bus; vehicle main PCS is bypassed in LV dock mode",
+  "vehicle_pack_voltage_V": "UNVERIFIED",
+  "isolated_DC_DC_product_and_voltage_ratio": "UNVERIFIED",
+  "study_auxiliary_conversion_efficiency": 0.9,
+  "efficiency_scope": "Explicit conservative simulation assumption for auxiliary interface; not a manufacturer efficiency guarantee or a change to original vehicle energy/capacity",
+  "study_dc_bus_minimum_for_current_audit_V": 40.0,
+  "study_DC_discharge_A_at_5kw_eta090_40V": 138.88888888888889,
+  "study_DC_charge_A_at_5kw_eta090_40V": 112.5,
+  "reactive_support_evidence": "NA operation guide Q(V), Q(P), adjustable power factor support both reactive signs; active power may be curtailed to meet reactive demand",
+  "arbitrary_independent_Q_setpoint_firmware_and_gateway": "UNVERIFIED_PRODUCTION_ENGINEERING_ASSUMPTION_FOR_STUDY",
+  "fixed_PF_charge_mode_source": 0.98,
+  "study_controls": "Quasistatic externally commanded P/Q within conservative envelope; hardware autonomous grid-profile interactions require implementation validation",
+  "temperature_assumption": "Interface maintained <=40C for the 5kW study envelope; higher-temperature derating not modeled",
+  "field_grid_profile_and_anti_islanding_settings": "UNVERIFIED; retain compliant grid-following disconnect/ride-through, no source RegControl override",
+  "source_certification_claim": "Manufacturer lists UL1741-SA/SB and IEEE1547-2018; not proof that the proposed complete mobile DC/DC+dock system is certified",
+  "certificate_evidence_limit": "The linked2020 certificate explicitly covers permanently connected fixed equipment and UL1741-SA/older IEEE1547; its contents alone do not independently verify the later datasheet SB/2018 claim or a mobile docking assembly",
+  "study_connect_delay_seconds": 600,
+  "delay_authority": "User-authorized original V42 delay; physical docking timing not observed",
+  "partial_slot_energy_availability": "Only time after actual arrival plus600 seconds contributes; first-slot energy scales by available seconds/900; instantaneous AC ceiling stays5kW/6kVA",
+  "safe_finite_difference_step_kw_or_kvar": 0.1,
+  "meaningful_nonlinear_validation_step_kw": 1.0,
+  "full_power_validation_required_kw": 5.0,
+  "full_power_validation_required_kvar": 3.0,
+  "study_electrical_eligibility": "Declared hardware design is a simulation input; original feeder/rating/control AC screening still decides each host/slot/direction",
+  "production_eligible": false,
+  "field_installation_certified": false,
+  "primary_sources": [
+    {
+      "id": "manufacturer_datasheet",
+      "title": "Schneider XW Pro UL Datasheet, DS20230313",
+      "url": "https://solar.se.com/us/wp-content/uploads/sites/7/2021/10/XW-Pro-UL-Datasheet.pdf",
+      "pages": [
+        1,
+        2
+      ],
+      "access_date": "2026-10-09"
+    },
+    {
+      "id": "manufacturer_NA_operation",
+      "title": "Schneider XW Pro NA Operation Guide 990-91227F-01",
+      "url": "https://solar.se.com/us/wp-content/uploads/sites/7/2023/02/990-91227F-01.pdf",
+      "pages": [
+        140,
+        141,
+        143,
+        150,
+        163,
+        164,
+        165,
+        166
+      ],
+      "access_date": "2026-10-09"
+    },
+    {
+      "id": "manufacturer_installation",
+      "title": "Schneider XW Pro NA Installation Guide 990-91228D-01",
+      "url": "https://solar.se.com/us/wp-content/uploads/sites/7/2021/10/XW-Pro-NA-Installation-Guide_990-91228.pdf",
+      "access_date": "2026-10-09"
+    },
+    {
+      "id": "manufacturer_certificate",
+      "title": "Schneider XW Pro UL Certificate of Compliance",
+      "url": "https://solar.se.com/us/wp-content/uploads/sites/7/2021/10/XW-Pro-UL-Certificate-of-Compliance.pdf",
+      "access_date": "2026-10-09"
+    },
+    {
+      "id": "IEEE_interconnection",
+      "title": "IEEE SCC21, IEEE Std1547-2018 and UL1741 Supplement SB",
+      "url": "https://sagroups.ieee.org/scc21/standards/1547rev/",
+      "access_date": "2026-10-09"
+    },
+    {
+      "id": "UL_interactive_equipment",
+      "title": "UL1741, Edition3, scope for interactive power conversion",
+      "url": "https://www.shopulstandards.com/ProductDetail.aspx?productId=UL1741",
+      "access_date": "2026-10-09"
+    }
+  ]
+}
