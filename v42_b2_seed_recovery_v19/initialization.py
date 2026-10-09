@@ -2,7 +2,7 @@
 from pathlib import Path
 import numpy as np
 from v42_may_campaign_native90 import m_stage as original
-from v42_b2_seed_recovery_v18.stationary_dispatch import validated_start,discrete_stationary
+from .stationary_dispatch import validated_start,discrete_stationary
 from v42_b2_seed_recovery_v18.initialization import analyze,sensitivity,admit
 from .common import atomic,read,record,now
 
@@ -31,8 +31,8 @@ def pattern_bounds(case,baseline_low,baseline_high,*,sites=None,free_modes=(),st
             if t not in free:low[j]=high[j]=0.
         elif stationary:
             low[j]=high[j]=stationary_values[j]
-        elif name.startswith('arc['):
-            unit,k=name[4:-1].split(',');arc=case.graph[2][int(k)]
+        elif name.startswith(('arc[','route_flow[')):
+            unit,k=name.split('[',1)[1][:-1].split(',');arc=case.graph[2][int(k)]
             allowed=sites|{case.graph[1][unit]}
             energy_ok=arc[-1] is None or arc[-1].energy_kwh<=case.graph[3].maximum-case.graph[3].minimum
             if arc[0] not in allowed or arc[2] not in allowed or not energy_ok:

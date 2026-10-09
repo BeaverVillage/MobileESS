@@ -86,7 +86,8 @@ def worker_view(root, day, row, epoch):
 def view(root):
     root = Path(root)
     campaign=root
-    for candidate,checkpoint in (('initialization_benchmark_v19_02','CHECKPOINT_V19.json'),('initialization_benchmark_v19_01','CHECKPOINT_V19.json'),('initialization_benchmark_v18r3_01','CHECKPOINT_V18R3.json'),('initialization_benchmark_v18r2_01','CHECKPOINT_V18R2.json')):
+    v19=[(p.name,'CHECKPOINT_V19.json') for p in sorted(campaign.glob('initialization_benchmark_v19_[0-9][0-9]'),reverse=True)]
+    for candidate,checkpoint in v19+[('initialization_benchmark_v18r3_01','CHECKPOINT_V18R3.json'),('initialization_benchmark_v18r2_01','CHECKPOINT_V18R2.json')]:
         benchmark=campaign/candidate
         if (benchmark/checkpoint).exists():root=benchmark;break
     version=19 if (root/'CHECKPOINT_V19.json').is_file() else '18R3' if (root/'CHECKPOINT_V18R3.json').is_file() else '18R2' if (root/'CHECKPOINT_V18R2.json').is_file() else 18 if (root/'CHECKPOINT_V18.json').is_file() else 17
