@@ -23,6 +23,7 @@ from .model_mapping import aidc_from_source, verify_fixed_mess_packet, verify_pl
 from .numerical_policy import (VERSION as NUMERICAL_VERSION, bind_apply_precision,
                                required_settings, settings_metadata, verify_settings_receipt)
 from .source_runtime import SourceStageOutput, jsonable
+from .state_io import LoadedSourceState, load_source_state
 
 
 A_SOURCE = "v42_may_build_v6.a_stage"
@@ -536,8 +537,9 @@ class ASourceBridge:
                               all_MESS_PQ_zero=context.request.stage == "A1")
             output = context.output / "SOURCE"
             state_path = output / "STATIC/P1_CLOSED_STATE.pkl.gz"
-            with gzip.open(state_path, "rb") as stream:
-                state = pickle.load(stream)
+            closed = _receipt(state_path)
+            loaded = load_source_state(closed, output, _checked)
+            state = loaded.state
             domain_sha = self._domain_authority(context, state)
             point_receipt = raw_result["incumbent"]["point"]
             replay = source.read(_checked(raw_result["incumbent"]["physical"], output))
@@ -547,7 +549,6 @@ class ASourceBridge:
             planning["time_axis"] = list(range(96))
             aidc = aidc_from_source(context, planning, replay, state)
             model_sha = identity["original_snapshot_sha256"]
-            closed = _receipt(state_path)
             packet = {"source_stage": context.request.stage, "authority_sha": context.request.authority.sha,
                 "decision_sha": aidc.sha, "original_model_sha": model_sha,
                 "planning_arrays": planning, "selected_jobs": jsonable(replay["selected_jobs"]),
@@ -580,8 +581,9 @@ class ASourceBridge:
                     "grid_matrix_rhs_point_bound_clock_reused": False}
             output_object = SourceStageOutput(context.request, jsonable(raw_result), aidc, context.request.fixed_mess,
                 model_sha, {}, {}, packet, ledger.sealed_receipt(), context.source_registry.evidence_kind)
+            del state
             with profile.measure("model_equivalence_verification"):
-                proof = self._verify_admitted(context, output_object)
+                proof = self._verify_admitted(context, output_object, loaded_state=loaded)
             packet["build_profile"] = profile.receipt()
             packet["physical_source_evidence"] = proof["physical_evidence"]
             return SourceStageOutput(context.request, jsonable(raw_result), aidc, context.request.fixed_mess,
@@ -677,7 +679,7 @@ class ASourceBridge:
         return {"version": NUMERICAL_VERSION, "records_sha": digest(records),
                 "source_settings_records": len(records), "Native_entry_settings_authority": "B3_SOURCE_STAGE_LEDGER"}
 
-    def _verify_admitted(self, context, output):
+    def _verify_admitted(self, context, output, *, loaded_state=None):
         require(output.request == context.request and output.evidence_kind == context.source_registry.evidence_kind,
                 "A_SOURCE_VERIFIER_REQUEST_EVIDENCE_DRIFT")
         packet = output.source_packet
@@ -692,8 +694,10 @@ class ASourceBridge:
         verify_planning_arrays(packet["planning_arrays"], output.aidc, context.request.authority)
         registry = context.source_registry
         source = registry.resolve(A_SOURCE)
-        with gzip.open(_checked(packet["closed_state"], source_root), "rb") as stream:
-            state = pickle.load(stream)
+        if loaded_state is None:
+            loaded_state = load_source_state(packet["closed_state"], source_root, _checked)
+        require(isinstance(loaded_state, LoadedSourceState), "SOURCE_STATE_VERIFIED_LOAD_REQUIRED")
+        state = loaded_state.take(packet["closed_state"], source_root, _checked)
         require(self._domain_authority(context, state) == packet["original_complete_domain_sha"],
                 "A_SOURCE_VERIFIER_ORIGINAL_COMPLETE_DOMAIN_AUTHORITY_DRIFT")
         verify_case = self._verification_case(context, registry)

@@ -13,11 +13,13 @@ import pickle
 import hashlib
 import re
 import subprocess
+import gc
 
 from v42_b3_joint.a_source import ASourceBridge, A_SOURCE, BuildProfile, _restore_source_globals, _scientific
 from v42_b3_joint.contracts import canonical, digest, require
 from v42_b3_joint.model_mapping import aidc_from_source
 from v42_b3_joint.source_runtime import SourceStageOutput, jsonable
+from v42_b3_joint.state_io import load_source_state
 from .admission import read, record, checked
 
 GRAPH_CACHE_COMPILERS = ("v42_root/data.py", "v42_root/common.py", "v42_exact/support.py", "v42_exact/common.py",
@@ -255,8 +257,8 @@ class B1A1ReuseBridge(ASourceBridge):
                 progress({"phase": "A1_REUSE_FRESH_FULL_MODEL_COMPARISON", "stage": "A1", "Native_calls": 0})
             fresh = run.__globals__["prepare"](self._request(context), progress)
             closed = record(self.b1_output / "STATIC/P1_CLOSED_STATE.pkl.gz")
-            with gzip.open(closed["path"], "rb") as stream:
-                old = pickle.load(stream)
+            loaded = load_source_state(closed, self.b1_output, checked)
+            old = loaded.state
             domain_digest = registry.callable("v42_a_stage_domain_v2/domain.py", "digest")
             equivalence = compare_original_identity(fresh, old, read(self.b1_output / "A_PREPARE_RECEIPT.json"), domain_digest)
             require(equivalence["complete_domain_sha"] == context.request.authority.physical_domain_sha,
@@ -321,7 +323,12 @@ class B1A1ReuseBridge(ASourceBridge):
                                   verified_B1_A1_reuse=True)
             output = SourceStageOutput(context.request, jsonable(current_result), decision, None, model_sha,
                                        {}, {}, packet, ledger.sealed_receipt(), registry.evidence_kind)
-            proof = self._verify_admitted(context, output)
+            # All fresh equality evidence and cache receipts are now sealed.
+            # Keep one SHA-bound old state for unchanged independent replay,
+            # and release the compared fresh model before allocating proofs.
+            del fresh, old
+            gc.collect()
+            proof = self._verify_admitted(context, output, loaded_state=loaded)
             packet["physical_source_evidence"] = proof["physical"]
             receipt_path = context.output / "B1_A1_VERIFIED_REUSE.json"
             receipt_path.write_text(canonical(reuse) + "\n", encoding="utf-8")
