@@ -22,13 +22,13 @@ def optional(path):
 
 def run(root):
     root = runtime_path(root)
-    if (root/'HOLD_V7.json').exists():return dict(state='HOLD',actions=[])
+    if (root/'HOLD_V7R2.json').exists():return dict(state='HOLD',actions=[])
     manifest = load_manifest(root, verify=True)
-    checkpoint = optional(root / 'CHECKPOINT_V7.json')
+    checkpoint = optional(root / 'CHECKPOINT_V7R2.json')
     heartbeat = optional(root / 'COORDINATOR_HEARTBEAT.json')
-    active = optional(root / 'ACTIVE_V7.json')
+    active = optional(root / 'ACTIVE_V7R2.json')
     actives = read_actives(root)
-    host = optional(root / 'COORDINATOR_V7_HOST.json')
+    host = optional(root / 'COORDINATOR_V7R2_HOST.json')
     coordinator_alive = same_process(heartbeat.get('process', {})) or same_process(host.get('process', {}))
     worker_alive = same_process(active.get('worker', {}))
     workers_alive = {name: same_process(row.get('worker', {})) for name, row in actives.items()}

@@ -108,7 +108,7 @@ def test_full_model_preflight_cannot_overlap_last_b1_or_any_worker(tmp_path):
 
 
 def test_failed_full_validation_blocks_dispatch_and_never_retries(tmp_path):
-    atomic(tmp_path/'B2_BUILD_FULL_VALIDATION_V7.json', dict(status='FAIL', PASS=False, error='UNCHANGED_SOURCE_MODEL_MISMATCH'))
+    atomic(tmp_path/'B2_BUILD_FULL_VALIDATION_V7R2.json', dict(status='FAIL', PASS=False, error='UNCHANGED_SOURCE_MODEL_MISMATCH'))
     checkpoint = cp(31)
     with patch.object(gate.subprocess, 'Popen', side_effect=AssertionError('UNSAFE_RETRY')):
         assert gate.ready(tmp_path, {}, checkpoint, {}) is False
@@ -118,7 +118,7 @@ def test_failed_full_validation_blocks_dispatch_and_never_retries(tmp_path):
 def test_full_gate_packet_hash_and_version_are_required(tmp_path):
     result = tmp_path/'RESULT.json';atomic(result, dict(PASS=True, Native_calls=0))
     receipt = record(result)
-    atomic(tmp_path/'B2_BUILD_FULL_VALIDATION_V7.json', dict(status='PASS', PASS=True,
+    atomic(tmp_path/'B2_BUILD_FULL_VALIDATION_V7R2.json', dict(status='PASS', PASS=True,
         implementation_SHA='SOURCE_SHA',
         comparisons={d:dict(PASS=True) for d in ('2025-05-01','2025-05-23')},
         builds={d+'/'+m:dict(receipt=receipt) for d,m in gate.ORDER}))
@@ -136,7 +136,7 @@ def test_preflight_order_is_one_model_and_one_date_at_a_time():
 
 
 def test_native_zero_gate_restart_adopts_live_validation_without_duplicate(tmp_path):
-    atomic(tmp_path/'B2_BUILD_FULL_VALIDATION_V7.json', dict(status='RUNNING', builds={},
+    atomic(tmp_path/'B2_BUILD_FULL_VALIDATION_V7R2.json', dict(status='RUNNING', builds={},
         active=dict(process={'PID':123}, result=str(tmp_path/'RESULT.json'), request='UNREAD')))
     with patch.object(gate, 'same_process', return_value=True), patch.object(
             gate.subprocess, 'Popen', side_effect=AssertionError('DUPLICATE_VALIDATION')):
@@ -144,7 +144,7 @@ def test_native_zero_gate_restart_adopts_live_validation_without_duplicate(tmp_p
 
 
 def test_missing_full_model_comparison_cannot_be_forged_as_pass(tmp_path):
-    atomic(tmp_path/'B2_BUILD_FULL_VALIDATION_V7.json', dict(status='PASS', builds={},
+    atomic(tmp_path/'B2_BUILD_FULL_VALIDATION_V7R2.json', dict(status='PASS', builds={},
         implementation_SHA='SOURCE', comparisons={}))
     with pytest.raises(PermissionError, match='COVERAGE_OR_COMPARISON'):
         gate.ready(tmp_path, {'implementation':{'source_SHA':'SOURCE'}}, cp(31), {})
@@ -166,3 +166,22 @@ def test_b1_functions_are_the_frozen_v6_functions():
     from v42_may_mess_build_v7 import a_stage
     from v42_may_build_v6 import a_stage as frozen
     assert a_stage.run is frozen.run and a_stage.prepare is frozen.prepare
+
+
+def test_activation_uses_real_scheduler_api_and_preserves_failed_admission(tmp_path):
+    from v42_may_mess_build_v7 import transition, windows, policy
+    failed = tmp_path / 'CONTINUATION_V7_MANIFEST.json'
+    atomic(failed, dict(status='FAILED_ADMISSION', original_source='IMMUTABLE'))
+    original_sha = sha(failed)
+    tasks = {role:'MobileESS_V42_B1B2_P1_fixture_MessBuildV7R2_'+role.title()
+             for role in ('monitor', 'coordinator', 'watchdog')}
+    atomic(tmp_path / policy.MANIFEST, dict(tasks=tasks))
+    assert policy.DEPLOYMENT_REVISION == 2
+    assert policy.MANIFEST != failed.name
+    with patch.object(windows, 'register_campaign_tasks', return_value={'fixture':True}), patch.object(
+            windows, 'run_task', side_effect=lambda name:dict(name=name, dispatch_requested=True)) as run:
+        value = transition.activate(tmp_path)
+    assert [call.args[0] for call in run.call_args_list] == list(tasks.values())
+    assert value['worker_kills'] == 0
+    assert sha(failed) == original_sha
+    assert (tmp_path/'SOURCE_TRANSITION_ACTIVATION_V7R2.json').exists()

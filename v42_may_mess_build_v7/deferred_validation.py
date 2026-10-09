@@ -10,7 +10,7 @@ ORDER = tuple((day, mode) for day in ('2025-05-01', '2025-05-23')
 
 
 def paths(root, day, mode):
-    return Path(root) / 'source_validation_v7' / 'B2' / day / mode
+    return Path(root) / 'source_validation_v7r2' / 'B2' / day / mode
 
 
 def matching_process(command):
@@ -45,7 +45,7 @@ def ready(root, manifest, checkpoint, actives):
     root = Path(root)
     if counts(checkpoint, 'B1')['completed'] != 31 or actives:
         raise PermissionError('V7_HEAVY_VALIDATION_REQUIRES_ALL_B1_TERMINAL_AND_NO_WORKERS')
-    path = root / 'B2_BUILD_FULL_VALIDATION_V7.json'
+    path = root / 'B2_BUILD_FULL_VALIDATION_V7R2.json'
     state = read(path) if path.is_file() else dict(status='NOT_TESTED', PASS=False, builds={})
     if state.get('status') == 'FAIL':
         checkpoint['state'] = 'B2_BUILD_VALIDATION_FAILED'

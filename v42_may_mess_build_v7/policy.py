@@ -3,8 +3,9 @@ from pathlib import Path
 from .common import ROOT, read, sha, digest
 
 VERSION = 'B2_BUILD_INPUT_REUSE_V7_20261009'
-MANIFEST = 'CONTINUATION_V7_MANIFEST.json'
-ATTEMPT = 'mess_build_v7_01'
+DEPLOYMENT_REVISION = 2
+MANIFEST = 'CONTINUATION_V7R2_MANIFEST.json'
+ATTEMPT = 'mess_build_v7r2_01'
 RETRY_DATES = ()
 PRECISION = dict(FeasibilityTol=1e-9, OptimalityTol=1e-9, NumericFocus=3, ScaleFlag=2)
 REQUIRED_VALIDATIONS = frozenset(('LIGHT_REGRESSION', 'B1_SOURCE_DELEGATION', 'B2_BUILD_LIGHT_EQUIVALENCE'))
@@ -25,7 +26,7 @@ def verify_policy(root, *, require_preflight=True):
     root = Path(root).resolve()
     previous = verify_previous(root, require_preflight=require_preflight)
     doc = read(root / MANIFEST)
-    if (doc.get('schema') != VERSION or doc.get('run_id') != previous['run_id']
+    if (doc.get('schema') != VERSION or doc.get('deployment_revision') != DEPLOYMENT_REVISION or doc.get('run_id') != previous['run_id']
             or sha(root / 'CONTINUATION_V6_MANIFEST.json') != doc['previous_manifest']['sha256']
             or doc['input_folders'] != previous['input_folders']
             or doc['scientific_authority'] != previous['scientific_authority']
@@ -53,7 +54,7 @@ def verify_request(request):
             or request.get('algorithm_version') != VERSION or request.get('attempt_id') != ATTEMPT):
         raise PermissionError('V7_WORKER_SOURCE_PIN_DRIFT')
     if request.get('preflight_native_zero') is True:
-        expected = Path(request['root']).resolve() / 'source_validation_v7' / 'B2' / request['day'] / request['build_mode']
+        expected = Path(request['root']).resolve() / 'source_validation_v7r2' / 'B2' / request['day'] / request['build_mode']
         if (request['arm'] != 'B2' or request['day'] not in ('2025-05-01', '2025-05-23')
                 or request['build_mode'] not in ('BASELINE', 'OPTIMIZED')
                 or Path(request['result']).resolve().parent != expected):

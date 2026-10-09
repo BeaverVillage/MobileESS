@@ -7,11 +7,11 @@ from .common import atomic, read, sha, now
 
 def save_checkpoint(root, checkpoint):
     root = Path(root)
-    path = root / 'CHECKPOINT_V7.json'
+    path = root / 'CHECKPOINT_V7R2.json'
     if path.is_file():
-        previous = root / 'CHECKPOINT_V7_PREVIOUS.json'
+        previous = root / 'CHECKPOINT_V7R2_PREVIOUS.json'
         shutil.copyfile(path, previous)
-        atomic(root / 'CHECKPOINT_V7_PREVIOUS_SHA.json', dict(sha256=sha(previous)))
+        atomic(root / 'CHECKPOINT_V7R2_PREVIOUS_SHA.json', dict(sha256=sha(previous)))
     checkpoint['updated_UTC'] = now()
     atomic(path, checkpoint)
 
@@ -29,7 +29,7 @@ def initialize_checkpoint(root, manifest):
     for row in checkpoint['dates'].values():
         if 'summary' in row:
             row['summary'] = {k: v for k, v in row['summary'].items() if k != 'files'}
-    atomic(root / 'ACTIVES_V7.json', dict(schema='V42_MAY_ACTIVE_WORKER_SLOTS_V2',
+    atomic(root / 'ACTIVES_V7R2.json', dict(schema='V42_MAY_ACTIVE_WORKER_SLOTS_V2',
            run_id=manifest['run_id'], workers=read_actives(root), updated_UTC=now()))
     save_checkpoint(root, checkpoint)
     return checkpoint

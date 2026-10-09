@@ -132,7 +132,7 @@ def register_campaign_tasks(root, manifest):
         python = manifest.get('Python', manifest.get('python_executable'))
         receipts[role] = (reuse_registered_task(root, role, name, python=python) if name and exists(name)
                           else register(root, role, name, hourly=role == 'watchdog', python=python))
-    atomic(root / 'WINDOWS_TASK_REGISTRATION_V7.json', dict(tasks=receipts, logoff_persistence=LOGOFF_STATUS,
+    atomic(root / 'WINDOWS_TASK_REGISTRATION_V7R2.json', dict(tasks=receipts, logoff_persistence=LOGOFF_STATUS,
           security_policy_changed=False, existing_tasks_changed=False, UTC=now()))
     return receipts
 

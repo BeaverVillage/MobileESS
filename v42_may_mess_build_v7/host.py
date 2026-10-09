@@ -15,10 +15,10 @@ def main(argv=None):
     mode, root = argv[0], runtime_path(argv[1])
     root.mkdir(parents=True, exist_ok=True)
     environment(root)
-    sys.stdout = (root / (mode + '_v7.stdout.log')).open('a', encoding='utf-8', buffering=1)
-    sys.stderr = (root / (mode + '_v7.stderr.log')).open('a', encoding='utf-8', buffering=1)
+    sys.stdout = (root / (mode + '_v7r2.stdout.log')).open('a', encoding='utf-8', buffering=1)
+    sys.stderr = (root / (mode + '_v7r2.stderr.log')).open('a', encoding='utf-8', buffering=1)
     psutil.Process().nice(psutil.NORMAL_PRIORITY_CLASS)
-    atomic(root / (mode.upper() + '_V7_HOST.json'), dict(process=process(), UTC=now(), mode=mode,
+    atomic(root / (mode.upper() + '_V7R2_HOST.json'), dict(process=process(), UTC=now(), mode=mode,
                                                   job=job_information()))
     try:
         if mode == 'coordinator':
@@ -31,7 +31,7 @@ def main(argv=None):
             raise ValueError('HOST_MODE_MUST_BE_COORDINATOR_MONITOR_OR_WATCHDOG')
         run(root)
     except BaseException as error:
-        atomic(root / (mode.upper() + '_V7_HOST_ERROR.json'), dict(error=str(error),
+        atomic(root / (mode.upper() + '_V7R2_HOST_ERROR.json'), dict(error=str(error),
                traceback=traceback.format_exc(), UTC=now(), process=process()))
         traceback.print_exc()
         return 1

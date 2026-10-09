@@ -73,7 +73,7 @@ def test_exact_order_23_through_31_then_three_b2_and_no_retries(campaign):
     with patch.object(co.subprocess,'Popen',side_effect=AssertionError('SECOND_RECOVERY_ATTEMPT')):
         co.run(root,verify=False)
     assert len((root/'order.jsonl').read_text().splitlines())==len(rows)
-    assert co.counts(read(root/'CHECKPOINT_V7.json'),'B1')['completed']==31
+    assert co.counts(read(root/'CHECKPOINT_V7R2.json'),'B1')['completed']==31
 
 
 def test_restart_adopts_same_recovery_process_and_cannot_dispatch_19(campaign):
@@ -224,6 +224,6 @@ def test_30_terminal_days_block_b2_and_31_with_failures_allow_three(campaign):
 
 def test_hold_prevents_new_dispatch_without_touching_live_worker(campaign):
     root,m,cp=campaign
-    atomic(root/'HOLD_V7.json',dict(block_new_dispatch_only=True))
+    atomic(root/'HOLD_V7R2.json',dict(block_new_dispatch_only=True))
     with patch.object(co.subprocess,'Popen',side_effect=AssertionError('HOLD_DISPATCH')):
         assert co.dispatch_available(root,m,cp,{}, {},factory(root))==[]

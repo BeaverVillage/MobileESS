@@ -11,7 +11,7 @@ def _base_view(root):
     original_optional=base.optional_json
     def optional(path, *args):
         path=Path(path)
-        mapping={'CHECKPOINT.json':'CHECKPOINT_V7.json','ACTIVE.json':'ACTIVE_V7.json'}
+        mapping={'CHECKPOINT.json':'CHECKPOINT_V7R2.json','ACTIVE.json':'ACTIVE_V7R2.json'}
         if path.name in mapping:
             path=path.with_name(mapping[path.name])
         return original_optional(path,*args)
@@ -23,7 +23,7 @@ def _base_view(root):
 def view(root):
     result=rebound(display.view,dict(display.view.__globals__,original=SimpleNamespace(view=_base_view),
                                    enrich_worker=enrich_worker))(root)
-    cp=co.read(Path(root)/'CHECKPOINT_V7.json')
+    cp=co.read(Path(root)/'CHECKPOINT_V7R2.json')
     for rows in result['date_tables'].values():
         for row in rows:
             row['summary']=co.normalized_summary(row)
@@ -35,7 +35,7 @@ def view(root):
     result['active_worker_versions'] = {
         worker['arm'] + '/' + worker['day']: co.read(worker['request']).get('algorithm_version')
         for worker in result.get('workers', [])}
-    result['B2_build_validation'] = base.optional_json(Path(root) / 'B2_BUILD_FULL_VALIDATION_V7.json')
+    result['B2_build_validation'] = base.optional_json(Path(root) / 'B2_BUILD_FULL_VALIDATION_V7R2.json')
     return result
 
 

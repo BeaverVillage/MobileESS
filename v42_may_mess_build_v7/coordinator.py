@@ -76,13 +76,13 @@ def load_manifest(root, *, verify=True):
 
 def load_checkpoint(root, manifest):
     root = Path(root)
-    path = root / 'CHECKPOINT_V7.json'
+    path = root / 'CHECKPOINT_V7R2.json'
     if path.is_file():
         try:
             checkpoint = read(path)
         except (ValueError, OSError) as error:
-            backup = root / 'CHECKPOINT_V7_PREVIOUS.json'
-            receipt = root / 'CHECKPOINT_V7_PREVIOUS_SHA.json'
+            backup = root / 'CHECKPOINT_V7R2_PREVIOUS.json'
+            receipt = root / 'CHECKPOINT_V7R2_PREVIOUS_SHA.json'
             if not backup.is_file() or not receipt.is_file() or sha(backup) != read(receipt)['sha256']:
                 raise ValueError('CORRUPT_CHECKPOINT_NO_VERIFIED_BACKUP') from error
             damaged = root / ('CHECKPOINT_CORRUPT_' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%f') + '.json')
@@ -124,22 +124,22 @@ def worker_limit(arm):
 
 
 def read_actives(root):
-    path = Path(root) / 'ACTIVES_V7.json'
+    path = Path(root) / 'ACTIVES_V7R2.json'
     if path.is_file():
         value = read(path)
         if value.get('schema') != 'V42_MAY_ACTIVE_WORKER_SLOTS_V2' or not isinstance(value.get('workers'), dict):
             raise PermissionError('ACTIVE_WORKER_SLOTS_SCHEMA_REQUIRED')
         return value['workers']
-    legacy = Path(root) / 'ACTIVE_V7.json'
+    legacy = Path(root) / 'ACTIVE_V7R2.json'
     value = read(legacy) if legacy.is_file() else {}
     return {key(value['arm'], value['day']): value} if value.get('request') else {}
 
 
 def persist_actives(root, manifest, actives):
     ordered = {name: actives[name] for name in sorted(actives)}
-    atomic(root / 'ACTIVES_V7.json', dict(schema='V42_MAY_ACTIVE_WORKER_SLOTS_V2',
+    atomic(root / 'ACTIVES_V7R2.json', dict(schema='V42_MAY_ACTIVE_WORKER_SLOTS_V2',
            run_id=manifest['run_id'], workers=ordered, updated_UTC=now()))
-    atomic(root / 'ACTIVE_V7.json', next(iter(ordered.values()), {}))
+    atomic(root / 'ACTIVE_V7R2.json', next(iter(ordered.values()), {}))
 
 
 def validate_slots(checkpoint, actives):
@@ -297,7 +297,7 @@ def recovery_requests(root, manifest, checkpoint, persisted):
 def recover_actives(root, manifest, checkpoint):
     """Adopt every exact live worker, including each Popen/persistence gap."""
     persisted = read_actives(root)
-    document = root / 'ACTIVES_V7.json'
+    document = root / 'ACTIVES_V7R2.json'
     if document.is_file() and read(document).get('run_id') != manifest['run_id']:
         raise PermissionError('ACTIVES_RUN_ID_DRIFT')
     requests = recovery_requests(root, manifest, checkpoint, persisted)
@@ -510,12 +510,12 @@ def snapshot(root, manifest, checkpoint, active=None):
         completed_arm_dates=totals['completed'], day_rows=list(checkpoint['dates'].values()),
         target_Global_Gap=.005 if primary.get('arm') == 'B1' else .03,
         wall_budget_seconds=None, native_budget_seconds=5400, P2_calls=0, Threads=1,
-        B1_parallel_workers=1, B2_parallel_workers=3, terminal_date_retries=1, authorized_recovery_dates=list(RETRY_DATES), algorithm_version='B2_BUILD_INPUT_REUSE_V7_20261009',
+        B1_parallel_workers=1, B2_parallel_workers=3, terminal_date_retries=0, authorized_recovery_dates=list(RETRY_DATES), algorithm_version='B2_BUILD_INPUT_REUSE_V7_20261009',
         B2_requires_all_B1_terminal=True, resource=telemetry, last_error=checkpoint.get('last_error'),
         timestamp_UTC=now(), heartbeat=heartbeat, monitor_port=manifest.get('monitor_port', 8793))
     atomic(root / 'CAMPAIGN_STATUS.json', value)
     recovery={day:checkpoint['dates'][key('B1',day)] for day in RETRY_DATES}
-    atomic(root/'MAY23_BUILD_CONTINUATION_SEQUENCE_V7.json',dict(UTC=now(),run_id=manifest['run_id'],
+    atomic(root/'MAY23_BUILD_CONTINUATION_SEQUENCE_V7R2.json',dict(UTC=now(),run_id=manifest['run_id'],
         algorithm_version='B2_BUILD_INPUT_REUSE_V7_20261009',authorized_order=list(RETRY_DATES),
         current_day=primary.get('day'),current_arm=primary.get('arm'),
         next_unstarted_B1_dates=[row['day'] for row in sorted(checkpoint['dates'].values(),
@@ -656,7 +656,7 @@ def reap_finished(root, manifest, checkpoint, actives, children):
 def dispatch_available(root, manifest, checkpoint, actives, children, command_factory):
     """Fill only free slots, preserving the pending date's original order."""
     validate_slots(checkpoint, actives)
-    if (root/'HOLD_V7.json').exists():return []
+    if (root/'HOLD_V7R2.json').exists():return []
     arm = pending_phase(checkpoint)
     if arm is None:
         return []
@@ -713,7 +713,7 @@ def dispatch_available(root, manifest, checkpoint, actives, children, command_fa
 
 def run(root, *, worker_command=None, verify=True, poll_seconds=0.5):
     root = runtime_path(root)
-    if (root/'HOLD_V7.json').exists():return 0
+    if (root/'HOLD_V7R2.json').exists():return 0
     manifest = load_manifest(root, verify=verify)
     command_factory = worker_command or default_worker_command
     with os_lock(root / 'COORDINATOR.lock') as acquired:
@@ -743,7 +743,7 @@ def run(root, *, worker_command=None, verify=True, poll_seconds=0.5):
             children = {}
             checkpoint['state'] = 'RUNNING'; save_checkpoint(root, checkpoint)
             while pending_phase(checkpoint) is not None or actives:
-                if (root/'HOLD_V7.json').exists():
+                if (root/'HOLD_V7R2.json').exists():
                     checkpoint['state']='HOLD';save_checkpoint(root,checkpoint);return 0
                 with mutex:
                     reap_finished(root, manifest, checkpoint, actives, children)
