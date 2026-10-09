@@ -1,6 +1,9 @@
 """OS-owned dispatch with fixed B2=3/B3=1 and restart adoption."""
 from pathlib import Path
-import argparse, hashlib, json, re, subprocess, sys, time, uuid
+import argparse, errno, hashlib, json, re, subprocess, sys, time, uuid
+from contextlib import contextmanager
+from datetime import datetime, timezone
+from v42_may_campaign_native90.common import LockBusy
 import psutil
 from v42_b2_seed_recovery_v19.common import read,atomic,record,sha,now,process,same_process,exclusive_lock
 
@@ -553,11 +556,75 @@ def cycle(root,manifest,cp):
     refresh_retries(root,cp)
     cp.update(UTC=now(),parallel_workers=limit if cp['state']!='SOURCE_BLOCKED' else 0)
 
+def reject_verified_duplicate_startup(root,error):
+    """A typed startup lock refusal needs a live, exact existing owner proof."""
+    lock_path=root/'AUTONOMOUS_SUPERVISOR.lock'
+    cause=error.__cause__
+    if (sys.platform!='win32' or type(error) is not LockBusy
+        or str(error)!='LIVE_OS_LOCK:'+str(lock_path)
+        or not isinstance(cause,OSError)
+        or cause.errno not in (errno.EACCES,errno.EAGAIN,errno.EDEADLK)):
+        return False
+    owner_path=root/'SUPERVISOR_PROCESS.json';heartbeat_path=root/'SUPERVISOR_HEARTBEAT.json'
+    # These are strict observations. No missing/corrupt/unreadable owner proof
+    # becomes permission to ignore a global lock or a stalled environment.
+    owner_raw=owner_path.read_bytes();heartbeat_raw=heartbeat_path.read_bytes()
+    owner=json.loads(owner_raw.decode('utf-8-sig'));heartbeat=json.loads(heartbeat_raw.decode('utf-8-sig'))
+    if (type(owner.get('PID')) is not int or owner['PID']==psutil.Process().pid
+        or not isinstance(owner.get('created'),(int,float)) or isinstance(owner['created'],bool)
+        or not isinstance(owner.get('command'),list)):
+        return False
+    try:
+        live=psutil.Process(owner['PID'])
+        actual=dict(PID=live.pid,created=live.create_time(),command=live.cmdline(),cwd=live.cwd())
+    except (psutil.NoSuchProcess,psutil.ZombieProcess,psutil.AccessDenied):
+        return False
+    if (not live.is_running() or actual['created']!=owner['created'] or actual['command']!=owner['command']
+        or actual['command'][1:]!=['-B','-X','utf8','-m','v42_autonomous.supervisor',str(root)]
+        or Path(actual['cwd']).resolve()!=Path(__file__).resolve().parents[1]
+        or Path(live.exe()).resolve()!=Path(actual['command'][0]).resolve()
+        or any(heartbeat.get('process',{}).get(field)!=actual[field] for field in ('PID','created','command'))):
+        return False
+    stamp=datetime.fromisoformat(heartbeat['timestamp_UTC'])
+    if stamp.tzinfo is None:return False
+    age=(datetime.now(timezone.utc)-stamp).total_seconds()
+    # This is operational owner evidence, never a scientific time budget.
+    if not 0<=age<=60:return False
+    event=dict(schema='V42_VERIFIED_LIVE_SUPERVISOR_DUPLICATE_STARTUP_REJECTION',UTC=now(),
+        reason='DUPLICATE_STARTUP_REJECTED_EXISTING_OWNED_LIVE_SUPERVISOR',root=str(root),
+        startup_error=repr(error),startup_cause=repr(cause),errno=cause.errno,
+        duplicate_process=process(),existing_owner=actual,matching_heartbeat_age_seconds=age,
+        owner_record=dict(path=str(owner_path),bytes=len(owner_raw),sha256=hashlib.sha256(owner_raw).hexdigest()),
+        heartbeat_record=dict(path=str(heartbeat_path),bytes=len(heartbeat_raw),sha256=hashlib.sha256(heartbeat_raw).hexdigest()),
+        CP_worker_Native_files_not_written=True,SUPERVISOR_ERROR_not_written=True,
+        lock_removed_or_lease_broken=False,Native_optimize_calls=0,real_Native_model_constructions=0)
+    folder=root/'autonomous/startup_rejections';folder.mkdir(parents=True,exist_ok=True)
+    # Exclusive creation preserves every rejection; the public true-error file
+    # and all existing evidence remain untouched.
+    path=folder/(datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%f')+'_'+uuid.uuid4().hex+'.json')
+    with path.open('x',encoding='utf-8') as stream:
+        json.dump(event,stream,ensure_ascii=False,indent=2);stream.write('\n')
+    return True
+
+
+@contextmanager
+def startup_supervisor_lock(root):
+    lock=exclusive_lock(root/'AUTONOMOUS_SUPERVISOR.lock')
+    try:lock.__enter__()
+    except LockBusy as error:
+        if not reject_verified_duplicate_startup(root,error):raise
+        yield False
+        return
+    try:yield True
+    finally:lock.__exit__(*sys.exc_info())
+
+
 def run(root):
     if sys.platform=='win32':psutil.Process().nice(psutil.NORMAL_PRIORITY_CLASS)
     root=Path(root).resolve();manifest=read(root/'AUTONOMOUS_MANIFEST.json')
     if manifest['B2_workers']!=3 or manifest['B3_workers']!=1:raise PermissionError('WORKER_COUNT_DRIFT')
-    with exclusive_lock(root/'AUTONOMOUS_SUPERVISOR.lock'):
+    with startup_supervisor_lock(root) as acquired:
+        if not acquired:return
         cp=read(root/'SUPERVISOR_STATE.json');adopt_intents(cp)
         from .recovery import LeaseBusy,sync_worker
         try:adopt_recovery_workers(root,cp)

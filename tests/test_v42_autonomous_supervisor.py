@@ -405,3 +405,150 @@ def test_adopted_terminal_normalizes_status_and_rejects_pass_disagreement(tmp_pa
     s.adopt_recovery_workers(tmp_path,cp)
     assert cp['dates'][key]['status']==('FAIL' if status=='TIME_LIMIT' else 'QUARANTINE')
     assert cp['dates'][key]['worker_status']==status and cp['dates'][key]['current_attempt']=='fresh_23'
+
+
+
+def _startup_lock_error(root,number=13,path=None):
+    from v42_may_campaign_native90.common import LockBusy
+    error=LockBusy('LIVE_OS_LOCK:'+str(path or root/'AUTONOMOUS_SUPERVISOR.lock'))
+    error.__cause__=OSError(number,'isolated lock refusal')
+    return error
+
+
+def _duplicate_owner_fixture(tmp_path,monkeypatch,age=0):
+    import sys
+    from datetime import datetime,timezone,timedelta
+    owner=dict(PID=22001,created=10.,command=[sys.executable,'-B','-X','utf8','-m','v42_autonomous.supervisor',str(tmp_path)])
+    heartbeat=dict(process=owner,timestamp_UTC=(datetime.now(timezone.utc)-timedelta(seconds=age)).isoformat(),state='B2_RUNNING')
+    s.atomic(tmp_path/'SUPERVISOR_PROCESS.json',owner);s.atomic(tmp_path/'SUPERVISOR_HEARTBEAT.json',heartbeat)
+    s.atomic(tmp_path/'SUPERVISOR_STATE.json',dict(workers={'B2/2025-05-01':dict(PID=12,request='unchanged sealed fixture')},status='RUNNING'))
+    s.atomic(tmp_path/'SUPERVISOR_ERROR.json',dict(error='actual earlier error retained',UTC='2026-01-01'))
+    class Live:
+        pid=owner['PID']
+        def create_time(self):return owner['created']
+        def cmdline(self):return owner['command']
+        def cwd(self):return str(Path(s.__file__).resolve().parents[1])
+        def exe(self):return sys.executable
+        def is_running(self):return True
+    live=Live()
+    monkeypatch.setattr(s.psutil,'Process',lambda pid=None:live if pid is not None else type('Caller',(),{'pid':99001})())
+    monkeypatch.setattr(s,'process',lambda:dict(PID=99001,command=['isolated test caller']))
+    return owner,heartbeat,live
+
+
+def test_duplicate_startup_immutable_event_preserves_public_error_cp_and_worker_evidence(tmp_path,monkeypatch):
+    owner,heartbeat,live=_duplicate_owner_fixture(tmp_path,monkeypatch)
+    paths=[tmp_path/n for n in ('SUPERVISOR_PROCESS.json','SUPERVISOR_HEARTBEAT.json','SUPERVISOR_STATE.json','SUPERVISOR_ERROR.json')]
+    before={p:p.read_bytes() for p in paths};error=_startup_lock_error(tmp_path)
+    for _ in range(2):assert s.reject_verified_duplicate_startup(tmp_path,error) is True
+    events=list((tmp_path/'autonomous/startup_rejections').glob('*.json'));assert len(events)==2
+    assert all(p.read_bytes()==raw for p,raw in before.items())
+    for p in events:
+        event=s.read(p)
+        assert event['existing_owner']['PID']==owner['PID']
+        assert event['reason']=='DUPLICATE_STARTUP_REJECTED_EXISTING_OWNED_LIVE_SUPERVISOR'
+        assert event['SUPERVISOR_ERROR_not_written'] and event['CP_worker_Native_files_not_written']
+        assert not event['lock_removed_or_lease_broken']
+
+
+@pytest.mark.parametrize('kind',['wrong_lock','wrong_type','unsupported_errno','no_cause'])
+def test_only_canonical_startup_lock_error_can_use_duplicate_rejection(tmp_path,monkeypatch,kind):
+    _duplicate_owner_fixture(tmp_path,monkeypatch);error=_startup_lock_error(tmp_path)
+    if kind=='wrong_lock':error=_startup_lock_error(tmp_path,path=tmp_path/'RECOVERY_QUEUE.lock')
+    elif kind=='wrong_type':error=RuntimeError(str(error));error.__cause__=OSError(13,'not canonical')
+    elif kind=='unsupported_errno':error=_startup_lock_error(tmp_path,number=5)
+    else:error.__cause__=None
+    assert s.reject_verified_duplicate_startup(tmp_path,error) is False
+    assert not (tmp_path/'autonomous/startup_rejections').exists()
+
+
+@pytest.mark.parametrize('kind',['stale_heartbeat','future_heartbeat','different_created','different_command','different_cwd','different_heartbeat_owner','dead_owner'])
+def test_unproven_or_stalled_owner_never_silences_startup_lock_failure(tmp_path,monkeypatch,kind):
+    import sys
+    owner,heartbeat,live=_duplicate_owner_fixture(tmp_path,monkeypatch,age=120 if kind=='stale_heartbeat' else -120 if kind=='future_heartbeat' else 0)
+    if kind=='different_created':monkeypatch.setattr(live,'create_time',lambda:11.)
+    elif kind=='different_command':monkeypatch.setattr(live,'cmdline',lambda:[sys.executable,'unrelated'])
+    elif kind=='different_cwd':monkeypatch.setattr(live,'cwd',lambda:str(tmp_path))
+    elif kind=='different_heartbeat_owner':heartbeat['process']['PID']=99001;s.atomic(tmp_path/'SUPERVISOR_HEARTBEAT.json',heartbeat)
+    elif kind=='dead_owner':monkeypatch.setattr(live,'is_running',lambda:False)
+    error=_startup_lock_error(tmp_path)
+    assert s.reject_verified_duplicate_startup(tmp_path,error) is False
+    assert not (tmp_path/'autonomous/startup_rejections').exists()
+
+
+@pytest.mark.parametrize('kind',['missing','corrupt','access_denied'])
+def test_startup_owner_proof_reads_remain_strict(tmp_path,monkeypatch,kind):
+    _duplicate_owner_fixture(tmp_path,monkeypatch);p=tmp_path/'SUPERVISOR_HEARTBEAT.json'
+    if kind=='missing':p.unlink();expected=FileNotFoundError
+    elif kind=='corrupt':p.write_bytes(b'{bad');expected=ValueError
+    else:
+        original=Path.read_bytes
+        def denied(path):
+            if path==p:raise PermissionError(13,'isolated ACL denial',str(p))
+            return original(path)
+        monkeypatch.setattr(Path,'read_bytes',denied);expected=PermissionError
+    with pytest.raises(expected):s.reject_verified_duplicate_startup(tmp_path,_startup_lock_error(tmp_path))
+    assert not (tmp_path/'autonomous/startup_rejections').exists()
+
+
+def test_lockbusy_inside_acquired_controller_body_is_not_duplicate_startup(tmp_path):
+    error=_startup_lock_error(tmp_path)
+    with pytest.raises(type(error)) as raised:
+        with s.startup_supervisor_lock(tmp_path) as acquired:
+            assert acquired
+            raise error
+    assert raised.value is error and not (tmp_path/'autonomous/startup_rejections').exists()
+
+
+def test_actual_windows_owned_supervisor_mutex_duplicate_keeps_error_cp_and_native_fixtures(tmp_path):
+    import os,sys,json,time,subprocess
+    if sys.platform!='win32':pytest.skip('real Windows supervisor mutex required')
+    repo=Path(s.__file__).resolve().parents[1]
+    site=tmp_path/'denial_site';site.mkdir()
+    attempts=tmp_path/'CHILD_NATIVE_ENTRY_ATTEMPTS.json';installed=tmp_path/'CHILD_NATIVE_DENIAL_INSTALLED.json'
+    site_code=("import gurobipy as gp\nfrom pathlib import Path\nimport json\n"
+        "def denied(*args,**kwargs):\n    Path("+repr(str(attempts))+").write_text('DENIED ENTRY',encoding='utf-8')\n    raise AssertionError('ISOLATED_CHILD_NATIVE_MODEL_ENTRY_DENIED')\n"
+        "gp.Model.__init__=denied\ngp.Model.optimize=denied\nPath("+repr(str(installed))+").write_text(json.dumps({'Model_init_denied':True,'Model_optimize_denied':True}),encoding='utf-8')\n")
+    (site/'sitecustomize.py').write_text(site_code,encoding='utf-8')
+    s.atomic(tmp_path/'AUTONOMOUS_MANIFEST.json',dict(B2_workers=3,B3_workers=1))
+    s.atomic(tmp_path/'CONTINUATION_V19_MANIFEST.json',dict(attempt_id='no_native_fixture'))
+    cp=checkpoint()
+    for row in cp['dates'].values():row['status']='PASS' # Operational fixture, no scientific PASS evidence.
+    s.atomic(tmp_path/'SUPERVISOR_STATE.json',cp)
+    prior_error=tmp_path/'SUPERVISOR_ERROR.json';s.atomic(prior_error,dict(error='prior true error fixture',Native_Runtime=None))
+    evidence=[prior_error]
+    for day in DAYS[:3]:
+        folder=tmp_path/'dates/B2'/day/'attempts/isolated_fixture';s.atomic(folder/'request.json',dict(day=day,fixture_only=True))
+        s.atomic(folder/'NATIVE_RUNTIME_LEDGER.json',dict(fixture_only=True,calls=[],no_real_Native_measurements=True))
+        evidence.extend([folder/'request.json',folder/'NATIVE_RUNTIME_LEDGER.json'])
+    env=dict(os.environ);env['PYTHONPATH']=str(site)+os.pathsep+str(repo);env['PYTHONDONTWRITEBYTECODE']='1'
+    command=[sys.executable,'-B','-X','utf8','-m','v42_autonomous.supervisor',str(tmp_path)]
+    child=None;expected_created=None
+    with (tmp_path/'child_stdout.log').open('wb') as out,(tmp_path/'child_stderr.log').open('wb') as err:
+        try:
+            child=subprocess.Popen(command,cwd=repo,env=env,stdin=subprocess.DEVNULL,stdout=out,stderr=err,creationflags=subprocess.CREATE_NO_WINDOW)
+            for _ in range(500):
+                if child.poll() is not None:pytest.fail('ISOLATED_OWNER_EXITED:'+str(child.returncode))
+                if (tmp_path/'SUPERVISOR_HEARTBEAT.json').exists():break
+                time.sleep(.02)
+            else:pytest.fail('ISOLATED_OWNER_HEARTBEAT_MISSING')
+            owner=s.read(tmp_path/'SUPERVISOR_PROCESS.json');expected_created=owner['created'];assert owner['PID']==child.pid and owner['command']==command
+            assert s.read(installed)==dict(Model_init_denied=True,Model_optimize_denied=True)
+            evidence.append(tmp_path/'SUPERVISOR_STATE.json');before={p:p.read_bytes() for p in evidence}
+            s.run(tmp_path)
+            assert child.poll() is None and all(p.read_bytes()==raw for p,raw in before.items())
+            events=list((tmp_path/'autonomous/startup_rejections').glob('*.json'));assert len(events)==1
+            event=s.read(events[0]);assert event['existing_owner']['PID']==child.pid
+            assert event['startup_error'].startswith("LockBusy('LIVE_OS_LOCK:") and event['errno']==13
+            assert not attempts.exists()
+            with pytest.raises(s.LockBusy):
+                with s.exclusive_lock(tmp_path/'AUTONOMOUS_SUPERVISOR.lock'):pytest.fail('ORIGINAL_OWNER_MUTEX_RELEASED')
+            s.atomic(tmp_path/'REAL_WINDOWS_STARTUP_DUPLICATE_NATIVE_DENIED_PROOF.json',dict(PASS=True,fixture_only=True,actual_canonical_owner=owner,actual_live_mutex_rejection=event,
+                prior_error_CP_three_sealed_worker_and_Native_fixture_bytes_unchanged=True,real_Native_model_constructions=0,Native_optimize_calls=0,child_Model_init_and_optimize_denied=True,
+                production_process_actions=0,isolated_fixture_child_launch_count=1,isolated_fixture_child_termination_required_for_teardown=True))
+        finally:
+            if child is not None and child.poll() is None:
+                actual=s.psutil.Process(child.pid)
+                assert actual.cmdline()==command and Path(actual.cwd()).resolve()==repo
+                if expected_created is not None:assert actual.create_time()==expected_created
+                child.terminate();child.wait(timeout=10)
