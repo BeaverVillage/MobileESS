@@ -1,0 +1,32 @@
+{
+  "ObservedUTC": "2026-10-09T22:18:02.8530403Z",
+  "State": "Running",
+  "ExecutionTimeLimit": "PT0S",
+  "RestartCount": 0,
+  "MultipleInstances": "IgnoreNew",
+  "LastRunTime": "2026-10-09T22:13:20.0000000Z",
+  "LastTaskResult": 15,
+  "Triggers": [
+    {
+      "Class": "MSFT_TaskLogonTrigger",
+      "Enabled": true,
+      "StartBoundary": null,
+      "RepetitionInterval": null,
+      "RepetitionDuration": null
+    },
+    {
+      "Class": "MSFT_TaskTimeTrigger",
+      "Enabled": true,
+      "StartBoundary": "2026-10-10T01:48:19+09:00",
+      "RepetitionInterval": "PT5M",
+      "RepetitionDuration": null
+    }
+  ],
+  "Actions": [
+    {
+      "Execute": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+      "Arguments": "-B -X utf8 -m v42_autonomous.supervisor D:\\v42_may_restart_20261010_02",
+      "WorkingDirectory": "D:\\MobileESS_v42_autonomous"
+    }
+  ]
+}

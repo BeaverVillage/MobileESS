@@ -1,0 +1,424 @@
+diff --git a/tests/test_v42_autonomous_recovery.py b/tests/test_v42_autonomous_recovery.py
+index 6f81b249..09d9cef6 100644
+--- a/tests/test_v42_autonomous_recovery.py
++++ b/tests/test_v42_autonomous_recovery.py
+@@ -590,23 +590,150 @@ def test_orphaned_live_recovery_is_adopted_without_relaunch(tmp_path,monkeypatch
+ 
+ 
+ def test_native_progress_gets_immutable_snapshot_receipts(tmp_path,monkeypatch):
++    worker,attempt=heartbeat_packet(tmp_path,monkeypatch)
++    synced=r.sync_worker(tmp_path,worker)
++    assert synced['verification_status']=='NATIVE_PROGRESS_VERIFIED'
++    receipts=synced['verification']['receipts']
++    r.atomic(attempt/'progress.json',dict(attempt_id='new',Native_Runtime=12.))
++    assert all(r.record(receipt['path'])==receipt for receipt in receipts)
++
++
++def heartbeat_packet(tmp_path,monkeypatch):
+     failure,repair=packet(tmp_path,monkeypatch)
+-    with r.repair_lease(tmp_path,token='test'):
+-        row=r.enqueue(tmp_path,failure,repair,lease_token='test')
+-    r.mark_dispatched(tmp_path,row['queue_id'],'new',r.identity(),source_SHA='b'*64)
+-    request=r.read(row['retry_request_receipt']['path']);attempt=Path(request['result']).parent
++    request_path=Path(repair['retry_request_receipt']['path'])
++    request=r.read(request_path);attempt=request_path.parent
+     request.update(output=str(attempt/'output'),progress=str(attempt/'progress.json'))
+-    r.atomic(row['retry_request_receipt']['path'],request)
+-    r.atomic(attempt/'output/V19_MODEL_IDENTITY_VERIFICATION.json',{'PASS':True})
++    r.atomic(request_path,request);repair['retry_request_receipt']=r.record(request_path)
++    with r.repair_lease(tmp_path,token='heartbeat-test'):
++        row=r.enqueue(tmp_path,failure,repair,lease_token='heartbeat-test')
++    r.mark_dispatched(tmp_path,row['queue_id'],'new',r.identity(),source_SHA='b'*64)
++    r.atomic(attempt/'output/V19_MODEL_IDENTITY_VERIFICATION.json',dict(PASS=True))
+     r.atomic(attempt/'NATIVE_RUNTIME_LEDGER.json',dict(measured_Native_Runtime=10.,inflight={'status':'IN_FLIGHT'},calls=[]))
+     r.atomic(attempt/'progress.json',dict(attempt_id='new',Native_Runtime=11.))
+     r.atomic(attempt/'HEARTBEAT.json',dict(timestamp_UTC='2099-01-01T00:00:00+00:00'))
+-    worker=dict(r.identity(),request=row['retry_request_receipt']['path'],recovery_queue_id=row['queue_id'])
++    return dict(r.identity(),request=str(request_path),recovery_queue_id=row['queue_id']),attempt
++
++
++@pytest.mark.parametrize('winerror',[None,5,32,33])
++def test_owned_windows_heartbeat_access_failure_defers_without_evidence_or_budget_changes(tmp_path,monkeypatch,winerror):
++    worker,attempt=heartbeat_packet(tmp_path,monkeypatch);heartbeat=attempt/'HEARTBEAT.json'
++    before=(tmp_path/'RECOVERY_QUEUE.json').read_bytes();native=(attempt/'NATIVE_RUNTIME_LEDGER.json').read_bytes()
++    original=Path.read_bytes
++    def denied(path):
++        if path.resolve()==heartbeat.resolve():
++            error=PermissionError(13,'fixture access denied',str(path));error.winerror=winerror;raise error
++        return original(path)
++    monkeypatch.setattr(Path,'read_bytes',denied);monkeypatch.setattr(r.sys,'platform','win32')
++    with pytest.raises(r.HeartbeatObservationDeferred) as caught:r.sync_worker(tmp_path,worker)
++    assert isinstance(caught.value.__cause__,PermissionError)
++    assert caught.value.observation['path']==str(heartbeat.resolve())
++    assert caught.value.observation['errno']==13 and caught.value.observation['winerror']==winerror
++    assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==before
++    assert (attempt/'NATIVE_RUNTIME_LEDGER.json').read_bytes()==native
++    assert not (tmp_path/'recovery_evidence').exists()
++    monkeypatch.setattr(Path,'read_bytes',original)
++    assert r.sync_worker(tmp_path,worker)['verification_status']=='NATIVE_PROGRESS_VERIFIED'
++
++
++@pytest.mark.parametrize('tamper',['request_seal','heartbeat_path','source','winerror','non_windows'])
++def test_heartbeat_defer_never_admits_unowned_or_nonmatching_access_failure(tmp_path,monkeypatch,tamper):
++    worker,attempt=heartbeat_packet(tmp_path,monkeypatch);heartbeat=attempt/'HEARTBEAT.json'
++    row=next(x for x in r.queue(tmp_path)['entries'] if x['queue_id']==worker['recovery_queue_id'])
++    request=r.read(worker['request'])
++    if tamper=='request_seal':r.atomic(worker['request'],dict(request,unexpected_change=True))
++    elif tamper=='heartbeat_path':heartbeat=tmp_path/'outside/HEARTBEAT.json';r.atomic(heartbeat,{})
++    elif tamper=='source':request=dict(request,implementation_SHA='wrong')
++    original=Path.read_bytes
++    def denied(path):
++        if path.resolve()==heartbeat.resolve():
++            error=PermissionError(13,'fixture denied',str(path));error.winerror=34 if tamper=='winerror' else 5;raise error
++        return original(path)
++    monkeypatch.setattr(Path,'read_bytes',denied)
++    monkeypatch.setattr(r.sys,'platform','linux' if tamper=='non_windows' else 'win32')
++    with pytest.raises(PermissionError) as caught:r._read_worker_heartbeat(tmp_path,worker,row,request,heartbeat)
++    assert not isinstance(caught.value,r.HeartbeatObservationDeferred)
++
++
++def test_permission_on_sealed_request_and_invalid_heartbeat_json_stay_strict(tmp_path,monkeypatch):
++    worker,attempt=heartbeat_packet(tmp_path,monkeypatch);request=Path(worker['request'])
++    original=r.read
++    def denied(path,*args,**kwargs):
++        if Path(path).resolve()==request.resolve():raise PermissionError(13,'sealed request denied',str(path))
++        return original(path,*args,**kwargs)
++    monkeypatch.setattr(r,'read',denied)
++    with pytest.raises(PermissionError):r.sync_worker(tmp_path,worker)
++    monkeypatch.setattr(r,'read',original)
++    (attempt/'HEARTBEAT.json').write_text('{invalid',encoding='utf-8')
++    with pytest.raises(json.JSONDecodeError):r.sync_worker(tmp_path,worker)
++    assert r.queue(tmp_path)['entries'][0]['verification_status']=='WORKER_ENTERED'
++
++
++def test_absent_heartbeat_is_explicitly_unavailable_and_not_a_clean_read(tmp_path,monkeypatch):
++    worker,attempt=heartbeat_packet(tmp_path,monkeypatch)
++    (attempt/'HEARTBEAT.json').unlink()
++    before=(tmp_path/'RECOVERY_QUEUE.json').read_bytes()
++    observation=r.sync_worker(tmp_path,worker)
++    assert not isinstance(observation,r.HeartbeatObservationRead)
++    assert observation['verification_status']=='WORKER_ENTERED'
++    assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==before
++    assert not (tmp_path/'recovery_evidence').exists()
++
++
++def test_b3_heartbeat_requires_exact_sealed_own_runtime_output(tmp_path,monkeypatch):
++    attempt=tmp_path/'dates/B3/2025-05-08/attempts/new'
++    code=tmp_path/'code';output=code/'runtime/b3/run/2025-05-08/new'
++    request=dict(arm='B3',day='2025-05-08',attempt_id='new',run_id='run',implementation_SHA='b'*64,
++        result=str(attempt/'RESULT.json'),output=str(output))
++    path=attempt/'request.json';r.atomic(path,request)
++    row=dict(arm='B3',date=request['day'],retry_attempt_id='new',repair_source_SHA='b'*64,
++        repair_code_root=str(code),retry_request_receipt=r.record(path))
++    heartbeat=output/'HEARTBEAT.json';r.atomic(heartbeat,dict(stage='M1',timestamp_UTC='2099'))
++    worker=dict(request=str(path))
++    observed,raw=r._read_worker_heartbeat(tmp_path,worker,row,request,heartbeat)
++    assert observed['stage']=='M1' and isinstance(raw,bytes)
++    wrong=tmp_path/'other/HEARTBEAT.json';r.atomic(wrong,dict(stage='M1'))
++    with pytest.raises(PermissionError,match='OWNERSHIP_OR_SEAL_DRIFT'):
++        r._read_worker_heartbeat(tmp_path,worker,row,request,wrong)
++
++
++def test_heartbeat_snapshot_is_the_same_single_read_that_was_parsed(tmp_path,monkeypatch):
++    worker,attempt=heartbeat_packet(tmp_path,monkeypatch);heartbeat=attempt/'HEARTBEAT.json'
++    original=Path.read_bytes;first=original(heartbeat);reads=[]
++    def replaced_after_read(path):
++        raw=original(path)
++        if path.resolve()==heartbeat.resolve():
++            reads.append(raw)
++            heartbeat.write_text(json.dumps(dict(timestamp_UTC='2100-01-01T00:00:00+00:00')),encoding='utf-8')
++        return raw
++    monkeypatch.setattr(Path,'read_bytes',replaced_after_read)
+     synced=r.sync_worker(tmp_path,worker)
+-    assert synced['verification_status']=='NATIVE_PROGRESS_VERIFIED'
+-    receipts=synced['verification']['receipts']
+-    r.atomic(attempt/'progress.json',dict(attempt_id='new',Native_Runtime=12.))
+-    assert all(r.record(receipt['path'])==receipt for receipt in receipts)
++    assert len(reads)==1 and reads[0]==first
++    frozen=[r.read(row['path']) for row in synced['verification']['receipts']]
++    observed=next(row for row in frozen if row['source_path']==str(heartbeat.resolve()))
++    assert observed['source_sha256']==r.hashlib.sha256(first).hexdigest()
++    assert observed['snapshot']['timestamp_UTC'].startswith('2099-')
++    assert r.read(heartbeat)['timestamp_UTC'].startswith('2100-')
++
++
++@pytest.mark.skipif(r.sys.platform!='win32',reason='Actual Windows file-sharing reproduction')
++def test_actual_windows_exclusive_heartbeat_lock_defers_and_recovers_without_native(tmp_path,monkeypatch):
++    import ctypes
++    from ctypes import wintypes
++    worker,attempt=heartbeat_packet(tmp_path,monkeypatch);heartbeat=attempt/'HEARTBEAT.json'
++    kernel=ctypes.WinDLL('kernel32',use_last_error=True)
++    kernel.CreateFileW.argtypes=(wintypes.LPCWSTR,wintypes.DWORD,wintypes.DWORD,wintypes.LPVOID,wintypes.DWORD,wintypes.DWORD,wintypes.HANDLE)
++    kernel.CreateFileW.restype=wintypes.HANDLE
++    kernel.CloseHandle.argtypes=(wintypes.HANDLE,);kernel.CloseHandle.restype=wintypes.BOOL
++    handle=kernel.CreateFileW(str(heartbeat),0x80000000,0,None,3,0,None)
++    assert handle!=ctypes.c_void_p(-1).value
++    before=(tmp_path/'RECOVERY_QUEUE.json').read_bytes()
++    try:
++        with pytest.raises(r.HeartbeatObservationDeferred) as caught:r.sync_worker(tmp_path,worker)
++        assert caught.value.observation['errno']==13
++        assert caught.value.observation['cause_classification'] in ('WINDOWS_SHARING_OR_LOCK_VIOLATION','WINDOWS_ACCESS_DENIED_CAUSE_UNRESOLVED')
++        assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==before
++    finally:assert kernel.CloseHandle(handle)
++    assert r.sync_worker(tmp_path,worker)['verification_status']=='NATIVE_PROGRESS_VERIFIED'
+ 
+ 
+ def test_repair_manifest_cannot_drop_original_native_carry(tmp_path,monkeypatch):
+diff --git a/tests/test_v42_autonomous_supervisor.py b/tests/test_v42_autonomous_supervisor.py
+index b0f36522..84705d7a 100644
+--- a/tests/test_v42_autonomous_supervisor.py
++++ b/tests/test_v42_autonomous_supervisor.py
+@@ -38,6 +38,69 @@ def test_cycle_survives_real_operator_queue_lock_and_keeps_all_three_workers(tmp
+     s.cycle(tmp_path,{},cp)
+     assert cp['workers']==workers and cp['dates']['B2/'+DAYS[0]]['status']=='PASS'
+ 
++def test_cycle_heartbeat_access_failure_keeps_all_workers_and_other_dates_observed(tmp_path,monkeypatch):
++    cp=checkpoint()
++    for slot,day in enumerate(DAYS[3:6],1):
++        key='B2/'+day;cp['dates'][key].update(status='RUNNING',Native_Runtime=40.+slot)
++        cp['workers'][key]=dict(day=day,arm='B2',worker_slot=slot,PID=100+slot,created=10.+slot,request='sealed_'+str(slot)+'.json')
++    workers=deepcopy(cp['workers']);dates=deepcopy(cp['dates']);calls=[]
++    fault_key='B2/'+DAYS[4];fault_path=tmp_path/'HEARTBEAT.json';failed=True;missing=False
++    def observe(root,worker):
++        calls.append(worker['day'])
++        if failed and worker['day']==DAYS[4]:
++            raise r.HeartbeatObservationDeferred(fault_path,PermissionError(13,'fixture Windows access denied',str(fault_path)))
++        if missing and worker['day']==DAYS[4]:return dict(verification_status='WORKER_ENTERED')
++        return r.HeartbeatObservationRead(dict(verification_status='WORKER_ENTERED'))
++    monkeypatch.setattr(s,'same_process',lambda worker:True);monkeypatch.setattr(r,'sync_worker',observe)
++    monkeypatch.setattr(s,'dispatch',lambda *a:pytest.fail('HEALTHY_WORKER_REPLACED'))
++    r.atomic(tmp_path/'RECOVERY_QUEUE.json',dict(entries=[]))
++    queue_bytes=(tmp_path/'RECOVERY_QUEUE.json').read_bytes()
++    for iteration in range(3):
++        s.cycle(tmp_path,{},cp)
++        assert calls[-3:]==list(DAYS[3:6])
++        assert cp['workers']==workers and cp['dates']==dates
++        assert cp['worker_observation_errors'][fault_key]['consecutive_failures']==iteration+1
++    error=cp['worker_observation_errors'][fault_key]
++    assert error['status']=='PERSISTENT_WORKER_HEARTBEAT_IO_ERROR'
++    assert error['original_read_error']['errno']==13 and error['original_read_error']['path']==str(fault_path.resolve())
++    assert len(cp['worker_observation_error_history'])==2
++    failed=False;missing=True;s.cycle(tmp_path,{},cp)
++    assert cp['worker_observation_errors'][fault_key]==error and len(cp['worker_observation_error_history'])==2
++    missing=False;s.cycle(tmp_path,{},cp)
++    assert not cp['worker_observation_errors'] and len(cp['worker_observation_error_history'])==3
++    assert cp['worker_observation_error_history'][-1]['observation_resolved_UTC']
++    assert cp['worker_observation_error_history'][-1]['original_read_error']==error['original_read_error']
++    assert cp['workers']==workers and cp['dates']==dates
++    assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==queue_bytes
++
++
++def test_cycle_never_swallows_general_permission_or_global_source_failure(tmp_path,monkeypatch):
++    cp=checkpoint();key='B2/'+DAYS[4]
++    cp['workers'][key]=dict(day=DAYS[4],arm='B2',worker_slot=1,PID=101,request='sealed.json')
++    cp['dates'][key].update(status='RUNNING',Native_Runtime=31.)
++    before=deepcopy(cp);monkeypatch.setattr(s,'same_process',lambda worker:True)
++    for error in (PermissionError(13,'sealed manifest inaccessible','manifest.json'),r.SourceBlocked('GLOBAL_SOURCE_INTEGRITY_FAILURE:shared')):
++        monkeypatch.setattr(r,'sync_worker',lambda *a:(_ for _ in ()).throw(error))
++        with pytest.raises(PermissionError) as caught:s.cycle(tmp_path,{},cp)
++        assert caught.value is error and cp['workers']==before['workers'] and cp['dates']==before['dates']
++        assert 'worker_observation_errors' not in cp
++
++
++def test_clean_heartbeat_for_different_attempt_cannot_resolve_previous_worker_fault(tmp_path):
++    cp=checkpoint();key='B2/'+DAYS[4]
++    worker=dict(PID=101,created=11.,request='original-request.json',recovery_queue_id='original-queue')
++    error=r.HeartbeatObservationDeferred(tmp_path/'HEARTBEAT.json',PermissionError(13,'original denied',str(tmp_path/'HEARTBEAT.json')))
++    s.record_heartbeat_observation_error(cp,key,worker,error)
++    original=deepcopy(cp['worker_observation_errors'][key]);history=deepcopy(cp['worker_observation_error_history'])
++    newer=dict(worker,PID=102,created=12.,request='new-request.json',recovery_queue_id='new-queue')
++    assert s.resolve_heartbeat_observation_error(cp,key,newer) is False
++    assert cp['worker_observation_errors'][key]==original and cp['worker_observation_error_history']==history
++    assert s.resolve_heartbeat_observation_error(cp,key,worker) is True
++    assert not cp['worker_observation_errors']
++    assert cp['worker_observation_error_history'][-1]['resolution']=='CLEAN_OWNED_HEARTBEAT_READ_FOR_SAME_WORKER_IDENTITY'
++    assert cp['worker_observation_error_history'][-1]['original_read_error']==original['original_read_error']
++
++
+ def test_failure_quarantine_and_budget_terminal_do_not_block_sweep():
+     cp=checkpoint()
+     for row in cp['dates'].values():row['status']='PASS'
+diff --git a/v42_autonomous/recovery.py b/v42_autonomous/recovery.py
+index 4de00bbc..4dc74d9d 100644
+--- a/v42_autonomous/recovery.py
++++ b/v42_autonomous/recovery.py
+@@ -152,6 +152,22 @@ class LeaseBusy(RuntimeError):
+     pass
+ 
+ 
++class HeartbeatObservationDeferred(RuntimeError):
++    """An owned volatile heartbeat could not be read; no evidence was admitted."""
++    def __init__(self, path, error):
++        self.observation = dict(path=str(Path(path).resolve()), error=repr(error),
++            reason=str(error), errno=error.errno, winerror=getattr(error, 'winerror', None),
++            error_class=type(error).__name__,
++            cause_classification=('WINDOWS_SHARING_OR_LOCK_VIOLATION' if getattr(error, 'winerror', None) in (32, 33)
++                                  else 'WINDOWS_ACCESS_DENIED_CAUSE_UNRESOLVED'))
++        super().__init__('OWNED_WORKER_HEARTBEAT_READ_DEFERRED:' + self.observation['reason'])
++
++
++class HeartbeatObservationRead(dict):
++    """A row result with a real, owned heartbeat read; no persisted evidence flag."""
++    pass
++
++
+ class SourceBlocked(PermissionError):
+     """A shared source or environment failure blocks future Native admission."""
+ 
+@@ -1019,10 +1035,10 @@ def mark_finished(root, queue_id, result_path):
+         return row
+ 
+ 
+-def _frozen_observation(root, queue_id, kind, path):
++def _frozen_observation(root, queue_id, kind, path, *, raw=None):
+     """Capture mutable progress once into immutable recovery evidence."""
+     path = Path(path)
+-    raw = path.read_bytes()
++    raw = path.read_bytes() if raw is None else raw
+     snapshot = Path(root) / 'recovery_evidence' / queue_id / (kind + '_' + uuid.uuid4().hex + '.json')
+     document = dict(observed_UTC=now(), source_path=str(path.resolve()),
+                     source_sha256=hashlib.sha256(raw).hexdigest(),
+@@ -1031,6 +1047,45 @@ def _frozen_observation(root, queue_id, kind, path):
+     return record(snapshot)
+ 
+ 
++def _owned_worker_heartbeat(root, worker, row, request, path):
++    attempt = Path(root).resolve() / 'dates' / row['arm'] / row['date'] / 'attempts' / request['attempt_id']
++    receipt = row['retry_request_receipt']
++    expected = attempt / 'HEARTBEAT.json' if row['arm'] == 'B2' else Path(request['output']).resolve() / 'HEARTBEAT.json'
++    b3_output = (Path(row['repair_code_root']).resolve() / 'runtime/b3' / request['run_id'] / row['date'] / request['attempt_id']) if row['arm'] == 'B3' else None
++    if (row['arm'] not in ('B2', 'B3') or request.get('arm') != row['arm']
++            or request.get('day') != row['date']
++            or request.get('attempt_id') != row['retry_attempt_id']
++            or request.get('implementation_SHA') != row['repair_source_SHA']
++            or Path(request['result']).resolve().parent != attempt
++            or Path(worker['request']).resolve() != attempt / 'request.json'
++            or Path(receipt['path']).resolve() != attempt / 'request.json'
++            or record(receipt['path']) != receipt or path != expected
++            or b3_output is not None and Path(request['output']).resolve() != b3_output):
++        raise PermissionError('WORKER_HEARTBEAT_OBSERVATION_OWNERSHIP_OR_SEAL_DRIFT')
++
++
++def _read_worker_heartbeat(root, worker, row, request, path):
++    """Only an exact sealed worker heartbeat may defer a Windows access failure.
++
++    The errno alone cannot prove an atomic replacement race. Preserve that
++    uncertainty; persistent access failures belong to operational observation
++    history, never to a fabricated empty heartbeat or Native accounting.
++    """
++    path = Path(path).resolve()
++    _owned_worker_heartbeat(root, worker, row, request, path)
++    try:
++        raw = path.read_bytes()
++    except FileNotFoundError:
++        return None, None
++    except PermissionError as error:
++        if (sys.platform != 'win32' or error.errno != 13
++                or getattr(error, 'winerror', None) not in (None, 5, 32, 33)
++                or not error.filename or Path(error.filename).resolve() != path):
++            raise
++        raise HeartbeatObservationDeferred(path, error) from error
++    return json.loads(raw.decode('utf-8-sig')), raw
++
++
+ def sync_worker(root, worker):
+     """Record Native progress without changing the running worker or source."""
+     queue_id = worker.get('recovery_queue_id')
+@@ -1043,11 +1098,13 @@ def sync_worker(root, worker):
+     attempt = Path(request['result']).parent
+     heartbeat_path = attempt / 'HEARTBEAT.json' if row['arm'] == 'B2' else Path(request['output']) / 'HEARTBEAT.json'
+     progress_path = Path(request['progress'])
+-    heartbeat = read(heartbeat_path, {})
++    heartbeat, heartbeat_raw = _read_worker_heartbeat(root, worker, row, request, heartbeat_path)
++    if heartbeat is None:
++        return row
+     progress = read(progress_path, {})
+     if (heartbeat.get('timestamp_UTC', '') <= row.get('dispatched_UTC', '')
+             or progress.get('attempt_id', progress.get('identity', {}).get('attempt_id')) != request['attempt_id']):
+-        return row
++        return HeartbeatObservationRead(row)
+     if row['arm'] == 'B2':
+         model_path = Path(request['output']) / 'V19_MODEL_IDENTITY_VERIFICATION.json'
+         ledger_path = attempt / 'NATIVE_RUNTIME_LEDGER.json'
+@@ -1057,7 +1114,7 @@ def sync_worker(root, worker):
+         native_progress = (type(progress.get('Native_Runtime')) in (int, float)
+                            and progress['Native_Runtime'] > ledger.get('measured_Native_Runtime', math.inf))
+         if model.get('PASS') is not True or not (new_calls or ledger.get('inflight') and native_progress):
+-            return row
++            return HeartbeatObservationRead(row)
+         paths = [('model', model_path), ('ledger', ledger_path), ('progress', progress_path), ('heartbeat', heartbeat_path)]
+     else:
+         output = Path(request['output'])
+@@ -1068,12 +1125,13 @@ def sync_worker(root, worker):
+         ledger = read(ledger_path, {})
+         if (admitted.get('PASS') is not True or admitted.get('source_sha') != row['repair_source_SHA']
+                 or stage not in ('M1', 'A2', 'M2') or not ledger.get('calls')):
+-            return row
++            return HeartbeatObservationRead(row)
+         paths = [('admission', admission), ('ledger', ledger_path), ('progress', progress_path), ('heartbeat', heartbeat_path)]
+-    receipts = [_frozen_observation(root, queue_id, kind, path) for kind, path in paths]
++    receipts = [_frozen_observation(root, queue_id, kind, path,
++                    raw=heartbeat_raw if kind == 'heartbeat' else None) for kind, path in paths]
+     evidence = dict(source_admission_PASS=True, model_generation_PASS=True, Native_entered=True,
+                     heartbeat_progress_PASS=True, ledger_progress_PASS=True, receipts=receipts)
+-    return mark_verified(root, queue_id, evidence)
++    return HeartbeatObservationRead(mark_verified(root, queue_id, evidence))
+ 
+ 
+ def reconcile_workers(root):
+diff --git a/v42_autonomous/supervisor.py b/v42_autonomous/supervisor.py
+index bdaf9ca4..05dcfd7f 100644
+--- a/v42_autonomous/supervisor.py
++++ b/v42_autonomous/supervisor.py
+@@ -435,9 +435,37 @@ def advance_sweeps(cp):
+         transition(cp,arm+'_COMPLETE' if all_pass else arm+'_SWEEP_COMPLETE_WITH_FAILURES')
+         if arm=='B2':transition(cp,'B3_STARTING');transition(cp,'B3_RUNNING')
+ 
++def record_heartbeat_observation_error(cp,key,worker,error):
++    """Preserve observation faults separately from scientific status/accounting."""
++    errors=cp.setdefault('worker_observation_errors',{})
++    identity={name:worker.get(name) for name in ('PID','created','request','recovery_queue_id')}
++    previous=errors.get(key)
++    consecutive=previous['consecutive_failures']+1 if previous and previous['worker_identity']==identity else 1
++    status='PERSISTENT_WORKER_HEARTBEAT_IO_ERROR' if consecutive>=3 else 'DEFERRED_WORKER_HEARTBEAT_IO_OBSERVATION'
++    entry=dict(status=status,worker_identity=identity,consecutive_failures=consecutive,
++        first_seen_UTC=previous['first_seen_UTC'] if previous and consecutive>1 else now(),
++        last_seen_UTC=now(),original_read_error=previous['original_read_error'] if previous and consecutive>1 else dict(error.observation),
++        last_read_error=dict(error.observation),scientific_status_and_native_accounting_unchanged=True,
++        counter_basis='CONSECUTIVE_ACCESS_FAILURES_WITHOUT_MATCHING_CLEAN_HEARTBEAT_READ')
++    errors[key]=entry
++    if not previous or previous['status']!=status or previous['worker_identity']!=identity:
++        cp.setdefault('worker_observation_error_history',[]).append(dict(key=key,**entry))
++
++
++def resolve_heartbeat_observation_error(cp,key,worker):
++    previous=cp.get('worker_observation_errors',{}).get(key)
++    identity={name:worker.get(name) for name in ('PID','created','request','recovery_queue_id')}
++    if previous and previous['worker_identity']!=identity:return False
++    if previous:
++        cp['worker_observation_errors'].pop(key)
++        cp.setdefault('worker_observation_error_history',[]).append(dict(key=key,**previous,
++            observation_resolved_UTC=now(),resolution='CLEAN_OWNED_HEARTBEAT_READ_FOR_SAME_WORKER_IDENTITY'))
++    return bool(previous)
++
++
+ def cycle(root,manifest,cp):
+     """One durable scheduling cycle; individual failures remain local."""
+-    from .recovery import LeaseBusy,queue,dispatch_ready,sync_worker,common_failure
++    from .recovery import LeaseBusy,HeartbeatObservationDeferred,HeartbeatObservationRead,queue,dispatch_ready,sync_worker,common_failure
+     root=Path(root)
+     adopt_intents(cp)
+     initialize_history(cp)
+@@ -451,8 +479,11 @@ def cycle(root,manifest,cp):
+         except LeaseBusy:cp['recovery_adoption_pending']=True
+     for key,worker in list(cp['workers'].items()):
+         if same_process(worker):
+-            try:sync_worker(root,worker)
++            try:
++                observation=sync_worker(root,worker)
++                if isinstance(observation,HeartbeatObservationRead):resolve_heartbeat_observation_error(cp,key,worker)
+             except LeaseBusy:pass
++            except HeartbeatObservationDeferred as error:record_heartbeat_observation_error(cp,key,worker,error)
+             continue
+         try:
+             collect(root,cp,key,worker)
