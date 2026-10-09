@@ -45,8 +45,9 @@ class Variables:
 class Raw:
     def __init__(self,name):
         self.Params=SimpleNamespace(OutputFlag=0,Method=1,Threads=1,TimeLimit=float('inf'),Presolve=-1,MIPGap=.0001,
-            FeasibilityTol=1e-8,OptimalityTol=1e-8,NumericFocus=0,ScaleFlag=-1)
+            FeasibilityTol=1e-8,OptimalityTol=1e-8,NumericFocus=0,ScaleFlag=-1,LPWarmStart=1,Crossover=-1)
         self.attrs={};self.entries=[];self.disposed=False;self.error=None
+        self.start_events=[];self.backend_entered=False;self.invalidate_starts_after_optimize=False
         self.Status=2;self.SolCount=0;self.Runtime=2.25;self.ObjCon=0.;self.Work=3.
     def setParam(self,k,v):setattr(self.Params,k,v)
     def addMVar(self,n,**kwargs):
@@ -59,10 +60,20 @@ class Raw:
     def update(self):pass
     def getA(self):return self.matrix.copy()
     def getAttr(self,key,*args):return self.attrs[key].copy()
+    def getVars(self):return list(range(self.NumVars))
+    def getConstrs(self):return list(range(self.NumConstrs))
+    def setAttr(self,key,axis,values):
+        assert not self.backend_entered,'NO_START_SETTER_AFTER_NATIVE_ENTRY'
+        self.start_events.append(key);self.attrs[key]=np.asarray(values,dtype=np.float64).copy()
     def optimize(self,callback=None):
         # Run unchanged original scope/Threads/date/P1 guard. No backend.
         original_guard.guard(self)
-        self.entries.append(dict(params=vars(self.Params).copy(),scope=dict(execution._model.get())))
+        self.backend_entered=True
+        self.entries.append(dict(params=vars(self.Params).copy(),scope=dict(execution._model.get()),
+            starts={k:v.copy() for k,v in self.attrs.items() if k in ('PStart','DStart')}))
+        if self.invalidate_starts_after_optimize:
+            self.attrs['PStart']=np.full(self.NumVars,gp.GRB.UNDEFINED)
+            self.attrs['DStart']=np.full(self.NumConstrs,gp.GRB.UNDEFINED)
         if callback is not None:callback(self,gp.GRB.Callback.POLLING)
         if self.error:raise self.error
         return 'FAKE_BACKEND_ONLY_NOT_NATIVE'
@@ -432,3 +443,206 @@ def test_complete_source_and_self_root_receipt_contains_real_declared_hashes(env
     assert s['computational_adapter_source']['sha256']==env.manifest['execution_sources']['v42_autonomous_b2/rmp_presolve.py']
     assert s['immutable_code_root']==str(draft._ROOT)
     assert s['exact_declared_package_files']==sorted(k for k in env.manifest['execution_sources'] if k.startswith('v42_autonomous_b2/'))
+
+
+def rebuild(env,*,columns=None):
+    result=env.runner.original_run.__globals__['build_master'](env.case,env.decomp,columns or {},env.out/'next_master')
+    env.model=result[0];env.proxy=draft.BudgetProxy(env.budget,write,env.runner.binding)
+    return result
+
+
+def test_current_nonunit_and_first_unit_seed_projected_with_complete_zero_dual(env):
+    plan=env.model._rmp_warm_plan
+    n=len(env.decomp.nonunit_columns)
+    assert np.array_equal(plan.pstart[:n],env.case.point[env.decomp.nonunit_columns])
+    assert np.array_equal(plan.pstart[n:],np.ones(4))
+    assert np.array_equal(plan.dstart,np.zeros(env.model.NumConstrs))
+    assert not plan.pstart.flags.writeable and not plan.dstart.flags.writeable
+    invoke(env)
+    raw=env.model._model;native=raw.entries[0]
+    assert raw.start_events==['PStart','DStart'] and native['params']['LPWarmStart']==2
+    assert native['params']['Method']==1 and native['params']['Presolve']==0 and native['params']['Crossover']==-1
+    assert np.array_equal(native['starts']['PStart'],plan.pstart)
+    assert np.array_equal(native['starts']['DStart'],plan.dstart)
+    receipt=json.loads((env.out/'master/RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json').read_text())['current_attempt_warm_start']
+    assert receipt['installed'] and receipt['exact_complete_start_readback_before_Native']
+    assert receipt['backend_actual_start_use_or_basis_proved'] is False
+    assert receipt['computational_zero_DStart_is_Native_Pi'] is False
+    assert receipt['start_is_basis_or_feasibility_or_dual_or_UB_or_Global_LB_authority'] is False
+
+
+def test_extra_unit_catalog_columns_receive_zero_without_using_past_point(env):
+    unit=next(iter(env.decomp.units));block=env.decomp.units[unit]
+    alternate=env.case.point[block.original_columns].copy();alternate[:]=0.
+    path=env.out/'own_alternate.npz';np.savez_compressed(path,point=alternate,original_columns=block.original_columns)
+    result=rebuild(env,columns={unit:[dict(path=str(path),sha256=dw.sha(path),admission=dict(PASS=True))]})
+    plan=env.model._rmp_warm_plan;n=len(env.decomp.nonunit_columns)
+    assert len(result[3]['catalog'])==5 and plan.pstart[n+1]==0.
+    for u in env.decomp.units:
+        positions=[j for j,v in enumerate(result[3]['catalog']) if v['unit']==u]
+        assert plan.pstart[n+positions[0]]==1.
+        assert all(plan.pstart[n+j]==0. for j in positions[1:])
+    invoke(env)
+    assert len(env.budget.calls)==1 and env.model._model.start_events==['PStart','DStart']
+
+
+def test_full_coupling_point_ineligible_uses_unchanged_cold_method1_call(env):
+    env.case.point[-2:]=[1.,0.]
+    rebuild(env)
+    plan=env.model._rmp_warm_plan
+    assert not plan.diagnostic['eligible'] and not plan.diagnostic['current_full_matrix_replay']['PASS']
+    invoke(env)
+    assert env.model.Params.LPWarmStart==1 and env.model.Params.Method==1
+    assert env.model._model.start_events==[] and len(env.budget.calls)==1
+    receipt=json.loads((env.out/'next_master/RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json').read_text())
+    assert receipt['Native_call_completed'] and not receipt['current_attempt_warm_start']['installed']
+
+
+def test_scaled_residual_is_separately_recorded_and_never_claimed_feasible(env):
+    env.case.d['sense'][6]='=';env.case.point[-2:]=[1e-25,1e-10]
+    env.decomp=build_blocks(env.case);rebuild(env)
+    hint=env.model._rmp_warm_plan.diagnostic
+    assert hint['eligible'] and hint['current_full_matrix_replay']['PASS']
+    assert hint['original_RMP_residual']['maximum_row_violation']<1e-9
+    assert hint['Native_scaled_RMP_residual']['maximum_row_violation']>1.
+    invoke(env)
+    assert len(env.budget.calls)==1 and env.model._model.entries[0]['params']['LPWarmStart']==2
+    assert not hint['start_is_basis_or_feasibility_or_dual_or_UB_or_Global_LB_authority']
+
+
+@pytest.mark.parametrize('mutation',[
+    lambda e:e.case.point.__setitem__(-1,3.),
+    lambda e:setattr(e.case,'case_sha','wrong_case'),
+    lambda e:e.decomp.nonunit_columns.__setitem__(0,0),
+    lambda e:e.model._rmp_warm_plan.identity['catalog'][0].update(point_vector_sha256='0'*64),
+    lambda e:e.model._rmp_warm_plan.diagnostic.update(eligible=False),
+    lambda e:setattr(e.model._rmp_warm_plan.pstart.flags,'writeable',True),
+    lambda e:setattr(e.model,'_rmp_warm_plan',None),
+    lambda e:Path(e.model._rmp_warm_plan.seed_receipts[0]['path']).write_bytes(b'changed_seed')])
+def test_current_case_seed_catalog_and_readonly_plan_tamper_denied_before_budget(env,mutation):
+    mutation(env)
+    with pytest.raises(PermissionError):invoke(env)
+    assert env.budget.calls==[] and env.model._model.entries==[] and env.model._model.start_events==[]
+
+
+@pytest.mark.parametrize('target',['install','verify','seal','binding_warm'])
+def test_instance_delegate_substitution_cannot_bypass_warm_guards(env,monkeypatch,target):
+    if target=='binding_warm':monkeypatch.setattr(env.runner.binding,'warm',lambda *a:env.model._rmp_warm_plan)
+    else:monkeypatch.setattr(env.model._rmp_warm_plan,target,lambda *a:True)
+    with pytest.raises(PermissionError):invoke(env)
+    assert env.budget.calls==[] and env.model._model.entries==[]
+
+
+@pytest.mark.parametrize('target',['warm_install','warm_verify','case_hash','vector_sha'])
+def test_inplace_warm_or_vector_code_drift_denied_before_budget(env,monkeypatch,target):
+    function=dict(warm_install=draft.WarmPlan.install,warm_verify=draft.WarmPlan.verify,
+        case_hash=draft._case_sha,vector_sha=dw.vector_sha)[target]
+    monkeypatch.setattr(function,'__code__',(lambda *a,**k:None).__code__)
+    with pytest.raises(PermissionError):invoke(env)
+    assert env.budget.calls==[] and env.model._model.entries==[]
+
+
+def test_pre_native_start_readback_drift_denied_without_extra_backend(env,monkeypatch):
+    raw=env.model._model;raw.Runtime=0.
+    original=raw.getAttr
+    def get(key,*args):
+        value=original(key,*args)
+        if key=='PStart':value[0]+=1.
+        return value
+    monkeypatch.setattr(raw,'getAttr',get)
+    with pytest.raises(PermissionError,match='EXACT_PRE_NATIVE_START_READBACK'):invoke(env)
+    assert raw.entries==[] and len(env.budget.calls)==1
+    receipt=json.loads((env.out/'master/RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json').read_text())
+    assert receipt['status']=='FAILED' and receipt['Native_call_completed'] is False
+
+
+@pytest.mark.parametrize('failed_key',['PStart','DStart'])
+def test_start_install_exception_preserves_original_unknown_runtime_and_disposes(env,monkeypatch,failed_key):
+    created=[]
+    initial=Raw.__init__
+    def init(self,*a,**k):initial(self,*a,**k);created.append(self);self.Runtime=float('nan')
+    original_set=Raw.setAttr
+    def fail(self,key,*args):
+        if key==failed_key:raise RuntimeError('SYNTHETIC_START_INSTALL_FAILURE')
+        return original_set(self,key,*args)
+    monkeypatch.setattr(Raw,'__init__',init);monkeypatch.setattr(Raw,'setAttr',fail)
+    with pytest.raises(RuntimeError,match='NATIVE_RUNTIME_UNAVAILABLE_QUARANTINE'):
+        env.runner(env.case,env.decomp,{},env.budget,env.out/'install_failure')
+    ledger=json.loads(env.budget.path.read_text())
+    assert created[-1].disposed and created[-1].entries==[]
+    assert len(ledger['calls'])==1 and ledger['calls'][0]['runtime_unavailable'] is True
+    assert ledger['calls'][0]['Native_Runtime'] is None
+    assert ledger['calls'][0]['error']=='SYNTHETIC_START_INSTALL_FAILURE'
+    receipt=json.loads((env.out/'install_failure/RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json').read_text())
+    assert receipt['status']=='FAILED' and not receipt['Native_call_completed']
+    assert draft._ENTRY.get() is None
+
+
+def test_no_start_setter_update_or_readback_after_native_even_if_undefined(env,monkeypatch):
+    created=[];initial=Raw.__init__;old_get=Raw.getAttr
+    def init(self,*a,**k):
+        initial(self,*a,**k);self.invalidate_starts_after_optimize=True;created.append(self)
+    def get(self,key,*args):
+        if self.backend_entered and key in ('PStart','DStart'):raise AssertionError('NO_POST_NATIVE_START_READ')
+        return old_get(self,key,*args)
+    def update(self):assert not self.backend_entered,'NO_POST_NATIVE_UPDATE'
+    monkeypatch.setattr(Raw,'__init__',init);monkeypatch.setattr(Raw,'getAttr',get);monkeypatch.setattr(Raw,'update',update)
+    result=env.runner(env.case,env.decomp,{},env.budget,env.out/'undefined_after')
+    assert result['native']['Native_Runtime']==2.25 and created[-1].disposed
+    assert created[-1].Params.LPWarmStart==2 and created[-1].start_events==['PStart','DStart']
+    assert np.all(created[-1].attrs['PStart']==gp.GRB.UNDEFINED)
+
+
+@pytest.mark.parametrize('key,value',[('LPWarmStart',0),('Crossover',0)])
+def test_pre_native_warm_or_crossover_param_tamper_remains_strict(env,key,value):
+    env.budget.progress=lambda row:setattr(env.model.Params,key,value)
+    with pytest.raises(PermissionError):invoke(env)
+    assert env.model._model.entries==[]
+
+
+def test_builder_post_return_warm_validation_failure_disposes_owned_model(env,monkeypatch):
+    created=[];initial=Raw.__init__
+    def init(self,*a,**k):initial(self,*a,**k);created.append(self)
+    monkeypatch.setattr(Raw,'__init__',init)
+    def drift(path,value):
+        write(path,value)
+        if Path(path).name=='RMP_IDENTITY.json':env.case.point[-1]=3.
+    runner=draft.scoped_runner(dw.run,env.output,drift)
+    with pytest.raises(PermissionError,match='CURRENT_BUILD_CASE_OR_POINT_DRIFT'):
+        runner(env.case,env.decomp,{},env.budget,env.out/'build_drift')
+    assert created[-1].disposed and created[-1].entries==[] and env.budget.calls==[]
+
+
+def test_ineligible_missing_partial_or_undefined_point_never_installs_hint(env):
+    model=env.model;identity=model._rmp_warm_plan.identity
+    for point in (None,np.array([0.]),np.full(env.case.A.shape[1],gp.GRB.UNDEFINED)):
+        env.case.point=point
+        current=draft._point(env.case)
+        plan=draft.WarmPlan(env.case,env.decomp,(model,None,None,identity),current,
+            draft._case_sha(env.case,env.decomp),env.request,env.out/'master')
+        assert not plan.diagnostic['eligible'] and plan.install() is False
+    assert model._model.start_events==[] and model.Params.LPWarmStart==1
+
+
+def test_computational_zero_dstart_does_not_create_absent_native_pi(env,monkeypatch):
+    original=Raw.addMConstr
+    class NoPi:
+        @property
+        def Pi(self):raise gp.GurobiError(10005,'SYNTHETIC_TIME_LIMIT_NO_PI')
+    def add(self,*a,**k):original(self,*a,**k);self.Status=11;return NoPi()
+    monkeypatch.setattr(Raw,'addMConstr',add)
+    result=env.runner(env.case,env.decomp,{},env.budget,env.out/'no_pi')
+    assert result['native']['Native_status']==11 and result['full_original_dual'] is None
+    assert result['convexity_duals'] is None and result['dual_status']=='NO_FINITE_PI_FOLLOWUP_PRICING_NOT_RUN'
+    assert result['restricted_master_is_Global_LB'] is False and env.budget.calls[-1]['Native_SolCount']==0
+
+
+def test_native_done_parameter_tamper_is_denied_without_start_restoration(env,monkeypatch):
+    original=Raw.optimize
+    def alter(self,*a,**k):
+        result=original(self,*a,**k);self.Params.LPWarmStart=1;return result
+    monkeypatch.setattr(Raw,'optimize',alter);monkeypatch.setattr(draft,'_RAW_OPTIMIZE',alter)
+    monkeypatch.setattr(draft,'_RAW_CODE',alter.__code__)
+    with pytest.raises(PermissionError,match='SINGLE_COMPLETED_NATIVE'):invoke(env)
+    assert len(env.budget.calls)==1 and len(env.model._model.entries)==1
+    assert env.model._model.start_events==['PStart','DStart'] and env.model.Params.LPWarmStart==1

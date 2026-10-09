@@ -1,4 +1,4 @@
-"""Restricted-master Presolve0 computational adapter; original single30s solve retained.
+"""Restricted-master Presolve0/current-start adapter; single30s solve retained.
 
 Reuse the unchanged ExactRowModel and its raw-model scope/row/Pi transport.
 The original budget remains the sole Runtime recorder and Native delegate.
@@ -12,6 +12,8 @@ import copy
 import json
 import math
 import inspect
+import weakref
+import sys
 
 import numpy as np
 from v42_autonomous_b2 import dw_native
@@ -48,10 +50,10 @@ _CODE_BINDINGS=tuple((f,f.__code__) for f in (
     _ORIGINAL_BUILD,_ORIGINAL_RUN,_ORIGINAL_NATIVE_OPTIMIZE,
     _ORIGINAL_RECEIPT_OPTIMIZE,_ORIGINAL_INHERITED_OPTIMIZE,_ORIGINAL_EXACT_OPTIMIZE,_ORIGINAL_SCOPE,_ORIGINAL_SCOPE_GENERATOR,
     _ORIGINAL_CURRENT,_ORIGINAL_AUTHORIZE,_ORIGINAL_GUARD,_ORIGINAL_PRECISION,
-    dw.matrix_replay,dw.verify_decomposition,dw.sha,
+    dw.matrix_replay,dw.verify_decomposition,dw.sha,dw.vector_sha,
     _SOURCE_FUNCTION,_REQUEST_VERIFIER,_SOURCE_DIGEST))
 _HELPERS=tuple((key,_ORIGINAL_BUILD.__globals__[key])
-               for key in ('matrix_replay','verify_decomposition','sha'))
+               for key in ('matrix_replay','verify_decomposition','sha','vector_sha'))
 _ENTRY=ContextVar('V42_B2_RMP_PRESOLVE_ENTRY_V30',default=None)
 PRECISION=dict(FeasibilityTol=1e-9,OptimalityTol=1e-9,NumericFocus=3,ScaleFlag=2)
 LABEL='ONE_RESTRICTED_MASTER'
@@ -75,7 +77,9 @@ def _method(obj,key,descriptor):
 
 
 def _delegates(model,budget):
-    if any(f.__code__ is not code for f,code in _CODE_BINDINGS):
+    if (any(f.__code__ is not code for f,code in _CODE_BINDINGS)
+            or any(getattr(owner,key) is not f or f.__code__ is not code
+                   for owner,key,f,code in _WARM_BINDINGS)):
         raise PermissionError('RMP_PRESOLVE_IMMUTABLE_ORIGINAL_CODE_REQUIRED')
     aliases=(
         (original_budget.DateBudget,'native_optimize',_ORIGINAL_NATIVE_OPTIMIZE),
@@ -83,7 +87,8 @@ def _delegates(model,budget):
         (original_budget.OriginalBudget,'optimize',_ORIGINAL_INHERITED_OPTIMIZE),
         (dw_native.ExactRowModel,'optimize',_ORIGINAL_EXACT_OPTIMIZE),
         (execution,'native_scope',_ORIGINAL_SCOPE),(execution,'current',_ORIGINAL_CURRENT),
-        (execution,'authorize',_ORIGINAL_AUTHORIZE),(numerical,'set_precision',_ORIGINAL_PRECISION))
+        (execution,'authorize',_ORIGINAL_AUTHORIZE),(numerical,'set_precision',_ORIGINAL_PRECISION),
+        *tuple((dw,key,value) for key,value in _HELPERS))
     if any(getattr(owner,key) is not expected for owner,key,expected in aliases):
         raise PermissionError('RMP_PRESOLVE_ORIGINAL_SCOPE_OR_DELEGATE_ALIAS_DRIFT')
     if (type(budget) is not ReceiptDateBudget
@@ -120,7 +125,19 @@ class RunBinding:
             *tuple((build.__globals__,key,build.__globals__[key])
                    for key in ('output_directory','write')))
         self.model_factory=build.__globals__['gp'];self.model_type=self.model_factory.Model
+        self.warm_records=weakref.WeakKeyDictionary()
+    def register_warm(self,model,plan):
+        self.warm_records[model]=(weakref.ref(plan),plan.seal())
+    def warm(self,model):
+        recorded=self.warm_records.get(model)
+        plan=getattr(model,'_rmp_warm_plan',None)
+        if recorded is None or type(plan) is not WarmPlan or recorded[0]() is not plan:
+            raise PermissionError('RMP_WARM_OWN_ORIGINAL_BUILD_PLAN_REQUIRED')
+        for key in ('seal','verify','install'):_method(plan,key,_WARM_METHODS[key])
+        plan.verify(recorded[1]);return plan
     def verify(self):
+        _method(self,'warm',_RUN_WARM)
+        _method(self,'register_warm',_RUN_REGISTER_WARM)
         if (any(f.__code__ is not code for f,code in self.functions)
                 or any(ns.get(key) is not value for ns,key,value in self.aliases)
                 or any(tuple(c.cell_contents for c in f.__closure__ or ())!=values for f,values in self.closures)
@@ -134,6 +151,171 @@ def _matrix_sha(matrix):
     for key in ('indptr','indices','data'):
         array=np.ascontiguousarray(getattr(matrix,key));h.update(array.dtype.str.encode());h.update(memoryview(array).cast('B'))
     return h.hexdigest()
+
+
+def _array_sha(value):
+    array=np.ascontiguousarray(value);h=sha256(str(array.shape).encode())
+    h.update(array.dtype.str.encode());h.update(array.tobytes());return h.hexdigest()
+
+
+def _case_sha(case,decomp):
+    # The hint belongs to this live case/decomposition, never a past point.
+    h=sha256(_matrix_sha(case.A).encode())
+    for key in ('names','lower','upper','types','objective','rhs','sense','row_names','constant'):
+        h.update(key.encode());h.update(_array_sha(np.asarray(case.d[key])).encode())
+    for block in (*decomp.units.values(),decomp.nonunit_block):
+        h.update(str(block.unit).encode());h.update(_matrix_sha(block.A).encode())
+        for key in ('original_rows','original_columns'):
+            h.update(_array_sha(getattr(block,key)).encode())
+        for key in ('names','lower','upper','types','objective','rhs','sense','row_names','constant'):
+            h.update(_array_sha(np.asarray(block.d[key])).encode())
+    h.update(_array_sha(decomp.coupling_rows).encode())
+    h.update(_array_sha(decomp.column_owner).encode())
+    return h.hexdigest()
+
+
+def _point(case):
+    value=getattr(case,'point',None)
+    if value is None:return None
+    try:return np.asarray(value,dtype=np.float64).copy()
+    except (TypeError,ValueError):return None
+
+
+def _residual(matrix,rhs,sense,point):
+    residual=np.asarray(matrix@point,dtype=np.float64)-rhs
+    if not np.isfinite(residual).all():return dict(finite=False)
+    violation=np.where(sense=='=',abs(residual),np.where(sense=='<',residual,-residual))
+    return dict(finite=True,residual_sha256=_array_sha(residual),
+        maximum_absolute_residual=float(np.max(abs(residual),initial=0)),
+        maximum_row_violation=max(0.,float(np.max(violation,initial=0))))
+
+
+class WarmPlan:
+    """Current original seed projection, exclusively a model-local LP hint."""
+    def __init__(self,case,decomp,result,point,case_structure,request,output):
+        self.case=case;self.decomp=decomp;self.model=result[0];self.identity=result[3]
+        self.request=copy.deepcopy(request);self.case_structure=case_structure
+        self.case_identity=(case.case_sha,decomp.case_sha)
+        self.point=point;self.point_sha=None if point is None else _array_sha(point)
+        self.identity_sha=sha256(json.dumps(self.identity,sort_keys=True,allow_nan=False).encode()).hexdigest()
+        self.pstart=None;self.dstart=None;self.seed_receipts=[]
+        self.original_lpwarmstart=int(self.model.Params.LPWarmStart)
+        self.original_crossover=int(self.model.Params.Crossover)
+        self.diagnostic=dict(eligible=False,reason='CURRENT_FULL_POINT_MISSING_PARTIAL_OR_NONFINITE',
+            original_method=1,computational_zero_DStart_is_Native_Pi=False,
+            start_is_basis_or_feasibility_or_dual_or_UB_or_Global_LB_authority=False,
+            Native_after_start_setters_or_updates_allowed=False,
+            owned_model_disposed_by_original_run_finally=True)
+        current=_point(case)
+        if (_case_sha(case,decomp)!=case_structure or case.case_sha!=decomp.case_sha
+                or (point is None)!=(current is None)
+                or point is not None and _array_sha(current)!=self.point_sha):
+            raise PermissionError('RMP_WARM_CURRENT_BUILD_CASE_OR_POINT_DRIFT')
+        if point is not None:point.flags.writeable=False
+        if (point is not None and point.shape==(case.A.shape[1],) and np.isfinite(point).all()
+                and not np.any(point==gp.GRB.UNDEFINED)
+                and np.isfinite(case.A@point).all()):
+            replay=dw.matrix_replay(case.A,case.d,point,tolerance=1e-9,
+                bound_tolerance=1e-9,integer_tolerance=0.)
+            self.diagnostic.update(current_full_matrix_replay=replay,current_point_sha256=self.point_sha)
+            if not (replay['PASS'] and replay['integer_pattern_exact'] and replay['exact_binary_0_1']):
+                self.diagnostic['reason']='CURRENT_FULL_POINT_NOT_STRICTLY_REPLAYED_COLD_ORIGINAL_METHOD1'
+            else:
+                nonunit=np.asarray(decomp.nonunit_columns)
+                rows=np.sort(np.concatenate((decomp.nonunit_block.original_rows,decomp.coupling_rows)))
+                identity=self.identity;catalog=identity['catalog'];n=len(nonunit)
+                if (identity.get('PASS') is not True or identity['case_sha']!=case.case_sha
+                        or not np.array_equal(identity['nonunit_columns'],nonunit)
+                        or not np.array_equal(identity['source_rows'],rows)
+                        or identity['columns']!=n+len(catalog)
+                        or identity['rows']!=len(rows)+4):
+                    raise PermissionError('RMP_WARM_ORIGINAL_CATALOG_AXES_DRIFT')
+                primal=np.r_[point[nonunit],np.zeros(len(catalog))]
+                for unit,block in decomp.units.items():
+                    positions=[j for j,item in enumerate(catalog) if item['unit']==unit]
+                    if not positions:raise PermissionError('RMP_WARM_OWN_CURRENT_SEED_MISSING')
+                    j=positions[0];item=catalog[j];seed=point[block.original_columns]
+                    expected=(Path(output)/(unit+'_MASTER_SEED_COLUMN.npz')).resolve()
+                    record=_record(expected)
+                    if (Path(item['point_path']).resolve()!=expected
+                            or item['point_file_sha256']!=record['sha256']
+                            or item['point_vector_sha256']!=_ORIGINAL_BUILD.__globals__['vector_sha'](seed)
+                            or not np.array_equal(item['original_columns'],block.original_columns)
+                            or item['local_replay'].get('PASS') is not True
+                            or item['local_replay'].get('integer_pattern_exact') is not True
+                            or item['local_replay'].get('exact_binary_0_1') is not True):
+                        raise PermissionError('RMP_WARM_CURRENT_SEED_FILE_VECTOR_OR_AXIS_DRIFT')
+                    with np.load(expected,allow_pickle=False) as saved:
+                        if (not np.array_equal(saved['original_columns'],block.original_columns)
+                                or _array_sha(np.asarray(saved['point'],dtype=np.float64))!=_array_sha(seed)):
+                            raise PermissionError('RMP_WARM_CURRENT_SEED_CONTENT_DRIFT')
+                    primal[n+j]=1.;self.seed_receipts.append(record)
+                if not np.isfinite(primal).all():raise PermissionError('RMP_WARM_FINITE_PROJECTED_VECTOR_REQUIRED')
+                dual=np.zeros(self.model.NumConstrs,dtype=np.float64)
+                primal.flags.writeable=False;dual.flags.writeable=False
+                self.pstart=primal;self.dstart=dual
+                original=self.model.getA();rhs=np.asarray(self.model.getAttr('RHS'));sense=np.asarray(self.model.getAttr('Sense'))
+                native=self.model._model.getA();native_rhs=np.asarray(self.model._model.getAttr('RHS'))
+                self.diagnostic.update(eligible=True,reason='OWN_CURRENT_STRICT_FULL_SEED_PROJECTION',
+                    PStart_sha256=_array_sha(primal),DStart_sha256=_array_sha(dual),
+                    PStart_variables=len(primal),DStart_rows=len(dual),
+                    DStart_policy='ALL_FINITE_COMPUTATIONAL_ZERO_NO_NATIVE_DUAL_AUTHORITY',
+                    own_first_seed_files=self.seed_receipts,
+                    original_RMP_residual=_residual(original,rhs,sense,primal),
+                    Native_scaled_RMP_residual=_residual(native,native_rhs,sense,primal),
+                    original_RMP_matrix_sha256=_matrix_sha(original),
+                    Native_scaled_RMP_matrix_sha256=_matrix_sha(native),
+                    LPWarmStart_planned=2,Presolve_planned=0,
+                    presolved_model_or_crushed_start_claimed=False)
+                if not (self.diagnostic['original_RMP_residual']['finite']
+                        and self.diagnostic['Native_scaled_RMP_residual']['finite']):
+                    self.diagnostic.update(eligible=False,reason='NONFINITE_RMP_RESIDUAL_COLD_ORIGINAL_METHOD1')
+                    self.pstart=None;self.dstart=None
+        self.diagnostic_json=json.dumps(self.diagnostic,sort_keys=True,allow_nan=False)
+
+    def seal(self):
+        return (id(self.case),id(self.decomp),id(self.model),id(self.identity),self.case_structure,
+            self.case_identity,self.point_sha,self.identity_sha,self.original_lpwarmstart,
+            self.original_crossover,self.diagnostic_json)
+
+    def verify(self,sealed):
+        if self.seal()!=sealed:raise PermissionError('RMP_WARM_SEALED_PLAN_DRIFT')
+        current=_point(self.case)
+        if (execution.current() is None or execution.current()['request']!=self.request
+                or (self.case.case_sha,self.decomp.case_sha)!=self.case_identity
+                or _case_sha(self.case,self.decomp)!=self.case_structure
+                or (current is None)!=(self.point is None)
+                or current is not None and _array_sha(current)!=self.point_sha
+                or self.point is not None and (self.point.flags.writeable or _array_sha(self.point)!=self.point_sha)
+                or sha256(json.dumps(self.identity,sort_keys=True,allow_nan=False).encode()).hexdigest()!=self.identity_sha
+                or json.dumps(self.diagnostic,sort_keys=True,allow_nan=False)!=self.diagnostic_json):
+            raise PermissionError('RMP_WARM_CURRENT_CASE_CATALOG_OR_REQUEST_DRIFT')
+        for value,key in ((self.pstart,'PStart_sha256'),(self.dstart,'DStart_sha256')):
+            if self.diagnostic['eligible'] and (value is None or value.flags.writeable
+                    or _array_sha(value)!=self.diagnostic[key]):
+                raise PermissionError('RMP_WARM_READONLY_START_VECTOR_DRIFT')
+            if not self.diagnostic['eligible'] and value is not None:
+                raise PermissionError('RMP_WARM_COLD_PLAN_HAS_UNAPPROVED_START')
+        if any(_record(r['path'])!=r for r in self.seed_receipts):
+            raise PermissionError('RMP_WARM_CURRENT_SEED_FILE_DRIFT')
+        self.model.getA();self.model.getAttr('RHS')
+
+    def install(self):
+        if (self.model.Params.LPWarmStart!=self.original_lpwarmstart
+                or self.model.Params.Crossover!=self.original_crossover):
+            raise PermissionError('RMP_WARM_PRE_NATIVE_ORIGINAL_PARAMETER_DRIFT')
+        if not self.diagnostic['eligible']:return False
+        variables=self.model.getVars();rows=self.model.getConstrs()
+        if len(variables)!=len(self.pstart) or len(rows)!=len(self.dstart):
+            raise PermissionError('RMP_WARM_NATIVE_START_AXIS_DRIFT')
+        self.model.setAttr('PStart',variables,self.pstart.tolist())
+        self.model.setAttr('DStart',rows,self.dstart.tolist())
+        self.model.Params.LPWarmStart=2;self.model.update()
+        if (self.model.Params.LPWarmStart!=2
+                or _array_sha(np.asarray(self.model.getAttr('PStart'),dtype=np.float64))!=self.diagnostic['PStart_sha256']
+                or _array_sha(np.asarray(self.model.getAttr('DStart'),dtype=np.float64))!=self.diagnostic['DStart_sha256']):
+            raise PermissionError('RMP_WARM_EXACT_PRE_NATIVE_START_READBACK_REQUIRED')
+        return True
 
 
 def _source(request):
@@ -236,6 +418,8 @@ class Entry:
         if binding is None or getattr(model,'_rmp_build_binding',None) is not binding:
             raise PermissionError('RMP_PRESOLVE_ORIGINAL_REBOUND_BUILD_REQUIRED')
         self.raw_model=model._model;self.binding=binding
+        binding.verify()
+        self.warm=binding.warm(model);self.warm_installed=False
         self.sources=_source(r);self.before=len(budget.calls);self.entered=False;self.committed=False
         self.before_ledger=_known_ledger(budget,r)
         self.matrix_sha=_matrix_sha(model.getA());self.rhs=np.array(model.getAttr('RHS'),copy=True)
@@ -251,15 +435,23 @@ class Entry:
                 or not np.array_equal(self.model.getAttr('RHS'),self.rhs)
                 or self.model._receipt!=self.original_row_transport):
             raise PermissionError('RMP_PRESOLVE_ORIGINAL_ROW_TRANSPORT_MATH_DRIFT')
+        if self.binding.warm(self.model) is not self.warm:
+            raise PermissionError('RMP_WARM_OWN_ENTRY_PLAN_DRIFT')
+        if self.model.Params.Crossover!=self.warm.original_crossover:
+            raise PermissionError('RMP_WARM_ORIGINAL_CROSSOVER_DRIFT')
 
     def receipt(self,**values):
-        result=dict(schema='V42_B2_RMP_PRESOLVE0_COMPUTATIONAL_ENTRY_V30',
+        result=dict(schema='V42_B2_RMP_PRESOLVE0_CURRENT_START_COMPUTATIONAL_ENTRY_V34',
             identity={k:self.request[k] for k in ('run_id','arm','day','worker_slot','attempt_id')},
             source=self.sources,original_row_transport=self.original_row_transport,
             Native_calls_added=0,original_RMP_call_required_seconds=30,
             original_total_Native_cap_seconds=5400,original_RMP_not_removed=True,
             restricted_master_objective_is_Global_LB=False,
             computational_performance_or_Global_LB_improvement_proved=False,**values)
+        result['current_attempt_warm_start']=dict(self.warm.diagnostic,
+            installed=self.warm_installed,
+            exact_complete_start_readback_before_Native=self.warm_installed,
+            backend_actual_start_use_or_basis_proved=False)
         self.write(self.output/'RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json',result)
 
 
@@ -282,8 +474,11 @@ class PresolveFreeRMP(dw_native.ExactRowModel):
         entry.entered=True
         self.Params.Presolve=0
         if self.Params.Presolve!=0:raise PermissionError('RMP_PRESOLVE_ZERO_NOT_APPLIED')
+        entry.warm_installed=entry.warm.install()
+        entry.verify()
         entry.receipt(status='ABOUT_TO_DELEGATE',Native_call_completed=False,
-            actual_parameters=dict(Presolve=0,Method=1,Threads=1,TimeLimit=float(self.Params.TimeLimit),precision=PRECISION),
+            actual_parameters=dict(Presolve=0,Method=1,Threads=1,TimeLimit=float(self.Params.TimeLimit),precision=PRECISION,
+                LPWarmStart=int(self.Params.LPWarmStart),Crossover=int(self.Params.Crossover)),
             ledger_before=entry.before_ledger)
         # ExactRowModel carries only this wrapper's model scope to its owned
         # raw delegate. Original guards/callbacks/Runtime accounting remain.
@@ -328,12 +523,14 @@ class BudgetProxy:
                     or self._budget.calls[-1].get('precision_parameters')!=PRECISION
                     or not 0<self._budget.calls[-1].get('effective_TimeLimit',0)<=30
                     or model.Params.Presolve!=0 or model.Params.Method!=1 or model.Params.Threads!=1
+                    or model.Params.LPWarmStart!=(2 if entry.warm_installed else entry.warm.original_lpwarmstart)
                     or {k:getattr(model.Params,k) for k in PRECISION}!=PRECISION):
                 raise PermissionError('RMP_PRESOLVE_ORIGINAL_SINGLE_COMPLETED_NATIVE_RECEIPT_REQUIRED')
             entry.committed=True
             entry.receipt(status='COMPLETED',Native_call_completed=True,
                 completed_original_Native_call=copy.deepcopy(self._budget.calls[-1]),
-                actual_parameters=dict(Presolve=0,Method=1,Threads=1,TimeLimit=float(model.Params.TimeLimit),precision=PRECISION),
+                actual_parameters=dict(Presolve=0,Method=1,Threads=1,TimeLimit=float(model.Params.TimeLimit),precision=PRECISION,
+                    LPWarmStart=int(model.Params.LPWarmStart),Crossover=int(model.Params.Crossover)),
                 ledger_after=known)
             return returned
         except BaseException as exc:
@@ -371,11 +568,19 @@ def scoped_runner(original_run,output_directory,write):
     checked_build=rebound(original_builder,namespace)
     build_owner=SimpleNamespace(binding=None)
     def build(case,decomp,columns,output):
+        point=_point(case);case_structure=_case_sha(case,decomp)
         result=checked_build(case,decomp,columns,output)
-        model=result[0];object.__setattr__(model,'_rmp_output',output_directory(output))
-        object.__setattr__(model,'_rmp_build_binding',build_owner.binding)
-        write(output_directory(output)/'RMP_NATIVE_ROW_SCALING.json',model._receipt)
-        return result
+        model=result[0]
+        try:
+            object.__setattr__(model,'_rmp_output',output_directory(output))
+            object.__setattr__(model,'_rmp_build_binding',build_owner.binding)
+            plan=WarmPlan(case,decomp,result,point,case_structure,context['request'],model._rmp_output)
+            object.__setattr__(model,'_rmp_warm_plan',plan);build_owner.binding.register_warm(model,plan)
+            write(output_directory(output)/'RMP_NATIVE_ROW_SCALING.json',model._receipt)
+            return result
+        except BaseException:
+            # Original run has not entered its model-disposal finally yet.
+            model.dispose();raise
     original=rebound(original_run,dict(original_run.__globals__,build_master=build,write=write))
     binding=RunBinding(original,checked_build,build,write)
     build_owner.binding=binding
@@ -384,3 +589,13 @@ def scoped_runner(original_run,output_directory,write):
         return original(case,decomp,columns,BudgetProxy(ledger,write,binding),output,seconds=seconds)
     run.original_run=original;run.original_build=checked_build;run.binding=binding
     return run
+
+
+_WARM_BINDINGS=tuple((owner,key,getattr(owner,key),getattr(owner,key).__code__)
+    for owner,keys in ((sys.modules[__name__],('_array_sha','_case_sha','_point','_residual')),
+                       (WarmPlan,('__init__','seal','verify','install')),
+                       (RunBinding,('register_warm','warm')))
+    for key in keys)
+_WARM_METHODS={key:getattr(WarmPlan,key) for key in ('seal','verify','install')}
+_RUN_WARM=RunBinding.warm
+_RUN_REGISTER_WARM=RunBinding.register_warm
