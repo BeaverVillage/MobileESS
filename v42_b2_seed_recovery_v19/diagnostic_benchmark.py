@@ -11,6 +11,42 @@ from v42_b2_seed_recovery_v18.initialization import values_for
 from .common import read,atomic,record
 from .diagnostics import diagnose_model,bounded_iis
 
+def substitute_fixed(case):
+    """Diagnostic algebra only: singleton rows imply bounds, then substitute.
+
+    Every implied fixed variable retains its original-row derivation. No point
+    from this diagnostic reduction can reach the initialization admission gate.
+    """
+    low=case.d['lower'].copy();high=case.d['upper'].copy();derivations=[]
+    for iteration in range(12):
+        fixed=low==high;values=np.where(fixed,low,0.)
+        remaining=np.flatnonzero(~fixed)
+        A=case.A[:,remaining].tocsr();rhs=case.d['rhs']-case.A@values
+        rows=np.flatnonzero(np.diff(A.indptr)==1);changed=False
+        for i in rows:
+            k=A.indptr[i];j=int(remaining[A.indices[k]]);coefficient=float(A.data[k])
+            bound=float(rhs[i])/coefficient;sense=str(case.d['sense'][i]);old=(low[j],high[j])
+            if sense=='=' or (sense=='<' and coefficient<0) or (sense=='>' and coefficient>0):low[j]=max(low[j],bound)
+            if sense=='=' or (sense=='<' and coefficient>0) or (sense=='>' and coefficient<0):high[j]=min(high[j],bound)
+            if low[j]>high[j]:
+                # Leave conflicting inequalities intact for Native Farkas/IIS.
+                low[j],high[j]=old;continue
+            if old!=(low[j],high[j]):
+                changed=True;derivations.append(dict(iteration=iteration,row_index=int(i),
+                    row_name=str(case.d['row_names'][i]),variable_index=j,variable_name=str(case.d['names'][j]),
+                    coefficient=coefficient,reduced_rhs=float(rhs[i]),lower=float(low[j]),upper=float(high[j])))
+        if not changed:break
+    fixed=low==high;values=np.where(fixed,low,0.);remaining=np.flatnonzero(~fixed)
+    reduced=case.A[:,remaining].tocsr();used=np.unique(reduced.indices);columns=remaining[used]
+    data=dict(case.d)
+    for key in ('names','lower','upper','types','objective'):data[key]=case.d[key][columns].copy()
+    data['lower']=low[columns];data['upper']=high[columns];data['objective']=np.zeros(len(columns))
+    data['rhs']=case.d['rhs']-case.A@values;data['constant']=np.array(0.)
+    return NS(A=reduced[:,used].tocsr(),d=data,case_sha=case.case_sha),dict(
+        original_columns=columns.tolist(),fixed_indices=np.flatnonzero(fixed).tolist(),
+        fixed_values=values[fixed].tolist(),singleton_original_row_derivations=derivations,
+        diagnostic_only=True,initialization_constraints_removed=0)
+
 def diagnostic_subsystem(case,description,ids,values,source):
     """An IIS search subsystem only. Feasible points are NEVER admitted here.
 
@@ -70,6 +106,7 @@ def run(request,budget,progress):
         else:charge=lambda u,t:t<16 or t>=description['charging_return_slot']
         ids,values=values_for(case,description['paths'],charge)
         candidate,source_rows=diagnostic_subsystem(case,description,ids,values,source)
+        candidate,substitution=substitute_fixed(candidate)
         model,receipt=original._model(candidate,continuous=True)
         try:
             out=output/('V18_'+name);out.mkdir(exist_ok=True)
@@ -80,6 +117,7 @@ def run(request,budget,progress):
                 diagnostic_only_original_row_subsystem=True,original_row_count=A.shape[0],
                 subsystem_original_rows=len(source_rows),no_subsystem_feasible_point_admitted=True,
                 reason='NATIVE_FARKAS_FOR_AN_INFEASIBLE_SUBSYSTEM; INITIALIZER_ALWAYS_RETAINS_ALL_ROWS'))
+            atomic(out/'DIAGNOSTIC_EXACT_FIXED_SUBSTITUTION.json',substitution)
             if progress:progress(dict(phase='V18_CANDIDATE_FARKAS_'+name))
             diagnose_model(candidate,model,budget,out,model.getAttr('VType'),seconds=15.,run_phase_one=name=='00')
             if not (out/'FARKAS_DIAGNOSTIC.json').exists():
