@@ -217,3 +217,73 @@ def test_a1_reuse_is_bound_to_equivalence_and_origin_bytes(tmp_path):
     write(origin, dict(PASS=False))
     with pytest.raises(ValueError, match='ORIGIN_SHA'):
         monitor.verified_reuse(a1, path, '2025-05-01')
+
+
+def test_initial_candidate_never_becomes_certified_bound(tmp_path):
+    bound = dict(UB=None, LB=None, gap=None)
+    raw = dict(component='FEASIBILITY_LP', track='M_START', entered_native=True,
+               Native_SolCount=1., Native_incumbent=.54, Native_Gap=0.,
+               Native_objective_basis='ORIGINAL_OBJECTIVE')
+    assert monitor.initial_solution(str(tmp_path), '2025-05-01', bound, {})['status'] == 'SEARCHING'
+    candidate = monitor.initial_solution(str(tmp_path), '2025-05-01', bound, dict(calls=[raw]))
+    assert candidate['status'] == 'CANDIDATE_UNVALIDATED'
+    assert candidate['label'] == 'FULL 검증 중'
+    assert candidate['candidate_observed'] and not candidate['scientifically_validated']
+    assert candidate['native_candidate_evidence'][0]['raw_native_objective'] == .54
+    assert bound == dict(UB=None, LB=None, gap=None)
+    auxiliary = {**raw, 'component': 'P1', 'track': 'F2_ALL_96_MODES',
+                 'Native_objective_basis': 'AUXILIARY_FEASIBILITY_ZERO', 'Native_incumbent': 0.}
+    assert monitor.initial_solution(str(tmp_path), '2025-05-01', bound, dict(calls=[auxiliary]))['status'] == 'SEARCHING'
+    validated = monitor.initial_solution(str(tmp_path), '2025-05-01', dict(UB=.54, LB=None, gap=None), dict(calls=[raw]))
+    assert validated['status'] == 'FULL_VALIDATED' and validated['scientifically_validated']
+
+
+def test_actual_three_date_replay_failure_bytes_survive_cached_api(tmp_path, monkeypatch):
+    fixture = Path(__file__).parent/'fixtures'/'v42_monitor_initial_solution'/'saved_may01_02_03_validation_failure.json'
+    saved = json.loads(fixture.read_text(encoding='utf8'))
+    cp = production(tmp_path)
+    for slot, case in enumerate(saved, 1):
+        day = case['day']
+        attempt = tmp_path/'dates'/'B2'/day/'attempt'
+        output = attempt/'output'
+        output.mkdir(parents=True)
+        proof = output/'STATIONARY_DISPATCH_REPLAY.json'
+        proof.write_bytes(case['proof_bytes'].encode('utf8'))
+        assert monitor.sha(proof) == case['original_proof_SHA']
+        write(output/'SCIENTIFIC_CASE_IDENTITY.json', dict(arm='B2', day=day, case_sha=case['case_sha']))
+        write(attempt/'NATIVE_RUNTIME_LEDGER.json', dict(calls=[case['native_call']]))
+        request = write(attempt/'request.json', dict(result=str(attempt/'RESULT.json'),
+            output=str(output), progress=str(attempt/'progress.json'), worker_slot=slot, attempt_id='saved'))
+        cp['workers']['B2/'+day] = dict(request=request, PID=100+slot, created=1, command=['worker'])
+        cp['dates']['B2/'+day].update(status='RUNNING', request=request)
+    write(tmp_path/'SUPERVISOR_STATE.json', cp)
+    # Persisted PID receipts are intentionally dead in the fixture; candidate
+    # evidence remains visible without falsely reporting a live worker.
+    monkeypatch.setattr(monitor, 'alive', lambda owner: False)
+    cache = Snapshot(tmp_path)
+    cache.refresh()
+    code, payload = cache.get()
+    assert code == 200
+    api = json.loads(payload)
+    assert len(api['workers']) == 3 and api['live_worker_count'] == 0
+    for worker, case in zip(api['workers'], saved):
+        state = worker['initial_solution']
+        assert state['status'] == 'VALIDATION_FAILURE'
+        assert state['label'] == '후보 생성 · FULL 검증 오류'
+        assert state['candidate_observed'] and not state['scientifically_validated']
+        assert state['proof_reason'] == 'HYBRID_FINAL_D_PATH_REQUIRED:EVIDENCE'
+        assert state['validation_evidence']['sha256'] == case['original_proof_SHA']
+        assert worker['bounds']['UB'] is None and worker['bounds']['LB'] is None and worker['bounds']['gap'] is None
+        row = next(row for row in api['rows'] if row['day'] == worker['day'])
+        assert row['B2']['initial_solution'] == state
+
+
+def test_failure_receipt_from_different_case_cannot_override_current_candidate(tmp_path):
+    write(tmp_path/'SCIENTIFIC_CASE_IDENTITY.json', dict(day='2025-05-01', arm='B2', case_sha='current'))
+    write(tmp_path/'STATIONARY_DISPATCH_REPLAY.json', dict(PASS=False, invalid_start_not_supplied=True,
+          case_sha='another', reason='wrong'))
+    observed = monitor.initial_solution(str(tmp_path), '2025-05-01', {}, dict(calls=[dict(
+        component='FEASIBILITY_LP', entered_native=True, Native_SolCount=1)]))
+    assert observed['status'] == 'CANDIDATE_UNVALIDATED'
+    assert observed['observation_error'] == 'INITIAL_SOLUTION_PROOF_CASE_MISMATCH'
+    assert observed['proof_reason'] is None

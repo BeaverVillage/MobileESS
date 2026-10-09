@@ -243,6 +243,46 @@ def runtime(ledger, progress, cap=5400.):
                 calls=len(ledger.get('calls', [])), ledger_present=bool(ledger))
 
 
+def initial_solution(output, day, bound, ledger):
+    """Distinguish a raw feasibility witness from a FULL-validated solution.
+
+    Native solution counts/objectives are observations only. They never supply
+    an independent UB, LB or Global Gap, even when the native gap is zero.
+    """
+    candidates = []
+    for call in ledger.get('calls', []):
+        count = call.get('Native_SolCount', call.get('SolCount'))
+        if ((call.get('track') == 'M_START' or call.get('component') in ('FEASIBILITY_LP', 'FEASIBILITY'))
+                and call.get('entered_native') is True and finite(count) and count > 0):
+            objective = call.get('Native_incumbent')
+            candidates.append(dict(track=call.get('track'), component=call.get('component'),
+                SolCount=count, observation_UTC=call.get('Native_observation_UTC'),
+                raw_native_objective=objective if finite(objective) and call.get('Native_objective_basis') == 'ORIGINAL_OBJECTIVE' else None,
+                diagnostic_only=True))
+    result = dict(status='SEARCHING', label='초기해 탐색 중',
+                  candidate_observed=bool(candidates), scientifically_validated=False,
+                  native_candidate_evidence=candidates, proof_reason=None)
+    if finite(bound.get('UB')):
+        result.update(status='FULL_VALIDATED', label='FULL 검증 완료', scientifically_validated=True)
+        return result
+    if candidates:
+        result.update(status='CANDIDATE_UNVALIDATED', label='FULL 검증 중')
+    if not output:
+        return result
+    path = Path(output) / 'STATIONARY_DISPATCH_REPLAY.json'
+    proof = read(path)
+    identity = read(Path(output) / 'SCIENTIFIC_CASE_IDENTITY.json')
+    if proof and (identity.get('day') != day or identity.get('arm') != 'B2'
+                  or proof.get('case_sha') != identity.get('case_sha')):
+        result['observation_error'] = 'INITIAL_SOLUTION_PROOF_CASE_MISMATCH'
+        return result
+    if proof.get('PASS') is False and proof.get('invalid_start_not_supplied') is True:
+        result.update(status='VALIDATION_FAILURE', label='후보 생성 · FULL 검증 오류',
+                      proof_reason=proof.get('reason', 'FULL_VALIDATION_FAILED'),
+                      validation_evidence=dict(path=str(path), sha256=sha(path), case_sha=proof.get('case_sha')))
+    return result
+
+
 def worker_view(key, worker, epoch):
     arm, day = key.split('/', 1)
     request = request_for(worker)
@@ -277,6 +317,7 @@ def worker_view(key, worker, epoch):
     return dict(slot=request.get('worker_slot', worker.get('worker_slot')), arm=arm, day=day,
                 PID=identity.get('PID'), alive=live, status='RUNNING' if live else 'PROCESS_ENDED',
                 stage=stage, phase=phase, initial_solution_verified=bound.get('UB') is not None,
+                initial_solution=initial_solution(output, day, bound, ledger),
                 heartbeat_UTC=timestamp, heartbeat_age_seconds=age(timestamp, epoch),
                 bounds=bound, runtime=runtime(ledger, progress), resource=resource,
                 attempt_id=request.get('attempt_id'), source_SHA=request.get('implementation_SHA', request.get('source_SHA')),
@@ -336,6 +377,8 @@ def view(root, epoch=None):
                             source_SHA=(live.get('source_SHA') if live else document.get('source_SHA',
                                         document.get('source_sha', original.get('source_SHA')))),
                             attempts=original.get('attempt_count'), current_attempt=original.get('current_attempt'))
+            if live:
+                row[arm]['initial_solution'] = live['initial_solution']
         row['recovery'] = [r for r in recovery if r.get('date') == day]
         b2, b3 = row['B2']['actual'], row['B3']['actual']
         row['rho_difference_pp'] = b3['percent'] - b2['percent'] if b2.get('available') and b3.get('available') else None
