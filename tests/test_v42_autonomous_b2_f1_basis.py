@@ -1,4 +1,4 @@
-"""Native-denied guard and original-code-path tests for production V28."""
+"""Native-denied guard and original-code-path tests for production V31."""
 import importlib.util
 import json
 from pathlib import Path
@@ -103,9 +103,10 @@ def test_method_zero_selected_only_after_original_reset_at_exact_one_delegate(en
     env.budget.native_optimize=actual
     proxy=env.scope._budget_proxy(env.case,env.budget)
     proxy.native_optimize(full,**lp_kwargs(env))
-    assert calls==[(0,1,1,300.,v27.PRECISION)] and len(env.budget.calls)==2
+    assert calls==[(0,2,1,300.,v27.PRECISION)] and len(env.budget.calls)==2
     receipt=json.loads((env.output/'F1_FULL_LP_COMPUTATIONAL_ENTRY.json').read_text())
     assert receipt['Native_call_completed'] and receipt['completed_original_Native_call']['Native_Runtime']==300.
+    assert receipt['actual_parameters']['LPWarmStart']==2
     with pytest.raises(PermissionError,match='EXACT_ORIGINAL_FULL_LP'):
         proxy.native_optimize(full,**lp_kwargs(env))
     assert len(calls)==1
@@ -171,7 +172,7 @@ def test_actual_original_full_lp_bytecode_builder_reset_delegate_dispose_and_che
     original_code=original.__code__
     dual,cert=env.scope.full_lp_adapter(rebound_original,env.case,env.budget)
     assert rebound_original.__code__ is original_code
-    assert full.disposed and full.Params.Method==0 and full.Params.LPWarmStart==1
+    assert full.disposed and full.Params.Method==0 and full.Params.LPWarmStart==2
     assert len(env.budget.calls)==2 and env.budget.calls[-1]['requested_seconds']==300.
     # Original y<=1 means original optimum x=1. Independent full-box proof1
     # is retained; the adapter never treats a fixed-box objective as proof.
@@ -186,3 +187,38 @@ def test_mutating_cached_decision_and_native_basis_together_cannot_invent_basis(
     with pytest.raises(PermissionError,match='INSTALLED_BASIS_CHANGED'):
         env.scope._budget_proxy(env.case,env.budget).native_optimize(full,**lp_kwargs(env))
     assert len(env.budget.calls)==1
+
+
+def test_builder_receipt_plans_presolved_start_without_claiming_presolved_basis_identity(env):
+    full=admitted_basis(env)
+    receipt=json.loads((env.output/'F1_FULL_LP_WARMSTART.json').read_text())
+    assert full.Params.Method==1 and full.Params.LPWarmStart==1
+    assert receipt['LPWarmStart_at_builder_return']==1
+    assert receipt['LPWarmStart_at_approved_Native_entry']==2
+    assert receipt['original_basis_installed_before_Native_entry'] is True
+    assert receipt['original_basis_to_presolved_start_transport_planned'] is True
+    assert receipt['original_unpresolved_basis_computational_start'] is False
+    assert receipt['presolved_basis_identity_unchanged_claimed'] is False
+    assert receipt['Global_LB_authority'] is False
+    assert receipt['performance_benefit_claimed'] is False
+    assert len(env.budget.calls)==1
+
+
+@pytest.mark.parametrize('changed',[
+    ('LPWarmStart',0),('LPWarmStart',1),('Method',1),('Threads',2)])
+def test_completed_original_native_cost_remains_recorded_when_post_parameters_tampered(env,changed):
+    full=admitted_basis(env);original=env.budget.native_optimize
+    def completed_then_tampered(model,*args,**kwargs):
+        assert model.Params.Method==0 and model.Params.LPWarmStart==2
+        returned=original(model,*args,**kwargs)
+        setattr(model.Params,*changed)
+        return returned
+    env.budget.native_optimize=completed_then_tampered
+    with pytest.raises(PermissionError,match='COMPLETED_CALL_PARAMETER_DRIFT'):
+        env.scope._budget_proxy(env.case,env.budget).native_optimize(full,**lp_kwargs(env))
+    assert len(env.budget.calls)==2
+    assert env.budget.calls[-1]['Native_Runtime']==300.
+    assert env.budget.inflight is None
+    receipt=json.loads((env.output/'F1_FULL_LP_COMPUTATIONAL_ENTRY.json').read_text())
+    assert receipt['Native_call_completed'] is False
+    assert receipt['actual_parameters']['LPWarmStart']==2

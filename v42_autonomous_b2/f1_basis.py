@@ -2,7 +2,8 @@
 
 Inherit the unchanged V27 source, FULL promotion, Native receipts and
 independent checker. Only a proved complete original basis selects
-Method0/LPWarmStart1; fallback keeps the original Method1 and 300s call.
+Method0/LPWarmStart2 at the exact original Native call. Installation keeps
+Method1/LPWarmStart1 until that entry; fallback retains Method1 and 300s.
 """
 import copy
 import math
@@ -112,16 +113,20 @@ class Scope(v27.Scope):
                 or model.Params.Threads != 1 or model.Params.Method != 1
                 or model.Params.LPWarmStart != 1):
             raise PermissionError('F1_V28_BASIS_INSTALL_MATH_OR_PRECISION_DRIFT')
-        receipt = dict(schema='V42_V28_CURRENT_ATTEMPT_ORIGINAL_BASIS_PRIMAL',
+        receipt = dict(schema='V42_V31_CURRENT_ATTEMPT_ORIGINAL_BASIS_PRESOLVED_PRIMAL',
             PASS=True,case_sha=case.case_sha,binding=state.binding,
             original_math_roundtrip=before,mode='COMPLETE_SAME_ATTEMPT_ORIGINAL_BASIS',
             LPWarmStart=1,Method_at_builder_return=1,Method_at_approved_Native_entry=0,
+            LPWarmStart_at_builder_return=1,LPWarmStart_at_approved_Native_entry=2,
             Threads=1,original_precision_unchanged=True,
             original_F1_required_seconds=120.,original_full_LP_required_seconds=300.,
             total_native_cap_seconds=5400,Native_calls_added=0,
             original_full_LP_not_removed=True,performance_benefit_claimed=False,
             F1_Native_objective_is_Global_LB=False,
-            original_unpresolved_basis_computational_start=True,
+            original_unpresolved_basis_computational_start=False,
+            original_basis_installed_before_Native_entry=True,
+            original_basis_to_presolved_start_transport_planned=True,
+            presolved_basis_identity_unchanged_claimed=False,
             **{k:val for k,val in decision.items() if k not in ('vbasis','cbasis','eligible')})
         self.installed = True
         self._primal_model = model
@@ -176,16 +181,20 @@ class Scope(v27.Scope):
                     for key,val in v27.PRECISION.items():
                         setattr(model.Params,key,val)
                     model.Params.TimeLimit = min(float(requested),budget.remaining())
+                    # Use the verified original basis to derive/crush starts
+                    # on the presolved FULL LP. Gurobi may construct a new
+                    # presolved basis; its identity is not claimed unchanged.
+                    model.Params.LPWarmStart = 2
                     model.Params.Method = 0
                     actual = dict(Method=int(model.Params.Method),LPWarmStart=int(model.Params.LPWarmStart),
                         Threads=int(model.Params.Threads),TimeLimit=float(model.Params.TimeLimit),
                         precision={k:getattr(model.Params,k) for k in v27.PRECISION})
-                    if (actual['Method'] != 0 or actual['LPWarmStart'] != 1 or actual['Threads'] != 1
+                    if (actual['Method'] != 0 or actual['LPWarmStart'] != 2 or actual['Threads'] != 1
                             or actual['precision'] != v27.PRECISION
                             or not 0 < actual['TimeLimit'] <= requested <= 300.):
                         raise PermissionError('F1_V28_ACTUAL_COMPUTATIONAL_PARAMETERS_DRIFT')
                     scope.write('F1_FULL_LP_COMPUTATIONAL_ENTRY.json',dict(
-                        schema='V42_V28_APPROVED_FULL_LP_NATIVE_ENTRY',status='ABOUT_TO_DELEGATE',
+                        schema='V42_V31_APPROVED_FULL_LP_PRESOLVED_NATIVE_ENTRY',status='ABOUT_TO_DELEGATE',
                         Native_call_completed=False,call_index=before,original_call=kwargs,
                         actual_parameters=actual,original_math_roundtrip=v27.verify_native_math(model,case),
                         basis_start_receipt=scope._primal_receipt,state_packet=state.packet,
@@ -195,7 +204,7 @@ class Scope(v27.Scope):
                     raise PermissionError('F1_V28_EXACTLY_ONE_COMPLETED_FULL_LP_CALL_REQUIRED')
                 if scope._primal_model is not None:
                     call = copy.deepcopy(budget.calls[-1])
-                    if (model.Params.Method != 0 or model.Params.LPWarmStart != 1
+                    if (model.Params.Method != 0 or model.Params.LPWarmStart != 2
                             or model.Params.Threads != 1
                             or {k:getattr(model.Params,k) for k in v27.PRECISION} != v27.PRECISION
                             or call.get('effective_TimeLimit') != model.Params.TimeLimit
