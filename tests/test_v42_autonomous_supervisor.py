@@ -267,3 +267,48 @@ def test_timeout_and_implementation_failure_have_fail_public_status_and_preserve
     assert cp['dates']['B2/'+DAYS[0]]['worker_status']=='TIME_LIMIT_FEASIBLE_NOT_CERTIFIED'
     assert cp['dates']['B2/'+DAYS[1]]['status']=='FAIL'
     assert cp['dates']['B2/'+DAYS[1]]['first_attempt_terminal']['worker_status']=='IMPLEMENTATION_FAILURE'
+
+
+def test_retry_activation_archives_old_evidence_and_clears_current_fields(tmp_path):
+    cp=checkpoint();key='B2/'+DAYS[0];row=cp['dates'][key]
+    row.update(status='FAIL',current_attempt='old_01',request='old_request',result='old_result',result_SHA='a'*64,
+        Native_Runtime=353.,source_SHA='a'*64,worker_status='IMPLEMENTATION_FAILURE',error='old_error',
+        failure_receipt={'path':'old_failure','sha256':'f'*64},finished_UTC='2026-01-01',terminal_policy_error='old_policy')
+    s.first_terminal(cp,key);first=deepcopy(row['first_attempt_terminal'])
+    request=tmp_path/'new/request.json';r.atomic(request,dict(attempt_id='fresh_23',implementation_SHA='b'*64))
+    worker=dict(request=str(request),worker_slot=2,source_SHA='b'*64,source_commit='c'*40,recovery_queue_id='retry')
+    s.activate_retry(cp,key,worker)
+    assert row['current_attempt']=='fresh_23' and row['status']=='RUNNING'
+    assert row['source_SHA']=='b'*64 and row['Native_Runtime'] is None
+    assert row['first_attempt_terminal']==first
+    assert row['attempt_history'][0]['result']=='old_result' and row['attempt_history'][0]['Native_Runtime']==353.
+    assert all(field not in row for field in ('result','result_SHA','worker_status','error','failure_receipt','finished_UTC','terminal_policy_error'))
+    s.activate_retry(cp,key,worker)
+    assert len(row['attempt_history'])==1
+
+
+def test_retry_adoption_uses_same_clean_activation(tmp_path,monkeypatch):
+    cp=checkpoint();key='B2/'+DAYS[0]
+    cp['dates'][key].update(status='FAIL',current_attempt='old',result='old_result',result_SHA='a'*64,Native_Runtime=353.)
+    s.first_terminal(cp,key)
+    request=tmp_path/'new/request.json';r.atomic(request,dict(attempt_id='fresh_23'))
+    worker=dict(arm='B2',day=DAYS[0],request=str(request),worker_slot=1,source_SHA='b'*64,recovery_queue_id='retry')
+    monkeypatch.setattr(r,'reconcile_workers',lambda root:[worker]);monkeypatch.setattr(r,'queue',lambda root:dict(entries=[]))
+    s.adopt_recovery_workers(tmp_path,cp)
+    assert cp['dates'][key]['current_attempt']=='fresh_23'
+    assert 'result' not in cp['dates'][key] and cp['dates'][key]['Native_Runtime'] is None
+    assert cp['dates'][key]['attempt_history'][0]['result']=='old_result'
+
+
+@pytest.mark.parametrize('status,passed',[('PASS',False),('FAIL',True),('TIME_LIMIT',False)])
+def test_adopted_terminal_normalizes_status_and_rejects_pass_disagreement(tmp_path,monkeypatch,status,passed):
+    cp=checkpoint();key='B2/'+DAYS[0]
+    request=tmp_path/'request.json';r.atomic(request,dict(attempt_id='fresh_23'))
+    result=tmp_path/'RESULT.json';r.atomic(result,dict(status=status,PASS=passed))
+    cp['dates'][key].update(status='RUNNING',request=str(request))
+    entry=dict(arm='B2',date=DAYS[0],retry_request_receipt=r.record(request),final_result_receipt=r.record(result),
+        verification_status='RECOVERY_FAILED',final_Native_Runtime=1.,repair_source_SHA='b'*64)
+    monkeypatch.setattr(r,'reconcile_workers',lambda root:[]);monkeypatch.setattr(r,'queue',lambda root:dict(entries=[entry]))
+    s.adopt_recovery_workers(tmp_path,cp)
+    assert cp['dates'][key]['status']==('FAIL' if status=='TIME_LIMIT' else 'QUARANTINE')
+    assert cp['dates'][key]['worker_status']==status and cp['dates'][key]['current_attempt']=='fresh_23'

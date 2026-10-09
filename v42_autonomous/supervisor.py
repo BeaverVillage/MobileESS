@@ -42,6 +42,28 @@ def initialize_history(cp):
         if row['status'] not in ('PENDING','RUNNING','RETRY_READY','RETRY_PENDING','SOURCE_BLOCKED'):
             first_terminal(cp,key)
 
+def activate_retry(cp,key,worker):
+    """Keep historical evidence out of the new running attempt's fields."""
+    row=cp['dates'][key];request=read(worker['request'])
+    changed=row.get('current_attempt')!=request['attempt_id'] or row.get('request')!=worker['request']
+    terminal_fields=('result','result_SHA','failure_receipt','error','error_receipt','finished_UTC',
+        'terminal_identity_error','terminal_policy_error','terminal_recovery_error')
+    if changed or any(row.get(field) is not None for field in terminal_fields):
+        snapshot=json.loads(json.dumps({field:value for field,value in row.items()
+            if field not in ('first_attempt_terminal','attempt_history')},ensure_ascii=False))
+        history=row.setdefault('attempt_history',[])
+        key_fields=('current_attempt','request','result','result_SHA','failure_receipt')
+        if not any(all(previous.get(field)==snapshot.get(field) for field in key_fields) for previous in history):
+            history.append(dict(snapshot,archived_UTC=now(),superseded_by_attempt_id=request['attempt_id']))
+    keep={'arm','day','attempt_count','first_attempt_terminal','attempt_history','retry_queue_ids','last_terminal_status'}
+    for field in list(row):
+        if field not in keep:row.pop(field)
+    row.update(status='RUNNING',current_attempt=request['attempt_id'],request=worker['request'],
+        worker_slot=worker['worker_slot'],source_SHA=worker.get('source_SHA',request.get('implementation_SHA')),
+        source_commit=worker.get('source_commit'),Native_Runtime=None,
+        native_runtime_state='AWAITING_CURRENT_ATTEMPT_LEDGER',active_recovery_queue_id=worker.get('recovery_queue_id'))
+    cp['workers'][key]=worker
+
 def collect(root,cp,key,worker):
     request=read(worker['request']);p=Path(request['result'])
     row=cp['dates'][key]
@@ -233,20 +255,23 @@ def adopt_recovery_workers(root,cp):
             raise PermissionError('RECOVERY_ADOPTION_CONFLICTING_ACTIVE_DATE')
         if any(other!=key and value.get('worker_slot')==worker['worker_slot'] for other,value in cp['workers'].items()):
             raise PermissionError('RECOVERY_ADOPTION_CONFLICTING_SLOT')
-        cp['workers'][key]=worker
-        cp['dates'][key].update(status='RUNNING',request=worker['request'],current_attempt=read(worker['request'])['attempt_id'])
+        activate_retry(cp,key,worker)
     # A worker can finish between queue launch and supervisor persistence.
     for row in queue(root)['entries']:
         if not row.get('final_result_receipt'):continue
         key=row['arm']+'/'+row['date']
         request=row['retry_request_receipt']['path']
         current=cp['dates'][key]
-        if key not in cp['workers'] and current.get('status')!='PASS' and (
-            current.get('request') in (None,request) or
-            current.get('result')==(row.get('original_result_receipt') or {}).get('path')):
+        if key not in cp['workers'] and (current.get('request')==request or current.get('status')!='PASS' and (
+            current.get('request') is None or
+            current.get('result')==(row.get('original_result_receipt') or {}).get('path'))):
             result=read(row['final_result_receipt']['path'])
-            cp['dates'][key].update(status='PASS' if row['verification_status']=='RECOVERY_PASS'
-                else 'QUARANTINE' if row['verification_status'].startswith('QUARANTINE') else result['status'],
+            status='PASS' if row['verification_status']=='RECOVERY_PASS' else (
+                'QUARANTINE' if row['verification_status'].startswith('QUARANTINE') else public_status(result['status']))
+            if (result.get('status')=='PASS') != (result.get('PASS') is True):
+                status='QUARANTINE';current['terminal_policy_error']='RESULT_PASS_STATUS_DISAGREEMENT'
+            cp['dates'][key].update(status=status,worker_status=result['status'],
+                current_attempt=read(request)['attempt_id'],
                 request=request,result=row['final_result_receipt']['path'],result_SHA=row['final_result_receipt']['sha256'],
                 Native_Runtime=row.get('final_Native_Runtime'),source_SHA=row['repair_source_SHA'])
 
@@ -484,8 +509,7 @@ def cycle(root,manifest,cp):
                 else:cp['dispatch_wait']=dict(reason='RECOVERY_RECONCILIATION_REQUIRED',error=str(error),UTC=now())
                 continue
         if retry:
-            key=arm+'/'+retry['day'];cp['workers'][key]=retry
-            cp['dates'][key].update(status='RUNNING',request=retry['request'],worker_slot=slot)
+            key=arm+'/'+retry['day'];activate_retry(cp,key,retry)
             atomic(root/'SUPERVISOR_STATE.json',cp);continue
         day=None if both else next_day(cp,arm)
         if day:safe_dispatch(root,manifest,cp,arm,day,slot)
