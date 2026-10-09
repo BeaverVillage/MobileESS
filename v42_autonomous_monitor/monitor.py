@@ -18,7 +18,7 @@ from v42_b2_monitor_v15.actual import metric, measured
 from v42_b2_monitor_v16.certificates import bounds
 
 DAYS = tuple(f'2025-05-{i:02d}' for i in range(1, 32))
-ACTIVE = {'PENDING', 'RUNNING', 'RETRY_READY', 'START_REQUESTED'}
+ACTIVE = {'PENDING', 'RUNNING', 'RETRY_READY', 'RETRY_PENDING', 'START_REQUESTED', 'SOURCE_BLOCKED'}
 
 
 def finite(value):
@@ -85,6 +85,16 @@ def age(timestamp, epoch):
 
 def terminal(status):
     return bool(status) and status not in ACTIVE and not status.startswith('HELD')
+
+
+def public_status(status):
+    if status == 'RETRY_READY':
+        return 'RETRY_PENDING'
+    if status and (status.startswith('QUARANTINE') or status == 'EVIDENCE_INVALID'):
+        return 'QUARANTINE'
+    if terminal(status) and status != 'PASS':
+        return 'FAIL'
+    return status
 
 
 def result_for(row):
@@ -357,7 +367,7 @@ def view(root, epoch=None):
                         or Path(original['result']).resolve() != Path(origin.get('path', '')).resolve()):
                     document, error = {}, 'MONITOR_B1_SEALED_ORIGIN_MISMATCH'
             verified_pass = status == 'PASS' and document.get('PASS') is True and not error
-            display_status = 'EVIDENCE_INVALID' if status == 'PASS' and not verified_pass else status
+            display_status = 'QUARANTINE' if status == 'PASS' and not verified_pass else public_status(status)
             is_terminal = terminal(status)
             totals[arm]['processed'] += is_terminal
             totals[arm]['PASS'] += verified_pass
@@ -372,7 +382,8 @@ def view(root, epoch=None):
             if not finite(native):
                 native = None
             actual = actual_for(original, document) if arm in ('B2', 'B3') and document else dict(available=False)
-            row[arm] = dict(status=display_status, recorded_status=status, result_verified=bool(document) and not error, PASS=verified_pass,
+            row[arm] = dict(status=display_status, recorded_status=status, worker_status=document.get('status', original.get('worker_status')),
+                            result_verified=bool(document) and not error, PASS=verified_pass,
                             Native_Runtime=native, bounds=bound, actual=actual,
                             stage=live.get('stage') if live else bound.get('stage'),
                             A1_reused=bound.get('A1_reused'), result=original.get('result'),
@@ -382,6 +393,9 @@ def view(root, epoch=None):
                             attempts=original.get('attempt_count'), current_attempt=original.get('current_attempt'))
             if live:
                 row[arm]['initial_solution'] = live['initial_solution']
+            elif arm == 'B2' and request.get('output'):
+                ledger = read(Path(request['result']).parent / 'NATIVE_RUNTIME_LEDGER.json') if request.get('result') else {}
+                row[arm]['initial_solution'] = initial_solution(request['output'], day, bound, ledger)
         row['recovery'] = [r for r in recovery if r.get('date') == day]
         b2, b3 = row['B2']['actual'], row['B3']['actual']
         row['rho_difference_pp'] = b3['percent'] - b2['percent'] if b2.get('available') and b3.get('available') else None

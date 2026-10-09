@@ -89,7 +89,7 @@ def test_unverified_pass_is_visible_as_evidence_invalid(tmp_path):
     cp['dates']['B2/2025-05-01'].update(status='PASS', result=str(tmp_path/'missing'), result_SHA='a'*64)
     write(tmp_path / 'SUPERVISOR_STATE.json', cp)
     result = monitor.view(tmp_path)
-    assert result['rows'][0]['B2']['status'] == 'EVIDENCE_INVALID'
+    assert result['rows'][0]['B2']['status'] == 'QUARANTINE'
     assert result['totals']['B2']['PASS'] == 0
     assert result['totals']['B2']['FAIL'] == 1
 
@@ -297,3 +297,8 @@ def test_failure_receipt_from_different_case_cannot_override_current_candidate(t
     assert observed['status'] == 'CANDIDATE_UNVALIDATED'
     assert observed['observation_error'] == 'INITIAL_SOLUTION_PROOF_CASE_MISMATCH'
     assert observed['proof_reason'] is None
+
+@pytest.mark.parametrize('raw,expected', [('IMPLEMENTATION_FAILURE','FAIL'), ('TIME_LIMIT','FAIL'), ('INFEASIBLE','FAIL'), ('NUMERICAL','FAIL'), ('QUARANTINE_NATIVE_UNKNOWN','QUARANTINE'), ('RETRY_READY','RETRY_PENDING'), ('RETRY_PENDING','RETRY_PENDING'), ('PASS','PASS')])
+def test_date_public_status_preserves_failure_and_retry_distinctions(raw, expected):
+    assert monitor.public_status(raw) == expected
+    assert monitor.terminal('RETRY_PENDING') is False
