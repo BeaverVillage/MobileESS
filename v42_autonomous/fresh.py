@@ -7,9 +7,11 @@ from v42_b2_seed_recovery_v19.common import read, atomic, record, sha, now, ROOT
 DAYS = tuple(f'2025-05-{i:02d}' for i in range(1, 32))
 
 
-def prepare(root, origin, deployment, code_root, commit):
+def prepare(root, origin, deployment, code_root, commit, *, previous_campaign=None,
+            user_instruction='5월 B2 B3 캠페인 처음부터 다시 시작해야지.'):
     root, origin, code_root = map(lambda p: Path(p).resolve(), (root, origin, code_root))
     deployment = Path(deployment).resolve()
+    previous_campaign = Path(previous_campaign or origin).resolve()
     if root.exists() and any(root.iterdir()):
         raise PermissionError('FRESH_CAMPAIGN_DESTINATION_MUST_BE_EMPTY')
     prior = read(deployment)
@@ -24,18 +26,20 @@ def prepare(root, origin, deployment, code_root, commit):
             raise PermissionError('IMMUTABLE_DEPLOYMENT_DRIFT:' + name)
     run_id = 'may2025_b2_b3_fresh_' + now().replace('-', '').replace(':', '').replace('.', '_')
     authorization = dict(schema='V42_EXPLICIT_FRESH_RESTART', UTC=now(),
-        user_instruction='5월 B2 B3 캠페인 처음부터 다시 시작해야지.',
-        new_campaign_root=str(root), prior_campaign_root=str(origin),
+        user_instruction=user_instruction,
+        new_campaign_root=str(root), prior_campaign_root=str(previous_campaign),
+        original_B1_authority_root=str(origin),
         prior_deployment=record(deployment),
-        stop_receipt=record(origin / 'USER_FRESH_RESTART_STOP_RECEIPT.json'),
+        stop_receipt=record(previous_campaign / 'USER_FRESH_RESTART_STOP_RECEIPT.json'),
         prior_results_and_native_ledgers_preserved=True,
         prior_unknown_runtime_remains_unknown=True,
         fresh_B2_and_B3_dates=list(DAYS), prior_B2_and_B3_results_inherited=False)
     doc = deepcopy(prior)
     for key in ('previous_manifest', 'prior_attempts', 'preserved_quarantine'):
         doc.pop(key, None)
+    fresh_attempt = prior.get('fresh_attempt_id', 'fresh_b2_v21_01')
     doc.update(run_id=run_id, UTC=now(), source_commit=prior['source_commit'],
-        prior_attempts={}, attempt_id='fresh_b2_v21_01', attempt_ids=['fresh_b2_v21_01'],
+        prior_attempts={}, attempt_id=fresh_attempt, attempt_ids=[fresh_attempt],
         user_authorized=True, fresh_campaign=True, inherited_B1_results=b1,
         new_campaign_native_budget_seconds=5400, seed_requested_seconds=300,
         target_gap=.03, P2_calls=0, Threads=1, initialization_native_limit_seconds=5400,
@@ -54,6 +58,7 @@ def prepare(root, origin, deployment, code_root, commit):
     manifest = dict(schema='V42_AUTONOMOUS_V1', run_id=run_id,
         campaign_root=str(root), code_root=str(ROOT), source_commit=commit, UTC=now(),
         origin_campaign_root=str(origin), B1_campaign_root=str(origin), B1_results=b1,
+        previous_campaign_root=str(previous_campaign),
         B2_workers=3, B3_workers=1, B2_manifest=record(manifest_path),
         B2_worker_module='v42_autonomous_b2.worker', B2_deployment_manifest=str(manifest_path),
         B2_code_root=str(code_root), B2_source_commit=prior['source_commit'],
@@ -71,5 +76,8 @@ if __name__ == '__main__':
     p = argparse.ArgumentParser()
     for name in ('root', 'origin', 'deployment', 'code_root', 'commit'):
         p.add_argument(name)
+    p.add_argument('--previous-campaign')
+    p.add_argument('--user-instruction', default='5월 B2 B3 캠페인 처음부터 다시 시작해야지.')
     a = p.parse_args()
-    print(prepare(a.root, a.origin, a.deployment, a.code_root, a.commit)['run_id'])
+    print(prepare(a.root, a.origin, a.deployment, a.code_root, a.commit,
+        previous_campaign=a.previous_campaign, user_instruction=a.user_instruction)['run_id'])
