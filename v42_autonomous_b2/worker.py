@@ -1,13 +1,119 @@
 from pathlib import Path
-from contextlib import contextmanager
+from contextlib import contextmanager,ExitStack
 from unittest.mock import patch
 import argparse
+import re
 import psutil
 from v42_b2_seed_recovery_v19.common import ROOT,read,record,sha,digest
 from v42_b2_seed_recovery_v19.policy import source_files as scientific_sources,exact_prior_runtime
 from v42_may_campaign_native90.a_routing import rebound
 
 CANONICAL=Path(r'D:\MobileESS_V42')
+
+
+def proof_routes(request):
+    """Route proof packets only to this sealed date/attempt's output subtree.
+
+    Validator/source modules retain their original ROOT. The copied function
+    namespaces change filesystem routing only; all original code objects,
+    integer gates, FULL rows, physical replay and exact arithmetic remain.
+    """
+    from v42_m1_hybrid import final_verify
+    from v42_m1_anytime import core
+    root=Path(request['root']).resolve()
+    day,attempt_id=request['day'],request['attempt_id']
+    if (root.drive.upper()!='D:' or request.get('arm')!='B2'
+            or not re.fullmatch(r'2025-05-(0[1-9]|[12][0-9]|3[01])',day)
+            or not re.fullmatch(r'[A-Za-z0-9_-]{1,100}',attempt_id)):
+        raise PermissionError('SCOPED_PROOF_REQUEST_IDENTITY_REQUIRED')
+    output=Path(request['output']).resolve()
+    expected=root/'dates/B2'/day/'attempts'/attempt_id/'output'
+    if output!=expected or not output.is_relative_to(root):
+        raise PermissionError('SCOPED_PROOF_OWN_OUTPUT_REQUIRED')
+
+    def owned(path):
+        value=Path(path).resolve()
+        if value.drive.upper()!='D:' or not value.is_relative_to(output):
+            raise ValueError('SCOPED_PROOF_OTHER_ATTEMPT_OR_INPUT_FORBIDDEN')
+        return value
+
+    original_under=final_verify._under
+    labels=frozenset(('EVIDENCE','RECORDED_PACKET','RECORDED_PATH','LP_DUAL','OUTPUT'))
+    def scoped_under(path,parent,label):
+        if label in labels and Path(parent).resolve()==final_verify.ROOT.resolve():
+            return owned(path)
+        return original_under(path,parent,label)
+
+    namespace=dict(vars(final_verify),_under=scoped_under)
+    for name in ('_raw','_json','_packet','_output','_strict_ub'):
+        namespace[name]=rebound(getattr(final_verify,name),namespace)
+
+    def output_directory(path):
+        value=owned(path);value.mkdir(parents=True,exist_ok=True);return value
+
+    # The original writer's D: and containment tests remain active against the
+    # exact owned output. Other core globals, source reads and scheduler stay.
+    write=rebound(core.write,dict(core.write.__globals__,ROOT=output))
+    return dict(output=output,owned=owned,final=namespace,
+                write=write,output_directory=output_directory)
+
+
+@contextmanager
+def proof_scope(request,manifest):
+    from v42_may_campaign_native90 import m_stage,operations
+    from v42_m1_anytime import core,algorithms
+    from v42_m1_hybrid import blocks,pricing,dw,final_verify
+    from v42_b2_seed_recovery_v19.common import atomic
+    routes=proof_routes(request);output=routes['output']
+    folder=Path(request['input_folder']).resolve()
+    # These pre-existing producer receipts must stay read-only. No new input
+    # generation is authorized by the proof-path adapter.
+    for name in ('B2_FIXED_AIDC.json','PLANNING_PHYSICAL.npz','NATIVE_INPUT.json'):
+        if not (folder/name).is_file():raise PermissionError('SCOPED_PROOF_FROZEN_INPUT_REQUIRED:'+name)
+    inputs={str(p.resolve()):record(p) for p in sorted(folder.rglob('*')) if p.is_file()}
+    if any(not Path(p).is_relative_to(folder) for p in inputs):
+        raise PermissionError('SCOPED_PROOF_INPUT_LINK_ESCAPE')
+    bundle=read(folder/'NATIVE_INPUT.json')
+    for key in ('route_table','electrical_certificate'):
+        receipt=bundle[key]
+        if sha(receipt['path'])!=receipt['sha256']:
+            raise PermissionError('SCOPED_PROOF_FROZEN_LINKED_INPUT_SHA_DRIFT:'+key)
+        inputs[str(Path(receipt['path']).resolve())]=record(receipt['path'])
+    source_receipts={name:record(ROOT/name) for name in (
+        'v42_m1_hybrid/final_verify.py','v42_m1_research/check_ub.py',
+        'v42_m1_research/check_lb.py','v42_m1_hybrid/blocks.py',
+        'v42_m1_anytime/core.py','v42_m1_anytime/algorithms.py',
+        'v42_may_campaign_native90/operations.py')}
+    output.mkdir(parents=True,exist_ok=True)
+    receipt=dict(schema='V42_B2_SCOPED_PROOF_PATH_AUTHORITY_V22',
+        run_id=request['run_id'],day=request['day'],attempt_id=request['attempt_id'],
+        manifest=record(request['manifest']),execution_SHA=manifest['execution_SHA'],
+        owned_output=str(output),proof_read_write_roots=[str(output)],
+        input_receipts_read_only=list(inputs.values()),original_sources=source_receipts,
+        original_validator_ROOT=str(final_verify.ROOT),
+        original_validator_code_objects_retained=True,scientific_arithmetic_changed=False,
+        historical_candidate_point_admission=False,Native_optimize_calls=0,
+        status='ROUTING_ADMITTED')
+    atomic(output/'SCOPED_PROOF_PATH_AUTHORITY.json',receipt)
+    with ExitStack() as stack:
+        for module in (m_stage,algorithms):
+            stack.enter_context(patch.object(module,'_strict_ub',routes['final']['_strict_ub']))
+        for module in (core,algorithms):
+            stack.enter_context(patch.object(module,'write',routes['write']))
+        for module in (blocks,pricing,dw):
+            stack.enter_context(patch.object(module,'output_directory',routes['output_directory']))
+        # Operations uses D-only routing already; also bind its sole output
+        # entry to this request while source ROOT and source SHA checks stay.
+        stack.enter_context(patch.object(operations,'d_path',routes['owned']))
+        try:yield routes
+        finally:
+            if any(record(p)!=r for p,r in inputs.items()):
+                raise PermissionError('SCOPED_PROOF_READ_ONLY_INPUT_CHANGED')
+            if any(record(ROOT/name)!=r for name,r in source_receipts.items()):
+                raise PermissionError('SCOPED_PROOF_ORIGINAL_VALIDATOR_SOURCE_CHANGED')
+            receipt.update(status='ROUTING_SCOPE_CLOSED',read_only_inputs_unchanged=True,
+                           original_validator_sources_unchanged=True)
+            atomic(output/'SCOPED_PROOF_PATH_AUTHORITY.json',receipt)
 
 def sources():
     return dict(scientific_sources(),**{p.relative_to(ROOT).as_posix():sha(p)
@@ -74,7 +180,8 @@ def worker_scope(request):
     before=legacy.guard
     with patch.object(execution,'assert_peers',assert_peers):
         legacy.guard=execution.guard
-        try:yield manifest
+        try:
+            with proof_scope(request,manifest):yield manifest
         finally:legacy.guard=before;legacy._active.reset(token)
 
 def run(path):
