@@ -210,6 +210,123 @@ def terminal_packet(tmp_path, row, *, unknown=False):
     return result,ledger
 
 
+def next_repair(tmp_path,repair):
+    newer=dict(repair,repair_source_SHA='d'*64,repair_commit_SHA='e'*40)
+    proof=r.read(repair['validation_receipt']['path'])
+    proof.update(repair_source_SHA=newer['repair_source_SHA'],repair_commit_SHA=newer['repair_commit_SHA'])
+    path=tmp_path/'new_validation.json';r.atomic(path,proof)
+    newer['validation_receipt']=r.record(path)
+    request=r.read(repair['retry_request_receipt']['path'])
+    folder=tmp_path/'dates/B2/2025-05-08/attempts/newer'
+    request.update(attempt_id='newer',implementation_SHA='d'*64,result=str(folder/'RESULT.json'))
+    r.atomic(folder/'request.json',request)
+    newer['retry_request_receipt']=r.record(folder/'request.json')
+    return newer
+
+
+def current_pass_with_ready(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        original=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        result,ledger=terminal_packet(tmp_path,original)
+        r.mark_finished(tmp_path,original['queue_id'],result)
+        ready=r.enqueue(tmp_path,failure,next_repair(tmp_path,repair),lease_token='test')
+    key='B2/2025-05-08'
+    cp=dict(workers={},dates={key:dict(status='PASS',current_attempt='new',
+        request=original['retry_request_receipt']['path'],result=str(result),
+        result_SHA=r.record(result)['sha256'],Native_Runtime=11.,source_SHA='b'*64,
+        first_attempt_terminal={'status':'FAIL'},attempt_history=[{'status':'FAIL'}])})
+    return cp,ready,result,ledger
+
+
+def test_current_verified_pass_retires_only_unstarted_prepared_repair(tmp_path,monkeypatch):
+    from copy import deepcopy
+    from v42_autonomous import supervisor
+    cp,ready,_,_=current_pass_with_ready(tmp_path,monkeypatch);before=deepcopy(cp)
+    supervisor.refresh_retries(tmp_path,cp)
+    assert cp==before
+    retired=r.queue(tmp_path)['entries'][-1]
+    assert retired['verification_status']=='RETIRED_CURRENT_VERIFIED_PASS'
+    assert retired['retry_request_receipt']==ready['retry_request_receipt']
+    assert retired['current_PASS_evidence']['attempt_id']=='new'
+    assert r.queue(tmp_path)['entries'][0]['verification_status']=='RECOVERY_PASS'
+
+
+@pytest.mark.parametrize('tamper',['result','ledger','request','source','identity'])
+def test_unverified_or_tampered_pass_never_cancels_prepared_repair(tmp_path,monkeypatch,tamper):
+    cp,ready,result,ledger=current_pass_with_ready(tmp_path,monkeypatch)
+    row=cp['dates']['B2/2025-05-08']
+    if tamper=='result':row['result_SHA']='0'*64
+    elif tamper=='ledger':r.atomic(ledger,dict(measured_Native_Runtime=11.,inflight={'status':'IN_FLIGHT'}))
+    elif tamper=='request':r.atomic(row['request'],dict(arm='B2',day='2025-05-08',attempt_id='wrong'))
+    elif tamper=='source':row['source_SHA']='0'*64
+    else:row['current_attempt']='wrong'
+    r.retire_satisfied_ready(tmp_path,cp)
+    assert r.queue(tmp_path)['entries'][-1]['verification_status']=='READY_VERIFIED_REPAIR'
+
+
+@pytest.mark.parametrize('kind',['active','intent','untracked_worker'])
+def test_active_or_intended_repair_is_never_retired(tmp_path,monkeypatch,kind):
+    cp,ready,_,_=current_pass_with_ready(tmp_path,monkeypatch)
+    if kind=='active':cp['workers']['B2/2025-05-08']={'arm':'B2','day':'2025-05-08'}
+    elif kind=='untracked_worker':monkeypatch.setattr(r,'_request_workers',lambda path:[{'PID':123}])
+    else:
+        doc=r.queue(tmp_path);doc['entries'][-1]['verification_status']='DISPATCH_INTENT'
+        r.atomic(tmp_path/'RECOVERY_QUEUE.json',doc)
+    r.retire_satisfied_ready(tmp_path,cp)
+    assert r.queue(tmp_path)['entries'][-1]['verification_status']==('DISPATCH_INTENT' if kind=='intent' else 'READY_VERIFIED_REPAIR')
+
+
+def test_real_failure_still_dispatches_next_priority_repair(tmp_path,monkeypatch):
+    from types import SimpleNamespace
+    cp,ready,_,_=current_pass_with_ready(tmp_path,monkeypatch)
+    cp['dates']['B2/2025-05-08']['status']='FAIL'
+    r.atomic(tmp_path/'SUPERVISOR_STATE.json',cp)
+    monkeypatch.setattr(r.subprocess,'Popen',lambda *args,**kwargs:SimpleNamespace(pid=123))
+    monkeypatch.setattr(r,'identity',lambda pid=None:dict(PID=pid,created=1.,command=[]))
+    worker=r.dispatch_ready(tmp_path,'B2',1,{})
+    assert worker['recovery_queue_id']==ready['queue_id']
+    assert r.queue(tmp_path)['entries'][-1]['verification_status']=='WORKER_ENTERED'
+
+
+def test_ready_supersession_is_verified_atomic_idempotent_and_preserves_history(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        newer=next_repair(tmp_path,repair)
+        new=r.enqueue(tmp_path,failure,newer,lease_token='test',supersede_queue_id=old['queue_id'])
+        assert r.enqueue(tmp_path,failure,newer,lease_token='test',supersede_queue_id=old['queue_id'])==new
+    rows=r.queue(tmp_path)['entries']
+    assert rows[0]['verification_status']=='SUPERSEDED_UNSTARTED_READY'
+    assert rows[0]['retry_request_receipt']==old['retry_request_receipt']
+    assert rows[0]['superseded_by_queue_id']==new['queue_id']
+    assert rows[1]['supersedes_queue_id']==old['queue_id']
+    assert rows[1]['verification_status']=='READY_VERIFIED_REPAIR'
+
+
+@pytest.mark.parametrize('blocker',['active','intent','invalid_new_validation'])
+def test_supersession_never_changes_active_intended_or_unverified_queue(tmp_path,monkeypatch,blocker):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        newer=next_repair(tmp_path,repair)
+        if blocker=='active':r.atomic(tmp_path/'SUPERVISOR_STATE.json',dict(workers={'x':dict(arm='B2',day='2025-05-08')}))
+        elif blocker=='intent':
+            doc=r.queue(tmp_path);doc['entries'][0]['verification_status']='DISPATCH_INTENT'
+            r.atomic(tmp_path/'RECOVERY_QUEUE.json',doc)
+        else:
+            proof=r.read(newer['validation_receipt']['path']);proof['PASS']=False
+            r.atomic(newer['validation_receipt']['path'],proof)
+            newer['validation_receipt']=r.record(newer['validation_receipt']['path'])
+        before=r.queue(tmp_path)
+        with pytest.raises(PermissionError):
+            r.enqueue(tmp_path,failure,newer,lease_token='test',supersede_queue_id=old['queue_id'])
+        assert r.queue(tmp_path)==before
+
+
 def test_terminal_recovery_is_measured_and_never_overwritten(tmp_path,monkeypatch):
     failure,repair=packet(tmp_path,monkeypatch)
     with r.repair_lease(tmp_path,token='test'):

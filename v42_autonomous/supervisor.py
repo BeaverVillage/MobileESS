@@ -337,9 +337,9 @@ def block_source(root,manifest,cp,error,*,arm=None,day=None,before_popen=False):
     transition(cp,'SOURCE_BLOCKED')
 
 def refresh_retries(root,cp):
-    from .recovery import queue
+    from .recovery import retire_satisfied_ready
     grouped={}
-    for entry in queue(root)['entries']:grouped.setdefault(entry['arm']+'/'+entry['date'],[]).append(entry)
+    for entry in retire_satisfied_ready(root,cp)['entries']:grouped.setdefault(entry['arm']+'/'+entry['date'],[]).append(entry)
     for key,entries in grouped.items():
         if key in cp['workers']:continue
         row=cp['dates'][key]

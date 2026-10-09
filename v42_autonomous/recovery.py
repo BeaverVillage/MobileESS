@@ -342,7 +342,7 @@ def zero_start_authorization(root, packet):
     return receipt
 
 
-def enqueue(root, failure, repair, *, lease_token):
+def enqueue(root, failure, repair, *, lease_token, supersede_queue_id=None):
     """Only a new, verified repair can create a dispatchable retry request.
 
     UNKNOWN runtime is preserved but never silently converted to a new budget.
@@ -462,7 +462,18 @@ def enqueue(root, failure, repair, *, lease_token):
         key = (failure['arm'], failure['date'], failure['original_attempt_id'], source)
         for row in doc['entries']:
             if (row['arm'], row['date'], row['original_attempt_id'], row['repair_source_SHA']) == key:
+                if supersede_queue_id is not None and row.get('supersedes_queue_id')!=supersede_queue_id:
+                    raise PermissionError('REPAIR_SUPERSESSION_IDEMPOTENCE_DRIFT')
                 return row
+        previous=None
+        if supersede_queue_id is not None:
+            previous=next((entry for entry in doc['entries'] if entry['queue_id']==supersede_queue_id),None)
+            if (previous is None or previous['arm']!=failure['arm'] or previous['date']!=failure['date']
+                    or previous['repair_source_SHA']==source or not _unstarted_ready(previous)
+                    or failure['date'] in {worker.get('day') for worker in
+                        read(root/'SUPERVISOR_STATE.json',{}).get('workers',{}).values()
+                        if worker.get('arm')==failure['arm']}):
+                raise PermissionError('ONLY_UNSTARTED_READY_REPAIR_CAN_BE_SUPERSEDED')
         row = {key: failure[key] for key in REQUIRED_FAILURE}
         row.update(queue_id=uuid.uuid4().hex, repair_commit_SHA=commit,
                    repair_source_SHA=source, repair_reason=repair['repair_reason'],
@@ -501,6 +512,12 @@ def enqueue(root, failure, repair, *, lease_token):
         _verify_dispatch(row, request)
         for alternate in alternatives.values():
             _verify_dispatch(dict(row, retry_request_receipt=alternate), read(alternate['path']))
+        if previous is not None:
+            previous.update(verification_status='SUPERSEDED_UNSTARTED_READY',
+                superseded_by_queue_id=row['queue_id'],superseded_UTC=now(),
+                superseded_reason='NEW_INDEPENDENTLY_VERIFIED_REPAIR_SOURCE',
+                original_prepared_repair_and_failure_evidence_preserved=True)
+            row['supersedes_queue_id']=previous['queue_id']
         doc['entries'].append(row)
         doc['UTC'] = now()
         atomic(root / 'RECOVERY_QUEUE.json', doc)
@@ -638,6 +655,8 @@ def _dispatch_ready(root, arm, slot, manifest):
     with os_lock(root / 'RECOVERY_QUEUE.lock'):
         doc = queue(root)
         supervisor = read(root / 'SUPERVISOR_STATE.json', {})
+        if _retire_satisfied(doc,supervisor):
+            atomic(root/'RECOVERY_QUEUE.json',doc)
         workers = supervisor.get('workers', {})
         active = {value['day'] for value in workers.values() if value.get('arm') == arm}
         if any(value.get('worker_slot') == slot for value in workers.values()):
@@ -717,6 +736,89 @@ def _dispatch_ready(root, arm, slot, manifest):
                    verification_status='WORKER_ENTERED', dispatched_UTC=now())
         atomic(root / 'RECOVERY_QUEUE.json', doc)
         return worker
+
+
+def _unstarted_ready(row):
+    if (row.get('verification_status')!='READY_VERIFIED_REPAIR'
+            or row.get('retry_attempt_id') or row.get('new_worker_PID') or row.get('dispatch_intent_UTC')):
+        return False
+    try:
+        receipts=[row['retry_request_receipt'],*row.get('retry_request_receipts_by_slot',{}).values()]
+        for receipt in receipts:
+            if record(receipt['path'])!=receipt:
+                return False
+            request=read(receipt['path'])
+            if Path(request['result']).exists() or _request_workers(receipt['path']):
+                return False
+    except (OSError,KeyError,TypeError,ValueError):return False
+    return True
+
+
+def _current_verified_pass(doc,cp,key):
+    """Require the current sealed scientific/accounting recovery result again."""
+    current=cp.get('dates',{}).get(key,{})
+    if current.get('status')!='PASS' or key in cp.get('workers',{}):
+        return None
+    try:
+        result_receipt=record(current['result'])
+        if current.get('result_SHA')!=result_receipt['sha256']:
+            return None
+        result=read(current['result']);request=read(current['request'])
+        identity=result.get('identity',{})
+        if (request.get('arm')+'/'+request.get('day')!=key
+                or current.get('current_attempt')!=request.get('attempt_id')
+                or Path(request['result']).resolve()!=Path(current['result']).resolve()
+                or current.get('source_SHA')!=request.get('implementation_SHA')
+                or current.get('Native_Runtime')!=result.get('Native_Runtime')
+                or 'run_id' in request and identity.get('run_id')!=request['run_id']
+                or identity.get('attempt_id')!=current['current_attempt']):
+            return None
+        terminal=next((entry for entry in doc['entries'] if
+            entry.get('verification_status')=='RECOVERY_PASS'
+            and entry.get('arm')+'/'+entry.get('date')==key
+            and entry.get('repair_source_SHA')==current['source_SHA']
+            and entry.get('final_result_receipt')==result_receipt
+            and Path(entry['retry_request_receipt']['path']).resolve()==Path(current['request']).resolve()),None)
+        if terminal is None or record(terminal['retry_request_receipt']['path'])!=terminal['retry_request_receipt']:
+            return None
+        receipts=[terminal['validation_receipt'],*terminal['source_files']]
+        if any(record(item['path'])!=item for item in receipts):
+            return None
+        sealed=[terminal.get('final_ledger_receipt')] if terminal['arm']=='B2' else [
+            *terminal.get('final_stage_ledger_receipts',{}).values(),
+            *terminal.get('final_stage_ledger_identity_receipts',{}).values()]
+        if not sealed or any(not item or record(item['path'])!=item for item in sealed):
+            return None
+        verified=_finish_row(dict(terminal),current['result'])
+        if verified['verification_status']!='RECOVERY_PASS':
+            return None
+        return dict(queue_id=terminal['queue_id'],request=terminal['retry_request_receipt'],
+            result=result_receipt,source_SHA=current['source_SHA'],attempt_id=current['current_attempt'],
+            native_accounting=verified['final_native_accounting'],scientific_PASS=True)
+    except (PermissionError,OSError,KeyError,TypeError,ValueError):
+        return None
+
+
+def _retire_satisfied(doc,cp):
+    changed=False
+    for row in doc['entries']:
+        if row.get('verification_status')!='READY_VERIFIED_REPAIR':continue
+        key=row['arm']+'/'+row['date']
+        proof=_current_verified_pass(doc,cp,key)
+        if proof is not None and _unstarted_ready(row):
+            row.update(verification_status='RETIRED_CURRENT_VERIFIED_PASS',retired_UTC=now(),
+                retirement_reason='CURRENT_SEALED_SCIENTIFIC_AND_ACCOUNTING_VERIFIED_PASS',
+                current_PASS_evidence=proof,original_prepared_repair_and_failure_evidence_preserved=True)
+            changed=True
+    return changed
+
+
+def retire_satisfied_ready(root,cp):
+    with os_lock(Path(root)/'RECOVERY_QUEUE.lock'):
+        doc=queue(root)
+        if _retire_satisfied(doc,cp):
+            doc['UTC']=now();atomic(Path(root)/'RECOVERY_QUEUE.json',doc)
+        return doc
 
 
 def mark_dispatched(root, queue_id, attempt_id, worker, *, source_SHA):
