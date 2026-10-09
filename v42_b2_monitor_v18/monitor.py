@@ -37,16 +37,25 @@ def worker_view(root, day, row, epoch):
         worker_result_received=Path(request['result']).is_file(),
         prior_native_runtime_seconds=(ledger.get('prior_attempt') or {}).get('Native_Runtime',0),
         attempt_id=request['attempt_id'], source_SHA=request['implementation_SHA'])
+    if ledger.get('budget_basis')=='CONSERVATIVE_LOST_CALL_WINDOW':
+        accounted=progress.get('Native_budget_accounted_upper_bound',ledger.get('Native_budget_accounted_upper_bound'))
+        worker.update(Native_Runtime_seconds=None,reported_native_runtime_seconds=accounted,
+            reported_native_remaining_seconds=max(0.,5400-accounted) if display.finite(accounted) else None,
+            native_runtime_basis='CONSERVATIVE_LOST_CALL_WINDOW',actual_cumulative_Native_Runtime='UNKNOWN',
+            current_attempt_measured_Native_Runtime=ledger.get('current_attempt_measured_Native_Runtime'),
+            lost_call_reserved_seconds=(ledger.get('prior_attempt') or {}).get('lost_call_reserved_seconds'))
     # Only file-backed independent certificates may supply these three fields.
     worker.update(UB=None, independent_Global_LB=None, Certified_Gap=None)
     worker = enrich(worker)
     output = Path(request['output'])
-    if worker['UB'] is None and (output/'STATIONARY_DISPATCH_REPLAY.json').is_file():
+    seed_certificate=output/'BENCHMARK_FULL_CERTIFICATE.json'
+    if not seed_certificate.exists():seed_certificate=output/'STATIONARY_DISPATCH_REPLAY.json'
+    if worker['UB'] is None and seed_certificate.is_file():
         identity = optional(output/'SCIENTIFIC_CASE_IDENTITY.json')
         try:
             if identity.get('arm') != 'B2' or identity.get('day') != day:
                 raise ValueError('CURRENT_DAY_CASE_REQUIRED')
-            evidence = certificate(output/'STATIONARY_DISPATCH_REPLAY.json',output,identity['case_sha'],'UB')
+            evidence = certificate(seed_certificate,output,identity['case_sha'],'UB')
             worker['UB'] = evidence['value']
             worker['bound_status'].update(UB_reason='같은 날짜 FULL 물리·정수 검증 통과',UB_certificate=evidence)
             worker['global_gap_display']['reason'] = '검증된 초기해 확보 · 독립 LB 인증 대기'
@@ -59,35 +68,61 @@ def worker_view(root, day, row, epoch):
         solver_bounds_reason='Native 값은 탐색 진단이며 Global Gap은 독립 인증서로 계산')
     track = (ledger.get('inflight') or {}).get('track')
     if track == 'M_START':worker['bound_status']['phase_label'] = '같은 날짜 dispatch 초기해 탐색'
+    if track=='M_MODE_GUIDE':worker['bound_status']['phase_label']='같은 날짜 LP로 이산 모드 후보 생성'
+    if Path(request['result']).is_file():
+        result=optional(request['result']);scientific=result.get('scientific',{})
+        if result.get('benchmark_initialization_only'):
+            worker['initialization_benchmark']=dict(status=result['status'],
+                first_FULL_pass_wall_seconds=scientific.get('first_FULL_pass_wall_seconds'),
+                LP_Runtime=scientific.get('LP_Runtime'),seed_MILP_calls=scientific.get('seed_MILP_calls'),
+                seed_MILP_Runtime=scientific.get('seed_MILP_Runtime'),point_SHA=scientific.get('point_SHA'))
     return worker
 
 
 def view(root):
     root = Path(root)
-    cp = co.read(root/'CHECKPOINT_V17.json')
-    manifest = co.read(root/'CONTINUATION_V17_MANIFEST.json')
+    campaign=root
+    for candidate,checkpoint in (('initialization_benchmark_v18r3_01','CHECKPOINT_V18R3.json'),('initialization_benchmark_v18r2_01','CHECKPOINT_V18R2.json')):
+        benchmark=campaign/candidate
+        if (benchmark/checkpoint).exists():root=benchmark;break
+    version='18R3' if (root/'CHECKPOINT_V18R3.json').is_file() else '18R2' if (root/'CHECKPOINT_V18R2.json').is_file() else 18 if (root/'CHECKPOINT_V18.json').is_file() else 17
+    cp = co.read(root/f'CHECKPOINT_V{version}.json')
+    manifest = co.read(root/f'CONTINUATION_V{version}_MANIFEST.json')
     workers = [worker_view(root,day,row,time.time()) for day,row in cp.get('workers',{}).items()]
+    if manifest.get('benchmark_initialization_only'):
+        for day in manifest['canary_days']:
+            row=cp['dates']['B2/'+day]
+            if day not in cp.get('workers',{}) and row.get('request') and row.get('result'):
+                workers.append(worker_view(root,day,row,time.time()))
+        if version=='18R3':
+            row=cp['dates']['B2/2025-05-02']
+            if row.get('request') and row.get('result'):
+                worker=worker_view(root,'2025-05-02',row,time.time())
+                worker.update(worker_slot=2,original_execution_slot=1)
+                workers.append(worker)
     slots = []
     for slot in range(1,4):
         worker = next((w for w in workers if w['worker_slot']==slot),None)
         if worker is None:
-            waiting_day = f'2025-05-{slot:02d}' if not cp.get('canary_PASS') else None
+            waiting_day = (f'2025-05-{slot:02d}' if version==17 else None) if not cp.get('canary_PASS') else None
             prior = manifest.get('prior_attempts',{}).get(waiting_day,{})
             used = prior.get('Native_Runtime')
             worker = dict(worker_slot=slot, arm='B2', day=waiting_day, display_waiting=True,
                 worker_alive=False, phase='HELD_FOR_CANARY' if not cp.get('canary_PASS') else 'IDLE',
-                waiting_reason='May01 독립 인증·Adaptive 실행 확인 후 재개' if not cp.get('canary_PASS') else '날짜 배정 대기',
+                waiting_reason=('May01 독립 인증·Adaptive 실행 확인 후 재개' if version==17 else 'May02/03 LP 직접 채택·인증·Adaptive 확인 후 재개') if not cp.get('canary_PASS') else '날짜 배정 대기',
                 Native_Runtime_seconds=used, native_remaining_seconds=max(0.,5400.-used) if display.finite(used) else None)
         slots.append(worker)
-    heartbeat = optional(root/'COORDINATOR_V17_HEARTBEAT.json')
+    heartbeat = optional(root/f'COORDINATOR_V{version}_HEARTBEAT.json')
     alive = same_process(heartbeat.get('process',{}))
     return display.clean(dict(run_id=manifest['run_id'],state=cp['state'],
         algorithm_version=manifest['schema'],display_version=VERSION,runtime_root=str(root),
         coordinator_alive=alive,canary_PASS=bool(cp.get('canary_PASS')),parallel_workers=cp.get('parallel_workers',1),
+        canary_label='May01' if version==17 else 'May02/03',
         B1=co.counts(cp,'B1'),B2=co.counts(cp,'B2'),workers=workers,worker_slots=slots,
         B2_validation_detail=dict(PASS=True,status=cp['state'],error=None),
         actual_comparison=comparison(cp['dates']),last_error=cp.get('last_error'),
-        source_SHA=manifest['execution_SHA'],telemetry_only=True))
+        source_SHA=manifest['execution_SHA'],telemetry_only=True,
+        benchmark_initialization_only=manifest.get('benchmark_initialization_only',False)))
 
 
 def run(root):

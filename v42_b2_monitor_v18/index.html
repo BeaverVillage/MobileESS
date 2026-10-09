@@ -136,7 +136,7 @@ function workerCard(w){
  }
 
  const used=w.reported_native_runtime_seconds??w.Native_Runtime_seconds,remaining=w.reported_native_remaining_seconds??w.native_remaining_seconds;
- const native=el('div',undefined,'time-row');native.append(el('span','Native 사용'),el('strong',time(used)+' / 90분'));card.append(native);
+ const native=el('div',undefined,'time-row');native.append(el('span',w.native_runtime_basis==='CONSERVATIVE_LOST_CALL_WINDOW'?'Native 예산 차감 (보수 상한)':'Native 사용'),el('strong',time(used)+' / 90분'));card.append(native);
  const track=el('div',undefined,'track'),fill=el('div');fill.style.width=(valid(used)?Math.max(0,Math.min(100,used/5400*100)):0)+'%';track.append(fill);card.append(track);
  const clocks=el('div',undefined,'time-row');clocks.append(el('span','잔여 '+time(remaining)),el('span','전체 '+time(w.wall_seconds)));card.append(clocks);
  const bad=!w.display_waiting&&!w.worker_result_received&&(!w.worker_alive||(valid(w.heartbeat_age_seconds)&&w.heartbeat_age_seconds>20));
@@ -145,9 +145,9 @@ function workerCard(w){
  const detail=el('details'),summary=el('summary','워커 세부사항'),kv=el('div',undefined,'kv'),build=w.build?.counters||{};
  detail.open=openWorkers.has(w.worker_slot);detail.addEventListener('toggle',()=>{if(detail.open)openWorkers.add(w.worker_slot);else openWorkers.delete(w.worker_slot);});
  pairs(kv,[['유효 해 UB',number(w.UB,6)],['독립 하한 LB',number(w.independent_Global_LB,6)],
- ['모델 생성 시간',time(w.model_preparation_seconds)],['해·물리 검증 시간',time(w.validation_seconds)],
+ ['첫 FULL 통과 경과',time(w.initialization_benchmark?.first_FULL_pass_wall_seconds)],['초기해 LP Native 시간',time(w.initialization_benchmark?.LP_Runtime)],['Seed MILP 호출 / 시간',number(w.initialization_benchmark?.seed_MILP_calls,0)+' / '+time(w.initialization_benchmark?.seed_MILP_Runtime)],['모델 생성 시간',time(w.model_preparation_seconds)],['해·물리 검증 시간',time(w.validation_seconds)],
  ['완료 Native 호출',number(w.Native_calls,0)+(w.native_inflight?' · 호출 실행 중':'')],
- ['완료 호출 누적 Runtime',time(w.Native_Runtime_seconds)],['이전 시도 이월',time(w.prior_native_runtime_seconds)],['Attempt',w.attempt_id||'—'],['실행 source SHA',w.source_SHA||'—'],['Native 시간 근거',w.native_runtime_basis==='SOLVER_CALLBACK_CURRENT_CALL_INCLUDED'?'현재 호출 포함 · Solver 보고':'완료 호출 기록'],
+ ['완료 호출 누적 Runtime',time(w.Native_Runtime_seconds)],['이전 시도 이월',time(w.prior_native_runtime_seconds)],['Attempt',w.attempt_id||'—'],['실행 source SHA',w.source_SHA||'—'],['Native 시간 근거',w.native_runtime_basis==='CONSERVATIVE_LOST_CALL_WINDOW'?'실제 누적 UNKNOWN · 실패 실행 전체 시간 예약 차감':w.native_runtime_basis==='SOLVER_CALLBACK_CURRENT_CALL_INCLUDED'?'현재 호출 포함 · Solver 보고':'완료 호출 기록'],
  ['모델 변수 / 제약식',number(build['변수'],0)+' / '+number(build['제약식'],0)],
  ['확인된 모델 단계',w.build?number(w.build.confirmed_steps,0)+' / '+number(w.build.total_steps,0):'—'],
  ['CPU 누적 시간',time(w.resource?.CPU_seconds)],['세부 보고 경과',time(w.solver_report_age_seconds)],
@@ -177,8 +177,8 @@ function render(){
  $('worker-total').replaceChildren(el('span',String(live)),el('small',' / '+(s.parallel_workers||1)));
  const done=b.completed===31,issue=!!g?.error||!s.coordinator_alive&&!done;
  $('overview').className='overview '+(issue?'error':'');
- $('campaign-title').textContent=g?.error?'B2 시작 오류':done?'B2 캠페인 종료':!s.coordinator_alive?'Coordinator 실행 상태 확인 필요':!g?.PASS?'B2 시작 준비 중':!s.canary_PASS&&live?'May01 검증 실행 · 1워커':live?'B2 실행 중 · '+live+'개 날짜 병렬 처리':'B2 날짜 배정 중';
- $('campaign-caption').textContent=done?'날짜별 성공 여부와 Actual 평가 결과를 아래 표에서 확인하세요.':!s.canary_PASS?'May01 초기해 탐색 → 독립 UB/LB 인증 → Adaptive 실행을 확인한 뒤 나머지 날짜를 재개합니다.':!g?.PASS?'검증 통과 후 3워커가 자동 시작됩니다.':'모델 생성 → 최적화 → Actual AC 평가 순서로 진행됩니다.';
+ $('campaign-title').textContent=s.benchmark_initialization_only?(s.state==='INITIALIZATION_BENCHMARK_COMPLETE'?'May02/03 초기해 성능시험 완료':'May02/03 초기해 성능시험 · '+live+'워커'):g?.error?'B2 시작 오류':done?'B2 캠페인 종료':!s.coordinator_alive?'Coordinator 실행 상태 확인 필요':!g?.PASS?'B2 시작 준비 중':!s.canary_PASS&&live?(s.canary_label||'May01')+' 검증 실행 · '+live+'워커':live?'B2 실행 중 · '+live+'개 날짜 병렬 처리':'B2 날짜 배정 중';
+ $('campaign-caption').textContent=s.benchmark_initialization_only?'Native 0초부터 첫 FULL 물리·정수 검증 통과까지 측정합니다. 초기해 이후 Adaptive는 동결 상태입니다.':done?'날짜별 성공 여부와 Actual 평가 결과를 아래 표에서 확인하세요.':!s.canary_PASS?(s.canary_label||'May01')+' 초기해 직접 채택 → 독립 UB/LB 인증 → Adaptive 실행을 확인한 뒤 나머지 날짜를 재개합니다.':!g?.PASS?'검증 통과 후 3워커가 자동 시작됩니다.':'모델 생성 → 최적화 → Actual AC 평가 순서로 진행됩니다.';
  const slots=s.worker_slots||[];$('workers').replaceChildren(...slots.map(workerCard));renderActual(s.actual_comparison);
  const errors=[];if(g?.error)errors.push('모델 검증: '+JSON.stringify(g.error));if(s.last_error)errors.push('최근 날짜 오류: '+JSON.stringify(s.last_error));
  const metricErrors=s.actual_comparison.rows.filter(r=>r.B1.error||r.B2.error);if(metricErrors.length)errors.push('Actual 근거 확인 필요: '+metricErrors.map(r=>day(r.day)).join(', '));
