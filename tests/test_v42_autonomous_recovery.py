@@ -327,6 +327,220 @@ def test_supersession_never_changes_active_intended_or_unverified_queue(tmp_path
         assert r.queue(tmp_path)==before
 
 
+def other_running_attempt(tmp_path,target,monkeypatch,*,day='2025-05-08',source='a'*64,attempt='running_other'):
+    """Declared live OS stand-in; no worker process or Native model launched."""
+    folder=tmp_path/'dates/B2'/day/'attempts'/attempt
+    request=dict(arm='B2',day=day,attempt_id=attempt,worker_slot=1,
+        result=str(folder/'RESULT.json'),implementation_SHA=source)
+    r.atomic(folder/'request.json',request)
+    worker=dict(r.identity(),arm='B2',day=day,worker_slot=1,request=str(folder/'request.json'),
+        source_SHA=source,recovery_queue_id='different_active_queue')
+    worker['command']=['python','-m',target['worker_module'],worker['request']]
+    cp=dict(workers={'B2/'+day:worker},dates={'B2/'+day:dict(status='RUNNING',
+        current_attempt=attempt,request=worker['request'],source_SHA=source,
+        active_recovery_queue_id='different_active_queue',retry_queue_ids=['different_active_queue'])})
+    r.atomic(tmp_path/'SUPERVISOR_STATE.json',cp)
+    # Match only this explicit OS stand-in. Real lease guardian checks remain.
+    original_alive=r.alive
+    monkeypatch.setattr(r,'alive',lambda owner:True if owner==worker else original_alive(owner))
+    return cp,worker,folder
+
+
+@pytest.mark.parametrize('source',['a'*64,'b'*64])
+def test_unstarted_ready_supersession_preserves_proved_other_same_day_attempt(tmp_path,monkeypatch,source):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        cp,worker,folder=other_running_attempt(tmp_path,old,monkeypatch,source=source)
+        r.atomic(folder/'NATIVE_RUNTIME_LEDGER.json',dict(inflight={'status':'IN_FLIGHT'},calls=[]))
+        cp_path=tmp_path/'SUPERVISOR_STATE.json';before=(cp_path.read_bytes(),r.record(folder/'request.json'),r.record(folder/'NATIVE_RUNTIME_LEDGER.json'))
+        newer=next_repair(tmp_path,repair);authorize_zero(tmp_path,newer)
+        new=r.enqueue(tmp_path,failure,newer,lease_token='test',supersede_queue_id=old['queue_id'])
+        assert r.enqueue(tmp_path,failure,newer,lease_token='test',supersede_queue_id=old['queue_id'])==new
+        assert r.assert_lease(tmp_path,'test')['state']=='ACTIVE'
+        assert (cp_path.read_bytes(),r.record(folder/'request.json'),r.record(folder/'NATIVE_RUNTIME_LEDGER.json'))==before
+    assert new['initial_native_runtime']==0 and new['remaining_native_seconds']==5400
+    assert r.queue(tmp_path)['entries'][0]['verification_status']=='SUPERSEDED_UNSTARTED_READY'
+    assert r.queue(tmp_path)['entries'][1]['verification_status']=='READY_VERIFIED_REPAIR'
+
+
+def test_other_day_same_attempt_name_and_source_does_not_block_target_supersession(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        other_running_attempt(tmp_path,old,monkeypatch,day='2025-05-09',source='b'*64,attempt='new')
+        cp_path=tmp_path/'SUPERVISOR_STATE.json';before=cp_path.read_bytes()
+        new=r.enqueue(tmp_path,failure,next_repair(tmp_path,repair),lease_token='test',supersede_queue_id=old['queue_id'])
+        assert cp_path.read_bytes()==before and new['supersedes_queue_id']==old['queue_id']
+
+
+@pytest.mark.parametrize('reference',['queue_id','recovery_queue_id','active_recovery_queue_id','request'])
+def test_other_day_explicit_target_cp_ownership_blocks_supersession(tmp_path,monkeypatch,reference):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        other=dict(status='RETRY_PENDING',current_attempt='new',retry_queue_ids=[old['queue_id']])
+        other[reference]=old['retry_request_receipt']['path'] if reference=='request' else old['queue_id']
+        r.atomic(tmp_path/'SUPERVISOR_STATE.json',dict(workers={},dates={'B2/2025-05-09':other}))
+        before=((tmp_path/'SUPERVISOR_STATE.json').read_bytes(),(tmp_path/'RECOVERY_QUEUE.json').read_bytes())
+        with pytest.raises(PermissionError,match='ONLY_UNSTARTED_READY'):
+            r.enqueue(tmp_path,failure,next_repair(tmp_path,repair),lease_token='test',supersede_queue_id=old['queue_id'])
+        assert ((tmp_path/'SUPERVISOR_STATE.json').read_bytes(),(tmp_path/'RECOVERY_QUEUE.json').read_bytes())==before
+
+
+def test_other_day_inactive_pending_metadata_and_generic_attempt_name_are_not_target_ownership(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        cp=dict(workers={},dates={'B2/2025-05-09':dict(status='RETRY_PENDING',
+            current_attempt='new',retry_queue_ids=[old['queue_id']])})
+        r.atomic(tmp_path/'SUPERVISOR_STATE.json',cp);before=(tmp_path/'SUPERVISOR_STATE.json').read_bytes()
+        new=r.enqueue(tmp_path,failure,next_repair(tmp_path,repair),lease_token='test',supersede_queue_id=old['queue_id'])
+        assert new['supersedes_queue_id']==old['queue_id'] and (tmp_path/'SUPERVISOR_STATE.json').read_bytes()==before
+
+
+@pytest.mark.parametrize('blocker',['target_queue','target_request','target_attempt','missing_identity',
+    'dead_identity','command_mismatch','source_mismatch','current_attempt_mismatch','launch_intent','missing_current_date'])
+def test_target_or_ambiguous_supervisor_ownership_blocks_supersession_without_cp_or_queue_edit(tmp_path,monkeypatch,blocker):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        cp,worker,_=other_running_attempt(tmp_path,old,monkeypatch)
+        key='B2/2025-05-08'
+        if blocker=='target_queue':cp['dates'][key]['active_recovery_queue_id']=old['queue_id']
+        elif blocker=='target_request':cp['dates'][key]['request']=old['retry_request_receipt']['path']
+        elif blocker=='target_attempt':cp['dates'][key]['current_attempt']='new'
+        elif blocker=='missing_identity':cp['workers'][key].pop('PID')
+        elif blocker=='dead_identity':monkeypatch.setattr(r,'alive',lambda owner:False if owner==worker else True)
+        elif blocker=='command_mismatch':cp['workers'][key]['command'][-1]='D:/other_request.json'
+        elif blocker=='source_mismatch':cp['workers'][key]['source_SHA']='f'*64
+        elif blocker=='current_attempt_mismatch':cp['dates'][key]['current_attempt']='unproved_other'
+        elif blocker=='launch_intent':cp['workers'][key]['launch_intent']=True
+        else:cp['dates'].clear()
+        r.atomic(tmp_path/'SUPERVISOR_STATE.json',cp)
+        cp_path=tmp_path/'SUPERVISOR_STATE.json';before=(cp_path.read_bytes(),(tmp_path/'RECOVERY_QUEUE.json').read_bytes())
+        with pytest.raises(PermissionError,match='ONLY_UNSTARTED_READY'):
+            r.enqueue(tmp_path,failure,next_repair(tmp_path,repair),lease_token='test',supersede_queue_id=old['queue_id'])
+        assert (cp_path.read_bytes(),(tmp_path/'RECOVERY_QUEUE.json').read_bytes())==before
+
+
+@pytest.mark.parametrize('marker',['worker','worker_slot','launch_intent','popen_returned','dispatch_intent_UTC'])
+def test_hidden_target_launch_metadata_is_not_discarded_by_supersession(tmp_path,monkeypatch,marker):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        doc=r.queue(tmp_path);doc['entries'][0][marker]={'PID':123} if marker=='worker' else 1
+        r.atomic(tmp_path/'RECOVERY_QUEUE.json',doc);before=(tmp_path/'RECOVERY_QUEUE.json').read_bytes()
+        with pytest.raises(PermissionError,match='ONLY_UNSTARTED_READY'):
+            r.enqueue(tmp_path,failure,next_repair(tmp_path,repair),lease_token='test',supersede_queue_id=old['queue_id'])
+        assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==before
+
+
+@pytest.mark.parametrize('marker',['NATIVE_RUNTIME_LEDGER.json','progress.json','error.json','output'])
+def test_target_execution_artifact_without_final_result_is_not_superseded(tmp_path,monkeypatch,marker):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        path=Path(old['retry_request_receipt']['path']).parent/marker
+        if marker=='output':path.mkdir()
+        else:r.atomic(path,dict(inflight={'status':'IN_FLIGHT'}))
+        before=(tmp_path/'RECOVERY_QUEUE.json').read_bytes()
+        with pytest.raises(PermissionError,match='ONLY_UNSTARTED_READY'):
+            r.enqueue(tmp_path,failure,next_repair(tmp_path,repair),lease_token='test',supersede_queue_id=old['queue_id'])
+        assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==before
+
+
+def test_alternate_request_os_worker_detection_blocks_target_supersession(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    alternate=tmp_path/'dates/B2/2025-05-08/attempts/target_slot2/request.json'
+    request=r.read(repair['retry_request_receipt']['path'])
+    request.update(attempt_id='target_slot2',worker_slot=2,result=str(alternate.parent/'RESULT.json'))
+    r.atomic(alternate,request);repair['retry_request_receipts_by_slot']={'2':r.record(alternate)}
+    # Exercise the actual _request_workers implementation with a declared
+    # process-table stand-in; it has the real test process PID/create time.
+    class Process:
+        pid=r.identity()['PID'];info={'name':'python.exe'}
+        def cmdline(self):return ['python','-m','v42_autonomous_b2.worker',str(alternate)]
+    monkeypatch.setattr(r.psutil,'process_iter',lambda fields:[Process()])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test');before=(tmp_path/'RECOVERY_QUEUE.json').read_bytes()
+        with pytest.raises(PermissionError,match='ONLY_UNSTARTED_READY'):
+            r.enqueue(tmp_path,failure,next_repair(tmp_path,repair),lease_token='test',supersede_queue_id=old['queue_id'])
+        assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==before
+
+
+def test_supersession_still_requires_exclusive_queue_lock_and_live_lease(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        other_running_attempt(tmp_path,old,monkeypatch)
+        before=(tmp_path/'RECOVERY_QUEUE.json').read_bytes();newer=next_repair(tmp_path,repair)
+        with r.os_lock(tmp_path/'RECOVERY_QUEUE.lock'):
+            with pytest.raises(r.LeaseBusy):
+                r.enqueue(tmp_path,failure,newer,lease_token='test',supersede_queue_id=old['queue_id'])
+        assert (tmp_path/'RECOVERY_QUEUE.json').read_bytes()==before
+        with pytest.raises(PermissionError,match='LIVE_REPAIR_LEASE'):
+            r.enqueue(tmp_path,failure,newer,lease_token='wrong',supersede_queue_id=old['queue_id'])
+
+
+def test_inactive_retry_pending_list_is_not_target_dispatch_ownership(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    with r.repair_lease(tmp_path,token='test'):
+        old=r.enqueue(tmp_path,failure,repair,lease_token='test')
+        cp=dict(workers={},dates={'B2/2025-05-08':dict(status='RETRY_PENDING',
+            current_attempt='historical_failed',request=str(tmp_path/'original/request.json'),
+            active_recovery_queue_id='historical_failed_queue',retry_queue_ids=[old['queue_id']])})
+        r.atomic(tmp_path/'SUPERVISOR_STATE.json',cp)
+        before=(tmp_path/'SUPERVISOR_STATE.json').read_bytes()
+        new=r.enqueue(tmp_path,failure,next_repair(tmp_path,repair),lease_token='test',supersede_queue_id=old['queue_id'])
+        assert new['supersedes_queue_id']==old['queue_id']
+        assert (tmp_path/'SUPERVISOR_STATE.json').read_bytes()==before
+
+
+def test_nine_pending_targets_with_three_running_other_attempts_can_be_superseded_without_cp_edits(tmp_path,monkeypatch):
+    failure,repair=packet(tmp_path,monkeypatch)
+    monkeypatch.setattr(r,'_request_workers',lambda path:[])
+    rows=[];repairs=[];failures=[]
+    with r.repair_lease(tmp_path,token='test'):
+        for n in range(1,10):
+            day=f'2025-05-{n:02d}';f=dict(failure,date=day)
+            folder=tmp_path/'dates/B2'/day/'attempts/target28'
+            request=dict(r.read(repair['retry_request_receipt']['path']),day=day,attempt_id='target28',result=str(folder/'RESULT.json'))
+            r.atomic(folder/'request.json',request)
+            item=dict(repair,retry_request_receipt=r.record(folder/'request.json'))
+            rows.append(r.enqueue(tmp_path,f,item,lease_token='test'));repairs.append(item);failures.append(f)
+        cp=dict(workers={},dates={});live=[]
+        for n,row in enumerate(rows,1):
+            key='B2/'+row['date']
+            if n<=3:
+                one,worker,_=other_running_attempt(tmp_path,row,monkeypatch,day=row['date'],attempt=f'active27_slot{n}')
+                cp['workers'].update(one['workers']);cp['dates'].update(one['dates']);live.append(worker)
+            else:
+                cp['dates'][key]=dict(status='RETRY_PENDING',current_attempt='historical25',
+                    request=str(tmp_path/'historical25/request.json'),active_recovery_queue_id='historical25_queue',
+                    retry_queue_ids=[row['queue_id']])
+        original_alive=r.alive
+        monkeypatch.setattr(r,'alive',lambda owner:True if owner in live else original_alive(owner))
+        r.atomic(tmp_path/'SUPERVISOR_STATE.json',cp);before=(tmp_path/'SUPERVISOR_STATE.json').read_bytes()
+        for n,(old,f,item) in enumerate(zip(rows,failures,repairs),1):
+            newer=dict(next_repair(tmp_path,item));path=tmp_path/'dates/B2'/f['date']/'attempts/target30/request.json'
+            request=dict(r.read(newer['retry_request_receipt']['path']),day=f['date'],attempt_id='target30',result=str(path.parent/'RESULT.json'))
+            r.atomic(path,request);newer['retry_request_receipt']=r.record(path)
+            new=r.enqueue(tmp_path,f,newer,lease_token='test',supersede_queue_id=old['queue_id'])
+            assert new['verification_status']=='READY_VERIFIED_REPAIR'
+        assert (tmp_path/'SUPERVISOR_STATE.json').read_bytes()==before
+    assert sum(row['verification_status']=='SUPERSEDED_UNSTARTED_READY' for row in r.queue(tmp_path)['entries'])==9
+
+
 def test_terminal_recovery_is_measured_and_never_overwritten(tmp_path,monkeypatch):
     failure,repair=packet(tmp_path,monkeypatch)
     with r.repair_lease(tmp_path,token='test'):

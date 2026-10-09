@@ -470,9 +470,7 @@ def enqueue(root, failure, repair, *, lease_token, supersede_queue_id=None):
             previous=next((entry for entry in doc['entries'] if entry['queue_id']==supersede_queue_id),None)
             if (previous is None or previous['arm']!=failure['arm'] or previous['date']!=failure['date']
                     or previous['repair_source_SHA']==source or not _unstarted_ready(previous)
-                    or failure['date'] in {worker.get('day') for worker in
-                        read(root/'SUPERVISOR_STATE.json',{}).get('workers',{}).values()
-                        if worker.get('arm')==failure['arm']}):
+                    or not _supervisor_preserves_unstarted_target(root,previous)):
                 raise PermissionError('ONLY_UNSTARTED_READY_REPAIR_CAN_BE_SUPERSEDED')
         row = {key: failure[key] for key in REQUIRED_FAILURE}
         row.update(queue_id=uuid.uuid4().hex, repair_commit_SHA=commit,
@@ -740,7 +738,8 @@ def _dispatch_ready(root, arm, slot, manifest):
 
 def _unstarted_ready(row):
     if (row.get('verification_status')!='READY_VERIFIED_REPAIR'
-            or row.get('retry_attempt_id') or row.get('new_worker_PID') or row.get('dispatch_intent_UTC')):
+            or any(row.get(name) for name in ('retry_attempt_id','new_worker_PID','dispatch_intent_UTC',
+                                             'worker','worker_slot','launch_intent','popen_returned','dispatched_UTC'))):
         return False
     try:
         receipts=[row['retry_request_receipt'],*row.get('retry_request_receipts_by_slot',{}).values()]
@@ -748,9 +747,79 @@ def _unstarted_ready(row):
             if record(receipt['path'])!=receipt:
                 return False
             request=read(receipt['path'])
-            if Path(request['result']).exists() or _request_workers(receipt['path']):
+            attempt=Path(request['result']).parent
+            started=[attempt/name for name in ('RESULT.json','NATIVE_RUNTIME_LEDGER.json','progress.json','error.json','output')]
+            started.extend(Path(request[name]) for name in ('output','progress','error') if request.get(name))
+            if any(path.exists() for path in started) or _request_workers(receipt['path']):
                 return False
     except (OSError,KeyError,TypeError,ValueError):return False
+    return True
+
+
+def _supervisor_preserves_unstarted_target(root, target):
+    """Permit a new READY while a proved different attempt keeps running.
+
+    This checks ownership only; it never edits the supervisor or a worker.
+    The caller holds the queue lock, and _unstarted_ready separately rejects
+    every target request/alternate process, dispatch marker and result.
+    """
+    try:
+        cp=read(Path(root)/'SUPERVISOR_STATE.json',{})
+        workers=cp.get('workers',{});dates=cp.get('dates',{})
+        if not isinstance(workers,dict) or not isinstance(dates,dict):return False
+        receipts=[target['retry_request_receipt'],*target.get('retry_request_receipts_by_slot',{}).values()]
+        paths={Path(item['path']).resolve() for item in receipts}
+        attempts={read(item['path'])['attempt_id'] for item in receipts}
+        key=target['arm']+'/'+target['date'];date=dates.get(key,{})
+        if not isinstance(date,dict):return False
+        def refers(value, *, same_day, pending_list_active=True):
+            return (any(value.get(name)==target['queue_id'] for name in
+                        ('queue_id','recovery_queue_id','active_recovery_queue_id'))
+                or pending_list_active and target['queue_id'] in value.get('retry_queue_ids',[])
+                or value.get('request') and Path(value['request']).resolve() in paths
+                or same_day and any(value.get(name) in attempts for name in
+                                    ('attempt_id','current_attempt','retry_attempt_id')))
+        # Explicit ownership of this queue/request is global. Generic
+        # attempt names and inactive pending lists are scoped to a date.
+        for date_key,date_value in dates.items():
+            if not isinstance(date_value,dict):return False
+            if date_key!=key and refers(date_value,same_day=False,pending_list_active=False):return False
+        # An inactive RETRY_PENDING date lists its READY queue as pending
+        # work. That list is not dispatch ownership. All explicit active
+        # IDs, current attempts/requests and running/launch lists still block.
+        pending_list_active=(key in workers or date.get('status')=='RUNNING'
+                             or bool(date.get('launch_intent') or date.get('dispatch_intent_UTC')))
+        if refers(date,same_day=True,pending_list_active=pending_list_active):return False
+        active=False
+        for worker_key,worker in workers.items():
+            if not isinstance(worker,dict):return False
+            arm,day=worker.get('arm'),worker.get('day')
+            if refers(worker,same_day=arm==target['arm'] and day==target['date']):return False
+            if (arm not in ('B2','B3') or day not in {f'2025-05-{n:02d}' for n in range(1,32)}
+                    or worker_key!=arm+'/'+day):return False
+            if worker_key!=key:continue
+            active=True
+            path=Path(worker['request']).resolve();request=read(path)
+            attempt=request.get('attempt_id');source=request.get('implementation_SHA')
+            expected=Path(root).resolve()/'dates'/arm/day/'attempts'/str(attempt)
+            if (not attempt or attempt in attempts or path!=expected/'request.json'
+                    or request.get('arm')!=arm or request.get('day')!=day
+                    or not _sha(source,64)
+                    or worker.get('source_SHA')!=source or type(worker.get('PID')) is not int
+                    or worker.get('PID',0)<=0 or not alive(worker)
+                    or worker.get('launch_intent') or worker.get('dispatch_intent_UTC')
+                    or not worker.get('command') or Path(worker['command'][-1]).resolve()!=path
+                    or '-m' not in worker['command']
+                    or worker['command'][worker['command'].index('-m')+1]!=target.get('worker_module')
+                    or worker.get('worker_slot')!=request.get('worker_slot')
+                    or type(worker.get('worker_slot')) is not int
+                    or worker.get('worker_slot') not in ((1,2,3) if arm=='B2' else (1,))
+                    or Path(request['result']).resolve()!=expected/'RESULT.json'
+                    or date.get('status')!='RUNNING' or date.get('current_attempt')!=attempt
+                    or not date.get('request') or Path(date['request']).resolve()!=path
+                    or date.get('source_SHA')!=source):return False
+        if not active and date.get('status')=='RUNNING':return False
+    except (OSError,KeyError,TypeError,ValueError,AttributeError,IndexError):return False
     return True
 
 
