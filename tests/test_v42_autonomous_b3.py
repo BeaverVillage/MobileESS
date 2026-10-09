@@ -7,6 +7,7 @@ import pickle
 import gzip
 import unittest
 from unittest.mock import patch
+from contextlib import nullcontext
 
 from v42_b3_joint.contracts import canonical, digest
 from v42_b3_joint.policy import require_production_authorization
@@ -18,6 +19,7 @@ from v42_autonomous_b3.ledger import prior_prefix
 from v42_autonomous_b3.worker import b1_origin, original_domain_sha
 from v42_autonomous_b3.diagnostic import native_zero_diagnostic
 from v42_autonomous_b3.accounting import collect_native_accounting
+from v42_autonomous_b3 import worker as b3_worker
 from v42_a_stage_domain_v2 import AUTHORITY as ORIGINAL_DOMAIN_AUTHORITY
 
 
@@ -377,6 +379,41 @@ class FailureAccountingTests(unittest.TestCase):
             (pipeline / "M1/NATIVE_RUNTIME_LEDGER.json").unlink()
             result = collect_native_accounting(pipeline, self.identity)
             self.assertEqual(result["native_runtime_state"], "UNKNOWN")
+
+
+class WorkerFailureTests(unittest.TestCase):
+    def test_publication_exception_after_pipeline_completion_is_never_pass(self):
+        # A mocked completed pipeline isolates the exception-to-status path.
+        # No SOURCE stage or Native optimization is executed by this fixture.
+        with TemporaryDirectory() as folder:
+            root = Path(folder); output = root / "runtime/b3/test"; pipeline = output / "PIPELINE"
+            fresh = pipeline / "M2/OPERATIONS/FRESH/FRESH_RESULT.json"
+            fresh.parent.mkdir(parents=True); fresh.write_text("{}")
+            for name in ("A1/B1_A1_VERIFIED_REUSE.json", "B3_SOURCE_ACTUAL_RESULT.json",
+                         "B3_SOURCE_VALIDATION.json", "B3_SOURCE_CHECKPOINT.json"):
+                path = pipeline / name; path.parent.mkdir(parents=True, exist_ok=True); path.write_text("{}")
+            seal = dict(source_sha=digest("test source"), files={})
+            seal_path = root / "seal.json"; seal_path.write_text(canonical(seal))
+            request = dict(arm="B3", day="2025-05-02", worker_slot=1, code_root=str(root), output=str(output),
+                           campaign_root=str(root / "campaign"), attempt_id="test", run_id="test", canary=True,
+                           source_seal=str(seal_path))
+            request_path = root / "request.json"; request_path.write_text(canonical(request))
+            stage_output = SimpleNamespace(sha=digest("stage"), model_sha=digest("model"),
+                ledger_receipt=canonical(dict(measured_native_runtime=0., native_call_count=0)),
+                global_evidence=dict(exact_LB="0", exact_UB="0"))
+            coordinator = SimpleNamespace(outputs=dict(A1=stage_output), run=lambda *a, **kw:
+                dict(status="COMPLETE", validation=dict(PASS=True)))
+            with patch.object(b3_worker, "__file__", str(root / "v42_autonomous_b3/worker.py")), \
+                 patch.object(b3_worker, "execution_permit", return_value=nullcontext()), \
+                 patch.object(b3_worker, "no_active_b2"), \
+                 patch.object(b3_worker, "setup", return_value=(SimpleNamespace(to_dict=lambda: {}), object(), root / "b1", root / "inputs")), \
+                 patch.object(b3_worker, "SourceCoordinator", return_value=coordinator), \
+                 patch.object(b3_worker, "publish_qualification", side_effect=ValueError("publication evidence rejected")):
+                outcome = b3_worker.run(request_path)
+            self.assertFalse(outcome["PASS"])
+            self.assertEqual(outcome["status"], "FAIL")
+            self.assertEqual(outcome["reason"], "publication evidence rejected")
+            self.assertTrue((output / "FAILURE.json").is_file())
 
 
 if __name__ == "__main__":

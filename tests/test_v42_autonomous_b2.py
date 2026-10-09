@@ -168,3 +168,46 @@ def test_production_scope_refuses_input_generation_and_detects_writes(tmp_path):
     with pytest.raises(PermissionError,match='READ_ONLY_INPUT_CHANGED'):
         with proof_scope(request,dict(execution_SHA='test_only')):
             (folder/'B2_FIXED_AIDC.json').write_text('{"changed": true}',encoding='utf8')
+
+
+def test_native_receipt_bridge_keeps_the_original_solve_and_exact_accounting(monkeypatch):
+    from v42_autonomous_b2.worker import ReceiptDateBudget,OriginalDateBudget
+    budget=ReceiptDateBudget.__new__(ReceiptDateBudget)
+    budget.calls=[];budget.inflight=None;seen=[]
+    receipt=dict(track='UB',label='000_U1_00',entered_native=True,
+        runtime_unavailable=False,Native_Runtime=45.948999881744385,Native_Work=56.2185)
+    def original_solve(self,model,callback=None,**kwargs):
+        seen.append((model,callback,kwargs));self.calls.append(receipt)
+        # Reproduce V19's implicit None return after real receipt persistence.
+    monkeypatch.setattr(OriginalDateBudget,'native_optimize',original_solve)
+    model=object();callback=object()
+    returned=budget.optimize(model,track='UB',label='000_U1_00',requested_seconds=120.,callback=callback)
+    assert returned==receipt and budget.calls==[receipt]
+    assert seen==[(model,callback,dict(component='P1',track='UB',label='000_U1_00',requested_seconds=120.))]
+    assert ReceiptDateBudget.native_optimize is OriginalDateBudget.native_optimize
+    assert returned['Native_Runtime']==45.948999881744385
+
+
+def test_native_receipt_bridge_never_reuses_stale_or_unknown_calls(monkeypatch):
+    from v42_autonomous_b2.worker import ReceiptDateBudget,OriginalDateBudget
+    budget=ReceiptDateBudget.__new__(ReceiptDateBudget);budget.calls=[];budget.inflight=None
+    monkeypatch.setattr(OriginalDateBudget,'native_optimize',lambda *args,**kwargs:None)
+    with pytest.raises(PermissionError,match='COMPLETED_NATIVE_RECEIPT_REQUIRED'):
+        budget.optimize(None,track='UB',label='x',requested_seconds=120.)
+    def bad(self,*args,**kwargs):
+        self.calls.append(dict(track='UB',label='x',entered_native=True,
+            runtime_unavailable=True,Native_Runtime=None))
+    monkeypatch.setattr(OriginalDateBudget,'native_optimize',bad)
+    with pytest.raises(PermissionError,match='NATIVE_RECEIPT_IDENTITY_DRIFT'):
+        budget.optimize(None,track='UB',label='x',requested_seconds=120.)
+
+
+def test_native_receipt_bridge_propagates_native_errors_without_retry(monkeypatch):
+    from v42_autonomous_b2.worker import ReceiptDateBudget,OriginalDateBudget
+    budget=ReceiptDateBudget.__new__(ReceiptDateBudget);budget.calls=[];budget.inflight=None
+    calls=[]
+    def fail(*args,**kwargs):calls.append(True);raise RuntimeError('original native failure')
+    monkeypatch.setattr(OriginalDateBudget,'native_optimize',fail)
+    with pytest.raises(RuntimeError,match='original native failure'):
+        budget.optimize(None,track='UB',label='x',requested_seconds=120.)
+    assert calls==[True] and budget.calls==[]

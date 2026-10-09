@@ -3,12 +3,42 @@ from contextlib import contextmanager,ExitStack
 from unittest.mock import patch
 import argparse
 import re
+import math
 import psutil
 from v42_b2_seed_recovery_v19.common import ROOT,read,record,sha,digest
+from v42_b2_seed_recovery_v19.budget import DateBudget as OriginalDateBudget
 from v42_b2_seed_recovery_v19.policy import source_files as scientific_sources,exact_prior_runtime
 from v42_may_campaign_native90.a_routing import rebound
 
 CANONICAL=Path(r'D:\MobileESS_V42')
+
+
+class ReceiptDateBudget(OriginalDateBudget):
+    """Return the actual persisted solve receipt required by the M algorithms.
+
+    V19's Native implementation intentionally persists Runtime before optional
+    diagnostics but has no return statement. Its inherited optimize adapter
+    therefore returns None to callers expecting a receipt. Keep that complete
+    implementation and accounting, exposing only its just-completed call.
+    """
+    def optimize(self,model,*,track,label,requested_seconds,callback=None):
+        before=len(self.calls)
+        result=super().optimize(model,track=track,label=label,
+            requested_seconds=requested_seconds,callback=callback)
+        if len(self.calls)!=before+1 or self.inflight is not None:
+            raise PermissionError('M_COMPLETED_NATIVE_RECEIPT_REQUIRED')
+        receipt=self.calls[-1]
+        runtime=receipt.get('Native_Runtime')
+        if (receipt.get('track')!=track or receipt.get('label')!=label
+                or receipt.get('entered_native') is not True
+                or receipt.get('runtime_unavailable') is not False
+                or isinstance(runtime,bool) or not isinstance(runtime,(int,float))
+                or not math.isfinite(runtime) or runtime<0
+                or (result is not None and result!=receipt)):
+            raise PermissionError('M_COMPLETED_NATIVE_RECEIPT_IDENTITY_DRIFT')
+        # Work is an optional diagnostic. Missing Work remains unknown; no
+        # synthetic measurement or change to the persisted Runtime is made.
+        return dict(receipt,Native_Work=receipt.get('Native_Work'))
 
 
 def proof_routes(request):
@@ -192,7 +222,7 @@ def run(path):
     generated=rebound(inputs.generate_b2,dict(inputs.generate_b2.__globals__,ROOT=CANONICAL))
     with patch.object(inputs,'generate_b2',generated):
         return rebound(original.run,dict(original.run.__globals__,verify_request=verify_request,
-            worker_scope=worker_scope))(path)
+            worker_scope=worker_scope,DateBudget=ReceiptDateBudget))(path)
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('request');a=p.parse_args();raise SystemExit(run(a.request))
