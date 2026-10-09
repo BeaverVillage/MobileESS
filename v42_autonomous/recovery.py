@@ -279,6 +279,7 @@ def enqueue(root, failure, repair, *, lease_token):
     if type(priority) is not int:
         raise ValueError('RECOVERY_INTEGER_PRIORITY_REQUIRED')
     request_receipt = repair.get('retry_request_receipt')
+    alternatives = repair.get('retry_request_receipts_by_slot', {})
     code_root = repair.get('repair_code_root')
     if not code_root or not request_receipt or record(request_receipt['path']) != request_receipt:
         raise PermissionError('SEALED_FRESH_RETRY_REQUEST_REQUIRED')
@@ -291,6 +292,20 @@ def enqueue(root, failure, repair, *, lease_token):
     expected = root / 'dates' / failure['arm'] / failure['date'] / 'attempts' / request['attempt_id']
     if retry_dir != expected or Path(request_receipt['path']).resolve() != expected / 'request.json':
         raise PermissionError('NEW_RETRY_ATTEMPT_DIRECTORY_REQUIRED')
+    for slot_key, alternate in alternatives.items():
+        if slot_key not in (('1', '2', '3') if failure['arm'] == 'B2' else ('1',)):
+            raise PermissionError('RETRY_ALTERNATE_SLOT_INVALID')
+        if record(alternate['path']) != alternate:
+            raise PermissionError('RETRY_ALTERNATE_REQUEST_SHA_DRIFT')
+        candidate = read(alternate['path'])
+        candidate_expected = root / 'dates' / failure['arm'] / failure['date'] / 'attempts' / candidate['attempt_id']
+        if (candidate.get('arm') != failure['arm'] or candidate.get('day') != failure['date']
+                or candidate.get('worker_slot') != int(slot_key)
+                or candidate['attempt_id'] == failure['original_attempt_id']
+                or Path(candidate['result']).exists()
+                or Path(candidate['result']).resolve().parent != candidate_expected
+                or Path(alternate['path']).resolve() != candidate_expected / 'request.json'):
+            raise PermissionError('RETRY_ALTERNATE_FRESH_SLOT_REQUEST_REQUIRED')
     with os_lock(root / 'RECOVERY_QUEUE.lock'):
         doc = queue(root)
         key = (failure['arm'], failure['date'], failure['original_attempt_id'], source)
@@ -309,7 +324,10 @@ def enqueue(root, failure, repair, *, lease_token):
                    worker_module=repair.get('worker_module',
                        'v42_b2_seed_recovery_v19.worker' if failure['arm'] == 'B2' else 'v42_autonomous_b3.worker'),
                    retry_request_receipt=request_receipt, repair_code_root=str(Path(code_root).resolve()))
+        row['retry_request_receipts_by_slot'] = alternatives
         _verify_dispatch(row, request)
+        for alternate in alternatives.values():
+            _verify_dispatch(dict(row, retry_request_receipt=alternate), read(alternate['path']))
         doc['entries'].append(row)
         doc['UTC'] = now()
         atomic(root / 'RECOVERY_QUEUE.json', doc)
@@ -386,7 +404,7 @@ def _verify_dispatch(row, request):
                     'assert not m.get("diagnostics_only"); '
                     'assert m["initialization_native_limit_seconds"]==5400')
     elif module == 'v42_autonomous_b2.worker':
-        if request.get('repair_source_SHA', request.get('deployment_SHA')) != row['repair_source_SHA']:
+        if request.get('repair_source_SHA', request.get('deployment_SHA', request.get('implementation_SHA'))) != row['repair_source_SHA']:
             raise PermissionError('B2_ADAPTER_DEPLOYMENT_SHA_DRIFT')
         verifier = ('import json,sys; from v42_autonomous_b2.worker import verify_request; '
                     'r=json.load(open(sys.argv[1],encoding="utf-8-sig")); verify_request(r)')
@@ -423,7 +441,18 @@ def _dispatch_ready(root, arm, slot, manifest):
         candidates.sort(key=lambda row: (-row['retry_priority'], row['queued_UTC']))
         if not candidates:
             return None
-        row = candidates[0]
+        row = next((candidate for candidate in candidates
+                    if candidate['verification_status'] == 'DISPATCH_INTENT'
+                    and candidate.get('worker_slot') == slot
+                    or candidate['verification_status'] == 'READY_VERIFIED_REPAIR'
+                    and (str(slot) in candidate.get('retry_request_receipts_by_slot', {})
+                         or read(candidate['retry_request_receipt']['path'])['worker_slot'] == slot)), None)
+        if row is None:
+            return None
+        if row['verification_status'] == 'READY_VERIFIED_REPAIR':
+            alternate = row.get('retry_request_receipts_by_slot', {}).get(str(slot))
+            if alternate:
+                row['retry_request_receipt'] = alternate
         path = Path(row['retry_request_receipt']['path'])
         request = read(path)
         _verify_dispatch(row, request)

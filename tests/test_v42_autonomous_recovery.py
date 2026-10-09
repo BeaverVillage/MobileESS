@@ -117,6 +117,7 @@ def test_launch_intent_is_never_reexecuted_after_unknown_exit(tmp_path, monkeypa
         r.enqueue(tmp_path, failure, repair, lease_token='test')
     doc = r.queue(tmp_path)
     doc['entries'][0]['verification_status'] = 'DISPATCH_INTENT'
+    doc['entries'][0]['worker_slot'] = 1
     r.atomic(tmp_path / 'RECOVERY_QUEUE.json', doc)
     monkeypatch.setattr(r, '_request_workers', lambda path: [])
     monkeypatch.setattr(r.subprocess, 'Popen', lambda *a, **k: pytest.fail('UNKNOWN_RELAUNCH'))
@@ -153,3 +154,45 @@ def test_repair_source_files_are_checked_again_before_dispatch(tmp_path, monkeyp
     request = r.read(row['retry_request_receipt']['path'])
     with pytest.raises(PermissionError, match='SEALED_EVIDENCE_DRIFT'):
         r._verify_dispatch(row, request)
+
+
+def test_retry_intent_is_persisted_before_launch_and_live_intent_adopted(tmp_path, monkeypatch):
+    failure, repair = packet(tmp_path, monkeypatch)
+    repair['worker_module'] = 'v42_autonomous_b2.worker'
+    with r.repair_lease(tmp_path, token='test'):
+        row = r.enqueue(tmp_path, failure, repair, lease_token='test')
+    worker = r.identity()
+    launched = []
+    def popen(command, **kwargs):
+        current = r.queue(tmp_path)['entries'][0]
+        assert current['verification_status'] == 'DISPATCH_INTENT'
+        launched.append(command)
+        return type('Child', (), {'pid': worker['PID']})()
+    monkeypatch.setattr(r, '_request_workers', lambda path: [])
+    monkeypatch.setattr(r.subprocess, 'Popen', popen)
+    retry = r.dispatch_ready(tmp_path, 'B2', 1, {})
+    assert launched[0][-2] == 'v42_autonomous_b2.worker'
+    assert retry['day'] == '2025-05-08' and retry['recovery_queue_id'] == row['queue_id']
+    assert r.dispatch_ready(tmp_path, 'B2', 1, {}) is None
+    doc = r.queue(tmp_path)
+    doc['entries'][0]['verification_status'] = 'DISPATCH_INTENT'
+    r.atomic(tmp_path / 'RECOVERY_QUEUE.json', doc)
+    monkeypatch.setattr(r, '_request_workers', lambda path: [worker])
+    adopted = r.dispatch_ready(tmp_path, 'B2', 1, {})
+    assert adopted['PID'] == worker['PID'] and len(launched) == 1
+
+
+def test_presealed_slot_alternatives_use_next_available_worker(tmp_path, monkeypatch):
+    failure, repair = packet(tmp_path, monkeypatch)
+    alternative = tmp_path / 'dates/B2/2025-05-08/attempts/new_slot2/request.json'
+    request = r.read(repair['retry_request_receipt']['path'])
+    request.update(attempt_id='new_slot2', worker_slot=2, result=str(alternative.parent / 'RESULT.json'))
+    r.atomic(alternative, request)
+    repair['retry_request_receipts_by_slot'] = {'2': r.record(alternative)}
+    with r.repair_lease(tmp_path, token='test'):
+        r.enqueue(tmp_path, failure, repair, lease_token='test')
+    monkeypatch.setattr(r, '_request_workers', lambda path: [])
+    monkeypatch.setattr(r.subprocess, 'Popen', lambda *a, **k: type('Child', (), {'pid': r.identity()['PID']})())
+    retry = r.dispatch_ready(tmp_path, 'B2', 2, {})
+    assert retry['worker_slot'] == 2 and retry['request'] == str(alternative)
+    assert r.queue(tmp_path)['entries'][0]['retry_attempt_id'] == 'new_slot2'

@@ -18,13 +18,13 @@ def verify_request(request):
     if (Path(request['manifest']).parent.resolve()!=root or m['schema']!='V42_AUTONOMOUS_B2_V20'
         or m['execution_sources']!=sources() or m['execution_SHA']!=digest(sources())
         or request['manifest_SHA']!=sha(request['manifest']) or request['implementation_SHA']!=m['execution_SHA']
-        or request['attempt_id']!=m['attempt_id'] or request['run_id']!=m['run_id']
+        or request['attempt_id'] not in m.get('attempt_ids',[m['attempt_id']]) or request['run_id']!=m['run_id']
         or request['arm']!='B2' or request['day'] not in m['input_folders']
         or request['Threads']!=1 or request['P2_calls']!=0 or request['target_gap']!=.03
         or request['native_budget_seconds']!=5400 or request['wall_budget_seconds'] is not None
         or m['initialization_native_limit_seconds']!=5400):
         raise PermissionError('B2_DEPLOYMENT_OR_REQUEST_SEAL_DRIFT')
-    attempt=root/'dates/B2'/request['day']/'attempts'/m['attempt_id']
+    attempt=root/'dates/B2'/request['day']/'attempts'/request['attempt_id']
     for k,n in [('result','RESULT.json'),('output','output'),('progress','progress.json'),('error','error.json')]:
         if Path(request[k]).resolve()!=attempt/n:raise PermissionError('FRESH_ATTEMPT_PATH_DRIFT')
     if Path(request['input_folder']).resolve()!=Path(m['input_folders'][request['day']]).resolve():

@@ -25,6 +25,7 @@ def deploy(root,commit):
     m.update(schema='V42_AUTONOMOUS_B2_V20',attempt_id='autonomous_b2_v20_01',source_commit=commit,
         previous_manifest=record(root/'CONTINUATION_V19_MANIFEST.json'),execution_sources=s,execution_SHA=digest(s),
         prior_attempts=prior,provenance_transport_only=True,UTC=now())
+    m['attempt_ids']=[f'autonomous_b2_v20_slot{i}_01' for i in (1,2,3)]
     atomic(root/MANIFEST,m)
     from v42_b2_seed_recovery_v19.policy import exact_prior_runtime
     for d,r in prior.items():exact_prior_runtime(r,root=root,day=d)
