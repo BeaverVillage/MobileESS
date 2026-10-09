@@ -2,7 +2,9 @@
 from contextlib import contextmanager, nullcontext
 from datetime import datetime, timezone
 from pathlib import Path
+from dataclasses import replace
 import hashlib
+import gzip
 import json
 import msvcrt
 import os
@@ -24,6 +26,10 @@ from .admission import (read, record, checked, source_seal, execution_permit,
 from .reuse import B1A1ReuseBridge
 from .ledger import CumulativeStageLedger
 from .diagnostic import native_zero_diagnostic
+from .accounting import collect_native_accounting
+from v42_pr134_b1.common import replace_file
+from v42_a_stage_domain_v2 import AUTHORITY as ORIGINAL_DOMAIN_AUTHORITY
+from v42_a_stage_domain_v2.domain import physical_starts
 
 
 def now():
@@ -35,7 +41,7 @@ def atomic(path, document):
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + ".tmp")
     temporary.write_text(canonical(document) + "\n", encoding="utf-8")
-    temporary.replace(path)
+    replace_file(temporary, path)
 
 
 @contextmanager
@@ -86,6 +92,13 @@ def b1_origin(request):
     source_path, result_path = checked(sources[0], root), checked(results[0], root)
     b1 = source_path.parent
     require(result_path.parent == b1, "B1_SUCCESSFUL_ATTEMPT_OUTPUT_OWNERSHIP_DRIFT")
+    origin_paths = (b1 / "A_PREPARE_RECEIPT.json", b1 / "STATIC/CAMPAIGN_INITIAL_STATE.pkl.gz",
+                    b1 / "STATIC/DATA/DATA.pkl", b1 / "STATIC/DOMAIN" / day / "PHYSICAL_DOMAIN_CACHE.json",
+                    b1 / "STATIC/DOMAIN" / day / "PHYSICAL_DOMAIN_CACHE.pkl.gz")
+    for path in origin_paths:
+        receipts = [receipt for receipt in final["files"] if Path(receipt["path"]).resolve() == path]
+        require(len(receipts) == 1 and checked(receipts[0], root) == path,
+                "B1_FINAL_ORIGINAL_PREPARATION_DOMAIN_RECEIPT_REQUIRED:" + str(path))
     frozen = read(source_path)
     require(frozen.get("PASS") is True and frozen.get("day") == day and frozen.get("arm") == "B1",
             "COMPLETED_B1_SAME_DAY_SOURCE_REQUIRED")
@@ -115,10 +128,37 @@ def original_domain_sha(b1, day):
         for uid in members:
             require(uid not in roster, "B1_COMPLETE_DOMAIN_DUPLICATE_JOB")
             roster[uid] = representative_sha
-    require(set(roster) == set(data[1]), "B1_COMPLETE_DOMAIN_ORIGINAL_JOB_AXIS")
+    require(set(roster) == set(data[1]) and cache["jobs"] == len(roster) and
+            cache["representatives"] == len(data[7]["classes"]) and
+            set(cache["complete_domain_hashes"]) == {members[0] for members in data[7]["classes"].values()},
+            "B1_COMPLETE_DOMAIN_ORIGINAL_JOB_AXIS")
     actual = hashlib.sha256(json.dumps(roster, sort_keys=True, separators=(",", ":"),
                                       default=str, allow_nan=False).encode()).hexdigest()
-    require(actual == data[7]["physical_domain_hash"], "B1_COMPLETE_DOMAIN_SCIENTIFIC_HASH_DRIFT")
+    expected = data[7].get("physical_domain_hash")
+    if expected is None:
+        # The original DATA pickle predates physical-domain construction.
+        # Its accepted Native-zero initial state independently seals the FULL
+        # job-domain roster and the scientific hash added by that construction.
+        preparation = read(b1 / "A_PREPARE_RECEIPT.json")
+        require(preparation.get("PASS") is True and preparation.get("day") == day and
+                preparation.get("arm") == "B1" and preparation.get("Native_calls") == 0,
+                "B1_ORIGINAL_DOMAIN_PREPARATION_AUTHORITY_REQUIRED")
+        with gzip.open(checked(preparation["state"], b1), "rb") as stream:
+            initial = pickle.load(stream)
+        # Original prepare_fast_active adds its authority marker and widens
+        # allowed_starts using the unchanged physical_starts producer. Verify
+        # precisely those original transformations, including all other fields.
+        expected_bounds = {uid: replace(bound, allowed_starts=physical_starts(data[1][uid], bound, data[3].control_end))
+                           for uid, bound in data[2].items()}
+        initial_data = initial["data"]
+        require(initial_data[0] == dict(data[0], aidc_domain_authority=ORIGINAL_DOMAIN_AUTHORITY) and
+                jsonable(initial_data[1]) == jsonable(data[1]) and jsonable(initial_data[2]) == jsonable(expected_bounds) and
+                jsonable(initial_data[3]) == jsonable(data[3]) and jsonable(initial_data[4]) == jsonable(data[4]) and
+                initial_data[7]["classes"] == data[7]["classes"] and
+                {uid: domain.sha for uid, domain in initial["domains"].items()} == roster,
+                "B1_COMPLETE_DOMAIN_INITIAL_STATE_ROSTER_DRIFT")
+        expected = initial["data"][7]["physical_domain_hash"]
+    require(actual == expected, "B1_COMPLETE_DOMAIN_SCIENTIFIC_HASH_DRIFT")
     return actual
 
 
@@ -294,10 +334,13 @@ def run(request_path):
                         request.get("qualification_output", str(Path(request["campaign_root"]) / "autonomous" / "B3_PRODUCTION_QUALIFICATION.json")))
     except Exception as error:
         result.update(failure_class=type(error).__name__, reason=str(error), traceback=traceback.format_exc())
-        atomic(envelope / "FAILURE.json", result)
     finally:
         stopped.set()
         thread.join(timeout=2)
+        result.update(collect_native_accounting(pipeline, identity, request.get("previous_attempts", ())))
+        if result["PASS"] is not True:
+            result["failed_stage"] = heartbeat.get("stage", "ADMISSION")
+            atomic(envelope / "FAILURE.json", result)
         result["completed_UTC"] = now()
         atomic(envelope / "RESULT.json", result)
         if request.get("result") and Path(request["result"]).resolve() != envelope / "RESULT.json":

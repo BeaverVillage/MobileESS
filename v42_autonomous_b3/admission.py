@@ -14,6 +14,7 @@ import json
 
 from v42_b3_joint.contracts import canonical, digest, require, require_sha
 from v42_b3_joint.source_coordinator import output_from_document
+from v42_pr134_b1.common import replace_file
 
 _permit = ContextVar("v42_b3_qualified_execution_permit", default=None)
 _native_zero = ContextVar("v42_b3_native_zero_diagnostic", default=False)
@@ -154,7 +155,7 @@ def publish_qualification(output, source_sha, destination):
         require(read(destination) == document, "CANARY_QUALIFICATION_NEVER_OVERWRITTEN")
         temporary.unlink()
     else:
-        temporary.replace(destination)
+        replace_file(temporary, destination)
     return record(destination)
 
 

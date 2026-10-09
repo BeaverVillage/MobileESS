@@ -4,6 +4,7 @@ from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 import json
 import pickle
+import gzip
 import unittest
 from unittest.mock import patch
 
@@ -15,6 +16,8 @@ from v42_autonomous_b3.reuse import compare_original_identity
 from v42_autonomous_b3.ledger import prior_prefix
 from v42_autonomous_b3.worker import b1_origin, original_domain_sha
 from v42_autonomous_b3.diagnostic import native_zero_diagnostic
+from v42_autonomous_b3.accounting import collect_native_accounting
+from v42_a_stage_domain_v2 import AUTHORITY as ORIGINAL_DOMAIN_AUTHORITY
 
 
 class AdmissionTests(unittest.TestCase):
@@ -105,8 +108,12 @@ class B1OriginTests(unittest.TestCase):
                 name: record(inputs / name) for name in ("NATIVE_INPUT.json", "WINDOWS.json")})
             (b1 / "A_NATIVE_SOURCE_FREEZE.json").write_text(canonical(freeze))
             (b1 / "A_RESULT.json").write_text(canonical(dict(PASS=True, accepted=True)))
+            extra = ("A_PREPARE_RECEIPT.json", "STATIC/CAMPAIGN_INITIAL_STATE.pkl.gz", "STATIC/DATA/DATA.pkl",
+                     "STATIC/DOMAIN/2025-05-19/PHYSICAL_DOMAIN_CACHE.json", "STATIC/DOMAIN/2025-05-19/PHYSICAL_DOMAIN_CACHE.pkl.gz")
+            for name in extra:
+                path = b1 / name; path.parent.mkdir(parents=True, exist_ok=True); path.write_text("{}")
             final = dict(PASS=True, status="PASS", identity=dict(arm="B1", day="2025-05-19"),
-                         files=[record(b1 / name) for name in ("A_NATIVE_SOURCE_FREEZE.json", "A_RESULT.json")])
+                         files=[record(b1 / name) for name in ("A_NATIVE_SOURCE_FREEZE.json", "A_RESULT.json", *extra)])
             final_path.write_text(canonical(final))
             manifest = dict(origin_campaign_root=str(old), B1_results={"B1/2025-05-19": record(final_path)})
             (new / "AUTONOMOUS_MANIFEST.json").write_text(canonical(manifest))
@@ -126,9 +133,29 @@ class B1OriginTests(unittest.TestCase):
                     dict(classes=dict(first=["a", "b"], second=["c"]), physical_domain_hash=expected))
             path = domain / "DATA.pkl"; path.write_bytes(pickle.dumps(data))
             receipt = dict(PASS=True, day="2025-05-01", scientific_candidates_removed=0,
+                           jobs=3, representatives=2,
                            complete_domain_hashes=dict(a=roster["a"], c=roster["c"]), frozen_DATA=record(path))
             (domain / "PHYSICAL_DOMAIN_CACHE.json").write_text(canonical(receipt))
             self.assertEqual(original_domain_sha(b1, "2025-05-01"), expected)
+            # Real original DATA is frozen before that metadata is added.
+            old_data = (*data[:7], dict(classes=data[7]["classes"]))
+            path.write_bytes(pickle.dumps(old_data))
+            receipt["frozen_DATA"] = record(path)
+            (domain / "PHYSICAL_DOMAIN_CACHE.json").write_text(canonical(receipt))
+            initial_path = b1 / "STATIC/CAMPAIGN_INITIAL_STATE.pkl.gz"
+            active_data = (dict(data[0], aidc_domain_authority=ORIGINAL_DOMAIN_AUTHORITY), *data[1:])
+            with gzip.open(initial_path, "wb") as stream:
+                pickle.dump(dict(data=active_data, domains={uid: SimpleNamespace(sha=sha) for uid, sha in roster.items()}), stream)
+            preparation = dict(PASS=True, day="2025-05-01", arm="B1", Native_calls=0, state=record(initial_path))
+            (b1 / "A_PREPARE_RECEIPT.json").write_text(canonical(preparation))
+            self.assertEqual(original_domain_sha(b1, "2025-05-01"), expected)
+            corrupted_data = (*active_data[:7], dict(data[7], physical_domain_hash=digest("different")))
+            with gzip.open(initial_path, "wb") as stream:
+                pickle.dump(dict(data=corrupted_data, domains={uid: SimpleNamespace(sha=sha) for uid, sha in roster.items()}), stream)
+            preparation["state"] = record(initial_path)
+            (b1 / "A_PREPARE_RECEIPT.json").write_text(canonical(preparation))
+            with self.assertRaisesRegex(ValueError, "SCIENTIFIC_HASH_DRIFT"):
+                original_domain_sha(b1, "2025-05-01")
 
 
 class DiagnosticTests(unittest.TestCase):
@@ -186,6 +213,57 @@ class PriorNativeTests(unittest.TestCase):
             c = self.attempt(root, "c", [{"Native_Runtime": 2., "runtime_unavailable": False}])
             with self.assertRaisesRegex(ValueError, "DISJOINT_NATIVE_ATTEMPTS"):
                 prior_prefix(self.context(root), [b, c])
+
+
+class FailureAccountingTests(unittest.TestCase):
+    identity = dict(run_id="r", day="2025-05-01", source_SHA=digest("source"))
+
+    def ledger(self, pipeline, stage, seconds, *, inflight=None):
+        folder = pipeline / stage; folder.mkdir(parents=True)
+        (folder / "NATIVE_RUNTIME_LEDGER_IDENTITY.json").write_text(canonical(dict(
+            run_id="r", day="2025-05-01", stage=stage, source_sha=digest("source"), input_sha=digest("input"), native_limit_seconds=5400)))
+        document = dict(Native_ceiling_seconds=5400, budget_basis="MEASURED_NATIVE_RUNTIME_ONLY",
+                        measured_Native_Runtime=seconds, inflight=inflight,
+                        calls=[dict(Native_Runtime=seconds, entered_native=True, runtime_unavailable=False)])
+        (folder / "NATIVE_RUNTIME_LEDGER.json").write_text(canonical(document))
+
+    def test_failed_run_preserves_measured_stage_budget_not_total_budget(self):
+        with TemporaryDirectory() as folder:
+            pipeline = Path(folder)
+            self.ledger(pipeline, "M1", 4000.)
+            self.ledger(pipeline, "A2", 3000.)
+            result = collect_native_accounting(pipeline, self.identity)
+            self.assertEqual(result["Native_Runtime"], 7000.)
+            self.assertEqual(result["stage_native_runtime"]["M1"], 4000.)
+            self.assertEqual(result["stage_native_accounting"]["A1"], "NOT_ENTERED")
+            self.assertEqual(result["stage_native_accounting"]["M1"], "MEASURED")
+            self.assertEqual(result["stage_native_calls"]["A2"], 1)
+            checked(result["stage_native_ledger_receipts"]["M1"])
+
+    def test_retry_failed_before_stage_does_not_erase_prior_stage_cost(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder); old = root / "old/PIPELINE"; new = root / "new/PIPELINE"
+            self.ledger(old, "M1", 4100.)
+            result = collect_native_accounting(new, self.identity, [old.parent])
+            self.assertEqual(result["Native_Runtime"], 4100.)
+            self.assertEqual(result["stage_native_accounting"]["M1"], "MEASURED")
+            self.assertEqual(Path(result["stage_native_ledger_receipts"]["M1"]["path"]).parent, old / "M1")
+            self.ledger(new, "M1", 12.)
+            result = collect_native_accounting(new, self.identity, [old.parent])
+            self.assertIsNone(result["Native_Runtime"])
+            self.assertEqual(result["stage_native_accounting"]["M1"], "UNKNOWN")
+
+    def test_interrupted_or_missing_accounting_is_unknown_never_zero(self):
+        with TemporaryDirectory() as folder:
+            pipeline = Path(folder)
+            self.ledger(pipeline, "M1", 12., inflight=dict(component="P1"))
+            result = collect_native_accounting(pipeline, self.identity)
+            self.assertIsNone(result["Native_Runtime"])
+            self.assertIsNone(result["stage_native_runtime"]["M1"])
+            self.assertEqual(result["stage_native_accounting"]["M1"], "UNKNOWN")
+            (pipeline / "M1/NATIVE_RUNTIME_LEDGER.json").unlink()
+            result = collect_native_accounting(pipeline, self.identity)
+            self.assertEqual(result["native_runtime_state"], "UNKNOWN")
 
 
 if __name__ == "__main__":

@@ -86,7 +86,8 @@ class SourceStageLedger:
         destination = self._path(path)
         temporary = destination.with_name(destination.name + ".b3-tmp")
         temporary.write_text(canonical(document) + "\n", encoding="utf-8")
-        temporary.replace(destination)
+        from v42_pr134_b1.common import replace_file
+        replace_file(temporary, destination)
 
     def _verify_document(self, document):
         require(document.get("Native_ceiling_seconds") == 5400
