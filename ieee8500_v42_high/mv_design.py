@@ -58,6 +58,8 @@ def write_csv(path, rows):
 
 def original_bus_audit():
     """Independent untouched official Balanced compilation; no policy/AC days."""
+    from ieee8500_v42_original.hold import require_execution_approval
+    require_execution_approval('OPENDSS:original_bus_audit')
     source_before = {p.name: sha(p) for p in sorted(FEEDER.iterdir()) if p.is_file()}
     d = odd.NewContext()
     for method in ('AllowChangeDir', 'AllowForms', 'AllowEditor', 'AllowDOScmd'):
@@ -430,6 +432,8 @@ def retain_web_source_facts():
 
 def component_regression():
     """Tiny isolated component test, not an IEEE8500 MV siting/eligibility test."""
+    from ieee8500_v42_original.hold import require_execution_approval
+    require_execution_approval('OPENDSS:component_regression')
     import numpy as np
     rejected=False
     try: transformer_overlay_commands('STA01','single_phase_proxy',[2])

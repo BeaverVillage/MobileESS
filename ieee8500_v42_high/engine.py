@@ -14,6 +14,8 @@ class HighEngine(IEEE8500AC):
     verify_parameters=BalancedEngine.verify_parameters
 
     def __init__(self,tag,bg=.552,layout='L0',mapping_path=None,report_dir=None):
+        from ieee8500_v42_original.hold import require_execution_approval
+        require_execution_approval('OPENDSS:HighEngine')
         self.report_dir=Path(report_dir) if report_dir else REPORT
         self.source_dir=SOURCE.resolve();self.output_dir=(self.report_dir/'ac'/tag/'dss').resolve()
         self.output_dir.mkdir(parents=True,exist_ok=True);self.source_hashes=self._hash_source()

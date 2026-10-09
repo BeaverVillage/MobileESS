@@ -1,0 +1,19 @@
+path,line,status,text
+v42_b3_joint/dry_run.py,17,KEEP_MOCK_FIXTURE,"mess_ids=tuple(""MESS"" + str(i) for i in range(4)))"
+v42_b3_joint/dry_run.py,34,KEEP_MOCK_FIXTURE,"return MESSDecision(routes=tuple((""STATION0"", ""STATION"" + str(marker)) for _ in range(4)),"
+v42_b3_joint/dry_run.py,35,KEEP_MOCK_FIXTURE,"location=zeros(4, 96, ""STATION"" + str(marker)),"
+v42_b3_joint/dry_run.py,36,KEEP_MOCK_FIXTURE,"charge_p=zeros(4, 96, marker / 10), discharge_p=zeros(4, 96), q=zeros(4, 96, marker / 20),"
+v42_b3_joint/dry_run.py,37,KEEP_MOCK_FIXTURE,"soc=zeros(4, 97, 0.5), initial_final_json=canonical({""initial"": [0.5] * 4, ""final"": [0.5] * 4}),"
+v42_b3_joint/dry_run.py,38,KEEP_MOCK_FIXTURE,"move_energy=zeros(4, 96, marker / 100),"
+v42_b3_joint/operations_bridge.py,163,KEEP_FOUR_STAGE_CONTRACT,"require(len(requests) == len(outputs) == 4, ""ALL_FOUR_SOURCE_STAGE_RESULTS_REQUIRED"")"
+v42_b3_joint/operations_bridge.py,289,KEEP_FOUR_STAGE_CONTRACT,"require(callable(verify_stage) and len(requests) == len(outputs) == 4,"
+v42_b3_joint/planning.py,47,KEEP_FOUR_STAGE_CONTRACT,"require(isinstance(records, list) and len(records) == 4 and digest(records) == plan[""source_receipts_sha""], ""FROZEN_STAGE_RECEIPTS_REQUIRED"")"
+v42_b3_joint/planning.py,63,KEEP_FOUR_STAGE_CONTRACT,"require(len(requests) == len(results) == 4, ""ALL_FOUR_STAGE_ACCEPTANCES_REQUIRED"")"
+v42_b3_joint/verify_preparation.py,137,KEEP_FOUR_STAGE_CONTRACT,"""json_schema_status"": ""STATIC_CONTRACT_PASS"" if schema_count == 4 else ""NOT_RUN"","
+v42_bootstrap/report.py,67,STATIC_REVIEW_REQUIRED_NOT_ASSUMED_VEHICLE_COUNT,native=[r for r in rows if r['case']=='native_static_96'];assert len(native)==4 and all(float(r['baseline_binary_reduction_percentage'])==0 for r in native)
+v42_bootstrap/verify.py,29,STATIC_REVIEW_REQUIRED_NOT_ASSUMED_VEHICLE_COUNT,assert len(a['passes'])==4 and all(r['status']==2 for r in a['passes'])
+v42_integrated/contract.py,39,STATIC_REVIEW_REQUIRED_NOT_ASSUMED_VEHICLE_COUNT,assert len(a['controls']['capacitors']) == 4
+v42_m1_hybrid/bound.py,64,STATIC_REVIEW_REQUIRED_NOT_ASSUMED_VEHICLE_COUNT,"all_four_trajectory_blocks_included=len(decomp.units)==4, nonunit_original_domain_included=True,"
+v42_m1_hybrid/bound.py,68,STATIC_REVIEW_REQUIRED_NOT_ASSUMED_VEHICLE_COUNT,if len(decomp.units)!=4:
+v42_m1_research/substitution_audit.py,399,STATIC_REVIEW_REQUIRED_NOT_ASSUMED_VEHICLE_COUNT,"input_identity=dict(day='2025-05-01',jobs=1499,units=4,slots=96,"
+v42_native/envelope.py,18,STATIC_REVIEW_REQUIRED_NOT_ASSUMED_VEHICLE_COUNT,for k in range(4):

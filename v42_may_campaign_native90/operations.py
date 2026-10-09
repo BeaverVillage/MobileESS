@@ -58,9 +58,11 @@ def _accepted(request, stage, output):
         with np.load(_verified(stage['planning']), allow_pickle=False) as archive:
             planning = {k: archive[k].copy() for k in archive.files}
         selected = accepted['selected_jobs']
-        mess = dict(P_kw=np.zeros((96, 4)), Q_kvar=np.zeros((96, 4)),
-                    locations=np.asarray([['STA01', 'STA12', 'STA08', 'STA06']] * 96),
-                    unit_ids=np.asarray(['MESS01', 'MESS02', 'MESS03', 'MESS04']),
+        initial = read(Path(request['input_folder']) / 'NATIVE_INPUT.json')['initial_MESS_sites']
+        units = sorted(initial)
+        mess = dict(P_kw=np.zeros((96, len(units))), Q_kvar=np.zeros((96, len(units))),
+                    locations=np.asarray([[initial[unit] for unit in units]] * 96),
+                    unit_ids=np.asarray(units),
                     SOC_kwh=None, routes=[])
     else:
         folder = Path(request['input_folder'])
@@ -88,6 +90,8 @@ def _accepted(request, stage, output):
                     locations=np.asarray(plan['locations'], dtype=str), unit_ids=np.asarray(plan['unit_ids'], dtype=str),
                     SOC_kwh=np.asarray(plan['SOC_kwh'], dtype=float), routes=plan['routes'])
     native_bundle = read(Path(request['input_folder']) / 'NATIVE_INPUT.json')
+    expected_units = sorted(native_bundle['initial_MESS_sites'])
+    n_mess = len(expected_units)
     site_axis = sorted(native_bundle['capacities'])
     if (native_bundle.get('day') != day or len(site_axis) != 12
             or list(map(str, planning['sites'])) != site_axis):
@@ -96,10 +100,10 @@ def _accepted(request, stage, output):
         if np.shape(planning[name]) != (96, 12) or not np.isfinite(planning[name]).all():
             raise ValueError('FROZEN_AIDC_PHYSICAL_AXIS:' + name)
     for name in ('P_kw', 'Q_kvar'):
-        if mess[name].shape != (96, 4) or not np.isfinite(mess[name]).all():
+        if mess[name].shape != (96, n_mess) or not np.isfinite(mess[name]).all():
             raise ValueError('FROZEN_MESS_PHYSICAL_AXIS:' + name)
-    if (mess['locations'].shape != (96, 4) or list(mess['unit_ids']) != [f'MESS{i:02d}' for i in range(1, 5)]
-            or (arm == 'B2' and (mess['SOC_kwh'].shape != (97, 4) or not np.isfinite(mess['SOC_kwh']).all()))):
+    if (n_mess == 0 or mess['locations'].shape != (96, n_mess) or list(mess['unit_ids']) != expected_units
+            or (arm == 'B2' and (mess['SOC_kwh'].shape != (97, n_mess) or not np.isfinite(mess['SOC_kwh']).all()))):
         raise ValueError('FROZEN_MESS_LOCATION_SOC_AXIS')
     for t in range(96):
         for j, location in enumerate(mess['locations'][t]):

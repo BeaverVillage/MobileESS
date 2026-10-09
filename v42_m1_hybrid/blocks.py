@@ -1,6 +1,6 @@
 """Exact original-CSR trajectory partition, without dropping a coefficient.
 
-The four local domains keep the original 96-slot route/SOC/mode/PCS/PQ
+The per-vehicle local domains keep the original 96-slot route/SOC/mode/PCS/PQ
 constraints and literal bounds/types.  All other rows are kept in either the
 nonunit block or the coupling table.  This is a decomposition, not a new cut.
 """
@@ -74,8 +74,8 @@ def build_blocks(case):
     A, d = case.A.tocsr(), case.d
     owners = [unit_owner(n) for n in d['names']]
     units = sorted({u for u in owners if u is not None})
-    if len(units) != 4:
-        raise ValueError('FOUR_ORIGINAL_FLEET_UNITS_REQUIRED')
+    if not units:
+        raise ValueError('ORIGINAL_FLEET_UNITS_REQUIRED')
     if hasattr(case, 'graph') and set(case.graph[1]) != set(units):
         raise ValueError('ORIGINAL_GRAPH_FLEET_IDENTITY_DRIFT')
     codes = {u: k+1 for k, u in enumerate(units)}

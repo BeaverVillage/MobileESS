@@ -143,8 +143,8 @@ def compare_native_arcs(bundle, table, accepted, route_receipt):
     _require(tuple(sites)==tuple(table['service_ids']) and dict(initial)==bundle['initial_MESS_sites']
         and receipt['accepted_routes']==len(accepted) and receipt['excluded']==route_receipt['exclusions'],
         'ORIGINAL_LOADER_AXES_AND_EXCLUSIONS')
-    _require(len(initial)==4 and battery.dt_hours==.25, 'ORIGINAL_FOUR_MESS_QUARTER_HOUR_BATTERY')
-    return dict(PASS=True, every_original_accepted_arc_checked=len(actual), units=4,
+    _require(len(initial)>0 and battery.dt_hours==.25, 'ORIGINAL_MESS_QUARTER_HOUR_BATTERY')
+    return dict(PASS=True, every_original_accepted_arc_checked=len(actual), units=len(initial),
         graph_arc_endpoints='origin@depart -> destination@connect',
         arrival='depart + travel_slots_15min', connection='depart + connection_ready_slots_15min',
         movement_energy='original energy_safe_kwh debited at departure',

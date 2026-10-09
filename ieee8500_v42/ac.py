@@ -46,6 +46,8 @@ class IEEE8500AC:
     Numerical iteration budgets do not alter physical controls or ratings.
     """
     def __init__(self, source_dir=None, output_dir=None):
+        from ieee8500_v42_original.hold import require_execution_approval
+        require_execution_approval('OPENDSS:IEEE8500AC')
         self.source_dir = Path(source_dir or Path(__file__).parent / "data" / "feeder").resolve()
         self.output_dir = Path(output_dir or Path(__file__).parent / "outputs" / "dss").resolve()
         self.output_dir.mkdir(parents=True, exist_ok=True)

@@ -147,7 +147,7 @@ def _plan(case,point):
             for t in range(96):
                 for family in ('Pch','Pdis','Q'):values.setdefault(f'{family}[{unit},{site},{t}]',0.)
         chosen[unit]=[k for k in range(len(arcs)) if values[f'arc[{unit},{k}]']==1.]
-    units=tuple(sorted(initial));p=np.zeros((96,4));q=np.zeros_like(p);soc=np.zeros((97,4));locations=[]
+    units=tuple(sorted(initial));p=np.zeros((96,len(units)));q=np.zeros_like(p);soc=np.zeros((97,len(units)));locations=[]
     route_records=[]
     for t in range(96):
         row=[]

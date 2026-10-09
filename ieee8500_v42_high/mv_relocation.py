@@ -306,6 +306,8 @@ def joint_unfixed_geometry_diagnostic():
 
 def audit_saved_joint_witness():
     """Fresh original source and traffic readback of saved geometry-only witness."""
+    from ieee8500_v42_original.hold import require_execution_approval
+    require_execution_approval('OPENDSS:audit_saved_joint_witness')
     import opendssdirect as odd
     result=read(REPORT/'JOINT_MV_GEOMETRY_DIAGNOSTIC_RESULT.json')
     assert result['geometric_feasible']

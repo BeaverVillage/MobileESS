@@ -61,10 +61,12 @@ def certify_global(case, decomp, coupling_dual, unit_duals, nonunit_dual):
     certificate = check_rational_dual_certificate(case.A, case.d, full, case_sha=case.case_sha)
     certificate.update(certified_domain='FULL_ORIGINAL_C3A_INTEGER_DOMAIN',
         theorem='SIGNED_COUPLING_PLUS_LOCAL_PLUS_NONUNIT_DUALS_AND_EXACT_ORIGINAL_RESIDUAL_BOX',
-        all_four_trajectory_blocks_included=True, nonunit_original_domain_included=True,
+        all_four_trajectory_blocks_included=len(decomp.units)==4, nonunit_original_domain_included=True,
         native_local_MIP_ObjBound_used=False, rounded_pricing_objective_used=False,
         restricted_master_objective_used=False, pricing_closure_required_for_this_LB=False,
         structural_integer_block_improvement_proven=False)
+    if len(decomp.units)!=4:
+        certificate.update(all_trajectory_blocks_included=True,unit_count=len(decomp.units))
     return certificate
 
 
