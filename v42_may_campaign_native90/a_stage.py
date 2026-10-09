@@ -546,7 +546,8 @@ def _planning(state, verification, power, output):
         raise ValueError('PLANNING_GPU_POWER_IDENTITY')
     np.savez_compressed(output / 'PLANNING_PHYSICAL.npz', sites=np.asarray(sites),
                         PCC_P_kw=pcc, PCC_Q_kvar=q, IT_kw=it, GPU=gpu, known_GPU=known,
-                        MESS_P_kw=np.zeros((96, 4)), MESS_Q_kvar=np.zeros((96, 4)))
+                        MESS_P_kw=np.zeros((96, len(bundle['initial_MESS_sites']))),
+                        MESS_Q_kvar=np.zeros((96, len(bundle['initial_MESS_sites']))))
     return record(output / 'PLANNING_PHYSICAL.npz')
 
 

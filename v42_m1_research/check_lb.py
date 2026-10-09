@@ -221,16 +221,17 @@ def check_route_conflicts_against_graph(A, d, cuts, graph, *, case_sha=None):
 
 
 def check_integer_count_cover(A,d,leaves,columns,split,*,units,case_sha=None):
-    """Independently prove a complete two-leaf four-fleet/two-time cover.
+    """Independently prove a complete two-leaf all-fleet/two-time cover.
 
-    z is a sum of eight original binary node activities. Every original
+    z sums two original binary node activities per vehicle. Every original
     integer point has z<=floor or z>=floor+1; no path or feasible assignment
     is deleted from the union. Each leaf keeps every original96-slot row.
     """
     columns=list(map(int,columns))
-    if len(columns)!=8 or len(set(columns))!=8:
-        raise ValueError('JOINT_COUNT_REQUIRES_EIGHT_DISTINCT_ORIGINAL_BINARIES')
-    if not isinstance(split,(int,np.integer)) or not 0<=int(split)<8:
+    n_mess=len(set(units)); n_binary=2*n_mess
+    if n_mess==0 or len(columns)!=n_binary or len(set(columns))!=n_binary:
+        raise ValueError('JOINT_COUNT_REQUIRES_TWO_DISTINCT_ORIGINAL_BINARIES_PER_UNIT')
+    if not isinstance(split,(int,np.integer)) or not 0<=int(split)<n_binary:
         raise ValueError('JOINT_COUNT_SPLIT_NOT_INTEGER_INTERIOR')
     if any(j<0 or j>=A.shape[1] or str(d['types'][j])!='B' for j in columns):
         raise ValueError('JOINT_COUNT_COLUMN_NOT_ORIGINAL_BINARY')
@@ -241,8 +242,8 @@ def check_integer_count_cover(A,d,leaves,columns,split,*,units,case_sha=None):
         u,s,t=n[14:-1].split(',');t=int(t)
         if not 66<=t<=95:raise ValueError('JOINT_COUNT_OUTSIDE_CRITICAL_WINDOW')
         groups.setdefault((s,t),set()).add(u)
-    if len(groups)!=2 or len({t for s,t in groups})!=2 or any(v!=set(units) for v in groups.values()) or len(set(units))!=4:
-        raise ValueError('JOINT_COUNT_NOT_ALL_FOUR_FLEETS_AT_TWO_DISTINCT_TIMES')
+    if len(groups)!=2 or len({t for s,t in groups})!=2 or any(v!=set(units) for v in groups.values()):
+        raise ValueError('JOINT_COUNT_NOT_ALL_FLEETS_AT_TWO_DISTINCT_TIMES')
     if len(leaves)!=2:raise ValueError('JOINT_COUNT_INCOMPLETE_LEAF_COVER')
     expected_senses=('<','>')
     for k,leaf in enumerate(leaves):

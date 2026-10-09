@@ -392,15 +392,15 @@ def prepare_count_disjunction(case,root_point):
             if b[2][1]<=a[2][1] or abs(a[2][1]-b[2][1])<6:continue
             count=a[4]+b[4]
             loss=abs(count-round(count))
-            if loss<=1e-7 or not 0<count<8:continue
+            if loss<=1e-7 or not 0<count<2*len(units):continue
             score=(loss,a[0]+b[0],abs(a[2][1]-b[2][1]))
             if best is None or score>best[0]:best=(score,a,b,count)
     if best is None:
-        return [],dict(status='NOT_PROVEN',reason='No fractional four-fleet two-time integer count found; no fallback single-binary branch')
+        return [],dict(status='NOT_PROVEN',reason='No fractional all-fleet two-time integer count found; no fallback single-binary branch')
     _,a,b,count=best
     columns=a[3]+b[3]
     split=int(np.floor(count))
-    row=sparse.csr_matrix((np.ones(8),(np.zeros(8,dtype=int),columns)),shape=(1,case.A.shape[1]))
+    row=sparse.csr_matrix((np.ones(len(columns)),(np.zeros(len(columns),dtype=int),columns)),shape=(1,case.A.shape[1]))
     B=sparse.vstack([case.A,row],format='csr')
     leaves=[]
     for k,sense in enumerate(('<','>')):

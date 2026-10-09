@@ -536,7 +536,7 @@ def build_case(payload, request, progress=None):
         bundle_sha=digest(bundle),anchor_sha=digest(anchor),route_table_sha=bundle['route_table']['sha256'],
         original_matrix_sha=matrix_sha(A),original_domain_sha=_domain_sha(d),
         selected_matrix_sha=matrix_sha(B),selected_domain_sha=_domain_sha(e),
-        binary_count=int(np.count_nonzero(e['types']=='B')),slots=96,units=4,sites=24,
+        binary_count=int(np.count_nonzero(e['types']=='B')),slots=96,units=len(initial),sites=len(sites),
         objective='min rho_max',C3A_policy='KEEP_ALL_REGENERATED_C2_ROWS',transport=proof,transport_authority=transport_authority,
         AIDC_optimization_calls=0,P2_calls=0,historical_bounds_points_columns_read=0)
     case=CampaignMCase(B,e,A,d,None,graph,digest(identity),identity,compact,presolve,bundle,anchor,planning,coeff,out)

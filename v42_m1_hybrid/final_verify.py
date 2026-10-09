@@ -276,7 +276,7 @@ def _rmp_duals(case,decomp,run_path,result,evidence):
         if z.files!=['dual','source_rows'] or not verify._same(z['source_rows'],source_rows):
             raise ValueError('HYBRID_FINAL_RMP_RAW_ORIGINAL_ROW_AXIS_DRIFT')
         pi=z['dual'].copy()
-    if pi.dtype!=np.dtype('float64') or pi.shape!=(len(source_rows)+4,) or not np.isfinite(pi).all():
+    if pi.dtype!=np.dtype('float64') or pi.shape!=(len(source_rows)+len(decomp.units),) or not np.isfinite(pi).all():
         raise ValueError('HYBRID_FINAL_RMP_RAW_PI_AXIS_OR_FINITE_DRIFT')
     signed=pi[:len(source_rows)].copy();senses=case.d['sense'][source_rows]
     invalid=((senses=='<')&(signed>0))|((senses=='>')&(signed<0));signed[invalid]=0.

@@ -49,12 +49,12 @@ def build_master(case,decomp,columns,output):
             column_count[u]+=1
     rowcount=len(source_rows);n=len(nonunit);k=len(catalog)
     matrix=sparse.hstack(pieces,format='csr')
-    convex=sparse.lil_matrix((4,n+k))
     units=list(decomp.units)
+    convex=sparse.lil_matrix((len(units),n+k))
     for j,item in enumerate(catalog):convex[units.index(item['unit']),n+j]=1.
     matrix=sparse.vstack((matrix,convex.tocsr()),format='csr')
-    rhs=np.concatenate((case.d['rhs'][source_rows],np.ones(4)))
-    sense=np.concatenate((case.d['sense'][source_rows],np.full(4,'=')))
+    rhs=np.concatenate((case.d['rhs'][source_rows],np.ones(len(units))))
+    sense=np.concatenate((case.d['sense'][source_rows],np.full(len(units),'=')))
     lower=np.concatenate((case.d['lower'][nonunit],np.zeros(k)))
     upper=np.concatenate((case.d['upper'][nonunit],np.ones(k)))
     names=list(map(str,case.d['names'][nonunit]))+[f"lambda[{item['unit']},{j}]" for j,item in enumerate(catalog)]

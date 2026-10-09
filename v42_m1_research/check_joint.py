@@ -265,7 +265,7 @@ def reconstruct_complete_cover(case, report):
         if descriptor is not None:
             expected = dict(case_sha=case.case_sha, original_rows=case.A.shape[0],
                             original_columns=case.A.shape[1], added_columns=columns,
-                            added_coefficients=[1.]*8, added_sense=row['sense'], added_rhs=row['rhs'],
+                            added_coefficients=[1.]*len(columns), added_sense=row['sense'], added_rhs=row['rhs'],
                             all_original_rows_bounds_types_objective_unchanged=True)
             if descriptor != expected:
                 raise ValueError('COUNT_LEAF_SAVED_DOMAIN_DESCRIPTOR_DRIFT')

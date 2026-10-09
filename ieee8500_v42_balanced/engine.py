@@ -10,6 +10,8 @@ from .common import *
 
 class OriginalCase(IEEE8500AC):
     def __init__(self, tag, balanced=True):
+        from ieee8500_v42_original.hold import require_execution_approval
+        require_execution_approval('OPENDSS:OriginalCase')
         self.source_dir = SOURCE.resolve()
         self.output_dir = (REPORT/'ac'/tag/'dss').resolve()
         self.output_dir.mkdir(parents=True, exist_ok=True)

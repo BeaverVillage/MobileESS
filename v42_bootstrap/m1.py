@@ -37,7 +37,9 @@ def native_inputs(bundle):
         if not 0<=t<arrive<=connect<96:excluded['outside_inherited_RouteArc_time_contract']+=1;continue
         routes.append(RouteArc(f'{s}:{d}:{t}',s,d,t,arrive,connect,r['energy_safe_kwh'],digest(r)))
     b=Battery(**bundle['battery']);b.validate()
-    require(len(bundle['initial_MESS_sites'])==4 and len(table['service_ids'])==24,'NATIVE_MESS_CASE_STUDY_AXIS')
+    require(len(bundle['initial_MESS_sites'])>0 and len(table['service_ids'])==24,'NATIVE_MESS_CASE_STUDY_AXIS')
+    require(all(isinstance(unit,str) and unit and site in table['service_ids']
+                for unit,site in bundle['initial_MESS_sites'].items()),'NATIVE_MESS_INITIAL_SITE_AXIS')
     receipt=dict(route_file=expected,excluded=dict(excluded),accepted_routes=len(routes),
                  battery=asdict(b),initial_MESS_sites=bundle['initial_MESS_sites'],sites=table['service_ids'],
                  native=True,synthetic=False,PR101_head='f536e65fc7fb968c52e99e4a5b017953edc53744',

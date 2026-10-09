@@ -59,8 +59,10 @@ def verify_decomposition(case,decomposition):
     A,d=case.A.tocsr(),case.d
     owners=[_owner(n) for n in d['names']]
     units=sorted({u for u in owners if u is not None})
-    if len(units)!=4 or sorted(decomposition.units)!=units:
-        raise ValueError('HYBRID_FOUR_ORIGINAL_UNITS_REQUIRED')
+    if not units or sorted(decomposition.units)!=units:
+        raise ValueError('HYBRID_ALL_ORIGINAL_UNITS_REQUIRED')
+    if hasattr(case,'graph') and set(case.graph[1])!=set(units):
+        raise ValueError('HYBRID_ORIGINAL_GRAPH_FLEET_IDENTITY_DRIFT')
     expected_columns={u:np.array([j for j,v in enumerate(owners) if v==u],dtype=np.int64) for u in units}
     nonunit_columns=np.array([j for j,v in enumerate(owners) if v is None],dtype=np.int64)
     expected_rows={u:[] for u in units};nonunit_rows=[];mixed=[]
