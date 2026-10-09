@@ -21,3 +21,11 @@ Actual 지표는 봉인된 RESULT/FRESH_RESULT/OPENDSS_PHASE_ARRAYS SHA를 확�
 Native 시간은 완료 호출 ledger와 실행 중인 호출을 포함한 Solver callback 보고를 구분한다. callback의 완료 누적 Runtime이 ledger와 동일할 때만 현재 호출을 포함한 보고값을 보여준다. Wall 경과를 Native 시간으로 추정하거나 solver MIPGap/BestBd를 독립 Global 인증으로 승격하지 않는다.
 
 검증: V13 경량 회귀 256 PASS, V15 지표 검증 7 PASS, 실제 31일 비교 배열 확인 PASS, 오프라인 DOM 검증 PASS(3worker/31행/미평가 —/%p/열린 세부사항 유지/연결 지연/시작 대기/불필요한 검증 패널 제거), 실제 HTTP HTML/API 일치 PASS. 최초 읽기 약 1.5초, 동일 프로세스 후속 API 계산 약 0.13초였다. 브라우저 도구의 저장 권한 확인 기능 오류로 직접 렌더링 화면 검사는 차단됐다. 브라우저 보안 경로를 우회하지 않았으며, DOM 검증을 실제 브라우저 시각 검사로 주장하지 않는다.
+
+UB/LB/Gap 미표시 후속 점검: localhost 연결과 3개 worker의 Runtime/Heartbeat 갱신은 정상이다. 초기 M_SEED 호출은 아직 반환되지 않았고 초기 strict UB 및 independent LB 인증서가 없다. V13 budget callback은 Runtime만 전달하므로 Solver 내부 incumbent/bound/Gap 및 presolve/root/node 단계는 현재 보고로 확인할 수 없다. Work=0은 완료 호출 합계이며 멈춤을 뜻하지 않는다. 인증 값 부재를 내부 incumbent 부재로 단정하지 않는다.
+
+읽기 전용 모니터 V16은 검증된 UB·독립 LB를 접지 않은 기본 카드에 배치하고, 초기 정수해 탐색/독립 물리 검증/독립 하한 계산 대기 이유를 표시한다. 현재 worker가 이미 생성한 초기 또는 frontier 인증서를 읽어 다음 알고리즘 callback보다 먼저 값을 갱신할 수 있다. current case/day, strict FULL/C3A 정수·물리 replay, point SHA, frontier의 두 certificate SHA, exact rational bound/Gap 및 같은 worker 출력 경계를 확인한다. Native BestBd 또는 실패한 stationary 후보를 인증 값으로 사용하지 않는다. 실제 현재 3 worker의 인증 값은 여전히 없는 상태다. 16개 지표 회귀와 V16 DOM 검증이 통과했고, MONITOR_V16_ACTIVATION.json은 monitor만 교체해 Native kill=0 및 Coordinator/worker PID 동일성을 기록한다.
+
+초기 solve 병목: 현재 모델 생성은 이미 완료됐으며 May01 운영 preparation은 약 171.85초다. Solver seed의 규모는 May01 779129행/306040열/9326 binaries/8384557 nonzeros다. 기존 C3A 비교 실험은 582808행/306040열/9322 binaries/5351612 nonzeros이고 검증된 시작 해를 사용했다. 해당 286.135초 실험의 Native status는 TIME_LIMIT(9), valid Gap은 15.0436%이며 새 유효 incumbent는 없었다. 빠른 종료를 최종 최적화 완료와 혼동하지 않는다. 후속 anytime 연구 또한 이미 검증된 UB/LB로 시작한 1499-job case이며 현재 May01은 1649-job case다.
+
+현재 초기 seed는 generic research builder의 MIPGap=0.005에서 시작하고, V13의 실제 TimeLimit은 요청된 900초 대신 날짜 Native 잔여 5400초다. 독립 목표 3% 판정과 Adaptive Primal–Dual는 seed 호출 종료 뒤에 도달한다. 이 호출이 날짜 예산을 길게 점유하는 구조가 확인됐다. 기존 M1 비교의 명시적 Method/NodeMethod/Crossover/MIPFocus 설정 및 NumericFocus/precision도 현재 seed 경로와 같지 않아 속도 비교는 통제된 실험이 아니다. 8초 CPU delta와 Runtime/Heartbeat가 계속 변하는 것을 읽기 전용으로 측정했다. 세부 root/node 병목과 precision의 성능 영향은 아직 증명되지 않았다. B2_INITIAL_SEED_BOTTLENECK_AUDIT.json에 원본 보고서, 소스 SHA, 모델 규모, timing, 실제 프로세스 관측을 남겼다. 실행 중 solver 소스·메모리·알고리즘은 변경하지 않았다.
