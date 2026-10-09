@@ -138,6 +138,59 @@ def test_result_sha_identity_and_benchmark_are_enforced(tmp_path):
     assert monitor.result_for(row)[1] == 'MONITOR_BENCHMARK_NOT_PRODUCTION'
 
 
+def test_cached_api_preserves_sealed_scientific_errors_while_retry_pending(tmp_path):
+    cp = production(tmp_path)
+    expected = 'PermissionError: RMP_PRESOLVE_ORIGINAL_BUDGET_OR_SCOPE_CLOSURE_DRIFT'
+    for day in monitor.DAYS[:3]:
+        path = tmp_path/'dates'/'B2'/day/'attempt'/'RESULT.json'
+        write(path, dict(identity=dict(arm='B2', day=day), PASS=False,
+              status='INPUT_OR_CERTIFICATION_FAILURE', source_SHA='a'*64,
+              scientific=dict(PASS=False, error=expected), Native_Runtime=626.365))
+        cp['dates']['B2/'+day].update(status='RETRY_PENDING', result=str(path),
+            result_SHA=monitor.sha(path), current_attempt='failed-original')
+    write(tmp_path/'SUPERVISOR_STATE.json', cp)
+    before = {p: p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+    cache = Snapshot(tmp_path)
+    cache.refresh()
+    code, payload = cache.get()
+    assert code == 200
+    api = json.loads(payload)
+    for row in api['rows'][:3]:
+        observed = row['B2']
+        assert observed['status'] == 'RETRY_PENDING'
+        assert observed['worker_status'] == 'INPUT_OR_CERTIFICATION_FAILURE'
+        assert observed['current_attempt'] == 'failed-original'
+        assert observed['result_verified'] and not observed['PASS']
+        assert observed['error'] == expected
+        assert observed['Native_Runtime'] == 626.365
+        assert observed['bounds']['UB'] is None and observed['bounds']['gap'] is None
+    assert api['totals']['B2']['PASS'] == 0 and api['totals']['B2']['pending'] == 31
+    assert before == {p: p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+
+
+@pytest.mark.parametrize('scientific', [None, 'not-a-document', []])
+def test_absent_or_untyped_scientific_error_is_unknown(scientific):
+    assert monitor.result_error(dict(scientific=scientific)) is None
+
+
+def test_top_level_error_takes_precedence_over_scientific_error():
+    assert monitor.result_error(dict(error='worker failure',
+        scientific=dict(error='scientific failure'))) == 'worker failure'
+
+
+def test_unsealed_scientific_error_cannot_override_result_integrity_error(tmp_path):
+    cp = production(tmp_path)
+    path = tmp_path/'RESULT.json'
+    write(path, dict(identity=dict(arm='B2', day=monitor.DAYS[0]), PASS=False,
+          scientific=dict(error='untrusted nested error')))
+    cp['dates']['B2/'+monitor.DAYS[0]].update(status='RETRY_PENDING',
+        result=str(path), result_SHA='0'*64)
+    write(tmp_path/'SUPERVISOR_STATE.json', cp)
+    observed = monitor.view(tmp_path)['rows'][0]['B2']
+    assert observed['error'] == 'MONITOR_RESULT_SHA_MISMATCH'
+    assert not observed['result_verified'] and not observed['PASS']
+
+
 def test_monitor_uses_explicit_production_and_keeps_31_unknown_days(tmp_path):
     production(tmp_path)
     write(tmp_path / 'initialization_benchmark_v19_99' / 'CHECKPOINT_V19.json', dict(state='COMPLETE'))

@@ -112,6 +112,13 @@ def result_for(row):
         return {}, str(error)
 
 
+def result_error(document):
+    # The original B2 worker seals scientific failures inside RESULT.scientific.
+    # Read that existing error only after result_for has verified the result.
+    scientific = document.get('scientific')
+    return document.get('error') or (scientific.get('error') if isinstance(scientific, dict) else None)
+
+
 def request_for(row):
     path = row.get('request')
     if not path and row.get('result'):
@@ -418,7 +425,7 @@ def view(root, epoch=None):
                             Native_Runtime=native, bounds=bound, actual=actual,
                             stage=live.get('stage') if live else bound.get('stage'),
                             A1_reused=bound.get('A1_reused'), result=original.get('result'),
-                            result_SHA=original.get('result_SHA'), error=error or document.get('error'),
+                            result_SHA=original.get('result_SHA'), error=error or result_error(document),
                             source_SHA=(live.get('source_SHA') if live else document.get('source_SHA',
                                         document.get('source_sha', original.get('source_SHA')))),
                             attempts=original.get('attempt_count'), current_attempt=original.get('current_attempt'))
