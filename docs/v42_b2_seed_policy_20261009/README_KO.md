@@ -1,102 +1,53 @@
-# B2 초기 Native 호출 진단과 향후 seed 정책
+# B2 초기 호출 제한 수정과 V17 재실행
 
-현재 세 B2 Solver는 변경·중단·재시작하지 않았다. 수정은 별도 worktree와
-codex/v42-b2-seed-policy 브랜치에만 있다. 활성 체크아웃 D:/MobileESS_V42의
-V13 코드, 요청, manifest, ledger, Scheduler 작업에는 쓰지 않았다.
+최신 사용자 지시에 따라 May01/02/03을 정상 중단하고 별도 source/attempt로 재실행했다.
+목표는 seed가 날짜 전체 90분 예산을 소진하는 문제를 해소하고 초기해 → 독립 UB/LB 인증 → 기존 Adaptive 절차를 실제 수행하는 것이다. 최종 3% 도달을 보장하지 않는다.
 
-## 현재 병목 판정
+## 중단과 보존
 
-INITIAL_NATIVE_READ_ONLY.json에 시각별 실제 callback Runtime과 PID를 기록했다.
-세 호출은 첫 CURRENT_DAY_UNRESTRICTED_P1_SEED에 머물러 있다. 현재 콜백은
-Runtime만 보고하며 OutputFlag=0인 로그에는 시작 헤더만 있다.
-SolCount, incumbent, BestBd, 실제 Native Gap, root/node는 UNKNOWN이다.
-따라서 첫 정수해 부재와 0.5% 증명 지연을 구분할 수 없다.
-독립 초기해 인증 파일이 없다는 것은 Solver 내부 incumbent 부재의 증거가 아니다.
-CPU 누적 증가와 Runtime 보고는 활동의 증거이며 presolve/root/tree 단계는 증명하지 않는다.
-progress와 ledger는 서로 다른 시점의 비트랜잭션 읽기이며 콜백 Runtime을
-완료된 누적 ledger Runtime과 혼동하지 않는다.
+먼저 HOLD_V13.json으로 Coordinator 신규 작업 투입을 차단하고 해당 run의 기존 Coordinator/Watchdog Scheduler를 비활성화했다. 각 worker의 PID/생성 시각 및 전용 콘솔 구성원을 확인한 뒤 CTRL_C_EVENT를 전달했다. 세 Gurobi 호출 모두 INTERRUPTED(11)로 정상 반환했다. Solver 강제 종료는 없었다.
 
-재현 가능한 읽기 전용 도구:
+| 날짜 | 최종 Native Runtime(s) | 잔여 예산(s) | SolCount |
+|---|---:|---:|---:|
+| May01 | 3318.513000011444 | 2081.486999988556 | 0 |
+| May02 | 3285.425999879837 | 2114.574000120163 | 0 |
+| May03 | 3316.044000148773 | 2083.955999851227 | 0 |
 
-    python -B -X utf8 -m v42_b2_start_recovery_v13.seed_audit ACTIVE_ROOT REPORT_OUTSIDE_ACTIVE_CHECKOUT
+병목은 **첫 정수해 부재**로 확정됐다. 실제 Native Gap은 UNKNOWN_NO_INCUMBENT, 미관측 root/node는 UNKNOWN이다. Runtime이 모두 확정돼 QUARANTINE은 필요하지 않았다. 미종료 inflight, Runtime unavailable, 증거 SHA 불일치 시 후속 Native 진입을 막고 예산을 격리한다.
 
-이 도구는 Solver에 연결하거나 신호를 보내지 않는다. 출력 파일은 활성 체크아웃 밖으로 제한한다.
+기존 V13 시도·Solver 로그·checkpoint·manifest·결과는 원래 경로에 보존했다. stop_preservation/에 중단 전후 근거를 복사했다. B0/B1 모델과 완료 결과는 수정하지 않았고 B1 31개 RESULT SHA를 새 manifest에 봉인했다. 새 CHECKPOINT_V17.json은 별도 journal이다.
 
-## 0.5% 설정의 근거 조사
+## 수정 정책
 
-v42_m1_research/lb.py의 공용 build_model이 MIPGap=.005를 설정하고,
-기존 B2 _seed_integer가 이를 그대로 상속한다. B2 최종 목표는 m_stage.TARGET=3/100이다.
-초기 seed의 역할은 원본 제약을 만족하는 현재 날짜 정수 witness를 얻는 것이다.
-초기 _strict_ub는 C3A 및 FULL의 literal 정수/이진 패턴, 원본 행/경계,
-96슬롯 route/SOC/PCS/charge-mode 물리 검증, exact 목적함수 transport를 검사한다.
-이 검사는 Native MIPGap을 사용하지 않는다. 최종 승인도 기존 rational dual 검사와
-엄밀한 UB/LB bracket의 exact gap으로 판정한다.
-다른 M1 연구용 최종 납품 검증에는 .005 파라미터 감사가 있지만 B2 seed 승인 경로에는 없다.
-따라서 이 경로에서 seed에 0.5%를 요구할 과학적 필요는 찾지 못했다.
-검색 정지 조건을 3%로 바꾼다고 첫 정수해를 더 빨리 찾는다는 보장은 없다.
+- B2 seed MILP만 MIPGap=.03이다. 최종 TARGET=3/100과 기존 exact UB/LB 인증기는 유지한다.
+- B2 실제 TimeLimit=min(requested_seconds, remaining_native_budget)이다. seed 요청은 이월 후에도 900초다. May01 ledger에서 요청/실제 모두900, MIPGap=.03을 확인했다.
+- 이전 DateBudget이 requested_seconds를 무시하고 날짜 잔여 예산 전체를 설정한 것이 불일치 원인이다. 중단한 세 호출의 요청900/실제5400도 보존했다.
+- 목적함수, FULL/C3A 행, 물리·정수 제약, 전체 route/SOC/P/Q 결정 공간은 변경하지 않는다. May01의 원본/선택 matrix·domain, bundle, anchor, binary_count 7개 식별 필드가 이전 시도와 일치한다. 새 case SHA에는 새 transport 증거 경로도 반영된다.
+- 실제 Runtime은 요청 초과분까지 누적 차감한다. 이전 날짜별 예산을 0으로 초기화하거나 새5400초를 주지 않는다.
 
-Gurobi 문서에서도 MIPGap은 incumbent와 best bound 사이의 검색 종료 조건이다.
-[MIPGap 정의](https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parameter-MIPGap).
+공용 v42_m1_research/lb.py의 .005를 B2 seed가 상속한 것이 기존 Gap 설정의 원인이다. 초기 seed 승인과 최종 exact 인증은 Native MIPGap을 사용하지 않는다. 이 경로에 0.5%가 필요한 과학적 이유는 찾지 못했다. MIPGap 변경만으로 첫 incumbent 발견이 빨라진다고 보장하지 않는다. [Gurobi MIPGap](https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parameter-MIPGap).
+[TimeLimit 이후 실제 Runtime 처리](https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parameter-TimeLimit).
 
-## 준비된 구현
+## 초기해 개선과 검증
 
-1. V13 B2 adapter의 seed 호출에만 MIPGap=.03을 적용한다.
-   공용 A/M builder, B1 정책, 이후 adaptive U/L 알고리즘과 FULL/Compact/C3A 생성은 유지한다.
-   seed identity에 실제 정책과 MIPGap을 기록한다.
-2. B2 Native 호출의 TimeLimit=min(requested_seconds, 날짜 잔여 Native 예산)으로 설정한다.
-   요청이 None일 때만 잔여 예산을 사용한다. 0/음수/NaN/무한대/bool 요청은 Native 진입 전에 거부한다.
-   요청 900초의 초기 seed는 잔여 예산이 충분하면 TimeLimit=900이다.
-   기존 seed 배분 공식 min(900, remaining/3)은 유지한다.
-3. Native 콜백에 탐색 단계, best incumbent, BestBd, 계산한 Native Gap, node/iteration 및
-   관측 시각을 기록한다. 실제 Model.SolCount는 optimize 종료 후에 읽는다.
-   콜백의 SOLCNT는 별도 필드로 기록한다. 특히 MIPSOL_SOLCNT는 이전 콜백 해 개수라
-   0이어도 incumbent 부재로 해석하지 않는다. 미관측 값은 UNKNOWN이다.
-   [콜백 값과 의미](https://docs.gurobi.com/projects/optimizer/en/current/reference/numericcodes/callbacks.html).
-4. Native 값은 진단 필드에만 기록한다. UB/LB/certified_gap으로 승격하지 않는다.
-   초기해는 기존 _strict_ub를 그대로 통과해야 한다. 최종 3%는 기존 exact 인증기로만 판정한다.
+기존 stationary 무이동/P=Q=0 후보의 원본 FULL 최대 row violation은 .00945962634612374다. STATIONARY_RESIDUAL_ANALYSIS.json에 기존 인증기가 보고한 최초20개 실패 원본 행의 lhs/rhs/residual과 행렬 SHA를 기록했다. 240개 원본 injection_binding 등식에서 Pch/Pdis/Q=0이면 injection=0임을 확인했다. 실패 행은 voltage_upper이며 rhs<0라 lhs=0이 위반한다. rho_max 변경으로 전압 위반을 해결할 수 없다.
 
-TimeLimit 종료에는 속성 계산 등의 추가 시간이 필요할 수 있다.
-900초를 넘긴 실제 Runtime도 전부 누적 차감하며 5400초 초과는 승인하지 않는다.
-[TimeLimit 종료와 Runtime](https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parameter-TimeLimit).
+새 보조 LP는 같은 날짜 원본 C3A 행/목적함수를 유지하고 초기 위치의 stationary 정수 패턴만 고정한 채 P/Q/SOC dispatch를 찾는다. 요청120초를 같은 날짜 Native 예산에 차감한다. 고정은 보조 후보 생성 모델에만 적용하고 뒤의 unrestricted seed MILP에는 적용하지 않는다. FULL 독립 검증을 통과한 후보만 MIP Start로 전달한다. 기존 실패 해나 이전 날짜 해는 재사용하지 않는다.
 
-## 900초 종료 후 실패·복구 계약
+May01 보조 LP는 실제 Native18.67300009727478초에 OPTIMAL로 반환했다. 원본 FULL961472개 행/316743개 열, 208312개 정수·이진 열과 C3A9326개 정수·이진 열 및 96슬롯 route/SOC/PCS/charge-mode 검증 PASS다. rounding/clipping/repair는0이다. 검증된 초기 UB=.6426752324712284, exact UB=2894351937477671/4503599627370496이다.
 
-- SolCount=0이면 기존 TIME_LIMIT_NO_VALID_INCUMBENT 분류와 명시적인 seed 실패 사유를 남긴다.
-  INFEASIBLE 상태는 INCONCLUSIVE로 남겨 입력·수치 진단 대상으로 둔다.
-  incumbent가 있어도 literal 정수/FULL 물리 검증 실패면 PHYSICAL_FAILURE이며 UB를 만들지 않는다.
-- B2_SEED_FAILURE_AND_RECOVERY.json에 case SHA, 실패 이유, 종료 ledger SHA,
-  실제 누적 Runtime, 잔여 Native 예산, 인증 bound 없음, 자동 재시도 없음 등을 저장한다.
-  M_STAGE_RESULT와 상위 Worker RESULT도 기존 실패 분류로 종료한다.
-- 숨은 5400초 재호출, 자동 파라미터 변경, 무한 seed 재시도는 하지 않는다.
-  이미 사용한 시간은 모두 보존한다. 예: 실제 901.2초 사용 시 같은 날짜의 잔여 예산은 4498.8초다.
-- 복구는 기존 시도의 자연 종료 후 동일 arm/date의 별도 attempt로만 한다.
-  정식 신규 source-version 전환 계약에서 이전 RESULT/request/case/ledger와 원본 입력 SHA를
-  봉인하고 종료 ledger를 연결한다. 모든 이전 시도의 actual Runtime을 중복 없이 이월하고
-  새 예산은 5400 - 이전 누적 Runtime이다. 과거 bound/point는 새 인증에 자동 이식하지 않는다.
-  현재 날짜 원본 모델을 다시 생성하고 새로운 초기해를 동일 독립 검사로 검증한다.
-- Runtime unavailable, inflight ledger, 누락·SHA 불일치 ledger는 복구를 거부한다.
-  콜백의 마지막 샘플로 총 Runtime을 추정하거나 0으로 초기화하지 않는다.
-  OS 강제 중단으로 정확한 Runtime을 잃으면 해당 날짜 예산을 격리하고 후속 Native 호출을 막는다.
+seed MILP 첫 feasible incumbent 콜백 관측은 해당 호출 Runtime12.121999979019165초였다. 그때 Native incumbent=.6426752324712284, BestBd=.3143088163056946, Native Gap=.5109367835802421이다. 이는 탐색 진단이고 독립 Global Gap 인증이 아니다.
 
-## 활성 캠페인 적용 경계와 보존
+콜백에서 Runtime, incumbent/BestBd/Gap, node/root/phase/iteration, first-incumbent Runtime/UTC를 관측 가능한 범위에서 기록한다. 실제 Model.SolCount는 종료 후 읽고 callback SOLCNT는 별도 필드다. MIPSOL_SOLCNT는 이전 callback 수이므로0을 incumbent 부재로 해석하지 않는다. 미관측 값은 UNKNOWN이다. [Gurobi callback 의미](https://docs.gurobi.com/projects/optimizer/en/current/reference/numericcodes/callbacks.html).
 
-현재 V13 manifest는 소스 SHA를 봉인했고 시작한 날짜 재dispatch를 거부한다.
-따라서 이 브랜치를 활성 폴더에 병합하거나 기존 manifest를 재봉인하지 않는다.
-향후 적용은 활성 3워커의 자연 종료와 Coordinator의 안전한 경계 이후,
-새 source-version/attempt의 정식 전환 및 검증으로 수행해야 한다.
-900초 실패 복구를 위한 신규 Coordinator 전환 구현은 이 준비 브랜치에서 활성화하지 않았다.
-실패 기록과 복구 계약은 준비했으며 현재 캠페인으로의 dispatch는 미수행이다.
+900초 종료 후 독립 검증 가능한 초기해가 없으면 B2_SEED_FAILURE_AND_RECOVERY.json 및 M_STAGE_RESULT/Worker RESULT에 명시적 실패를 저장한다. Adaptive를 통과시키거나 자동 재호출하지 않는다. 복구는 새 같은 날짜 attempt에서 봉인된 종료 ledger/RESULT와 누적 Runtime을 연결해야 한다. UNKNOWN/미종료/누락·변조 증거는 후속 실행을 거부한다.
 
-현재 워커를 중단할 필요는 없다. 추후 중단이 필요하다면 먼저 각 PID/생성시각,
-누적 완료 Runtime 및 inflight 상태, request/manifest/case SHA, 완료 인증서와 RESULT를 보고한다.
-원본 시도 디렉터리는 읽기 전용 보존하고 새 시도 경로를 분리한다.
-Solver가 자연 반환하기 전 내부 incumbent/tree를 외부 파일에서 복구 가능하다고 약속하지 않는다.
-정확한 종료 Runtime이 확보되지 않은 강제 중단은 자동 재실행하지 않는다.
+## 실제 실행과 모니터
 
-## 검증 범위
+실행 source commit=6a74fef5, execution SHA=2dd3bdf8db88a40f63e756e0e99e8f54f42fa4437711d5fb352689bdbae4dc60, attempt=seed_policy_v17_01이다. 기존 mess_build_v13_01 Runtime을 이월한다. 현재 May01 단독 실제 검증 실행이며 May02..31은 대기한다. May01 초기 strict UB/exact LB, 최종 독립 인증서와 정상 Adaptive 종료 근거를 확인해야 나머지를 자동 해제한다. 동시 워커 수는 RAM 여유와 May01 peak RSS로 계산한다(4GB 여유, 워커당 최소4.5GB, 최대3).
 
-Mock Solver 및 소형 CSR fixture로 시간 배분, 실제 Runtime 초과 차감, UNKNOWN 처리,
-초기 seed 실패, FULL 행/정수/물리 거부 경로, exact 3% 승인 경계를 검증했다.
-물리 판정과 분해/운전계획은 일부 소형 테스트에서 fixture로 대체했다.
-새 실제 날짜의 대형 FULL 물리 검증이나 900초 incumbent 발견 성능을 증명한 결과는 아니다.
-대형 Native optimize 및 동시 FULL build는 실행하지 않았다. 실행 내역은 VALIDATION.json에 있다.
+http://127.0.0.1:8793/ 모니터는 별도 V18 읽기 전용 코드로 V17 journal/새 attempt를 표시한다. Native Gap과 독립 인증 Global Gap을 구분하고 첫 정수해 시간/node, 이월 Runtime/잔여 시간/attempt/source SHA를 표시한다. B1/B2 날짜별 Actual 최대 선로 부하율 비교는 기존 SHA 검증된96슬롯 AC 배열을 사용한다. 모니터 전환에서 확인된 기존 모니터 PID만 종료했고 Solver/Coordinator는 변경하지 않았다.
+
+## 검증
+
+기존 회귀를 포함한 정책/시간 제한/예산 이월/인증/명시적 실패 테스트165개 PASS. 새 V18 표시 회귀3개와 기존 인증 표시9개 PASS. Node 오프라인 DOM 실행에서 워커 카드3개/Actual31행/May01 단독 검증 상태를 확인했다. 경량 테스트에는 대형 Native optimize가 없다. 실제 May01은 별도 원본 모델 실측이다. 최종 결과와 재개 여부는 MAY01_MEASURED_RESULT.json에 기록한다.
