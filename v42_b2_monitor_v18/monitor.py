@@ -64,26 +64,28 @@ def worker_view(root, day, row, epoch):
 
 def view(root):
     root = Path(root)
-    cp = co.read(root/'CHECKPOINT_V17.json')
-    manifest = co.read(root/'CONTINUATION_V17_MANIFEST.json')
+    version=18 if (root/'CHECKPOINT_V18.json').is_file() else 17
+    cp = co.read(root/f'CHECKPOINT_V{version}.json')
+    manifest = co.read(root/f'CONTINUATION_V{version}_MANIFEST.json')
     workers = [worker_view(root,day,row,time.time()) for day,row in cp.get('workers',{}).items()]
     slots = []
     for slot in range(1,4):
         worker = next((w for w in workers if w['worker_slot']==slot),None)
         if worker is None:
-            waiting_day = f'2025-05-{slot:02d}' if not cp.get('canary_PASS') else None
+            waiting_day = (f'2025-05-{slot:02d}' if version==17 else None) if not cp.get('canary_PASS') else None
             prior = manifest.get('prior_attempts',{}).get(waiting_day,{})
             used = prior.get('Native_Runtime')
             worker = dict(worker_slot=slot, arm='B2', day=waiting_day, display_waiting=True,
                 worker_alive=False, phase='HELD_FOR_CANARY' if not cp.get('canary_PASS') else 'IDLE',
-                waiting_reason='May01 독립 인증·Adaptive 실행 확인 후 재개' if not cp.get('canary_PASS') else '날짜 배정 대기',
+                waiting_reason=('May01 독립 인증·Adaptive 실행 확인 후 재개' if version==17 else 'May02/03 LP 직접 채택·인증·Adaptive 확인 후 재개') if not cp.get('canary_PASS') else '날짜 배정 대기',
                 Native_Runtime_seconds=used, native_remaining_seconds=max(0.,5400.-used) if display.finite(used) else None)
         slots.append(worker)
-    heartbeat = optional(root/'COORDINATOR_V17_HEARTBEAT.json')
+    heartbeat = optional(root/f'COORDINATOR_V{version}_HEARTBEAT.json')
     alive = same_process(heartbeat.get('process',{}))
     return display.clean(dict(run_id=manifest['run_id'],state=cp['state'],
         algorithm_version=manifest['schema'],display_version=VERSION,runtime_root=str(root),
         coordinator_alive=alive,canary_PASS=bool(cp.get('canary_PASS')),parallel_workers=cp.get('parallel_workers',1),
+        canary_label='May02/03' if version==18 else 'May01',
         B1=co.counts(cp,'B1'),B2=co.counts(cp,'B2'),workers=workers,worker_slots=slots,
         B2_validation_detail=dict(PASS=True,status=cp['state'],error=None),
         actual_comparison=comparison(cp['dates']),last_error=cp.get('last_error'),

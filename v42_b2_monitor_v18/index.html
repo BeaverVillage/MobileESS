@@ -177,8 +177,8 @@ function render(){
  $('worker-total').replaceChildren(el('span',String(live)),el('small',' / '+(s.parallel_workers||1)));
  const done=b.completed===31,issue=!!g?.error||!s.coordinator_alive&&!done;
  $('overview').className='overview '+(issue?'error':'');
- $('campaign-title').textContent=g?.error?'B2 시작 오류':done?'B2 캠페인 종료':!s.coordinator_alive?'Coordinator 실행 상태 확인 필요':!g?.PASS?'B2 시작 준비 중':!s.canary_PASS&&live?'May01 검증 실행 · 1워커':live?'B2 실행 중 · '+live+'개 날짜 병렬 처리':'B2 날짜 배정 중';
- $('campaign-caption').textContent=done?'날짜별 성공 여부와 Actual 평가 결과를 아래 표에서 확인하세요.':!s.canary_PASS?'May01 초기해 탐색 → 독립 UB/LB 인증 → Adaptive 실행을 확인한 뒤 나머지 날짜를 재개합니다.':!g?.PASS?'검증 통과 후 3워커가 자동 시작됩니다.':'모델 생성 → 최적화 → Actual AC 평가 순서로 진행됩니다.';
+ $('campaign-title').textContent=g?.error?'B2 시작 오류':done?'B2 캠페인 종료':!s.coordinator_alive?'Coordinator 실행 상태 확인 필요':!g?.PASS?'B2 시작 준비 중':!s.canary_PASS&&live?(s.canary_label||'May01')+' 검증 실행 · '+live+'워커':live?'B2 실행 중 · '+live+'개 날짜 병렬 처리':'B2 날짜 배정 중';
+ $('campaign-caption').textContent=done?'날짜별 성공 여부와 Actual 평가 결과를 아래 표에서 확인하세요.':!s.canary_PASS?(s.canary_label||'May01')+' 초기해 직접 채택 → 독립 UB/LB 인증 → Adaptive 실행을 확인한 뒤 나머지 날짜를 재개합니다.':!g?.PASS?'검증 통과 후 3워커가 자동 시작됩니다.':'모델 생성 → 최적화 → Actual AC 평가 순서로 진행됩니다.';
  const slots=s.worker_slots||[];$('workers').replaceChildren(...slots.map(workerCard));renderActual(s.actual_comparison);
  const errors=[];if(g?.error)errors.push('모델 검증: '+JSON.stringify(g.error));if(s.last_error)errors.push('최근 날짜 오류: '+JSON.stringify(s.last_error));
  const metricErrors=s.actual_comparison.rows.filter(r=>r.B1.error||r.B2.error);if(metricErrors.length)errors.push('Actual 근거 확인 필요: '+metricErrors.map(r=>day(r.day)).join(', '));
