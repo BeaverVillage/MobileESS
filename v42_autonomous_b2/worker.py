@@ -93,7 +93,9 @@ def proof_scope(request,manifest):
     from v42_may_campaign_native90 import m_stage,operations
     from v42_m1_anytime import core,algorithms
     from v42_m1_hybrid import blocks,pricing,dw,final_verify
+    from v42_b2_seed_recovery_v18 import certificate_box
     from v42_b2_seed_recovery_v19.common import atomic
+    from . import canonical_stream
     routes=proof_routes(request);output=routes['output']
     folder=Path(request['input_folder']).resolve()
     # These pre-existing producer receipts must stay read-only. No new input
@@ -113,7 +115,8 @@ def proof_scope(request,manifest):
         'v42_m1_hybrid/final_verify.py','v42_m1_research/check_ub.py',
         'v42_m1_research/check_lb.py','v42_m1_hybrid/blocks.py',
         'v42_m1_anytime/core.py','v42_m1_anytime/algorithms.py',
-        'v42_may_campaign_native90/operations.py')}
+        'v42_may_campaign_native90/operations.py',
+        'v42_b2_seed_recovery_v18/certificate_box.py','v42_pr134_b1/common.py')}
     output.mkdir(parents=True,exist_ok=True)
     receipt=dict(schema='V42_B2_SCOPED_PROOF_PATH_AUTHORITY_V22',
         run_id=request['run_id'],day=request['day'],attempt_id=request['attempt_id'],
@@ -123,9 +126,16 @@ def proof_scope(request,manifest):
         original_validator_ROOT=str(final_verify.ROOT),
         original_validator_code_objects_retained=True,scientific_arithmetic_changed=False,
         historical_candidate_point_admission=False,Native_optimize_calls=0,
+        certificate_proof_serialization='V42_B2_CANONICAL_STREAM_V24',
         status='ROUTING_ADMITTED')
     atomic(output/'SCOPED_PROOF_PATH_AUTHORITY.json',receipt)
+    def proof_atomic(path,value):
+        return canonical_stream.atomic(routes['owned'](path),value)
     with ExitStack() as stack:
+        # Limit the memory-saving serialization adapter to this proof producer.
+        # Global common functions and all certificate arithmetic stay original.
+        stack.enter_context(patch.object(certificate_box,'digest',canonical_stream.digest))
+        stack.enter_context(patch.object(certificate_box,'atomic',proof_atomic))
         for module in (m_stage,algorithms):
             stack.enter_context(patch.object(module,'_strict_ub',routes['final']['_strict_ub']))
         for module in (core,algorithms):

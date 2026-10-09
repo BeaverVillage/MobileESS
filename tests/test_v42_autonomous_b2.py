@@ -124,6 +124,9 @@ def test_production_scope_routes_imported_aliases_and_restores_sources(tmp_path)
     from v42_may_campaign_native90 import m_stage,operations
     from v42_m1_anytime import core,algorithms
     from v42_m1_hybrid import pricing,dw,final_verify
+    from v42_b2_seed_recovery_v18 import certificate_box
+    from v42_pr134_b1 import common
+    from v42_autonomous_b2 import canonical_stream
     from v42_b2_seed_recovery_v19.common import atomic
     request=proof_request(tmp_path);folder=tmp_path/'inputs';folder.mkdir()
     for name in ('B2_FIXED_AIDC.json','PLANNING_PHYSICAL.npz','LINKED.json'):
@@ -135,12 +138,23 @@ def test_production_scope_routes_imported_aliases_and_restores_sources(tmp_path)
     before=(m_stage._strict_ub,algorithms._strict_ub,core.write,algorithms.write,
             pricing.output_directory,dw.output_directory,operations.d_path)
     roots=(core.ROOT,algorithms.ROOT,final_verify.ROOT,operations.ROOT)
+    serialization=(certificate_box.digest,certificate_box.atomic,common.digest,common.atomic)
+    checker=certificate_box.check.__code__
     with proof_scope(request,dict(execution_SHA='test_routing_only')) as routes:
         assert m_stage._strict_ub is algorithms._strict_ub is routes['final']['_strict_ub']
         assert m_stage._strict_ub.__code__ is before[0].__code__
         assert core.write is algorithms.write is routes['write']
         assert pricing.output_directory is dw.output_directory is routes['output_directory']
         assert (core.ROOT,algorithms.ROOT,final_verify.ROOT,operations.ROOT)==roots
+        assert certificate_box.digest is canonical_stream.digest
+        assert certificate_box.check.__code__ is checker
+        assert (common.digest,common.atomic)==serialization[2:]
+        packet=routes['output']/'CERTIFICATE_DOMAIN_PROOFS/P.json'
+        certificate_box.atomic(packet,dict(PASS=True,exact='1/3'))
+        assert core.read(packet)==dict(PASS=True,exact='1/3')
+        with pytest.raises(ValueError,match='SCOPED_PROOF'):
+            certificate_box.atomic(folder/'PROOF.json',dict(PASS=True))
+        assert not (folder/'PROOF.json').exists()
         pricing.output_directory(routes['output']/'L1_PRICING')
         algorithms.write(routes['output']/'frontier/STATE.json',dict(PASS=True))
         assert operations.d_path(routes['output']/'OPERATIONS')==routes['output']/'OPERATIONS'
@@ -148,9 +162,11 @@ def test_production_scope_routes_imported_aliases_and_restores_sources(tmp_path)
             operations.d_path(folder/'OPERATIONS')
     assert (m_stage._strict_ub,algorithms._strict_ub,core.write,algorithms.write,
             pricing.output_directory,dw.output_directory,operations.d_path)==before
+    assert (certificate_box.digest,certificate_box.atomic,common.digest,common.atomic)==serialization
     receipt=core.read(Path(request['output'])/'SCOPED_PROOF_PATH_AUTHORITY.json')
     assert receipt['read_only_inputs_unchanged'] and receipt['original_validator_sources_unchanged']
     assert receipt['proof_read_write_roots']==[request['output']]
+    assert receipt['certificate_proof_serialization']=='V42_B2_CANONICAL_STREAM_V24'
 
 
 def test_production_scope_refuses_input_generation_and_detects_writes(tmp_path):
@@ -211,3 +227,26 @@ def test_native_receipt_bridge_propagates_native_errors_without_retry(monkeypatc
     with pytest.raises(RuntimeError,match='original native failure'):
         budget.optimize(None,track='UB',label='x',requested_seconds=120.)
     assert calls==[True] and budget.calls==[]
+
+
+def test_request_seal_detects_serialization_source_tamper(tmp_path,monkeypatch):
+    from v42_autonomous_b2 import worker
+    from v42_b2_seed_recovery_v19.common import atomic,sha,digest
+    source=tmp_path/'canonical_stream.py';source.write_text('verified source',encoding='utf8')
+    monkeypatch.setattr(worker,'sources',lambda:{'canonical_stream.py':sha(source)})
+    request=proof_request(tmp_path);manifest_path=tmp_path/'MANIFEST.json'
+    manifest=dict(schema='V42_AUTONOMOUS_B2_V20',execution_sources=worker.sources(),
+        execution_SHA=digest(worker.sources()),attempt_id=request['attempt_id'],run_id='test_only',
+        input_folders={request['day']:str(tmp_path/'inputs')},initialization_native_limit_seconds=5400,
+        builder_original_sources={},inherited_B1_results={},prior_attempts={})
+    atomic(manifest_path,manifest)
+    request.update(manifest=str(manifest_path),manifest_SHA=sha(manifest_path),
+        implementation_SHA=manifest['execution_SHA'],run_id=manifest['run_id'],Threads=1,
+        P2_calls=0,target_gap=.03,native_budget_seconds=5400,wall_budget_seconds=None,
+        input_folder=manifest['input_folders'][request['day']])
+    attempt=Path(request['output']).parent
+    request.update(result=str(attempt/'RESULT.json'),progress=str(attempt/'progress.json'),error=str(attempt/'error.json'))
+    assert worker.verify_request(request)==manifest
+    source.write_text('changed source',encoding='utf8')
+    with pytest.raises(PermissionError,match='DEPLOYMENT_OR_REQUEST_SEAL_DRIFT'):
+        worker.verify_request(request)
