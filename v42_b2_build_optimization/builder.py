@@ -54,6 +54,7 @@ class AdmittedSourceGateway:
         sources = manifest.get("implementation", {}).get("sources", {})
         for name in ("v42_b2_build_optimization/builder.py", "v42_b2_build_optimization/source_port.py",
                      "v42_b2_build_optimization/build_runtime.py", "v42_b2_build_optimization/contracts.py",
+                     "v42_b2_build_optimization/copy_elision.py",
                      "v42_b2_build_optimization/scalar_math.py"):
             require(sources.get(name) == _sha(self.root / name), "B2_BUILD_VERSION_SOURCE_SHA_DRIFT:" + name)
         self.manifest = manifest
@@ -193,4 +194,7 @@ def build_case(payload, request, progress=None):
     # VersionedB2BuildPort instance for repeated same-identity input reuse.
     # No module-level mutable cache survives a model build.
     port = VersionedB2BuildPort(request)
-    return port.build(payload, request, progress)
+    case = port.build(payload, request, progress)
+    from v42_pr134_b1.common import atomic
+    atomic(case.output / 'B2_BUILD_OPTIMIZATION_V7.json', port.last_receipt)
+    return case

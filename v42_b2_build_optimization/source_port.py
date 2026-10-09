@@ -29,6 +29,8 @@ def instrument_builder(source, namespace, native_inputs, profile, expected_sourc
                 ast.Name("_b2_native_inputs", ast.Load())), node)
             import_count += 1
     require(import_count == 1, "B2_NATIVE_INPUT_IMPORT_SHAPE_DRIFT")
+    from .copy_elision import snapshot_before_dispose
+    copy_proof = snapshot_before_dispose(definition, fixture=namespace.get('__b3_fake__') is True)
     routed_ast = ast.dump(definition, include_attributes=False)
     def target(node, name):
         return isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets)
@@ -70,5 +72,6 @@ def instrument_builder(source, namespace, native_inputs, profile, expected_sourc
     exec(compile(ast.fix_missing_locations(ast.Module([definition], type_ignores=[])), str(source) + ":B2_ISOLATED", "exec"), scope)
     return scope["build_case"], dict(source_sha=expected_source_sha,
         original_ast_sha=digest(original_ast), routed_ast_sha=digest(routed_ast),
-        only_loader_routing_and_phase_scopes=True, numeric_constants_changed=False,
-        source_statements_preserved=True, FULL_Compact_C3A_builds_preserved=True)
+        only_loader_routing_and_phase_scopes=not copy_proof['applied'], numeric_constants_changed=False,
+        source_statements_preserved=True, FULL_Compact_C3A_builds_preserved=True,
+        model_copy_elision=copy_proof)
