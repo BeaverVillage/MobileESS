@@ -1,0 +1,29 @@
+# May11 / May19 recovery and continuation V5
+
+The user authorized one new attempt for B1 May11 and May19 after the running May22 date became terminal. May22 completed PASS at 2026-10-09 11:53:49 KST; its result, 286-call ledger and measured Native Runtime 410.1640021800995 seconds remain untouched. Independent certified gap is 2.3216953146523962e-10. No validity defect requires repeating May22.
+
+The separately admitted `v42_may_recovery_v5` version uses the original A/M algorithms and scientific input authority. It owns `CONTINUATION_V5_MANIFEST.json`, `CHECKPOINT_V5.json`, `ACTIVES_V5.json` and nested `dates/<arm>/<day>/attempts/recovery_v5_01` output/temporary/log/ledger directories. The base V2 manifest, source pins, checkpoint boundary and failed results remain evidence. Base HOLD.json permanently blocks new V2 dispatch. RecoveryV5 dedicated Windows tasks drive May11 → May19 → May23–31 → B2 three workers. Each planned recovery is a new attempt with its own Native budget; no old point, bound, clock or ledger is transferred. Further arbitrary failed-date retries are disabled. B2 admission still requires all31 B1 dates terminal, including failures.
+
+## Repairs
+
+May11's original equality residual 1/524288 exceeds the unchanged scientific acceptance tolerance1e-6. Only this date's Phase I/original-P1 LP solver arithmetic is tightened (FeasibilityTol1e-9, OptimalityTol1e-9, NumericFocus3, ScaleFlag2). Integer-control parameters, Gap, Threads1 and Heuristics0.05 stay unchanged. A single finite60-second diagnostic call on the unchanged original matrix completed in0.711 seconds. Unmodified raw primal replay has maximum row residual3.38e-14, bound residual4.44e-16; independent dual replay passes. This is one real diagnostic Native call, not a Native-zero test or a completed production date.
+
+May19's phase activation recomputed artificial normalization weights as support grew, violating the prior frozen-weight witness. V5 connects the existing V4 adapter, retaining first weights by original global-row identity. Saved real activation replay passes with identical exact Phi, original1e-6 acceptance, full-domain and original/expanded matrices. No past solution enters production.
+
+Preparation removes a duplicate assembly of the same newly created reference model and indexes columns in one pass; every original matrix/objective/RHS/sense/bound/type/domain fingerprint is independently compared. May11 full preparation changed402.54→296.64 seconds. May19's graph-cache admission candidate took421.67 seconds and was rejected for performance; original fresh DATA production remains enabled there. The final May19 build took316.59 seconds versus old300.88 seconds, so no May19 or universal speedup is claimed. Every production date runs in its own fresh process, matching original date-bound module state.
+
+Native admission checks retain exact worker/date/slot/process identities and lifetime locks. Windows process names are selected before querying Python command lines; measured identical-membership scan cost changed0.5323→0.00293 seconds. No Worker throttling, memory cap, sleep or scientific-domain reduction was introduced.
+
+## Monitoring and timing
+
+The replacement read-only monitor uses the existing localhost:8793 address and current V5 checkpoint/attempt paths. It shows recovery order, actual model milestones/class counts, each B2 slot's PID/date/phase/UB/independent LB/Gap/Native remaining budget/Heartbeat, and normalized historical date metrics. Completed Native ledger Runtime overrides a stale Solver report. It does not interpolate active Solver Runtime or promote BestBd to an independent bound. Full Wall begins at Coordinator dispatch; Native alone is limited to5400 seconds. Pricing can build additional models between optimize calls, so Native remaining budget changes intermittently. May22 read-only CPU/ledger observation confirms correct accounting;42m17s original preparation is documented without claiming a restart was necessary.
+
+## Validation and execution evidence
+
+108 focused/reused regression tests and the DOM harness pass with no real optimize calls. Two complete independent date builds are Native-zero. Native-zero OS probe observes the launcher exiting and changing child Heartbeats thereafter, with no kill-on-job-close job limit and actual Task Scheduler ancestry. InteractiveToken remains LOGOFF_PERSISTENCE_NOT_PROVEN. Production OS ownership and first recovery Worker observations are recorded separately from test PASS; real May11/19 terminal certification is never inferred from these gates.
+
+The first two-date dry-run process exposed legacy date-bound global state and failed matrix equivalence closed; this failed artifact remains recorded in MAY19_BUILD_DIFFERENCE.json. Fresh-process tests correct the harness. A regression invocation using the default C-drive pytest temporary directory failed15 D-only guards; the corrected isolated D-drive harness passes all108 tests. Neither failed harness was counted as PASS or used to relax production guards.
+
+Existing hourly Codex automation is saved as PAUSED; its prompt now targets the V5 authority without resuming it. The Windows Coordinator and minute watchdog execute the queue independently. Maintenance retains the original whole-turn ownership lock and exact orphan adoption protocol. No running Solver, original result/ledger or existing scheduler definition is altered.
+
+Reproduce the short regressions with the command in REGRESSION_VERIFICATION.json and `node tests/v42_may_recovery_v5_ui.cjs`. Fresh reconstruction uses `python -B -X utf8 -m validation_tools.recovery_v5.preflight --day <date> --probe <new-name>`; each output must be a new directory. Production admission and activation are explicit one-time tools, never hourly retry entry points.
