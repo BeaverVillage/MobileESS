@@ -11,7 +11,7 @@ from v42_may_campaign_native90.a_routing import rebound
 from v42_may_mess_build_v7 import windows
 from v42_may_mess_build_v7.policy import MANIFEST, verify_policy
 
-PERMIT = 'MONITOR_GAP_V8_PERMIT.json'
+PERMIT = 'MONITOR_GAP_V8R2_PERMIT.json'
 
 
 def sources():
@@ -43,10 +43,10 @@ def activate(root, validation):
     if not path.exists():
         if record(validation['path']) != validation or read(validation['path']).get('PASS') is not True:
             raise PermissionError('READ_ONLY_MONITOR_V8_TESTS_REQUIRED')
-        atomic(path, dict(UTC=now(),source_HEAD=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+        atomic(path, dict(UTC=now(),deployment_revision=2,source_HEAD=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
             sources=sources(), campaign_manifest=record(root / MANIFEST), validation=validation,
             optimizer_changes=0, completed_result_changes=0, existing_task_changes=0,
-            tasks={role:'MobileESS_V42_B1B2_P1_'+campaign['run_id']+'_MonitorGapV8_'+role.title()
+            tasks={role:'MobileESS_V42_B1B2_P1_'+campaign['run_id']+'_MonitorGapV8R2_'+role.title()
                    for role in ('monitor','watchdog')}))
     doc = verify(root)
     register = rebound(windows.register, dict(windows.register.__globals__, task_definition=definition))
@@ -54,10 +54,19 @@ def activate(root, validation):
                     dict(windows.reuse_registered_task.__globals__, task_definition=definition))
     registrations = {role:(reuse(root,role,name) if windows.exists(name) else register(root,role,name))
                      for role,name in doc['tasks'].items()}
+    identity_path = root / 'MONITOR_PROCESS.json'
+    if identity_path.exists():
+        peer = read(identity_path)
+        if same_process(peer) and peer.get('command',[])[1:] == [
+                '-B','-X','utf8','-m','v42_may_monitor_gap_v8.host','monitor',str(root)]:
+            atomic(root/'MONITOR_GAP_V8_BEFORE_R2.json',dict(UTC=now(),process=peer,worker_kills=0))
+            current = psutil.Process(peer['PID'])
+            current.terminate()
+            current.wait(timeout=10)
     started = {role:windows.run_task(name) for role,name in doc['tasks'].items()}
     result = dict(UTC=now(),permit=record(path),registration=registrations,started=started,
                   optimizer_changes=0, existing_task_changes=0, logoff_persistence=windows.LOGOFF_STATUS)
-    atomic(root/'MONITOR_GAP_V8_ACTIVATION.json',result)
+    atomic(root/'MONITOR_GAP_V8R2_ACTIVATION.json',result)
     return result
 
 

@@ -45,7 +45,7 @@ def view(root):
     heartbeat = display.original.optional_json(Path(root) / 'COORDINATOR_HEARTBEAT.json')
     if same_process(heartbeat.get('process', {})):
         value['state'] = heartbeat.get('state', value['state'])
-    value.update(display_version='GAP_DISPLAY_V8_20261009', read_only=True,
+    value.update(display_version='GAP_DISPLAY_V8R2_20261009', read_only=True,
                  campaign_source_changed=False, gap_interpolation=False)
     return value
 
