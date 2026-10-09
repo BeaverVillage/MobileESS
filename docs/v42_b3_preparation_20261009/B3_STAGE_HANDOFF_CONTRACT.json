@@ -1,0 +1,664 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:v42:b3:handoff:preparation:v1",
+  "title": "B3 sealed request/result software contract",
+  "$comment": "Schema shape validation is necessary only. Python verifies exact gaps, causal KST cutoff, SHA chain, whole frozen decisions, stage order and ledgers. MOCK never certifies science. Source units/mapping/full row coverage require original verifiers.",
+  "$defs": {
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "grid_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "pcc_mapping_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "physical_domain_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "forecast_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "runtime_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "day": {
+          "type": "string",
+          "format": "date"
+        },
+        "planning_cutoff": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "forecast_available_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "pcc_ids": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "mess_ids": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "slots": {
+          "const": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95
+          ]
+        },
+        "actual_observations_used": {
+          "const": false
+        }
+      },
+      "required": [
+        "input_sha",
+        "grid_sha",
+        "pcc_mapping_sha",
+        "physical_domain_sha",
+        "forecast_sha",
+        "runtime_sha",
+        "source_sha",
+        "day",
+        "planning_cutoff",
+        "forecast_available_at",
+        "pcc_ids",
+        "mess_ids",
+        "slots",
+        "actual_observations_used"
+      ]
+    },
+    "aidc": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "jobs_json": {
+          "type": "string",
+          "contentMediaType": "application/json"
+        },
+        "gpu_runtime_json": {
+          "type": "string",
+          "contentMediaType": "application/json"
+        },
+        "variables_json": {
+          "type": "string",
+          "contentMediaType": "application/json"
+        },
+        "it_power": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": "array",
+            "minItems": 96,
+            "maxItems": 96,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "pcc_p": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": "array",
+            "minItems": 96,
+            "maxItems": 96,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "pcc_q": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": "array",
+            "minItems": 96,
+            "maxItems": 96,
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "required": [
+        "jobs_json",
+        "gpu_runtime_json",
+        "variables_json",
+        "it_power",
+        "pcc_p",
+        "pcc_q"
+      ]
+    },
+    "mess": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "routes": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "location": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "array",
+            "minItems": 96,
+            "maxItems": 96,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "charge_p": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "array",
+            "minItems": 96,
+            "maxItems": 96,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "discharge_p": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "array",
+            "minItems": 96,
+            "maxItems": 96,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "q": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "array",
+            "minItems": 96,
+            "maxItems": 96,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "move_energy": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "array",
+            "minItems": 96,
+            "maxItems": 96,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "soc": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "array",
+            "minItems": 97,
+            "maxItems": 97,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "initial_final_json": {
+          "type": "string",
+          "contentMediaType": "application/json"
+        },
+        "variables_json": {
+          "type": "string",
+          "contentMediaType": "application/json"
+        }
+      },
+      "required": [
+        "routes",
+        "location",
+        "charge_p",
+        "discharge_p",
+        "q",
+        "move_energy",
+        "soc",
+        "initial_final_json",
+        "variables_json"
+      ]
+    },
+    "warm": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authority_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "fixed_aidc_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "mess": {
+          "$ref": "#/$defs/mess"
+        },
+        "eligible": {
+          "type": "boolean"
+        },
+        "feasibility_verified": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "authority_sha",
+        "fixed_aidc_sha",
+        "mess",
+        "eligible",
+        "feasibility_verified",
+        "reason"
+      ]
+    },
+    "certificate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "enum": [
+            "A1",
+            "M1",
+            "A2",
+            "M2"
+          ]
+        },
+        "authority_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "fixed_input_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "decision_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "verifier_source_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "original_model_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "evidence_kind": {
+          "const": "MOCK"
+        },
+        "lower_bound": {
+          "type": "string",
+          "minLength": 1
+        },
+        "upper_bound": {
+          "type": "string",
+          "minLength": 1
+        },
+        "global_domain_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "original_global_bound_verified": {
+          "const": true
+        },
+        "bound_scope": {
+          "const": "STAGE_FIXED_INPUT_GLOBAL"
+        },
+        "objective": {
+          "const": "min rho_max"
+        },
+        "p2_calls": {
+          "const": 0
+        }
+      },
+      "required": [
+        "stage",
+        "authority_sha",
+        "fixed_input_sha",
+        "decision_sha",
+        "verifier_source_sha",
+        "original_model_sha",
+        "evidence_kind",
+        "lower_bound",
+        "upper_bound",
+        "global_domain_sha",
+        "original_global_bound_verified",
+        "bound_scope",
+        "objective",
+        "p2_calls"
+      ]
+    },
+    "physical": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "enum": [
+            "A1",
+            "M1",
+            "A2",
+            "M2"
+          ]
+        },
+        "authority_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "fixed_input_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "decision_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "verifier_source_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "original_model_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "evidence_kind": {
+          "const": "MOCK"
+        },
+        "replay_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "original_integer_physical_verified": {
+          "const": true
+        }
+      },
+      "required": [
+        "stage",
+        "authority_sha",
+        "fixed_input_sha",
+        "decision_sha",
+        "verifier_source_sha",
+        "original_model_sha",
+        "evidence_kind",
+        "replay_sha",
+        "original_integer_physical_verified"
+      ]
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "enum": [
+            "A1",
+            "M1",
+            "A2",
+            "M2"
+          ]
+        },
+        "authority": {
+          "$ref": "#/$defs/authority"
+        },
+        "fixed_aidc": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/aidc"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fixed_mess": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/mess"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "warm_start": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/warm"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "stage",
+        "authority",
+        "fixed_aidc",
+        "fixed_mess",
+        "warm_start"
+      ]
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stage": {
+          "enum": [
+            "A1",
+            "M1",
+            "A2",
+            "M2"
+          ]
+        },
+        "authority": {
+          "$ref": "#/$defs/authority"
+        },
+        "aidc": {
+          "$ref": "#/$defs/aidc"
+        },
+        "mess": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/mess"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "certificate": {
+          "$ref": "#/$defs/certificate"
+        },
+        "physical": {
+          "$ref": "#/$defs/physical"
+        },
+        "native_receipt": {
+          "type": "string",
+          "contentMediaType": "application/json"
+        },
+        "fixed_input_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "stage",
+        "authority",
+        "aidc",
+        "mess",
+        "certificate",
+        "physical",
+        "native_receipt",
+        "fixed_input_sha"
+      ]
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "request": {
+      "$ref": "#/$defs/request"
+    },
+    "result": {
+      "$ref": "#/$defs/result"
+    }
+  },
+  "required": [
+    "request",
+    "result"
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "schema": "V42_B3_PREPARATION_READINESS_V1",
+  "status": "PRODUCTION_NOT_AUTHORIZED",
+  "CODE_IMPLEMENTED": true,
+  "production_ready": false,
+  "B3_NATIVE_EXECUTION_AUTHORIZED": false,
+  "B3_PRODUCTION_CAMPAIGN_STARTED": false,
+  "B3_FRESH_AC_EXECUTED": false,
+  "stages": [
+    "A1",
+    "M1",
+    "A2",
+    "M2",
+    "PLANNING_FREEZE",
+    "ACTUAL",
+    "FRESH_AC",
+    "VALIDATION"
+  ],
+  "stage_policy": {
+    "A1": {
+      "Threads": 1,
+      "MIPGap": 0.005,
+      "P2_calls": 0,
+      "objective": "min rho_max",
+      "native_limit_seconds": 5400,
+      "wall_limit_seconds": null,
+      "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+      "FeasibilityTol": 1e-06,
+      "OptimalityTol": 1e-06,
+      "IntFeasTol": 1e-05
+    },
+    "M1": {
+      "Threads": 1,
+      "MIPGap": 0.03,
+      "P2_calls": 0,
+      "objective": "min rho_max",
+      "native_limit_seconds": 5400,
+      "wall_limit_seconds": null,
+      "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+      "FeasibilityTol": 1e-08,
+      "OptimalityTol": 1e-08,
+      "IntFeasTol": 1e-08
+    },
+    "A2": {
+      "Threads": 1,
+      "MIPGap": 0.005,
+      "P2_calls": 0,
+      "objective": "min rho_max",
+      "native_limit_seconds": 5400,
+      "wall_limit_seconds": null,
+      "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+      "FeasibilityTol": 1e-06,
+      "OptimalityTol": 1e-06,
+      "IntFeasTol": 1e-05
+    },
+    "M2": {
+      "Threads": 1,
+      "MIPGap": 0.03,
+      "P2_calls": 0,
+      "objective": "min rho_max",
+      "native_limit_seconds": 5400,
+      "wall_limit_seconds": null,
+      "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+      "FeasibilityTol": 1e-08,
+      "OptimalityTol": 1e-08,
+      "IntFeasTol": 1e-08
+    }
+  },
+  "REAL_MODEL_EQUIVALENCE_NOT_RUN": true,
+  "NATIVE_OPTIMIZATION_NOT_RUN": true,
+  "ACTUAL_FRESH_AC_NOT_RUN": true,
+  "joint_global_optimality_proven": false,
+  "blockers": [
+    "A2 fixed-MESS original grid/materializer/physical replay wiring",
+    "M2 explicit-stage generalized same-day original hybrid case binding",
+    "Actual realized input binding and original freeze authority",
+    "Original FULL/Compact/C3A equivalence and integer/physical proofs",
+    "Independent same-stage exact global LB/UB certification",
+    "Native ledger bridge, measured Runtime/peak RSS and scientific regression",
+    "Separate explicit B3 production execution authorization"
+  ],
+  "base_git_sha": "5ab907e384a5384f1505f851385f4953220f6634",
+  "worktree": "D:\\MobileESS_v42_B3_prep",
+  "branch": "codex/v42-b3-preparation",
+  "states": [
+    "CODE_IMPLEMENTED",
+    "STATIC_CONTRACT_PASS",
+    "MOCK_TEST_PASS",
+    "REAL_MODEL_EQUIVALENCE_NOT_RUN",
+    "NATIVE_OPTIMIZATION_NOT_RUN",
+    "ACTUAL_FRESH_AC_NOT_RUN",
+    "PRODUCTION_NOT_AUTHORIZED"
+  ],
+  "lightweight_tests_run": 75,
+  "lightweight_tests_passed": true,
+  "actual_A2_source_builder": "NOT_IMPLEMENTED_FIXED_MESS_ORIGINAL_GRID_MATERIALIZER_BRIDGE",
+  "actual_M2_source_builder": "NOT_IMPLEMENTED_EXPLICIT_STAGE_AND_A2_ORIGINAL_BUNDLE_BRIDGE",
+  "native_ledger_bridge": "MOCK_POLICY_IMPLEMENTED_REAL_SOURCE_LEDGER_BRIDGE_NOT_IMPLEMENTED",
+  "actual_fresh_ac_bridge": "STATIC_ORIGINAL_API_LINKS_ONLY_REAL_PHYSICAL_ADAPTER_NOT_IMPLEMENTED",
+  "counts": {
+    "native_optimize": 0,
+    "OpenDSS": 0,
+    "FULL_model_build": 0
+  }
+}
