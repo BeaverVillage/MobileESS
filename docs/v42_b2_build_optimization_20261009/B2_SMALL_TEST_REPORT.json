@@ -5,7 +5,7 @@
   "executed_by": "parent_root_sequential_light_runner",
   "result": "PASS",
   "tests": 17,
-  "elapsed_seconds": 0.36,
+  "elapsed_seconds": 0.387,
   "Native_optimize_calls": 0,
   "real_FULL_model_build_calls": 0,
   "OpenDSS_calls": 0,
@@ -25,5 +25,8 @@
   "real_performance": "NOT_RUN",
   "tested_builder_sha_before_global_cache_removal": "54e1651c773218112be1872b607f02d46c44d3277942081c42d1ae64cfb5a058",
   "final_builder_sha": "ca0d84d0a41cf3ebbf6a3fbe3cb4de2139a70346bb9929aeeb37f69986d377a2",
-  "post_test_change": "Removed module-global mutable worker port cache; default entrypoint owns a fresh private port. Fixture-tested port/scalar math logic unchanged."
+  "post_test_change": "Module-global mutable worker port cache removed and final code retested. Default entrypoint owns a fresh private port.",
+  "post_change_tested": true,
+  "final_verified_builder_sha": "ca0d84d0a41cf3ebbf6a3fbe3cb4de2139a70346bb9929aeeb37f69986d377a2",
+  "latest_execution_note": "Parent root reran all same 17 tests sequentially after removal of the module-global cache; all passed in 0.387s. No further tests are needed."
 }
