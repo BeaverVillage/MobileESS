@@ -140,6 +140,7 @@ def test_production_scope_routes_imported_aliases_and_restores_sources(tmp_path)
     roots=(core.ROOT,algorithms.ROOT,final_verify.ROOT,operations.ROOT)
     serialization=(certificate_box.digest,certificate_box.atomic,common.digest,common.atomic)
     dw_before=(dw.build_master,dw.write)
+    pricing_before=pricing.run_pricing
     checker=certificate_box.check.__code__
     with proof_scope(request,dict(execution_SHA='test_routing_only')) as routes:
         assert m_stage._strict_ub is algorithms._strict_ub is routes['final']['_strict_ub']
@@ -151,6 +152,7 @@ def test_production_scope_routes_imported_aliases_and_restores_sources(tmp_path)
         assert certificate_box.check.__code__ is checker
         assert dw.build_master.original_builder.__code__ is dw_before[0].__code__
         assert dw.write is routes['write']
+        assert pricing.run_pricing.original_pricing.__code__ is pricing_before.__code__
         assert (common.digest,common.atomic)==serialization[2:]
         packet=routes['output']/'CERTIFICATE_DOMAIN_PROOFS/P.json'
         certificate_box.atomic(packet,dict(PASS=True,exact='1/3'))
@@ -167,11 +169,13 @@ def test_production_scope_routes_imported_aliases_and_restores_sources(tmp_path)
             pricing.output_directory,dw.output_directory,operations.d_path)==before
     assert (certificate_box.digest,certificate_box.atomic,common.digest,common.atomic)==serialization
     assert (dw.build_master,dw.write)==dw_before
+    assert pricing.run_pricing is pricing_before
     receipt=core.read(Path(request['output'])/'SCOPED_PROOF_PATH_AUTHORITY.json')
     assert receipt['read_only_inputs_unchanged'] and receipt['original_validator_sources_unchanged']
     assert receipt['proof_read_write_roots']==[request['output']]
     assert receipt['certificate_proof_serialization']=='V42_B2_CANONICAL_STREAM_V24'
     assert receipt['restricted_master_native_rows']=='V42_B2_RMP_EXACT_POWER_OF_TWO_ROWS_V25'
+    assert receipt['pricing_nonunit_box']=='V42_B2_PRICING_FULL_CASE_PROJECTION_BOX_V26'
 
 
 def test_production_scope_refuses_input_generation_and_detects_writes(tmp_path):

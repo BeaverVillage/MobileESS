@@ -95,7 +95,7 @@ def proof_scope(request,manifest):
     from v42_m1_hybrid import blocks,pricing,dw,final_verify
     from v42_b2_seed_recovery_v18 import certificate_box
     from v42_b2_seed_recovery_v19.common import atomic
-    from . import canonical_stream,dw_native
+    from . import canonical_stream,dw_native,pricing_box
     routes=proof_routes(request);output=routes['output']
     folder=Path(request['input_folder']).resolve()
     # These pre-existing producer receipts must stay read-only. No new input
@@ -115,7 +115,8 @@ def proof_scope(request,manifest):
         'v42_m1_hybrid/final_verify.py','v42_m1_research/check_ub.py',
         'v42_m1_research/check_lb.py','v42_m1_hybrid/blocks.py',
         'v42_m1_anytime/core.py','v42_m1_anytime/algorithms.py',
-        'v42_may_campaign_native90/operations.py','v42_m1_hybrid/dw.py',
+        'v42_may_campaign_native90/operations.py','v42_m1_hybrid/dw.py','v42_m1_hybrid/bound.py',
+        'v42_m1_hybrid/pricing.py',
         'v42_b2_seed_recovery_v18/certificate_box.py','v42_pr134_b1/common.py')}
     output.mkdir(parents=True,exist_ok=True)
     receipt=dict(schema='V42_B2_SCOPED_PROOF_PATH_AUTHORITY_V22',
@@ -128,6 +129,7 @@ def proof_scope(request,manifest):
         historical_candidate_point_admission=False,Native_optimize_calls=0,
         certificate_proof_serialization='V42_B2_CANONICAL_STREAM_V24',
         restricted_master_native_rows='V42_B2_RMP_EXACT_POWER_OF_TWO_ROWS_V25',
+        pricing_nonunit_box='V42_B2_PRICING_FULL_CASE_PROJECTION_BOX_V26',
         status='ROUTING_ADMITTED')
     atomic(output/'SCOPED_PROOF_PATH_AUTHORITY.json',receipt)
     def proof_atomic(path,value):
@@ -146,6 +148,8 @@ def proof_scope(request,manifest):
         stack.enter_context(patch.object(dw,'build_master',dw_native.scoped_builder(
             dw.build_master,routes['output_directory'],routes['write'])))
         stack.enter_context(patch.object(dw,'write',routes['write']))
+        stack.enter_context(patch.object(pricing,'run_pricing',pricing_box.scoped_pricing(
+            pricing.run_pricing,pricing.local_exact_price_bound,routes['output_directory'])))
         # Operations uses D-only routing already; also bind its sole output
         # entry to this request while source ROOT and source SHA checks stay.
         stack.enter_context(patch.object(operations,'d_path',routes['owned']))
