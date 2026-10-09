@@ -1,0 +1,25 @@
+{
+  "trigger": "user CAPBank0A/VREG3 priority instruction",
+  "original_P0_P3_preserved": true,
+  "scale_and_mapping_changes": 0,
+  "Source": 1.04,
+  "fixed_tap_cases": [
+    "BASE",
+    "CAP0A_OFF",
+    "CAP0B_OFF",
+    "CAP0C_OFF",
+    "CAP0ABC_OFF",
+    "CAP0ABC_ON",
+    "PV_OFF",
+    "CAP0A_OFF_PV_OFF"
+  ],
+  "new_policy_priority": [
+    "P4",
+    "P5"
+  ],
+  "P4": "P3 + VREG3A/B/C123.5",
+  "P5": "P3 + all9downstream Vreg123.5; historicalPR62 target, original deadband/limits",
+  "selection": "first new Planning96 hardPASS in P4,P5 priority; Actual not used to choose",
+  "capacitor_7740_override_threshold_change": 0,
+  "no_final_PV_removal": true
+}
