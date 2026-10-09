@@ -11,6 +11,41 @@ from v42_b2_seed_recovery_v18.initialization import values_for
 from .common import read,atomic,record
 from .diagnostics import diagnose_model
 
+def diagnostic_subsystem(case,description,ids,values,source):
+    """An IIS search subsystem only. Feasible points are NEVER admitted here.
+
+    Infeasibility of a subset of original rows proves this fixed candidate
+    impossible; feasibility of the subset says nothing about FULL feasibility.
+    """
+    rows=read(source/'INITIALIZATION_FAILURE_CONSTRAINT_ANALYSIS.json')['original_stationary_background_failures']
+    voltage={r['index'] for r in rows if r['domain']=='C3A' and r['name'].startswith('voltage_')}
+    connected=set()
+    for unit,path in description['paths'].items():
+        for k in path:
+            arc=case.graph[2][k]
+            if arc[-1] is None:connected.add((unit,arc[0],arc[1]))
+    active=np.zeros(case.A.shape[1],dtype=bool)
+    for j,name in enumerate(map(str,case.d['names'])):
+        if name.startswith(('Pch[','Pdis[','Q[','node_activity[')):
+            axis=name.split('[',1)[1][:-1].split(',')
+            active[j]=(axis[0],axis[1],int(axis[2])) in connected
+    prefix=np.r_[0,np.cumsum(active[case.A.indices],dtype=np.int64)]
+    active_row=(prefix[case.A.indptr[1:]]-prefix[case.A.indptr[:-1]])>0
+    keep=[]
+    families={'energy_balance','initial_SOC','terminal_SOC','no_simultaneous_charge','no_simultaneous_discharge',
+        'connected_Pch','connected_Pdis','connected_Qmax','connected_Qmin','injection_P_binding','injection_Q_binding',
+        'flow','terminal_location','node_activity_link'}
+    for i,name in enumerate(map(str,case.d['row_names'])):
+        family=name.split('[',1)[0]
+        if family in ('voltage_upper','voltage_lower') or family in families or (family=='PCS16' and active_row[i]):keep.append(i)
+    selected=np.asarray(keep,dtype=np.int64);A=case.A[selected]
+    fix=sparse.csr_matrix((np.ones(len(ids)),(np.arange(len(ids)),ids)),shape=(len(ids),case.A.shape[1]))
+    data=dict(case.d)
+    data['rhs']=np.concatenate([case.d['rhs'][selected],values])
+    data['sense']=np.concatenate([case.d['sense'][selected],np.array(['=']*len(ids))])
+    data['row_names']=np.concatenate([case.d['row_names'][selected],np.array(['FIXED_'+str(case.d['names'][j]) for j in ids])])
+    return NS(A=sparse.vstack([A,fix],format='csr'),d=data,case_sha=case.case_sha),selected
+
 def run(request,budget,progress):
     root=Path(request['root']);manifest=read(request['manifest'])
     source=Path(manifest['campaign_root'])/'initialization_benchmark_v18r2_01/dates/B2/2025-05-03/attempts/seed_policy_v18r2_01/output'
@@ -34,18 +69,17 @@ def run(request,budget,progress):
         elif description['kind']=='STATIONARY_CHARGE_AFTER_PEAK':charge=lambda u,t:t>=peak
         else:charge=lambda u,t:t<16 or t>=description['charging_return_slot']
         ids,values=values_for(case,description['paths'],charge)
-        model,receipt=original._model(case,continuous=True)
+        candidate,source_rows=diagnostic_subsystem(case,description,ids,values,source)
+        model,receipt=original._model(candidate,continuous=True)
         try:
-            fix=sparse.csr_matrix((np.ones(len(ids)),(np.arange(len(ids)),ids)),shape=(len(ids),A.shape[1]))
-            model.addMConstr(fix,model.getVars(),'=',values,name='INITIALIZATION_ONLY_FIXED_ORIGINAL_INTEGERS');model.update()
-            extended=sparse.vstack([A,fix],format='csr');data=dict(d)
-            data['rhs']=np.concatenate([d['rhs'],values]);data['sense']=np.concatenate([d['sense'],np.array(['=']*len(ids))])
-            data['row_names']=np.concatenate([d['row_names'],np.array(['FIXED_'+str(d['names'][j]) for j in ids])])
-            candidate=NS(A=extended,d=data,case_sha=case.case_sha)
             out=output/('V18_'+name);out.mkdir(exist_ok=True)
+            np.savez_compressed(out/'ORIGINAL_SUBSYSTEM_ROW_MAP.npz',original_C3A_rows=source_rows)
             atomic(out/'ORIGINAL_CANDIDATE_AUTHORITY.json',dict(candidate=record(old/'CANDIDATE.json'),
                 full_replay=record(old/'FULL_REPLAY.json'),old_termination=read(old/'FULL_REPLAY.json'),
-                original_rows_and_fixed_integer_equalities_reproduced=True))
+                original_rows_and_fixed_integer_equalities_reproduced=True,
+                diagnostic_only_original_row_subsystem=True,original_row_count=A.shape[0],
+                subsystem_original_rows=len(source_rows),no_subsystem_feasible_point_admitted=True,
+                reason='NATIVE_FARKAS_FOR_AN_INFEASIBLE_SUBSYSTEM; INITIALIZER_ALWAYS_RETAINS_ALL_ROWS'))
             if progress:progress(dict(phase='V18_CANDIDATE_FARKAS_'+name))
             diagnose_model(candidate,model,budget,out,model.getAttr('VType'),seconds=15.,run_phase_one=name=='00')
             summaries.append(dict(candidate=name,kind=description['kind'],status=read(out/'DIAGNOSTIC_STATUS.json'),

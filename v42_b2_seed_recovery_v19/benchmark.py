@@ -5,8 +5,8 @@ import argparse
 from .common import read,atomic,record,sha,digest,now,same_process
 from .policy import VERSION,MANIFEST,source_files,MODEL_FIELDS
 
-def prepare(root,*,code_commit,diagnostics=False):
-    campaign=Path(root).resolve();root=campaign/('feasibility_diagnostics_v19_01' if diagnostics else 'initialization_benchmark_v19_01')
+def prepare(root,*,code_commit,diagnostics=False,diagnostic_attempt=1):
+    campaign=Path(root).resolve();root=campaign/(f'feasibility_diagnostics_v19_{diagnostic_attempt:02d}' if diagnostics else 'initialization_benchmark_v19_01')
     if (root/MANIFEST).exists():raise PermissionError('BENCHMARK_NEVER_RESET_OR_OVERWRITTEN')
     previous=campaign/'initialization_benchmark_v18r2_01'
     previous_cp=read(previous/'CHECKPOINT_V18R2.json')
@@ -89,5 +89,5 @@ def run(request,budget,progress):
     return result
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('root');p.add_argument('--code-commit',required=True);p.add_argument('--diagnostics',action='store_true')
-    a=p.parse_args();root,doc=prepare(a.root,code_commit=a.code_commit,diagnostics=a.diagnostics);print(root);print(doc['execution_SHA'])
+    p=argparse.ArgumentParser();p.add_argument('root');p.add_argument('--code-commit',required=True);p.add_argument('--diagnostics',action='store_true');p.add_argument('--diagnostic-attempt',type=int,default=1)
+    a=p.parse_args();root,doc=prepare(a.root,code_commit=a.code_commit,diagnostics=a.diagnostics,diagnostic_attempt=a.diagnostic_attempt);print(root);print(doc['execution_SHA'])
