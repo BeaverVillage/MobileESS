@@ -53,3 +53,10 @@ May01 V17의 실제 불필요 seed 시간은900.696초다. May02/03에서 seed �
 V18의 완료 진단 dict.update에서 SolCount 중복 키 예외가 Runtime 저장보다 먼저 발생했다. May02/03의 해당 호출 Runtime은 UNKNOWN이며 QUARANTINE 기록과 실패 source/결과를 보존한다. V18R2는 Runtime을 먼저 ledger에 영속화하고 선택적 진단 실패와 분리한다.
 
 최신 사용자 지시에 따라 캠페인 예산 이월 재시작에 앞서 별도 initialization_benchmark_v18r2_01에서 May02/03 초기해 성능을 Native 0초부터 실측한다. 원본 캠페인의 예산을 초기화하지 않는다. 첫 원본 FULL 정수·96슬롯 물리 검증 통과까지만 실행하고 LB/Adaptive는 호출하지 않는다. 기존 Adaptive/RMP/Pricing/인증기 파일 SHA는 보존한다. 실패 시 LP 후보 불가능을 FULL MILP 불가능으로 선언하지 않는다. Fallback MILP는 최대900초, MIPFocus1, 최초 feasible exit 후 독립 FULL 검증을 유지한다.
+
+
+## V18R3 동일 날짜 LP 기반 모드 후보
+
+May02 별도0초 시험은 Native LP7.639초, 첫 FULL 검증369.057초, UB0.6550074996357235, seed MILP0회로 통과했다. May03의 고정모드 stationary LP와4개 후보는 초기해를 확보하지 못해900초 seed를 실측 중이다. 이를 기반으로 V18R3 후보 생성 경로를 준비했다.
+
+V18R3는 동일 날짜 원본 stationary 경로를 고정하고 charge_mode만 연속으로 둔 원본 LP를 최대120초 푼다. 이 분수 해는 초기해/UB로 절대 채택하지 않는다. Pch/Pdis 방향 및 LP mode 값을 사용해 최대2개의 완전 이산 후보를 만들고, 원본 LP에서 모든 정수변수를 고정해 새 해를 구한다. 반환된 새 LP 해의 원본 FULL 정수·물리 검증을 통과한 경우만 채택한다. 실패하면 기존 V18 후보/900초 seed fallback을 그대로 호출한다. 후보 제한은 최종 MILP/Adaptive 공간에 추가하지 않는다. 이전 실측이 자연 종료한 뒤 별도 source SHA/attempt에서 시험한다.

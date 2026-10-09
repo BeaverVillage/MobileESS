@@ -145,7 +145,7 @@ function workerCard(w){
  const detail=el('details'),summary=el('summary','워커 세부사항'),kv=el('div',undefined,'kv'),build=w.build?.counters||{};
  detail.open=openWorkers.has(w.worker_slot);detail.addEventListener('toggle',()=>{if(detail.open)openWorkers.add(w.worker_slot);else openWorkers.delete(w.worker_slot);});
  pairs(kv,[['유효 해 UB',number(w.UB,6)],['독립 하한 LB',number(w.independent_Global_LB,6)],
- ['모델 생성 시간',time(w.model_preparation_seconds)],['해·물리 검증 시간',time(w.validation_seconds)],
+ ['첫 FULL 통과 경과',time(w.initialization_benchmark?.first_FULL_pass_wall_seconds)],['초기해 LP Native 시간',time(w.initialization_benchmark?.LP_Runtime)],['Seed MILP 호출 / 시간',number(w.initialization_benchmark?.seed_MILP_calls,0)+' / '+time(w.initialization_benchmark?.seed_MILP_Runtime)],['모델 생성 시간',time(w.model_preparation_seconds)],['해·물리 검증 시간',time(w.validation_seconds)],
  ['완료 Native 호출',number(w.Native_calls,0)+(w.native_inflight?' · 호출 실행 중':'')],
  ['완료 호출 누적 Runtime',time(w.Native_Runtime_seconds)],['이전 시도 이월',time(w.prior_native_runtime_seconds)],['Attempt',w.attempt_id||'—'],['실행 source SHA',w.source_SHA||'—'],['Native 시간 근거',w.native_runtime_basis==='CONSERVATIVE_LOST_CALL_WINDOW'?'실제 누적 UNKNOWN · 실패 실행 전체 시간 예약 차감':w.native_runtime_basis==='SOLVER_CALLBACK_CURRENT_CALL_INCLUDED'?'현재 호출 포함 · Solver 보고':'완료 호출 기록'],
  ['모델 변수 / 제약식',number(build['변수'],0)+' / '+number(build['제약식'],0)],

@@ -68,14 +68,24 @@ def worker_view(root, day, row, epoch):
         solver_bounds_reason='Native 값은 탐색 진단이며 Global Gap은 독립 인증서로 계산')
     track = (ledger.get('inflight') or {}).get('track')
     if track == 'M_START':worker['bound_status']['phase_label'] = '같은 날짜 dispatch 초기해 탐색'
+    if track=='M_MODE_GUIDE':worker['bound_status']['phase_label']='같은 날짜 LP로 이산 모드 후보 생성'
+    if Path(request['result']).is_file():
+        result=optional(request['result']);scientific=result.get('scientific',{})
+        if result.get('benchmark_initialization_only'):
+            worker['initialization_benchmark']=dict(status=result['status'],
+                first_FULL_pass_wall_seconds=scientific.get('first_FULL_pass_wall_seconds'),
+                LP_Runtime=scientific.get('LP_Runtime'),seed_MILP_calls=scientific.get('seed_MILP_calls'),
+                seed_MILP_Runtime=scientific.get('seed_MILP_Runtime'),point_SHA=scientific.get('point_SHA'))
     return worker
 
 
 def view(root):
     root = Path(root)
-    benchmark=root/'initialization_benchmark_v18r2_01'
-    if (benchmark/'CHECKPOINT_V18R2.json').exists():root=benchmark
-    version='18R2' if (root/'CHECKPOINT_V18R2.json').is_file() else 18 if (root/'CHECKPOINT_V18.json').is_file() else 17
+    campaign=root
+    for candidate,checkpoint in (('initialization_benchmark_v18r3_01','CHECKPOINT_V18R3.json'),('initialization_benchmark_v18r2_01','CHECKPOINT_V18R2.json')):
+        benchmark=campaign/candidate
+        if (benchmark/checkpoint).exists():root=benchmark;break
+    version='18R3' if (root/'CHECKPOINT_V18R3.json').is_file() else '18R2' if (root/'CHECKPOINT_V18R2.json').is_file() else 18 if (root/'CHECKPOINT_V18.json').is_file() else 17
     cp = co.read(root/f'CHECKPOINT_V{version}.json')
     manifest = co.read(root/f'CONTINUATION_V{version}_MANIFEST.json')
     workers = [worker_view(root,day,row,time.time()) for day,row in cp.get('workers',{}).items()]
@@ -84,6 +94,12 @@ def view(root):
             row=cp['dates']['B2/'+day]
             if day not in cp.get('workers',{}) and row.get('request') and row.get('result'):
                 workers.append(worker_view(root,day,row,time.time()))
+        if version=='18R3':
+            row=cp['dates']['B2/2025-05-02']
+            if row.get('request') and row.get('result'):
+                worker=worker_view(root,'2025-05-02',row,time.time())
+                worker.update(worker_slot=2,original_execution_slot=1)
+                workers.append(worker)
     slots = []
     for slot in range(1,4):
         worker = next((w for w in workers if w['worker_slot']==slot),None)
