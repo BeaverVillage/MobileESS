@@ -1,0 +1,46 @@
+........................................................................ [ 24%]
+........................................................................ [ 48%]
+..................................................F..................... [ 72%]
+........................................................................ [ 96%]
+............                                                             [100%]
+================================== FAILURES ===================================
+___________ test_exact_own_output_paths_and_original_source_guards ____________
+
+tmp_path = WindowsPath('D:/v42_b2_v30_independent_review_20261010_01/pytest/test_exact_own_output_paths_an0')
+
+    def test_exact_own_output_paths_and_original_source_guards(tmp_path):
+        from v42_autonomous_b2.worker import proof_routes
+        from v42_m1_hybrid import final_verify
+        request=proof_request(tmp_path);r=proof_routes(request)
+        original_root=final_verify.ROOT
+        point=r['output']/'adaptive/RAW.npz'
+        assert r['final']['_under'](point,original_root,'EVIDENCE')==point
+        for outside in (tmp_path/'other',Path(request['output']).parent/'other',
+                tmp_path/'dates/B2/2025-05-02/attempts/proof_v22_01/output/RAW.npz',
+                original_root/'runtime/historical/RAW.npz',tmp_path/'inputs/NATIVE_INPUT.json'):
+            with pytest.raises(ValueError,match='SCOPED_PROOF'):
+                r['final']['_under'](outside,original_root,'EVIDENCE')
+        # Test storage lies inside the source checkout; compare the original guard
+        # directly, and also exercise an external campaign path outside that root.
+>       assert r['final']['_under'](point,original_root,'PROTECTED_SOURCE')==final_verify._under(
+            point,original_root,'PROTECTED_SOURCE')
+
+tests\test_v42_autonomous_b2.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_autonomous_b2\worker.py:75: in scoped_under
+    return original_under(path,parent,label)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = WindowsPath('D:/v42_b2_v30_independent_review_20261010_01/pytest/test_exact_own_output_paths_an0/dates/B2/2025-05-03/attempts/proof_v22_01/output/adaptive/RAW.npz')
+parent = WindowsPath('D:/MobileESS_v42_autonomous'), label = 'PROTECTED_SOURCE'
+
+    def _under(path,parent,label):
+        p=Path(path).resolve()
+        if ROOT.resolve().drive.upper()!='D:' or p.drive.upper()!='D:' or not p.is_relative_to(Path(parent).resolve()):
+>           raise ValueError('HYBRID_FINAL_D_PATH_REQUIRED:'+label)
+E           ValueError: HYBRID_FINAL_D_PATH_REQUIRED:PROTECTED_SOURCE
+
+v42_m1_hybrid\final_verify.py:35: ValueError
+=========================== short test summary info ===========================
+FAILED tests/test_v42_autonomous_b2.py::test_exact_own_output_paths_and_original_source_guards
+1 failed, 299 passed in 267.74s (0:04:27)
