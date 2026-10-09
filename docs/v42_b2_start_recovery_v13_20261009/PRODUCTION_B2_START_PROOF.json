@@ -1,0 +1,488 @@
+{
+  "PASS": true,
+  "UTC": "2026-10-09T11:54:27.178533+00:00",
+  "run_id": "native90_build_reuse_20261009_01",
+  "version": "B2_FULL_SOURCE_AUTHORITY_RECOVERY_V13",
+  "implementation_SHA": "8ef96e069c3c4d3c0cba67cb14e9efa9e8908ac3f22e114e8bbe51ec9bc733ab",
+  "real_FULL_validation": {
+    "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\B2_BUILD_FULL_VALIDATION_V13.json",
+    "sha256": "624152dccaa5f161cf5d40382c92475b7163585d14fc9df380b2266bea2812dd",
+    "bytes": 19424
+  },
+  "comparisons": {
+    "2025-05-01": {
+      "PASS": true,
+      "baseline_seconds": 367.24923710001167,
+      "optimized_seconds": 363.2044025999494,
+      "fingerprints_identical": true,
+      "performance_observation": "PINNED_ORIGINAL_REFERENCE; NOT_CONTROLLED_BENCHMARK"
+    },
+    "2025-05-23": {
+      "PASS": true,
+      "baseline_seconds": 305.91139780002413,
+      "optimized_seconds": 164.95896179997362,
+      "fingerprints_identical": true,
+      "performance_observation": "PINNED_ORIGINAL_REFERENCE; NOT_CONTROLLED_BENCHMARK"
+    }
+  },
+  "B1_PASS": 31,
+  "completed_B1_rows_unchanged": true,
+  "inherited_result_verification": {
+    "PASS": true,
+    "verified": 31,
+    "total": 31,
+    "UTC": "2026-10-09T11:34:53.556560+00:00"
+  },
+  "Coordinator": {
+    "process": {
+      "PID": 92644,
+      "created": 1791545428.8361945,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_b2_start_recovery_v13.host",
+        "coordinator",
+        "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01"
+      ],
+      "parent": 2648,
+      "priority": 32
+    },
+    "UTC": "2026-10-09T11:30:29.051355+00:00",
+    "mode": "coordinator",
+    "job": {
+      "in_any_job": true,
+      "limit_flags": 0,
+      "kill_on_job_close": false,
+      "breakaway_ok": false,
+      "silent_breakaway_ok": false,
+      "query_scope": "CURRENT_PROCESS_IMMEDIATE_JOB; membership tests any job",
+      "limit_flags_hex": "0x0"
+    }
+  },
+  "B2_actual_live_workers": 3,
+  "workers": [
+    {
+      "arm": "B2",
+      "day": "2025-05-01",
+      "worker_slot": 1,
+      "worker": {
+        "PID": 29088,
+        "created": 1791546559.615163,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_b2_start_recovery_v13.worker",
+          "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-01\\attempts\\mess_build_v13_01\\request.json"
+        ],
+        "parent": 92644,
+        "priority": 32
+      },
+      "request": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-01\\attempts\\mess_build_v13_01\\request.json",
+        "sha256": "b28a2d34c0492dc8c563cb0c1724abe03c8f3cfe10934ed077dec18036ac88fe",
+        "bytes": 2053
+      },
+      "admission": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-01\\attempts\\mess_build_v13_01\\NATIVE_WORKER_ADMISSION.json",
+        "sha256": "5a2772538543e19ac838c7d95a02c208d626469d92de7919e7d16e094ca14c10",
+        "bytes": 2402
+      },
+      "accelerated_builder_receipt": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-01\\attempts\\mess_build_v13_01\\output\\B2_BUILD_OPTIMIZATION_V13.json",
+        "sha256": "0edead2c97aca32244e7eb9629b745278cae932074a517d6094bf4c578457e26",
+        "bytes": 4719
+      },
+      "source_AST_proof": {
+        "source_sha": "758fbb11c07c52ac10895da63bf3bd6049dd5d94cb19e6b606589f25b5889dde",
+        "original_ast_sha": "be480d3877e0017193edb80f2e779e5ee50c0a41b0786b000e72988d1424ef60",
+        "routed_ast_sha": "dd7d8ee5f1b7b74054db50c3f1ecdeb76b3addb64165481bc84ebcea76b083f5",
+        "only_loader_routing_and_phase_scopes": false,
+        "numeric_constants_changed": false,
+        "source_statements_preserved": true,
+        "FULL_Compact_C3A_builds_preserved": true,
+        "model_copy_elision": {
+          "applied": true,
+          "eliminated_model_copies": 1,
+          "fresh_FULL_models": 1,
+          "snapshot": "ORIGINAL_UPDATED_MODEL_BEFORE_NATIVE_SOLVE_FINALLY_DISPOSE",
+          "original_native_owner_disposal_preserved": true,
+          "scientific_AST_roundtrip_identical": true,
+          "numeric_constants_changed": false,
+          "candidates_removed": 0,
+          "matrices_reused_from_other_builds": 0
+        }
+      },
+      "PCS_reuse": {
+        "source_proof": {
+          "source_sha": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec",
+          "original_pcs_ast_sha": "c97b50c3123797f70530eb2d5ab6efba2adba97b13a485b39ec74c9d13df5751",
+          "source_AST_and_bytecode_preserved": true,
+          "original_FACES": 16,
+          "original_cos_sin_only": true,
+          "coefficient_expressions_changed": false,
+          "source_globals_unchanged": true,
+          "function_restored": true
+        },
+        "calls": {
+          "requests": {
+            "cos": 286144,
+            "sin": 143072
+          },
+          "original_math_evaluations": {
+            "cos": 17,
+            "sin": 16
+          },
+          "hits": {
+            "cos": 286127,
+            "sin": 143056
+          },
+          "exact_argument_key": "FLOAT_HEX",
+          "result_arithmetic_changed": false,
+          "cache_scope": "ONE_SOURCE_MODEL_BUILD",
+          "real_performance_comparison": "NOT_RUN"
+        }
+      },
+      "measured_Native_Runtime": 0.0,
+      "Native_calls_completed": 0,
+      "inflight": {
+        "component": "P1",
+        "track": "M_SEED",
+        "label": "CURRENT_DAY_UNRESTRICTED_P1_SEED",
+        "requested_seconds": 900.0,
+        "precision_policy": "B2_FULL_SOURCE_AUTHORITY_RECOVERY_V13",
+        "precision_parameters": {
+          "FeasibilityTol": 1e-09,
+          "OptimalityTol": 1e-09,
+          "NumericFocus": 3,
+          "ScaleFlag": 2
+        },
+        "effective_TimeLimit": 5400.0,
+        "started_wall_seconds": 249.1913976999931,
+        "UTC": "2026-10-09T11:53:20.375639+00:00",
+        "status": "IN_FLIGHT"
+      },
+      "progress": {
+        "phase": "P1",
+        "worker": {
+          "PID": 29088,
+          "created": 1791546559.615163,
+          "command": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-B",
+            "-X",
+            "utf8",
+            "-m",
+            "v42_b2_start_recovery_v13.worker",
+            "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-01\\attempts\\mess_build_v13_01\\request.json"
+          ],
+          "parent": 92644,
+          "priority": 32
+        },
+        "worker_slot": 1,
+        "run_id": "native90_build_reuse_20261009_01",
+        "arm": "B2",
+        "day": "2025-05-01",
+        "attempt_id": "mess_build_v13_01",
+        "algorithm_version": "B2_FULL_SOURCE_AUTHORITY_RECOVERY_V13",
+        "timestamp_UTC": "2026-10-09T11:54:24.178057+00:00",
+        "Native_Runtime": 40.02999997138977,
+        "Native_Runtime_completed": 0.0,
+        "Wall_Time": 312.99375060002785,
+        "remaining_seconds": 5359.97000002861,
+        "native_remaining_seconds": 5359.97000002861,
+        "wall_limit_seconds": null,
+        "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+        "inflight": true,
+        "Work": 0
+      }
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-02",
+      "worker_slot": 2,
+      "worker": {
+        "PID": 97556,
+        "created": 1791546567.9492269,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_b2_start_recovery_v13.worker",
+          "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-02\\attempts\\mess_build_v13_01\\request.json"
+        ],
+        "parent": 92644,
+        "priority": 32
+      },
+      "request": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-02\\attempts\\mess_build_v13_01\\request.json",
+        "sha256": "24688595f31c62ceb11c551f4ef89300493befb0138ba8e6870094bdff49d74e",
+        "bytes": 2053
+      },
+      "admission": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-02\\attempts\\mess_build_v13_01\\NATIVE_WORKER_ADMISSION.json",
+        "sha256": "9b356bbe48fff6fce83c5522a7922d3a11f48f562749a9f98f91d5dbf683576e",
+        "bytes": 2403
+      },
+      "accelerated_builder_receipt": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-02\\attempts\\mess_build_v13_01\\output\\B2_BUILD_OPTIMIZATION_V13.json",
+        "sha256": "2e7b53c622af9726a1424fd301b4df13fcdd4e74622867a3c0477a3828463a0b",
+        "bytes": 4724
+      },
+      "source_AST_proof": {
+        "source_sha": "758fbb11c07c52ac10895da63bf3bd6049dd5d94cb19e6b606589f25b5889dde",
+        "original_ast_sha": "be480d3877e0017193edb80f2e779e5ee50c0a41b0786b000e72988d1424ef60",
+        "routed_ast_sha": "dd7d8ee5f1b7b74054db50c3f1ecdeb76b3addb64165481bc84ebcea76b083f5",
+        "only_loader_routing_and_phase_scopes": false,
+        "numeric_constants_changed": false,
+        "source_statements_preserved": true,
+        "FULL_Compact_C3A_builds_preserved": true,
+        "model_copy_elision": {
+          "applied": true,
+          "eliminated_model_copies": 1,
+          "fresh_FULL_models": 1,
+          "snapshot": "ORIGINAL_UPDATED_MODEL_BEFORE_NATIVE_SOLVE_FINALLY_DISPOSE",
+          "original_native_owner_disposal_preserved": true,
+          "scientific_AST_roundtrip_identical": true,
+          "numeric_constants_changed": false,
+          "candidates_removed": 0,
+          "matrices_reused_from_other_builds": 0
+        }
+      },
+      "PCS_reuse": {
+        "source_proof": {
+          "source_sha": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec",
+          "original_pcs_ast_sha": "c97b50c3123797f70530eb2d5ab6efba2adba97b13a485b39ec74c9d13df5751",
+          "source_AST_and_bytecode_preserved": true,
+          "original_FACES": 16,
+          "original_cos_sin_only": true,
+          "coefficient_expressions_changed": false,
+          "source_globals_unchanged": true,
+          "function_restored": true
+        },
+        "calls": {
+          "requests": {
+            "cos": 285952,
+            "sin": 142976
+          },
+          "original_math_evaluations": {
+            "cos": 17,
+            "sin": 16
+          },
+          "hits": {
+            "cos": 285935,
+            "sin": 142960
+          },
+          "exact_argument_key": "FLOAT_HEX",
+          "result_arithmetic_changed": false,
+          "cache_scope": "ONE_SOURCE_MODEL_BUILD",
+          "real_performance_comparison": "NOT_RUN"
+        }
+      },
+      "measured_Native_Runtime": 0.0,
+      "Native_calls_completed": 0,
+      "inflight": {
+        "component": "P1",
+        "track": "M_SEED",
+        "label": "CURRENT_DAY_UNRESTRICTED_P1_SEED",
+        "requested_seconds": 900.0,
+        "precision_policy": "B2_FULL_SOURCE_AUTHORITY_RECOVERY_V13",
+        "precision_parameters": {
+          "FeasibilityTol": 1e-09,
+          "OptimalityTol": 1e-09,
+          "NumericFocus": 3,
+          "ScaleFlag": 2
+        },
+        "effective_TimeLimit": 5400.0,
+        "started_wall_seconds": 270.3343019000022,
+        "UTC": "2026-10-09T11:53:49.977675+00:00",
+        "status": "IN_FLIGHT"
+      },
+      "progress": {
+        "phase": "P1",
+        "worker": {
+          "PID": 97556,
+          "created": 1791546567.9492269,
+          "command": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-B",
+            "-X",
+            "utf8",
+            "-m",
+            "v42_b2_start_recovery_v13.worker",
+            "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-02\\attempts\\mess_build_v13_01\\request.json"
+          ],
+          "parent": 92644,
+          "priority": 32
+        },
+        "worker_slot": 2,
+        "run_id": "native90_build_reuse_20261009_01",
+        "arm": "B2",
+        "day": "2025-05-02",
+        "attempt_id": "mess_build_v13_01",
+        "algorithm_version": "B2_FULL_SOURCE_AUTHORITY_RECOVERY_V13",
+        "timestamp_UTC": "2026-10-09T11:54:27.046449+00:00",
+        "Native_Runtime": 9.072999954223633,
+        "Native_Runtime_completed": 0.0,
+        "Wall_Time": 307.4036561999819,
+        "remaining_seconds": 5390.927000045776,
+        "native_remaining_seconds": 5390.927000045776,
+        "wall_limit_seconds": null,
+        "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+        "inflight": true,
+        "Work": 0
+      }
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-03",
+      "worker_slot": 3,
+      "worker": {
+        "PID": 82468,
+        "created": 1791546576.4245348,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_b2_start_recovery_v13.worker",
+          "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-03\\attempts\\mess_build_v13_01\\request.json"
+        ],
+        "parent": 92644,
+        "priority": 32
+      },
+      "request": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-03\\attempts\\mess_build_v13_01\\request.json",
+        "sha256": "8560e5b1c163437efa910d40562166621aeda2f7eaac34f637451b1aea31f4ca",
+        "bytes": 2053
+      },
+      "admission": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-03\\attempts\\mess_build_v13_01\\NATIVE_WORKER_ADMISSION.json",
+        "sha256": "025ec1b42b7ed16389c7b7a227a478035ece5031101ac5f34cb3f72356b101ae",
+        "bytes": 2403
+      },
+      "accelerated_builder_receipt": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-03\\attempts\\mess_build_v13_01\\output\\B2_BUILD_OPTIMIZATION_V13.json",
+        "sha256": "abdf1b106479c4d9e14208c63b22f04f985b43990bfa6cc883753cd73996f491",
+        "bytes": 4722
+      },
+      "source_AST_proof": {
+        "source_sha": "758fbb11c07c52ac10895da63bf3bd6049dd5d94cb19e6b606589f25b5889dde",
+        "original_ast_sha": "be480d3877e0017193edb80f2e779e5ee50c0a41b0786b000e72988d1424ef60",
+        "routed_ast_sha": "dd7d8ee5f1b7b74054db50c3f1ecdeb76b3addb64165481bc84ebcea76b083f5",
+        "only_loader_routing_and_phase_scopes": false,
+        "numeric_constants_changed": false,
+        "source_statements_preserved": true,
+        "FULL_Compact_C3A_builds_preserved": true,
+        "model_copy_elision": {
+          "applied": true,
+          "eliminated_model_copies": 1,
+          "fresh_FULL_models": 1,
+          "snapshot": "ORIGINAL_UPDATED_MODEL_BEFORE_NATIVE_SOLVE_FINALLY_DISPOSE",
+          "original_native_owner_disposal_preserved": true,
+          "scientific_AST_roundtrip_identical": true,
+          "numeric_constants_changed": false,
+          "candidates_removed": 0,
+          "matrices_reused_from_other_builds": 0
+        }
+      },
+      "PCS_reuse": {
+        "source_proof": {
+          "source_sha": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec",
+          "original_pcs_ast_sha": "c97b50c3123797f70530eb2d5ab6efba2adba97b13a485b39ec74c9d13df5751",
+          "source_AST_and_bytecode_preserved": true,
+          "original_FACES": 16,
+          "original_cos_sin_only": true,
+          "coefficient_expressions_changed": false,
+          "source_globals_unchanged": true,
+          "function_restored": true
+        },
+        "calls": {
+          "requests": {
+            "cos": 285984,
+            "sin": 142992
+          },
+          "original_math_evaluations": {
+            "cos": 17,
+            "sin": 16
+          },
+          "hits": {
+            "cos": 285967,
+            "sin": 142976
+          },
+          "exact_argument_key": "FLOAT_HEX",
+          "result_arithmetic_changed": false,
+          "cache_scope": "ONE_SOURCE_MODEL_BUILD",
+          "real_performance_comparison": "NOT_RUN"
+        }
+      },
+      "measured_Native_Runtime": 0.0,
+      "Native_calls_completed": 0,
+      "inflight": {
+        "component": "P1",
+        "track": "M_SEED",
+        "label": "CURRENT_DAY_UNRESTRICTED_P1_SEED",
+        "requested_seconds": 900.0,
+        "precision_policy": "B2_FULL_SOURCE_AUTHORITY_RECOVERY_V13",
+        "precision_parameters": {
+          "FeasibilityTol": 1e-09,
+          "OptimalityTol": 1e-09,
+          "NumericFocus": 3,
+          "ScaleFlag": 2
+        },
+        "effective_TimeLimit": 5400.0,
+        "started_wall_seconds": 237.0477723000222,
+        "UTC": "2026-10-09T11:53:25.017756+00:00",
+        "status": "IN_FLIGHT"
+      },
+      "progress": {
+        "phase": "P1",
+        "worker": {
+          "PID": 82468,
+          "created": 1791546576.4245348,
+          "command": [
+            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+            "-B",
+            "-X",
+            "utf8",
+            "-m",
+            "v42_b2_start_recovery_v13.worker",
+            "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B2\\2025-05-03\\attempts\\mess_build_v13_01\\request.json"
+          ],
+          "parent": 92644,
+          "priority": 32
+        },
+        "worker_slot": 3,
+        "run_id": "native90_build_reuse_20261009_01",
+        "arm": "B2",
+        "day": "2025-05-03",
+        "attempt_id": "mess_build_v13_01",
+        "algorithm_version": "B2_FULL_SOURCE_AUTHORITY_RECOVERY_V13",
+        "timestamp_UTC": "2026-10-09T11:54:22.616183+00:00",
+        "Native_Runtime": 35.00999999046326,
+        "Native_Runtime_completed": 0.0,
+        "Wall_Time": 294.6464515000116,
+        "remaining_seconds": 5364.990000009537,
+        "native_remaining_seconds": 5364.990000009537,
+        "wall_limit_seconds": null,
+        "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+        "inflight": true,
+        "Work": 0
+      }
+    }
+  ],
+  "Threads": 1,
+  "P2_calls": 0,
+  "native_seconds_per_date": 5400,
+  "wall_limit_seconds": null,
+  "target_certified_gap": 0.03,
+  "full_B2_date_result": "NOT_YET_FINISHED_AT_START_PROOF"
+}
