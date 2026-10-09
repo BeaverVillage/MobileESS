@@ -421,7 +421,7 @@ def test_preserved_original_f1_and_full_lp_code_objects_end_to_end_without_nativ
 
 
 def test_production_proof_scope_lazy_hooks_promote_warm_and_restore_original_aliases(env,monkeypatch):
-    from v42_autonomous_b2 import worker
+    from v42_autonomous_b2 import worker,f1_basis
     from v42_b2_seed_recovery_v19 import initialization,fixed_pattern
     from v42_may_campaign_native90 import m_stage
     from v42_may_campaign_native90.a_routing import rebound
@@ -447,10 +447,10 @@ def test_production_proof_scope_lazy_hooks_promote_warm_and_restore_original_ali
         _model=lambda c,continuous:(full_model,{}),check_rational_dual_certificate=check))
     monkeypatch.setattr(initialization,'validated_start',real_f1)
     monkeypatch.setattr(m_stage,'_fresh_lp_dual',real_lp)
-    scopes=[];original_scope=Scope
+    scopes=[];original_scope=f1_basis.Scope
     def factory(request,code_root):
         scopes.append(original_scope(request,env.code,writer=write));return scopes[-1]
-    monkeypatch.setattr(f1_state,'Scope',factory)
+    monkeypatch.setattr(f1_basis,'Scope',factory)
     inputs=env.root/'immutable_inputs';inputs.mkdir()
     for name in ('B2_FIXED_AIDC.json','PLANNING_PHYSICAL.npz','linked.json'):
         (inputs/name).write_bytes(b'unchanged input')

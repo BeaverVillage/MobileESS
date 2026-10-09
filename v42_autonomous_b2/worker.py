@@ -95,7 +95,7 @@ def proof_scope(request,manifest):
     from v42_m1_hybrid import blocks,pricing,dw,final_verify
     from v42_b2_seed_recovery_v18 import certificate_box
     from v42_b2_seed_recovery_v19.common import atomic
-    from . import canonical_stream,dw_native,pricing_box,f1_state
+    from . import canonical_stream,dw_native,pricing_box,f1_state,f1_basis
     from v42_b2_seed_recovery_v19 import initialization
     routes=proof_routes(request);output=routes['output']
     folder=Path(request['input_folder']).resolve()
@@ -145,7 +145,7 @@ def proof_scope(request,manifest):
         current_f1_state = [None]
         def state():
             if current_f1_state[0] is None:
-                current_f1_state[0] = f1_state.Scope(request,ROOT)
+                current_f1_state[0] = f1_basis.Scope(request,ROOT)
             return current_f1_state[0]
         def current_f1(case,budget,progress=None):
             return state().capture(saved_f1,case,budget,progress)
