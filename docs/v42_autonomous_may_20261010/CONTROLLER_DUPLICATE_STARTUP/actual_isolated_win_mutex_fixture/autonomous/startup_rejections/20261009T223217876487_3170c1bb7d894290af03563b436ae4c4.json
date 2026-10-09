@@ -1,0 +1,52 @@
+{
+  "schema": "V42_VERIFIED_LIVE_SUPERVISOR_DUPLICATE_STARTUP_REJECTION",
+  "UTC": "2026-10-09T22:32:17.863469+00:00",
+  "reason": "DUPLICATE_STARTUP_REJECTED_EXISTING_OWNED_LIVE_SUPERVISOR",
+  "root": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\pytest_full\\test_actual_windows_owned_supe0",
+  "startup_error": "LockBusy('LIVE_OS_LOCK:D:\\\\v42_controller_duplicate_startup_repair_20261010_01\\\\pytest_full\\\\test_actual_windows_owned_supe0\\\\AUTONOMOUS_SUPERVISOR.lock')",
+  "startup_cause": "PermissionError(13, 'Permission denied')",
+  "errno": 13,
+  "duplicate_process": {
+    "PID": 47196,
+    "created": 1791585126.7052274,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "D:\\v42_controller_duplicate_startup_repair_20261010_01\\run_full_native_denied_tests.py"
+    ],
+    "parent": 88996,
+    "priority": 32
+  },
+  "existing_owner": {
+    "PID": 45160,
+    "created": 1791585137.3640468,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "v42_autonomous.supervisor",
+      "D:\\v42_controller_duplicate_startup_repair_20261010_01\\pytest_full\\test_actual_windows_owned_supe0"
+    ],
+    "cwd": "D:\\MobileESS_v42_autonomous"
+  },
+  "matching_heartbeat_age_seconds": 0.067058,
+  "owner_record": {
+    "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\pytest_full\\test_actual_windows_owned_supe0\\SUPERVISOR_PROCESS.json",
+    "bytes": 373,
+    "sha256": "71b8e5ffff2ad50c93cbe042600d9a71138d31003fba8c8145369244fab5e7cf"
+  },
+  "heartbeat_record": {
+    "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\pytest_full\\test_actual_windows_owned_supe0\\SUPERVISOR_HEARTBEAT.json",
+    "bytes": 505,
+    "sha256": "7a5d524e0edadbb71d5303c3a3ed600932699cb657651448475d0b21bc57acb3"
+  },
+  "CP_worker_Native_files_not_written": true,
+  "SUPERVISOR_ERROR_not_written": true,
+  "lock_removed_or_lease_broken": false,
+  "Native_optimize_calls": 0,
+  "real_Native_model_constructions": 0
+}

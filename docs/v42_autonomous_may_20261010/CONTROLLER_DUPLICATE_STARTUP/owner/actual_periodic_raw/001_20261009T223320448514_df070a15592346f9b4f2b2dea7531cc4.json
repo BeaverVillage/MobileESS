@@ -1,0 +1,54 @@
+{
+  "schema": "V42_VERIFIED_LIVE_SUPERVISOR_DUPLICATE_STARTUP_REJECTION",
+  "UTC": "2026-10-09T22:33:20.437993+00:00",
+  "reason": "DUPLICATE_STARTUP_REJECTED_EXISTING_OWNED_LIVE_SUPERVISOR",
+  "root": "D:\\v42_may_restart_20261010_02",
+  "startup_error": "LockBusy('LIVE_OS_LOCK:D:\\\\v42_may_restart_20261010_02\\\\AUTONOMOUS_SUPERVISOR.lock')",
+  "startup_cause": "PermissionError(13, 'Permission denied')",
+  "errno": 13,
+  "duplicate_process": {
+    "PID": 98264,
+    "created": 1791585200.2570143,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "v42_autonomous.supervisor",
+      "D:\\v42_may_restart_20261010_02"
+    ],
+    "parent": 2648,
+    "priority": 32
+  },
+  "existing_owner": {
+    "PID": 107788,
+    "created": 1791584282.2589123,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "v42_autonomous.supervisor",
+      "D:\\v42_may_restart_20261010_02"
+    ],
+    "cwd": "D:\\MobileESS_v42_autonomous"
+  },
+  "matching_heartbeat_age_seconds": 1.00599,
+  "owner_record": {
+    "path": "D:\\v42_may_restart_20261010_02\\SUPERVISOR_PROCESS.json",
+    "bytes": 305,
+    "sha256": "86e7fd8cf51e0e15c6b4ceb966b2f6c02d42bc1b2503047d814c5c09ea501381"
+  },
+  "heartbeat_record": {
+    "path": "D:\\v42_may_restart_20261010_02\\SUPERVISOR_HEARTBEAT.json",
+    "bytes": 430,
+    "sha256": "bd2be72f0f19db2f84c6d13390b1bec8c44f9bd6ee36f09e26758fd73fdf143a"
+  },
+  "CP_worker_Native_files_not_written": true,
+  "SUPERVISOR_ERROR_not_written": true,
+  "lock_removed_or_lease_broken": false,
+  "Native_optimize_calls": 0,
+  "real_Native_model_constructions": 0
+}

@@ -1,0 +1,528 @@
+{
+  "PASS": true,
+  "UTC": "2026-10-09T22:36:29.950512+00:00",
+  "schema": "V42_ACTUAL_OS_PERIODIC_DUPLICATE_STARTUP_REJECTION_INDEPENDENT_READ_ONLY_AUDIT",
+  "actual_event": {
+    "source": {
+      "path": "D:\\v42_may_restart_20261010_02\\autonomous\\startup_rejections\\20261009T223320448514_df070a15592346f9b4f2b2dea7531cc4.json",
+      "bytes": 1832,
+      "sha256": "21895f402150152c1bd371af8899aadd4ca7df9973f517282e0ffe14910366d7"
+    },
+    "snapshot": {
+      "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\001_20261009T223320448514_df070a15592346f9b4f2b2dea7531cc4.json",
+      "bytes": 1832,
+      "sha256": "21895f402150152c1bd371af8899aadd4ca7df9973f517282e0ffe14910366d7"
+    },
+    "source_read_count": 1
+  },
+  "actual_event_data": {
+    "schema": "V42_VERIFIED_LIVE_SUPERVISOR_DUPLICATE_STARTUP_REJECTION",
+    "UTC": "2026-10-09T22:33:20.437993+00:00",
+    "reason": "DUPLICATE_STARTUP_REJECTED_EXISTING_OWNED_LIVE_SUPERVISOR",
+    "root": "D:\\v42_may_restart_20261010_02",
+    "startup_error": "LockBusy('LIVE_OS_LOCK:D:\\\\v42_may_restart_20261010_02\\\\AUTONOMOUS_SUPERVISOR.lock')",
+    "startup_cause": "PermissionError(13, 'Permission denied')",
+    "errno": 13,
+    "duplicate_process": {
+      "PID": 98264,
+      "created": 1791585200.2570143,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_autonomous.supervisor",
+        "D:\\v42_may_restart_20261010_02"
+      ],
+      "parent": 2648,
+      "priority": 32
+    },
+    "existing_owner": {
+      "PID": 107788,
+      "created": 1791584282.2589123,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_autonomous.supervisor",
+        "D:\\v42_may_restart_20261010_02"
+      ],
+      "cwd": "D:\\MobileESS_v42_autonomous"
+    },
+    "matching_heartbeat_age_seconds": 1.00599,
+    "owner_record": {
+      "path": "D:\\v42_may_restart_20261010_02\\SUPERVISOR_PROCESS.json",
+      "bytes": 305,
+      "sha256": "86e7fd8cf51e0e15c6b4ceb966b2f6c02d42bc1b2503047d814c5c09ea501381"
+    },
+    "heartbeat_record": {
+      "path": "D:\\v42_may_restart_20261010_02\\SUPERVISOR_HEARTBEAT.json",
+      "bytes": 430,
+      "sha256": "bd2be72f0f19db2f84c6d13390b1bec8c44f9bd6ee36f09e26758fd73fdf143a"
+    },
+    "CP_worker_Native_files_not_written": true,
+    "SUPERVISOR_ERROR_not_written": true,
+    "lock_removed_or_lease_broken": false,
+    "Native_optimize_calls": 0,
+    "real_Native_model_constructions": 0
+  },
+  "actual_OS_task": {
+    "source": {
+      "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\ACTUAL_PERIODIC_REJECTION_TASK_READ_ONLY_OBSERVATION.json",
+      "bytes": 485,
+      "sha256": "51f590a88d23bb2bc20e916ccf7067beb4c12b90d2d3c09f57245b83631e9187"
+    },
+    "snapshot": {
+      "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\002_ACTUAL_PERIODIC_REJECTION_TASK_READ_ONLY_OBSERVATION.json",
+      "bytes": 485,
+      "sha256": "51f590a88d23bb2bc20e916ccf7067beb4c12b90d2d3c09f57245b83631e9187"
+    },
+    "source_read_count": 1
+  },
+  "owner_supervisor_unchanged": {
+    "PID": 107788,
+    "created": 1791584282.2589123,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "v42_autonomous.supervisor",
+      "D:\\v42_may_restart_20261010_02"
+    ],
+    "cwd": "D:\\MobileESS_v42_autonomous"
+  },
+  "workers": [
+    {
+      "key": "B2/2025-05-01",
+      "identity": {
+        "PID": 106760,
+        "created": 1791583103.9296637,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_autonomous_b2.worker",
+          "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v32_01_s3\\request.json"
+        ],
+        "cwd": "D:\\v42run32"
+      },
+      "request": {
+        "source": {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v32_01_s3\\request.json",
+          "bytes": 1809,
+          "sha256": "fd2201115652bc34483272545ef36a754c72fbe503811d0ebee1d1947d5d9ec1"
+        },
+        "snapshot": {
+          "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\005_request.json",
+          "bytes": 1809,
+          "sha256": "fd2201115652bc34483272545ef36a754c72fbe503811d0ebee1d1947d5d9ec1"
+        },
+        "source_read_count": 1
+      },
+      "ledger": {
+        "source": {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v32_01_s3\\NATIVE_RUNTIME_LEDGER.json",
+          "bytes": 52081,
+          "sha256": "49f56a599184ea03f2e29497abc5ca69134278a7dd6402ab528c1e3c4da37e98"
+        },
+        "snapshot": {
+          "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\007_NATIVE_RUNTIME_LEDGER.json",
+          "bytes": 52081,
+          "sha256": "49f56a599184ea03f2e29497abc5ca69134278a7dd6402ab528c1e3c4da37e98"
+        },
+        "source_read_count": 1
+      },
+      "Native_before": 716.2020003795624,
+      "Native_after": 1240.6150002479553,
+      "calls_before": 20,
+      "calls_after": 24,
+      "ledger_UTC": "2026-10-09T22:33:20.975360+00:00",
+      "CP_status": "RUNNING"
+    },
+    {
+      "key": "B2/2025-05-02",
+      "identity": {
+        "PID": 95584,
+        "created": 1791583195.246852,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_autonomous_b2.worker",
+          "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v32_01_s1\\request.json"
+        ],
+        "cwd": "D:\\v42run32"
+      },
+      "request": {
+        "source": {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v32_01_s1\\request.json",
+          "bytes": 1809,
+          "sha256": "e0d325c5a61b1b93a57c361f3e5ebc1da70ce91f59e3d32a8c239dbc0d7a5c30"
+        },
+        "snapshot": {
+          "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\008_request.json",
+          "bytes": 1809,
+          "sha256": "e0d325c5a61b1b93a57c361f3e5ebc1da70ce91f59e3d32a8c239dbc0d7a5c30"
+        },
+        "source_read_count": 1
+      },
+      "ledger": {
+        "source": {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v32_01_s1\\NATIVE_RUNTIME_LEDGER.json",
+          "bytes": 54607,
+          "sha256": "3792e074b5a33d38a45eb541fe6a57fb1b1539c59a695e4348a07b787340c4fa"
+        },
+        "snapshot": {
+          "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\010_NATIVE_RUNTIME_LEDGER.json",
+          "bytes": 54607,
+          "sha256": "3792e074b5a33d38a45eb541fe6a57fb1b1539c59a695e4348a07b787340c4fa"
+        },
+        "source_read_count": 1
+      },
+      "Native_before": 706.3659999370575,
+      "Native_after": 1246.7820000648499,
+      "calls_before": 20,
+      "calls_after": 24,
+      "ledger_UTC": "2026-10-09T22:35:14.598044+00:00",
+      "CP_status": "RUNNING"
+    },
+    {
+      "key": "B2/2025-05-03",
+      "identity": {
+        "PID": 107636,
+        "created": 1791583343.210727,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_autonomous_b2.worker",
+          "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v32_01_s2\\request.json"
+        ],
+        "cwd": "D:\\v42run32"
+      },
+      "request": {
+        "source": {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v32_01_s2\\request.json",
+          "bytes": 1809,
+          "sha256": "1cc72d695b3bd75c421395b353573667220ffcfa6009888ee2b98903f65d0faa"
+        },
+        "snapshot": {
+          "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\011_request.json",
+          "bytes": 1809,
+          "sha256": "1cc72d695b3bd75c421395b353573667220ffcfa6009888ee2b98903f65d0faa"
+        },
+        "source_read_count": 1
+      },
+      "ledger": {
+        "source": {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v32_01_s2\\NATIVE_RUNTIME_LEDGER.json",
+          "bytes": 47809,
+          "sha256": "a7c79929cfb0afaa89eb15e0151440b742562d6a80f2ab3c42f6fae1eeeffe8c"
+        },
+        "snapshot": {
+          "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\013_NATIVE_RUNTIME_LEDGER.json",
+          "bytes": 47809,
+          "sha256": "a7c79929cfb0afaa89eb15e0151440b742562d6a80f2ab3c42f6fae1eeeffe8c"
+        },
+        "source_read_count": 1
+      },
+      "Native_before": 639.4100003242493,
+      "Native_after": 1005.8949999809265,
+      "calls_before": 8,
+      "calls_after": 21,
+      "ledger_UTC": "2026-10-09T22:33:24.021727+00:00",
+      "CP_status": "RUNNING"
+    }
+  ],
+  "all_completed_Native_prefixes_preserved": true,
+  "public_error_bytes_unchanged_from_pre_full_test_observation": true,
+  "public_error": {
+    "source": {
+      "path": "D:\\v42_may_restart_20261010_02\\SUPERVISOR_ERROR.json",
+      "bytes": 1271,
+      "sha256": "0663676ff3c15e300e2f2aee38164599b43cb933782707ae50dffe5aed69d9b1"
+    },
+    "snapshot": {
+      "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\014_SUPERVISOR_ERROR.json",
+      "bytes": 1271,
+      "sha256": "0663676ff3c15e300e2f2aee38164599b43cb933782707ae50dffe5aed69d9b1"
+    },
+    "source_read_count": 1
+  },
+  "public_error_UTC": "2026-10-09T22:28:20.472607+00:00",
+  "control_source4": {
+    "v42_autonomous/recovery.py": {
+      "path": "D:\\MobileESS_v42_autonomous\\v42_autonomous\\recovery.py",
+      "bytes": 68868,
+      "sha256": "bb779f4aa198001bf859225328d0f9dcc9d2249f71edab9a6596e3aea2d1fcb8"
+    },
+    "v42_autonomous/supervisor.py": {
+      "path": "D:\\MobileESS_v42_autonomous\\v42_autonomous\\supervisor.py",
+      "bytes": 40140,
+      "sha256": "4ad79721ca02272e6471fe56e1637b60b9f38a48748da5cd39d6a2adf5f45f92"
+    },
+    "tests/test_v42_autonomous_recovery.py": {
+      "path": "D:\\MobileESS_v42_autonomous\\tests\\test_v42_autonomous_recovery.py",
+      "bytes": 61107,
+      "sha256": "2f8c9c35d25f2642d4176cf2b41f972721403c8fede677ab06ccffb1526b9b9a"
+    },
+    "tests/test_v42_autonomous_supervisor.py": {
+      "path": "D:\\MobileESS_v42_autonomous\\tests\\test_v42_autonomous_supervisor.py",
+      "bytes": 35773,
+      "sha256": "c29ecd845a90b8f91f5db67280f4887f667eef6bd78aa69521242274c6068137"
+    }
+  },
+  "actual_HTTP8794": {
+    "status": 200,
+    "snapshot": {
+      "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\HTTP8794_API_STATUS_RAW.json",
+      "bytes": 1405677,
+      "sha256": "f6542d1ec1262f42c0169d12a27e1c5d6c1fc1aa5801e3e8344959ddbd4fe41c"
+    },
+    "snapshot_UTC": "2026-10-09T22:36:24.892220+00:00"
+  },
+  "raw_single_read_records": [
+    {
+      "source": {
+        "path": "D:\\v42_control_heartbeat_io_repair_20261010_01\\CONTROLLER_HEARTBEAT_IO_RELOAD_INDEPENDENT_ACTUAL_AUDIT_02.json",
+        "bytes": 549362,
+        "sha256": "b3e13933330568bcb41195b2b1b8d40eaf7f0c98833f625f998fdcdabcdc4256"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\000_CONTROLLER_HEARTBEAT_IO_RELOAD_INDEPENDENT_ACTUAL_AUDIT_02.json",
+        "bytes": 549362,
+        "sha256": "b3e13933330568bcb41195b2b1b8d40eaf7f0c98833f625f998fdcdabcdc4256"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_may_restart_20261010_02\\autonomous\\startup_rejections\\20261009T223320448514_df070a15592346f9b4f2b2dea7531cc4.json",
+        "bytes": 1832,
+        "sha256": "21895f402150152c1bd371af8899aadd4ca7df9973f517282e0ffe14910366d7"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\001_20261009T223320448514_df070a15592346f9b4f2b2dea7531cc4.json",
+        "bytes": 1832,
+        "sha256": "21895f402150152c1bd371af8899aadd4ca7df9973f517282e0ffe14910366d7"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\ACTUAL_PERIODIC_REJECTION_TASK_READ_ONLY_OBSERVATION.json",
+        "bytes": 485,
+        "sha256": "51f590a88d23bb2bc20e916ccf7067beb4c12b90d2d3c09f57245b83631e9187"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\002_ACTUAL_PERIODIC_REJECTION_TASK_READ_ONLY_OBSERVATION.json",
+        "bytes": 485,
+        "sha256": "51f590a88d23bb2bc20e916ccf7067beb4c12b90d2d3c09f57245b83631e9187"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_may_restart_20261010_02\\SUPERVISOR_STATE.json",
+        "bytes": 62259,
+        "sha256": "c5b9d8587dc0c2798108a944443bf856de352708e778fb85a2974bfc88568718"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\003_SUPERVISOR_STATE.json",
+        "bytes": 62259,
+        "sha256": "c5b9d8587dc0c2798108a944443bf856de352708e778fb85a2974bfc88568718"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_may_restart_20261010_02\\SUPERVISOR_PROCESS.json",
+        "bytes": 305,
+        "sha256": "86e7fd8cf51e0e15c6b4ceb966b2f6c02d42bc1b2503047d814c5c09ea501381"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\004_SUPERVISOR_PROCESS.json",
+        "bytes": 305,
+        "sha256": "86e7fd8cf51e0e15c6b4ceb966b2f6c02d42bc1b2503047d814c5c09ea501381"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v32_01_s3\\request.json",
+        "bytes": 1809,
+        "sha256": "fd2201115652bc34483272545ef36a754c72fbe503811d0ebee1d1947d5d9ec1"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\005_request.json",
+        "bytes": 1809,
+        "sha256": "fd2201115652bc34483272545ef36a754c72fbe503811d0ebee1d1947d5d9ec1"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_control_heartbeat_io_repair_20261010_01\\post_reload_raw_02\\013_NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 42439,
+        "sha256": "f3d277ab233c8a85215069950b43f6978ad7719cef690f826e14c0debb80ca5d"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\006_013_NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 42439,
+        "sha256": "f3d277ab233c8a85215069950b43f6978ad7719cef690f826e14c0debb80ca5d"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v32_01_s3\\NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 52081,
+        "sha256": "49f56a599184ea03f2e29497abc5ca69134278a7dd6402ab528c1e3c4da37e98"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\007_NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 52081,
+        "sha256": "49f56a599184ea03f2e29497abc5ca69134278a7dd6402ab528c1e3c4da37e98"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v32_01_s1\\request.json",
+        "bytes": 1809,
+        "sha256": "e0d325c5a61b1b93a57c361f3e5ebc1da70ce91f59e3d32a8c239dbc0d7a5c30"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\008_request.json",
+        "bytes": 1809,
+        "sha256": "e0d325c5a61b1b93a57c361f3e5ebc1da70ce91f59e3d32a8c239dbc0d7a5c30"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_control_heartbeat_io_repair_20261010_01\\post_reload_raw_02\\016_NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 41891,
+        "sha256": "bb1fc0ff7c10f9b59cc6f42ac5c0a11d3bd878b4d736ec3ca653be5948df5847"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\009_016_NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 41891,
+        "sha256": "bb1fc0ff7c10f9b59cc6f42ac5c0a11d3bd878b4d736ec3ca653be5948df5847"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v32_01_s1\\NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 54607,
+        "sha256": "3792e074b5a33d38a45eb541fe6a57fb1b1539c59a695e4348a07b787340c4fa"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\010_NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 54607,
+        "sha256": "3792e074b5a33d38a45eb541fe6a57fb1b1539c59a695e4348a07b787340c4fa"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v32_01_s2\\request.json",
+        "bytes": 1809,
+        "sha256": "1cc72d695b3bd75c421395b353573667220ffcfa6009888ee2b98903f65d0faa"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\011_request.json",
+        "bytes": 1809,
+        "sha256": "1cc72d695b3bd75c421395b353573667220ffcfa6009888ee2b98903f65d0faa"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_control_heartbeat_io_repair_20261010_01\\post_reload_raw_02\\019_NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 21656,
+        "sha256": "ec4e756edb2729337caac995fcece7442845e5dd54bcac74928ff1a34814cabe"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\012_019_NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 21656,
+        "sha256": "ec4e756edb2729337caac995fcece7442845e5dd54bcac74928ff1a34814cabe"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v32_01_s2\\NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 47809,
+        "sha256": "a7c79929cfb0afaa89eb15e0151440b742562d6a80f2ab3c42f6fae1eeeffe8c"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\013_NATIVE_RUNTIME_LEDGER.json",
+        "bytes": 47809,
+        "sha256": "a7c79929cfb0afaa89eb15e0151440b742562d6a80f2ab3c42f6fae1eeeffe8c"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_may_restart_20261010_02\\SUPERVISOR_ERROR.json",
+        "bytes": 1271,
+        "sha256": "0663676ff3c15e300e2f2aee38164599b43cb933782707ae50dffe5aed69d9b1"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\014_SUPERVISOR_ERROR.json",
+        "bytes": 1271,
+        "sha256": "0663676ff3c15e300e2f2aee38164599b43cb933782707ae50dffe5aed69d9b1"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\ORIGINAL_SUPERVISOR_ERROR_RAW_FULL.json",
+        "bytes": 1271,
+        "sha256": "0663676ff3c15e300e2f2aee38164599b43cb933782707ae50dffe5aed69d9b1"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\015_ORIGINAL_SUPERVISOR_ERROR_RAW_FULL.json",
+        "bytes": 1271,
+        "sha256": "0663676ff3c15e300e2f2aee38164599b43cb933782707ae50dffe5aed69d9b1"
+      },
+      "source_read_count": 1
+    },
+    {
+      "source": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\FULL_NATIVE_DENIED_TEST_RECEIPT.json",
+        "bytes": 5630,
+        "sha256": "444b57293766b310b7c846009897c3bcfaf3c8f4fa2bb721875b210f03aacf13"
+      },
+      "snapshot": {
+        "path": "D:\\v42_controller_duplicate_startup_repair_20261010_01\\actual_periodic_raw\\016_FULL_NATIVE_DENIED_TEST_RECEIPT.json",
+        "bytes": 5630,
+        "sha256": "444b57293766b310b7c846009897c3bcfaf3c8f4fa2bb721875b210f03aacf13"
+      },
+      "source_read_count": 1
+    }
+  ],
+  "future_startup_candidate_applied_by_existing_OS_task": true,
+  "active_owner_loop_not_restarted": true,
+  "supervisor_reload_required": false,
+  "Native_optimize_calls_by_auditor": 0,
+  "real_Native_model_constructions_by_auditor": 0,
+  "process_actions_by_auditor": 0,
+  "production_source_queue_manifest_changes_by_auditor": 0,
+  "scientific_final_PASS_claimed": false,
+  "independent142_review_status": "PENDING_AT_THIS_OBSERVATION",
+  "limitations": "OS task naturally loaded edited future startup code. Reviewer did not launch the task or restart any production process. Duplicate event code declares Native/model0; audit did not independently instrument that task process. Actual Native ledger values belong to unchanged scientific workers. Operational files/API were observed sequentially at their stated timestamps."
+}

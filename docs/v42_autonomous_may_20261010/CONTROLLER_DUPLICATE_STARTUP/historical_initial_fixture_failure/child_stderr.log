@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\MobileESS_v42_autonomous\v42_autonomous\supervisor.py", line 646, in <module>
+    try:run(a.root)
+        ^^^^^^^^^^^
+  File "D:\MobileESS_v42_autonomous\v42_autonomous\supervisor.py", line 632, in run
+    adopt_unjournaled_requests(root,cp,manifest)
+  File "D:\MobileESS_v42_autonomous\v42_autonomous\supervisor.py", line 296, in adopt_unjournaled_requests
+    m=read(deployment_path)
+      ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\MobileESS_v42_autonomous\v42_pr134_b1\common.py", line 38, in read
+    def read(p):return json.loads(Path(p).read_text(encoding='utf-8-sig'))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1058, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v42_controller_duplicate_startup_repair_20261010_01\\pytest_targeted\\test_actual_windows_owned_supe0\\CONTINUATION_V19_MANIFEST.json'
