@@ -1,0 +1,180 @@
+{
+  "schema": "V42_CONTROL_DIAGNOSTIC_SUPPLEMENT_V1",
+  "PASS": true,
+  "common_control_implementation_defect_found": false,
+  "conclusion_scope": "Exact settings, enabled seven RegControls, capacitor state, original Fresh source routing, bit-exact B1/B2 replay, and observed per-slot completion/iteration data. No proof that future days must be voltage-feasible.",
+  "summary": [
+    {
+      "arm": "B0",
+      "evidence": "ORIGINAL_HISTORICAL_RAW_LOG",
+      "max_control_iterations_observed": 3,
+      "max_Solution_Iterations_total_observed": 9,
+      "ControlActionsDone_true_slots": 96,
+      "configured_MaxControlIterations": 100,
+      "configured_MaxIterations": "NOT_RECORDED",
+      "settings_SHA": "3e4aaaabc10429aa2e95f810573337bdbdbb4d6ca4aeda41ae51d0325cf322cf",
+      "historical_iteration_fields": "RECORDED",
+      "regulator_settings_changed": false,
+      "capacitor_settings_changed": false,
+      "original_AC_arrays_bit_exact": "ORIGINAL_ARRAYS_UNCHANGED"
+    },
+    {
+      "arm": "B1",
+      "evidence": "SEPARATE_EXACT_ORIGINAL_B1_REPLAY",
+      "max_control_iterations_observed": 3,
+      "max_Solution_Iterations_total_observed": 9,
+      "ControlActionsDone_true_slots": 96,
+      "configured_MaxControlIterations": 100,
+      "configured_MaxIterations": 15,
+      "settings_SHA": "3e4aaaabc10429aa2e95f810573337bdbdbb4d6ca4aeda41ae51d0325cf322cf",
+      "historical_iteration_fields": "ORIGINAL_LOG_UNKNOWN; separate exact replay measured",
+      "regulator_settings_changed": false,
+      "capacitor_settings_changed": false,
+      "original_AC_arrays_bit_exact": true
+    },
+    {
+      "arm": "B2",
+      "evidence": "SEPARATE_EXACT_FULL_PQ_B2_REPLAY",
+      "max_control_iterations_observed": 5,
+      "max_Solution_Iterations_total_observed": 17,
+      "ControlActionsDone_true_slots": 96,
+      "configured_MaxControlIterations": 100,
+      "configured_MaxIterations": 15,
+      "settings_SHA": "3e4aaaabc10429aa2e95f810573337bdbdbb4d6ca4aeda41ae51d0325cf322cf",
+      "historical_iteration_fields": "ORIGINAL_LOG_UNKNOWN; separate exact replay measured",
+      "regulator_settings_changed": false,
+      "capacitor_settings_changed": false,
+      "original_AC_arrays_bit_exact": true
+    }
+  ],
+  "individual_RegControl_settings_SHA": {
+    "creg1a": "5f3b4d5dcc544848694c283add99d77e9095d05df82b5edba2b139827cb695ee",
+    "creg2a": "fe665c30b6c67e2565881105c5b69c9f848fc3abf2dbe9166614795dbbfde3c1",
+    "creg3a": "7ea623d6e623891111822644588c1e90f24ad371418d65942c24afd238869d70",
+    "creg3c": "a53c63208173774296c70e5736df3398db3d63bda741b24e81c2f444ddd8eb8c",
+    "creg4a": "7af6d365548534b9aaf8f56200d59911cdd32a57a23818fa6642ad84f11b3f47",
+    "creg4b": "6a4aea581c4ed5bfed4f7e6b559d32e57afff3927f4aa2ff98c07219a86f4346",
+    "creg4c": "5bf2a77e9114cf15df857fc57ced80796f501cb99793e6e4efc99fd8afefb33b"
+  },
+  "common_RegControl_settings_SHA": "3e4aaaabc10429aa2e95f810573337bdbdbb4d6ca4aeda41ae51d0325cf322cf",
+  "original_voltage_limits": [
+    0.95,
+    1.05
+  ],
+  "original_controls_settings_preserved": true,
+  "original_model_settings_and_tap_cap_arrays_preserved": true,
+  "original_phase_manifest_proofs": [
+    {
+      "arm": "B1",
+      "original_phase_manifest": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_OUTPUT_MANIFEST.json",
+        "sha256": "36632f87311d2e34409447107433fa09fe389dcc413640a739114791a2421b5b",
+        "bytes": 760
+      },
+      "original_phase_array": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+        "sha256": "3604000171b2c4b4479dbc62d1ea49167f3a2f6c9fbfcc4ef4072c2b81e5939f",
+        "bytes": 850432
+      },
+      "PASS": true
+    },
+    {
+      "arm": "B2",
+      "original_phase_manifest": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_OUTPUT_MANIFEST.json",
+        "sha256": "31ed2c017c9006a597c2b322d27c664348cec32d30b3d5a436bed9c19cdbcc0f",
+        "bytes": 761
+      },
+      "original_phase_array": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+        "sha256": "6d1591cd20759465c215ce80fe786f286eebe6182c038d5ce1fbe79e966443dc",
+        "bytes": 852518
+      },
+      "PASS": true
+    }
+  ],
+  "historical_missing_iteration_values_not_overwritten": true,
+  "counts_are_separate_diagnostic_measurements": true,
+  "iteration_semantics": {
+    "Solution_Iterations": "Total iterations for the most recent solution including control passes; not the per-pass cap counter",
+    "MostIterationsDone": "Maximum number required by any single control pass; not captured by these observe-only hooks",
+    "configured_MaxIterations": 15,
+    "citation": "https://dss-extensions.org/OpenDSSDirect.py/opendssdirect.html#opendssdirect.Solution.ISolution.ISolution.Iterations",
+    "second_citation": "https://dss-extensions.org/OpenDSSDirect.py/opendssdirect.html#opendssdirect.Solution.ISolution.ISolution.MostIterationsDone"
+  },
+  "source_receipts": [
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\CONTROL_AUDIT_RESULT.json",
+      "sha256": "1cb3a9d7cd1c241873762114b4c9e279b4b5a0dd93eed2d586eb2d4b3929acb8",
+      "bytes": 12287
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\CONTROL_SOURCE_SHA_LEDGER.json",
+      "sha256": "1306d9f058cc9c5a1650a484ac7aea5722f2737e227e5b267cbcb3dbf80a1f04",
+      "bytes": 11201
+    },
+    {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\RAW_CONTROL_LOG.json",
+      "sha256": "b9b290c4d0b06d26ec42ab85435ebf3227522fdd77d5e0ac34c639447ba33b37",
+      "bytes": 66989
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\FACTORIAL_REPLAY_STATUS.json",
+      "sha256": "6b0082592c9e2bd8b7db90c889b4b65694eaddae5a3b8ddb607384845f0e9b1a",
+      "bytes": 45353
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\FULL_PQ_REPLAY\\OBSERVED_CONTROL_ITERATIONS.json",
+      "sha256": "86d59e8cea5c89e653e6beeea6dcf85c1164565e7d653b5d9e1f0dc99a8236be",
+      "bytes": 30726
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\B1_MAY01_EXACT_CONTROL_REPLAY\\B1_EXACT_CONTROL_REPLAY_RESULT.json",
+      "sha256": "06926cbbb7d0a106255adefbb903daf65e4b72021c5982bc49bb1ace8d9dd8a3",
+      "bytes": 9047
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\B1_MAY01_EXACT_CONTROL_REPLAY\\factorial\\EXACT_B1_MAY01\\OBSERVED_CONTROL_ITERATIONS.json",
+      "sha256": "bb71fbd4406ece30e7895236b0f86199eb8a3a212504e245c44ca4c0c5590f75",
+      "bytes": 30715
+    },
+    {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_OUTPUT_MANIFEST.json",
+      "sha256": "36632f87311d2e34409447107433fa09fe389dcc413640a739114791a2421b5b",
+      "bytes": 760
+    },
+    {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "3604000171b2c4b4479dbc62d1ea49167f3a2f6c9fbfcc4ef4072c2b81e5939f",
+      "bytes": 850432
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_OUTPUT_MANIFEST.json",
+      "sha256": "31ed2c017c9006a597c2b322d27c664348cec32d30b3d5a436bed9c19cdbcc0f",
+      "bytes": 761
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "6d1591cd20759465c215ce80fe786f286eebe6182c038d5ce1fbe79e966443dc",
+      "bytes": 852518
+    }
+  ],
+  "original_source_before_after_SHA_equal": true,
+  "supplemental_B1_new_AC_solves": 96,
+  "supplemental_B1_Native_optimizer_calls": 0,
+  "B2_full_pq_diagnostic_receipt": {
+    "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\FULL_PQ_REPLAY\\DIAGNOSTIC_RECEIPT.json",
+    "sha256": "d5e59fef717f4fc6f7dd9d48cc92929435346533c46159635d082bbf11ae2525",
+    "bytes": 9296
+  },
+  "B1_exact_control_replay_receipt": {
+    "path": "D:\\v42_actual_voltage_audit_20261010\\B1_MAY01_EXACT_CONTROL_REPLAY\\B1_EXACT_CONTROL_REPLAY_RESULT.json",
+    "sha256": "06926cbbb7d0a106255adefbb903daf65e4b72021c5982bc49bb1ace8d9dd8a3",
+    "bytes": 9047
+  },
+  "supplemental_script": {
+    "path": "D:\\v42_actual_voltage_audit_20261010\\CONTROL_DIAGNOSTIC_SUPPLEMENT.py",
+    "sha256": "1c1123010840eb6cf70c4e993dca10c7a614cd67203be25c3f9b16ca45037548",
+    "bytes": 10918
+  }
+}

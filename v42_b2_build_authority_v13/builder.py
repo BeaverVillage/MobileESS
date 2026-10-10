@@ -23,10 +23,27 @@ def admitted_native_limit(request, manifest=None):
     """Admit the new sealed common engine epoch with its explicit M cap."""
     if request.get("algorithm_version") == "V42_COMMON_MESS_PRIMAL_ANYTIME_U4_V1":
         if manifest is not None:
-            require(manifest.get("schema") == "V42_COMMON_U4_QUALIFICATION_V1"
-                and manifest.get("algorithm_version") == request["algorithm_version"]
-                and manifest.get("native_M_limit_seconds") == 1800,
-                "B2_COMMON_U4_MANIFEST_REQUIRED")
+            if manifest.get("schema") == "V42_VMAX1048_DIAGNOSTIC_MANIFEST_V1":
+                require(manifest.get("planning_policy") == request.get("planning_policy")
+                    == "V42_PLANNING_VMAX_1048_DIAGNOSTIC_V1"
+                    and manifest.get("planning_voltage_min_pu") == .95
+                    and manifest.get("planning_voltage_max_pu") == request.get("planning_voltage_max_pu") == 1.048
+                    and manifest.get("planning_voltage_max_squared_pu") == 1.098304
+                    and manifest.get("actual_voltage_min_pu") == .95
+                    and manifest.get("actual_voltage_max_pu") == request.get("actual_voltage_max_pu") == 1.05
+                    and manifest.get("algorithm_version") == request["algorithm_version"]
+                    and manifest.get("native_M_limit_seconds") == 1800
+                    and type(manifest.get("Threads")) is int and manifest["Threads"] == 1
+                    and type(manifest.get("P2_calls")) is int and manifest["P2_calls"] == 0
+                    and manifest.get("diagnostic_only") is True
+                    and manifest.get("all31_policy_conversion_approved") is False
+                    and manifest.get("A1_A2_policy_changed") is False,
+                    "B2_VMAX1048_EXPLICIT_DIAGNOSTIC_MANIFEST_REQUIRED")
+            else:
+                require(manifest.get("schema") == "V42_COMMON_U4_QUALIFICATION_V1"
+                    and manifest.get("algorithm_version") == request["algorithm_version"]
+                    and manifest.get("native_M_limit_seconds") == 1800,
+                    "B2_COMMON_U4_MANIFEST_REQUIRED")
         return 1800
     return 5400
 

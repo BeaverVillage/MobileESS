@@ -1,0 +1,351 @@
+{
+  "schema": "V42_DIAGNOSTIC_FACTORIAL_CELL_DECOMPOSITION_V1",
+  "diagnostic_only": true,
+  "original_violation_cells": 19,
+  "worst_original_cell": {
+    "day": "2025-05-01",
+    "arm": "B2",
+    "node_phase": "mess_sta08_pcc.1",
+    "node": "mess_sta08_pcc",
+    "phase": "A",
+    "node_axis_0based": "371",
+    "slot_1based": "11",
+    "slot_0based": "10",
+    "timestamp_interval_end_aest": "2025-05-01T02:45:00+10:00",
+    "Actual_V_pu": "1.0583754890888868",
+    "Planning_V_pu": "1.0455284095019148",
+    "violated_limit_pu": "1.05",
+    "direction": "UPPER",
+    "Actual_exceedance_pu": "0.008375489088886745",
+    "Actual_minus_Planning_pu": "0.012847079586971955",
+    "Planning_margin_to_violated_limit_pu": "0.0044715904980852095",
+    "FULL_voltage_upper_row": "289147",
+    "FULL_voltage_lower_row": "289146",
+    "VFull_PQ": 1.0583754890888868,
+    "VPonly_Qzero": 1.0262251105954137,
+    "VQonly_Pzero": 1.0583754890888868,
+    "Vzero_PQ": 1.0327267471742596,
+    "P_effect_when_Qzero_pu": -0.0065016365788459485,
+    "Q_effect_when_Pzero_pu": 0.025648741914627182,
+    "P_effect_when_Qoriginal_pu": 0.0,
+    "Q_effect_when_Poriginal_pu": 0.03215037849347313,
+    "P_Q_interaction_pu": 0.0065016365788459485,
+    "full_MESS_effect_vs_zero_pu": 0.025648741914627182,
+    "Planning_Actual_difference_pu": 0.012847079586971955,
+    "station": "STA08",
+    "local_MESS_units": [
+      "MESS03"
+    ],
+    "local_original_MESS_P_kw": -1.1368683772161603e-13,
+    "local_original_MESS_Q_kvar": 363.39187888541096,
+    "all_original_MESS_P_kw": [
+      -1.1368683772161603e-13,
+      -1.1368683772161603e-13,
+      -1.1368683772161603e-13,
+      -1.1368683772161603e-13
+    ],
+    "all_original_MESS_Q_kvar": [
+      -290.5343497079117,
+      -392.3141121612963,
+      363.39187888541096,
+      -392.31411216129675
+    ],
+    "all_original_MESS_locations": [
+      "STA01",
+      "STA12",
+      "STA08",
+      "STA06"
+    ],
+    "Full_taps": [
+      1.0250000000000001,
+      0.9937499999999999,
+      1.0062499999999999,
+      0.9999999999999999,
+      1.04375,
+      1.0187499999999998,
+      1.0312499999999998
+    ],
+    "Ponly_taps": [
+      1.0125,
+      1.00625,
+      1.0125,
+      1.0062499999999999,
+      1.0375,
+      1.025,
+      1.03125
+    ],
+    "Qonly_taps": [
+      1.0250000000000001,
+      0.9937499999999999,
+      1.0062499999999999,
+      0.9999999999999999,
+      1.04375,
+      1.0187499999999998,
+      1.0312499999999998
+    ],
+    "Zero_taps": [
+      1.0125,
+      1.0062499999999999,
+      1.0125,
+      1.0062499999999999,
+      1.04375,
+      1.025,
+      1.03125
+    ],
+    "Full_vs_Zero_literal_tap_differences": 6,
+    "Full_vs_Zero_different_regulators": 5
+  },
+  "original_19_cells_still_upper_violating": {
+    "VFull_PQ": 19,
+    "VPonly_Qzero": 0,
+    "VQonly_Pzero": 18,
+    "Vzero_PQ": 0
+  },
+  "original_19_conditional_effect_ranges_pu": {
+    "P_effect_when_Qzero_pu": [
+      -0.006852312699662466,
+      0.0020961088867539335
+    ],
+    "Q_effect_when_Pzero_pu": [
+      0.008753745216504516,
+      0.0458288330478549
+    ],
+    "P_effect_when_Qoriginal_pu": [
+      -0.0007136869710751004,
+      0.0037893980207146516
+    ],
+    "Q_effect_when_Poriginal_pu": [
+      0.015398725563142257,
+      0.04593765321828669
+    ],
+    "P_Q_interaction_pu": [
+      -0.00014012955444853148,
+      0.006648460406558865
+    ]
+  },
+  "factorial_interpretation": "Whole-day P/Q interventions including endogenous sequential control response; conditional effects are not linear sensitivity derivatives or isolated tap effects.",
+  "Planning_Actual_interpretation": "Planning voltage is reconstructed from the original fixed affine FULL model. Actual is measured nonlinear OpenDSS with the unchanged enabled autonomous controls. These trajectories quantify the discrepancy, but do not identify an isolated contribution of tap changes without changing controls.",
+  "tap_summary": {
+    "FULL_PQ_REPLAY": {
+      "literal_slot_regulator_differences_vs_zero": 570,
+      "physical_slot_regulator_differences_vs_zero": 502,
+      "physical_slots_different_vs_zero": 96,
+      "maximum_absolute_tap_delta_vs_zero": 0.025000000000000355,
+      "within_day_physical_tap_changes": 121,
+      "fixed_capacitor_states_identical": true
+    },
+    "P_ONLY_Q_ZERO": {
+      "literal_slot_regulator_differences_vs_zero": 292,
+      "physical_slot_regulator_differences_vs_zero": 205,
+      "physical_slots_different_vs_zero": 86,
+      "maximum_absolute_tap_delta_vs_zero": 0.0125000000000004,
+      "within_day_physical_tap_changes": 30,
+      "fixed_capacitor_states_identical": true
+    },
+    "Q_ONLY_P_ZERO": {
+      "literal_slot_regulator_differences_vs_zero": 547,
+      "physical_slot_regulator_differences_vs_zero": 475,
+      "physical_slots_different_vs_zero": 96,
+      "maximum_absolute_tap_delta_vs_zero": 0.025000000000000133,
+      "within_day_physical_tap_changes": 136,
+      "fixed_capacitor_states_identical": true
+    },
+    "ZERO_PQ": {
+      "literal_slot_regulator_differences_vs_zero": 0,
+      "physical_slot_regulator_differences_vs_zero": 0,
+      "physical_slots_different_vs_zero": 0,
+      "maximum_absolute_tap_delta_vs_zero": 0.0,
+      "within_day_physical_tap_changes": 33,
+      "fixed_capacitor_states_identical": true
+    }
+  },
+  "tap_comparison_semantics": "Physical change threshold1e-12 pu, far below the unchanged original0.00625 tap step; exact array differences retained separately.",
+  "measured_diagnostic_control_counts": {
+    "FULL_PQ_REPLAY": {
+      "max_control_iterations": 5,
+      "max_electrical_iterations": 17,
+      "configured_max_control_iterations": [
+        100
+      ],
+      "configured_max_electrical_iterations": [
+        15
+      ],
+      "control_actions_done_slots": 96,
+      "raw_observation_receipt": {
+        "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\FULL_PQ_REPLAY\\OBSERVED_CONTROL_ITERATIONS.json",
+        "sha256": "86d59e8cea5c89e653e6beeea6dcf85c1164565e7d653b5d9e1f0dc99a8236be",
+        "bytes": 30726
+      }
+    },
+    "P_ONLY_Q_ZERO": {
+      "max_control_iterations": 3,
+      "max_electrical_iterations": 9,
+      "configured_max_control_iterations": [
+        100
+      ],
+      "configured_max_electrical_iterations": [
+        15
+      ],
+      "control_actions_done_slots": 96,
+      "raw_observation_receipt": {
+        "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\P_ONLY_Q_ZERO\\OBSERVED_CONTROL_ITERATIONS.json",
+        "sha256": "d760e67213d753a9e3210489dbd1286945ba57296a68c8151e50a8ea3ed63182",
+        "bytes": 30715
+      }
+    },
+    "Q_ONLY_P_ZERO": {
+      "max_control_iterations": 5,
+      "max_electrical_iterations": 17,
+      "configured_max_control_iterations": [
+        100
+      ],
+      "configured_max_electrical_iterations": [
+        15
+      ],
+      "control_actions_done_slots": 96,
+      "raw_observation_receipt": {
+        "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\Q_ONLY_P_ZERO\\OBSERVED_CONTROL_ITERATIONS.json",
+        "sha256": "7ce26f173f165df34f49b9c4151a78ed108b88fa7f1bdb6dc23e93f4ab0a9dd0",
+        "bytes": 30728
+      }
+    },
+    "ZERO_PQ": {
+      "max_control_iterations": 3,
+      "max_electrical_iterations": 9,
+      "configured_max_control_iterations": [
+        100
+      ],
+      "configured_max_electrical_iterations": [
+        15
+      ],
+      "control_actions_done_slots": 96,
+      "raw_observation_receipt": {
+        "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\ZERO_PQ\\OBSERVED_CONTROL_ITERATIONS.json",
+        "sha256": "463f2e41595b528a879176ca661f2e997df89c08cac4f70337c97ad423a4eeeb",
+        "bytes": 30715
+      }
+    }
+  },
+  "raw_line_loading_metrics": {
+    "FULL_PQ_REPLAY": {
+      "variant": "FULL_PQ_REPLAY",
+      "actual_maximum_line_loading_percent": 59.90347229877903,
+      "peak_slot_0based": 30,
+      "peak_slot_1based": 31,
+      "peak_branch_phase": "line.sw1::A",
+      "peak_current_a": 473.2374311603543,
+      "peak_NormalAmps": 790.0,
+      "exact_line_phase_set_count": 263,
+      "line_current_violation_cells": 0,
+      "maximum_stored_normalized_loading_error_pu": 0.0,
+      "formula": "100*max(abs(raw_phase_current_a)/unchanged_NormalAmps) over original 263 line phases and 96 slots",
+      "raw_AC_receipt": {
+        "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\FULL_PQ_REPLAY\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+        "sha256": "6d1591cd20759465c215ce80fe786f286eebe6182c038d5ce1fbe79e966443dc",
+        "bytes": 852518
+      }
+    },
+    "P_ONLY_Q_ZERO": {
+      "variant": "P_ONLY_Q_ZERO",
+      "actual_maximum_line_loading_percent": 61.92684301076131,
+      "peak_slot_0based": 32,
+      "peak_slot_1based": 33,
+      "peak_branch_phase": "line.l10::A",
+      "peak_current_a": 432.2493642151139,
+      "peak_NormalAmps": 698.0,
+      "exact_line_phase_set_count": 263,
+      "line_current_violation_cells": 0,
+      "maximum_stored_normalized_loading_error_pu": 0.0,
+      "formula": "100*max(abs(raw_phase_current_a)/unchanged_NormalAmps) over original 263 line phases and 96 slots",
+      "raw_AC_receipt": {
+        "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\P_ONLY_Q_ZERO\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+        "sha256": "2c16f8ebed9d5ca05410bbf2d1ffbb8606d012194c92cc87dfd970c8d4d7671f",
+        "bytes": 850559
+      }
+    },
+    "Q_ONLY_P_ZERO": {
+      "variant": "Q_ONLY_P_ZERO",
+      "actual_maximum_line_loading_percent": 69.69615013432136,
+      "peak_slot_0based": 30,
+      "peak_slot_1based": 31,
+      "peak_branch_phase": "line.l10::A",
+      "peak_current_a": 486.479127937563,
+      "peak_NormalAmps": 698.0,
+      "exact_line_phase_set_count": 263,
+      "line_current_violation_cells": 0,
+      "maximum_stored_normalized_loading_error_pu": 0.0,
+      "formula": "100*max(abs(raw_phase_current_a)/unchanged_NormalAmps) over original 263 line phases and 96 slots",
+      "raw_AC_receipt": {
+        "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\Q_ONLY_P_ZERO\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+        "sha256": "01006727c4c2ee3a99fd03b885757e7269a28c3b73d4c4a5fc90db7befca3eef",
+        "bytes": 852329
+      }
+    },
+    "ZERO_PQ": {
+      "variant": "ZERO_PQ",
+      "actual_maximum_line_loading_percent": 71.3304636624136,
+      "peak_slot_0based": 30,
+      "peak_slot_1based": 31,
+      "peak_branch_phase": "line.l10::A",
+      "peak_current_a": 497.88663636364697,
+      "peak_NormalAmps": 698.0,
+      "exact_line_phase_set_count": 263,
+      "line_current_violation_cells": 0,
+      "maximum_stored_normalized_loading_error_pu": 0.0,
+      "formula": "100*max(abs(raw_phase_current_a)/unchanged_NormalAmps) over original 263 line phases and 96 slots",
+      "raw_AC_receipt": {
+        "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\ZERO_PQ\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+        "sha256": "d5b6133fb008a6608660c1d93bb12695cfb75c1b0de612497692cba0dfbfca57",
+        "bytes": 848922
+      }
+    }
+  },
+  "unchanged_B1_line_authority": {
+    "path": "D:\\MobileESS_V42\\docs\\v42_transformer_normalamps_contract\\LINE_CURRENT_AUTHORITY_UNCHANGED.csv",
+    "sha256": "99e100247167d1b11de02cef328972cd1131fe99e5e4c7aa5a1feeaacb10f08c",
+    "bytes": 6383
+  },
+  "historical_B1_B2_control_counts": "UNKNOWN in original historical logs; new diagnostic observations are separate receipts.",
+  "files": [
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\B2_MAY01_19CELL_PQ_FACTORIAL.csv",
+      "sha256": "c2f23f782a233562a08059e51208c784b102126e02534d1002aa1b4872865cad",
+      "bytes": 22094
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\B2_MAY01_FACTORIAL_TAP_TRAJECTORIES.csv",
+      "sha256": "059a8b01f4a84f270b016cc2bdfc2cfef4214e1529a768f949420cfc4590e028",
+      "bytes": 238719
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\B2_MAY01_FACTORIAL_RAW_LINE_LOADING.csv",
+      "sha256": "29186b33bf0446f4f5ef9516433c2ca0bab55eb9814d7ec3f5b2c29f8c7666c1",
+      "bytes": 1866
+    },
+    {
+      "path": "D:\\MobileESS_V42\\docs\\v42_transformer_normalamps_contract\\LINE_CURRENT_AUTHORITY_UNCHANGED.csv",
+      "sha256": "99e100247167d1b11de02cef328972cd1131fe99e5e4c7aa5a1feeaacb10f08c",
+      "bytes": 6383
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\B2_MAY01_PLANNING_ACTUAL_VOLTAGES.npz",
+      "sha256": "b0563d919f49308a59a8d30ffe5f513a2ee8e9747ef9ae6ba82aa54741fc4156",
+      "bytes": 776949
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_MESS_TRAJECTORY.npz",
+      "sha256": "3d7ccc52a22e6581641fe4f26ed86792d314ba0b064933e79b1def75a24b576f",
+      "bytes": 6284
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\FACTORIAL_REPLAY_STATUS.json",
+      "sha256": "6b0082592c9e2bd8b7db90c889b4b65694eaddae5a3b8ddb607384845f0e9b1a",
+      "bytes": 45353
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\ANALYZE_FACTORIAL_CELLS.py",
+      "sha256": "b8eb4a47c48073a186f2f93a74b348785a04b7608fc6eebff7e19c40651434e9",
+      "bytes": 11541
+    }
+  ]
+}

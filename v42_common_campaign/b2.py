@@ -107,7 +107,8 @@ def _accepted_port(original, request, stage, strict_validator, case):
 
 
 def run(request, manifest, progress):
-    from v42_b2_build_authority_v13 import build_case
+    from v42_b2_build_authority_v13 import build_case as original_build_case
+    from v42_common_mess.planning_policy import build_case
     from v42_autonomous_b2.worker import proof_routes
     from v42_may_campaign_native90 import m_stage, operations
     from v42_common_mess import optimize_case
@@ -120,7 +121,8 @@ def run(request, manifest, progress):
         progress(dict(phase="B2_ORIGINAL_MODEL_AND_TRANSPORT_BUILD", native_runtime_seconds=0))
         with ledger.cost("model_preparation", "B2_ORIGINAL_FULL_COMPACT_C3A"):
             payload = _payload(request)
-            case = build_case(payload, source_request, progress)
+            case = build_case(original_build_case, payload, source_request, progress, stage='B2_M',
+                strict_validator=routes['final']['_strict_ub'])
         strict = routes["final"]["_strict_ub"]
         # Original _plan exports FULL coordinates and the complete 96-slot plan.
         result, point = optimize_case(case, ledger, progress,

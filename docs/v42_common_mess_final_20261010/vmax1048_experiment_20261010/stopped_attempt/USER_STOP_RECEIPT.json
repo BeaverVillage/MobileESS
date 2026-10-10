@@ -1,0 +1,106 @@
+{
+  "schema": "V42_EXPLICIT_USER_STOP_RECEIPT_V1",
+  "status": "STOPPED_BY_USER",
+  "policy": "V42_PLANNING_VMAX_1048_DIAGNOSTIC_V1",
+  "requested_UTC": "2026-10-10T14:12:09.272890+00:00",
+  "authorization": "User: 1.048 실험 중지해. 계획이 변경되었어.",
+  "owned_process": {
+    "PID": 49092,
+    "created": 1791640804.9741924,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "v42_vmax1048.worker",
+      "D:\\v42_vmax1048_diagnostic_20261010_01\\dates\\B2\\2025-05-01\\attempts\\B2_MAY01_VMAX1048_CANARY\\REQUEST.json"
+    ],
+    "parent": 98488,
+    "priority": 32
+  },
+  "ownership_verified": true,
+  "owned_console_children": [
+    {
+      "PID": 105660,
+      "created": 1791640804.9824166,
+      "command": [
+        "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+        "0x4"
+      ],
+      "parent": 49092,
+      "name": "conhost.exe"
+    }
+  ],
+  "preserved_snapshot_receipts": [
+    {
+      "path": "D:\\v42_vmax1048_diagnostic_20261010_01\\dates\\B2\\2025-05-01\\attempts\\B2_MAY01_VMAX1048_CANARY\\USER_STOP_SNAPSHOT\\REQUEST.json",
+      "sha256": "f22e09036a5783ca9dd9c5c26abe17ef0a07d307a3af978b1ba6b21017a76dc8",
+      "bytes": 1775
+    },
+    {
+      "path": "D:\\v42_vmax1048_diagnostic_20261010_01\\dates\\B2\\2025-05-01\\attempts\\B2_MAY01_VMAX1048_CANARY\\USER_STOP_SNAPSHOT\\PROCESS.json",
+      "sha256": "a84a14b597c90f1b2303490ee11740ddf99b6788a725d622c0b36ad769fb094c",
+      "bytes": 378
+    },
+    {
+      "path": "D:\\v42_vmax1048_diagnostic_20261010_01\\dates\\B2\\2025-05-01\\attempts\\B2_MAY01_VMAX1048_CANARY\\USER_STOP_SNAPSHOT\\progress.json",
+      "sha256": "562a5b3a4f952ea258607bae791d48d99f143fac37c8906642ed7bf47d8adf88",
+      "bytes": 2215
+    },
+    {
+      "path": "D:\\v42_vmax1048_diagnostic_20261010_01\\dates\\B2\\2025-05-01\\attempts\\B2_MAY01_VMAX1048_CANARY\\USER_STOP_SNAPSHOT\\NATIVE_RUNTIME_LEDGER.json",
+      "sha256": "6b882da5f6851856e0e90cb619f2f8f2c83d60ddcead1dca033d8161c630ea1f",
+      "bytes": 10729
+    },
+    {
+      "path": "D:\\v42_vmax1048_diagnostic_20261010_01\\dates\\B2\\2025-05-01\\attempts\\B2_MAY01_VMAX1048_CANARY\\USER_STOP_SNAPSHOT\\worker.stdout.log",
+      "sha256": "5adb426553d47b280c0843115026d18c674c2fffbebaa2d46b277e2bc3a67242",
+      "bytes": 31821
+    },
+    {
+      "path": "D:\\v42_vmax1048_diagnostic_20261010_01\\dates\\B2\\2025-05-01\\attempts\\B2_MAY01_VMAX1048_CANARY\\USER_STOP_SNAPSHOT\\worker.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "completed_measured_Native_Runtime_seconds": 213.47500038146973,
+  "completed_native_calls": 3,
+  "inflight_native_call": {
+    "component": "UB",
+    "track": "M_U4",
+    "label": "002_U4",
+    "requested_seconds": 300.0,
+    "precision_policy": "B2_SEED_RECOVERY_V19",
+    "precision_parameters": {
+      "FeasibilityTol": 1e-09,
+      "OptimalityTol": 1e-09,
+      "NumericFocus": 3,
+      "ScaleFlag": 2
+    },
+    "effective_TimeLimit": 300.0,
+    "started_wall_seconds": 587.0514875999652,
+    "UTC": "2026-10-10T14:09:56.801294+00:00",
+    "status": "IN_FLIGHT",
+    "time_limit_policy": "B2_REQUEST_CAPPED_BY_REMAINING_NATIVE",
+    "effective_MIPGap": 0.005
+  },
+  "last_observed_callback_cumulative_Native_Runtime_seconds": 300.7260003089905,
+  "total_Native_Runtime_seconds": null,
+  "interrupted_call_final_Native_Runtime_seconds": null,
+  "interrupted_native_runtime_status": "UNKNOWN_NOT_RECOVERABLE_FROM_TERMINATED_MODEL",
+  "preserved_verified_UB_progress": 0.5464151451386842,
+  "Actual_Fresh_status": "NOT_RUN",
+  "Full_AC_Physical_PASS": false,
+  "original_ledger_modified": false,
+  "date_runtime_reset": false,
+  "other_processes_terminated": [],
+  "terminated_UTC": "2026-10-10T14:12:09.551805+00:00",
+  "owned_process_alive": false,
+  "stopped_PID": 49092,
+  "post_stop_ledger_receipt": {
+    "path": "D:\\v42_vmax1048_diagnostic_20261010_01\\dates\\B2\\2025-05-01\\attempts\\B2_MAY01_VMAX1048_CANARY\\NATIVE_RUNTIME_LEDGER.json",
+    "sha256": "6b882da5f6851856e0e90cb619f2f8f2c83d60ddcead1dca033d8161c630ea1f",
+    "bytes": 10729
+  }
+}

@@ -1,0 +1,6 @@
+"""Explicitly authorized Planning-only safety-margin experiment."""
+
+POLICY = 'V42_PLANNING_VMAX_1048_DIAGNOSTIC_V1'
+ATTEMPT = 'B2_MAY01_VMAX1048_CANARY'
+DAY = '2025-05-01'
+MANIFEST = 'VMAX1048_DIAGNOSTIC_MANIFEST.json'
