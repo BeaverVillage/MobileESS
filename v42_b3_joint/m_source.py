@@ -342,13 +342,16 @@ class MSourceBridge:
             controls.append(row)
         return names, controls
 
-    def execute(self, context, ledger, progress=None):
+    def execute(self, context, ledger, progress=None, *, lb_rescue=None):
         registry = context.source_registry
         registry.admit(context, "M_SOURCE_MODEL_AND_HYBRID")
         require(getattr(ledger, "context", None) is context
                 and getattr(ledger, "stage", None) == context.request.stage,
                 "M_SOURCE_STAGE_LEDGER_DRIFT")
         with registry.execution_scope(context):
+            if lb_rescue is not None:
+                lb_rescue = registry.callable("v42_b3_joint/lb_research.py", "checked_factory")(
+                    lb_rescue, context, registry)
             started = perf_counter()
             with self._phase(context, "input_preparation_seconds"):
                 payload = fixed_aidc_payload(context)
@@ -361,7 +364,8 @@ class MSourceBridge:
             run = registry.rebind(STAGE_MODULE, "run", globals={"prepare": prepare, "_seed_integer": seed,
                                   "_fresh_lp_dual": fresh, "_plan": plan}, literal_replacements=routing)
             request = {**context.identity, "input_folder": str(context.input_folder), "output": str(context.output)}
-            result = run(request, ledger, progress)
+            result = (run(request, ledger, progress) if lb_rescue is None else
+                      run(request, ledger, progress, lb_rescue=lb_rescue))
             require(result.get("accepted") is True and type(result.get("P2_calls")) is int
                     and result["P2_calls"] == 0,
                     "M_SOURCE_RESULT_NOT_INDEPENDENTLY_ACCEPTED")
