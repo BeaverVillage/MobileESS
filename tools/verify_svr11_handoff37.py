@@ -33,6 +33,9 @@ def audit_date(root,m,row):
             and a['day']==day and a['arm']==arm,'HANDOFF_PHYSICAL_SOURCE_IDENTITY')
         require(a['status']=='COMPLETE' and a['logical_Fresh_slots']==96 and a['Full_AC_Physical_PASS'] is True
             and a['hardware_and_controller_PASS'] is True,'HANDOFF_COMPLETE_96_PHYSICAL_REQUIRED')
+        if m.get('original_transformer_current_authority')=='COMPILED_NORMALAMPS_ONLY':
+            require(a.get('original_transformer_current_authority')=='COMPILED_NORMALAMPS_ONLY',
+                'HANDOFF_FROZEN_ORIGINAL_CURRENT_CONTRACT_DRIFT')
         require(a['Actual_optimizer_calls']==a['Actual_plan_repair_calls']==0 and a['DSTATCOM_object_count']==0
             and a['Planning_Tap_or_Cap_state_transfer_to_Actual'] is False,'HANDOFF_INDEPENDENT_AUTO_CONTROL_REQUIRED')
         sp=checked(a['slots_receipt'],output);slots=read(sp)
@@ -52,7 +55,7 @@ def audit_date(root,m,row):
             for c in p['currents']:
                 require(c['terminal'] in (1,2) and math.isfinite(c['current_A']) and c['current_A']>=0
                     and c['NormalAmps']>0 and c['current_A']<=c['NormalAmps'],'HANDOFF_LITERAL_BOTH_TERMINAL_CURRENT_FAIL')
-                if c['nameplate_current_A'] is not None:
+                if c['nameplate_current_A'] is not None and not (c['original'] and m.get('original_transformer_current_authority')=='COMPILED_NORMALAMPS_ONLY'):
                     require(c['current_A']<=c['nameplate_current_A'],'HANDOFF_NAMEPLATE_PHASE_CURRENT_FAIL')
                 if c['element'].startswith('line.'):peak_line=max(peak_line,c['loading_pu'])
             require(all(t['rating_kVA']>0 and math.isfinite(t['kVA']) and t['kVA']<=t['rating_kVA'] for t in p['transformers']),

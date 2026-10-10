@@ -51,11 +51,15 @@ def release(root):
         execution_sources=source,execution_SHA=digest(source),source_commit=h['source_commit'],algorithm_version=VERSION,
         native_M_limit_seconds=1800,native_A_limit_seconds=5400,A_gap=.005,A_anytime_FULL_feasible=True,A_gap_certificate_required=False,normal_TIMEOUT_restart=False,retry_new_attempt_starts_zero=True,retry_max_attempts=3,retry_authority="USER_EXPLICIT_RESTART_FROM_ZERO_20261011",M_acceptance='FULL_FEASIBLE_UB',M_gap_certificate_required=False,
         Threads=1,P2_calls=0,policy_order=list(ORDER),worker_counts=dict(B0=1,B2=3,B1=1,B3=1),FAIL_CONTINUE=True,
+        original_transformer_current_authority='COMPILED_NORMALAMPS_ONLY',
+        added_SVR_phase_nameplate_current_guard=True,original_winding_kVA_guard=True,
         hardware=record(hpath),scenario=record(root/'hardware/SCENARIO.json'),thermal=record(root/'hardware/THERMAL.json'),
         input_receipts=read(root/'RAW_INPUT_RECEIPTS.json'),origins=read(root/'RAW_INPUT_ORIGINS.json'),
         implementation=dict(version='B2_BUILD_SOURCE_AUTHORITY_V13_20261009',sources=source),builder_original_sources=source,
         Actual_reoptimization=0,Actual_PQ_repair=0,Planning_taps_copied_to_Actual=False,monthly_precanary=False,
         retrospective_design=True,independent_holdout_claim=False,predecessor_commit='a26133a8983b625c7ba589c67a40c6576e796247',predecessor_PR=206,UTC=now())
+    if (root/'PREDECESSOR_DRAIN_CONTRACT.json').exists():
+        m['predecessor_drain_contract']=record(root/'PREDECESSOR_DRAIN_CONTRACT.json')
     atomic(manifest,m)
     from .authority import verify
     verify(manifest)

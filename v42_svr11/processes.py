@@ -3,6 +3,19 @@ from pathlib import Path
 import os,psutil
 from v42_pr134_b1.common import read,process,atomic,now
 
+def allowed_worker_cwds(code_root):
+    """DSS Compile/Redirect transiently changes the OS cwd to audited assets."""
+    from v42_common_campaign.authority import ROOT
+    if Path(code_root).resolve()!=ROOT:
+        raise PermissionError('SVR11_GLOBAL_WORKER_CODE_ROOT_DRIFT')
+    from v42_regcontrol.authority import source
+    assets=source()['assets']
+    return {ROOT}|{Path(getattr(assets,key)).resolve().parent for key in ('master','pcc','ratings','phase_pv')}
+
+def verify_worker_cwd(cwd,code_root):
+    if Path(cwd).resolve() not in allowed_worker_cwds(code_root):
+        raise PermissionError('SVR11_GLOBAL_WORKER_CHECKOUT_DRIFT')
+
 def live(receipt):
     try:
         p=psutil.Process(receipt['PID'])
@@ -23,7 +36,7 @@ def workers(root,source):
             r=read(args[-1])
             if Path(r['root']).resolve()!=Path(root).resolve() or r['source_SHA']!=source:
                 raise PermissionError('SVR11_GLOBAL_OTHER_EPOCH_WORKER_ACTIVE')
-            if Path(p.cwd()).resolve()!=Path(r['code_root']).resolve():raise PermissionError('SVR11_GLOBAL_WORKER_CHECKOUT_DRIFT')
+            verify_worker_cwd(p.cwd(),r['code_root'])
             found.append(dict(identity(p),arm=r['arm'],day=r['day'],worker_slot=r['worker_slot'],request=str(Path(args[-1]).resolve())))
         except psutil.Error:continue
     return found

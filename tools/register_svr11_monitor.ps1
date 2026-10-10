@@ -1,10 +1,10 @@
-param([string]$CampaignRoot='D:\v42_svr11_may_20261011_02',[string]$SourceRoot='D:\v42_svr11_epoch02_20261011')
+param([string]$CampaignRoot='D:\v42_svr11_may_20261011_03',[string]$SourceRoot='D:\v42_svr11_epoch03_20261011')
 $ErrorActionPreference='Stop'
 $v42Python='C:\Users\kjw39\AppData\Local\Programs\Python\Python311\pythonw.exe'
 $v42Tasks=@('MobileESS_V42_May_B2_B3_Autonomous_Supervisor','MobileESS_V42_May_B2_B3_Autonomous_Monitor')
 foreach($v42Name in $v42Tasks){
   $v42Extra=if($v42Name.EndsWith('_Monitor')){' --monitor-only'}else{''}
-  $v42Arguments='-B -X utf8 '+(Join-Path $SourceRoot 'tools\svr11_monitor_ui.py')+' watchdog '+$CampaignRoot+$v42Extra
+  $v42Arguments='-B -X utf8 -m v42_svr11.migration '+$CampaignRoot+$v42Extra
   $v42Action=New-ScheduledTaskAction -Execute $v42Python -Argument $v42Arguments -WorkingDirectory $SourceRoot
   Set-ScheduledTask -TaskName $v42Name -Action $v42Action | Out-Null
   Enable-ScheduledTask -TaskName $v42Name | Out-Null

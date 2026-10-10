@@ -19,6 +19,8 @@ def verify(path):
     for key in ('hardware','scenario','thermal'):
         if record(m[key]['path'])!=m[key]:
             raise PermissionError('SVR11_GLOBAL_HARDWARE_INTEGRITY_FAILURE:'+key)
+    if 'predecessor_drain_contract' in m and record(m['predecessor_drain_contract']['path'])!=m['predecessor_drain_contract']:
+        raise PermissionError('SVR11_GLOBAL_PREDECESSOR_CONTRACT_DRIFT')
     h=read(m['hardware']['path'])
     if not h['PASS'] or h['source_SHA']!=m['execution_SHA'] or h['SVR_count']!=11:
         raise PermissionError('SVR11_MINIMUM_IMPLEMENTATION_PREFLIGHT_REQUIRED')
