@@ -152,6 +152,15 @@ def b2_request(root,manifest,day,slot):
         implementation_SHA=m['execution_SHA'],deployment_SHA=m['execution_SHA'],
         algorithm_version=m.get('algorithm_version',m['schema']),policy_version=m.get('policy_version',m['schema']),
         attempt_id=attempt_id,started_UTC=now(),input_authority_root=str(root),stationary_dispatch_seed=True)
+    if m.get('restart_from_zero') is True:
+        # The sealed repair deployment also supplies future first-sweep dates.
+        # Preserve its explicit zero-start contract at the request boundary.
+        from .recovery import zero_start_authorization
+        authorization=zero_start_authorization(root,m)
+        if (m.get('prior_attempts')!={} or m.get('historical_bound_point_reuse') is not False
+                or not authorization):
+            raise PermissionError('B2_ZERO_START_DEPLOYMENT_POLICY_DRIFT')
+        request.update(restart_from_zero=True,previous_attempts=[],reset_authorization=authorization)
     request.update({key:str(attempt/name) for key,name in
         (('output','output'),('progress','progress.json'),('result','RESULT.json'),('error','error.json'))})
     request_path=attempt/'request.json'

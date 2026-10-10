@@ -413,12 +413,47 @@ def current_production_request(tmp_path):
     manifest.update(execution_sources=execution,execution_SHA=worker.digest(execution))
     manifest['attempt_id']='audit_price35';manifest['attempt_ids']=['audit_price35']
     manifest['prior_attempts']={}
+    authorization=json.loads((base/'USER_ZERO_START_RETRY_AUTHORIZATION.json').read_text(encoding='utf-8'))
+    authorization['campaign_root']=str(root)
+    authority_path=root/'USER_ZERO_START_RETRY_AUTHORIZATION.json';legacy.write(authority_path,authorization)
+    manifest['reset_authorization']=f1_state._record(authority_path)
     path=root/'manifest.json';legacy.write(path,manifest)
     out=root/'dates/B2/2025-05-01/attempts/audit_price35/output'
     request.update(root=str(root),attempt_id='audit_price35',manifest=str(path),manifest_SHA=f1_state._record(path)['sha256'],
         implementation_SHA=manifest['execution_SHA'],deployment_SHA=manifest['execution_SHA'],previous_attempts=[],
+        reset_authorization=manifest['reset_authorization'],
         result=str(out.parent/'RESULT.json'),output=str(out),progress=str(out.parent/'progress.json'),error=str(out.parent/'error.json'))
     return request,manifest,path
+
+
+@pytest.mark.parametrize('missing',['restart_from_zero','previous_attempts','reset_authorization'])
+def test_current99_preflight_denies_missing_zero_contract_before_model(tmp_path,missing):
+    from v42_autonomous_b2 import worker
+    request,manifest,path=current_production_request(tmp_path)
+    request.pop(missing)
+    with pytest.raises(ValueError,match='FRESH_ZERO_CURRENT_REQUEST_REQUIRED|FRESH_ZERO_AUTHORIZATION_REQUIRED'):
+        worker.verify_request(request)
+    assert not Path(request['output']).exists()
+
+
+def test_current99_preflight_denies_changed_zero_authority_bytes(tmp_path):
+    from v42_autonomous_b2 import worker
+    request,manifest,path=current_production_request(tmp_path)
+    authority=Path(request['reset_authorization']['path'])
+    document=json.loads(authority.read_text(encoding='utf-8'));document['native_budget_seconds']=6000
+    legacy.write(authority,document)
+    with pytest.raises(ValueError,match='RESET_AUTHORIZATION_SHA_OR_ROOT_DRIFT'):
+        worker.verify_request(request)
+    assert not Path(request['output']).exists()
+
+
+def test_current99_preflight_denies_nonempty_history_in_zero_deployment(tmp_path):
+    from v42_autonomous_b2 import worker
+    request,manifest,path=current_production_request(tmp_path)
+    request['previous_attempts']=['old_attempt']
+    with pytest.raises(ValueError,match='FRESH_ZERO_CURRENT_REQUEST_REQUIRED'):
+        worker.verify_request(request)
+    assert not Path(request['output']).exists()
 
 def test_actual99_source_constructor_and_factory_create_no_output_or_native(tmp_path,monkeypatch):
     request,manifest,path=current_production_request(tmp_path)

@@ -240,6 +240,11 @@ def verify_request(request):
     for r in m['inherited_B1_results'].values():
         if record(r['path'])!=r:raise PermissionError('B1_RESULT_SHA_DRIFT')
     for day,r in m['prior_attempts'].items():exact_prior_runtime(r,root=root,day=day)
+    if m.get('restart_from_zero') is True:
+        # Admit the same contract required by the later projection scope
+        # before model preparation or the first measured Native call.
+        from .pricing_cache import _fresh_authorization
+        _fresh_authorization(request,m,root)
     return m
 
 def assert_peers(request):
