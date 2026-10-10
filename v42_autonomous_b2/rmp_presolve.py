@@ -190,6 +190,47 @@ def _residual(matrix,rhs,sense,point):
         maximum_row_violation=max(0.,float(np.max(violation,initial=0))))
 
 
+def _bound_residual(lower,upper,point):
+    lower=np.asarray(lower,dtype=np.float64);upper=np.asarray(upper,dtype=np.float64)
+    if lower.shape!=point.shape or upper.shape!=point.shape or np.isnan(lower).any() or np.isnan(upper).any():
+        return dict(finite=False)
+    violation=np.maximum(0.,np.maximum(lower-point,point-upper))
+    if not np.isfinite(violation).all():return dict(finite=False)
+    return dict(finite=True,bound_violation_sha256=_array_sha(violation),
+        maximum_bound_violation=float(np.max(violation,initial=0)))
+
+
+def _primal_method_eligibility(diagnostic):
+    # Computational choice only. The unchanged original checker retains all
+    # feasibility/dual/Global-LB authority; no numerical tolerance is changed.
+    tolerance=1e-9
+    rows=[diagnostic[k] for k in ('original_RMP_residual','Native_scaled_RMP_residual')]
+    bounds=[diagnostic[k] for k in ('original_RMP_bounds','Native_RMP_bounds')]
+    eligible=(diagnostic['eligible'] is True
+        and all(r.get('finite') is True and 0<=r['maximum_row_violation']<=tolerance for r in rows)
+        and all(r.get('finite') is True and 0<=r['maximum_bound_violation']<=tolerance for r in bounds))
+    return dict(eligible=eligible,original_FeasibilityTol=tolerance,
+        reason=('CURRENT_COMPLETE_ORIGINAL_AND_NATIVE_START_WITHIN_ORIGINAL_TOLERANCE'
+                if eligible else 'START_NOT_WITHIN_ORIGINAL_TOLERANCE_KEEP_ORIGINAL_METHOD1'),
+        candidate_Method=0 if eligible else 1,
+        start_is_Native_basis_or_certified_feasibility_or_Global_LB=False,
+        computational_performance_or_Global_LB_improvement_proved=False)
+
+
+def _selected_method(warm,installed):
+    choice=warm.diagnostic.get('primal_simplex_selection')
+    if choice is not None and choice!=_primal_method_eligibility(warm.diagnostic):
+        raise PermissionError('RMP_WARM_LITERAL_ORIGINAL_TOLERANCE_SELECTION_DRIFT')
+    return 0 if installed and choice is not None and choice['eligible'] is True else 1
+
+
+def _verify_installed_start(model,warm,installed):
+    if not installed:return
+    if (_array_sha(np.asarray(model.getAttr('PStart'),dtype=np.float64))!=warm.diagnostic['PStart_sha256']
+            or _array_sha(np.asarray(model.getAttr('DStart'),dtype=np.float64))!=warm.diagnostic['DStart_sha256']):
+        raise PermissionError('RMP_WARM_EXACT_PRE_NATIVE_START_READBACK_REQUIRED')
+
+
 class WarmPlan:
     """Current original seed projection, exclusively a model-local LP hint."""
     def __init__(self,case,decomp,result,point,case_structure,request,output):
@@ -263,6 +304,8 @@ class WarmPlan:
                     own_first_seed_files=self.seed_receipts,
                     original_RMP_residual=_residual(original,rhs,sense,primal),
                     Native_scaled_RMP_residual=_residual(native,native_rhs,sense,primal),
+                    original_RMP_bounds=_bound_residual(self.model.getAttr('LB'),self.model.getAttr('UB'),primal),
+                    Native_RMP_bounds=_bound_residual(self.model._model.getAttr('LB'),self.model._model.getAttr('UB'),primal),
                     original_RMP_matrix_sha256=_matrix_sha(original),
                     Native_scaled_RMP_matrix_sha256=_matrix_sha(native),
                     LPWarmStart_planned=2,Presolve_planned=0,
@@ -271,6 +314,7 @@ class WarmPlan:
                         and self.diagnostic['Native_scaled_RMP_residual']['finite']):
                     self.diagnostic.update(eligible=False,reason='NONFINITE_RMP_RESIDUAL_COLD_ORIGINAL_METHOD1')
                     self.pstart=None;self.dstart=None
+                self.diagnostic['primal_simplex_selection']=_primal_method_eligibility(self.diagnostic)
         self.diagnostic_json=json.dumps(self.diagnostic,sort_keys=True,allow_nan=False)
 
     def seal(self):
@@ -439,15 +483,23 @@ class Entry:
             raise PermissionError('RMP_WARM_OWN_ENTRY_PLAN_DRIFT')
         if self.model.Params.Crossover!=self.warm.original_crossover:
             raise PermissionError('RMP_WARM_ORIGINAL_CROSSOVER_DRIFT')
+        if self.model.Params.Method!=_selected_method(self.warm,self.warm_installed):
+            raise PermissionError('RMP_WARM_EXACT_COMPUTATIONAL_METHOD_DRIFT')
+        if self.entered and (self.model.Params.Presolve!=0 or self.model.Params.Threads!=1
+                or not 0<self.model.Params.TimeLimit<=30
+                or self.model.Params.LPWarmStart!=(2 if self.warm_installed else self.warm.original_lpwarmstart)
+                or {k:getattr(self.model.Params,k) for k in PRECISION}!=PRECISION):
+            raise PermissionError('RMP_WARM_EXACT_COMPUTATIONAL_PARAMETERS_DRIFT')
 
     def receipt(self,**values):
-        result=dict(schema='V42_B2_RMP_PRESOLVE0_CURRENT_START_COMPUTATIONAL_ENTRY_V34',
+        result=dict(schema='V42_B2_RMP_PRESOLVE0_CURRENT_START_PRIMAL_COMPUTATIONAL_ENTRY_V36',
             identity={k:self.request[k] for k in ('run_id','arm','day','worker_slot','attempt_id')},
             source=self.sources,original_row_transport=self.original_row_transport,
             Native_calls_added=0,original_RMP_call_required_seconds=30,
             original_total_Native_cap_seconds=5400,original_RMP_not_removed=True,
             restricted_master_objective_is_Global_LB=False,
             computational_performance_or_Global_LB_improvement_proved=False,**values)
+        result['exact_selected_computational_Method']=_selected_method(self.warm,self.warm_installed)
         result['current_attempt_warm_start']=dict(self.warm.diagnostic,
             installed=self.warm_installed,
             exact_complete_start_readback_before_Native=self.warm_installed,
@@ -455,13 +507,18 @@ class Entry:
         self.write(self.output/'RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json',result)
 
 
+def _entry_methods(entry):
+    for key in ('verify','receipt'):_method(entry,key,_ENTRY_METHODS[key])
+
+
 class PresolveFreeRMP(dw_native.ExactRowModel):
-    """Change only computational Presolve at the admitted original RMP entry."""
+    """Presolve0; current start may select primal at the sole original entry."""
     def optimize(self,callback=None):
         entry=_ENTRY.get();scope=execution._model.get()
         if (entry is None or entry.model is not self or entry.entered or scope is None
                 or scope.get('model') is not self or scope.get('component')!='P1' or scope.get('track')!='RMP'):
             raise PermissionError('RMP_PRESOLVE_ONE_APPROVED_MODEL_ENTRY_REQUIRED')
+        _delegates(self,entry.budget);_entry_methods(entry)
         entry.verify();_known_ledger(entry.budget,entry.request,inflight=True)
         row=entry.budget.inflight
         if (any(row.get(k)!=v for k,v in entry.kwargs.items())
@@ -475,13 +532,16 @@ class PresolveFreeRMP(dw_native.ExactRowModel):
         self.Params.Presolve=0
         if self.Params.Presolve!=0:raise PermissionError('RMP_PRESOLVE_ZERO_NOT_APPLIED')
         entry.warm_installed=entry.warm.install()
+        self.Params.Method=_selected_method(entry.warm,entry.warm_installed)
         entry.verify()
         entry.receipt(status='ABOUT_TO_DELEGATE',Native_call_completed=False,
-            actual_parameters=dict(Presolve=0,Method=1,Threads=1,TimeLimit=float(self.Params.TimeLimit),precision=PRECISION,
+            actual_parameters=dict(Presolve=0,Method=_selected_method(entry.warm,entry.warm_installed),Threads=1,TimeLimit=float(self.Params.TimeLimit),precision=PRECISION,
                 LPWarmStart=int(self.Params.LPWarmStart),Crossover=int(self.Params.Crossover)),
             ledger_before=entry.before_ledger)
         # ExactRowModel carries only this wrapper's model scope to its owned
         # raw delegate. Original guards/callbacks/Runtime accounting remain.
+        _delegates(self,entry.budget);_entry_methods(entry)
+        entry.verify();_verify_installed_start(self,entry.warm,entry.warm_installed)
         return super().optimize(callback)
 
 
@@ -509,12 +569,14 @@ class BudgetProxy:
             # the checks contained in the wrapper method itself.
             if not progress_verified:
                 progress_verified=True
+                _delegates(model,self._budget);_entry_methods(entry)
                 entry.verify()
             return returned
         self._budget.progress=progress
         try:
             returned=self._budget.optimize(model,track=track,label=label,
                 requested_seconds=requested_seconds,callback=callback)
+            _delegates(model,self._budget);_entry_methods(entry)
             entry.verify();known=_known_ledger(self._budget,entry.request)
             if (not entry.entered or len(self._budget.calls)!=entry.before+1
                     or self._budget.calls[-1].get('label')!=LABEL
@@ -522,14 +584,14 @@ class BudgetProxy:
                     or self._budget.calls[-1].get('component')!='P1'
                     or self._budget.calls[-1].get('precision_parameters')!=PRECISION
                     or not 0<self._budget.calls[-1].get('effective_TimeLimit',0)<=30
-                    or model.Params.Presolve!=0 or model.Params.Method!=1 or model.Params.Threads!=1
+                    or model.Params.Presolve!=0 or model.Params.Method!=_selected_method(entry.warm,entry.warm_installed) or model.Params.Threads!=1
                     or model.Params.LPWarmStart!=(2 if entry.warm_installed else entry.warm.original_lpwarmstart)
                     or {k:getattr(model.Params,k) for k in PRECISION}!=PRECISION):
                 raise PermissionError('RMP_PRESOLVE_ORIGINAL_SINGLE_COMPLETED_NATIVE_RECEIPT_REQUIRED')
             entry.committed=True
             entry.receipt(status='COMPLETED',Native_call_completed=True,
                 completed_original_Native_call=copy.deepcopy(self._budget.calls[-1]),
-                actual_parameters=dict(Presolve=0,Method=1,Threads=1,TimeLimit=float(model.Params.TimeLimit),precision=PRECISION,
+                actual_parameters=dict(Presolve=0,Method=_selected_method(entry.warm,entry.warm_installed),Threads=1,TimeLimit=float(model.Params.TimeLimit),precision=PRECISION,
                     LPWarmStart=int(model.Params.LPWarmStart),Crossover=int(model.Params.Crossover)),
                 ledger_after=known)
             return returned
@@ -592,10 +654,12 @@ def scoped_runner(original_run,output_directory,write):
 
 
 _WARM_BINDINGS=tuple((owner,key,getattr(owner,key),getattr(owner,key).__code__)
-    for owner,keys in ((sys.modules[__name__],('_array_sha','_case_sha','_point','_residual')),
+    for owner,keys in ((sys.modules[__name__],('_array_sha','_case_sha','_point','_residual','_bound_residual','_primal_method_eligibility','_selected_method','_verify_installed_start','_entry_methods')),
                        (WarmPlan,('__init__','seal','verify','install')),
+                       (Entry,('__init__','verify','receipt')),
                        (RunBinding,('register_warm','warm')))
     for key in keys)
 _WARM_METHODS={key:getattr(WarmPlan,key) for key in ('seal','verify','install')}
+_ENTRY_METHODS={key:getattr(Entry,key) for key in ('verify','receipt')}
 _RUN_WARM=RunBinding.warm
 _RUN_REGISTER_WARM=RunBinding.register_warm

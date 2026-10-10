@@ -140,7 +140,7 @@ def test_single_original_budget_native_guard_row_transport_and_measured_ledger(e
     receipt=invoke(env)
     assert receipt==env.budget.calls[-1] and len(env.budget.calls)==1
     assert env.budget.used()==2.25 and json.loads(env.budget.path.read_text())['measured_Native_Runtime']==2.25
-    assert env.model.Params.Presolve==0 and env.model.Params.Method==1
+    assert env.model.Params.Presolve==0 and env.model.Params.Method==0
     assert env.model._model.entries[0]['scope']['model'] is env.model._model
     assert env.model._model.entries[0]['params']['TimeLimit']==30
     assert {k:env.model._model.entries[0]['params'][k] for k in draft.PRECISION}==draft.PRECISION
@@ -258,7 +258,8 @@ def test_live_actual_parameters_cannot_change_after_original_budget_admission(en
     # precision/cap but before its guarded Native delegation.
     env.model._model.Runtime=0.
     env.budget.progress=lambda value_:setattr(env.model.Params,field,value)
-    with pytest.raises(PermissionError,match='ACTUAL_ORIGINAL|V19_B2_P1_THREADS_ONE_ONLY'):invoke(env)
+    reason='EXACT_COMPUTATIONAL_METHOD' if field=='Method' else 'ACTUAL_ORIGINAL|V19_B2_P1_THREADS_ONE_ONLY'
+    with pytest.raises(PermissionError,match=reason):invoke(env)
     assert env.model._model.entries==[] and env.budget.used()==0
     assert draft._ENTRY.get() is None and execution._model.get() is None
 
@@ -461,7 +462,7 @@ def test_current_nonunit_and_first_unit_seed_projected_with_complete_zero_dual(e
     invoke(env)
     raw=env.model._model;native=raw.entries[0]
     assert raw.start_events==['PStart','DStart'] and native['params']['LPWarmStart']==2
-    assert native['params']['Method']==1 and native['params']['Presolve']==0 and native['params']['Crossover']==-1
+    assert native['params']['Method']==0 and native['params']['Presolve']==0 and native['params']['Crossover']==-1
     assert np.array_equal(native['starts']['PStart'],plan.pstart)
     assert np.array_equal(native['starts']['DStart'],plan.dstart)
     receipt=json.loads((env.out/'master/RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json').read_text())['current_attempt_warm_start']
@@ -507,6 +508,8 @@ def test_scaled_residual_is_separately_recorded_and_never_claimed_feasible(env):
     assert hint['Native_scaled_RMP_residual']['maximum_row_violation']>1.
     invoke(env)
     assert len(env.budget.calls)==1 and env.model._model.entries[0]['params']['LPWarmStart']==2
+    assert env.model._model.entries[0]['params']['Method']==1
+    assert hint['primal_simplex_selection']['eligible'] is False
     assert not hint['start_is_basis_or_feasibility_or_dual_or_UB_or_Global_LB_authority']
 
 
@@ -643,6 +646,151 @@ def test_native_done_parameter_tamper_is_denied_without_start_restoration(env,mo
         result=original(self,*a,**k);self.Params.LPWarmStart=1;return result
     monkeypatch.setattr(Raw,'optimize',alter);monkeypatch.setattr(draft,'_RAW_OPTIMIZE',alter)
     monkeypatch.setattr(draft,'_RAW_CODE',alter.__code__)
-    with pytest.raises(PermissionError,match='SINGLE_COMPLETED_NATIVE'):invoke(env)
+    with pytest.raises(PermissionError,match='EXACT_COMPUTATIONAL_PARAMETERS'):invoke(env)
     assert len(env.budget.calls)==1 and len(env.model._model.entries)==1
     assert env.model._model.start_events==['PStart','DStart'] and env.model.Params.LPWarmStart==1
+
+
+def test_primal_choice_sealed_current_complete_starts_math_caps_and_receipt(env):
+    hint=env.model._rmp_warm_plan.diagnostic
+    choice=hint['primal_simplex_selection']
+    assert choice['eligible'] and choice['candidate_Method']==0 and choice['original_FeasibilityTol']==1e-9
+    for key in ('original_RMP_residual','Native_scaled_RMP_residual'):
+        assert hint[key]['maximum_row_violation']<=1e-9
+    for key in ('original_RMP_bounds','Native_RMP_bounds'):
+        assert hint[key]['maximum_bound_violation']<=1e-9
+    before=env.model.getA();rhs=env.model.getAttr('RHS');bounds=(env.model.getAttr('LB'),env.model.getAttr('UB'))
+    assert env.model.Params.Method==1
+    invoke(env)
+    raw=env.model._model
+    assert len(raw.entries)==1 and raw.entries[0]['params']['Method']==0
+    assert raw.entries[0]['params']['Presolve']==0 and raw.entries[0]['params']['TimeLimit']==30
+    assert raw.entries[0]['params']['Threads']==1 and raw.entries[0]['params']['LPWarmStart']==2
+    assert {k:raw.entries[0]['params'][k] for k in draft.PRECISION}==draft.PRECISION
+    assert (env.model.getA()-before).nnz==0 and np.array_equal(env.model.getAttr('RHS'),rhs)
+    assert np.array_equal(env.model.getAttr('LB'),bounds[0]) and np.array_equal(env.model.getAttr('UB'),bounds[1])
+    receipt=json.loads((env.out/'master/RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json').read_text())
+    assert receipt['schema'].endswith('V36') and receipt['exact_selected_computational_Method']==0
+    assert receipt['actual_parameters']['Method']==0 and receipt['Native_calls_added']==0
+    assert not receipt['restricted_master_objective_is_Global_LB']
+    assert not receipt['computational_performance_or_Global_LB_improvement_proved']
+    assert not choice['start_is_Native_basis_or_certified_feasibility_or_Global_LB']
+
+
+@pytest.mark.parametrize('key,field,value',[
+    ('original_RMP_residual','maximum_row_violation',1.0000001e-9),
+    ('Native_scaled_RMP_residual','maximum_row_violation',1.0000001e-9),
+    ('original_RMP_bounds','maximum_bound_violation',1.0000001e-9),
+    ('Native_RMP_bounds','maximum_bound_violation',1.0000001e-9),
+    ('original_RMP_residual','finite',False),
+    ('Native_scaled_RMP_residual','finite',False),
+    ('original_RMP_bounds','finite',False),
+    ('Native_RMP_bounds','finite',False)])
+def test_primal_choice_requires_each_original_and_native_residual_bound(key,field,value):
+    diagnostic=dict(eligible=True,
+        **{k:dict(finite=True,maximum_row_violation=0.) for k in ('original_RMP_residual','Native_scaled_RMP_residual')},
+        **{k:dict(finite=True,maximum_bound_violation=0.) for k in ('original_RMP_bounds','Native_RMP_bounds')})
+    diagnostic[key][field]=value
+    choice=draft._primal_method_eligibility(diagnostic)
+    assert not choice['eligible'] and choice['candidate_Method']==1
+    assert choice['original_FeasibilityTol']==1e-9
+
+
+def test_bound_residual_unbounded_valid_and_nan_or_violated_infinite_denied():
+    point=np.array([0.,1.])
+    valid=draft._bound_residual(np.array([-np.inf,0.]),np.array([np.inf,1.]),point)
+    assert valid['finite'] and valid['maximum_bound_violation']==0.
+    assert not draft._bound_residual(np.array([np.nan,0.]),np.array([np.inf,1.]),point)['finite']
+    assert not draft._bound_residual(np.array([np.inf,0.]),np.array([np.inf,1.]),point)['finite']
+
+
+def test_primal_selection_cannot_inherit_mutable_precision_relaxation(monkeypatch):
+    diagnostic=dict(eligible=True,
+        **{k:dict(finite=True,maximum_row_violation=5e-9) for k in ('original_RMP_residual','Native_scaled_RMP_residual')},
+        **{k:dict(finite=True,maximum_bound_violation=0.) for k in ('original_RMP_bounds','Native_RMP_bounds')})
+    monkeypatch.setitem(draft.PRECISION,'FeasibilityTol',1e-8)
+    choice=draft._primal_method_eligibility(diagnostic)
+    monkeypatch.setitem(draft.PRECISION,'FeasibilityTol',1e-9)
+    assert not choice['eligible'] and choice['original_FeasibilityTol']==1e-9
+    assert draft._selected_method(SimpleNamespace(diagnostic=dict(diagnostic,primal_simplex_selection=choice)),True)==1
+
+
+def test_exact_original_method1_required_before_original_budget(env):
+    env.model.Params.Method=0
+    with pytest.raises(PermissionError,match='EXACT_ORIGINAL_ONE'):invoke(env)
+    assert env.budget.calls==[] and env.budget.inflight is None and env.model._model.entries==[]
+
+
+def test_first_progress_cannot_prematurely_select_primal_preserves_inflight_unknown(env):
+    env.budget.progress=lambda row:setattr(env.model.Params,'Method',0)
+    with pytest.raises(PermissionError,match='EXACT_COMPUTATIONAL_METHOD'):invoke(env)
+    assert env.budget.calls==[] and env.model._model.entries==[]
+    assert env.budget.inflight is not None and json.loads(env.budget.path.read_text())['inflight'] is not None
+
+
+@pytest.mark.parametrize('key',['PStart','DStart','Method','Threads','Presolve','LPWarmStart','FeasibilityTol'])
+def test_receipt_writer_cannot_mutate_start_or_exact_method_before_raw_delegate(env,monkeypatch,key):
+    def altered(path,value):
+        write(path,value)
+        if value.get('status')=='ABOUT_TO_DELEGATE':
+            if key=='Method':env.model.Params.Method=1
+            elif key=='Threads':env.model.Params.Threads=2
+            elif key=='Presolve':env.model.Params.Presolve=1
+            elif key=='LPWarmStart':env.model.Params.LPWarmStart=1
+            elif key=='FeasibilityTol':env.model.Params.FeasibilityTol=1e-8
+            else:env.model._model.attrs[key][0]+=1.
+    env.proxy._write=altered
+    with pytest.raises(PermissionError):invoke(env)
+    assert env.model._model.entries==[] and len(env.budget.calls)==1
+    assert env.model._model.start_events==['PStart','DStart']
+
+
+def test_post_native_method_change_denied_without_post_native_parameter_repair(env,monkeypatch):
+    original=Raw.optimize
+    def alter(self,*a,**k):
+        result=original(self,*a,**k);self.Params.Method=1;return result
+    monkeypatch.setattr(Raw,'optimize',alter);monkeypatch.setattr(draft,'_RAW_OPTIMIZE',alter)
+    monkeypatch.setattr(draft,'_RAW_CODE',alter.__code__)
+    with pytest.raises(PermissionError,match='EXACT_COMPUTATIONAL_METHOD'):invoke(env)
+    assert len(env.budget.calls)==1 and len(env.model._model.entries)==1
+    assert env.model._model.entries[0]['params']['Method']==0 and env.model.Params.Method==1
+    assert env.model._model.start_events==['PStart','DStart']
+
+
+@pytest.mark.parametrize('key',['_selected_method','_primal_method_eligibility','_bound_residual','_verify_installed_start'])
+def test_primal_choice_helper_identity_and_code_substitution_denied_before_budget(env,monkeypatch,key):
+    function=getattr(draft,key)
+    from types import FunctionType
+    replaced=FunctionType(function.__code__,dict(function.__globals__),function.__name__)
+    monkeypatch.setattr(draft,key,replaced)
+    with pytest.raises(PermissionError,match='IMMUTABLE_ORIGINAL_CODE'):invoke(env)
+    assert env.budget.calls==[] and env.model._model.entries==[]
+
+
+def test_primal_sealed_decision_mutation_denied_before_original_budget(env):
+    env.model._rmp_warm_plan.diagnostic['primal_simplex_selection']['eligible']=False
+    with pytest.raises(PermissionError):invoke(env)
+    assert env.budget.calls==[] and env.model._model.entries==[]
+
+
+@pytest.mark.parametrize('target',['verify','receipt'])
+@pytest.mark.parametrize('boundary',['progress','receipt_writer'])
+@pytest.mark.parametrize('mutation',['code','instance'])
+def test_entry_descriptor_and_code_mutation_at_callback_denied_before_raw(env,monkeypatch,target,boundary,mutation):
+    def mutate():
+        entry=draft._ENTRY.get()
+        if mutation=='code':monkeypatch.setattr(getattr(draft.Entry,target),'__code__',(lambda *a,**k:None).__code__)
+        else:monkeypatch.setattr(entry,target,lambda *a,**k:None)
+    if boundary=='progress':env.budget.progress=lambda row:mutate()
+    else:
+        def changed(path,value):
+            write(path,value)
+            if value.get('status')=='ABOUT_TO_DELEGATE':mutate()
+        env.proxy._write=changed
+    with pytest.raises(PermissionError):invoke(env)
+    assert env.model._model.entries==[] and draft._ENTRY.get() is None
+    if boundary=='progress':
+        assert env.budget.calls==[] and env.budget.inflight is not None
+        assert json.loads(env.budget.path.read_text())['inflight'] is not None
+    else:
+        assert len(env.budget.calls)==1 and env.model._model.start_events==['PStart','DStart']
