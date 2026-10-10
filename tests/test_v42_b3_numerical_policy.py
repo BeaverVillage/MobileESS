@@ -21,6 +21,7 @@ from v42_b3_joint.numerical_policy import (apply_native_precision,
     assert_native_precision, bind_apply_precision, policy_sha, required_settings,
     verify_settings_receipt)
 from v42_b3_joint.source_runtime import RealStageContext, SourceRegistry
+from v42_b3_joint.policy import native_limit
 from test_v42_b3_runtime_operations import runtime_registry
 
 
@@ -118,7 +119,7 @@ class B3NumericalPolicyTests(unittest.TestCase):
                     for name, value in ORIGINAL_PARAMETERS.items():
                         if name not in expected and name != "TimeLimit":
                             self.assertEqual(entry["parameters"][name], value)
-                    self.assertEqual(entry["parameters"]["TimeLimit"], 5400.)
+                    self.assertEqual(entry["parameters"]["TimeLimit"], .5 if stage.startswith("M") else 5400.)
                     self.assertEqual(entry["parameters"]["Threads"], 1)
                     receipt = ledger.receipt()
                     self.assertEqual(receipt["evidence_kind"], "FAKE_SOURCE_TEST")
@@ -126,7 +127,7 @@ class B3NumericalPolicyTests(unittest.TestCase):
                     self.assertEqual(receipt["numerical_policy_sha"], policy_sha())
                     self.assertEqual(receipt["native_call_count"], 1)
                     self.assertEqual(receipt["measured_native_runtime"], 1.25)
-                    self.assertEqual(receipt["remaining_seconds"], 5398.75)
+                    self.assertEqual(receipt["remaining_seconds"], native_limit(stage) - 1.25)
                     row = receipt["calls"][0]
                     metadata = row["b3_numerical_policy"]
                     self.assertEqual(metadata, entry["receipt"])
@@ -149,7 +150,7 @@ class B3NumericalPolicyTests(unittest.TestCase):
                     ENTRY_EVIDENCE.append(dict(day=day, stage=stage, component=component,
                         evidence_kind="FAKE_SOURCE_TEST", effective_parameters=metadata["effective_parameters"],
                         overrides=metadata["overrides"], metadata_content_sha=metadata["content_sha"],
-                        native_limit_seconds=5400, P2_calls=0, scientific_certified=False))
+                        native_limit_seconds=native_limit(stage), P2_calls=0, scientific_certified=False))
                     seen.add((day, stage))
         self.assertEqual(len(seen), 124)
         self.assertEqual(hashlib.sha256(budget_source.read_bytes()).hexdigest(), before_source_sha)
@@ -370,7 +371,7 @@ class B3NumericalPolicyTests(unittest.TestCase):
         canonical(receipt)  # The constructor receipt remains JSON serializable.
         ledger = SourceStageLedger(self.context("M2"))
         ledger.native_optimize(model, component="P1", track="M2")
-        self.assertEqual(model.entries[0]["receipt"]["effective_parameters"]["TimeLimit"], 5400.)
+        self.assertEqual(model.entries[0]["receipt"]["effective_parameters"]["TimeLimit"], 1800.)
 
     def test_p2_and_model_date_drift_cannot_enter_native(self):
         ledger = SourceStageLedger(self.context("M1"))

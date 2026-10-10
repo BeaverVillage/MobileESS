@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import subprocess
 import unittest
 from unittest.mock import patch
 
@@ -190,7 +191,7 @@ class P1GapCertificateTests(B3SyntheticFixture):
             self.assertEqual(config["objective"], "min rho_max")
             self.assertEqual(config["Threads"], 1)
             self.assertEqual(config["P2_calls"], 0)
-            self.assertEqual(config["native_limit_seconds"], 5400)
+            self.assertEqual(config["native_limit_seconds"], 5400 if stage.startswith("A") else 1800)
             self.assertIsNone(config["wall_limit_seconds"])
         with self.assertRaises(ValueError):
             policy.parameters("ACTUAL")
@@ -850,8 +851,13 @@ class PlanningAndExecutionProtectionTests(B3SyntheticFixture):
                 for module in modules:
                     with self.subTest(source=source.name, module=module):
                         self.assertFalse(module.startswith(("gurobipy", "opendss", "win32com", "v42_native", "v42_a_stage", "v42_m1", "v42_may")))
-        self.assertNotIn("gurobipy", sys.modules)
-        self.assertNotIn("win32com.client", sys.modules)
+        # Native engine suites may have imported a solver earlier in this
+        # process. Preparation must remain solver-free in a fresh interpreter.
+        subprocess.run([sys.executable, "-c", "import sys; from v42_b3_joint import "
+            "adapters, budget, certificates, contracts, dry_run, handoff, pipeline, "
+            "planning, validation, schema, verify_preparation; "
+            "assert 'gurobipy' not in sys.modules; assert 'win32com.client' not in sys.modules"],
+            cwd=package.parent, check=True, capture_output=True, text=True)
 
 
 if __name__ == "__main__":

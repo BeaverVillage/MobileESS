@@ -16,6 +16,7 @@ from .contracts import MESSDecision, canonical, digest, require, require_sha
 from .source_runtime import RealStageContext, SourceStageOutput, jsonable
 from .build_runtime import BuildIdentity, ImmutableInputCache
 from .scalar_math import original_pcs_math_scope
+from .m_acceptance import verify_m_acceptance
 
 MODEL_MODULE = "v42_may_campaign_native90.m_model"
 STAGE_MODULE = "v42_may_campaign_native90.m_stage"
@@ -353,20 +354,23 @@ class MSourceBridge:
             with self._phase(context, "input_preparation_seconds"):
                 payload = fixed_aidc_payload(context)
             stage = context.request.stage
-            prepare = lambda request, callback=None: self._prepare(context, payload, ledger, callback)
             routing = {"B2": "B3", "M_STAGE_RESULT.json": stage + "_STAGE_RESULT.json"}
-            seed = registry.rebind(STAGE_MODULE, "_seed_integer", literal_replacements=routing)
-            fresh = registry.rebind(STAGE_MODULE, "_fresh_lp_dual", literal_replacements=routing)
             plan = registry.rebind(STAGE_MODULE, "_plan", literal_replacements=routing)
-            run = registry.rebind(STAGE_MODULE, "run", globals={"prepare": prepare, "_seed_integer": seed,
-                                  "_fresh_lp_dual": fresh, "_plan": plan}, literal_replacements=routing)
-            request = {**context.identity, "input_folder": str(context.input_folder), "output": str(context.output)}
-            result = run(request, ledger, progress)
-            require(result.get("accepted") is True and type(result.get("P2_calls")) is int
+            with ledger.cost("model_preparation", stage + "_original_model_build"):
+                case = self._prepare(context, payload, ledger, progress)
+            optimizer = registry.callable("v42_common_mess/engine.py", "optimize_case")
+            result, point = optimizer(case, ledger, progress, stage_identity=context.identity,
+                initial_point=case.point,
+                strict_validator=registry.callable("v42_m1_hybrid/final_verify.py", "_strict_ub"),
+                plan_exporter=plan)
+            result = dict(result)
+            result.pop("point", None)
+            require(result.get("feasible_accepted") is True and result.get("accepted") is True and type(result.get("P2_calls")) is int
                     and result["P2_calls"] == 0,
                     "M_SOURCE_RESULT_NOT_INDEPENDENTLY_ACCEPTED")
             case = self._cases[self._key(context)]
             result = dict(result, stage=stage, **{"fixed_input_sha": context.request.fixed_input_sha})
+            registry.callable("v42_pr134_b1/common.py", "atomic")(context.output / (stage + "_STAGE_RESULT.json"), _plain(result))
             decision, source_plan = self._mess_decision(context, case, result["mess"])
             names, controls = self._controls(case, source_plan)
             context.grid_authority.validate(stage, context.request.authority, bundle=context.original_bundle,
@@ -388,7 +392,9 @@ class MSourceBridge:
                       "raw_point": _plain(case.point),
                       "source_exact_LB": result["exact_Global_LB"], "source_exact_UB": result["exact_Global_UB"],
                       "raw_point_path": str(case.output / "BEST_STRICT_UB_POINT.npz"),
-                      "dual_path": str(case.output / "BEST_EXACT_ORIGINAL_DUAL.json"),
+                      "dual_path": str(case.output / "BEST_EXACT_ORIGINAL_DUAL.json") if result.get("exact_Global_LB") is not None else None,
+                      "common_engine_version": result["engine_version"],
+                      "feasible_accepted": True, "global_gap_certified": result["global_gap_certified"],
                       "build_profile_seconds": dict(self._profiles.get(self._key(context), {})),
                       "original_pcs_scalar_math_memo": self._scalar_receipts[self._key(context)],
                       "immutable_route_input_cache": [cache.receipt() for cache in self._input_caches.values()],
@@ -401,8 +407,12 @@ class MSourceBridge:
             from dataclasses import replace
             packet["physical_source_evidence"] = evidence["physical"]
             packet["stage_total_wall_seconds"] = perf_counter() - started
+            result["stage_wall_seconds"] = packet["stage_total_wall_seconds"]
+            result["wall_seconds"] = packet["stage_total_wall_seconds"]
+            registry.callable("v42_pr134_b1/common.py", "atomic")(
+                context.output / (stage + "_STAGE_RESULT.json"), _plain(result))
             return replace(output, physical_evidence=evidence["physical"], global_evidence=evidence["global"],
-                           source_packet=packet)
+                           source_packet=packet, source_result=_plain(result))
 
     def _restore_case(self, context, packet):
         """Reload this B3 case and replay source static transport, without Model."""
@@ -454,24 +464,27 @@ class MSourceBridge:
                     "M_FULL_ORIGINAL_MODEL_SHA_DRIFT")
             proof = registry.callable("v42_may_campaign_native90/m_model.py", "verify_case")(case)
             require(proof.get("PASS") is True, "M_FULL_COMPACT_C3A_EQUIVALENCE_FAILED")
-            point_path, dual_path = Path(packet["raw_point_path"]), Path(packet["dual_path"])
+            point_path = Path(packet["raw_point_path"])
+            dual_path = Path(packet["dual_path"]) if packet.get("dual_path") is not None else None
             require(point_path.resolve() == context.output / "BEST_STRICT_UB_POINT.npz"
-                    and dual_path.resolve() == context.output / "BEST_EXACT_ORIGINAL_DUAL.json",
+                    and (dual_path is None or dual_path.resolve() == context.output / "BEST_EXACT_ORIGINAL_DUAL.json"),
                     "M_INDEPENDENT_CERTIFICATE_PATH_ESCAPE")
             strict = registry.callable("v42_m1_hybrid/final_verify.py", "_strict_ub")(case, point_path, {})
             point_sha = registry.callable("v42_m1_research/check_ub.py", "vector_sha")(case.point)
             require(strict.get("point_vector_sha256") == point_sha
                     and _plain(case.point) == packet["raw_point"], "M_SOURCE_RAW_POINT_REPLAY_DRIFT")
-            reader = registry.callable("v42_pr134_b1/common.py", "read")
-            dual = reader(dual_path)
-            exact = registry.callable("v42_m1_research/check_lb.py", "check_rational_dual_certificate")(
-                case.A, case.d, dual, case_sha=case.case_sha)
-            require(strict.get("PASS") is True and exact.get("PASS") is True,
-                    "M_ORIGINAL_INTEGER_PHYSICAL_OR_GLOBAL_BOUND_FAILED")
-            lower, upper = Fraction(exact["exact_bound"]), Fraction(strict["exact_Global_UB"])
-            require(0 <= lower <= upper and (upper == 0 or (upper - lower) / upper <= Fraction(3, 100)),
-                    "M_INDEPENDENT_EXACT_GLOBAL_GAP_NOT_ACCEPTED")
-            require(str(lower) == packet["source_exact_LB"] and str(upper) == packet["source_exact_UB"],
+            exact, lower = None, None
+            if dual_path is not None:
+                dual = registry.callable("v42_pr134_b1/common.py", "read")(dual_path)
+                exact = registry.callable("v42_m1_research/check_lb.py", "check_rational_dual_certificate")(
+                    case.A, case.d, dual, case_sha=case.case_sha)
+                require(exact.get("PASS") is True, "M_ORIGINAL_GLOBAL_BOUND_FAILED")
+                lower = Fraction(exact["exact_bound"])
+            require(strict.get("PASS") is True, "M_ORIGINAL_INTEGER_PHYSICAL_FAILED")
+            upper = Fraction(strict["exact_Global_UB"])
+            require(upper >= 0 and (lower is None or 0 <= lower <= upper),
+                    "M_INDEPENDENT_EXACT_GLOBAL_BOUND_INVALID")
+            require((str(lower) if lower is not None else None) == packet["source_exact_LB"] and str(upper) == packet["source_exact_UB"],
                     "M_INDEPENDENT_FINAL_BOUND_DRIFT")
             original_plan = registry.rebind(STAGE_MODULE, "_plan", literal_replacements={"B2": "B3"})(case, case.point)
             mess, enhanced_plan = self._mess_decision(context, case, original_plan)
@@ -494,11 +507,22 @@ class MSourceBridge:
                         "source_replay": _scientific_replay(_plain(strict)),
                         "transport": _scientific_replay(_plain(proof)),
                         "evidence_kind": registry.evidence_kind}
-            global_evidence = {**identity, "PASS": True, "exact_LB": str(lower), "exact_UB": str(upper),
+            gap = None if lower is None else Fraction(0) if upper == 0 else (upper - lower) / upper
+            certified = gap is not None and gap <= Fraction(3, 100)
+            global_evidence = {**identity, "PASS": True, "exact_LB": str(lower) if lower is not None else None, "exact_UB": str(upper),
                                "bound_scope": "STAGE_FIXED_INPUT_GLOBAL",
                                "global_domain_sha": context.request.authority.physical_domain_sha,
-                               "verifier_source_sha": verifier_sha, "original_global_bound_verified": True,
-                               "source_weak_duality_certificate": _scientific_replay(_plain(exact)),
+                               "verifier_source_sha": verifier_sha, "original_global_bound_verified": exact is not None,
+                               "source_weak_duality_certificate": _scientific_replay(_plain(exact)) if exact is not None else None,
+                               "global_gap_certified": certified, "exact_gap": str(gap) if gap is not None else None,
+                               "certification_status": "GLOBAL_GAP_CERTIFIED" if certified else "UNKNOWN" if lower is None else "GAP_NOT_CERTIFIED",
                                "joint_global_optimality_claim": False, "evidence_kind": registry.evidence_kind}
+            require(output.source_result.get("scientific_case_sha") == case.case_sha
+                and output.source_result.get("fixed_input_sha") == context.request.fixed_input_sha
+                and packet.get("common_engine_version") == output.source_result.get("engine_version")
+                and packet.get("feasible_accepted") is True
+                and packet.get("global_gap_certified") is certified,
+                "M_COMMON_ENGINE_CASE_OR_FIXED_INPUT_DRIFT")
+            verify_m_acceptance(output.source_result, physical, global_evidence)
             return {"PASS": True, "physical": physical, "global": global_evidence,
                     "original_model_sha": output.model_sha, "evidence_kind": registry.evidence_kind}

@@ -16,6 +16,8 @@ import re
 
 from v42_b3_joint.contracts import canonical, digest, require, require_sha
 from v42_b3_joint.source_coordinator import output_from_document
+from v42_b3_joint.policy import COMMON_MESS_VERSION, native_limit
+from v42_b3_joint.m_acceptance import verify_m_acceptance
 from v42_pr134_b1.common import replace_file
 
 _permit = ContextVar("v42_b3_qualified_execution_permit", default=None)
@@ -50,7 +52,7 @@ def source_seal(root):
     for folder in sorted(root.glob("v42_*")):
         # Independent B2 recovery and UI/supervisor edits cannot relabel or
         # invalidate an otherwise identical B3 scientific source identity.
-        if folder.name.startswith("v42_b2_") or folder.name in {
+        if (folder.name.startswith("v42_b2_") and folder.name != "v42_b2_seed_recovery_v19") or folder.name in {
                 "v42_autonomous", "v42_autonomous_b2", "v42_autonomous_monitor"}:
             continue
         if folder.is_dir():
@@ -105,7 +107,8 @@ def scientific_run_id(request):
 def verify_qualification(path, source_sha):
     qualification = read(path)
     day = qualification.get("qualified_day", qualification.get("day"))
-    require(qualification.get("schema") == "B3_REAL_CANARY_QUALIFICATION_V1" and
+    require(qualification.get("schema") == "B3_REAL_CANARY_QUALIFICATION_U4_V2" and
+            qualification.get("common_mess_version") == COMMON_MESS_VERSION and
             qualification.get("source_sha") == source_sha and
             day in DAYS and qualification.get("day", day) == day and qualification.get("worker_count") == 1 and
             qualification.get("evidence_kind") == "SOURCE", "REAL_SOURCE_MATCHED_B3_CANARY_REQUIRED")
@@ -126,21 +129,24 @@ def verify_qualification(path, source_sha):
                 "B3_CANARY_STAGE_SHA_OR_SOURCE_DRIFT")
         physical, bounds = out.physical_evidence, out.global_evidence
         require(physical.get("original_integer_physical_verified") is True and
-                bounds.get("original_global_bound_verified") is True and
+                (stage.startswith("M") or bounds.get("original_global_bound_verified") is True) and
                 bounds.get("bound_scope") == "STAGE_FIXED_INPUT_GLOBAL" and
                 bounds.get("joint_global_optimality_claim") is False,
                 "B3_CANARY_INDEPENDENT_ORIGINAL_PROOFS_REQUIRED")
-        lower, upper = Fraction(bounds["exact_LB"]), Fraction(bounds["exact_UB"])
-        target = Fraction(1, 200) if stage.startswith("A") else Fraction(3, 100)
-        require(0 <= lower <= upper and (upper == 0 or (upper - lower) / upper <= target),
-                "B3_CANARY_EXACT_GAP_NOT_ACCEPTED")
+        if stage.startswith("M"):
+            verify_m_acceptance(out.source_result, physical, bounds)
+        else:
+            lower, upper = Fraction(bounds["exact_LB"]), Fraction(bounds["exact_UB"])
+            require(0 <= lower <= upper and (upper == 0 or (upper - lower) / upper <= Fraction(1, 200)),
+                    "B3_CANARY_EXACT_GAP_NOT_ACCEPTED")
         ledger = json.loads(out.ledger_receipt)
         require(ledger.get("source_sha") == source_sha and ledger.get("day") == day and
-                ledger.get("stage") == stage and ledger.get("native_limit_seconds") == 5400 and
+                ledger.get("stage") == stage and ledger.get("native_limit_seconds") == native_limit(stage) and
                 ledger.get("P2_calls") == 0 and ledger.get("Threads") == 1 and
                 ledger.get("wall_limit_seconds") is None and
                 type(ledger.get("measured_native_runtime")) in (float, int) and
-                math.isfinite(ledger["measured_native_runtime"]) and 0 <= ledger["measured_native_runtime"] <= 5400,
+                math.isfinite(ledger["measured_native_runtime"]) and 0 <= ledger["measured_native_runtime"]
+                and (stage.startswith("M") or ledger["measured_native_runtime"] <= 5400),
                 "B3_CANARY_ORIGINAL_STAGE_NATIVE_ACCOUNTING_REQUIRED")
         if stage == "A1":
             reuse = out.source_packet.get("b1_reuse", {})
@@ -196,7 +202,8 @@ def publish_qualification(output, source_sha, destination):
     artifacts += [record(output / stage / "B3_SOURCE_STAGE_OUTPUT.json")
                   for stage in ("A1", "M1", "A2", "M2")]
     day = read(output / "B3_SOURCE_CHECKPOINT.json")["identity"]["day"]
-    document = {"schema": "B3_REAL_CANARY_QUALIFICATION_V1", "source_sha": source_sha,
+    document = {"schema": "B3_REAL_CANARY_QUALIFICATION_U4_V2", "source_sha": source_sha,
+                "common_mess_version": COMMON_MESS_VERSION,
                 "day": day, "qualified_day": day, "worker_count": 1, "evidence_kind": "SOURCE",
                 "canary_output": str(output), "artifacts": artifacts}
     # Validate the fully materialized receipt before atomic publication.

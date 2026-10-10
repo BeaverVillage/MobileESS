@@ -8,7 +8,8 @@ from pathlib import Path
 from .contracts import (AIDCDecision, MESSDecision, StageRequest, canonical,
                         digest, require, require_sha, request_from_dict)
 from .native_ledger import SourceStageLedger
-from .policy import gap_target
+from .policy import gap_target, native_limit
+from .m_acceptance import verify_m_acceptance
 from .source_runtime import SourceStageOutput, jsonable
 
 ORDER = ("A1", "M1", "A2", "M2")
@@ -53,11 +54,12 @@ def verify_output(context, output, bridge, ledger):
             and receipt.get("authority_sha") == request.authority.sha,
             "SOURCE_LEDGER_SCIENTIFIC_IDENTITY_DRIFT")
     require(receipt.get("quarantined") is False and receipt.get("P2_calls") == 0
-            and receipt.get("Threads") == 1 and receipt.get("native_limit_seconds") == 5400
+            and receipt.get("Threads") == 1 and receipt.get("native_limit_seconds") == native_limit(request.stage)
             and receipt.get("wall_limit_seconds") is None
             and type(receipt.get("measured_native_runtime")) in (int, float)
             and math.isfinite(receipt["measured_native_runtime"])
-            and 0 <= receipt["measured_native_runtime"] <= 5400,
+            and 0 <= receipt["measured_native_runtime"]
+            and (request.stage.startswith("M") or receipt["measured_native_runtime"] <= 5400),
             "SOURCE_LEDGER_NOT_ACCEPTED")
     proof = bridge.verify(context, output)
     require(proof.get("PASS") is True and proof.get("evidence_kind") == registry.evidence_kind
@@ -73,14 +75,17 @@ def verify_output(context, output, bridge, ledger):
     require(physical.get("original_integer_physical_verified") is True,
             "ORIGINAL_INTEGER_PHYSICAL_REPLAY_REQUIRED")
     require_sha(physical.get("replay_sha"))
-    require(bounds.get("original_global_bound_verified") is True
+    require((request.stage.startswith("M") or bounds.get("original_global_bound_verified") is True)
             and bounds.get("bound_scope") == "STAGE_FIXED_INPUT_GLOBAL"
             and bounds.get("global_domain_sha") == request.authority.physical_domain_sha
             and bounds.get("joint_global_optimality_claim") is False,
             "INDEPENDENT_STAGE_GLOBAL_SCOPE_REQUIRED")
-    lower, upper = Fraction(bounds["exact_LB"]), Fraction(bounds["exact_UB"])
-    require(0 <= lower <= upper and (upper == 0 or (upper - lower) / upper <= gap_target(request.stage)),
-            "EXACT_SOURCE_GLOBAL_GAP_NOT_ACCEPTED")
+    if request.stage.startswith("M"):
+        verify_m_acceptance(output.source_result, physical, bounds)
+    else:
+        lower, upper = Fraction(bounds["exact_LB"]), Fraction(bounds["exact_UB"])
+        require(0 <= lower <= upper and (upper == 0 or (upper - lower) / upper <= gap_target(request.stage)),
+                "EXACT_SOURCE_GLOBAL_GAP_NOT_ACCEPTED")
     require(output.sha == before, "SOURCE_VERIFIER_MUTATED_OUTPUT")
     return proof
 

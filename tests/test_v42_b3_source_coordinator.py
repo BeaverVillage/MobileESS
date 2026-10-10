@@ -12,6 +12,7 @@ from v42_b3_joint.dry_run import fixture_authority, fixture_aidc, fixture_mess
 from v42_b3_joint.source_runtime import RealStageContext, SourceRegistry, FakeSourceRegistry, SourceStageOutput
 from v42_b3_joint.source_coordinator import SourceCoordinator, output_document, output_from_document, verify_output
 from v42_b3_joint.source_guard import SourceGuardAliases
+from v42_b3_joint.policy import COMMON_MESS_VERSION, native_limit
 
 
 class FixtureLedger:
@@ -21,7 +22,7 @@ class FixtureLedger:
 
     def receipt(self):
         return {**self.context.identity, "evidence_kind": "FAKE_SOURCE_TEST", "Threads": 1,
-                "P2_calls": 0, "native_limit_seconds": 5400, "wall_limit_seconds": None,
+                "P2_calls": 0, "native_limit_seconds": native_limit(self.context.request.stage), "wall_limit_seconds": None,
                 "quarantined": False, "measured_native_runtime": 0, "native_call_count": 0}
 
     def sealed_receipt(self):
@@ -37,7 +38,9 @@ class FixtureBridge:
         self.executions.append(stage)
         if stage == self.fail:
             raise ValueError("FIXTURE_SOURCE_FAILURE")
-        output = SourceStageOutput(context.request, {}, context.request.fixed_aidc or fixture_aidc(1 if stage == "A1" else 2),
+        result = dict(engine_version=COMMON_MESS_VERSION, feasible_accepted=True, accepted=True,
+            PASS=True, exact_Global_LB="1", exact_Global_UB="1", exact_gap="0", global_gap_certified=True) if stage.startswith("M") else {}
+        output = SourceStageOutput(context.request, result, context.request.fixed_aidc or fixture_aidc(1 if stage == "A1" else 2),
             None if stage == "A1" else context.request.fixed_mess or fixture_mess(1 if stage == "M1" else 2),
             digest(context.identity), {}, {}, {"synthetic_fixture_only": True}, ledger.sealed_receipt(), "FAKE_SOURCE_TEST")
         proof = self.verify(context, output)
@@ -48,11 +51,12 @@ class FixtureBridge:
         if self.corrupt:
             raise ValueError("FIXTURE_INDEPENDENT_REPLAY_FAILURE")
         verifier = digest("TEST_CALLBACK_NO_SCIENTIFIC_PROOF")
-        physical = {**output.identity, "original_integer_physical_verified": True,
+        physical = {**output.identity, "PASS": True, "original_integer_physical_verified": True,
                     "replay_sha": digest(output.decision_sha), "verifier_source_sha": verifier}
         bounds = {**output.identity, "original_global_bound_verified": True, "exact_LB": "1", "exact_UB": "1",
                   "bound_scope": "STAGE_FIXED_INPUT_GLOBAL", "global_domain_sha": context.request.authority.physical_domain_sha,
-                  "verifier_source_sha": verifier, "joint_global_optimality_claim": False}
+                  "verifier_source_sha": verifier, "joint_global_optimality_claim": False,
+                  "global_gap_certified": True}
         return {"PASS": True, "physical": physical, "global": bounds, "original_model_sha": output.model_sha,
                 "evidence_kind": "FAKE_SOURCE_TEST"}
 

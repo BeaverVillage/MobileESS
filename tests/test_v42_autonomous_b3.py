@@ -72,7 +72,8 @@ class AdmissionTests(unittest.TestCase):
     def test_fake_and_incomplete_canary_cannot_promote(self):
         with TemporaryDirectory() as folder:
             path = Path(folder) / "qualification.json"
-            document = dict(schema="B3_REAL_CANARY_QUALIFICATION_V1", source_sha=digest("s"),
+            document = dict(schema="B3_REAL_CANARY_QUALIFICATION_U4_V2",
+                            common_mess_version="V42_COMMON_MESS_PRIMAL_ANYTIME_U4_V1", source_sha=digest("s"),
                             day="2025-05-01", worker_count=1, evidence_kind="FAKE_SOURCE_TEST")
             path.write_text(canonical(document))
             with self.assertRaisesRegex(ValueError, "REAL_SOURCE_MATCHED"):
@@ -90,7 +91,8 @@ class AdmissionTests(unittest.TestCase):
             previous = root / "may01_failed"; previous.mkdir()
             (previous / "B3_SOURCE_CHECKPOINT.json").write_text(canonical(dict(status="FAILED")))
             qualification = root / "qualification.json"
-            qualification.write_text(canonical(dict(schema="B3_REAL_CANARY_QUALIFICATION_V1",
+            qualification.write_text(canonical(dict(schema="B3_REAL_CANARY_QUALIFICATION_U4_V2",
+                common_mess_version="V42_COMMON_MESS_PRIMAL_ANYTIME_U4_V1",
                 source_sha=seal["source_sha"], day="2025-05-01", worker_count=1, evidence_kind="SOURCE",
                 canary_output=str(previous), artifacts=[])))
             status = qualification_status(qualification, seal["source_sha"], seal=seal, code_root=root)
@@ -302,7 +304,7 @@ class PriorNativeTests(unittest.TestCase):
         attempt = root / name
         stage = attempt / "PIPELINE/M1"
         stage.mkdir(parents=True)
-        identity = dict(stage="M1", day="2025-05-01", input_sha=digest("input"), native_limit_seconds=5400)
+        identity = dict(stage="M1", day="2025-05-01", input_sha=digest("input"), native_limit_seconds=1800)
         (stage / "NATIVE_RUNTIME_LEDGER_IDENTITY.json").write_text(canonical(identity))
         document = dict(calls=calls, inflight=inflight,
                         measured_Native_Runtime=sum(row.get("Native_Runtime") or 0 for row in calls))
@@ -334,10 +336,11 @@ class FailureAccountingTests(unittest.TestCase):
     identity = dict(run_id="r", day="2025-05-01", source_SHA=digest("source"))
 
     def ledger(self, pipeline, stage, seconds, *, inflight=None):
+        from v42_b3_joint.policy import native_limit
         folder = pipeline / stage; folder.mkdir(parents=True)
         (folder / "NATIVE_RUNTIME_LEDGER_IDENTITY.json").write_text(canonical(dict(
-            run_id="r", day="2025-05-01", stage=stage, source_sha=digest("source"), input_sha=digest("input"), native_limit_seconds=5400)))
-        document = dict(Native_ceiling_seconds=5400, budget_basis="MEASURED_NATIVE_RUNTIME_ONLY",
+            run_id="r", day="2025-05-01", stage=stage, source_sha=digest("source"), input_sha=digest("input"), native_limit_seconds=native_limit(stage))))
+        document = dict(Native_ceiling_seconds=native_limit(stage), budget_basis="MEASURED_NATIVE_RUNTIME_ONLY",
                         measured_Native_Runtime=seconds, inflight=inflight,
                         calls=[dict(Native_Runtime=seconds, entered_native=True, runtime_unavailable=False)])
         (folder / "NATIVE_RUNTIME_LEDGER.json").write_text(canonical(document))
@@ -382,6 +385,21 @@ class FailureAccountingTests(unittest.TestCase):
 
 
 class WorkerFailureTests(unittest.TestCase):
+    def test_scientific_and_implementation_failures_are_distinct(self):
+        with TemporaryDirectory() as folder:
+            pipeline = Path(folder)
+            self.assertEqual(b3_worker.classify_failure(ValueError(
+                "A_SOURCE_ORIGINAL_P1_NOT_CERTIFIED:TIME_LIMIT_FEASIBLE_NOT_CERTIFIED"), "A2", pipeline), "A_STAGE_NOT_CERTIFIED")
+            self.assertEqual(b3_worker.classify_failure(ValueError(
+                "A_SOURCE_ORIGINAL_P1_NOT_CERTIFIED:IMPLEMENTATION_FAILURE"), "A2", pipeline), "IMPLEMENTATION_FAILURE")
+            self.assertEqual(b3_worker.classify_failure(ValueError(
+                "B3_FINAL_INDEPENDENT_VALIDATION_FAILED"), "VALIDATION", pipeline), "ACTUAL_AC_FAILED")
+            self.assertEqual(b3_worker.classify_failure(ValueError("M_FULL_ORIGINAL_MODEL_SHA_DRIFT"), "M1", pipeline), "INPUT_OR_SOURCE_FAILURE")
+            stage = pipeline / "M1"; stage.mkdir()
+            (stage / "M_STAGE_RESULT.json").write_text(canonical(dict(classification="M_NO_VALID_FEASIBLE")))
+            self.assertEqual(b3_worker.classify_failure(ValueError(
+                "M_SOURCE_RESULT_NOT_INDEPENDENTLY_ACCEPTED"), "M1", pipeline), "M_NO_VALID_FEASIBLE")
+
     def test_publication_exception_after_pipeline_completion_is_never_pass(self):
         # A mocked completed pipeline isolates the exception-to-status path.
         # No SOURCE stage or Native optimization is executed by this fixture.
@@ -398,7 +416,7 @@ class WorkerFailureTests(unittest.TestCase):
                            campaign_root=str(root / "campaign"), attempt_id="test", run_id="test", canary=True,
                            source_seal=str(seal_path))
             request_path = root / "request.json"; request_path.write_text(canonical(request))
-            stage_output = SimpleNamespace(sha=digest("stage"), model_sha=digest("model"),
+            stage_output = SimpleNamespace(sha=digest("stage"), model_sha=digest("model"), source_result={},
                 ledger_receipt=canonical(dict(measured_native_runtime=0., native_call_count=0)),
                 global_evidence=dict(exact_LB="0", exact_UB="0"))
             coordinator = SimpleNamespace(outputs=dict(A1=stage_output), run=lambda *a, **kw:

@@ -19,6 +19,18 @@ from .scalar_math import original_pcs_math_scope
 VERSION = "B2_BUILD_SOURCE_AUTHORITY_V13_20261009"
 
 
+def admitted_native_limit(request, manifest=None):
+    """Admit the new sealed common engine epoch with its explicit M cap."""
+    if request.get("algorithm_version") == "V42_COMMON_MESS_PRIMAL_ANYTIME_U4_V1":
+        if manifest is not None:
+            require(manifest.get("schema") == "V42_COMMON_U4_QUALIFICATION_V1"
+                and manifest.get("algorithm_version") == request["algorithm_version"]
+                and manifest.get("native_M_limit_seconds") == 1800,
+                "B2_COMMON_U4_MANIFEST_REQUIRED")
+        return 1800
+    return 5400
+
+
 def _sha(path):
     with Path(path).open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
@@ -49,7 +61,7 @@ class AdmittedSourceGateway:
         require(request.get("arm") == "B2" and request.get("run_id") == manifest.get("run_id")
             and type(request.get("Threads")) is int and request.get("Threads") == 1
             and type(request.get("P2_calls")) is int and request.get("P2_calls") == 0
-            and request.get("native_budget_seconds") == 5400 and request.get("wall_budget_seconds") is None
+            and request.get("native_budget_seconds") == admitted_native_limit(request, manifest) and request.get("wall_budget_seconds") is None
             and request.get("target_gap") == .03, "B2_NATIVE90_POLICY_OR_IDENTITY_DRIFT")
         sources = manifest.get("implementation", {}).get("sources", {})
         for name in ("v42_b2_build_authority_v13/builder.py", "v42_b2_build_authority_v13/source_port.py",
@@ -111,7 +123,7 @@ class VersionedB2BuildPort:
         require(self.request.get("arm") == "B2", "B2_FIXED_AIDC_ARM_REQUIRED")
         require(type(self.request.get("Threads")) is int and self.request.get("Threads") == 1
             and type(self.request.get("P2_calls")) is int and self.request.get("P2_calls") == 0
-            and self.request.get("native_budget_seconds") == 5400
+            and self.request.get("native_budget_seconds") == admitted_native_limit(self.request)
             and self.request.get("wall_budget_seconds") is None, "B2_BUILD_NATIVE_POLICY_DRIFT")
         self.cache = None
         self.identity = None
@@ -183,7 +195,7 @@ class VersionedB2BuildPort:
             profile=self.profile.receipt(), input_cache=self.cache.receipt(), source_ast_proof=proof,
             original_FULL_Compact_C3A_verifier=verified, evidence_kind=evidence_kind,
             original_PCS_scalar_math=dict(source_proof=pcs_proof, calls=memo.receipt()),
-            Native_budget_seconds=5400, Threads=1, P2_calls=0, production_worker_started=False,
+            Native_budget_seconds=admitted_native_limit(self.request), Threads=1, P2_calls=0, production_worker_started=False,
             real_performance_comparison="NOT_RUN", source_version_transition_by_this_module=False)
         return case
 

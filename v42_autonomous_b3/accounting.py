@@ -3,6 +3,7 @@ from pathlib import Path
 import math
 from .admission import read, record
 from v42_b3_joint.contracts import require, require_sha
+from v42_b3_joint.policy import native_limit
 
 STAGES = ("A1", "M1", "A2", "M2")
 
@@ -25,8 +26,8 @@ def collect_native_accounting(pipeline, identity, previous_attempts=()):
                 require(ledger.is_file() and seal.is_file(), "PARTIAL_NATIVE_LEDGER_IDENTITY_QUARANTINE")
                 document, metadata = read(ledger), read(seal)
                 require(metadata["stage"] == stage and metadata["day"] == identity["day"] and
-                        metadata["run_id"] == identity.get("scientific_run_id", identity["run_id"]) and metadata["native_limit_seconds"] == 5400 and
-                        document["Native_ceiling_seconds"] == 5400 and
+                        metadata["run_id"] == identity.get("scientific_run_id", identity["run_id"]) and metadata["native_limit_seconds"] == native_limit(stage) and
+                        document["Native_ceiling_seconds"] == native_limit(stage) and
                         document["budget_basis"] == "MEASURED_NATIVE_RUNTIME_ONLY",
                         "STAGE_NATIVE_ACCOUNTING_IDENTITY_DRIFT")
                 require_sha(metadata["source_sha"])
@@ -67,6 +68,6 @@ def collect_native_accounting(pipeline, identity, previous_attempts=()):
     total = sum(totals.values()) if known else None
     return {"stage_native_runtime": totals, "stage_native_calls": counts, "stage_native_accounting": states,
             "stage_native_ledger_receipts": ledger_receipts, "stage_native_ledger_identity_receipts": identity_receipts,
-            "native_accounting": {"stages": details, "native_budget_seconds_by_stage": {stage: 5400 for stage in STAGES}},
+            "native_accounting": {"stages": details, "native_budget_seconds_by_stage": {stage: native_limit(stage) for stage in STAGES}},
             "native_runtime_state": "KNOWN" if known else "UNKNOWN", "Native_Runtime": total,
             "native_seconds": total, "Native_calls": sum(counts.values()) if known else None}

@@ -238,6 +238,34 @@ def no_active_b2(request):
             continue
 
 
+def classify_failure(error, stage, pipeline):
+    """Keep scientific stops distinct from environment or implementation faults."""
+    reason = str(error)
+    if any(token in reason for token in ("SHA_DRIFT", "SOURCE_SEAL_", "IDENTITY_DRIFT", "INPUT_AUTHORITY", "SOURCE_FILE_")):
+        return "INPUT_OR_SOURCE_FAILURE"
+    if stage in ("M1", "M2") and reason.startswith("M_SOURCE_RESULT_NOT_INDEPENDENTLY_ACCEPTED"):
+        path = Path(pipeline) / stage / "M_STAGE_RESULT.json"
+        if path.is_file():
+            outcome = read(path)
+            if outcome.get("classification") == "M_NO_VALID_FEASIBLE" or outcome.get("status") == "M_NO_VALID_FEASIBLE":
+                return "M_NO_VALID_FEASIBLE"
+            if outcome.get("classification") == "INPUT_OR_SOURCE_FAILURE":
+                return "INPUT_OR_SOURCE_FAILURE"
+        return "IMPLEMENTATION_FAILURE"
+    if reason.startswith("A_SOURCE_ORIGINAL_P1_NOT_CERTIFIED:"):
+        source_status = reason.split(":", 1)[1]
+        if source_status == "INPUT_OR_SOURCE_FAILURE":
+            return source_status
+        if source_status.startswith(("TIME_LIMIT", "INCONCLUSIVE", "A_STAGE_NOT_CERTIFIED", "NO_FEASIBLE")):
+            return "A_STAGE_NOT_CERTIFIED"
+    if stage in ("ACTUAL", "FRESH_AC", "VALIDATION", "ACTUAL_FRESH_AC") and any(
+            token in reason for token in ("FINAL_INDEPENDENT_VALIDATION_FAILED", "ACTUAL_FIXED_REPLAY_FAILED", "AC_FAILED", "AC_NOT_CONVERGED")):
+        return "ACTUAL_AC_FAILED"
+    if isinstance(error, (FileNotFoundError, PermissionError)):
+        return "INPUT_OR_SOURCE_FAILURE"
+    return "IMPLEMENTATION_FAILURE"
+
+
 def run(request_path):
     request_path = Path(request_path).resolve()
     request = read(request_path)
@@ -324,7 +352,10 @@ def run(request_path):
                     stages[stage] = {"result_sha": output.sha, "original_model_sha": output.model_sha,
                         "exact_LB": bounds["exact_LB"], "exact_UB": bounds["exact_UB"],
                         "native_seconds": receipt["measured_native_runtime"], "native_calls": receipt["native_call_count"],
-                        "original_integer_physical_verified": True, "independent_global_verified": True}
+                        "original_integer_physical_verified": True,
+                        "feasible_accepted": output.source_result.get("feasible_accepted", True),
+                        "global_gap_certified": bounds.get("global_gap_certified", stage.startswith("A")),
+                        "independent_global_verified": bounds.get("original_global_bound_verified") is True}
                 fresh_path = pipeline / "M2" / "OPERATIONS" / "FRESH" / "FRESH_RESULT.json"
                 result.update(status="PASS", PASS=True, stages=stages,
                     native_seconds=sum(value["native_seconds"] for value in stages.values()),
@@ -341,7 +372,11 @@ def run(request_path):
                     result["production_qualification"] = publish_qualification(pipeline, seal["source_sha"],
                         request.get("qualification_output", str(Path(request["campaign_root"]) / "autonomous" / "B3_PRODUCTION_QUALIFICATION.json")))
     except Exception as error:
-        result.update(status="FAIL", PASS=False, failure_class=type(error).__name__, reason=str(error), traceback=traceback.format_exc())
+        failed_stage = heartbeat.get("stage", "ADMISSION")
+        classification = classify_failure(error, failed_stage, pipeline)
+        result.update(status="FAIL", PASS=False, classification=classification,
+            failure_state=classification, failed_stage=failed_stage,
+            failure_class=type(error).__name__, reason=str(error), traceback=traceback.format_exc())
         result["source_global_integrity_block"] = str(error).startswith(("B3_SOURCE_SEAL_", "SOURCE_FILE_SHA_DRIFT"))
     finally:
         stopped.set()
