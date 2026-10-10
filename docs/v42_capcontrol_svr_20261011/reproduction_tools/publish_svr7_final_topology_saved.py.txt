@@ -1,0 +1,170 @@
+"""Publish selected seven topology/rating from a qualified hardware freeze.
+
+Reads only receipts and saved native response data. Never compiles/solves DSS,
+changes equipment/control source, or relabels an earlier comparison's Source.
+"""
+from __future__ import annotations
+import argparse
+import csv
+import hashlib
+import json
+import math
+import subprocess
+import sys
+from pathlib import Path
+
+BASE=Path('D:/v42_voltage_control_development_20261011')
+AUDIT=BASE/'SVR7_TOPOLOGY_AUDIT_02'
+OBS=BASE/'SVR7_NATIVE_AUTO_SELECTOR_AUDIT_01'
+
+
+def read(path):return json.loads(Path(path).read_text(encoding='utf-8-sig'))
+
+
+def receipt(path):
+    p=Path(path);b=p.read_bytes()
+    return dict(path=str(p.resolve()),bytes=len(b),sha256=hashlib.sha256(b).hexdigest())
+
+
+def digest(value):return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()
+
+
+def rows(path):
+    with Path(path).open(encoding='utf-8-sig',newline='') as f:return list(csv.DictReader(f))
+
+
+def write(path,values):
+    with Path(path).open('w',encoding='utf-8-sig',newline='') as f:
+        w=csv.DictWriter(f,fieldnames=list(values[0]));w.writeheader();w.writerows(values)
+
+
+def original_nameplate_basis(branch):
+    """Keep each winding's nameplate current distinct from native NormAmps."""
+    if not branch['element'].lower().startswith('transformer.'):
+        return None
+    phases=int(branch['phases'])
+    assert phases in (1,3), 'UNSUPPORTED_ORIGINAL_TRANSFORMER_NAMEPLATE_PHASES'
+    result=[]
+    for winding in branch['windings']:
+        kv=float(winding['kv']);kva=float(winding['kva'])
+        assert kv>0 and kva>0
+        result.append(dict(terminal=int(winding['winding']),nameplate_kVA=kva,
+            phase_nameplate_kVA=kva/phases,nominal_kV=kv,
+            nominal_kV_convention='LINE_LINE' if phases==3 else 'LINE_NEUTRAL',
+            phase_nameplate_current_A=kva/(math.sqrt(3)*kv) if phases==3 else kva/kv,
+            current_formula='kVA/(sqrt(3)*kV_LL)' if phases==3 else 'kVA/kV_LN',
+            native_element_NormalAmps_A=float(branch['norm_amps']),
+            Native_NormalAmps_modified=False))
+    return result
+
+
+def main():
+    a=argparse.ArgumentParser();a.add_argument('--freeze-folder',type=Path,required=True)
+    a.add_argument('--output',type=Path,required=True);args=a.parse_args()
+    contract_path=args.freeze_folder/'SVR_CONTROLLER_CONTRACT.json'
+    freeze_path=args.freeze_folder/'HARDWARE_FREEZE_RECEIPT.json'
+    scenario_path=args.freeze_folder/'SCENARIO.json'
+    cold_path=args.freeze_folder/'COLD_READ_ONLY_ADMISSION_AUDIT.json'
+    contract=read(contract_path);freeze=read(freeze_path);scenario=read(scenario_path)
+    cold=read(cold_path)
+    assert freeze['PASS'] is True
+    assert cold['PASS'] is True and cold['hardware_freeze_receipt']==receipt(freeze_path)
+    assert contract['status']=='FROZEN'
+    units=contract['units'];assert [u['id'] for u in units]==['STA01','STA06','STA08','BUS83','BUS79','BUS108','BUS50']
+    known=read(BASE/'SVR7_DEVELOPMENT_SCENARIOS_01/B_SVR7_BUS50.json')['svr']['units']
+    assert units==known, 'OBSERVED_AND_FINAL_HARDWARE_UNIT_DTO_MISMATCH'
+    assert scenario['svr']['units']==units and scenario['time_mode']=='TIME' and scenario['capcontrol'] is None
+    frozen_source=freeze.get('source_SHA',freeze.get('execution_source_SHA',freeze.get('execution_SourceSHA_before')))
+    assert frozen_source and len(frozen_source)==64
+    if 'execution_SourceSHA_after' in freeze:
+        assert freeze['execution_SourceSHA_after']==frozen_source
+    assert cold['source_SHA']==frozen_source and cold['scenario_SHA']==scenario['scenario_SHA']
+    measured=read(OBS/'CANDIDATE_NATIVE_AUTO_SELECTOR_RESPONSE_RECEIPT.json')
+    assert measured['status']=='PAIRED_KNOWN_DEVELOPMENT_FULL96_VERIFIED'
+    observed_source=measured['source_SHA']
+    inventory_path=BASE/'SVR_ORIGINAL_TOPOLOGY_INVENTORY.json'
+    inventory=read(inventory_path)
+    branches={x['element'].lower():x for x in inventory['original_branches']}
+    nameplate_audit_path=OBS/'PRIOR_SOURCE_ORIGINAL_TX_NAMEPLATE_CURRENT_AUDIT.json'
+    nameplate_audit=read(nameplate_audit_path)
+    assert nameplate_audit['PASS'] is True and nameplate_audit['measurement_Source_SHA']==observed_source
+    out=args.output;out.mkdir(parents=True,exist_ok=False)
+    unit_by_id={u['id']:u for u in units}
+    topology=rows(AUDIT/'SVR7_INSTALLATION_TOPOLOGY_AUDIT.csv')
+    rating=rows(AUDIT/'SVR7_PHYSICAL_RATING_AUDIT.csv')
+    assert len(topology)==len(rating)==7
+    observed=[r for r in rows(OBS/'CANDIDATE_DEVICE_THERMAL_AND_TAP_RESPONSE.csv') if r['variant']=='BUS50']
+    assert len(observed)==42
+    for r in topology:
+        r['source_SHA']=frozen_source;r['scenario_SHA']=scenario['scenario_SHA']
+        if r['bank_id'] in ['BUS79','BUS108','BUS50']:
+            r['role']='SELECTED_ADDITIONAL3_FROZEN'
+        r['selection_status']='EXACT_SEVEN_SELECTED_FROZEN_HARDWARE'
+        r['contract_receipt_SHA']=receipt(contract_path)['sha256']
+        r['hardware_freeze_receipt_SHA']=receipt(freeze_path)['sha256']
+        r['known_native_comparison_source_SHA']=observed_source
+        r['native_voltage_response_scope']='KNOWN_MAY01_B2_AND_MAY28_B1_96_SLOT_AUTO_HARDWARE_INTERVENTION; LOCAL_TAP_DERIVATIVE_UNIDENTIFIED'
+        r['real_native_tap_sensitivity']='ENDOGENOUS_96_SLOT_AUTO_HARDWARE_RESPONSE_MEASURED; NO_LOCAL_PARTIAL_DERIVATIVE_CLAIM'
+        assert receipt(r['original_master_path'])['sha256']==r['original_master_SHA']
+        assert r['bank_id'] in unit_by_id
+    for r in rating:
+        unit=unit_by_id[r['bank_id']];values=[x for x in observed if x['bank_id']==r['bank_id']]
+        topology_row=next(x for x in topology if x['bank_id']==r['bank_id'])
+        original=branches[r['original_cut_element'].lower()]
+        if r['bank_id'] in ['BUS79','BUS108','BUS50']:
+            r['role']='SELECTED_ADDITIONAL3_FROZEN'
+        assert len(values)==6 and r['exact_contract_unit_SHA']==digest(unit)
+        r['source_SHA']=frozen_source;r['contract_receipt_SHA']=receipt(contract_path)['sha256']
+        r['hardware_freeze_receipt_SHA']=receipt(freeze_path)['sha256']
+        r['actual_installed_hardware_gate']='PASS_KNOWN_SOURCE_COMPARISON_TWO_DATES_ONLY'
+        current=max(float(x['max_both_terminal_current_loading_pu']) for x in values)
+        apparent=max(float(x['max_both_terminal_apparent_kVA_loading_pu']) for x in values)
+        assert current<=1 and apparent<=1
+        r['actual_thermal_margin']=min(1-current,1-apparent)
+        r['known_max_both_terminal_phase_current_loading_pu']=current
+        r['known_max_both_terminal_phase_apparent_kVA_loading_pu']=apparent
+        r['known_comparison_execution_source_SHA']=observed_source
+        r['known_measurement_scope']='MAY01_B2_AND_MAY28_B1; 96_CHRONOLOGICAL_SLOT_END_MEASUREMENTS; NOT_CONTINUOUS_TRANSIENT_CERTIFICATION'
+        r['new_MV_bank_reverseflow_actual_observed']=False if r['bank_id'] in ['BUS79','BUS108','BUS50'] else 'SEPARATE_MESS_SERVICE_SCOPE'
+        cut_basis=original_nameplate_basis(original)
+        r['original_native_NormalAmps_modified']=False
+        r['original_cut_native_NormalAmps_basis']='NATIVE_ELEMENT_READBACK_UNCHANGED; INDEPENDENT_OF_PER_WINDING_NAMEPLATE_CURRENT'
+        r['original_cut_phase_nameplate_basis_by_terminal']=json.dumps(cut_basis,sort_keys=True) if cut_basis else ''
+        r['original_cut_line_current_limit_A']=original['norm_amps'] if cut_basis is None else ''
+        r['new_phase_nameplate_current_formula']='phase_kVA/nominal_kV_LN; EACH_1_PHASE_1_TO_1_WINDING'
+        r['new_phase_nameplate_current_basis_A']=float(unit['phase_kva'])/float(unit['nominal_kv_ln'])
+        r['known_original_TX_nameplate_current_audit_receipt_SHA']=receipt(nameplate_audit_path)['sha256']
+        services=[]
+        for service in topology_row['direct_PCC_original_service_TX'].split('|'):
+            if service:
+                branch=branches[service.lower()]
+                services.append(dict(element=branch['element'],nameplate_basis_by_terminal=original_nameplate_basis(branch)))
+        r['covered_original_service_TX_nameplate_basis']=json.dumps(services,sort_keys=True)
+        r['nameplate_basis_current_source_canary_status']='PENDING_SEPARATE_CE30_CANARY; KNOWN_MEASUREMENTS_REMAIN_PRIOR_2CF_SOURCE'
+    write(out/'SVR7_INSTALLATION_TOPOLOGY_AUDIT.csv',topology)
+    write(out/'SVR7_PHYSICAL_RATING_AUDIT.csv',rating)
+    command=[sys.executable,str(BASE/'plot_svr7_exact_topology_v2.py'),'--contract',str(contract_path),'--output',str(out)]
+    subprocess.run(command,check=True)
+    result=dict(schema='V42_SVR7_SELECTED_FROZEN_TOPOLOGY_PUBLICATION_RECEIPT_V1',PASS=True,
+        contract_source_SHA=frozen_source,known_native_comparison_source_SHA=observed_source,
+        contract_source_equals_known_execution_source=frozen_source==observed_source,
+        source_difference_disclosed=frozen_source!=observed_source,hardware_DTO_equals_all_known_comparisons=True,
+        bank_count=7,physical_single_phase_transformer_count=21,total_bank_nameplate_kVA=sum(3*u['phase_kva'] for u in units),
+        exact_previous_four_canonical_SHA=digest(units[:4]),selected_alternative='BUS50',
+        source_receipts=[receipt(x) for x in [contract_path,freeze_path,scenario_path,
+            cold_path,inventory_path,nameplate_audit_path,
+            OBS/'CANDIDATE_NATIVE_AUTO_SELECTOR_RESPONSE_RECEIPT.json',
+            AUDIT/'SVR7_EXACT_TOPOLOGY_RATING_READONLY_RECEIPT.json']],
+        output_receipts=[receipt(p) for p in sorted(out.iterdir()) if p.is_file()],
+        script_receipt=receipt(__file__),plot_command=command,
+        Native_optimizer_calls=0,OpenDSS_compile_calls=0,OpenDSS_solve_calls=0,
+        production_source_edits=0,future_dates_success_claim=False,Planning_E2E_qualification_claim=False,
+        holdout_claim=False,new_MV_bank_reverseflow_actual_tested=False,
+        qualification_scope='HARDWARE_ONLY_NOT_E2E_QUALIFIED; MONTHLY_SAFETY_CONTINGENT_ON_CURRENT_SOURCE_CANARIES',
+        original_native_NormalAmps_modified=False,
+        per_winding_nameplate_current_and_native_NormalAmps_reported_separately=True)
+    (out/'SVR7_SELECTED_FROZEN_TOPOLOGY_PUBLICATION_RECEIPT.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+    print(json.dumps({k:result[k] for k in ['PASS','contract_source_SHA','known_native_comparison_source_SHA','bank_count','total_bank_nameplate_kVA']},indent=2))
+
+
+if __name__=='__main__':main()

@@ -1,0 +1,313 @@
+{
+  "schema": "V42_AC_ONLY_FROZEN_DAY_PROVENANCE_V1",
+  "job": {
+    "priority": 57,
+    "arm": "B0",
+    "day": "2025-05-01",
+    "original_operations_folder": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501",
+    "original_frozen_inventory": {
+      "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_AC_MONTHLY_PRIORITY_03\\FROZEN_PLAN_DATE_INVENTORY_V3.json",
+      "sha256": "cd40dc470ed2f00912fc24bdce5b8832bac246535b6383d5f1fc03bd58a5aee2",
+      "bytes": 881854
+    },
+    "inventory_row_key": "B0/2025-05-01",
+    "priority_tags": [
+      "HIGH_PV_UPPER_QUARTILE"
+    ],
+    "priority_metadata": {
+      "AEMO_Actual_demand_MW": {
+        "min": 3335.24,
+        "max": 6414.64,
+        "mean": 4869.538333333333
+      },
+      "AEMO_Actual_PV_MW": {
+        "min": 0.0,
+        "max": 2525.364,
+        "mean": 651.1841875
+      },
+      "Actual_PV_daily_MWh": 15628.4205,
+      "Actual_AIDC_aggregate_P_kw": {
+        "min": 461.4513075426252,
+        "max": 568.2574906013508,
+        "mean": 563.0940389650304
+      },
+      "original_background_net_P_kw_from_pinned_formula": {
+        "min": 1459.6493130300532,
+        "max": 2712.7207479455833,
+        "mean": 2071.9891767580593
+      },
+      "frozen_nominal_total_net_P_kw_BG_plus_AIDC_minus_MESS": {
+        "min": 2022.4295483257579,
+        "max": 3271.6669160439983,
+        "mean": 2635.0832157230893
+      },
+      "total_net_power_definition": "Original alpha_BG1.15 gross background minus original alpha_grid-scaled PV (no additional alpha_BG scaling) + frozen Actual AIDC PCC load minus frozen MESS generator-positive P. Nominal input, excludes AC loss.",
+      "MESS_P_kw": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "MESS_Q_kvar": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "MESS_max_abs_P_kw": 0.0,
+      "MESS_max_abs_Q_kvar": 0.0,
+      "MESS_max_adjacent_unit_P_swing_kw": 0.0,
+      "MESS_max_adjacent_unit_Q_swing_kvar": 0.0,
+      "MESS_max_unit_apparent_kVA": 0.0,
+      "MESS_location_change_count": 0,
+      "actual_exogenous_receipt": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250501\\DERIVED_AEMO_ACTUAL.parquet",
+        "exists": true,
+        "sha256": "d56f3854cbbc34835c9ec6cab150aa384a358c8f2f52a76f5b16dbcf230030fe",
+        "bytes": 4279
+      },
+      "background_formula_authority": {
+        "path": "D:\\v42_voltage_control_development_20261011\\APRIL_EXOGENOUS_RESIDUAL_AUDIT_01\\APRIL_EXOGENOUS_AND_FINITE_RATING_AUDIT.json",
+        "sha256": "0d13d2ac1160e72b6265b1187ffaf78b9ffec54ae4dc952feed5bef1e622f46e",
+        "bytes": 84811
+      }
+    },
+    "original_metrics": {
+      "voltage_lower_violations": 0,
+      "voltage_upper_violations": 0,
+      "voltage_violations": 0,
+      "line_current_violations": 0,
+      "transformer_current_violations": 0,
+      "transformer_kva_violations_phase_rows": 0,
+      "Vmin": 0.9777019157414255,
+      "Vmax": 1.048495347455922,
+      "max_line_loading_pu": 0.7133046369124362,
+      "max_transformer_current_pu": 0.8240044232131726,
+      "max_transformer_kva_pu": 0.6912052540597948,
+      "converged_slots": 96,
+      "worst_node_phase": "83.2",
+      "worst_slot0": 41,
+      "raw_original_node_axis_exact": true,
+      "raw_original_branch_phase_axis_exact": true,
+      "raw_96slot_shape_exact": true,
+      "DSTATCOM_added_SVR_CapControl_physical_objects_in_original_axes": false,
+      "original_raw_physical_PASS": true
+    },
+    "original_frozen_input_receipts": {
+      "INPUT_FREEZE.json": {
+        "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\INPUT_FREEZE.json",
+        "exists": true,
+        "sha256": "0c9dc4369f44fb2ed87c887346b24efaa0625499bff750f31174b245a45b3596",
+        "bytes": 1971
+      },
+      "PLANNING_FREEZE.json": {
+        "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\PLANNING_FREEZE.json",
+        "exists": true,
+        "sha256": "d93c96ac6bc24ac0f269277dc5e1c3b37e9c4771e7ed43b94570cc9c231555dd",
+        "bytes": 15455
+      },
+      "PLANNING_PHYSICAL.npz": {
+        "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\PLANNING_PHYSICAL.npz",
+        "exists": true,
+        "sha256": "f159e795784742009887c76fe013b6462ea9f6a44a9fd01f43acb492edf4de65",
+        "bytes": 28358
+      },
+      "ACTUAL_PHYSICAL.npz": {
+        "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\ACTUAL_PHYSICAL.npz",
+        "exists": true,
+        "sha256": "4cea3d6fc54edfe5534b407f2c1d897b47ca9f0d66035298ff449fb96369f116",
+        "bytes": 7726
+      },
+      "V_ACTUAL_AC.npz": {
+        "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\V_ACTUAL_AC.npz",
+        "exists": true,
+        "sha256": "de51c2bff71fa24409bfe13f879bda71676fc8e6742cf26510cb236ddd016957",
+        "bytes": 852496
+      },
+      "RAW_CONTROL_LOG.json": {
+        "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\RAW_CONTROL_LOG.json",
+        "exists": true,
+        "sha256": "b9b290c4d0b06d26ec42ab85435ebf3227522fdd77d5e0ac34c639447ba33b37",
+        "bytes": 66989
+      },
+      "RAW_PHYSICAL_INPUT_LOG.json": {
+        "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\RAW_PHYSICAL_INPUT_LOG.json",
+        "exists": true,
+        "sha256": "5ada910a578426b61b79dc9b07802061fd86f316ae775f997fbf16c0739eaa80",
+        "bytes": 504497
+      },
+      "FRESH_ACTUAL_AC_RECEIPT.json": {
+        "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\FRESH_ACTUAL_AC_RECEIPT.json",
+        "exists": true,
+        "sha256": "15f22c4783c2e008f77e63e47c10459c5c0b763b72a82577cb16a2cf6af59190",
+        "bytes": 2027
+      }
+    },
+    "source_proof": {
+      "day_exact": true,
+      "timestamps96_exact": true,
+      "control": {
+        "source_initial_inventory_exact_original": true,
+        "source_inventory_canonical_SHA256": "d94429198223d3eeb1c447492e09eb0cbfb0fec61bbf5c78aefbb65843fadf92",
+        "original_RegControl_count": 7,
+        "original_CapControl_count": 0,
+        "original_regulators_ALWAYS_AUTO": true,
+        "original_four_caps_fixed_ON_all96": true,
+        "no_CapControl_all96": true,
+        "no_Planning_tap_replay": true,
+        "historical_internal_time_event_trace_available": false,
+        "PASS": true
+      },
+      "Planning_original_band_95_105": true,
+      "MESS_all_zero96": true,
+      "Actual_no_PQ_repair": true,
+      "Actual_PQ_equals_saved_physical": true,
+      "receipt_checks": {
+        "raw_AC_declared_sha": {
+          "declared": {
+            "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\V_ACTUAL_AC.npz",
+            "sha256": "de51c2bff71fa24409bfe13f879bda71676fc8e6742cf26510cb236ddd016957",
+            "bytes": 852496
+          },
+          "actual": {
+            "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\V_ACTUAL_AC.npz",
+            "exists": true,
+            "sha256": "de51c2bff71fa24409bfe13f879bda71676fc8e6742cf26510cb236ddd016957",
+            "bytes": 852496
+          },
+          "PASS": true
+        },
+        "Actual_physical_declared_sha": {
+          "declared": {
+            "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\ACTUAL_PHYSICAL.npz",
+            "sha256": "4cea3d6fc54edfe5534b407f2c1d897b47ca9f0d66035298ff449fb96369f116",
+            "bytes": 7726
+          },
+          "actual": {
+            "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\ACTUAL_PHYSICAL.npz",
+            "exists": true,
+            "sha256": "4cea3d6fc54edfe5534b407f2c1d897b47ca9f0d66035298ff449fb96369f116",
+            "bytes": 7726
+          },
+          "PASS": true
+        },
+        "Planning_physical_declared_sha": {
+          "declared": {
+            "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\PLANNING_PHYSICAL.npz",
+            "sha256": "f159e795784742009887c76fe013b6462ea9f6a44a9fd01f43acb492edf4de65",
+            "bytes": 28358
+          },
+          "actual": {
+            "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\PLANNING_PHYSICAL.npz",
+            "exists": true,
+            "sha256": "f159e795784742009887c76fe013b6462ea9f6a44a9fd01f43acb492edf4de65",
+            "bytes": 28358
+          },
+          "PASS": true
+        },
+        "Planning_voltage_declared_sha": {
+          "declared": {
+            "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\V_PLAN.npz",
+            "sha256": "4d02a919ad33aaf5197d4da50a6adf35f54e57f0a9e0e4d3cdb712ed62e3ee21",
+            "bytes": 765677
+          },
+          "actual": {
+            "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\V_PLAN.npz",
+            "exists": true,
+            "sha256": "4d02a919ad33aaf5197d4da50a6adf35f54e57f0a9e0e4d3cdb712ed62e3ee21",
+            "bytes": 765677
+          },
+          "PASS": true
+        }
+      },
+      "actual_source": {
+        "declared": {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250501\\DERIVED_AEMO_ACTUAL.parquet",
+          "sha256": "d56f3854cbbc34835c9ec6cab150aa384a358c8f2f52a76f5b16dbcf230030fe",
+          "bytes": 4279
+        },
+        "actual": {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250501\\DERIVED_AEMO_ACTUAL.parquet",
+          "exists": true,
+          "sha256": "d56f3854cbbc34835c9ec6cab150aa384a358c8f2f52a76f5b16dbcf230030fe",
+          "bytes": 4279
+        },
+        "PASS": true,
+        "day_96_end_timestamps_exact": true,
+        "light_PV_summary": {
+          "daily_PV_MWh": 15628.4205,
+          "max_PV_MW": 2525.364,
+          "worst_slot_PV_MW": null,
+          "max_demand_MW": 6414.64
+        }
+      },
+      "original_RegControl_authority_SHA": "3e4aaaabc10429aa2e95f810573337bdbdbb4d6ca4aeda41ae51d0325cf322cf",
+      "original_capacitor_fixed_state_authority_SHA": "c4084bd35f395f3472d2dab0411433c8bb9cd6ccfb366060f50878bfb45c96f4"
+    },
+    "new_AC_status": "NOT_RUN",
+    "new_Planning_optimization_status": "NOT_REQUESTED_AC_ONLY",
+    "Native_optimizer_calls": 0
+  },
+  "source_SHA": "ce30af2a74d9d2b6a2f2a33fee7a690927752f940f94bd466218075ba34cbf04",
+  "scenario_SHA": "3b9398cabfcc7acb8cf3c9c92d14aea7e4418dcf8a0bd63519ba482e16345603",
+  "infrastructure": {
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\HARDWARE_FREEZE_RECEIPT.json",
+    "sha256": "490020ddf9c25f32a2bd6d6f13c5c05402aa5de0004f591047407bd96ccefffe",
+    "bytes": 37619
+  },
+  "driver": {
+    "path": "D:\\v42_voltage_control_development_20261011\\run_frozen_ac_day.py",
+    "sha256": "77ea1b6e1c15816d43020e47db1909f63ca5e776c7b3250000b46622a8d74adc",
+    "bytes": 11719
+  },
+  "queue": {
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_AC_MONTHLY_PRIORITY_03\\FROZEN_AC_MAY31_PRIORITY_QUEUE.json",
+    "sha256": "301dafbb620152a2058e4700ef5b62b25d9e675358040544b12d12502b368c86",
+    "bytes": 887981
+  },
+  "configuration": "SVR7",
+  "original_frozen_receipts": {
+    "INPUT_FREEZE.json": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\INPUT_FREEZE.json",
+      "sha256": "0c9dc4369f44fb2ed87c887346b24efaa0625499bff750f31174b245a45b3596",
+      "bytes": 1971
+    },
+    "PLANNING_FREEZE.json": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\PLANNING_FREEZE.json",
+      "sha256": "d93c96ac6bc24ac0f269277dc5e1c3b37e9c4771e7ed43b94570cc9c231555dd",
+      "bytes": 15455
+    },
+    "PLANNING_PHYSICAL.npz": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\PLANNING_PHYSICAL.npz",
+      "sha256": "f159e795784742009887c76fe013b6462ea9f6a44a9fd01f43acb492edf4de65",
+      "bytes": 28358
+    },
+    "ACTUAL_PHYSICAL.npz": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\ACTUAL_PHYSICAL.npz",
+      "sha256": "4cea3d6fc54edfe5534b407f2c1d897b47ca9f0d66035298ff449fb96369f116",
+      "bytes": 7726
+    },
+    "V_ACTUAL_AC.npz": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\V_ACTUAL_AC.npz",
+      "sha256": "de51c2bff71fa24409bfe13f879bda71676fc8e6742cf26510cb236ddd016957",
+      "bytes": 852496
+    },
+    "RAW_CONTROL_LOG.json": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\RAW_CONTROL_LOG.json",
+      "sha256": "b9b290c4d0b06d26ec42ab85435ebf3227522fdd77d5e0ac34c639447ba33b37",
+      "bytes": 66989
+    },
+    "RAW_PHYSICAL_INPUT_LOG.json": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\RAW_PHYSICAL_INPUT_LOG.json",
+      "sha256": "5ada910a578426b61b79dc9b07802061fd86f316ae775f997fbf16c0739eaa80",
+      "bytes": 504497
+    },
+    "FRESH_ACTUAL_AC_RECEIPT.json": {
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_transformer_normalamps_pr\\docs\\v42_may_b0_zero_margin_holdout\\BUNDLE\\DAY_20250501\\FRESH_ACTUAL_AC_RECEIPT.json",
+      "sha256": "15f22c4783c2e008f77e63e47c10459c5c0b763b72a82577cb16a2cf6af59190",
+      "bytes": 2027
+    }
+  },
+  "new_Planning_optimization": false,
+  "historical_plan_reuse_for_physical_diagnosis_only": true,
+  "Native_optimizer_calls": 0,
+  "independent_holdout_claim": false
+}

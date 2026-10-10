@@ -1,0 +1,95 @@
+"""Read-only monitor for capacitor/SVR diagnostics; it cannot launch a worker."""
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from datetime import datetime, timezone
+import csv
+import json
+import psutil
+
+ROOT = Path(__file__).resolve().parents[1]
+_cache = {}
+
+def read(path):
+    try:
+        return json.loads(Path(path).read_text(encoding='utf-8-sig'))
+    except (OSError, ValueError):
+        return {}
+
+def state():
+    stages=[]
+    diagnostic_paths=[p for folder in ROOT.iterdir() if folder.is_dir()
+        and not folder.name.startswith('AC_ONLY_SVR4_SVR7_CANARY_')
+        and folder.name!='DSTATCOM_RETIRED_SOURCE_SNAPSHOT'
+        for p in folder.glob('**/REPLAY_RESULT.json')]
+    for path in sorted(diagnostic_paths):
+        if 'DSTATCOM_RETIRED_SOURCE_SNAPSHOT' in path.parts or any(part.startswith('AC_ONLY_SVR4_SVR7_CANARY_') for part in path.parts):
+            continue
+        value=read(path)
+        metrics=dict(value.get('metrics',{}))
+        receipt=value.get('physical_audit') or {}
+        audit=read(receipt.get('path',''))
+        slots_receipt=audit.get('slots_receipt') or {}
+        key=slots_receipt.get('sha256')
+        if key:
+            if key not in _cache:
+                rows=read(slots_receipt.get('path',''))
+                if isinstance(rows,list) and len(rows)==96:
+                    frames=[r['physical'] for r in rows]
+                    _cache[key]=dict(voltage_violation_cells=sum(f['voltage_violation_cells'] for f in frames),voltage_min_pu=min(f['voltage_min_pu'] for f in frames),voltage_max_pu=max(f['voltage_max_pu'] for f in frames),line_current_violation_cells=sum(f['line_current_violation_cells'] for f in frames),original_service_and_grid_transformer_current_violation_cells=sum(f['transformer_current_violation_cells'] for f in frames),original_service_and_grid_transformer_kva_violation_cells=sum(f['transformer_kva_violation_cells'] for f in frames))
+            metrics.update(_cache.get(key,{}))
+        stages.append(dict(name=path.parent.name,day=value.get('day'),arm=value.get('arm'),
+            case=value.get('case',value.get('scenario_case')),source_SHA=value.get('source_SHA'),
+            physical_PASS=value.get('Full_AC_Physical_PASS',value.get('PASS')),
+            voltage_violations=metrics.get('voltage_violation_cells'),
+            voltage_min_pu=metrics.get('voltage_min_pu'),voltage_max_pu=metrics.get('voltage_max_pu'),
+            max_line_loading_percent=metrics.get('actual_maximum_line_loading_percent'),
+            line_violations=metrics.get('line_current_violation_cells'),
+            transformer_current_violations=metrics.get('original_service_and_grid_transformer_current_violation_cells'),
+            transformer_kva_violations=metrics.get('original_service_and_grid_transformer_kva_violation_cells'),
+            converged_slots=metrics.get('converged_slots'),path=str(path)))
+    workers=[]
+    for proc in psutil.process_iter(['pid','cmdline']):
+        cmd=proc.info.get('cmdline') or []
+        if any(arg.startswith('v42_voltage_control.') or Path(arg).name in ('run_frozen_ac_day.py','run_ac_only_svr_comparison.py') for arg in cmd):
+            entry=next((Path(a).name for a in cmd[1:] if a.lower().endswith('.py')),None)
+            workers.append(dict(PID=proc.info['pid'],command=cmd,entry=entry))
+    monthly=[]
+    for path in sorted(ROOT.glob('AC_ONLY_SVR4_SVR7_CANARY_*/**/AC_ONLY_DAY_RESULT.json')):
+        value=read(path);m=value.get('metric') or {}
+        monthly.append(dict(epoch=path.relative_to(ROOT).parts[0],configuration=value.get('configuration'),arm=value.get('arm'),day=value.get('day'),status=value.get('status'),
+            voltage_violations=m.get('voltage_violation_cells'),Vmin=m.get('Vmin'),Vmax=m.get('Vmax'),
+            line_loading_percent=m.get('max_line_loading_percent'),line_violations=m.get('line_current_violation_cells'),
+            transformer_current_violations=m.get('transformer_current_violation_cells'),transformer_kva_violations=m.get('transformer_kva_violation_cells'),
+            transformer_nameplate_current_violations=m.get('transformer_nameplate_current_violation_cells'),
+            upper_margin=m.get('upper_voltage_margin_pu'),lower_margin=m.get('lower_voltage_margin_pu'),
+            converged_slots=m.get('converged_slots'),source_SHA=value.get('source_SHA'),path=str(path)))
+    batches=[read(p) for p in sorted(ROOT.glob('AC_ONLY_SVR4_SVR7_CANARY_*/DISPATCH_PROGRESS.json'))]
+    return dict(utc=datetime.now(timezone.utc).isoformat(),mode='SVR4_VS_SVR7_AC_ONLY',
+        DSTATCOM='RETIRED',deployment='HOLD_UNTIL_PHYSICAL_AND_E2E_GATES',
+        execution_processes=workers,AC_day_workers=[w for w in workers if w['entry']=='run_frozen_ac_day.py'],
+        AC_dispatchers=[w for w in workers if w['entry']=='run_ac_only_svr_comparison.py'],
+        native_workers=[w for w in workers if any(a=='v42_voltage_control.campaign_worker' for a in w['command'])],
+        retirement=read(ROOT/'DSTATCOM_RETIREMENT_FINAL_SVR7_AUDIT.json') or read(ROOT/'DSTATCOM_RETIREMENT_AUDIT.json'),
+        status=read(ROOT/'DEVELOPMENT_PROGRESS.json'),stages=stages,monthly=monthly,batches=batches,
+        final_coverage=read(ROOT/'SVR4_SVR7_FINAL_COLLECTION_04/FINAL_COHORT_COVERAGE.json'),
+        final_comparison=list(csv.DictReader((ROOT/'SVR4_SVR7_FINAL_COLLECTION_04/SVR4_VS_SVR7_CANARY_COMPARISON.csv').open(encoding='utf-8-sig',newline=''))),
+        preserved_failures=dict(DSTATCOM_all=921,DSTATCOM_STA08_single=40),
+        unknown_is_not_zero=True)
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path.split('?')[0]=='/api/state':
+            body=json.dumps(state(),ensure_ascii=False,allow_nan=False).encode('utf8')
+            kind='application/json; charset=utf-8'
+        elif self.path.split('?')[0]=='/':
+            body=Path(__file__).with_name('index.html').read_bytes();kind='text/html; charset=utf-8'
+        else:
+            self.send_error(404);return
+        self.send_response(200);self.send_header('Content-Type',kind)
+        self.send_header('Cache-Control','no-store');self.send_header('Content-Length',str(len(body)))
+        self.end_headers();self.wfile.write(body)
+    def log_message(self,*args):
+        pass
+
+if __name__=='__main__':
+    ThreadingHTTPServer(('127.0.0.1',8796),Handler).serve_forever()

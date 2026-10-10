@@ -136,7 +136,7 @@ def fresh(root,day,planning,actual_folder,output,freeze,progress):
         result=original_voltage(engine,axis); inventory=m['inventory'](engine); assert_inventory(inventory)
         if not engine.Solution.ControlActionsDone(): raise ValueError('CONTROL_ACTIONS_INCOMPLETE')
         logs.append(dict(slot=len(logs),taps=m['native_state'](engine)[0],caps=m['native_state'](engine)[1],
-                         all_7_RegControls_enabled=True,CapControl_count=0,Planning_tap_replay=False))
+                         all_7_RegControls_enabled=True,CapControl_count=len(inventory['capcontrols']),Planning_tap_replay=False))
         return result
     keys=('compile_clean_engine','apply_trajectory_slot','apply_frozen_native_state','_branch_measurement','_voltage_vector')
     old={k:getattr(backend,k) for k in keys}

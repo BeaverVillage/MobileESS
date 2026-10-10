@@ -1,0 +1,379 @@
+{
+  "schema": "V42_AC_ONLY_FROZEN_DAY_PROVENANCE_V1",
+  "job": {
+    "priority": 2,
+    "arm": "B2",
+    "day": "2025-05-01",
+    "original_operations_folder": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS",
+    "original_frozen_inventory": {
+      "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_AC_MONTHLY_PRIORITY_03\\FROZEN_PLAN_DATE_INVENTORY_V3.json",
+      "sha256": "cd40dc470ed2f00912fc24bdce5b8832bac246535b6383d5f1fc03bd58a5aee2",
+      "bytes": 881854
+    },
+    "inventory_row_key": "B2/2025-05-01",
+    "priority_tags": [
+      "HIGH_MESS_Q_EXTREMUM",
+      "HIGH_PV_UPPER_QUARTILE",
+      "MESS_MOVEMENT_PRESENT",
+      "MESS_PQ_SWING_PRESENT",
+      "NEAR_OR_ABOVE_UPPER_BOUND",
+      "ORIGINAL_VOLTAGE_VIOLATION"
+    ],
+    "priority_metadata": {
+      "AEMO_Actual_demand_MW": {
+        "min": 3335.24,
+        "max": 6414.64,
+        "mean": 4869.538333333333
+      },
+      "AEMO_Actual_PV_MW": {
+        "min": 0.0,
+        "max": 2525.364,
+        "mean": 651.1841875
+      },
+      "Actual_PV_daily_MWh": 15628.4205,
+      "Actual_AIDC_aggregate_P_kw": {
+        "min": 193.5366552038866,
+        "max": 568.2574788977206,
+        "mean": 373.04952093722386
+      },
+      "original_background_net_P_kw_from_pinned_formula": {
+        "min": 1459.6493130300532,
+        "max": 2712.7207479455833,
+        "mean": 2071.9891767580593
+      },
+      "frozen_nominal_total_net_P_kw_BG_plus_AIDC_minus_MESS": {
+        "min": 1689.1535555739397,
+        "max": 2693.6074860263248,
+        "mean": 2457.736267283403
+      },
+      "total_net_power_definition": "Original alpha_BG1.15 gross background minus original alpha_grid-scaled PV (no additional alpha_BG scaling) + frozen Actual AIDC PCC load minus frozen MESS generator-positive P. Nominal input, excludes AC loss.",
+      "MESS_P_kw": {
+        "min": -300.00000000000387,
+        "max": 300.00000000000375,
+        "mean": -3.174392397029955
+      },
+      "MESS_Q_kvar": {
+        "min": -392.3141121613012,
+        "max": 392.3141121613014,
+        "mean": -15.796173822050951
+      },
+      "MESS_max_abs_P_kw": 300.00000000000387,
+      "MESS_max_abs_Q_kvar": 392.3141121613014,
+      "MESS_max_adjacent_unit_P_swing_kw": 300.0000000000041,
+      "MESS_max_adjacent_unit_Q_swing_kvar": 782.6385108199747,
+      "MESS_max_unit_apparent_kVA": 400.0000000000046,
+      "MESS_location_change_count": 4,
+      "actual_exogenous_receipt": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL_SOURCE\\INPUT\\BUNDLE\\DAY_20250501\\DERIVED_AEMO_ACTUAL.parquet",
+        "exists": true,
+        "sha256": "d56f3854cbbc34835c9ec6cab150aa384a358c8f2f52a76f5b16dbcf230030fe",
+        "bytes": 4279
+      },
+      "background_formula_authority": {
+        "path": "D:\\v42_voltage_control_development_20261011\\APRIL_EXOGENOUS_RESIDUAL_AUDIT_01\\APRIL_EXOGENOUS_AND_FINITE_RATING_AUDIT.json",
+        "sha256": "0d13d2ac1160e72b6265b1187ffaf78b9ffec54ae4dc952feed5bef1e622f46e",
+        "bytes": 84811
+      }
+    },
+    "original_metrics": {
+      "voltage_lower_violations": 0,
+      "voltage_upper_violations": 19,
+      "voltage_violations": 19,
+      "line_current_violations": 0,
+      "transformer_current_violations": 0,
+      "transformer_kva_violations_phase_rows": 0,
+      "Vmin": 0.9558012512075119,
+      "Vmax": 1.0583754890888868,
+      "max_line_loading_pu": 0.5990347229877903,
+      "max_transformer_current_pu": 0.6354687846329823,
+      "max_transformer_kva_pu": 0.587206270047025,
+      "converged_slots": 96,
+      "worst_node_phase": "mess_sta08_pcc.1",
+      "worst_slot0": 10,
+      "raw_original_node_axis_exact": true,
+      "raw_original_branch_phase_axis_exact": true,
+      "raw_96slot_shape_exact": true,
+      "DSTATCOM_added_SVR_CapControl_physical_objects_in_original_axes": false,
+      "original_raw_physical_PASS": false
+    },
+    "original_frozen_input_receipts": {
+      "request": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\request.json",
+        "exists": true,
+        "sha256": "9829494222df74412ee4fed07937a75d9414380174e8b1403525a2afa9af9e6e",
+        "bytes": 1616
+      },
+      "RESULT": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\RESULT.json",
+        "exists": true,
+        "sha256": "1627578fd0dd8ee1e99dc5b9e435845a869ee21972ef0fa48c19091bcab5ad5f",
+        "bytes": 13411464
+      },
+      "Planning_freeze": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\PLANNING\\V42_DAYAHEAD_DECISION_FREEZE.json",
+        "exists": true,
+        "sha256": "40c3c6dc9099a7bb86062001335dcc8d2aa6af1f7603dccc3a86e6127370eb62",
+        "bytes": 6240850
+      },
+      "Actual_replay": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_FIXED_REPLAY_RECEIPT.json",
+        "exists": true,
+        "sha256": "c4ea6cc815cd28ea7e3d6ab17a896b7d644a97a6d4d58db677a823a0e726b5ec",
+        "bytes": 1756
+      },
+      "Planning_physical": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\SOURCE\\PLANNING_PHYSICAL.npz",
+        "exists": true,
+        "sha256": "599d4130cda663affce1df17086ffbf4cdb0bd5fb4284a3f7c334835fffaa2a7",
+        "bytes": 9322
+      },
+      "Planning_MESS": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\SOURCE\\PLANNING_MESS.npz",
+        "exists": true,
+        "sha256": "3d7ccc52a22e6581641fe4f26ed86792d314ba0b064933e79b1def75a24b576f",
+        "bytes": 6284
+      },
+      "Actual_fixed": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_FIXED_TRAJECTORY.npz",
+        "exists": true,
+        "sha256": "e752c5879d9eb89312413ac8a11d09154efdfbdf7e9f8d1b98b0de5b30f1d61c",
+        "bytes": 5481
+      },
+      "Actual_MESS": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_MESS_TRAJECTORY.npz",
+        "exists": true,
+        "sha256": "3d7ccc52a22e6581641fe4f26ed86792d314ba0b064933e79b1def75a24b576f",
+        "bytes": 6284
+      },
+      "raw_AC": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+        "exists": true,
+        "sha256": "6d1591cd20759465c215ce80fe786f286eebe6182c038d5ce1fbe79e966443dc",
+        "bytes": 852518
+      },
+      "raw_control_log": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\RAW_CONTROL_LOG.json",
+        "exists": true,
+        "sha256": "745be50a54248b592062b1f762a07d41fa9fad650f67216edfd10f6d4575e365",
+        "bytes": 49890
+      },
+      "raw_physical_input_log": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\RAW_PHYSICAL_INPUT_LOG.json",
+        "exists": true,
+        "sha256": "9c64f1ed9a97cc0996f7396da5320e8a388c4f4143f005b36452f93319354250",
+        "bytes": 134207
+      },
+      "original_OPS_result": {
+        "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\OPERATIONS_RESULT.json",
+        "exists": true,
+        "sha256": "10becd60cdd740f68bb1001cf0137f48ac30ab716def2197fb4539c40f526b1d",
+        "bytes": 8462
+      }
+    },
+    "source_proof": {
+      "day_arm_exact": true,
+      "decision_day_exact": true,
+      "decision_SHA_exact": true,
+      "Planning_PQ_equals_Actual_fixed": true,
+      "Actual_PQ_equals_physical_log": true,
+      "Actual_MESS_equals_Planning_bytes": true,
+      "MESS_PQ_locations_equals_logged96": true,
+      "Actual_no_PQ_repair": true,
+      "future_feedback_to_Planning": false,
+      "execution_source_SHA": "9df4e1dfba249aad77a0eca8077aeca951108dff55c6a29d891e192aab20297a",
+      "execution_source_commit": "1e691988dce2cf0f54f44851cd1a19634bbe68ff",
+      "receipt_checks": {
+        "Planning_freeze_receipt": {
+          "declared": {
+            "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\PLANNING\\V42_DAYAHEAD_DECISION_FREEZE.json",
+            "sha256": "40c3c6dc9099a7bb86062001335dcc8d2aa6af1f7603dccc3a86e6127370eb62",
+            "bytes": 6240850
+          },
+          "actual": {
+            "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\PLANNING\\V42_DAYAHEAD_DECISION_FREEZE.json",
+            "exists": true,
+            "sha256": "40c3c6dc9099a7bb86062001335dcc8d2aa6af1f7603dccc3a86e6127370eb62",
+            "bytes": 6240850
+          },
+          "PASS": true
+        },
+        "MESS_frozen_receipt": {
+          "declared": {
+            "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_MESS_TRAJECTORY.npz",
+            "sha256": "3d7ccc52a22e6581641fe4f26ed86792d314ba0b064933e79b1def75a24b576f",
+            "bytes": 6284
+          },
+          "actual": {
+            "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_MESS_TRAJECTORY.npz",
+            "exists": true,
+            "sha256": "3d7ccc52a22e6581641fe4f26ed86792d314ba0b064933e79b1def75a24b576f",
+            "bytes": 6284
+          },
+          "PASS": true
+        },
+        "MESS_Planning_receipt": {
+          "declared": {
+            "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\SOURCE\\PLANNING_MESS.npz",
+            "sha256": "3d7ccc52a22e6581641fe4f26ed86792d314ba0b064933e79b1def75a24b576f",
+            "bytes": 6284
+          },
+          "actual": {
+            "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\SOURCE\\PLANNING_MESS.npz",
+            "exists": true,
+            "sha256": "3d7ccc52a22e6581641fe4f26ed86792d314ba0b064933e79b1def75a24b576f",
+            "bytes": 6284
+          },
+          "PASS": true
+        },
+        "accepted_Plan_receipt": {
+          "declared": {
+            "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPTIMIZED_MESS_PLAN.json",
+            "sha256": "3574912966f9c9421a94b3d890832537a9e00722999e6bff53592c412118c8fe",
+            "bytes": 11919083
+          },
+          "actual": {
+            "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPTIMIZED_MESS_PLAN.json",
+            "exists": true,
+            "sha256": "3574912966f9c9421a94b3d890832537a9e00722999e6bff53592c412118c8fe",
+            "bytes": 11919083
+          },
+          "PASS": true
+        }
+      },
+      "actual_source": {
+        "declared": {
+          "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL_SOURCE\\INPUT\\BUNDLE\\DAY_20250501\\DERIVED_AEMO_ACTUAL.parquet",
+          "sha256": "d56f3854cbbc34835c9ec6cab150aa384a358c8f2f52a76f5b16dbcf230030fe",
+          "bytes": 4279
+        },
+        "actual": {
+          "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL_SOURCE\\INPUT\\BUNDLE\\DAY_20250501\\DERIVED_AEMO_ACTUAL.parquet",
+          "exists": true,
+          "sha256": "d56f3854cbbc34835c9ec6cab150aa384a358c8f2f52a76f5b16dbcf230030fe",
+          "bytes": 4279
+        },
+        "PASS": true,
+        "day_96_end_timestamps_exact": true,
+        "light_PV_summary": {
+          "daily_PV_MWh": 15628.4205,
+          "max_PV_MW": 2525.364,
+          "worst_slot_PV_MW": null,
+          "max_demand_MW": 6414.64
+        }
+      },
+      "control": {
+        "source_initial_inventory_exact_original": true,
+        "source_inventory_canonical_SHA256": "d94429198223d3eeb1c447492e09eb0cbfb0fec61bbf5c78aefbb65843fadf92",
+        "original_RegControl_count": 7,
+        "original_CapControl_count": 0,
+        "original_regulators_ALWAYS_AUTO": true,
+        "original_four_caps_fixed_ON_all96": true,
+        "no_CapControl_all96": true,
+        "no_Planning_tap_replay": true,
+        "historical_internal_time_event_trace_available": null,
+        "PASS": true
+      },
+      "raw_declared_receipt": {
+        "declared": {
+          "bytes": 852518,
+          "sha256": "6d1591cd20759465c215ce80fe786f286eebe6182c038d5ce1fbe79e966443dc"
+        },
+        "actual": {
+          "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+          "exists": true,
+          "sha256": "6d1591cd20759465c215ce80fe786f286eebe6182c038d5ce1fbe79e966443dc",
+          "bytes": 852518
+        },
+        "PASS": true
+      },
+      "raw_manifest_day_arm_ACTUAL_exact": true
+    },
+    "new_AC_status": "NOT_RUN",
+    "new_Planning_optimization_status": "NOT_REQUESTED_AC_ONLY",
+    "Native_optimizer_calls": 0
+  },
+  "source_SHA": "ce30af2a74d9d2b6a2f2a33fee7a690927752f940f94bd466218075ba34cbf04",
+  "scenario_SHA": "3b9398cabfcc7acb8cf3c9c92d14aea7e4418dcf8a0bd63519ba482e16345603",
+  "infrastructure": {
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\HARDWARE_FREEZE_RECEIPT.json",
+    "sha256": "490020ddf9c25f32a2bd6d6f13c5c05402aa5de0004f591047407bd96ccefffe",
+    "bytes": 37619
+  },
+  "driver": {
+    "path": "D:\\v42_voltage_control_development_20261011\\run_frozen_ac_day.py",
+    "sha256": "77ea1b6e1c15816d43020e47db1909f63ca5e776c7b3250000b46622a8d74adc",
+    "bytes": 11719
+  },
+  "queue": {
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_AC_MONTHLY_PRIORITY_03\\FROZEN_AC_MAY31_PRIORITY_QUEUE.json",
+    "sha256": "301dafbb620152a2058e4700ef5b62b25d9e675358040544b12d12502b368c86",
+    "bytes": 887981
+  },
+  "configuration": "SVR7",
+  "original_frozen_receipts": {
+    "request": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\REQUEST.json",
+      "sha256": "9829494222df74412ee4fed07937a75d9414380174e8b1403525a2afa9af9e6e",
+      "bytes": 1616
+    },
+    "RESULT": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\RESULT.json",
+      "sha256": "1627578fd0dd8ee1e99dc5b9e435845a869ee21972ef0fa48c19091bcab5ad5f",
+      "bytes": 13411464
+    },
+    "Planning_freeze": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\PLANNING\\V42_DAYAHEAD_DECISION_FREEZE.json",
+      "sha256": "40c3c6dc9099a7bb86062001335dcc8d2aa6af1f7603dccc3a86e6127370eb62",
+      "bytes": 6240850
+    },
+    "Actual_replay": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_FIXED_REPLAY_RECEIPT.json",
+      "sha256": "c4ea6cc815cd28ea7e3d6ab17a896b7d644a97a6d4d58db677a823a0e726b5ec",
+      "bytes": 1756
+    },
+    "Planning_physical": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\SOURCE\\PLANNING_PHYSICAL.npz",
+      "sha256": "599d4130cda663affce1df17086ffbf4cdb0bd5fb4284a3f7c334835fffaa2a7",
+      "bytes": 9322
+    },
+    "Planning_MESS": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\SOURCE\\PLANNING_MESS.npz",
+      "sha256": "3d7ccc52a22e6581641fe4f26ed86792d314ba0b064933e79b1def75a24b576f",
+      "bytes": 6284
+    },
+    "Actual_fixed": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_FIXED_TRAJECTORY.npz",
+      "sha256": "e752c5879d9eb89312413ac8a11d09154efdfbdf7e9f8d1b98b0de5b30f1d61c",
+      "bytes": 5481
+    },
+    "Actual_MESS": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_MESS_TRAJECTORY.npz",
+      "sha256": "3d7ccc52a22e6581641fe4f26ed86792d314ba0b064933e79b1def75a24b576f",
+      "bytes": 6284
+    },
+    "raw_AC": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "6d1591cd20759465c215ce80fe786f286eebe6182c038d5ce1fbe79e966443dc",
+      "bytes": 852518
+    },
+    "raw_control_log": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\RAW_CONTROL_LOG.json",
+      "sha256": "745be50a54248b592062b1f762a07d41fa9fad650f67216edfd10f6d4575e365",
+      "bytes": 49890
+    },
+    "raw_physical_input_log": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\RAW_PHYSICAL_INPUT_LOG.json",
+      "sha256": "9c64f1ed9a97cc0996f7396da5320e8a388c4f4143f005b36452f93319354250",
+      "bytes": 134207
+    },
+    "original_OPS_result": {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\OPERATIONS_RESULT.json",
+      "sha256": "10becd60cdd740f68bb1001cf0137f48ac30ab716def2197fb4539c40f526b1d",
+      "bytes": 8462
+    }
+  },
+  "new_Planning_optimization": false,
+  "historical_plan_reuse_for_physical_diagnosis_only": true,
+  "Native_optimizer_calls": 0,
+  "independent_holdout_claim": false
+}

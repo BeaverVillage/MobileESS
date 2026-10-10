@@ -368,12 +368,17 @@ def fresh(request, planning, actual_folder, source_folder, output, progress=None
     receipt = read(output / 'FRESH_RESULT.json')
     controls = read(output / 'RAW_CONTROL_LOG.json')['slots']
     inputs = read(output / 'RAW_PHYSICAL_INPUT_LOG.json')['slots']
+    # A new source epoch may explicitly add native capacitor controllers. The
+    # admitted scope independently checks their exact equipment/settings; the
+    # original fixed-on path still requires zero controllers.
+    from v42_voltage_control.integration import current_declared_capcontrol_count
+    expected_capcontrols = current_declared_capcontrol_count()
     passed = (_summary_pass(result['summary'], result['converged'])
         and receipt['checker_SHA'] == replay.CHECKER and receipt['NormalAmps_current'] is True
         and receipt['Planning_tap_replay'] is False and receipt['Actual_reoptimization'] == 0
         and receipt['local_PQ_repair'] == 0 and receipt['global_PQ_repair'] == 0
         and len(controls) == len(inputs) == 96
-        and all(row['all_7_RegControls_enabled'] is True and row['CapControl_count'] == 0
+        and all(row['all_7_RegControls_enabled'] is True and row['CapControl_count'] == expected_capcontrols
                 and row['Planning_tap_replay'] is False for row in controls))
     result.update(PASS=bool(passed), receipt=record(output / 'FRESH_RESULT.json'),
         control_log=record(output / 'RAW_CONTROL_LOG.json'), physical_input_log=record(output / 'RAW_PHYSICAL_INPUT_LOG.json'),

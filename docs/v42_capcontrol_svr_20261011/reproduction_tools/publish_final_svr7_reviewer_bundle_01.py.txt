@@ -1,0 +1,81 @@
+"""Byte-preserving publication. No optimizers, model edits or physical solve."""
+from pathlib import Path
+import json
+import shutil
+import sys
+
+sys.path.insert(0,'D:/v42voltage')
+from v42_voltage_control.authority import source_files
+from v42_voltage_control.integration import record
+from v42_b3_joint.contracts import digest
+
+development=Path(__file__).resolve().parent
+target=Path('D:/v42voltage/docs/v42_capcontrol_svr_20261011')
+before=source_files()
+assert digest(before)=='ce30af2a74d9d2b6a2f2a33fee7a690927752f940f94bd466218075ba34cbf04'
+rows=[]
+def copy(original,destination):
+    original=Path(original); destination=Path(destination)
+    destination.parent.mkdir(parents=True,exist_ok=True)
+    if destination.exists():
+        raise FileExistsError(destination)
+    source=record(original)
+    shutil.copyfile(original,destination)
+    saved=record(destination)
+    assert (saved['sha256'],saved['bytes'])==(source['sha256'],source['bytes'])
+    rows.append(dict(original=source,published=saved))
+
+collection=development/'SVR4_SVR7_FINAL_COLLECTION_04'
+for path in sorted(collection.iterdir()):
+    if path.is_file(): copy(path,target/path.name)
+for name in ('SVR7_CE30_MAY03_UPSTREAM_FAILURE_AUDIT_03',
+             'SVR7_CE30_NEW3_BIDIRECTIONAL_OBSERVATION_AUDIT_01',
+             'SVR7_FINAL_CE30_KNOWN_CANARY_AUDIT_03',
+             'FINAL_COMMON_SVR_KNOWN_DATE_READONLY_AUDIT_01',
+             'READONLY_DISPATCH_PIN_GUARD_AUDIT_02',
+             'SVR4_SVR7_FINAL_COLLECTION_READONLY_VERIFICATION_01',
+             'ENGINE_HELPER_REPRODUCTION_MANIFEST_02'):
+    folder=development/name
+    for path in sorted(folder.rglob('*')):
+        if path.is_file(): copy(path,target/'supporting_audits'/name/path.relative_to(folder))
+for name in ('FROZEN_SVR4_INFRASTRUCTURE_03','FROZEN_SVR4_INFRASTRUCTURE_06','FROZEN_SVR7_INFRASTRUCTURE_02'):
+    for path in sorted((development/name).glob('*.json')):
+        copy(path,target/'hardware_freeze'/name/path.name)
+for name in ('FINAL_CANONICAL_NESTED_EXOGENOUS_GATE_02.xml',
+             'FINAL_SVR4_SVR7_COLD_ADMISSION_01.json',
+             'FROZEN_DATE_BINDING_READONLY_ADMISSION_05.json',
+             'FROZEN_SVR4_SVR7_COMMON_SOURCE_RELEASE_01.json',
+             'SVR_ORIGINAL_TOPOLOGY_INVENTORY.json'):
+    copy(development/name,target/'source_and_admission'/name)
+for name in ('run_frozen_ac_day.py','run_ac_only_svr_comparison.py','run_ac_only_svr_comparison_v2.py',
+             'collect_svr4_svr7_frozen_ac.py','plot_svr7_exact_topology_v2.py',
+             'publish_svr7_final_topology_saved.py','finalize_stopped_canary_readonly_01.py',
+             'publish_final_svr7_reviewer_bundle_01.py'):
+    copy(development/name,target/'reproduction_tools'/(name+'.txt'))
+for name in ('FROZEN_AC_MAY31_PRIORITY_QUEUE.json',):
+    copy(development/'FROZEN_AC_MONTHLY_PRIORITY_03'/name,target/'original_plan_admission'/name)
+for name in ('FROZEN_PLAN_MAY31_AVAILABILITY_V3.csv','FROZEN_PLAN_DATE_INVENTORY_V3.json'):
+    found=list(development.glob('**/'+name))
+    assert len(found)>=1
+    copy(found[0],target/'original_plan_admission'/name)
+root=development/'AC_ONLY_SVR4_SVR7_CANARY_03'
+for name in ('DISPATCH_SOURCE_RECEIPT.json','DISPATCH_PROGRESS.json','DISPATCH_FINAL_RECEIPT_RECOVERY.json','DISPATCHER_USED.py'):
+    copy(root/name,target/'execution_journal'/(name+'.txt' if name.endswith('.py') else name))
+for path in sorted(root.glob('*/days/*/*/AC_ONLY_DAY_RESULT.json')):
+    value=json.loads(path.read_text(encoding='utf8'))
+    prefix=target/'actual_raw'/value['configuration']/value['arm']/value['day']
+    copy(path,prefix/'AC_ONLY_DAY_RESULT.json')
+    copy(value['raw_AC']['path'],prefix/'OPENDSS_PHASE_ARRAYS.npz')
+    copy(path.parent/'JOB_SOURCE_PROVENANCE.json',prefix/'JOB_SOURCE_PROVENANCE.json')
+    if value['REF_time_controlled'] is not None:
+        copy(value['REF_time_controlled']['raw_AC']['path'],target/'actual_raw/REF_TIME'/value['arm']/value['day']/'OPENDSS_PHASE_ARRAYS.npz')
+for path in (target/'FINAL_V42_VOLTAGE_CONTROL_REVIEW_KO.md',target/'DSTATCOM_RETIREMENT_AUDIT.json'):
+    copy(path,target/'historical_initial_review'/path.name)
+assert source_files()==before
+receipt=dict(schema='V42_SVR7_REVIEWER_PUBLICATION_BYTE_LEDGER_V1',execution_SourceSHA=digest(before),
+             source_file_count=len(before),source_before_after_equal=True,Native_optimizer_calls=0,
+             OpenDSS_compile_calls=0,OpenDSS_solve_calls=0,original_inputs_or_outputs_modified=0,
+             copied_files=rows,new_Planning_E2E='NOT_RUN',deployment='HOLD')
+with (target/'REVIEWER_PUBLICATION_BYTE_LEDGER.json').open('x',encoding='utf8') as stream:
+    json.dump(receipt,stream,ensure_ascii=False,indent=2)
+print(json.dumps(dict(target=str(target),copied_files=len(rows),bytes=sum(r['published']['bytes'] for r in rows),SourceSHA=digest(before))))

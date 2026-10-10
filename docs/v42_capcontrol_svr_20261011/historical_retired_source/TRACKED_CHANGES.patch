@@ -1,0 +1,197 @@
+diff --git a/v42_autonomous_b3/reuse.py b/v42_autonomous_b3/reuse.py
+index 49380550..747383e4 100644
+--- a/v42_autonomous_b3/reuse.py
++++ b/v42_autonomous_b3/reuse.py
+@@ -336,7 +336,11 @@ class B1A1ReuseBridge(ASourceBridge):
+                 progress({"phase": "A1_B1_VERIFIED_REUSE_COMPLETE", "stage": "A1", "Native_calls": 0,
+                           "UB": float(Fraction(result["exact_UB"])), "LB": float(Fraction(result["exact_LB"])),
+                           "certified_gap": result["certified_gap"], "B3_A1_reused": True})
+-            return replace(output, physical_evidence=proof["physical"], global_evidence=proof["global"])
++            # SourceStageOutput seals a deep copy of its packet at construction.
++            # Seal the independently verified physical proof into the handoff
++            # packet as well as the A1 top-level evidence consumed by the UI.
++            return replace(output, physical_evidence=proof["physical"], global_evidence=proof["global"],
++                           source_packet=packet)
+ 
+     def _verification_root(self, context, output):
+         self._verify_origin(context, output)
+diff --git a/v42_common_campaign/authority.py b/v42_common_campaign/authority.py
+index f01c884f..2918777f 100644
+--- a/v42_common_campaign/authority.py
++++ b/v42_common_campaign/authority.py
+@@ -59,6 +59,9 @@ def verify_real_canary(receipt, arm, manifest):
+             or result.get("source_SHA") != manifest["execution_SHA"]
+             or identity.get("arm") != arm or identity.get("day") not in DAYS):
+         raise PermissionError("COMMON_U4_BOTH_REAL_E2E_CANARIES_REQUIRED:" + arm)
++    if manifest.get('DSTATCOM_design'):
++        from v42_dstatcom.authority import verify_physical_result
++        verify_physical_result(result,manifest,arm,identity['day'])
+     if arm == "B3":
+         from v42_autonomous_b3.admission import verify_qualification, validate_seal
+         seal = read(checked(manifest["B3_source_seal"]))
+@@ -130,6 +133,9 @@ def verify_manifest(path, *, production=False):
+     preflight = read(manifest["preflight"]["path"])
+     if preflight.get("PASS") is not True or preflight.get("source_SHA") != manifest["execution_SHA"]:
+         raise PermissionError("COMMON_U4_REAL_PREFLIGHT_REQUIRED")
++    if manifest.get('DSTATCOM_design'):
++        from v42_dstatcom.authority import verify_design
++        verify_design(manifest['DSTATCOM_design'],manifest['execution_SHA'])
+     if production:
+         verify_control_audit(path.parent, manifest)
+         official = read(path.parent / "COMMON_U4_CAMPAIGN_MANIFEST.json")
+diff --git a/v42_common_campaign/controller.py b/v42_common_campaign/controller.py
+index 1cc1ec66..a424cec7 100644
+--- a/v42_common_campaign/controller.py
++++ b/v42_common_campaign/controller.py
+@@ -59,7 +59,7 @@ def storage_admission(root):
+     return free
+ 
+ 
+-def prepare(root, regression_receipt, previous_common_epoch=None):
++def prepare(root, regression_receipt, previous_common_epoch=None, *, dstatcom_design=None):
+     root = Path(root).resolve()
+     if root.exists() and (root / MANIFEST).exists():
+         raise PermissionError("COMMON_U4_SOURCE_EPOCH_NEVER_OVERWRITTEN")
+@@ -134,13 +134,25 @@ def prepare(root, regression_receipt, previous_common_epoch=None):
+         previous_attempts_preserved=True, prior_attempts=prior_attempts,
+         storage_headroom_minimum_bytes=4*1024**3,
+         storage_free_at_preparation_bytes=storage_admission(root), UTC=now())
++    if dstatcom_design is not None:
++        from v42_dstatcom.authority import verify_design
++        manifest['DSTATCOM_design'] = record(dstatcom_design)
++        design = verify_design(manifest['DSTATCOM_design'],source_sha)
++        manifest.update(DSTATCOM_scenario_SHA=design['scenario_SHA'],
++            physical_scenario_version='V42_DSTATCOM_LOCAL_VOLTVAR_INFRASTRUCTURE_V1')
+     atomic(root / MANIFEST, manifest)
+     verify_manifest(root / MANIFEST)
+     return record(root / MANIFEST)
+ 
+ 
++def attempt_id_for(manifest,arm,day):
++    if manifest.get('DSTATCOM_design'):
++        return f'{arm}_MAY01_DSTATCOM_V1' if day==DAYS[0] else f'{arm}_DSTATCOM_V1'
++    return 'common_u4_v1_01'
++
++
+ def request_for(root, manifest, arm, day, slot, *, canary):
+-    attempt_id = "common_u4_v1_01"
++    attempt_id = attempt_id_for(manifest,arm,day)
+     attempt = root / "dates" / arm / day / "attempts" / attempt_id
+     path = attempt / "REQUEST.json"
+     if path.exists():
+@@ -232,7 +244,7 @@ def canaries(root):
+     manifest = verify_manifest(root / MANIFEST)
+     receipts = {}
+     for arm in ("B2", "B3"):
+-        for day in DAYS:
++        for day in (DAYS[:1] if manifest.get('DSTATCOM_design') else DAYS):
+             request, result = canary_trial(root, manifest, arm, day)
+             if result.get("PASS") is True and result.get("actual_ac_physical_pass") is True:
+                 receipts[arm] = record(read(request)["result"])
+@@ -273,7 +285,8 @@ def trials(root, arms, days):
+ 
+ def sweep(root, arm):
+     manifest = verify_manifest(root / MANIFEST, production=True)
+-    pending = [day for day in DAYS if not (root / "dates" / arm / day / "attempts/common_u4_v1_01/RESULT.json").exists()]
++    pending = [day for day in DAYS if not (root/'dates'/arm/day/'attempts'/
++        attempt_id_for(manifest,arm,day)/'RESULT.json').exists()]
+     running = {}
+     implementation_failures = 0
+     max_workers = 3 if arm == "B2" else 1
+@@ -309,6 +322,9 @@ def sweep(root, arm):
+ 
+ def run(root):
+     root = Path(root).resolve()
++    current=verify_manifest(root/MANIFEST)
++    if current.get('DSTATCOM_design'):
++        raise PermissionError('DSTATCOM_FOUR_POLICY_B0_B2_B1_B3_COORDINATOR_REQUIRED')
+     with singleton(root / "CONTROLLER.lock"):
+         atomic(root / "CONTROLLER_PROCESS.json", process())
+         try:
+@@ -330,11 +346,13 @@ if __name__ == "__main__":
+     parser.add_argument("root")
+     parser.add_argument("--regression-receipt")
+     parser.add_argument("--previous-common-epoch")
++    parser.add_argument("--dstatcom-design")
+     parser.add_argument('--canary-arm', action='append', choices=('B2','B3'))
+     parser.add_argument('--canary-day', action='append', choices=DAYS)
+     args=parser.parse_args()
+     if args.action == "prepare":
+-        print(json.dumps(prepare(args.root, args.regression_receipt, args.previous_common_epoch)))
++        print(json.dumps(prepare(args.root, args.regression_receipt, args.previous_common_epoch,
++            dstatcom_design=args.dstatcom_design)))
+     elif args.action == 'canary':
+         trials(args.root, args.canary_arm or ['B2','B3'], args.canary_day or [DAYS[0]])
+     else:
+diff --git a/v42_common_campaign/worker.py b/v42_common_campaign/worker.py
+index f4f58d04..5fce4410 100644
+--- a/v42_common_campaign/worker.py
++++ b/v42_common_campaign/worker.py
+@@ -1,5 +1,6 @@
+ """One date, one immutable source epoch, one owned result publication."""
+ from pathlib import Path
++from contextlib import ExitStack
+ import os
+ import sys
+ import threading
+@@ -38,10 +39,17 @@ def run(request_path):
+         status="IMPLEMENTATION_FAILURE", worker=process(), request=record(request_path),
+         actual_ac_physical_pass=False)
+     progress({}); ticker_thread.start()
++    physical_audit=None
++    physical_events=None
+     try:
+         shared = Path(r"D:\MobileESS_V42\runtime\v42_may_campaign\native_slots")
+         slot = shared / (f"SLOT_{request['worker_slot']}.lock" if request["arm"] == "B2" else "COMMON_B3.lock")
+-        with singleton(attempt / "WORKER.lock"), singleton(slot):
++        with singleton(attempt / "WORKER.lock"), singleton(slot), ExitStack() as physical_scope:
++            if manifest.get('DSTATCOM_design'):
++                if request['arm']!='B2':
++                    raise PermissionError('DSTATCOM_B3_INDEPENDENT_PLANNING_ACTUAL_ADAPTER_REQUIRED')
++                from v42_dstatcom.operations import independent_scopes
++                physical_events=physical_scope.enter_context(independent_scopes(request,manifest))
+             if request["arm"] == "B2":
+                 from .b2 import run as execute
+                 result.update(execute(request, manifest, progress))
+@@ -74,6 +82,26 @@ def run(request_path):
+                     stage_outputs={stage: record(pipeline / stage / "B3_SOURCE_STAGE_OUTPUT.json")
+                         for stage in ("A1", "M1", "A2", "M2")
+                         if (pipeline / stage / "B3_SOURCE_STAGE_OUTPUT.json").is_file()})
++        if physical_events is not None:
++            physical_audit=physical_events['Actual']
++            if physical_audit is None or physical_events['Planning'] is None:
++                raise PermissionError('DSTATCOM_REAL_FORECAST_AND_ACTUAL_FRESH_REQUIRED')
++            hardware_PASS=physical_audit.result['hardware_and_controller_PASS']
++            original_PASS=result.get('actual_ac_physical_pass') is True
++            planning_PASS=physical_events['Planning_physical_PASS']
++            result.update(DSTATCOM_scenario_SHA=physical_audit.scenario['scenario_SHA'],
++                DSTATCOM_physical_audit=physical_audit.receipt,
++                DSTATCOM_Planning_physical_audit=physical_events['Planning'].receipt,
++                DSTATCOM_Planning_physical_PASS=planning_PASS,
++                DSTATCOM_control_independence=physical_events['independence'],
++                DSTATCOM_hardware_and_controller_PASS=hardware_PASS,
++                original_Fresh_physical_PASS=original_PASS,
++                actual_ac_physical_pass=original_PASS and hardware_PASS,
++                PASS=result.get('PASS') is True and hardware_PASS and planning_PASS)
++            if original_PASS and not hardware_PASS:
++                result['status']='DSTATCOM_HARDWARE_OR_CONTROL_FAILED'
++            elif not planning_PASS:
++                result['status']='DSTATCOM_FORECAST_PLANNING_AC_FAILED'
+     except Exception as error:
+         text = str(error)
+         status = ("INPUT_OR_SOURCE_FAILURE" if isinstance(error, PermissionError)
+@@ -82,6 +110,14 @@ def run(request_path):
+         atomic(attempt / "error.json", dict(error=repr(error), traceback=traceback.format_exc(), UTC=now()))
+     finally:
+         stopped.set(); ticker_thread.join(timeout=2)
++        if physical_events is not None:
++            physical_audit=physical_events['Actual']
++            if physical_events['Planning'] is not None:
++                result.update(DSTATCOM_Planning_physical_audit=physical_events['Planning'].receipt,
++                    DSTATCOM_Planning_physical_PASS=physical_events['Planning_physical_PASS'])
++        if physical_audit is not None:
++            result.update(DSTATCOM_scenario_SHA=physical_audit.scenario['scenario_SHA'],
++                DSTATCOM_physical_audit=physical_audit.receipt)
+         result.update(completed_UTC=now(), worker_wall_seconds=time.perf_counter()-started)
+         ledger_path = attempt / "NATIVE_RUNTIME_LEDGER.json"
+         if ledger_path.is_file():

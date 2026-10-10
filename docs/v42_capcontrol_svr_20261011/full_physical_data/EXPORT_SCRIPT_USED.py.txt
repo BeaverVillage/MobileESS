@@ -1,0 +1,291 @@
+"""Deterministic flat CSV.gz export of the fifteen saved Actual trajectories.
+
+Python standard library only. No execution-source imports, DSS engine, optimize,
+measurement regeneration, state editing, or modification of completed records.
+"""
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
+import argparse
+import csv
+import gzip
+import hashlib
+import io
+import json
+import math
+import platform
+import shutil
+import sys
+import zlib
+
+TYPES = ('voltages', 'currents', 'transformer_kVA')
+COMMON = ['source_SHA', 'scenario_SHA', 'configuration', 'arm', 'day', 'namespace',
+          'slot_0based', 'slot_1based', 'dateTime_AEST', 'native_last_solve_seconds']
+FIELDS = {
+    'voltages': COMMON + ['node_phase', 'bus', 'phase_1based', 'phase', 'actual_voltage_pu',
+        'original', 'added', 'lower_limit_pu', 'upper_limit_pu', 'voltage_violation'],
+    'currents': COMMON + ['element', 'element_kind', 'terminal_1based', 'phase_1based', 'phase',
+        'actual_current_A', 'native_NormalAmps_A', 'native_loading_pu',
+        'independent_nameplate_current_A', 'independent_nameplate_loading_pu',
+        'winding_rating_kVA', 'winding_nominal_kV', 'nameplate_basis_status',
+        'original', 'added', 'native_current_violation', 'nameplate_current_violation'],
+    'transformer_kVA': COMMON + ['element', 'terminal_1based', 'phase_scope',
+        'actual_apparent_kVA', 'winding_rating_kVA', 'loading_pu', 'original', 'added', 'kVA_violation'],
+}
+
+def read(path):
+    return json.loads(Path(path).read_text(encoding='utf-8-sig'))
+
+def record(path):
+    path = Path(path).resolve()
+    with path.open('rb') as stream:
+        sha = hashlib.file_digest(stream, 'sha256').hexdigest()
+    return {'path': str(path), 'sha256': sha, 'bytes': path.stat().st_size}
+
+def digest(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode('utf8')).hexdigest()
+
+def source_files(root):
+    # Literal file-only reproduction of v42_common_campaign.authority.source_files.
+    files = {}
+    for folder in sorted(root.glob('v42_*')):
+        if folder.is_dir():
+            for path in sorted(folder.rglob('*.py')):
+                files[path.relative_to(root).as_posix()] = record(path)['sha256']
+        elif folder.suffix == '.py':
+            files[folder.relative_to(root).as_posix()] = record(folder)['sha256']
+    return files
+
+def text(value):
+    if value is None:
+        return ''
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError('NONFINITE_SAVED_VALUE')
+        literal = repr(value)
+        if float(literal).hex() != value.hex():
+            raise ValueError('FLOAT_ROUNDTRIP_FAILED')
+        return literal
+    return str(value)
+
+class DeterministicCSV:
+    def __init__(self, path, fields):
+        self.path = path
+        self.fields = fields
+        self.raw_sha = hashlib.sha256()
+        self.raw_bytes = 0
+        self.count = 0
+        self.file = path.open('xb')
+        self.gz = gzip.GzipFile(filename='', mode='wb', compresslevel=9, fileobj=self.file, mtime=0)
+        self._line(fields)
+    def _line(self, values):
+        buffer = io.StringIO(newline='')
+        csv.writer(buffer, lineterminator='\n').writerow([text(v) for v in values])
+        data = buffer.getvalue().encode('utf8')
+        self.raw_sha.update(data); self.raw_bytes += len(data)
+        self.gz.write(data)
+    def add(self, row):
+        self._line([row[k] for k in self.fields]); self.count += 1
+    def close(self):
+        self.gz.close(); self.file.close()
+        if self.path.stat().st_size > 30_000_000:
+            raise ValueError('GZIP_EXCEEDS_30MB: ' + str(self.path))
+        return {'receipt': record(self.path), 'row_count_excluding_header': self.count,
+                'uncompressed_UTF8_bytes': self.raw_bytes, 'uncompressed_SHA256': self.raw_sha.hexdigest(),
+                'columns': self.fields, 'gzip_mtime': 0, 'gzip_filename': '', 'gzip_level': 9}
+
+class CSVParts:
+    def __init__(self, output, name, fields):
+        self.output, self.name, self.fields = output, name, fields
+        self.max_rows = 250000 if name == 'currents' else None
+        self.parts = []
+        self.part = self._start()
+    def _start(self):
+        suffix = f'.part{len(self.parts)+1:03d}' if self.max_rows else ''
+        return DeterministicCSV(self.output/(self.name.upper()+suffix+'.csv.gz'), self.fields)
+    def add(self, row):
+        if self.max_rows and self.part.count >= self.max_rows:
+            self.parts.append(self.part.close()); self.part = self._start()
+        self.part.add(row)
+    def close(self):
+        self.parts.append(self.part.close())
+        return {'parts': self.parts, 'row_count_excluding_header': sum(x['row_count_excluding_header'] for x in self.parts),
+                'columns': self.fields, 'maximum_rows_per_part': self.max_rows}
+
+def read_csv_parts(file_info, expected_fields):
+    for part in file_info['parts']:
+        with gzip.open(part['receipt']['path'], 'rt', encoding='utf8', newline='') as stream:
+            reader = csv.reader(stream)
+            assert next(reader) == expected_fields
+            yield from reader
+
+def values_for(dataset, rows, equipment):
+    date0 = datetime.fromisoformat(dataset['day']).replace(tzinfo=timezone(timedelta(hours=10)))
+    for slot in rows:
+        index = slot['slot']
+        common = dict(source_SHA=dataset['source_SHA'], scenario_SHA=dataset['scenario_SHA'],
+            configuration=dataset['configuration'], arm=dataset['arm'], day=dataset['day'], namespace='ACTUAL',
+            slot_0based=index, slot_1based=index+1,
+            dateTime_AEST=(date0+timedelta(minutes=15*(index+1))).isoformat(),
+            native_last_solve_seconds=slot['time_control']['last_solve_seconds'])
+        for node in slot['physical']['nodes']:
+            bus, phase = node['node_phase'].rsplit('.', 1)
+            phase = int(phase)
+            yield 'voltages', {**common, 'node_phase': node['node_phase'], 'bus': bus,
+                'phase_1based': phase, 'phase': 'ABC'[phase-1], 'actual_voltage_pu': node['voltage_pu'],
+                'original': node['original'], 'added': not node['original'], 'lower_limit_pu': .95,
+                'upper_limit_pu': 1.05, 'voltage_violation': not .95 <= node['voltage_pu'] <= 1.05}
+        for current in slot['physical']['currents']:
+            element = current['element']; kind = element.split('.')[0]
+            winding = equipment[element]['windings'][current['terminal']-1] if kind == 'transformer' else None
+            yield 'currents', {**common, 'element': element, 'element_kind': kind,
+                'terminal_1based': current['terminal'], 'phase_1based': current['phase'], 'phase': 'ABC'[current['phase']-1],
+                'actual_current_A': current['current_A'], 'native_NormalAmps_A': current['NormalAmps'],
+                'native_loading_pu': current['loading_pu'], 'independent_nameplate_current_A': current['nameplate_current_A'],
+                'independent_nameplate_loading_pu': current['nameplate_current_loading_pu'],
+                'winding_rating_kVA': winding['kVA'] if winding else None, 'winding_nominal_kV': winding['kV'] if winding else None,
+                'nameplate_basis_status': 'SAVED_INDEPENDENT_WINDING_NAMEPLATE' if winding else 'NOT_APPLICABLE_LINE_NATIVE_NORM',
+                'original': current['original'], 'added': not current['original'],
+                'native_current_violation': current['loading_pu'] > 1,
+                'nameplate_current_violation': current['nameplate_current_loading_pu'] > 1 if winding else None}
+        for tx in slot['physical']['transformers']:
+            yield 'transformer_kVA', {**common, 'element': tx['element'], 'terminal_1based': tx['terminal'],
+                'phase_scope': 'ALL_PRESENT_PHASES_TERMINAL_TOTAL', 'actual_apparent_kVA': tx['kVA'],
+                'winding_rating_kVA': tx['rating_kVA'], 'loading_pu': tx['loading_pu'],
+                'original': tx['original'], 'added': not tx['original'], 'kVA_violation': tx['loading_pu'] > 1}
+
+class HashSink:
+    def __init__(self): self.hash = hashlib.sha256(); self.bytes = 0
+    def write(self, data): self.hash.update(data); self.bytes += len(data); return len(data)
+    def flush(self): pass
+
+def main(args):
+    source_root = Path(args.source).resolve(); root = Path(args.root).resolve()
+    output = Path(args.output).resolve(); output.mkdir(parents=True, exist_ok=False)
+    sources = source_files(source_root); sha = digest(sources)
+    proof = read(root/'DISPATCH_SOURCE_RECEIPT.json')
+    assert sources == proof['source_map'] and sha == proof['source_SHA']
+    evidence = {}
+    def checked(item):
+        actual = record(item['path'])
+        assert actual['sha256'] == item['sha256'] and actual['bytes'] == item['bytes']
+        evidence[str(Path(actual['path'])).casefold()] = actual
+        return Path(actual['path'])
+    checked(record(root/'DISPATCH_SOURCE_RECEIPT.json'))
+    equipment_by_config = {}
+    for config, receipt in proof['infrastructure'].items():
+        infra = read(checked(receipt))
+        doc = read(checked(next(x for x in infra['independent_namespaces'] if x['namespace'] == 'ACTUAL')['initial_state_receipt']))
+        equipment_by_config[config] = doc['initial_state']['installed_equipment_after']
+        if config == 'SVR4':
+            equipment_by_config['REF_TIME'] = doc['initial_state']['source_equipment_before']
+    datasets = []
+    jobs = [(name, arm, day) for name in ('SVR4', 'SVR7') for arm, day in (
+        ('B0', '2025-05-01'), ('B1', '2025-05-28'), ('B2', '2025-05-01'), ('B2', '2025-05-02'), ('B2', '2025-05-03'))]
+    for config, arm, day in jobs:
+        path = root/config/'days'/arm/day/'AC_ONLY_DAY_RESULT.json'
+        result = read(checked(record(path)))
+        assert result['source_SHA'] == sha and result['arm'] == arm and result['day'] == day
+        provenance = read(checked(record(path.parent/'JOB_SOURCE_PROVENANCE.json')))
+        for item in provenance['original_frozen_receipts'].values(): checked(item)
+        choices = [(config, result)]
+        if config == 'SVR4': choices.insert(0, ('REF_TIME', result['REF_time_controlled']))
+        for dataset_config, selected in choices:
+            audit = read(checked(selected['physical_audit']))
+            checked(selected['raw_AC'])
+            assert audit['source_SHA'] == audit['execution_source_SHA'] == sha
+            assert audit['namespace'] == 'ACTUAL' and audit['arm'] == arm and audit['day'] == day
+            assert audit['Native_optimizer_calls'] == audit['Actual_optimizer_calls'] == audit['Actual_plan_repair_calls'] == 0
+            assert audit['original_input_setpoints_unchanged'] and not audit['Planning_Tap_or_Cap_state_transfer_to_Actual']
+            checked(audit['slots_receipt'])
+            datasets.append(dict(configuration=dataset_config, arm=arm, day=day, source_SHA=sha,
+                scenario_SHA=audit['scenario_SHA'], namespace='ACTUAL', physical_audit=selected['physical_audit'],
+                slots_receipt=audit['slots_receipt'], raw_AC=selected['raw_AC'], source_day_result=record(path),
+                source_Actual_physical_PASS=audit['Full_AC_Physical_PASS']))
+    assert len(datasets) == 15 and len({(x['configuration'], x['arm'], x['day']) for x in datasets}) == 15
+    config_order = {'REF_TIME': 0, 'SVR4': 1, 'SVR7': 2}
+    datasets.sort(key=lambda x: (x['day'], x['arm'], config_order[x['configuration']]))
+    writers = {name: CSVParts(output, name, FIELDS[name]) for name in TYPES}
+    for dataset in datasets:
+        rows = read(checked(dataset['slots_receipt']))
+        assert [r['slot'] for r in rows] == list(range(96))
+        assert all(r['day'] == dataset['day'] and r['arm'] == dataset['arm'] and r['namespace'] == 'ACTUAL' for r in rows)
+        expected_axis = {'voltages': 386 if dataset['configuration'] == 'REF_TIME' else (398 if dataset['configuration'] == 'SVR4' else 407),
+            'currents': 766+(0 if dataset['configuration']=='REF_TIME' else (24 if dataset['configuration']=='SVR4' else 42)),
+            'transformer_kVA': 88+(0 if dataset['configuration']=='REF_TIME' else (24 if dataset['configuration']=='SVR4' else 42))}
+        node_axis = [n['node_phase'] for n in rows[0]['physical']['nodes']]
+        current_axis = [(c['element'], c['terminal'], c['phase']) for c in rows[0]['physical']['currents']]
+        kva_axis = [(t['element'], t['terminal']) for t in rows[0]['physical']['transformers']]
+        for row in rows:
+            assert [n['node_phase'] for n in row['physical']['nodes']] == node_axis
+            assert [(c['element'], c['terminal'], c['phase']) for c in row['physical']['currents']] == current_axis
+            assert [(t['element'], t['terminal']) for t in row['physical']['transformers']] == kva_axis
+        assert len(node_axis) == expected_axis['voltages'] and len(set(node_axis)) == len(node_axis)
+        assert len(current_axis) == expected_axis['currents'] and len(set(current_axis)) == len(current_axis)
+        assert len(kva_axis) == expected_axis['transformer_kVA'] and len(set(kva_axis)) == len(kva_axis)
+        # Explicit all-two-terminal coverage, including neutral-excluded phase identifiers.
+        elements = {x[0] for x in current_axis}
+        assert all({terminal for e, terminal, phase in current_axis if e == element} == {1, 2} for element in elements)
+        assert all({terminal for e, terminal in kva_axis if e == element} == {1, 2} for element in {x[0] for x in kva_axis})
+        counts = {name: 0 for name in TYPES}
+        for name, row in values_for(dataset, rows, equipment_by_config[dataset['configuration']]):
+            writers[name].add(row); counts[name] += 1
+        assert counts == {k: 96*v for k, v in expected_axis.items()}
+        dataset['row_counts'] = counts
+        dataset['slot_count'] = 96
+        dataset['axis_SHA'] = dict(nodes=digest(node_axis), both_terminal_current=digest(current_axis), both_terminal_kVA=digest(kva_axis))
+        print(json.dumps({'exported': (dataset['configuration'], dataset['arm'], dataset['day']), 'rows': counts}), flush=True)
+        del rows
+    files = {name: writer.close() for name, writer in writers.items()}
+    # Every exported CSV field is independently read back and compared with its source record.
+    readers = {name: read_csv_parts(files[name], FIELDS[name]) for name in TYPES}
+    checked_counts = {name: 0 for name in TYPES}
+    for dataset in datasets:
+        rows = read(checked(dataset['slots_receipt']))
+        for name, expected in values_for(dataset, rows, equipment_by_config[dataset['configuration']]):
+            actual = next(readers[name])
+            assert actual == [text(expected[k]) for k in FIELDS[name]]
+            checked_counts[name] += 1
+        del rows
+    for name in TYPES:
+        assert next(readers[name], None) is None
+        assert checked_counts[name] == files[name]['row_count_excluding_header']
+        # Recompression checks complete gzip byte determinism independent of output path.
+        for part in files[name]['parts']:
+            sink = HashSink(); uncompressed_sha = hashlib.sha256(); uncompressed_bytes = 0
+            with gzip.GzipFile(filename='', mode='wb', compresslevel=9, fileobj=sink, mtime=0) as compressed:
+                with gzip.open(part['receipt']['path'], 'rb') as original:
+                    while True:
+                        chunk = original.read(1024*1024)
+                        if not chunk: break
+                        uncompressed_sha.update(chunk); uncompressed_bytes += len(chunk); compressed.write(chunk)
+            assert sink.hash.hexdigest() == part['receipt']['sha256'] and sink.bytes == part['receipt']['bytes']
+            assert uncompressed_sha.hexdigest() == part['uncompressed_SHA256'] and uncompressed_bytes == part['uncompressed_UTF8_bytes']
+            part['byte_identical_recompression'] = True
+        files[name]['all_fields_exact_roundtrip'] = True
+        files[name]['byte_identical_recompression'] = True
+    assert source_files(source_root) == sources
+    for item in list(evidence.values()): assert record(item['path']) == item
+    shutil.copyfile(__file__, output/'EXPORT_SCRIPT_USED.py')
+    manifest = dict(schema='V42_SVR_CE30_FULL_PHYSICAL_SAVED_CSV_EXPORT_V1', PASS=True, source_SHA=sha,
+        source_count=len(sources), source_before_after_exact=True, dataset_count=15,
+        chronological_slots_per_dataset=96, files=files, datasets=datasets, evidence=list(evidence.values()),
+        exporter=record(output/'EXPORT_SCRIPT_USED.py'), Native_optimizer_calls=0, OpenDSS_calls=0,
+        physical_jobs_launched=0, execution_source_or_tests_modified=False, original_records_modified=False,
+        scope='EXISTING_FROZEN_PLAN_ACTUAL_ONLY; NEW_E2E_NOT_RUN',
+        gzip_contract=dict(mtime=0, filename='', level=9, UTF8_BOM=False, newline='LF', max_compressed_bytes_per_file=30000000),
+        ordering='day ascending, arm lexical, REF_TIME/SVR4/SVR7, slot0..95, pinned source native physical axis order',
+        numeric_contract='Python float repr without rounding, exact binary float.hex roundtrip; every CSV field checked against the source and complete gzip recompression byte-identical',
+        timestamp_semantics='dateTime_AEST is original15minute interval-end label (slot0=00:15, slot95=nextday00:00), UTC+10. Source native_last_solve_seconds identifies measured state held through unsolved slot remainder.',
+        missing_data='Empty nameplate and winding fields for lines mean not applicable, not zero. Line terminal P/Q/kVA not archived in physical records; no line kVA is invented. Transformer kVA is aggregate S of all present terminal phases, not per-phase S.',
+        physical_pass_contract='Export preserves all values and physical failures; export PASS means completeness/identity/roundtrip, not that all electrical limits passed.',
+        measurement_scope='96 chronological slot-end states; not continuous waveform or thermal transient certification.',
+        runtime=dict(python=sys.version, executable=sys.executable, platform=platform.platform(), zlib_version=zlib.ZLIB_VERSION, zlib_runtime_version=zlib.ZLIB_RUNTIME_VERSION))
+    (output/'FULL_PHYSICAL_EXPORT_RECEIPT.json').write_text(json.dumps(manifest, sort_keys=True, ensure_ascii=False, indent=2, allow_nan=False)+'\n', encoding='utf8')
+    print(json.dumps({'PASS': True, 'datasets': len(datasets), 'files': {k: {'part_bytes': [p['receipt']['bytes'] for p in v['parts']], 'rows': v['row_count_excluding_header']} for k, v in files.items()}, 'output': str(output)}))
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--source', required=True)
+    parser.add_argument('--root', required=True)
+    parser.add_argument('--output', required=True)
+    main(parser.parse_args())

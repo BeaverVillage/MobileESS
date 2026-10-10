@@ -1,0 +1,146 @@
+{
+  "schema": "V42_SVR7_LITERAL_TOPOLOGY_FIGURE_RECEIPT_V1",
+  "status": "FROZEN | BUS50",
+  "original_native_base_buses": 132,
+  "distinct_LV_service_PCC_buses": 36,
+  "total_original_base_buses": 168,
+  "original_phase_nodes": 386,
+  "original_phase_edges": 383,
+  "SVR_bank_count": 7,
+  "physical_single_phase_transformer_count": 21,
+  "original_RegControl_count": 7,
+  "original_caps_Fixed_ON_count": 4,
+  "native_bus_coordinate_source_count": 130,
+  "display_offset_bus_count": 38,
+  "added_node_voltage_exclusions": 0,
+  "AI_image_generation": false,
+  "Native_optimizer_calls": 0,
+  "OpenDSS_compile_calls": 0,
+  "OpenDSS_solve_calls": 0,
+  "electrical_graph_source": {
+    "path": "D:\\v42_voltage_control_development_20261011\\SVR_ORIGINAL_TOPOLOGY_INVENTORY.json",
+    "sha256": "ca80243a7ac28c539ca444e978af046504cf465b1d442d956b270ab131410a49",
+    "bytes": 374492
+  },
+  "coordinate_source": {
+    "path": "D:\\v42_voltage_control_development_20261011\\SVR7_TOPOLOGY_AUDIT_01\\PRIMARY_IEEE123_BusCoords.dat",
+    "sha256": "0b409c0e5d99f365c0140bf38280c1d64932032f1ecb8ef83ae54d4ed0d2716f",
+    "bytes": 2858
+  },
+  "existing4_source": {
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR4_INFRASTRUCTURE_03\\SVR_CONTROLLER_CONTRACT.json",
+    "sha256": "c8bd1da3d51585304968e56f3475cc5fe850cec6b5707d73fe0db5f4636597c0",
+    "bytes": 9955
+  },
+  "contract_source": {
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\SVR_CONTROLLER_CONTRACT.json",
+    "sha256": "c3f085c07e5c75ac0dcf587707570444d0e4699d54a8f539fc707048df51d135",
+    "bytes": 18745
+  },
+  "bank_cut_symbols": [
+    {
+      "bank_id": "STA01",
+      "cut_element": "Transformer.mess_sta01_tx",
+      "cut_terminal": 1,
+      "original_bus_spec": "28.1.2.3",
+      "sensed_bus": "mess_sta01_pcc",
+      "added_bus": "svr_sta01_regulated",
+      "display_x": 1467.45,
+      "display_y": 3378.35,
+      "role": "EXISTING4"
+    },
+    {
+      "bank_id": "STA06",
+      "cut_element": "Transformer.mess_sta06_tx",
+      "cut_terminal": 1,
+      "original_bus_spec": "98.1.2.3",
+      "sensed_bus": "mess_sta06_pcc",
+      "added_bus": "svr_sta06_regulated",
+      "display_x": 3800.0,
+      "display_y": 2128.35,
+      "role": "EXISTING4"
+    },
+    {
+      "bank_id": "STA08",
+      "cut_element": "Transformer.mess_sta08_tx",
+      "cut_terminal": 1,
+      "original_bus_spec": "67.1.2.3",
+      "sensed_bus": "mess_sta08_pcc",
+      "added_bus": "svr_sta08_regulated",
+      "display_x": 3525.0,
+      "display_y": 1878.35,
+      "role": "EXISTING4"
+    },
+    {
+      "bank_id": "BUS83",
+      "cut_element": "Line.l84",
+      "cut_terminal": 1,
+      "original_bus_spec": "82.1.2.3",
+      "sensed_bus": "83",
+      "added_bus": "svr_bus83_regulated",
+      "display_x": 4077.5,
+      "display_y": 175.0,
+      "role": "EXISTING4"
+    },
+    {
+      "bank_id": "BUS79",
+      "cut_element": "Line.l79",
+      "cut_terminal": 2,
+      "original_bus_spec": "79.1.2.3",
+      "sensed_bus": "79",
+      "added_bus": "svr_bus79_series_input",
+      "display_x": 4214.0,
+      "display_y": 1375.0,
+      "role": "ADDITIONAL3"
+    },
+    {
+      "bank_id": "BUS108",
+      "cut_element": "Line.l105",
+      "cut_terminal": 2,
+      "original_bus_spec": "108.1.2.3",
+      "sensed_bus": "108",
+      "added_bus": "svr_bus108_series_input",
+      "display_x": 3525.0,
+      "display_y": 2998.0,
+      "role": "ADDITIONAL3"
+    },
+    {
+      "bank_id": "BUS50",
+      "cut_element": "Line.l49",
+      "cut_terminal": 2,
+      "original_bus_spec": "50.1.2.3",
+      "sensed_bus": "50",
+      "added_bus": "svr_bus50_series_input",
+      "display_x": 2435.0,
+      "display_y": 3275.0,
+      "role": "ADDITIONAL3"
+    }
+  ],
+  "script": {
+    "path": "D:\\v42_voltage_control_development_20261011\\plot_svr7_exact_topology_v2.py",
+    "sha256": "1dc4e4f8c63f0b61aef3eef355361bc69afcc994ba79e39d60bfba7b8415ebad",
+    "bytes": 16247
+  },
+  "outputs": [
+    {
+      "path": "D:\\v42_voltage_control_development_20261011\\SVR7_TOPOLOGY_FINAL_CE30_01\\IEEE123_SVR7_INSTALLATION_TOPOLOGY.svg",
+      "sha256": "10f41a05f0a62f23b423da5604b1fa80f66db99a784204c64f1f4b86b0a3695c",
+      "bytes": 381920
+    },
+    {
+      "path": "D:\\v42_voltage_control_development_20261011\\SVR7_TOPOLOGY_FINAL_CE30_01\\IEEE123_SVR7_INSTALLATION_TOPOLOGY.png",
+      "sha256": "55a5df77130d536a8a613de2ba54f76bc60b6339f03e9f8f753d35dc47697b0f",
+      "bytes": 451522
+    },
+    {
+      "path": "D:\\v42_voltage_control_development_20261011\\SVR7_TOPOLOGY_FINAL_CE30_01\\IEEE123_SVR7_LITERAL_PHASE_EDGES.csv",
+      "sha256": "6240f3b523c35e134498763c65d891a21b541b6af1bdfbca8634768844fb0cbc",
+      "bytes": 17562
+    },
+    {
+      "path": "D:\\v42_voltage_control_development_20261011\\SVR7_TOPOLOGY_FINAL_CE30_01\\IEEE123_SVR7_DISPLAY_COORDINATES.csv",
+      "sha256": "f9fd33653fba595d1f71ee611c50de67a931c9e798b0d468f0837796612b508c",
+      "bytes": 15344
+    }
+  ]
+}

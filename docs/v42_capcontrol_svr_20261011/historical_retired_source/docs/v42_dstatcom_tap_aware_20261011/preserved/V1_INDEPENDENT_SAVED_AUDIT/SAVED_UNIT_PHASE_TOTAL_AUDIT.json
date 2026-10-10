@@ -1,0 +1,64 @@
+{
+  "schema": "V42_DSTATCOM_V1_SAVED_UNIT_PHASE_TOTAL_AUDIT_V1",
+  "Native_optimizer_calls": 0,
+  "additional_DSS_calls": 0,
+  "V1_source_epoch_SHA": "b37e20bc1e6172ca2600e3ebcd42e8dd5f6ba95d2b78d6e42f02b211cd676618",
+  "scenario_SHA": "9dbe76a4afea476f24abff8baecade03ba6575e07c5154a6b9e221e8889e9946",
+  "device_count": 36,
+  "unique_device_id_count": 36,
+  "unique_PCC_bus_count": 36,
+  "physical_element_count": 432,
+  "unique_physical_element_names": 432,
+  "phases_per_device": 3,
+  "per_phase_nameplate_is_total_divided_by_three": true,
+  "total_V1_nameplate_kvar": 27750,
+  "total_V1_nameplate_MVAr": 27.75,
+  "latest_requested_canonical_PCC_count": 24,
+  "latest_requested_initial_MVAr": 18.75,
+  "added_V1_IDC_MESS_endpoint_count": 12,
+  "duplicate_same_bus_connection_observed": false,
+  "max_actual_Q_minus_command_error_kvar": 2.6815585272288445e-06,
+  "power_or_nominal_P_failure_rows": 0,
+  "max_I_times_actual_LN_voltage_minus_apparent_power_error_kva": 1.1368683772161603e-13,
+  "max_local_PCC_voltage_minus_original_raw_axis_error_pu": 0.0,
+  "converter_phase_current_limit_failed_rows": 0,
+  "converter_phase_kva_limit_failed_rows": 0,
+  "converter_whole_kva_failed_device_slots": 0,
+  "all_device_slots_exact_three_phases": true,
+  "sign_units_phase_total_connection_PASS": true,
+  "classification": {
+    "source_sign_unit_or_phase_duplication_error": "NOT_OBSERVED_IN_SAVED_OUTPUT_AND_CONTROLLED_STA08_DIAGNOSTIC",
+    "voltage_control_design": "V1 AGGRESSIVE_LOCAL_DEADBAND_AND_AGGREGATE_REACTIVE_CIRCULATION_FAILURE; REMOTE_NODES_AND_THERMAL_LIMITS_FAIL",
+    "placement_scope": "V1 HAD36DISTINCT_ENDPOINTS; LATEST_USER_REQUIRES24CANONICAL_PCC. 12_EXTRA_IDC_MESS_DEVICES_ARE_DISTINCT_BUSES_NOT_DUPLICATE_INJECTION",
+    "capacity": "OBSERVED_1_5_RESERVE_FAILED_IDC01_AIDC; DOES_NOT_JUSTIFY_INCREASE_BEFORE_CONTROL_AND_CAUSAL_DESIGN_REVIEW"
+  },
+  "loss_accounting": "Original Circuit.Losses contains passive network/coupling/cable losses; converter loss Loads are separate consumption. Do not add total new hardware loss to Circuit.Losses without removing passive-loss overlap.",
+  "actual_Q_scope": "Q_actual_supply is converter Generator supply; coupling transformer/cable reactive losses and magnetizing demand are additional PCC net-flow effects.",
+  "input_paths": [
+    "D:\\v42_dstatcom_development_20261010\\V1_INDEPENDENT_SAVED_AUDIT\\PHASE96X108_Q_V_READBACK.csv",
+    "D:\\v42_dstatcom_development_20261010\\B2_MAY01_FROZEN_ON_01\\DSTATCOM_PHYSICAL\\DSTATCOM_ACTUAL_PHYSICAL_AUDIT.json",
+    "D:\\v42_dstatcom_development_20261010\\B2_MAY01_FROZEN_ON_01\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz"
+  ],
+  "input_receipts": [
+    {
+      "path": "D:\\v42_dstatcom_development_20261010\\V1_INDEPENDENT_SAVED_AUDIT\\PHASE96X108_Q_V_READBACK.csv",
+      "sha256": "1dd8feedfb88531f71c30152e171a7f767d2527ce94cb8c2f10da49c150490f2",
+      "bytes": 2218613
+    },
+    {
+      "path": "D:\\v42_dstatcom_development_20261010\\B2_MAY01_FROZEN_ON_01\\DSTATCOM_PHYSICAL\\DSTATCOM_ACTUAL_PHYSICAL_AUDIT.json",
+      "sha256": "f09f4e7e8087851c03d6a83626933ff4f81e38b5252e2d3caefae833bc2eeb23",
+      "bytes": 270728
+    },
+    {
+      "path": "D:\\v42_dstatcom_development_20261010\\B2_MAY01_FROZEN_ON_01\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "c4dab39614dee6192c32df2eec1dea0b01d44e46e92afff34e7587bb6fa94aac",
+      "bytes": 856667
+    }
+  ],
+  "verification_script": {
+    "path": "D:\\v42_dstatcom_development_20261010\\audit_saved_v1_units.py",
+    "sha256": "2f136fa5e85177c35647a0beaee02c0b8174aa5a10f82f71485062db05c0152e",
+    "bytes": 5704
+  }
+}
