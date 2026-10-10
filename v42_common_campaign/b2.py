@@ -64,6 +64,9 @@ def _payload(request):
     # provenance path. Existing immutable producer receipts are never written.
     from v42_may_campaign_native90 import inputs
     canonical = Path(r"D:\MobileESS_V42")
+    from v42_svr11.authority import active
+    if active() is not None:
+        canonical = ROOT
     generator = rebound(inputs.generate_b2, dict(inputs.generate_b2.__globals__, ROOT=canonical))
     return generator(request)
 

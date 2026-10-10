@@ -516,7 +516,8 @@ def build_case(payload, request, progress=None):
     families={str(n).split('[',1)[0] for n in d['names']}
     if not families <= {'arc','charge_mode','Pch','Pdis','Q','SOC','rho_max'}|binding_families:
         raise ValueError('CURRENT_M_AIDC_OPTIMIZATION_VARIABLE_PRESENT')
-    if len(thermal)!=120*96: raise ValueError('CURRENT_M_ALL_TRANSFORMER_PHASE_ROWS_REQUIRED')
+    from v42_svr11.authority import active
+    if len(thermal)!=(153 if active() is not None else 120)*96: raise ValueError('CURRENT_M_ALL_TRANSFORMER_PHASE_ROWS_REQUIRED')
     if progress: progress(dict(phase='M_EXISTING_COMPACT_STATIC_PRESOLVE',day=day,arm='B2'))
     compact=Compact(A,d,graph[2],initial,96)
     presolve=Presolve(compact.A,compact.d);B,e=presolve.run()

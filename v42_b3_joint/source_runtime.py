@@ -91,7 +91,10 @@ class RealStageContext:
         registry = self.source_registry
         if not isinstance(registry, FakeSourceRegistry):
             workspace = Path(__file__).resolve().parents[1]
-            require(self.output.is_relative_to(workspace / "runtime" / "b3"), "ISOLATED_B3_RUNTIME_OUTPUT_REQUIRED")
+            from v42_svr11.authority import active
+            epoch=active()
+            owned=Path(epoch['root'])/'dates/B3'/self.request.authority.day if epoch else workspace/'runtime/b3'
+            require(self.output.is_relative_to(owned), "ISOLATED_B3_RUNTIME_OUTPUT_REQUIRED")
         require(isinstance(self.source_packets, dict), "SOURCE_HANDOFF_PACKETS_REQUIRED")
         return True
 

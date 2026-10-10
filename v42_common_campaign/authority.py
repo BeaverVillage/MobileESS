@@ -108,6 +108,9 @@ def verify_real_canary(receipt, arm, manifest):
 
 
 def verify_manifest(path, *, production=False):
+    from v42_svr11.authority import active,verify
+    if active() is not None:
+        return verify(path)
     path = Path(path).resolve()
     manifest = read(path)
     if (manifest.get("schema") != "V42_COMMON_U4_QUALIFICATION_V1"
@@ -172,6 +175,9 @@ def verify_control_audit(root, manifest):
 
 
 def verify_request(request):
+    from v42_svr11.authority import active,verify_request as successor
+    if active() is not None:
+        return successor(request)
     manifest_path = Path(request["manifest"]).resolve()
     manifest = verify_manifest(manifest_path, production=request.get("canary") is not True)
     root = manifest_path.parent
@@ -199,6 +205,10 @@ def verify_request(request):
 
 
 def assert_peers(request):
+    from v42_svr11.authority import active
+    if active() is not None:
+        from v42_svr11.processes import assert_peers as successor
+        return successor(request)
     seen = {(request["arm"], request["day"])}
     slots = {request["worker_slot"]}
     for proc in psutil.process_iter(("pid", "name")):
