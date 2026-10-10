@@ -132,7 +132,9 @@ def run_fresh(day, arm, physical_receipt, mess_receipt, forecast_receipt, output
             trajectory=trajectory,output=output/'fresh',progress=progress)
         require(not denied,'CAPCONTROL_SVR_FORECAST_PHYSICAL_OPTIMIZER_FORBIDDEN')
     require(backend.run_fresh_opendss.__code__ is original_backend,'CAPCONTROL_SVR_FORECAST_ORIGINAL_BODY_MUTATED')
-    require(all(record(r['path']) == r for r in source_receipts+sources),'CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED')
+    # Match checked(): historical C: junctions resolve to the same D: file.
+    # Original SHA/length stay exact; only the equivalent path is normalized.
+    require(all(record(r['path']) == dict(r,path=str(Path(r['path']).resolve())) for r in source_receipts+sources),'CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED')
     metrics = raw_metrics(output/'fresh/OPENDSS_PHASE_ARRAYS.npz')
     passed = (metrics['converged_slots'] == 96 and len(controls) == 96
         and not any(metrics[k] for k in ('voltage_violation_cells','line_current_violation_cells',

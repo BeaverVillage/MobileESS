@@ -11,7 +11,18 @@ from verify_svr11_handoff37 import audit_date,require
 # additional original nominal-current guard. B0 has no model/Native solver.
 B0_REVIEWED_CHANGES={'v42_svr11/migration.py','v42_svr11/processes.py',
  'v42_voltage_control/integration.py','v42_svr11/model.py','v42_svr11/prepare.py',
- 'v42_svr11/authority.py','v42_svr11/context_lifecycle.py','v42_voltage_control/timecontrol.py'}
+ 'v42_svr11/authority.py','v42_svr11/context_lifecycle.py','v42_voltage_control/timecontrol.py',
+ 'v42_voltage_control/forecast.py'}
+
+def normalized_forecast_receipt_guard(text):
+    """Only normalize the final receipt's existing checked() path rule."""
+    import ast
+    expected=ast.parse("record(r['path']) == dict(r,path=str(Path(r['path']).resolve()))",mode='eval').body
+    original=ast.parse("record(r['path']) == r",mode='eval').body
+    class Guard(ast.NodeTransformer):
+        def visit_Compare(self,node):
+            return original if ast.dump(node,include_attributes=False)==ast.dump(expected,include_attributes=False) else self.generic_visit(node)
+    return ast.dump(Guard().visit(ast.parse(text)),include_attributes=False)
 
 def normalized_reviewed_model(text):
     """Recognize only completed-owner cleanup and an exact NPZ read cache."""
@@ -67,10 +78,13 @@ def qualify(root,origin,day,arm='B0'):
     changes={k for k in set(old['execution_sources'])|set(m['execution_sources'])
         if old['execution_sources'].get(k)!=m['execution_sources'].get(k)}
     require(changes<=B0_REVIEWED_CHANGES,'REUSE_UNREVIEWED_SCIENTIFIC_CHANGE')
+    if 'v42_voltage_control/forecast.py' in changes:
+        forecasts=[normalized_forecast_receipt_guard((Path(mm['code_root'])/'v42_voltage_control/forecast.py').read_text()) for mm in (old,m)]
+        require(forecasts[0]==forecasts[1],'REUSE_UNREVIEWED_FORECAST_CHANGE')
     require(arm in ('B0','B2'),'REUSE_POLICY_NOT_REVIEWED')
     if arm=='B2':
         require(changes<={'v42_svr11/context_lifecycle.py','v42_svr11/model.py',
-            'v42_svr11/prepare.py','v42_svr11/migration.py'},'REUSE_M_POLICY_CHANGE')
+            'v42_svr11/prepare.py','v42_svr11/migration.py','v42_voltage_control/forecast.py'},'REUSE_M_POLICY_CHANGE')
         require(all(m[k]==old[k] for k in ('algorithm_version','native_M_limit_seconds',
             'M_acceptance','M_gap_certificate_required','Threads','Actual_reoptimization',
             'Actual_PQ_repair','Planning_taps_copied_to_Actual')),'REUSE_M_CONTRACT_DIFFERENT')
@@ -151,11 +165,42 @@ def admit_before_first_dispatch(root):
     with singleton(root/'WATCHDOG.lock'):
         if sup.exists() and live(read(sup)):return
         ledger=read(root/'CAMPAIGN_LEDGER.json');source=read(origin/'CAMPAIGN_LEDGER.json');decisions=[]
+        failure_admissions=[]
         for key,row in ledger['dates'].items():
             if row['arm']!='B2' or row['status']!='NOT_EXECUTED' or row['attempts']:continue
             oldrow=source['dates'][key]
             path=Path(oldrow['result']) if oldrow.get('result') else (Path(read(oldrow['request'])['result']) if oldrow.get('request') else None)
-            if path is None or not path.exists() or read(path).get('PASS') is not True:continue
+            if path is None or not path.exists():continue
+            result=read(path)
+            if result.get('PASS') is not True:
+                # Only this diagnosed, byte-identical C/D junction mismatch is
+                # a reviewed technical recovery. Keep the original FAIL/Native
+                # Runtime; do not promote an unfinished stage to date PASS.
+                diagnosis=root/'FORECAST_JUNCTION_RECEIPT_DIAGNOSIS.json'
+                expected="ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED')"
+                if result.get('reason')!=expected or not diagnosis.exists() or not read(diagnosis)['PASS']:continue
+                model_contract=read(m['model_checkpoint_reuse_contract']['path'])
+                require(record(diagnosis)==model_contract['forecast_junction_diagnosis'],'RETRY_DIAGNOSIS_RECEIPT_DRIFT')
+                forecast=read(origin/'raw'/row['day']/'SOURCE_PROVENANCE.json')['daily_sources']['aemo_forecast.json']
+                require(record(forecast['path'])==dict(forecast,path=str(Path(forecast['path']).resolve())),
+                    'RETRY_FORECAST_CONTENT_DIFFERENT')
+                from v42_svr11.controller import record_terminal,following_date
+                record_terminal(row,path)
+                day_after=following_date(row['day']);nextrow=source['dates'].get('B2/'+str(day_after),{})
+                # A following date already assigned in the preserved origin
+                # satisfies the user's dispatch-first requirement. Otherwise
+                # the successor dispatches that next date before this retry.
+                already_assigned=bool(nextrow.get('attempts'))
+                row.update(retry_pending=True,retry_eligible_after=None if already_assigned else day_after,
+                    execution_source_SHA=result['source_SHA'],validation_source_SHA=m['execution_SHA'],
+                    previous_epoch_Native_Runtime=result.get('Native_Runtime'),previous_epoch_failure=record(path),
+                    previous_epoch_runtime_pending=False,
+                    next_date_previous_epoch_assignment=record(nextrow['request']) if already_assigned else None,
+                    recovery='Verified canonical Forecast receipt path fix; fresh Native0 attempt; original FAIL/runtime retained')
+                history=row.setdefault('previous_epoch_attempts',[])
+                for receipt in (record(oldrow['request']),record(path)):
+                    if receipt not in history:history.append(receipt)
+                failure_admissions.append(record(path));continue
             try:proof_path,proof,admitted=qualify(root,origin,row['day'],'B2')
             except ValueError as error:
                 # A rejected date is recalculated, never accepted or used to
@@ -168,10 +213,13 @@ def admit_before_first_dispatch(root):
                 validation_source_SHA=m['execution_SHA'],retry_pending=False)
             verify_reuse(root,m,admitted);ledger['dates'][key]=admitted
             decisions.append(record(proof_path))
-        if decisions:
+        if decisions or failure_admissions:
             atomic(root/'CAMPAIGN_LEDGER.json',ledger)
             atomic(root/'B2_PRE_DISPATCH_REUSE.json',dict(PASS=True,proofs=decisions,UTC=now(),
                 original_result_bytes_changed=False,Native_calls=0,AC_calls=0))
+            atomic(root/'TECHNICAL_FAIL_RETRY_ADMISSION.json',dict(PASS=True,failed_original_results=failure_admissions,
+                recovery='Only independently diagnosed canonical C/D alias mismatch; fresh Native0 after next date assignment',
+                original_FAIL_and_Runtime_preserved=True,failures_promoted_to_PASS=0,UTC=now()))
 
 def admit(root,origin,day):
     import psutil
