@@ -11,7 +11,7 @@ from verify_svr11_handoff37 import audit_date,require
 # additional original nominal-current guard. B0 has no model/Native solver.
 B0_REVIEWED_CHANGES={'v42_svr11/migration.py','v42_svr11/processes.py',
  'v42_voltage_control/integration.py','v42_svr11/model.py','v42_svr11/prepare.py',
- 'v42_svr11/authority.py','v42_svr11/context_lifecycle.py'}
+ 'v42_svr11/authority.py','v42_svr11/context_lifecycle.py','v42_voltage_control/timecontrol.py'}
 
 def qualify(root,origin,day,arm='B0'):
     root=Path(root).resolve();origin=Path(origin).resolve()

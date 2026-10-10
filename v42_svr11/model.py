@@ -105,7 +105,7 @@ def generate(day,input_folder,output,progress):
                 if t==target and j is not None:
                     delta=original._perturbation(controls[j],anchor[t,j])
                     original._apply_control(e,controls[j],float(anchor[t,j]+sign*delta),p[t])
-                clock.settle_slot(e,t)
+                clock.settle_slot(e,t,capture_events=False)
             solves+=clock.total_physical_solve_count
             return measurement(e)
         finally:retire_completed_probe(e)
@@ -115,6 +115,11 @@ def generate(day,input_folder,output,progress):
             saved=read(checkpoint)
             if saved['source_SHA']!=m['execution_SHA'] or saved['day']!=day or record(saved['data']['path'])!=saved['data']:
                 raise PermissionError('SVR11_MODEL_CHECKPOINT_DRIFT')
+            if saved.get('reused'):
+                contract=read(m['model_checkpoint_reuse_contract']['path'])
+                owned=contract['days'][day]['slots'].get(str(t))
+                if not owned or record(owned['original_checkpoint']['path'])!=owned['original_checkpoint'] or record(owned['original_data']['path'])!=owned['original_data'] or owned['original_data']['sha256']!=saved['data']['sha256'] or saved['generation_source_SHA']!=contract['generation_source_SHA']:
+                    raise PermissionError('SVR11_REUSED_MODEL_SLOT_PROVENANCE_DRIFT')
             with np.load(saved['data']['path']) as z:slots.append({f:z[f].copy() for f in FIELDS})
             continue
         progress(dict(phase='SVR11_FORECAST_MODEL_GENERATION',model_slot=t,model_slots=96,Native_Runtime=0,
@@ -144,7 +149,9 @@ def generate(day,input_folder,output,progress):
         equipment_SHA=read(m['hardware']['path'])['equipment_SHA'],model_regenerated=True,Actual_inputs_read=0,
         control_semantics='Independent source-initial native TIME prefix for each slot/control/sign; no tap setters',
         sensitivity_semantics='Local central secant with identical unperturbed prefix; discrete AUTO response; no global nonlinear feasibility guarantee',
-        output=ref,independent_compiles=count,physical_solves=solves,wall_seconds=time.perf_counter()-started,UTC=now())
+        output=ref,independent_compiles=count,physical_solves=solves,wall_seconds=time.perf_counter()-started,UTC=now(),
+        unused_probe_EventLog_receipt_copy=False,
+        reused_forecast_slot_provenance=m.get('model_checkpoint_reuse_contract'))
     cert['outputs']={k:ref for k in ('voltage','current','planning_coefficients','transformer_coefficients')}
     atomic(cert_path,cert);verify_coefficients(cert,day,load_coefficients(cert,day))
     return record(cert_path)

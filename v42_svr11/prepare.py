@@ -61,6 +61,9 @@ def release(root):
         retrospective_design=True,independent_holdout_claim=False,predecessor_commit='a26133a8983b625c7ba589c67a40c6576e796247',predecessor_PR=206,UTC=now())
     if (root/'PREDECESSOR_DRAIN_CONTRACT.json').exists():
         m['predecessor_drain_contract']=record(root/'PREDECESSOR_DRAIN_CONTRACT.json')
+    if (root/'MODEL_CHECKPOINT_REUSE_CONTRACT.json').exists():
+        m['model_checkpoint_reuse_contract']=record(root/'MODEL_CHECKPOINT_REUSE_CONTRACT.json')
+        m['unused_probe_EventLog_receipt_copy']=False
     atomic(manifest,m)
     from .authority import verify
     verify(manifest)
