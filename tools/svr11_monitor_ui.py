@@ -102,7 +102,9 @@ def safeguard(root,monitor_only=False):
     # Proven lifetime-only successor changes may reuse complete predecessor
     # dates. Audit before the immutable migration can dispatch fresh Workers.
     m=read(root/'CAMPAIGN_MANIFEST.json')
-    if m.get('model_probe_context_retirement')=='EXACT_COMPLETED_OWNER_AND_FINALIZED_CALLBACK_REGISTRY_DETACH_CFFI_GC':
+    predecessor=read(m['predecessor_drain_contract']['path'])
+    if (predecessor.get('qualified_completed_dates_reused',True) and
+        m.get('model_probe_context_retirement')=='EXACT_COMPLETED_OWNER_AND_FINALIZED_CALLBACK_REGISTRY_DETACH_CFFI_GC'):
         from reuse_svr11_completed import admit_before_first_dispatch
         admit_before_first_dispatch(root)
     state=check(root,monitor_only)

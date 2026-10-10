@@ -61,6 +61,10 @@ def release(root):
         retrospective_design=True,independent_holdout_claim=False,predecessor_commit='a26133a8983b625c7ba589c67a40c6576e796247',predecessor_PR=206,UTC=now())
     if (root/'PREDECESSOR_DRAIN_CONTRACT.json').exists():
         m['predecessor_drain_contract']=record(root/'PREDECESSOR_DRAIN_CONTRACT.json')
+    if (root/'EQUIPMENT_CHANGE_CONTRACT.json').exists():
+        m['equipment_change_contract']=record(root/'EQUIPMENT_CHANGE_CONTRACT.json')
+        m['fresh_all_124_physical_results_required']=True
+        m['previous_equipment_dates_or_models_promoted']=0
     if (root/'MODEL_CHECKPOINT_REUSE_CONTRACT.json').exists():
         m['model_checkpoint_reuse_contract']=record(root/'MODEL_CHECKPOINT_REUSE_CONTRACT.json')
         m['unused_probe_EventLog_receipt_copy']=False

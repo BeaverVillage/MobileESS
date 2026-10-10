@@ -57,6 +57,21 @@ def prepare(root):
         c.update(status='FROZEN',design_data='Retrospective May03-informed SVR11 design; May2025 is not independent holdout',
             independent_holdout_claim=False,whole_network_success_claim=False)
         validate_contract(c);assert c['units'][:7]==old['svr']['units'] and c['units'][:9]==prior9['svr']['units'] and len(c['units'])==11
+        # Repeated saved physical failures justify one placement correction.
+        # Preserve every other bank and all ratings/control parameters.
+        change=read(root.parent/'EQUIPMENT_CHANGE_CONTRACT.json')
+        assert change['confirmed_repeated_physical_failure'] and change['SVR_count']==11
+        assert len(change['failed_dates'])>=2 and all(record(r['path'])==r for r in change['protected_evidence'])
+        baseline=copy.deepcopy(c['units']);u=next(x for x in c['units'] if x['id']=='BUS82')
+        assert u['cut_element']=='Line.l82' and u['cut_terminal']==2 and u['sensed_bus']=='82'
+        u.update(cut_terminal=1,original_bus_spec='81.1.2.3',series_orientation='UPSTREAM_OF_EXISTING_BRANCH',
+            upstream_new_bus='svr_bus82_line_input')
+        u['engineering_assumptions']+=['Repeated May04/May05 Actual primary-side voltage failures: existing SVR8 is relocated before line82 with remote Bus82 A/B/C sensing; no additional device, relaxed limit or monthly safety claim.']
+        placement_keys={'cut_terminal','original_bus_spec','series_orientation','upstream_new_bus','engineering_assumptions'}
+        assert all(a==b if a['id']!='BUS82' else {k:v for k,v in a.items() if k not in placement_keys}==
+            {k:v for k,v in b.items() if k not in placement_keys} for a,b in zip(baseline,c['units']))
+        validate_contract(c)
+        c['design_data']='Retrospective May04/May05 structural-primary correction; one existing bank relocated; May2025 is not independent holdout'
     finally:e.Basic.ClearAll()
     scenario=copy.deepcopy(old);scenario['svr']=c;scenario['scenario_SHA']=digest(scenario_identity(scenario))
     atomic(root/'SCENARIO.json',scenario)
@@ -95,6 +110,7 @@ def prepare(root):
         equipment_SHA=digest(physical),scenario_SHA=scenario['scenario_SHA'],independent_initial_states=states,
         original_RegControl_count=7,additional_RegControl_count=33,capacitors_fixed_ON=4,
         CapControl_count=0,DSTATCOM_count=0,tap_optimization_variables=0,minimum_AC=record(root/'SINGLE_TIMESTAMP_AC.json'),
+        equipment_change_contract=record(root.parent/'EQUIPMENT_CHANGE_CONTRACT.json'),
         monthly_zero_violation_certification=False,pre_campaign_monthly_canary=False,independent_holdout_claim=False,UTC=now())
     atomic(root/'EXECUTION_SOURCE_MANIFEST.json',dict(execution_sources=source,execution_SHA=digest(source)))
     atomic(root/'HARDWARE.json',h)
