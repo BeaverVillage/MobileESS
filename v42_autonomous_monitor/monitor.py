@@ -15,7 +15,7 @@ import time
 import psutil
 
 from v42_b2_monitor_v15.actual import metric, measured
-from v42_b2_monitor_v16.certificates import bounds
+from .current_certificates import bounds
 
 DAYS = tuple(f'2025-05-{i:02d}' for i in range(1, 32))
 ACTIVE = {'PENDING', 'RUNNING', 'RETRY_READY', 'RETRY_PENDING', 'START_REQUESTED', 'SOURCE_BLOCKED'}
@@ -171,9 +171,9 @@ def verified_reuse(a1, receipt_path, day):
     return True
 
 
-def b2_bound(output, day):
+def b2_bound(output, day, request=None, *, source=None, attempt=None):
     try:
-        found = bounds(output, day) if output else {}
+        found = bounds(output, day, request, source=source, attempt=attempt) if output else {}
         return dict(UB=found.get('UB', {}).get('value'),
                     LB=found.get('LB', {}).get('value'), gap=found.get('Gap'),
                     target=.03, scope='ORIGINAL_FULL_GLOBAL',
@@ -349,7 +349,8 @@ def worker_view(key, worker, epoch):
         stage = bound.get('stage')
         ledger_path = Path(output) / 'PIPELINE' / str(stage) / 'NATIVE_RUNTIME_LEDGER.json' if output and stage else None
     else:
-        bound = b2_bound(output, day)
+        bound = b2_bound(output, day, request, source=worker.get('source_SHA'),
+                         attempt=worker.get('attempt_id'))
         ledger_path = attempt / 'NATIVE_RUNTIME_LEDGER.json' if attempt else None
     ledger = read(ledger_path)
     phase_view = current_phase(ledger, progress, heartbeat, live, worker.get('launch_intent', False))
@@ -413,7 +414,8 @@ def view(root, epoch=None):
             totals[arm]['pending'] += not is_terminal
             request = request_for(original)
             live = next((w for w in workers if w['arm'] == arm and w['day'] == day), None)
-            bound = live['bounds'] if live else (b2_bound(request.get('output'), day) if arm == 'B2'
+            bound = live['bounds'] if live else (b2_bound(request.get('output'), day, request,
+                     source=original.get('source_SHA'), attempt=original.get('current_attempt')) if arm == 'B2'
                      else b3_observation(request.get('output'), day) if arm == 'B3' else {})
             native = (live['runtime']['Native_Runtime'] if live else
                       document.get('Native_Runtime', document.get('native_seconds', original.get('Native_Runtime'))))
