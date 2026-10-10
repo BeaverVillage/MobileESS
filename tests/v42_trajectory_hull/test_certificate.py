@@ -7,6 +7,7 @@ from scipy import sparse
 from scipy.optimize import linprog
 import pytest
 from v42_trajectory_hull.certificate import check_cover, node_bound, check_global
+from v42_trajectory_hull.master import audit_transport
 
 
 def fixture():
@@ -102,3 +103,46 @@ def test_original_grid_objective_certifies_integer_hull_gain():
     packet['units']['MESS01']['exact_price']={'1':'-2'}
     with pytest.raises(ValueError,match='UNROUNDED_PRICE'):
         check_global(case,decomp,packet)
+
+
+def test_native_transport_never_silently_changes_source_grid():
+    original=sparse.csr_matrix([[1.,1e-20]])
+    native=sparse.csr_matrix([[1.,0.]])
+    with pytest.raises(ValueError,match='DW_NATIVE_MATRIX_DRIFT'):
+        audit_transport(original,native,1)
+    changed=sparse.csr_matrix([[.9,0.]])
+    with pytest.raises(ValueError,match='DW_NATIVE_MATRIX_DRIFT'):
+        audit_transport(original,changed,1)
+
+
+def test_full96_mobility_soc_pcs_fixture_strict_hull_and_exact_empty_leaf():
+    # Two complete A->A trajectories: stay, or a remote round trip consuming
+    # one energy unit at slot48. Capacity/initial SOC=.6; terminal SOC=.6.
+    # Charge at90 may restore energy but cannot prevent earlier SOC<0.
+    # Remote reactive relief Q<=z is the normalized PCS/location constraint.
+    n=99;matrix=sparse.lil_matrix((98,n));rhs=np.zeros(98)
+    matrix[0,1]=1;matrix[0,0]=-1  # Q-z<=0
+    matrix[1,3]=1;rhs[1]=.6     # Initial SOC
+    for t in range(1,96):
+        row=t+1;matrix[row,3+t]=1;matrix[row,3+t-1]=-1
+        if t==48:matrix[row,0]=1
+        if t==90:matrix[row,2]=-1
+    matrix[97,98]=1;rhs[97]=.6 # terminal SOC
+    lo=np.zeros(n);hi=np.concatenate(([1.,1.,.6],np.full(96,.6)))
+    types=np.full(n,'C');types[0]='B'
+    b=SimpleNamespace(A=matrix.tocsr(),d=dict(lower=lo,upper=hi,types=types,
+        objective=np.zeros(n),rhs=rhs,sense=np.concatenate((['<'],np.full(97,'='))),constant=np.array(0.)))
+    q={'1':'-1'};c=np.zeros(n);c[1]=-1
+    lp=linprog(c,A_ub=b.A[:1],b_ub=rhs[:1],A_eq=b.A[1:],b_eq=rhs[1:],
+               bounds=list(zip(lo,hi)),method='highs')
+    assert lp.success and abs(lp.fun+.6)<1e-12
+    soc_dual={str(i):'-1' for i in range(1,50)}
+    root=dict(soc_dual,**{'0':'-1'})
+    tree={'r':dict(fixes={},proof=dict(kind='DUAL',dual=root),split=0),
+          'r0':dict(fixes={'0':0},proof=dict(kind='DUAL',dual={'0':'-1'}),split=None),
+          'r1':dict(fixes={'0':1},proof=dict(kind='FARKAS',dual=soc_dual),split=None)}
+    assert node_bound(b,q,{},tree['r']['proof'])==-F(float(.6))
+    assert node_bound(b,q,{'0':1},tree['r1']['proof']) is None
+    assert check_cover(b,q,tree)==0
+    # Congestion rho>=1-Q: original LP .4 versus complete integer hull 1.
+    assert 1+check_cover(b,q,tree)>1+F(float(lp.fun))

@@ -27,7 +27,7 @@ def endpoints(block, fixes):
     return lower, upper
 
 
-def node_bound(block, exact_price, fixes, packet):
+def node_bound_details(block, exact_price, fixes, packet):
     lo, hi = endpoints(block, fixes)
     d = dict(block.d)
     d['objective'] = np.zeros(block.A.shape[1]) if packet['kind'] == 'FARKAS' else np.array(
@@ -37,15 +37,22 @@ def node_bound(block, exact_price, fixes, packet):
     if packet['kind'] == 'FARKAS':
         if bound <= 0:
             raise ValueError('EXACT_INFEASIBILITY_NOT_PROVEN')
-        return None  # +infinity, proved empty leaf; never inferred from status.
+        return dict(empty=True, bound=None, certificate=cert, objective_correction='0')
     if packet['kind'] != 'DUAL':
         raise ValueError('UNKNOWN_PRICING_PROOF_KIND')
     # Native coefficients were rounded for search. Independently correct their error.
+    correction = F(0)
     for key, q in exact_price.items():
         j = int(key)
         delta = F(q)-F(float(d['objective'][j]))
-        bound += delta*F(float(lo[j] if delta >= 0 else hi[j]))
-    return bound
+        correction += delta*F(float(lo[j] if delta >= 0 else hi[j]))
+    return dict(empty=False, bound=str(bound+correction), certificate=cert,
+                objective_correction=str(correction))
+
+
+def node_bound(block, exact_price, fixes, packet):
+    detail = node_bound_details(block, exact_price, fixes, packet)
+    return None if detail['empty'] else F(detail['bound'])
 
 
 def check_cover(block, exact_price, tree):

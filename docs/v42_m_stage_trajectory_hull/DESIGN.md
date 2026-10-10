@@ -81,3 +81,19 @@ B3 saved identity/arrays means NOT_RUN; B2 evidence is never reassigned.
 Production code, campaign, queue, frozen artifacts, Supervisor and Windows tasks
 are untouched. The production 3%/5400-second contract is not replaced by the
 research 600-second ceiling. No automatic production promotion is implemented.
+
+## Native master transport and first-pilot stop
+
+The first registered run used the inherited hybrid master factory unchanged.
+Its exact matrix-readback gate failed before any master optimize: Gurobi ignored
+tiny generated-column coefficients. Four full96 MILP searches and their covers
+had completed; their independently certified gain was only about 4.78e-14.
+The consumed pilot is not rerun.
+
+The repaired master uses reversible power-of-two row scaling and the same RHS
+scaling. Columns, objective, bounds and primal coordinates remain unchanged.
+Original duals are R times solver duals. All native coefficients must match exactly.
+No rounding exception is allowed. One model/readback passed: three rows scaled
+by 2^20, zero coefficient losses, bit-identical inverse CSR/domain identities.
+No optimize was run; Global LB improvement is NOT_MEASURED. Measured evidence
+is in MASTER_COEFFICIENT_REPAIR.json.

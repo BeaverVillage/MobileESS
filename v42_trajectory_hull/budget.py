@@ -57,3 +57,56 @@ class Budget:
                                                 allocated_native_ceiling=600,
                                                 native_overshoot=max(0., self.used-600.)))
         return row
+
+
+class ContinuedBudget(Budget):
+    """Append previous measured Native calls; interrupted calls are quarantined."""
+    def __init__(self, output, previous, *, additional_limit=300, resume=False):
+        from .case import file_sha, read
+        self.output = Path(output).resolve()
+        if self.output.drive.upper() != 'D:':
+            raise ValueError('RESEARCH_D_DRIVE_REQUIRED')
+        self.output.mkdir(parents=True, exist_ok=True)
+        previous = Path(previous).resolve()
+        old = read(previous)
+        if old.get('inflight') is not None:
+            raise ValueError('PREVIOUS_NATIVE_CALL_UNRESOLVED')
+        carried = sum(c['Runtime'] for c in old['calls'])
+        if carried != old['measured_native_seconds']:
+            raise ValueError('PREVIOUS_NATIVE_LEDGER_ARITHMETIC_DRIFT')
+        token = dict(previous=str(previous), previous_sha=file_sha(previous),
+                     carried=carried, additional_limit=additional_limit,
+                     ceiling=min(600., carried+additional_limit))
+        if resume:
+            if read(self.output/'ONCE.json') != token:
+                raise ValueError('RESUME_NATIVE_AUTHORITY_DRIFT')
+            current = read(self.output/'LEDGER.json')
+            if current.get('inflight') is not None:
+                raise ValueError('UNFINISHED_NATIVE_CALL_NO_AUTOMATIC_REPLAY')
+            if current['calls'][:len(old['calls'])] != old['calls']:
+                raise ValueError('CARRIED_NATIVE_CALLS_REWRITTEN')
+            self.calls = current['calls']
+        else:
+            with (self.output/'ONCE.json').open('x', encoding='utf-8') as f:
+                json.dump(token, f)
+            self.calls = old['calls'].copy()
+            write(self.output/'LEDGER.json', dict(calls=self.calls, inflight=None,
+                                                 measured_native_seconds=carried))
+        self.carried, self.ceiling = carried, token['ceiling']
+        self.build_seconds = self.certificate_seconds = 0.
+
+    @property
+    def remaining(self):
+        return max(0., self.ceiling-self.used)
+
+    def optimize(self, model, label, limit):
+        if self.remaining <= .05:
+            raise TimeoutError('ADDITIONAL_NATIVE_BUDGET_CONSUMED')
+        result = super().optimize(model, label, min(limit, self.remaining))
+        from .case import read
+        receipt = read(self.output/'LEDGER.json')
+        receipt.update(carried_native_seconds=self.carried, additional_native_ceiling=self.ceiling,
+                       additional_runtime=self.used-self.carried,
+                       overshoot=max(0., self.used-self.ceiling))
+        write(self.output/'LEDGER.json', receipt)
+        return result

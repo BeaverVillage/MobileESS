@@ -9,7 +9,7 @@ import tempfile
 import subprocess
 import numpy as np
 from v42_m1_hybrid.pricing import make_prices
-from v42_m1_hybrid.dw import build_master
+from .master import build_master
 from .case import load, read
 from .budget import Budget, write
 from .pricing import integer_price
@@ -83,8 +83,15 @@ def run(spec, output):
             stop = 'NATIVE_BUDGET_OR_ROUND_LIMIT'
             break
         begin = perf_counter()
-        model, variables, rows, identity, source_rows = build_master(
-            case, decomp, catalog, output/f'round_{iteration}'/'master')
+        try:
+            model, variables, rows, identity, source_rows = build_master(
+                case, decomp, catalog, output/f'round_{iteration}'/'master')
+        except Exception as exc:
+            budget.build_seconds += perf_counter()-begin
+            stop = 'MASTER_BUILD_GATE_FAIL'
+            write(output/f'round_{iteration}_MASTER_FAILURE.json',dict(error=repr(exc),
+                  master_native_optimize_calls=0, no_automatic_rerun=True))
+            break
         budget.build_seconds += perf_counter()-begin
         try:
             model.Params.OutputFlag = 0
@@ -96,6 +103,8 @@ def run(spec, output):
                 write(output/f'round_{iteration}_MASTER_RESULT.json', record)
                 break
             pi = np.asarray(rows.Pi)
+            for i, exponent in identity['row_scale_exponents'].items():
+                pi[int(i)] = np.ldexp(pi[int(i)], exponent)
             senses = case.d['sense'][source_rows]
             bad = ((senses=='<') & (pi[:len(source_rows)]>0)) | ((senses=='>') & (pi[:len(source_rows)]<0))
             record['invalid_dual_signs'] = int(bad.sum())
