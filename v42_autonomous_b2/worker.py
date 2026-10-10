@@ -286,13 +286,17 @@ def worker_scope(request):
             with proof_scope(request,manifest):yield manifest
         finally:legacy.guard=before;legacy._active.reset(token)
 
-def run(path):
+def run(path,*,lb_rescue=None):
     from v42_b2_seed_recovery_v19 import worker as original
     from v42_may_campaign_native90 import inputs
     # The original generator compares its immutable provenance record including
     # absolute path. Its arithmetic, input bytes and all checks stay unchanged.
     generated=rebound(inputs.generate_b2,dict(inputs.generate_b2.__globals__,ROOT=CANONICAL))
-    with patch.object(inputs,'generate_b2',generated):
+    with ExitStack() as stack:
+        if lb_rescue is not None:
+            from . import lb_research
+            stack.enter_context(lb_research.stage_scope(path,lb_rescue))
+        stack.enter_context(patch.object(inputs,'generate_b2',generated))
         return rebound(original.run,dict(original.run.__globals__,verify_request=verify_request,
             worker_scope=worker_scope,DateBudget=ReceiptDateBudget))(path)
 

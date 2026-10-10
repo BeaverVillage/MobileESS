@@ -9,6 +9,8 @@ from fractions import Fraction as F
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
+from hashlib import sha256
+import json
 import re
 import time
 
@@ -176,7 +178,19 @@ def _plan(case,point):
     return plan
 
 
-def run(request,budget,progress):
+def _lb_catalog_sha(decomp,point,context):
+    """Hash admitted mathematical columns, never packet names or timestamps."""
+    columns={}
+    for unit,block in decomp.units.items():
+        values={vector_sha(point[block.original_columns])}
+        for path in context['seed_columns'][unit]:
+            with np.load(path,allow_pickle=False) as packet:
+                values.add(vector_sha(packet['point']))
+        columns[unit]=sorted(values)
+    return sha256(json.dumps(columns,sort_keys=True).encode('ascii')).hexdigest()
+
+
+def run(request,budget,progress,*,lb_rescue=None):
     from v42_m1_anytime import algorithms as alg,core
     from v42_m1_hybrid.blocks import build_blocks
     from v42_m1_hybrid.verify import verify_decomposition,verify_rmp_pricing_lower_bounds
@@ -196,6 +210,7 @@ def run(request,budget,progress):
                 native_seconds=budget.used(),native_calls=len(budget.calls))
             atomic(case.output/'M_STAGE_RESULT.json',result);return result
     case.point=point.copy();decomp=build_blocks(case);verify_decomposition(case,decomp)
+    search=None if lb_rescue is None else lb_rescue(case,request)
     packet=case.output/'INITIAL_STRICT_UB_POINT.npz';np.savez_compressed(packet,point=point)
     with budget.cost('integer_physical_validation','M_initial_strict_UB'):
         strict=_strict_ub(case,packet,{});strict.update(case_sha=case.case_sha)
@@ -217,6 +232,9 @@ def run(request,budget,progress):
                     termination='INDEPENDENT_GLOBAL_GAP_3_PERCENT_CERTIFIED';break
                 if budget.remaining(reserve=budget.final_reserve)<=0:break
                 method,reason=core.schedule_choice(history,iteration,budget.wall())
+                if search is not None and budget.remaining(reserve=budget.final_reserve)>=600:
+                    rescue=search.take_rescue(history,budget.remaining(reserve=budget.final_reserve),frontier.gap())
+                    if rescue is not None:method=rescue['method'];reason=rescue
                 if method.startswith('L') and budget.remaining(reserve=budget.final_reserve)<600:
                     method='U3';reason['reason']='FINAL_CERTIFICATE_RESERVE_REQUIRES_SHORTER_UB_TASK'
                 if method=='L4' and budget.remaining(reserve=budget.final_reserve)<1000:
@@ -236,33 +254,59 @@ def run(request,budget,progress):
                     row,point=alg.ub_trial(case,point,method,ordinal,budget,frontier,target,limit,grid_cache[key],context=context)
                     case.point=point.copy()
                 else:
-                    price=dual;alpha=None
+                    price=dual;alpha=None;selection=None
                     if method in ('L2','L3'):
                         if method=='L2' or rmpdual is None:
+                            if search is not None:search.record_rmp(_lb_catalog_sha(decomp,point,context))
                             latest_rmp=alg.feedback_master(case,decomp,point,budget,case.output/(label+'_MASTER'),context=context)
                             rmpdual=latest_rmp.get('full_original_dual')
                         if rmpdual is None:
                             history.append(dict(method=method,certified_gain=0,wall_seconds=time.perf_counter()-begin,
                                 status='NOT_RUN_NO_FINITE_RMP_PI'));continue
-                        if method=='L2':price=rmpdual
+                        if search is not None:
+                            with budget.cost('exact_dual_candidate_selection',label):
+                                selection=search.select(case,dual,rmpdual,frontier.lb,
+                                    certify=lambda y:(search.finite_box.check(case.A,case.d,y,
+                                        checker=check_rational_dual_certificate,case_sha=case.case_sha)
+                                        if hasattr(search.finite_box,'check') else
+                                        check_rational_dual_certificate(case.A,case.d,y,case_sha=case.case_sha)))
+                            price=selection['dual'];alpha=selection.get('alpha')
+                            atomic(case.output/(label+'_DUAL_SEARCH.json'),selection)
+                        elif method=='L2':price=rmpdual
                         else:
                             alpha=('1/8','1/4','1/2')[ordinal%3];price=alg.mix_duals(dual,rmpdual,alpha)
+                    kind='MILP_AND_LP' if method=='L4' else 'LP_ONLY'
+                    if search is not None and not search.consume_pricing(decomp,price,kind):
+                        history.append(dict(method=method,certified_gain=0,wall_seconds=time.perf_counter()-begin,
+                            status='NOT_RUN_IDENTICAL_STAGE_PRICE_INPUT'))
+                        atomic(case.output/'ADAPTIVE_SCHEDULER_AUDIT.json',dict(case_sha=case.case_sha,
+                            choices=choices,history=history,goal_gap=.03,development_only=True))
+                        continue
+                    start_lb=frontier.lb
                     row,adopted,pricing=alg.lp_round(case,decomp,price,budget,frontier,target,method,
-                        'MILP_AND_LP' if method=='L4' else 'LP_ONLY',context=context)
+                        kind,context=context)
                     if adopted is not None:dual=adopted
                     for unit,columns in pricing['columns'].items():
                         for column in columns:
                             if column.get('admission',{}).get('PASS') and column['path'] not in context['seed_columns'][unit]:
                                 context['seed_columns'][unit].append(column['path'])
                     row['dual_stabilization_weight']=alpha
-                    if method=='L2' and latest_rmp.get('convexity_duals') is not None:
-                        import json
+                    if search is not None:
+                        certificate=json.loads(Path(row['certificate']).read_text(encoding='utf-8'))
+                        # lp_round independently checks the complete four-unit
+                        # certificate, including trials the Frontier did not adopt.
+                        certificate['exact_bound']=certificate['exact_Global_LB']
+                        search.record_pricing(price,certificate,frontier.lb-start_lb,
+                            new_catalog_sha=_lb_catalog_sha(decomp,point,context))
+                        row['development_dual_search_status']=None if selection is None else selection['status']
+                    if method=='L2' and latest_rmp.get('convexity_duals') is not None and selection is None:
                         selected=json.loads((target/'SELECTED_UNIT_DUALS_EXACT.json').read_text(encoding='utf-8'))
                         closure=verify_rmp_pricing_lower_bounds(case,decomp,rmpdual,selected,latest_rmp['convexity_duals'])
                         atomic(target/'INDEPENDENT_MISSING_COLUMN_CERTIFICATE.json',closure)
                 row['wall_seconds']=time.perf_counter()-begin;row['completed_wall_seconds']=budget.wall();history.append(row)
                 atomic(case.output/'ADAPTIVE_SCHEDULER_AUDIT.json',dict(case_sha=case.case_sha,
-                    choices=choices,history=history,goal_gap=.03,existing_scheduler='v42_m1_anytime.core.schedule_choice'))
+                    choices=choices,history=history,goal_gap=.03,existing_scheduler='v42_m1_anytime.core.schedule_choice',
+                    development_dual_search=search is not None))
         except TimeoutError:
             termination='NATIVE_BUDGET_WINDOW_CLOSED_AT_SOLVER_BOUNDARY'
         except Exception as exc:

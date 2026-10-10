@@ -79,11 +79,19 @@ class DateBudget:
         return self.native_optimize(model, callback, component='P1', track=track,
                                     label=label, requested_seconds=requested_seconds)
 
-    def native_optimize(self, model, callback=None, *, component='P1', track='A', label='', requested_seconds=None):
+    def native_optimize(self, model, callback=None, *, component='P1', track='A', label='', requested_seconds=5400.):
         self.check(self.final_reserve)
         if any(r.get('runtime_unavailable') for r in self.calls):
             raise RuntimeError('UNMEASURED_RUNTIME_QUARANTINE')
-        limit = self.remaining()
+        if type(requested_seconds) not in (int, float):
+            raise ValueError('FINITE_POSITIVE_REQUESTED_NATIVE_CAP_REQUIRED')
+        try:
+            requested_cap = float(requested_seconds)
+        except OverflowError:
+            raise ValueError('FINITE_POSITIVE_REQUESTED_NATIVE_CAP_REQUIRED') from None
+        if not math.isfinite(requested_cap) or requested_cap <= 0:
+            raise ValueError('FINITE_POSITIVE_REQUESTED_NATIVE_CAP_REQUIRED')
+        limit = min(requested_cap, self.remaining())
         if limit <= 0:
             raise BudgetStop('DATE_NATIVE_RUNTIME_BUDGET_EXHAUSTED')
         model.Params.Threads = 1
@@ -94,6 +102,7 @@ class DateBudget:
         model.Params.LogFile = str(self.path.parent / f'{len(self.calls):04d}_{track}_{component}_NATIVE.log')
         start = self.clock()
         row = dict(component=component, track=track, label=label, requested_seconds=requested_seconds,
+                   requested_cap_policy='MIN_VALID_REQUESTED_SECONDS_AND_REMAINING_NATIVE_V1',
                    effective_TimeLimit=limit, started_wall_seconds=self.wall(), UTC=now(), status='IN_FLIGHT')
         self.inflight = row; self.latest = {}; self.persist()
         error = None; entered_native = False

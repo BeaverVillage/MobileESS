@@ -109,8 +109,21 @@ class SourceStageLedger:
                 day=self.context.request.authority.day, stage=self.stage, component=row["component"])
             require(row["b3_numerical_policy"]["effective_parameters"].get("TimeLimit")
                 == row["effective_TimeLimit"], "NATIVE_LEDGER_NUMERICAL_LIMIT_DRIFT")
+            remaining = max(0., 5400 - total)
+            expected_limit = remaining
+            if "requested_cap_policy" in row:
+                require(row["requested_cap_policy"] == "MIN_VALID_REQUESTED_SECONDS_AND_REMAINING_NATIVE_V1",
+                    "NATIVE_LEDGER_REQUESTED_CAP_POLICY_DRIFT")
+                requested = row.get("requested_seconds")
+                require(type(requested) in (int, float), "NATIVE_LEDGER_REQUESTED_CAP_REQUIRED")
+                try:
+                    requested = float(requested)
+                except OverflowError:
+                    raise ValueError("NATIVE_LEDGER_REQUESTED_CAP_REQUIRED") from None
+                require(math.isfinite(requested) and requested > 0, "NATIVE_LEDGER_REQUESTED_CAP_REQUIRED")
+                expected_limit = min(requested, remaining)
             require(not unknown_seen and total < 5400
-                and row.get("effective_TimeLimit") == max(0., 5400 - total),
+                and row.get("effective_TimeLimit") == expected_limit,
                 "NATIVE_LEDGER_REMAINING_LIMIT_OR_QUARANTINE_DRIFT")
             runtime = row.get("Native_Runtime")
             if row.get("runtime_unavailable"):
@@ -154,7 +167,7 @@ class SourceStageLedger:
             stage=self.stage, component=self.budget.inflight["component"])
 
     def native_optimize(self, model, callback=None, *, component="P1", track=None,
-                        label="", requested_seconds=None):
+                        label="", requested_seconds=5400.):
         self.registry.admit(self.context, "NATIVE_OPTIMIZE")
         require(component in COMPONENTS, "B3_P2_NATIVE_FORBIDDEN")
         require(self.budget.inflight is None, "INTERRUPTED_NATIVE_CALL_QUARANTINE")
