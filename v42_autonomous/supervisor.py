@@ -8,6 +8,7 @@ import psutil
 from v42_b2_seed_recovery_v19.common import read,atomic,record,sha,now,process,same_process,exclusive_lock
 
 DAYS=tuple(f'2025-05-{i:02d}' for i in range(1,32))
+FIRST_SWEEP_RETRY_LIMIT={'B2':2,'B3':1}
 
 def public_status(status):
     if status in ('PASS','FAIL','QUARANTINE','RETRY_PENDING','PENDING','RUNNING','SOURCE_BLOCKED'):return status
@@ -29,6 +30,17 @@ def next_day(cp,arm):
         cp['dates'][arm+'/'+d].get('first_attempt_terminal') is None]
     return pending[0] if pending else None
 
+def retry_streak(cp,arm):
+    value=cp.get('first_sweep_retry_streak',{}).get(arm,0)
+    if type(value) is not int or not 0<=value<=FIRST_SWEEP_RETRY_LIMIT[arm]:
+        raise PermissionError('FIRST_SWEEP_DISPATCH_ACCOUNTING_DRIFT')
+    return value
+
+def note_first_sweep_dispatch(cp,arm,*,retry):
+    if arm in cp.get('first_sweeps_completed',{}):return
+    value=min(FIRST_SWEEP_RETRY_LIMIT[arm],retry_streak(cp,arm)+1) if retry else 0
+    cp.setdefault('first_sweep_retry_streak',{})[arm]=value
+
 def first_terminal(cp,key,worker=None):
     row=cp['dates'][key]
     if row.get('first_attempt_terminal') is not None or (worker or {}).get('recovery_queue_id'):return
@@ -48,6 +60,7 @@ def initialize_history(cp):
 def activate_retry(cp,key,worker):
     """Keep historical evidence out of the new running attempt's fields."""
     row=cp['dates'][key];request=read(worker['request'])
+    already_current=cp['workers'].get(key,{}).get('request')==worker['request']
     changed=row.get('current_attempt')!=request['attempt_id'] or row.get('request')!=worker['request']
     terminal_fields=('result','result_SHA','failure_receipt','error','error_receipt','finished_UTC',
         'terminal_identity_error','terminal_policy_error','terminal_recovery_error')
@@ -66,6 +79,8 @@ def activate_retry(cp,key,worker):
         source_commit=worker.get('source_commit'),Native_Runtime=None,
         native_runtime_state='AWAITING_CURRENT_ATTEMPT_LEDGER',active_recovery_queue_id=worker.get('recovery_queue_id'))
     cp['workers'][key]=worker
+    # Adoption of the same persisted worker must not charge a start twice.
+    if not already_current:note_first_sweep_dispatch(cp,key.split('/',1)[0],retry=True)
 
 def collect(root,cp,key,worker):
     request=read(worker['request']);p=Path(request['result'])
@@ -540,7 +555,9 @@ def cycle(root,manifest,cp):
             cp['dispatch_wait']=dict(reason='EXTERNAL_SCIENTIFIC_WORKER_ACTIVE',workers=other,UTC=now())
             continue
         retry=None
-        if allow_retries:
+        ordinary_due=(not both and next_day(cp,arm) is not None
+            and retry_streak(cp,arm)>=FIRST_SWEEP_RETRY_LIMIT[arm])
+        if allow_retries and not ordinary_due:
             try:retry=dispatch_ready(root,arm,slot,manifest)
             except LeaseBusy:
                 cp['dispatch_wait']=dict(reason='RECOVERY_QUEUE_BEING_UPDATED',UTC=now());continue
@@ -552,7 +569,12 @@ def cycle(root,manifest,cp):
             key=arm+'/'+retry['day'];activate_retry(cp,key,retry)
             atomic(root/'SUPERVISOR_STATE.json',cp);continue
         day=None if both else next_day(cp,arm)
-        if day:safe_dispatch(root,manifest,cp,arm,day,slot)
+        if day:
+            started=safe_dispatch(root,manifest,cp,arm,day,slot)
+            # A local preflight failure also visits this first-sweep date.
+            # Locks, unentered failures and a common source block do not.
+            if started or cp['dates'][arm+'/'+day].get('first_attempt_terminal') is not None:
+                note_first_sweep_dispatch(cp,arm,retry=False)
     refresh_retries(root,cp)
     cp.update(UTC=now(),parallel_workers=limit if cp['state']!='SOURCE_BLOCKED' else 0)
 
