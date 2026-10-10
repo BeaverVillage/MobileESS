@@ -94,8 +94,16 @@ def run(spec,output,*,resume=False):
     start=perf_counter();root=Path(__file__).resolve().parents[1];output=Path(output).resolve()
     gate=read(root/'docs/v42_m_stage_trajectory_hull/INTEGRATION_GATES.json')
     if not gate['PASS'] or gate['source_hash']!=source_hash():raise ValueError('FIXTURE_GATE_OR_SOURCE_FREEZE_DRIFT')
+    if gate.get('native_pilot_stopped',False):
+        raise ValueError('PILOT_STOPPED_NO_AUTOMATIC_REPLAY')
     prior=root/'runtime/v42_trajectory_hull/first_CG_round01'
-    budget=ContinuedBudget(output,prior/'LEDGER.json',additional_limit=300,resume=resume)
+    native_authority=gate.get('native_ledger')
+    previous_ledger=root/native_authority['path'] if native_authority else prior/'LEDGER.json'
+    if native_authority and file_sha(previous_ledger)!=native_authority['sha256']:
+        raise ValueError('CUMULATIVE_NATIVE_AUTHORITY_DRIFT')
+    carried=read(previous_ledger)['measured_native_seconds']
+    remaining_campaign=max(0.,gate.get('campaign_native_ceiling',carried+300)-carried)
+    budget=ContinuedBudget(output,previous_ledger,additional_limit=min(300.,remaining_campaign),resume=resume)
     case,decomp,seed,admission=load(spec);write(output/'SOURCE_ADMISSION.json',admission)
     identity={k:spec[k] for k in ('stage','case_sha','selected_matrix_sha','selected_domain_sha','fixed_input_sha','fixed_decision_sha')}
     base=root/'runtime/v42_trajectory_hull/may01_pilot01';trial=root/'runtime/v42_trajectory_hull/master_single_trial01'

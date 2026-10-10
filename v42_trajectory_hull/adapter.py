@@ -113,8 +113,13 @@ class CGAdapter:
                   axis_sha=axis_sha(axis),feasibility='NUMERICAL_ONLY_NOT_EXACT_MEMBERSHIP')
         projected=block.B@x
         comparisons=[('ORIGINAL_UB_SEED',self.case.point[block.columns])]
-        comparisons.extend((item['point_sha'],np.load(item['path'],allow_pickle=False)['point'])
-                           for item in self.master.catalog[block.unit])
+        for item in self.master.catalog[block.unit]:
+            with np.load(item['path'],allow_pickle=False) as cached:
+                previous=cached['point']
+            digest=vector_sha(previous)
+            if 'point_sha' in item and item['point_sha']!=digest:
+                raise ValueError('CACHED_COLUMN_POINT_SHA_DRIFT')
+            comparisons.append((digest,previous))
         info['grid_projection_comparisons']=[dict(point_sha=digest,
              max_abs_difference=float(np.max(abs(projected-block.B@previous),initial=0.)),
              numerical_similarity_only=True) for digest,previous in comparisons]

@@ -78,6 +78,11 @@ dual bytes, discovery-center bytes and the measured Native sum. Resume restores
 pool, columns, smoothing and round state. It never resets prior Native usage;
 unresolved IN_FLIGHT calls and terminal checkpoints prohibit automatic replay.
 The original ledger is read-only and carried unchanged as the new ledger prefix.
+After the stopped integrated trial, the gate anchors the latest 141.40300178527832
+second ledger by SHA and retains the original 436.16500186920166 second campaign
+ceiling. The pilot stop latch forbids automatic restart, including in a new folder.
+Optional cached `point_sha` metadata is derived from the verified saved vector
+when absent; an explicitly supplied mismatching point SHA is rejected.
 
 One sequential worker, Threads=1, at most three rounds. Per round each vehicle
 requests 6 seconds discovery + LP certificate nodes 8/3/3 seconds (20 total),

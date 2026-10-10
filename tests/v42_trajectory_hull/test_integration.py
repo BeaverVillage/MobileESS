@@ -53,6 +53,22 @@ def test_column_axis_and_fractional_integer_rejected():
     assert exact_price(np.array([.1]),{'0':'1/3'})==F(float(.1))/3
 
 
+def test_legacy_saved_catalog_without_optional_point_sha(tmp_path):
+    from v42_trajectory_hull.case import file_sha
+    case,decomp,b=small_case();out=tmp_path/'old_schema';out.mkdir()
+    old=out/'old.npz';seed=case.point[b.original_columns]
+    np.savez(old,point=seed,original_columns=b.original_columns)
+    # Saved original pricing catalogs have file hash + admission, not point_sha.
+    catalog={'MESS01':[dict(path=str(old),sha256=file_sha(old),admission={'PASS':True})]}
+    adapter=CGAdapter(case,decomp,np.array([0]),catalog,out)
+    adapter.bind_true_prices(NS(exact_objectives={'MESS01':{0:F(-1)}}),{'MESS01':'0'})
+    candidate=out/'new.npz';np.savez(candidate,point=np.ones(97),original_columns=b.original_columns)
+    info=adapter.admit(0,candidate)
+    assert info['added'] and len(info['grid_projection_comparisons'])==2
+    assert info['grid_projection_comparisons'][1]['max_abs_difference']==1
+    assert not info['projection_pruning_authority']
+
+
 def test_checkpoint_preserves_identity_axes_and_budget(tmp_path):
     case,decomp,b=small_case();out=tmp_path/'cp';out.mkdir();adapter=CGAdapter(case,decomp,np.array([0]),{'MESS01':[]},out)
     adapter.current_round=1;adapter.smooth(np.array([1.]),np.array([0.]));dual=out/'dual.npz';np.savez(dual,Pi_original=np.array([1.,0.]))
@@ -70,6 +86,15 @@ def test_native_resume_does_not_reset_budget_or_replay_inflight(tmp_path):
     restored=ContinuedBudget(out,old,resume=True);assert restored.used==b.used
     state=json.loads((out/'LEDGER.json').read_text());state['inflight']={'label':'unresolved'};write(out/'LEDGER.json',state)
     with pytest.raises(ValueError,match='NO_AUTOMATIC_REPLAY'):ContinuedBudget(out,old,resume=True)
+
+
+def test_failed_pilot_cannot_start_another_native_round(tmp_path,monkeypatch):
+    from v42_trajectory_hull import integrated
+    monkeypatch.setattr(integrated,'read',lambda path:dict(PASS=True,source_hash='fixture',native_pilot_stopped=True))
+    monkeypatch.setattr(integrated,'source_hash',lambda:'fixture')
+    with pytest.raises(ValueError,match='STOPPED_NO_AUTOMATIC_REPLAY'):
+        integrated.run({},tmp_path/'never_created')
+    assert not (tmp_path/'never_created').exists()
 
 
 def test_power_two_recovery_and_discovery_only_stabilization(tmp_path):
