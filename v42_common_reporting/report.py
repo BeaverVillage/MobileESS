@@ -41,7 +41,7 @@ def finite(value):
         return None
     try:
         value = float(Fraction(value)) if isinstance(value, str) and "/" in value else float(value)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, ZeroDivisionError, OverflowError):
         return None
     return value if math.isfinite(value) else None
 
@@ -95,6 +95,50 @@ def coalesce(*values):
     return next((value for value in values if value is not None), None)
 
 
+def matching_receipts(path, *containers):
+    """Find declared receipts by canonical path, including junction aliases."""
+    path = Path(path).resolve()
+    answer = []
+    name = path.name.casefold()
+    def visit(value):
+        if isinstance(value, dict):
+            if value.get("path") and (value.get("sha256") is not None or value.get("bytes") is not None):
+                candidate = Path(value["path"])
+                # B1 declares thousands of unrelated receipts. Resolve only the
+                # matching filename so Windows/junction filesystem calls stay
+                # proportional to the artifacts actually used by this report.
+                if candidate.name.casefold() == name and candidate.resolve() == path:
+                    answer.append(value)
+            for nested in value.values():
+                if isinstance(nested, (dict, list, tuple)):
+                    visit(nested)
+        elif isinstance(value, (list, tuple)):
+            for nested in value:
+                visit(nested)
+    for container in containers:
+        visit(container)
+    return answer
+
+
+def checked_record(path, *containers):
+    actual = record(path)
+    declared = matching_receipts(path, *containers)
+    for expected in declared:
+        if ((expected.get("sha256") is not None and actual["sha256"] != expected["sha256"])
+                or (expected.get("bytes") is not None and actual["bytes"] != expected["bytes"])):
+            raise ValueError("DECLARED_FILE_SHA_OR_SIZE_MISMATCH")
+    return actual, declared
+
+
+def execution_source(result, manifest, arm):
+    # The public common worker preserves B3's scientific seal in source_sha and
+    # binds the complete execution epoch in source_SHA. These are distinct seals.
+    expected = first(manifest, "execution_SHA", "source_SHA", "source_sha", arm + "_source_SHA")
+    source = first(result, "source_SHA", "implementation_SHA", "source_sha")
+    scientific = result.get("source_sha")
+    return source, expected, source == expected if expected else None, scientific
+
+
 def load_receipt(value, provenance, errors):
     """Validate referenced bytes before a result can enter any comparison."""
     if not value:
@@ -106,8 +150,7 @@ def load_receipt(value, provenance, errors):
     path = Path(raw_path)
     try:
         actual = record(path)
-        if expected and expected.get("sha256") and (
-                actual["sha256"] != expected["sha256"] or
+        if expected and ((expected.get("sha256") is not None and actual["sha256"] != expected["sha256"]) or
                 (expected.get("bytes") is not None and actual["bytes"] != expected["bytes"])):
             raise ValueError("REFERENCED_FILE_SHA_OR_SIZE_MISMATCH")
         value = read(path)
@@ -152,10 +195,10 @@ def line_authority(manifest, provenance, errors):
         return {}
 
 
-def current_metric(path, limits, provenance):
+def current_metric(path, limits, provenance, *receipt_containers):
     """100 * max(abs(I_actual_line_phase_A) / corresponding Line NormAmps)."""
     path = Path(path)
-    before = record(path)
+    before, declared = checked_record(path, *receipt_containers)
     with np.load(path, allow_pickle=False) as archive:
         names = archive["branch_names"].astype(str)
         if "phase_current_a" in archive:
@@ -189,7 +232,9 @@ def current_metric(path, limits, provenance):
                       convergence_count=int(np.count_nonzero(convergence)),
                       current_formula="100*max(abs(Actual line phase current A)/source Line NormAmps A)",
                       line_axis_sha=hashlib.sha256(json.dumps(sorted(selected)).encode()).hexdigest(),
-                      raw_current_receipt=before)
+                      raw_current_receipt=before,
+                      raw_current_declared_receipts=declared,
+                      raw_current_declared_sha_verified=any(ref.get("sha256") for ref in declared))
     if record(path) != before:
         raise ValueError("RAW_CURRENT_BYTES_CHANGED_DURING_REPORT")
     provenance[str(path.resolve())] = before
@@ -199,8 +244,17 @@ def current_metric(path, limits, provenance):
 def evaluation_of(result, path, provenance, errors):
     # B3 wraps the original DDAY result, whose physical output is fresh_ac.
     actual_ref = result.get("actual")
+    discovered = False
+    if not actual_ref and path:
+        candidate = path.parent / "output/PIPELINE/B3_SOURCE_ACTUAL_RESULT.json"
+        if candidate.is_file():
+            refs = matching_receipts(candidate, result.get("files"))
+            actual_ref = refs[0] if refs else candidate
+            discovered = True
     if actual_ref:
         actual, _ = load_receipt(actual_ref, provenance, errors)
+        if actual is None:
+            return {}
         if actual:
             body = actual.get("result", {})
             ac = body.get("fresh_ac", body.get("ac", {}))
@@ -210,7 +264,8 @@ def evaluation_of(result, path, provenance, errors):
                 if not folder and partial.get("folder"):
                     folder = Path(partial["folder"]).parent
                 return dict(PASS=body.get("PASS") is True and ac.get("PASS") is True,
-                    summary=ac["summary"], Fresh=dict(ac, **({"folder":str(folder/"FRESH")} if folder else {})),
+                    diagnostic_only=discovered,
+                    summary=ac["summary"], Fresh={**partial, **ac, **({"folder":str(folder/"FRESH")} if folder else {})},
                     Actual={"folder":str(folder/"ACTUAL")} if folder else {},
                     folder=str(folder) if folder else None, physical_violation=ac["summary"].get("physical_violation"),
                     Actual_reoptimization=int(body.get("global_MILP_calls", 0)),
@@ -254,12 +309,23 @@ def metric_from_result(result, path, evaluation, limits, provenance, errors):
     for p in dict.fromkeys(candidates):
         if p.exists():
             try:
-                return current_metric(p, limits, provenance)
+                return current_metric(p, limits, provenance,
+                    result.get("files"), result.get("actual_current_arrays"),
+                    evaluation.get("files"), evaluation.get("actual_current_arrays"), evaluation.get("Fresh"))
             except (ValueError, KeyError, OSError) as error:
                 errors.append({"path": str(p), "error": str(error)})
                 return {}
     # rho_max_AC may include transformers; it is never substituted for the line metric.
     return {}
+
+
+def planning_upper(result, arm, rows):
+    fields = result.get("fields", {})
+    value = finite(coalesce(first(result, "planning_rho_max", "verified_UB"), fields.get("planning_rho_max")))
+    if value is not None:
+        return value
+    final_stage = "M" if arm == "B2" else "M2"
+    return next((row["verified_UB"] for row in rows if row["stage"] == final_stage), None)
 
 
 def stage_documents(result, result_path, arm, provenance, errors):
@@ -271,7 +337,13 @@ def stage_documents(result, result_path, arm, provenance, errors):
     if arm == "B2" and not stages:
         stage_path = result_path.parent / "output/M_STAGE_RESULT.json" if result_path else None
         if stage_path and stage_path.exists():
-            value,_=load_receipt(stage_path,provenance,errors)
+            refs = matching_receipts(stage_path, result.get("files"))
+            try:
+                checked_record(stage_path, result.get("files"))
+                value,_=load_receipt(refs[0] if refs else stage_path,provenance,errors)
+            except (OSError, ValueError) as error:
+                errors.append({"path":str(stage_path),"error":str(error)})
+                value = None
         else:
             value=result.get("M", result.get("scientific", result))
         stages = {"M": value}
@@ -295,6 +367,9 @@ def stage_documents(result, result_path, arm, provenance, errors):
             actual_ledger,_=load_receipt(ledger_ref,provenance,errors)
             if actual_ledger:
                 value["__report_stage_wall_seconds"]=actual_ledger.get("wall_seconds")
+                value["__report_current_native_runtime_seconds"]=coalesce(
+                    actual_ledger.get("measured_native_runtime"),
+                    actual_ledger.get("measured_Native_Runtime"))
         if not any(not key.startswith("__report_") for key in value) and state in ("MEASURED","NOT_ENTERED","UNKNOWN"):
             value.update(native_runtime_seconds=result.get("stage_native_runtime",{}).get(name),
                          termination_reason=state,native_accounting_state=state)
@@ -340,14 +415,20 @@ def stage_row(arm, day, stage, document, result_path):
                certified_gap=finite(coalesce(first(document, "certified_gap", "global_gap"), fields.get("certified_gap"),measured_gap)),
                native_best_bound_diagnostic=finite(document.get("native_best_bound_diagnostic")),
                termination_reason=first(document, "termination_reason", "status"),
-               native_runtime_seconds=finite(coalesce(first(document, "native_runtime_seconds", "Native_Runtime", "Native_runtime", "native_seconds"),ledger.get("measured_native_runtime"))),
+               native_runtime_seconds=finite(coalesce(wrapper.get("__report_current_native_runtime_seconds"),
+                   ledger.get("measured_native_runtime"),
+                   first(document, "native_runtime_seconds", "Native_Runtime", "Native_runtime", "native_seconds"))),
                stage_wall_seconds=finite(coalesce(first(document, "stage_wall_seconds", "wall_seconds", "optimization_seconds"),wrapper.get("__report_stage_wall_seconds"),ledger.get("wall_seconds"),ledger.get("wall_elapsed_seconds"))),
                native_accounting_state=coalesce(wrapper.get("native_accounting_state"),document.get("native_accounting_state")),
-               scientific_case_sha=coalesce(first(document, "scientific_case_sha", "case_sha"),wrapper.get("model_sha")),
-               matrix_sha=coalesce(first(document, "matrix_sha", "Matrix_SHA"),bounds.get("original_model_sha")),
-               domain_sha=coalesce(first(document, "domain_sha", "Domain_SHA"),bounds.get("global_domain_sha")),
+               scientific_case_sha=first(document, "scientific_case_sha", "case_sha"),
+               model_sha=coalesce(first(document, "model_sha", "original_model_sha"),wrapper.get("model_sha"),bounds.get("original_model_sha")),
+               matrix_sha=first(document, "matrix_sha", "Matrix_SHA"),
+               domain_sha=first(document, "domain_sha", "Domain_SHA"),
+               complete_scientific_domain_sha=bounds.get("global_domain_sha"),
+               C3A_matrix_sha=document.get("C3A_matrix_sha"),
+               C3A_domain_sha=document.get("C3A_domain_sha"),
                fixed_input_sha=coalesce(first(document, "fixed_input_sha", "fixed_AIDC_SHA"),identity.get("fixed_input_sha"),ledger.get("fixed_input_sha")),
-               source_sha=coalesce(first(document, "source_sha", "source_SHA", "Source_SHA"),identity.get("source_SHA"),ledger.get("source_sha"),authority.get("source_sha")),
+               source_sha=coalesce(first(document, "source_SHA", "Source_SHA", "source_sha"),identity.get("source_SHA"),ledger.get("source_sha"),authority.get("source_sha")),
                initial_UB=finite(first(document, "initial_UB", "initial_verified_UB")),
                result_path=str(result_path) if result_path else None)
     row["native_budget_seconds"] = 1800 if stage.startswith("M") else None
@@ -412,9 +493,64 @@ def physical_row(arm, day, evaluation, metric, result_path):
                 physical_violation=summary.get("physical_violation"), **counts,
                 fresh_convergence_failure_count=96-converged if converged is not None else None,
                 Vmin_pu=finite(summary.get("Vmin_pu")), Vmax_pu=finite(summary.get("Vmax_pu")),
+                raw_current_declared_sha_verified=metric.get("raw_current_declared_sha_verified"),
                 Actual_reoptimization=evaluation.get("Actual_reoptimization"),
                 local_PQ_repair=evaluation.get("local_PQ_repair"), global_PQ_repair=evaluation.get("global_PQ_repair"),
                 result_path=str(result_path) if result_path else None)
+
+
+def previous_attempt_rows(manifest, arm, day, provenance, errors):
+    """Preserve historical envelopes/costs without admitting old scientific PASS."""
+    entries = manifest.get("prior_attempts", {}).get(arm + "/" + day, [])
+    answer, seen = [], set()
+    for index, entry in enumerate(entries):
+        ref = entry.get("result")
+        result, path = load_receipt(ref, provenance, errors)
+        if path and str(path.resolve()) in seen:
+            continue
+        if path:
+            seen.add(str(path.resolve()))
+        result = result or {}
+        identity = result.get("identity", {})
+        declared_day = coalesce(identity.get("day"), result.get("day"))
+        declared_arm = coalesce(identity.get("arm"), result.get("arm"))
+        if ((declared_day is not None and declared_day != day) or (declared_arm is not None and declared_arm != arm)):
+            errors.append({"path": str(path), "error": "PRIOR_ATTEMPT_DATE_ARM_IDENTITY_MISMATCH"})
+        source = first(result, "source_SHA", "implementation_SHA", "source_sha")
+        expected_source = entry.get("source_SHA")
+        if source and expected_source and source != expected_source:
+            errors.append({"path": str(path), "error": "PRIOR_ATTEMPT_SOURCE_SHA_MISMATCH"})
+        if result.get("source_commit") and entry.get("source_commit") and result["source_commit"] != entry["source_commit"]:
+            errors.append({"path": str(path), "error": "PRIOR_ATTEMPT_SOURCE_COMMIT_MISMATCH"})
+        ledger_ref = entry.get("native_ledger")
+        ledger, ledger_path = load_receipt(ledger_ref, provenance, errors) if ledger_ref else (None, None)
+        if ledger_ref:
+            runtime = finite(first(ledger or {}, "measured_Native_Runtime", "measured_native_runtime"))
+            if ledger and (ledger.get("inflight") or any(call.get("runtime_unavailable") for call in ledger.get("calls", []))):
+                runtime = None
+            basis = "DECLARED_NATIVE_LEDGER" if ledger else "UNVERIFIED_NATIVE_LEDGER"
+        else:
+            runtime = finite(first(result, "native_runtime_seconds", "Native_Runtime", "native_seconds"))
+            basis = "RESULT_ENVELOPE" if result else "UNVERIFIED_RESULT_ENVELOPE"
+        if runtime is not None and runtime < 0:
+            errors.append({"path": str(ledger_path or path), "error": "NEGATIVE_PRIOR_NATIVE_RUNTIME"})
+            runtime = None
+        classification = first(result, "classification", "failure_state", "status")
+        error = first(result, "error", "failure_reason", "reason", "termination_reason")
+        if error is None and classification == "ACTUAL_AC_FAILED":
+            summary = result.get("evaluation", {}).get("summary", {})
+            error = {key: summary.get(key) for key in ("physical_violation", "voltage_violation_count",
+                "line_current_violation_count", "transformer_current_violation_count", "transformer_kva_violation_count")}
+        answer.append(dict(arm=arm, day=day, epoch="HISTORICAL", attempt=path.parent.name if path else str(index),
+            status=result.get("status", "RESULT_RECEIPT_UNVERIFIED"), classification=classification, error=error,
+            scientific_PASS_diagnostic=result.get("PASS"), current_success_eligible=False,
+            native_runtime_seconds=runtime, native_runtime_basis=basis,
+            wall_seconds=finite(first(result, "worker_wall_seconds", "total_worker_wall_seconds", "total_date_wall_seconds", "wall_seconds")),
+            source_SHA=coalesce(source, expected_source), expected_source_SHA=expected_source,
+            source_commit=coalesce(result.get("source_commit"), entry.get("source_commit")),
+            result_receipt=record(path) if path and result else None,
+            native_ledger_receipt=record(ledger_path) if ledger_path and ledger else None))
+    return answer
 
 
 def summarize(campaign_root, manifest_path=None, output_root=None):
@@ -470,57 +606,78 @@ def summarize(campaign_root, manifest_path=None, output_root=None):
             metric = metric_from_result(r, path, evaluation, limits, provenance, errors)
             p = physical_row(arm, day, evaluation, metric, path)
             physical.append(p)
-            fields = r.get("fields", {})
-            planning = finite(coalesce(first(r, "planning_rho_max", "verified_UB"), fields.get("planning_rho_max")))
-            data[(arm,day)] = dict(metric=metric, physical=p, planning=planning, result=r, path=path)
             if arm == "B1":
+                data[(arm,day)] = dict(metric=metric, physical=p, planning=planning_upper(r, arm, []),
+                    result=bool(r), path=path,
+                    result_receipt=provenance.get(str(path.resolve())) if path and r else None,
+                    official_pair_eligible=r.get("PASS") is True and p["actual_fresh_physical_pass"])
                 continue
             documents = stage_documents(r, path, arm, provenance, errors)
             local_stages = [stage_row(arm, day, name, document, path) for name,document in documents.items()]
             stages += local_stages
             m_rows = [s for s in local_stages if s["stage"].startswith("M")]
             physical_feasible = bool(m_rows) and all(s["feasible_accepted"] is True for s in m_rows)
-            source = first(r, "source_sha", "source_SHA", "implementation_SHA")
-            expected = manifest.get("source_sha", manifest.get("source_SHA", manifest.get("execution_SHA",manifest.get(arm+"_source_SHA"))))
-            source_match = source == expected if expected else None
+            source, expected, source_match, scientific_source = execution_source(r, manifest, arm)
+            eligible = (r.get("PASS") is True and physical_feasible and p["actual_fresh_physical_pass"]
+                and source_match is True and evaluation.get("diagnostic_only") is not True)
+            data[(arm,day)] = dict(metric=metric, physical=p, planning=planning_upper(r, arm, local_stages),
+                result=bool(r), path=path,
+                result_receipt=provenance.get(str(path.resolve())) if path and r else None,
+                official_pair_eligible=eligible)
             operational_status = state.get("dates", {}).get(arm+"/"+day, {}).get("status", "PENDING")
             status = r.get("status", operational_status)
             if r and p["fresh_replay_completed"] and not p["actual_fresh_physical_pass"]:
                 status = "ACTUAL_AC_FAILED"
             elif r.get("PASS") is True and physical_feasible and p["actual_fresh_physical_pass"]:
-                status = "COMPLETED_PHYSICAL_PASS"
+                status = ("RESULT_ENVELOPE_INCOMPLETE" if evaluation.get("diagnostic_only") is True
+                    else "COMPLETED_PHYSICAL_PASS" if source_match is True
+                    else "SOURCE_MISMATCH" if source_match is False else "SOURCE_UNVERIFIED")
             executions.append(dict(arm=arm,day=day,status=status,
-                feasible_accepted=physical_feasible,global_gap_certified=all(s["global_gap_certified"] is True for s in m_rows),
+                feasible_accepted=physical_feasible,global_gap_certified=bool(m_rows) and all(s["global_gap_certified"] is True for s in m_rows),
                 actual_fresh_completed=p["fresh_replay_completed"],actual_fresh_physical_pass=p["actual_fresh_physical_pass"],
-                actual_maximum_line_loading_percent=metric.get("actual_maximum_line_loading_percent"),
+                actual_maximum_line_loading_percent=metric.get("actual_maximum_line_loading_percent") if eligible else None,
+                diagnostic_actual_maximum_line_loading_percent=metric.get("actual_maximum_line_loading_percent"),
+                official_pair_eligible=eligible,
                 source_sha=source,expected_source_sha=expected,source_match=source_match,
-                result_receipt=record(path) if path and r else None,
+                execution_source_SHA=source,scientific_source_SHA=scientific_source,
+                raw_current_receipt=metric.get("raw_current_receipt"),
+                raw_current_declared_receipts=metric.get("raw_current_declared_receipts"),
+                raw_current_declared_sha_verified=metric.get("raw_current_declared_sha_verified"),
+                result_receipt=data[(arm,day)]["result_receipt"],
                 date_wall_seconds=finite(first(r,"worker_wall_seconds","total_worker_wall_seconds","total_date_wall_seconds")),
                 stage_count=len(documents),error=first(r,"error","failure_reason","reason","termination_reason")))
             movement.append(dict(arm=arm,day=day,**mess_statistics(r,evaluation,path,provenance,errors,documents)))
             for attempt_path in sorted((root/"dates"/arm/day).glob("attempts/*/RESULT.json")):
                 try:
-                    ar=read(attempt_path)
-                    attempts.append(dict(arm=arm,day=day,attempt=attempt_path.parent.name,status=ar.get("status"),
+                    ar=r if path and attempt_path.resolve() == path.resolve() else read(attempt_path)
+                    attempts.append(dict(arm=arm,day=day,epoch="CURRENT",attempt=attempt_path.parent.name,status=ar.get("status"),
+                        classification=first(ar,"classification","failure_state","status"),
+                        error=first(ar,"error","failure_reason","reason","termination_reason"),
+                        source_SHA=first(ar,"source_SHA","implementation_SHA","source_sha"),source_commit=ar.get("source_commit"),
                         native_runtime_seconds=finite(first(ar,"native_runtime_seconds","Native_Runtime")),
-                        wall_seconds=finite(first(ar,"total_worker_wall_seconds","total_date_wall_seconds","wall_seconds")),
+                        wall_seconds=finite(first(ar,"worker_wall_seconds","total_worker_wall_seconds","total_date_wall_seconds","wall_seconds")),
                         result_receipt=record(attempt_path)))
                 except (ValueError,OSError) as error:
                     errors.append({"path":str(attempt_path),"error":str(error)})
+            attempts += previous_attempt_rows(manifest, arm, day, provenance, errors)
     comparison=[]
     for day in DAYS:
         row={"day":day,"B0_actual_line_loading_percent":b0_rows.get(day,{}).get("actual_maximum_line_loading_percent")}
         for arm in ("B1","B2","B3"):
             d=data[(arm,day)];value=d["metric"].get("actual_maximum_line_loading_percent")
-            row[arm+"_actual_line_loading_percent"]=value
+            official_value = value if arm == "B1" or d["official_pair_eligible"] else None
+            row[arm+"_actual_line_loading_percent"]=official_value
+            row[arm+"_diagnostic_actual_line_loading_percent"]=value
             row[arm+"_actual_physical_pass"]=d["physical"]["actual_fresh_physical_pass"]
+            row[arm+"_official_pair_eligible"]=d["official_pair_eligible"]
             row[arm+"_planning_rho_max"]=d["planning"]
-            row[arm+"_planning_to_actual_line_difference_pp"]=value-100*d["planning"] if value is not None and d["planning"] is not None else None
-            row[arm+"_result_SHA"]=record(d["path"])["sha256"] if d["path"] and d["result"] else None
+            row[arm+"_planning_to_actual_line_difference_pp"]=official_value-100*d["planning"] if official_value is not None and d["planning"] is not None else None
+            row[arm+"_result_SHA"]=(d["result_receipt"] or {}).get("sha256")
         for left,right in (("B2","B1"),("B3","B1"),("B3","B2")):
             a,b=row[left+"_actual_line_loading_percent"],row[right+"_actual_line_loading_percent"]
-            row[left+"_minus_"+right+"_pp"]=a-b if a is not None and b is not None else None
-            row[left+"_"+right+"_paired_physical_valid"]=row[left+"_actual_physical_pass"] and row[right+"_actual_physical_pass"]
+            eligible = row[left+"_official_pair_eligible"] and row[right+"_official_pair_eligible"]
+            row[left+"_minus_"+right+"_pp"]=a-b if eligible and a is not None and b is not None else None
+            row[left+"_"+right+"_paired_physical_valid"]=eligible
         comparison.append(row)
     summary={}
     for arm in ("B2","B3"):
@@ -529,6 +686,8 @@ def summarize(campaign_root, manifest_path=None, output_root=None):
         native=[r["native_runtime_seconds"] for r in ss]
         all_stage_native=[r["native_runtime_seconds"] for r in stages if r["arm"]==arm]
         walls=[r["date_wall_seconds"] for r in es]
+        historical = [attempt for attempt in attempts if attempt["arm"] == arm and attempt["epoch"] == "HISTORICAL"]
+        historical_native = [attempt["native_runtime_seconds"] for attempt in historical]
         summary[arm]=dict(total_dates=31,result_dates=sum(r["result_receipt"] is not None for r in es),
             physical_feasible_dates=sum(r["feasible_accepted"] for r in es),
             actual_fresh_completed_dates=sum(r["actual_fresh_completed"] for r in es),
@@ -541,6 +700,11 @@ def summarize(campaign_root, manifest_path=None, output_root=None):
             native_runtime_unknown_stages=sum(v is None for v in native),
             all_stage_native_runtime_known_seconds=sum(v for v in all_stage_native if v is not None),
             all_stage_native_runtime_unknown_stages=sum(v is None for v in all_stage_native),
+            current_epoch_native_runtime_known_seconds=sum(v for v in all_stage_native if v is not None),
+            current_epoch_native_runtime_unknown_stages=sum(v is None for v in all_stage_native),
+            historical_attempt_count=len(historical),
+            historical_native_runtime_known_seconds=sum(v for v in historical_native if v is not None),
+            historical_native_runtime_unknown_attempts=sum(v is None for v in historical_native),
             date_worker_wall_known_seconds=sum(v for v in walls if v is not None),
             date_worker_wall_unknown_dates=sum(v is None for v in walls),
             paired_B1_physical_valid_dates=len(paired),paired_mean_difference_pp=float(np.mean(paired)) if paired else None,
@@ -549,6 +713,7 @@ def summarize(campaign_root, manifest_path=None, output_root=None):
     status=dict(schema="V42_COMMON_MAY31_REPORT_V1",algorithm_version=execution_version,report_target_algorithm=ALGORITHM,
         generated_UTC=datetime.now(timezone.utc).isoformat(),campaign_root=str(root),
         official_date_count=62,summary=summary,dates=executions,attempts=attempts,
+        runtime_scope="Current execution epoch and referenced historical attempt costs are reported separately; historical scientific PASS never admits a current date.",
         baseline_B0_verified_raw_dates=len(b0_rows),baseline_B1_result_dates=sum(bool(data[("B1",d)]["result"]) for d in DAYS),
         baseline_B1_actual_fresh_physical_pass_dates=sum(data[("B1",d)]["physical"]["actual_fresh_physical_pass"] for d in DAYS),
         audit_errors=errors,missing_values="null JSON / blank CSV; never zero",paper_experiment_usable=all(s["all_31_verified_results"] for s in summary.values()) and not errors)
@@ -560,9 +725,16 @@ def summarize(campaign_root, manifest_path=None, output_root=None):
     write_csv(output/"MAY31_MESS_OPERATION.csv",movement)
     write_json(output/"MAY31_EXECUTION_STATUS.json",status)
     write_json(output/"MAY31_SOURCE_MODEL_SHA_MANIFEST.json",dict(schema="V42_COMMON_REPORT_SHA_V1",files=list(provenance.values()),
-        execution_source_SHA=coalesce(manifest.get("source_SHA"),manifest.get("execution_SHA")),
+        report_implementation_receipt=record(__file__),
+        execution_source_SHA=first(manifest,"execution_SHA","source_SHA","source_sha"),
         execution_source_commit=manifest.get("source_commit"),execution_sources=manifest.get("execution_sources",{}),
         input_receipts=manifest.get("input_receipts",{}),stage_identities=stages,
+        historical_attempt_provenance=[attempt for attempt in attempts if attempt["epoch"] == "HISTORICAL"],
+        actual_current_bindings=[dict(arm=arm,day=day,
+            observed=data[(arm,day)]["metric"].get("raw_current_receipt"),
+            declared=data[(arm,day)]["metric"].get("raw_current_declared_receipts"),
+            declared_sha_verified=data[(arm,day)]["metric"].get("raw_current_declared_sha_verified"))
+            for arm in ("B1","B2","B3") for day in DAYS],
         line_authority_csv=manifest.get("line_current_authority_csv",str(AUTHORITY/"LINE_CURRENT_AUTHORITY_UNCHANGED.csv")),B0_source_files=b0_refs))
     for arm in ("B2","B3"):
         s=summary[arm]
@@ -570,7 +742,7 @@ def summarize(campaign_root, manifest_path=None, output_root=None):
             f"실제 결과 파일 {s['result_dates']}/31일, M 물리 가능해 수용 {s['physical_feasible_dates']}/31일, Actual/Fresh 실행 {s['actual_fresh_completed_dates']}/31일, Actual/Fresh 무위반 {s['actual_fresh_physical_pass_dates']}/31일.","",
             f"동일 소스 확인 {s['source_verified_dates']}/31일. M 단계 인증률 {100*s['global_gap_certification_rate']:.2f}%. 알려진 M Native Runtime {s['native_runtime_known_seconds']:.3f}초; 시간 미상 단계 {s['native_runtime_unknown_stages']}개.","",
             f"B1과 물리 유효 공통 날짜 {s['paired_B1_physical_valid_dates']}일. 평균 Actual 최대선로부하율 차이(%p): {s['paired_mean_difference_pp'] if s['paired_mean_difference_pp'] is not None else '미확보'}.","",
-            "최대선로부하율은 원본 Actual 전류에서 선로·상별 Line NormAmps로 다시 계산한다. 변압기는 제외한다. 미완료/실패일의 수치는 공란이다.","",
+            "최대선로부하율은 원본 Actual 전류에서 선로·상별 Line NormAmps로 다시 계산한다. 변압기는 제외한다. 미완료/실패일의 공식 비교값은 공란이며, 확보된 원본 진단값은 CSV의 diagnostic 열에 별도로 보존한다. Paired Comparison에는 성공 Envelope·동일 실행 소스·M 가능해·Actual/Fresh 무위반을 모두 만족한 날짜만 포함한다.","",
             "B1은 31일 Replay를 완료했으나 May28에 전압 위반 2개를 기록했다. 해당 날짜는 무위반 Paired Comparison에서 제외되며 원본 증거는 보존된다.","",
             "| 날짜 | 상태 | Actual 최대선로부하율(%) | 무위반 |", "|---|---|---:|---|"]
         for e in executions:
@@ -584,6 +756,17 @@ def summarize(campaign_root, manifest_path=None, output_root=None):
         if e["status"]!="COMPLETED_PHYSICAL_PASS":
             failure_lines.append(f"| {e['arm']} | {e['day']} | {e['status']} | {str(e['error'] or '결과 또는 후속 검증 미완료').replace('|','/').replace(chr(10),' ')} |")
     failure_lines += ["",f"보고 자료 감사 오류 {len(errors)}개. 오류 상세는 MAY31_EXECUTION_STATUS.json을 참조한다."]
+    historical = [attempt for attempt in attempts if attempt["epoch"] == "HISTORICAL"]
+    failure_lines += ["", "이전 실행 Epoch의 Attempt는 현재 완료 판정과 분리한다. SHA가 확인된 이전 결과·Native Ledger, 실패 분류·원인, Solver 비용은 다음 표 및 MAY31_EXECUTION_STATUS.json의 attempts에 보존한다.", "",
+        "| Case | 날짜 | 이전 Attempt | 상태/분류 | Native(초) | Worker Wall(초) | 원인 |", "|---|---|---|---|---:|---:|---|"]
+    for attempt in historical:
+        def cell(value):
+            return "" if value is None else str(value).replace("|", "/").replace("\n", " ")
+        failure_lines.append("| " + " | ".join(cell(attempt.get(key)) for key in
+            ("arm", "day", "attempt", "classification", "native_runtime_seconds", "wall_seconds", "error")) + " |")
+    for arm in ("B2", "B3"):
+        s = summary[arm]
+        failure_lines += ["", f"{arm}: 현재 Epoch 알려진 전체 단계 Native {s['current_epoch_native_runtime_known_seconds']:.6f}초(미상 {s['current_epoch_native_runtime_unknown_stages']}단계). 이전 Epoch {s['historical_attempt_count']}개 Attempt의 알려진 Native {s['historical_native_runtime_known_seconds']:.6f}초(미상 {s['historical_native_runtime_unknown_attempts']}개). 두 비용 범위를 별도로 유지한다."]
     (output/"MAY31_FAILURE_AND_RETRY_REPORT_KO.md").write_text("\n".join(failure_lines)+"\n",encoding="utf8")
     algorithm_doc=output/"FINAL_COMMON_MESS_ALGORITHM_KO.md"
     if not algorithm_doc.exists():

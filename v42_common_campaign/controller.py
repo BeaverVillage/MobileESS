@@ -7,13 +7,59 @@ import subprocess
 import sys
 import time
 import psutil
+import shutil
 
 from v42_pr134_b1.common import atomic, digest, now, read, record, sha, process, same_process
 from . import VERSION, DAYS
-from .authority import ROOT, MANIFEST, checked, singleton, source_files, verify_manifest
+from .authority import ROOT, MANIFEST, checked, singleton, source_files, verify_manifest, verify_control_audit
 
 
-def prepare(root, regression_receipt):
+def previous_common_evidence(root):
+    if root is None:
+        return None, {}
+    root = Path(root).resolve()
+    previous = read(root / MANIFEST)
+    if previous.get('schema') != 'V42_COMMON_U4_QUALIFICATION_V1':
+        raise PermissionError('COMMON_U4_PREVIOUS_EPOCH_MANIFEST_REQUIRED')
+    old_source = Path(previous['code_root']).resolve()
+    if previous['execution_SHA'] != digest(previous['execution_sources']):
+        raise PermissionError('COMMON_U4_PREVIOUS_EPOCH_SOURCE_IDENTITY_DRIFT')
+    for name, expected in previous['execution_sources'].items():
+        path = (old_source / name).resolve()
+        if not path.is_relative_to(old_source) or sha(path) != expected:
+            raise PermissionError('COMMON_U4_PREVIOUS_EPOCH_SOURCE_BYTES_DRIFT')
+    history = dict(previous.get('prior_attempts', {}))
+    for request_path in root.glob('dates/*/*/attempts/*/REQUEST.json'):
+        request = read(request_path)
+        owner = request_path.parent / 'PROCESS.json'
+        if owner.is_file() and same_process(read(owner)):
+            raise PermissionError('COMMON_U4_PRIOR_EPOCH_ACTIVE_WORKER')
+        result_path = Path(request['result'])
+        if not result_path.is_file():
+            raise PermissionError('COMMON_U4_PRIOR_INTERRUPTED_ATTEMPT_REQUIRES_RECOVERY')
+        result = read(result_path)
+        if result.get('source_SHA') != previous['execution_SHA']:
+            raise PermissionError('COMMON_U4_PRIOR_RESULT_SOURCE_DRIFT')
+        key = request['arm']+'/'+request['day']
+        row = dict(result=record(result_path), source_SHA=previous['execution_SHA'],
+            source_commit=previous['source_commit'], status=result['status'],
+            native_runtime_seconds=result.get('native_runtime_seconds'),
+            worker_wall_seconds=result.get('worker_wall_seconds'))
+        ledger = request_path.parent / 'NATIVE_RUNTIME_LEDGER.json'
+        if ledger.is_file():
+            row['native_ledger'] = record(ledger)
+        history.setdefault(key, []).append(row)
+    return record(root / MANIFEST), history
+
+
+def storage_admission(root):
+    free = shutil.disk_usage(root).free
+    if free < 4 * 1024**3:
+        raise PermissionError('COMMON_U4_STORAGE_HEADROOM_BELOW_4_GIB')
+    return free
+
+
+def prepare(root, regression_receipt, previous_common_epoch=None):
     root = Path(root).resolve()
     if root.exists() and (root / MANIFEST).exists():
         raise PermissionError("COMMON_U4_SOURCE_EPOCH_NEVER_OVERWRITTEN")
@@ -24,6 +70,9 @@ def prepare(root, regression_receipt):
     previous = read(Path(r"D:\v42_may_restart_20261010_02\B2_V37_ZERO_START_DEPLOYMENT_MANIFEST.json"))
     sources = source_files()
     source_sha = digest(sources)
+    if regression.get('source_SHA') != source_sha:
+        raise PermissionError('COMMON_U4_REGRESSION_SOURCE_BYTES_DRIFT')
+    previous_common, prior_attempts = previous_common_evidence(previous_common_epoch)
     preflight = dict(schema="COMMON_U4_IMPLEMENTATION_ENVIRONMENT_PREFLIGHT_V1", PASS=True,
         source_SHA=source_sha, regression=record(regression_receipt), UTC=now(),
         official_campaign_authorized=False, real_E2E_required_before_production=True)
@@ -79,7 +128,12 @@ def prepare(root, regression_receipt):
         B3_source_seal=record(root / "B3_SOURCE_SEAL.json"),
         preflight=record(root / "IMPLEMENTATION_PREFLIGHT.json"),
         previous_epoch=record(r"D:\v42_may_restart_20261010_02\AUTONOMOUS_MANIFEST.json"),
-        previous_attempts_preserved=True, prior_attempts={}, UTC=now())
+        previous_common_epoch=previous_common,
+        common_control_audit_required=previous_common is not None,
+        control_audit_baseline=(prior_attempts.get('B2/2025-05-01') or [{}])[-1].get('result'),
+        previous_attempts_preserved=True, prior_attempts=prior_attempts,
+        storage_headroom_minimum_bytes=4*1024**3,
+        storage_free_at_preparation_bytes=storage_admission(root), UTC=now())
     atomic(root / MANIFEST, manifest)
     verify_manifest(root / MANIFEST)
     return record(root / MANIFEST)
@@ -116,6 +170,7 @@ def request_for(root, manifest, arm, day, slot, *, canary):
 
 def launch(path):
     request = read(path)
+    storage_admission(request['root'])
     attempt = path.parent
     owner_path = attempt / "PROCESS.json"
     if owner_path.is_file():
@@ -154,33 +209,38 @@ def outcome(path):
     return None
 
 
+def canary_trial(root, manifest, arm, day):
+    request = request_for(root, manifest, arm, day, 1, canary=True)
+    result = outcome(request)
+    if result is None:
+        child = launch(request)
+        while child.poll() is None:
+            atomic(root / "CONTROLLER_HEARTBEAT.json", dict(phase="REAL_E2E_CANARY", arm=arm,
+                day=day, child_PID=child.pid, UTC=now()))
+            time.sleep(10)
+        result = outcome(request)
+    if result is None:
+        raise RuntimeError("COMMON_U4_WORKER_EXITED_WITHOUT_RESULT:" + arm + "/" + day)
+    if result.get("source_SHA") != manifest["execution_SHA"]:
+        raise PermissionError("COMMON_U4_CANARY_RESULT_SOURCE_DRIFT")
+    if result.get("status") in ("INPUT_OR_SOURCE_FAILURE", "IMPLEMENTATION_FAILURE"):
+        raise RuntimeError("COMMON_U4_CANARY_IMPLEMENTATION_BACKSTOP:" + arm + "/" + day)
+    return request, result
+
+
 def canaries(root):
     manifest = verify_manifest(root / MANIFEST)
     receipts = {}
     for arm in ("B2", "B3"):
         for day in DAYS:
-            request = request_for(root, manifest, arm, day, 1, canary=True)
-            result = outcome(request)
-            if result is None:
-                child = launch(request)
-                while child.poll() is None:
-                    atomic(root / "CONTROLLER_HEARTBEAT.json", dict(phase="REAL_E2E_CANARY", arm=arm,
-                        day=day, child_PID=child.pid, UTC=now()))
-                    time.sleep(10)
-                result = outcome(request)
-            if result is None:
-                raise RuntimeError("COMMON_U4_WORKER_EXITED_WITHOUT_RESULT:" + arm + "/" + day)
-            if result.get("source_SHA") != manifest["execution_SHA"]:
-                raise PermissionError("COMMON_U4_CANARY_RESULT_SOURCE_DRIFT")
+            request, result = canary_trial(root, manifest, arm, day)
             if result.get("PASS") is True and result.get("actual_ac_physical_pass") is True:
                 receipts[arm] = record(read(request)["result"])
                 break
-            if result.get("status") in ("INPUT_OR_SOURCE_FAILURE", "IMPLEMENTATION_FAILURE"):
-                # A shared implementation/environment defect must be repaired
-                # in a new source epoch, never swept under date-local failures.
-                raise RuntimeError("COMMON_U4_CANARY_IMPLEMENTATION_BACKSTOP:" + arm + "/" + day)
         if arm not in receipts:
             raise RuntimeError("COMMON_U4_NO_REAL_PHYSICAL_E2E_CANARY:" + arm)
+    atomic(root / 'REAL_E2E_CANARY_RECEIPTS.json', receipts)
+    verify_control_audit(root, manifest)
     official = dict(schema="V42_COMMON_U4_CAMPAIGN_V1", source_SHA=manifest["execution_SHA"],
         source_commit=manifest["source_commit"], algorithm_version=VERSION,
         qualification_manifest=record(root / MANIFEST), canaries=receipts, UTC=now(),
@@ -189,6 +249,26 @@ def canaries(root):
     atomic(root / "COMMON_U4_CAMPAIGN_MANIFEST.json", official)
     verify_manifest(root / MANIFEST, production=True)
     return official
+
+
+def trials(root, arms, days):
+    root = Path(root).resolve()
+    with singleton(root / 'CONTROLLER.lock'):
+        atomic(root / 'CONTROLLER_PROCESS.json', process())
+        manifest = verify_manifest(root / MANIFEST)
+        try:
+            results = []
+            for arm in arms:
+                for day in days:
+                    request, result = canary_trial(root, manifest, arm, day)
+                    results.append(dict(arm=arm, day=day, status=result['status'],
+                        PASS=result.get('PASS'), result=record(read(request)['result'])))
+            atomic(root / 'CANARY_TRIAL_STATUS.json', dict(state='SELECTED_CANARIES_TERMINAL',
+                results=results, official_campaign_authorized=False, UTC=now()))
+        except Exception as error:
+            atomic(root / 'CANARY_TRIAL_STATUS.json', dict(state='DISPATCH_HELD',
+                error=repr(error), UTC=now()))
+            raise
 
 
 def sweep(root, arm):
@@ -246,11 +326,16 @@ def run(root):
 
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
-    parser.add_argument("action", choices=("prepare", "run"))
+    parser.add_argument("action", choices=("prepare", "run", "canary"))
     parser.add_argument("root")
     parser.add_argument("--regression-receipt")
+    parser.add_argument("--previous-common-epoch")
+    parser.add_argument('--canary-arm', action='append', choices=('B2','B3'))
+    parser.add_argument('--canary-day', action='append', choices=DAYS)
     args=parser.parse_args()
     if args.action == "prepare":
-        print(json.dumps(prepare(args.root, args.regression_receipt)))
+        print(json.dumps(prepare(args.root, args.regression_receipt, args.previous_common_epoch)))
+    elif args.action == 'canary':
+        trials(args.root, args.canary_arm or ['B2','B3'], args.canary_day or [DAYS[0]])
     else:
         run(args.root)

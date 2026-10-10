@@ -103,6 +103,29 @@ def test_route_manifest_rejects_fully_fixed_pattern(route_case):
     assert not route_witness(route_case, route_case.point, [], 48)['PASS']
 
 
+def test_route_witness_keeps_tolerated_continuous_center_residual(route_case):
+    point = route_case.point.copy()
+    point[-1] += 4e-12
+    before = point.tobytes()
+    assert 0 < point[-1] - route_case.d['upper'][-1] < 1e-8
+    grid = ([dict(unit='U', site='B', slot=62, numeric_score=1.)],
+            dict(active_voltage_observations=[]))
+    spec = select(route_case, point, 'U4', 0, grid)
+    assert spec['route_openness']['PASS'] and spec['route_openness']['route_changed']
+    assert not spec['route_openness']['SOC_PQ_grid_feasibility_claimed']
+    assert point.tobytes() == before
+
+
+def test_route_witness_rejects_changed_continuous_route_bound_violation(route_case):
+    # Continuous Compact representatives remain original FULL route binaries.
+    # Every alternate path needs one of these travel arcs at value one.
+    route_case.d['upper'][192:194] = .5
+    assert np.all(route_case.point >= route_case.d['lower'])
+    assert np.all(route_case.point <= route_case.d['upper'])
+    free = np.flatnonzero(route_case.d['types'] != 'C')
+    assert not route_witness(route_case, route_case.point, free, 48)['PASS']
+
+
 def test_U4_no_charging_fallback_opens_actual_route_and_is_stage_equal(route_case):
     grid = ([dict(unit='U', site='B', slot=62, numeric_score=1.)],
             dict(active_voltage_observations=[]))
@@ -145,6 +168,69 @@ def test_near_integer_FULL_arc_cannot_be_admitted_as_LP_seed(route_case):
     assert _validate(route_case, point, path, _strict, StageBudget(ParentBudget()), 'FULL_integer_gate') is None
     receipt = json.loads(path.with_suffix('.REPLAY.json').read_text())
     assert receipt['error'] == 'HYBRID_FINAL_LITERAL_INTEGER_GATE_FAILED:FULL'
+
+
+@pytest.mark.parametrize('mutation', [
+    {'label':'previous_call'}, {'component':'OTHER'}, {'track':'M_U1'},
+    {'requested_seconds':99.}, {'effective_TimeLimit':99.},
+    {'status':'IN_FLIGHT'}, {'entered_native':False}, {'runtime_unavailable':True},
+    {'Native_Runtime':None}, {'Native_Runtime':float('nan')}, {'Native_Runtime':3.},
+])
+def test_native_receipt_fallback_rejects_unmatched_or_unmeasured_row(mutation):
+    from v42_common_mess.engine import _completed_native_receipt
+    parent = ParentBudget(1702.25)
+    parent.calls.append(dict(component='UB', track='M_U4', label='trial',
+        requested_seconds=100., effective_TimeLimit=100., status='FINISHED',
+        entered_native=True, Native_Runtime=2.25, runtime_unavailable=False))
+    parent.calls[-1].update(mutation)
+    assert _completed_native_receipt(StageBudget(parent), 0, 1700.,
+        component='UB', track='M_U4', label='trial', requested_seconds=100.) is None
+
+
+def test_native_receipt_fallback_requires_one_completed_call_and_no_inflight():
+    from v42_common_mess.engine import _completed_native_receipt
+    parent = ParentBudget(1702.25)
+    row = dict(component='UB', track='M_U4', label='trial', requested_seconds=100.,
+        effective_TimeLimit=100., status='FAILED', entered_native=True,
+        Native_Runtime=2.25, runtime_unavailable=False, error='measured solver exception')
+    parent.calls.append(row)
+    budget = StageBudget(parent)
+    arguments = dict(component='UB', track='M_U4', label='trial', requested_seconds=100.)
+    assert _completed_native_receipt(budget, 0, 1700., **arguments) == row
+    assert _completed_native_receipt(budget, 1, 1700., **arguments) is None
+    parent.inflight = dict(row)
+    assert _completed_native_receipt(budget, 0, 1700., **arguments) is None
+    parent.inflight = None
+    parent.calls.append(dict(row))
+    assert _completed_native_receipt(budget, 0, 1700., **arguments) is None
+
+
+def test_trial_recovers_durable_no_return_ledger_receipt(tmp_path, monkeypatch):
+    from v42_common_mess import engine
+    from v42_common_mess.storage import write
+    model = SimpleNamespace(Params=SimpleNamespace(), SolCount=0, Status=9,
+        Work=1., dispose=lambda:None)
+    monkeypatch.setattr(engine, 'build', lambda *args, **kwargs:(model, None, {}))
+    class NoReturnBudget(ParentBudget):
+        def native_optimize(self, model, callback=None, **kwargs):
+            self.value += 2.25
+            self.calls.append(dict(kwargs, effective_TimeLimit=model.Params.TimeLimit,
+                status='FINISHED', entered_native=True, Native_Runtime=2.25,
+                runtime_unavailable=False, precision_parameters={'FeasibilityTol':1e-9}))
+            write(tmp_path / 'DURABLE_LEDGER.json', dict(calls=self.calls, measured=self.value))
+            return None
+    parent = NoReturnBudget(1700.)
+    case = SimpleNamespace(case_sha='b' * 64)
+    point, strict, row = engine._trial(case, StageBudget(parent), tmp_path / 'trial',
+        validator=lambda *args:pytest.fail('No incumbent to validate'), seconds=900.,
+        spec={'method':'U4'})
+    durable = json.loads((tmp_path / 'DURABLE_LEDGER.json').read_text())
+    assert point is strict is None
+    assert row['native_receipt'] == durable['calls'][-1]
+    assert row['native_receipt']['requested_seconds'] == 100.
+    assert row['Native_Runtime'] == 2.25 and row['cumulative_native_runtime_seconds'] == durable['measured']
+    parent.calls[-1]['precision_parameters']['FeasibilityTol'] = .1
+    assert row['native_receipt']['precision_parameters']['FeasibilityTol'] == 1e-9
 
 
 def test_real_native_trial_keeps_original_rows_and_never_promotes_bound(tmp_path):

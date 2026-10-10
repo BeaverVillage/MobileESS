@@ -131,6 +131,7 @@ def verify_manifest(path, *, production=False):
     if preflight.get("PASS") is not True or preflight.get("source_SHA") != manifest["execution_SHA"]:
         raise PermissionError("COMMON_U4_REAL_PREFLIGHT_REQUIRED")
     if production:
+        verify_control_audit(path.parent, manifest)
         official = read(path.parent / "COMMON_U4_CAMPAIGN_MANIFEST.json")
         if (official.get("schema") != "V42_COMMON_U4_CAMPAIGN_V1"
                 or official.get("source_SHA") != manifest["execution_SHA"]
@@ -139,6 +140,35 @@ def verify_manifest(path, *, production=False):
         for arm in ("B2", "B3"):
             verify_real_canary(official["canaries"][arm], arm, manifest)
     return manifest
+
+
+def verify_control_audit(root, manifest):
+    """A required causal audit can hold production while canaries continue."""
+    if manifest.get('common_control_audit_required') is not True:
+        return
+    path = Path(root) / 'COMMON_CONTROL_AUDIT_STATUS.json'
+    if not path.is_file():
+        raise PermissionError('COMMON_U4_COMMON_CONTROL_AUDIT_PENDING')
+    status = read(path)
+    if (status.get('schema') != 'COMMON_U4_CONTROL_AUDIT_STATUS_V1'
+            or status.get('source_SHA') != manifest['execution_SHA']
+            or status.get('status') != 'PASS'
+            or status.get('common_control_implementation_defect') is not False):
+        raise PermissionError('COMMON_U4_COMMON_CONTROL_AUDIT_DISPATCH_HELD')
+    audit = read(checked(status['audit']))
+    baseline = manifest.get('control_audit_baseline')
+    if (audit.get('schema') != 'V42_MAY01_COMMON_CONTROL_CAUSAL_AUDIT_V1'
+            or not baseline or audit.get('baseline_RESULT') != baseline
+            or audit.get('audit_complete') is not True
+            or audit.get('common_control_implementation_defect') is not False
+            or audit.get('same_Actual_factorial_full_PQ_bit_exact') is not True
+            or audit.get('regcontrol_count') != 7
+            or audit.get('original_control_settings_preserved') is not True
+            or audit.get('original_canary_evidence_preserved') is not True):
+        raise PermissionError('COMMON_U4_CONTROL_AUDIT_AUTHORITATIVE_VERDICT_REQUIRED')
+    original = read(checked(baseline))
+    if audit.get('baseline_source_SHA') != original.get('source_SHA'):
+        raise PermissionError('COMMON_U4_CONTROL_AUDIT_BASELINE_SOURCE_DRIFT')
 
 
 def verify_request(request):

@@ -4,6 +4,7 @@ No pricing, DW, CG, Benders, full-LP bound solve or LB strengthening is called.
 Restricted BestBound is persisted only as a native diagnostic.
 """
 from fractions import Fraction as F
+from copy import deepcopy
 from pathlib import Path
 from time import perf_counter
 import json
@@ -59,6 +60,32 @@ def _attr(model, name):
         return None
 
 
+def _completed_native_receipt(budget, before_count, before_used, *, component,
+                              track, label, requested_seconds):
+    """Recover only the exact measured call persisted by a no-return ledger."""
+    if len(budget.calls) != before_count + 1:
+        return None
+    parent = getattr(budget, 'parent', budget)
+    if getattr(parent, 'inflight', None) is not None:
+        return None
+    row = budget.calls[-1]
+    if (not isinstance(row, dict) or row.get('status') not in ('FINISHED', 'FAILED')
+            or row.get('entered_native') is not True or row.get('runtime_unavailable') is not False
+            or any(row.get(key) != value for key, value in
+                (('component', component), ('track', track), ('label', label),
+                 ('requested_seconds', requested_seconds), ('effective_TimeLimit', requested_seconds)))):
+        return None
+    try:
+        runtime = float(row['Native_Runtime'])
+    except (KeyError, TypeError, ValueError):
+        return None
+    consumed = budget.used() - before_used
+    if (not math.isfinite(runtime) or runtime < 0
+            or not math.isclose(runtime, consumed, rel_tol=1e-12, abs_tol=1e-9)):
+        return None
+    return deepcopy(row)
+
+
 def _trial(case, budget, path, *, validator, seconds, lower=None, upper=None,
            point=None, strict=None, continuous=False, spec=None, initialization=False,
            numeric_parameters=None):
@@ -75,6 +102,10 @@ def _trial(case, budget, path, *, validator, seconds, lower=None, upper=None,
     pending, capture_errors = [], []
     discovered = float(F(strict['exact_Global_UB'])) if strict else float('inf')
     before = budget.used()
+    before_count = len(budget.calls)
+    component = 'FEASIBILITY_LP' if continuous else 'FEASIBILITY_MIP' if initialization else 'UB'
+    track = 'M_START' if initialization else 'M_' + (spec['method'] if spec else 'FIXED_ROUTE')
+    effective_seconds = min(float(seconds), budget.remaining())
     def capture(m, where):
         nonlocal discovered
         if where != gp.GRB.Callback.MIPSOL:
@@ -92,12 +123,15 @@ def _trial(case, budget, path, *, validator, seconds, lower=None, upper=None,
     try:
         try:
             native = budget.native_optimize(model, capture,
-                component='FEASIBILITY_LP' if continuous else 'FEASIBILITY_MIP' if initialization else 'UB',
-                track='M_START' if initialization else 'M_' + (spec['method'] if spec else 'FIXED_ROUTE'),
+                component=component, track=track,
                 label=path.name, requested_seconds=seconds)
         except Exception as failure:
             native_failure = failure
             error = type(failure).__name__ + ': ' + str(failure)
+        if native is None:
+            native = _completed_native_receipt(budget, before_count, before,
+                component=component, track=track, label=path.name,
+                requested_seconds=effective_seconds)
         if _attr(model, 'SolCount'):
             pending.append((float(model.ObjVal), np.asarray(variables.X, dtype=np.float64).copy()))
         best = None if point is None else point.copy()

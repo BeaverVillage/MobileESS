@@ -154,10 +154,16 @@ def run(request, manifest, progress):
                 raise PermissionError("COMMON_U4_ACTUAL_NATIVE_OPTIMIZE_FORBIDDEN")
         ac_pass = evaluation.get("PASS") is True and evaluation.get("physical_violation") is False
         status = "COMPLETED_PHYSICAL_PASS" if ac_pass else "ACTUAL_AC_FAILED"
+        fresh_root = Path(evaluation['Fresh']['receipt']['path']).parent
+        raw_arrays = list(fresh_root.rglob('OPENDSS_PHASE_ARRAYS.npz'))
+        if len(raw_arrays) != 1:
+            raise PermissionError('COMMON_U4_EXACTLY_ONE_ORIGINAL_FRESH_PHASE_ARRAY_REQUIRED')
+        raw_receipt = record(raw_arrays[0])
+        evaluation['Fresh']['raw_phase_arrays'] = raw_receipt
         return dict(scientific=result, evaluation=evaluation, PASS=ac_pass,
             status=status, feasible_accepted=True,
             global_gap_certified=result.get("global_gap_certified", False),
             actual_ac_physical_pass=ac_pass, Native_Runtime=ledger.used(),
             native_runtime_seconds=ledger.used(), stage_wall_seconds=time.perf_counter()-started,
             files=[record(output / "M_STAGE_RESULT.json"), record(output / "BEST_STRICT_UB_POINT.npz"),
-                record(output / "BEST_STRICT_UB_CERTIFICATE.json"), result["mess_plan"]])
+                record(output / "BEST_STRICT_UB_CERTIFICATE.json"), result["mess_plan"], raw_receipt])

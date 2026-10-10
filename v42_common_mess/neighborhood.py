@@ -159,6 +159,7 @@ def route_witness(case, point, free, radius):
             if time == H and different and node_cost(site, H) is not None)
         for _, terminal, path in terminals:
             trial = point.copy()
+            route_columns = []
             visited = {(case.graph[2][k][0], case.graph[2][k][1]) for k in path} | {(terminal, H)}
             chosen = set(path)
             for r in records:
@@ -166,14 +167,20 @@ def route_witness(case, point, free, radius):
                     continue
                 if r['family'] == 'node_activity':
                     trial[r['column']] = float((r['site'], r['slot']) in visited)
+                    route_columns.append(r['column'])
             for name, j in names.items():
                 if name.startswith((f'route_flow[{unit},', f'arc[{unit},')):
                     trial[j] = float(int(name.split(',')[-1][:-1]) in chosen)
+                    route_columns.append(j)
+            route_columns = np.asarray(route_columns, dtype=int)
             allbinary = np.asarray([r['column'] for r in records], dtype=int)
             fixed = np.asarray(sorted(set(allbinary) - free), dtype=int)
             distance = int(np.count_nonzero(trial[allbinary] != point[allbinary]))
             if (distance <= radius and np.array_equal(trial[fixed], point[fixed])
-                    and np.all(trial >= case.d['lower']) and np.all(trial <= case.d['upper'])):
+                    # This witness changes routes only. Untouched P/Q/SOC
+                    # residuals are judged by original FULL scientific replay.
+                    and np.all(trial[route_columns] >= case.d['lower'][route_columns])
+                    and np.all(trial[route_columns] <= case.d['upper'][route_columns])):
                 return dict(PASS=True, unit=unit, arc_indices=list(path), hamming_distance=distance,
                     original_DAG_flow_and_terminal_slot=96, route_changed=True,
                     SOC_PQ_grid_feasibility_claimed=False)
