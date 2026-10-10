@@ -100,6 +100,7 @@ def audit_date(root,m,row):
 
 def run(root):
     root=Path(root).resolve();m=verify(root/'CAMPAIGN_MANIFEST.json');ledger=read(root/'CAMPAIGN_LEDGER.json')
+    final_check=all(ledger['dates'][a+'/'+d]['status']=='PASS' for a,d in TARGETS)
     folder=root/'handoff37';folder.mkdir(exist_ok=True);dates=[]
     for arm,day in TARGETS:
         row=ledger['dates'][arm+'/'+day];cache=folder/(arm+'_'+day+'.json')
@@ -108,12 +109,16 @@ def run(root):
         try:
             previous=read(cache) if cache.exists() else None
             if previous and previous['source_SHA']==m['execution_SHA'] and previous['result_SHA']==row['result_SHA']:
-                require(all(record(r['path'])==r for r in previous['evidence']),'HANDOFF_CACHED_RECEIPT_DRIFT');v=previous
+                # Complete immutable attempts are verified once while waiting;
+                # all protected bytes are rehashed before the final handoff.
+                if final_check:require(all(record(r['path'])==r for r in previous['evidence']),'HANDOFF_CACHED_RECEIPT_DRIFT')
+                v=previous
             else:v=audit_date(root,m,row);atomic(cache,v)
             dates.append(v)
         except Exception as error:dates.append(dict(arm=arm,day=day,PASS=False,status='VERIFICATION_FAILED',error=repr(error)))
     passed=sum(d['PASS'] is True for d in dates)
     result=dict(schema='SVR11_USER_HANDOFF_37_V1',PASS=passed==37,verified_PASS=passed,total=37,
+        final_all_receipt_bytes_reverified=bool(final_check and passed==37),
         source_SHA=m['execution_SHA'],campaign_root=str(root),verifier=record(Path(__file__)),dates=dates,
         campaign_processes_terminated=0,Native_optimizer_calls=0,UTC=now())
     atomic(root/'HANDOFF_37_VALIDATION.json',result)

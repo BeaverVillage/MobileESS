@@ -19,7 +19,7 @@ python -B -X utf8 -m v42_svr11.freeze D:\v42_svr11_may_20261011_02\hardware
 python -B -X utf8 -m v42_svr11.prepare raw D:\v42_svr11_may_20261011_02
 python -B -X utf8 -m v42_svr11.regression D:\v42_svr11_may_20261011_02
 python -B -X utf8 -m v42_svr11.prepare release D:\v42_svr11_may_20261011_02
-python -B -X utf8 -m v42_svr11.watchdog D:\v42_svr11_may_20261011_02
+python -B -X utf8 tools\svr11_monitor_ui.py watchdog D:\v42_svr11_may_20261011_02
 ```
 
 The read-only dashboard is `http://localhost:8796`, with five-second refresh, policy/date summaries, live process state, measured Native Runtime, separate bounds, and clickable physical detail. Existing hourly Codex recovery and five-minute Windows tasks are repointed to this release, preserving their old definitions. Scheduling registration is distinct from observed scheduled execution.
@@ -31,3 +31,7 @@ Epoch01 is isolated after three B0 input-axis implementation FAILs. Its original
 Epoch02 immutable scientific Source SHA: `68130f4e8a19b54637ae168a7417b768592fd2e397b904aa006567ab90fc388a` (commit `02b527124151c3912fc48b72b9a992fbb42cfa54`). [Timestamped execution snapshot](epoch02_snapshot/SNAPSHOT.json), [campaign ledger](epoch02_snapshot/CAMPAIGN_LEDGER.json), [in-progress report](epoch02_snapshot/REPORT.md), [37-date evidence verification](epoch02_snapshot/HANDOFF_37_VALIDATION.json), and [hardware](epoch02_snapshot/HARDWARE.json) are separate from the live runtime.
 
 The read-only UI has its own sealed HTML/Python receipts outside the scientific source namespace. `tools/svr11_monitor_ui.py watchdog` preserves the same scientific Supervisor/Worker implementation and only changes the HTTP frontend; existing Windows tasks use this wrapper. It reads atomic worker heartbeats instead of the unretried physics progress files. Scientific workers and source bytes are unchanged. `tools/verify_svr11_handoff37.py` independently reads every full-node/phase, both-terminal current/kVA, native tap and 96-slot AC receipt before authorizing the requested handoff.
+
+The 37-date verifier caches fully checked immutable date receipts while waiting, then rehashes every protected receipt byte before the final all-37 PASS gate. Intentional non-transformer NaNs in the original Fresh transformer-loading array are excluded using its recorded branch-kind axis; all transformer cells and the full physical audit remain mandatory. `tools/report_svr11_campaign.py` writes `PERFORMANCE_COMPARISON.json` and `.md`, separating each policy's own PASS cohort from each pair's identical PASS-date intersection. Every failed attempt, measured or uncertain Native Runtime, and source receipt remains linked. This reporting does not rerun optimization or AC and labels incomplete campaigns IN_PROGRESS.
+
+The existing hourly heartbeat includes autonomous diagnosis and conservative verified recovery, normal feasible TIME_LIMIT acceptance, next-date-first technical retries starting at Native zero, FAIL-CONTINUE, and new common Source Epochs for unavoidable scientific or equipment changes. Healthy workers are preserved. Final conversation handoff requires all 37 actual PASS dates, final receipt-byte verification, live Supervisor/Workers/monitor, and the existing hourly heartbeat ACTIVE with its next execution time and correct root/source binding. Remaining dates continue in their own processes.
