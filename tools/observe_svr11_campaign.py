@@ -20,14 +20,25 @@ def run(root):
     else:
         supervisor=read(root/'SUPERVISOR_PROCESS.json');assert live(supervisor)
         peers=workers(root,m['execution_SHA']);assert len(peers)<=m['worker_counts'][s['policy']]
-    result=dict(UTC=now(),source_SHA=m['execution_SHA'],policy=s['policy'],counts=s['counts'],supervisor_PID=supervisor['PID'] if supervisor else None,migration_status=migration.get('status'),workers=[])
+    result=dict(UTC=now(),source_SHA=m['execution_SHA'],policy=s['policy'],counts=s['counts'],supervisor_PID=supervisor['PID'] if supervisor else None,migration_status=migration.get('status'),workers=[],read_only_snapshot_races=[])
+    expected={p['PID']:p for p in peers}
     for w in s['workers']:
-        p=psutil.Process(w['PID'])
+        known=expected.get(w['PID'])
+        if not known or not live(known):
+            result['read_only_snapshot_races'].append(dict(PID=w['PID'],reason='Worker naturally exited or changed between independent reads'))
+            continue
+        try:
+            p=psutil.Process(w['PID'])
+            if p.create_time()!=known['create_time']:raise PermissionError('OBSERVER_WORKER_PID_REUSE')
+            rss=round(p.memory_info().rss/1024**2,1)
+        except psutil.NoSuchProcess:
+            result['read_only_snapshot_races'].append(dict(PID=w['PID'],reason='Worker naturally exited during memory observation'))
+            continue
         owned_root=Path(read(migration['predecessor_manifest']['path'])['root']) if waiting else root
         progress=list((owned_root/'models'/w['day']).rglob('MODEL_GENERATION_PROGRESS.json'))
         v=read(progress[0]) if progress else {}
         result['workers'].append(dict(day=w['day'],PID=p.pid,phase=w['phase'],Native_Runtime=w['Native_Runtime'],
-            completed_model_slots=v.get('completed_slots'),model_wall_seconds=v.get('wall_seconds'),RSS_MB=round(p.memory_info().rss/1024**2,1)))
+            completed_model_slots=v.get('completed_slots'),model_wall_seconds=v.get('wall_seconds'),RSS_MB=rss))
     result['errors']=s['errors']
     result['current_epoch_failures']=[dict(arm=r['arm'],day=r['day'],reason=r.get('reason'),result=r.get('result'))
         for r in s['dates'] if r['status']=='FAIL' and r.get('result') and Path(r['result']).resolve().is_relative_to(root.resolve()/'dates')]
