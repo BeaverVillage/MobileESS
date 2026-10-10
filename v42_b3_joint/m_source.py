@@ -220,6 +220,9 @@ class MSourceBridge:
     def _prepare(self, context, payload, ledger, progress):
         builder = self._construction(context, payload, progress)
         registry = context.source_registry
+        from v42_common_mess.planning_policy import build_case as common_build_case
+        if registry.evidence_kind == "SOURCE":
+            common_build_case = registry.callable("v42_common_mess/planning_policy.py", "build_case")
         source_request = {**context.identity, "output": str(context.output),
                           "input_folder": str(context.input_folder), "_budget": ledger}
         with self._phase(context, "full_model_and_transport_total_seconds"):
@@ -227,11 +230,12 @@ class MSourceBridge:
                 native = registry.resolve("v42_native.mess")
                 with original_pcs_math_scope(native, native.__file__,
                         registry.source_manifest.get("v42_native/mess.py")) as (memo, source_proof):
-                    case = builder(payload, source_request, progress)
+                    case = common_build_case(builder, payload, source_request, progress, stage=context.request.stage,
+                        strict_validator=registry.callable("v42_m1_hybrid/final_verify.py", "_strict_ub"))
                 self._scalar_receipts[self._key(context)] = {
                     "evidence_kind": "SOURCE", "memo": memo.receipt(), "source_proof": dict(source_proof)}
             else:
-                case = builder(payload, source_request, progress)
+                case = common_build_case(builder, payload, source_request, progress, stage=context.request.stage)
                 self._scalar_receipts[self._key(context)] = {
                     "evidence_kind": "FAKE_SOURCE_TEST", "status": "NOT_APPLIED_TO_FAKE_MODEL",
                     "real_performance_comparison": "NOT_RUN"}
