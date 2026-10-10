@@ -13,6 +13,7 @@ folder=SOURCE/'docs/v42_svr11_final_20261011/epoch05_snapshot';folder.mkdir(pare
 for name in ('CAMPAIGN_MANIFEST.json','CAMPAIGN_LEDGER.json','HANDOFF_37_VALIDATION.json','CALLBACK_CONTEXT_DIAGNOSIS.json',
     'PREDECESSOR_DRAIN_CONTRACT.json','MIGRATION_STATUS.json','REUSE_ADMISSION.json','MONITOR_PROCESS.json',
     'MONITOR_UI_RELEASE.json','SUPERVISOR_PROCESS.json','WATCHDOG_LAST_RUN.json','REPORT.json','REPORT.md',
+    'WINDOWS_SCHEDULE_OBSERVED_EXECUTION.json','B2_PRE_DISPATCH_REUSE.json',
     'PERFORMANCE_COMPARISON.json','PERFORMANCE_COMPARISON.md','NORMALAMPS_CLASSIFICATION_CORRECTION.json'):
     if (root/name).exists():shutil.copyfile(root/name,folder/name)
 shutil.copyfile(root/'hardware/HARDWARE.json',folder/'HARDWARE.json')

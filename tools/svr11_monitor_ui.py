@@ -67,7 +67,8 @@ def snapshot(root):
         ETA=f'{estimate/3600:.1f} h' if known else '측정 중',
         errors=[r['arm']+' '+r['day']+': '+str(r.get('reason')) for r in rows if r['status']=='FAIL'][-3:]+([ledger['error']] if ledger.get('error') else []),
         source_SHA=m['execution_SHA'],root=str(root),UTC=now(),
-        notice='May19–22 네 날짜는 원본 NormalAmps·kVA·전압·SVR 정격 재검증 PASS. 기존 오판정 이력은 보존하며 수정 Source의 공식 실행은 별도로 기록합니다.'
+        notice=('검증된 완료 날짜 '+str(sum(bool(r.get('reused')) for r in rows))+'일 재사용 · 원본 실행 SHA/Runtime 보존 · 현재 검증 SHA 별도 기록. '
+            if any(r.get('reused') for r in rows) else '')+'May19–22 네 날짜는 원본 NormalAmps·kVA·전압·SVR 정격 재검증 PASS. 기존 오판정 이력은 보존합니다.'
             if (root/'NORMALAMPS_CLASSIFICATION_CORRECTION.json').exists() else '')
 
 def serve(root):
