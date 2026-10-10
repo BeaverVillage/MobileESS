@@ -1,6 +1,6 @@
 """Seal handoff only after real 37-date evidence and live recovery bindings."""
 from pathlib import Path
-import sys,json,sqlite3,datetime,urllib.request,subprocess
+import sys,json,sqlite3,datetime,urllib.request,subprocess,psutil
 SOURCE=Path(__file__).resolve().parents[1];sys.path.insert(0,str(SOURCE))
 from v42_pr134_b1.common import read,record,atomic,now
 from v42_svr11.authority import verify
@@ -11,6 +11,10 @@ def finish(root):
     root=Path(root).resolve();m=verify(root/'CAMPAIGN_MANIFEST.json');h=run(root)
     assert h['PASS'] and h['verified_PASS']==37 and h['final_all_receipt_bytes_reverified'], 'HANDOFF_37_ACTUAL_PASS_REQUIRED'
     supervisor=read(root/'SUPERVISOR_PROCESS.json');assert live(supervisor)
+    assert psutil.Process(supervisor['PID']).status()!=psutil.STATUS_STOPPED
+    heartbeat=read(root/'SUPERVISOR_HEARTBEAT.json')
+    assert heartbeat['PID']==supervisor['PID'] and heartbeat['source_SHA']==m['execution_SHA']
+    assert datetime.timedelta(0)<=datetime.datetime.now(datetime.timezone.utc)-datetime.datetime.fromisoformat(heartbeat['UTC'])<datetime.timedelta(seconds=30)
     peers=workers(root,m['execution_SHA'])
     with urllib.request.urlopen('http://127.0.0.1:8796/api/state',timeout=10) as response:s=json.load(response)
     assert s['source_SHA']==m['execution_SHA'] and Path(s['root']).resolve()==root
@@ -45,7 +49,7 @@ def finish(root):
     atomic(root/'WINDOWS_SCHEDULE_OBSERVED_EXECUTION.json',task_data)
     receipt=dict(schema='SVR11_VERIFIED_37_ACTIVE_CAMPAIGN_HANDOFF_V1',PASS=True,
         source_SHA=m['execution_SHA'],equipment_SHA=read(m['hardware']['path'])['equipment_SHA'],root=str(root),
-        handoff37=record(root/'HANDOFF_37_VALIDATION.json'),supervisor=supervisor,workers=peers,monitor=monitor,
+        handoff37=record(root/'HANDOFF_37_VALIDATION.json'),supervisor=supervisor,supervisor_heartbeat=heartbeat,workers=peers,monitor=monitor,
         monitor_URL='http://127.0.0.1:8796',monitor_HTTP=200,counts=s['counts'],policy=s['policy'],
         hourly=a,Windows_tasks=task_data,campaign_processes_terminated=0,
         monthly_campaign_complete=False,chat_handoff_only=True,UTC=now())

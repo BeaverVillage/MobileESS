@@ -12,7 +12,7 @@ Policy own PASS cohorts and paired same-date populations are separate. B0 has no
 
 | B0 | 31 | 0 | 0.7346361754547684 | 1596.92006544262 |
 
-| B2 | 1 | 4 | 0.7174118237187053 | 1464.549672891064 |
+| B2 | 3 | 2 | 0.660828156671847 | 1421.7699894874588 |
 
 | B1 | 0 | 0 | None | None |
 
@@ -24,7 +24,7 @@ Pairwise deltas use only dates where both policies PASS. A lower failure rate an
 
 
 
-- B0 / B2: 1 common PASS dates; exact dates and numerical deltas in PERFORMANCE_COMPARISON.json.
+- B0 / B2: 3 common PASS dates; exact dates and numerical deltas in PERFORMANCE_COMPARISON.json.
 
 - B0 / B1: 0 common PASS dates; exact dates and numerical deltas in PERFORMANCE_COMPARISON.json.
 

@@ -20,7 +20,7 @@ Date failures do not gate later dates or policies. Unexecuted metrics remain una
 
 | B0 | 31 | 0 | 0 | 0 |
 
-| B2 | 1 | 4 | 3 | 23 |
+| B2 | 3 | 2 | 3 | 23 |
 
 | B1 | 0 | 0 | 0 | 31 |
 
@@ -35,10 +35,6 @@ Full node/phase, both-terminal current/kVA, control events/taps and loss evidenc
 
 
 ## Failures
-
-- B2 2025-05-03: ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED') (result: D:\v42_svr11_may_20261011_06\dates\B2\2025-05-03\attempts\attempt_01\RESULT.json)
-
-- B2 2025-05-04: ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED') (result: D:\v42_svr11_may_20261011_06\dates\B2\2025-05-04\attempts\attempt_01\RESULT.json)
 
 - B2 2025-05-05: ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED') (result: D:\v42_svr11_may_20261011_06\dates\B2\2025-05-05\attempts\attempt_01\RESULT.json)
 
