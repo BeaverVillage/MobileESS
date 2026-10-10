@@ -1,0 +1,189 @@
+{
+  "schema": "V42_MAY01_PRESERVED_FULL_1048_NATIVE0_COEFFICIENT_AUDIT_V1",
+  "generated_UTC": "2026-10-10T13:55:04.660845+00:00",
+  "PASS": true,
+  "diagnostic_only": true,
+  "Native_optimize_calls": 0,
+  "OpenDSS_solve_calls": 0,
+  "original_point_mutation_count": 0,
+  "original_source_mutation_count": 0,
+  "original_case_SHA": "0f3c98db9ba044cfebd317b56510809873c6e46f0ff01c174b45f6e5f257536a",
+  "original_SourceSHA": "9df4e1dfba249aad77a0eca8077aeca951108dff55c6a29d891e192aab20297a",
+  "original_domain_SHA": "5abaf34283afbc90e06a6593949f3e339256a3c3a89bd1f11b2aaacf198d8d54",
+  "candidate_FULL_domain_SHA": "10392e4479cb1280470b61b22f7e5290a5ff95065046490928672679f723efa9",
+  "coefficient_matrix_SHA_unchanged": "cb7e7f4fbea861b609cac7d3dc3bed4652924dbaa06c6cc8d54f5cd9b4d4fb2b",
+  "policy": {
+    "version": "V42_PLANNING_VMAX_1048_DIAGNOSTIC_V1",
+    "diagnostic_only": true,
+    "Planning_lower_pu": 0.95,
+    "Planning_upper_pu": 1.048,
+    "Planning_lower_squared": 0.9025,
+    "Planning_upper_squared": 1.098304,
+    "exact_decimal_lower_squared": "0.902500",
+    "exact_decimal_upper_squared": "1.098304",
+    "baseline_Planning_upper_squared": 1.1025,
+    "voltage_coordinate": "SQUARED_PU",
+    "Actual_lower_pu": 0.95,
+    "Actual_upper_pu": 1.05,
+    "stages": [
+      "B2_M",
+      "M1",
+      "M2"
+    ],
+    "A1_A2_policy_changed": false,
+    "post_observed_May01_diagnostic": true,
+    "independent_holdout_claim": false
+  },
+  "coverage": "Independent exact original FULL snapshot with only user-authorized voltage-upper RHS shift, read back from actual Gurobi without optimize. Fresh source rebuild/Compact/C3A independent gate is still required from actual diagnostic worker.",
+  "changed_upper_rows": 37056,
+  "lower_rows_unchanged": 37056,
+  "all_nonupper_RHS_byte_equal": true,
+  "all_other_column_row_metadata_byte_equal": true,
+  "Native_full_readback": {
+    "rows": 961472,
+    "columns": 316743,
+    "checks": {
+      "FULL_native_CSR_exact": true,
+      "FULL_native_RHS_exact": true,
+      "FULL_native_sense_exact": true,
+      "FULL_native_types_exact": true,
+      "FULL_native_lower_exact": true,
+      "FULL_native_upper_exact": true,
+      "FULL_native_objective_exact": true,
+      "preserved_FULL_nonupper_RHS_byte_equal": true,
+      "preserved_FULL_all_other_metadata_byte_equal": true
+    }
+  },
+  "original_coefficient_voltage_audit": {
+    "PASS": true,
+    "upper_rows": 37056,
+    "lower_rows": 37056,
+    "original_coefficient_terms_exact": true,
+    "upper_squared": 1.098304,
+    "lower_squared": 0.9025,
+    "maximum_original_affine_RHS_arithmetic_difference": 8.881784197001252e-16,
+    "arithmetic_comparison_tolerance": 1e-12,
+    "native_optimize_calls": 0,
+    "Native_readback_source": "Original FULL builder calls Gurobi getA/getAttr RHS before Compact/Presolve; common Native model additionally reads back exact current C3A coefficients/RHS on every trial."
+  },
+  "old_strict_point_under_new_FULL_upper_violation_count": 474,
+  "old_strict_point_under_new_FULL_upper_max_violation_squared_pu": 0.00419600000000013,
+  "old_point_feasibility_not_reused": true,
+  "sources": [
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "6d1591cd20759465c215ce80fe786f286eebe6182c038d5ce1fbe79e966443dc",
+      "bytes": 852518
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_SUMMARY.json",
+      "sha256": "bf6119e8a6cc3cd2aa5efa07ceaca107ce3d2a1cfdf8de45120e42ba782ca4b9",
+      "bytes": 1512
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_VIOLATIONS.json",
+      "sha256": "031b145d519af86a10242cedb0f71157db7d5400d08deca86f75115294af41f4",
+      "bytes": 3888
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\BEST_STRICT_UB_POINT.npz",
+      "sha256": "203f94301b5a1f271b519494e8ebedfb3484db0d3931b38fd5ac7ec2f9504bb6",
+      "bytes": 374961
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL_SOURCE\\INPUT\\BUNDLE\\DAY_20250501\\DERIVED_AEMO_ACTUAL.parquet",
+      "sha256": "d56f3854cbbc34835c9ec6cab150aa384a358c8f2f52a76f5b16dbcf230030fe",
+      "bytes": 4279
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+      "sha256": "735e190e1a5e5367c26ee4848192a41bdb8cc5749ebd5e3cb177f9599a314ef7",
+      "bytes": 28521980
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250501\\kernel\\electrical\\2025-05-01\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-01.npz",
+      "sha256": "b0ca5052a025425ba185066d396f6d98dd05104bac50e0c1a1255d165b812a28",
+      "bytes": 14055002
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\SCIENTIFIC_CASE_IDENTITY.json",
+      "sha256": "1511be48c5a76ffaac4bfc25227b2de24d4654d60eb44108cd41517a54e83681",
+      "bytes": 5815
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\CURRENT_C2_AXES.npz",
+      "sha256": "1152a7f7d93d627685e3d2b507b952214fb590d973096d38a8faf489f9e9ede2",
+      "bytes": 1503650
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\CURRENT_C2_ALIASES.json",
+      "sha256": "b32d69c15f366967ac252a12477d9d2af0da515b9c7d44e8d14149937aeed09f",
+      "bytes": 7107863
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\FULL_A.npz",
+      "sha256": "35bdc6e7c2664b763d3d0456b7296b7c8830d7c7c39a61a3cb32e699f8bb2024",
+      "bytes": 28471538
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\FULL_DATA.npz",
+      "sha256": "7c0df0ab0d04027ac93fa383c3a45ab436ac512e10c106173f422f483ed8a7d6",
+      "bytes": 5882403
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\FIXED_AIDC_ANCHOR.json",
+      "sha256": "f117ecc42edf3a13c5784e09fab608732cbe91e6001987860afe663b55e3a042",
+      "bytes": 85962
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\BEST_STRICT_UB_CERTIFICATE.json",
+      "sha256": "4f16604f3bf49d7a56c20f8bf1d3ded0519f53567bf748ad4523752811470917",
+      "bytes": 4252
+    },
+    {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\inputs\\B2\\2025-05-01\\NATIVE_INPUT.json",
+      "sha256": "2318d4cb4fd42fabb493dbee923eda037ae697a524406fabd9c8a7e7615c7f59",
+      "bytes": 2421771
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_FIXED_REPLAY_RECEIPT.json",
+      "sha256": "c4ea6cc815cd28ea7e3d6ab17a896b7d644a97a6d4d58db677a823a0e726b5ec",
+      "bytes": 1756
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL_SOURCE\\ACTUAL_SOURCE_RECEIPT.json",
+      "sha256": "05a3de8fdfdc77246e5bcdfcb70a9b4a2185c285831a7147db6e7062686a201b",
+      "bytes": 991
+    },
+    {
+      "path": "D:\\v42u4final\\v42_may_campaign\\m_model.py",
+      "sha256": "059583b44a73a8abc010a987c833996b1550c20bf75c30a2645944dc29f53708",
+      "bytes": 33739
+    },
+    {
+      "path": "D:\\v42u4final\\v42_supercompact\\formulation.py",
+      "sha256": "183897e4259aaabbbdf7fcc7976adb84147ba04106cbc18bb11f9d3353cfd19f",
+      "bytes": 4740
+    },
+    {
+      "path": "D:\\v42u4final\\v42_supercompact\\presolve.py",
+      "sha256": "04adf32c1b83fa49631b64bb317c04e207ca534ba7e2af6c2b9eb16b614ba69f",
+      "bytes": 14438
+    },
+    {
+      "path": "D:\\v42u4final\\v42_m1_sparse\\grid.py",
+      "sha256": "16912a1661a98f10b6abf034ff92e293e070c140fec42432c3caa677aec19e24",
+      "bytes": 6028
+    },
+    {
+      "path": "D:\\v42u4final\\v42_may01\\prepare.py",
+      "sha256": "a22b68c718482bbabb06f49404617dcd46b5cd15a2f3882d11dee83c613c55f3",
+      "bytes": 24516
+    },
+    {
+      "path": "D:\\v42u4final\\v42_native\\voltage.py",
+      "sha256": "2173356203e985be70e36255fd8e225cf02321a3a8845401fa56ac428c86bfd4",
+      "bytes": 1916
+    }
+  ]
+}

@@ -1,0 +1,417 @@
+{
+  "schema": "V42_B2_MAY01_PLANNING_ACTUAL_FACTORIAL_GAP_AUDIT_V1",
+  "generated_UTC": "2026-10-10T13:44:53.657216+00:00",
+  "diagnostic_only": true,
+  "PASS": true,
+  "Native_optimizer_calls": 0,
+  "OpenDSS_solve_calls": 0,
+  "source_mutation_count": 0,
+  "point_mutation_count": 0,
+  "original_strict_point_and_original_Fresh_trajectory_preserved": true,
+  "original_case_SHA": "0f3c98db9ba044cfebd317b56510809873c6e46f0ff01c174b45f6e5f257536a",
+  "original_source_SHA": "9df4e1dfba249aad77a0eca8077aeca951108dff55c6a29d891e192aab20297a",
+  "exact_coordinate_axis": true,
+  "original_FULL_point_counterfactual_controls": true,
+  "preserving_non_MESS_coordinates": true,
+  "original_FULL_voltage_row_max_v2_difference": 2.220446049250313e-16,
+  "original_Planning_reconstruction_max_pu_difference": 2.220446049250313e-16,
+  "Planning_squared_voltage_PQ_interaction_max": 4.440892098500626e-16,
+  "affine_evaluation": "V_squared = original voltage_constant + original voltage_matrix * original controls. P-only zeros only MESS Q; Q-only zeros only MESS P; zero zeros only MESS P/Q. These hypothetical coordinate evaluations are not strict-feasible replacement points.",
+  "Planning_pu_interaction_semantics": "The affine squared-voltage model has zero P/Q interaction; a nonzero pu interaction can arise solely from taking square roots.",
+  "decomposition_equation": "ActualFull-PlanFull=(Actualzero-Planzero)+[(ActualFull-Actualzero)-(PlanFull-Planzero)]",
+  "contribution_error_equation": "combined response error = P-only effect error + Q-only effect error + P/Q interaction error",
+  "baseline_residual_scope": "The baseline residual combines forecast/Actual exogenous input differences, fixed AIDC operating-point differences, affine model error, and native control response. This comparison does not uniquely assign it to regulator controls or any single cause.",
+  "response_error_scope": "Actual factorial effects include nonlinear network response and autonomous control actions along each trajectory. They are not fixed-tap local derivatives.",
+  "voltage_cell_count": 19,
+  "worst_original_voltage_cell": {
+    "day": "2025-05-01",
+    "arm": "B2",
+    "node_phase": "mess_sta08_pcc.1",
+    "node": "mess_sta08_pcc",
+    "phase": "A",
+    "node_axis_0based": "371",
+    "slot_1based": "11",
+    "slot_0based": "10",
+    "timestamp_interval_end_aest": "2025-05-01T02:45:00+10:00",
+    "Actual_V_pu": "1.0583754890888868",
+    "Planning_V_pu": "1.0455284095019148",
+    "violated_limit_pu": "1.05",
+    "direction": "UPPER",
+    "Actual_exceedance_pu": "0.008375489088886745",
+    "Actual_minus_Planning_pu": "0.012847079586971955",
+    "Planning_margin_to_violated_limit_pu": "0.0044715904980852095",
+    "FULL_voltage_upper_row": "289147",
+    "FULL_voltage_lower_row": "289146",
+    "VFull_PQ": "1.0583754890888868",
+    "VPonly_Qzero": "1.0262251105954137",
+    "VQonly_Pzero": "1.0583754890888868",
+    "Vzero_PQ": "1.0327267471742596",
+    "P_effect_when_Qzero_pu": "-0.0065016365788459485",
+    "Q_effect_when_Pzero_pu": "0.025648741914627182",
+    "P_effect_when_Qoriginal_pu": "0.0",
+    "Q_effect_when_Poriginal_pu": "0.03215037849347313",
+    "P_Q_interaction_pu": "0.0065016365788459485",
+    "full_MESS_effect_vs_zero_pu": "0.025648741914627182",
+    "Planning_Actual_difference_pu": "0.012847079586971955",
+    "station": "STA08",
+    "local_MESS_units": "[\"MESS03\"]",
+    "local_original_MESS_P_kw": "-1.1368683772161603e-13",
+    "local_original_MESS_Q_kvar": "363.39187888541096",
+    "all_original_MESS_P_kw": "[-1.1368683772161603e-13, -1.1368683772161603e-13, -1.1368683772161603e-13, -1.1368683772161603e-13]",
+    "all_original_MESS_Q_kvar": "[-290.5343497079117, -392.3141121612963, 363.39187888541096, -392.31411216129675]",
+    "all_original_MESS_locations": "[\"STA01\", \"STA12\", \"STA08\", \"STA06\"]",
+    "Full_taps": "[1.0250000000000001, 0.9937499999999999, 1.0062499999999999, 0.9999999999999999, 1.04375, 1.0187499999999998, 1.0312499999999998]",
+    "Ponly_taps": "[1.0125, 1.00625, 1.0125, 1.0062499999999999, 1.0375, 1.025, 1.03125]",
+    "Qonly_taps": "[1.0250000000000001, 0.9937499999999999, 1.0062499999999999, 0.9999999999999999, 1.04375, 1.0187499999999998, 1.0312499999999998]",
+    "Zero_taps": "[1.0125, 1.0062499999999999, 1.0125, 1.0062499999999999, 1.04375, 1.025, 1.03125]",
+    "Full_vs_Zero_literal_tap_differences": "6",
+    "Full_vs_Zero_different_regulators": "5",
+    "Planning_Full_PQ_pu": 1.0455284095019148,
+    "Planning_Ponly_Qzero_pu": 1.0327644720068854,
+    "Planning_Qonly_Pzero_pu": 1.0455284095019148,
+    "Planning_zero_PQ_pu": 1.0327644720068856,
+    "Planning_minus_Actual_zero_PQ_pu": 3.7724832625984916e-05,
+    "baseline_Actual_minus_Planning_zero_PQ_pu": -3.7724832625984916e-05,
+    "Planning_MESS_P_effect_when_Qzero_pu": -2.220446049250313e-16,
+    "Planning_MESS_Q_effect_when_Pzero_pu": 0.012763937495029243,
+    "Planning_MESS_P_effect_when_Qoriginal_pu": 0.0,
+    "Planning_MESS_Q_effect_when_Poriginal_pu": 0.012763937495029465,
+    "Planning_P_Q_interaction_pu": 2.220446049250313e-16,
+    "Planning_combined_MESS_effect_pu": 0.012763937495029243,
+    "P_contribution_error_when_Qzero_pu": -0.006501636578845726,
+    "Q_contribution_error_when_Pzero_pu": 0.01288480441959794,
+    "P_contribution_error_when_Qoriginal_pu": 0.0,
+    "Q_contribution_error_when_Poriginal_pu": 0.019386440998443666,
+    "P_Q_interaction_error_pu": 0.006501636578845726,
+    "combined_MESS_contribution_error_pu": 0.01288480441959794,
+    "gap_decomposition_sum_pu": 0.012847079586971955,
+    "gap_decomposition_identity_residual_pu": 0.0,
+    "Planning_P_contribution_squared_pu": -2.220446049250313e-16,
+    "Planning_Q_contribution_squared_pu": 0.0265272004359427,
+    "Planning_anchor_AC_zeroMESS_pu": 1.0327644720068856,
+    "Planning_anchor_taps": "[1.0125, 1.0062499999999999, 1.0125, 1.0062499999999999, 1.04375, 1.025, 1.03125]",
+    "Planning_anchor_capacitor_states": "[1, 1, 1, 1]",
+    "Actual_Full_capacitor_states": "[1, 1, 1, 1]"
+  },
+  "maximum_abs_gap_decomposition_identity_residual_pu": 0.0,
+  "Planning_reference": {
+    "sensitivity_schema": "V16_3_D1_AC_ANCHOR_SENSITIVITY_NPZ_V1",
+    "day": "2025-05-01",
+    "native_master_SHA": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969",
+    "reference_AIDC_plan_SHA": "bbcacea63f361ca5d9ff3cceaf3a00604851bf4a3a702dd24887e43b6e37fd21",
+    "AC_anchor_input_role": "V41R2_780GPU_Q90_B0_PCC_PRE_AC_INPUT",
+    "all_anchor_MESS_PQ_zero": true,
+    "AIDC_control_change_max_abs_kw": 54.77239723608389,
+    "AIDC_control_change_total_over_all_cells_kw": -18731.200237018274,
+    "AIDC_control_different_slot_site_cells": 565,
+    "coefficient_anchor_reconstruction_max_v2_error": 2.220446049250313e-16,
+    "exported_H_vs_raw_D1_H_changed_entries": 331776,
+    "exported_H_vs_raw_D1_H_max_abs_change": 2.21788222407704e-05,
+    "original_frozen_April_joint_gradient_pairs": 1728,
+    "joint_calibration_days": [
+      "2025-04-01",
+      "2025-04-02",
+      "2025-04-04",
+      "2025-04-05",
+      "2025-04-07",
+      "2025-04-08",
+      "2025-04-11",
+      "2025-04-17"
+    ],
+    "May_outcomes_used_for_gradient_selection": false,
+    "reference_controls_method": "Per slot enable native RegControls, apply forecast background/PV and V41R2 Q90 B0 PCC AIDC input with zero MESS, solve to settle taps/caps; then freeze those states and disable controls for central finite differences. Exported Planning H includes frozen April joint-gradient substitutions and is recentered to the same AC anchor.",
+    "regulator_order": [
+      "reg1a",
+      "reg2a",
+      "reg3a",
+      "reg3c",
+      "reg4a",
+      "reg4b",
+      "reg4c"
+    ],
+    "capacitor_order": [
+      "c83",
+      "c88a",
+      "c90b",
+      "c92c"
+    ],
+    "tap_comparison": {
+      "FULL_PQ_REPLAY": {
+        "different_regulator_slot_cells": 418,
+        "slots_with_any_regulator_difference": 96,
+        "per_regulator_different_slot_count": {
+          "reg1a": 71,
+          "reg2a": 35,
+          "reg3a": 74,
+          "reg3c": 65,
+          "reg4a": 60,
+          "reg4b": 43,
+          "reg4c": 70
+        },
+        "maximum_abs_tap_difference": 0.01875000000000049,
+        "capacitor_state_difference_count": 0
+      },
+      "P_ONLY_Q_ZERO": {
+        "different_regulator_slot_cells": 201,
+        "slots_with_any_regulator_difference": 76,
+        "per_regulator_different_slot_count": {
+          "reg1a": 6,
+          "reg2a": 3,
+          "reg3a": 30,
+          "reg3c": 27,
+          "reg4a": 51,
+          "reg4b": 39,
+          "reg4c": 45
+        },
+        "maximum_abs_tap_difference": 0.012500000000000178,
+        "capacitor_state_difference_count": 0
+      },
+      "Q_ONLY_P_ZERO": {
+        "different_regulator_slot_cells": 454,
+        "slots_with_any_regulator_difference": 96,
+        "per_regulator_different_slot_count": {
+          "reg1a": 71,
+          "reg2a": 47,
+          "reg3a": 75,
+          "reg3c": 62,
+          "reg4a": 71,
+          "reg4b": 59,
+          "reg4c": 69
+        },
+        "maximum_abs_tap_difference": 0.01875000000000049,
+        "capacitor_state_difference_count": 0
+      },
+      "ZERO_PQ": {
+        "different_regulator_slot_cells": 314,
+        "slots_with_any_regulator_difference": 71,
+        "per_regulator_different_slot_count": {
+          "reg1a": 20,
+          "reg2a": 61,
+          "reg3a": 35,
+          "reg3c": 30,
+          "reg4a": 57,
+          "reg4b": 50,
+          "reg4c": 61
+        },
+        "maximum_abs_tap_difference": 0.012500000000000178,
+        "capacitor_state_difference_count": 0
+      }
+    },
+    "forecast_vs_Actual_profile_difference": {
+      "demand_mw_96": {
+        "max_abs_Actual_minus_forecast_MW": 469.1899999999996,
+        "min_Actual_minus_forecast_MW": -304.9800000000005,
+        "max_Actual_minus_forecast_MW": 469.1899999999996,
+        "mean_Actual_minus_forecast_MW": 0.5531249999999565
+      },
+      "pv_mw_96": {
+        "max_abs_Actual_minus_forecast_MW": 68.69800000000032,
+        "min_Actual_minus_forecast_MW": -66.44900000000007,
+        "max_Actual_minus_forecast_MW": 68.69800000000032,
+        "mean_Actual_minus_forecast_MW": -0.3390416666666602
+      }
+    }
+  },
+  "csv": {
+    "path": "D:\\v42_actual_voltage_audit_20261010\\B2_MAY01_PLANNING_ACTUAL_FACTORIAL_19CELLS.csv",
+    "sha256": "fecc254f581131c640f1d6577f04b27e8c3c58f9749a1bc1fc3f0968f8202dea",
+    "bytes": 33240
+  },
+  "reference_taps_csv": {
+    "path": "D:\\v42_actual_voltage_audit_20261010\\B2_MAY01_PLANNING_ANCHOR_ACTUAL_TAPS.csv",
+    "sha256": "ee9ff5157ce31a56963b8fb3886b4a0807697f7b4d52778e5aee05bd22c8f09e",
+    "bytes": 266285
+  },
+  "sources": [
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "6d1591cd20759465c215ce80fe786f286eebe6182c038d5ce1fbe79e966443dc",
+      "bytes": 852518
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_SUMMARY.json",
+      "sha256": "bf6119e8a6cc3cd2aa5efa07ceaca107ce3d2a1cfdf8de45120e42ba782ca4b9",
+      "bytes": 1512
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_VIOLATIONS.json",
+      "sha256": "031b145d519af86a10242cedb0f71157db7d5400d08deca86f75115294af41f4",
+      "bytes": 3888
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\BEST_STRICT_UB_POINT.npz",
+      "sha256": "203f94301b5a1f271b519494e8ebedfb3484db0d3931b38fd5ac7ec2f9504bb6",
+      "bytes": 374961
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL_SOURCE\\INPUT\\BUNDLE\\DAY_20250501\\DERIVED_AEMO_ACTUAL.parquet",
+      "sha256": "d56f3854cbbc34835c9ec6cab150aa384a358c8f2f52a76f5b16dbcf230030fe",
+      "bytes": 4279
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+      "sha256": "735e190e1a5e5367c26ee4848192a41bdb8cc5749ebd5e3cb177f9599a314ef7",
+      "bytes": 28521980
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250501\\kernel\\electrical\\2025-05-01\\data\\D1_AC_ANCHOR_SENSITIVITY_2025-05-01.npz",
+      "sha256": "b0ca5052a025425ba185066d396f6d98dd05104bac50e0c1a1255d165b812a28",
+      "bytes": 14055002
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\SCIENTIFIC_CASE_IDENTITY.json",
+      "sha256": "1511be48c5a76ffaac4bfc25227b2de24d4654d60eb44108cd41517a54e83681",
+      "bytes": 5815
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\CURRENT_C2_AXES.npz",
+      "sha256": "1152a7f7d93d627685e3d2b507b952214fb590d973096d38a8faf489f9e9ede2",
+      "bytes": 1503650
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\CURRENT_C2_ALIASES.json",
+      "sha256": "b32d69c15f366967ac252a12477d9d2af0da515b9c7d44e8d14149937aeed09f",
+      "bytes": 7107863
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\FULL_A.npz",
+      "sha256": "35bdc6e7c2664b763d3d0456b7296b7c8830d7c7c39a61a3cb32e699f8bb2024",
+      "bytes": 28471538
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\FULL_DATA.npz",
+      "sha256": "7c0df0ab0d04027ac93fa383c3a45ab436ac512e10c106173f422f483ed8a7d6",
+      "bytes": 5882403
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\FIXED_AIDC_ANCHOR.json",
+      "sha256": "f117ecc42edf3a13c5784e09fab608732cbe91e6001987860afe663b55e3a042",
+      "bytes": 85962
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\BEST_STRICT_UB_CERTIFICATE.json",
+      "sha256": "4f16604f3bf49d7a56c20f8bf1d3ded0519f53567bf748ad4523752811470917",
+      "bytes": 4252
+    },
+    {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\inputs\\B2\\2025-05-01\\NATIVE_INPUT.json",
+      "sha256": "2318d4cb4fd42fabb493dbee923eda037ae697a524406fabd9c8a7e7615c7f59",
+      "bytes": 2421771
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_FIXED_REPLAY_RECEIPT.json",
+      "sha256": "c4ea6cc815cd28ea7e3d6ab17a896b7d644a97a6d4d58db677a823a0e726b5ec",
+      "bytes": 1756
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL_SOURCE\\ACTUAL_SOURCE_RECEIPT.json",
+      "sha256": "05a3de8fdfdc77246e5bcdfcb70a9b4a2185c285831a7147db6e7062686a201b",
+      "bytes": 991
+    },
+    {
+      "path": "D:\\v42u4final\\v42_may_campaign\\m_model.py",
+      "sha256": "059583b44a73a8abc010a987c833996b1550c20bf75c30a2645944dc29f53708",
+      "bytes": 33739
+    },
+    {
+      "path": "D:\\v42u4final\\v42_supercompact\\formulation.py",
+      "sha256": "183897e4259aaabbbdf7fcc7976adb84147ba04106cbc18bb11f9d3353cfd19f",
+      "bytes": 4740
+    },
+    {
+      "path": "D:\\v42u4final\\v42_supercompact\\presolve.py",
+      "sha256": "04adf32c1b83fa49631b64bb317c04e207ca534ba7e2af6c2b9eb16b614ba69f",
+      "bytes": 14438
+    },
+    {
+      "path": "D:\\v42u4final\\v42_m1_sparse\\grid.py",
+      "sha256": "16912a1661a98f10b6abf034ff92e293e070c140fec42432c3caa677aec19e24",
+      "bytes": 6028
+    },
+    {
+      "path": "D:\\v42u4final\\v42_may01\\prepare.py",
+      "sha256": "a22b68c718482bbabb06f49404617dcd46b5cd15a2f3882d11dee83c613c55f3",
+      "bytes": 24516
+    },
+    {
+      "path": "D:\\v42u4final\\v42_native\\voltage.py",
+      "sha256": "2173356203e985be70e36255fd8e225cf02321a3a8845401fa56ac428c86bfd4",
+      "bytes": 1916
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\B2_MAY01_VOLTAGE_AUDIT.json",
+      "sha256": "9c8456f877a893a81bfebfe03b2910cde101ae591849aabf180ee9220ac2d913",
+      "bytes": 9246
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\FACTORIAL_REPLAY_STATUS.json",
+      "sha256": "6b0082592c9e2bd8b7db90c889b4b65694eaddae5a3b8ddb607384845f0e9b1a",
+      "bytes": 45353
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\B2_MAY01_19CELL_PQ_FACTORIAL.csv",
+      "sha256": "c2f23f782a233562a08059e51208c784b102126e02534d1002aa1b4872865cad",
+      "bytes": 22094
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250501\\V41_ELECTRICAL_CERTIFICATE.json",
+      "sha256": "c6b649edc1b2b3e2f324b0e41f939e397bdfcb26b64fff2c7be56d3d27424d35",
+      "bytes": 136903
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250501\\kernel\\april_joint_authority\\V40E_CORRECTED_JOINT_VOLTAGE_AUTHORITY.json",
+      "sha256": "a2fbc32eda0767f6ec87df11d462df179705a698220b69de307d14730842237f",
+      "bytes": 853486
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\electrical.py",
+      "sha256": "e8f2afc6a94c563d518be1ba72e004977bb0fa91ebc5bb54b575b138aff3262e",
+      "bytes": 20897
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40i\\electrical.py",
+      "sha256": "dc8df57722410a14a0e30592fe35918cb4dcb4c4b0b0afdfcb189c60c6c591e3",
+      "bytes": 30775
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\run_v16_3_voltage_candidate.py",
+      "sha256": "10ab0ed968084ea10f41035847d42df0ed73a4b6cb0456f50637b1f2032ee335",
+      "bytes": 34946
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\FULL_PQ_REPLAY\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "6d1591cd20759465c215ce80fe786f286eebe6182c038d5ce1fbe79e966443dc",
+      "bytes": 852518
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\P_ONLY_Q_ZERO\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "2c16f8ebed9d5ca05410bbf2d1ffbb8606d012194c92cc87dfd970c8d4d7671f",
+      "bytes": 850559
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\Q_ONLY_P_ZERO\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "01006727c4c2ee3a99fd03b885757e7269a28c3b73d4c4a5fc90db7befca3eef",
+      "bytes": 852329
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\ZERO_PQ\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "d5b6133fb008a6608660c1d93bb12695cfb75c1b0de612497692cba0dfbfca57",
+      "bytes": 848922
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\B2_MAY01_PLANNING_ACTUAL_VOLTAGES.npz",
+      "sha256": "b0563d919f49308a59a8d30ffe5f513a2ee8e9747ef9ae6ba82aa54741fc4156",
+      "bytes": 776949
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\cache\\v28r2_campaign_sources\\may_2025\\days\\2025-05-01\\aemo_forecast.json",
+      "sha256": "93e07ffbfd7ccef05782b8b81fed5b40a1b418446ec6cb8da1e4ee09143b5637",
+      "bytes": 6466
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL_SOURCE\\INPUT\\BUNDLE\\DAY_20250501\\DERIVED_AEMO_ACTUAL.parquet",
+      "sha256": "d56f3854cbbc34835c9ec6cab150aa384a358c8f2f52a76f5b16dbcf230030fe",
+      "bytes": 4279
+    }
+  ]
+}

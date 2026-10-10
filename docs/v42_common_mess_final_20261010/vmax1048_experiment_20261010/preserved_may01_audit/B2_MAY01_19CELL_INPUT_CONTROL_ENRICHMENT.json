@@ -1,0 +1,2465 @@
+{
+  "schema": "V42_MAY01_19CELL_INPUT_CONTROL_READ_ONLY_V1",
+  "PASS": true,
+  "rows": 19,
+  "preserved_original_scientific_sources": true,
+  "Native_optimizer_calls": 0,
+  "Fresh_AC_calls": 0,
+  "original_source_before_after_SHA_equal": true,
+  "regulator_settings_SHA": "3e4aaaabc10429aa2e95f810573337bdbdbb4d6ca4aeda41ae51d0325cf322cf",
+  "AIDC_Planning_Actual_bit_equal": true,
+  "Pnet_sign": "Pdis-Pch; positive discharge; Q original generator sign",
+  "background_semantics": "Original source background(); feeder sums after exact single alpha_BG=1.15 gross P/Q scaling; PV unscaled",
+  "attribution_scope": "Raw input differences and observed taps are linked context; factorial P/Q voltage effects are exact original Fresh interventions, not additive prediction of exogenous effects",
+  "output": {
+    "path": "D:\\v42_actual_voltage_audit_20261010\\B2_MAY01_19CELL_INPUT_CONTROL_ENRICHMENT.csv",
+    "sha256": "49c12dadef683f86420339f7b369a638f4647c0074b2b412d3eb5daa83c39b8a",
+    "bytes": 68054
+  },
+  "Source_SHA_receipts": [
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\B2_MAY01_19CELL_PQ_FACTORIAL.csv",
+      "sha256": "c2f23f782a233562a08059e51208c784b102126e02534d1002aa1b4872865cad",
+      "bytes": 22094
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\REQUEST.json",
+      "sha256": "9829494222df74412ee4fed07937a75d9414380174e8b1403525a2afa9af9e6e",
+      "bytes": 1616
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPTIMIZED_MESS_PLAN.json",
+      "sha256": "3574912966f9c9421a94b3d890832537a9e00722999e6bff53592c412118c8fe",
+      "bytes": 11919083
+    },
+    {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\inputs\\B2\\2025-05-01\\OPERATIONS.json",
+      "sha256": "8274c93787a65580ce17edbe095ec0bf221587bc5c34ea8220a7bce65f9d6e3e",
+      "bytes": 14972
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL_SOURCE\\INPUT\\BUNDLE\\DAY_20250501\\DERIVED_AEMO_ACTUAL.parquet",
+      "sha256": "d56f3854cbbc34835c9ec6cab150aa384a358c8f2f52a76f5b16dbcf230030fe",
+      "bytes": 4279
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\factorial\\FULL_PQ_REPLAY\\OBSERVED_CONTROL_ITERATIONS.json",
+      "sha256": "86d59e8cea5c89e653e6beeea6dcf85c1164565e7d653b5d9e1f0dc99a8236be",
+      "bytes": 30726
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\RAW_CONTROL_LOG.json",
+      "sha256": "745be50a54248b592062b1f762a07d41fa9fad650f67216edfd10f6d4575e365",
+      "bytes": 49890
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\FRESH\\RAW_PHYSICAL_INPUT_LOG.json",
+      "sha256": "9c64f1ed9a97cc0996f7396da5320e8a388c4f4143f005b36452f93319354250",
+      "bytes": 134207
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_MESS_TRAJECTORY.npz",
+      "sha256": "3d7ccc52a22e6581641fe4f26ed86792d314ba0b064933e79b1def75a24b576f",
+      "bytes": 6284
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_FIXED_TRAJECTORY.npz",
+      "sha256": "e752c5879d9eb89312413ac8a11d09154efdfbdf7e9f8d1b98b0de5b30f1d61c",
+      "bytes": 5481
+    },
+    {
+      "path": "D:\\v42_common_mess_campaign_20261010_01\\dates\\B2\\2025-05-01\\attempts\\common_u4_v1_01\\output\\OPERATIONS\\SOURCE\\PLANNING_PHYSICAL.npz",
+      "sha256": "599d4130cda663affce1df17086ffbf4cdb0bd5fb4284a3f7c334835fffaa2a7",
+      "bytes": 9322
+    },
+    {
+      "path": "D:\\v42u4final\\v42_regcontrol\\runner.py",
+      "sha256": "2636f507a3b1a3e7f28cd28b271e8316c1748ab15bb79650b25ee1cbed07c187",
+      "bytes": 10051
+    },
+    {
+      "path": "D:\\v42u4final\\v42_regcontrol\\authority.py",
+      "sha256": "195fe6cf8b83996061d59baa0b2e237920d400f2410b9e3406c7673ee20e8cdb",
+      "bytes": 4882
+    },
+    {
+      "path": "D:\\v42u4final\\v42_may_campaign_native90\\operations.py",
+      "sha256": "d7dcd71f28ef8192d2b80d12a685224a9f2b6c16d7aab17b8999796c32e796f9",
+      "bytes": 25515
+    },
+    {
+      "path": "D:\\v42_actual_voltage_audit_20261010\\ENRICH_19_INPUT_CONTROL_AUDIT.py",
+      "sha256": "91a055279106d40a77213b31d86be1b16fa40487c10e80188ff454ccefd98cec",
+      "bytes": 9651
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Master.dss",
+      "sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969",
+      "bytes": 17008
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEELineCodes.DSS",
+      "sha256": "be95f7afaf3e342b132ff2ef20a2b150e3b9966626cbf95eb47f5e9820953c40",
+      "bytes": 11971
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Regulators.DSS",
+      "sha256": "cd6ad77980dc018631ce39faab528afce40b0b9a50a6bc1c9ac8049ffb8207d7",
+      "bytes": 1861
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Loads.DSS",
+      "sha256": "fd28f52836205506a1980b52c5a7e12ca585aa626c52a6249502c1c3b2fc2255",
+      "bytes": 8289
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v35r3e_r1_beam\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+      "sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719",
+      "bytes": 13785
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_Planning_Line_Ratings_u080.dss",
+      "sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302",
+      "bytes": 6038
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\Generated_PhasePV.dss",
+      "sha256": "fb4149c6c79de49cd059a7d5b7dc5142ab405948a1876a24e94252019b392562",
+      "bytes": 9992
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\electrical.py",
+      "sha256": "afdbba3160538b0a70219b226c7ac7723e4c35787dbbd1300a464106686dab3f",
+      "bytes": 11026
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\planning.py",
+      "sha256": "ab4559c6f936da723e3fb315bdeb8b67aa10d7391d70cecfca4849b57e6c8cf7",
+      "bytes": 7299
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\replay.py",
+      "sha256": "4aa8fe3917f43c63711f31243135600bead708a9195714947f4e767eaf6a444d",
+      "bytes": 5399
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\actual.py",
+      "sha256": "2343d8b3f169d3009cb99b07157bce1cdb3c4fb13c76d10602491ce36305a294",
+      "bytes": 7078
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\actual.py",
+      "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9",
+      "bytes": 9906
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\grid.py",
+      "sha256": "1d5c353c1e767cae54520f04ad101e34a95da3d1976d9b449e366400fe78112d",
+      "bytes": 3190
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\voltage.py",
+      "sha256": "d034ec5816b3b6d55e78a3877305be19b269a586f5f354e922566b16fa763751",
+      "bytes": 1920
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\grid_background_v16_2.py",
+      "sha256": "85d0e7f566ff90cc0124d5af7465e9586d1a34d9a396985aab4654f93302fb74",
+      "bytes": 10254
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\full_ieee123_g11_v16_1.py",
+      "sha256": "5dac427fbf0b2b3381a576c4eac96e6dfa445a690f40d90732b590bde6ee7c8e",
+      "bytes": 29183
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\run_v16_3_voltage_candidate.py",
+      "sha256": "10ab0ed968084ea10f41035847d42df0ed73a4b6cb0456f50637b1f2032ee335",
+      "bytes": 34946
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\mapping.py",
+      "sha256": "6ba0e0903f61f7f08d4548cd108912e6ea351760ff71377df8c13d4065cde403",
+      "bytes": 7314
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_mapping.py",
+      "sha256": "7e25e9befd8f80dba8cf1bc8cdba574ad1d77083c3b100430bea63abdfe9af89",
+      "bytes": 7091
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_backend.py",
+      "sha256": "55ad4be7175088ea24dbb611313635736f182f4d945f6f9b416b2ddec2c29956",
+      "bytes": 6855
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\run_planning_ac_voltage_forensic_v1.py",
+      "sha256": "43705f551f461cdf95c509eb567807a1b662dfd82ff298c76fb6af1d025f6c29",
+      "bytes": 33322
+    }
+  ],
+  "Forecast_background_evidence": {
+    "authority_id": "GRID_BACKGROUND_MAPPING_CONTRACT_V16_2_BINDING",
+    "status": "PASS",
+    "is_native_ieee123_load": "B_SPATIAL_TEMPLATE_REFERENCE_BASIS_ALREADY_INCORPORATED",
+    "formula": "gross=alpha_grid*((AEMO_MW*3490/7100.2615)+(PV_MW/4021.226*698.000002861023)); net=gross-PV",
+    "alpha_grid": 0.7481417265421424,
+    "alpha_grid_application_count": 1,
+    "pwc_30_to_15_application_count": 1,
+    "native_background_double_count_call_count": 0,
+    "mapping_fitting_call_count": 0,
+    "pv_capacity_kw": 698.000002861023,
+    "source_paths_and_sha256": {
+      "manifest": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\work\\power_side_p4f12_review_20260731_201553\\p4f1_artifact_cleanup\\p4f1_full_artifact_manifest.json",
+        "sha256": "7780cc3cd19a7f1dcf8e2d6a35d2872f7742bee200873b69a6c806df557624b5",
+        "status": "PASS"
+      },
+      "build_source": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\work\\Mobile_ESS_Integrated_Rebuild_20260731\\src\\build_power_v70_3ph.py",
+        "sha256": "aa81880e956e03a3195a316eae95687088772f5c2171abed7e215e1bab083a82",
+        "status": "PASS"
+      },
+      "runtime_adapter": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+        "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036",
+        "status": "PASS"
+      },
+      "bus_ids": {
+        "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\bus_ids.npy",
+        "sha256": "7cad8bec82a1efd0bf55f3d566f1f2faff5b2be4bd058d957481a858fac771f4",
+        "status": "PASS"
+      },
+      "clusters": {
+        "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\load_archetype_cluster_id.npy",
+        "sha256": "27cbb7e41785d14c79635de662093442561c54162614f14418a6b961f5691f92",
+        "status": "PASS"
+      },
+      "pv_capacity": {
+        "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\pv_capacity_kw.npy",
+        "sha256": "2d39c325249c12045bed10825bfaa345d708883e6d7eba2954f6c36181464636",
+        "status": "PASS"
+      },
+      "residual_lookup": {
+        "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\integrated_rebuild\\current\\02_power_preprocess\\jemena_feeders\\jemena_cluster_residual_lookup.csv.gz",
+        "sha256": "159242ca2c198954c32a145a1776bf5dbc15eb896666c83dc93a2c444ca5e1ae",
+        "status": "PASS"
+      },
+      "q_lookup": {
+        "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\integrated_rebuild\\current\\02_power_preprocess\\jemena_mvar\\jemena_q_over_p_lookup.csv.gz",
+        "sha256": "32143c7717e1cf37947d6d390bf7d7b518e7fbd852d719fa456e2b9a054f3e60",
+        "status": "PASS"
+      },
+      "pv_reference": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\work\\Mobile_ESS_Integrated_Rebuild_20260731\\example_results\\aemo_rooftop\\aemo_rooftop_pv_2025_measurement_5min.npz",
+        "sha256": "fe1b9c1c35249173edbe488a49d2271888cd745efb1b2bb03e526c3b5a429a97",
+        "status": "PASS"
+      },
+      "scale_contract": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\pfr\\contracts\\FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json",
+        "sha256": "5fd67c25b7e3df89a19cba6bcaab348f2e0a3f72f85ac47e34c4b7935307e650",
+        "status": "PASS"
+      }
+    },
+    "identity_maxima": {
+      "gross_mapping_error_kw": 4.547473508864641e-13,
+      "pv_mapping_error_kw": 5.684341886080802e-14,
+      "net_identity_error_kw": 4.547473508864641e-13,
+      "q_mapping_error_kvar": 4.547473508864641e-13
+    },
+    "slot_totals": [
+      {
+        "time_index": 0,
+        "gross_pre_alpha_kw": 2363.945539188944,
+        "gross_after_alpha_kw": 1768.5662971404124,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1768.5662971404124,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 1,
+        "gross_pre_alpha_kw": 2363.945539188944,
+        "gross_after_alpha_kw": 1768.5662971404124,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1768.5662971404124,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 2,
+        "gross_pre_alpha_kw": 2287.251927270566,
+        "gross_after_alpha_kw": 1711.188605905044,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1711.188605905044,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 3,
+        "gross_pre_alpha_kw": 2287.251927270566,
+        "gross_after_alpha_kw": 1711.188605905044,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1711.188605905044,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 4,
+        "gross_pre_alpha_kw": 2217.0514424011003,
+        "gross_after_alpha_kw": 1658.6686939507063,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1658.6686939507063,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 5,
+        "gross_pre_alpha_kw": 2217.0514424011003,
+        "gross_after_alpha_kw": 1658.6686939507063,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1658.6686939507063,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 6,
+        "gross_pre_alpha_kw": 2150.8667673718783,
+        "gross_after_alpha_kw": 1609.1531769037135,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1609.1531769037135,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 7,
+        "gross_pre_alpha_kw": 2150.8667673718783,
+        "gross_after_alpha_kw": 1609.1531769037135,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1609.1531769037135,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 8,
+        "gross_pre_alpha_kw": 2101.9938209318066,
+        "gross_after_alpha_kw": 1572.5892863728366,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1572.5892863728366,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 9,
+        "gross_pre_alpha_kw": 2101.9938209318066,
+        "gross_after_alpha_kw": 1572.5892863728366,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1572.5892863728366,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 10,
+        "gross_pre_alpha_kw": 2073.573487399021,
+        "gross_after_alpha_kw": 1551.326848974715,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1551.326848974715,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 11,
+        "gross_pre_alpha_kw": 2073.573487399021,
+        "gross_after_alpha_kw": 1551.326848974715,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1551.326848974715,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 12,
+        "gross_pre_alpha_kw": 2060.7936764019187,
+        "gross_after_alpha_kw": 1541.7657391104606,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1541.7657391104606,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 13,
+        "gross_pre_alpha_kw": 2060.7936764019187,
+        "gross_after_alpha_kw": 1541.7657391104606,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1541.7657391104606,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 14,
+        "gross_pre_alpha_kw": 2060.5774026773524,
+        "gross_after_alpha_kw": 1541.603935712758,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1541.603935712758,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 15,
+        "gross_pre_alpha_kw": 2060.5774026773524,
+        "gross_after_alpha_kw": 1541.603935712758,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1541.603935712758,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 16,
+        "gross_pre_alpha_kw": 2084.6378545353573,
+        "gross_after_alpha_kw": 1559.6045637071898,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1559.6045637071898,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 17,
+        "gross_pre_alpha_kw": 2084.6378545353573,
+        "gross_after_alpha_kw": 1559.6045637071898,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1559.6045637071898,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 18,
+        "gross_pre_alpha_kw": 2131.716712123913,
+        "gross_after_alpha_kw": 1594.8262215071236,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1594.8262215071236,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 19,
+        "gross_pre_alpha_kw": 2131.716712123913,
+        "gross_after_alpha_kw": 1594.8262215071236,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1594.8262215071236,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 20,
+        "gross_pre_alpha_kw": 2227.8602133174954,
+        "gross_after_alpha_kw": 1666.7551864858967,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1666.7551864858967,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 21,
+        "gross_pre_alpha_kw": 2227.8602133174954,
+        "gross_after_alpha_kw": 1666.7551864858967,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1666.7551864858967,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 22,
+        "gross_pre_alpha_kw": 2343.994288097699,
+        "gross_after_alpha_kw": 1753.6399337023327,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1753.6399337023327,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 23,
+        "gross_pre_alpha_kw": 2343.994288097699,
+        "gross_after_alpha_kw": 1753.6399337023327,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1753.6399337023327,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 24,
+        "gross_pre_alpha_kw": 2522.06620840655,
+        "gross_after_alpha_kw": 1886.8629676108708,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1886.8629676108708,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 25,
+        "gross_pre_alpha_kw": 2522.06620840655,
+        "gross_after_alpha_kw": 1886.8629676108708,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1886.8629676108708,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 26,
+        "gross_pre_alpha_kw": 2683.45556005226,
+        "gross_after_alpha_kw": 2007.6050757966093,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2007.6050757966093,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 27,
+        "gross_pre_alpha_kw": 2683.45556005226,
+        "gross_after_alpha_kw": 2007.6050757966093,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2007.6050757966093,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 28,
+        "gross_pre_alpha_kw": 2803.4244460839413,
+        "gross_after_alpha_kw": 2097.358805323689,
+        "pv_after_alpha_kw": 5.71157382028548,
+        "operational_after_alpha_kw": 2091.6472315034034,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 29,
+        "gross_pre_alpha_kw": 2803.4244460839413,
+        "gross_after_alpha_kw": 2097.358805323689,
+        "pv_after_alpha_kw": 5.71157382028548,
+        "operational_after_alpha_kw": 2091.6472315034034,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 30,
+        "gross_pre_alpha_kw": 2848.447986275193,
+        "gross_after_alpha_kw": 2131.0427944174116,
+        "pv_after_alpha_kw": 37.939332334683364,
+        "operational_after_alpha_kw": 2093.1034620827286,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": -7.105427357601002e-15,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 31,
+        "gross_pre_alpha_kw": 2848.447986275193,
+        "gross_after_alpha_kw": 2131.0427944174116,
+        "pv_after_alpha_kw": 37.939332334683364,
+        "operational_after_alpha_kw": 2093.1034620827286,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": -7.105427357601002e-15,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": -4.547473508864641e-13
+      },
+      {
+        "time_index": 32,
+        "gross_pre_alpha_kw": 2822.7964911356803,
+        "gross_after_alpha_kw": 2111.851840555349,
+        "pv_after_alpha_kw": 87.58101479535476,
+        "operational_after_alpha_kw": 2024.2708257599943,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": -1.4210854715202004e-14,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 33,
+        "gross_pre_alpha_kw": 2822.7964911356803,
+        "gross_after_alpha_kw": 2111.851840555349,
+        "pv_after_alpha_kw": 87.58101479535476,
+        "operational_after_alpha_kw": 2024.2708257599943,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": -1.4210854715202004e-14,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 34,
+        "gross_pre_alpha_kw": 2720.7962652823044,
+        "gross_after_alpha_kw": 2035.5412154777162,
+        "pv_after_alpha_kw": 141.46696461922906,
+        "operational_after_alpha_kw": 1894.074250858487,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 35,
+        "gross_pre_alpha_kw": 2720.7962652823044,
+        "gross_after_alpha_kw": 2035.5412154777162,
+        "pv_after_alpha_kw": 141.46696461922906,
+        "operational_after_alpha_kw": 1894.074250858487,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 36,
+        "gross_pre_alpha_kw": 2623.9239103840487,
+        "gross_after_alpha_kw": 1963.0669646299318,
+        "pv_after_alpha_kw": 194.02261199630686,
+        "operational_after_alpha_kw": 1769.044352633625,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": -5.684341886080802e-14,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 37,
+        "gross_pre_alpha_kw": 2623.9239103840487,
+        "gross_after_alpha_kw": 1963.0669646299318,
+        "pv_after_alpha_kw": 194.02261199630686,
+        "operational_after_alpha_kw": 1769.044352633625,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": -5.684341886080802e-14,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 38,
+        "gross_pre_alpha_kw": 2507.819577154202,
+        "gross_after_alpha_kw": 1876.20446830833,
+        "pv_after_alpha_kw": 236.64696203628876,
+        "operational_after_alpha_kw": 1639.5575062720413,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 39,
+        "gross_pre_alpha_kw": 2507.819577154202,
+        "gross_after_alpha_kw": 1876.20446830833,
+        "pv_after_alpha_kw": 236.64696203628876,
+        "operational_after_alpha_kw": 1639.5575062720413,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 40,
+        "gross_pre_alpha_kw": 2411.243443238293,
+        "gross_after_alpha_kw": 1803.9518327377168,
+        "pv_after_alpha_kw": 270.4895498093663,
+        "operational_after_alpha_kw": 1533.4622829283503,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 41,
+        "gross_pre_alpha_kw": 2411.243443238293,
+        "gross_after_alpha_kw": 1803.9518327377168,
+        "pv_after_alpha_kw": 270.4895498093663,
+        "operational_after_alpha_kw": 1533.4622829283503,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 42,
+        "gross_pre_alpha_kw": 2304.646595357352,
+        "gross_after_alpha_kw": 1724.2022829201196,
+        "pv_after_alpha_kw": 294.66926421621173,
+        "operational_after_alpha_kw": 1429.5330187039078,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 43,
+        "gross_pre_alpha_kw": 2304.646595357352,
+        "gross_after_alpha_kw": 1724.2022829201196,
+        "pv_after_alpha_kw": 294.66926421621173,
+        "operational_after_alpha_kw": 1429.5330187039078,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 44,
+        "gross_pre_alpha_kw": 2232.313726564569,
+        "gross_after_alpha_kw": 1670.0870455757408,
+        "pv_after_alpha_kw": 309.5558212921656,
+        "operational_after_alpha_kw": 1360.5312242835753,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 5.684341886080802e-14,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 45,
+        "gross_pre_alpha_kw": 2232.313726564569,
+        "gross_after_alpha_kw": 1670.0870455757408,
+        "pv_after_alpha_kw": 309.5558212921656,
+        "operational_after_alpha_kw": 1360.5312242835753,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 5.684341886080802e-14,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 46,
+        "gross_pre_alpha_kw": 2166.2892385687196,
+        "gross_after_alpha_kw": 1620.6913711324648,
+        "pv_after_alpha_kw": 317.82099403023784,
+        "operational_after_alpha_kw": 1302.8703771022272,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 5.684341886080802e-14,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 47,
+        "gross_pre_alpha_kw": 2166.2892385687196,
+        "gross_after_alpha_kw": 1620.6913711324648,
+        "pv_after_alpha_kw": 317.82099403023784,
+        "operational_after_alpha_kw": 1302.8703771022272,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 5.684341886080802e-14,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 48,
+        "gross_pre_alpha_kw": 2145.0128081464336,
+        "gross_after_alpha_kw": 1604.7735857416822,
+        "pv_after_alpha_kw": 320.7385950720357,
+        "operational_after_alpha_kw": 1284.0349906696463,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 49,
+        "gross_pre_alpha_kw": 2145.0128081464336,
+        "gross_after_alpha_kw": 1604.7735857416822,
+        "pv_after_alpha_kw": 320.7385950720357,
+        "operational_after_alpha_kw": 1284.0349906696463,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 50,
+        "gross_pre_alpha_kw": 2137.885303935664,
+        "gross_after_alpha_kw": 1599.4412024355006,
+        "pv_after_alpha_kw": 317.4802371364078,
+        "operational_after_alpha_kw": 1281.9609652990925,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 51,
+        "gross_pre_alpha_kw": 2137.885303935664,
+        "gross_after_alpha_kw": 1599.4412024355006,
+        "pv_after_alpha_kw": 317.4802371364078,
+        "operational_after_alpha_kw": 1281.9609652990925,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 52,
+        "gross_pre_alpha_kw": 2156.6612994384845,
+        "gross_after_alpha_kw": 1613.4883081285282,
+        "pv_after_alpha_kw": 306.0911132405714,
+        "operational_after_alpha_kw": 1307.3971948879566,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 53,
+        "gross_pre_alpha_kw": 2156.6612994384845,
+        "gross_after_alpha_kw": 1613.4883081285282,
+        "pv_after_alpha_kw": 306.0911132405714,
+        "operational_after_alpha_kw": 1307.3971948879566,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 54,
+        "gross_pre_alpha_kw": 2164.206084536952,
+        "gross_after_alpha_kw": 1619.132876678485,
+        "pv_after_alpha_kw": 287.2004029388733,
+        "operational_after_alpha_kw": 1331.9324737396119,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 55,
+        "gross_pre_alpha_kw": 2164.206084536952,
+        "gross_after_alpha_kw": 1619.132876678485,
+        "pv_after_alpha_kw": 287.2004029388733,
+        "operational_after_alpha_kw": 1331.9324737396119,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 56,
+        "gross_pre_alpha_kw": 2244.240326565513,
+        "gross_after_alpha_kw": 1679.0098326922243,
+        "pv_after_alpha_kw": 260.5125411816347,
+        "operational_after_alpha_kw": 1418.4972915105898,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 57,
+        "gross_pre_alpha_kw": 2244.240326565513,
+        "gross_after_alpha_kw": 1679.0098326922243,
+        "pv_after_alpha_kw": 260.5125411816347,
+        "operational_after_alpha_kw": 1418.4972915105898,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 58,
+        "gross_pre_alpha_kw": 2312.816203754442,
+        "gross_after_alpha_kw": 1730.3143078514918,
+        "pv_after_alpha_kw": 225.61625621475517,
+        "operational_after_alpha_kw": 1504.6980516367366,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 2.842170943040401e-14,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 59,
+        "gross_pre_alpha_kw": 2312.816203754442,
+        "gross_after_alpha_kw": 1730.3143078514918,
+        "pv_after_alpha_kw": 225.61625621475517,
+        "operational_after_alpha_kw": 1504.6980516367366,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 2.842170943040401e-14,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 60,
+        "gross_pre_alpha_kw": 2387.1313539544462,
+        "gross_after_alpha_kw": 1785.9125726303614,
+        "pv_after_alpha_kw": 182.82334579055407,
+        "operational_after_alpha_kw": 1603.0892268398075,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 61,
+        "gross_pre_alpha_kw": 2387.1313539544462,
+        "gross_after_alpha_kw": 1785.9125726303614,
+        "pv_after_alpha_kw": 182.82334579055407,
+        "operational_after_alpha_kw": 1603.0892268398075,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 62,
+        "gross_pre_alpha_kw": 2495.6327106531867,
+        "gross_after_alpha_kw": 1867.086964963122,
+        "pv_after_alpha_kw": 134.29392811481162,
+        "operational_after_alpha_kw": 1732.7930368483105,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 2.842170943040401e-14,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 63,
+        "gross_pre_alpha_kw": 2495.6327106531867,
+        "gross_after_alpha_kw": 1867.086964963122,
+        "pv_after_alpha_kw": 134.29392811481162,
+        "operational_after_alpha_kw": 1732.7930368483105,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 2.842170943040401e-14,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 64,
+        "gross_pre_alpha_kw": 2594.9430644291974,
+        "gross_after_alpha_kw": 1941.3851845006177,
+        "pv_after_alpha_kw": 84.59926211272152,
+        "operational_after_alpha_kw": 1856.7859223878959,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 1.4210854715202004e-14,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 65,
+        "gross_pre_alpha_kw": 2594.9430644291974,
+        "gross_after_alpha_kw": 1941.3851845006177,
+        "pv_after_alpha_kw": 84.59926211272152,
+        "operational_after_alpha_kw": 1856.7859223878959,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 1.4210854715202004e-14,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 66,
+        "gross_pre_alpha_kw": 2718.1389514133107,
+        "gross_after_alpha_kw": 2033.5531680918027,
+        "pv_after_alpha_kw": 38.92913761089217,
+        "operational_after_alpha_kw": 1994.6240304809107,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 67,
+        "gross_pre_alpha_kw": 2718.1389514133107,
+        "gross_after_alpha_kw": 2033.5531680918027,
+        "pv_after_alpha_kw": 38.92913761089217,
+        "operational_after_alpha_kw": 1994.6240304809107,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 68,
+        "gross_pre_alpha_kw": 2872.9133988533886,
+        "gross_after_alpha_kw": 2149.3463904242285,
+        "pv_after_alpha_kw": 6.988503140799944,
+        "operational_after_alpha_kw": 2142.3578872834287,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 69,
+        "gross_pre_alpha_kw": 2872.9133988533886,
+        "gross_after_alpha_kw": 2149.3463904242285,
+        "pv_after_alpha_kw": 6.988503140799944,
+        "operational_after_alpha_kw": 2142.3578872834287,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 70,
+        "gross_pre_alpha_kw": 3054.4436426742877,
+        "gross_after_alpha_kw": 2285.1567404560124,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2285.1567404560124,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 71,
+        "gross_pre_alpha_kw": 3054.4436426742877,
+        "gross_after_alpha_kw": 2285.1567404560124,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2285.1567404560124,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 72,
+        "gross_pre_alpha_kw": 3142.6833222973546,
+        "gross_after_alpha_kw": 2351.172526718739,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2351.172526718739,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 73,
+        "gross_pre_alpha_kw": 3142.6833222973546,
+        "gross_after_alpha_kw": 2351.172526718739,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2351.172526718739,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 74,
+        "gross_pre_alpha_kw": 3145.1655548179456,
+        "gross_after_alpha_kw": 2353.029588442373,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2353.029588442373,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 75,
+        "gross_pre_alpha_kw": 3145.1655548179456,
+        "gross_after_alpha_kw": 2353.029588442373,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2353.029588442373,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 76,
+        "gross_pre_alpha_kw": 3112.930939233717,
+        "gross_after_alpha_kw": 2328.913527484766,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2328.913527484766,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 77,
+        "gross_pre_alpha_kw": 3112.930939233717,
+        "gross_after_alpha_kw": 2328.913527484766,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2328.913527484766,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 78,
+        "gross_pre_alpha_kw": 3069.27805405477,
+        "gross_after_alpha_kw": 2296.254982598443,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2296.254982598443,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 79,
+        "gross_pre_alpha_kw": 3069.27805405477,
+        "gross_after_alpha_kw": 2296.254982598443,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2296.254982598443,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 80,
+        "gross_pre_alpha_kw": 3002.0365869623256,
+        "gross_after_alpha_kw": 2245.948835312675,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2245.948835312675,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 81,
+        "gross_pre_alpha_kw": 3002.0365869623256,
+        "gross_after_alpha_kw": 2245.948835312675,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2245.948835312675,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 82,
+        "gross_pre_alpha_kw": 2934.94257922754,
+        "gross_after_alpha_kw": 2195.75300852534,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2195.75300852534,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 83,
+        "gross_pre_alpha_kw": 2934.94257922754,
+        "gross_after_alpha_kw": 2195.75300852534,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2195.75300852534,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 84,
+        "gross_pre_alpha_kw": 2861.3013760127005,
+        "gross_after_alpha_kw": 2140.6589516075496,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2140.6589516075496,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 85,
+        "gross_pre_alpha_kw": 2861.3013760127005,
+        "gross_after_alpha_kw": 2140.6589516075496,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2140.6589516075496,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 86,
+        "gross_pre_alpha_kw": 2755.5336940759157,
+        "gross_after_alpha_kw": 2061.5297354310032,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2061.5297354310032,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 87,
+        "gross_pre_alpha_kw": 2755.5336940759157,
+        "gross_after_alpha_kw": 2061.5297354310032,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2061.5297354310032,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 88,
+        "gross_pre_alpha_kw": 2645.524097950477,
+        "gross_after_alpha_kw": 1979.2269662495137,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1979.2269662495137,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 89,
+        "gross_pre_alpha_kw": 2645.524097950477,
+        "gross_after_alpha_kw": 1979.2269662495137,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1979.2269662495137,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 90,
+        "gross_pre_alpha_kw": 2558.6164678582613,
+        "gross_after_alpha_kw": 1914.2077418226377,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1914.2077418226377,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 91,
+        "gross_pre_alpha_kw": 2558.6164678582613,
+        "gross_after_alpha_kw": 1914.2077418226377,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1914.2077418226377,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 92,
+        "gross_pre_alpha_kw": 2546.2200511910723,
+        "gross_after_alpha_kw": 1904.9334652543112,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1904.9334652543112,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 93,
+        "gross_pre_alpha_kw": 2546.2200511910723,
+        "gross_after_alpha_kw": 1904.9334652543112,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1904.9334652543112,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 94,
+        "gross_pre_alpha_kw": 2494.9975856523033,
+        "gross_after_alpha_kw": 1866.611801448391,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1866.611801448391,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 95,
+        "gross_pre_alpha_kw": 2494.9975856523033,
+        "gross_after_alpha_kw": 1866.611801448391,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1866.611801448391,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      }
+    ],
+    "may_scientific_loader_access_count": 0,
+    "june_scientific_loader_access_count": 0,
+    "alpha_BG": 1.15,
+    "alpha_BG_application_count": 1
+  },
+  "Actual_background_evidence": {
+    "authority_id": "GRID_BACKGROUND_MAPPING_CONTRACT_V16_2_BINDING",
+    "status": "PASS",
+    "is_native_ieee123_load": "B_SPATIAL_TEMPLATE_REFERENCE_BASIS_ALREADY_INCORPORATED",
+    "formula": "gross=alpha_grid*((AEMO_MW*3490/7100.2615)+(PV_MW/4021.226*698.000002861023)); net=gross-PV",
+    "alpha_grid": 0.7481417265421424,
+    "alpha_grid_application_count": 1,
+    "pwc_30_to_15_application_count": 1,
+    "native_background_double_count_call_count": 0,
+    "mapping_fitting_call_count": 0,
+    "pv_capacity_kw": 698.000002861023,
+    "source_paths_and_sha256": {
+      "manifest": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\work\\power_side_p4f12_review_20260731_201553\\p4f1_artifact_cleanup\\p4f1_full_artifact_manifest.json",
+        "sha256": "7780cc3cd19a7f1dcf8e2d6a35d2872f7742bee200873b69a6c806df557624b5",
+        "status": "PASS"
+      },
+      "build_source": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\work\\Mobile_ESS_Integrated_Rebuild_20260731\\src\\build_power_v70_3ph.py",
+        "sha256": "aa81880e956e03a3195a316eae95687088772f5c2171abed7e215e1bab083a82",
+        "status": "PASS"
+      },
+      "runtime_adapter": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\opendss_runtime_adapter.json",
+        "sha256": "5637dc95ab3ea62611b278e0b5f1aefe49befd4bf90bafb7a478fe83e0c43036",
+        "status": "PASS"
+      },
+      "bus_ids": {
+        "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\bus_ids.npy",
+        "sha256": "7cad8bec82a1efd0bf55f3d566f1f2faff5b2be4bd058d957481a858fac771f4",
+        "status": "PASS"
+      },
+      "clusters": {
+        "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\load_archetype_cluster_id.npy",
+        "sha256": "27cbb7e41785d14c79635de662093442561c54162614f14418a6b961f5691f92",
+        "status": "PASS"
+      },
+      "pv_capacity": {
+        "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\processed\\power_v70_3ph\\runtime_arrays\\pv_capacity_kw.npy",
+        "sha256": "2d39c325249c12045bed10825bfaa345d708883e6d7eba2954f6c36181464636",
+        "status": "PASS"
+      },
+      "residual_lookup": {
+        "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\integrated_rebuild\\current\\02_power_preprocess\\jemena_feeders\\jemena_cluster_residual_lookup.csv.gz",
+        "sha256": "159242ca2c198954c32a145a1776bf5dbc15eb896666c83dc93a2c444ca5e1ae",
+        "status": "PASS"
+      },
+      "q_lookup": {
+        "path": "\\\\wsl.localhost\\Ubuntu-MobileESS-D\\home\\jaewon\\mobile_ess_work\\integrated_rebuild\\current\\02_power_preprocess\\jemena_mvar\\jemena_q_over_p_lookup.csv.gz",
+        "sha256": "32143c7717e1cf37947d6d390bf7d7b518e7fbd852d719fa456e2b9a054f3e60",
+        "status": "PASS"
+      },
+      "pv_reference": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\Desktop\\4-2\\Mobile ESS\\work\\Mobile_ESS_Integrated_Rebuild_20260731\\example_results\\aemo_rooftop\\aemo_rooftop_pv_2025_measurement_5min.npz",
+        "sha256": "fe1b9c1c35249173edbe488a49d2271888cd745efb1b2bb03e526c3b5a429a97",
+        "status": "PASS"
+      },
+      "scale_contract": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\MobileESS_v28r2_heavy_backend\\pfr\\contracts\\FEEDER_ABSOLUTE_SCALE_CONTRACT_V2.json",
+        "sha256": "5fd67c25b7e3df89a19cba6bcaab348f2e0a3f72f85ac47e34c4b7935307e650",
+        "status": "PASS"
+      }
+    },
+    "identity_maxima": {
+      "gross_mapping_error_kw": 4.547473508864641e-13,
+      "pv_mapping_error_kw": 1.1368683772161603e-13,
+      "net_identity_error_kw": 9.094947017729282e-13,
+      "q_mapping_error_kvar": 2.2737367544323206e-13
+    },
+    "slot_totals": [
+      {
+        "time_index": 0,
+        "gross_pre_alpha_kw": 2390.203135476067,
+        "gross_after_alpha_kw": 1788.210700561507,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1788.210700561507,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 1,
+        "gross_pre_alpha_kw": 2343.3454669239995,
+        "gross_after_alpha_kw": 1753.1545235092237,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1753.1545235092237,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 2,
+        "gross_pre_alpha_kw": 2306.6330021788635,
+        "gross_after_alpha_kw": 1725.6883967491804,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1725.6883967491804,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 3,
+        "gross_pre_alpha_kw": 2272.8205714676847,
+        "gross_after_alpha_kw": 1700.3919064583324,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1700.3919064583324,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 4,
+        "gross_pre_alpha_kw": 2247.201965730417,
+        "gross_after_alpha_kw": 1681.2255585304506,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1681.2255585304506,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 5,
+        "gross_pre_alpha_kw": 2206.2328408608614,
+        "gross_after_alpha_kw": 1650.5748467156207,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1650.5748467156207,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 6,
+        "gross_pre_alpha_kw": 2162.9436887641396,
+        "gross_after_alpha_kw": 1618.1884257254337,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1618.1884257254337,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 7,
+        "gross_pre_alpha_kw": 2129.583466749781,
+        "gross_after_alpha_kw": 1593.2302516297823,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1593.2302516297823,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 8,
+        "gross_pre_alpha_kw": 2105.9408164051424,
+        "gross_after_alpha_kw": 1575.5421983809122,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1575.5421983809122,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 9,
+        "gross_pre_alpha_kw": 2095.1172995529814,
+        "gross_after_alpha_kw": 1567.4446737958785,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1567.4446737958785,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 10,
+        "gross_pre_alpha_kw": 2075.623172470479,
+        "gross_after_alpha_kw": 1552.860303902943,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1552.860303902943,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 11,
+        "gross_pre_alpha_kw": 2068.584445798229,
+        "gross_after_alpha_kw": 1547.5943387777077,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1547.5943387777077,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 12,
+        "gross_pre_alpha_kw": 2063.084211757553,
+        "gross_after_alpha_kw": 1543.4793841861306,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1543.4793841861306,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 13,
+        "gross_pre_alpha_kw": 2052.113235547733,
+        "gross_after_alpha_kw": 1535.2715391026632,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1535.2715391026632,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 14,
+        "gross_pre_alpha_kw": 2067.8815561933884,
+        "gross_after_alpha_kw": 1547.068477735174,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1547.068477735174,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 15,
+        "gross_pre_alpha_kw": 2061.378598520632,
+        "gross_after_alpha_kw": 1542.2033437542473,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1542.2033437542473,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 16,
+        "gross_pre_alpha_kw": 2086.613809927987,
+        "gross_after_alpha_kw": 1561.082858386202,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1561.082858386202,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 17,
+        "gross_pre_alpha_kw": 2075.667410277776,
+        "gross_after_alpha_kw": 1552.8934000524728,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1552.8934000524728,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 18,
+        "gross_pre_alpha_kw": 2093.2052432153378,
+        "gross_after_alpha_kw": 1566.014184666188,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1566.014184666188,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 19,
+        "gross_pre_alpha_kw": 2130.3256788499975,
+        "gross_after_alpha_kw": 1593.7855314718988,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1593.7855314718988,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 20,
+        "gross_pre_alpha_kw": 2188.3214442172307,
+        "gross_after_alpha_kw": 1637.1745835058734,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1637.1745835058734,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 21,
+        "gross_pre_alpha_kw": 2234.4418159810034,
+        "gross_after_alpha_kw": 1671.6791580659878,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1671.6791580659878,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 22,
+        "gross_pre_alpha_kw": 2310.063889900393,
+        "gross_after_alpha_kw": 1728.2551870127375,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1728.2551870127375,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 23,
+        "gross_pre_alpha_kw": 2388.5614212941314,
+        "gross_after_alpha_kw": 1786.9824656789451,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1786.9824656789451,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 24,
+        "gross_pre_alpha_kw": 2511.1443853159494,
+        "gross_after_alpha_kw": 1878.6918960268813,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1878.6918960268813,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 25,
+        "gross_pre_alpha_kw": 2630.080187891672,
+        "gross_after_alpha_kw": 1967.6727327135577,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1967.6727327135577,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 26,
+        "gross_pre_alpha_kw": 2762.3870909000634,
+        "gross_after_alpha_kw": 2066.6570475636995,
+        "pv_after_alpha_kw": 0.008441005373074354,
+        "operational_after_alpha_kw": 2066.6486065583263,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 27,
+        "gross_pre_alpha_kw": 2837.99933419561,
+        "gross_after_alpha_kw": 2123.225721810554,
+        "pv_after_alpha_kw": 0.008441005373074354,
+        "operational_after_alpha_kw": 2123.2172808051814,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 28,
+        "gross_pre_alpha_kw": 2964.9769064547063,
+        "gross_after_alpha_kw": 2218.2229419526043,
+        "pv_after_alpha_kw": 5.142260473276897,
+        "operational_after_alpha_kw": 2213.0806814793273,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 29,
+        "gross_pre_alpha_kw": 3014.3069769035196,
+        "gross_after_alpha_kw": 2255.128826028625,
+        "pv_after_alpha_kw": 5.142260473276897,
+        "operational_after_alpha_kw": 2249.986565555348,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 30,
+        "gross_pre_alpha_kw": 3074.9221855822634,
+        "gross_after_alpha_kw": 2300.4775929042526,
+        "pv_after_alpha_kw": 34.83654862116236,
+        "operational_after_alpha_kw": 2265.64104428309,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": -7.105427357601002e-15,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 31,
+        "gross_pre_alpha_kw": 3013.588923420018,
+        "gross_after_alpha_kw": 2254.5916202557287,
+        "pv_after_alpha_kw": 34.83654862116236,
+        "operational_after_alpha_kw": 2219.7550716345663,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": -7.105427357601002e-15,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 32,
+        "gross_pre_alpha_kw": 3001.8091694603395,
+        "gross_after_alpha_kw": 2245.7786947900927,
+        "pv_after_alpha_kw": 80.5145946818803,
+        "operational_after_alpha_kw": 2165.2641001082125,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 33,
+        "gross_pre_alpha_kw": 2887.415115100511,
+        "gross_after_alpha_kw": 2160.195729455175,
+        "pv_after_alpha_kw": 80.5145946818803,
+        "operational_after_alpha_kw": 2079.6811347732946,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 34,
+        "gross_pre_alpha_kw": 2828.7325645279175,
+        "gross_after_alpha_kw": 2116.2928647518984,
+        "pv_after_alpha_kw": 136.7349370070836,
+        "operational_after_alpha_kw": 1979.5579277448148,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 35,
+        "gross_pre_alpha_kw": 2707.820806559567,
+        "gross_after_alpha_kw": 2025.833733386211,
+        "pv_after_alpha_kw": 136.7349370070836,
+        "operational_after_alpha_kw": 1889.0987963791274,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 36,
+        "gross_pre_alpha_kw": 2688.6852016059584,
+        "gross_after_alpha_kw": 2011.5175888577899,
+        "pv_after_alpha_kw": 190.97930490526073,
+        "operational_after_alpha_kw": 1820.5382839525294,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 37,
+        "gross_pre_alpha_kw": 2592.679329146191,
+        "gross_after_alpha_kw": 1939.6915896775547,
+        "pv_after_alpha_kw": 190.97930490526073,
+        "operational_after_alpha_kw": 1748.7122847722937,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 38,
+        "gross_pre_alpha_kw": 2527.110792265653,
+        "gross_after_alpha_kw": 1890.6370312889069,
+        "pv_after_alpha_kw": 234.49099940238446,
+        "operational_after_alpha_kw": 1656.1460318865225,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 2.842170943040401e-14,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 39,
+        "gross_pre_alpha_kw": 2394.338386629607,
+        "gross_after_alpha_kw": 1791.304454499202,
+        "pv_after_alpha_kw": 234.49099940238446,
+        "operational_after_alpha_kw": 1556.8134550968175,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 2.842170943040401e-14,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 40,
+        "gross_pre_alpha_kw": 2353.7090139203156,
+        "gross_after_alpha_kw": 1760.9079254521484,
+        "pv_after_alpha_kw": 269.08795333257257,
+        "operational_after_alpha_kw": 1491.8199721195758,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 5.684341886080802e-14,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 41,
+        "gross_pre_alpha_kw": 2259.46282312861,
+        "gross_after_alpha_kw": 1690.3984175532216,
+        "pv_after_alpha_kw": 269.08795333257257,
+        "operational_after_alpha_kw": 1421.3104642206492,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 5.684341886080802e-14,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 42,
+        "gross_pre_alpha_kw": 2239.890019685781,
+        "gross_after_alpha_kw": 1675.7551865922337,
+        "pv_after_alpha_kw": 294.8992491472227,
+        "operational_after_alpha_kw": 1380.855937445011,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 43,
+        "gross_pre_alpha_kw": 2195.90289329614,
+        "gross_after_alpha_kw": 1642.8465819094602,
+        "pv_after_alpha_kw": 294.8992491472227,
+        "operational_after_alpha_kw": 1347.9473327622375,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 44,
+        "gross_pre_alpha_kw": 2156.1853523593763,
+        "gross_after_alpha_kw": 1613.1322322590215,
+        "pv_after_alpha_kw": 318.4770549401575,
+        "operational_after_alpha_kw": 1294.655177318864,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": -1.1368683772161603e-13,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 45,
+        "gross_pre_alpha_kw": 2134.440012416615,
+        "gross_after_alpha_kw": 1596.8636360899982,
+        "pv_after_alpha_kw": 318.4770549401575,
+        "operational_after_alpha_kw": 1278.3865811498408,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": -1.1368683772161603e-13,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 46,
+        "gross_pre_alpha_kw": 2104.596077462712,
+        "gross_after_alpha_kw": 1574.5361430667738,
+        "pv_after_alpha_kw": 326.7193720329117,
+        "operational_after_alpha_kw": 1247.816771033862,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 47,
+        "gross_pre_alpha_kw": 2093.9347659039754,
+        "gross_after_alpha_kw": 1566.5599710300169,
+        "pv_after_alpha_kw": 326.7193720329117,
+        "operational_after_alpha_kw": 1239.8405989971054,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 48,
+        "gross_pre_alpha_kw": 2102.55656526746,
+        "gross_after_alpha_kw": 1573.0102988917142,
+        "pv_after_alpha_kw": 327.94786296874685,
+        "operational_after_alpha_kw": 1245.0624359229673,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": -5.684341886080802e-14,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -2.2737367544323206e-13
+      },
+      {
+        "time_index": 49,
+        "gross_pre_alpha_kw": 2077.724409437706,
+        "gross_after_alpha_kw": 1554.4323269554786,
+        "pv_after_alpha_kw": 327.94786296874685,
+        "operational_after_alpha_kw": 1226.4844639867317,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": -5.684341886080802e-14,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 50,
+        "gross_pre_alpha_kw": 2089.1604531007897,
+        "gross_after_alpha_kw": 1562.9881084063893,
+        "pv_after_alpha_kw": 322.6510671663321,
+        "operational_after_alpha_kw": 1240.337041240057,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": -5.684341886080802e-14,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 51,
+        "gross_pre_alpha_kw": 2105.9855658096662,
+        "gross_after_alpha_kw": 1575.5756772776742,
+        "pv_after_alpha_kw": 322.6510671663321,
+        "operational_after_alpha_kw": 1252.9246101113424,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": -5.684341886080802e-14,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 52,
+        "gross_pre_alpha_kw": 2101.731522371876,
+        "gross_after_alpha_kw": 1572.3930498753407,
+        "pv_after_alpha_kw": 304.303048579312,
+        "operational_after_alpha_kw": 1268.0900012960287,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 53,
+        "gross_pre_alpha_kw": 2141.4030048940335,
+        "gross_after_alpha_kw": 1602.072941303954,
+        "pv_after_alpha_kw": 304.303048579312,
+        "operational_after_alpha_kw": 1297.7698927246422,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 54,
+        "gross_pre_alpha_kw": 2151.8447042833973,
+        "gross_after_alpha_kw": 1609.8848123131468,
+        "pv_after_alpha_kw": 283.7184232916696,
+        "operational_after_alpha_kw": 1326.166389021477,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": -5.684341886080802e-14,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 55,
+        "gross_pre_alpha_kw": 2166.1679232239953,
+        "gross_after_alpha_kw": 1620.6006100610068,
+        "pv_after_alpha_kw": 283.7184232916696,
+        "operational_after_alpha_kw": 1336.8821867693373,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": -5.684341886080802e-14,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 56,
+        "gross_pre_alpha_kw": 2165.690819212319,
+        "gross_after_alpha_kw": 1620.2436686419712,
+        "pv_after_alpha_kw": 251.88336631955127,
+        "operational_after_alpha_kw": 1368.3603023224202,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 57,
+        "gross_pre_alpha_kw": 2215.586150532159,
+        "gross_after_alpha_kw": 1657.5724479619885,
+        "pv_after_alpha_kw": 251.88336631955127,
+        "operational_after_alpha_kw": 1405.689081642437,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 58,
+        "gross_pre_alpha_kw": 2196.081054947522,
+        "gross_after_alpha_kw": 1642.9798720749284,
+        "pv_after_alpha_kw": 223.97142892159582,
+        "operational_after_alpha_kw": 1419.0084431533328,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 59,
+        "gross_pre_alpha_kw": 2259.2182365851277,
+        "gross_after_alpha_kw": 1690.2154321542916,
+        "pv_after_alpha_kw": 223.97142892159582,
+        "operational_after_alpha_kw": 1466.2440032326958,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 60,
+        "gross_pre_alpha_kw": 2267.2826374604497,
+        "gross_after_alpha_kw": 1696.2487469486832,
+        "pv_after_alpha_kw": 183.9863864693426,
+        "operational_after_alpha_kw": 1512.2623604793407,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 61,
+        "gross_pre_alpha_kw": 2371.3987745914555,
+        "gross_after_alpha_kw": 1774.1423735427722,
+        "pv_after_alpha_kw": 183.9863864693426,
+        "operational_after_alpha_kw": 1590.1559870734297,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 62,
+        "gross_pre_alpha_kw": 2383.914570699645,
+        "gross_after_alpha_kw": 1783.5059628522026,
+        "pv_after_alpha_kw": 136.2480857894889,
+        "operational_after_alpha_kw": 1647.2578770627138,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 63,
+        "gross_pre_alpha_kw": 2507.229916197836,
+        "gross_after_alpha_kw": 1875.7633183423598,
+        "pv_after_alpha_kw": 136.2480857894889,
+        "operational_after_alpha_kw": 1739.515232552871,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 64,
+        "gross_pre_alpha_kw": 2558.159917761151,
+        "gross_after_alpha_kw": 1913.8661776447325,
+        "pv_after_alpha_kw": 85.57971735220939,
+        "operational_after_alpha_kw": 1828.286460292523,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 65,
+        "gross_pre_alpha_kw": 2682.7335831113633,
+        "gross_after_alpha_kw": 2007.0649347215233,
+        "pv_after_alpha_kw": 85.57971735220939,
+        "operational_after_alpha_kw": 1921.485217369314,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 66,
+        "gross_pre_alpha_kw": 2747.112701324383,
+        "gross_after_alpha_kw": 2055.229639374673,
+        "pv_after_alpha_kw": 39.32846209584915,
+        "operational_after_alpha_kw": 2015.9011772788238,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 67,
+        "gross_pre_alpha_kw": 2850.339166997514,
+        "gross_after_alpha_kw": 2132.457665628212,
+        "pv_after_alpha_kw": 39.32846209584915,
+        "operational_after_alpha_kw": 2093.129203532363,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 68,
+        "gross_pre_alpha_kw": 2907.7483028595543,
+        "gross_after_alpha_kw": 2175.4078356513314,
+        "pv_after_alpha_kw": 7.49236623076192,
+        "operational_after_alpha_kw": 2167.9154694205695,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 69,
+        "gross_pre_alpha_kw": 2994.7100013829113,
+        "gross_after_alpha_kw": 2240.4675109276327,
+        "pv_after_alpha_kw": 7.49236623076192,
+        "operational_after_alpha_kw": 2232.975144696871,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -9.094947017729282e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 70,
+        "gross_pre_alpha_kw": 3053.5940927565844,
+        "gross_after_alpha_kw": 2284.521156713798,
+        "pv_after_alpha_kw": 0.06311274786637132,
+        "operational_after_alpha_kw": 2284.4580439659317,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 71,
+        "gross_pre_alpha_kw": 3107.716592329312,
+        "gross_after_alpha_kw": 2325.0124569889144,
+        "pv_after_alpha_kw": 0.06311274786637132,
+        "operational_after_alpha_kw": 2324.9493442410485,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 72,
+        "gross_pre_alpha_kw": 3137.423938540855,
+        "gross_after_alpha_kw": 2347.237762274604,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2347.237762274604,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 73,
+        "gross_pre_alpha_kw": 3152.995646709632,
+        "gross_after_alpha_kw": 2358.887606909203,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2358.887606909203,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 74,
+        "gross_pre_alpha_kw": 3147.3430379993756,
+        "gross_after_alpha_kw": 2354.6586544692445,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2354.6586544692445,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 75,
+        "gross_pre_alpha_kw": 3136.411384284931,
+        "gross_after_alpha_kw": 2346.480228185359,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2346.480228185359,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 76,
+        "gross_pre_alpha_kw": 3101.576568693984,
+        "gross_after_alpha_kw": 2320.418849105371,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2320.418849105371,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 77,
+        "gross_pre_alpha_kw": 3089.7994813289624,
+        "gross_after_alpha_kw": 2311.607918630466,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2311.607918630466,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 2.2737367544323206e-13
+      },
+      {
+        "time_index": 78,
+        "gross_pre_alpha_kw": 3096.1353183963715,
+        "gross_after_alpha_kw": 2316.348022713167,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2316.348022713167,
+        "gross_mapping_error_kw": -4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 79,
+        "gross_pre_alpha_kw": 3072.792502078973,
+        "gross_after_alpha_kw": 2298.8842878111127,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2298.8842878111127,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 80,
+        "gross_pre_alpha_kw": 3029.6262327802997,
+        "gross_after_alpha_kw": 2266.58980056962,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2266.58980056962,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 81,
+        "gross_pre_alpha_kw": 2963.107316540384,
+        "gross_after_alpha_kw": 2216.8242237261775,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2216.8242237261775,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 82,
+        "gross_pre_alpha_kw": 2948.071377371101,
+        "gross_after_alpha_kw": 2205.5752102358874,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2205.5752102358874,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 83,
+        "gross_pre_alpha_kw": 2909.0782078941743,
+        "gross_after_alpha_kw": 2176.402793100069,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2176.402793100069,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 84,
+        "gross_pre_alpha_kw": 2820.5190329961792,
+        "gross_after_alpha_kw": 2110.1479790907356,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2110.1479790907356,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      },
+      {
+        "time_index": 85,
+        "gross_pre_alpha_kw": 2782.7743527474304,
+        "gross_after_alpha_kw": 2081.9096088416554,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2081.9096088416554,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 86,
+        "gross_pre_alpha_kw": 2767.9940097980902,
+        "gross_after_alpha_kw": 2070.851817548651,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2070.851817548651,
+        "gross_mapping_error_kw": 4.547473508864641e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 4.547473508864641e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 87,
+        "gross_pre_alpha_kw": 2696.024012636718,
+        "gross_after_alpha_kw": 2017.008059613109,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 2017.008059613109,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 88,
+        "gross_pre_alpha_kw": 2656.2738851238087,
+        "gross_after_alpha_kw": 1987.2693305853306,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1987.2693305853306,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 89,
+        "gross_pre_alpha_kw": 2599.5511855443633,
+        "gross_after_alpha_kw": 1944.832712187833,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1944.832712187833,
+        "gross_mapping_error_kw": 2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 2.2737367544323206e-13,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 90,
+        "gross_pre_alpha_kw": 2579.6048497650404,
+        "gross_after_alpha_kw": 1929.910026099701,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1929.910026099701,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 91,
+        "gross_pre_alpha_kw": 2534.4527944498946,
+        "gross_after_alpha_kw": 1896.1298894793017,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1896.1298894793017,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 92,
+        "gross_pre_alpha_kw": 2555.485414163971,
+        "gross_after_alpha_kw": 1911.8652699058953,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1911.8652699058953,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": -1.1368683772161603e-13
+      },
+      {
+        "time_index": 93,
+        "gross_pre_alpha_kw": 2566.7267325294993,
+        "gross_after_alpha_kw": 1920.2753692364913,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1920.2753692364913,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 94,
+        "gross_pre_alpha_kw": 2510.048270757352,
+        "gross_after_alpha_kw": 1877.871846988524,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1877.871846988524,
+        "gross_mapping_error_kw": 0.0,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": 0.0,
+        "q_mapping_error_kvar": 0.0
+      },
+      {
+        "time_index": 95,
+        "gross_pre_alpha_kw": 2439.0220134849965,
+        "gross_after_alpha_kw": 1824.7341402429577,
+        "pv_after_alpha_kw": 0.0,
+        "operational_after_alpha_kw": 1824.7341402429577,
+        "gross_mapping_error_kw": -2.2737367544323206e-13,
+        "pv_mapping_error_kw": 0.0,
+        "net_identity_error_kw": -2.2737367544323206e-13,
+        "q_mapping_error_kvar": 1.1368683772161603e-13
+      }
+    ],
+    "may_scientific_loader_access_count": 0,
+    "june_scientific_loader_access_count": 0,
+    "alpha_BG": 1.15,
+    "alpha_BG_application_count": 1
+  }
+}
