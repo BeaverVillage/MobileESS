@@ -46,6 +46,15 @@ def snapshot(root):
             UB=v.get('Best_Feasible_UB',v.get('verified_UB',v.get('UB',science.get('verified_UB',science.get('UB'))))),
             certified_LB=v.get('Certified_Global_LB',science.get('certified_Global_LB',science.get('LB'))),
             certified_Gap=science.get('certified_gap',v.get('Certified_Gap')) if science.get('global_gap_certified') else None,Fresh=fresh))
+    migration=read(root/'MIGRATION_STATUS.json') if (root/'MIGRATION_STATUS.json').exists() else {}
+    if migration.get('status')=='WAITING_PREDECESSOR_DRAIN':
+        for old in migration['predecessor_workers']:
+            if not live(old):continue
+            request=read(old['request']['path']);path=Path(request['progress']);v=read(path) if path.exists() else {}
+            peers.append(dict(arm='이전 Epoch '+old['arm'],day=old['day'],PID=old['PID'],
+                phase='기존 작업 자연 종료 대기 · '+v.get('phase','RUNNING')+' '+str(v.get('model_slot',0))+'/96',
+                optimization_status=solver_label(v),Native_Runtime=v.get('Native_Runtime',0),UB=None,
+                certified_LB=None,certified_Gap=None,Fresh='이전 Source · 새 공식 결과에 합산하지 않음'))
     policies=[];estimate=0.;known=True
     for arm in ORDER:
         axis=[r for r in rows if r['arm']==arm];p=dict(policy=arm,**{k:sum(r['status']==k for r in axis) for k in ('PASS','FAIL','RUNNING')})
@@ -57,7 +66,9 @@ def snapshot(root):
     return dict(status=ledger['status'],policy=ledger.get('policy'),counts=counts,workers=peers,policies=policies,dates=rows,
         ETA=f'{estimate/3600:.1f} h' if known else '측정 중',
         errors=[r['arm']+' '+r['day']+': '+str(r.get('reason')) for r in rows if r['status']=='FAIL'][-3:]+([ledger['error']] if ledger.get('error') else []),
-        source_SHA=m['execution_SHA'],root=str(root),UTC=now())
+        source_SHA=m['execution_SHA'],root=str(root),UTC=now(),
+        notice='May19–22 네 날짜는 원본 NormalAmps·kVA·전압·SVR 정격 재검증 PASS. 기존 오판정 이력은 보존하며 수정 Source의 공식 실행은 별도로 기록합니다.'
+            if (root/'NORMALAMPS_CLASSIFICATION_CORRECTION.json').exists() else '')
 
 def serve(root):
     from v42_svr11.authority import verify
@@ -79,6 +90,29 @@ def watchdog(root,monitor_only=False):
                 stdout=log,stderr=subprocess.STDOUT,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
     with patch.object(w,'launch',launch):return w.check(root,monitor_only=monitor_only)
 
+def safeguard(root,monitor_only=False):
+    # Scheduling calls the frozen scientific migration gate. While old science
+    # drains, recover only the independent successor HTTP process.
+    from v42_svr11.migration import check
+    from v42_svr11.processes import live
+    from v42_common_campaign.authority import singleton
+    import psutil
+    root=Path(root);verify_ui(root);state=check(root,monitor_only)
+    if state['status']!='WAITING_PREDECESSOR_DRAIN':return state
+    with singleton(root/'MONITOR_RECOVERY.lock'):
+        current=read(root/'MONITOR_PROCESS.json') if (root/'MONITOR_PROCESS.json').exists() else {}
+        if live(current):return state
+        oldroot=Path(read(state['predecessor_manifest']['path'])['root'])
+        old=read(oldroot/'MONITOR_PROCESS.json') if (oldroot/'MONITOR_PROCESS.json').exists() else {}
+        if live(old):
+            if not any('svr11_monitor_ui.py' in a or a=='v42_svr11.monitor' for a in old['command']):
+                raise PermissionError('READ_ONLY_PREDECESSOR_MONITOR_IDENTITY_DRIFT')
+            p=psutil.Process(old['PID']);p.terminate();p.wait(timeout=10)
+        with (root/'monitor_ui_STDOUT.log').open('ab') as log:
+            subprocess.Popen([sys.executable,'-B','-X','utf8',str(Path(__file__)),'serve',str(root)],cwd=SOURCE,
+                stdout=log,stderr=subprocess.STDOUT,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+    return state
+
 if __name__=='__main__':
     mode,root=sys.argv[1:3]
     if mode=='release':atomic(Path(root)/'MONITOR_UI_RELEASE.json',dict(schema='SVR11_READ_ONLY_UI_V1',files=ui_files(),
@@ -86,6 +120,10 @@ if __name__=='__main__':
     elif mode=='serve':serve(root)
     elif mode=='watchdog':
         try:watchdog(root,'--monitor-only' in sys.argv)
+        except PermissionError as error:
+            if 'PROCESS_LEASE_ALREADY_OWNED' not in str(error):raise
+    elif mode=='safeguard':
+        try:safeguard(root,'--monitor-only' in sys.argv)
         except PermissionError as error:
             if 'PROCESS_LEASE_ALREADY_OWNED' not in str(error):raise
     else:raise ValueError('UNKNOWN_UI_MODE')
