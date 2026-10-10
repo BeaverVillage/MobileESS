@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import tempfile
+import subprocess
 import numpy as np
 from v42_m1_hybrid.pricing import make_prices
 from v42_m1_hybrid.dw import build_master
@@ -19,6 +20,9 @@ def run(spec, output):
     start = perf_counter()
     budget = Budget(output)
     output = budget.output
+    producer = subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip()
+    write(output/'PRODUCER.json', dict(head=producer, baseline=spec['source_head'],
+                                      preregistered_configuration='PREREGISTRATION.json'))
     temporary = output/'tmp'
     temporary.mkdir()
     os.environ.update(TEMP=str(temporary), TMP=str(temporary))

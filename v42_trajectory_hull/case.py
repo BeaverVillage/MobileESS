@@ -3,6 +3,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from hashlib import sha256
 import json
+from fractions import Fraction as F
+import subprocess
 import numpy as np
 from scipy import sparse
 from v42_m1_hybrid.blocks import matrix_sha, build_blocks
@@ -25,6 +27,9 @@ def load(spec):
     if spec['stage'] not in ('B2_M', 'B3_M1', 'B3_M2'):
         raise ValueError('UNKNOWN_STAGE')
     root = Path(spec['arrays']).resolve()
+    development = Path(__file__).resolve().parents[1]
+    subprocess.run(['git','merge-base','--is-ancestor',spec['source_head'],'HEAD'],
+                   cwd=development, check=True, capture_output=True)
     identity = read(root/'SCIENTIFIC_CASE_IDENTITY.json')
     for key in ('case_sha', 'selected_matrix_sha', 'selected_domain_sha'):
         if identity[key] != spec[key]:
@@ -55,6 +60,10 @@ def load(spec):
     point = np.load(spec['point']['path'], allow_pickle=False)['point']
     if not matrix_replay(A, d, point)['PASS']:
         raise ValueError('CURRENT_FULL_ORIGINAL_UB_REPLAY_FAILURE')
+    objective = F(float(d['constant']))+sum((F(float(d['objective'][j]))*F(float(point[j]))
+                  for j in np.flatnonzero(d['objective'])),F(0))
+    if objective != F(spec['ub_exact']):
+        raise ValueError('ORIGINAL_OBJECTIVE_AND_UB_IDENTITY_DRIFT')
     envelope = read(spec['envelope']['path'])
     lo, hi = d['lower'].copy(), d['upper'].copy()
     for step in envelope['steps']:
