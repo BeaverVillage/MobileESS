@@ -1,0 +1,254 @@
+"""Plot saved literal IEEE123 branches and primary display coordinates; no DSS.
+
+Original coordinates are never electrical authority. Synthetic LV/end-stub
+positions are for display only and recorded separately. Original phase graph,
+service endpoints and series cut positions come from saved native inventory.
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import hashlib
+import json
+import math
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+BASE = Path('D:/v42_voltage_control_development_20261011')
+sys.path.insert(0, str(BASE / 'plotting_dependencies'))  # plot-only runtime
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+
+
+def receipt(path):
+    p = Path(path)
+    b = p.read_bytes()
+    return {'path': str(p.resolve()), 'sha256': hashlib.sha256(b).hexdigest(), 'bytes': len(b)}
+
+
+def phase_spec(spec, count):
+    parts = spec.lower().split('.')
+    return parts[0], [int(p) for p in parts[1:] if p.isdigit() and int(p) > 0] or list(range(1, count + 1))
+
+
+def main():
+    a = argparse.ArgumentParser()
+    a.add_argument('--contract', type=Path)
+    a.add_argument('--output', type=Path, default=BASE / 'SVR7_TOPOLOGY_AUDIT_01')
+    args = a.parse_args()
+    args.output.mkdir(parents=True, exist_ok=True)
+    inventory_path = BASE / 'SVR_ORIGINAL_TOPOLOGY_INVENTORY.json'
+    coordinates_path = BASE / 'SVR7_TOPOLOGY_AUDIT_01/PRIMARY_IEEE123_BusCoords.dat'
+    existing_path = BASE / 'FROZEN_SVR4_INFRASTRUCTURE_03/SVR_CONTROLLER_CONTRACT.json'
+    inv = json.loads(inventory_path.read_text(encoding='utf-8-sig'))
+    old = json.loads(existing_path.read_text(encoding='utf-8-sig'))['units']
+    if args.contract:
+        raw_contract = json.loads(args.contract.read_text(encoding='utf-8-sig'))
+        contract = raw_contract.get('svr', raw_contract)
+        units = contract['units']
+        assert len(units) == 7
+        assert units[:4] == old, 'EXACT_EXISTING_FOUR_DRIFT'
+        variant_status = contract['status'] + ' | ' + units[-1]['id']
+    else:
+        units = list(old)
+        for unit_id, line, down in [('BUS79', 'Line.l79', '79'), ('BUS108', 'Line.l105', '108'), ('BUS50', 'Line.l49', '50')]:
+            branch = next(r for r in inv['original_branches'] if r['element'].lower() == line.lower())
+            units.append(dict(id=unit_id, cut_element=line, cut_terminal=2,
+                original_bus_spec=branch['buses'][1], sensed_bus=down,
+                upstream_new_bus='svr_' + unit_id.lower() + '_series_input'))
+        variant_status = 'PROVISIONAL_BUS50_NOT_FROZEN_NATIVE_SELECTOR_PENDING'
+
+    xy = {}
+    for text in coordinates_path.read_text(encoding='ascii').splitlines():
+        cells = text.replace(',', ' ').split()
+        if cells:
+            xy[cells[0].lower()] = tuple(map(float, cells[1:3]))
+    original_xy = dict(xy)
+    branches = {r['element'].lower(): r for r in inv['original_branches']}
+    bases = {spec.split('.')[0].lower() for b in branches.values() for spec in b['buses']}
+    endpoints = {r['pcc_bus']: r for r in inv['original_endpoints']}
+    assert len(endpoints) == 36 and len(bases) == 168
+    display_basis = {n: 'PINNED_PRIMARY_IEEE123_BUSCOORDS' for n in bases & set(xy)}
+
+    # The original source intentionally distinguishes opened-end stubs from
+    # active buses 300 and 94. Never draw an electrical link between them.
+    for node, anchor, offset in [('300_open', '151', (-180, 155)), ('94_open', '54', (-45, -145))]:
+        xy[node] = (xy[anchor][0] + offset[0], xy[anchor][1] + offset[1])
+        display_basis[node] = 'SYNTHETIC_OPEN_STUB_POSITION_NEAR_LITERAL_PARENT'
+
+    directions = {
+        'IDC01': (-1, -1), 'IDC02': (0, 1), 'IDC03': (-1, 1), 'IDC04': (1, 1),
+        'IDC05': (0, -1), 'IDC06': (-1, 1), 'IDC07': (-1, 1), 'IDC08': (-1, 1),
+        'IDC09': (0, -1), 'IDC10': (1, -1), 'IDC11': (1, 1), 'IDC12': (-1, 1),
+        'STA01': (-1, 1), 'STA02': (-1, -1), 'STA03': (-1, -1), 'STA04': (-1, 1),
+        'STA05': (-1, 1), 'STA06': (0, 1), 'STA07': (1, 1), 'STA08': (0, 1),
+        'STA09': (1, 1), 'STA10': (0, 1), 'STA11': (0, 1), 'STA12': (1, -1),
+    }
+    for node, ep in endpoints.items():
+        parent = ep['mv_parent_bus'].split('.')[0]
+        px, py = xy[parent]
+        dx, dy = directions[ep['logical_site_id']]
+        slot = -1 if ep['endpoint_id'] == 'AIDC' else (1 if ep['logical_site_id'].startswith('IDC') else 0)
+        xy[node] = (px + dx * 155 + slot * 40, py + dy * 135 - slot * 40)
+        display_basis[node] = 'SYNTHETIC_LV_SERVICE_ENDPOINT_DISPLAY_OFFSET; ELECTRICAL_PARENT_LITERAL'
+    assert not bases - set(xy)
+
+    fig = plt.figure(figsize=(28, 21), facecolor='white')
+    ax = fig.add_axes([.035, .14, .73, .79])
+    side = fig.add_axes([.785, .14, .20, .79]); side.axis('off')
+    ax.set_aspect('equal'); ax.axis('off')
+    # Native ABC graph including each separate one-phase regulator branch.
+    native_rows = []
+    for row in inv['original_branches']:
+        left, lp = phase_spec(row['buses'][0], row['phases'])
+        right, rp = phase_spec(row['buses'][1], row['phases'])
+        start, end = xy[left], xy[right]
+        is_service = right in endpoints
+        line_style = '-' if row['phases'] == 3 else ('--' if row['phases'] == 2 else ':')
+        color = '#8d9aa5' if not is_service else '#b8bcc4'
+        ax.plot([start[0], end[0]], [start[1], end[1]], ls=line_style,
+                color=color, lw=1.15 if row['phases'] == 3 else .9, zorder=1)
+        for ph, ph2 in zip(lp, rp):
+            native_rows.append(dict(element=row['element'], upstream_node_phase=f'{left}.{ph}',
+                downstream_node_phase=f'{right}.{ph2}', native_phases=row['phases'],
+                normal_amps=row['norm_amps'], display_geometry_only=True))
+        if row['phases'] < 3 and row['element'].lower().startswith('line.'):
+            ax.text((start[0]+end[0])/2, (start[1]+end[1])/2+14,
+                    ''.join('ABC'[p-1] for p in lp), color='#89919a', fontsize=5.1,
+                    ha='center', va='bottom', zorder=2)
+    assert len(native_rows) == 383
+
+    all_native = sorted(bases - set(endpoints))
+    for n in all_native:
+        x, y = xy[n]
+        ax.scatter([x], [y], s=11, c='#596673', zorder=3)
+        text = n if n not in ('150r', '9r', '25r', '160r') else n
+        dy = -28 if n.endswith('r') else 20
+        ax.text(x+10, y+dy, text, fontsize=6.0, color='#475260', zorder=3)
+
+    for n, ep in endpoints.items():
+        x, y = xy[n]
+        is_aidc = ep['endpoint_id'] == 'AIDC'
+        ax.scatter([x], [y], s=42 if is_aidc else 35, marker='^' if is_aidc else 's',
+                   facecolor='#2b8bbd' if is_aidc else '#8b63ac', edgecolor='white', linewidth=.45, zorder=4)
+        label = ep['logical_site_id'] + (' A' if is_aidc else ' M')
+        ax.text(x, y + (22 if is_aidc else -30), label, fontsize=6.9, weight='medium',
+                color='#126180' if is_aidc else '#674081', ha='center', va='bottom' if is_aidc else 'top', zorder=5)
+
+    # Exact original RegControl names. Their native coordinate pairs coincide;
+    # markers/callouts do not displace or merge the electrical buses.
+    groups = [
+        ('150', 'Original Reg1\ncreg1a (ABC transformer)', (-35, -160)),
+        ('9', 'Original Reg2\ncreg2a (A)', (-180, 40)),
+        ('25', 'Original Reg3\ncreg3a, creg3c (A,C)', (-295, -70)),
+        ('160', 'Original Reg4\ncreg4a, creg4b, creg4c', (-245, -130)),
+    ]
+    for node, label, offset in groups:
+        x, y = xy[node]
+        ax.scatter([x], [y], s=112, marker='o', facecolor='white', edgecolor='#1e5baa', linewidth=2, zorder=7)
+        ax.annotate(label, xy=(x,y), xytext=(x+offset[0], y+offset[1]), fontsize=7.2,
+                    color='#174e92', ha='center', va='center', weight='bold',
+                    bbox=dict(boxstyle='round,pad=.3', fc='white', ec='#a7bedb', alpha=.95),
+                    arrowprops=dict(arrowstyle='-', color='#1e5baa', lw=.8), zorder=9)
+
+    bank_positions = []
+    label_offsets = {'STA01': (-85, 95), 'STA06': (5, 100), 'STA08': (0, 110), 'BUS83': (-115,-120),
+                     'BUS79': (70, -115), 'BUS108': (-195, 30), 'BUS50': (110, -110), 'BUS48': (-155,-110)}
+    for index, unit in enumerate(units):
+        row = branches[unit['cut_element'].lower()]
+        left, right = [b.split('.')[0] for b in row['buses']]
+        # An exact serial cut is labelled on its own original branch; the
+        # marker offset represents added bank+bus symbol, not line length.
+        frac = .21 if unit['cut_terminal'] == 1 else .84
+        x = xy[left][0]*(1-frac)+xy[right][0]*frac
+        y = xy[left][1]*(1-frac)+xy[right][1]*frac
+        color = '#df7a20' if index < 4 else '#13836b'
+        ax.scatter([x], [y], s=155, marker='D', facecolor='white', edgecolor=color, linewidth=2, zorder=8)
+        dx, dy = label_offsets[unit['id']]
+        text = ('SVR4 ' if index < 4 else '+SVR ') + unit['id']
+        ax.annotate(text, xy=(x,y), xytext=(x+dx,y+dy), fontsize=8.1, color=color,
+                    ha='center', va='center', weight='bold',
+                    bbox=dict(boxstyle='round,pad=.24', fc='white', ec=color, alpha=.98),
+                    arrowprops=dict(arrowstyle='-', color=color, lw=1.1), zorder=10)
+        bank_positions.append(dict(bank_id=unit['id'], cut_element=unit['cut_element'],
+            cut_terminal=unit['cut_terminal'], original_bus_spec=unit['original_bus_spec'],
+            sensed_bus=unit['sensed_bus'], added_bus=unit['upstream_new_bus'],
+            display_x=x, display_y=y, role='EXISTING4' if index < 4 else 'ADDITIONAL3'))
+
+    alternative = 'BUS48' if units[-1]['id'] == 'BUS50' else 'BUS50'
+    other = branches['line.l47' if alternative == 'BUS48' else 'line.l49']
+    left, right = [b.split('.')[0] for b in other['buses']]
+    x = xy[left][0]*.16+xy[right][0]*.84; y=xy[left][1]*.16+xy[right][1]*.84
+    ax.scatter([x], [y], s=90, marker='D', facecolor='none', edgecolor='#b095aa', linewidth=1.2, zorder=6)
+    ax.text(x, y-140, alternative+'\nuninstalled alternative', fontsize=6.8, color='#8d7385', ha='center')
+
+    ax.set_xlim(-100, 5710); ax.set_ylim(-190, 4390)
+    is_frozen = bool(args.contract and contract['status'] == 'FROZEN')
+    title = 'IEEE123 literal native topology | exact SVR4 + selected SVR3' if is_frozen else 'IEEE123 literal native topology | existing SVR4 + three candidate banks'
+    fig.text(.04, .965, title, fontsize=21, weight='bold', color='#18313c')
+    fig.text(.04, .94, variant_status.replace('_', ' ') + '  |  Original7 AUTO  |  Original4 capacitors Fixed-ON  |  Native optimizer calls 0',
+             fontsize=11, color='#52646c')
+
+    legend = [
+        Line2D([0],[0], color='#8d9aa5', lw=1.5, label='Native 3-phase branch'),
+        Line2D([0],[0], color='#8d9aa5', lw=1.2, ls='--', label='Native 2-phase branch'),
+        Line2D([0],[0], color='#8d9aa5', lw=1.2, ls=':', label='Native 1-phase branch; phase letters shown'),
+        Line2D([0],[0], marker='o', markerfacecolor='white', markeredgecolor='#1e5baa', color='none', markersize=10, label='Original RegControl (7 named controls)'),
+        Line2D([0],[0], marker='D', markerfacecolor='white', markeredgecolor='#df7a20', color='none', markersize=10, label='Exact existing SVR4 bank'),
+        Line2D([0],[0], marker='D', markerfacecolor='white', markeredgecolor='#13836b', color='none', markersize=10, label='Additional SVR3 bank'),
+        Line2D([0],[0], marker='^', color='none', markerfacecolor='#2b8bbd', markersize=8, label='A: distinct AIDC LV PCC (12)'),
+        Line2D([0],[0], marker='s', color='none', markerfacecolor='#8b63ac', markersize=8, label='M: distinct MESS LV PCC (24)'),
+    ]
+    side.legend(handles=legend, loc='upper left', frameon=False, fontsize=9, labelspacing=1.3, handlelength=2.4)
+    side.text(0, .68, 'Exact physical connection map', fontsize=13, weight='bold', color='#18313c')
+    labels = []
+    for site in sorted({r['logical_site_id'] for r in endpoints.values()}):
+        eps = sorted([r for r in endpoints.values() if r['logical_site_id'] == site], key=lambda r:r['endpoint_id'])
+        parents = {r['mv_parent_bus'].split('.')[0] for r in eps}
+        assert len(parents)==1
+        labels.append(site+'  ←  '+next(iter(parents))+'  |  '+('A + M (two service TXs)' if site.startswith('IDC') else 'M'))
+    side.text(0,.65,'\n'.join(labels), fontsize=9.0, color='#475260', linespacing=1.65, va='top')
+    side.text(0,.135, 'Counts: 24 logical sites / 36 distinct LV PCCs\n7 SVR banks / 21 one-phase physical units\nOriginal graph: 386 phase nodes / 383 edges\n300_open and 94_open are literal end stubs.\nThey are never joined to buses 300 / 94.',
+              fontsize=9, color='#475260', linespacing=1.5, va='top')
+
+    fig.text(.04,.093, 'Coverage and shared-control paths', fontsize=13, weight='bold', color='#18313c')
+    fig.text(.04,.071, 'BUS79 / BUS108: downstream of Original Reg4 on separate branches from BUS83.  BUS48 / BUS50: Original Reg1 only, no direct Reg4 path.',
+             fontsize=10.5, color='#475260')
+    fig.text(.04,.052, 'BUS50 directly covers IDC04 + IDC02 (four LV PCCs); BUS48 directly covers IDC06 (two LV PCCs). Wider coverage is not proof of better AC performance.',
+             fontsize=10.5, color='#475260')
+    fig.text(.04,.029, 'Coordinates: pinned OpenDSS BusCoords.dat. LV endpoints, added devices and end-stub offsets are display-only. Every electrical edge is the saved literal native branch.',
+             fontsize=9.5, color='#69767b')
+    figure_scope = 'Frozen hardware only; monthly safety and new Planning E2E remain subject to separate qualification. This diagram performs no physical solve.' if is_frozen else 'No new physical solve or autonomous sensitivity is claimed by this figure. Actual all-node / thermal / TIME-control comparison is required before selecting or qualifying SVR7.'
+    fig.text(.04,.013, figure_scope,
+             fontsize=9.5, color='#69767b')
+    svg=args.output/'IEEE123_SVR7_INSTALLATION_TOPOLOGY.svg'; png=args.output/'IEEE123_SVR7_INSTALLATION_TOPOLOGY.png'
+    fig.savefig(svg, format='svg'); fig.savefig(png, dpi=110); plt.close(fig)
+    csv_path=args.output/'IEEE123_SVR7_LITERAL_PHASE_EDGES.csv'
+    with csv_path.open('w',encoding='utf-8-sig',newline='') as f:
+        w=csv.DictWriter(f,fieldnames=list(native_rows[0]));w.writeheader();w.writerows(native_rows)
+    coords_rows=[dict(bus=n,display_x=xy[n][0],display_y=xy[n][1],display_basis=display_basis[n],
+                      electrical_topology_authority='SAVED_NATIVE_INVENTORY',is_LV_PCC=n in endpoints) for n in sorted(bases)]
+    csv_path2=args.output/'IEEE123_SVR7_DISPLAY_COORDINATES.csv'
+    with csv_path2.open('w',encoding='utf-8-sig',newline='') as f:
+        w=csv.DictWriter(f,fieldnames=list(coords_rows[0]));w.writeheader();w.writerows(coords_rows)
+    result=dict(schema='V42_SVR7_LITERAL_TOPOLOGY_FIGURE_RECEIPT_V1',status=variant_status,
+        original_native_base_buses=132,distinct_LV_service_PCC_buses=36,total_original_base_buses=168,
+        original_phase_nodes=386,original_phase_edges=len(native_rows),
+        SVR_bank_count=len(units),physical_single_phase_transformer_count=3*len(units),
+        original_RegControl_count=7,original_caps_Fixed_ON_count=4,
+        native_bus_coordinate_source_count=len(bases & set(original_xy)),
+        display_offset_bus_count=len(bases-set(original_xy)),
+        added_node_voltage_exclusions=0,AI_image_generation=False,
+        Native_optimizer_calls=0,OpenDSS_compile_calls=0,OpenDSS_solve_calls=0,
+        electrical_graph_source=receipt(inventory_path),coordinate_source=receipt(coordinates_path),
+        existing4_source=receipt(existing_path),contract_source=receipt(args.contract) if args.contract else None,
+        bank_cut_symbols=bank_positions,script=receipt(__file__),
+        outputs=[receipt(p) for p in (svg,png,csv_path,csv_path2)])
+    (args.output/'IEEE123_SVR7_TOPOLOGY_FIGURE_RECEIPT.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+    print(json.dumps({k:result[k] for k in ['status','total_original_base_buses','original_phase_edges','SVR_bank_count','physical_single_phase_transformer_count']},indent=2))
+
+
+if __name__=='__main__':main()

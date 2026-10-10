@@ -1,0 +1,375 @@
+{
+  "schema": "V42_AC_ONLY_FROZEN_DAY_PROVENANCE_V1",
+  "job": {
+    "priority": 1,
+    "arm": "B1",
+    "day": "2025-05-28",
+    "original_operations_folder": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS",
+    "original_frozen_inventory": {
+      "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_AC_MONTHLY_PRIORITY_03\\FROZEN_PLAN_DATE_INVENTORY_V3.json",
+      "sha256": "cd40dc470ed2f00912fc24bdce5b8832bac246535b6383d5f1fc03bd58a5aee2",
+      "bytes": 881854
+    },
+    "inventory_row_key": "B1/2025-05-28",
+    "priority_tags": [
+      "NEAR_OR_ABOVE_UPPER_BOUND",
+      "ORIGINAL_VOLTAGE_VIOLATION"
+    ],
+    "priority_metadata": {
+      "AEMO_Actual_demand_MW": {
+        "min": 4149.95,
+        "max": 7278.77,
+        "mean": 5578.565729166668
+      },
+      "AEMO_Actual_PV_MW": {
+        "min": 0.0,
+        "max": 1312.646,
+        "mean": 285.5211458333333
+      },
+      "Actual_PV_daily_MWh": 6852.5075,
+      "Actual_AIDC_aggregate_P_kw": {
+        "min": 143.22371562980328,
+        "max": 568.257479231256,
+        "mean": 219.09778732987783
+      },
+      "original_background_net_P_kw_from_pinned_formula": {
+        "min": 1754.994117820606,
+        "max": 3078.157215139723,
+        "mean": 2364.7106510123367
+      },
+      "frozen_nominal_total_net_P_kw_BG_plus_AIDC_minus_MESS": {
+        "min": 1912.2441243441842,
+        "max": 3269.3170660549213,
+        "mean": 2583.8084383422142
+      },
+      "total_net_power_definition": "Original alpha_BG1.15 gross background minus original alpha_grid-scaled PV (no additional alpha_BG scaling) + frozen Actual AIDC PCC load minus frozen MESS generator-positive P. Nominal input, excludes AC loss.",
+      "MESS_P_kw": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "MESS_Q_kvar": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "MESS_max_abs_P_kw": 0.0,
+      "MESS_max_abs_Q_kvar": 0.0,
+      "MESS_max_adjacent_unit_P_swing_kw": 0.0,
+      "MESS_max_adjacent_unit_Q_swing_kvar": 0.0,
+      "MESS_max_unit_apparent_kVA": 0.0,
+      "MESS_location_change_count": 0,
+      "actual_exogenous_receipt": {
+        "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250528\\DERIVED_AEMO_ACTUAL.parquet",
+        "exists": true,
+        "sha256": "26a0820364f40895d87cb93f965fa8cbb954e88eb23c390b647a1c535e89d50a",
+        "bytes": 4289
+      },
+      "background_formula_authority": {
+        "path": "D:\\v42_voltage_control_development_20261011\\APRIL_EXOGENOUS_RESIDUAL_AUDIT_01\\APRIL_EXOGENOUS_AND_FINITE_RATING_AUDIT.json",
+        "sha256": "0d13d2ac1160e72b6265b1187ffaf78b9ffec54ae4dc952feed5bef1e622f46e",
+        "bytes": 84811
+      }
+    },
+    "original_metrics": {
+      "voltage_lower_violations": 0,
+      "voltage_upper_violations": 2,
+      "voltage_violations": 2,
+      "line_current_violations": 0,
+      "transformer_current_violations": 0,
+      "transformer_kva_violations_phase_rows": 0,
+      "Vmin": 0.9770098466845692,
+      "Vmax": 1.050228286007951,
+      "max_line_loading_pu": 0.7277064837755913,
+      "max_transformer_current_pu": 0.7662766529875997,
+      "max_transformer_kva_pu": 0.6912766126858267,
+      "converged_slots": 96,
+      "worst_node_phase": "83.2",
+      "worst_slot0": 66,
+      "raw_original_node_axis_exact": true,
+      "raw_original_branch_phase_axis_exact": true,
+      "raw_96slot_shape_exact": true,
+      "DSTATCOM_added_SVR_CapControl_physical_objects_in_original_axes": false,
+      "original_raw_physical_PASS": false
+    },
+    "original_frozen_input_receipts": {
+      "request": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\request.json",
+        "exists": true,
+        "sha256": "4f164b1b54800ef5f753194b4e950338bef29fc5016d91970bda52e24e5a0dae",
+        "bytes": 2025
+      },
+      "RESULT": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\RESULT.json",
+        "exists": true,
+        "sha256": "6a93157d9164602ab55732b3215b8576503b382ea5f2adb9aae9d8cd0d9119cc",
+        "bytes": 734770
+      },
+      "Planning_freeze": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\PLANNING\\V42_DAYAHEAD_DECISION_FREEZE.json",
+        "exists": true,
+        "sha256": "12d0f68e7b3266fb1ba1cf24c1d8f3962b9e003444423fa2ac0cfca44a41820b",
+        "bytes": 441358
+      },
+      "Actual_replay": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_FIXED_REPLAY_RECEIPT.json",
+        "exists": true,
+        "sha256": "dd013c52f3bb70956852d94fa8c098ae9252bf7311b61f4efb528570df8030bd",
+        "bytes": 1841
+      },
+      "Planning_physical": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\SOURCE\\PLANNING_PHYSICAL.npz",
+        "exists": true,
+        "sha256": "94a4d50e14590347a14d0326dbd8d65e5414219398afc6e870ed2c943515d8b9",
+        "bytes": 9219
+      },
+      "Planning_MESS": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\SOURCE\\PLANNING_MESS.npz",
+        "exists": true,
+        "sha256": "605b6c0fd01fa4a965f8c4011b770ffacee489305321564c8eceee116b26a2df",
+        "bytes": 924
+      },
+      "Actual_fixed": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_FIXED_TRAJECTORY.npz",
+        "exists": true,
+        "sha256": "49dcc690c8320ad40139fc49993a10b81872da007d1d451fa59f7607fb28c7bb",
+        "bytes": 6000
+      },
+      "Actual_MESS": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_MESS_TRAJECTORY.npz",
+        "exists": true,
+        "sha256": "605b6c0fd01fa4a965f8c4011b770ffacee489305321564c8eceee116b26a2df",
+        "bytes": 924
+      },
+      "raw_AC": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+        "exists": true,
+        "sha256": "33f8a8f0cb70f99d60936c4a569d573333a7b1e3c2cc8d658ba20b6ce47fa8ef",
+        "bytes": 850472
+      },
+      "raw_control_log": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\FRESH\\RAW_CONTROL_LOG.json",
+        "exists": true,
+        "sha256": "a9f2bb81857863b1571c4307c844c1c6c4d2d0e50a6669d6fc6b7e2dc577fdfe",
+        "bytes": 47098
+      },
+      "raw_physical_input_log": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\FRESH\\RAW_PHYSICAL_INPUT_LOG.json",
+        "exists": true,
+        "sha256": "07f4be5956a7539d37963cbad5199417ca52c782db1c21aaf8a633d90da7ac0e",
+        "bytes": 121980
+      },
+      "original_OPS_result": {
+        "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\OPERATIONS_RESULT.json",
+        "exists": true,
+        "sha256": "841de609d68999b8167ed7c71dd16598902048112f4581c09eceb3b6a1057aa9",
+        "bytes": 8882
+      }
+    },
+    "source_proof": {
+      "day_arm_exact": true,
+      "decision_day_exact": true,
+      "decision_SHA_exact": true,
+      "Planning_PQ_equals_Actual_fixed": true,
+      "Actual_PQ_equals_physical_log": true,
+      "Actual_MESS_equals_Planning_bytes": true,
+      "MESS_PQ_locations_equals_logged96": true,
+      "Actual_no_PQ_repair": true,
+      "future_feedback_to_Planning": false,
+      "execution_source_SHA": "332502f7a7f2e17f10def5fad81ba2fa7e8f66b320022a994d887be8d80c17d7",
+      "execution_source_commit": null,
+      "receipt_checks": {
+        "Planning_freeze_receipt": {
+          "declared": {
+            "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\PLANNING\\V42_DAYAHEAD_DECISION_FREEZE.json",
+            "sha256": "12d0f68e7b3266fb1ba1cf24c1d8f3962b9e003444423fa2ac0cfca44a41820b",
+            "bytes": 441358
+          },
+          "actual": {
+            "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\PLANNING\\V42_DAYAHEAD_DECISION_FREEZE.json",
+            "exists": true,
+            "sha256": "12d0f68e7b3266fb1ba1cf24c1d8f3962b9e003444423fa2ac0cfca44a41820b",
+            "bytes": 441358
+          },
+          "PASS": true
+        },
+        "MESS_frozen_receipt": {
+          "declared": {
+            "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_MESS_TRAJECTORY.npz",
+            "sha256": "605b6c0fd01fa4a965f8c4011b770ffacee489305321564c8eceee116b26a2df",
+            "bytes": 924
+          },
+          "actual": {
+            "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_MESS_TRAJECTORY.npz",
+            "exists": true,
+            "sha256": "605b6c0fd01fa4a965f8c4011b770ffacee489305321564c8eceee116b26a2df",
+            "bytes": 924
+          },
+          "PASS": true
+        },
+        "MESS_Planning_receipt": {
+          "declared": {
+            "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\SOURCE\\PLANNING_MESS.npz",
+            "sha256": "605b6c0fd01fa4a965f8c4011b770ffacee489305321564c8eceee116b26a2df",
+            "bytes": 924
+          },
+          "actual": {
+            "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\SOURCE\\PLANNING_MESS.npz",
+            "exists": true,
+            "sha256": "605b6c0fd01fa4a965f8c4011b770ffacee489305321564c8eceee116b26a2df",
+            "bytes": 924
+          },
+          "PASS": true
+        },
+        "accepted_Plan_receipt": {
+          "declared": {
+            "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\B1_P1_FREEZE.json",
+            "sha256": "e20263bb830927c481e2d4dc08d2a53322c8e23f6b271ef0caa328f16d51e387",
+            "bytes": 526844
+          },
+          "actual": {
+            "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\B1_P1_FREEZE.json",
+            "exists": true,
+            "sha256": "e20263bb830927c481e2d4dc08d2a53322c8e23f6b271ef0caa328f16d51e387",
+            "bytes": 526844
+          },
+          "PASS": true
+        }
+      },
+      "actual_source": {
+        "declared": {
+          "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250528\\DERIVED_AEMO_ACTUAL.parquet",
+          "sha256": "26a0820364f40895d87cb93f965fa8cbb954e88eb23c390b647a1c535e89d50a",
+          "bytes": 4289
+        },
+        "actual": {
+          "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_may_b0_holdout_pr\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250528\\DERIVED_AEMO_ACTUAL.parquet",
+          "exists": true,
+          "sha256": "26a0820364f40895d87cb93f965fa8cbb954e88eb23c390b647a1c535e89d50a",
+          "bytes": 4289
+        },
+        "PASS": true,
+        "day_96_end_timestamps_exact": true,
+        "light_PV_summary": {
+          "daily_PV_MWh": 6852.5075,
+          "max_PV_MW": 1312.646,
+          "worst_slot_PV_MW": null,
+          "max_demand_MW": 7278.77
+        }
+      },
+      "control": {
+        "source_initial_inventory_exact_original": true,
+        "source_inventory_canonical_SHA256": "d94429198223d3eeb1c447492e09eb0cbfb0fec61bbf5c78aefbb65843fadf92",
+        "original_RegControl_count": 7,
+        "original_CapControl_count": 0,
+        "original_regulators_ALWAYS_AUTO": true,
+        "original_four_caps_fixed_ON_all96": true,
+        "no_CapControl_all96": true,
+        "no_Planning_tap_replay": true,
+        "historical_internal_time_event_trace_available": null,
+        "PASS": true
+      },
+      "raw_declared_receipt": {
+        "declared": {
+          "bytes": 850472,
+          "sha256": "33f8a8f0cb70f99d60936c4a569d573333a7b1e3c2cc8d658ba20b6ce47fa8ef"
+        },
+        "actual": {
+          "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+          "exists": true,
+          "sha256": "33f8a8f0cb70f99d60936c4a569d573333a7b1e3c2cc8d658ba20b6ce47fa8ef",
+          "bytes": 850472
+        },
+        "PASS": true
+      },
+      "raw_manifest_day_arm_ACTUAL_exact": true
+    },
+    "new_AC_status": "NOT_RUN",
+    "new_Planning_optimization_status": "NOT_REQUESTED_AC_ONLY",
+    "Native_optimizer_calls": 0
+  },
+  "source_SHA": "ce30af2a74d9d2b6a2f2a33fee7a690927752f940f94bd466218075ba34cbf04",
+  "scenario_SHA": "c8a98155d897fa5e2fe5fbaea6fb170bf2e2a382c5bc9f802e168922469e60cb",
+  "infrastructure": {
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR4_INFRASTRUCTURE_06\\HARDWARE_FREEZE_RECEIPT.json",
+    "sha256": "61119445304423816bc67caf6745735e4850567798838b45f5b136543f12590a",
+    "bytes": 33423
+  },
+  "driver": {
+    "path": "D:\\v42_voltage_control_development_20261011\\run_frozen_ac_day.py",
+    "sha256": "77ea1b6e1c15816d43020e47db1909f63ca5e776c7b3250000b46622a8d74adc",
+    "bytes": 11719
+  },
+  "queue": {
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_AC_MONTHLY_PRIORITY_03\\FROZEN_AC_MAY31_PRIORITY_QUEUE.json",
+    "sha256": "301dafbb620152a2058e4700ef5b62b25d9e675358040544b12d12502b368c86",
+    "bytes": 887981
+  },
+  "configuration": "SVR4",
+  "original_frozen_receipts": {
+    "request": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\request.json",
+      "sha256": "4f164b1b54800ef5f753194b4e950338bef29fc5016d91970bda52e24e5a0dae",
+      "bytes": 2025
+    },
+    "RESULT": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\RESULT.json",
+      "sha256": "6a93157d9164602ab55732b3215b8576503b382ea5f2adb9aae9d8cd0d9119cc",
+      "bytes": 734770
+    },
+    "Planning_freeze": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\PLANNING\\V42_DAYAHEAD_DECISION_FREEZE.json",
+      "sha256": "12d0f68e7b3266fb1ba1cf24c1d8f3962b9e003444423fa2ac0cfca44a41820b",
+      "bytes": 441358
+    },
+    "Actual_replay": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_FIXED_REPLAY_RECEIPT.json",
+      "sha256": "dd013c52f3bb70956852d94fa8c098ae9252bf7311b61f4efb528570df8030bd",
+      "bytes": 1841
+    },
+    "Planning_physical": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\SOURCE\\PLANNING_PHYSICAL.npz",
+      "sha256": "94a4d50e14590347a14d0326dbd8d65e5414219398afc6e870ed2c943515d8b9",
+      "bytes": 9219
+    },
+    "Planning_MESS": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\SOURCE\\PLANNING_MESS.npz",
+      "sha256": "605b6c0fd01fa4a965f8c4011b770ffacee489305321564c8eceee116b26a2df",
+      "bytes": 924
+    },
+    "Actual_fixed": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_FIXED_TRAJECTORY.npz",
+      "sha256": "49dcc690c8320ad40139fc49993a10b81872da007d1d451fa59f7607fb28c7bb",
+      "bytes": 6000
+    },
+    "Actual_MESS": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\ACTUAL\\ACTUAL_MESS_TRAJECTORY.npz",
+      "sha256": "605b6c0fd01fa4a965f8c4011b770ffacee489305321564c8eceee116b26a2df",
+      "bytes": 924
+    },
+    "raw_AC": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "33f8a8f0cb70f99d60936c4a569d573333a7b1e3c2cc8d658ba20b6ce47fa8ef",
+      "bytes": 850472
+    },
+    "raw_control_log": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\FRESH\\RAW_CONTROL_LOG.json",
+      "sha256": "a9f2bb81857863b1571c4307c844c1c6c4d2d0e50a6669d6fc6b7e2dc577fdfe",
+      "bytes": 47098
+    },
+    "raw_physical_input_log": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\FRESH\\RAW_PHYSICAL_INPUT_LOG.json",
+      "sha256": "07f4be5956a7539d37963cbad5199417ca52c782db1c21aaf8a633d90da7ac0e",
+      "bytes": 121980
+    },
+    "original_OPS_result": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-28\\attempts\\recovery_v9_01\\output\\OPERATIONS\\OPERATIONS_RESULT.json",
+      "sha256": "841de609d68999b8167ed7c71dd16598902048112f4581c09eceb3b6a1057aa9",
+      "bytes": 8882
+    }
+  },
+  "new_Planning_optimization": false,
+  "historical_plan_reuse_for_physical_diagnosis_only": true,
+  "Native_optimizer_calls": 0,
+  "independent_holdout_claim": false
+}

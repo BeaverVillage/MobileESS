@@ -1,0 +1,97 @@
+{
+  "schema": "V42_AC_ONLY_MONTHLY_FROZEN_DAY_RESULT_V1",
+  "status": "PASS",
+  "PASS": true,
+  "arm": "B0",
+  "day": "2025-05-01",
+  "scope": "EXISTING_FROZEN_PLAN_ACTUAL_ONLY",
+  "configuration": "SVR4",
+  "source_SHA": "ce30af2a74d9d2b6a2f2a33fee7a690927752f940f94bd466218075ba34cbf04",
+  "scenario_SHA": "c8a98155d897fa5e2fe5fbaea6fb170bf2e2a382c5bc9f802e168922469e60cb",
+  "infrastructure": {
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR4_INFRASTRUCTURE_06\\HARDWARE_FREEZE_RECEIPT.json",
+    "sha256": "61119445304423816bc67caf6745735e4850567798838b45f5b136543f12590a",
+    "bytes": 33423
+  },
+  "metric": {
+    "voltage_violation_cells": 0,
+    "Vmin": 0.9791850583223584,
+    "Vmax": 1.047538002685624,
+    "line_current_violation_cells": 0,
+    "transformer_current_violation_cells": 0,
+    "transformer_nameplate_current_violation_cells": 0,
+    "transformer_kva_violation_cells": 0,
+    "max_line_loading_percent": 71.64468403350196,
+    "loss_energy_slot_end_estimate_kWh": 1310.7928583434043,
+    "converged_slots": 96,
+    "control_complete_slots": 96,
+    "Original7_AUTO_all96": true,
+    "Fixed_ON_original_caps_all96": true,
+    "SVR_hardware_PASS_all96": true,
+    "old_and_added_node_phase_count": 398,
+    "native_physical_solve_count": 178,
+    "Original7_slot_end_tap_change_count": 34,
+    "upper_voltage_margin_pu": 0.0024619973143760188,
+    "lower_voltage_margin_pu": 0.029185058322358404
+  },
+  "raw_AC": {
+    "path": "D:\\v42_voltage_control_development_20261011\\AC_ONLY_SVR4_SVR7_CANARY_03\\SVR4\\days\\B0\\2025-05-01\\PAIR\\ON\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+    "sha256": "0514147d991e098b27b42ffebb1a5b3a8f1474f9bdbd8d979404e8f9895654b4",
+    "bytes": 849140
+  },
+  "physical_audit": {
+    "path": "D:\\v42_voltage_control_development_20261011\\AC_ONLY_SVR4_SVR7_CANARY_03\\SVR4\\days\\B0\\2025-05-01\\PAIR\\ON\\CAPCONTROL_SVR\\VOLTAGE_CONTROL_ACTUAL_PHYSICAL_AUDIT.json",
+    "sha256": "60beec895f02dc38c4318f8f89a3d03827b13f50de625fe15e0dfc057472d286",
+    "bytes": 372349
+  },
+  "OFF_original_arrays_bit_exact": true,
+  "Native_optimizer_calls": 0,
+  "Actual_PQ_repair": 0,
+  "Planning_reoptimized": false,
+  "new_model_E2E_qualified": false,
+  "original_inputs_unchanged": true,
+  "failures": [],
+  "REF_time_controlled": {
+    "configuration": "REF_TIME",
+    "metric": {
+      "voltage_violation_cells": 0,
+      "Vmin": 0.9777019161885104,
+      "Vmax": 1.0484953474555212,
+      "line_current_violation_cells": 0,
+      "transformer_current_violation_cells": 0,
+      "transformer_nameplate_current_violation_cells": 0,
+      "transformer_kva_violation_cells": 0,
+      "max_line_loading_percent": 71.33046371130919,
+      "loss_energy_slot_end_estimate_kWh": 1236.9847488119485,
+      "converged_slots": 96,
+      "control_complete_slots": 96,
+      "Original7_AUTO_all96": true,
+      "Fixed_ON_original_caps_all96": true,
+      "SVR_hardware_PASS_all96": true,
+      "old_and_added_node_phase_count": 386,
+      "native_physical_solve_count": 134,
+      "Original7_slot_end_tap_change_count": 35,
+      "upper_voltage_margin_pu": 0.0015046525444788461,
+      "lower_voltage_margin_pu": 0.027701916188510478
+    },
+    "physical_audit": {
+      "path": "D:\\v42_voltage_control_development_20261011\\AC_ONLY_SVR4_SVR7_CANARY_03\\SVR4\\days\\B0\\2025-05-01\\REF_TIME\\PHYSICAL\\VOLTAGE_CONTROL_ACTUAL_PHYSICAL_AUDIT.json",
+      "sha256": "8a749265d05030eccd3eb6630c875274b989738ae8c78f32b77fd922a22a5c67",
+      "bytes": 35634
+    },
+    "raw_AC": {
+      "path": "D:\\v42_voltage_control_development_20261011\\AC_ONLY_SVR4_SVR7_CANARY_03\\SVR4\\days\\B0\\2025-05-01\\REF_TIME\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+      "sha256": "094612e36dc14980b0621d8c36b1272f03b7032c75cc0c7f1dc762a0eec7a201",
+      "bytes": 847593
+    }
+  },
+  "wall_seconds": 31.414924600045197,
+  "timing": {
+    "source_and_input_preparation_seconds": 12.847789300023578,
+    "B0_STATIC_REF_AND_SVR_pair_seconds": 13.592443100002129,
+    "REF_TIME_including_audit_seconds": 4.548042499984149
+  },
+  "Fresh_context_count": 3,
+  "measurement_scope": "96 chronological slot-end measurements; not continuous transient certification",
+  "loss_energy_method": "sum(final slot loss W)*0.25h; not within-slot event integration"
+}

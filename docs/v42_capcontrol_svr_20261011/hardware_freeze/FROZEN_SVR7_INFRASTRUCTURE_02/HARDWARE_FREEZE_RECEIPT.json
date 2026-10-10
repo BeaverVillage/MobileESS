@@ -1,0 +1,671 @@
+{
+  "Actual_band_pu": [
+    0.95,
+    1.05
+  ],
+  "Cap4_fixed_ON_total_nameplate_kvar": 750,
+  "CapControl_count": 0,
+  "Native_optimizer_calls": 0,
+  "PASS": true,
+  "Planning_Actual_independent_Source_Initial_State": true,
+  "Planning_band_pu": [
+    0.95,
+    1.05
+  ],
+  "SourceCode_before_after_equal": true,
+  "across_days_start_from_common_initial_state": true,
+  "additional_RegControl_count": 21,
+  "additional_single_phase_transformer_count": 21,
+  "additional_unit_ids": [
+    "BUS79",
+    "BUS108",
+    "BUS50"
+  ],
+  "all31May_qualified": false,
+  "bank_nameplate_kVA_by_bank": {
+    "BUS108": 2882.132543794612,
+    "BUS50": 2882.132543794612,
+    "BUS79": 2882.132543794612,
+    "BUS83": 2882.132543794612,
+    "STA01": 750.0,
+    "STA06": 750.0,
+    "STA08": 750.0
+  },
+  "controller_contract": {
+    "bytes": 18745,
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\SVR_CONTROLLER_CONTRACT.json",
+    "sha256": "c3f085c07e5c75ac0dcf587707570444d0e4699d54a8f539fc707048df51d135"
+  },
+  "engineering_assumptions": {
+    "BUS108": [
+      "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+      "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+      "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+      "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+      "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+      "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No.",
+      "The existing line keeps its full length, LineCode, impedance and normal/emergency current ratings; only Bus2 is reconnected to the series-bank input.",
+      "The new bank is downstream of the original line and controls the original downstream MV bus. No fictitious direct line is created.",
+      "Coverage is a source topology cut, not proof that every downstream LV phase is safe or that this candidate dominates its alternative."
+    ],
+    "BUS50": [
+      "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+      "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+      "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+      "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+      "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+      "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No.",
+      "The existing line keeps its full length, LineCode, impedance and normal/emergency current ratings; only Bus2 is reconnected to the series-bank input.",
+      "The new bank is downstream of the original line and controls the original downstream MV bus. No fictitious direct line is created.",
+      "Coverage is a source topology cut, not proof that every downstream LV phase is safe or that this candidate dominates its alternative."
+    ],
+    "BUS79": [
+      "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+      "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+      "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+      "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+      "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+      "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No.",
+      "The existing line keeps its full length, LineCode, impedance and normal/emergency current ratings; only Bus2 is reconnected to the series-bank input.",
+      "The new bank is downstream of the original line and controls the original downstream MV bus. No fictitious direct line is created.",
+      "Coverage is a source topology cut, not proof that every downstream LV phase is safe or that this candidate dominates its alternative."
+    ],
+    "BUS83": [
+      "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+      "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+      "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+      "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+      "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+      "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+    ],
+    "STA01": [
+      "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+      "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+      "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+      "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+      "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+      "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+    ],
+    "STA06": [
+      "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+      "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+      "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+      "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+      "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+      "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+    ],
+    "STA08": [
+      "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+      "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+      "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+      "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+      "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+      "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+    ]
+  },
+  "execution_SourceSHA_after": "ce30af2a74d9d2b6a2f2a33fee7a690927752f940f94bd466218075ba34cbf04",
+  "execution_SourceSHA_before": "ce30af2a74d9d2b6a2f2a33fee7a690927752f940f94bd466218075ba34cbf04",
+  "existing_original_band_pu": [
+    0.95,
+    1.05
+  ],
+  "expectation": "Each DAYAHEAD/ACTUAL and each May day compiles fresh common source initial state; only chronological within-day native state carries. No Planning/Actual state or queues copied.",
+  "external_original_source_receipts": [
+    {
+      "bytes": 17008,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Master.dss",
+      "sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969"
+    },
+    {
+      "bytes": 11971,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEELineCodes.DSS",
+      "sha256": "be95f7afaf3e342b132ff2ef20a2b150e3b9966626cbf95eb47f5e9820953c40"
+    },
+    {
+      "bytes": 1861,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Regulators.DSS",
+      "sha256": "cd6ad77980dc018631ce39faab528afce40b0b9a50a6bc1c9ac8049ffb8207d7"
+    },
+    {
+      "bytes": 8289,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Loads.DSS",
+      "sha256": "fd28f52836205506a1980b52c5a7e12ca585aa626c52a6249502c1c3b2fc2255"
+    },
+    {
+      "bytes": 13785,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v35r3e_r1_beam\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+      "sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719"
+    },
+    {
+      "bytes": 6038,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_Planning_Line_Ratings_u080.dss",
+      "sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302"
+    },
+    {
+      "bytes": 9992,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\Generated_PhasePV.dss",
+      "sha256": "fb4149c6c79de49cd059a7d5b7dc5142ab405948a1876a24e94252019b392562"
+    },
+    {
+      "bytes": 11026,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\electrical.py",
+      "sha256": "afdbba3160538b0a70219b226c7ac7723e4c35787dbbd1300a464106686dab3f"
+    },
+    {
+      "bytes": 7299,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\planning.py",
+      "sha256": "ab4559c6f936da723e3fb315bdeb8b67aa10d7391d70cecfca4849b57e6c8cf7"
+    },
+    {
+      "bytes": 5399,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\replay.py",
+      "sha256": "4aa8fe3917f43c63711f31243135600bead708a9195714947f4e767eaf6a444d"
+    },
+    {
+      "bytes": 7078,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\actual.py",
+      "sha256": "2343d8b3f169d3009cb99b07157bce1cdb3c4fb13c76d10602491ce36305a294"
+    },
+    {
+      "bytes": 9906,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\actual.py",
+      "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9"
+    },
+    {
+      "bytes": 3190,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\grid.py",
+      "sha256": "1d5c353c1e767cae54520f04ad101e34a95da3d1976d9b449e366400fe78112d"
+    },
+    {
+      "bytes": 1920,
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\voltage.py",
+      "sha256": "d034ec5816b3b6d55e78a3877305be19b269a586f5f354e922566b16fa763751"
+    },
+    {
+      "bytes": 10254,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\grid_background_v16_2.py",
+      "sha256": "85d0e7f566ff90cc0124d5af7465e9586d1a34d9a396985aab4654f93302fb74"
+    },
+    {
+      "bytes": 29183,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\full_ieee123_g11_v16_1.py",
+      "sha256": "5dac427fbf0b2b3381a576c4eac96e6dfa445a690f40d90732b590bde6ee7c8e"
+    },
+    {
+      "bytes": 34946,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\run_v16_3_voltage_candidate.py",
+      "sha256": "10ab0ed968084ea10f41035847d42df0ed73a4b6cb0456f50637b1f2032ee335"
+    },
+    {
+      "bytes": 7314,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\mapping.py",
+      "sha256": "6ba0e0903f61f7f08d4548cd108912e6ea351760ff71377df8c13d4065cde403"
+    },
+    {
+      "bytes": 7091,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_mapping.py",
+      "sha256": "7e25e9befd8f80dba8cf1bc8cdba574ad1d77083c3b100430bea63abdfe9af89"
+    },
+    {
+      "bytes": 6855,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_backend.py",
+      "sha256": "55ad4be7175088ea24dbb611313635736f182f4d945f6f9b416b2ddec2c29956"
+    },
+    {
+      "bytes": 33322,
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\run_planning_ac_voltage_forensic_v1.py",
+      "sha256": "43705f551f461cdf95c509eb567807a1b662dfd82ff298c76fb6af1d025f6c29"
+    },
+    {
+      "bytes": 9640,
+      "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\audit_sources.py",
+      "sha256": "fcc5059b962bd81842a0706e35607b1269219ae2684f4d4a6ce10faf68f3f3d3"
+    }
+  ],
+  "freeze_script": {
+    "bytes": 24197,
+    "path": "D:\\v42_voltage_control_development_20261011\\freeze_svr_infrastructure_v2.py",
+    "sha256": "21c3805765d625d5ede513a4c62764f906c0236549ce218dbfcbc5b94a4ca5c5"
+  },
+  "freeze_script_used_copy": {
+    "bytes": 24197,
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\FREEZE_SCRIPT_USED.py",
+    "sha256": "21c3805765d625d5ede513a4c62764f906c0236549ce218dbfcbc5b94a4ca5c5"
+  },
+  "frozen_at_UTC": "2026-10-10T16:38:55.972039+00:00",
+  "full_network_physical_PASS": null,
+  "hardware_and_control_law_changes_from_selected_development_units": 0,
+  "independent_namespaces": [
+    {
+      "Cap4_fixed_ON": true,
+      "CapControl_count": 0,
+      "RegControl_count": 28,
+      "additional_single_phase_transformer_count": 21,
+      "clock_is_independent": true,
+      "day_label": "2025-05-01",
+      "independently_compiled": true,
+      "initial_state_SHA": "e286bc6ecbcf8842e20721497399dd09aa3abebd2783eafb4ded93a6f89150fa",
+      "initial_state_receipt": {
+        "bytes": 346404,
+        "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\DAYAHEAD_SOURCE_INITIAL_STATE.json",
+        "sha256": "905de4eefaaba5f6e99ca78323cc8b040a0de6386c87a0e5027a19aa85054d4a"
+      },
+      "namespace": "DAYAHEAD",
+      "native_TIME_at_zero": true,
+      "native_queue_initial_empty": true,
+      "new_initial_winding_taps_all1": true,
+      "original7_initial_taps": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "Cap4_fixed_ON": true,
+      "CapControl_count": 0,
+      "RegControl_count": 28,
+      "additional_single_phase_transformer_count": 21,
+      "clock_is_independent": true,
+      "day_label": "2025-05-01",
+      "independently_compiled": true,
+      "initial_state_SHA": "e286bc6ecbcf8842e20721497399dd09aa3abebd2783eafb4ded93a6f89150fa",
+      "initial_state_receipt": {
+        "bytes": 346400,
+        "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\ACTUAL_SOURCE_INITIAL_STATE.json",
+        "sha256": "adfdd3ce6e526e1ba7f4fc07865c10657f384dec16bd3fbe1af19391894f58de"
+      },
+      "namespace": "ACTUAL",
+      "native_TIME_at_zero": true,
+      "native_queue_initial_empty": true,
+      "new_initial_winding_taps_all1": true,
+      "original7_initial_taps": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "infrastructure_variant": "SVR7",
+  "initialization_guard_receipt": {
+    "bytes": 31939,
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\COMMAND_AND_GUARD_RECEIPT.json",
+    "sha256": "1c65ef043e3154298a2db52dbe87afc082908a5893239c8f6ac1d866da05c5d8"
+  },
+  "manufacturer_proof": "UNKNOWN",
+  "new_frozen_scenario_source_matched_96_reverification_required": true,
+  "new_model_regenerated": false,
+  "only_scenario_metadata_change": "svr.status DEVELOPMENT_NOT_FROZEN_NOT_CANARY -> FROZEN; recomputed scenario_SHA",
+  "optimized_Planning_Actual_E2E_qualified": false,
+  "original_Capacitor_state_setters": 0,
+  "original_RegControl_count": 7,
+  "original_RegControl_settings_changes": 0,
+  "original_RegControl_tap_setters": 0,
+  "original_SVR4_predecessor_receipt": {
+    "bytes": 17098,
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR4_INFRASTRUCTURE_03\\HARDWARE_FREEZE_RECEIPT.json",
+    "sha256": "d0139c54fb617d426405c0005cc50bc2581ffd2f4da956eac211a21233222c38"
+  },
+  "original_development_scenario_copy": {
+    "bytes": 20085,
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\ORIGINAL_DEVELOPMENT_SCENARIO.json",
+    "sha256": "765fee496371a6b1fd9f31feeda3aa70a6444e6f2d6e4f93c21677a53f013b8d"
+  },
+  "original_equipment_rating_changes": 0,
+  "original_native_compile_voltage_base_initialization_retained": true,
+  "phase_nameplate_kVA_by_bank": {
+    "BUS108": 960.7108479315374,
+    "BUS50": 960.7108479315374,
+    "BUS79": 960.7108479315374,
+    "BUS83": 960.7108479315374,
+    "STA01": 250.0,
+    "STA06": 250.0,
+    "STA08": 250.0
+  },
+  "physical_source_initial_state_SHA_excluding_execution_source_SHA": "e189c1432f1ff752240cce679d37dcde6efd4092c0711374a9be567a10a256bb",
+  "predecessor_development_scenario": {
+    "bytes": 20085,
+    "path": "D:\\v42_voltage_control_development_20261011\\SVR7_DEVELOPMENT_SCENARIOS_01\\B_SVR7_BUS50.json",
+    "sha256": "765fee496371a6b1fd9f31feeda3aa70a6444e6f2d6e4f93c21677a53f013b8d"
+  },
+  "predecessor_hardware_freeze_receipt": {
+    "bytes": 17098,
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR4_INFRASTRUCTURE_03\\HARDWARE_FREEZE_RECEIPT.json",
+    "sha256": "d0139c54fb617d426405c0005cc50bc2581ffd2f4da956eac211a21233222c38"
+  },
+  "predecessor_same_physical_hardware_component_sources": true,
+  "predecessor_same_physical_initial_state": null,
+  "predecessor_scenario_SHA": "715068223c18f6b4ac94f5d9050e520022859544ff2e836f8cc029297a0671ea",
+  "preserved_SVR4_native_readback": [
+    {
+      "namespace": "DAYAHEAD",
+      "original_and_four_RegControl_initial_properties_exact": true,
+      "original_compile_equipment_and_nodes_exact": true,
+      "original_four_added_bus_voltage_bases_exact": true,
+      "original_four_initial_winding_taps_exact": true,
+      "original_four_transformer_and_regcontrol_static_properties_exact": true,
+      "original_four_units_canonical_equal": true,
+      "preserved_original_and_four_equipment_rows_checked": 179
+    },
+    {
+      "namespace": "ACTUAL",
+      "original_and_four_RegControl_initial_properties_exact": true,
+      "original_compile_equipment_and_nodes_exact": true,
+      "original_four_added_bus_voltage_bases_exact": true,
+      "original_four_initial_winding_taps_exact": true,
+      "original_four_transformer_and_regcontrol_static_properties_exact": true,
+      "original_four_units_canonical_equal": true,
+      "preserved_original_and_four_equipment_rows_checked": 179
+    }
+  ],
+  "preserved_SVR4_units_canonical_SHA": "50107089d25566ad97141dcc2a8170fc4c8c7fdecc2cf8513988e70bfed94503",
+  "previous_diagnostic_results_are_for_previous_scenario_SHA": true,
+  "replay_logical_slots": 0,
+  "runtime_environment": {
+    "cwd": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2",
+    "original_declared_and_canonical_receipts": [
+      {
+        "canonical": {
+          "bytes": 17008,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Master.dss",
+          "sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969"
+        },
+        "declared": {
+          "bytes": 17008,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Master.dss",
+          "sha256": "cc7c2f153ca1e57f9fb5cad8b3c3e1ecbcb20c5db59ca4d65539411a50525969"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 11971,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEELineCodes.DSS",
+          "sha256": "be95f7afaf3e342b132ff2ef20a2b150e3b9966626cbf95eb47f5e9820953c40"
+        },
+        "declared": {
+          "bytes": 11971,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEELineCodes.DSS",
+          "sha256": "be95f7afaf3e342b132ff2ef20a2b150e3b9966626cbf95eb47f5e9820953c40"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 1861,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Regulators.DSS",
+          "sha256": "cd6ad77980dc018631ce39faab528afce40b0b9a50a6bc1c9ac8049ffb8207d7"
+        },
+        "declared": {
+          "bytes": 1861,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Regulators.DSS",
+          "sha256": "cd6ad77980dc018631ce39faab528afce40b0b9a50a6bc1c9ac8049ffb8207d7"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 8289,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Loads.DSS",
+          "sha256": "fd28f52836205506a1980b52c5a7e12ca585aa626c52a6249502c1c3b2fc2255"
+        },
+        "declared": {
+          "bytes": 8289,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\IEEE123Loads.DSS",
+          "sha256": "fd28f52836205506a1980b52c5a7e12ca585aa626c52a6249502c1c3b2fc2255"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 13785,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v35r3e_r1_beam\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+          "sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719"
+        },
+        "declared": {
+          "bytes": 13785,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v35r3e_r1_beam\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+          "sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 6038,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_Planning_Line_Ratings_u080.dss",
+          "sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302"
+        },
+        "declared": {
+          "bytes": 6038,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\opendss_assets\\Generated_Planning_Line_Ratings_u080.dss",
+          "sha256": "46d492b5b62400d33646089b80105d713250d0790ed7baab85b002d48121f302"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 9992,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\Generated_PhasePV.dss",
+          "sha256": "fb4149c6c79de49cd059a7d5b7dc5142ab405948a1876a24e94252019b392562"
+        },
+        "declared": {
+          "bytes": 9992,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\tmp\\c12_exact_sources_repo_cleanup\\c12_exact_sources\\v2038_parent\\Conversation3_Exact_AC_Remediation_Sweep_From_Conversation1_V2038\\reference\\power_v70_p4f_contract\\Generated_PhasePV.dss",
+          "sha256": "fb4149c6c79de49cd059a7d5b7dc5142ab405948a1876a24e94252019b392562"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 11026,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\electrical.py",
+          "sha256": "afdbba3160538b0a70219b226c7ac7723e4c35787dbbd1300a464106686dab3f"
+        },
+        "declared": {
+          "bytes": 11026,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\electrical.py",
+          "sha256": "afdbba3160538b0a70219b226c7ac7723e4c35787dbbd1300a464106686dab3f"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 7299,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\planning.py",
+          "sha256": "ab4559c6f936da723e3fb315bdeb8b67aa10d7391d70cecfca4849b57e6c8cf7"
+        },
+        "declared": {
+          "bytes": 7299,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\planning.py",
+          "sha256": "ab4559c6f936da723e3fb315bdeb8b67aa10d7391d70cecfca4849b57e6c8cf7"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 5399,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\replay.py",
+          "sha256": "4aa8fe3917f43c63711f31243135600bead708a9195714947f4e767eaf6a444d"
+        },
+        "declared": {
+          "bytes": 5399,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\replay.py",
+          "sha256": "4aa8fe3917f43c63711f31243135600bead708a9195714947f4e767eaf6a444d"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 7078,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\actual.py",
+          "sha256": "2343d8b3f169d3009cb99b07157bce1cdb3c4fb13c76d10602491ce36305a294"
+        },
+        "declared": {
+          "bytes": 7078,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_capacity\\actual.py",
+          "sha256": "2343d8b3f169d3009cb99b07157bce1cdb3c4fb13c76d10602491ce36305a294"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 9906,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\actual.py",
+          "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9"
+        },
+        "declared": {
+          "bytes": 9906,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\actual.py",
+          "sha256": "70b042aecaa89fc287d919534f90af8f55b12b3a688ead20be9ec3620bf165b9"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 3190,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\grid.py",
+          "sha256": "1d5c353c1e767cae54520f04ad101e34a95da3d1976d9b449e366400fe78112d"
+        },
+        "declared": {
+          "bytes": 3190,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\grid.py",
+          "sha256": "1d5c353c1e767cae54520f04ad101e34a95da3d1976d9b449e366400fe78112d"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 1920,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\voltage.py",
+          "sha256": "d034ec5816b3b6d55e78a3877305be19b269a586f5f354e922566b16fa763751"
+        },
+        "declared": {
+          "bytes": 1920,
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\v42_autonomous_grid_controls_pr\\v42_native\\voltage.py",
+          "sha256": "d034ec5816b3b6d55e78a3877305be19b269a586f5f354e922566b16fa763751"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 10254,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\grid_background_v16_2.py",
+          "sha256": "85d0e7f566ff90cc0124d5af7465e9586d1a34d9a396985aab4654f93302fb74"
+        },
+        "declared": {
+          "bytes": 10254,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\grid_background_v16_2.py",
+          "sha256": "85d0e7f566ff90cc0124d5af7465e9586d1a34d9a396985aab4654f93302fb74"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 29183,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\full_ieee123_g11_v16_1.py",
+          "sha256": "5dac427fbf0b2b3381a576c4eac96e6dfa445a690f40d90732b590bde6ee7c8e"
+        },
+        "declared": {
+          "bytes": 29183,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\full_ieee123_g11_v16_1.py",
+          "sha256": "5dac427fbf0b2b3381a576c4eac96e6dfa445a690f40d90732b590bde6ee7c8e"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 34946,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\run_v16_3_voltage_candidate.py",
+          "sha256": "10ab0ed968084ea10f41035847d42df0ed73a4b6cb0456f50637b1f2032ee335"
+        },
+        "declared": {
+          "bytes": 34946,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\run_v16_3_voltage_candidate.py",
+          "sha256": "10ab0ed968084ea10f41035847d42df0ed73a4b6cb0456f50637b1f2032ee335"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 7314,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\mapping.py",
+          "sha256": "6ba0e0903f61f7f08d4548cd108912e6ea351760ff71377df8c13d4065cde403"
+        },
+        "declared": {
+          "bytes": 7314,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\mapping.py",
+          "sha256": "6ba0e0903f61f7f08d4548cd108912e6ea351760ff71377df8c13d4065cde403"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 7091,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_mapping.py",
+          "sha256": "7e25e9befd8f80dba8cf1bc8cdba574ad1d77083c3b100430bea63abdfe9af89"
+        },
+        "declared": {
+          "bytes": 7091,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_mapping.py",
+          "sha256": "7e25e9befd8f80dba8cf1bc8cdba574ad1d77083c3b100430bea63abdfe9af89"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 6855,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_backend.py",
+          "sha256": "55ad4be7175088ea24dbb611313635736f182f4d945f6f9b416b2ddec2c29956"
+        },
+        "declared": {
+          "bytes": 6855,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\opendss_backend.py",
+          "sha256": "55ad4be7175088ea24dbb611313635736f182f4d945f6f9b416b2ddec2c29956"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 33322,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\run_planning_ac_voltage_forensic_v1.py",
+          "sha256": "43705f551f461cdf95c509eb567807a1b662dfd82ff298c76fb6af1d025f6c29"
+        },
+        "declared": {
+          "bytes": 33322,
+          "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\run_planning_ac_voltage_forensic_v1.py",
+          "sha256": "43705f551f461cdf95c509eb567807a1b662dfd82ff298c76fb6af1d025f6c29"
+        }
+      },
+      {
+        "canonical": {
+          "bytes": 9640,
+          "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\audit_sources.py",
+          "sha256": "fcc5059b962bd81842a0706e35607b1269219ae2684f4d4a6ce10faf68f3f3d3"
+        },
+        "declared": {
+          "bytes": 9640,
+          "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\audit_sources.py",
+          "sha256": "fcc5059b962bd81842a0706e35607b1269219ae2684f4d4a6ce10faf68f3f3d3"
+        }
+      }
+    ],
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python_executable": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "python_version": "3.11.7 (tags/v3.11.7:fa7a6f2, Dec  4 2023, 19:24:49) [MSC v.1937 64 bit (AMD64)]"
+  },
+  "runtime_physical_solve_count": 0,
+  "scenario": {
+    "bytes": 20058,
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\SCENARIO.json",
+    "sha256": "eac3bd7dae38bbebe47d43ff9cd0e266becb44c00bc26e839b7c461c8273fb82"
+  },
+  "scenario_SHA": "3b9398cabfcc7acb8cf3c9c92d14aea7e4418dcf8a0bd63519ba482e16345603",
+  "schema": "V42_SVR_HARDWARE_FREEZE_RECEIPT_V2",
+  "selected_bank_ids": [
+    "STA01",
+    "STA06",
+    "STA08",
+    "BUS83",
+    "BUS79",
+    "BUS108",
+    "BUS50"
+  ],
+  "selected_units_canonical_SHA_after": "ee3074abead17a596d73e35ca88108b314e44e8f5bb21eef36fe8c2bdebaab46",
+  "selected_units_canonical_SHA_before": "ee3074abead17a596d73e35ca88108b314e44e8f5bb21eef36fe8c2bdebaab46",
+  "source_and_tests_modified": 0,
+  "source_archive_receipt": {
+    "bytes": 920683,
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\SOURCE_EPOCH\\SOURCE_SNAPSHOT_RECEIPT.json",
+    "sha256": "6a6b87e18c0ea8a8259530873373b1291121e41f12594b8d5ca9c0d3abf37c2c"
+  },
+  "source_initial_state_SHA": "e286bc6ecbcf8842e20721497399dd09aa3abebd2783eafb4ded93a6f89150fa",
+  "status": "FROZEN_HARDWARE_ONLY_NOT_E2E_QUALIFIED",
+  "three_phase_bank_count": 7
+}

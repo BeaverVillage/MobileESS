@@ -1,0 +1,539 @@
+"""Read-only REF/TIME/SVR4/SVR7 comparison; no scientific source imports.
+
+Each invocation writes a new immutable directory. Pending/missing physical
+measurements are null, while historical plan metrics stay separately labelled.
+"""
+import argparse
+import csv
+from datetime import datetime,timezone
+import gzip
+import hashlib
+import html
+import json
+import math
+from pathlib import Path
+
+ROOT=Path(__file__).resolve().parent
+FIELDS=('status','Full_AC_Physical_PASS','logical_slots','physical_SolveSnap_count','additional_TIME_SolveSnap_count',
+    'Vmin','Vmax','upper_margin_pu','lower_margin_pu','full_voltage_violation_cells','original_voltage_violation_cells',
+    'added_voltage_violation_cells','line_current_violation_cells','transformer_current_violation_cells',
+    'transformer_nameplate_current_violation_cells','original_transformer_nameplate_current_violation_cells',
+    'added_transformer_nameplate_current_violation_cells','nameplate_current_guard_status',
+    'transformer_kva_violation_cells','max_line_loading_percent','max_all_line_terminal_loading_percent',
+    'original_raw_terminal1_max_line_loading_percent','converged_slots','control_complete_slots',
+    'loss_energy_slot_end_estimate_kWh','original_tap_change_observations','added_tap_change_observations',
+    'tap_direction_reversals_within_slot','original_added_opposite_direction_solve_observations',
+    'OFF_original_arrays_bit_exact','Source_inputs_unchanged','Native_optimizer_calls','wall_seconds','source_SHA','scenario_SHA')
+
+def record(path):
+    path=Path(path).resolve()
+    with path.open('rb') as stream:sha=hashlib.file_digest(stream,'sha256').hexdigest()
+    return dict(path=str(path),sha256=sha,bytes=path.stat().st_size)
+
+def read(path,consumed,expected=None):
+    before=record(path)
+    if expected is not None and before!=dict(expected,path=str(Path(expected['path']).resolve())):raise ValueError('RECEIPT_DRIFT:'+str(path))
+    value=json.loads(Path(path).read_text(encoding='utf-8-sig'))
+    if record(path)!=before:raise ValueError('CHANGED_DURING_READ:'+str(path))
+    consumed[before['path']]=before
+    return value
+
+def checked(item,consumed):
+    actual=record(item['path'])
+    if actual!=dict(item,path=str(Path(item['path']).resolve())):raise ValueError('EXACT_RECEIPT_DRIFT:'+item['path'])
+    consumed[actual['path']]=actual
+    return Path(actual['path'])
+
+def source_archive(path,source_SHA,consumed):
+    """Executed source is read from its immutable archive after a later epoch."""
+    snapshot=read(path,consumed)
+    actual=hashlib.sha256(json.dumps(snapshot['execution_sources'],sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()
+    if (actual!=source_SHA or snapshot['source_SHA']!=source_SHA or snapshot['PASS'] is not True
+        or snapshot['byte_verified'] is not True or snapshot['original_files_modified']!=0):
+        raise ValueError('EXECUTED_SOURCE_ARCHIVE_IDENTITY_REQUIRED')
+    archived={}
+    for row in snapshot['files']+snapshot['external_files']:
+        original=row['original'];saved=row['archived']
+        if saved['sha256']!=original['sha256'] or saved['bytes']!=original['bytes']:
+            raise ValueError('SOURCE_ARCHIVE_BYTE_MAPPING_DRIFT')
+        checked(saved,consumed)
+        key=(str(Path(original['path']).resolve()),original['sha256'],original['bytes'])
+        archived[key]=saved
+    for relative,sha in snapshot['execution_sources'].items():
+        if not any(row.get('relative_path')==relative and row['archived']['sha256']==sha for row in snapshot['files']):
+            raise ValueError('EXECUTION_SOURCE_MISSING_FROM_ARCHIVE:'+relative)
+    return archived
+
+def checked_executed_source(item,archived,consumed):
+    key=(str(Path(item['path']).resolve()),item['sha256'],item['bytes'])
+    if key in archived:return checked(archived[key],consumed)
+    return checked(item,consumed)
+
+def write_json(path,value):
+    path.write_text(json.dumps(value,ensure_ascii=False,indent=2,allow_nan=False)+'\n',encoding='utf8')
+
+def write_csv(path,rows,fields=None):
+    fields=fields or list(dict.fromkeys(k for r in rows for k in r))
+    with path.open('w',encoding='utf-8-sig',newline='') as f:
+        w=csv.DictWriter(f,fieldnames=fields);w.writeheader()
+        for row in rows:w.writerow({k:json.dumps(v,ensure_ascii=False) if isinstance(v,(dict,list)) else v for k,v in row.items()})
+
+def params(regulators):
+    return [dict(name=r['name'],transformer=r['transformer'],winding=r['winding'],min_tap=r['min_tap'],
+        max_tap=r['max_tap'],num_taps=r['num_taps'],tap_step=r['tap_step'],
+        properties={k:v for k,v in r['resolved_properties'].items() if k!='TapNum'}) for r in regulators]
+
+def physical_summary(result,audit,rows,events):
+    if (len(rows)!=96 or [r['slot'] for r in rows]!=list(range(96)) or audit['error'] is not None
+        or audit['source_SHA']!=result['source_SHA'] or audit['scenario_SHA']!=result['scenario_SHA']
+        or audit['arm']!=result['arm'] or audit['day']!=result['day'] or audit['namespace']!='ACTUAL'):
+        raise ValueError('EXACT_SOURCE_ARM_DAY_96_AUDIT_REQUIRED')
+    if (audit['DSTATCOM_object_count']!=0 or audit['Native_optimizer_calls']!=0
+        or audit['Actual_optimizer_calls']!=0 or audit['Actual_plan_repair_calls']!=0
+        or audit['control_MILP_variables']!=0 or audit['original_physical_ratings_changed']!=0
+        or not audit['Original_Fresh_and_96_slot_body_unchanged']
+        or not audit['Original_Source_SHA_before_after_equal']
+        or audit['Planning_Tap_or_Cap_state_transfer_to_Actual'] is not False):
+        raise ValueError('ORIGINAL_SOURCE_NATIVE_ZERO_PHYSICS_REQUIRED')
+    expected=params(audit['source_initial_controls']['regulators'])
+    if len(expected)!=7:raise ValueError('ORIGINAL_SEVEN_SOURCE_CONTROLS_REQUIRED')
+    controls=[r['settled_original_controls'] for r in rows]
+    for row in rows:
+        p=row['physical']
+        if (row['arm']!=result['arm'] or row['day']!=result['day'] or row['namespace']!='ACTUAL'
+            or sum(n['original'] for n in p['nodes'])!=386 or len(p['nodes'])!=len({n['node_phase'] for n in p['nodes']})
+            or p['all_original_and_added_axes_checked'] is not True
+            or row['capcontrol'] is not None or params(row['settled_original_controls']['original_regulators'])!=expected):
+            raise ValueError('FULL_AXES_ORIGINAL7_FIXED_CAPS_ONLY_REQUIRED')
+    for event in events:
+        c=event.get('controls') or {}
+        if not event['completed'] or params(c.get('original_regulators',[]))!=expected:
+            raise ValueError('EVERY_PHYSICAL_SOLVE_ORIGINAL7_SOURCE_SETTINGS_REQUIRED')
+    nodes=[n for r in rows for n in r['physical']['nodes']]
+    currents=[n for r in rows for n in r['physical']['currents']]
+    transformers=[n for r in rows for n in r['physical']['transformers']]
+    if any(not math.isfinite(n['voltage_pu']) for n in nodes) or any(not math.isfinite(n['loading_pu']) for n in currents+transformers):
+        raise ValueError('FINITE_ALL_AXES_REQUIRED')
+    vbad=sum(not .95<=n['voltage_pu']<=1.05 for n in nodes)
+    obad=sum(n['original'] and not .95<=n['voltage_pu']<=1.05 for n in nodes)
+    lbad=sum(n['element'].lower().startswith('line.') and not 0<=n['loading_pu']<=1 for n in currents)
+    tcbad=sum(n['element'].lower().startswith('transformer.') and not 0<=n['loading_pu']<=1 for n in currents)
+    tkbad=sum(not 0<=n['loading_pu']<=1 for n in transformers)
+    txcurrents=[n for n in currents if n['element'].lower().startswith('transformer.')]
+    nameplate_recorded=all('nameplate_current_loading_pu' in n and n['nameplate_current_loading_pu'] is not None for n in txcurrents)
+    if nameplate_recorded:
+        if any(not math.isfinite(n['nameplate_current_loading_pu']) or not math.isfinite(n['nameplate_current_A'])
+               or n['nameplate_current_A']<=0 or n['nameplate_current_loading_pu']!=n['current_A']/n['nameplate_current_A'] for n in txcurrents):
+            raise ValueError('EXACT_FINITE_NAMEPLATE_CURRENT_AUDIT_REQUIRED')
+        nbad=sum(not 0<=n['nameplate_current_loading_pu']<=1 for n in txcurrents)
+        onbad=sum(n['original'] and not 0<=n['nameplate_current_loading_pu']<=1 for n in txcurrents)
+        if sum(r['physical']['transformer_nameplate_current_violation_cells'] for r in rows)!=nbad:
+            raise ValueError('NAMEPLATE_CURRENT_PRODUCER_COUNT_DISAGREEMENT')
+    else:
+        nbad=onbad=None
+    converged=sum(c['solution_converged'] for c in controls)
+    complete=sum(r['control_actions_done_as_of_current_time'] for r in rows)
+    original_auto=all(c['all_seven_RegControls_enabled'] and c['configured_MaxControlIterations']==100
+        and c['configured_MaxIterations']==15 for c in controls)
+    fixed_caps=all(len(c['capacitors'])==4 and all(r['states']==[1] for r in c['capacitors']) for c in controls)
+    hardware=all(r['svr'] is None or (r['svr']['hardware_PASS'] and r['svr']['added_nodes_voltage_PASS']) for r in rows)
+    preserved=all(r['original_input_setpoints_unchanged'] for r in rows) and result['original_inputs_unchanged'] is True
+    passed=(not(vbad or lbad or tcbad or tkbad or nbad) and converged==96 and complete==96 and original_auto
+        and fixed_caps and hardware and preserved and result['OFF_original_arrays_bit_exact'] is True)
+    if 'PASS' in result and passed!=result['PASS']:raise ValueError('PRODUCER_LITERAL_PHYSICAL_PASS_DISAGREEMENT')
+    vmax=max(n['voltage_pu'] for n in nodes);vmin=min(n['voltage_pu'] for n in nodes)
+    max_line=100*max(n['loading_pu'] for n in currents if n['element'].lower().startswith('line.'))
+    return dict(status='PASS' if passed else 'PHYSICAL_FAIL',Full_AC_Physical_PASS=passed,logical_slots=96,
+        physical_SolveSnap_count=len(events),additional_TIME_SolveSnap_count=audit['additional_time_queue_solve_count'],
+        Vmin=vmin,Vmax=vmax,upper_margin_pu=1.05-vmax,lower_margin_pu=vmin-.95,
+        full_voltage_violation_cells=vbad,original_voltage_violation_cells=obad,added_voltage_violation_cells=vbad-obad,
+        line_current_violation_cells=lbad,transformer_current_violation_cells=tcbad,transformer_kva_violation_cells=tkbad,
+        transformer_nameplate_current_violation_cells=nbad,original_transformer_nameplate_current_violation_cells=onbad,
+        added_transformer_nameplate_current_violation_cells=None if nbad is None else nbad-onbad,
+        nameplate_current_guard_status='MEASURED_STRICT' if nameplate_recorded else 'NOT_CAPTURED_IN_PRIOR_SOURCE',
+        max_line_loading_percent=max_line,max_all_line_terminal_loading_percent=max_line,
+        original_raw_terminal1_max_line_loading_percent=(result.get('metric') or {}).get('max_line_loading_percent'),
+        converged_slots=converged,control_complete_slots=complete,Original7_AUTO_all96=original_auto,Fixed_ON_original_caps_all96=fixed_caps,
+        loss_energy_slot_end_estimate_kWh=sum(r['physical']['losses_W_var'][0] for r in rows)*.25/1000,
+        OFF_original_arrays_bit_exact=result['OFF_original_arrays_bit_exact'],Source_inputs_unchanged=preserved,
+        Native_optimizer_calls=result['Native_optimizer_calls'],wall_seconds=result['wall_seconds'],
+        source_SHA=result['source_SHA'],scenario_SHA=result['scenario_SHA'])
+
+def collect_taps(variant,arm,day,rows,events):
+    previous={};last_direction={};result=[];original_changes=added_changes=reversals=opposite_solves=0
+    by_slot={r['slot']:r for r in rows};indices={}
+    for i,event in enumerate(events):
+        controls=event['controls'];slot=event['slot'];index=indices.get(slot,0);indices[slot]=index+1
+        times=by_slot[slot]['time_control']['events'] if by_slot[slot]['time_control'] else []
+        seconds=times[index]['absolute_seconds'] if index<len(times) else None
+        changed=[]
+        for kind,group in [('ORIGINAL_REG7',controls['original_regulators']),('ADDED_SVR',controls['added_regulators'])]:
+            for r in group:
+                key=(kind,r['name']);tap=r['initial_tap'];old=previous.get(key);delta=None if old is None else tap-old
+                steps=None if delta is None else round(delta/r['tap_step'])
+                reversal=False
+                if steps:
+                    direction=1 if steps>0 else -1
+                    prior=last_direction.get((slot,key))
+                    reversal=prior is not None and prior!=direction;last_direction[(slot,key)]=direction
+                    changed.append((kind,direction))
+                    original_changes+=kind=='ORIGINAL_REG7';added_changes+=kind=='ADDED_SVR';reversals+=reversal
+                result.append(dict(variant=variant,arm=arm,day=day,slot_0based=slot,physical_solve_index=i,
+                    native_absolute_seconds=seconds,device_kind=kind,device=r['name'],tap=tap,previous_observed_tap=old,
+                    observed_delta_tap_steps=steps,within_slot_direction_reversal=reversal,
+                    solution_converged=controls['solution_converged'],all_original7_AUTO=controls['all_seven_RegControls_enabled'],
+                    scope='Aggregate tap change between real SolveSnap calls; unobserved inner first actions remain unknown'))
+                previous[key]=tap
+        opposite_solves+=bool({d for k,d in changed if k=='ORIGINAL_REG7'} and
+            any(od==-ad for k,od in changed if k=='ORIGINAL_REG7' for k2,ad in changed if k2=='ADDED_SVR'))
+    return result,dict(original_tap_change_observations=original_changes,added_tap_change_observations=added_changes,
+        tap_direction_reversals_within_slot=reversals,original_added_opposite_direction_solve_observations=opposite_solves)
+
+def tap_summary(taps,summaries):
+    groups={}
+    for row in taps:
+        key=tuple(row[k] for k in ('variant','arm','day','device_kind','device'))
+        entry=groups.setdefault(key,dict(zip(('variant','arm','day','device_kind','device'),key),
+            observations=0,observed_change_events=0,boost_events=0,buck_events=0,
+            boost_tap_steps=0,buck_tap_steps=0,absolute_observed_tap_steps=0,
+            within_slot_direction_reversals=0,first_observed_tap=row['tap'],last_observed_tap=row['tap'],
+            min_observed_tap=row['tap'],max_observed_tap=row['tap']))
+        steps=row['observed_delta_tap_steps']
+        entry['observations']+=1;entry['last_observed_tap']=row['tap']
+        entry['min_observed_tap']=min(entry['min_observed_tap'],row['tap'])
+        entry['max_observed_tap']=max(entry['max_observed_tap'],row['tap'])
+        entry['within_slot_direction_reversals']+=bool(row['within_slot_direction_reversal'])
+        if steps:
+            entry['observed_change_events']+=1;entry['absolute_observed_tap_steps']+=abs(steps)
+            entry['boost_events']+=steps>0;entry['buck_events']+=steps<0
+            entry['boost_tap_steps']+=max(0,steps);entry['buck_tap_steps']+=max(0,-steps)
+        value=summaries[key[:3]]
+        entry['source_SHA']=value['source_SHA'];entry['scenario_SHA']=value['scenario_SHA']
+        entry['scope']='Observed aggregate tap differences between genuine automatic SolveSnap calls; inner native actions are not individually observed'
+    return [groups[key] for key in sorted(groups)]
+
+def collect_slot_details(variant,result,rows,details,voltagecells,thermalcells,failedslots):
+    """Record every measured failure, with exact post-control tap states."""
+    for row in rows:
+        p=row['physical'];controls=row['settled_original_controls']
+        base=dict(variant=variant,arm=result['arm'],day=result['day'],slot_0based=row['slot'])
+        original_taps={r['name']:r['initial_tap'] for r in controls['original_regulators']}
+        added_taps={r['name']:r['initial_tap'] for r in controls['added_regulators']}
+        state=dict(original_Reg7_taps=original_taps,added_SVR_taps=added_taps,
+            original_cap_states={r['name']:r['states'] for r in controls['capacitors']},
+            source_SHA=result['source_SHA'],scenario_SHA=result['scenario_SHA'])
+        details.append(dict(**base,original_node_count=sum(n['original'] for n in p['nodes']),all_node_count=len(p['nodes']),
+            Vmin=p['voltage_min_pu'],Vmax=p['voltage_max_pu'],upper_margin_pu=1.05-p['voltage_max_pu'],
+            lower_margin_pu=p['voltage_min_pu']-.95,loss_W=p['losses_W_var'][0],loss_var=p['losses_W_var'][1],
+            whole_network_PASS=p['PASS'],Original7_AUTO=controls['all_seven_RegControls_enabled'],
+            line_current_violation_cells=p['line_current_violation_cells'],
+            transformer_current_violation_cells=p['transformer_current_violation_cells'],
+            transformer_nameplate_current_violation_cells=p.get('transformer_nameplate_current_violation_cells'),
+            transformer_kva_violation_cells=p['transformer_kva_violation_cells']))
+        slot_voltage=[];slot_thermal=[]
+        for node in p['nodes']:
+            if not .95<=node['voltage_pu']<=1.05:
+                cell=dict(**base,node_phase=node['node_phase'],original=node['original'],voltage_pu=node['voltage_pu'],
+                    upper_exceedance_pu=max(0,node['voltage_pu']-1.05),lower_exceedance_pu=max(0,.95-node['voltage_pu']),**state)
+                voltagecells.append(cell);slot_voltage.append(cell)
+        for current in p['currents']:
+            transformer=current['element'].lower().startswith('transformer.')
+            groups=[('TRANSFORMER_CURRENT_NATIVE_NORMALAMPS' if transformer else 'LINE_CURRENT_NATIVE_NORMALAMPS',
+                     current['loading_pu'],current['NormalAmps'])]
+            if transformer and current.get('nameplate_current_loading_pu') is not None:
+                groups.append(('TRANSFORMER_CURRENT_ORIGINAL_NAMEPLATE',current['nameplate_current_loading_pu'],current['nameplate_current_A']))
+            for basis,loading,limit in groups:
+                if not 0<=loading<=1:
+                    cell=dict(**base,violation_basis=basis,element=current['element'],terminal=current['terminal'],phase=current['phase'],
+                        original=current['original'],current_A=current['current_A'],current_limit_A=limit,loading_pu=loading,
+                        apparent_kVA=None,rating_kVA=None,upper_exceedance_pu=max(0,loading-1),**state)
+                    thermalcells.append(cell);slot_thermal.append(cell)
+        for winding in p['transformers']:
+            if not 0<=winding['loading_pu']<=1:
+                cell=dict(**base,violation_basis='TRANSFORMER_WINDING_KVA',element=winding['element'],terminal=winding['terminal'],phase=None,
+                    original=winding['original'],current_A=None,current_limit_A=None,loading_pu=winding['loading_pu'],
+                    apparent_kVA=winding['kVA'],rating_kVA=winding['rating_kVA'],upper_exceedance_pu=max(0,winding['loading_pu']-1),**state)
+                thermalcells.append(cell);slot_thermal.append(cell)
+        if not row['PASS']:
+            failedslots.append(dict(**base,**state,voltage_violation_cells=slot_voltage,current_or_kva_violation_cells=slot_thermal,
+                Full_AC_Physical_PASS=False,solution_converged=controls['solution_converged'],
+                ControlActionsDone=controls['ControlActionsDone'],control_actions_done_as_of_current_time=row['control_actions_done_as_of_current_time'],
+                Original7_AUTO=controls['all_seven_RegControls_enabled'],
+                original_regulator_settings_SHA=controls['regulator_settings_SHA'],
+                SVR_hardware_PASS=None if row['svr'] is None else row['svr']['hardware_PASS'],
+                SVR_added_nodes_voltage_PASS=None if row['svr'] is None else row['svr']['added_nodes_voltage_PASS'],
+                losses_W_var=p['losses_W_var'],new_Planning_E2E_status='NOT_RUN'))
+
+def margin_svg(path,monthly):
+    width=1080;height=1060;left=84;right=32;top=70;panel_width=455;panel_height=185
+    colors={'SVR4':'#266dd3','SVR7':'#e06b1d'}
+    svg=[f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
+        '<rect width="100%" height="100%" fill="white"/>',
+        '<style>text{font-family:Arial,sans-serif;font-size:12px}</style>',
+        '<text x="24" y="26" font-size="18">SVR4 / SVR7 measured voltage margins, May 2025</text>',
+        '<text x="24" y="48">Missing days have no plotted value. Slot-end AC-only measurements; new planning E2E remains NOT_RUN.</text>']
+    for index,arm in enumerate(('B0','B1','B2','B3')):
+        for col,metric in enumerate(('upper_margin_pu','lower_margin_pu')):
+            x=left+col*515;y=top+index*242
+            values=[r[metric] for r in monthly if r['arm']==arm and r['variant'] in colors and r.get(metric) is not None]
+            low=min([-.001]+values);high=max([.008]+values);span=high-low
+            py=lambda v:y+panel_height-(v-low)/span*panel_height
+            svg.append(f'<text x="{x}" y="{y-12}">{arm} · {"1.05 − Vmax" if col==0 else "Vmin − 0.95"} (pu)</text>')
+            for tick in range(5):
+                v=low+tick*span/4;yy=py(v)
+                svg+= [f'<line x1="{x}" y1="{yy:.2f}" x2="{x+panel_width}" y2="{yy:.2f}" stroke="#e8e8e8"/>',
+                    f'<text x="{x-8}" y="{yy+4:.2f}" text-anchor="end">{v:.4f}</text>']
+            svg.append(f'<line x1="{x}" y1="{py(0):.2f}" x2="{x+panel_width}" y2="{py(0):.2f}" stroke="#bc3030" stroke-dasharray="4 3"/>')
+            for day in (1,8,15,22,31):
+                xx=x+(day-1)*panel_width/30
+                svg.append(f'<text x="{xx:.2f}" y="{y+panel_height+18}" text-anchor="middle">May {day:02d}</text>')
+            for variant,color in colors.items():
+                for r in monthly:
+                    if r['arm']==arm and r['variant']==variant and r.get(metric) is not None:
+                        xx=x+(int(r['day'][-2:])-1)*panel_width/30;yy=py(r[metric])
+                        svg.append(f'<circle cx="{xx:.3f}" cy="{yy:.3f}" r="4" fill="{color}"><title>{html.escape(variant+" "+r["day"]+" "+str(r[metric]))}</title></circle>')
+            if not values:svg.append(f'<text x="{x+panel_width/2}" y="{y+panel_height/2}" text-anchor="middle" fill="#777">NOT_TESTED</text>')
+    svg += ['<text x="84" y="1040" fill="#266dd3">● SVR4</text>','<text x="190" y="1040" fill="#e06b1d">● SVR7</text>','</svg>']
+    path.write_text('\n'.join(svg)+'\n',encoding='utf8')
+
+def collect(args):
+    output=args.output.resolve();output.mkdir(parents=True,exist_ok=False);consumed={}
+    inventory=read(args.inventory,consumed)
+    dispatch=None
+    dispatch_root=args.dispatch_root
+    if dispatch_root is None and args.svr4_root is not None and args.svr7_root is not None and args.svr4_root.parent==args.svr7_root.parent:
+        dispatch_root=args.svr4_root.parent
+    if dispatch_root is not None:
+        dispatch_path=next((dispatch_root/name for name in ('DISPATCH_FINAL_RECEIPT.json','DISPATCH_FINAL_RECEIPT_RECOVERY.json','DISPATCH_PROGRESS.json') if (dispatch_root/name).exists()),None)
+        if dispatch_path is not None:
+            # Live progress may legitimately advance while immutable physical
+            # evidence is collected. Pin the observed value into this output;
+            # final dispatch receipts remain subject to before/after checks.
+            live=dispatch_path.name=='DISPATCH_PROGRESS.json'
+            observed={} if live else consumed
+            dispatch=read(dispatch_path,observed)
+            if live:
+                write_json(output/'DISPATCH_OBSERVED_SNAPSHOT.json',dict(observed_UTC=datetime.now(timezone.utc).isoformat(),
+                    observed_progress_receipt=record(dispatch_path),value=dispatch,mutable_progress_only=True))
+            if args.required_source_SHA is not None and dispatch['source_SHA']!=args.required_source_SHA:
+                raise ValueError('DISPATCH_FINAL_COHORT_SOURCE_DRIFT')
+            if dispatch_path.name=='DISPATCH_FINAL_RECEIPT_RECOVERY.json':
+                if (dispatch.get('source_before_after_equal') is not True or dispatch.get('source_after_SHA')!=dispatch['source_SHA']
+                    or dispatch.get('physical_receipts_rewritten')!=0 or dispatch.get('additional_AC_or_optimizer_calls')!=0
+                    or dispatch.get('original_dispatcher_and_used_code_preserved') is not True or dispatch.get('running')!=[]):
+                    raise ValueError('TERMINAL_REPORTING_RECOVERY_ONLY_REQUIRED')
+                for item in [dispatch['dispatch_source_receipt'],dispatch['terminal_progress_receipt']]+dispatch['actual_day_results']:
+                    checked(item,consumed)
+                if len(dispatch['actual_day_results'])!=dispatch['completed_comparisons']:
+                    raise ValueError('RECOVERY_ACTUAL_DAY_COUNT_DRIFT')
+                write_json(output/'DISPATCH_COMPLETION_JOURNAL_REPORT.json',dict(recovery_receipt=record(dispatch_path),
+                    status='EXTERNAL_REPORTING_IMPLEMENTATION_FAILURE_AFTER_VALID_PHYSICAL_RESULTS',
+                    error=dispatch['completion_journal_error'],physical_day_results_modified=False,
+                    physical_day_implementation_failures=0,physical_stop_reason=dispatch['stopped_reason'],
+                    additional_AC_or_optimizer_calls=0,source_SHA=dispatch['source_SHA']))
+    available={(r['arm'],r['day']):r for r in inventory['rows']}
+    summaries={};details=[];taps=[];failures=[];timings=[];provenance=[];comparison=[];cellrows=[];thermalcells=[];failedslots=[]
+    roots={'SVR4':args.svr4_root,'SVR7':args.svr7_root}
+    for variant,root in roots.items():
+        if root is None or not root.exists():continue
+        for path in sorted(root.rglob('AC_ONLY_DAY_RESULT.json')):
+            result=read(path,consumed);key=(variant,result['arm'],result['day'])
+            if result['configuration']!=variant:raise ValueError('DIRECTORY_CONFIGURATION_IDENTITY_DRIFT')
+            if key in summaries:raise ValueError('DUPLICATE_VARIANT_ARM_DAY:'+str(key))
+            if (result['arm'],result['day']) not in available or not available[(result['arm'],result['day'])]['diagnostic_replay_ready']:
+                raise ValueError('RESULT_WITHOUT_ADMITTED_ORIGINAL_PLAN:'+str(key))
+            if result['status']=='IMPLEMENTATION_OR_SOURCE_FAILURE':
+                summaries[key]=dict(status=result['status'],Full_AC_Physical_PASS=None,Native_optimizer_calls=result['Native_optimizer_calls'])
+                failures.append(dict(variant=variant,result_receipt=record(path),error=result.get('error')));continue
+            if args.required_source_SHA is not None and result['source_SHA']!=args.required_source_SHA:
+                raise ValueError('FINAL_COHORT_EXECUTION_SOURCE_DRIFT')
+            if (result['Native_optimizer_calls']!=0 or result['Actual_PQ_repair']!=0 or result['Planning_reoptimized'] is not False
+                or result['new_model_E2E_qualified'] is not False):raise ValueError('AC_ONLY_NO_NEW_PLANNING_E2E_REQUIRED')
+            job=read(path.parent/'JOB_SOURCE_PROVENANCE.json',consumed)
+            if (job['source_SHA']!=result['source_SHA'] or job['scenario_SHA']!=result['scenario_SHA']
+                or job['configuration']!=variant or job['new_Planning_optimization'] is not False):
+                raise ValueError('ORIGINAL_PLAN_JOB_SOURCE_PROVENANCE_DRIFT')
+            archive_path=path.parent/'SOURCE_EPOCH/SOURCE_SNAPSHOT_RECEIPT.json'
+            archived=source_archive(archive_path,result['source_SHA'],consumed)
+            for item in job['original_frozen_receipts'].values():checked(item,consumed)
+            frozen=read(result['infrastructure']['path'],consumed,result['infrastructure'])
+            if (frozen['execution_SourceSHA_before']!=result['source_SHA']
+                or frozen['execution_SourceSHA_after']!=result['source_SHA']
+                or frozen['scenario_SHA']!=result['scenario_SHA'] or frozen['infrastructure_variant']!=variant):
+                raise ValueError('FROZEN_INFRASTRUCTURE_SOURCE_VARIANT_DRIFT')
+            audit=read(result['physical_audit']['path'],consumed,result['physical_audit'])
+            rows=read(audit['slots_receipt']['path'],consumed,audit['slots_receipt'])
+            events=read(audit['physical_solve_events_receipt']['path'],consumed,audit['physical_solve_events_receipt'])
+            checked(result['raw_AC'],consumed)
+            for item in audit['original_sources']:checked_executed_source(item,archived,consumed)
+            summary=physical_summary(result,audit,rows,events)
+            if args.require_nameplate_current and summary['nameplate_current_guard_status']!='MEASURED_STRICT':
+                raise ValueError('FINAL_COHORT_STRICT_NAMEPLATE_CURRENT_NOT_CAPTURED')
+            taprows,tapmetrics=collect_taps(variant,result['arm'],result['day'],rows,events);taps+=taprows;summary.update(tapmetrics)
+            summaries[key]=summary
+            provenance.append(dict(variant=variant,arm=result['arm'],day=result['day'],result_receipt=record(path),
+                physical_audit_receipt=result['physical_audit'],raw_AC_receipt=result['raw_AC'],infrastructure=result['infrastructure'],
+                execution_source_archive_receipt=record(archive_path),
+                Original_Frozen_Plan=available[(result['arm'],result['day'])]['receipts'],OFF_original_arrays_bit_exact=summary['OFF_original_arrays_bit_exact']))
+            timings.append(dict(variant=variant,arm=result['arm'],day=result['day'],wall_seconds=result['wall_seconds'],
+                wall_time_scope='Archives + OriginalSTATIC_REF + scenarioFresh96 + REF_TIME96 forSVR4; not isolated scenario runtime',
+                timing=result.get('timing'),Fresh_context_count=result.get('Fresh_context_count'),
+                logical_slots=96,physical_SolveSnap_count=len(events),Native_optimizer_calls=0))
+            if result.get('REF_time_controlled') is not None:
+                ref=result['REF_time_controlled']
+                ra=read(ref['physical_audit']['path'],consumed,ref['physical_audit'])
+                rr=read(ra['slots_receipt']['path'],consumed,ra['slots_receipt'])
+                re=read(ra['physical_solve_events_receipt']['path'],consumed,ra['physical_solve_events_receipt'])
+                checked(ref['raw_AC'],consumed)
+                ref_result=dict(source_SHA=ra['source_SHA'],scenario_SHA=ra['scenario_SHA'],arm=result['arm'],day=result['day'],
+                    original_inputs_unchanged=True,OFF_original_arrays_bit_exact=result['OFF_original_arrays_bit_exact'],
+                    Native_optimizer_calls=0,wall_seconds=None,metric=ref.get('metric'))
+                rsummary=physical_summary(ref_result,ra,rr,re)
+                rt,rm=collect_taps('REF_TIME',result['arm'],result['day'],rr,re);taps+=rt;rsummary.update(rm)
+                summaries[('REF_TIME',result['arm'],result['day'])]=rsummary
+                collect_slot_details('REF_TIME',ref_result,rr,details,cellrows,thermalcells,failedslots)
+            collect_slot_details(variant,result,rows,details,cellrows,thermalcells,failedslots)
+    monthly=[]
+    for row in sorted(inventory['rows'],key=lambda r:(r['day'],r['arm'])):
+        arm,day=row['arm'],row['day'];base=dict(arm=arm,day=day,available_original_frozen_plan=row['diagnostic_replay_ready'],
+            original_availability=row['availability'],original_Plan_algorithm_SourceSHA=row.get('source_proof',{}).get('execution_source_SHA'),
+            historical_original_voltage_violation_cells=(row.get('metrics') or {}).get('voltage_violations'),new_Planning_Actual_E2E_status='NOT_RUN',
+            comparison_scope='Same existing frozen plan, fresh AC-only; not new system reoptimization',
+            not_tested_reason='' if row['diagnostic_replay_ready'] else 'Original qualified frozen plan/terminal chain unavailable')
+        compare=dict(base)
+        for variant in ('REF_TIME','SVR4','SVR7'):
+            value=summaries.get((variant,arm,day),dict(status='NOT_TESTED'))
+            if value['status']=='NOT_TESTED' and row['diagnostic_replay_ready'] and dispatch and dispatch.get('stopped_reason'):
+                physical_stop='PHYSICAL_CANARY_FAILED' in dispatch['stopped_reason']
+                value=dict(status='NOT_TESTED_CANARY_GATE' if physical_stop else 'NOT_TESTED_IMPLEMENTATION_GATE')
+            entry=dict(base,variant=variant,**{f:value.get(f) for f in FIELDS});monthly.append(entry)
+            if entry['status'].startswith('NOT_TESTED') and row['diagnostic_replay_ready']:
+                entry['not_tested_reason']=dispatch['stopped_reason'] if dispatch and dispatch.get('stopped_reason') else 'Admitted original inputs; physical replay not completed'
+            compare.update({variant+'_'+f:value.get(f) for f in FIELDS})
+        four=summaries.get(('SVR4',arm,day));seven=summaries.get(('SVR7',arm,day))
+        paired=four is not None and seven is not None and all(r.get('logical_slots')==96 for r in (four,seven))
+        compare['paired_physical_96_comparison_available']=paired
+        if paired:
+            if four['source_SHA']!=seven['source_SHA']:raise ValueError('COMPARISON_DIFFERENT_EXECUTION_SOURCE:'+arm+day)
+            compare['SVR7_minus_SVR4_upper_margin_pu']=seven['upper_margin_pu']-four['upper_margin_pu']
+            compare['SVR7_minus_SVR4_lower_margin_pu']=seven['lower_margin_pu']-four['lower_margin_pu']
+            compare['SVR7_minus_SVR4_loss_energy_slot_end_estimate_kWh']=seven['loss_energy_slot_end_estimate_kWh']-four['loss_energy_slot_end_estimate_kWh']
+        else:
+            for f in ('upper_margin_pu','lower_margin_pu','loss_energy_slot_end_estimate_kWh'):compare['SVR7_minus_SVR4_'+f]=None
+        comparison.append(compare)
+    write_csv(output/'SVR4_VS_SVR7_CANARY_COMPARISON.csv',comparison)
+    for variant in ('REF_TIME','SVR4','SVR7'):write_csv(output/('MAY31_'+variant+'_FROZEN_REPLAY_SUMMARY.csv'),[r for r in monthly if r['variant']==variant])
+    write_csv(output/'SVR7_VOLTAGE_MARGIN_BY_DAY.csv',[{k:r[k] for k in ('arm','day','status','Vmin','Vmax','upper_margin_pu','lower_margin_pu','full_voltage_violation_cells','Full_AC_Physical_PASS','source_SHA','scenario_SHA')}
+        for r in monthly if r['variant']=='SVR7'])
+    margin_svg(output/'SVR4_VS_SVR7_VOLTAGE_MARGIN.svg',monthly)
+    prior=[]
+    for root in args.prior_root:
+        for path in sorted(root.rglob('AC_ONLY_DAY_RESULT.json')):
+            value=read(path,consumed)
+            prior.append(dict(receipt=record(path),status=value['status'],arm=value['arm'],day=value['day'],
+                configuration=value['configuration'],error=value.get('error'),physical_result_available=value.get('metric') is not None))
+    write_json(output/'SUPERSEDED_ATTEMPT_RECEIPTS.json',prior)
+    write_csv(output/'FULL_96SLOT_LOSS_MARGIN_RESULTS.csv',details,['variant','arm','day','slot_0based','original_node_count','all_node_count','Vmin','Vmax','upper_margin_pu','lower_margin_pu','loss_W','loss_var','whole_network_PASS','Original7_AUTO','line_current_violation_cells','transformer_current_violation_cells','transformer_nameplate_current_violation_cells','transformer_kva_violation_cells'])
+    full_tap_path=output/'SVR7_TAP_INTERACTION_AUDIT.csv'
+    write_csv(full_tap_path,taps,['variant','arm','day','slot_0based','physical_solve_index','native_absolute_seconds','device_kind','device','tap','previous_observed_tap','observed_delta_tap_steps','within_slot_direction_reversal','solution_converged','all_original7_AUTO','scope'])
+    compact_tap_path=output/'SVR7_TAP_INTERACTION_COMPACT_SUMMARY.csv'
+    compact_taps=tap_summary(taps,summaries);write_csv(compact_tap_path,compact_taps)
+    gzip_tap_path=output/'FULL_SVR7_TAP_INTERACTION_AUDIT.csv.gz'
+    with full_tap_path.open('rb') as original,gzip_tap_path.open('wb') as target:
+        with gzip.GzipFile(filename='',mode='wb',fileobj=target,mtime=0) as zipped:
+            while chunk:=original.read(1024*1024):zipped.write(chunk)
+    with gzip.open(gzip_tap_path,'rb') as stream:
+        if hashlib.file_digest(stream,'sha256').hexdigest()!=record(full_tap_path)['sha256']:
+            raise ValueError('FULL_TAP_GZIP_BYTE_REPRODUCTION_FAILED')
+    write_json(output/'FULL_TAP_TRAJECTORY_LINK.json',dict(full_csv=record(full_tap_path),gzip_full_csv=record(gzip_tap_path),
+        compact_summary=record(compact_tap_path),full_observed_rows=len(taps),compact_control_day_rows=len(compact_taps),
+        gzip_decompressed_bytes_SHA_matches_full=True,full_csv_below_50_MiB=full_tap_path.stat().st_size<50*1024*1024,
+        omitted_scientific_rows=0,scope='All collected REF_TIME/SVR4/SVR7 genuine SolveSnap observations; compact table does not replace full trajectories'))
+    write_csv(output/'ALL_REMOTE_VOLTAGE_VIOLATION_CELLS.csv',cellrows,['variant','arm','day','slot_0based','node_phase','original','voltage_pu','upper_exceedance_pu','lower_exceedance_pu','original_Reg7_taps','added_SVR_taps','original_cap_states','source_SHA','scenario_SHA'])
+    thermalfields=['variant','arm','day','slot_0based','violation_basis','element','terminal','phase','original','current_A','current_limit_A','loading_pu','apparent_kVA','rating_kVA','upper_exceedance_pu','original_Reg7_taps','added_SVR_taps','original_cap_states','source_SHA','scenario_SHA']
+    write_csv(output/'ALL_CURRENT_KVA_VIOLATION_CELLS.csv',thermalcells,thermalfields)
+    for filename,bases in [('ALL_LINE_CURRENT_VIOLATION_CELLS.csv',{'LINE_CURRENT_NATIVE_NORMALAMPS'}),
+                          ('ALL_TRANSFORMER_CURRENT_VIOLATION_CELLS.csv',{'TRANSFORMER_CURRENT_NATIVE_NORMALAMPS','TRANSFORMER_CURRENT_ORIGINAL_NAMEPLATE'}),
+                          ('ALL_TRANSFORMER_KVA_VIOLATION_CELLS.csv',{'TRANSFORMER_WINDING_KVA'})]:
+        write_csv(output/filename,[r for r in thermalcells if r['violation_basis'] in bases],thermalfields)
+    write_json(output/'FAILED_SLOT_PHYSICAL_DETAILS.json',dict(scope='Measured slot-end voltage/current/nameplate/kVA failures with exact observed original/SVR taps; control failure separated',rows=failedslots,new_Planning_E2E_status='NOT_RUN'))
+    first_pair=[next((r for r in timings if r['variant']==v and r['arm']=='B2' and r['day']=='2025-05-01'),None)
+                for v in ('SVR4','SVR7')]
+    first_pair_seconds=sum(r['wall_seconds'] for r in first_pair) if all(first_pair) else None
+    first_pair_contexts=sum(r['Fresh_context_count'] for r in first_pair) if all(first_pair) else None
+    admitted=sum(r['diagnostic_replay_ready'] for r in inventory['rows'])
+    naive=None if first_pair_seconds is None else dict(
+        scope='Naive estimate from one measured date pair; not an observed monthly completion rate',
+        admitted_date_pairs=admitted,first_B2_May01_SVR4_plus_SVR7_wall_seconds=first_pair_seconds,
+        first_B2_May01_total_independent_Fresh_contexts=first_pair_contexts,
+        first_B2_May01_principal_TIME_contexts=3,repeated_Original_STATIC_bit_proof_contexts=2,
+        sequential_minutes=first_pair_seconds*admitted/60,
+        ideal_three_worker_minutes=first_pair_seconds*admitted/(60*3),
+        assumptions='Identical date costs and perfect three-worker concurrency; serial known-day and representative gates, repeat archives, filesystem contention and IO overhead are not included',
+        observed_parallel_throughput_used=False,remaining_minutes=None)
+    write_json(output/'SVR7_AC_ONLY_EXECUTION_TIME.json',dict(status='MEASURED_PARTIAL' if timings else 'NOT_TESTED',measurements=timings,
+        sum_completed_date_process_wall_seconds=sum(r['wall_seconds'] for r in timings),
+        actual_elapsed_dispatch_seconds=None if dispatch is None else dispatch.get('elapsed_dispatch_seconds'),
+        actual_elapsed_dispatch_status=None if dispatch is None else dispatch.get('status'),
+        stopped_reason=None if dispatch is None else dispatch.get('stopped_reason'),
+        remaining_execution_ETA_seconds=None,
+        first_measured_date_pair=naive,monthly_parallel_completion_elapsed_seconds=None,
+        note='Sum of process wall times differs from actual dispatch elapsed time. Naive projections are labelled and will be replaced by measured parallel throughput when available.',
+        Native_optimizer_calls=0 if timings else None))
+    write_json(output/'REF_SOURCE_AND_PLAN_IDENTITY_AUDIT.json',dict(status='MEASURED_PARTIAL' if provenance else 'NOT_TESTED',rows=provenance,
+        old_STATIC_REF_bit_identity_is_separate_from_new_TIME_comparison=True,new_Planning_Actual_E2E_status='NOT_RUN'))
+    write_json(output/'IMPLEMENTATION_FAILURES.json',failures)
+    if args.topology_publication is not None and args.topology_publication.exists():
+        pub=read(args.topology_publication,consumed)
+        if (pub['PASS'] is not True or pub['bank_count']!=7 or pub['physical_single_phase_transformer_count']!=21
+            or pub['selected_alternative']!='BUS50' or pub['future_dates_success_claim'] is not False
+            or pub['Planning_E2E_qualification_claim'] is not False or pub['original_native_NormalAmps_modified'] is not False):
+            raise ValueError('EXACT_SEVEN_HARDWARE_ONLY_PUBLICATION_REQUIRED')
+        if args.required_source_SHA is not None and pub['contract_source_SHA']!=args.required_source_SHA:
+            raise ValueError('TOPOLOGY_CURRENT_CONTRACT_SOURCE_DRIFT')
+        for item in pub['source_receipts']+[pub['script_receipt']]:checked(item,consumed)
+        copies=[]
+        for item in pub['output_receipts']:
+            original=checked(item,consumed);target=output/original.name
+            target.write_bytes(original.read_bytes())
+            copied=record(target)
+            if copied['sha256']!=item['sha256'] or copied['bytes']!=item['bytes']:
+                raise ValueError('TOPOLOGY_COPY_BYTE_DRIFT')
+            copies.append(dict(original=item,copied=copied))
+        write_json(output/'SVR7_TOPOLOGY_PUBLICATION_LINK.json',dict(original_publication_receipt=record(args.topology_publication),
+            hardware_contract_source_SHA=pub['contract_source_SHA'],known_prior_measurement_source_SHA=pub['known_native_comparison_source_SHA'],
+            current_monthly_actual_measurements_are_separate=True,new_Planning_E2E_status='NOT_RUN',copies=copies))
+    write_json(output/'DISPATCH_CANARY_GATE_STATUS.json',dict(dispatch=dispatch,
+        no_original_plan_rows_per_variant=sum(not r['diagnostic_replay_ready'] for r in inventory['rows']),
+        remaining_admitted_unmeasured_rows_per_variant={v:sum(r['variant']==v and r['available_original_frozen_plan'] and r['status'].startswith('NOT_TESTED') for r in monthly)
+            for v in ('REF_TIME','SVR4','SVR7')},new_Planning_E2E_status='NOT_RUN'))
+    write_json(output/'FINAL_COHORT_COVERAGE.json',dict(source_SHA=args.required_source_SHA,
+        per_variant={v:dict(status_counts={status:sum(r['variant']==v and r['status']==status for r in monthly)
+            for status in sorted({r['status'] for r in monthly if r['variant']==v})},
+            monthly_rows=sum(r['variant']==v for r in monthly),measured_chronological_96_dates=sum(r['variant']==v and r['logical_slots']==96 for r in monthly))
+            for v in ('REF_TIME','SVR4','SVR7')},
+        Native_optimizer_calls=0,Actual_PQ_repair=0,Planning_reoptimized=False,
+        line_loading_main_metric='Maximum measured native line loading across all terminals and phases',
+        old_raw_terminal1_line_loading_reported_separately=True,new_Planning_E2E_status='NOT_RUN',
+        full_month_execution_complete=False,scientific_source_edits=0))
+    write_json(output/'NEW_PLANNING_E2E_HOLD.json',dict(status='HOLD',PASS=None,all_four_arms_status='NOT_RUN',
+        note='Saved-plan AC-only validation does not qualify regenerated planning model or new optimized E2E policies'))
+    for path,item in consumed.items():
+        if record(path)!=item:raise ValueError('CONSUMED_BYTE_MUTATION:'+path)
+    write_json(output/'SHA_LEDGER.json',dict(schema='V42_SVR4_SVR7_READONLY_COLLECTION_V1',script=record(__file__),
+        generated_UTC=datetime.now(timezone.utc).isoformat(),scientific_source_imports=0,OpenDSS_calls=0,Native_calls=0,
+        consumed=list(consumed.values()),produced=[record(p) for p in sorted(output.iterdir()) if p.is_file()],
+        original_bytes_unchanged=True,monthly_row_count_per_variant=124))
+    print(json.dumps(dict(output=str(output),completed_results=len(summaries),physical_measurements=len(timings),comparison_rows=len(comparison))))
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--inventory',type=Path,default=ROOT/'FROZEN_AC_MONTHLY_PRIORITY_03/FROZEN_PLAN_DATE_INVENTORY_V3.json')
+    parser.add_argument('--svr4-root',type=Path);parser.add_argument('--svr7-root',type=Path)
+    parser.add_argument('--prior-root',type=Path,action='append',default=[])
+    parser.add_argument('--required-source-SHA',dest='required_source_SHA')
+    parser.add_argument('--require-nameplate-current',action='store_true')
+    parser.add_argument('--dispatch-root',type=Path)
+    parser.add_argument('--topology-publication',type=Path,default=ROOT/'SVR7_TOPOLOGY_FINAL_CE30_01/SVR7_SELECTED_FROZEN_TOPOLOGY_PUBLICATION_RECEIPT.json')
+    parser.add_argument('--output',type=Path,required=True)
+    collect(parser.parse_args())

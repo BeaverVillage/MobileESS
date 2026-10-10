@@ -1,0 +1,65 @@
+{
+  "schema": "V42_AC_ONLY_MONTHLY_FROZEN_DAY_RESULT_V1",
+  "status": "PASS",
+  "PASS": true,
+  "arm": "B2",
+  "day": "2025-05-02",
+  "scope": "EXISTING_FROZEN_PLAN_ACTUAL_ONLY",
+  "configuration": "SVR7",
+  "source_SHA": "ce30af2a74d9d2b6a2f2a33fee7a690927752f940f94bd466218075ba34cbf04",
+  "scenario_SHA": "3b9398cabfcc7acb8cf3c9c92d14aea7e4418dcf8a0bd63519ba482e16345603",
+  "infrastructure": {
+    "path": "D:\\v42_voltage_control_development_20261011\\FROZEN_SVR7_INFRASTRUCTURE_02\\HARDWARE_FREEZE_RECEIPT.json",
+    "sha256": "490020ddf9c25f32a2bd6d6f13c5c05402aa5de0004f591047407bd96ccefffe",
+    "bytes": 37619
+  },
+  "metric": {
+    "voltage_violation_cells": 0,
+    "Vmin": 0.9600802089346612,
+    "Vmax": 1.0494777630958243,
+    "line_current_violation_cells": 0,
+    "transformer_current_violation_cells": 0,
+    "transformer_nameplate_current_violation_cells": 0,
+    "transformer_kva_violation_cells": 0,
+    "max_line_loading_percent": 64.60619954878833,
+    "loss_energy_slot_end_estimate_kWh": 1466.3868931697423,
+    "converged_slots": 96,
+    "control_complete_slots": 96,
+    "Original7_AUTO_all96": true,
+    "Fixed_ON_original_caps_all96": true,
+    "SVR_hardware_PASS_all96": true,
+    "old_and_added_node_phase_count": 407,
+    "native_physical_solve_count": 794,
+    "Original7_slot_end_tap_change_count": 168,
+    "upper_voltage_margin_pu": 0.0005222369041757435,
+    "lower_voltage_margin_pu": 0.010080208934661217
+  },
+  "raw_AC": {
+    "path": "D:\\v42_voltage_control_development_20261011\\AC_ONLY_SVR4_SVR7_CANARY_03\\SVR7\\days\\B2\\2025-05-02\\SVR\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+    "sha256": "a1ae89897cce2d69fb198c3f6bb200f4f98d49377ccbc1e329d83287c470805b",
+    "bytes": 854040
+  },
+  "physical_audit": {
+    "path": "D:\\v42_voltage_control_development_20261011\\AC_ONLY_SVR4_SVR7_CANARY_03\\SVR7\\days\\B2\\2025-05-02\\SVR\\VOLTAGE_CONTROL_PHYSICAL\\VOLTAGE_CONTROL_ACTUAL_PHYSICAL_AUDIT.json",
+    "sha256": "bf2dcf911564f84584670fd3a47dcafdd3b3a9f6fbff42f1048c6d8e40652aef",
+    "bytes": 600881
+  },
+  "OFF_original_arrays_bit_exact": true,
+  "Native_optimizer_calls": 0,
+  "Actual_PQ_repair": 0,
+  "Planning_reoptimized": false,
+  "new_model_E2E_qualified": false,
+  "original_inputs_unchanged": true,
+  "failures": [],
+  "REF_time_controlled": null,
+  "wall_seconds": 54.727778400003444,
+  "timing": {
+    "source_and_input_preparation_seconds": 10.083417100016959,
+    "STATIC_REF_replay_including_archive_seconds": 13.87222760001896,
+    "SVR_replay_including_archive_seconds": 30.360830100020394,
+    "SVR_actual_backend_and_validation_seconds": 21.604488499986473
+  },
+  "Fresh_context_count": 2,
+  "measurement_scope": "96 chronological slot-end measurements; not continuous transient certification",
+  "loss_energy_method": "sum(final slot loss W)*0.25h; not within-slot event integration"
+}

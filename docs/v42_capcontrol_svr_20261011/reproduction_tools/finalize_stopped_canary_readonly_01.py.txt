@@ -1,0 +1,49 @@
+"""Recover only the completion journal; never rerun or modify physics."""
+from pathlib import Path
+import hashlib
+import json
+import sys
+from datetime import datetime,timezone
+
+sys.path.insert(0,'D:/v42voltage')
+from v42_voltage_control.authority import source_files
+from v42_voltage_control.integration import record
+from v42_b3_joint.contracts import digest
+
+root=Path(__file__).resolve().parent/'AC_ONLY_SVR4_SVR7_CANARY_03'
+progress=json.loads((root/'DISPATCH_PROGRESS.json').read_text(encoding='utf8'))
+dispatch=json.loads((root/'DISPATCH_SOURCE_RECEIPT.json').read_text(encoding='utf8'))
+assert progress['status']=='STOPPED_PHYSICAL_CANARY_FAILURE'
+assert progress['stopped_reason']=='REPRESENTATIVE_PHYSICAL_CANARY_FAILED_NO_MONTHLY_EXPANSION'
+assert progress['running']==[] and progress['completed_comparisons']==10
+assert source_files()==dispatch['source_map']
+for key in ('driver','dispatcher','original_queue'):
+    assert record(dispatch[key]['path'])==dispatch[key]
+for value in dispatch['infrastructure'].values():
+    assert record(value['path'])==value
+records=[]
+for p in sorted(root.glob('*/days/*/*/AC_ONLY_DAY_RESULT.json')):
+    result=json.loads(p.read_text(encoding='utf8'))
+    assert result['source_SHA']==dispatch['source_SHA']
+    assert result['Native_optimizer_calls']==0 and result['Actual_PQ_repair']==0
+    assert result['original_inputs_unchanged'] and result['OFF_original_arrays_bit_exact']
+    assert result['status'] in ('PASS','PHYSICAL_FAIL')
+    assert record(result['raw_AC']['path'])==result['raw_AC']
+    assert record(result['physical_audit']['path'])==result['physical_audit']
+    records.append(record(p))
+assert len(records)==10
+value=dict(progress, schema='V42_AC_ONLY_STOPPED_CANARY_TERMINAL_JOURNAL_RECOVERY_V1',
+    recovery_created_UTC=datetime.now(timezone.utc).isoformat(),
+    source_after_SHA=digest(source_files()),source_before_after_equal=True,
+    dispatch_source_receipt=record(root/'DISPATCH_SOURCE_RECEIPT.json'),
+    terminal_progress_receipt=record(root/'DISPATCH_PROGRESS.json'),
+    actual_day_results=records,physical_receipts_rewritten=0,additional_AC_or_optimizer_calls=0,
+    valid_original_plan_policy_days_NOT_TESTED_CANARY_GATE=60,
+    original_plan_missing_policy_days_NOT_TESTED=59,
+    completion_journal_error="External dispatcher dict(**final, Native_optimizer_calls=0) duplicate keyword TypeError after all10 valid results and correctly saved physical stop. Does not alter day physics.",
+    original_dispatcher_and_used_code_preserved=True,
+    qualified_final_common_infrastructure=False,new_31day_MILP_deployment='HOLD')
+path=root/'DISPATCH_FINAL_RECEIPT_RECOVERY.json'
+with path.open('x',encoding='utf8') as stream:
+    json.dump(value,stream,ensure_ascii=False,indent=2,allow_nan=False)
+print(json.dumps(dict(path=str(path),sha256=record(path)['sha256'],completed=10,status=value['status'],Native_optimizer_calls=0)))
