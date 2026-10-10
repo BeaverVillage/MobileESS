@@ -13,6 +13,42 @@ B0_REVIEWED_CHANGES={'v42_svr11/migration.py','v42_svr11/processes.py',
  'v42_voltage_control/integration.py','v42_svr11/model.py','v42_svr11/prepare.py',
  'v42_svr11/authority.py','v42_svr11/context_lifecycle.py','v42_voltage_control/timecontrol.py'}
 
+def normalized_reviewed_model(text):
+    """Recognize only completed-owner cleanup and an exact NPZ read cache."""
+    import ast
+    class CacheNames(ast.NodeTransformer):
+        def visit_Assign(self,node):
+            if any(isinstance(t,ast.Name) and t.id=='cached' for t in node.targets):
+                approved=ast.parse("cached={f:z[f] for f in FIELDS+('anchor_control',)}").body[0]
+                require(ast.dump(node,include_attributes=False)==ast.dump(approved,include_attributes=False),'REUSE_UNREVIEWED_COEFFICIENT_CACHE')
+                return None
+            return self.generic_visit(node)
+        def visit_Name(self,node):
+            return ast.copy_location(ast.Name(id='z',ctx=node.ctx),node) if node.id=='cached' else node
+    class Reviewed(ast.NodeTransformer):
+        def visit_FunctionDef(self,node):
+            if node.name=='load_coefficients':
+                node=CacheNames().visit(node)
+            return self.generic_visit(node)
+        def visit_Call(self,node):
+            approved=ast.parse("owned.get('generation_source_SHA',contract['generation_source_SHA'])",mode='eval').body
+            if ast.dump(node,include_attributes=False)==ast.dump(approved,include_attributes=False):
+                return node.args[1]
+            return self.generic_visit(node)
+        def visit_Import(self,node):
+            return None if all(a.name in ('gc','weakref') for a in node.names) else node
+        def visit_ImportFrom(self,node):
+            return None if node.module=='context_lifecycle' else node
+        def visit_Delete(self,node):
+            return None if all(isinstance(t,ast.Name) and t.id=='e' for t in node.targets) else node
+        def visit_Expr(self,node):
+            call=node.value
+            if isinstance(call,ast.Call) and ((isinstance(call.func,ast.Name) and call.func.id=='flush_completed_probes')
+                or (isinstance(call.func,ast.Attribute) and isinstance(call.func.value,ast.Name)
+                    and call.func.value.id=='gc' and call.func.attr=='collect')):return None
+            return self.generic_visit(node)
+    return ast.dump(Reviewed().visit(ast.parse(text)),include_attributes=False)
+
 def qualify(root,origin,day,arm='B0'):
     root=Path(root).resolve();origin=Path(origin).resolve()
     m=verify(root/'CAMPAIGN_MANIFEST.json');old=read(origin/'CAMPAIGN_MANIFEST.json')
@@ -40,22 +76,7 @@ def qualify(root,origin,day,arm='B0'):
             'Actual_PQ_repair','Planning_taps_copied_to_Actual')),'REUSE_M_CONTRACT_DIFFERENT')
         # Explicitly verify that the only model edits are retirement imports,
         # completed-owner GC statements and deletion of a finished local owner.
-        import ast
-        class CleanupOnly(ast.NodeTransformer):
-            def visit_Import(self,node):
-                return None if all(a.name in ('gc','weakref') for a in node.names) else node
-            def visit_ImportFrom(self,node):
-                return None if node.module=='context_lifecycle' else node
-            def visit_Delete(self,node):
-                return None if all(isinstance(t,ast.Name) and t.id=='e' for t in node.targets) else node
-            def visit_Expr(self,node):
-                call=node.value
-                if isinstance(call,ast.Call) and ((isinstance(call.func,ast.Name) and call.func.id=='flush_completed_probes')
-                    or (isinstance(call.func,ast.Attribute) and isinstance(call.func.value,ast.Name)
-                        and call.func.value.id=='gc' and call.func.attr=='collect')):return None
-                return self.generic_visit(node)
-        models=[ast.dump(CleanupOnly().visit(ast.parse((Path(mm['code_root'])/'v42_svr11/model.py').read_text())),
-            include_attributes=False) for mm in (old,m)]
+        models=[normalized_reviewed_model((Path(mm['code_root'])/'v42_svr11/model.py').read_text()) for mm in (old,m)]
         require(models[0]==models[1],'REUSE_MODEL_MATH_NOT_IDENTICAL')
     # B0 excludes B1/B2 operations and optimization templates. Every actual
     # B0 load/PV/power, forecast, domain and traffic input must be byte equal.

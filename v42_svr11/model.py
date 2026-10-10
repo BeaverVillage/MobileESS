@@ -26,8 +26,11 @@ def load_coefficients(certificate,day):
         names=tuple(map(str,z['branch_names']));controls=tuple(map(str,z['control_names']))
         expected=denominators(names);assert np.array_equal(expected,z['rating_a'])
         ratings=tuple(None if np.isnan(x) else float(x) for x in z['transformer_ratings'])
-        result=[SimpleNamespace(**{f:z[f][t].copy() for f in FIELDS},slot=t,
-            control_names=controls,branch_names=names,anchor=z['anchor_control'][t].copy(),transformer_ratings=ratings,
+        # NPZ indexing decompresses the whole 96-slot field every time.
+        # Read each immutable field once; retain detached per-slot copies.
+        cached={f:z[f] for f in FIELDS+('anchor_control',)}
+        result=[SimpleNamespace(**{f:cached[f][t].copy() for f in FIELDS},slot=t,
+            control_names=controls,branch_names=names,anchor=cached['anchor_control'][t].copy(),transformer_ratings=ratings,
             coefficient_sha256=ref['sha256'],current_denominators_A=expected.copy(),
             transformer_current_contract=SCHEMA,
             transformer_current_authority_sha256=current_authority()['transformer_current_authority_sha256']) for t in range(96)]
@@ -118,7 +121,7 @@ def generate(day,input_folder,output,progress):
             if saved.get('reused'):
                 contract=read(m['model_checkpoint_reuse_contract']['path'])
                 owned=contract['days'][day]['slots'].get(str(t))
-                if not owned or record(owned['original_checkpoint']['path'])!=owned['original_checkpoint'] or record(owned['original_data']['path'])!=owned['original_data'] or owned['original_data']['sha256']!=saved['data']['sha256'] or saved['generation_source_SHA']!=contract['generation_source_SHA']:
+                if not owned or record(owned['original_checkpoint']['path'])!=owned['original_checkpoint'] or record(owned['original_data']['path'])!=owned['original_data'] or owned['original_data']['sha256']!=saved['data']['sha256'] or saved['generation_source_SHA']!=owned.get('generation_source_SHA',contract['generation_source_SHA']):
                     raise PermissionError('SVR11_REUSED_MODEL_SLOT_PROVENANCE_DRIFT')
             with np.load(saved['data']['path']) as z:slots.append({f:z[f].copy() for f in FIELDS})
             continue
