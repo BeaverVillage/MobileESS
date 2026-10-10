@@ -48,6 +48,10 @@ def run(root):
             validation_source_SHA=r.get('validation_source_SHA',m['execution_SHA']),reuse_proof=r.get('reuse_proof'),
             latest_performance={k:value(r,k) for k in METRICS},FULL_feasible_certified=r.get('FULL_feasible_certified'),
             global_gap_certified=r.get('global_gap_certified'),optimization_status=r.get('optimization_status'),AC_status=r.get('AC_status'),attempts=attempts,
+            previous_epoch_attempts=r.get('previous_epoch_attempts',[]),
+            previous_epoch_Native_Runtime=r.get('previous_epoch_Native_Runtime'),
+            user_authorized_one_time_model_restart=r.get('user_authorized_one_time_model_restart',False),
+            reused_forecast_model_slots=r.get('reused_forecast_model_slots',0),
             controls_and_physical_evidence={ns:{k:metrics.get(k) for k in (
                 'slots','voltage_violations','line_current_violations','transformer_current_violations',
                 'transformer_nameplate_current_violations','transformer_kVA_violations','AC_converged','control_complete',
