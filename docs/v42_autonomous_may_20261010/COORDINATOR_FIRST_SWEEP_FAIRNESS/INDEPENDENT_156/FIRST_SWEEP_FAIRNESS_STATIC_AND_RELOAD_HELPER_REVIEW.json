@@ -1,0 +1,179 @@
+{
+  "schema": "V42_FIRST_SWEEP_FAIRNESS_AND_OWNED_CONTROLLER_RELOAD_STATIC_INDEPENDENT_REVIEW",
+  "PASS": true,
+  "UTC": "2026-10-10T00:55:16.178362+00:00",
+  "source": {
+    "path": "D:\\MobileESS_v42_autonomous\\v42_autonomous\\supervisor.py",
+    "bytes": 41423,
+    "sha256": "cce72776da0e8f31d834f63fc9530e9894eb77a5164c694b7a9a937a2de1c77a"
+  },
+  "new_tests": {
+    "path": "D:\\MobileESS_v42_autonomous\\tests\\test_v42_autonomous_first_sweep_fairness.py",
+    "bytes": 10814,
+    "sha256": "fca4b18fa0dfbbc2df5872e9e349eff058e17a563e0cdf3e41719d4d3fb249f4"
+  },
+  "independent_156": {
+    "path": "D:\\v42_first_sweep_fairness_independent_review_20261010_01\\FIRST_SWEEP_FAIRNESS_INDEPENDENT_NATIVE_DENIED_REVIEW_RECEIPT.json",
+    "bytes": 1322621,
+    "sha256": "773b1d7baa2da806bc26b1b6ac5928114ef0891e4f45ddcbfc5cc2af2af59cee"
+  },
+  "owner_final_156": {
+    "path": "D:\\v42_first_sweep_fairness_owner_review_20261010_02\\FIRST_SWEEP_FAIRNESS_OWNER_NATIVE_DENIED_REVIEW_RECEIPT.json",
+    "bytes": 1283428,
+    "sha256": "09b7b6d7c4ecf43dab7a5ddd1206d54048749f85e886830f529944a813728c59"
+  },
+  "owner_initial_wrong_focused_count_history": {
+    "path": "D:\\v42_first_sweep_fairness_owner_review_20261010_01\\FIRST_SWEEP_FAIRNESS_OWNER_NATIVE_DENIED_REVIEW_RECEIPT.json",
+    "bytes": 1277715,
+    "sha256": "72bef4f31b83636097e23f9aa20419ebdb22d50e5198480c5f6789c31a352cb7"
+  },
+  "helper_reviewed_unexecuted": {
+    "path": "D:\\v42_may_restart_20261010_02\\autonomous\\reload_owned_supervisor_retry_fairness.py",
+    "bytes": 6612,
+    "sha256": "d63598af0bb842b681db5b3e5a0354020dcf48917699122748b14b8cc2180f87"
+  },
+  "source_evidence": {
+    "FIRST_SWEEP_RETRY_LIMIT=": [
+      {
+        "line": 11,
+        "text": "FIRST_SWEEP_RETRY_LIMIT={'B2':2,'B3':1}"
+      }
+    ],
+    "def retry_streak": [
+      {
+        "line": 33,
+        "text": "def retry_streak(cp,arm):"
+      }
+    ],
+    "def note_first_sweep_dispatch": [
+      {
+        "line": 39,
+        "text": "def note_first_sweep_dispatch(cp,arm,*,retry):"
+      }
+    ],
+    "already_current": [
+      {
+        "line": 63,
+        "text": "    already_current=cp['workers'].get(key,{}).get('request')==worker['request']"
+      },
+      {
+        "line": 83,
+        "text": "    if not already_current:note_first_sweep_dispatch(cp,key.split('/',1)[0],retry=True)"
+      }
+    ],
+    "if not already_current": [
+      {
+        "line": 83,
+        "text": "    if not already_current:note_first_sweep_dispatch(cp,key.split('/',1)[0],retry=True)"
+      }
+    ],
+    "ordinary_due=": [
+      {
+        "line": 558,
+        "text": "        ordinary_due=(not both and next_day(cp,arm) is not None"
+      }
+    ],
+    "if allow_retries and not ordinary_due": [
+      {
+        "line": 560,
+        "text": "        if allow_retries and not ordinary_due:"
+      }
+    ],
+    "if started or": [
+      {
+        "line": 576,
+        "text": "            if started or cp['dates'][arm+'/'+day].get('first_attempt_terminal') is not None:"
+      }
+    ],
+    "note_first_sweep_dispatch(cp,arm,retry=False)": [
+      {
+        "line": 577,
+        "text": "                note_first_sweep_dispatch(cp,arm,retry=False)"
+      }
+    ],
+    "def advance_sweeps": [
+      {
+        "line": 444,
+        "text": "def advance_sweeps(cp):"
+      }
+    ],
+    "B3_STARTING": [
+      {
+        "line": 454,
+        "text": "        if arm=='B2':transition(cp,'B3_STARTING');transition(cp,'B3_RUNNING')"
+      }
+    ]
+  },
+  "helper_evidence": {
+    "heartbeat_age=": [
+      {
+        "line": 23,
+        "text": "heartbeat_age=(datetime.now(timezone.utc)-stamp).total_seconds();assert 0<=heartbeat_age<=60"
+      }
+    ],
+    "with exclusive_lock": [
+      {
+        "line": 26,
+        "text": " with exclusive_lock(lock_path):"
+      }
+    ],
+    "LIVE_OS_LOCK:": [
+      {
+        "line": 29,
+        "text": " assert type(refusal) is LockBusy and str(refusal)=='LIVE_OS_LOCK:'+str(lock_path)"
+      }
+    ],
+    "assert ident(old": [
+      {
+        "line": 43,
+        "text": "proc=psutil.Process(old['PID']);assert ident(old['PID'])==old;proc.terminate();proc.wait(timeout=10)"
+      }
+    ],
+    "proc.terminate": [
+      {
+        "line": 43,
+        "text": "proc=psutil.Process(old['PID']);assert ident(old['PID'])==old;proc.terminate();proc.wait(timeout=10)"
+      }
+    ],
+    "except (OSError": [
+      {
+        "line": 59,
+        "text": " except (OSError,AssertionError,psutil.NoSuchProcess):time.sleep(.25)"
+      }
+    ],
+    "assert rec(R/": [
+      {
+        "line": 62,
+        "text": "assert rec(R/'SUPERVISOR_ERROR.json')==read(A/'CONTROLLER_RETRY_FAIRNESS_RELOAD_BEFORE.json')['prior_supervisor_error']"
+      }
+    ],
+    "old_error_evidence_unchanged=": [
+      {
+        "line": 63,
+        "text": "p=seal('CONTROLLER_RETRY_FAIRNESS_RELOAD_VERIFICATION.json',dict(PASS=True,UTC=datetime.now(timezone.utc).isoformat(),before=b,launch=launch,actual_supervisor=actual,actual_workers={k:ident(v['PID']) for k,v in workers.items()},same_worker_PID_create_command_cwd=True,all3_current_workers_adopted=True,all3_original_Native_call_prefixes_preserved=True,Native_after={k:read(ledger_paths[k])['measured_Native_Runtime'] for k in workers},control_files=files,exact_request_records_preserved=requests,old_error_evidence_unchanged=rec(R/'SUPERVISOR_ERROR.json')==read(A/'CONTROLLER_RETRY_FAIRNESS_RELOAD_BEFORE.json')['prior_supervisor_error'],scientific_worker_terminate_calls=0,Native_optimize_calls=0,model_constructions=0,new_supervisor_P2_calls=0,final_scientific_PASS_not_claimed=True))"
+      }
+    ]
+  },
+  "verified_findings": [
+    "Persistent checkpoint B2 retry quota2 / B3 quota1 while ordinary unvisited first dates exist; exact integer0..limit, bool invalid.",
+    "Existing retry dispatch priority and worker limits remain; retry adoption of same persisted request does not double charge.",
+    "Entered ordinary attempt or local first-attempt terminal admission failure resets retry turn; lock/unentered failure/common source block does not.",
+    "First-sweep completion and B2-to-B3 transition retain existing failure isolation; both completed sweeps retain unrestricted original retry dispatch.",
+    "Root helper verifies exact107788 process/create/command/cwd, recent matching heartbeat, typed canonical live OS lock refusal before termination, and immediately repeats exact old identity.",
+    "Only owned controller is terminated; science processes, request SHA and ordered Native prefix / original5400 / P2zero must match; public SUPERVISOR_ERROR hash equality asserted before final PASS.",
+    "Replacement uses exact canonical controller command and normal exclusive startup mutex; bounded metadata poll catches NoSuchProcess."
+  ],
+  "initial_helper_static_finding_corrected": "Initial593314 helper only recorded error-preservation Boolean. Unexecuted d635 now asserts equality and adds heartbeat/mutex evidence.",
+  "owner_initial_history_label": "Actual156 tests all passed; initial focused expected15 count made owner01 PASSfalse. Owner02 correct14 count; history retained, no code/test changes.",
+  "Native_optimize_calls": 0,
+  "real_Native_model_constructions": 0,
+  "modelattempts": [],
+  "nativeattempts": [],
+  "science_modules_imported_by_static_review": false,
+  "helper_executions": 0,
+  "production_queue_lease_process_source_Git_changes": 0,
+  "limitations": [
+    "Control behavior fixtures are fake workers/receipts; existing142 include isolated temporary Windows ownership tests.",
+    "Review does not claim actual fairness deployment, scientific performance, GlobalGap<=.03 or Actual/Fresh final PASS."
+  ]
+}
