@@ -23741,7 +23741,7 @@
     "B2/2025-05-04": {
       "arm": "B2",
       "day": "2025-05-04",
-      "status": "RUNNING",
+      "status": "FAIL",
       "attempts": [
         "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\request.json"
       ],
@@ -23760,11 +23760,321 @@
       "previous_epoch_Native_Runtime": 140.96899962425232,
       "previous_epoch_runtime_pending": false,
       "reused_forecast_model_slots": 96,
-      "result": "D:\\v42_svr11_may_20261011_06\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\RESULT.json",
-      "result_SHA": "6c08c0ed4501efa62dc9df4dc744fc53480670d14a3f5113f032aca12713019b",
-      "reason": "ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED')",
+      "result": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\RESULT.json",
+      "result_SHA": "8e45ca7c70a6b7b2c9bf35c14c1a2d966d9aaf5eb75277db81197293712cd4e1",
+      "reason": "ACTUAL:VOLTAGE_VIOLATION",
       "metrics": {
         "environments": {
+          "ACTUAL": {
+            "slots": 96,
+            "Vmin": 0.9614528387204592,
+            "Vmax": 1.0500718582125512,
+            "voltage_violations": 1,
+            "line_current_violations": 0,
+            "transformer_current_violations": 0,
+            "transformer_nameplate_current_violations": 0,
+            "transformer_kVA_violations": 0,
+            "maximum_line_loading": 0.5143038080546929,
+            "losses_kWh": 1271.0297926121748,
+            "losses_kvarh": 2509.6459417825336,
+            "AC_converged": true,
+            "control_complete": true,
+            "Full_AC_Physical_PASS": false,
+            "SVR11_finite_rating_and_taps": true,
+            "original_RegControl_count": 7,
+            "SVR_bank_count": 11,
+            "phase_tap_operation_evidence": {
+              "bytes": 36266872,
+              "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\SVR11\\VOLTAGE_CONTROL_ACTUAL_SLOTS.json",
+              "sha256": "7e515dad7f19f3fdd9329758a213e69f80f9d60184f068202b7dfc967b57b324"
+            },
+            "SVR_tap_ranges": {
+              "STA01::1": {
+                "min": 0.9687500000000001,
+                "max": 1.0500000000000007,
+                "changes": 17
+              },
+              "STA01::2": {
+                "min": 0.9500000000000002,
+                "max": 1.0312500000000004,
+                "changes": 17
+              },
+              "STA01::3": {
+                "min": 0.9625000000000001,
+                "max": 1.0500000000000007,
+                "changes": 17
+              },
+              "STA06::1": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 54
+              },
+              "STA06::2": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 50
+              },
+              "STA06::3": {
+                "min": 0.9375000000000002,
+                "max": 1.0125000000000002,
+                "changes": 50
+              },
+              "STA08::1": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 43
+              },
+              "STA08::2": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 45
+              },
+              "STA08::3": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 49
+              },
+              "BUS83::1": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 22
+              },
+              "BUS83::2": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 11
+              },
+              "BUS83::3": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 16
+              },
+              "BUS79::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 7
+              },
+              "BUS79::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "BUS79::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "BUS108::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 6
+              },
+              "BUS108::2": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 1
+              },
+              "BUS108::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 5
+              },
+              "BUS50::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 4
+              },
+              "BUS50::2": {
+                "min": 0.99375,
+                "max": 1.0,
+                "changes": 1
+              },
+              "BUS50::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 3
+              },
+              "BUS82::1": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 14
+              },
+              "BUS82::2": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 10
+              },
+              "BUS82::3": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 11
+              },
+              "BUS48::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 3
+              },
+              "BUS48::2": {
+                "min": 0.99375,
+                "max": 1.0,
+                "changes": 1
+              },
+              "BUS48::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 3
+              },
+              "BUS86::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "BUS86::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS86::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "BUS62::1": {
+                "min": 1.0,
+                "max": 1.0125000000000002,
+                "changes": 4
+              },
+              "BUS62::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 6
+              },
+              "BUS62::3": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 4
+              }
+            },
+            "original_RegControl_tap_ranges": {
+              "creg1a": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 1
+              },
+              "creg2a": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 3
+              },
+              "creg3a": {
+                "min": 1.0,
+                "max": 1.0125000000000002,
+                "changes": 20
+              },
+              "creg3c": {
+                "min": 0.99375,
+                "max": 1.0125000000000002,
+                "changes": 21
+              },
+              "creg4a": {
+                "min": 1.0250000000000004,
+                "max": 1.0562500000000008,
+                "changes": 14
+              },
+              "creg4b": {
+                "min": 1.0125000000000002,
+                "max": 1.0312500000000004,
+                "changes": 12
+              },
+              "creg4c": {
+                "min": 1.0187500000000003,
+                "max": 1.0437500000000006,
+                "changes": 9
+              }
+            },
+            "BUS86_BUS62_original_control_interaction": {
+              "BUS86": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 4
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 4
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 0
+                }
+              ],
+              "BUS62": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 8
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 6
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 4
+                }
+              ]
+            },
+            "BUS82_BUS83_serial_interaction": {
+              "observations": [
+                {
+                  "phase": 1,
+                  "simultaneous_boundary_tap_changes": 10,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 2,
+                  "simultaneous_boundary_tap_changes": 5,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 3,
+                  "simultaneous_boundary_tap_changes": 6,
+                  "opposite_boundary_tap_changes": 0
+                }
+              ],
+              "interpretation": "Observed boundary tap co-movement only; event receipts retain subslot actions. Causal absence of interference is not certified."
+            }
+          },
           "DAYAHEAD": {
             "slots": 96,
             "Vmin": 0.9611950794522607,
@@ -23779,13 +24089,13 @@
             "losses_kvarh": 2497.5068002771413,
             "AC_converged": true,
             "control_complete": true,
-            "Full_AC_Physical_PASS": false,
+            "Full_AC_Physical_PASS": true,
             "SVR11_finite_rating_and_taps": true,
             "original_RegControl_count": 7,
             "SVR_bank_count": 11,
             "phase_tap_operation_evidence": {
               "bytes": 36269355,
-              "path": "D:\\v42_svr11_may_20261011_06\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_SLOTS.json",
+              "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_SLOTS.json",
               "sha256": "0e7c700a48abfc30d1205f921b42c679db1f092e3e4956a575bc17144b326aea"
             },
             "SVR_tap_ranges": {
@@ -24078,27 +24388,38 @@
         },
         "evidence": [
           {
-            "path": "D:\\v42_svr11_may_20261011_06\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_PHYSICAL_AUDIT.json",
-            "sha256": "9c9bacdd1a8f5abd0a122748f3213b4b61343e165529d0476ba3fcee31152551",
-            "bytes": 903935
+            "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\SVR11\\VOLTAGE_CONTROL_ACTUAL_PHYSICAL_AUDIT.json",
+            "sha256": "371057775f9450aaa778fd57c9cf2cace8044d4613be341b949525c3f56c834d",
+            "bytes": 903854
+          },
+          {
+            "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_PHYSICAL_AUDIT.json",
+            "sha256": "0406eca52439ff534421b9589a6f9cbab004d8cd4659b6019aed1fea532ef9e0",
+            "bytes": 903861
           }
         ]
       },
-      "Native_Runtime": 140.96899962425232,
-      "wall_seconds": 2675.4633159999503,
-      "Planning_objective": null,
-      "FULL_feasible_certified": false,
+      "Native_Runtime": 233.5059998035431,
+      "wall_seconds": 841.9410424000816,
+      "Planning_objective": 0.45618519281939407,
+      "FULL_feasible_certified": true,
       "global_gap_certified": false,
       "certified_LB": null,
       "certified_Gap": null,
-      "optimization_status": null,
-      "AC_status": null,
+      "optimization_status": "FEASIBLE",
+      "AC_status": "AC FAIL",
       "terminal_history": [
         {
           "result": "D:\\v42_svr11_may_20261011_06\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\RESULT.json",
           "result_SHA": "6c08c0ed4501efa62dc9df4dc744fc53480670d14a3f5113f032aca12713019b",
           "status": "FAIL",
           "reason": "ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED')"
+        },
+        {
+          "result": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\RESULT.json",
+          "result_SHA": "8e45ca7c70a6b7b2c9bf35c14c1a2d966d9aaf5eb75277db81197293712cd4e1",
+          "status": "FAIL",
+          "reason": "ACTUAL:VOLTAGE_VIOLATION"
         }
       ],
       "retry_eligible_after": null,
@@ -24129,8 +24450,8 @@
           "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\request.json"
         ],
         "cwd": "D:\\v42_svr11_epoch08_20261011",
-        "CPU_seconds": 46.875,
-        "UTC": "2026-10-10T22:04:40.642763+00:00",
+        "CPU_seconds": 780.8125,
+        "UTC": "2026-10-10T22:17:50.137232+00:00",
         "arm": "B2",
         "day": "2025-05-04",
         "worker_slot": 1,
@@ -24140,8 +24461,10 @@
     "B2/2025-05-05": {
       "arm": "B2",
       "day": "2025-05-05",
-      "status": "FAIL",
-      "attempts": [],
+      "status": "RUNNING",
+      "attempts": [
+        "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-05\\attempts\\attempt_01\\request.json"
+      ],
       "previous_epoch_attempts": [
         {
           "path": "D:\\v42_svr11_may_20261011_06\\dates\\B2\\2025-05-05\\attempts\\attempt_01\\request.json",
@@ -24498,7 +24821,6 @@
           "reason": "ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED')"
         }
       ],
-      "retry_pending": true,
       "retry_eligible_after": null,
       "execution_source_SHA": "456956ff89f605a39cbdf14386e39fb7c25dfcf1b670851f56e9c9ed3df64fcb",
       "validation_source_SHA": "2e6fa8ceed27986b63b3ebb6ca84b90f0e772d5f63449d4fd5d7207228da91d4",
@@ -24512,7 +24834,28 @@
         "sha256": "e6a7606687fbb300bc03b7cafd488402d068e39e525795366897f53e26b72fd2",
         "bytes": 1482
       },
-      "recovery": "Verified canonical Forecast receipt path fix; fresh Native0 attempt; original FAIL/runtime retained"
+      "recovery": "Verified canonical Forecast receipt path fix; fresh Native0 attempt; original FAIL/runtime retained",
+      "request": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-05\\attempts\\attempt_01\\request.json",
+      "worker": {
+        "PID": 85456,
+        "create_time": 1791670675.9197173,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.worker",
+          "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-05\\attempts\\attempt_01\\request.json"
+        ],
+        "cwd": "D:\\v42_svr11_epoch08_20261011",
+        "CPU_seconds": 555.359375,
+        "UTC": "2026-10-10T22:27:58.998703+00:00",
+        "arm": "B2",
+        "day": "2025-05-05",
+        "worker_slot": 1,
+        "request": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-05\\attempts\\attempt_01\\request.json"
+      }
     },
     "B2/2025-05-06": {
       "arm": "B2",
@@ -24908,8 +25251,8 @@
           "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-07\\attempts\\attempt_01\\request.json"
         ],
         "cwd": "D:\\v42_svr11_epoch08_20261011",
-        "CPU_seconds": 2280.890625,
-        "UTC": "2026-10-10T22:04:40.637763+00:00",
+        "CPU_seconds": 3575.390625,
+        "UTC": "2026-10-10T22:27:58.992672+00:00",
         "arm": "B2",
         "day": "2025-05-07",
         "worker_slot": 2,
@@ -24937,8 +25280,8 @@
           "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-08\\attempts\\attempt_01\\request.json"
         ],
         "cwd": "D:\\v42_svr11_epoch08_20261011",
-        "CPU_seconds": 2283.21875,
-        "UTC": "2026-10-10T22:04:40.647953+00:00",
+        "CPU_seconds": 3582.234375,
+        "UTC": "2026-10-10T22:27:59.003710+00:00",
         "arm": "B2",
         "day": "2025-05-08",
         "worker_slot": 3,
@@ -25457,7 +25800,7 @@
     }
   },
   "source_SHA": "2e6fa8ceed27986b63b3ebb6ca84b90f0e772d5f63449d4fd5d7207228da91d4",
-  "UTC": "2026-10-10T22:04:40.648952+00:00",
+  "UTC": "2026-10-10T22:27:59.004693+00:00",
   "active_workers": [
     {
       "PID": 10328,
@@ -25472,16 +25815,16 @@
         "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-07\\attempts\\attempt_01\\request.json"
       ],
       "cwd": "D:\\v42_svr11_epoch08_20261011",
-      "CPU_seconds": 2280.890625,
-      "UTC": "2026-10-10T22:04:40.637763+00:00",
+      "CPU_seconds": 3575.390625,
+      "UTC": "2026-10-10T22:27:58.992672+00:00",
       "arm": "B2",
       "day": "2025-05-07",
       "worker_slot": 2,
       "request": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-07\\attempts\\attempt_01\\request.json"
     },
     {
-      "PID": 84960,
-      "create_time": 1791669825.8480885,
+      "PID": 85456,
+      "create_time": 1791670675.9197173,
       "command": [
         "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
         "-B",
@@ -25489,15 +25832,15 @@
         "utf8",
         "-m",
         "v42_svr11.worker",
-        "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\request.json"
+        "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-05\\attempts\\attempt_01\\request.json"
       ],
       "cwd": "D:\\v42_svr11_epoch08_20261011",
-      "CPU_seconds": 46.875,
-      "UTC": "2026-10-10T22:04:40.642763+00:00",
+      "CPU_seconds": 555.359375,
+      "UTC": "2026-10-10T22:27:58.998703+00:00",
       "arm": "B2",
-      "day": "2025-05-04",
+      "day": "2025-05-05",
       "worker_slot": 1,
-      "request": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\request.json"
+      "request": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-05\\attempts\\attempt_01\\request.json"
     },
     {
       "PID": 117456,
@@ -25512,8 +25855,8 @@
         "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-08\\attempts\\attempt_01\\request.json"
       ],
       "cwd": "D:\\v42_svr11_epoch08_20261011",
-      "CPU_seconds": 2283.21875,
-      "UTC": "2026-10-10T22:04:40.647953+00:00",
+      "CPU_seconds": 3582.234375,
+      "UTC": "2026-10-10T22:27:59.003710+00:00",
       "arm": "B2",
       "day": "2025-05-08",
       "worker_slot": 3,
@@ -25533,7 +25876,7 @@
       "D:\\v42_svr11_may_20261011_08"
     ],
     "cwd": "D:\\v42_svr11_epoch08_20261011",
-    "CPU_seconds": 182.328125,
-    "UTC": "2026-10-10T22:04:40.648952+00:00"
+    "CPU_seconds": 284.65625,
+    "UTC": "2026-10-10T22:27:59.004693+00:00"
   }
 }

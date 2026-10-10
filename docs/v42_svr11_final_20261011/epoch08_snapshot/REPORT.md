@@ -36,6 +36,6 @@ Full node/phase, both-terminal current/kVA, control events/taps and loss evidenc
 
 ## Failures
 
-- B2 2025-05-05: ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED') (result: D:\v42_svr11_may_20261011_06\dates\B2\2025-05-05\attempts\attempt_01\RESULT.json)
+- B2 2025-05-04: ACTUAL:VOLTAGE_VIOLATION (result: D:\v42_svr11_may_20261011_08\dates\B2\2025-05-04\attempts\attempt_01\RESULT.json)
 
 - B2 2025-05-06: ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED') (result: D:\v42_svr11_may_20261011_06\dates\B2\2025-05-06\attempts\attempt_01\RESULT.json)

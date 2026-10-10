@@ -28,7 +28,10 @@ def run(root):
         v=read(progress[0]) if progress else {}
         result['workers'].append(dict(day=w['day'],PID=p.pid,phase=w['phase'],Native_Runtime=w['Native_Runtime'],
             completed_model_slots=v.get('completed_slots'),model_wall_seconds=v.get('wall_seconds'),RSS_MB=round(p.memory_info().rss/1024**2,1)))
-    result['errors']=s['errors'];atomic(root/'LIVE_OBSERVATION.json',result)
+    result['errors']=s['errors']
+    result['current_epoch_failures']=[dict(arm=r['arm'],day=r['day'],reason=r.get('reason'),result=r.get('result'))
+        for r in s['dates'] if r['status']=='FAIL' and r.get('result') and Path(r['result']).resolve().is_relative_to(root.resolve()/'dates')]
+    atomic(root/'LIVE_OBSERVATION.json',result)
     print(json.dumps(result,ensure_ascii=False))
     return result
 

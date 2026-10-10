@@ -54,6 +54,7 @@ def run(root):
                     known_completed_Native_Runtime=v.get('known_completed_Native_Runtime'),Native_Runtime_uncertain=v.get('Native_Runtime_uncertain'),reason=v.get('reason')))
         date_table.append(dict(arm=r['arm'],day=r['day'],status=r['status'],reason=r.get('reason'),
             reused=r.get('reused',False),execution_source_SHA=execution_source,
+            preserved_origin_admission_source_SHA=r.get('execution_source_SHA') if r.get('previous_epoch_attempts') else None,
             validation_source_SHA=r.get('validation_source_SHA',m['execution_SHA']),reuse_proof=r.get('reuse_proof'),
             latest_performance=latest_performance,FULL_feasible_certified=r.get('FULL_feasible_certified'),
             global_gap_certified=r.get('global_gap_certified'),optimization_status=r.get('optimization_status'),AC_status=r.get('AC_status'),attempts=attempts,
@@ -70,7 +71,7 @@ def run(root):
     out=dict(status='COMPLETE' if terminal==124 and not any(r.get('retry_pending') for r in rows) else 'IN_PROGRESS',completed=terminal,total=124,
         source_SHA=m['execution_SHA'],equipment_SHA=read(m['hardware']['path'])['equipment_SHA'],campaign_root=str(root),
         reused_completed_dates=sum(bool(r.get('reused')) for r in rows),
-        provenance_note='Qualified completed results retain original execution SHA and Runtime; current validation SHA identifies independent same-equipment/input/full-evidence revalidation. No original execution is relabelled.',
+        provenance_note='Qualified reused completed results retain original execution SHA and Runtime. Fresh attempts derive execution SHA from their immutable request/result, while the untouched ledger may retain an imported origin-admission SHA. That retained field is reported separately as preserved_origin_admission_source_SHA, never used to label a new execution. Current validation SHA identifies independent same-equipment/input/full-evidence revalidation.',
         policy_own_PASS_cohorts=cohorts,paired_same_date_comparisons=paired,dates=date_table,retrospective_design=True,
         independent_holdout_claim=False,Native_limit_basis='Measured cumulative per stage within each explicitly fresh attempt; previous attempts retained',
         tap_interaction_assessment=dict(
