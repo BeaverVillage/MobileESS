@@ -5,11 +5,22 @@ from pathlib import Path
 import argparse
 import json
 import os
+import socket
 import threading
 import uuid
 
 import psutil
 from .monitor import view
+
+
+class ExclusiveMonitorHTTPServer(ThreadingHTTPServer):
+    """A second Windows observer must not share and overwrite this address."""
+    allow_reuse_address = False
+
+    def server_bind(self):
+        if os.name == 'nt':
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
 
 
 def atomic(path, value):
@@ -82,7 +93,7 @@ def run(root, port=8794):
         def log_message(self, *args):
             pass
 
-    server = ThreadingHTTPServer(('127.0.0.1', int(port)), Handler)
+    server = ExclusiveMonitorHTTPServer(('127.0.0.1', int(port)), Handler)
     server.daemon_threads = True
     observer.refresh()
     thread = threading.Thread(target=observer.loop, daemon=True, name='production-observer')
