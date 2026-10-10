@@ -11,7 +11,7 @@ from pathlib import Path
 from time import perf_counter
 
 from .contracts import canonical, digest, require
-from .policy import STAGES
+from .policy import STAGES, native_limit
 from .numerical_policy import (VERSION as NUMERICAL_VERSION, policy_sha,
     apply_native_precision, assert_native_precision, verify_settings_receipt)
 
@@ -29,6 +29,7 @@ class SourceStageLedger:
         self.context, self.registry = context, context.source_registry
         self.stage = context.request.stage
         require(self.stage in STAGES[:4], "NATIVE_LEDGER_STAGE_REQUIRED")
+        self.native_limit = native_limit(self.stage)
         self.output = Path(context.output).resolve()
         self.path = self._path(path or self.output / "NATIVE_RUNTIME_LEDGER.json")
         self.identity_path = self.path.with_name(self.path.stem + "_IDENTITY.json")
@@ -37,7 +38,7 @@ class SourceStageLedger:
             run_id=context.run_id, day=request.authority.day, stage=self.stage,
             authority_sha=request.authority.sha, input_sha=request.authority.input_sha,
             request_sha=request.request_sha, fixed_input_sha=request.fixed_input_sha,
-            source_sha=request.authority.source_sha, native_limit_seconds=5400,
+            source_sha=request.authority.source_sha, native_limit_seconds=self.native_limit,
             wall_limit_seconds=None, Threads=1, P2_calls=0,
             budget_basis="MEASURED_NATIVE_RUNTIME_ONLY",
             numerical_policy_version=NUMERICAL_VERSION, numerical_policy_sha=policy_sha())
@@ -49,6 +50,8 @@ class SourceStageLedger:
                 globals={"atomic": self._atomic})
             rebound_optimize = self.registry.rebind("v42_may_campaign_native90.budget", "DateBudget.native_optimize",
                 globals={"d_path": self._path, "native_scope": self._native_scope, "guard": self._guard})
+            if self.stage.startswith("M"):
+                rebound_optimize = self.registry.callable("v42_b3_joint/m_budget.py", "native_optimize")
         budget_type = type("B3SourceDateBudget", (source_class,), dict(
             __init__=rebound_init, persist=rebound_persist, native_optimize=rebound_optimize))
         exists, sealed = self.path.exists(), self.identity_path.exists()
@@ -61,7 +64,7 @@ class SourceStageLedger:
             budget = budget_type.__new__(budget_type)
             budget.path, budget.clock = self.path, clock
             budget.started = document["inclusive_T0"]
-            budget.wall_limit, budget.native_limit, budget.final_reserve = None, 5400., 0.
+            budget.wall_limit, budget.native_limit, budget.final_reserve = None, float(self.native_limit), 0.
             budget.calls = document["calls"]
             budget.costs = document["costs"]
             budget.admission_failures = document["admission_failures"]
@@ -73,8 +76,10 @@ class SourceStageLedger:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             with self.identity_path.open("x", encoding="utf-8", newline="\n") as stream:
                 stream.write(canonical(self.identity) + "\n")
-            self.budget = budget_type(self.path, clock=clock, native_limit=5400.,
+            self.budget = budget_type(self.path, clock=clock, native_limit=float(self.native_limit),
                 wall_limit=None, final_reserve=0., progress=progress)
+        self.budget._b3_native_scope, self.budget._b3_guard = self._native_scope, self._guard
+        self.budget._b3_now = source_class.__init__.__globals__["now"]
 
     def _path(self, path):
         resolved = Path(path).resolve()
@@ -90,7 +95,7 @@ class SourceStageLedger:
         replace_file(temporary, destination)
 
     def _verify_document(self, document):
-        require(document.get("Native_ceiling_seconds") == 5400
+        require(document.get("Native_ceiling_seconds") == self.native_limit
             and document.get("wall_ceiling_seconds") is None
             and document.get("P2_calls") == 0
             and document.get("budget_basis") == "MEASURED_NATIVE_RUNTIME_ONLY"
@@ -109,8 +114,14 @@ class SourceStageLedger:
                 day=self.context.request.authority.day, stage=self.stage, component=row["component"])
             require(row["b3_numerical_policy"]["effective_parameters"].get("TimeLimit")
                 == row["effective_TimeLimit"], "NATIVE_LEDGER_NUMERICAL_LIMIT_DRIFT")
-            require(not unknown_seen and total < 5400
-                and row.get("effective_TimeLimit") == max(0., 5400 - total),
+            requested = row.get("requested_seconds")
+            expected_limit = max(0., self.native_limit - total)
+            if self.stage.startswith("M") and requested is not None:
+                require(type(requested) in (int, float) and math.isfinite(requested) and requested > 0,
+                    "M_LEDGER_POSITIVE_FINITE_REQUEST_REQUIRED")
+                expected_limit = min(expected_limit, requested)
+            require(not unknown_seen and total < self.native_limit
+                and row.get("effective_TimeLimit") == expected_limit,
                 "NATIVE_LEDGER_REMAINING_LIMIT_OR_QUARANTINE_DRIFT")
             runtime = row.get("Native_Runtime")
             if row.get("runtime_unavailable"):
@@ -170,6 +181,7 @@ class SourceStageLedger:
         self._verify_document(document)
         return dict(self.identity, evidence_kind=self.registry.evidence_kind,
             measured_native_runtime=self.budget.used(), remaining_seconds=self.budget.remaining(),
+            native_budget_excess_seconds=max(0., self.budget.used() - self.native_limit),
             native_call_count=len(self.budget.calls), calls=document["calls"],
             non_native_costs=document["costs"], admission_failures=document["admission_failures"],
             quarantined=self.budget.inflight is not None or any(

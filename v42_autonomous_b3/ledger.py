@@ -5,6 +5,7 @@ from pathlib import Path
 
 from v42_b3_joint.contracts import canonical, require
 from v42_b3_joint.native_ledger import SourceStageLedger
+from v42_b3_joint.policy import native_limit
 from .admission import read, record, checked
 
 
@@ -19,7 +20,7 @@ def prior_prefix(context, attempts):
         require(identity.get("stage") == context.request.stage and
                 identity.get("day") == context.request.authority.day and
                 identity.get("input_sha") == context.request.authority.input_sha and
-                identity.get("native_limit_seconds") == 5400,
+                identity.get("native_limit_seconds") == native_limit(context.request.stage),
                 "B3_REPAIR_PRIOR_LEDGER_SCIENTIFIC_IDENTITY_DRIFT")
         document = read(path)
         require(document.get("inflight") is None and
@@ -50,7 +51,7 @@ class CumulativeStageLedger(SourceStageLedger):
         else:
             self.budget.calls = prior
             self.budget.native_used = sum(row["Native_Runtime"] for row in prior)
-            require(self.budget.native_used < 5400 or context.request.stage == "A1" and not prior,
+            require(self.budget.native_used < native_limit(context.request.stage) or context.request.stage == "A1" and not prior,
                     "B3_REPAIR_STAGE_NATIVE_BUDGET_EXHAUSTED")
             self.budget.persist()
             carry_path.write_text(canonical({"prior_receipts": receipts,

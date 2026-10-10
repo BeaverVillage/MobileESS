@@ -7,6 +7,12 @@ B3_PRODUCTION_CAMPAIGN_STARTED = False
 B3_FRESH_AC_EXECUTED = False
 NATIVE_LIMIT_SECONDS = 5400
 THREADS = 1
+COMMON_MESS_VERSION = "V42_COMMON_MESS_PRIMAL_ANYTIME_U4_V1"
+
+
+def native_limit(stage):
+    gap_target(stage)
+    return 1800 if stage.startswith("M") else 5400
 
 
 def gap_target(stage):
@@ -18,7 +24,7 @@ def gap_target(stage):
 def parameters(stage):
     gap = gap_target(stage)
     return {"Threads": 1, "MIPGap": float(gap), "P2_calls": 0,
-            "objective": "min rho_max", "native_limit_seconds": 5400,
+            "objective": "min rho_max", "native_limit_seconds": native_limit(stage),
             "wall_limit_seconds": None, "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
             "FeasibilityTol": 1e-6 if stage.startswith("A") else 1e-8,
             "OptimalityTol": 1e-6 if stage.startswith("A") else 1e-8,

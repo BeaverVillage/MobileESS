@@ -27,6 +27,9 @@ class FakeLedger:
     def sealed_receipt(self):
         return canonical({"evidence_kind": "FAKE_SOURCE_TEST", "real_native_calls": 0, "Threads": 1})
 
+    def cost(self, *args, **kwargs):
+        return nullcontext()
+
 
 class FakeGrid:
     def __init__(self, authority):
@@ -235,6 +238,21 @@ class SourceFixture:
                         "FAKE_SOURCE_TEST": True}
             return run
 
+        def optimize_case(case, ledger, progress=None, **kwargs):
+            from fractions import Fraction
+            from v42_b3_joint.policy import COMMON_MESS_VERSION
+            stage = ledger.context.request.stage
+            self.events.append(("SOURCE_HYBRID", stage, "B3"))
+            self.virtual_files[str(case.output / "BEST_EXACT_ORIGINAL_DUAL.json")] = {}
+            gap = None if self.bound is None else Fraction(1) - Fraction(self.bound)
+            return dict(accepted=True, feasible_accepted=True, PASS=True, P2_calls=0,
+                engine_version=COMMON_MESS_VERSION, scientific_case_sha=case.case_sha,
+                global_gap_certified=gap is not None and gap <= Fraction(3, 100),
+                certified_gap=float(gap) if gap is not None else None,
+                exact_gap=str(gap) if gap is not None else None,
+                exact_Global_LB=self.bound, exact_Global_UB="1", mess=case.fake_plan,
+                FAKE_SOURCE_TEST=True), case.point
+
         def reconstruct(A, data, names, values):
             self.events.append(("M1_NEW_A2_ORIGINAL_RECONSTRUCTION", len(names)))
             return [0.0], {"PASS": self.warm_feasible, "FAKE_SOURCE_TEST": True}
@@ -255,6 +273,7 @@ class SourceFixture:
             return SimpleNamespace(**dict(zip(fields, args)), fake_plan=self.last_case.fake_plan)
 
         modules = {
+            "v42_common_mess.engine": fake_module(optimize_case=optimize_case),
             "v42_may_campaign_native90.m_model": fake_module(build_case=lambda: None, verify_case=verify_case,
                 verify_transport=lambda *args: {"PASS": True, "FAKE_SOURCE_TEST": True}, __b3_rebind__=model_factory,
                 np=SimpleNamespace(savez_compressed=lambda *args, **kwargs: None,
@@ -426,6 +445,32 @@ class RealMSourceRoutingTests(unittest.TestCase):
         fixture.bound, fixture.strict_pass = "97/100", False
         with self.assertRaises(ValueError):
             bridge.verify(fixture.context, output)
+
+    def test_feasible_m_stage_with_unknown_lb_can_advance_without_global_claim(self):
+        fixture = SourceFixture()
+        fixture.bound = None
+        bridge = MSourceBridge()
+        output = bridge.execute(fixture.context, FakeLedger(fixture.context))
+        self.assertTrue(output.source_result["feasible_accepted"])
+        self.assertFalse(output.global_evidence["global_gap_certified"])
+        self.assertFalse(output.global_evidence["original_global_bound_verified"])
+        self.assertIsNone(output.global_evidence["exact_LB"])
+        self.assertIsNone(output.source_packet["dual_path"])
+        proof = bridge.verify(fixture.context, output)
+        self.assertTrue(proof["physical"]["original_integer_physical_verified"])
+        self.assertEqual(proof["global"]["certification_status"], "UNKNOWN")
+        forged = dict(output.source_result, global_gap_certified=True)
+        with self.assertRaisesRegex(ValueError, "UNKNOWN_LB"):
+            bridge.verify(fixture.context, replace(output, source_result=forged))
+
+    def test_physically_feasible_gap_above_three_percent_is_uncertified(self):
+        fixture = SourceFixture()
+        fixture.bound = "1/2"
+        output = MSourceBridge().execute(fixture.context, FakeLedger(fixture.context))
+        self.assertTrue(output.source_result["feasible_accepted"])
+        self.assertEqual(output.source_result["exact_gap"], "1/2")
+        self.assertFalse(output.global_evidence["global_gap_certified"])
+        self.assertEqual(output.global_evidence["certification_status"], "GAP_NOT_CERTIFIED")
 
     def test_m1_candidate_is_independently_checked_under_new_a2_case(self):
         first = SourceFixture("M1")

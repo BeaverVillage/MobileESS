@@ -80,7 +80,9 @@ def runtime_registry():
         dict(contextmanager=contextmanager, Path=Path, perf_counter=perf_counter,
              process_time=process_time, math=math, atomic=write_once, now=lambda: "FAKE_TEST",
              d_path=Path, native_scope=denied_scope, guard=lambda model: None))
-    return FakeSourceRegistry({budget.__name__: budget})
+    m_budget = fake_source_module("v42_b3_joint.m_budget", "v42_b3_joint/m_budget.py",
+        dict(math=math, importlib=__import__("importlib")))
+    return FakeSourceRegistry({budget.__name__: budget, m_budget.__name__: m_budget})
 
 
 def operation_registry():
@@ -168,6 +170,60 @@ class SourceRuntimeOperationsTests(unittest.TestCase):
         self.assertEqual(model.Params.Threads, 1)
         self.assertEqual(ledger.receipt()["evidence_kind"], "FAKE_SOURCE_TEST")
 
+    def test_m_requested_calls_share_1800_native_budget_and_preserve_overshoot(self):
+        context = self.context(runtime_registry(), stage="M1")
+        ledger = SourceStageLedger(context)
+        first = FakeModel(1200.)
+        ledger.native_optimize(first, track="M_START", requested_seconds=1200.)
+        second = FakeModel(600.125)
+        receipt = ledger.native_optimize(second, track="M_U4", requested_seconds=900.)
+        self.assertEqual((first.Params.TimeLimit, second.Params.TimeLimit), (1200., 600.))
+        self.assertEqual(ledger.used(), 1800.125)
+        self.assertEqual(receipt["cumulative_budget_excess_seconds"], .125)
+        resumed = SourceStageLedger(context)
+        self.assertEqual(resumed.receipt()["native_budget_excess_seconds"], .125)
+        denied = FakeModel(1.)
+        with self.assertRaises(TimeoutError):
+            resumed.native_optimize(denied, track="M_U4", requested_seconds=1.)
+        self.assertEqual(denied.calls, 0)
+
+    def test_m_failed_call_is_durable_and_nonfinite_bound_is_unknown(self):
+        context = self.context(runtime_registry(), stage="M2")
+        ledger = SourceStageLedger(context)
+        model = FakeModel(7., fail=True)
+        model.ObjBound = float("inf")
+        with self.assertRaisesRegex(RuntimeError, "FAKE_NATIVE_FAILURE"):
+            ledger.native_optimize(model, track="M_U4", requested_seconds=10.)
+        document = json.loads(ledger.path.read_text())
+        self.assertEqual(document["measured_Native_Runtime"], 7.)
+        self.assertIsNone(document["calls"][0]["Native_BestBd"])
+        self.assertEqual(SourceStageLedger(context).remaining(), 1793.)
+
+    def test_m_polling_does_not_read_unsupported_callback_runtime(self):
+        ledger = SourceStageLedger(self.context(runtime_registry(), stage="M1"))
+        model = FakeModel(2.)
+        def unsupported(code):
+            self.fail("POLLING must not query runtime")
+        model.cbGet = unsupported
+        model.optimize = lambda callback: callback(model, self.fake_gp.GRB.Callback.POLLING)
+        events = []
+        ledger.native_optimize(model, track="M_U4", requested_seconds=5.,
+            callback=lambda m, where: events.append(where))
+        self.assertEqual(events, [self.fake_gp.GRB.Callback.POLLING])
+        self.assertEqual(ledger.used(), 2.)
+
+    def test_m_unknown_runtime_survives_restart_as_quarantine(self):
+        context = self.context(runtime_registry(), stage="M2")
+        ledger = SourceStageLedger(context)
+        with self.assertRaisesRegex(RuntimeError, "RUNTIME_UNAVAILABLE"):
+            ledger.native_optimize(FakeModel(float("nan")), track="M_U4", requested_seconds=1.)
+        resumed = SourceStageLedger(context)
+        self.assertTrue(resumed.receipt()["quarantined"])
+        denied = FakeModel(1.)
+        with self.assertRaisesRegex(RuntimeError, "QUARANTINE"):
+            resumed.native_optimize(denied, track="M_U4", requested_seconds=1.)
+        self.assertEqual(denied.calls, 0)
+
     def test_failed_source_optimize_runtime_is_charged(self):
         ledger = SourceStageLedger(self.context(runtime_registry()))
         with self.assertRaisesRegex(RuntimeError, "FAKE_NATIVE_FAILURE"):
@@ -191,7 +247,7 @@ class SourceRuntimeOperationsTests(unittest.TestCase):
         registry = runtime_registry()
         ledgers = [SourceStageLedger(self.context(registry, stage)) for stage in ("A1", "M1", "A2", "M2")]
         ledgers[0].native_optimize(FakeModel(10.))
-        self.assertEqual([ledger.remaining() for ledger in ledgers], [5390., 5400., 5400., 5400.])
+        self.assertEqual([ledger.remaining() for ledger in ledgers], [5390., 1800., 5400., 1800.])
 
     def test_restart_keeps_runtime_and_next_limit(self):
         context = self.context(runtime_registry())
