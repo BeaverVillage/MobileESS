@@ -53,7 +53,7 @@ def qualify(root,origin,day):
     # NormalAmps/kVA/SVR/voltage check is retained in this independent audit.
     receipts.extend(validation['evidence'])
     proof=dict(schema='SVR11_COMPLETED_B0_REUSE_V1',PASS=True,arm='B0',day=day,
-        origin_root=str(origin),execution_source_SHA=old['execution_SHA'],
+        origin_root=str(origin),execution_source_SHA=validation.get('execution_source_SHA',old['execution_SHA']),
         validation_source_SHA=m['execution_SHA'],equipment_SHA=h['equipment_SHA'],
         original_result=row['result'],original_result_SHA=row['result_SHA'],
         changed_sources_reviewed=sorted(changes),validation=validation,evidence=receipts,

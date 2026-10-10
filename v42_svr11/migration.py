@@ -69,7 +69,8 @@ def check(root,monitor_only=False):
             results=[record(p) for p in sorted((oldroot/'dates').rglob('RESULT.json'))]
             atomic(isolated,dict(state,reason='Classifier and transient DSS cwd guard corrected in immutable successor',
                 old_ledger=record(oldroot/'CAMPAIGN_LEDGER.json'),all_prior_results=results,
-                original_results_and_ledger_preserved=True,new_epoch_all_124_recalculated=True))
+                original_results_and_ledger_preserved=True,new_epoch_all_124_recalculated=False,
+                qualified_completed_dates_reused=True))
         # Only the obsolete read-only HTTP process is stopped after workers drain.
         monitor_root=Path(read(state['predecessor_monitor_manifest']['path'])['root'])
         mp=monitor_root/'MONITOR_PROCESS.json';monitor=read(mp) if mp.exists() else {}
