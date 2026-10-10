@@ -8,20 +8,22 @@ Minimum installation validation checks exact native wiring, original ratings/pro
 
 B0 regenerates raw causal FCFS planning and realized operation. Non-B0 workers require a new source-bound forecast-only electrical certificate before Native optimization. Independent native TIME prefix probes regenerate local central secants on the new graph, including all 153 transformer phase rows. The finite response includes discrete autonomous tap response, so this local planning surrogate does not prove nonlinear AC feasibility. Forecast AC and independent chronological Actual Fresh AC evaluate the accepted plan with exact full-node/phase and both-terminal current/kVA evidence. No Actual repair or reoptimization occurs.
 
-B2 and B3 M1/M2 use the unchanged common U4 Anytime engine and cumulative measured Native Runtime of 1,800 seconds per M stage. FULL-feasible UB acceptance is separate from a valid independent global bound/gap. A stages retain the existing approved settings and 5,400-second Native allowance. B3 starts with a freshly optimized A1 and preserves A1→M1→A2→M2 dependencies; historical B1 points or AC results are not substituted. Only the immutable original job-domain roster is used as domain provenance.
+B2 and B3 M1/M2 use the unchanged common U4 Anytime engine and cumulative measured Native Runtime of 1,800 seconds per M stage. FULL-feasible UB acceptance is separate from a valid independent global bound/gap. A stages retain the existing approved solver settings and 5,400-second Native allowance. A complete independently verified original integer and physical incumbent is now explicitly accepted without the 0.5% gap certificate; Phase I, pricing closure, original integer types, complete job schedule and fixed decisions remain mandatory. TIME_LIMIT_FEASIBLE_ACCEPTED continues each A/M handoff, while TIME_LIMIT_NO_FEASIBLE terminates only that date. Native budget termination retains validated prior incumbents for the exact same date, model and stage. B3 starts with a freshly optimized A1 and preserves A1→M1→A2→M2 dependencies; historical B1 points or AC results are not substituted. Only the immutable original job-domain roster is used as domain provenance.
 
-`v42_svr11.controller` persists all 124 ledger entries, adopts exact PID/create-time/command/root/source workers, isolates date failures, and advances policies after every date is terminal. Only pre-Native file-sharing/process-start failures receive up to two retries. Any inflight/unknown Native call prevents a zero-budget retry. Global source/hardware integrity failure stops dispatch and records a distinct system error while retaining healthy workers and all evidence.
+`v42_svr11.controller` persists all 124 ledger entries, adopts exact PID/create-time/command/root/source workers, isolates date failures, and advances policies after every date is terminal. Restartable technical failures receive at most two retries, queued after dispatching the next original date. The latest explicit user authorization requires every rerun to start a new attempt with Native accounting at zero. Prior measured/unknown Runtime and FAIL evidence remain immutable in their original attempts; cumulative stage ceilings remain 1,800/5,400 seconds within each attempt. Normal TIME_LIMIT and physical violations do not trigger automatic technical retries. Global source/hardware integrity failure stops dispatch and records a distinct system error while retaining healthy workers and all evidence.
 
-Runtime root: `D:\v42_svr11_may_20261011`. Entry points:
+Runtime root: `D:\v42_svr11_may_20261011_02`. Entry points:
 
 ```powershell
-python -B -X utf8 -m v42_svr11.freeze D:\v42_svr11_may_20261011\hardware
-python -B -X utf8 -m v42_svr11.prepare raw D:\v42_svr11_may_20261011
-python -B -X utf8 -m v42_svr11.regression D:\v42_svr11_may_20261011
-python -B -X utf8 -m v42_svr11.prepare release D:\v42_svr11_may_20261011
-python -B -X utf8 -m v42_svr11.watchdog D:\v42_svr11_may_20261011
+python -B -X utf8 -m v42_svr11.freeze D:\v42_svr11_may_20261011_02\hardware
+python -B -X utf8 -m v42_svr11.prepare raw D:\v42_svr11_may_20261011_02
+python -B -X utf8 -m v42_svr11.regression D:\v42_svr11_may_20261011_02
+python -B -X utf8 -m v42_svr11.prepare release D:\v42_svr11_may_20261011_02
+python -B -X utf8 -m v42_svr11.watchdog D:\v42_svr11_may_20261011_02
 ```
 
 The read-only dashboard is `http://localhost:8796`, with five-second refresh, policy/date summaries, live process state, measured Native Runtime, separate bounds, and clickable physical detail. Existing hourly Codex recovery and five-minute Windows tasks are repointed to this release, preserving their old definitions. Scheduling registration is distinct from observed scheduled execution.
 
 The runtime `CAMPAIGN_MANIFEST.json` binds executable source SHA, hardware/scenario/thermal receipts and raw input receipts. `CAMPAIGN_LEDGER.json`, `REPORT.json`, `REPORT.md`, process receipts and scheduled-run receipts provide live evidence. Published snapshots must explicitly label incomplete campaigns; the final report is produced only when all 124 dates have terminal results. SVR7/SVR9 artifacts and PR #206 remain untouched.
+
+Epoch01 is isolated after three B0 input-axis implementation FAILs. Its original results are preserved. Epoch02 restores the approved daily96 Actual exogenous producer after each own Planning freeze and binds Fresh checking to the SVR11 finite thermal authority. No prior result is promoted into Epoch02.

@@ -47,9 +47,9 @@ def release(root):
         source_release_UTC=now(),provisional_receipt=record(root/'hardware/PROVISIONAL_IMPLEMENTATION_FREEZE.json'))
     atomic(hpath,h)
     atomic(root/'B3_SOURCE_SEAL.json',dict(schema='B3_AUTONOMOUS_SOURCE_SEAL_V1',root=str(ROOT),source_sha=digest(source),files=source))
-    m=dict(schema=SCHEMA,svr11_campaign=True,authorization='V42_FINAL_USER_20261011',run_id='SVR11_FINAL_MAY_20261011',root=str(root),code_root=str(ROOT),
+    m=dict(schema=SCHEMA,svr11_campaign=True,authorization='V42_FINAL_USER_20261011',run_id='SVR11_FINAL_MAY_'+root.name,root=str(root),code_root=str(ROOT),
         execution_sources=source,execution_SHA=digest(source),source_commit=h['source_commit'],algorithm_version=VERSION,
-        native_M_limit_seconds=1800,native_A_limit_seconds=5400,A_gap=.005,M_acceptance='FULL_FEASIBLE_UB',M_gap_certificate_required=False,
+        native_M_limit_seconds=1800,native_A_limit_seconds=5400,A_gap=.005,A_anytime_FULL_feasible=True,A_gap_certificate_required=False,normal_TIMEOUT_restart=False,retry_new_attempt_starts_zero=True,retry_max_attempts=3,retry_authority="USER_EXPLICIT_RESTART_FROM_ZERO_20261011",M_acceptance='FULL_FEASIBLE_UB',M_gap_certificate_required=False,
         Threads=1,P2_calls=0,policy_order=list(ORDER),worker_counts=dict(B0=1,B2=3,B1=1,B3=1),FAIL_CONTINUE=True,
         hardware=record(hpath),scenario=record(root/'hardware/SCENARIO.json'),thermal=record(root/'hardware/THERMAL.json'),
         input_receipts=read(root/'RAW_INPUT_RECEIPTS.json'),origins=read(root/'RAW_INPUT_ORIGINS.json'),

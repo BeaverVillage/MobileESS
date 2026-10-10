@@ -34,9 +34,8 @@ def run(path):
                 progress(dict(phase='FRESH_INPUT_AND_SVR11_MODEL_PREPARATION'));inputs(request,progress)
                 if request['arm']=='B0':
                     atomic(attempt/'NATIVE_RUNTIME_LEDGER.json',dict(schema='V42_B0_NATIVE_ZERO_LEDGER_V1',measured_Native_Runtime=0,calls=[],inflight=None,Native_ceiling_seconds=0,source_SHA=manifest['execution_SHA'],UTC=now()))
-                    from v42_voltage_control.b0_new import run_day
-                    science=run_day(request['day'],request['input_folder'],request['output'],scenario=read(manifest['scenario']['path']),
-                        source_SHA=manifest['execution_SHA'],progress=progress,design_receipt=manifest['hardware'])
+                    from .b0 import run as execute
+                    science=execute(request,manifest,progress)
                 elif request['arm']=='B2':
                     from v42_common_campaign.b2 import run as execute
                     from .operations import scope as ops_scope
@@ -57,6 +56,11 @@ def run(path):
                 result['physical_failures']=failures
                 if failures:result.update(PASS=False,status='FAIL',reason='; '.join(f["environment"]+':'+f['reason'] for f in failures))
                 scientific=science.get('scientific',science)
+                result['retryable_technical_error']=not result['PASS'] and not failures and scientific.get('classification') in ('IMPLEMENTATION_FAILURE','INPUT_OR_SOURCE_FAILURE')
+                from .anytime import solver_label
+                result['optimization_status']=solver_label(scientific) if request['arm']!='B0' else 'Native 0 · B0'
+                result['AC_status']='AC FAIL' if failures else 'AC PASS' if result['metrics']['environments'].get('ACTUAL') and result['PASS'] else 'NOT_EXECUTED'
+                result['stage_optimization_statuses']={k:solver_label(v) for k,v in science.get('stages',{}).items()}
                 result['Planning_objective']=scientific.get('verified_UB',scientific.get('UB'))
                 result['FULL_feasible_certified']=scientific.get('feasible_accepted',result.get('FULL_feasible_certified',False))
                 result['global_gap_certified']=scientific.get('global_gap_certified',result.get('global_gap_certified',False))
@@ -65,6 +69,7 @@ def run(path):
         except Exception as error:
             result.update(PASS=False,status='FAIL',reason=repr(error),traceback=traceback.format_exc(),source_global_integrity_block=global_error(error))
             result['retryable_pre_native_technical_error']=isinstance(error,OSError) and getattr(error,'winerror',None) in (32,33)
+            result['retryable_technical_error']=not result['source_global_integrity_block'] and (isinstance(error,OSError) or 'NATIVE_RUNTIME_UNAVAILABLE' in str(error) or 'UNMEASURED_RUNTIME' in str(error) or type(error).__name__=='GurobiError')
             atomic(attempt/'error.json',result)
             try:
                 from .report import metrics
@@ -75,9 +80,11 @@ def run(path):
             # inflight Runtime uncertainty alongside every completed call.
             ledgers=[]
             for ledger in attempt.rglob('NATIVE_RUNTIME_LEDGER.json'):
-                value=read(ledger);ledgers.append(dict(receipt=record(ledger),Native_Runtime=value.get('measured_Native_Runtime',0),inflight=value.get('inflight')))
+                value=read(ledger);ledgers.append(dict(receipt=record(ledger),Native_Runtime=value.get('measured_Native_Runtime',0),inflight=value.get('inflight'),runtime_unavailable=any(c.get('runtime_unavailable') for c in value.get('calls',[]))))
             result['native_ledgers']=ledgers
-            result['Native_Runtime']=sum(l['Native_Runtime'] for l in ledgers)
+            result['known_completed_Native_Runtime']=sum(l['Native_Runtime'] for l in ledgers)
+            result['Native_Runtime_uncertain']=any(l['inflight'] or l['runtime_unavailable'] for l in ledgers)
+            result['Native_Runtime']=None if result['Native_Runtime_uncertain'] else result['known_completed_Native_Runtime']
             result.update(finished_UTC=now(),wall_seconds=time.perf_counter()-start,
                 Actual_PQ_repair=0,Actual_reoptimization=0,next_date_blocked_by_FAIL=False)
             atomic(request['result'],result);stop.set();thread.join(timeout=2);progress(dict(phase='TERMINAL',status=result['status']))

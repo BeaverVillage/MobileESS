@@ -168,6 +168,9 @@ def _trial(case, budget, path, *, validator, seconds, lower=None, upper=None,
         write(path / 'RESULT.json', row)
         if any(r.get('runtime_unavailable') for r in budget.calls):
             raise RuntimeError('COMMON_M_NATIVE_RUNTIME_UNAVAILABLE_QUARANTINE')
+        from v42_svr11.anytime import enabled,normal_budget_exception
+        if enabled() and native_failure is not None and not normal_budget_exception(native_failure):
+            raise native_failure
         if isinstance(native_failure, (PermissionError, ValueError)) or error and (
                 'ADMISSION' in error or 'SOURCE' in error or 'DRIFT' in error):
             raise RuntimeError(error)
@@ -387,9 +390,13 @@ def optimize_case(case, budget, progress=None, *, stage_identity=None, initial_p
                     case_sha=case.case_sha, history=history, no_LB_research_calls=True,
                     repeated_failed_neighborhoods=False, cumulative_native_runtime_seconds=ledger.used()))
     except Exception as failure:
-        error = type(failure).__name__ + ': ' + str(failure)
-        termination = 'INPUT_OR_IMPLEMENTATION_FAILURE'
-        write(case.output / 'COMMON_MESS_ERROR.json', dict(error=error, case_sha=case.case_sha))
+        from v42_svr11.anytime import enabled,normal_budget_exception
+        if enabled() and normal_budget_exception(failure):
+            termination = 'NATIVE_1800_SECONDS_EXHAUSTED'
+        else:
+            error = type(failure).__name__ + ': ' + str(failure)
+            termination = 'INPUT_OR_IMPLEMENTATION_FAILURE'
+            write(case.output / 'COMMON_MESS_ERROR.json', dict(error=error, case_sha=case.case_sha))
     if point is not None:
         strict = _validate(case, point, case.output / 'BEST_STRICT_UB_POINT.npz', validator,
             ledger, 'COMMON_M_FINAL_FULL_LITERAL_INTEGER_PHYSICAL_REPLAY')
@@ -414,6 +421,9 @@ def optimize_case(case, budget, progress=None, *, stage_identity=None, initial_p
     status = 'GLOBAL_GAP_CERTIFIED' if feasible and certified else (
         'TIME_LIMIT_FEASIBLE' if time_limited else 'FEASIBLE_ACCEPTED') if feasible else (
         'INPUT_OR_SOURCE_FAILURE' if error else 'M_NO_VALID_FEASIBLE')
+    from v42_svr11.anytime import enabled
+    if enabled() and time_limited and error is None:
+        status='TIME_LIMIT_FEASIBLE_ACCEPTED' if feasible else 'TIME_LIMIT_NO_FEASIBLE'
     result = dict(engine_version=VERSION, algorithm_version=VERSION,
         day=case.bundle['day'], arm=stage_identity.get('arm', case.identity.get('arm', 'B2')),
         stage=stage_identity.get('stage', 'M'), stage_identity=stage_identity,

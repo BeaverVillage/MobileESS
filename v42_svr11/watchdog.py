@@ -20,7 +20,7 @@ def check(root,port=8796,monitor_only=False):
         # Process liveness, command, create time and source determine adoption;
         # elapsed Native time or stale timestamp alone never permits termination.
         if not monitor_only and not live(supervisor) and ledger.get('status')!='COMPLETE':
-            if ledger.get('status')=='GLOBAL_SYSTEM_ERROR':
+            if ledger.get('status') in ('GLOBAL_SYSTEM_ERROR','SOURCE_EPOCH_ISOLATED'):
                 actions.append('GLOBAL_SYSTEM_ERROR_REQUIRES_DIAGNOSIS; healthy workers preserved')
             else:
                 # Close launch/receipt window with actual module+root inventory.
@@ -48,7 +48,7 @@ def check(root,port=8796,monitor_only=False):
             with urllib.request.urlopen(f'http://127.0.0.1:{port}/api/state',timeout=5) as response:
                 import json
                 actual=json.load(response);value.update(monitor_HTTP=response.status,monitor_source_SHA=actual['source_SHA'])
-                if actual['source_SHA']!=m['execution_SHA']:raise PermissionError('SVR11_GLOBAL_MONITOR_EPOCH_DRIFT')
+                if actual['source_SHA']!=m['execution_SHA'] or Path(actual['root']).resolve()!=root:raise PermissionError('SVR11_GLOBAL_MONITOR_EPOCH_DRIFT')
         except (OSError,ValueError) as error:value['monitor_HTTP_error']=repr(error)
         atomic(root/'WATCHDOG_LAST_RUN.json',value);return value
 

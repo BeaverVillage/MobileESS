@@ -58,7 +58,7 @@ def b1(request,manifest,progress):
         with native_zero() as calls:evaluation=operations.run(request,scientific,progress)
         if calls:raise PermissionError('SVR11_ACTUAL_NATIVE_OPTIMIZATION_FORBIDDEN')
         out.update(evaluation=evaluation,PASS=bool(evaluation['PASS']),status='PASS' if evaluation['PASS'] else 'ACTUAL_AC_FAILED',
-            FULL_feasible_certified=True,global_gap_certified=True)
+            FULL_feasible_certified=True,global_gap_certified=scientific.get("global_gap_certified",False))
         return out
 
 def b3_setup(request,seal,pipeline):

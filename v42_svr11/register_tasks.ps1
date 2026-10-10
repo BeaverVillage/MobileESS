@@ -1,4 +1,4 @@
-param([string]$CampaignRoot='D:\v42_svr11_may_20261011', [string]$SourceRoot='C:\v42_svr9_final_20261011')
+param([string]$CampaignRoot='D:\v42_svr11_may_20261011_02', [string]$SourceRoot='D:\v42_svr11_epoch02_20261011')
 $ErrorActionPreference='Stop'
 $v42Python='C:\Users\kjw39\AppData\Local\Programs\Python\Python311\pythonw.exe'
 $v42Tasks=@('MobileESS_V42_May_B2_B3_Autonomous_Supervisor','MobileESS_V42_May_B2_B3_Autonomous_Monitor')
