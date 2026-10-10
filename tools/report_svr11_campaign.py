@@ -38,15 +38,24 @@ def run(root):
         paired.append(dict(policies=[a,b],same_PASS_dates=days,n=len(days),metrics=comparison))
     for r in rows:
         attempts=[]
+        current_request=read(r['attempts'][-1]) if r['attempts'] and not r.get('reused') else None
+        execution_source=current_request['source_SHA'] if current_request else r.get('execution_source_SHA',m['execution_SHA'])
+        latest_performance={k:value(r,k) for k in METRICS}
+        if r['status']=='RUNNING' and current_request:
+            progress=Path(current_request['progress'])
+            p=read(progress) if progress.exists() else {}
+            # A previous-epoch terminal Runtime remains historical, never the
+            # live Runtime of a new independently started attempt.
+            latest_performance.update(Native_Runtime=p.get('Native_Runtime',0),wall_seconds=p.get('wall_seconds'))
         for request in r['attempts']:
             rp=Path(read(request)['result'])
             if rp.exists():
                 v=read(rp);attempts.append(dict(result=record(rp),status=v['status'],Native_Runtime=v.get('Native_Runtime'),
                     known_completed_Native_Runtime=v.get('known_completed_Native_Runtime'),Native_Runtime_uncertain=v.get('Native_Runtime_uncertain'),reason=v.get('reason')))
         date_table.append(dict(arm=r['arm'],day=r['day'],status=r['status'],reason=r.get('reason'),
-            reused=r.get('reused',False),execution_source_SHA=r.get('execution_source_SHA',m['execution_SHA']),
+            reused=r.get('reused',False),execution_source_SHA=execution_source,
             validation_source_SHA=r.get('validation_source_SHA',m['execution_SHA']),reuse_proof=r.get('reuse_proof'),
-            latest_performance={k:value(r,k) for k in METRICS},FULL_feasible_certified=r.get('FULL_feasible_certified'),
+            latest_performance=latest_performance,FULL_feasible_certified=r.get('FULL_feasible_certified'),
             global_gap_certified=r.get('global_gap_certified'),optimization_status=r.get('optimization_status'),AC_status=r.get('AC_status'),attempts=attempts,
             previous_epoch_attempts=r.get('previous_epoch_attempts',[]),
             previous_epoch_Native_Runtime=r.get('previous_epoch_Native_Runtime'),

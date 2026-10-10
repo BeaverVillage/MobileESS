@@ -1,7 +1,7 @@
 {
   "schema": "SVR11_USER_HANDOFF_37_V1",
   "PASS": false,
-  "verified_PASS": 31,
+  "verified_PASS": 32,
   "total": 37,
   "final_all_receipt_bytes_reverified": false,
   "source_SHA": "2e6fa8ceed27986b63b3ebb6ca84b90f0e772d5f63449d4fd5d7207228da91d4",
@@ -13649,17 +13649,88 @@
       "reused": true
     },
     {
+      "PASS": true,
       "arm": "B2",
       "day": "2025-05-01",
-      "PASS": false,
-      "status": "FAIL",
-      "reason": "ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED')"
+      "source_SHA": "2e6fa8ceed27986b63b3ebb6ca84b90f0e772d5f63449d4fd5d7207228da91d4",
+      "result_SHA": "27be341740d3dea4cb785269fdf2014cdf24ccd1ff96da25fa1afeae89ddbcf1",
+      "namespaces": {
+        "ACTUAL": {
+          "slots": 96,
+          "all_node_phase_count": 419,
+          "Vmin": 0.9623776930913688,
+          "Vmax": 1.0480476933314842,
+          "maximum_line_loading": 0.7174118237187053,
+          "Full_AC_Physical_PASS": true
+        },
+        "DAYAHEAD": {
+          "slots": 96,
+          "all_node_phase_count": 419,
+          "Vmin": 0.9621609971980323,
+          "Vmax": 1.0471333529992368,
+          "maximum_line_loading": 0.6731340403940345,
+          "Full_AC_Physical_PASS": true
+        }
+      },
+      "Fresh_original_arrays_count": 2,
+      "evidence": [
+        {
+          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\RESULT.json",
+          "sha256": "27be341740d3dea4cb785269fdf2014cdf24ccd1ff96da25fa1afeae89ddbcf1",
+          "bytes": 14781518
+        },
+        {
+          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\SVR11\\VOLTAGE_CONTROL_ACTUAL_PHYSICAL_AUDIT.json",
+          "sha256": "652bef1c891f6b8ca330927b2f67704106b190ed61623c63b427dcb0508ba4fb",
+          "bytes": 903849
+        },
+        {
+          "bytes": 36210189,
+          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\SVR11\\VOLTAGE_CONTROL_ACTUAL_SLOTS.json",
+          "sha256": "f5aa9eeb2c4e506c0321bb602bbb607b5c3a4218c92b623798a1d9ff3aa8c6de"
+        },
+        {
+          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_PHYSICAL_AUDIT.json",
+          "sha256": "f1f3c0ea1e6495d846d6609c45b99b8a13e04fb9213e26d01e67c147d577b83e",
+          "bytes": 903861
+        },
+        {
+          "bytes": 36198835,
+          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_SLOTS.json",
+          "sha256": "8f40c261aac9b201ab48f17c38d342d6c76c4c97033c4c36de48014ddec2fb8a"
+        },
+        {
+          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+          "sha256": "ed9ef2904beb10edd85f97781e14cc4ccf7fd15f661c5b19eac6c626a76d1b2b",
+          "bytes": 851421
+        },
+        {
+          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\FORECAST_FRESH\\fresh\\OPENDSS_PHASE_ARRAYS.npz",
+          "sha256": "ae9468ce229a7b73f21fe4ae503575ed5697ad47e1d29a1d3345ff4289548897",
+          "bytes": 851064
+        },
+        {
+          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\PLANNING_ACTUAL_CONTROL_INDEPENDENCE_AUDIT.json",
+          "sha256": "7ebd5571a043337c8450a7c9e10b5be21f423503df19aa8b9e57057ba6950649",
+          "bytes": 107670
+        },
+        {
+          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\BEST_STRICT_UB_CERTIFICATE.json",
+          "sha256": "d2e9b5a220d1bd1628c90762cb64b4de98988aa4bf669532c8765a8dab6c0f45",
+          "bytes": 3676
+        }
+      ],
+      "optimization_status": "FEASIBLE",
+      "global_gap_certified": false,
+      "Native_Runtime": 189.55999970436096,
+      "wall_seconds": 778.5498363000806,
+      "UTC": "2026-10-10T21:36:41.268392+00:00"
     },
     {
       "arm": "B2",
       "day": "2025-05-02",
       "PASS": false,
-      "status": "FAIL",
+      "status": "RUNNING",
       "reason": "ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED')"
     },
     {
@@ -13673,25 +13744,25 @@
       "arm": "B2",
       "day": "2025-05-04",
       "PASS": false,
-      "status": "NOT_EXECUTED",
-      "reason": null
+      "status": "FAIL",
+      "reason": "ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED')"
     },
     {
       "arm": "B2",
       "day": "2025-05-05",
       "PASS": false,
-      "status": "NOT_EXECUTED",
-      "reason": null
+      "status": "FAIL",
+      "reason": "ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED')"
     },
     {
       "arm": "B2",
       "day": "2025-05-06",
       "PASS": false,
-      "status": "NOT_EXECUTED",
-      "reason": null
+      "status": "FAIL",
+      "reason": "ValueError('CAPCONTROL_SVR_FORECAST_SOURCE_OR_DECISION_MUTATED')"
     }
   ],
   "campaign_processes_terminated": 0,
   "Native_optimizer_calls": 0,
-  "UTC": "2026-10-10T21:16:29.681446+00:00"
+  "UTC": "2026-10-10T21:36:41.292394+00:00"
 }
