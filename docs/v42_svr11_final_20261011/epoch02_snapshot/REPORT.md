@@ -1,6 +1,6 @@
 # SVR11 May 2025 campaign
 
-Status: IN_PROGRESS; attempted terminal dates 6/124.
+Status: IN_PROGRESS; attempted terminal dates 21/124.
 
 Source SHA: `68130f4e8a19b54637ae168a7417b768592fd2e397b904aa006567ab90fc388a`
 
@@ -18,7 +18,7 @@ Date failures do not gate later dates or policies. Unexecuted metrics remain una
 
 |---|---:|---:|---:|---:|
 
-| B0 | 6 | 0 | 1 | 24 |
+| B0 | 18 | 3 | 1 | 9 |
 
 | B2 | 0 | 0 | 0 | 31 |
 
@@ -36,4 +36,8 @@ Full node/phase, both-terminal current/kVA, control events/taps and loss evidenc
 
 ## Failures
 
-None recorded so far; unexecuted dates are not PASS.
+- B0 2025-05-19: ACTUAL:TRANSFORMER_NAMEPLATE_CURRENT_VIOLATION (result: D:\v42_svr11_may_20261011_02\dates\B0\2025-05-19\attempts\attempt_01\RESULT.json)
+
+- B0 2025-05-20: ACTUAL:TRANSFORMER_NAMEPLATE_CURRENT_VIOLATION (result: D:\v42_svr11_may_20261011_02\dates\B0\2025-05-20\attempts\attempt_01\RESULT.json)
+
+- B0 2025-05-21: ACTUAL:TRANSFORMER_NAMEPLATE_CURRENT_VIOLATION (result: D:\v42_svr11_may_20261011_02\dates\B0\2025-05-21\attempts\attempt_01\RESULT.json)
