@@ -1,6 +1,6 @@
 """Prove this physical successor preserves every Native/model execution module."""
 from pathlib import Path
-import sys,json
+import sys,json,tempfile,copy
 SOURCE=Path(__file__).resolve().parents[1];sys.path.insert(0,str(SOURCE))
 from v42_pr134_b1.common import read,record,atomic,now
 from v42_svr11.authority import verify
@@ -22,4 +22,17 @@ out=dict(PASS=True,changed_sources=changed,only_one_existing_bank_placement_chan
     Native_and_model_execution_modules_byte_identical=True,policy_budgets_and_constraints_preserved=True,
     old_equipment_physics_or_models_admitted=False,source_SHA=m['execution_SHA'],
     equipment_change_contract=m['equipment_change_contract'],minimum_smoke=read(m['hardware']['path'])['minimum_AC'],UTC=now())
+with tempfile.TemporaryDirectory(prefix='svr11_epoch09_binding_') as td:
+    probe=Path(td).resolve();assert probe.is_relative_to(Path(tempfile.gettempdir()).resolve())
+    contract=probe/'CONTRACT.json';contract.write_bytes(Path(m['equipment_change_contract']['path']).read_bytes())
+    alternate=copy.deepcopy(m);alternate['equipment_change_contract']=record(contract)
+    manifest=probe/'MANIFEST.json';atomic(manifest,alternate)
+    verify(manifest)
+    contract.write_bytes(contract.read_bytes()+b'\n')
+    try:verify(manifest)
+    except PermissionError as error:assert str(error)=='SVR11_GLOBAL_EQUIPMENT_CHANGE_CONTRACT_DRIFT'
+    else:raise AssertionError('TAMPERED_PHYSICAL_CHANGE_CONTRACT_ACCEPTED')
+verify(root/'CAMPAIGN_MANIFEST.json')
+out['independent_contract_byte_tamper_rejected']=True
+out['original_contract_bytes_unchanged']=True
 atomic(root/'SOURCE_SCOPE_VERIFICATION.json',out);print(json.dumps(out,ensure_ascii=False))

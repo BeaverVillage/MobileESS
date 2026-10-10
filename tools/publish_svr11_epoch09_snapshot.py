@@ -14,7 +14,7 @@ with urllib.request.urlopen('http://127.0.0.1:8796/api/state',timeout=10) as res
 assert state['source_SHA']==m['execution_SHA'] and Path(state['root']).resolve()==root
 folder=SOURCE/'docs/v42_svr11_final_20261011/epoch09_snapshot';folder.mkdir(parents=True,exist_ok=True)
 for name in ('CAMPAIGN_MANIFEST.json','CAMPAIGN_LEDGER.json','EQUIPMENT_CHANGE_CONTRACT.json',
-    'PREDECESSOR_DRAIN_CONTRACT.json','MIGRATION_STATUS.json','SOURCE_SCOPE_VERIFICATION.json',
+    'PREDECESSOR_DRAIN_CONTRACT.json','MIGRATION_STATUS.json','SOURCE_SCOPE_VERIFICATION.json','REGRESSION_VALIDATION.json',
     'REPORT.json','REPORT.md','PERFORMANCE_COMPARISON.json','PERFORMANCE_COMPARISON.md',
     'MONITOR_UI_RELEASE.json','MONITOR_PROCESS.json','LIVE_OBSERVATION.json','WATCHDOG_LAST_RUN.json',
     'SUPERVISOR_PROCESS.json','SUPERVISOR_HEARTBEAT.json','WINDOWS_SCHEDULE_OBSERVED_EXECUTION.json',

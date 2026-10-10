@@ -51,8 +51,10 @@ def snapshot(root):
         for old in migration['predecessor_workers']:
             if not live(old):continue
             request=read(old['request']['path']);path=Path(request['progress']);v=read(path) if path.exists() else {}
+            phase=v.get('phase','RUNNING')
+            if phase=='SVR11_FORECAST_MODEL_GENERATION':phase+=' '+str(v.get('model_slot',0))+'/96'
             peers.append(dict(arm='이전 Epoch '+old['arm'],day=old['day'],PID=old['PID'],
-                phase='기존 작업 자연 종료 대기 · '+v.get('phase','RUNNING')+' '+str(v.get('model_slot',0))+'/96',
+                phase='기존 작업 자연 종료 대기 · '+phase,
                 optimization_status=solver_label(v),Native_Runtime=v.get('Native_Runtime',0),UB=None,
                 certified_LB=None,certified_Gap=None,Fresh='이전 Source · 새 공식 결과에 합산하지 않음'))
     policies=[];estimate=0.;known=True
