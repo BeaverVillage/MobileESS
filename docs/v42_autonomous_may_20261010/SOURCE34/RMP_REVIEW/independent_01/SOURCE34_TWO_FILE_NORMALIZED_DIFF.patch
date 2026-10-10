@@ -1,0 +1,590 @@
+diff --git a/tests/test_v42_autonomous_b2_rmp_presolve.py b/tests/test_v42_autonomous_b2_rmp_presolve.py
+index b0ca0d9e..af9dc3a3 100644
+--- a/tests/test_v42_autonomous_b2_rmp_presolve.py
++++ b/tests/test_v42_autonomous_b2_rmp_presolve.py
+@@ -45,8 +45,9 @@ class Variables:
+ class Raw:
+     def __init__(self,name):
+         self.Params=SimpleNamespace(OutputFlag=0,Method=1,Threads=1,TimeLimit=float('inf'),Presolve=-1,MIPGap=.0001,
+-            FeasibilityTol=1e-8,OptimalityTol=1e-8,NumericFocus=0,ScaleFlag=-1)
++            FeasibilityTol=1e-8,OptimalityTol=1e-8,NumericFocus=0,ScaleFlag=-1,LPWarmStart=1,Crossover=-1)
+         self.attrs={};self.entries=[];self.disposed=False;self.error=None
++        self.start_events=[];self.backend_entered=False;self.invalidate_starts_after_optimize=False
+         self.Status=2;self.SolCount=0;self.Runtime=2.25;self.ObjCon=0.;self.Work=3.
+     def setParam(self,k,v):setattr(self.Params,k,v)
+     def addMVar(self,n,**kwargs):
+@@ -59,10 +60,20 @@ class Raw:
+     def update(self):pass
+     def getA(self):return self.matrix.copy()
+     def getAttr(self,key,*args):return self.attrs[key].copy()
++    def getVars(self):return list(range(self.NumVars))
++    def getConstrs(self):return list(range(self.NumConstrs))
++    def setAttr(self,key,axis,values):
++        assert not self.backend_entered,'NO_START_SETTER_AFTER_NATIVE_ENTRY'
++        self.start_events.append(key);self.attrs[key]=np.asarray(values,dtype=np.float64).copy()
+     def optimize(self,callback=None):
+         # Run unchanged original scope/Threads/date/P1 guard. No backend.
+         original_guard.guard(self)
+-        self.entries.append(dict(params=vars(self.Params).copy(),scope=dict(execution._model.get())))
++        self.backend_entered=True
++        self.entries.append(dict(params=vars(self.Params).copy(),scope=dict(execution._model.get()),
++            starts={k:v.copy() for k,v in self.attrs.items() if k in ('PStart','DStart')}))
++        if self.invalidate_starts_after_optimize:
++            self.attrs['PStart']=np.full(self.NumVars,gp.GRB.UNDEFINED)
++            self.attrs['DStart']=np.full(self.NumConstrs,gp.GRB.UNDEFINED)
+         if callback is not None:callback(self,gp.GRB.Callback.POLLING)
+         if self.error:raise self.error
+         return 'FAKE_BACKEND_ONLY_NOT_NATIVE'
+@@ -432,3 +443,206 @@ def test_complete_source_and_self_root_receipt_contains_real_declared_hashes(env
+     assert s['computational_adapter_source']['sha256']==env.manifest['execution_sources']['v42_autonomous_b2/rmp_presolve.py']
+     assert s['immutable_code_root']==str(draft._ROOT)
+     assert s['exact_declared_package_files']==sorted(k for k in env.manifest['execution_sources'] if k.startswith('v42_autonomous_b2/'))
++
++
++def rebuild(env,*,columns=None):
++    result=env.runner.original_run.__globals__['build_master'](env.case,env.decomp,columns or {},env.out/'next_master')
++    env.model=result[0];env.proxy=draft.BudgetProxy(env.budget,write,env.runner.binding)
++    return result
++
++
++def test_current_nonunit_and_first_unit_seed_projected_with_complete_zero_dual(env):
++    plan=env.model._rmp_warm_plan
++    n=len(env.decomp.nonunit_columns)
++    assert np.array_equal(plan.pstart[:n],env.case.point[env.decomp.nonunit_columns])
++    assert np.array_equal(plan.pstart[n:],np.ones(4))
++    assert np.array_equal(plan.dstart,np.zeros(env.model.NumConstrs))
++    assert not plan.pstart.flags.writeable and not plan.dstart.flags.writeable
++    invoke(env)
++    raw=env.model._model;native=raw.entries[0]
++    assert raw.start_events==['PStart','DStart'] and native['params']['LPWarmStart']==2
++    assert native['params']['Method']==1 and native['params']['Presolve']==0 and native['params']['Crossover']==-1
++    assert np.array_equal(native['starts']['PStart'],plan.pstart)
++    assert np.array_equal(native['starts']['DStart'],plan.dstart)
++    receipt=json.loads((env.out/'master/RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json').read_text())['current_attempt_warm_start']
++    assert receipt['installed'] and receipt['exact_complete_start_readback_before_Native']
++    assert receipt['backend_actual_start_use_or_basis_proved'] is False
++    assert receipt['computational_zero_DStart_is_Native_Pi'] is False
++    assert receipt['start_is_basis_or_feasibility_or_dual_or_UB_or_Global_LB_authority'] is False
++
++
++def test_extra_unit_catalog_columns_receive_zero_without_using_past_point(env):
++    unit=next(iter(env.decomp.units));block=env.decomp.units[unit]
++    alternate=env.case.point[block.original_columns].copy();alternate[:]=0.
++    path=env.out/'own_alternate.npz';np.savez_compressed(path,point=alternate,original_columns=block.original_columns)
++    result=rebuild(env,columns={unit:[dict(path=str(path),sha256=dw.sha(path),admission=dict(PASS=True))]})
++    plan=env.model._rmp_warm_plan;n=len(env.decomp.nonunit_columns)
++    assert len(result[3]['catalog'])==5 and plan.pstart[n+1]==0.
++    for u in env.decomp.units:
++        positions=[j for j,v in enumerate(result[3]['catalog']) if v['unit']==u]
++        assert plan.pstart[n+positions[0]]==1.
++        assert all(plan.pstart[n+j]==0. for j in positions[1:])
++    invoke(env)
++    assert len(env.budget.calls)==1 and env.model._model.start_events==['PStart','DStart']
++
++
++def test_full_coupling_point_ineligible_uses_unchanged_cold_method1_call(env):
++    env.case.point[-2:]=[1.,0.]
++    rebuild(env)
++    plan=env.model._rmp_warm_plan
++    assert not plan.diagnostic['eligible'] and not plan.diagnostic['current_full_matrix_replay']['PASS']
++    invoke(env)
++    assert env.model.Params.LPWarmStart==1 and env.model.Params.Method==1
++    assert env.model._model.start_events==[] and len(env.budget.calls)==1
++    receipt=json.loads((env.out/'next_master/RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json').read_text())
++    assert receipt['Native_call_completed'] and not receipt['current_attempt_warm_start']['installed']
++
++
++def test_scaled_residual_is_separately_recorded_and_never_claimed_feasible(env):
++    env.case.d['sense'][6]='=';env.case.point[-2:]=[1e-25,1e-10]
++    env.decomp=build_blocks(env.case);rebuild(env)
++    hint=env.model._rmp_warm_plan.diagnostic
++    assert hint['eligible'] and hint['current_full_matrix_replay']['PASS']
++    assert hint['original_RMP_residual']['maximum_row_violation']<1e-9
++    assert hint['Native_scaled_RMP_residual']['maximum_row_violation']>1.
++    invoke(env)
++    assert len(env.budget.calls)==1 and env.model._model.entries[0]['params']['LPWarmStart']==2
++    assert not hint['start_is_basis_or_feasibility_or_dual_or_UB_or_Global_LB_authority']
++
++
++@pytest.mark.parametrize('mutation',[
++    lambda e:e.case.point.__setitem__(-1,3.),
++    lambda e:setattr(e.case,'case_sha','wrong_case'),
++    lambda e:e.decomp.nonunit_columns.__setitem__(0,0),
++    lambda e:e.model._rmp_warm_plan.identity['catalog'][0].update(point_vector_sha256='0'*64),
++    lambda e:e.model._rmp_warm_plan.diagnostic.update(eligible=False),
++    lambda e:setattr(e.model._rmp_warm_plan.pstart.flags,'writeable',True),
++    lambda e:setattr(e.model,'_rmp_warm_plan',None),
++    lambda e:Path(e.model._rmp_warm_plan.seed_receipts[0]['path']).write_bytes(b'changed_seed')])
++def test_current_case_seed_catalog_and_readonly_plan_tamper_denied_before_budget(env,mutation):
++    mutation(env)
++    with pytest.raises(PermissionError):invoke(env)
++    assert env.budget.calls==[] and env.model._model.entries==[] and env.model._model.start_events==[]
++
++
++@pytest.mark.parametrize('target',['install','verify','seal','binding_warm'])
++def test_instance_delegate_substitution_cannot_bypass_warm_guards(env,monkeypatch,target):
++    if target=='binding_warm':monkeypatch.setattr(env.runner.binding,'warm',lambda *a:env.model._rmp_warm_plan)
++    else:monkeypatch.setattr(env.model._rmp_warm_plan,target,lambda *a:True)
++    with pytest.raises(PermissionError):invoke(env)
++    assert env.budget.calls==[] and env.model._model.entries==[]
++
++
++@pytest.mark.parametrize('target',['warm_install','warm_verify','case_hash','vector_sha'])
++def test_inplace_warm_or_vector_code_drift_denied_before_budget(env,monkeypatch,target):
++    function=dict(warm_install=draft.WarmPlan.install,warm_verify=draft.WarmPlan.verify,
++        case_hash=draft._case_sha,vector_sha=dw.vector_sha)[target]
++    monkeypatch.setattr(function,'__code__',(lambda *a,**k:None).__code__)
++    with pytest.raises(PermissionError):invoke(env)
++    assert env.budget.calls==[] and env.model._model.entries==[]
++
++
++def test_pre_native_start_readback_drift_denied_without_extra_backend(env,monkeypatch):
++    raw=env.model._model;raw.Runtime=0.
++    original=raw.getAttr
++    def get(key,*args):
++        value=original(key,*args)
++        if key=='PStart':value[0]+=1.
++        return value
++    monkeypatch.setattr(raw,'getAttr',get)
++    with pytest.raises(PermissionError,match='EXACT_PRE_NATIVE_START_READBACK'):invoke(env)
++    assert raw.entries==[] and len(env.budget.calls)==1
++    receipt=json.loads((env.out/'master/RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json').read_text())
++    assert receipt['status']=='FAILED' and receipt['Native_call_completed'] is False
++
++
++@pytest.mark.parametrize('failed_key',['PStart','DStart'])
++def test_start_install_exception_preserves_original_unknown_runtime_and_disposes(env,monkeypatch,failed_key):
++    created=[]
++    initial=Raw.__init__
++    def init(self,*a,**k):initial(self,*a,**k);created.append(self);self.Runtime=float('nan')
++    original_set=Raw.setAttr
++    def fail(self,key,*args):
++        if key==failed_key:raise RuntimeError('SYNTHETIC_START_INSTALL_FAILURE')
++        return original_set(self,key,*args)
++    monkeypatch.setattr(Raw,'__init__',init);monkeypatch.setattr(Raw,'setAttr',fail)
++    with pytest.raises(RuntimeError,match='NATIVE_RUNTIME_UNAVAILABLE_QUARANTINE'):
++        env.runner(env.case,env.decomp,{},env.budget,env.out/'install_failure')
++    ledger=json.loads(env.budget.path.read_text())
++    assert created[-1].disposed and created[-1].entries==[]
++    assert len(ledger['calls'])==1 and ledger['calls'][0]['runtime_unavailable'] is True
++    assert ledger['calls'][0]['Native_Runtime'] is None
++    assert ledger['calls'][0]['error']=='SYNTHETIC_START_INSTALL_FAILURE'
++    receipt=json.loads((env.out/'install_failure/RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json').read_text())
++    assert receipt['status']=='FAILED' and not receipt['Native_call_completed']
++    assert draft._ENTRY.get() is None
++
++
++def test_no_start_setter_update_or_readback_after_native_even_if_undefined(env,monkeypatch):
++    created=[];initial=Raw.__init__;old_get=Raw.getAttr
++    def init(self,*a,**k):
++        initial(self,*a,**k);self.invalidate_starts_after_optimize=True;created.append(self)
++    def get(self,key,*args):
++        if self.backend_entered and key in ('PStart','DStart'):raise AssertionError('NO_POST_NATIVE_START_READ')
++        return old_get(self,key,*args)
++    def update(self):assert not self.backend_entered,'NO_POST_NATIVE_UPDATE'
++    monkeypatch.setattr(Raw,'__init__',init);monkeypatch.setattr(Raw,'getAttr',get);monkeypatch.setattr(Raw,'update',update)
++    result=env.runner(env.case,env.decomp,{},env.budget,env.out/'undefined_after')
++    assert result['native']['Native_Runtime']==2.25 and created[-1].disposed
++    assert created[-1].Params.LPWarmStart==2 and created[-1].start_events==['PStart','DStart']
++    assert np.all(created[-1].attrs['PStart']==gp.GRB.UNDEFINED)
++
++
++@pytest.mark.parametrize('key,value',[('LPWarmStart',0),('Crossover',0)])
++def test_pre_native_warm_or_crossover_param_tamper_remains_strict(env,key,value):
++    env.budget.progress=lambda row:setattr(env.model.Params,key,value)
++    with pytest.raises(PermissionError):invoke(env)
++    assert env.model._model.entries==[]
++
++
++def test_builder_post_return_warm_validation_failure_disposes_owned_model(env,monkeypatch):
++    created=[];initial=Raw.__init__
++    def init(self,*a,**k):initial(self,*a,**k);created.append(self)
++    monkeypatch.setattr(Raw,'__init__',init)
++    def drift(path,value):
++        write(path,value)
++        if Path(path).name=='RMP_IDENTITY.json':env.case.point[-1]=3.
++    runner=draft.scoped_runner(dw.run,env.output,drift)
++    with pytest.raises(PermissionError,match='CURRENT_BUILD_CASE_OR_POINT_DRIFT'):
++        runner(env.case,env.decomp,{},env.budget,env.out/'build_drift')
++    assert created[-1].disposed and created[-1].entries==[] and env.budget.calls==[]
++
++
++def test_ineligible_missing_partial_or_undefined_point_never_installs_hint(env):
++    model=env.model;identity=model._rmp_warm_plan.identity
++    for point in (None,np.array([0.]),np.full(env.case.A.shape[1],gp.GRB.UNDEFINED)):
++        env.case.point=point
++        current=draft._point(env.case)
++        plan=draft.WarmPlan(env.case,env.decomp,(model,None,None,identity),current,
++            draft._case_sha(env.case,env.decomp),env.request,env.out/'master')
++        assert not plan.diagnostic['eligible'] and plan.install() is False
++    assert model._model.start_events==[] and model.Params.LPWarmStart==1
++
++
++def test_computational_zero_dstart_does_not_create_absent_native_pi(env,monkeypatch):
++    original=Raw.addMConstr
++    class NoPi:
++        @property
++        def Pi(self):raise gp.GurobiError(10005,'SYNTHETIC_TIME_LIMIT_NO_PI')
++    def add(self,*a,**k):original(self,*a,**k);self.Status=11;return NoPi()
++    monkeypatch.setattr(Raw,'addMConstr',add)
++    result=env.runner(env.case,env.decomp,{},env.budget,env.out/'no_pi')
++    assert result['native']['Native_status']==11 and result['full_original_dual'] is None
++    assert result['convexity_duals'] is None and result['dual_status']=='NO_FINITE_PI_FOLLOWUP_PRICING_NOT_RUN'
++    assert result['restricted_master_is_Global_LB'] is False and env.budget.calls[-1]['Native_SolCount']==0
++
++
++def test_native_done_parameter_tamper_is_denied_without_start_restoration(env,monkeypatch):
++    original=Raw.optimize
++    def alter(self,*a,**k):
++        result=original(self,*a,**k);self.Params.LPWarmStart=1;return result
++    monkeypatch.setattr(Raw,'optimize',alter);monkeypatch.setattr(draft,'_RAW_OPTIMIZE',alter)
++    monkeypatch.setattr(draft,'_RAW_CODE',alter.__code__)
++    with pytest.raises(PermissionError,match='SINGLE_COMPLETED_NATIVE'):invoke(env)
++    assert len(env.budget.calls)==1 and len(env.model._model.entries)==1
++    assert env.model._model.start_events==['PStart','DStart'] and env.model.Params.LPWarmStart==1
+diff --git a/v42_autonomous_b2/rmp_presolve.py b/v42_autonomous_b2/rmp_presolve.py
+index fc46e018..7e26f233 100644
+--- a/v42_autonomous_b2/rmp_presolve.py
++++ b/v42_autonomous_b2/rmp_presolve.py
+@@ -1,4 +1,4 @@
+-"""Restricted-master Presolve0 computational adapter; original single30s solve retained.
++"""Restricted-master Presolve0/current-start adapter; single30s solve retained.
+ 
+ Reuse the unchanged ExactRowModel and its raw-model scope/row/Pi transport.
+ The original budget remains the sole Runtime recorder and Native delegate.
+@@ -12,6 +12,8 @@ import copy
+ import json
+ import math
+ import inspect
++import weakref
++import sys
+ 
+ import numpy as np
+ from v42_autonomous_b2 import dw_native
+@@ -48,10 +50,10 @@ _CODE_BINDINGS=tuple((f,f.__code__) for f in (
+     _ORIGINAL_BUILD,_ORIGINAL_RUN,_ORIGINAL_NATIVE_OPTIMIZE,
+     _ORIGINAL_RECEIPT_OPTIMIZE,_ORIGINAL_INHERITED_OPTIMIZE,_ORIGINAL_EXACT_OPTIMIZE,_ORIGINAL_SCOPE,_ORIGINAL_SCOPE_GENERATOR,
+     _ORIGINAL_CURRENT,_ORIGINAL_AUTHORIZE,_ORIGINAL_GUARD,_ORIGINAL_PRECISION,
+-    dw.matrix_replay,dw.verify_decomposition,dw.sha,
++    dw.matrix_replay,dw.verify_decomposition,dw.sha,dw.vector_sha,
+     _SOURCE_FUNCTION,_REQUEST_VERIFIER,_SOURCE_DIGEST))
+ _HELPERS=tuple((key,_ORIGINAL_BUILD.__globals__[key])
+-               for key in ('matrix_replay','verify_decomposition','sha'))
++               for key in ('matrix_replay','verify_decomposition','sha','vector_sha'))
+ _ENTRY=ContextVar('V42_B2_RMP_PRESOLVE_ENTRY_V30',default=None)
+ PRECISION=dict(FeasibilityTol=1e-9,OptimalityTol=1e-9,NumericFocus=3,ScaleFlag=2)
+ LABEL='ONE_RESTRICTED_MASTER'
+@@ -75,7 +77,9 @@ def _method(obj,key,descriptor):
+ 
+ 
+ def _delegates(model,budget):
+-    if any(f.__code__ is not code for f,code in _CODE_BINDINGS):
++    if (any(f.__code__ is not code for f,code in _CODE_BINDINGS)
++            or any(getattr(owner,key) is not f or f.__code__ is not code
++                   for owner,key,f,code in _WARM_BINDINGS)):
+         raise PermissionError('RMP_PRESOLVE_IMMUTABLE_ORIGINAL_CODE_REQUIRED')
+     aliases=(
+         (original_budget.DateBudget,'native_optimize',_ORIGINAL_NATIVE_OPTIMIZE),
+@@ -83,7 +87,8 @@ def _delegates(model,budget):
+         (original_budget.OriginalBudget,'optimize',_ORIGINAL_INHERITED_OPTIMIZE),
+         (dw_native.ExactRowModel,'optimize',_ORIGINAL_EXACT_OPTIMIZE),
+         (execution,'native_scope',_ORIGINAL_SCOPE),(execution,'current',_ORIGINAL_CURRENT),
+-        (execution,'authorize',_ORIGINAL_AUTHORIZE),(numerical,'set_precision',_ORIGINAL_PRECISION))
++        (execution,'authorize',_ORIGINAL_AUTHORIZE),(numerical,'set_precision',_ORIGINAL_PRECISION),
++        *tuple((dw,key,value) for key,value in _HELPERS))
+     if any(getattr(owner,key) is not expected for owner,key,expected in aliases):
+         raise PermissionError('RMP_PRESOLVE_ORIGINAL_SCOPE_OR_DELEGATE_ALIAS_DRIFT')
+     if (type(budget) is not ReceiptDateBudget
+@@ -120,7 +125,19 @@ class RunBinding:
+             *tuple((build.__globals__,key,build.__globals__[key])
+                    for key in ('output_directory','write')))
+         self.model_factory=build.__globals__['gp'];self.model_type=self.model_factory.Model
++        self.warm_records=weakref.WeakKeyDictionary()
++    def register_warm(self,model,plan):
++        self.warm_records[model]=(weakref.ref(plan),plan.seal())
++    def warm(self,model):
++        recorded=self.warm_records.get(model)
++        plan=getattr(model,'_rmp_warm_plan',None)
++        if recorded is None or type(plan) is not WarmPlan or recorded[0]() is not plan:
++            raise PermissionError('RMP_WARM_OWN_ORIGINAL_BUILD_PLAN_REQUIRED')
++        for key in ('seal','verify','install'):_method(plan,key,_WARM_METHODS[key])
++        plan.verify(recorded[1]);return plan
+     def verify(self):
++        _method(self,'warm',_RUN_WARM)
++        _method(self,'register_warm',_RUN_REGISTER_WARM)
+         if (any(f.__code__ is not code for f,code in self.functions)
+                 or any(ns.get(key) is not value for ns,key,value in self.aliases)
+                 or any(tuple(c.cell_contents for c in f.__closure__ or ())!=values for f,values in self.closures)
+@@ -136,6 +153,171 @@ def _matrix_sha(matrix):
+     return h.hexdigest()
+ 
+ 
++def _array_sha(value):
++    array=np.ascontiguousarray(value);h=sha256(str(array.shape).encode())
++    h.update(array.dtype.str.encode());h.update(array.tobytes());return h.hexdigest()
++
++
++def _case_sha(case,decomp):
++    # The hint belongs to this live case/decomposition, never a past point.
++    h=sha256(_matrix_sha(case.A).encode())
++    for key in ('names','lower','upper','types','objective','rhs','sense','row_names','constant'):
++        h.update(key.encode());h.update(_array_sha(np.asarray(case.d[key])).encode())
++    for block in (*decomp.units.values(),decomp.nonunit_block):
++        h.update(str(block.unit).encode());h.update(_matrix_sha(block.A).encode())
++        for key in ('original_rows','original_columns'):
++            h.update(_array_sha(getattr(block,key)).encode())
++        for key in ('names','lower','upper','types','objective','rhs','sense','row_names','constant'):
++            h.update(_array_sha(np.asarray(block.d[key])).encode())
++    h.update(_array_sha(decomp.coupling_rows).encode())
++    h.update(_array_sha(decomp.column_owner).encode())
++    return h.hexdigest()
++
++
++def _point(case):
++    value=getattr(case,'point',None)
++    if value is None:return None
++    try:return np.asarray(value,dtype=np.float64).copy()
++    except (TypeError,ValueError):return None
++
++
++def _residual(matrix,rhs,sense,point):
++    residual=np.asarray(matrix@point,dtype=np.float64)-rhs
++    if not np.isfinite(residual).all():return dict(finite=False)
++    violation=np.where(sense=='=',abs(residual),np.where(sense=='<',residual,-residual))
++    return dict(finite=True,residual_sha256=_array_sha(residual),
++        maximum_absolute_residual=float(np.max(abs(residual),initial=0)),
++        maximum_row_violation=max(0.,float(np.max(violation,initial=0))))
++
++
++class WarmPlan:
++    """Current original seed projection, exclusively a model-local LP hint."""
++    def __init__(self,case,decomp,result,point,case_structure,request,output):
++        self.case=case;self.decomp=decomp;self.model=result[0];self.identity=result[3]
++        self.request=copy.deepcopy(request);self.case_structure=case_structure
++        self.case_identity=(case.case_sha,decomp.case_sha)
++        self.point=point;self.point_sha=None if point is None else _array_sha(point)
++        self.identity_sha=sha256(json.dumps(self.identity,sort_keys=True,allow_nan=False).encode()).hexdigest()
++        self.pstart=None;self.dstart=None;self.seed_receipts=[]
++        self.original_lpwarmstart=int(self.model.Params.LPWarmStart)
++        self.original_crossover=int(self.model.Params.Crossover)
++        self.diagnostic=dict(eligible=False,reason='CURRENT_FULL_POINT_MISSING_PARTIAL_OR_NONFINITE',
++            original_method=1,computational_zero_DStart_is_Native_Pi=False,
++            start_is_basis_or_feasibility_or_dual_or_UB_or_Global_LB_authority=False,
++            Native_after_start_setters_or_updates_allowed=False,
++            owned_model_disposed_by_original_run_finally=True)
++        current=_point(case)
++        if (_case_sha(case,decomp)!=case_structure or case.case_sha!=decomp.case_sha
++                or (point is None)!=(current is None)
++                or point is not None and _array_sha(current)!=self.point_sha):
++            raise PermissionError('RMP_WARM_CURRENT_BUILD_CASE_OR_POINT_DRIFT')
++        if point is not None:point.flags.writeable=False
++        if (point is not None and point.shape==(case.A.shape[1],) and np.isfinite(point).all()
++                and not np.any(point==gp.GRB.UNDEFINED)
++                and np.isfinite(case.A@point).all()):
++            replay=dw.matrix_replay(case.A,case.d,point,tolerance=1e-9,
++                bound_tolerance=1e-9,integer_tolerance=0.)
++            self.diagnostic.update(current_full_matrix_replay=replay,current_point_sha256=self.point_sha)
++            if not (replay['PASS'] and replay['integer_pattern_exact'] and replay['exact_binary_0_1']):
++                self.diagnostic['reason']='CURRENT_FULL_POINT_NOT_STRICTLY_REPLAYED_COLD_ORIGINAL_METHOD1'
++            else:
++                nonunit=np.asarray(decomp.nonunit_columns)
++                rows=np.sort(np.concatenate((decomp.nonunit_block.original_rows,decomp.coupling_rows)))
++                identity=self.identity;catalog=identity['catalog'];n=len(nonunit)
++                if (identity.get('PASS') is not True or identity['case_sha']!=case.case_sha
++                        or not np.array_equal(identity['nonunit_columns'],nonunit)
++                        or not np.array_equal(identity['source_rows'],rows)
++                        or identity['columns']!=n+len(catalog)
++                        or identity['rows']!=len(rows)+4):
++                    raise PermissionError('RMP_WARM_ORIGINAL_CATALOG_AXES_DRIFT')
++                primal=np.r_[point[nonunit],np.zeros(len(catalog))]
++                for unit,block in decomp.units.items():
++                    positions=[j for j,item in enumerate(catalog) if item['unit']==unit]
++                    if not positions:raise PermissionError('RMP_WARM_OWN_CURRENT_SEED_MISSING')
++                    j=positions[0];item=catalog[j];seed=point[block.original_columns]
++                    expected=(Path(output)/(unit+'_MASTER_SEED_COLUMN.npz')).resolve()
++                    record=_record(expected)
++                    if (Path(item['point_path']).resolve()!=expected
++                            or item['point_file_sha256']!=record['sha256']
++                            or item['point_vector_sha256']!=_ORIGINAL_BUILD.__globals__['vector_sha'](seed)
++                            or not np.array_equal(item['original_columns'],block.original_columns)
++                            or item['local_replay'].get('PASS') is not True
++                            or item['local_replay'].get('integer_pattern_exact') is not True
++                            or item['local_replay'].get('exact_binary_0_1') is not True):
++                        raise PermissionError('RMP_WARM_CURRENT_SEED_FILE_VECTOR_OR_AXIS_DRIFT')
++                    with np.load(expected,allow_pickle=False) as saved:
++                        if (not np.array_equal(saved['original_columns'],block.original_columns)
++                                or _array_sha(np.asarray(saved['point'],dtype=np.float64))!=_array_sha(seed)):
++                            raise PermissionError('RMP_WARM_CURRENT_SEED_CONTENT_DRIFT')
++                    primal[n+j]=1.;self.seed_receipts.append(record)
++                if not np.isfinite(primal).all():raise PermissionError('RMP_WARM_FINITE_PROJECTED_VECTOR_REQUIRED')
++                dual=np.zeros(self.model.NumConstrs,dtype=np.float64)
++                primal.flags.writeable=False;dual.flags.writeable=False
++                self.pstart=primal;self.dstart=dual
++                original=self.model.getA();rhs=np.asarray(self.model.getAttr('RHS'));sense=np.asarray(self.model.getAttr('Sense'))
++                native=self.model._model.getA();native_rhs=np.asarray(self.model._model.getAttr('RHS'))
++                self.diagnostic.update(eligible=True,reason='OWN_CURRENT_STRICT_FULL_SEED_PROJECTION',
++                    PStart_sha256=_array_sha(primal),DStart_sha256=_array_sha(dual),
++                    PStart_variables=len(primal),DStart_rows=len(dual),
++                    DStart_policy='ALL_FINITE_COMPUTATIONAL_ZERO_NO_NATIVE_DUAL_AUTHORITY',
++                    own_first_seed_files=self.seed_receipts,
++                    original_RMP_residual=_residual(original,rhs,sense,primal),
++                    Native_scaled_RMP_residual=_residual(native,native_rhs,sense,primal),
++                    original_RMP_matrix_sha256=_matrix_sha(original),
++                    Native_scaled_RMP_matrix_sha256=_matrix_sha(native),
++                    LPWarmStart_planned=2,Presolve_planned=0,
++                    presolved_model_or_crushed_start_claimed=False)
++                if not (self.diagnostic['original_RMP_residual']['finite']
++                        and self.diagnostic['Native_scaled_RMP_residual']['finite']):
++                    self.diagnostic.update(eligible=False,reason='NONFINITE_RMP_RESIDUAL_COLD_ORIGINAL_METHOD1')
++                    self.pstart=None;self.dstart=None
++        self.diagnostic_json=json.dumps(self.diagnostic,sort_keys=True,allow_nan=False)
++
++    def seal(self):
++        return (id(self.case),id(self.decomp),id(self.model),id(self.identity),self.case_structure,
++            self.case_identity,self.point_sha,self.identity_sha,self.original_lpwarmstart,
++            self.original_crossover,self.diagnostic_json)
++
++    def verify(self,sealed):
++        if self.seal()!=sealed:raise PermissionError('RMP_WARM_SEALED_PLAN_DRIFT')
++        current=_point(self.case)
++        if (execution.current() is None or execution.current()['request']!=self.request
++                or (self.case.case_sha,self.decomp.case_sha)!=self.case_identity
++                or _case_sha(self.case,self.decomp)!=self.case_structure
++                or (current is None)!=(self.point is None)
++                or current is not None and _array_sha(current)!=self.point_sha
++                or self.point is not None and (self.point.flags.writeable or _array_sha(self.point)!=self.point_sha)
++                or sha256(json.dumps(self.identity,sort_keys=True,allow_nan=False).encode()).hexdigest()!=self.identity_sha
++                or json.dumps(self.diagnostic,sort_keys=True,allow_nan=False)!=self.diagnostic_json):
++            raise PermissionError('RMP_WARM_CURRENT_CASE_CATALOG_OR_REQUEST_DRIFT')
++        for value,key in ((self.pstart,'PStart_sha256'),(self.dstart,'DStart_sha256')):
++            if self.diagnostic['eligible'] and (value is None or value.flags.writeable
++                    or _array_sha(value)!=self.diagnostic[key]):
++                raise PermissionError('RMP_WARM_READONLY_START_VECTOR_DRIFT')
++            if not self.diagnostic['eligible'] and value is not None:
++                raise PermissionError('RMP_WARM_COLD_PLAN_HAS_UNAPPROVED_START')
++        if any(_record(r['path'])!=r for r in self.seed_receipts):
++            raise PermissionError('RMP_WARM_CURRENT_SEED_FILE_DRIFT')
++        self.model.getA();self.model.getAttr('RHS')
++
++    def install(self):
++        if (self.model.Params.LPWarmStart!=self.original_lpwarmstart
++                or self.model.Params.Crossover!=self.original_crossover):
++            raise PermissionError('RMP_WARM_PRE_NATIVE_ORIGINAL_PARAMETER_DRIFT')
++        if not self.diagnostic['eligible']:return False
++        variables=self.model.getVars();rows=self.model.getConstrs()
++        if len(variables)!=len(self.pstart) or len(rows)!=len(self.dstart):
++            raise PermissionError('RMP_WARM_NATIVE_START_AXIS_DRIFT')
++        self.model.setAttr('PStart',variables,self.pstart.tolist())
++        self.model.setAttr('DStart',rows,self.dstart.tolist())
++        self.model.Params.LPWarmStart=2;self.model.update()
++        if (self.model.Params.LPWarmStart!=2
++                or _array_sha(np.asarray(self.model.getAttr('PStart'),dtype=np.float64))!=self.diagnostic['PStart_sha256']
++                or _array_sha(np.asarray(self.model.getAttr('DStart'),dtype=np.float64))!=self.diagnostic['DStart_sha256']):
++            raise PermissionError('RMP_WARM_EXACT_PRE_NATIVE_START_READBACK_REQUIRED')
++        return True
++
++
+ def _source(request):
+     if (Path(deployment.ROOT).resolve()!=_ROOT or deployment.sources is not _SOURCE_FUNCTION
+             or deployment.verify_request is not _REQUEST_VERIFIER or deployment.digest is not _SOURCE_DIGEST):
+@@ -236,6 +418,8 @@ class Entry:
+         if binding is None or getattr(model,'_rmp_build_binding',None) is not binding:
+             raise PermissionError('RMP_PRESOLVE_ORIGINAL_REBOUND_BUILD_REQUIRED')
+         self.raw_model=model._model;self.binding=binding
++        binding.verify()
++        self.warm=binding.warm(model);self.warm_installed=False
+         self.sources=_source(r);self.before=len(budget.calls);self.entered=False;self.committed=False
+         self.before_ledger=_known_ledger(budget,r)
+         self.matrix_sha=_matrix_sha(model.getA());self.rhs=np.array(model.getAttr('RHS'),copy=True)
+@@ -251,15 +435,23 @@ class Entry:
+                 or not np.array_equal(self.model.getAttr('RHS'),self.rhs)
+                 or self.model._receipt!=self.original_row_transport):
+             raise PermissionError('RMP_PRESOLVE_ORIGINAL_ROW_TRANSPORT_MATH_DRIFT')
++        if self.binding.warm(self.model) is not self.warm:
++            raise PermissionError('RMP_WARM_OWN_ENTRY_PLAN_DRIFT')
++        if self.model.Params.Crossover!=self.warm.original_crossover:
++            raise PermissionError('RMP_WARM_ORIGINAL_CROSSOVER_DRIFT')
+ 
+     def receipt(self,**values):
+-        result=dict(schema='V42_B2_RMP_PRESOLVE0_COMPUTATIONAL_ENTRY_V30',
++        result=dict(schema='V42_B2_RMP_PRESOLVE0_CURRENT_START_COMPUTATIONAL_ENTRY_V34',
+             identity={k:self.request[k] for k in ('run_id','arm','day','worker_slot','attempt_id')},
+             source=self.sources,original_row_transport=self.original_row_transport,
+             Native_calls_added=0,original_RMP_call_required_seconds=30,
+             original_total_Native_cap_seconds=5400,original_RMP_not_removed=True,
+             restricted_master_objective_is_Global_LB=False,
+             computational_performance_or_Global_LB_improvement_proved=False,**values)
++        result['current_attempt_warm_start']=dict(self.warm.diagnostic,
++            installed=self.warm_installed,
++            exact_complete_start_readback_before_Native=self.warm_installed,
++            backend_actual_start_use_or_basis_proved=False)
+         self.write(self.output/'RMP_PRESOLVE0_COMPUTATIONAL_ENTRY.json',result)
+ 
+ 
+@@ -282,8 +474,11 @@ class PresolveFreeRMP(dw_native.ExactRowModel):
+         entry.entered=True
+         self.Params.Presolve=0
+         if self.Params.Presolve!=0:raise PermissionError('RMP_PRESOLVE_ZERO_NOT_APPLIED')
++        entry.warm_installed=entry.warm.install()
++        entry.verify()
+         entry.receipt(status='ABOUT_TO_DELEGATE',Native_call_completed=False,
+-            actual_parameters=dict(Presolve=0,Method=1,Threads=1,TimeLimit=float(self.Params.TimeLimit),precision=PRECISION),
++            actual_parameters=dict(Presolve=0,Method=1,Threads=1,TimeLimit=float(self.Params.TimeLimit),precision=PRECISION,
++                LPWarmStart=int(self.Params.LPWarmStart),Crossover=int(self.Params.Crossover)),
+             ledger_before=entry.before_ledger)
+         # ExactRowModel carries only this wrapper's model scope to its owned
+         # raw delegate. Original guards/callbacks/Runtime accounting remain.
+@@ -328,12 +523,14 @@ class BudgetProxy:
+                     or self._budget.calls[-1].get('precision_parameters')!=PRECISION
+                     or not 0<self._budget.calls[-1].get('effective_TimeLimit',0)<=30
+                     or model.Params.Presolve!=0 or model.Params.Method!=1 or model.Params.Threads!=1
++                    or model.Params.LPWarmStart!=(2 if entry.warm_installed else entry.warm.original_lpwarmstart)
+                     or {k:getattr(model.Params,k) for k in PRECISION}!=PRECISION):
+                 raise PermissionError('RMP_PRESOLVE_ORIGINAL_SINGLE_COMPLETED_NATIVE_RECEIPT_REQUIRED')
+             entry.committed=True
+             entry.receipt(status='COMPLETED',Native_call_completed=True,
+                 completed_original_Native_call=copy.deepcopy(self._budget.calls[-1]),
+-                actual_parameters=dict(Presolve=0,Method=1,Threads=1,TimeLimit=float(model.Params.TimeLimit),precision=PRECISION),
++                actual_parameters=dict(Presolve=0,Method=1,Threads=1,TimeLimit=float(model.Params.TimeLimit),precision=PRECISION,
++                    LPWarmStart=int(model.Params.LPWarmStart),Crossover=int(model.Params.Crossover)),
+                 ledger_after=known)
+             return returned
+         except BaseException as exc:
+@@ -371,11 +568,19 @@ def scoped_runner(original_run,output_directory,write):
+     checked_build=rebound(original_builder,namespace)
+     build_owner=SimpleNamespace(binding=None)
+     def build(case,decomp,columns,output):
++        point=_point(case);case_structure=_case_sha(case,decomp)
+         result=checked_build(case,decomp,columns,output)
+-        model=result[0];object.__setattr__(model,'_rmp_output',output_directory(output))
+-        object.__setattr__(model,'_rmp_build_binding',build_owner.binding)
+-        write(output_directory(output)/'RMP_NATIVE_ROW_SCALING.json',model._receipt)
+-        return result
++        model=result[0]
++        try:
++            object.__setattr__(model,'_rmp_output',output_directory(output))
++            object.__setattr__(model,'_rmp_build_binding',build_owner.binding)
++            plan=WarmPlan(case,decomp,result,point,case_structure,context['request'],model._rmp_output)
++            object.__setattr__(model,'_rmp_warm_plan',plan);build_owner.binding.register_warm(model,plan)
++            write(output_directory(output)/'RMP_NATIVE_ROW_SCALING.json',model._receipt)
++            return result
++        except BaseException:
++            # Original run has not entered its model-disposal finally yet.
++            model.dispose();raise
+     original=rebound(original_run,dict(original_run.__globals__,build_master=build,write=write))
+     binding=RunBinding(original,checked_build,build,write)
+     build_owner.binding=binding
+@@ -384,3 +589,13 @@ def scoped_runner(original_run,output_directory,write):
+         return original(case,decomp,columns,BudgetProxy(ledger,write,binding),output,seconds=seconds)
+     run.original_run=original;run.original_build=checked_build;run.binding=binding
+     return run
++
++
++_WARM_BINDINGS=tuple((owner,key,getattr(owner,key),getattr(owner,key).__code__)
++    for owner,keys in ((sys.modules[__name__],('_array_sha','_case_sha','_point','_residual')),
++                       (WarmPlan,('__init__','seal','verify','install')),
++                       (RunBinding,('register_warm','warm')))
++    for key in keys)
++_WARM_METHODS={key:getattr(WarmPlan,key) for key in ('seal','verify','install')}
++_RUN_WARM=RunBinding.warm
++_RUN_REGISTER_WARM=RunBinding.register_warm

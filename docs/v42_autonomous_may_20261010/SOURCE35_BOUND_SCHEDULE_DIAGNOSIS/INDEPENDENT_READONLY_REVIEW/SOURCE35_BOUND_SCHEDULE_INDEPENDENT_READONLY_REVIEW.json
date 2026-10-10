@@ -1,0 +1,2488 @@
+{
+  "PASS": true,
+  "PASS_scope": "source-byte, line-content and saved-artifact consistency; no scientific qualification",
+  "UTC": "2026-10-10T01:20:01.823313+00:00",
+  "report": {
+    "path": "D:\\v42_source35_bound_schedule_readonly_20261010_01\\REPORT.md",
+    "bytes": 4485,
+    "sha256": "8ac6ce651bf966fa50cb4d8ef2e972bd5f2115b5e63e959a8b53efadd4cec795"
+  },
+  "source_inventory": {
+    "path": "D:\\v42_source35_bound_schedule_readonly_20261010_01\\SHA_INVENTORY.json",
+    "bytes": 19753,
+    "sha256": "a2e48b06669ff4b3aafc00bfdd541bfb067f28995212489301f5388334826623"
+  },
+  "original9_source_content_references": {
+    "v42_may_campaign_native90/m_stage.py": {
+      "sha256": "12f2a75996c4ec17654fda2205fbf139dfc702fb03923b22c4551bea9f2133b4",
+      "line_range": [
+        215,
+        270
+      ],
+      "source_text_read_only": [
+        {
+          "line": 215,
+          "text": "            for iteration in range(4096):"
+        },
+        {
+          "line": 216,
+          "text": "                if frontier.gap()<=TARGET:"
+        },
+        {
+          "line": 217,
+          "text": "                    termination='INDEPENDENT_GLOBAL_GAP_3_PERCENT_CERTIFIED';break"
+        },
+        {
+          "line": 218,
+          "text": "                if budget.remaining(reserve=budget.final_reserve)<=0:break"
+        },
+        {
+          "line": 219,
+          "text": "                method,reason=core.schedule_choice(history,iteration,budget.wall())"
+        },
+        {
+          "line": 220,
+          "text": "                if method.startswith('L') and budget.remaining(reserve=budget.final_reserve)<600:"
+        },
+        {
+          "line": 221,
+          "text": "                    method='U3';reason['reason']='FINAL_CERTIFICATE_RESERVE_REQUIRES_SHORTER_UB_TASK'"
+        },
+        {
+          "line": 222,
+          "text": "                if method=='L4' and budget.remaining(reserve=budget.final_reserve)<1000:"
+        },
+        {
+          "line": 223,
+          "text": "                    method='U4';reason['reason']='FULL_MILP_PRICE_PASS_RESERVE_REQUIRES_SHORTER_UB_TASK'"
+        },
+        {
+          "line": 224,
+          "text": "                counts[method]+=1;ordinal=counts[method]-1;label=f'{iteration:03d}_{method}_{ordinal:02d}'"
+        },
+        {
+          "line": 225,
+          "text": "                target=case.output/label;frontier.algorithm=label;begin=time.perf_counter()"
+        },
+        {
+          "line": 226,
+          "text": "                choices.append(dict(method=method,ordinal=ordinal,reason=reason,wall_seconds=budget.wall(),case_sha=case.case_sha))"
+        },
+        {
+          "line": 227,
+          "text": "                if progress:progress(dict(phase='M_ADAPTIVE_'+method,day=request['day'],arm='B2',"
+        },
+        {
+          "line": 228,
+          "text": "                    UB=float(frontier.ub),global_LB=float(frontier.lb),gap=float(frontier.gap()),goal_gap=.03))"
+        },
+        {
+          "line": 229,
+          "text": "                if method.startswith('U'):"
+        },
+        {
+          "line": 230,
+          "text": "                    key=vector_sha(point)"
+        },
+        {
+          "line": 231,
+          "text": "                    if key not in grid_cache:"
+        },
+        {
+          "line": 232,
+          "text": "                        with budget.cost('active_source_grid_projection',label):"
+        },
+        {
+          "line": 233,
+          "text": "                            grid_cache[key]=alg.dynamic_grid(case,point,case.output/(label+'_GRID_PROJECTION.json'),context=context)"
+        },
+        {
+          "line": 234,
+          "text": "                    if iteration<4:limit={'U1':120,'U2':90,'U3':120,'U4':90}[method]"
+        },
+        {
+          "line": 235,
+          "text": "                    else:limit=300 if any(r['method']==method and r['certified_gain']>0 for r in history) else (180,240)[ordinal%2]"
+        },
+        {
+          "line": 236,
+          "text": "                    row,point=alg.ub_trial(case,point,method,ordinal,budget,frontier,target,limit,grid_cache[key],context=context)"
+        },
+        {
+          "line": 237,
+          "text": "                    case.point=point.copy()"
+        },
+        {
+          "line": 238,
+          "text": "                else:"
+        },
+        {
+          "line": 239,
+          "text": "                    price=dual;alpha=None"
+        },
+        {
+          "line": 240,
+          "text": "                    if method in ('L2','L3'):"
+        },
+        {
+          "line": 241,
+          "text": "                        if method=='L2' or rmpdual is None:"
+        },
+        {
+          "line": 242,
+          "text": "                            latest_rmp=alg.feedback_master(case,decomp,point,budget,case.output/(label+'_MASTER'),context=context)"
+        },
+        {
+          "line": 243,
+          "text": "                            rmpdual=latest_rmp.get('full_original_dual')"
+        },
+        {
+          "line": 244,
+          "text": "                        if rmpdual is None:"
+        },
+        {
+          "line": 245,
+          "text": "                            history.append(dict(method=method,certified_gain=0,wall_seconds=time.perf_counter()-begin,"
+        },
+        {
+          "line": 246,
+          "text": "                                status='NOT_RUN_NO_FINITE_RMP_PI'));continue"
+        },
+        {
+          "line": 247,
+          "text": "                        if method=='L2':price=rmpdual"
+        },
+        {
+          "line": 248,
+          "text": "                        else:"
+        },
+        {
+          "line": 249,
+          "text": "                            alpha=('1/8','1/4','1/2')[ordinal%3];price=alg.mix_duals(dual,rmpdual,alpha)"
+        },
+        {
+          "line": 250,
+          "text": "                    row,adopted,pricing=alg.lp_round(case,decomp,price,budget,frontier,target,method,"
+        },
+        {
+          "line": 251,
+          "text": "                        'MILP_AND_LP' if method=='L4' else 'LP_ONLY',context=context)"
+        },
+        {
+          "line": 252,
+          "text": "                    if adopted is not None:dual=adopted"
+        },
+        {
+          "line": 253,
+          "text": "                    for unit,columns in pricing['columns'].items():"
+        },
+        {
+          "line": 254,
+          "text": "                        for column in columns:"
+        },
+        {
+          "line": 255,
+          "text": "                            if column.get('admission',{}).get('PASS') and column['path'] not in context['seed_columns'][unit]:"
+        },
+        {
+          "line": 256,
+          "text": "                                context['seed_columns'][unit].append(column['path'])"
+        },
+        {
+          "line": 257,
+          "text": "                    row['dual_stabilization_weight']=alpha"
+        },
+        {
+          "line": 258,
+          "text": "                    if method=='L2' and latest_rmp.get('convexity_duals') is not None:"
+        },
+        {
+          "line": 259,
+          "text": "                        import json"
+        },
+        {
+          "line": 260,
+          "text": "                        selected=json.loads((target/'SELECTED_UNIT_DUALS_EXACT.json').read_text(encoding='utf-8'))"
+        },
+        {
+          "line": 261,
+          "text": "                        closure=verify_rmp_pricing_lower_bounds(case,decomp,rmpdual,selected,latest_rmp['convexity_duals'])"
+        },
+        {
+          "line": 262,
+          "text": "                        atomic(target/'INDEPENDENT_MISSING_COLUMN_CERTIFICATE.json',closure)"
+        },
+        {
+          "line": 263,
+          "text": "                row['wall_seconds']=time.perf_counter()-begin;row['completed_wall_seconds']=budget.wall();history.append(row)"
+        },
+        {
+          "line": 264,
+          "text": "                atomic(case.output/'ADAPTIVE_SCHEDULER_AUDIT.json',dict(case_sha=case.case_sha,"
+        },
+        {
+          "line": 265,
+          "text": "                    choices=choices,history=history,goal_gap=.03,existing_scheduler='v42_m1_anytime.core.schedule_choice'))"
+        },
+        {
+          "line": 266,
+          "text": "        except TimeoutError:"
+        },
+        {
+          "line": 267,
+          "text": "            termination='NATIVE_BUDGET_WINDOW_CLOSED_AT_SOLVER_BOUNDARY'"
+        },
+        {
+          "line": 268,
+          "text": "        except Exception as exc:"
+        },
+        {
+          "line": 269,
+          "text": "            error=type(exc).__name__+': '+str(exc);termination='INPUT_OR_CERTIFICATION_FAILURE'"
+        },
+        {
+          "line": 270,
+          "text": "            atomic(case.output/'M_ADAPTIVE_ERROR.json',dict(error=error,wall_seconds=budget.wall()))"
+        }
+      ]
+    },
+    "v42_m1_anytime/algorithms.py": {
+      "sha256": "1ba142fa2baea50c7f4acf6412d9fe9b6e21d9a731b2be06e24b31ac49ccc25c",
+      "line_range": [
+        150,
+        213
+      ],
+      "source_text_read_only": [
+        {
+          "line": 150,
+          "text": "def mix_duals(best,new,alpha):"
+        },
+        {
+          "line": 151,
+          "text": "    a=F(alpha)"
+        },
+        {
+          "line": 152,
+          "text": "    if not 0<=a<=1:raise ValueError('CONVEX_DUAL_WEIGHT_REQUIRED')"
+        },
+        {
+          "line": 153,
+          "text": "    return {k:str(q) for k in sorted(set(best)|set(new),key=int)"
+        },
+        {
+          "line": 154,
+          "text": "            if (q:=(1-a)*F(best.get(k,'0'))+a*F(new.get(k,'0')))}"
+        },
+        {
+          "line": 155,
+          "text": ""
+        },
+        {
+          "line": 156,
+          "text": "def lp_round(case,decomp,dual,ledger,frontier,path,method,kind='LP_ONLY',*,context=None):"
+        },
+        {
+          "line": 157,
+          "text": "    start=perf_counter();start_lb=frontier.lb"
+        },
+        {
+          "line": 158,
+          "text": "    with ledger.cost('exact_price_build',path.name):prices=pricing.make_prices(case,decomp,dual)"
+        },
+        {
+          "line": 159,
+          "text": "    with ledger.cost('full96_prices',path.name):"
+        },
+        {
+          "line": 160,
+          "text": "        if kind=='MILP_AND_LP':result=pricing.run_pricing(case,decomp,prices,ledger,path,seconds_per_unit=75,lp_seconds=45)"
+        },
+        {
+          "line": 161,
+          "text": "        else:result=pricing.run_lp_prices(case,decomp,prices,ledger,path,lp_seconds=45)"
+        },
+        {
+          "line": 162,
+          "text": "    selected=read(path/'SELECTED_UNIT_DUALS_EXACT.json')"
+        },
+        {
+          "line": 163,
+          "text": "    with ledger.cost('independent_exact_Global_LB',path.name):"
+        },
+        {
+          "line": 164,
+          "text": "        certificate=verify.verify_global_lagrangian_bound(case,decomp,prices.coupling_dual,selected,nonunit_dual=prices.seed_nonunit_dual)"
+        },
+        {
+          "line": 165,
+          "text": "    full=certificate.pop('canonical_sparse_original_row_rational_dual')"
+        },
+        {
+          "line": 166,
+          "text": "    fullpath=path/'INDEPENDENT_FULL_ORIGINAL_DUAL_EXACT.json';write(fullpath,full)"
+        },
+        {
+          "line": 167,
+          "text": "    certificate.update(case_sha=CASE if context is None else case.case_sha,dual_path=str(fullpath),dual_sha256=sha(fullpath),actual_certificate_completion_time=ledger.wall())"
+        },
+        {
+          "line": 168,
+          "text": "    certpath=path/'INDEPENDENT_GLOBAL_LB_CERTIFICATE.json';write(certpath,certificate)"
+        },
+        {
+          "line": 169,
+          "text": "    adopted=frontier.publish('LB',certificate['exact_Global_LB'],certificate,certpath,sha(certpath))"
+        },
+        {
+          "line": 170,
+          "text": "    if F(result['exact_global_certificate']['exact_bound'])!=F(certificate['exact_Global_LB']):raise ValueError('PRICE_PRODUCER_AND_INDEPENDENT_BOUND_DIFFER')"
+        },
+        {
+          "line": 171,
+          "text": "    if kind=='MILP_AND_LP':"
+        },
+        {
+          "line": 172,
+          "text": "        # Native status is diagnostic. Exact integer closure needs an exact"
+        },
+        {
+          "line": 173,
+          "text": "        # primal witness and equal exact lower/upper price certificates."
+        },
+        {
+          "line": 174,
+          "text": "        differences={}"
+        },
+        {
+          "line": 175,
+          "text": "        for u in decomp.units:"
+        },
+        {
+          "line": 176,
+          "text": "            packet=path/(u+'_MILP_RAW_COLUMN.npz')"
+        },
+        {
+          "line": 177,
+          "text": "            if packet.is_file():"
+        },
+        {
+          "line": 178,
+          "text": "                with np.load(packet,allow_pickle=False) as z:raw=z['point'].copy()"
+        },
+        {
+          "line": 179,
+          "text": "                priced=sum((q*F(float(raw[j])) for j,q in prices.exact_objectives[u].items()),F(0))"
+        },
+        {
+          "line": 180,
+          "text": "                beta=F(result['local_exact_certificates'][u]['selected']['exact_bound'])"
+        },
+        {
+          "line": 181,
+          "text": "                differences[u]=dict(exact_integer_RAW_price_objective=str(priced),exact_complete_domain_LP_lower_bound=str(beta),"
+        },
+        {
+          "line": 182,
+          "text": "                    exact_price_primal_minus_lower=str(priced-beta),hard_exact_primal_rows_NOT_checked=True,"
+        },
+        {
+          "line": 183,
+          "text": "                    Native_integer_optimality_status_is_not_exact_certificate=True)"
+        },
+        {
+          "line": 184,
+          "text": "        write(path/'INTEGER_PRICING_CERTIFICATION.json',dict(case_sha=CASE if context is None else case.case_sha,status='NOT_PROVEN',"
+        },
+        {
+          "line": 185,
+          "text": "            reason='No exact rational primal row/optimality proof or full branch certificate; Native OPTIMAL does not supply it',"
+        },
+        {
+          "line": 186,
+          "text": "            exact_price_upper_lower_diagnostics=differences,"
+        },
+        {
+          "line": 187,
+          "text": "            native_MILP_records=[r for r in result['records'] if r['kind']=='MILP'],Native_ObjBound_used_as_exact=False))"
+        },
+        {
+          "line": 188,
+          "text": "    row=dict(method=method,start_LB=float(start_lb),certified_LB=float(frontier.lb),candidate_LB=float(F(certificate['exact_Global_LB'])),"
+        },
+        {
+          "line": 189,
+          "text": "        adopted=adopted,certified_gain=float(frontier.lb-start_lb),wall_seconds=perf_counter()-start,"
+        },
+        {
+          "line": 190,
+          "text": "        certificate=str(certpath),certificate_sha256=sha(certpath),full_dual=str(fullpath),full_dual_sha256=sha(fullpath),"
+        },
+        {
+          "line": 191,
+          "text": "        pricing_result=str(path/'PRICING_RESULT.json'),Native_Runtime=sum(r['native']['Native_Runtime'] for r in result['records']),"
+        },
+        {
+          "line": 192,
+          "text": "        integer_hull_or_full_closure='NOT_PROVEN')"
+        },
+        {
+          "line": 193,
+          "text": "    write(path/'LB_RESULT.json',row);return row,full if adopted else None,result"
+        },
+        {
+          "line": 194,
+          "text": ""
+        },
+        {
+          "line": 195,
+          "text": "def feedback_master(case,decomp,point,ledger,path,*,context=None):"
+        },
+        {
+          "line": 196,
+          "text": "    start=perf_counter();case.point=point.copy();columns={u:[] for u in decomp.units}"
+        },
+        {
+          "line": 197,
+          "text": "    for u,b in decomp.units.items():"
+        },
+        {
+          "line": 198,
+          "text": "        if context is None:"
+        },
+        {
+          "line": 199,
+          "text": "            packets=[ROOT/f'docs/v42_m1_fast_hybrid_20261008/artifacts/pricing_initial/{u}_MILP_RAW_COLUMN.npz']"
+        },
+        {
+          "line": 200,
+          "text": "        else:"
+        },
+        {
+          "line": 201,
+          "text": "            packets=[Path(p) for p in context.get('seed_columns',{}).get(u,[])]"
+        },
+        {
+          "line": 202,
+          "text": "        for packet in packets:"
+        },
+        {
+          "line": 203,
+          "text": "            with np.load(packet,allow_pickle=False) as z:raw=z['point'].copy()"
+        },
+        {
+          "line": 204,
+          "text": "            replay=pricing.validate_local_column(case,b,raw)"
+        },
+        {
+          "line": 205,
+          "text": "            columns[u].append(dict(path=str(packet),sha256=sha(packet),unit=u,admission=replay))"
+        },
+        {
+          "line": 206,
+          "text": "        # Explicitly validate newest globally strict trajectory as a local column."
+        },
+        {
+          "line": 207,
+          "text": "        current=pricing.validate_local_column(case,b,point[b.original_columns])"
+        },
+        {
+          "line": 208,
+          "text": "        if not current['PASS']:raise ValueError('LATEST_UB_TRAJECTORY_NOT_IN_ORIGINAL_LOCAL_DOMAIN')"
+        },
+        {
+          "line": 209,
+          "text": "    result=dw.run(case,decomp,columns,ledger,path,seconds=30)"
+        },
+        {
+          "line": 210,
+          "text": "    write(path/'LATEST_UB_FEEDBACK_AUDIT.json',dict(case_sha=CASE if context is None else case.case_sha,PASS=True,latest_strict_UB_vector_sha256=ub.vector_sha(point),"
+        },
+        {
+          "line": 211,
+          "text": "        every_latest_unit_in_catalog=True,column_counts=result['identity']['column_count_by_unit'],"
+        },
+        {
+          "line": 212,
+          "text": "        restricted_RMP_objective_not_Global_LB=True,wall_seconds=perf_counter()-start))"
+        },
+        {
+          "line": 213,
+          "text": "    return result"
+        }
+      ]
+    },
+    "v42_m1_anytime/core.py": {
+      "sha256": "78a00beaf605125f6b996b49ef662402d6ab3f6d27d8bfe275e0b606a62caf17",
+      "line_range": [
+        135,
+        193
+      ],
+      "source_text_read_only": [
+        {
+          "line": 135,
+          "text": "    def publish(self,kind,value,certificate,path,digest,discovery=None):"
+        },
+        {
+          "line": 136,
+          "text": "        with self.lock:"
+        },
+        {
+          "line": 137,
+          "text": "            value=F(value);old=self.ub if kind=='UB' else self.lb"
+        },
+        {
+          "line": 138,
+          "text": "            improving=value<old if kind=='UB' else value>old"
+        },
+        {
+          "line": 139,
+          "text": "            if not improving:return False"
+        },
+        {
+          "line": 140,
+          "text": "            if not certificate.get('PASS') or certificate.get('case_sha',CASE)!=CASE:raise ValueError('CERTIFICATE_REQUIRED')"
+        },
+        {
+          "line": 141,
+          "text": "            expected_key='exact_Global_UB' if kind=='UB' else 'exact_Global_LB'"
+        },
+        {
+          "line": 142,
+          "text": "            if sha(path)!=digest or read(path)!=certificate or F(certificate[expected_key])!=value:"
+        },
+        {
+          "line": 143,
+          "text": "                raise ValueError('CERTIFICATE_PACKET_BINDING_REQUIRED')"
+        },
+        {
+          "line": 144,
+          "text": "            if (kind=='LB' and value>self.ub) or (kind=='UB' and value<self.lb):"
+        },
+        {
+          "line": 145,
+          "text": "                raise ValueError('INCONSISTENT_GLOBAL_LB_UB')"
+        },
+        {
+          "line": 146,
+          "text": "            if kind=='UB':self.ub=value;self.ub_path=str(path);self.ub_hash=digest"
+        },
+        {
+          "line": 147,
+          "text": "            else:self.lb=value;self.lb_path=str(path);self.lb_hash=digest"
+        },
+        {
+          "line": 148,
+          "text": "            done=self.wall();self.event(kind+'_CERTIFIED_IMPROVEMENT',done if discovery is None else discovery,done,kind=='UB',kind=='LB')"
+        },
+        {
+          "line": 149,
+          "text": "            return True"
+        },
+        {
+          "line": 150,
+          "text": "    def checkpoint(self,target):"
+        },
+        {
+          "line": 151,
+          "text": "        with self.lock:"
+        },
+        {
+          "line": 152,
+          "text": "            last=self.checkpoints[-1] if self.checkpoints else None"
+        },
+        {
+          "line": 153,
+          "text": "            row=dict(target_wall_seconds=target,actual_snapshot_wall_seconds=self.wall(),"
+        },
+        {
+          "line": 154,
+          "text": "                UB_improved_since_checkpoint=False if last is None else self.ub<F(last['exact_UB']),"
+        },
+        {
+          "line": 155,
+          "text": "                LB_improved_since_checkpoint=False if last is None else self.lb>F(last['exact_LB']),**self.common())"
+        },
+        {
+          "line": 156,
+          "text": "            self.checkpoints.append(row);self.save()"
+        },
+        {
+          "line": 157,
+          "text": "    def save(self):"
+        },
+        {
+          "line": 158,
+          "text": "        self.path.mkdir(parents=True,exist_ok=True)"
+        },
+        {
+          "line": 159,
+          "text": "        table(self.path/'FRONTIER_EVENTS.csv',self.events)"
+        },
+        {
+          "line": 160,
+          "text": "        if self.checkpoints:table(self.path/'FRONTIER_CHECKPOINTS.csv',self.checkpoints)"
+        },
+        {
+          "line": 161,
+          "text": "        write(self.path/'CURRENT_CERTIFIED_STATE.json',dict(self.common(),events=len(self.events)))"
+        },
+        {
+          "line": 162,
+          "text": "    def start_observer(self):"
+        },
+        {
+          "line": 163,
+          "text": "        def observe():"
+        },
+        {
+          "line": 164,
+          "text": "            for target in TARGETS:"
+        },
+        {
+          "line": 165,
+          "text": "                delay=max(0,target-self.wall())"
+        },
+        {
+          "line": 166,
+          "text": "                if self.stop.wait(delay):return"
+        },
+        {
+          "line": 167,
+          "text": "                self.checkpoint(target)"
+        },
+        {
+          "line": 168,
+          "text": "        self.thread=threading.Thread(target=observe,name='CertifiedCheckpointObserver',daemon=True);self.thread.start()"
+        },
+        {
+          "line": 169,
+          "text": "    def finish(self):"
+        },
+        {
+          "line": 170,
+          "text": "        self.stop.set();self.thread.join(timeout=2);self.checkpoint('FINAL')"
+        },
+        {
+          "line": 171,
+          "text": "        rows=[self.passages.get(str(t),dict(threshold_percent=float(t),status='NOT_REACHED',actual_certificate_completion_seconds='',wall_minutes='',retrospectively_validated_candidate_discovery_seconds='',event='')) for t in THRESHOLDS]"
+        },
+        {
+          "line": 172,
+          "text": "        table(self.path/'GAP_FIRST_PASSAGE_TIMES.csv',rows)"
+        },
+        {
+          "line": 173,
+          "text": ""
+        },
+        {
+          "line": 174,
+          "text": "def schedule_choice(history,iteration,wall):"
+        },
+        {
+          "line": 175,
+          "text": "    \"\"\"Deterministic efficiency-weighted exploration, not a Gap stop rule.\"\"\""
+        },
+        {
+          "line": 176,
+          "text": "    pilots=('U1','U2','U3','U4','L1','L2','L3','L4')"
+        },
+        {
+          "line": 177,
+          "text": "    if iteration<len(pilots):return pilots[iteration],dict(reason='PREREGISTERED_PILOT',iteration=iteration)"
+        },
+        {
+          "line": 178,
+          "text": "    scores={k:0. for k in pilots}"
+        },
+        {
+          "line": 179,
+          "text": "    for k in pilots:"
+        },
+        {
+          "line": 180,
+          "text": "        rows=[r for r in history if r['method']==k][-3:]"
+        },
+        {
+          "line": 181,
+          "text": "        cost=sum(r['wall_seconds'] for r in rows);gain=sum(r['certified_gain'] for r in rows)"
+        },
+        {
+          "line": 182,
+          "text": "        scores[k]=gain/cost if cost else 0."
+        },
+        {
+          "line": 183,
+          "text": "    # Periodic diversity; bounded LB passes prevent repeatedly weak prices."
+        },
+        {
+          "line": 184,
+          "text": "    eligible=[k for k in pilots if not k.startswith('L') or sum(r['method']==k for r in history)<(2 if k in ('L2','L3') else 1)]"
+        },
+        {
+          "line": 185,
+          "text": "    if max(scores[k] for k in eligible)<=0:"
+        },
+        {
+          "line": 186,
+          "text": "        k=min([k for k in eligible if k.startswith('U')],key=lambda k:sum(r['method']==k for r in history))"
+        },
+        {
+          "line": 187,
+          "text": "        return k,dict(reason='NO_RECENT_CERTIFIED_GAIN_DIVERSIFY_LEAST_USED_UB',scores=scores,wall_seconds=wall,iteration=iteration)"
+        },
+        {
+          "line": 188,
+          "text": "    if iteration%5==0:"
+        },
+        {
+          "line": 189,
+          "text": "        k=min([k for k in eligible if k.startswith('U')],key=lambda k:sum(r['method']==k for r in history))"
+        },
+        {
+          "line": 190,
+          "text": "        reason='PERIODIC_UB_DIVERSIFICATION'"
+        },
+        {
+          "line": 191,
+          "text": "    else:"
+        },
+        {
+          "line": 192,
+          "text": "        k=max(eligible,key=lambda k:(scores[k],-pilots.index(k)));reason='CERTIFIED_GAIN_PER_WALL_SECOND'"
+        },
+        {
+          "line": 193,
+          "text": "    return k,dict(reason=reason,scores=scores,wall_seconds=wall,iteration=iteration)"
+        }
+      ]
+    },
+    "v42_m1_hybrid/blocks.py": {
+      "sha256": "9c9ee88e31af36f51cfcec71816c718e60de02774efec88019375bc6dba2282d",
+      "line_range": [
+        1,
+        120
+      ],
+      "source_text_read_only": [
+        {
+          "line": 1,
+          "text": "\"\"\"Exact original-CSR trajectory partition, without dropping a coefficient."
+        },
+        {
+          "line": 2,
+          "text": ""
+        },
+        {
+          "line": 3,
+          "text": "The four local domains keep the original 96-slot route/SOC/mode/PCS/PQ"
+        },
+        {
+          "line": 4,
+          "text": "constraints and literal bounds/types.  All other rows are kept in either the"
+        },
+        {
+          "line": 5,
+          "text": "nonunit block or the coupling table.  This is a decomposition, not a new cut."
+        },
+        {
+          "line": 6,
+          "text": "\"\"\""
+        },
+        {
+          "line": 7,
+          "text": "from dataclasses import dataclass"
+        },
+        {
+          "line": 8,
+          "text": "from hashlib import sha256"
+        },
+        {
+          "line": 9,
+          "text": "from pathlib import Path"
+        },
+        {
+          "line": 10,
+          "text": "import json"
+        },
+        {
+          "line": 11,
+          "text": "import numpy as np"
+        },
+        {
+          "line": 12,
+          "text": "from scipy import sparse"
+        },
+        {
+          "line": 13,
+          "text": ""
+        },
+        {
+          "line": 14,
+          "text": "UNIT_FAMILIES = frozenset(('route_flow', 'node_activity', 'charge_mode',"
+        },
+        {
+          "line": 15,
+          "text": "                           'SOC', 'Pch', 'Pdis', 'Q'))"
+        },
+        {
+          "line": 16,
+          "text": ""
+        },
+        {
+          "line": 17,
+          "text": ""
+        },
+        {
+          "line": 18,
+          "text": "def unit_owner(name):"
+        },
+        {
+          "line": 19,
+          "text": "    text = str(name)"
+        },
+        {
+          "line": 20,
+          "text": "    if '[' not in text or not text.endswith(']'):"
+        },
+        {
+          "line": 21,
+          "text": "        return None"
+        },
+        {
+          "line": 22,
+          "text": "    family, axis = text.split('[', 1)"
+        },
+        {
+          "line": 23,
+          "text": "    return axis[:-1].split(',', 1)[0] if family in UNIT_FAMILIES else None"
+        },
+        {
+          "line": 24,
+          "text": ""
+        },
+        {
+          "line": 25,
+          "text": ""
+        },
+        {
+          "line": 26,
+          "text": "def _equal(a, b):"
+        },
+        {
+          "line": 27,
+          "text": "    a, b = np.asarray(a), np.asarray(b)"
+        },
+        {
+          "line": 28,
+          "text": "    return a.shape == b.shape and a.dtype == b.dtype and a.tobytes() == b.tobytes()"
+        },
+        {
+          "line": 29,
+          "text": ""
+        },
+        {
+          "line": 30,
+          "text": ""
+        },
+        {
+          "line": 31,
+          "text": "def matrix_sha(A):"
+        },
+        {
+          "line": 32,
+          "text": "    A = A.tocsr()"
+        },
+        {
+          "line": 33,
+          "text": "    h = sha256(np.asarray(A.shape, dtype='<i8').tobytes())"
+        },
+        {
+          "line": 34,
+          "text": "    for value in (A.indptr, A.indices, A.data):"
+        },
+        {
+          "line": 35,
+          "text": "        h.update(np.asarray(value).dtype.str.encode('ascii'))"
+        },
+        {
+          "line": 36,
+          "text": "        h.update(np.ascontiguousarray(value).tobytes())"
+        },
+        {
+          "line": 37,
+          "text": "    return h.hexdigest()"
+        },
+        {
+          "line": 38,
+          "text": ""
+        },
+        {
+          "line": 39,
+          "text": ""
+        },
+        {
+          "line": 40,
+          "text": "@dataclass"
+        },
+        {
+          "line": 41,
+          "text": "class UnitBlock:"
+        },
+        {
+          "line": 42,
+          "text": "    unit: str"
+        },
+        {
+          "line": 43,
+          "text": "    A: object"
+        },
+        {
+          "line": 44,
+          "text": "    d: dict"
+        },
+        {
+          "line": 45,
+          "text": "    original_rows: np.ndarray"
+        },
+        {
+          "line": 46,
+          "text": "    original_columns: np.ndarray"
+        },
+        {
+          "line": 47,
+          "text": ""
+        },
+        {
+          "line": 48,
+          "text": ""
+        },
+        {
+          "line": 49,
+          "text": "@dataclass"
+        },
+        {
+          "line": 50,
+          "text": "class Decomposition:"
+        },
+        {
+          "line": 51,
+          "text": "    units: dict"
+        },
+        {
+          "line": 52,
+          "text": "    nonunit_block: UnitBlock"
+        },
+        {
+          "line": 53,
+          "text": "    coupling_rows: np.ndarray"
+        },
+        {
+          "line": 54,
+          "text": "    column_owner: np.ndarray"
+        },
+        {
+          "line": 55,
+          "text": "    case_sha: str"
+        },
+        {
+          "line": 56,
+          "text": "    inclusion: dict"
+        },
+        {
+          "line": 57,
+          "text": ""
+        },
+        {
+          "line": 58,
+          "text": "    @property"
+        },
+        {
+          "line": 59,
+          "text": "    def nonunit_columns(self):"
+        },
+        {
+          "line": 60,
+          "text": "        return self.nonunit_block.original_columns"
+        },
+        {
+          "line": 61,
+          "text": ""
+        },
+        {
+          "line": 62,
+          "text": ""
+        },
+        {
+          "line": 63,
+          "text": "def _metadata(d, rows, columns):"
+        },
+        {
+          "line": 64,
+          "text": "    result = {k: np.asarray(d[k])[columns].copy()"
+        },
+        {
+          "line": 65,
+          "text": "              for k in ('names', 'lower', 'upper', 'types', 'objective')}"
+        },
+        {
+          "line": 66,
+          "text": "    result.update({k: np.asarray(d[k])[rows].copy()"
+        },
+        {
+          "line": 67,
+          "text": "                   for k in ('rhs', 'sense', 'row_names')})"
+        },
+        {
+          "line": 68,
+          "text": "    # Original ObjCon belongs to the global bound exactly once."
+        },
+        {
+          "line": 69,
+          "text": "    result['constant'] = np.asarray(0., dtype=np.asarray(d['constant']).dtype)"
+        },
+        {
+          "line": 70,
+          "text": "    return result"
+        },
+        {
+          "line": 71,
+          "text": ""
+        },
+        {
+          "line": 72,
+          "text": ""
+        },
+        {
+          "line": 73,
+          "text": "def build_blocks(case):"
+        },
+        {
+          "line": 74,
+          "text": "    A, d = case.A.tocsr(), case.d"
+        },
+        {
+          "line": 75,
+          "text": "    owners = [unit_owner(n) for n in d['names']]"
+        },
+        {
+          "line": 76,
+          "text": "    units = sorted({u for u in owners if u is not None})"
+        },
+        {
+          "line": 77,
+          "text": "    if len(units) != 4:"
+        },
+        {
+          "line": 78,
+          "text": "        raise ValueError('FOUR_ORIGINAL_FLEET_UNITS_REQUIRED')"
+        },
+        {
+          "line": 79,
+          "text": "    if hasattr(case, 'graph') and set(case.graph[1]) != set(units):"
+        },
+        {
+          "line": 80,
+          "text": "        raise ValueError('ORIGINAL_GRAPH_FLEET_IDENTITY_DRIFT')"
+        },
+        {
+          "line": 81,
+          "text": "    codes = {u: k+1 for k, u in enumerate(units)}"
+        },
+        {
+          "line": 82,
+          "text": "    column_owner = np.asarray([codes.get(u, 0) for u in owners], dtype=np.int64)"
+        },
+        {
+          "line": 83,
+          "text": "    counts = np.diff(A.indptr)"
+        },
+        {
+          "line": 84,
+          "text": "    nonempty = np.flatnonzero(counts)"
+        },
+        {
+          "line": 85,
+          "text": "    low = np.zeros(A.shape[0], dtype=np.int64)"
+        },
+        {
+          "line": 86,
+          "text": "    high = np.zeros(A.shape[0], dtype=np.int64)"
+        },
+        {
+          "line": 87,
+          "text": "    if len(nonempty):"
+        },
+        {
+          "line": 88,
+          "text": "        support = column_owner[A.indices]"
+        },
+        {
+          "line": 89,
+          "text": "        low[nonempty] = np.minimum.reduceat(support, A.indptr[nonempty])"
+        },
+        {
+          "line": 90,
+          "text": "        high[nonempty] = np.maximum.reduceat(support, A.indptr[nonempty])"
+        },
+        {
+          "line": 91,
+          "text": "    blocks = {}"
+        },
+        {
+          "line": 92,
+          "text": "    for u, code in codes.items():"
+        },
+        {
+          "line": 93,
+          "text": "        rows = np.flatnonzero((low == code) & (high == code)).astype(np.int64)"
+        },
+        {
+          "line": 94,
+          "text": "        columns = np.flatnonzero(column_owner == code).astype(np.int64)"
+        },
+        {
+          "line": 95,
+          "text": "        blocks[u] = UnitBlock(u, A[rows][:, columns].tocsr(),"
+        },
+        {
+          "line": 96,
+          "text": "                              _metadata(d, rows, columns), rows, columns)"
+        },
+        {
+          "line": 97,
+          "text": "    rows = np.flatnonzero((low == 0) & (high == 0)).astype(np.int64)"
+        },
+        {
+          "line": 98,
+          "text": "    columns = np.flatnonzero(column_owner == 0).astype(np.int64)"
+        },
+        {
+          "line": 99,
+          "text": "    nonunit = UnitBlock('NONUNIT', A[rows][:, columns].tocsr(),"
+        },
+        {
+          "line": 100,
+          "text": "                        _metadata(d, rows, columns), rows, columns)"
+        },
+        {
+          "line": 101,
+          "text": "    coupling = np.flatnonzero(low != high).astype(np.int64)"
+        },
+        {
+          "line": 102,
+          "text": "    decomp = Decomposition(blocks, nonunit, coupling, column_owner,"
+        },
+        {
+          "line": 103,
+          "text": "                           case.case_sha, {})"
+        },
+        {
+          "line": 104,
+          "text": "    decomp.inclusion = verify_decomposition(case, decomp)"
+        },
+        {
+          "line": 105,
+          "text": "    return decomp"
+        },
+        {
+          "line": 106,
+          "text": ""
+        },
+        {
+          "line": 107,
+          "text": ""
+        },
+        {
+          "line": 108,
+          "text": "def verify_decomposition(case, decomp):"
+        },
+        {
+          "line": 109,
+          "text": "    \"\"\"Check every original row/column and every local matrix nonzero.\"\"\""
+        },
+        {
+          "line": 110,
+          "text": "    A, d = case.A.tocsr(), case.d"
+        },
+        {
+          "line": 111,
+          "text": "    if decomp.case_sha != case.case_sha:"
+        },
+        {
+          "line": 112,
+          "text": "        raise ValueError('DECOMPOSITION_CASE_SHA_DRIFT')"
+        },
+        {
+          "line": 113,
+          "text": "    all_blocks = list(decomp.units.values()) + [decomp.nonunit_block]"
+        },
+        {
+          "line": 114,
+          "text": "    rows = np.concatenate([b.original_rows for b in all_blocks] + [decomp.coupling_rows])"
+        },
+        {
+          "line": 115,
+          "text": "    columns = np.concatenate([b.original_columns for b in all_blocks])"
+        },
+        {
+          "line": 116,
+          "text": "    for axis, size, label in ((rows, A.shape[0], 'ROW'), (columns, A.shape[1], 'COLUMN')):"
+        },
+        {
+          "line": 117,
+          "text": "        if axis.dtype.kind not in 'iu' or not np.array_equal(np.sort(axis), np.arange(size)):"
+        },
+        {
+          "line": 118,
+          "text": "            raise ValueError('ORIGINAL_'+label+'_PARTITION_INCOMPLETE_OR_DUPLICATE')"
+        },
+        {
+          "line": 119,
+          "text": "    nnz = 0"
+        },
+        {
+          "line": 120,
+          "text": "    for b in all_blocks:"
+        }
+      ]
+    },
+    "v42_m1_hybrid/pricing.py": {
+      "sha256": "b5d907fac13080484c7dc36c87cf78661d1c2b74793739f991985d3f32c5b5a3",
+      "line_range": [
+        300,
+        371
+      ],
+      "source_text_read_only": [
+        {
+          "line": 300,
+          "text": "                    if replay['PASS']:"
+        },
+        {
+          "line": 301,
+          "text": "                        columns[u].append(column)"
+        },
+        {
+          "line": 302,
+          "text": "                else:"
+        },
+        {
+          "line": 303,
+          "text": "                    record['candidate_column'] = dict(PASS=False,status='NO_RAW_INCUMBENT')"
+        },
+        {
+          "line": 304,
+          "text": "                records.append(record)"
+        },
+        {
+          "line": 305,
+          "text": "                _write(path/(label+'_RESULT.json'),record)"
+        },
+        {
+          "line": 306,
+          "text": "            finally:"
+        },
+        {
+          "line": 307,
+          "text": "                model.dispose()"
+        },
+        {
+          "line": 308,
+          "text": "        model,v,build = build_pricing_model(b,prices.unit_objectives[u],'LP')"
+        },
+        {
+          "line": 309,
+          "text": "        label = u+'_FULL96_LP_PRICING'"
+        },
+        {
+          "line": 310,
+          "text": "        try:"
+        },
+        {
+          "line": 311,
+          "text": "            model.Params.LogFile = str(path/(label+'.log'))"
+        },
+        {
+          "line": 312,
+          "text": "            before = perf_counter()"
+        },
+        {
+          "line": 313,
+          "text": "            native = ledger.optimize(model,track='PRICING',label=label,"
+        },
+        {
+          "line": 314,
+          "text": "                                      requested_seconds=float(lp_seconds))"
+        },
+        {
+          "line": 315,
+          "text": "            wall = perf_counter()-before"
+        },
+        {
+          "line": 316,
+          "text": "            native_wall += wall"
+        },
+        {
+          "line": 317,
+          "text": "            record = dict(label=label,unit=u,kind='LP',build=build,native=native,"
+        },
+        {
+          "line": 318,
+          "text": "                native_optimize_wall_seconds=wall,pricing_closure=False,"
+        },
+        {
+          "line": 319,
+          "text": "                rounded_price_native_objective_is_diagnostic_only=True)"
+        },
+        {
+          "line": 320,
+          "text": "            packet = _dual_packet(model,b)"
+        },
+        {
+          "line": 321,
+          "text": "            if packet is None:"
+        },
+        {
+          "line": 322,
+          "text": "                record.update(dual_status='NO_FINITE_PI_EXACT_SEED_RETAINED')"
+        },
+        {
+          "line": 323,
+          "text": "            else:"
+        },
+        {
+          "line": 324,
+          "text": "                raw,checked,clipped = packet"
+        },
+        {
+          "line": 325,
+          "text": "                np.savez_compressed(path/(u+'_LP_DUAL.npz'),raw_dual=raw,dual=checked,"
+        },
+        {
+          "line": 326,
+          "text": "                    objective_native=prices.unit_objectives[u],original_rows=b.original_rows,"
+        },
+        {
+          "line": 327,
+          "text": "                    original_columns=b.original_columns)"
+        },
+        {
+          "line": 328,
+          "text": "                cert = local_exact_price_bound(b,exact_price,checked)"
+        },
+        {
+          "line": 329,
+          "text": "                record.update(dual_evidence=_file(path/(u+'_LP_DUAL.npz')),"
+        },
+        {
+          "line": 330,
+          "text": "                    signed_rows_zeroed=clipped,exact_local_price_certificate=cert)"
+        },
+        {
+          "line": 331,
+          "text": "                if Fraction(cert['exact_bound']) > Fraction(seed['exact_bound']):"
+        },
+        {
+          "line": 332,
+          "text": "                    selected[u] = _strings(rational_dual(checked,b.A.shape[0]))"
+        },
+        {
+          "line": 333,
+          "text": "                    local_certificates[u].update(selected=cert,source='FRESH_LOCAL_LP_SIGNED_DUAL')"
+        },
+        {
+          "line": 334,
+          "text": "                    record['fresh_dual_adopted'] = True"
+        },
+        {
+          "line": 335,
+          "text": "                else:"
+        },
+        {
+          "line": 336,
+          "text": "                    record['fresh_dual_adopted'] = False"
+        },
+        {
+          "line": 337,
+          "text": "            _write(path/(u+'_SELECTED_DUAL_EXACT.json'),selected[u])"
+        },
+        {
+          "line": 338,
+          "text": "            records.append(record)"
+        },
+        {
+          "line": 339,
+          "text": "            _write(path/(label+'_RESULT.json'),record)"
+        },
+        {
+          "line": 340,
+          "text": "        finally:"
+        },
+        {
+          "line": 341,
+          "text": "            model.dispose()"
+        },
+        {
+          "line": 342,
+          "text": "        # Durable checkpoint after each naturally completed unit."
+        },
+        {
+          "line": 343,
+          "text": "        _write(path/'PRICING_CHECKPOINT.json',dict(case_sha=case.case_sha,"
+        },
+        {
+          "line": 344,
+          "text": "            finished_units=list(local_certificates),records=records,columns=columns))"
+        },
+        {
+          "line": 345,
+          "text": "    certificate = certify_global(case,decomp,prices.coupling_dual,selected,prices.seed_nonunit_dual)"
+        },
+        {
+          "line": 346,
+          "text": "    nonunit = local_exact_price_bound(decomp.nonunit_block,prices.nonunit_exact_objective,"
+        },
+        {
+          "line": 347,
+          "text": "                                     prices.seed_nonunit_dual)"
+        },
+        {
+          "line": 348,
+          "text": "    exact_sum = Fraction(float(case.d['constant']))+Fraction(prices.coupling_constant_exact)"
+        },
+        {
+          "line": 349,
+          "text": "    exact_sum += Fraction(nonunit['exact_bound'])"
+        },
+        {
+          "line": 350,
+          "text": "    exact_sum += sum((Fraction(local_certificates[u]['selected']['exact_bound']) for u in decomp.units),Fraction(0))"
+        },
+        {
+          "line": 351,
+          "text": "    if exact_sum != Fraction(certificate['exact_bound']):"
+        },
+        {
+          "line": 352,
+          "text": "        raise ValueError('LOCAL_PRICE_SUM_AND_FULL_ORIGINAL_CERTIFICATE_DISAGREE')"
+        },
+        {
+          "line": 353,
+          "text": "    _write(path/'SELECTED_UNIT_DUALS_EXACT.json',selected)"
+        },
+        {
+          "line": 354,
+          "text": "    _write(path/'FINAL_EXACT_GLOBAL_LB.json',certificate)"
+        },
+        {
+          "line": 355,
+          "text": "    elapsed = perf_counter()-begin"
+        },
+        {
+          "line": 356,
+          "text": "    reported_runtime = sum(float(r['native']['Native_Runtime']) for r in records)"
+        },
+        {
+          "line": 357,
+          "text": "    result = dict(case_sha=case.case_sha,status='FINITE_FULL96_PRICING_PILOT_COMPLETED',mode=mode,"
+        },
+        {
+          "line": 358,
+          "text": "        prices=identity,records=records,columns=columns,baseline_exact_certificate=baseline,"
+        },
+        {
+          "line": 359,
+          "text": "        exact_global_certificate=certificate,local_exact_certificates=local_certificates,"
+        },
+        {
+          "line": 360,
+          "text": "        nonunit_exact_certificate=nonunit,exact_decomposition_sum=str(exact_sum),"
+        },
+        {
+          "line": 361,
+          "text": "        decomposition_sum_matches_full_original_exact_bound=True,"
+        },
+        {
+          "line": 362,
+          "text": "        selected_unit_duals=_file(path/'SELECTED_UNIT_DUALS_EXACT.json'),"
+        },
+        {
+          "line": 363,
+          "text": "        seed_nonunit_dual=_file(path/'SEED_NONUNIT_DUAL_EXACT.json'),"
+        },
+        {
+          "line": 364,
+          "text": "        coupling_dual=_file(path/'COUPLING_DUAL_EXACT.json'),"
+        },
+        {
+          "line": 365,
+          "text": "        independently_certified_LB_gain=certificate['independently_certified_LB']-baseline['independently_certified_LB'],"
+        },
+        {
+          "line": 366,
+          "text": "        genuine_integer_block_strengthening='NOT_PROVEN',pricing_closure=False,"
+        },
+        {
+          "line": 367,
+          "text": "        restricted_master_objective_global_authority=False,"
+        },
+        {
+          "line": 368,
+          "text": "        wall_seconds=elapsed,native_optimize_wall_seconds=native_wall,"
+        },
+        {
+          "line": 369,
+          "text": "        native_reported_Runtime_seconds=reported_runtime,"
+        },
+        {
+          "line": 370,
+          "text": "        ledger_optimize_wall_includes_ledger_bookkeeping=True,"
+        },
+        {
+          "line": 371,
+          "text": "        non_native_wall_seconds=max(0.,elapsed-native_wall),unused_budget_retry_loop=False)"
+        }
+      ]
+    },
+    "v42_m1_hybrid/dw.py": {
+      "sha256": "111f49ab1e63a7b4ec90a413a3d1b116e0561a7cc407bd301ad1c38bbdc5f88f",
+      "line_range": [
+        84,
+        118
+      ],
+      "source_text_read_only": [
+        {
+          "line": 84,
+          "text": "def run(case,decomp,columns,ledger,output,*,seconds=30):"
+        },
+        {
+          "line": 85,
+          "text": "    if seconds!=30:raise ValueError('ONE_PREREGISTERED_30_SECOND_RMP_REQUIRED')"
+        },
+        {
+          "line": 86,
+          "text": "    output=Path(output);start=perf_counter()"
+        },
+        {
+          "line": 87,
+          "text": "    with ledger.cost('RMP_model_build','ONE_RESTRICTED_MASTER',track='RMP'):"
+        },
+        {
+          "line": 88,
+          "text": "        model,variables,rows,identity,source_rows=build_master(case,decomp,columns,output)"
+        },
+        {
+          "line": 89,
+          "text": "    try:"
+        },
+        {
+          "line": 90,
+          "text": "        native=ledger.optimize(model,track='RMP',label='ONE_RESTRICTED_MASTER',requested_seconds=seconds)"
+        },
+        {
+          "line": 91,
+          "text": "        result=dict(case_sha=case.case_sha,identity=identity,native=native,"
+        },
+        {
+          "line": 92,
+          "text": "            Native_objective_diagnostic=None,restricted_master_is_Global_LB=False,"
+        },
+        {
+          "line": 93,
+          "text": "            restricted_master_is_Global_UB=False,pricing_closure='NOT_PROVEN',"
+        },
+        {
+          "line": 94,
+          "text": "            full_original_dual=None,convexity_duals=None)"
+        },
+        {
+          "line": 95,
+          "text": "        if model.SolCount:"
+        },
+        {
+          "line": 96,
+          "text": "            result['Native_objective_diagnostic']=float(model.ObjVal)"
+        },
+        {
+          "line": 97,
+          "text": "            np.savez_compressed(output/'RMP_RAW_POINT.npz',point=np.asarray(variables.X),source_rows=source_rows)"
+        },
+        {
+          "line": 98,
+          "text": "        try:"
+        },
+        {
+          "line": 99,
+          "text": "            pi=np.asarray(rows.Pi,dtype=np.float64)"
+        },
+        {
+          "line": 100,
+          "text": "        except gp.GurobiError:"
+        },
+        {
+          "line": 101,
+          "text": "            pi=None"
+        },
+        {
+          "line": 102,
+          "text": "        if pi is not None and np.isfinite(pi).all():"
+        },
+        {
+          "line": 103,
+          "text": "            signed=pi[:len(source_rows)].copy();senses=case.d['sense'][source_rows]"
+        },
+        {
+          "line": 104,
+          "text": "            invalid=((senses=='<')&(signed>0))|((senses=='>')&(signed<0))"
+        },
+        {
+          "line": 105,
+          "text": "            signed[invalid]=0."
+        },
+        {
+          "line": 106,
+          "text": "            full={str(int(i)):str(F(float(q))) for i,q in zip(source_rows,signed) if q}"
+        },
+        {
+          "line": 107,
+          "text": "            eta={u:str(F(float(pi[len(source_rows)+j]))) for j,u in enumerate(decomp.units)}"
+        },
+        {
+          "line": 108,
+          "text": "            write(output/'RMP_ORIGINAL_ROW_DUAL_EXACT.json',full)"
+        },
+        {
+          "line": 109,
+          "text": "            write(output/'RMP_CONVEXITY_DUAL_EXACT.json',eta)"
+        },
+        {
+          "line": 110,
+          "text": "            np.savez_compressed(output/'RMP_RAW_DUAL.npz',dual=pi,source_rows=source_rows)"
+        },
+        {
+          "line": 111,
+          "text": "            result.update(full_original_dual=full,convexity_duals=eta,"
+        },
+        {
+          "line": 112,
+          "text": "                invalid_original_inequality_multiplier_signs_zeroed=int(invalid.sum()),"
+        },
+        {
+          "line": 113,
+          "text": "                dual_status='FINITE_ORIGINAL_ROW_DUAL_AVAILABLE_NOT_NATIVE_OBJECTIVE_PROOF')"
+        },
+        {
+          "line": 114,
+          "text": "        else:result['dual_status']='NO_FINITE_PI_FOLLOWUP_PRICING_NOT_RUN'"
+        },
+        {
+          "line": 115,
+          "text": "        result['wall_seconds']=perf_counter()-start"
+        },
+        {
+          "line": 116,
+          "text": "        write(output/'RMP_RESULT.json',result)"
+        },
+        {
+          "line": 117,
+          "text": "        return result"
+        },
+        {
+          "line": 118,
+          "text": "    finally:model.dispose()"
+        }
+      ]
+    },
+    "v42_m1_hybrid/bound.py": {
+      "sha256": "99ff32cad0c3f801dea5cd99b89f934c9af4601bd116008db887b2121fcb7edd",
+      "line_range": [
+        30,
+        72
+      ],
+      "source_text_read_only": [
+        {
+          "line": 30,
+          "text": "def check_signs(dual, senses):"
+        },
+        {
+          "line": 31,
+          "text": "    for i,q in dual.items():"
+        },
+        {
+          "line": 32,
+          "text": "        s = str(senses[i])"
+        },
+        {
+          "line": 33,
+          "text": "        if s not in ('<','>','=') or (s == '<' and q > 0) or (s == '>' and q < 0):"
+        },
+        {
+          "line": 34,
+          "text": "            raise ValueError('INVALID_LAGRANGIAN_DUAL_SIGN')"
+        },
+        {
+          "line": 35,
+          "text": ""
+        },
+        {
+          "line": 36,
+          "text": ""
+        },
+        {
+          "line": 37,
+          "text": "def assemble_full_dual(case, decomp, coupling_dual, unit_duals, nonunit_dual):"
+        },
+        {
+          "line": 38,
+          "text": "    \"\"\"Embed all block/coupling signed multipliers on original row axes.\"\"\""
+        },
+        {
+          "line": 39,
+          "text": "    from .blocks import verify_decomposition"
+        },
+        {
+          "line": 40,
+          "text": "    verify_decomposition(case, decomp)"
+        },
+        {
+          "line": 41,
+          "text": "    if set(unit_duals) != set(decomp.units):"
+        },
+        {
+          "line": 42,
+          "text": "        raise ValueError('ALL_FOUR_UNIT_DUALS_REQUIRED')"
+        },
+        {
+          "line": 43,
+          "text": "    pieces = [(decomp.coupling_rows, coupling_dual)]"
+        },
+        {
+          "line": 44,
+          "text": "    pieces += [(b.original_rows, unit_duals[u]) for u,b in decomp.units.items()]"
+        },
+        {
+          "line": 45,
+          "text": "    pieces.append((decomp.nonunit_block.original_rows, nonunit_dual))"
+        },
+        {
+          "line": 46,
+          "text": "    result = {}"
+        },
+        {
+          "line": 47,
+          "text": "    for rows, dual in pieces:"
+        },
+        {
+          "line": 48,
+          "text": "        active = rational_dual(dual, len(rows))"
+        },
+        {
+          "line": 49,
+          "text": "        check_signs(active, case.d['sense'][rows])"
+        },
+        {
+          "line": 50,
+          "text": "        for i,q in active.items():"
+        },
+        {
+          "line": 51,
+          "text": "            original = int(rows[i])"
+        },
+        {
+          "line": 52,
+          "text": "            if original in result:"
+        },
+        {
+          "line": 53,
+          "text": "                raise ValueError('FULL_DUAL_ROW_ASSIGNED_TWICE')"
+        },
+        {
+          "line": 54,
+          "text": "            result[original] = str(q)"
+        },
+        {
+          "line": 55,
+          "text": "    return result"
+        },
+        {
+          "line": 56,
+          "text": ""
+        },
+        {
+          "line": 57,
+          "text": ""
+        },
+        {
+          "line": 58,
+          "text": "def certify_global(case, decomp, coupling_dual, unit_duals, nonunit_dual):"
+        },
+        {
+          "line": 59,
+          "text": "    \"\"\"Finite-box weak duality: valid even with incomplete/time-limited pricing.\"\"\""
+        },
+        {
+          "line": 60,
+          "text": "    full = assemble_full_dual(case, decomp, coupling_dual, unit_duals, nonunit_dual)"
+        },
+        {
+          "line": 61,
+          "text": "    certificate = check_rational_dual_certificate(case.A, case.d, full, case_sha=case.case_sha)"
+        },
+        {
+          "line": 62,
+          "text": "    certificate.update(certified_domain='FULL_ORIGINAL_C3A_INTEGER_DOMAIN',"
+        },
+        {
+          "line": 63,
+          "text": "        theorem='SIGNED_COUPLING_PLUS_LOCAL_PLUS_NONUNIT_DUALS_AND_EXACT_ORIGINAL_RESIDUAL_BOX',"
+        },
+        {
+          "line": 64,
+          "text": "        all_four_trajectory_blocks_included=True, nonunit_original_domain_included=True,"
+        },
+        {
+          "line": 65,
+          "text": "        native_local_MIP_ObjBound_used=False, rounded_pricing_objective_used=False,"
+        },
+        {
+          "line": 66,
+          "text": "        restricted_master_objective_used=False, pricing_closure_required_for_this_LB=False,"
+        },
+        {
+          "line": 67,
+          "text": "        structural_integer_block_improvement_proven=False)"
+        },
+        {
+          "line": 68,
+          "text": "    return certificate"
+        },
+        {
+          "line": 69,
+          "text": ""
+        },
+        {
+          "line": 70,
+          "text": ""
+        },
+        {
+          "line": 71,
+          "text": "def local_exact_price_bound(block, exact_objective, dual):"
+        },
+        {
+          "line": 72,
+          "text": "    \"\"\"A local LP dual proves a lower bound for the unchanged integer domain."
+        }
+      ]
+    },
+    "v42_m1_hybrid/verify.py": {
+      "sha256": "889193e86fc75b9fda94cecbcc4de36b223da52abae65e18885a7cc6fffe9a48",
+      "line_range": [
+        110,
+        152
+      ],
+      "source_text_read_only": [
+        {
+          "line": 110,
+          "text": "def verify_global_lagrangian_bound(case,decomposition,coupling_dual,unit_duals,*,nonunit_dual=None):"
+        },
+        {
+          "line": 111,
+          "text": "    \"\"\"Check exact global weak duality, including nonunit grid and finite boxes."
+        },
+        {
+          "line": 112,
+          "text": ""
+        },
+        {
+          "line": 113,
+          "text": "    Reassembling y avoids any rounding of c-B.T*lambda used in a Native price"
+        },
+        {
+          "line": 114,
+          "text": "    objective.  The exact residual correction covers every original column."
+        },
+        {
+          "line": 115,
+          "text": "    No requirement of LP/MIP optimal status is needed for this lower bound."
+        },
+        {
+          "line": 116,
+          "text": "    \"\"\""
+        },
+        {
+          "line": 117,
+          "text": "    begin=perf_counter();inclusion=verify_decomposition(case,decomposition)"
+        },
+        {
+          "line": 118,
+          "text": "    if set(unit_duals)!=set(decomposition.units):raise ValueError('HYBRID_LOCAL_DUAL_UNIT_COVER_INCOMPLETE')"
+        },
+        {
+          "line": 119,
+          "text": "    y={}"
+        },
+        {
+          "line": 120,
+          "text": "    def assign(rows,dual,label):"
+        },
+        {
+          "line": 121,
+          "text": "        rows=np.asarray(rows,dtype=np.int64)"
+        },
+        {
+          "line": 122,
+          "text": "        if isinstance(dual,dict):"
+        },
+        {
+          "line": 123,
+          "text": "            local={}"
+        },
+        {
+          "line": 124,
+          "text": "            for key,value in dual.items():"
+        },
+        {
+          "line": 125,
+          "text": "                j=int(key)"
+        },
+        {
+          "line": 126,
+          "text": "                if not 0<=j<len(rows) or str(j)!=str(key):"
+        },
+        {
+          "line": 127,
+          "text": "                    raise ValueError('HYBRID_RATIONAL_LOCAL_DUAL_AXIS_DRIFT:'+label)"
+        },
+        {
+          "line": 128,
+          "text": "                local[j]=F(value)"
+        },
+        {
+          "line": 129,
+          "text": "        else:"
+        },
+        {
+          "line": 130,
+          "text": "            value=np.asarray(dual,dtype=np.float64)"
+        },
+        {
+          "line": 131,
+          "text": "            if value.shape!=(len(rows),) or not np.isfinite(value).all():"
+        },
+        {
+          "line": 132,
+          "text": "                raise ValueError('HYBRID_LOCAL_DUAL_AXIS_OR_FINITE_DRIFT:'+label)"
+        },
+        {
+          "line": 133,
+          "text": "            local={int(j):F(float(value[j])) for j in np.flatnonzero(value)}"
+        },
+        {
+          "line": 134,
+          "text": "        for j,value in local.items():"
+        },
+        {
+          "line": 135,
+          "text": "            if value:y[str(int(rows[j]))]=str(value)"
+        },
+        {
+          "line": 136,
+          "text": "    assign(decomposition.coupling_rows,coupling_dual,'COUPLING')"
+        },
+        {
+          "line": 137,
+          "text": "    for unit,block in decomposition.units.items():assign(block.original_rows,unit_duals[unit],unit)"
+        },
+        {
+          "line": 138,
+          "text": "    rows=decomposition.nonunit_block.original_rows"
+        },
+        {
+          "line": 139,
+          "text": "    if nonunit_dual is None and len(rows):raise ValueError('HYBRID_RETAINED_NONUNIT_GRID_DUAL_MISSING')"
+        },
+        {
+          "line": 140,
+          "text": "    assign(rows,np.zeros(0) if nonunit_dual is None else nonunit_dual,'NONUNIT')"
+        },
+        {
+          "line": 141,
+          "text": "    certificate=check_rational_dual_certificate(case.A,case.d,y,case_sha=case.case_sha)"
+        },
+        {
+          "line": 142,
+          "text": "    canonical='\\n'.join(f'{i}:{y[str(i)]}' for i in sorted(map(int,y))).encode('ascii')"
+        },
+        {
+          "line": 143,
+          "text": "    return dict(PASS=True,case_sha=case.case_sha,scope='FULL_ORIGINAL_C3A_SIGNED_LAGRANGIAN_LP_DUAL',"
+        },
+        {
+          "line": 144,
+          "text": "        independent_decomposition=inclusion,independent_exact_certificate=certificate,"
+        },
+        {
+          "line": 145,
+          "text": "        exact_Global_LB=certificate['exact_bound'],independently_certified_Global_LB=certificate['independently_certified_LB'],"
+        },
+        {
+          "line": 146,
+          "text": "        assembled_original_dual_sha256=hashlib.sha256(canonical).hexdigest(),"
+        },
+        {
+          "line": 147,
+          "text": "        canonical_sparse_original_row_rational_dual=y,"
+        },
+        {
+          "line": 148,
+          "text": "        theorem='ObjCon+b*y+min_original_finite_box((c-A.T*y)*x) <= every original integer objective',"
+        },
+        {
+          "line": 149,
+          "text": "        native_rounded_price_objectives_used_as_proof=False,restricted_master_objective_used_as_Global_LB=False,"
+        },
+        {
+          "line": 150,
+          "text": "        Native_MIP_ObjBound_used_as_exact_Global_LB=False,full_pricing_closure_certified=False,"
+        },
+        {
+          "line": 151,
+          "text": "        structural_integer_hull_strengthening_certified=False,Native_optimize_calls=0,"
+        },
+        {
+          "line": 152,
+          "text": "        checker_wall_seconds=perf_counter()-begin)"
+        }
+      ]
+    },
+    "v42_m1_research/check_lb.py": {
+      "sha256": "6c87483c677e015c966da3b5f76277968ed7a3412166a081b807bb60b65570d8",
+      "line_range": [
+        94,
+        166
+      ],
+      "source_text_read_only": [
+        {
+          "line": 94,
+          "text": "def check_rational_dual_certificate(A, d, multipliers, *, lower=None, upper=None,"
+        },
+        {
+          "line": 95,
+          "text": "                                    source_rows=None, case_sha=None):"
+        },
+        {
+          "line": 96,
+          "text": "    \"\"\"Same independent theorem with exact sparse rational multipliers."
+        },
+        {
+          "line": 97,
+          "text": ""
+        },
+        {
+          "line": 98,
+          "text": "    Equality multiplier repair can be stored as rationals without re-rounding"
+        },
+        {
+          "line": 99,
+          "text": "    them to native binary64. The writer cannot supply its own claimed bound."
+        },
+        {
+          "line": 100,
+          "text": "    \"\"\""
+        },
+        {
+          "line": 101,
+          "text": "    begin=perf_counter()"
+        },
+        {
+          "line": 102,
+          "text": "    A=A.tocsr()"
+        },
+        {
+          "line": 103,
+          "text": "    lo=np.asarray(d['lower'] if lower is None else lower,dtype=np.float64)"
+        },
+        {
+          "line": 104,
+          "text": "    hi=np.asarray(d['upper'] if upper is None else upper,dtype=np.float64)"
+        },
+        {
+          "line": 105,
+          "text": "    if lo.shape!=(A.shape[1],) or hi.shape!=lo.shape or np.any(lo>hi):"
+        },
+        {
+          "line": 106,
+          "text": "        raise ValueError('RATIONAL_CERTIFICATE_BOX_AXIS_DRIFT')"
+        },
+        {
+          "line": 107,
+          "text": "    if not all(np.isfinite(z).all() for z in (lo,hi,d['objective'],d['rhs'],A.data,d['constant'])):"
+        },
+        {
+          "line": 108,
+          "text": "        raise ValueError('EXACT_BOX_CERTIFICATE_REQUIRES_FINITE_COEFFICIENTS_AND_BOUNDS')"
+        },
+        {
+          "line": 109,
+          "text": "    active={}"
+        },
+        {
+          "line": 110,
+          "text": "    for key,value in multipliers.items():"
+        },
+        {
+          "line": 111,
+          "text": "        i=int(key)"
+        },
+        {
+          "line": 112,
+          "text": "        if not 0<=i<A.shape[0] or str(i)!=str(key):"
+        },
+        {
+          "line": 113,
+          "text": "            raise ValueError('RATIONAL_DUAL_ROW_AXIS_DRIFT')"
+        },
+        {
+          "line": 114,
+          "text": "        q=Fraction(value)"
+        },
+        {
+          "line": 115,
+          "text": "        if i in active:"
+        },
+        {
+          "line": 116,
+          "text": "            raise ValueError('RATIONAL_DUAL_DUPLICATE_ROW')"
+        },
+        {
+          "line": 117,
+          "text": "        sense=str(d['sense'][i])"
+        },
+        {
+          "line": 118,
+          "text": "        if sense not in {'<','>','='} or (sense=='<' and q>0) or (sense=='>' and q<0):"
+        },
+        {
+          "line": 119,
+          "text": "            raise ValueError('INVALID_DUAL_ROW_SIGN')"
+        },
+        {
+          "line": 120,
+          "text": "        if q:active[i]=q"
+        },
+        {
+          "line": 121,
+          "text": "    raw='\\n'.join(f'{i}:{active[i]}' for i in sorted(active)).encode('ascii')"
+        },
+        {
+          "line": 122,
+          "text": "    return _rational_bound(A,d,active,lo,hi,source_rows,case_sha,begin,sha256(raw).hexdigest())"
+        },
+        {
+          "line": 123,
+          "text": ""
+        },
+        {
+          "line": 124,
+          "text": ""
+        },
+        {
+          "line": 125,
+          "text": "def _rational_bound(A,d,active,lo,hi,source_rows,case_sha,begin,dual_hash):"
+        },
+        {
+          "line": 126,
+          "text": "    # This mathematical evaluator is independent of native solve and repair."
+        },
+        {
+          "line": 127,
+          "text": "    products = {}"
+        },
+        {
+          "line": 128,
+          "text": "    weighted_rhs = Fraction(0)"
+        },
+        {
+          "line": 129,
+          "text": "    c=np.asarray(d['objective'],dtype=np.float64)"
+        },
+        {
+          "line": 130,
+          "text": "    for i,q in active.items():"
+        },
+        {
+          "line": 131,
+          "text": "        weighted_rhs += q * Fraction(float(d['rhs'][i]))"
+        },
+        {
+          "line": 132,
+          "text": "        a, b = A.indptr[i:i+2]"
+        },
+        {
+          "line": 133,
+          "text": "        for j, value in zip(A.indices[a:b], A.data[a:b]):"
+        },
+        {
+          "line": 134,
+          "text": "            j = int(j)"
+        },
+        {
+          "line": 135,
+          "text": "            products[j] = products.get(j, Fraction(0)) + q * Fraction(float(value))"
+        },
+        {
+          "line": 136,
+          "text": "    total = Fraction(float(np.asarray(d['constant']).item())) + weighted_rhs"
+        },
+        {
+          "line": 137,
+          "text": "    correction = Fraction(0)"
+        },
+        {
+          "line": 138,
+          "text": "    nonzero = 0"
+        },
+        {
+          "line": 139,
+          "text": "    max_residual = Fraction(0)"
+        },
+        {
+          "line": 140,
+          "text": "    for j in range(A.shape[1]):"
+        },
+        {
+          "line": 141,
+          "text": "        residual = Fraction(float(c[j])) - products.get(j, Fraction(0))"
+        },
+        {
+          "line": 142,
+          "text": "        if residual:"
+        },
+        {
+          "line": 143,
+          "text": "            nonzero += 1"
+        },
+        {
+          "line": 144,
+          "text": "            max_residual = max(max_residual, abs(residual))"
+        },
+        {
+          "line": 145,
+          "text": "            correction += residual * Fraction(float(lo[j] if residual > 0 else hi[j]))"
+        },
+        {
+          "line": 146,
+          "text": "    total += correction"
+        },
+        {
+          "line": 147,
+          "text": "    value = float(total)"
+        },
+        {
+          "line": 148,
+          "text": "    if not np.isfinite(value):"
+        },
+        {
+          "line": 149,
+          "text": "        raise ValueError('EXACT_CERTIFICATE_BOUND_NOT_FINITE')"
+        },
+        {
+          "line": 150,
+          "text": "    if Fraction(value) > total:"
+        },
+        {
+          "line": 151,
+          "text": "        value = float(np.nextafter(value, -np.inf))"
+        },
+        {
+          "line": 152,
+          "text": "    row_axis = np.arange(A.shape[0], dtype=np.int64) if source_rows is None else np.asarray(source_rows, dtype=np.int64)"
+        },
+        {
+          "line": 153,
+          "text": "    if row_axis.shape != (A.shape[0],):"
+        },
+        {
+          "line": 154,
+          "text": "        raise ValueError('CERTIFICATE_SOURCE_ROW_AXIS_DRIFT')"
+        },
+        {
+          "line": 155,
+          "text": "    return dict(PASS=True, status='EXACT_STORED_RATIONAL_BOUND_CERTIFIED',"
+        },
+        {
+          "line": 156,
+          "text": "                case_sha=case_sha, certified_domain='CHECKED_ROW_DOMAIN_WITH_FINITE_BOX',"
+        },
+        {
+          "line": 157,
+          "text": "                independently_certified_LB=value, exact_bound=str(total),"
+        },
+        {
+          "line": 158,
+          "text": "                weighted_rhs_exact=str(weighted_rhs), box_correction_exact=str(correction),"
+        },
+        {
+          "line": 159,
+          "text": "                nonzero_dual_rows=len(active), residual_nonzero_columns=nonzero,"
+        },
+        {
+          "line": 160,
+          "text": "                max_exact_residual=str(max_residual), native_objective_used=False,"
+        },
+        {
+          "line": 161,
+          "text": "                native_BestBd_used=False, optimality_claimed=False,"
+        },
+        {
+          "line": 162,
+          "text": "                dual_SHA256=dual_hash,"
+        },
+        {
+          "line": 163,
+          "text": "                source_rows_SHA256=sha256(row_axis.tobytes()).hexdigest(),"
+        },
+        {
+          "line": 164,
+          "text": "                check_wall_seconds=perf_counter()-begin)"
+        },
+        {
+          "line": 165,
+          "text": ""
+        },
+        {
+          "line": 166,
+          "text": ""
+        }
+      ]
+    }
+  },
+  "dates": {
+    "2025-05-01": {
+      "saved_choices": 44,
+      "history_counts": {
+        "U1": 10,
+        "U2": 10,
+        "U3": 10,
+        "U4": 10,
+        "L1": 1,
+        "L2": 1,
+        "L3": 1,
+        "L4": 1
+      },
+      "RMP": [
+        {
+          "Native_status": 11,
+          "SolCount": 0.0,
+          "Native_Runtime": 30.050000190734863,
+          "effective_TimeLimit": 30.0
+        },
+        {
+          "Native_status": 11,
+          "SolCount": 0.0,
+          "Native_Runtime": 30.04700016975403,
+          "effective_TimeLimit": 30.0
+        }
+      ],
+      "saved_missingPi_is_direct_result_not_inferred_from_SolCount": true,
+      "L1_L4_exact_LB": "72763421188672844413290555716948908315532491447013/187072209578355573530071658587684226515959365500928",
+      "L1_L4_exact_dual_SHA": "af4681962dcdbf84e47cab614c00c996cba889e833dcca1d7ebf114b737fa9fd",
+      "L4_not_adopted": true,
+      "positive_LB_events": 1,
+      "saved_frontier_UTC": "2026-10-10T00:53:28.315930+00:00",
+      "historical_Native_prefix_UTC": "2026-10-10T01:02:19.517364+00:00",
+      "current_runtime_or_atomic_cross_file_snapshot_claimed": false
+    },
+    "2025-05-02": {
+      "saved_choices": 36,
+      "history_counts": {
+        "U1": 7,
+        "U2": 11,
+        "U3": 7,
+        "U4": 7,
+        "L1": 1,
+        "L2": 1,
+        "L3": 1,
+        "L4": 1
+      },
+      "RMP": [
+        {
+          "Native_status": 11,
+          "SolCount": 0.0,
+          "Native_Runtime": 30.05400013923645,
+          "effective_TimeLimit": 30.0
+        },
+        {
+          "Native_status": 11,
+          "SolCount": 0.0,
+          "Native_Runtime": 30.103000164031982,
+          "effective_TimeLimit": 30.0
+        }
+      ],
+      "saved_missingPi_is_direct_result_not_inferred_from_SolCount": true,
+      "L1_L4_exact_LB": "33795435769331285107766642720164803281559/87112285931760246646623899502532662132736",
+      "L1_L4_exact_dual_SHA": "f789b14ebfd78cdd184cacf913053129d1182c2beebeeee932bdd6ae2b51cc7c",
+      "L4_not_adopted": true,
+      "positive_LB_events": 1,
+      "saved_frontier_UTC": "2026-10-10T00:46:29.434447+00:00",
+      "historical_Native_prefix_UTC": "2026-10-10T00:59:22.767634+00:00",
+      "current_runtime_or_atomic_cross_file_snapshot_claimed": false
+    },
+    "2025-05-03": {
+      "saved_choices": 28,
+      "history_counts": {
+        "U1": 7,
+        "U2": 9,
+        "U3": 4,
+        "U4": 4,
+        "L1": 1,
+        "L2": 1,
+        "L3": 1,
+        "L4": 1
+      },
+      "RMP": [
+        {
+          "Native_status": 11,
+          "SolCount": 0.0,
+          "Native_Runtime": 30.080999851226807,
+          "effective_TimeLimit": 30.0
+        },
+        {
+          "Native_status": 11,
+          "SolCount": 0.0,
+          "Native_Runtime": 30.05900001525879,
+          "effective_TimeLimit": 30.0
+        }
+      ],
+      "saved_missingPi_is_direct_result_not_inferred_from_SolCount": true,
+      "L1_L4_exact_LB": "6515790807732327584519642679779208308638497789487/46768052394588893382517914646921056628989841375232",
+      "L1_L4_exact_dual_SHA": "dd63481328455d9dce928c1f3d8d2ba3e17ce095cda1853423d3698416939b34",
+      "L4_not_adopted": true,
+      "positive_LB_events": 1,
+      "saved_frontier_UTC": "2026-10-10T01:11:45.336962+00:00",
+      "historical_Native_prefix_UTC": "2026-10-10T01:01:56.319827+00:00",
+      "current_runtime_or_atomic_cross_file_snapshot_claimed": false
+    }
+  },
+  "findings": [
+    "Original L1/L4 eligibility counts and L2/L3 zero gain explain continued UB choices in these saved traces.",
+    "Saved RMP missingPi leads to current-track continue, not a whole-attempt TIME_LIMIT abort.",
+    "Source36 finite Pi, certified improvement and measured performance remain unobserved here."
+  ],
+  "limitations": [
+    "Different saved file timestamps are not an atomic current-state or final Runtime snapshot.",
+    "RMP None packets are direct saved evidence; SolCount0 alone is not a general Pi-availability proof.",
+    "No original function execution, scheduler simulation, checker replay, new tests or model/Native calls.",
+    "No final Global Gap, FULL, Actual, Fresh or date scientific PASS is certified."
+  ],
+  "Native_optimize_calls": 0,
+  "model_constructions": 0,
+  "science_module_imports": 0,
+  "original_functions_executed": 0,
+  "checker_replays": 0,
+  "new_tests": 0,
+  "production_queue_lease_process_or_Git_mutations": 0,
+  "producer": {
+    "path": "D:\\v42_source35_bound_schedule_independent_docs_20261010_01\\review_and_package.py",
+    "bytes": 15419,
+    "sha256": "a7e745ec6f4d1e573c91254137c940120d8fbc991cc97c68cf1a2bb171d268b1"
+  }
+}

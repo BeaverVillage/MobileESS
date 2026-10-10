@@ -1,0 +1,13 @@
+# Current LB display and exclusive observer bind
+
+The former monitor accepted flat exact LB receipts but rejected the existing assembled wrapper. That error hid both current UB and independently certified LB. The observer adapter recognizes only the existing SHA-bound wrapper, exact current request/case/source/attempt, original domain containment, rational dual and implication proof receipts, and exact Frontier bracket/gap. The original scientific certificate reader remains byte exact.
+
+Owner and independent adapter qualification each passed 97 selected tests; final owner and independent host qualification each passed 103 tests. Gurobi Model, retained constructor and optimize entries were denied after protected preloads; attempted model/Native calls were empty. Frozen Source35 1111 files and repo original 1007 source files match their declarations before and after. Root Source36 execution edits are outside these claims.
+
+Windows had two exactly owned legacy observer PIDs, 102084 and 7340, listening on localhost8794. Three accepted HTTP samples belonged to PID102084 while the metadata last writer was PID7340. The host now uses allow_reuse_address=False and sets SO_EXCLUSIVEADDRUSE before bind. Real isolated socket fixtures prove duplicate refusal without metadata replacement, protected ports 8791/8793 and successful HTTP operation.
+
+Helper01 import failure and Helper02 ownership-assumption failure are retained as FAIL records. Their saved receipts state that failure occurred before process/scientific mutation. Helper03 AST review is static evidence only. Actual Helper03 terminated only the two exact owned display hosts and launched the replacement, then exited on psutil.NoSuchProcess while polling stale PID7340 metadata before its replacement wrote metadata. Its actual traceback and exit1 are retained; readonly Helper04 verified the already running replacement, current science workers, Native prefixes and supervisor without further process mutation. Historical earlier owner receipt/XML and single-host helper reviews remain labeled by their original version and do not qualify later source bytes.
+
+Actual display replacement receipt verified with one listener, exact current science worker/request identities, preserved completed Native prefixes and supervisor identity. Replacement display PID: 105976.
+
+This is control/display evidence. No scientific matrix replay, final date PASS, Global Gap 3% achievement, Actual/Fresh acceptance, solver performance improvement or GUI rendering is claimed. Raw JSON/XML/log/helper bytes are copied without normalization. COPY_PROVENANCE records every external/source origin; SHA_INVENTORY, when present, seals all payload files except itself.

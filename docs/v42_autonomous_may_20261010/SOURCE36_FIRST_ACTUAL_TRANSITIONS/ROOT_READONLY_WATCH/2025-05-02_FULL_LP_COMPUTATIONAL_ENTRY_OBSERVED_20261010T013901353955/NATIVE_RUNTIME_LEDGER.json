@@ -1,0 +1,110 @@
+{
+  "wall_ceiling_seconds": null,
+  "Native_ceiling_seconds": 5400,
+  "policy_version": "NATIVE90_V2",
+  "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+  "inclusive_T0": 468150.9138421,
+  "UTC": "2026-10-10T01:39:01.055936+00:00",
+  "wall_seconds": 248.22930609999457,
+  "measured_Native_Runtime": 6.140000104904175,
+  "calls": [
+    {
+      "component": "FEASIBILITY_LP",
+      "track": "M_START",
+      "label": "CURRENT_DAY_STATIONARY_FULL_INTEGER_REPRESENTATIVE_BOUNDS",
+      "requested_seconds": 120.0,
+      "precision_policy": "B2_SEED_RECOVERY_V19",
+      "precision_parameters": {
+        "FeasibilityTol": 1e-09,
+        "OptimalityTol": 1e-09,
+        "NumericFocus": 3,
+        "ScaleFlag": 2
+      },
+      "effective_TimeLimit": 120.0,
+      "started_wall_seconds": 219.72146229998907,
+      "UTC": "2026-10-10T01:38:32.548078+00:00",
+      "status": "FINISHED",
+      "time_limit_policy": "B2_REQUEST_CAPPED_BY_REMAINING_NATIVE",
+      "effective_MIPGap": 0.005,
+      "Native_objective_basis": "ORIGINAL_OBJECTIVE",
+      "error": null,
+      "entered_native": true,
+      "Native_Runtime": 6.140000104904175,
+      "runtime_unavailable": false,
+      "optimize_wall_seconds": 6.405501200002618,
+      "finished_wall_seconds": 226.1269639999955,
+      "SolCount": 1.0,
+      "Native_SolCount": 1.0,
+      "Native_solution_count_callback": "UNKNOWN",
+      "Native_incumbent": 0.6550074996357234,
+      "Native_BestBd": 0.6550074996357234,
+      "Native_Gap": "UNKNOWN",
+      "Native_NodeCount": 0.0,
+      "Native_root_progress": "UNKNOWN",
+      "Native_subphase": "SIMPLEX",
+      "Native_iteration_count": 2356.0,
+      "Native_observation_UTC": "2026-10-10T01:38:38.955690+00:00",
+      "Native_mip_phase": "UNKNOWN",
+      "Native_open_nodes": "UNKNOWN",
+      "Native_gap_source": "MODEL_MIPGAP_NOT_CERTIFIED",
+      "Native_first_incumbent_Runtime": "UNKNOWN",
+      "Native_first_incumbent_UTC": "UNKNOWN",
+      "Native_first_incumbent_source": "UNKNOWN",
+      "Native_Work": 9.839486716088354,
+      "Native_status": 2
+    }
+  ],
+  "costs": [
+    {
+      "kind": "integer_physical_validation",
+      "label": "stationary_dispatch_original_FULL_replay",
+      "track": null,
+      "wall_seconds": 1.4489434999995865,
+      "CPU_seconds": 1.40625,
+      "exclusive_non_native_wall_seconds": 1.4489434999995865,
+      "nested_costs_may_overlap": true
+    },
+    {
+      "kind": "model_preparation",
+      "label": "M_original_model_build",
+      "track": null,
+      "wall_seconds": 231.2205126999761,
+      "CPU_seconds": 225.8125,
+      "exclusive_non_native_wall_seconds": 224.81501149997348,
+      "nested_costs_may_overlap": true
+    },
+    {
+      "kind": "integer_physical_validation",
+      "label": "M_initial_strict_UB",
+      "track": null,
+      "wall_seconds": 1.403141200018581,
+      "CPU_seconds": 1.375,
+      "exclusive_non_native_wall_seconds": 1.403141200018581,
+      "nested_costs_may_overlap": true
+    }
+  ],
+  "admission_failures": [],
+  "inflight": {
+    "component": "P1",
+    "track": "M_LB",
+    "label": "CURRENT_DAY_FULL_LP_EXACT_DUAL",
+    "requested_seconds": 300.0,
+    "precision_policy": "B2_SEED_RECOVERY_V19",
+    "precision_parameters": {
+      "FeasibilityTol": 1e-09,
+      "OptimalityTol": 1e-09,
+      "NumericFocus": 3,
+      "ScaleFlag": 2
+    },
+    "effective_TimeLimit": 300.0,
+    "started_wall_seconds": 248.22925979999127,
+    "UTC": "2026-10-10T01:39:01.055936+00:00",
+    "status": "IN_FLIGHT",
+    "time_limit_policy": "B2_REQUEST_CAPPED_BY_REMAINING_NATIVE",
+    "effective_MIPGap": 0.005
+  },
+  "P2_calls": 0,
+  "historical_costs_reused": false,
+  "prior_attempt": null,
+  "date_runtime_reset": false
+}

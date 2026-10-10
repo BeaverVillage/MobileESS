@@ -1,0 +1,146 @@
+{
+  "schema": "V42_CONTROLLER_V27_REAL_WINDOWS_QUEUE_CONTENTION_REVIEW",
+  "PASS": true,
+  "UTC": "2026-10-09T19:20:24.509670+00:00",
+  "retirement": {
+    "PASS": true,
+    "real_second_process_lock_owner": {
+      "PID": 48728,
+      "created": 1791573624.2156396,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-c",
+        "import sys; from pathlib import Path; from v42_autonomous.recovery import os_lock; \nwith os_lock(Path(sys.argv[1])):\n print(\"REAL_WINDOWS_LOCK_HELD\",flush=True); sys.stdin.buffer.read(1)",
+        "D:\\v42_controller_lock_review27_20261010_02\\verified_PASS_fixture\\RECOVERY_QUEUE.lock"
+      ]
+    },
+    "contended_refresh_cp_dates_workers_history_unchanged": true,
+    "contended_refresh_queue_bytes_unchanged": true,
+    "fallback_queue_read_never_called": true,
+    "next_uncontended_refresh_retired_only_verified_unstarted_ready": true,
+    "verified_PASS_fixture_is_synthetic_control_contract_only": true
+  },
+  "cycle": {
+    "PASS": true,
+    "real_second_process_lock_owner": {
+      "PID": 77968,
+      "created": 1791573624.3685627,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-c",
+        "import sys; from pathlib import Path; from v42_autonomous.recovery import os_lock; \nwith os_lock(Path(sys.argv[1])):\n print(\"REAL_WINDOWS_LOCK_HELD\",flush=True); sys.stdin.buffer.read(1)",
+        "D:\\v42_controller_lock_review27_20261010_02\\live_worker_identity_cycle\\RECOVERY_QUEUE.lock"
+      ]
+    },
+    "actual_observed_running_workers": {
+      "B2/2025-05-01": {
+        "PID": 69164,
+        "created": 1791573503.7264671,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_autonomous_b2.worker",
+          "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\request.json"
+        ],
+        "request": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\request.json",
+        "worker_slot": 3,
+        "arm": "B2",
+        "day": "2025-05-01",
+        "source_commit": "24fad8f72ff03ae29f3992c06b0b84a07d1f6bdd",
+        "source_SHA": "889e3508e3d267a648251ecf48f143d9288adaca8e2f208b15a07d326485a98f",
+        "recovery_queue_id": "631d2084553042e4a9bb7cbe83b6699e"
+      },
+      "B2/2025-05-02": {
+        "PID": 106548,
+        "created": 1791573555.3943748,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_autonomous_b2.worker",
+          "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\request.json"
+        ],
+        "request": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\request.json",
+        "worker_slot": 1,
+        "arm": "B2",
+        "day": "2025-05-02",
+        "source_commit": "24fad8f72ff03ae29f3992c06b0b84a07d1f6bdd",
+        "source_SHA": "889e3508e3d267a648251ecf48f143d9288adaca8e2f208b15a07d326485a98f",
+        "recovery_queue_id": "2478684753034442ae188976ae1718ee"
+      },
+      "B2/2025-05-03": {
+        "PID": 98068,
+        "created": 1791573615.4571536,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_autonomous_b2.worker",
+          "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\request.json"
+        ],
+        "request": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\request.json",
+        "worker_slot": 2,
+        "arm": "B2",
+        "day": "2025-05-03",
+        "source_commit": "24fad8f72ff03ae29f3992c06b0b84a07d1f6bdd",
+        "source_SHA": "889e3508e3d267a648251ecf48f143d9288adaca8e2f208b15a07d326485a98f",
+        "recovery_queue_id": "e5fdaf0681794a7fbfc78fc36e5a02eb"
+      }
+    },
+    "actual_request_records": [
+      {
+        "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\request.json",
+        "sha256": "3e8e263fcb68f42dfd827933af4c3ca46d2d018f49d190affb80ba1d405150e0",
+        "bytes": 1809
+      },
+      {
+        "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\request.json",
+        "sha256": "29ab18e677d4305c851d619fd4da677f4cc12777b4daa34f2325274d6b15cd4c",
+        "bytes": 1809
+      },
+      {
+        "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\request.json",
+        "sha256": "af9d7a2b99c4e954da7aa2d898b132f8ef78d664df998ea7a000c07cf9830f0d",
+        "bytes": 1809
+      }
+    ],
+    "actual_worker_PIDs_commands_creation_identity_preserved": true,
+    "copied_cycle_dates_worker_state_history_unchanged": true,
+    "original_live_root_not_mutated_by_audit": true,
+    "new_worker_launch_denied": true,
+    "worker_native_ledger_runtime_may_progress_independently": true
+  },
+  "control_sources": {
+    "v42_autonomous/supervisor.py": {
+      "path": "D:\\MobileESS_v42_autonomous\\v42_autonomous\\supervisor.py",
+      "sha256": "b4bcaa86cfe908e333b33f25b86f105038eef080f58826e83f4914af338a3e16",
+      "bytes": 33411
+    },
+    "v42_autonomous/recovery.py": {
+      "path": "D:\\MobileESS_v42_autonomous\\v42_autonomous\\recovery.py",
+      "sha256": "6295be30c006e08716416f992a670abcdb9cd3628d8d9d1e3a11602748ac4d25",
+      "bytes": 60717
+    }
+  },
+  "scientific_worker_source_unchanged": true,
+  "Native_optimize_calls": 0,
+  "worker_starts_or_stops": 0,
+  "source_script": {
+    "path": "D:\\MobileESS_v42_autonomous\\tmp\\audit_v27_controller_queue_lock.py",
+    "sha256": "2775ec278aeed35c4c0de48ad2c4f6be98b64c66d081451cc8dea7b32bdae24c",
+    "bytes": 5403
+  }
+}

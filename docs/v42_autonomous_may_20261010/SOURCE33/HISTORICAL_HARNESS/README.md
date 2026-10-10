@@ -1,0 +1,5 @@
+The original first F1-only harness JUnit record contains117 tests:116 passed and1 failed, with no errors or skips. It was recorded at2026-10-10T07:22:01.938287+09:00 and took6.527 seconds. Its XML is preserved byte-for-byte from `D:\v42_source33_cli_identity_review_20261010_01\f1_initial.xml`, SHA `cacad57c34bc0d64a87cec8ba4b6a79cd8bd2c6eeee13b406f6e8aa9aa4728d9`.
+
+The failed lazy-hook test imported the protected RMP module after the model-denial fixture had already replaced `gp.Model` with a function. Static lookup of its optimize descriptor raised AttributeError. This is the recorded harness import-order failure. The later protected-preload214-test owner and independent suites are separate accepted runs.
+
+This direct initial pytest run has no separate JSON receipt, saved runner or disk stdout, and no complete1105-file source start-end seal. Do not project the final214-suite source or Native/model proof backward onto this initial117-test run. No missing evidence is synthesized here, and the failed result is not relabeled as success.

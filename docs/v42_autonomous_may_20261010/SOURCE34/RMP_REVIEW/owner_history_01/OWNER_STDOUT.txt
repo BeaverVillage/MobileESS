@@ -1,0 +1,17 @@
+.....F.................................................................. [ 29%]
+........................................................................ [ 59%]
+........................................................................ [ 88%]
+............................                                             [100%]
+================================== FAILURES ===================================
+___________ test_exact_own_output_paths_and_original_source_guards ____________
+tests\test_v42_autonomous_b2.py:138: in test_exact_own_output_paths_and_original_source_guards
+    assert r['final']['_under'](point,original_root,'PROTECTED_SOURCE')==final_verify._under(
+v42_autonomous_b2\worker.py:75: in scoped_under
+    return original_under(path,parent,label)
+v42_m1_hybrid\final_verify.py:35: in _under
+    raise ValueError('HYBRID_FINAL_D_PATH_REQUIRED:'+label)
+E   ValueError: HYBRID_FINAL_D_PATH_REQUIRED:PROTECTED_SOURCE
+- generated xml file: D:\v42_rmp_current_start34_tests_20261010_01\SOURCE34_NATIVE_DENIED_TEST_RESULT.xml -
+=========================== short test summary info ===========================
+FAILED tests/test_v42_autonomous_b2.py::test_exact_own_output_paths_and_original_source_guards
+1 failed, 243 passed in 32.50s

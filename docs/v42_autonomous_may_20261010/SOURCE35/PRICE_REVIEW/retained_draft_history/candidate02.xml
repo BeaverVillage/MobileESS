@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="42" time="3.756" timestamp="2026-10-10T08:14:59.900676+09:00" hostname="JaewonKim"><testcase classname="test_price_seed" name="test_negative_valid_nonzero_seed_only_changes_existing_price_input" time="0.095" /><testcase classname="test_price_seed" name="test_unapproved_existing_calls_keep_original_price_identity[L1-MILP_AND_LP]" time="0.066" /><testcase classname="test_price_seed" name="test_unapproved_existing_calls_keep_original_price_identity[L2-LP_ONLY]" time="0.063" /><testcase classname="test_price_seed" name="test_unapproved_existing_calls_keep_original_price_identity[L3-LP_ONLY]" time="0.063" /><testcase classname="test_price_seed" name="test_unapproved_existing_calls_keep_original_price_identity[L4-LP_ONLY]" time="0.065" /><testcase classname="test_price_seed" name="test_unapproved_existing_calls_keep_original_price_identity[OTHER-LP_ONLY]" time="0.066" /><testcase classname="test_price_seed" name="test_l4_existing_milp_lp_call_can_use_price_seed" time="0.091" /><testcase classname="test_price_seed" name="test_adopted_stronger_or_nonzero_certified_dual_is_never_overwritten[dual0-lb0]" time="0.062" /><testcase classname="test_price_seed" name="test_adopted_stronger_or_nonzero_certified_dual_is_never_overwritten[dual1-lb1]" time="0.066" /><testcase classname="test_price_seed" name="test_adopted_stronger_or_nonzero_certified_dual_is_never_overwritten[dual2-lb2]" time="0.067" /><testcase classname="test_price_seed" name="test_missing_admitted_state_falls_back_without_a_candidate[scope]" time="0.068" /><testcase classname="test_price_seed" name="test_missing_admitted_state_falls_back_without_a_candidate[state]" time="0.067" /><testcase classname="test_price_seed" name="test_missing_admitted_state_falls_back_without_a_candidate[pi]" time="0.096"><failure message="FileExistsError: [Errno 17] File exists: 'D:\\v42_f1_price_seed35_candidate_20261010_01\\pytest02\\test_missing_admitted_state_fa2\\campaign\\dates\\B2\\2025-05-01\\attempts\\new_attempt\\output\\F1_SAME_ATTEMPT_STATE.npz'">ready = namespace(code=WindowsPath('D:/v42_f1_price_seed35_candidate_20261010_01/pytest02/test_missing_admitted_state_fa2/code...ng_rows=array([0])), frontier=namespace(lb=Fraction(0, 1)), runner=&lt;price_seed.PriceSeed object at 0x00000210FFBDA210&gt;)
+absence = 'pi'
+
+    @pytest.mark.parametrize('absence',['scope','state','pi'])
+    def test_missing_admitted_state_falls_back_without_a_candidate(ready,absence):
+        if absence=='scope':
+            ready.runner.get_f1_scope=lambda:None
+            ready.runner.owner_seals['get_f1_scope']=p._callable_seal(ready.runner.get_f1_scope)
+        elif absence=='state':ready.scope.state=None
+        else:
+            # Scope forbids mutable array metadata; a genuinely admitted absent Pi
+            # is covered by the original51 tests. Recreate that legitimate state.
+            ready.scope=f1_state.Scope(ready.request,ready.code,writer=legacy.write)
+&gt;           legacy.capture(ready,model=legacy.Model(ready.case,pi=None));legacy.select(ready,dual={'0':'10'})
+
+D:\v42_f1_price_seed35_candidate_20261010_01\test_price_seed.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\test_v42_autonomous_b2_f1_state.py:140: in capture
+    return env.scope.capture(original_f1(env,**kwargs),env.case,env.budget,
+v42_autonomous_b2\f1_state.py:361: in capture
+    with packet_path.open('xb') as stream:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('D:/v42_f1_price_seed35_candidate_20261010_01/pytest02/test_missing_admitted_state_fa2/campaign/dates/B2/2025-05-01/attempts/new_attempt/output/F1_SAME_ATTEMPT_STATE.npz')
+mode = 'xb', buffering = -1, encoding = None, errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+E       FileExistsError: [Errno 17] File exists: 'D:\\v42_f1_price_seed35_candidate_20261010_01\\pytest02\\test_missing_admitted_state_fa2\\campaign\\dates\\B2\\2025-05-01\\attempts\\new_attempt\\output\\F1_SAME_ATTEMPT_STATE.npz'
+
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: FileExistsError</failure></testcase><testcase classname="test_price_seed" name="test_current_state_source_model_ledger_and_domain_drift_denied_before_delegate[&lt;lambda&gt;0]" time="0.068" /><testcase classname="test_price_seed" name="test_current_state_source_model_ledger_and_domain_drift_denied_before_delegate[&lt;lambda&gt;1]" time="0.074" /><testcase classname="test_price_seed" name="test_current_state_source_model_ledger_and_domain_drift_denied_before_delegate[&lt;lambda&gt;2]" time="0.068" /><testcase classname="test_price_seed" name="test_current_state_source_model_ledger_and_domain_drift_denied_before_delegate[&lt;lambda&gt;3]" time="0.074" /><testcase classname="test_price_seed" name="test_current_state_source_model_ledger_and_domain_drift_denied_before_delegate[&lt;lambda&gt;4]" time="0.070" /><testcase classname="test_price_seed" name="test_current_state_source_model_ledger_and_domain_drift_denied_before_delegate[&lt;lambda&gt;5]" time="0.073" /><testcase classname="test_price_seed" name="test_current_state_source_model_ledger_and_domain_drift_denied_before_delegate[&lt;lambda&gt;6]" time="0.073" /><testcase classname="test_price_seed" name="test_current_state_source_model_ledger_and_domain_drift_denied_before_delegate[&lt;lambda&gt;7]" time="0.072" /><testcase classname="test_price_seed" name="test_current_state_source_model_ledger_and_domain_drift_denied_before_delegate[&lt;lambda&gt;8]" time="0.069" /><testcase classname="test_price_seed" name="test_current_selection_authority_must_remain_zero_and_same_case[case_sha-foreign]" time="0.088" /><testcase classname="test_price_seed" name="test_current_selection_authority_must_remain_zero_and_same_case[PASS-False]" time="0.088" /><testcase classname="test_price_seed" name="test_current_selection_authority_must_remain_zero_and_same_case[selected-CURRENT_ATTEMPT_F1_ORIGINAL_ROW_PI]" time="0.089" /><testcase classname="test_price_seed" name="test_current_selection_authority_must_remain_zero_and_same_case[maximum_exact_bound-1]" time="0.091" /><testcase classname="test_price_seed" name="test_original_repaired_candidate_must_match_previous_full_domain_checker[exact_bound--1]" time="0.090" /><testcase classname="test_price_seed" name="test_original_repaired_candidate_must_match_previous_full_domain_checker[dual_SHA256-invented]" time="0.089" /><testcase classname="test_price_seed" name="test_original_repaired_candidate_must_match_previous_full_domain_checker[case_sha-foreign]" time="0.086" /><testcase classname="test_price_seed" name="test_original_repaired_candidate_must_match_previous_full_domain_checker[PASS-False]" time="0.087" /><testcase classname="test_price_seed" name="test_no_import_of_saved_state_from_another_scope" time="0.067" /><testcase classname="test_price_seed" name="test_own_price_path_remains_in_current_output" time="0.061" /><testcase classname="test_price_seed" name="test_namespace_alias_change_is_denied_before_delegate" time="0.062" /><testcase classname="test_price_seed" name="test_in_place_original_code_change_is_denied_before_delegate" time="0.060"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'ORIGINAL_CODE_DRIFT'&#10; Input: 'PRICE_SEED_SCOPE_DELEGATE_DRIFT:original'">ready = namespace(code=WindowsPath('D:/v42_f1_price_seed35_candidate_20261010_01/pytest02/test_in_place_original_code_ch0/code...ng_rows=array([0])), frontier=namespace(lb=Fraction(0, 1)), runner=&lt;price_seed.PriceSeed object at 0x00000210FFD62550&gt;)
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000210FFF95410&gt;
+
+    def test_in_place_original_code_change_is_denied_before_delegate(ready,monkeypatch):
+        monkeypatch.setattr(ready.original_lp,'__code__',ready.original_lp.__code__.replace(co_name='mutated_delegate'))
+&gt;       with pytest.raises(PermissionError,match='ORIGINAL_CODE_DRIFT'):call(ready)
+
+D:\v42_f1_price_seed35_candidate_20261010_01\test_price_seed.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+D:\v42_f1_price_seed35_candidate_20261010_01\test_price_seed.py:54: in call
+    return e.runner(e.case,e.decomp,{} if dual is None else dual,e.budget,e.frontier,
+D:\v42_f1_price_seed35_candidate_20261010_01\price_seed.py:186: in __call__
+    self._integrity()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;price_seed.PriceSeed object at 0x00000210FFD62550&gt;
+
+    def _integrity(self):
+        if self.entered:raise PermissionError('PRICE_SEED_REENTRANT_CALL_FORBIDDEN')
+        if _digest(self.request)!=self.request_digest or f1_state._record(__file__)!=self.adapter:
+            raise PermissionError('PRICE_SEED_REQUEST_OR_ADAPTER_SOURCE_DRIFT')
+        for name,seal in self.owner_seals.items():
+&gt;           if not _same_callable(getattr(self,name),seal):raise PermissionError('PRICE_SEED_SCOPE_DELEGATE_DRIFT:'+name)
+E           PermissionError: PRICE_SEED_SCOPE_DELEGATE_DRIFT:original
+
+D:\v42_f1_price_seed35_candidate_20261010_01\price_seed.py:118: PermissionError
+
+During handling of the above exception, another exception occurred:
+
+ready = namespace(code=WindowsPath('D:/v42_f1_price_seed35_candidate_20261010_01/pytest02/test_in_place_original_code_ch0/code...ng_rows=array([0])), frontier=namespace(lb=Fraction(0, 1)), runner=&lt;price_seed.PriceSeed object at 0x00000210FFD62550&gt;)
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000210FFF95410&gt;
+
+    def test_in_place_original_code_change_is_denied_before_delegate(ready,monkeypatch):
+        monkeypatch.setattr(ready.original_lp,'__code__',ready.original_lp.__code__.replace(co_name='mutated_delegate'))
+&gt;       with pytest.raises(PermissionError,match='ORIGINAL_CODE_DRIFT'):call(ready)
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'ORIGINAL_CODE_DRIFT'
+E        Input: 'PRICE_SEED_SCOPE_DELEGATE_DRIFT:original'
+
+D:\v42_f1_price_seed35_candidate_20261010_01\test_price_seed.py:146: AssertionError</failure></testcase><testcase classname="test_price_seed" name="test_bound_wrapper_delegate_change_is_denied" time="0.062" /><testcase classname="test_price_seed" name="test_no_reroute_to_a_different_scope_after_an_actual_call" time="0.094" /><testcase classname="test_price_seed" name="test_original_failed_delegation_is_not_retried_and_accounting_is_preserved" time="0.100" /><testcase classname="test_price_seed" name="test_original_result_and_frontier_publish_semantics_are_forwarded_exactly" time="0.087" /><testcase classname="test_price_seed" name="test_exact_original_row_normalization_refuses_bad_axis_or_nonfinite[bad0]" time="0.000" /><testcase classname="test_price_seed" name="test_exact_original_row_normalization_refuses_bad_axis_or_nonfinite[bad1]" time="0.001" /><testcase classname="test_price_seed" name="test_exact_original_row_normalization_refuses_bad_axis_or_nonfinite[bad2]" time="0.000" /><testcase classname="test_price_seed" name="test_exact_original_row_normalization_refuses_bad_axis_or_nonfinite[bad3]" time="0.001" /></testsuite></testsuites>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="17" time="1.427" timestamp="2026-10-10T07:30:49.999950+09:00" hostname="JaewonKim"><testcase classname="tests.test_v42_autonomous_supervisor" name="test_duplicate_startup_immutable_event_preserves_public_error_cp_and_worker_evidence" time="0.066" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_only_canonical_startup_lock_error_can_use_duplicate_rejection[wrong_lock]" time="0.005" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_only_canonical_startup_lock_error_can_use_duplicate_rejection[wrong_type]" time="0.005" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_only_canonical_startup_lock_error_can_use_duplicate_rejection[unsupported_errno]" time="0.007" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_only_canonical_startup_lock_error_can_use_duplicate_rejection[no_cause]" time="0.005" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_unproven_or_stalled_owner_never_silences_startup_lock_failure[stale_heartbeat]" time="0.024" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_unproven_or_stalled_owner_never_silences_startup_lock_failure[future_heartbeat]" time="0.022" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_unproven_or_stalled_owner_never_silences_startup_lock_failure[different_created]" time="0.026" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_unproven_or_stalled_owner_never_silences_startup_lock_failure[different_command]" time="0.027" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_unproven_or_stalled_owner_never_silences_startup_lock_failure[different_cwd]" time="0.026" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_unproven_or_stalled_owner_never_silences_startup_lock_failure[different_heartbeat_owner]" time="0.026" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_unproven_or_stalled_owner_never_silences_startup_lock_failure[dead_owner]" time="0.025" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_startup_owner_proof_reads_remain_strict[missing]" time="0.015" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_startup_owner_proof_reads_remain_strict[corrupt]" time="0.014" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_startup_owner_proof_reads_remain_strict[access_denied]" time="0.015" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_lockbusy_inside_acquired_controller_body_is_not_duplicate_startup" time="0.003" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_actual_windows_owned_supervisor_mutex_duplicate_keeps_error_cp_and_native_fixtures" time="0.474"><failure message="Failed: ISOLATED_OWNER_EXITED:1">tmp_path = WindowsPath('D:/v42_controller_duplicate_startup_repair_20261010_01/pytest_targeted/test_actual_windows_owned_supe0')
+
+    def test_actual_windows_owned_supervisor_mutex_duplicate_keeps_error_cp_and_native_fixtures(tmp_path):
+        import os,sys,json,time,subprocess
+        if sys.platform!='win32':pytest.skip('real Windows supervisor mutex required')
+        repo=Path(s.__file__).resolve().parents[1]
+        site=tmp_path/'denial_site';site.mkdir()
+        attempts=tmp_path/'CHILD_NATIVE_ENTRY_ATTEMPTS.json';installed=tmp_path/'CHILD_NATIVE_DENIAL_INSTALLED.json'
+        site_code=("import gurobipy as gp\nfrom pathlib import Path\nimport json\n"
+            "def denied(*args,**kwargs):\n    Path("+repr(str(attempts))+").write_text('DENIED ENTRY',encoding='utf-8')\n    raise AssertionError('ISOLATED_CHILD_NATIVE_MODEL_ENTRY_DENIED')\n"
+            "gp.Model.__init__=denied\ngp.Model.optimize=denied\nPath("+repr(str(installed))+").write_text(json.dumps({'Model_init_denied':True,'Model_optimize_denied':True}),encoding='utf-8')\n")
+        (site/'sitecustomize.py').write_text(site_code,encoding='utf-8')
+        s.atomic(tmp_path/'AUTONOMOUS_MANIFEST.json',dict(B2_workers=3,B3_workers=1))
+        cp=checkpoint()
+        for row in cp['dates'].values():row['status']='PASS' # Operational fixture, no scientific PASS evidence.
+        s.atomic(tmp_path/'SUPERVISOR_STATE.json',cp)
+        prior_error=tmp_path/'SUPERVISOR_ERROR.json';s.atomic(prior_error,dict(error='prior true error fixture',Native_Runtime=None))
+        evidence=[prior_error]
+        for day in DAYS[:3]:
+            folder=tmp_path/'dates/B2'/day/'attempts/isolated_fixture';s.atomic(folder/'request.json',dict(day=day,fixture_only=True))
+            s.atomic(folder/'NATIVE_RUNTIME_LEDGER.json',dict(fixture_only=True,calls=[],no_real_Native_measurements=True))
+            evidence.extend([folder/'request.json',folder/'NATIVE_RUNTIME_LEDGER.json'])
+        env=dict(os.environ);env['PYTHONPATH']=str(site)+os.pathsep+str(repo);env['PYTHONDONTWRITEBYTECODE']='1'
+        command=[sys.executable,'-B','-X','utf8','-m','v42_autonomous.supervisor',str(tmp_path)]
+        child=None;expected_created=None
+        with (tmp_path/'child_stdout.log').open('wb') as out,(tmp_path/'child_stderr.log').open('wb') as err:
+            try:
+                child=subprocess.Popen(command,cwd=repo,env=env,stdin=subprocess.DEVNULL,stdout=out,stderr=err,creationflags=subprocess.CREATE_NO_WINDOW)
+                for _ in range(500):
+&gt;                   if child.poll() is not None:pytest.fail('ISOLATED_OWNER_EXITED:'+str(child.returncode))
+E                   Failed: ISOLATED_OWNER_EXITED:1
+
+tests\test_v42_autonomous_supervisor.py:530: Failed</failure></testcase></testsuite></testsuites>

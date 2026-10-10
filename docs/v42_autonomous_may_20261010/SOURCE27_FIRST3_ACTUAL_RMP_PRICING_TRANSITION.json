@@ -1,0 +1,677 @@
+{
+  "schema": "V42_SOURCE27_ACTUAL_RMP_PRICING_TRANSITION_READ_ONLY_AUDIT_V1",
+  "UTC": "2026-10-09T19:45:49.953080+00:00",
+  "worker_execution_SHA": "889e3508e3d267a648251ecf48f143d9288adaca8e2f208b15a07d326485a98f",
+  "scope": "ACTUAL_L2_RMP_CONSTRUCTION_NATIVE_EXECUTION_AND_INDEPENDENT_PRICING_CHECKS; NOT_FINAL_DATE_PASS",
+  "all_three_transition_and_certificate_checks_verified": true,
+  "final_daily_PASS_claimed": false,
+  "new_Global_LB_gain_claimed": false,
+  "Native_optimize_calls_by_auditor": 0,
+  "model_constructions_by_auditor": 0,
+  "full_matrix_or_raw_point_cases_loaded_by_auditor": 0,
+  "worker_stop_restart_or_campaign_control_mutations_by_auditor": 0,
+  "worker_independent_witness_receipts_audited_without_heavy_replay": true,
+  "actual_receipt_snapshot": {
+    "path": "D:\\MobileESS_v42_autonomous\\tmp\\v27_rmp_actual_watch\\LATEST_SNAPSHOT.json",
+    "bytes": 44709,
+    "sha256": "debd7586b8391c8fd54be2e43559943370663940bde61010419f0ac7b06a5e1e"
+  },
+  "cases": {
+    "2025-05-01": {
+      "attempt_id": "repair_b2_v27_01_s3",
+      "case_sha": "aefcfdcc1931e3a85e4a77be8d26cc2ee4db80492bdb3067a33b273c98283efd",
+      "flags": {
+        "actual_request_source27": true,
+        "RMP_native_finished_positive_runtime_no_error": true,
+        "original_matrix_RHS_domain_objective_transport_worker_PASS": true,
+        "same_case_RMP_projection_pricing_certificate": true,
+        "worker_independent_projection_replay_PASS": true,
+        "producer_decomposition_sum_matches_independent_full_exact_bound": true,
+        "worker_independent_Global_LB_check_PASS": true,
+        "closure_checker_PASS_with_no_closure_claim": true,
+        "negative_candidate_not_adopted_frontier_zero": true,
+        "historical25_guard_failure_zero_Runtime_preserved": true
+      },
+      "Source27_RMP": {
+        "native": {
+          "label": "ONE_RESTRICTED_MASTER",
+          "component": "P1",
+          "track": "RMP",
+          "status": "FINISHED",
+          "Native_status": 3,
+          "Native_Runtime": 2.738999843597412,
+          "SolCount": 0.0,
+          "Native_SolCount": 0.0,
+          "error": null,
+          "entered_native": true,
+          "runtime_unavailable": false,
+          "requested_seconds": 30
+        },
+        "dual_status": "FINITE_ORIGINAL_ROW_DUAL_AVAILABLE_NOT_NATIVE_OBJECTIVE_PROOF",
+        "full_original_dual_nonzero": 1249,
+        "maximum_abs_original_Pi": 637666133668.9236,
+        "invalid_original_inequality_multiplier_signs_zeroed": 0,
+        "convexity_duals": {
+          "MESS01": "0",
+          "MESS02": "-818357833166203/32768",
+          "MESS03": "922558275924861/65536",
+          "MESS04": "3327497198319513/131072"
+        },
+        "column_count_by_unit": {
+          "MESS01": 1,
+          "MESS02": 1,
+          "MESS03": 1,
+          "MESS04": 1
+        },
+        "rows": 564329,
+        "columns": 61776,
+        "wall_seconds": 10.123245500028133,
+        "Native_objective_diagnostic": null
+      },
+      "transport": {
+        "schema": "V42_B2_RMP_EXACT_POWER_OF_TWO_ROWS_V25",
+        "PASS": true,
+        "Native_optimize_calls": 0,
+        "original_rows": 564329,
+        "original_columns": 61776,
+        "original_nnz": 6874437,
+        "scaled_rows": 3,
+        "tiny_nonzero_coefficients_preserved": 3,
+        "maximum_row_scale_exponent": 20,
+        "maximum_absolute_scaled_coefficient": 392.3141121613113,
+        "minimum_absolute_original_coefficient": 1.0054249174680861e-18,
+        "matrix_and_RHS_exactly_reversible": true,
+        "row_senses_unchanged": true,
+        "variable_domain_and_objective_unchanged": true,
+        "original_FULL_model_rescaled": false,
+        "coefficients_dropped_or_clipped": 0,
+        "dual_pullback": "original_Pi = Native_Pi * 2**row_exponent",
+        "restricted_master_objective_is_Global_LB": false
+      },
+      "projection": {
+        "PASS": true,
+        "derived_columns": 48547,
+        "schema": "V42_B2_PRICING_FULL_CASE_PROJECTION_BOX_V26",
+        "case_sha": "aefcfdcc1931e3a85e4a77be8d26cc2ee4db80492bdb3067a33b273c98283efd",
+        "source_matrix_sha256": "4208fb565b604245319974463282a010aaff38f3c9c11027719be9579f4f7226",
+        "source_domain_sha256": "f46d93c8d1a3be15f745087104240e0d46a07e81ed995d03e006cdd5482c9b12",
+        "independent_replay": {
+          "PASS": true,
+          "checked_original_equality_implications": 48547,
+          "all_original_feasible_points_contained": true
+        },
+        "original_model_and_block_bounds_mutated": false,
+        "unit_boxes_are_original": true,
+        "nonunit_scope": "PROJECTION_OF_GLOBALLY_EXTENDABLE_ORIGINAL_FEASIBLE_POINTS",
+        "standalone_nonunit_domain_bound_or_closure_claimed": false
+      },
+      "pricing_Native_Runtime": 46.29299974441528,
+      "L2_candidate_Global_LB": -3157189111588.8936,
+      "exact_L2_candidate_Global_LB": "-500276584042461426590720218056700103809047/158456325028528675187087900672",
+      "candidate_adopted": false,
+      "certified_frontier_Global_LB_at_L2": 0.0,
+      "closure_status": "FULL_PRICING_CLOSURE_NOT_PROVEN",
+      "full_closure_proven": false,
+      "L2_wall_costs": {
+        "exact_price_build": {
+          "wall_seconds": 2.468155200011097,
+          "CPU_seconds": 2.375,
+          "exclusive_non_native_wall_seconds": 2.468155200011097
+        },
+        "full96_prices": {
+          "wall_seconds": 119.86802539997734,
+          "CPU_seconds": 115.59375,
+          "exclusive_non_native_wall_seconds": 73.09607279993361
+        },
+        "independent_exact_Global_LB": {
+          "wall_seconds": 11.754810200014617,
+          "CPU_seconds": 11.46875,
+          "exclusive_non_native_wall_seconds": 11.754810200014617
+        }
+      },
+      "original_pricing_wall_seconds": 62.99223000003258,
+      "scoped_projection_initialization_extra_wall_seconds": 56.875795399944764,
+      "Native_log_selected_lines": [
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\0010_RMP_P1_NATIVE.log",
+          "bytes": 1458,
+          "selected_tail": [
+            "Optimize a model with 564329 rows, 61776 columns and 6874437 nonzeros (Min)",
+            "  Matrix range     [1e-13, 4e+02]",
+            "  Objective range  [1e+00, 1e+00]",
+            "  Bounds range     [1e+00, 2e+02]",
+            "  RHS range        [2e-24, 1e+06]",
+            "Warning: Model contains large matrix coefficient range",
+            "Presolve: All rows and columns removed",
+            "Iteration    Objective       Primal Inf.    Dual Inf.      Time",
+            "       0    5.6420789e-01   2.113807e-07   1.124793e+09      2s",
+            "Warning: very big Kappa = 9.95782e+12, try parameter NumericFocus",
+            "Solved in 1 iterations and 2.74 seconds (3.40 work units)",
+            "Infeasible model"
+          ]
+        }
+      ],
+      "historical_Source25": {
+        "worker_source_SHA": "f9264381ff7cbe5a6905e397719b1ceb368d04914820225672e188c0071a2e89",
+        "error": {
+          "error": "PermissionError: V19_NATIVE_MODEL_SCOPE_REQUIRED",
+          "wall_seconds": 1187.6808608000283
+        },
+        "RMP": {
+          "label": "ONE_RESTRICTED_MASTER",
+          "component": "P1",
+          "track": "RMP",
+          "status": "FAILED",
+          "Native_status": 1,
+          "Native_Runtime": 0.0,
+          "SolCount": 0.0,
+          "Native_SolCount": 0.0,
+          "error": "V19_NATIVE_MODEL_SCOPE_REQUIRED",
+          "entered_native": true,
+          "runtime_unavailable": false,
+          "requested_seconds": 30
+        },
+        "entered_native_true_was_guarded_attempt_not_completed_raw_optimize": true
+      },
+      "artifact_receipts": [
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\request.json",
+          "bytes": 1809,
+          "sha256": "3e8e263fcb68f42dfd827933af4c3ca46d2d018f49d190affb80ba1d405150e0"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\output\\005_L2_00_MASTER\\RMP_NATIVE_ROW_SCALING.json",
+          "bytes": 759,
+          "sha256": "86ca5f18d61d7d0970cc43291de0ca1018afa4de5e96bd389c66b6a410a36294"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\output\\005_L2_00_MASTER\\RMP_RESULT.json",
+          "bytes": 13986263,
+          "sha256": "be3f15e737221844c16247c97fcec3b348771be4d31eb6eeae07166dcb6bac1e"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\output\\005_L2_00\\PRICING_RESULT.json",
+          "bytes": 32525,
+          "sha256": "a4fea80a515016d2d4026f25bb4e5fd0df6dffd7b7d6317515837bf6c1f8af01"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\output\\005_L2_00\\LB_RESULT.json",
+          "bytes": 948,
+          "sha256": "7ce81fd30fde7ca6a42405f5b8315e58fd8d146b995557161b8f5ab6bc01022c"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\output\\005_L2_00\\INDEPENDENT_GLOBAL_LB_CERTIFICATE.json",
+          "bytes": 4502,
+          "sha256": "ede4705151a84af48484d2c2d62b9a9557939075dfbde819f5025ae83f57ba92"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\output\\005_L2_00\\INDEPENDENT_MISSING_COLUMN_CERTIFICATE.json",
+          "bytes": 5226,
+          "sha256": "4cd7525ad284bb4ab07b2130b104bf2b9dd830f8564a0935af82f4a67904b9bb"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\output\\005_L2_00\\FULL_CASE_PRICING_BOX_PROOF.json",
+          "bytes": 13245408,
+          "sha256": "023287ea5e7e4f069b617a434fbe0902fc326b18fa486057d96e50a3bc629f16"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v25_01_s3\\output\\M_ADAPTIVE_ERROR.json",
+          "bytes": 104,
+          "sha256": "ae685ca206bb6eeaac3ab43695e5e20713613082f72e9883ee8ba4f6f1cd69a2"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v25_01_s3\\NATIVE_RUNTIME_LEDGER.json",
+          "bytes": 25518,
+          "sha256": "2b26f34de069202f21ebedb71e5dec777ee0cebb9b247fe124790496d089b490"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v27_01_s3\\0010_RMP_P1_NATIVE.log",
+          "bytes": 1458,
+          "sha256": "7e1fec75e4f028f94e11f3b2b22611d86d3424fdafec342bfe876ae845a42222"
+        }
+      ]
+    },
+    "2025-05-02": {
+      "attempt_id": "repair_b2_v27_01_s1",
+      "case_sha": "359b919b4a00ebe4603a8b0613acd925eef2dae72a63d63ad22028478c5078ee",
+      "flags": {
+        "actual_request_source27": true,
+        "RMP_native_finished_positive_runtime_no_error": true,
+        "original_matrix_RHS_domain_objective_transport_worker_PASS": true,
+        "same_case_RMP_projection_pricing_certificate": true,
+        "worker_independent_projection_replay_PASS": true,
+        "producer_decomposition_sum_matches_independent_full_exact_bound": true,
+        "worker_independent_Global_LB_check_PASS": true,
+        "closure_checker_PASS_with_no_closure_claim": true,
+        "negative_candidate_not_adopted_frontier_zero": true,
+        "historical25_guard_failure_zero_Runtime_preserved": true
+      },
+      "Source27_RMP": {
+        "native": {
+          "label": "ONE_RESTRICTED_MASTER",
+          "component": "P1",
+          "track": "RMP",
+          "status": "FINISHED",
+          "Native_status": 3,
+          "Native_Runtime": 2.004999876022339,
+          "SolCount": 0.0,
+          "Native_SolCount": 0.0,
+          "error": null,
+          "entered_native": true,
+          "runtime_unavailable": false,
+          "requested_seconds": 30
+        },
+        "dual_status": "FINITE_ORIGINAL_ROW_DUAL_AVAILABLE_NOT_NATIVE_OBJECTIVE_PROOF",
+        "full_original_dual_nonzero": 865,
+        "maximum_abs_original_Pi": 353679340722.86804,
+        "invalid_original_inequality_multiplier_signs_zeroed": 0,
+        "convexity_duals": {
+          "MESS01": "0",
+          "MESS02": "0",
+          "MESS03": "4098645797888299/1048576",
+          "MESS04": "4716128207481361/1048576"
+        },
+        "column_count_by_unit": {
+          "MESS01": 1,
+          "MESS02": 1,
+          "MESS03": 1,
+          "MESS04": 1
+        },
+        "rows": 564268,
+        "columns": 61765,
+        "wall_seconds": 7.860603200038895,
+        "Native_objective_diagnostic": null
+      },
+      "transport": {
+        "schema": "V42_B2_RMP_EXACT_POWER_OF_TWO_ROWS_V25",
+        "PASS": true,
+        "Native_optimize_calls": 0,
+        "original_rows": 564268,
+        "original_columns": 61765,
+        "original_nnz": 6869617,
+        "scaled_rows": 3,
+        "tiny_nonzero_coefficients_preserved": 3,
+        "maximum_row_scale_exponent": 21,
+        "maximum_absolute_scaled_coefficient": 392.31411216132096,
+        "minimum_absolute_original_coefficient": 5.745286881640881e-19,
+        "matrix_and_RHS_exactly_reversible": true,
+        "row_senses_unchanged": true,
+        "variable_domain_and_objective_unchanged": true,
+        "original_FULL_model_rescaled": false,
+        "coefficients_dropped_or_clipped": 0,
+        "dual_pullback": "original_Pi = Native_Pi * 2**row_exponent",
+        "restricted_master_objective_is_Global_LB": false
+      },
+      "projection": {
+        "PASS": true,
+        "derived_columns": 48530,
+        "schema": "V42_B2_PRICING_FULL_CASE_PROJECTION_BOX_V26",
+        "case_sha": "359b919b4a00ebe4603a8b0613acd925eef2dae72a63d63ad22028478c5078ee",
+        "source_matrix_sha256": "147c9763c227fb9dce79919c4c3b5503ee2c0b89d45fcc692ef2e1b9d48e5200",
+        "source_domain_sha256": "11243466ddf122011ef8a202e8e7582305b215beeb68504d4d9ab0f7081397b3",
+        "independent_replay": {
+          "PASS": true,
+          "checked_original_equality_implications": 48530,
+          "all_original_feasible_points_contained": true
+        },
+        "original_model_and_block_bounds_mutated": false,
+        "unit_boxes_are_original": true,
+        "nonunit_scope": "PROJECTION_OF_GLOBALLY_EXTENDABLE_ORIGINAL_FEASIBLE_POINTS",
+        "standalone_nonunit_domain_bound_or_closure_claimed": false
+      },
+      "pricing_Native_Runtime": 37.98799991607666,
+      "L2_candidate_Global_LB": -1297130740248.8208,
+      "exact_L2_candidate_Global_LB": "-28249005983857779143101365622511674112021981613901521/21778071482940061661655974875633165533184",
+      "candidate_adopted": false,
+      "certified_frontier_Global_LB_at_L2": 0.0,
+      "closure_status": "FULL_PRICING_CLOSURE_NOT_PROVEN",
+      "full_closure_proven": false,
+      "L2_wall_costs": {
+        "exact_price_build": {
+          "wall_seconds": 1.7309548999764957,
+          "CPU_seconds": 1.703125,
+          "exclusive_non_native_wall_seconds": 1.7309548999764957
+        },
+        "full96_prices": {
+          "wall_seconds": 113.65939569997136,
+          "CPU_seconds": 109.75,
+          "exclusive_non_native_wall_seconds": 75.22290669992799
+        },
+        "independent_exact_Global_LB": {
+          "wall_seconds": 9.99905820004642,
+          "CPU_seconds": 9.671875,
+          "exclusive_non_native_wall_seconds": 9.99905820004642
+        }
+      },
+      "original_pricing_wall_seconds": 52.63720860000467,
+      "scoped_projection_initialization_extra_wall_seconds": 61.022187099966686,
+      "Native_log_selected_lines": [
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\0010_RMP_P1_NATIVE.log",
+          "bytes": 1458,
+          "selected_tail": [
+            "Optimize a model with 564268 rows, 61765 columns and 6869617 nonzeros (Min)",
+            "  Matrix range     [1e-13, 4e+02]",
+            "  Objective range  [1e+00, 1e+00]",
+            "  Bounds range     [1e+00, 2e+02]",
+            "  RHS range        [2e-09, 2e+06]",
+            "Warning: Model contains large matrix coefficient range",
+            "Presolve: All rows and columns removed",
+            "Iteration    Objective       Primal Inf.    Dual Inf.      Time",
+            "       0    5.3448136e-01   2.035172e-07   1.526834e+09      1s",
+            "Warning: very big Kappa = 3.28712e+12, try parameter NumericFocus",
+            "Solved in 1 iterations and 2.00 seconds (3.41 work units)",
+            "Infeasible model"
+          ]
+        }
+      ],
+      "historical_Source25": {
+        "worker_source_SHA": "f9264381ff7cbe5a6905e397719b1ceb368d04914820225672e188c0071a2e89",
+        "error": {
+          "error": "PermissionError: V19_NATIVE_MODEL_SCOPE_REQUIRED",
+          "wall_seconds": 1179.648685299966
+        },
+        "RMP": {
+          "label": "ONE_RESTRICTED_MASTER",
+          "component": "P1",
+          "track": "RMP",
+          "status": "FAILED",
+          "Native_status": 1,
+          "Native_Runtime": 0.0,
+          "SolCount": 0.0,
+          "Native_SolCount": 0.0,
+          "error": "V19_NATIVE_MODEL_SCOPE_REQUIRED",
+          "entered_native": true,
+          "runtime_unavailable": false,
+          "requested_seconds": 30
+        },
+        "entered_native_true_was_guarded_attempt_not_completed_raw_optimize": true
+      },
+      "artifact_receipts": [
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\request.json",
+          "bytes": 1809,
+          "sha256": "29ab18e677d4305c851d619fd4da677f4cc12777b4daa34f2325274d6b15cd4c"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\output\\005_L2_00_MASTER\\RMP_NATIVE_ROW_SCALING.json",
+          "bytes": 759,
+          "sha256": "66086f3b7c9d76621c998d1b948b7115731d5bf4de5513345affcf099605beb4"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\output\\005_L2_00_MASTER\\RMP_RESULT.json",
+          "bytes": 13964878,
+          "sha256": "f2b70675baa1caa011fa2dfe463483f9534126b042ff900ca1e3364606d31810"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\output\\005_L2_00\\PRICING_RESULT.json",
+          "bytes": 32685,
+          "sha256": "5e7dabeae83fb15171fa5f9cec845731890e98693c8329276bd89dc2ab27d530"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\output\\005_L2_00\\LB_RESULT.json",
+          "bytes": 950,
+          "sha256": "6787f36f4be19beb1b8c25acaf46d0a547e742c476bed1d12247ae4951c63320"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\output\\005_L2_00\\INDEPENDENT_GLOBAL_LB_CERTIFICATE.json",
+          "bytes": 4569,
+          "sha256": "b7f1753e3c63bb711ba7e703f5ecc045a92496f094b4555253ae0bf00a62e158"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\output\\005_L2_00\\INDEPENDENT_MISSING_COLUMN_CERTIFICATE.json",
+          "bytes": 5285,
+          "sha256": "e753b9d410f9048af06a34fb22c5f6be845769fbc3e82717a5402661ad070853"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\output\\005_L2_00\\FULL_CASE_PRICING_BOX_PROOF.json",
+          "bytes": 13242471,
+          "sha256": "b9535dcd46c5deb44ec4d770b00bfd72f47bcfeef48e2f4d1b57f1ec75b2992f"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v25_01_s1\\output\\M_ADAPTIVE_ERROR.json",
+          "bytes": 103,
+          "sha256": "03ed38f47e08cd8d00a7b090fe61946c31f504dc10cf8ef577fe8def152dce94"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v25_01_s1\\NATIVE_RUNTIME_LEDGER.json",
+          "bytes": 26081,
+          "sha256": "3df95a3c5af26f2932308fb83f2b20ebeae95bfcf10b4d474ea76c229de73bd6"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v27_01_s1\\0010_RMP_P1_NATIVE.log",
+          "bytes": 1458,
+          "sha256": "1f49e7d40ff02e8c8510ebb462309c4dae5836815e6921fb9269f7dbfb759849"
+        }
+      ]
+    },
+    "2025-05-03": {
+      "attempt_id": "repair_b2_v27_01_s2",
+      "case_sha": "7f96ad3f439110ad116dbcdb0eeccc03a5ac09852acbdf5020ce996ed38f655d",
+      "flags": {
+        "actual_request_source27": true,
+        "RMP_native_finished_positive_runtime_no_error": true,
+        "original_matrix_RHS_domain_objective_transport_worker_PASS": true,
+        "same_case_RMP_projection_pricing_certificate": true,
+        "worker_independent_projection_replay_PASS": true,
+        "producer_decomposition_sum_matches_independent_full_exact_bound": true,
+        "worker_independent_Global_LB_check_PASS": true,
+        "closure_checker_PASS_with_no_closure_claim": true,
+        "negative_candidate_not_adopted_frontier_zero": true,
+        "historical25_guard_failure_zero_Runtime_preserved": true
+      },
+      "Source27_RMP": {
+        "native": {
+          "label": "ONE_RESTRICTED_MASTER",
+          "component": "P1",
+          "track": "RMP",
+          "status": "FINISHED",
+          "Native_status": 3,
+          "Native_Runtime": 2.5309998989105225,
+          "SolCount": 0.0,
+          "Native_SolCount": 0.0,
+          "error": null,
+          "entered_native": true,
+          "runtime_unavailable": false,
+          "requested_seconds": 30
+        },
+        "dual_status": "FINITE_ORIGINAL_ROW_DUAL_AVAILABLE_NOT_NATIVE_OBJECTIVE_PROOF",
+        "full_original_dual_nonzero": 482,
+        "maximum_abs_original_Pi": 194693896575.05756,
+        "invalid_original_inequality_multiplier_signs_zeroed": 0,
+        "convexity_duals": {
+          "MESS01": "0",
+          "MESS02": "0",
+          "MESS03": "1700270736621435/131072",
+          "MESS04": "0"
+        },
+        "column_count_by_unit": {
+          "MESS01": 1,
+          "MESS02": 1,
+          "MESS03": 1,
+          "MESS04": 1
+        },
+        "rows": 564260,
+        "columns": 61757,
+        "wall_seconds": 8.679175600002054,
+        "Native_objective_diagnostic": null
+      },
+      "transport": {
+        "schema": "V42_B2_RMP_EXACT_POWER_OF_TWO_ROWS_V25",
+        "PASS": true,
+        "Native_optimize_calls": 0,
+        "original_rows": 564260,
+        "original_columns": 61757,
+        "original_nnz": 6869316,
+        "scaled_rows": 3,
+        "tiny_nonzero_coefficients_preserved": 3,
+        "maximum_row_scale_exponent": 21,
+        "maximum_absolute_scaled_coefficient": 392.3141121613147,
+        "minimum_absolute_original_coefficient": 5.745276993749205e-19,
+        "matrix_and_RHS_exactly_reversible": true,
+        "row_senses_unchanged": true,
+        "variable_domain_and_objective_unchanged": true,
+        "original_FULL_model_rescaled": false,
+        "coefficients_dropped_or_clipped": 0,
+        "dual_pullback": "original_Pi = Native_Pi * 2**row_exponent",
+        "restricted_master_objective_is_Global_LB": false
+      },
+      "projection": {
+        "PASS": true,
+        "derived_columns": 48522,
+        "schema": "V42_B2_PRICING_FULL_CASE_PROJECTION_BOX_V26",
+        "case_sha": "7f96ad3f439110ad116dbcdb0eeccc03a5ac09852acbdf5020ce996ed38f655d",
+        "source_matrix_sha256": "ceb0f73747c419679084214f97fab07a87b282e686e564b12c45e2dd5c205064",
+        "source_domain_sha256": "ed4a2a08f68ba760e8b10d73fd1538a85e6b1b20519f8a85a097fc29fc281aeb",
+        "independent_replay": {
+          "PASS": true,
+          "checked_original_equality_implications": 48522,
+          "all_original_feasible_points_contained": true
+        },
+        "original_model_and_block_bounds_mutated": false,
+        "unit_boxes_are_original": true,
+        "nonunit_scope": "PROJECTION_OF_GLOBALLY_EXTENDABLE_ORIGINAL_FEASIBLE_POINTS",
+        "standalone_nonunit_domain_bound_or_closure_claimed": false
+      },
+      "pricing_Native_Runtime": 41.959999799728394,
+      "L2_candidate_Global_LB": -466677271882.8185,
+      "exact_L2_candidate_Global_LB": "-1300906366275516883626197788840453815881312125784820725/2787593149816327892691964784081045188247552",
+      "candidate_adopted": false,
+      "certified_frontier_Global_LB_at_L2": 0.0,
+      "closure_status": "FULL_PRICING_CLOSURE_NOT_PROVEN",
+      "full_closure_proven": false,
+      "L2_wall_costs": {
+        "exact_price_build": {
+          "wall_seconds": 1.8933104000170715,
+          "CPU_seconds": 1.84375,
+          "exclusive_non_native_wall_seconds": 1.8933104000170715
+        },
+        "full96_prices": {
+          "wall_seconds": 110.50581190001685,
+          "CPU_seconds": 107.4375,
+          "exclusive_non_native_wall_seconds": 68.08043239993276
+        },
+        "independent_exact_Global_LB": {
+          "wall_seconds": 9.557617799961008,
+          "CPU_seconds": 9.40625,
+          "exclusive_non_native_wall_seconds": 9.557617799961008
+        }
+      },
+      "original_pricing_wall_seconds": 55.035616000008304,
+      "scoped_projection_initialization_extra_wall_seconds": 55.47019590000855,
+      "Native_log_selected_lines": [
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\0010_RMP_P1_NATIVE.log",
+          "bytes": 1458,
+          "selected_tail": [
+            "Optimize a model with 564260 rows, 61757 columns and 6869316 nonzeros (Min)",
+            "  Matrix range     [1e-13, 4e+02]",
+            "  Objective range  [1e+00, 1e+00]",
+            "  Bounds range     [1e+00, 2e+02]",
+            "  RHS range        [1e-09, 2e+06]",
+            "Warning: Model contains large matrix coefficient range",
+            "Presolve: All rows and columns removed",
+            "Iteration    Objective       Primal Inf.    Dual Inf.      Time",
+            "       0    4.8072993e-01   1.114276e-07   2.544584e+09      2s",
+            "Warning: very big Kappa = 3.20013e+13, try parameter NumericFocus",
+            "Solved in 2 iterations and 2.53 seconds (3.45 work units)",
+            "Infeasible model"
+          ]
+        }
+      ],
+      "historical_Source25": {
+        "worker_source_SHA": "f9264381ff7cbe5a6905e397719b1ceb368d04914820225672e188c0071a2e89",
+        "error": {
+          "error": "PermissionError: V19_NATIVE_MODEL_SCOPE_REQUIRED",
+          "wall_seconds": 1228.7980166000198
+        },
+        "RMP": {
+          "label": "ONE_RESTRICTED_MASTER",
+          "component": "P1",
+          "track": "RMP",
+          "status": "FAILED",
+          "Native_status": 1,
+          "Native_Runtime": 0.0,
+          "SolCount": 0.0,
+          "Native_SolCount": 0.0,
+          "error": "V19_NATIVE_MODEL_SCOPE_REQUIRED",
+          "entered_native": true,
+          "runtime_unavailable": false,
+          "requested_seconds": 30
+        },
+        "entered_native_true_was_guarded_attempt_not_completed_raw_optimize": true
+      },
+      "artifact_receipts": [
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\request.json",
+          "bytes": 1809,
+          "sha256": "af9d7a2b99c4e954da7aa2d898b132f8ef78d664df998ea7a000c07cf9830f0d"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\output\\005_L2_00_MASTER\\RMP_NATIVE_ROW_SCALING.json",
+          "bytes": 758,
+          "sha256": "6a20c6a5c3e0c90e02618e53313e8c15f13bbdd5b2bc6beb905d80a4b8f5a1b8"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\output\\005_L2_00_MASTER\\RMP_RESULT.json",
+          "bytes": 13948603,
+          "sha256": "9141a911b9390585f0163f2114257e37e4735d74548391f880a58d71b826ffbd"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\output\\005_L2_00\\PRICING_RESULT.json",
+          "bytes": 32872,
+          "sha256": "136d50a2611ae0ed4ad571fd9d534baaf74e326fff033840d2bf674757e69c8f"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\output\\005_L2_00\\LB_RESULT.json",
+          "bytes": 950,
+          "sha256": "e588c9bfa7099be299188d9f3b7a60e96156adee60b13a4bbd51e796db48dcde"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\output\\005_L2_00\\INDEPENDENT_GLOBAL_LB_CERTIFICATE.json",
+          "bytes": 4616,
+          "sha256": "9a745576672f3500a14f2d7ff612d41cce4b0cc71118608eb2ba140d1f84702e"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\output\\005_L2_00\\INDEPENDENT_MISSING_COLUMN_CERTIFICATE.json",
+          "bytes": 5308,
+          "sha256": "3276d4d2309530dc8cce34981f4aeec07cfec6f6cd87e26d1f2a122296167bad"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\output\\005_L2_00\\FULL_CASE_PRICING_BOX_PROOF.json",
+          "bytes": 13255043,
+          "sha256": "5560c790a872e5255f11abdd2fc4fc28e95302f79166f5833863b5bbd5c0078d"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v25_01_s2\\output\\M_ADAPTIVE_ERROR.json",
+          "bytes": 104,
+          "sha256": "04a3358e129b208dc12c6d17c6ceeb9788003286f3afef41115d7622ae7a2939"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v25_01_s2\\NATIVE_RUNTIME_LEDGER.json",
+          "bytes": 27185,
+          "sha256": "17bda735e74563533abea07327352f25e5b2c02bdcbf08e4c25ddef062b64edc"
+        },
+        {
+          "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-03\\attempts\\repair_b2_v27_01_s2\\0010_RMP_P1_NATIVE.log",
+          "bytes": 1458,
+          "sha256": "7c36e0e4d80bc3ac6b8404358b20f9675eb98e3265e8b3944589d56c19b07e7e"
+        }
+      ]
+    }
+  },
+  "future_performance_candidate": "Only a new approved source could reuse the independently verified same-attempt finite envelope after exact source/matrix/domain identity checks; no change applied.",
+  "source27_dyadic_row_scaling_risk_observation": "These actual first L2 masters had exponent20/21/21 and maxcoefficient392, not the prior saved-point exponent44/max1.76e13. Bad conditioning still observed.",
+  "auditor_scripts": [
+    {
+      "path": "D:\\MobileESS_v42_autonomous\\tmp\\v27_rmp_actual_watch\\seal_actual.py",
+      "bytes": 7979,
+      "sha256": "2f96edad74cc777d7bbd5c13ac473711a3b49540b041dc32cae3ad52551fcc4b"
+    },
+    {
+      "path": "D:\\MobileESS_v42_autonomous\\tmp\\v27_rmp_actual_watch\\watch.py",
+      "bytes": 8599,
+      "sha256": "254ebf1797425453b0d1a60c88fc8c8dee8cd05ca61dbcb57e6801c4c9565360"
+    }
+  ]
+}

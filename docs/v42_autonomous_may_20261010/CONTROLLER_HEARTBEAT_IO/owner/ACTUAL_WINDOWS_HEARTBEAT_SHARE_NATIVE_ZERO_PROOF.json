@@ -1,0 +1,53 @@
+{
+  "PASS": true,
+  "UTC": "2026-10-09T22:17:07.972809+00:00",
+  "schema": "V42_ACTUAL_WINDOWS_HEARTBEAT_SHARE_DENIAL_AND_CLEAN_READ_NATIVE0_PROOF",
+  "scope": "Isolated synthetic operational I/O fixture; not a scientifically admitted request or production day evidence",
+  "actual_Win32_CreateFileW_share_mode_zero_denied_Path_read_bytes": true,
+  "actual_deferred_error": {
+    "path": "D:\\v42_control_heartbeat_io_repair_20261010_01\\windows_share_synthetic_case\\dates\\B2\\2025-05-05\\attempts\\synthetic_io_only\\HEARTBEAT.json",
+    "error": "PermissionError(13, 'Permission denied')",
+    "reason": "[Errno 13] Permission denied: 'D:\\\\v42_control_heartbeat_io_repair_20261010_01\\\\windows_share_synthetic_case\\\\dates\\\\B2\\\\2025-05-05\\\\attempts\\\\synthetic_io_only\\\\HEARTBEAT.json'",
+    "errno": 13,
+    "winerror": null,
+    "error_class": "PermissionError",
+    "cause_classification": "WINDOWS_ACCESS_DENIED_CAUSE_UNRESOLVED"
+  },
+  "handle_closed_before_clean_read": true,
+  "actual_clean_read_identical_bytes_and_JSON": true,
+  "expected_owned_heartbeat_before": {
+    "path": "D:\\v42_control_heartbeat_io_repair_20261010_01\\windows_share_synthetic_case\\dates\\B2\\2025-05-05\\attempts\\synthetic_io_only\\HEARTBEAT.json",
+    "bytes": 87,
+    "sha256": "ccb991dd22f6db594e58a0631563b26d276259316c3117e4f8d78b4263d9a614"
+  },
+  "owned_request": {
+    "path": "D:\\v42_control_heartbeat_io_repair_20261010_01\\windows_share_synthetic_case\\dates\\B2\\2025-05-05\\attempts\\synthetic_io_only\\request.json",
+    "bytes": 489,
+    "sha256": "0e766a0dbdf9e30ee1a538798293a64be9ef4df55d00cf972e84e4b569275f4d"
+  },
+  "control_source_files": [
+    {
+      "path": "D:\\MobileESS_v42_autonomous\\v42_autonomous\\recovery.py",
+      "bytes": 68868,
+      "sha256": "bb779f4aa198001bf859225328d0f9dcc9d2249f71edab9a6596e3aea2d1fcb8"
+    },
+    {
+      "path": "D:\\MobileESS_v42_autonomous\\v42_autonomous\\supervisor.py",
+      "bytes": 35586,
+      "sha256": "cdcae21c7a8e91e9966aeac096d336839aec61f22cc279db1708ceded32c9841"
+    }
+  ],
+  "Native_optimize_calls": 0,
+  "real_Native_model_constructions": 0,
+  "denied_entry_attempts": [],
+  "budget_ledgers_or_results_created": false,
+  "production_immutable_queue_manifest_changes": 0,
+  "process_actions": 0,
+  "historical_atomic_replace_race_cause_is_plausible_not_proven": true,
+  "historical_saved_error_scope": "The original saved failure only preserves PermissionError13, without a serialized winerror. This reproduction proves a Windows sharing failure follows the scoped defer path; it does not prove the exact historical cause.",
+  "source_script": {
+    "path": "D:\\v42_control_heartbeat_io_repair_20261010_01\\seal_windows_share_proof.py",
+    "bytes": 4106,
+    "sha256": "3b36ae5c6fb8ddc97329d67996223f93a624008db3430d38ce0359b0e01a40b2"
+  }
+}

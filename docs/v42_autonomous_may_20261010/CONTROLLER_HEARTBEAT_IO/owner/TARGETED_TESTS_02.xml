@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="16" time="2.023" timestamp="2026-10-10T07:10:49.592174+09:00" hostname="JaewonKim"><testcase classname="tests.test_v42_autonomous_recovery" name="test_owned_windows_heartbeat_access_failure_defers_without_evidence_or_budget_changes[None]" time="0.172" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_owned_windows_heartbeat_access_failure_defers_without_evidence_or_budget_changes[5]" time="0.132" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_owned_windows_heartbeat_access_failure_defers_without_evidence_or_budget_changes[32]" time="0.134" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_owned_windows_heartbeat_access_failure_defers_without_evidence_or_budget_changes[33]" time="0.139" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_heartbeat_defer_never_admits_unowned_or_nonmatching_access_failure[request_seal]" time="0.086" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_heartbeat_defer_never_admits_unowned_or_nonmatching_access_failure[heartbeat_path]" time="0.080" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_heartbeat_defer_never_admits_unowned_or_nonmatching_access_failure[source]" time="0.082" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_heartbeat_defer_never_admits_unowned_or_nonmatching_access_failure[winerror]" time="0.073" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_heartbeat_defer_never_admits_unowned_or_nonmatching_access_failure[non_windows]" time="0.081" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_permission_on_sealed_request_and_invalid_heartbeat_json_stay_strict" time="0.085" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_absent_heartbeat_is_explicitly_unavailable_and_not_a_clean_read" time="0.075" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_b3_heartbeat_requires_exact_sealed_own_runtime_output" time="0.024" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_heartbeat_snapshot_is_the_same_single_read_that_was_parsed" time="0.127" /><testcase classname="tests.test_v42_autonomous_recovery" name="test_actual_windows_exclusive_heartbeat_lock_defers_and_recovers_without_native" time="0.125" /><testcase classname="tests.test_v42_autonomous_supervisor" name="test_cycle_heartbeat_access_failure_keeps_all_workers_and_other_dates_observed" time="0.012"><failure message="AssertionError: assert ['2025-05-04'... '2025-05-06'] == ('2025-05-04'... '2025-05-06')&#10;  &#10;  Use -v to get more diff">tmp_path = WindowsPath('D:/v42_control_heartbeat_io_repair_20261010_01/pytest_targeted_02/test_cycle_heartbeat_access_fa0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x0000022E1894D690&gt;
+
+    def test_cycle_heartbeat_access_failure_keeps_all_workers_and_other_dates_observed(tmp_path,monkeypatch):
+        cp=checkpoint()
+        for slot,day in enumerate(DAYS[3:6],1):
+            key='B2/'+day;cp['dates'][key].update(status='RUNNING',Native_Runtime=40.+slot)
+            cp['workers'][key]=dict(day=day,arm='B2',worker_slot=slot,PID=100+slot,created=10.+slot,request='sealed_'+str(slot)+'.json')
+        workers=deepcopy(cp['workers']);dates=deepcopy(cp['dates']);calls=[]
+        fault_key='B2/'+DAYS[4];fault_path=tmp_path/'HEARTBEAT.json';failed=True;missing=False
+        def observe(root,worker):
+            calls.append(worker['day'])
+            if failed and worker['day']==DAYS[4]:
+                raise r.HeartbeatObservationDeferred(fault_path,PermissionError(13,'fixture Windows access denied',str(fault_path)))
+            if missing and worker['day']==DAYS[4]:return dict(verification_status='WORKER_ENTERED')
+            return r.HeartbeatObservationRead(dict(verification_status='WORKER_ENTERED'))
+        monkeypatch.setattr(s,'same_process',lambda worker:True);monkeypatch.setattr(r,'sync_worker',observe)
+        monkeypatch.setattr(s,'dispatch',lambda *a:pytest.fail('HEALTHY_WORKER_REPLACED'))
+        r.atomic(tmp_path/'RECOVERY_QUEUE.json',dict(entries=[]))
+        queue_bytes=(tmp_path/'RECOVERY_QUEUE.json').read_bytes()
+        for iteration in range(3):
+            s.cycle(tmp_path,{},cp)
+&gt;           assert calls[-3:]==DAYS[3:6]
+E           AssertionError: assert ['2025-05-04'... '2025-05-06'] == ('2025-05-04'... '2025-05-06')
+E             
+E             Use -v to get more diff
+
+tests\test_v42_autonomous_supervisor.py:60: AssertionError</failure></testcase><testcase classname="tests.test_v42_autonomous_supervisor" name="test_cycle_never_swallows_general_permission_or_global_source_failure" time="0.002" /></testsuite></testsuites>

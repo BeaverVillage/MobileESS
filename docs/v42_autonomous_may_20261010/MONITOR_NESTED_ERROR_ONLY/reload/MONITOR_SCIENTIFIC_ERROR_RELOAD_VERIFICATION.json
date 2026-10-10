@@ -1,0 +1,123 @@
+{
+  "PASS": true,
+  "UTC": "2026-10-09T21:59:23.624837+00:00",
+  "before": {
+    "path": "D:\\v42_may_restart_20261010_02\\autonomous\\MONITOR_SCIENTIFIC_ERROR_RELOAD_BEFORE.json",
+    "bytes": 3177,
+    "sha256": "44a58bd14e302cf080a62d993b78edf124d5d029ceb0821c80142d662a28d14b"
+  },
+  "actual_monitor": {
+    "PID": 102084,
+    "created": 1791583141.483806,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "v42_autonomous_monitor.host",
+      "D:\\v42_may_restart_20261010_02",
+      "--port",
+      "8794"
+    ],
+    "cwd": "D:\\MobileESS_v42_autonomous"
+  },
+  "workers_exact_identity_preserved": {
+    "B2/2025-05-05": {
+      "PID": 82904,
+      "created": 1791581734.4816203,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_autonomous_b2.worker",
+        "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-05\\attempts\\repair_b2_v30_01_s1\\request.json"
+      ],
+      "cwd": "D:\\v42run30"
+    },
+    "B2/2025-05-06": {
+      "PID": 101664,
+      "created": 1791581887.6850405,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_autonomous_b2.worker",
+        "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-06\\attempts\\repair_b2_v30_01_s2\\request.json"
+      ],
+      "cwd": "D:\\v42run30"
+    },
+    "B2/2025-05-01": {
+      "PID": 106760,
+      "created": 1791583103.9296637,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_autonomous_b2.worker",
+        "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-01\\attempts\\repair_b2_v32_01_s3\\request.json"
+      ],
+      "cwd": "D:\\v42run32"
+    }
+  },
+  "pre_reload_already_exited": {},
+  "original_first3_results_unchanged": true,
+  "live_HTTP_current_source30_error_rows": 2,
+  "first6": [
+    {
+      "day": "2025-05-01",
+      "status": "RUNNING",
+      "attempt": "repair_b2_v32_01_s3",
+      "error": null
+    },
+    {
+      "day": "2025-05-02",
+      "status": "RETRY_PENDING",
+      "attempt": "repair_b2_v30_01_s1",
+      "error": "PermissionError: RMP_PRESOLVE_ORIGINAL_BUDGET_OR_SCOPE_CLOSURE_DRIFT"
+    },
+    {
+      "day": "2025-05-03",
+      "status": "RETRY_PENDING",
+      "attempt": "repair_b2_v30_01_s2",
+      "error": "PermissionError: RMP_PRESOLVE_ORIGINAL_BUDGET_OR_SCOPE_CLOSURE_DRIFT"
+    },
+    {
+      "day": "2025-05-04",
+      "status": "RETRY_PENDING",
+      "attempt": "repair_b2_v30_01_s3",
+      "error": "PermissionError: RMP_PRESOLVE_ORIGINAL_BUDGET_OR_SCOPE_CLOSURE_DRIFT"
+    },
+    {
+      "day": "2025-05-05",
+      "status": "RUNNING",
+      "attempt": "repair_b2_v30_01_s1",
+      "error": null
+    },
+    {
+      "day": "2025-05-06",
+      "status": "RUNNING",
+      "attempt": "repair_b2_v30_01_s2",
+      "error": null
+    }
+  ],
+  "startup_verification_initial_race": "New host launched successfully; initial helper read old server PID before atomic replacement and NoSuchProcess escaped. Read-only follow-up verifies actual new host and HTTP, with no second restart.",
+  "earlier_harness_failures_preserved_as_tool_outputs": [
+    "external-script import path before production mutation",
+    "stale checkpoint PID natural exit before production mutation",
+    "current source32 row no longer carries old result key before production mutation"
+  ],
+  "monitor_only_owned_PID_terminated": 75212,
+  "scientific_worker_terminate_calls": 0,
+  "supervisor_terminate_calls": 0,
+  "Native_optimize_calls": 0,
+  "model_constructions": 0,
+  "URL": "http://127.0.0.1:8794/",
+  "no_GUI_render_verification_claimed": true
+}

@@ -1,0 +1,93 @@
+{
+  "UTC": "2026-10-09T19:18:06.920983+00:00",
+  "error_receipt": {
+    "path": "D:\\v42_may_restart_20261010_02\\SUPERVISOR_ERROR.json",
+    "sha256": "aa6b2475596d03a2c43d6da0680091e9b86b7996e972d736e3e4fca5416948a8",
+    "bytes": 1774
+  },
+  "error": {
+    "error": "LeaseBusy('REPAIR_OS_LEASE_BUSY:D:\\\\v42_may_restart_20261010_02\\\\RECOVERY_QUEUE.lock')",
+    "traceback": "Traceback (most recent call last):\n  File \"D:\\MobileESS_v42_autonomous\\v42_autonomous\\recovery.py\", line 195, in os_lock\n    msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)\nPermissionError: [Errno 13] Permission denied\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"D:\\MobileESS_v42_autonomous\\v42_autonomous\\supervisor.py\", line 542, in <module>\n    try:run(a.root)\n        ^^^^^^^^^^^\n  File \"D:\\MobileESS_v42_autonomous\\v42_autonomous\\supervisor.py\", line 535, in run\n    cycle(root,manifest,cp)\n  File \"D:\\MobileESS_v42_autonomous\\v42_autonomous\\supervisor.py\", line 466, in cycle\n    refresh_retries(root,cp)\n  File \"D:\\MobileESS_v42_autonomous\\v42_autonomous\\supervisor.py\", line 342, in refresh_retries\n    for entry in retire_satisfied_ready(root,cp)['entries']:grouped.setdefault(entry['arm']+'/'+entry['date'],[]).append(entry)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\MobileESS_v42_autonomous\\v42_autonomous\\recovery.py\", line 817, in retire_satisfied_ready\n    with os_lock(Path(root)/'RECOVERY_QUEUE.lock'):\n  File \"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\contextlib.py\", line 137, in __enter__\n    return next(self.gen)\n           ^^^^^^^^^^^^^^\n  File \"D:\\MobileESS_v42_autonomous\\v42_autonomous\\recovery.py\", line 201, in os_lock\n    raise LeaseBusy('REPAIR_OS_LEASE_BUSY:' + str(path)) from exc\nv42_autonomous.recovery.LeaseBusy: REPAIR_OS_LEASE_BUSY:D:\\v42_may_restart_20261010_02\\RECOVERY_QUEUE.lock\n",
+    "UTC": "2026-10-09T19:14:43.860079+00:00"
+  },
+  "actual_task_LastTaskResult": 1,
+  "owned_supervisor_process": {
+    "PID": 107208,
+    "created": 1791572809.7317052,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "v42_autonomous.supervisor",
+      "D:\\v42_may_restart_20261010_02"
+    ],
+    "parent": 2648,
+    "priority": 32
+  },
+  "active_workers_preserved": {
+    "B2/2025-05-04": {
+      "PID": 96996,
+      "created": 1791572195.8079417,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_autonomous_b2.worker",
+        "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-04\\attempts\\repair_b2_v25_01_s3\\request.json"
+      ],
+      "request": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-04\\attempts\\repair_b2_v25_01_s3\\request.json",
+      "worker_slot": 3,
+      "arm": "B2",
+      "day": "2025-05-04",
+      "source_commit": "c6b3cc51f9aba78755611f4421eae4c5267f6fa8",
+      "source_SHA": "f9264381ff7cbe5a6905e397719b1ceb368d04914820225672e188c0071a2e89",
+      "recovery_queue_id": "0b28c7eed2aa444b9bc92463edf223c1"
+    },
+    "B2/2025-05-05": {
+      "PID": 102704,
+      "created": 1791572249.6243954,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_autonomous_b2.worker",
+        "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-05\\attempts\\repair_b2_v25_01_s1\\request.json"
+      ],
+      "request": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-05\\attempts\\repair_b2_v25_01_s1\\request.json",
+      "worker_slot": 1,
+      "arm": "B2",
+      "day": "2025-05-05",
+      "source_commit": "c6b3cc51f9aba78755611f4421eae4c5267f6fa8",
+      "source_SHA": "f9264381ff7cbe5a6905e397719b1ceb368d04914820225672e188c0071a2e89",
+      "recovery_queue_id": "12f50a794b2d47c090e61fa08385ecfb"
+    },
+    "B2/2025-05-06": {
+      "PID": 96308,
+      "created": 1791572311.5081344,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_autonomous_b2.worker",
+        "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-06\\attempts\\repair_b2_v25_01_s2\\request.json"
+      ],
+      "request": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-06\\attempts\\repair_b2_v25_01_s2\\request.json",
+      "worker_slot": 2,
+      "arm": "B2",
+      "day": "2025-05-06",
+      "source_commit": "c6b3cc51f9aba78755611f4421eae4c5267f6fa8",
+      "source_SHA": "f9264381ff7cbe5a6905e397719b1ceb368d04914820225672e188c0071a2e89",
+      "recovery_queue_id": "8fc7fd7543ff4c4c80b06a1c305632d2"
+    }
+  },
+  "failure_class": "TRANSIENT_RECOVERY_QUEUE_LOCK_LEASEBUSY_UNHANDLED_IN_REFRESH",
+  "scientific_sources_or_native_workers_modified": false
+}

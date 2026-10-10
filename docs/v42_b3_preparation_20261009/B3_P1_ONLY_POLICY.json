@@ -1,0 +1,71 @@
+{
+  "schema": "V42_B3_P1_ONLY_POLICY_V1",
+  "stage_order": [
+    "A1",
+    "M1",
+    "A2",
+    "M2",
+    "PLANNING_FREEZE",
+    "ACTUAL",
+    "FRESH_AC",
+    "VALIDATION"
+  ],
+  "stage_policy": {
+    "A1": {
+      "Threads": 1,
+      "MIPGap": 0.005,
+      "P2_calls": 0,
+      "objective": "min rho_max",
+      "native_limit_seconds": 5400,
+      "wall_limit_seconds": null,
+      "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+      "FeasibilityTol": 1e-06,
+      "OptimalityTol": 1e-06,
+      "IntFeasTol": 1e-05
+    },
+    "M1": {
+      "Threads": 1,
+      "MIPGap": 0.03,
+      "P2_calls": 0,
+      "objective": "min rho_max",
+      "native_limit_seconds": 5400,
+      "wall_limit_seconds": null,
+      "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+      "FeasibilityTol": 1e-08,
+      "OptimalityTol": 1e-08,
+      "IntFeasTol": 1e-08
+    },
+    "A2": {
+      "Threads": 1,
+      "MIPGap": 0.005,
+      "P2_calls": 0,
+      "objective": "min rho_max",
+      "native_limit_seconds": 5400,
+      "wall_limit_seconds": null,
+      "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+      "FeasibilityTol": 1e-06,
+      "OptimalityTol": 1e-06,
+      "IntFeasTol": 1e-05
+    },
+    "M2": {
+      "Threads": 1,
+      "MIPGap": 0.03,
+      "P2_calls": 0,
+      "objective": "min rho_max",
+      "native_limit_seconds": 5400,
+      "wall_limit_seconds": null,
+      "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+      "FeasibilityTol": 1e-08,
+      "OptimalityTol": 1e-08,
+      "IntFeasTol": 1e-08
+    }
+  },
+  "objective": "min rho_max",
+  "P2_calls": 0,
+  "acceptance_scope": "STAGE_FIXED_INPUT_GLOBAL",
+  "joint_global_optimality_claim": false,
+  "legacy_unified_acceptance_reused": false,
+  "B3_NATIVE_EXECUTION_AUTHORIZED": false,
+  "B3_PRODUCTION_CAMPAIGN_STARTED": false,
+  "B3_FRESH_AC_EXECUTED": false
+}

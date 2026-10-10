@@ -1,0 +1,41 @@
+{
+  "schema": "SOURCE35_ROOT_LAZY_HOOK_STATIC_REVIEW",
+  "PASS": true,
+  "source_files": [
+    {
+      "path": "D:\\v42_f1_price_seed35_candidate_20261010_01\\ROOT_WORKER35_HOOK_PREVIEW.py",
+      "bytes": 17956,
+      "sha256": "ff42dcb94488a57817b545d2badb15c0da1faef05755a2ec06fafe3a96a8104c"
+    },
+    {
+      "path": "D:\\v42_f1_price_seed35_candidate_20261010_01\\ROOT_HOOK35_TEST_ADDITIONS.py",
+      "bytes": 8209,
+      "sha256": "c98395a3868ff4576adf56c21d8b9900eb2c45a0094f08bf87091bbddf44b5fd"
+    },
+    {
+      "path": "D:\\v42run34\\v42_autonomous_b2\\worker.py",
+      "bytes": 17215,
+      "sha256": "490776a45c8a8d16c2bc1fc105f3c09d33e146f1ed7470240e04ba36fd7e9782"
+    }
+  ],
+  "source_start_end_identical": true,
+  "tests_executed": 0,
+  "proposed_test_cases": 4,
+  "proposed_test_functions": [
+    "test_current_f1_price_hook_is_lazy_once_and_restores_all_aliases",
+    "test_current_f1_price_hook_no_scheduled_round_creates_no_factory_or_scope"
+  ],
+  "scientific_model_imports": 0,
+  "Native_optimize_calls": 0,
+  "real_Native_model_constructions": 0,
+  "modelattempts": [],
+  "Nativeattempts": [],
+  "production_mutations": 0,
+  "findings": [
+    "Only new import, routing receipt field, lazy round slot/factory, original marker and ExitStack lp_round patch differ from immutable Source34 worker.",
+    "saved original lp_round captured before alias changes; installed pricing routing is visible when first scheduled round constructs wrapper.",
+    "No price factory or F1 Scope at scope entry; current F1 getter remains shared with existing initialization/full LP wrappers.",
+    "ExitStack owns restoration on normal and exceptional paths; proposed four cases cover no round, normal two rounds, factory error and delegate error.",
+    "Proposed tests are external, not executed, and supply no scientific admission or performance evidence."
+  ]
+}

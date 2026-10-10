@@ -1,0 +1,139 @@
+diff --git a/tests/test_v42_autonomous_b2_f1_basis.py b/tests/test_v42_autonomous_b2_f1_basis.py
+index 41a8bf66..ea0a570a 100644
+--- a/tests/test_v42_autonomous_b2_f1_basis.py
++++ b/tests/test_v42_autonomous_b2_f1_basis.py
+@@ -1,4 +1,4 @@
+-"""Native-denied guard and original-code-path tests for production V28."""
++"""Native-denied guard and original-code-path tests for production V31."""
+ import importlib.util
+ import json
+ from pathlib import Path
+@@ -103,9 +103,10 @@ def test_method_zero_selected_only_after_original_reset_at_exact_one_delegate(en
+     env.budget.native_optimize=actual
+     proxy=env.scope._budget_proxy(env.case,env.budget)
+     proxy.native_optimize(full,**lp_kwargs(env))
+-    assert calls==[(0,1,1,300.,v27.PRECISION)] and len(env.budget.calls)==2
++    assert calls==[(0,2,1,300.,v27.PRECISION)] and len(env.budget.calls)==2
+     receipt=json.loads((env.output/'F1_FULL_LP_COMPUTATIONAL_ENTRY.json').read_text())
+     assert receipt['Native_call_completed'] and receipt['completed_original_Native_call']['Native_Runtime']==300.
++    assert receipt['actual_parameters']['LPWarmStart']==2
+     with pytest.raises(PermissionError,match='EXACT_ORIGINAL_FULL_LP'):
+         proxy.native_optimize(full,**lp_kwargs(env))
+     assert len(calls)==1
+@@ -171,7 +172,7 @@ def test_actual_original_full_lp_bytecode_builder_reset_delegate_dispose_and_che
+     original_code=original.__code__
+     dual,cert=env.scope.full_lp_adapter(rebound_original,env.case,env.budget)
+     assert rebound_original.__code__ is original_code
+-    assert full.disposed and full.Params.Method==0 and full.Params.LPWarmStart==1
++    assert full.disposed and full.Params.Method==0 and full.Params.LPWarmStart==2
+     assert len(env.budget.calls)==2 and env.budget.calls[-1]['requested_seconds']==300.
+     # Original y<=1 means original optimum x=1. Independent full-box proof1
+     # is retained; the adapter never treats a fixed-box objective as proof.
+@@ -186,3 +187,38 @@ def test_mutating_cached_decision_and_native_basis_together_cannot_invent_basis(
+     with pytest.raises(PermissionError,match='INSTALLED_BASIS_CHANGED'):
+         env.scope._budget_proxy(env.case,env.budget).native_optimize(full,**lp_kwargs(env))
+     assert len(env.budget.calls)==1
++
++
++def test_builder_receipt_plans_presolved_start_without_claiming_presolved_basis_identity(env):
++    full=admitted_basis(env)
++    receipt=json.loads((env.output/'F1_FULL_LP_WARMSTART.json').read_text())
++    assert full.Params.Method==1 and full.Params.LPWarmStart==1
++    assert receipt['LPWarmStart_at_builder_return']==1
++    assert receipt['LPWarmStart_at_approved_Native_entry']==2
++    assert receipt['original_basis_installed_before_Native_entry'] is True
++    assert receipt['original_basis_to_presolved_start_transport_planned'] is True
++    assert receipt['original_unpresolved_basis_computational_start'] is False
++    assert receipt['presolved_basis_identity_unchanged_claimed'] is False
++    assert receipt['Global_LB_authority'] is False
++    assert receipt['performance_benefit_claimed'] is False
++    assert len(env.budget.calls)==1
++
++
++@pytest.mark.parametrize('changed',[
++    ('LPWarmStart',0),('LPWarmStart',1),('Method',1),('Threads',2)])
++def test_completed_original_native_cost_remains_recorded_when_post_parameters_tampered(env,changed):
++    full=admitted_basis(env);original=env.budget.native_optimize
++    def completed_then_tampered(model,*args,**kwargs):
++        assert model.Params.Method==0 and model.Params.LPWarmStart==2
++        returned=original(model,*args,**kwargs)
++        setattr(model.Params,*changed)
++        return returned
++    env.budget.native_optimize=completed_then_tampered
++    with pytest.raises(PermissionError,match='COMPLETED_CALL_PARAMETER_DRIFT'):
++        env.scope._budget_proxy(env.case,env.budget).native_optimize(full,**lp_kwargs(env))
++    assert len(env.budget.calls)==2
++    assert env.budget.calls[-1]['Native_Runtime']==300.
++    assert env.budget.inflight is None
++    receipt=json.loads((env.output/'F1_FULL_LP_COMPUTATIONAL_ENTRY.json').read_text())
++    assert receipt['Native_call_completed'] is False
++    assert receipt['actual_parameters']['LPWarmStart']==2
+diff --git a/v42_autonomous_b2/f1_basis.py b/v42_autonomous_b2/f1_basis.py
+index 4ce16e67..97e67648 100644
+--- a/v42_autonomous_b2/f1_basis.py
++++ b/v42_autonomous_b2/f1_basis.py
+@@ -2,7 +2,8 @@
+ 
+ Inherit the unchanged V27 source, FULL promotion, Native receipts and
+ independent checker. Only a proved complete original basis selects
+-Method0/LPWarmStart1; fallback keeps the original Method1 and 300s call.
++Method0/LPWarmStart2 at the exact original Native call. Installation keeps
++Method1/LPWarmStart1 until that entry; fallback retains Method1 and 300s.
+ """
+ import copy
+ import math
+@@ -112,16 +113,20 @@ class Scope(v27.Scope):
+                 or model.Params.Threads != 1 or model.Params.Method != 1
+                 or model.Params.LPWarmStart != 1):
+             raise PermissionError('F1_V28_BASIS_INSTALL_MATH_OR_PRECISION_DRIFT')
+-        receipt = dict(schema='V42_V28_CURRENT_ATTEMPT_ORIGINAL_BASIS_PRIMAL',
++        receipt = dict(schema='V42_V31_CURRENT_ATTEMPT_ORIGINAL_BASIS_PRESOLVED_PRIMAL',
+             PASS=True,case_sha=case.case_sha,binding=state.binding,
+             original_math_roundtrip=before,mode='COMPLETE_SAME_ATTEMPT_ORIGINAL_BASIS',
+             LPWarmStart=1,Method_at_builder_return=1,Method_at_approved_Native_entry=0,
++            LPWarmStart_at_builder_return=1,LPWarmStart_at_approved_Native_entry=2,
+             Threads=1,original_precision_unchanged=True,
+             original_F1_required_seconds=120.,original_full_LP_required_seconds=300.,
+             total_native_cap_seconds=5400,Native_calls_added=0,
+             original_full_LP_not_removed=True,performance_benefit_claimed=False,
+             F1_Native_objective_is_Global_LB=False,
+-            original_unpresolved_basis_computational_start=True,
++            original_unpresolved_basis_computational_start=False,
++            original_basis_installed_before_Native_entry=True,
++            original_basis_to_presolved_start_transport_planned=True,
++            presolved_basis_identity_unchanged_claimed=False,
+             **{k:val for k,val in decision.items() if k not in ('vbasis','cbasis','eligible')})
+         self.installed = True
+         self._primal_model = model
+@@ -176,16 +181,20 @@ class Scope(v27.Scope):
+                     for key,val in v27.PRECISION.items():
+                         setattr(model.Params,key,val)
+                     model.Params.TimeLimit = min(float(requested),budget.remaining())
++                    # Use the verified original basis to derive/crush starts
++                    # on the presolved FULL LP. Gurobi may construct a new
++                    # presolved basis; its identity is not claimed unchanged.
++                    model.Params.LPWarmStart = 2
+                     model.Params.Method = 0
+                     actual = dict(Method=int(model.Params.Method),LPWarmStart=int(model.Params.LPWarmStart),
+                         Threads=int(model.Params.Threads),TimeLimit=float(model.Params.TimeLimit),
+                         precision={k:getattr(model.Params,k) for k in v27.PRECISION})
+-                    if (actual['Method'] != 0 or actual['LPWarmStart'] != 1 or actual['Threads'] != 1
++                    if (actual['Method'] != 0 or actual['LPWarmStart'] != 2 or actual['Threads'] != 1
+                             or actual['precision'] != v27.PRECISION
+                             or not 0 < actual['TimeLimit'] <= requested <= 300.):
+                         raise PermissionError('F1_V28_ACTUAL_COMPUTATIONAL_PARAMETERS_DRIFT')
+                     scope.write('F1_FULL_LP_COMPUTATIONAL_ENTRY.json',dict(
+-                        schema='V42_V28_APPROVED_FULL_LP_NATIVE_ENTRY',status='ABOUT_TO_DELEGATE',
++                        schema='V42_V31_APPROVED_FULL_LP_PRESOLVED_NATIVE_ENTRY',status='ABOUT_TO_DELEGATE',
+                         Native_call_completed=False,call_index=before,original_call=kwargs,
+                         actual_parameters=actual,original_math_roundtrip=v27.verify_native_math(model,case),
+                         basis_start_receipt=scope._primal_receipt,state_packet=state.packet,
+@@ -195,7 +204,7 @@ class Scope(v27.Scope):
+                     raise PermissionError('F1_V28_EXACTLY_ONE_COMPLETED_FULL_LP_CALL_REQUIRED')
+                 if scope._primal_model is not None:
+                     call = copy.deepcopy(budget.calls[-1])
+-                    if (model.Params.Method != 0 or model.Params.LPWarmStart != 1
++                    if (model.Params.Method != 0 or model.Params.LPWarmStart != 2
+                             or model.Params.Threads != 1
+                             or {k:getattr(model.Params,k) for k in v27.PRECISION} != v27.PRECISION
+                             or call.get('effective_TimeLimit') != model.Params.TimeLimit
