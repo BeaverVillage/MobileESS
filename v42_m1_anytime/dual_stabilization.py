@@ -42,6 +42,87 @@ def dual_sha(dual):
     return sha256('\n'.join(f'{i}:{F(dual[str(i)])}' for i in sorted(map(int,dual))
         if F(dual[str(i)])).encode('ascii')).hexdigest()
 
+class ProvedEnvelope:
+    """One issued stage/attempt owns an independently replayed certificate box.
+
+    The cache is private to this instance. It never changes the scientific
+    domain and cannot substitute a proof from another case or fixed input.
+    """
+    def __init__(self,identity,*,derive,verify,validate):
+        if type(identity) is not StageIdentity or not all(callable(f) for f in (derive,verify,validate)):
+            raise ValueError('STAGE_BOUND_ENVELOPE_DELEGATES_REQUIRED')
+        self.identity=identity;self._identity_sha=identity.sha
+        self._derive,self._verify,self._validate=derive,verify,validate
+        self._cache=None;self.derive_calls=0;self.verify_calls=0;self.cache_hits=0
+
+    def _original(self,A,d):
+        from v42_m1_hybrid.blocks import matrix_sha
+        h=sha256()
+        for key in sorted(d):
+            value=np.asarray(d[key]);h.update(key.encode());h.update(value.dtype.str.encode())
+            h.update(np.asarray(value.shape,dtype='<i8').tobytes());h.update(value.tobytes())
+        stamp=(matrix_sha(A),h.hexdigest())
+        if self.identity.sha!=self._identity_sha or stamp!=(self.identity.matrix_sha,self.identity.domain_sha):
+            raise ValueError('ENVELOPE_STAGE_MATRIX_DOMAIN_IDENTITY_DRIFT')
+        return stamp
+
+    @staticmethod
+    def _seal(lo,hi,proof):
+        h=sha256()
+        for value in (lo,hi):
+            value=np.asarray(value);h.update(value.dtype.str.encode());h.update(value.tobytes())
+        h.update(json.dumps(proof,sort_keys=True,allow_nan=False,separators=(',',':')).encode())
+        return h.hexdigest()
+
+    def __call__(self,A,d):
+        self._validate();stamp=self._original(A,d)
+        if self._cache is None:
+            if np.isfinite(d['lower']).all() and np.isfinite(d['upper']).all():
+                lo,hi=np.array(d['lower'],copy=True),np.array(d['upper'],copy=True)
+                proof=dict(PASS=True,original_model_bounds_mutated=False,finite_original_box=True,
+                    independent_replay=dict(PASS=True,all_original_feasible_points_contained=True))
+            else:
+                self.derive_calls+=1;lo,hi,proof=self._derive(A,d)
+                self.verify_calls+=1;replay=self._verify(A,d,lo,hi,proof)
+                if (proof.get('PASS') is not True or proof.get('original_model_bounds_mutated') is not False
+                        or replay.get('PASS') is not True or replay.get('all_original_feasible_points_contained') is not True):
+                    raise ValueError('INDEPENDENT_ORIGINAL_EQUALITY_BOX_PROOF_REQUIRED')
+                proof=dict(proof,independent_replay=replay)
+            lo,hi=np.array(lo,copy=True),np.array(hi,copy=True)
+            if (lo.shape!=(A.shape[1],) or hi.shape!=lo.shape or not np.isfinite(lo).all()
+                    or not np.isfinite(hi).all() or np.any(lo>hi)):
+                raise ValueError('PROVED_ENVELOPE_COMPLETE_FINITE_BOX_REQUIRED')
+            proof=dict(proof,stage_identity_sha=self._identity_sha,
+                       source_matrix_sha=stamp[0],source_domain_sha=stamp[1])
+            self._validate()
+            if self._original(A,d)!=stamp:raise ValueError('ENVELOPE_ORIGINAL_MODEL_MUTATED')
+            lo.flags.writeable=False;hi.flags.writeable=False
+            self._cache=(lo,hi,proof,self._seal(lo,hi,proof))
+        else:self.cache_hits+=1
+        lo,hi,proof,seal=self._cache
+        if proof.get('stage_identity_sha')!=self._identity_sha or self._seal(lo,hi,proof)!=seal:
+            raise ValueError('ENVELOPE_CACHE_OR_STAGE_PROOF_DRIFT')
+        # Return copies so a caller cannot mutate another invocation's inputs.
+        return lo.copy(),hi.copy(),json.loads(json.dumps(proof,allow_nan=False))
+
+    def check(self,A,d,dual,*,checker,case_sha,lower=None,upper=None,source_rows=None):
+        if case_sha!=self.identity.case_sha:raise ValueError('ENVELOPE_CERTIFICATE_CASE_DRIFT')
+        lo,hi,proof=self(A,d)
+        for supplied,key,proved in ((lower,'lower',lo),(upper,'upper',hi)):
+            if supplied is not None and not any(
+                    np.asarray(supplied).dtype==np.asarray(expected).dtype
+                    and np.asarray(supplied).shape==np.asarray(expected).shape
+                    and np.asarray(supplied).tobytes()==np.asarray(expected).tobytes()
+                    for expected in (d[key],proved)):
+                raise ValueError('ENVELOPE_FOREIGN_CERTIFICATE_BOX_REQUIRED')
+        result=checker(A,d,dual,lower=lo,upper=hi,source_rows=source_rows,case_sha=case_sha)
+        if result.get('PASS') is not True or result.get('case_sha')!=case_sha:
+            raise ValueError('INDEPENDENT_SAME_STAGE_CERTIFICATE_REQUIRED')
+        return dict(result,finite_box_original_row_implication=dict(
+            stage_identity_sha=self._identity_sha,proof_SHA=self._cache[3],
+            independent_replay=proof['independent_replay']),
+            original_checker_byte_preserved=True,arbitrary_finite_bounds_used=False)
+
 def checked_dual(A,d,dual):
     result={}
     for key,value in dual.items():

@@ -266,7 +266,10 @@ def run(request,budget,progress,*,lb_rescue=None):
                         if search is not None:
                             with budget.cost('exact_dual_candidate_selection',label):
                                 selection=search.select(case,dual,rmpdual,frontier.lb,
-                                    certify=lambda y:check_rational_dual_certificate(case.A,case.d,y,case_sha=case.case_sha))
+                                    certify=lambda y:(search.finite_box.check(case.A,case.d,y,
+                                        checker=check_rational_dual_certificate,case_sha=case.case_sha)
+                                        if hasattr(search.finite_box,'check') else
+                                        check_rational_dual_certificate(case.A,case.d,y,case_sha=case.case_sha)))
                             price=selection['dual'];alpha=selection.get('alpha')
                             atomic(case.output/(label+'_DUAL_SEARCH.json'),selection)
                         elif method=='L2':price=rmpdual

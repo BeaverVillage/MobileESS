@@ -58,6 +58,7 @@ class _StageFactory:
                  and fixed["identity"].get("day") == self.request["day"],
                  "B2_LB_RESEARCH_FIXED_CURRENT_INPUT_REQUIRED")
         self.request_receipt, self.manifest_receipt = record(self.path), record(self.request["manifest"])
+        self._envelopes = {}
         _ISSUED[self] = (tuple((k, self.request[k]) for k in _KEYS),
                         digest(self.inputs), self.adapter_sha,
                         digest(self.request_receipt), digest(self.manifest_receipt))
@@ -88,15 +89,16 @@ class _StageFactory:
         common_path, _ = _declared_file(worker, self.manifest, _COMMON_RELATIVE)
         _require(Path(common.__file__).resolve() == common_path,
                  "B2_LB_RESEARCH_COMMON_MODULE_CHECKOUT_DRIFT")
-        return common.DualSearch(common.StageIdentity(
+        identity = common.StageIdentity(
             stage="B2_M", day=self.request["day"], source_sha=self.request["implementation_SHA"],
             input_sha=self.inputs["NATIVE_INPUT.json"]["sha256"],
             fixed_input_sha=self.inputs["B2_FIXED_AIDC.json"]["sha256"],
             case_sha=case.case_sha, matrix_sha=case.identity["selected_matrix_sha"],
-            domain_sha=case.identity["selected_domain_sha"]), finite_box=_finite_box_provider(self, case))
+            domain_sha=case.identity["selected_domain_sha"])
+        return common.DualSearch(identity, finite_box=_finite_box_provider(self, case, identity))
 
 
-def _finite_box_provider(factory, case):
+def _finite_box_provider(factory, case, identity):
     """Lazy original equality envelope, used only for an unbounded box view."""
     from . import worker
     from v42_b2_seed_recovery_v18 import certificate_box as box
@@ -105,25 +107,23 @@ def _finite_box_provider(factory, case):
     derive, verify = box.derive, box.verify
     derive_code, verify_code = derive.__code__, verify.__code__
 
-    def finite_box(A, d):
+    def validate():
         checked_factory(factory, factory.path)
         _declared_file(worker, factory.manifest, _BOX_RELATIVE)
         _require(Path(box.__file__).resolve() == path and box.derive is derive and box.verify is verify
                  and derive.__code__ is derive_code and verify.__code__ is verify_code,
                  "B2_LB_RESEARCH_ORIGINAL_BOX_DELEGATE_DRIFT")
-        from v42_may_campaign_native90 import m_model
-        from v42_m1_hybrid.blocks import matrix_sha
-        _require(matrix_sha(A) == case.identity["selected_matrix_sha"]
-                 and m_model._domain_sha(d) == case.identity["selected_domain_sha"],
+        _require(case.case_sha == identity.case_sha
+                 and case.identity["selected_matrix_sha"] == identity.matrix_sha
+                 and case.identity["selected_domain_sha"] == identity.domain_sha,
                  "B2_LB_RESEARCH_BOX_CURRENT_CASE_AXIS_DRIFT")
-        lo, hi, proof = derive(A, d)
-        replay = verify(A, d, lo, hi, proof)
-        _require(proof.get("PASS") is True and replay.get("PASS") is True
-                 and replay.get("all_original_feasible_points_contained") is True
-                 and proof.get("original_model_bounds_mutated") is False,
-                 "B2_LB_RESEARCH_ORIGINAL_FINITE_BOX_NOT_PROVED")
-        return lo, hi, dict(proof, independent_replay=replay)
-    return finite_box
+    from v42_m1_anytime.dual_stabilization import ProvedEnvelope
+    validate()
+    if case.case_sha not in factory._envelopes:
+        factory._envelopes[case.case_sha] = ProvedEnvelope(identity, derive=derive, verify=verify, validate=validate)
+    envelope = factory._envelopes[case.case_sha]
+    _require(envelope.identity == identity, "B2_LB_RESEARCH_BOX_FOREIGN_STAGE_OR_ATTEMPT")
+    return envelope
 
 
 def checked_factory(factory, path):

@@ -7,7 +7,7 @@ the B2 FCFS producer is never called. No source module is imported on import of
 this file, and no physical equation or optimization algorithm is duplicated.
 """
 from fractions import Fraction
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 import json
 from pathlib import Path
 from time import perf_counter
@@ -348,10 +348,12 @@ class MSourceBridge:
         require(getattr(ledger, "context", None) is context
                 and getattr(ledger, "stage", None) == context.request.stage,
                 "M_SOURCE_STAGE_LEDGER_DRIFT")
-        with registry.execution_scope(context):
+        with registry.execution_scope(context), ExitStack() as research_scope:
             if lb_rescue is not None:
                 lb_rescue = registry.callable("v42_b3_joint/lb_research.py", "checked_factory")(
                     lb_rescue, context, registry)
+                research_scope.enter_context(registry.callable("v42_b3_joint/lb_research.py", "checker_scope")(
+                    lb_rescue, context, registry))
             started = perf_counter()
             with self._phase(context, "input_preparation_seconds"):
                 payload = fixed_aidc_payload(context)
@@ -398,6 +400,9 @@ class MSourceBridge:
                       "immutable_route_input_cache": [cache.receipt() for cache in self._input_caches.values()],
                       "B2_FCFS_producer_calls": 0, "AIDC_decision_variables": 0,
                       "optimized_families": ["arc", "charge_mode", "Pch", "Pdis", "Q", "SOC", "rho_max"]}
+            if lb_rescue is not None:
+                packet["development_lb_envelope"] = registry.callable(
+                    "v42_b3_joint/lb_research.py", "envelope_marker")(lb_rescue, case)
             output = SourceStageOutput(context.request, _plain(result), context.request.fixed_aidc,
                                        decision, model_sha, {}, {}, packet, ledger.sealed_receipt(),
                                        evidence_kind=registry.evidence_kind)
@@ -468,8 +473,12 @@ class MSourceBridge:
                     and _plain(case.point) == packet["raw_point"], "M_SOURCE_RAW_POINT_REPLAY_DRIFT")
             reader = registry.callable("v42_pr134_b1/common.py", "read")
             dual = reader(dual_path)
-            exact = registry.callable("v42_m1_research/check_lb.py", "check_rational_dual_certificate")(
-                case.A, case.d, dual, case_sha=case.case_sha)
+            if "development_lb_envelope" in packet:
+                exact = registry.callable("v42_b3_joint/lb_research.py", "verify_certificate")(
+                    context, case, dual, packet["development_lb_envelope"])
+            else:
+                exact = registry.callable("v42_m1_research/check_lb.py", "check_rational_dual_certificate")(
+                    case.A, case.d, dual, case_sha=case.case_sha)
             require(strict.get("PASS") is True and exact.get("PASS") is True,
                     "M_ORIGINAL_INTEGER_PHYSICAL_OR_GLOBAL_BOUND_FAILED")
             lower, upper = Fraction(exact["exact_bound"]), Fraction(strict["exact_Global_UB"])

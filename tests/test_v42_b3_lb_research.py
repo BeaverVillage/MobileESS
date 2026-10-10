@@ -18,26 +18,31 @@ _SPEC.loader.exec_module(_FIXTURE)
 
 
 def fixture(stage="M1", marker=1):
+    from contextlib import nullcontext
+    from v42_m1_anytime.dual_stabilization import StageIdentity
     value = _FIXTURE.SourceFixture(stage, marker)
     value.searches, value.routed_keywords = [], []
     registry = value.registry
     own = Path(lb_research.__file__).resolve()
     registry.source_manifest["v42_b3_joint/lb_research.py"] = hashlib.sha256(own.read_bytes()).hexdigest()
     registry.modules["v42_b3_joint.lb_research"] = _FIXTURE.fake_module(
-        checked_factory=lb_research.checked_factory)
+        checked_factory=lb_research.checked_factory,
+        checker_scope=lambda *args: nullcontext(),
+        envelope_marker=lambda *args: {"FAKE_SOURCE_TEST_ROUTING_ONLY": True},
+        verify_certificate=lambda context, case, dual, marker: registry.modules[
+            "v42_m1_research.check_lb"].check_rational_dual_certificate(
+                case.A, case.d, dual, case_sha=case.case_sha))
     registry.modules["v42_b3_joint.m_source"] = _FIXTURE.fake_module(
         fixed_aidc_payload=m_source.fixed_aidc_payload)
 
-    def identity(**fields):
-        return SimpleNamespace(**fields)
-
-    def search(stage_identity):
+    def search(stage_identity, **kwargs):
         result = SimpleNamespace(identity=stage_identity, candidates=[])
         value.searches.append(result)
         return result
 
     registry.modules[lb_research.COMMON_MODULE] = _FIXTURE.fake_module(
-        StageIdentity=identity, DualSearch=search)
+        StageIdentity=StageIdentity, DualSearch=search,
+        ProvedEnvelope=lambda identity, **kwargs: SimpleNamespace(identity=identity))
     model = registry.modules[lb_research.MODEL_MODULE]
     original_model_factory = model.__b3_rebind__
 
