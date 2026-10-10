@@ -1,0 +1,24 @@
+{
+  "actual_exit_code": 1,
+  "actual_command": "python -B -X utf8 D:\\v42_may_restart_20261010_02\\autonomous\\reload_owned_monitor_assembled_lb_03.py",
+  "helper": {
+    "path": "D:\\v42_may_restart_20261010_02\\autonomous\\reload_owned_monitor_assembled_lb_03.py",
+    "bytes": 7340,
+    "sha256": "0e95736b124f52191ec8581d02ffd9961abba031e7aa5445fb46f5c3be0b33e8"
+  },
+  "traceback_copied_from_actual_tool_output": "Traceback (most recent call last):\n  File \"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\psutil\\_pswindows.py\", line 726, in wrapper\n    return fun(self, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\psutil\\_pswindows.py\", line 988, in create_time\n    _user, _system, created = cext.proc_times(self.pid)\n                              ^^^^^^^^^^^^^^^^^^^^^^^^^\nProcessLookupError: [Errno 3] assume no such process (originated from GetExitCodeProcess != STILL_ACTIVE)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\psutil\\__init__.py\", line 355, in _init\n    self._ident = self._get_ident()\n                  ^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\psutil\\__init__.py\", line 393, in _get_ident\n    self._create_time = self._proc.create_time(fast_only=True)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\psutil\\_pswindows.py\", line 728, in wrapper\n    raise convert_oserror(err, pid=self.pid, name=self._name)\npsutil.NoSuchProcess: process no longer exists (pid=7340)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"D:\\v42_may_restart_20261010_02\\autonomous\\reload_owned_monitor_assembled_lb_03.py\", line 81, in <module>\n    new_host = read(ROOT/'AUTONOMOUS_MONITOR_SERVER.json')['process']; new = identity(new_host['PID'])\n                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_may_restart_20261010_02\\autonomous\\reload_owned_monitor_assembled_lb_03.py\", line 18, in identity\n    p = psutil.Process(pid)\n        ^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\psutil\\__init__.py\", line 319, in __init__\n    self._init(pid)\n  File \"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\psutil\\__init__.py\", line 368, in _init\n    raise NoSuchProcess(pid, msg=msg)\npsutil.NoSuchProcess: process PID not found (pid=7340)\n",
+  "failed_after_owned_display_replacement_launch": true,
+  "old_metadata_PID": 7340,
+  "replacement_PID": 105976,
+  "scientific_workers_terminated": 0,
+  "read_only_continuation": {
+    "path": "D:\\v42_may_restart_20261010_02\\autonomous\\verify_owned_monitor_assembled_lb_04.py",
+    "bytes": 4352,
+    "sha256": "535f91b42a1c6991a90bfa165185f2490662537d34929a7a4c8e0f636aa3d055"
+  },
+  "actual_continuation_verification": {
+    "path": "D:\\v42_may_restart_20261010_02\\autonomous\\MONITOR_ASSEMBLED_LB_RELOAD_VERIFICATION.json",
+    "bytes": 8662,
+    "sha256": "2ddf814f6e276d9fec51d87ae1b2a30373b0fd747e687e511d16428622d96034"
+  }
+}
