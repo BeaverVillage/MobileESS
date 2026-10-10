@@ -97,7 +97,14 @@ def safeguard(root,monitor_only=False):
     from v42_svr11.processes import live
     from v42_common_campaign.authority import singleton
     import psutil
-    root=Path(root);verify_ui(root);state=check(root,monitor_only)
+    root=Path(root);verify_ui(root)
+    # Proven lifetime-only successor changes may reuse complete predecessor
+    # dates. Audit before the immutable migration can dispatch fresh Workers.
+    m=read(root/'CAMPAIGN_MANIFEST.json')
+    if m.get('model_probe_context_retirement')=='EXACT_COMPLETED_OWNER_AND_FINALIZED_CALLBACK_REGISTRY_DETACH_CFFI_GC':
+        from reuse_svr11_completed import admit_before_first_dispatch
+        admit_before_first_dispatch(root)
+    state=check(root,monitor_only)
     if state['status']!='WAITING_PREDECESSOR_DRAIN':return state
     with singleton(root/'MONITOR_RECOVERY.lock'):
         current=read(root/'MONITOR_PROCESS.json') if (root/'MONITOR_PROCESS.json').exists() else {}
