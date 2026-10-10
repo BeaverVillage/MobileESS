@@ -1,0 +1,160 @@
+{
+  "schema": "V42_SOURCE36_ACTUAL_READONLY_EVENT",
+  "event": "FULL_LP_COMPUTATIONAL_ENTRY_COMPLETED",
+  "day": "2025-05-02",
+  "UTC": "2026-10-10T01:44:04.047433+00:00",
+  "source_SHA": "4f1a5980ae897ce1dcfc1ca0fc35836d2a17eddcf3e15df5d587de9f9bd0bf39",
+  "details": {
+    "worker": {
+      "PID": 107404,
+      "created": 1791596091.011591,
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_autonomous_b2.worker",
+        "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v36_01_s1\\request.json"
+      ],
+      "request": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v36_01_s1\\request.json",
+      "worker_slot": 1,
+      "arm": "B2",
+      "day": "2025-05-02",
+      "source_commit": "68b8903c1184a958c16dd7976044716bdff091c6",
+      "source_SHA": "4f1a5980ae897ce1dcfc1ca0fc35836d2a17eddcf3e15df5d587de9f9bd0bf39",
+      "recovery_queue_id": "03c60661387542048651a0c303656c78"
+    },
+    "entry": {
+      "schema": "V42_V33_APPROVED_FULL_LP_PRESOLVED_PDHG_NATIVE_ENTRY",
+      "status": "COMPLETED",
+      "Native_call_completed": true,
+      "call_index": 1,
+      "original_call": {
+        "component": "P1",
+        "track": "M_LB",
+        "label": "CURRENT_DAY_FULL_LP_EXACT_DUAL",
+        "requested_seconds": 300.0
+      },
+      "actual_parameters": {
+        "Method": 6,
+        "LPWarmStart": 2,
+        "Threads": 1,
+        "TimeLimit": 300.0,
+        "Crossover": -1,
+        "PDHG_parameters": {
+          "PDHGAbsTol": 1e-09,
+          "PDHGRelTol": 0.0,
+          "PDHGConvTol": 1e-09,
+          "PDHGGPU": 0
+        },
+        "Gurobi_version": [
+          13,
+          0,
+          2
+        ],
+        "precision": {
+          "FeasibilityTol": 1e-09,
+          "OptimalityTol": 1e-09,
+          "NumericFocus": 3,
+          "ScaleFlag": 2
+        }
+      },
+      "original_math_roundtrip": {
+        "PASS": true,
+        "matrix_RHS_senses_original_bounds_objective_constant_exact": true,
+        "all_original_columns_continuous_for_this_LP": true,
+        "fixed_candidate_bounds_only": false
+      },
+      "basis_start_receipt": {
+        "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v36_01_s1\\output\\F1_FULL_LP_WARMSTART.json",
+        "bytes": 5017,
+        "sha256": "86be1f675b491249cf5fa50270b5affe07719f4c7e286fb7747fc835009bf65a"
+      },
+      "state_packet": {
+        "path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v36_01_s1\\output\\F1_SAME_ATTEMPT_STATE.npz",
+        "bytes": 752570,
+        "sha256": "d8245d9b87def5266d6b8b721a0e257fced908ac2feab669bf13984c46d39801"
+      },
+      "Native_calls_added": 0,
+      "performance_benefit_claimed": false,
+      "extra_PDHG_parameters_restored_to_original_model": true,
+      "restored_PDHG_parameters": {
+        "PDHGAbsTol": 1e-06,
+        "PDHGRelTol": 1e-06,
+        "PDHGConvTol": 1e-06,
+        "PDHGGPU": 0
+      },
+      "completed_original_Native_call": {
+        "component": "P1",
+        "track": "M_LB",
+        "label": "CURRENT_DAY_FULL_LP_EXACT_DUAL",
+        "requested_seconds": 300.0,
+        "precision_policy": "B2_SEED_RECOVERY_V19",
+        "precision_parameters": {
+          "FeasibilityTol": 1e-09,
+          "OptimalityTol": 1e-09,
+          "NumericFocus": 3,
+          "ScaleFlag": 2
+        },
+        "effective_TimeLimit": 300.0,
+        "started_wall_seconds": 248.22925979999127,
+        "UTC": "2026-10-10T01:39:01.055936+00:00",
+        "status": "FINISHED",
+        "time_limit_policy": "B2_REQUEST_CAPPED_BY_REMAINING_NATIVE",
+        "effective_MIPGap": 0.005,
+        "Native_objective_basis": "ORIGINAL_OBJECTIVE",
+        "error": null,
+        "entered_native": true,
+        "Native_Runtime": 300.94200015068054,
+        "runtime_unavailable": false,
+        "optimize_wall_seconds": 301.0126489000395,
+        "finished_wall_seconds": 549.2419079999672,
+        "SolCount": 0.0,
+        "Native_SolCount": 0.0,
+        "Native_solution_count_callback": "UNKNOWN",
+        "Native_incumbent": "UNKNOWN",
+        "Native_BestBd": "UNKNOWN",
+        "Native_Gap": "UNKNOWN",
+        "Native_NodeCount": 0.0,
+        "Native_root_progress": "UNKNOWN",
+        "Native_subphase": "PRESOLVE",
+        "Native_iteration_count": "UNKNOWN",
+        "Native_observation_UTC": "2026-10-10T01:44:02.070580+00:00",
+        "Native_mip_phase": "UNKNOWN",
+        "Native_open_nodes": "UNKNOWN",
+        "Native_gap_source": "MODEL_MIPGAP_NOT_CERTIFIED",
+        "Native_first_incumbent_Runtime": "UNKNOWN",
+        "Native_first_incumbent_UTC": "UNKNOWN",
+        "Native_first_incumbent_source": "UNKNOWN",
+        "Native_Work": 811.4662231841601,
+        "Native_status": 11
+      }
+    }
+  },
+  "files": [
+    {
+      "original_path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v36_01_s1\\request.json",
+      "path": "D:\\v42_may_restart_20261010_02\\autonomous\\source36_actual_watch\\2025-05-02_FULL_LP_COMPUTATIONAL_ENTRY_COMPLETED_20261010T014404046435\\request.json",
+      "bytes": 1809,
+      "sha256": "1f903f9c38d4a7943b8bbc86a9abf663b5f9fc2a6329e5246f52c58eca44e2fd"
+    },
+    {
+      "original_path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v36_01_s1\\output\\F1_FULL_LP_COMPUTATIONAL_ENTRY.json",
+      "path": "D:\\v42_may_restart_20261010_02\\autonomous\\source36_actual_watch\\2025-05-02_FULL_LP_COMPUTATIONAL_ENTRY_COMPLETED_20261010T014404046435\\F1_FULL_LP_COMPUTATIONAL_ENTRY.json",
+      "bytes": 3376,
+      "sha256": "5e3a9697696b6a1fb482e68f88df318dffa745365d826147d245e98de3603337"
+    },
+    {
+      "original_path": "D:\\v42_may_restart_20261010_02\\dates\\B2\\2025-05-02\\attempts\\repair_b2_v36_01_s1\\NATIVE_RUNTIME_LEDGER.json",
+      "path": "D:\\v42_may_restart_20261010_02\\autonomous\\source36_actual_watch\\2025-05-02_FULL_LP_COMPUTATIONAL_ENTRY_COMPLETED_20261010T014404046435\\NATIVE_RUNTIME_LEDGER.json",
+      "bytes": 4786,
+      "sha256": "6b1e21fadd51e7fc3ce8427520946f41a58f8015c37180cb63f2dfa4e9b06326"
+    }
+  ],
+  "Native_optimize_calls": 0,
+  "model_constructions": 0,
+  "scientific_worker_changes": 0,
+  "queue_changes": 0,
+  "final_scientific_PASS_not_inferred": true
+}

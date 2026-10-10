@@ -1,0 +1,96 @@
+{
+  "schema": "V42_FIRST_ACTUAL_TRANSITIONS_CAPTURE_SCOPE_CORRECTION_V2",
+  "UTC": "2026-10-10T01:52:03.583684+00:00",
+  "artifact_consistency_verified": true,
+  "scientific_PASS_claimed": false,
+  "corrects_original_package_inventory": {
+    "path": "D:\\MobileESS_v42_autonomous\\docs\\v42_autonomous_may_20261010\\SOURCE36_FIRST_ACTUAL_TRANSITIONS\\SHA_INVENTORY.json",
+    "bytes": 77800,
+    "sha256": "150c9b49aeec2e63c6c6f7a1136e4c79bc1c6a46333b4674e25fdea8a9639693"
+  },
+  "original_scope": [
+    "2026-10-10T01:49:09+00:00",
+    "2026-10-10T01:49:15+00:00"
+  ],
+  "original_raw_bytes_and_old_inventory_preserved": true,
+  "initial_documentation_claim_error": {
+    "cause": "The package producer checked completed calls only, omitted the Native ledger inflight field, and did not classify new RMP watch events added before capture.",
+    "affected_files": [
+      "README.md",
+      "INDEPENDENT_DOC_REVIEW/SOURCE36_FIRST_ACTUAL_TRANSITIONS_READONLY_DOC_REVIEW.json"
+    ],
+    "affected_claims": [
+      "No first RMP call/event existed in this capture",
+      "first_RMP_event_observed_in_fixed_capture=false",
+      "current_sequential_reads/2025-05-01/actual_RMP_call_observed=false"
+    ],
+    "prior_guard_assertions_did_not_fail": true,
+    "source_science_or_production_failure": false
+  },
+  "corrected_fixed_capture_facts": {
+    "root_watch_RMP_entry_observed": true,
+    "root_watch_event_UTC": "2026-10-10T01:48:57.271362+00:00",
+    "identity": {
+      "run_id": "may2025_b2_b3_fresh_20261009T172421_999933+0000",
+      "arm": "B2",
+      "day": "2025-05-01",
+      "worker_slot": 3,
+      "attempt_id": "repair_b2_v36_01_s3"
+    },
+    "computational_entry_status": "ABOUT_TO_DELEGATE",
+    "selected_Method": 0,
+    "original_per_call_seconds": 30,
+    "Native_ledger_IN_FLIGHT_observed": true,
+    "Native_ledger_inflight": {
+      "component": "P1",
+      "track": "RMP",
+      "label": "ONE_RESTRICTED_MASTER",
+      "requested_seconds": 30,
+      "precision_policy": "B2_SEED_RECOVERY_V19",
+      "precision_parameters": {
+        "FeasibilityTol": 1e-09,
+        "OptimalityTol": 1e-09,
+        "NumericFocus": 3,
+        "ScaleFlag": 2
+      },
+      "effective_TimeLimit": 30.0,
+      "started_wall_seconds": 997.7338421000168,
+      "UTC": "2026-10-10T01:48:50.285402+00:00",
+      "status": "IN_FLIGHT",
+      "time_limit_policy": "B2_REQUEST_CAPPED_BY_REMAINING_NATIVE",
+      "effective_MIPGap": 0.0001
+    },
+    "completed_RMP_Native_call_observed": false,
+    "finite_Pi_or_RMP_result_observed": false,
+    "independent_observer_RMP_event_cursor_still_empty": true,
+    "Native_backend_optimize_entry_or_completion_proved_by_inflight_alone": false,
+    "Source36_performance_benefit_or_final_scientific_PASS_observed": false
+  },
+  "unchanged_transition_facts": {
+    "source35_all3_PASS": false,
+    "source35_all3_status": "TIME_LIMIT_FEASIBLE_NOT_CERTIFIED",
+    "source36_birth_dates": [
+      "2025-05-01",
+      "2025-05-02",
+      "2025-05-10"
+    ],
+    "observed_retry_streak": [
+      1,
+      2,
+      0
+    ],
+    "May03_at_ordinary_event": "READY_VERIFIED_REPAIR priority1000, no new PID"
+  },
+  "limitations": [
+    "This correction reads already captured bytes only; it is not a new current production scan.",
+    "The earlier package is immutable. Its raw-copy inventory remains valid, but the identified absence statements must be superseded by this correction.",
+    "The two original producer folders are not sealed as whole future directories and can append later events.",
+    "ABOUT_TO_DELEGATE plus IN_FLIGHT does not prove finite Pi, completed runtime, performance benefit or scientific certification."
+  ],
+  "model_constructions": 0,
+  "Native_optimize_calls": 0,
+  "checker_replays": 0,
+  "tests": 0,
+  "production_mutations": 0,
+  "Git_mutations": 0
+}
