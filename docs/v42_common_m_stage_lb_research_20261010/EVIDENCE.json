@@ -8,7 +8,8 @@
     "number": 191,
     "head": "40b6f94dcd80e470f93c73b7479fdd2d9d91c3f2"
   },
-  "implementation_commit": "1eae7e5574c5028b24535e4a1d3cd0cd5b427994",
+  "initial_implementation_commit": "1eae7e5574c5028b24535e4a1d3cd0cd5b427994",
+  "implementation_commit": "f90c514d7ea42311d14fd404d14d55d399981057",
   "Draft_PR": "https://github.com/BeaverVillage/MobileESS/pull/202",
   "production_promoted": false,
   "scientific_date_PASS_claimed": false,
@@ -109,40 +110,404 @@
     "P2_calls": 0
   },
   "current_source_sha256": {
-    "v42_m1_anytime\\dual_stabilization.py": "d580d0dbdbb413663b2eb7eaeb36f863c78ee9c0b3d85fb947f7e0d7e1879d33",
-    "v42_may_campaign_native90\\m_stage.py": "afc4c26f5c97007594637ec14214aaac15079a79909a2ec62368816a588fdd94",
+    "v42_m1_anytime\\dual_stabilization.py": "684d77f818efdab69db2a1f930fc62a3e59d0c81524a5a9e0e537c3a864b5cd9",
+    "v42_may_campaign_native90\\m_stage.py": "bb72b55f8d450687b04b42524632c5f15ac5163460c90b5711718ef990d955fe",
     "v42_may_campaign_native90\\budget.py": "69663e75a0f4cadaa00318ee69745fd979c476feb7407e51dc18968c567cb3c0",
-    "v42_autonomous_b2\\lb_research.py": "2eda025e60a30083b59bf8b1e50aca5096b891eb818d25af279227674cb37483",
-    "v42_b3_joint\\lb_research.py": "16dc74fed16f48e2637c38f8a3d842c8fabed2516e23abb50d97474239af77c2",
-    "v42_b3_joint\\m_source.py": "882d28f098d6679ea1658016dc5a5d1c436acc7257983c56b1ba5787a20a77c3",
+    "v42_autonomous_b2\\lb_research.py": "7042c8dc7eb2c397992fcc19c5d07515fca94cd91d89897069ee4d63bd45df3d",
+    "v42_b3_joint\\lb_research.py": "4d911da4f3936e750e3bdd7b50be6507d31df222cb213ca39679a323fe48b569",
+    "v42_b3_joint\\m_source.py": "1a3cb5606cc2249c2034ee31bbde7fc283b475d4c193f93373d4a8ca2ba22814",
+    "v42_b3_joint\\adapters.py": "39c48d3800fd69ab80f02539a5edc2d58a69e74ff5a72fc245ed330b5c30be0c",
     "v42_b3_joint\\native_ledger.py": "4acc87b8e4e487f33b7a078ef4c6b79945dd533be3078433bb1f3f93a61ced40"
   },
   "Gate2": {
-    "status": "NOT_RUN_PRODUCTION_RESOURCE_COLLISION_UNCONFIRMED",
-    "sealed_summary": {
-      "path": "D:\\v42_common_lb_equality_repair_20261010_01\\GATE2_NOT_RUN_20261010_01\\GATE2_NOT_RUN_RESOURCE_COLLISION_SUMMARY.json",
-      "sha256": "59739b183dc171f566affcde8868510b3f25677befff39aa2511d34cdd34f89f",
-      "bytes": 8948
+    "receipt": {
+      "path": "D:\\v42_gate2_may01_rmp_20261010_02\\GATE2_RESULT.json",
+      "sha256": "e916dbcab8e103d6854d1077674842f1225fa7ebef53ea746ea8d542473f0b1e",
+      "bytes": 12208
     },
-    "actual_failure": {
-      "path": "D:\\v42_common_lb_equality_repair_20261010_01\\GATE2_PRE_NATIVE_ACTUAL_WORKER_GUARD_FAILURE_01.json",
-      "sha256": "0383638c8990d7ec6a7f6c979f5b69c500a4d47b5d0bf496dc59a7dd20325fcc",
-      "bytes": 6331
+    "status": "FAILED",
+    "Native_calls": 1,
+    "Native_Runtime": 30.115000009536743,
+    "Native_budget_PASS": true,
+    "Native_status": 11,
+    "SolCount": 0,
+    "scientific_Global_LB_or_date_PASS": false,
+    "Native_objective_used_as_Global_LB": false,
+    "pricing": "NOT_RUN",
+    "Native_pricing_calls": 0,
+    "additional_dates": 0,
+    "Runtime_rewritten_or_capped": false,
+    "actual_error": "PermissionError('ORIGINAL_PI_SIGN_INVALID_NO_CLIPPING')",
+    "wall_timings": {
+      "array_preprocessing_wall_seconds": 4.410132200049702,
+      "model_build_and_readback_wall_seconds": 1.4027843000367284,
+      "optimize_wall_seconds": 30.693825499969535,
+      "total_wall_seconds": 37.435702999995556
     },
-    "invocation_exit_code": 1,
-    "tool_wall_seconds": 1.2339774000000001,
-    "models_constructed": 0,
+    "Native_call_physically_returned": true,
+    "Native_call_completed_and_Runtime_measured": true,
+    "original_candidate_certificate_PASS": null,
+    "retained_Certified_Global_LB": 0.38895900867731903,
+    "retained_UB": 0.5406756909532602,
+    "retained_gap_percent": 28.060570285386962,
+    "RAW_NATIVE_PHYSICAL_RETURN.json": {
+      "path": "D:\\v42_gate2_may01_rmp_20261010_02\\RAW_NATIVE_PHYSICAL_RETURN.json",
+      "sha256": "823d5be92cb237142d8f0c9ad0c6cf1dbf151971850cc3242ef2306f76514add",
+      "bytes": 492
+    },
+    "Native_ledger": {
+      "path": "D:\\v42_gate2_may01_rmp_20261010_02\\NATIVE_LEDGER.json",
+      "sha256": "604541695fa005f3e33402e8414d7b3c7fbfe1ba3947a0272cb025e82ca7413b",
+      "bytes": 1234
+    },
+    "measured_Native_Runtime": 30.115000009536743,
+    "actual_call_TimeLimit_overshoot_seconds": 0.11500000953674316,
+    "actual_budget_overshoot_seconds": 0.0
+  },
+  "real_Gurobi_TimeLimit_readback": {
+    "receipt": {
+      "path": "D:\\v42_common_native_cap_readback_20261010_01\\ACTUAL_GUROBI_NATIVE0_TIMELIMIT_READBACK.json",
+      "sha256": "ebfcdf80730bcbad47a6e7059e412081150a673d137fdea1b011dca564c11573",
+      "bytes": 3727
+    },
+    "PASS": true,
+    "cases": [
+      {
+        "case": "RMP_30",
+        "requested_seconds": 30.0,
+        "remaining_seconds": 5400.0,
+        "expected_TimeLimit": 30.0,
+        "actual_Gurobi_TimeLimit_readback": 30.0,
+        "actual_Gurobi_Threads_readback": 1,
+        "PASS": true
+      },
+      {
+        "case": "LP_PRICING_45",
+        "requested_seconds": 45.0,
+        "remaining_seconds": 5400.0,
+        "expected_TimeLimit": 45.0,
+        "actual_Gurobi_TimeLimit_readback": 45.0,
+        "actual_Gurobi_Threads_readback": 1,
+        "PASS": true
+      },
+      {
+        "case": "RMP_MIN_REMAINING",
+        "requested_seconds": 30.0,
+        "remaining_seconds": 17.25,
+        "expected_TimeLimit": 17.25,
+        "actual_Gurobi_TimeLimit_readback": 17.25,
+        "actual_Gurobi_Threads_readback": 1,
+        "PASS": true
+      },
+      {
+        "case": "LP_MIN_REMAINING",
+        "requested_seconds": 45.0,
+        "remaining_seconds": 0.125,
+        "expected_TimeLimit": 0.125,
+        "actual_Gurobi_TimeLimit_readback": 0.125,
+        "actual_Gurobi_Threads_readback": 1,
+        "PASS": true
+      },
+      {
+        "case": "OMITTED_DEFAULT",
+        "requested_seconds": null,
+        "remaining_seconds": 5400.0,
+        "expected_TimeLimit": 5400.0,
+        "actual_Gurobi_TimeLimit_readback": 5400.0,
+        "actual_Gurobi_Threads_readback": 1,
+        "PASS": true
+      },
+      {
+        "case": "INVALID_CAPS_BEFORE_MUTATION",
+        "variants": [
+          {
+            "type": "NoneType",
+            "representation": "None",
+            "rejected_before_TimeLimit_mutation": true
+          },
+          {
+            "type": "bool",
+            "representation": "True",
+            "rejected_before_TimeLimit_mutation": true
+          },
+          {
+            "type": "str",
+            "representation": "'30'",
+            "rejected_before_TimeLimit_mutation": true
+          },
+          {
+            "type": "float",
+            "representation": "nan",
+            "rejected_before_TimeLimit_mutation": true
+          },
+          {
+            "type": "float",
+            "representation": "inf",
+            "rejected_before_TimeLimit_mutation": true
+          },
+          {
+            "type": "float",
+            "representation": "0.0",
+            "rejected_before_TimeLimit_mutation": true
+          },
+          {
+            "type": "float",
+            "representation": "-1.0",
+            "rejected_before_TimeLimit_mutation": true
+          }
+        ],
+        "PASS": true
+      }
+    ],
+    "scope": "RESEARCH_SOURCE_EXACT_AST_PREFIX_PARAMETER_READBACK_ONLY",
+    "Native_Runtime": 0.0,
+    "optimize_calls": 0,
+    "full_Production_DateBudget_executed": false,
+    "wall_seconds": 0.05704210000112653
+  },
+  "latest_user_authorized_campaign_stop": {
+    "receipt": {
+      "path": "D:\\v42_lb_research_stop_20261010_03\\evidence\\USER_STOP_RECEIPT.json",
+      "sha256": "cc37928dd58cb017d827d1c90fda9f17ed363c99121a6b353d2bce86014e572a",
+      "bytes": 28534
+    },
+    "state": "USER_STOPPED_FOR_LB_RESEARCH",
+    "stopped_PIDs": [
+      92052,
+      109656,
+      97168,
+      101664
+    ],
+    "all_exact_owned_processes_gone": true,
+    "execution_sources_unchanged": true,
+    "scientific_ledgers_or_results_rewritten": false,
+    "queue_written": false,
+    "unfinished_Native_Runtime": "UNKNOWN_PRESERVED_IN_ORIGINAL_LEDGER",
+    "restart_cause": "Windows Task Scheduler exact campaign Supervisor action; enabled repeating trigger PT5M",
+    "task_name": "MobileESS_V42_May_B2_B3_Autonomous_Supervisor",
+    "task_enabled_after_stop": false,
+    "task_before": {
+      "path": "D:\\v42_lb_research_stop_20261010_03\\SUPERVISOR_TASK_BEFORE.xml",
+      "sha256": "a157f63484827ef84cb64c34275b99263e9a3141834d6a9fab1fec9bce6c784f",
+      "bytes": 1847
+    },
+    "task_disabled": {
+      "path": "D:\\v42_lb_research_stop_20261010_03\\SUPERVISOR_TASK_DISABLED.xml",
+      "sha256": "c479c7f2708897ece728341d5cf47b2e3d3f1024964e73c704eefac40591c79e",
+      "bytes": 1877
+    },
+    "B3_reservation_changed": false
+  },
+  "next_structural_candidate": {
+    "receipt": {
+      "path": "D:\\v42_structural_lb_next_20261010_01\\SOC_AWARE_MULTITIME_CONFLICT_PROOF_PILOT.json",
+      "sha256": "8c4b5798d28eadf58ab53541fc897831c673c3cd1541a520ebf088e0dfdd2ea1",
+      "bytes": 3573
+    },
+    "candidate": "SOC_AWARE_MULTITIME_NODE_CONFLICT",
+    "scope": "DATA_ONLY_EXACT_LOCAL_PHYSICAL_LP_COUNTEREXAMPLE_AND_VALIDITY_PILOT",
+    "toy_exact_cut_violation": "1/2",
+    "integer_validity_proof": "Any original integer unit trajectory is one forward path. Its SOC at the first endpoint is at most Emax. On a stay, next SOC is at most min(Emax,current_SOC+dt*eta_c*Pmax); on a move it decreases by exact movement energy. Discharging can only reduce this maximum and P/Q grid constraints can only restrict it. Induction over the complete DAG upper-bounds every feasible path. An unreachable second endpoint therefore forbids visiting both. The inequality preserves every original integer plan and their convex combinations.",
+    "Native_Runtime": 0.0,
+    "actual_May01_matrix_separation": "NOT_RUN",
+    "new_Certified_Global_LB": "NOT_RUN"
+  },
+  "finite_envelope_GateA": {
+    "receipt": {
+      "path": "D:\\v42_finite_envelope_gateA_20261010_01\\GATEA_FINAL.json",
+      "sha256": "51e1166d1fbb1df1611d1020e85ddc0fbb5ca40c24c4f4d15ad106556a69c6c9",
+      "bytes": 556207
+    },
+    "PASS": true,
+    "unique_tests": 24,
+    "new_tests": 16,
+    "affected_existing_tests": 8,
+    "actual_test_executions": 35,
+    "initial_failed_tests": 1,
+    "rerun_only_changed_B3_tests": 11,
+    "wall_seconds": 8.580668599985074,
     "Native_calls": 0,
     "Native_Runtime": 0.0,
-    "Native_pricing_calls": 0,
-    "retries": 0,
-    "model_build_wall_seconds": "UNKNOWN_NOT_ENTERED",
-    "Native_optimize_wall_seconds": "NOT_RUN",
-    "total_trial_wall_seconds": "UNKNOWN",
     "actual_B3_M1": "NOT_RUN",
-    "actual_B3_M2": "NOT_RUN",
-    "resource_noncollision": "UNCONFIRMED",
-    "production_worker_or_supervisor_stopped_by_this_gate": false,
-    "worker_restart_cause": "UNKNOWN"
-  }
+    "actual_B3_M2": "NOT_RUN"
+  },
+  "actual_B2_finite_envelope": {
+    "receipt": {
+      "path": "D:\\v42_finite_envelope_actual_20261010_01\\ACTUAL_B2_SAVED_FINITE_ENVELOPE_PROVIDER_SELECT_RECEIPT.json",
+      "sha256": "649571c7fe00e89e3cad6a4954b748d988d8253c3b653533348eedfbd33971f3",
+      "bytes": 16886
+    },
+    "data_only_provider_audit_PASS": true,
+    "binding": "SAVED_C3A_DATA_ONLY",
+    "full_production_factory_admission": "NOT_RUN",
+    "current_branch_new_case_build": "NOT_RUN",
+    "provider_source_function": "_finite_box_provider AST source exact; checked_factory/_declared_file globals replaced by explicit saved-data-only validators",
+    "source_and_inputs_unchanged": true,
+    "stage_identity": {
+      "stage": "B2_M",
+      "day": "2025-05-01",
+      "source_sha": "684d77f818efdab69db2a1f930fc62a3e59d0c81524a5a9e0e537c3a864b5cd9",
+      "input_sha": "2318d4cb4fd42fabb493dbee923eda037ae697a524406fabd9c8a7e7615c7f59",
+      "fixed_input_sha": "5d53bc9e3ca0d54e192516f83afe79072548eeecfcab7317155dc74571fee86e",
+      "case_sha": "00a75e638b92b0437e68241b9e46aa864f64e3db0877ac3cf2fe494d0504e917",
+      "matrix_sha": "4208fb565b604245319974463282a010aaff38f3c9c11027719be9579f4f7226",
+      "domain_sha": "f46d93c8d1a3be15f745087104240e0d46a07e81ed995d03e006cdd5482c9b12"
+    },
+    "shape": [
+      779129,
+      306040
+    ],
+    "original_domain_mutated": false,
+    "actual_call_counters": {
+      "derive": 1,
+      "verify": 1,
+      "original_checker": 2,
+      "select": 1
+    },
+    "provider_counters": {
+      "derive": 1,
+      "verify": 1,
+      "cache_hits": 3
+    },
+    "total_wall_seconds": 199.75224820000585,
+    "derived_columns": 48547,
+    "bounds": {
+      "path": "D:\\v42_finite_envelope_actual_20261010_01\\ACTUAL_ORIGINAL_B2_FINITE_ENVELOPE_BOUNDS.npz",
+      "bytes": 728173,
+      "sha256": "3d6271f3cd8de4159aeeaa644709380b2f7baab3db4ac382cca6d1547a79c175"
+    },
+    "selected_status": "VALID_PROPOSAL",
+    "baseline_exact_L1": "72763421188672844413290555716948908315532491447013/187072209578355573530071658587684226515959365500928",
+    "selected_exact_independently_checked_bound": "-3643437540611357006778357012707711848414476481247369935473783173/2993155353253689176481146537402947624255349848014848",
+    "certified_gain": "-3643437540612521221517375778218324497305947663780418455336935381/2993155353253689176481146537402947624255349848014848",
+    "Global_LB_published": false,
+    "new_research_case_certificate_issued": false,
+    "scientific_date_or_campaign_PASS": false,
+    "models_constructed": 0,
+    "Native_optimize_calls": 0,
+    "harness_history": {
+      "path": "D:\\v42_finite_envelope_actual_20261010_01\\EXTERNAL_HARNESS_HISTORY_QUALIFICATION_SCOPE.json",
+      "sha256": "32e5ef77f89ddde3194cdfac55ca42ed7ce58fdda2129dd22b295aab0d657772",
+      "bytes": 2921
+    },
+    "counter_scope": "One completed qualifying invocation; a preceding partial derive was interrupted and preserved separately."
+  },
+  "Gate2_final_additive_scope": {
+    "receipt": {
+      "path": "D:\\v42_gate2_may01_rmp_20261010_02\\GATEB_ACTUAL_SINGLE_NATIVE30_ADDITIVE_FINAL_SUMMARY.json",
+      "sha256": "65ba6a463d489af15e04313f6c222bcf4ed0bdd99bcbf8f4a23e409e342b9408",
+      "bytes": 4211
+    },
+    "schema": "V42_SINGLE_GATEB_ACTUAL_NATIVE30_FINAL_ADDITIVE_SCOPE_V1",
+    "actual_trial_completed": true,
+    "actual_Native_calls": 1,
+    "extra_Native_calls": 0,
+    "raw_finite_Pi": true,
+    "status_name": "INTERRUPTED",
+    "Gurobi_status": 11,
+    "SolCount": 0,
+    "actual_TimeLimit_readback": 30.0,
+    "actual_Runtime_seconds": 30.115000009536743,
+    "actual_TimeLimit_overshoot_seconds": 0.11500000953674316,
+    "Runtime_capped_or_rewritten": false,
+    "cap_configuration_error": false,
+    "Native_budget_limit": 210.0,
+    "Native_budget_PASS": true,
+    "computational_original_Pi_restore": "Pi_original=R*Pi_native; byte-exact inverse roundtrip verified",
+    "invalid_original_sign_count": 1057,
+    "invalid_samples": [
+      {
+        "row": 573514,
+        "sense": "<",
+        "name": "voltage_upper[63,239]",
+        "exact_multiplier": "1010397306016255/512",
+        "absolute_float": 1973432238312.998
+      },
+      {
+        "row": 625393,
+        "sense": "<",
+        "name": "voltage_upper[72,209]",
+        "exact_multiplier": "7619829955424399/4096",
+        "absolute_float": 1860310047711.035
+      },
+      {
+        "row": 573566,
+        "sense": "<",
+        "name": "voltage_upper[63,266]",
+        "exact_multiplier": "8648960521148415/32768",
+        "absolute_float": 263945328404.18747
+      },
+      {
+        "row": 590465,
+        "sense": "<",
+        "name": "voltage_upper[66,57]",
+        "exact_multiplier": "3581193455744567/16384",
+        "absolute_float": 218578702132.8471
+      },
+      {
+        "row": 613547,
+        "sense": "<",
+        "name": "voltage_upper[70,57]",
+        "exact_multiplier": "7056607424567311/32768",
+        "absolute_float": 215350568376.68796
+      }
+    ],
+    "signs_clipped": false,
+    "original_L1_changed_dual_rows": 29268,
+    "original_L1_max_abs_difference_exact": "1010397306016255/512",
+    "original_full_float_c_minus_At_y_max_abs": 45875785601.468925,
+    "original_full_float_c_minus_At_y_nonzero": 50168,
+    "float_residual_is_certificate": false,
+    "original_fresh_independent_checker": "NOT_RUN_SIGN_GATE_REJECT",
+    "fresh_DualSearch_select": "NOT_RUN_SIGN_GATE_REJECT",
+    "Native_pricing": "NOT_RUN",
+    "additional_mix_repair": "NOT_RUN",
+    "actual_fresh_certified_gain": "NOT_AVAILABLE",
+    "retained_Global_LB_improvement": 0,
+    "retained_original_L1_exact": "72763421188672844413290555716948908315532491447013/187072209578355573530071658587684226515959365500928",
+    "Global_LB_published": false,
+    "scientific_date_campaign_PASS": false,
+    "current_required_source_input_records_unchanged_after_exception": true,
+    "protected_original1005_matches_historical_after_exception": true,
+    "authorized_original_changes_exactly_two": [
+      "v42_may_campaign_native90/budget.py",
+      "v42_may_campaign_native90/m_stage.py"
+    ],
+    "approved_authorized_original_sources_match": true,
+    "original1007_current_map_sha256": "bb757417d1972eeef5392e635722f70b0bd082666cc935afba858813ffb95041",
+    "original1007_all_historical_match": false,
+    "wall_phases_seconds": {
+      "array_preprocessing_wall_seconds": 4.410132200049702,
+      "model_build_and_readback_wall_seconds": 1.4027843000367284,
+      "optimize_wall_seconds": 30.693825499969535,
+      "total_wall_seconds": 37.435702999995556
+    },
+    "failure_original_result": {
+      "path": "D:\\v42_gate2_may01_rmp_20261010_02\\GATE2_RESULT.json",
+      "bytes": 12208,
+      "sha256": "e916dbcab8e103d6854d1077674842f1225fa7ebef53ea746ea8d542473f0b1e"
+    },
+    "Native_ledger": {
+      "path": "D:\\v42_gate2_may01_rmp_20261010_02\\NATIVE_LEDGER.json",
+      "bytes": 1234,
+      "sha256": "604541695fa005f3e33402e8414d7b3c7fbfe1ba3947a0272cb025e82ca7413b"
+    },
+    "raw_return": {
+      "path": "D:\\v42_gate2_may01_rmp_20261010_02\\RAW_NATIVE_PHYSICAL_RETURN.json",
+      "bytes": 492,
+      "sha256": "823d5be92cb237142d8f0c9ad0c6cf1dbf151971850cc3242ef2306f76514add"
+    },
+    "read_only_sign_diagnosis": {
+      "path": "D:\\v42_gate2_may01_rmp_20261010_02\\POST_NATIVE_SIGN_REJECTION_READONLY_DIAGNOSIS.json",
+      "bytes": 12861,
+      "sha256": "aefe9ad9ab86e1eb973a45181ca04d0e9415254aa7f36be907f6ac3bb0a6feea"
+    },
+    "production_restart_or_process_queue_manifest_Git_changes_by_trial": false
+  },
+  "implementation_scope": "PASS: actual saved B2 numerical proof/select and B2/B3 adapter fixtures; full real production admission and B3 physical cases NOT_RUN.",
+  "Scientific_Improvement_PASS": false,
+  "retained_Global_LB_improvement": 0,
+  "fresh_certified_candidate": "NOT_AVAILABLE: original sign gate rejected fresh Pi before select/checker.",
+  "campaign_restarted_after_research": false,
+  "total_research_wall_seconds": "UNKNOWN: distinct phase clocks; not inferred by summing completed receipts."
 }
