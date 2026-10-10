@@ -1,0 +1,2188 @@
+{
+  "status": "RUNNING",
+  "policy": "B0",
+  "counts": {
+    "PASS": 2,
+    "FAIL": 0,
+    "RUNNING": 1,
+    "NOT_EXECUTED": 121,
+    "completed": 2
+  },
+  "workers": [
+    {
+      "arm": "B0",
+      "day": "2025-05-03",
+      "PID": 108248,
+      "phase": "ACTUAL:B0 · Fresh AC",
+      "optimization_status": "Native 0 · B0",
+      "Native_Runtime": 0,
+      "UB": null,
+      "certified_LB": null,
+      "certified_Gap": null,
+      "Fresh": "ACTUAL:B0 90/96"
+    }
+  ],
+  "policies": [
+    {
+      "policy": "B0",
+      "PASS": 2,
+      "FAIL": 0,
+      "RUNNING": 1,
+      "remaining": 28
+    },
+    {
+      "policy": "B2",
+      "PASS": 0,
+      "FAIL": 0,
+      "RUNNING": 0,
+      "remaining": 31
+    },
+    {
+      "policy": "B1",
+      "PASS": 0,
+      "FAIL": 0,
+      "RUNNING": 0,
+      "remaining": 31
+    },
+    {
+      "policy": "B3",
+      "PASS": 0,
+      "FAIL": 0,
+      "RUNNING": 0,
+      "remaining": 31
+    }
+  ],
+  "dates": [
+    {
+      "arm": "B0",
+      "day": "2025-05-01",
+      "status": "PASS",
+      "attempts": [
+        "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-01\\attempts\\attempt_01\\request.json"
+      ],
+      "request": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-01\\attempts\\attempt_01\\request.json",
+      "worker": {
+        "PID": 117380,
+        "create_time": 1791659402.875796,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.worker",
+          "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-01\\attempts\\attempt_01\\request.json"
+        ],
+        "cwd": "D:\\v42_svr11_epoch04_20261011",
+        "CPU_seconds": 45.53125,
+        "UTC": "2026-10-10T19:10:50.246868+00:00",
+        "arm": "B0",
+        "day": "2025-05-01",
+        "worker_slot": 1,
+        "request": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-01\\attempts\\attempt_01\\request.json"
+      },
+      "result": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-01\\attempts\\attempt_01\\RESULT.json",
+      "result_SHA": "05bdef844e1f13948642f430963504c96e06cfbac9b294798ceeaeb1952dcdbf",
+      "reason": "PASS",
+      "metrics": {
+        "environments": {
+          "ACTUAL": {
+            "slots": 96,
+            "Vmin": 0.9791298190262312,
+            "Vmax": 1.0474566127005387,
+            "voltage_violations": 0,
+            "line_current_violations": 0,
+            "transformer_current_violations": 0,
+            "transformer_nameplate_current_violations": 0,
+            "transformer_kVA_violations": 0,
+            "maximum_line_loading": 0.7189472461061958,
+            "losses_kWh": 1582.9762707736943,
+            "losses_kvarh": 2586.881202724328,
+            "AC_converged": true,
+            "control_complete": true,
+            "Full_AC_Physical_PASS": true,
+            "SVR11_finite_rating_and_taps": true,
+            "original_RegControl_count": 7,
+            "SVR_bank_count": 11,
+            "phase_tap_operation_evidence": {
+              "bytes": 35644436,
+              "path": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-01\\attempts\\attempt_01\\output\\ACTUAL\\CAPCONTROL_SVR\\VOLTAGE_CONTROL_ACTUAL_SLOTS.json",
+              "sha256": "17c2f033ddf6664ada65c84ff4c17a157d43bff8b451ffaa740e04750a283e50"
+            },
+            "SVR_tap_ranges": {
+              "STA01::1": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 2
+              },
+              "STA01::2": {
+                "min": 0.9812500000000001,
+                "max": 1.0,
+                "changes": 3
+              },
+              "STA01::3": {
+                "min": 0.99375,
+                "max": 1.0,
+                "changes": 2
+              },
+              "STA06::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "STA06::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "STA06::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "STA08::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "STA08::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "STA08::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS83::1": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 3
+              },
+              "BUS83::2": {
+                "min": 0.9875,
+                "max": 0.99375,
+                "changes": 1
+              },
+              "BUS83::3": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 3
+              },
+              "BUS79::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS79::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 2
+              },
+              "BUS79::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS108::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS108::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "BUS108::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS50::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 3
+              },
+              "BUS50::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 2
+              },
+              "BUS50::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 1
+              },
+              "BUS82::1": {
+                "min": 0.9562500000000002,
+                "max": 0.9687500000000001,
+                "changes": 4
+              },
+              "BUS82::2": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "BUS82::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS48::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 3
+              },
+              "BUS48::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 2
+              },
+              "BUS48::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 1
+              },
+              "BUS86::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS86::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "BUS86::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS62::1": {
+                "min": 1.0,
+                "max": 1.0187500000000003,
+                "changes": 7
+              },
+              "BUS62::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 2
+              },
+              "BUS62::3": {
+                "min": 0.99375,
+                "max": 1.0,
+                "changes": 2
+              }
+            },
+            "original_RegControl_tap_ranges": {
+              "creg1a": {
+                "min": 1.0125000000000002,
+                "max": 1.0312500000000004,
+                "changes": 4
+              },
+              "creg2a": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 2
+              },
+              "creg3a": {
+                "min": 1.0,
+                "max": 1.0125000000000002,
+                "changes": 6
+              },
+              "creg3c": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 8
+              },
+              "creg4a": {
+                "min": 1.0375000000000005,
+                "max": 1.0562500000000008,
+                "changes": 9
+              },
+              "creg4b": {
+                "min": 1.0187500000000003,
+                "max": 1.0250000000000004,
+                "changes": 2
+              },
+              "creg4c": {
+                "min": 1.0250000000000004,
+                "max": 1.0375000000000005,
+                "changes": 5
+              }
+            },
+            "BUS86_BUS62_original_control_interaction": {
+              "BUS86": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 1
+                }
+              ],
+              "BUS62": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 3
+                }
+              ]
+            },
+            "BUS82_BUS83_serial_interaction": {
+              "observations": [
+                {
+                  "phase": 1,
+                  "simultaneous_boundary_tap_changes": 0,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 2,
+                  "simultaneous_boundary_tap_changes": 0,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 3,
+                  "simultaneous_boundary_tap_changes": 0,
+                  "opposite_boundary_tap_changes": 0
+                }
+              ],
+              "interpretation": "Observed boundary tap co-movement only; event receipts retain subslot actions. Causal absence of interference is not certified."
+            }
+          },
+          "DAYAHEAD": {
+            "slots": 96,
+            "Vmin": 0.9780149354324291,
+            "Vmax": 1.0472720859328404,
+            "voltage_violations": 0,
+            "line_current_violations": 0,
+            "transformer_current_violations": 0,
+            "transformer_nameplate_current_violations": 0,
+            "transformer_kVA_violations": 0,
+            "maximum_line_loading": 0.67746450775142,
+            "losses_kWh": 1424.1483760738283,
+            "losses_kvarh": 2251.8612828104597,
+            "AC_converged": true,
+            "control_complete": true,
+            "Full_AC_Physical_PASS": true,
+            "SVR11_finite_rating_and_taps": true,
+            "original_RegControl_count": 7,
+            "SVR_bank_count": 11,
+            "phase_tap_operation_evidence": {
+              "bytes": 35659993,
+              "path": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-01\\attempts\\attempt_01\\output\\PLANNING\\CAPCONTROL_SVR\\VOLTAGE_CONTROL_PLANNING_SLOTS.json",
+              "sha256": "092bbec5c9760978e77dbba3da12a18a784ae814ead9e686f5bceaee255cc21e"
+            },
+            "SVR_tap_ranges": {
+              "STA01::1": {
+                "min": 1.0,
+                "max": 1.0125000000000002,
+                "changes": 3
+              },
+              "STA01::2": {
+                "min": 0.9812500000000001,
+                "max": 1.0,
+                "changes": 3
+              },
+              "STA01::3": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 3
+              },
+              "STA06::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "STA06::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "STA06::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "STA08::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "STA08::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "STA08::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 2
+              },
+              "BUS83::1": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 5
+              },
+              "BUS83::2": {
+                "min": 0.9812500000000001,
+                "max": 1.0,
+                "changes": 3
+              },
+              "BUS83::3": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 5
+              },
+              "BUS79::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS79::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 2
+              },
+              "BUS79::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS108::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 6
+              },
+              "BUS108::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS108::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "BUS50::1": {
+                "min": 1.00625,
+                "max": 1.0187500000000003,
+                "changes": 3
+              },
+              "BUS50::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 2
+              },
+              "BUS50::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 1
+              },
+              "BUS82::1": {
+                "min": 0.9562500000000002,
+                "max": 0.9687500000000001,
+                "changes": 4
+              },
+              "BUS82::2": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS82::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS48::1": {
+                "min": 1.00625,
+                "max": 1.0187500000000003,
+                "changes": 3
+              },
+              "BUS48::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 2
+              },
+              "BUS48::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 1
+              },
+              "BUS86::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS86::2": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 2
+              },
+              "BUS86::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "BUS62::1": {
+                "min": 1.00625,
+                "max": 1.0187500000000003,
+                "changes": 4
+              },
+              "BUS62::2": {
+                "min": 0.9812500000000001,
+                "max": 1.0,
+                "changes": 3
+              },
+              "BUS62::3": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 4
+              }
+            },
+            "original_RegControl_tap_ranges": {
+              "creg1a": {
+                "min": 1.0125000000000002,
+                "max": 1.0250000000000004,
+                "changes": 3
+              },
+              "creg2a": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 2
+              },
+              "creg3a": {
+                "min": 1.0,
+                "max": 1.0125000000000002,
+                "changes": 4
+              },
+              "creg3c": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 7
+              },
+              "creg4a": {
+                "min": 1.0375000000000005,
+                "max": 1.0500000000000007,
+                "changes": 5
+              },
+              "creg4b": {
+                "min": 1.0125000000000002,
+                "max": 1.0250000000000004,
+                "changes": 3
+              },
+              "creg4c": {
+                "min": 1.0250000000000004,
+                "max": 1.0375000000000005,
+                "changes": 3
+              }
+            },
+            "BUS86_BUS62_original_control_interaction": {
+              "BUS86": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 1
+                }
+              ],
+              "BUS62": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 0
+                }
+              ]
+            },
+            "BUS82_BUS83_serial_interaction": {
+              "observations": [
+                {
+                  "phase": 1,
+                  "simultaneous_boundary_tap_changes": 0,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 2,
+                  "simultaneous_boundary_tap_changes": 2,
+                  "opposite_boundary_tap_changes": 1
+                },
+                {
+                  "phase": 3,
+                  "simultaneous_boundary_tap_changes": 0,
+                  "opposite_boundary_tap_changes": 0
+                }
+              ],
+              "interpretation": "Observed boundary tap co-movement only; event receipts retain subslot actions. Causal absence of interference is not certified."
+            }
+          }
+        },
+        "evidence": [
+          {
+            "path": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-01\\attempts\\attempt_01\\output\\ACTUAL\\CAPCONTROL_SVR\\VOLTAGE_CONTROL_ACTUAL_PHYSICAL_AUDIT.json",
+            "sha256": "aa3479ed7a03454db403ee6d2e3dcfc4136079a3cfd7fe34b6fa48dff23e91c7",
+            "bytes": 903844
+          },
+          {
+            "path": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-01\\attempts\\attempt_01\\output\\PLANNING\\CAPCONTROL_SVR\\VOLTAGE_CONTROL_PLANNING_PHYSICAL_AUDIT.json",
+            "sha256": "f49c772b1a4ec426acff5e3f3fbacd133e777e12f1cddbf366a2ceb4b4745bcf",
+            "bytes": 903853
+          }
+        ]
+      },
+      "Native_Runtime": 0,
+      "wall_seconds": 50.33870159997605,
+      "Planning_objective": null,
+      "FULL_feasible_certified": false,
+      "global_gap_certified": false,
+      "certified_LB": null,
+      "certified_Gap": null,
+      "optimization_status": "Native 0 · B0",
+      "AC_status": "AC PASS",
+      "terminal_history": [
+        {
+          "result": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-01\\attempts\\attempt_01\\RESULT.json",
+          "result_SHA": "05bdef844e1f13948642f430963504c96e06cfbac9b294798ceeaeb1952dcdbf",
+          "status": "PASS",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-02",
+      "status": "PASS",
+      "attempts": [
+        "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-02\\attempts\\attempt_01\\request.json"
+      ],
+      "request": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-02\\attempts\\attempt_01\\request.json",
+      "worker": {
+        "PID": 106096,
+        "create_time": 1791659455.3925383,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.worker",
+          "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-02\\attempts\\attempt_01\\request.json"
+        ],
+        "cwd": "D:\\v42_svr11_epoch04_20261011",
+        "CPU_seconds": 45.078125,
+        "UTC": "2026-10-10T19:11:51.884791+00:00",
+        "arm": "B0",
+        "day": "2025-05-02",
+        "worker_slot": 1,
+        "request": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-02\\attempts\\attempt_01\\request.json"
+      },
+      "result": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-02\\attempts\\attempt_01\\RESULT.json",
+      "result_SHA": "9d3047d75b5a7d13a096cd7763d8a32abbfd36d58077d4608ba9680a126b0515",
+      "reason": "PASS",
+      "metrics": {
+        "environments": {
+          "ACTUAL": {
+            "slots": 96,
+            "Vmin": 0.9784231540959366,
+            "Vmax": 1.0471293997023265,
+            "voltage_violations": 0,
+            "line_current_violations": 0,
+            "transformer_current_violations": 0,
+            "transformer_nameplate_current_violations": 0,
+            "transformer_kVA_violations": 0,
+            "maximum_line_loading": 0.7438735329935272,
+            "losses_kWh": 1593.128533080879,
+            "losses_kvarh": 2607.232107597491,
+            "AC_converged": true,
+            "control_complete": true,
+            "Full_AC_Physical_PASS": true,
+            "SVR11_finite_rating_and_taps": true,
+            "original_RegControl_count": 7,
+            "SVR_bank_count": 11,
+            "phase_tap_operation_evidence": {
+              "bytes": 35658224,
+              "path": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-02\\attempts\\attempt_01\\output\\ACTUAL\\CAPCONTROL_SVR\\VOLTAGE_CONTROL_ACTUAL_SLOTS.json",
+              "sha256": "ec28bce54b702e8d81828ccb8a5eb65e2ee27841a5f4325f79b61e4858c951d7"
+            },
+            "SVR_tap_ranges": {
+              "STA01::1": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 2
+              },
+              "STA01::2": {
+                "min": 0.9812500000000001,
+                "max": 1.0,
+                "changes": 3
+              },
+              "STA01::3": {
+                "min": 0.99375,
+                "max": 1.0,
+                "changes": 2
+              },
+              "STA06::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "STA06::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "STA06::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "STA08::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 5
+              },
+              "STA08::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "STA08::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS83::1": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 4
+              },
+              "BUS83::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 4
+              },
+              "BUS83::3": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 3
+              },
+              "BUS79::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS79::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 2
+              },
+              "BUS79::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS108::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS108::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "BUS108::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS50::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 3
+              },
+              "BUS50::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 2
+              },
+              "BUS50::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 1
+              },
+              "BUS82::1": {
+                "min": 0.9562500000000002,
+                "max": 0.9687500000000001,
+                "changes": 5
+              },
+              "BUS82::2": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS82::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS48::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 3
+              },
+              "BUS48::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 2
+              },
+              "BUS48::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 1
+              },
+              "BUS86::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 5
+              },
+              "BUS86::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "BUS86::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "BUS62::1": {
+                "min": 1.00625,
+                "max": 1.0187500000000003,
+                "changes": 5
+              },
+              "BUS62::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 2
+              },
+              "BUS62::3": {
+                "min": 0.99375,
+                "max": 1.0,
+                "changes": 2
+              }
+            },
+            "original_RegControl_tap_ranges": {
+              "creg1a": {
+                "min": 1.0125000000000002,
+                "max": 1.0312500000000004,
+                "changes": 5
+              },
+              "creg2a": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 4
+              },
+              "creg3a": {
+                "min": 1.0,
+                "max": 1.0125000000000002,
+                "changes": 8
+              },
+              "creg3c": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 7
+              },
+              "creg4a": {
+                "min": 1.0312500000000004,
+                "max": 1.0500000000000007,
+                "changes": 6
+              },
+              "creg4b": {
+                "min": 1.0125000000000002,
+                "max": 1.0250000000000004,
+                "changes": 3
+              },
+              "creg4c": {
+                "min": 1.0250000000000004,
+                "max": 1.0375000000000005,
+                "changes": 5
+              }
+            },
+            "BUS86_BUS62_original_control_interaction": {
+              "BUS86": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 4
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 2
+                }
+              ],
+              "BUS62": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 2
+                }
+              ]
+            },
+            "BUS82_BUS83_serial_interaction": {
+              "observations": [
+                {
+                  "phase": 1,
+                  "simultaneous_boundary_tap_changes": 1,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 2,
+                  "simultaneous_boundary_tap_changes": 2,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 3,
+                  "simultaneous_boundary_tap_changes": 0,
+                  "opposite_boundary_tap_changes": 0
+                }
+              ],
+              "interpretation": "Observed boundary tap co-movement only; event receipts retain subslot actions. Causal absence of interference is not certified."
+            }
+          },
+          "DAYAHEAD": {
+            "slots": 96,
+            "Vmin": 0.9785071616620027,
+            "Vmax": 1.0477109114620715,
+            "voltage_violations": 0,
+            "line_current_violations": 0,
+            "transformer_current_violations": 0,
+            "transformer_nameplate_current_violations": 0,
+            "transformer_kVA_violations": 0,
+            "maximum_line_loading": 0.6871677465837153,
+            "losses_kWh": 1333.0194712423413,
+            "losses_kvarh": 2061.597009482676,
+            "AC_converged": true,
+            "control_complete": true,
+            "Full_AC_Physical_PASS": true,
+            "SVR11_finite_rating_and_taps": true,
+            "original_RegControl_count": 7,
+            "SVR_bank_count": 11,
+            "phase_tap_operation_evidence": {
+              "bytes": 35662516,
+              "path": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-02\\attempts\\attempt_01\\output\\PLANNING\\CAPCONTROL_SVR\\VOLTAGE_CONTROL_PLANNING_SLOTS.json",
+              "sha256": "d9ae1f5de3f0dfccd55f9eaf60304ecaa20051438d970ae5ff628ed91f66a2de"
+            },
+            "SVR_tap_ranges": {
+              "STA01::1": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 2
+              },
+              "STA01::2": {
+                "min": 0.9875,
+                "max": 0.99375,
+                "changes": 1
+              },
+              "STA01::3": {
+                "min": 0.99375,
+                "max": 1.0,
+                "changes": 2
+              },
+              "STA06::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "STA06::2": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 2
+              },
+              "STA06::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "STA08::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "STA08::2": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "STA08::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS83::1": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 3
+              },
+              "BUS83::2": {
+                "min": 0.9875,
+                "max": 0.99375,
+                "changes": 3
+              },
+              "BUS83::3": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 3
+              },
+              "BUS79::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS79::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "BUS79::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS108::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "BUS108::2": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS108::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS50::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 2
+              },
+              "BUS50::2": {
+                "min": 0.99375,
+                "max": 1.0,
+                "changes": 1
+              },
+              "BUS50::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 2
+              },
+              "BUS82::1": {
+                "min": 0.9562500000000002,
+                "max": 0.9687500000000001,
+                "changes": 4
+              },
+              "BUS82::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9687500000000001,
+                "changes": 1
+              },
+              "BUS82::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS48::1": {
+                "min": 1.00625,
+                "max": 1.0187500000000003,
+                "changes": 4
+              },
+              "BUS48::2": {
+                "min": 0.99375,
+                "max": 1.0,
+                "changes": 1
+              },
+              "BUS48::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 2
+              },
+              "BUS86::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS86::2": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS86::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS62::1": {
+                "min": 1.0,
+                "max": 1.0187500000000003,
+                "changes": 8
+              },
+              "BUS62::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 2
+              },
+              "BUS62::3": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 4
+              }
+            },
+            "original_RegControl_tap_ranges": {
+              "creg1a": {
+                "min": 1.0125000000000002,
+                "max": 1.0312500000000004,
+                "changes": 5
+              },
+              "creg2a": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 4
+              },
+              "creg3a": {
+                "min": 0.99375,
+                "max": 1.0125000000000002,
+                "changes": 8
+              },
+              "creg3c": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 9
+              },
+              "creg4a": {
+                "min": 1.0312500000000004,
+                "max": 1.0500000000000007,
+                "changes": 7
+              },
+              "creg4b": {
+                "min": 1.0187500000000003,
+                "max": 1.0250000000000004,
+                "changes": 2
+              },
+              "creg4c": {
+                "min": 1.0250000000000004,
+                "max": 1.0375000000000005,
+                "changes": 4
+              }
+            },
+            "BUS86_BUS62_original_control_interaction": {
+              "BUS86": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 2
+                }
+              ],
+              "BUS62": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 2
+                }
+              ]
+            },
+            "BUS82_BUS83_serial_interaction": {
+              "observations": [
+                {
+                  "phase": 1,
+                  "simultaneous_boundary_tap_changes": 0,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 2,
+                  "simultaneous_boundary_tap_changes": 1,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 3,
+                  "simultaneous_boundary_tap_changes": 0,
+                  "opposite_boundary_tap_changes": 0
+                }
+              ],
+              "interpretation": "Observed boundary tap co-movement only; event receipts retain subslot actions. Causal absence of interference is not certified."
+            }
+          }
+        },
+        "evidence": [
+          {
+            "path": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-02\\attempts\\attempt_01\\output\\ACTUAL\\CAPCONTROL_SVR\\VOLTAGE_CONTROL_ACTUAL_PHYSICAL_AUDIT.json",
+            "sha256": "9ae4523ba7a1cacf49d2bc89e9e82f3210b6cb09785858e4ca740f697151427e",
+            "bytes": 903844
+          },
+          {
+            "path": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-02\\attempts\\attempt_01\\output\\PLANNING\\CAPCONTROL_SVR\\VOLTAGE_CONTROL_PLANNING_PHYSICAL_AUDIT.json",
+            "sha256": "853ffd07774092e98be1bd5072f52a7a2c6446bfd74d7967d1a4c1aff90a226f",
+            "bytes": 903853
+          }
+        ]
+      },
+      "Native_Runtime": 0,
+      "wall_seconds": 59.385755299939774,
+      "Planning_objective": null,
+      "FULL_feasible_certified": false,
+      "global_gap_certified": false,
+      "certified_LB": null,
+      "certified_Gap": null,
+      "optimization_status": "Native 0 · B0",
+      "AC_status": "AC PASS",
+      "terminal_history": [
+        {
+          "result": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-02\\attempts\\attempt_01\\RESULT.json",
+          "result_SHA": "9d3047d75b5a7d13a096cd7763d8a32abbfd36d58077d4608ba9680a126b0515",
+          "status": "PASS",
+          "reason": "PASS"
+        }
+      ]
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-03",
+      "status": "RUNNING",
+      "attempts": [
+        "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-03\\attempts\\attempt_01\\request.json"
+      ],
+      "request": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-03\\attempts\\attempt_01\\request.json",
+      "worker": {
+        "PID": 108248,
+        "create_time": 1791659517.0266085,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.worker",
+          "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-03\\attempts\\attempt_01\\request.json"
+        ],
+        "cwd": "D:\\v42_svr11_epoch04_20261011",
+        "CPU_seconds": 44.140625,
+        "UTC": "2026-10-10T19:12:43.253567+00:00",
+        "arm": "B0",
+        "day": "2025-05-03",
+        "worker_slot": 1,
+        "request": "D:\\v42_svr11_may_20261011_04\\dates\\B0\\2025-05-03\\attempts\\attempt_01\\request.json"
+      }
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-04",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-05",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-06",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-07",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-08",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-09",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-10",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-11",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-12",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-13",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-14",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-15",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-16",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-17",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-18",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-19",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-20",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-21",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-22",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-23",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-24",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-25",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-26",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-27",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-28",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-29",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-30",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B0",
+      "day": "2025-05-31",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-01",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-02",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-03",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-04",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-05",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-06",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-07",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-08",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-09",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-10",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-11",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-12",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-13",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-14",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-15",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-16",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-17",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-18",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-19",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-20",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-21",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-22",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-23",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-24",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-25",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-26",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-27",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-28",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-29",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-30",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-31",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-01",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-02",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-03",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-04",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-05",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-06",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-07",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-08",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-09",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-10",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-11",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-12",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-13",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-14",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-15",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-16",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-17",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-18",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-19",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-20",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-21",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-22",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-23",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-24",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-25",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-26",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-27",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-28",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-29",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-30",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B1",
+      "day": "2025-05-31",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-01",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-02",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-03",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-04",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-05",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-06",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-07",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-08",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-09",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-10",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-11",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-12",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-13",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-14",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-15",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-16",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-17",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-18",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-19",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-20",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-21",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-22",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-23",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-24",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-25",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-26",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-27",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-28",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-29",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-30",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    },
+    {
+      "arm": "B3",
+      "day": "2025-05-31",
+      "status": "NOT_EXECUTED",
+      "attempts": []
+    }
+  ],
+  "ETA": "측정 중",
+  "errors": [],
+  "source_SHA": "5ccd4ed37f3e7686e8b94ef86e5b14d8f7ceb4509fead55268b7228d47c6cb91",
+  "root": "D:\\v42_svr11_may_20261011_04",
+  "UTC": "2026-10-10T19:12:44.515045+00:00",
+  "notice": "May19–22 네 날짜는 원본 NormalAmps·kVA·전압·SVR 정격 재검증 PASS. 기존 오판정 이력은 보존하며 수정 Source의 공식 실행은 별도로 기록합니다."
+}

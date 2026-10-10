@@ -102,7 +102,7 @@ def safeguard(root,monitor_only=False):
     with singleton(root/'MONITOR_RECOVERY.lock'):
         current=read(root/'MONITOR_PROCESS.json') if (root/'MONITOR_PROCESS.json').exists() else {}
         if live(current):return state
-        oldroot=Path(read(state['predecessor_manifest']['path'])['root'])
+        oldroot=Path(read(state.get('predecessor_monitor_manifest',state['predecessor_manifest'])['path'])['root'])
         old=read(oldroot/'MONITOR_PROCESS.json') if (oldroot/'MONITOR_PROCESS.json').exists() else {}
         if live(old):
             if not any('svr11_monitor_ui.py' in a or a=='v42_svr11.monitor' for a in old['command']):
