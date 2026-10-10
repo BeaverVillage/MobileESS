@@ -1,12 +1,12 @@
 {
   "status": "RUNNING",
-  "policy": "B0",
+  "policy": "B2",
   "counts": {
-    "PASS": 24,
+    "PASS": 31,
     "FAIL": 0,
-    "RUNNING": 1,
-    "NOT_EXECUTED": 99,
-    "completed": 24
+    "RUNNING": 3,
+    "NOT_EXECUTED": 90,
+    "completed": 31
   },
   "source_SHA": "5ccd4ed37f3e7686e8b94ef86e5b14d8f7ceb4509fead55268b7228d47c6cb91",
   "scientific_source_commit": "0ddd4d646d6331b80e47015ebc300e3f240b26d4",
@@ -14,20 +14,45 @@
   "equipment_SHA": "bb81b33f497c0967dee83ae0843cc54981e167c3ea7733ad1e3bb8dc2b0b2fed",
   "active_workers": [
     {
-      "arm": "B0",
-      "day": "2025-05-25",
-      "PID": 112176,
-      "phase": "DAYAHEAD:B0 · Fresh AC",
-      "optimization_status": "Native 0 · B0",
+      "arm": "B2",
+      "day": "2025-05-01",
+      "PID": 118196,
+      "phase": "SVR11_FORECAST_MODEL_GENERATION 7/96",
+      "optimization_status": "대기",
       "Native_Runtime": 0,
       "UB": null,
       "certified_LB": null,
       "certified_Gap": null,
-      "Fresh": "DAYAHEAD:B0 12/96"
+      "Fresh": "대기"
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-02",
+      "PID": 115380,
+      "phase": "SVR11_FORECAST_MODEL_GENERATION 6/96",
+      "optimization_status": "대기",
+      "Native_Runtime": 0,
+      "UB": null,
+      "certified_LB": null,
+      "certified_Gap": null,
+      "Fresh": "대기"
+    },
+    {
+      "arm": "B2",
+      "day": "2025-05-03",
+      "PID": 116664,
+      "phase": "SVR11_FORECAST_MODEL_GENERATION 6/96",
+      "optimization_status": "대기",
+      "Native_Runtime": 0,
+      "UB": null,
+      "certified_LB": null,
+      "certified_Gap": null,
+      "Fresh": "대기"
     }
   ],
   "corrected_historical_May19_22_PASS": true,
-  "old_results_promoted": false,
+  "old_executions_relabelled": false,
+  "qualified_reused_dates": 1,
   "healthy_workers_terminated": 0,
   "regression": "120 passed, 1 skipped",
   "monitor_HTTP": 200,
@@ -41,18 +66,18 @@
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\CAMPAIGN_LEDGER.json",
-      "sha256": "cdbe4d288b4ad13cb63379310bbcf181fd3839503f3c77fe13975cece09cd940",
-      "bytes": 564545
+      "sha256": "51a680fb438b8fe4bf1590fa1bc8b5d083693f8e2cb4d2709c0388c9bf2d4ed4",
+      "bytes": 727787
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\SUPERVISOR_PROCESS.json",
-      "sha256": "d9b97cb17bef00929ef43ed2a8eee97c6a5c85fe7c5a1234c7b830e0632b39bf",
+      "sha256": "108a5e410aaaef85906f9dba5ba860d5758ef80639a8f60fb3747cd8c1028f03",
       "bytes": 504
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\SUPERVISOR_HEARTBEAT.json",
-      "sha256": "aff57b60525ab5130c20360768c07a50d06e64f0c860fde994efcbe18f578180",
-      "bytes": 481
+      "sha256": "a50f1770598a2dc6310fd47a6e4512534674cbfd76e65fa3b779a921284c678d",
+      "bytes": 479
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\MONITOR_PROCESS.json",
@@ -66,7 +91,7 @@
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\MIGRATION_STATUS.json",
-      "sha256": "76ed8677ace3a21753221bd2c24ac52d2997ec1c94d45228984f5c52ead09733",
+      "sha256": "78b4e216123dba1ee3c91a21990429128df8b74d1935dd01cfdf45efe2ef8dad",
       "bytes": 1602
     },
     {
@@ -76,8 +101,8 @@
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\WATCHDOG_LAST_RUN.json",
-      "sha256": "a7031c89379fe90bcb1dd693326ce53398f6b7b7b39479123c2d08fbfa765b64",
-      "bytes": 1672
+      "sha256": "c162dce0803925e895ab9cf57301b4e77b7ec03f9bd6205f4553a8887d866cf0",
+      "bytes": 1673
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\CONTEXT_RETENTION_DIAGNOSIS.json",
@@ -95,6 +120,16 @@
       "bytes": 8091
     },
     {
+      "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\REUSE_ADMISSION.json",
+      "sha256": "2d5507b757b570b010afbab816fb028956dfd8244bf91b108f51738cbd224ac5",
+      "bytes": 617
+    },
+    {
+      "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\REUSE_DISPATCH_QUIESCENCE.json",
+      "sha256": "bdd77d4a96164981d7a418bec85bb236bc3b1927d14c679170430baffbdda46a",
+      "bytes": 714
+    },
+    {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\WINDOWS_SCHEDULE_REGISTRATION.json",
       "sha256": "bc69cc2a7cb4c96e43609ed40a55469b6b9b569766c455911eefea6c0cd963dc",
       "bytes": 1615
@@ -106,28 +141,28 @@
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\HANDOFF_37_VALIDATION.json",
-      "sha256": "1389670593ce4c5dba02610f3de37f48e55af2d45a0e8022863411028c1e0112",
-      "bytes": 77455
+      "sha256": "cfbf18fd82dce617c8063b946678e2b0a50cb055e70ecedc0d2272efc71b83cd",
+      "bytes": 112388
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\REPORT.md",
-      "sha256": "a0cfd164980127c9cbf593411b14ba39b218066d77b62abc18c56efe848812ae",
+      "sha256": "d7bfc8aae9117e58febfa10c751609edc8eee8ba4ab013821969afb98ca697e2",
       "bytes": 1111
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\REPORT.json",
-      "sha256": "7fe6d7c7b0ee0824bf2d888582cb76d9b2f83926ba75119b1cf08c3aeac5c0ea",
-      "bytes": 563527
+      "sha256": "3de33913ab62166f5bf61fa1813399ef6572e47bd09d6b71382b16c7e5fd54ef",
+      "bytes": 725599
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\PERFORMANCE_COMPARISON.md",
-      "sha256": "4c75e612d0d3a8bbb9a0e1a6d56f37045f34a6235ea71cfa2b967b3291a59038",
+      "sha256": "0c295792c27bf1fd9eab2ed2479f78409570c78a4f86f35ecef31317fff3a7cf",
       "bytes": 1900
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\PERFORMANCE_COMPARISON.json",
-      "sha256": "3a74df3ba3712ebf62f2615556336dd51bb6d752bb40ed3598ac37c5e0ae76bb",
-      "bytes": 113236
+      "sha256": "baf4035b2e2e0b4beedb7138fef3ca10c4626b73d8c2936351d2a4f7c531367a",
+      "bytes": 536507
     },
     {
       "path": "D:\\v42_svr11_epoch04_20261011\\docs\\v42_svr11_final_20261011\\epoch04_snapshot\\DISPATCH_QUIESCENCE_FOR_CONTEXT_FIX.json",
@@ -140,5 +175,5 @@
       "bytes": 3144
     }
   ],
-  "UTC": "2026-10-10T19:31:43.469443+00:00"
+  "UTC": "2026-10-10T19:38:00.964319+00:00"
 }

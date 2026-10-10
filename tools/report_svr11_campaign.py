@@ -44,6 +44,8 @@ def run(root):
                 v=read(rp);attempts.append(dict(result=record(rp),status=v['status'],Native_Runtime=v.get('Native_Runtime'),
                     known_completed_Native_Runtime=v.get('known_completed_Native_Runtime'),Native_Runtime_uncertain=v.get('Native_Runtime_uncertain'),reason=v.get('reason')))
         date_table.append(dict(arm=r['arm'],day=r['day'],status=r['status'],reason=r.get('reason'),
+            reused=r.get('reused',False),execution_source_SHA=r.get('execution_source_SHA',m['execution_SHA']),
+            validation_source_SHA=r.get('validation_source_SHA',m['execution_SHA']),reuse_proof=r.get('reuse_proof'),
             latest_performance={k:value(r,k) for k in METRICS},FULL_feasible_certified=r.get('FULL_feasible_certified'),
             global_gap_certified=r.get('global_gap_certified'),optimization_status=r.get('optimization_status'),AC_status=r.get('AC_status'),attempts=attempts,
             controls_and_physical_evidence={ns:{k:metrics.get(k) for k in (
@@ -54,6 +56,8 @@ def run(root):
     terminal=sum(r['status'] in ('PASS','FAIL') for r in rows)
     out=dict(status='COMPLETE' if terminal==124 and not any(r.get('retry_pending') for r in rows) else 'IN_PROGRESS',completed=terminal,total=124,
         source_SHA=m['execution_SHA'],equipment_SHA=read(m['hardware']['path'])['equipment_SHA'],campaign_root=str(root),
+        reused_completed_dates=sum(bool(r.get('reused')) for r in rows),
+        provenance_note='Qualified completed results retain original execution SHA and Runtime; current validation SHA identifies independent same-equipment/input/full-evidence revalidation. No original execution is relabelled.',
         policy_own_PASS_cohorts=cohorts,paired_same_date_comparisons=paired,dates=date_table,retrospective_design=True,
         independent_holdout_claim=False,Native_limit_basis='Measured cumulative per stage within each explicitly fresh attempt; previous attempts retained',
         tap_interaction_assessment=dict(

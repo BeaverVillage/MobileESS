@@ -19,6 +19,9 @@ def checked(r,owned):
     return p
 
 def audit_date(root,m,row):
+    if row.get('reused'):
+        from reuse_svr11_completed import verify_reuse
+        return verify_reuse(root,m,row)
     arm,day=row['arm'],row['day'];result_path=Path(row['result']);attempt=result_path.parent
     require(attempt.is_relative_to(root/'dates'/arm/day/'attempts'),'HANDOFF_ATTEMPT_OWNERSHIP')
     require(sha(result_path)==row['result_SHA'],'HANDOFF_RESULT_SHA_DRIFT')
