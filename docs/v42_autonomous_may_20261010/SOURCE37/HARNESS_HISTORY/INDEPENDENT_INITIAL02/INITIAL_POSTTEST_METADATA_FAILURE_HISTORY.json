@@ -1,0 +1,35 @@
+{
+  "schema": "V42_SOURCE37_INDEPENDENT_POSTTEST_METADATA_HARNESS_FAILURE_HISTORY_V1",
+  "PASS": false,
+  "status": "OBSERVER_RECEIPT_COMPOSER_FAIL",
+  "UTC": "2026-10-10T02:11:09.765937+00:00",
+  "original_runner": {
+    "path": "D:\\v42_source37_independent_review_20261010_02\\run_independent_review.py",
+    "bytes": 6766,
+    "sha256": "ee44d9c8566c51cd9e867bfbac2760ef4cee906b5cd1e801d29799031bf08331"
+  },
+  "test_XML": {
+    "path": "D:\\v42_source37_independent_review_20261010_02\\SOURCE37_INDEPENDENT_SELECTED_NATIVE_DENIED.xml",
+    "bytes": 60392,
+    "sha256": "c12cb2ab10f9002d6ebcd020d2cdad50fc221e97cdacdc52dd0b5656ac529d17"
+  },
+  "raw_pytest_stdout_stderr": {
+    "path": "D:\\v42_source37_independent_review_20261010_02\\SOURCE37_INDEPENDENT_SELECTED_NATIVE_DENIED_OUTPUT.log",
+    "bytes": 630,
+    "sha256": "faf6fdc20baef00afbfe62ce5028c8d4db31aa0766687acdf4215d384b4abce4"
+  },
+  "statistics": {
+    "tests": 374,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "selected_tests_passed": true,
+  "qualification_complete": false,
+  "cause": "A second escaped historical-path literal was evaluated only during final receipt construction after374tests and post-source snapshot calculation. No receipt issued; complete qualification requires03 rerun.",
+  "exact_exception": "OSError: [Errno 22] Invalid argument: 'D:\\\\MobileESS_v42_autonomous\\\\\\x0b42_source37_independent_review_20261010_01\\\\INITIAL_HARNESS_FAILURE_HISTORY.json'",
+  "scientific_or_production_failure": false,
+  "production_actions": 0,
+  "source_test_Git_edits": 0,
+  "corrective_scope": "03 uses forward-slash literal paths, rejects AST string control chars, validates all historical paths before tests, persists source snapshots and denial counters separately before final receipt."
+}
