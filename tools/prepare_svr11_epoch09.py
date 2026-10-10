@@ -1,6 +1,6 @@
 """One justified physical placement change; no old numerical result promotion."""
 from pathlib import Path
-import sys,copy,json,psutil
+import sys,copy,json,psutil,subprocess
 SOURCE=Path(__file__).resolve().parents[1];sys.path.insert(0,str(SOURCE))
 from v42_pr134_b1.common import read,record,atomic,now,digest,sha
 from v42_svr11.processes import live,workers
@@ -67,13 +67,19 @@ def handoff():
     m=read(old/'CAMPAIGN_MANIFEST.json');sup=read(old/'SUPERVISOR_PROCESS.json')
     assert live(sup) and sup['source_SHA']==m['execution_SHA']
     p=psutil.Process(sup['PID']);assert p.status()!=psutil.STATUS_STOPPED
-    peers=workers(old,m['execution_SHA']);p.suspend()
+    # Each process inventory validates its own checkout's frozen authority.
+    # Never execute predecessor inventory through the successor's ROOT.
+    for name,expected in m['execution_sources'].items():assert sha(Path(m['code_root'])/name)==expected
+    code="from pathlib import Path;import json;from v42_svr11.processes import workers;from v42_pr134_b1.common import read;root=Path(r'D:\\v42_svr11_may_20261011_08');m=read(root/'CAMPAIGN_MANIFEST.json');print(json.dumps(workers(root,m['execution_SHA'])))"
+    peers=json.loads(subprocess.check_output([sys.executable,'-B','-X','utf8','-c',code],cwd=m['code_root'],encoding='utf8'))
+    p.suspend()
     q=old/'DISPATCH_QUIESCENCE_FOR_LINE82_PLACEMENT.json'
     assert not q.exists()
     atomic(q,dict(PASS=True,root=str(old),source_SHA=m['execution_SHA'],process=sup,new_dispatch_quiesced=True,
         worker_terminated=0,current_workers_preserved=peers,equipment_change_contract=record(root/'EQUIPMENT_CHANGE_CONTRACT.json'),
         reason='Validated minimum placement implementation; healthy workers finish under unchanged Epoch08 before common physical Epoch09 begins',UTC=now()))
-    assert all(live(w) for w in peers)
+    # A Worker may finish naturally between inventory and this receipt.
+    assert all(not live(w) or psutil.Process(w['PID']).status()!=psutil.STATUS_STOPPED for w in peers)
     atomic(root/'PREDECESSOR_DRAIN_CONTRACT.json',dict(schema='SVR11_PREDECESSOR_DRAIN_CONTRACT_V1',
         manifest=record(old/'CAMPAIGN_MANIFEST.json'),source_SHA=m['execution_SHA'],dispatch_quiescence=record(q),
         physical_equipment_change=True,qualified_completed_dates_reused=False,all_old_results_preserved=True,
