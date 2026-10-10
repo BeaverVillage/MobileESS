@@ -14,6 +14,16 @@ def predecessors(root,m):
     if record(oldpath)!=receipt['manifest']:
         raise PermissionError('SVR11_GLOBAL_PREDECESSOR_MANIFEST_DRIFT')
     old=read(oldpath);oldroot=Path(old['root']).resolve();oldcode=Path(old['code_root']).resolve()
+    if 'monitor_manifest' in receipt and record(receipt['monitor_manifest']['path'])!=receipt['monitor_manifest']:
+        raise PermissionError('SVR11_GLOBAL_PREDECESSOR_MONITOR_MANIFEST_DRIFT')
+    quiescence=None
+    if 'dispatch_quiescence' in receipt:
+        q=receipt['dispatch_quiescence']
+        if record(q['path'])!=q:raise PermissionError('SVR11_GLOBAL_DISPATCH_QUIESCENCE_DRIFT')
+        quiescence=read(q['path'])
+        if (Path(quiescence['root']).resolve()!=oldroot or quiescence['source_SHA']!=old['execution_SHA']
+            or not quiescence.get('new_dispatch_quiesced') or quiescence['worker_terminated']!=0):
+            raise PermissionError('SVR11_GLOBAL_DISPATCH_QUIESCENCE_BINDING_DRIFT')
     if old['execution_SHA']!=receipt['source_SHA'] or oldroot==root or oldcode==ROOT:
         raise PermissionError('SVR11_GLOBAL_PREDECESSOR_BINDING_DRIFT')
     # Validate predecessor byte identity without executing its frozen buggy guard.
@@ -27,7 +37,9 @@ def predecessors(root,m):
             if (p.info['name'] or '').lower() not in ('python.exe','pythonw.exe'):continue
             args=p.cmdline();module=args[args.index('-m')+1] if '-m' in args else ''
             if module=='v42_svr11.controller' and Path(args[-1]).resolve()==oldroot:
-                old_supervisors.append(identity(p));continue
+                me=identity(p)
+                quiesced=bool(quiescence and live(quiescence['process']) and p.pid==quiescence['process']['PID'])
+                old_supervisors.append(dict(me,dispatch_quiesced=quiesced));continue
             if module!='v42_svr11.worker':continue
             r=read(args[-1]);rroot=Path(r['root']).resolve()
             if rroot==root and r['source_SHA']==m['execution_SHA']:continue
@@ -43,21 +55,24 @@ def check(root,monitor_only=False):
     root=Path(root).resolve();m=verify(root/'CAMPAIGN_MANIFEST.json')
     with singleton(root/'MIGRATION.lock'):
         receipt,old,peers,supervisors=predecessors(root,m)
-        status='WAITING_PREDECESSOR_DRAIN' if peers or supervisors else 'PREDECESSOR_DRAIN_COMPLETE'
+        dispatchers=[p for p in supervisors if not p.get('dispatch_quiesced')]
+        status='WAITING_PREDECESSOR_DRAIN' if peers or dispatchers else 'PREDECESSOR_DRAIN_COMPLETE'
         state=dict(schema='SVR11_SAFE_EPOCH_MIGRATION_V1',status=status,source_SHA=m['execution_SHA'],root=str(root),
             predecessor_manifest=receipt['manifest'],predecessor_source_SHA=old['execution_SHA'],
+            predecessor_monitor_manifest=receipt.get('monitor_manifest',receipt['manifest']),
             predecessor_workers=peers,predecessor_supervisors=supervisors,
             healthy_workers_terminated=0,scientific_results_promoted=0,UTC=now())
         atomic(root/'MIGRATION_STATUS.json',state)
-        if peers or supervisors:return state
-        oldroot=Path(old['root']);isolated=oldroot/'SOURCE_EPOCH_ISOLATION_03.json'
+        if peers or dispatchers:return state
+        oldroot=Path(old['root']);isolated=oldroot/'SOURCE_EPOCH_SUCCESSOR_ISOLATION.json'
         if not isolated.exists():
             results=[record(p) for p in sorted((oldroot/'dates').rglob('RESULT.json'))]
             atomic(isolated,dict(state,reason='Classifier and transient DSS cwd guard corrected in immutable successor',
                 old_ledger=record(oldroot/'CAMPAIGN_LEDGER.json'),all_prior_results=results,
                 original_results_and_ledger_preserved=True,new_epoch_all_124_recalculated=True))
         # Only the obsolete read-only HTTP process is stopped after workers drain.
-        mp=oldroot/'MONITOR_PROCESS.json';monitor=read(mp) if mp.exists() else {}
+        monitor_root=Path(read(state['predecessor_monitor_manifest']['path'])['root'])
+        mp=monitor_root/'MONITOR_PROCESS.json';monitor=read(mp) if mp.exists() else {}
         if live(monitor):
             command=monitor['command']
             if not any('svr11_monitor_ui.py' in a or a=='v42_svr11.monitor' for a in command):

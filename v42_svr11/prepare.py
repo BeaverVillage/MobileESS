@@ -53,6 +53,7 @@ def release(root):
         Threads=1,P2_calls=0,policy_order=list(ORDER),worker_counts=dict(B0=1,B2=3,B1=1,B3=1),FAIL_CONTINUE=True,
         original_transformer_current_authority='COMPILED_NORMALAMPS_ONLY',
         added_SVR_phase_nameplate_current_guard=True,original_winding_kVA_guard=True,
+        model_probe_context_retirement='EXACT_COMPLETED_OWNER_REGISTRY_DETACH_CFFI_GC',
         hardware=record(hpath),scenario=record(root/'hardware/SCENARIO.json'),thermal=record(root/'hardware/THERMAL.json'),
         input_receipts=read(root/'RAW_INPUT_RECEIPTS.json'),origins=read(root/'RAW_INPUT_ORIGINS.json'),
         implementation=dict(version='B2_BUILD_SOURCE_AUTHORITY_V13_20261009',sources=source),builder_original_sources=source,

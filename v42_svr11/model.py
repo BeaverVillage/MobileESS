@@ -6,10 +6,11 @@ Discrete tap responses are secants, not a smooth global AC certificate.
 """
 from pathlib import Path
 from types import SimpleNamespace
-import copy,time
+import copy,time,gc
 import numpy as np
 from v42_pr134_b1.common import read,record,atomic,digest,now
 from .authority import active
+from .context_lifecycle import retire_completed_probe
 
 FIELDS=('voltage_constant','voltage_matrix','current_constant','current_matrix',
     'flow_p_constant','flow_q_constant','flow_p_matrix','flow_q_matrix','branch_limits')
@@ -80,7 +81,7 @@ def generate(day,input_folder,output,progress):
         ratings=np.array([rows[n.lower()]['NormalAmps'] for n in names])
         kva=np.array([rows[n.lower()]['kVA']/rows[n.lower()]['Phases'] if n.startswith('transformer.') else np.nan for n in names])
         limits=np.array([b.ampacity_a_u080 for b in branches])
-    finally:e.Basic.ClearAll()
+    finally:retire_completed_probe(e)
     assert len(controls)==60 and sum(n.startswith('transformer.') for n in names)==153
     anchor=np.zeros((96,60));anchor[:,:12]=p
     count=solves=0;started=time.perf_counter();slots=[]
@@ -105,7 +106,7 @@ def generate(day,input_folder,output,progress):
                 clock.settle_slot(e,t)
             solves+=clock.total_physical_solve_count
             return measurement(e)
-        finally:e.Basic.ClearAll()
+        finally:retire_completed_probe(e)
     for t in range(96):
         checkpoint=output/f'SLOT_{t:02d}.json'
         if checkpoint.is_file():
@@ -128,6 +129,9 @@ def generate(day,input_folder,output,progress):
         np.savez_compressed(output/f'SLOT_{t:02d}.npz',**row)
         atomic(checkpoint,dict(day=day,source_SHA=m['execution_SHA'],data=record(output/f'SLOT_{t:02d}.npz')))
         slots.append(row)
+        # All target-slot results are detached NumPy arrays. Release finished
+        # probe object cycles before the next prefix; physics stays identical.
+        gc.collect()
         atomic(output/'MODEL_GENERATION_PROGRESS.json',dict(day=day,completed_slots=t+1,independent_compiles=count,
             physical_solves=solves,wall_seconds=time.perf_counter()-started,source_SHA=m['execution_SHA'],Actual_inputs_read=0))
     np.savez_compressed(output/'COEFFICIENTS.npz',**{f:np.array([r[f] for r in slots]) for f in FIELDS},
