@@ -1,6 +1,6 @@
 # SVR11 campaign performance comparison
 
-IN_PROGRESS: 0/124 dates terminal.
+IN_PROGRESS: 3/124 dates terminal.
 
 Scientific Source SHA: `95f7b468808c191d7b77d7f74accb9d3622be612e050146fd12ebbede54fafc9`
 
@@ -10,7 +10,7 @@ Policy own PASS cohorts and paired same-date populations are separate. B0 has no
 
 |---|---:|---:|---:|---:|
 
-| B0 | 0 | 0 | None | None |
+| B0 | 3 | 0 | 0.6895271761348424 | 1476.0094345513082 |
 
 | B2 | 0 | 0 | None | None |
 

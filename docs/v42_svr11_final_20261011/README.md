@@ -4,7 +4,7 @@ Epoch08 B2 May04 and May05 both have genuine Actual voltage failures at the unre
 
 Native U4/A models, algorithms, domains, objective and budgets remain unchanged. All network-coupled official physics/results and Forecast sensitivities require fresh computation under this new common equipment. Reuse exact raw inputs and descriptors; promote zero prior-equipment dates/models. Source08 numerical results remain separate history. Healthy origin Workers finish naturally, with zero terminations or hot patches; frozen migration then starts B0→B2→B1→B3, Worker1/3/1/1, all124 despite date/policy FAIL. Technical retries are finite fresh Native0 attempts after following-date allocation. Actual controls remain independent of Planning and Actual repair/reoptimization remain0.
 
-Current 0/124 terminal, 0/37 independently verified handoff dates; migration `WAITING_PREDECESSOR_DRAIN`. Monitor HTTP200 at http://127.0.0.1:8796. Existing hourly ACTIVE and two Windows jobs now target Epoch09.37-date handoff and full campaign completion are pending. Earlier sections below are preserved historical epochs.
+Current 3/124 terminal, 2/37 independently verified handoff dates; migration `SUCCESSOR_WATCHDOG_INVOKED`. Monitor HTTP200 at http://127.0.0.1:8796. Existing hourly ACTIVE and two Windows jobs now target Epoch09.37-date handoff and full campaign completion are pending. Earlier sections below are preserved historical epochs.
 
 <!-- EPOCH09_CURRENT_END -->
 

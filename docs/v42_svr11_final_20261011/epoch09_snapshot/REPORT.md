@@ -1,6 +1,6 @@
 # SVR11 May 2025 campaign
 
-Status: IN_PROGRESS; attempted terminal dates 0/124.
+Status: IN_PROGRESS; attempted terminal dates 3/124.
 
 Source SHA: `95f7b468808c191d7b77d7f74accb9d3622be612e050146fd12ebbede54fafc9`
 
@@ -18,7 +18,7 @@ Date failures do not gate later dates or policies. Unexecuted metrics remain una
 
 |---|---:|---:|---:|---:|
 
-| B0 | 0 | 0 | 0 | 31 |
+| B0 | 3 | 0 | 1 | 27 |
 
 | B2 | 0 | 0 | 0 | 31 |
 

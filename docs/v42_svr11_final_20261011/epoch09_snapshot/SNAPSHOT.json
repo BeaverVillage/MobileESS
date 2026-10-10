@@ -4,16 +4,16 @@
   "manifest_commit": "6ae4a3f8ae7162b6d73409f8050dceb00b4d142f",
   "equipment_SHA": "41c00f9b190d568b318284dfbc4a02ef27397eae69a27796cf17f6e64a9af75d",
   "counts": {
-    "PASS": 0,
+    "PASS": 3,
     "FAIL": 0,
-    "RUNNING": 0,
-    "NOT_EXECUTED": 124,
-    "completed": 0
+    "RUNNING": 1,
+    "NOT_EXECUTED": 120,
+    "completed": 3
   },
   "policy": "B0",
   "migration": {
     "schema": "SVR11_SAFE_EPOCH_MIGRATION_V1",
-    "status": "WAITING_PREDECESSOR_DRAIN",
+    "status": "SUCCESSOR_WATCHDOG_INVOKED",
     "source_SHA": "95f7b468808c191d7b77d7f74accb9d3622be612e050146fd12ebbede54fafc9",
     "root": "D:\\v42_svr11_may_20261011_09",
     "predecessor_manifest": {
@@ -27,77 +27,7 @@
       "sha256": "8ffb072e4e57c1ad7e89905e09304824d34ca467005ba8fadbc6410c66a2a618",
       "bytes": 562546
     },
-    "predecessor_workers": [
-      {
-        "PID": 10328,
-        "create_time": 1791667403.172336,
-        "command": [
-          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
-          "-B",
-          "-X",
-          "utf8",
-          "-m",
-          "v42_svr11.worker",
-          "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-07\\attempts\\attempt_01\\request.json"
-        ],
-        "cwd": "D:\\v42_svr11_epoch08_20261011",
-        "CPU_seconds": 4295.171875,
-        "UTC": "2026-10-10T22:41:00.433528+00:00",
-        "arm": "B2",
-        "day": "2025-05-07",
-        "request": {
-          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-07\\attempts\\attempt_01\\request.json",
-          "sha256": "48048a54c1f7791714ecd0b86bb147a7689ab6fdc4459d8704370a94d7a68a13",
-          "bytes": 1482
-        }
-      },
-      {
-        "PID": 105768,
-        "create_time": 1791671537.2796535,
-        "command": [
-          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
-          "-B",
-          "-X",
-          "utf8",
-          "-m",
-          "v42_svr11.worker",
-          "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-06\\attempts\\attempt_01\\request.json"
-        ],
-        "cwd": "D:\\v42_svr11_epoch08_20261011",
-        "CPU_seconds": 480.0625,
-        "UTC": "2026-10-10T22:41:00.515551+00:00",
-        "arm": "B2",
-        "day": "2025-05-06",
-        "request": {
-          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-06\\attempts\\attempt_01\\request.json",
-          "sha256": "9bc47d7a5fa0f0bc2fbdb3d690c485abe69d1b66f402c610b404d2c3b68298d5",
-          "bytes": 1482
-        }
-      },
-      {
-        "PID": 117456,
-        "create_time": 1791667403.2189596,
-        "command": [
-          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
-          "-B",
-          "-X",
-          "utf8",
-          "-m",
-          "v42_svr11.worker",
-          "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-08\\attempts\\attempt_01\\request.json"
-        ],
-        "cwd": "D:\\v42_svr11_epoch08_20261011",
-        "CPU_seconds": 4300.234375,
-        "UTC": "2026-10-10T22:41:00.528065+00:00",
-        "arm": "B2",
-        "day": "2025-05-08",
-        "request": {
-          "path": "D:\\v42_svr11_may_20261011_08\\dates\\B2\\2025-05-08\\attempts\\attempt_01\\request.json",
-          "sha256": "30080da2caaf6d3e431fc1712eb2faf8798e0e8409041d2dc2e21774272a645c",
-          "bytes": 1482
-        }
-      }
-    ],
+    "predecessor_workers": [],
     "predecessor_supervisors": [
       {
         "PID": 101520,
@@ -113,56 +43,37 @@
         ],
         "cwd": "D:\\v42_svr11_epoch08_20261011",
         "CPU_seconds": 322.703125,
-        "UTC": "2026-10-10T22:41:00.514549+00:00",
+        "UTC": "2026-10-10T22:53:22.236090+00:00",
         "dispatch_quiesced": true
       }
     ],
     "healthy_workers_terminated": 0,
     "scientific_results_promoted": 0,
-    "UTC": "2026-10-10T22:41:00.529065+00:00"
+    "UTC": "2026-10-10T22:53:23.720082+00:00",
+    "predecessor_isolation": {
+      "path": "D:\\v42_svr11_may_20261011_08\\SOURCE_EPOCH_SUCCESSOR_ISOLATION.json",
+      "sha256": "0570aa9809a2919076c2607a4a39dc7469eabbc97671c380f9d23ab0f5784750",
+      "bytes": 13018
+    }
   },
   "workers": [
     {
-      "arm": "이전 Epoch B2",
-      "day": "2025-05-07",
-      "PID": 10328,
-      "phase": "기존 작업 자연 종료 대기 · M_EXISTING_COMPACT_STATIC_PRESOLVE",
-      "optimization_status": "대기",
+      "arm": "B0",
+      "day": "2025-05-04",
+      "PID": 104864,
+      "phase": "DAYAHEAD:B0 · Fresh AC",
+      "optimization_status": "Native 0 · B0",
       "Native_Runtime": 0,
       "UB": null,
       "certified_LB": null,
       "certified_Gap": null,
-      "Fresh": "이전 Source · 새 공식 결과에 합산하지 않음"
-    },
-    {
-      "arm": "이전 Epoch B2",
-      "day": "2025-05-06",
-      "PID": 105768,
-      "phase": "기존 작업 자연 종료 대기 · UB",
-      "optimization_status": "대기",
-      "Native_Runtime": 154.12800002098083,
-      "UB": null,
-      "certified_LB": null,
-      "certified_Gap": null,
-      "Fresh": "이전 Source · 새 공식 결과에 합산하지 않음"
-    },
-    {
-      "arm": "이전 Epoch B2",
-      "day": "2025-05-08",
-      "PID": 117456,
-      "phase": "기존 작업 자연 종료 대기 · M_EXISTING_COMPACT_STATIC_PRESOLVE",
-      "optimization_status": "대기",
-      "Native_Runtime": 0,
-      "UB": null,
-      "certified_LB": null,
-      "certified_Gap": null,
-      "Fresh": "이전 Source · 새 공식 결과에 합산하지 않음"
+      "Fresh": "DAYAHEAD:B0 70/96"
     }
   ],
   "monitor_URL": "http://127.0.0.1:8796",
   "hourly_ACTIVE": true,
-  "handoff37_verified": 0,
+  "handoff37_verified": 2,
   "old_equipment_numerical_results_or_models_promoted": 0,
   "monthly_campaign_complete": false,
-  "UTC": "2026-10-10T22:42:39.477872+00:00"
+  "UTC": "2026-10-10T22:53:52.506061+00:00"
 }
