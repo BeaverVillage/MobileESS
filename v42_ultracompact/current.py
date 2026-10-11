@@ -156,6 +156,7 @@ def reduce_current_c3a(A,d,graph,progress=None,physical_original=None):
     e.update({k:d[k][rows] for k in ('rhs','sense','row_names')})
     full,fd=physical_original if physical_original is not None else (None,None)
     ultra=CurrentC3A(A,d,B,e,rows,certs,bounds,{},full,fd)
+    del src, keys, vectors, constants, times, defs, _, cache, dom, pairs, eligible
     from .current_verify import verify_current_c3a
     proof=verify_current_c3a(ultra,graph)
     proof.update(schema='V42_CURRENT_EXACT_C3A_PROOF_V1',C3A_policy=POLICY,

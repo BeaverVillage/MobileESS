@@ -18,14 +18,18 @@ def seal():
         raise PermissionError('CURRENT_GAP_VALIDATION_REQUIRED')
     preserved=preserved_science(read(OLD/'CAMPAIGN_MANIFEST.json'),sources)
     output=DEV/'dates/B2/2025-05-01/attempts/representative01/output'
-    proof=read(output/'CURRENT_EXACT_C3A_PROOF.json')
     equivalent=DEV/'ORIGINAL_EQUIVALENCE_VALIDATION_FINAL_SOURCE.json'
+    equivalent_data=read(equivalent)
+    proof_receipt=equivalent_data.get('exact_reduction_proof',record(output/'CURRENT_EXACT_C3A_PROOF.json'))
+    if record(proof_receipt['path'])!=proof_receipt:
+        raise PermissionError('FINAL_CURRENT_EXACT_PROOF_BYTES_DRIFT')
+    proof=read(proof_receipt['path'])
     if not proof['PASS'] or not read(equivalent)['PASS']:
         raise PermissionError('CURRENT_EXACT_REDUCTION_AND_ORIGINAL_EQUIVALENCE_REQUIRED')
     receipt=dict(schema='SVR11_EPOCH15_MINIMAL_VALIDATION_V1',PASS=True,
         source_SHA=source_sha,Native_M_limit_seconds=1800,
         A1_A2_algorithms_changed=False,physical_and_forecast_science_bitwise_unchanged=True,
-        production_results_promoted=0,exact_reduction_proof=record(output/'CURRENT_EXACT_C3A_PROOF.json'),
+        production_results_promoted=0,exact_reduction_proof=proof_receipt,
         original_equivalence_validation=record(equivalent),runtime_smoke=record(DEV/'RUNTIME_SMOKE.json'),
         gap_validation=record(gap),unchanged_science=preserved,
         construction_source_SHA=read(equivalent).get('construction_source_SHA',read(equivalent)['source_SHA']),

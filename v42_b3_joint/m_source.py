@@ -431,11 +431,38 @@ class MSourceBridge:
         presolve = registry.resolve("v42_supercompact.presolve").Presolve(compact.A, compact.d)
         B, selected = presolve.run()
         proof = model.verify_transport(compact, presolve)
+        ultra = None
+        if packet['case_identity'].get('C3A_policy') == 'SELECTED_EXACT_CURRENT_MATRIX_PROOFS':
+            # A new stage-batch process has no in-memory CurrentC3A object.
+            # Restore the exact selected packet, retaining C2 only for its
+            # inverse mapping and original-domain transport proof. Do not run
+            # the reduction producer or a Solver again during checkpoint replay.
+            current = registry.resolve('v42_ultracompact.current')
+            B = sparse.load_npz(context.output / 'C3A_A.npz')
+            with numeric.load(context.output / 'C3A_DATA.npz', allow_pickle=False) as archive:
+                selected = {key:archive[key].copy() for key in archive.files}
+            with numeric.load(context.output / 'CURRENT_C3A_AXES.npz', allow_pickle=False) as archive:
+                rows, columns = archive['rows'].copy(), archive['columns'].copy()
+            require(rows.ndim == columns.ndim == 1 and rows.dtype.kind in 'iu'
+                and columns.dtype.kind in 'iu' and numeric.array_equal(columns, numeric.arange(B.shape[1])),
+                'M_RESTORED_C3A_COLUMN_AXIS_DRIFT')
+            read = registry.callable('v42_pr134_b1/common.py', 'read')
+            c3_proof = read(context.output / 'CURRENT_EXACT_C3A_PROOF.json')
+            ultra = current.CurrentC3A(presolve.A, presolve.d, B, selected, rows,
+                read(context.output / 'CURRENT_C3A_ROW_CERTIFICATES.json'),
+                read(context.output / 'CURRENT_C3A_BOUND_PROOFS.json'), c3_proof, A, data)
+            proof = dict(proof, C3A_policy=current.POLICY,
+                selected_C3A_independent_proof_PASS=c3_proof['PASS'],
+                selected_C3A_rows_removed=c3_proof['removed_rows'],
+                selected_C3A_bounds_tightened=c3_proof['bounds_tightened'],
+                selected_C3A_original_P1_bit_exact=c3_proof['original_P1_bit_exact'],
+                selected_C3A_integer_and_full_LP_domains_identical=c3_proof['integer_and_full_LP_domains_identical'])
         require(_plain(proof) == packet["case_identity"]["transport"], "M_RESTORED_TRANSPORT_PROOF_DRIFT")
         coefficients = context.grid_authority.coefficients(context.original_bundle, context.request.authority.day)
         case = model.CampaignMCase(B, selected, A, data, packet["raw_point"], graph, packet["case_sha"],
                                   packet["case_identity"], compact, presolve, context.original_bundle,
-                                  packet["anchor"], packet["planning_arrays"], coefficients, context.output)
+                                  packet["anchor"], packet["planning_arrays"], coefficients, context.output,
+                                  **({'ultra':ultra} if ultra is not None else {}))
         model.verify_case(case)
         self._cases[self._key(context)] = case
         return case

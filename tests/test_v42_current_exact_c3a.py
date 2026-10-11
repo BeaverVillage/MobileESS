@@ -12,13 +12,16 @@ from v42_may_campaign_native90.m_model import verify_transport
 from v42_ultracompact.current import reduce_current_c3a, POLICY
 from v42_ultracompact.current_verify import verify_current_c3a
 
-def fixture():
-    sites=('A','B');initial={'MESS01':'A'};H=2
-    arcs=[(s,t,s,t+1,None) for s in sites for t in range(H)]+[('A',0,'B',1,SimpleNamespace(energy_kwh=1.))]
-    live=[0,1,3,4];states=[('A',0,0),('A',1,1),('B',1,3)]
+def fixture(H=2):
+    from v42_native.mess import RouteArc
+    sites=('A','B');initial={'MESS01':'A'}
+    route=RouteArc('AB','A','B',0,1,1,1.,'a'*64)
+    arcs=[(s,t,s,t+1,None) for s in sites for t in range(H)]+[('A',0,'B',1,route)]
+    live=list(range(H))+list(range(H+1,2*H))+[2*H]
+    states=[('A',t,t) for t in range(H)]+[('B',t,H+t) for t in range(1,H)]
     names=[f'arc[MESS01,{k}]' for k in live]
     for s,t,k in states:names.extend(f'{f}[MESS01,{s},{t}]' for f in ('Pch','Pdis','Q'))
-    names+=['response_line_P[0,0]','response_line_P[1,0]','rho_max'];pos={n:j for j,n in enumerate(names)}
+    names+=[f'response_line_P[{t},0]' for t in range(H)]+['rho_max'];pos={n:j for j,n in enumerate(names)}
     n=len(names);lo=np.zeros(n);hi=np.ones(n);types=np.full(n,'C');types[:len(live)]='B';rows=[];rhs=[];sense=[];labels=[]
     def add(terms,r,s,label):rows.append({pos[k]:v for k,v in terms.items() if v});rhs.append(r);sense.append(s);labels.append(label)
     for site in sites:

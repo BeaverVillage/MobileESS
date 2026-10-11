@@ -193,7 +193,7 @@ def run(seconds=30.):
     finally:_active.reset(token);current_authority.cache_clear()
 
 
-def _load_resumed_case(fresh, original, payload, output):
+def _load_resumed_case(fresh, original, payload, output, memory_checkpoint=None):
     """Recover proof-bound current arrays; never build a Gurobi FULL model.
 
     Epoch14 C2 arrays are only used after their exact current baseline SHA,
@@ -242,8 +242,14 @@ def _load_resumed_case(fresh, original, payload, output):
     presolve.row_ids=rowids;presolve.col_ids=colids
     reused_old_arrays=False;fallback=False
     try:
-        baseline=sparse.load_npz(original/'C3A_A.npz')
-        with np.load(original/'C3A_DATA.npz',allow_pickle=False) as z:bd={k:z[k].copy() for k in z.files}
+        if memory_checkpoint is not None:
+            for item in (memory_checkpoint['C2_matrix'],memory_checkpoint['C2_data'],memory_checkpoint['C2_bound_history']):
+                if record(item['path'])!=item:raise PermissionError('MEMORY_REFRESH_C2_CACHE_BYTES_DRIFT')
+            baseline=sparse.load_npz(memory_checkpoint['C2_matrix']['path'])
+            with np.load(memory_checkpoint['C2_data']['path'],allow_pickle=False) as z:bd={k:z[k].copy() for k in z.files}
+        else:
+            baseline=sparse.load_npz(original/'C3A_A.npz')
+            with np.load(original/'C3A_DATA.npz',allow_pickle=False) as z:bd={k:z[k].copy() for k in z.files}
         proof=read(fresh/'CURRENT_EXACT_C3A_PROOF.json')
         if (constructor.matrix_sha(baseline)!=proof['baseline_matrix_SHA256']
                 or not np.array_equal(bd['row_names'],compact.d['row_names'][rowids])
@@ -275,7 +281,8 @@ def _load_resumed_case(fresh, original, payload, output):
             i=min(candidates)
             bounds.append(dict(column=j,name=str(compact.d['names'][j]),old_lower=float(compact.d['lower'][j]),
                 old_upper=float(compact.d['upper'][j]),new_lower=float(value),new_upper=float(value),proof='SINGLETON_EQUALITY:'+str(i)))
-        presolve.bound=sorted(bounds,key=lambda p:int(p['proof'].split(':',1)[1]))
+        presolve.bound=(read(memory_checkpoint['C2_bound_history']['path']) if memory_checkpoint is not None
+            else sorted(bounds,key=lambda p:int(p['proof'].split(':',1)[1])))
         if constructor._transport_state_sha(compact,presolve,graph)!=raw['transport_authority']['state_sha']:
             raise ValueError('RESUME_C2_RECONSTRUCTION_STATE_SHA_MISMATCH')
         reused_old_arrays=True
@@ -295,15 +302,107 @@ def _load_resumed_case(fresh, original, payload, output):
     cert,_,_,_=load_power(payload['bundle']);coeff=original_coefficients_for_day(preparation,cert,DAY)
     case=constructor.CampaignMCase(selected,sd,full,fd,None,graph,case_sha,raw,compact,presolve,
         payload['bundle'],read(fresh/'FIXED_AIDC_ANCHOR.json'),payload['planning'],coeff,fresh,ultra)
-    verified=constructor.verify_case(case)
-    if verified.get('PASS') is not True:raise PermissionError('RESUME_CURRENT_SOURCE_TRANSPORT_AND_C3_PROOF_FAILED')
+    if memory_checkpoint is None:
+        verified=constructor.verify_case(case)
+        if verified.get('PASS') is not True:raise PermissionError('RESUME_CURRENT_SOURCE_TRANSPORT_AND_C3_PROOF_FAILED')
+    else:
+        _verify_memory_delete_source(case,memory_checkpoint)
     return case,dict(PASS=True,fresh_artifacts=records,original_FULL_bytes_equal=True,
         source_proof_fingerprints_rechecked=True,all_C2_and_C3_state_SHAs_rechecked=True,
         old_C2_arrays_reused_only_after_exact_current_state_SHA=reused_old_arrays,
         fresh_FULL_static_presolve_fallback=fallback,Gurobi_FULL_models_rebuilt=0,Native_optimizer_calls=0)
 
 
-def resume(seconds=30.):
+DELETE_NAMES=('src','keys','vectors','constants','times','defs','_','cache','dom','pairs','eligible')
+
+def _verify_memory_delete_source(case, checkpoint):
+    """Admit exactly one Delete statement, with the old producer archived.
+
+    This is a development transition proof, not permission to replace producer
+    fingerprints generally. Every other mathematical source remains exact.
+    """
+    import ast,copy
+    import v42_may_campaign_native90.m_model as constructor
+    archive=checkpoint['producer_source_before_delete']
+    if record(archive['path'])!=archive:raise PermissionError('MEMORY_REFRESH_ARCHIVED_PRODUCER_DRIFT')
+    old=ast.parse(Path(archive['path']).read_text(encoding='utf-8-sig'))
+    new=ast.parse((SOURCE/'v42_ultracompact/current.py').read_text(encoding='utf-8-sig'))
+    definitions=[n for n in new.body if isinstance(n,ast.FunctionDef) and n.name=='reduce_current_c3a']
+    if len(definitions)!=1:raise PermissionError('MEMORY_REFRESH_PRODUCER_FUNCTION_DRIFT')
+    body=definitions[0].body;deletes=[(i,n) for i,n in enumerate(body) if isinstance(n,ast.Delete)]
+    if len(deletes)!=1:raise PermissionError('MEMORY_REFRESH_EXACTLY_ONE_DELETE_REQUIRED')
+    index,node=deletes[0]
+    if tuple(n.id for n in node.targets if isinstance(n,ast.Name))!=DELETE_NAMES or len(node.targets)!=len(DELETE_NAMES):
+        raise PermissionError('MEMORY_REFRESH_DELETE_TARGETS_DRIFT')
+    if (index+1>=len(body) or not isinstance(body[index+1],ast.ImportFrom)
+            or body[index+1].module!='current_verify' or body[index+1].level!=1):
+        raise PermissionError('MEMORY_REFRESH_DELETE_POSITION_DRIFT')
+    del body[index]
+    if ast.dump(old,include_attributes=False)!=ast.dump(new,include_attributes=False):
+        raise PermissionError('MEMORY_REFRESH_NON_DELETE_SCIENTIFIC_SOURCE_CHANGE')
+    authority=case.identity['c3_authority']
+    producer='v42_ultracompact/current.py'
+    if authority['sources'][producer]['sha256']!=archive['sha256']:
+        raise PermissionError('MEMORY_REFRESH_OLD_PRODUCER_NOT_PROOF_BOUND')
+    for name,item in authority['sources'].items():
+        if name!=producer and sha(SOURCE/name)!=item['sha256']:raise PermissionError('MEMORY_REFRESH_OTHER_C3_SOURCE_CHANGED:'+name)
+    transport=case.identity['transport_authority']
+    if any(sha(SOURCE/name)!=item['sha256'] for name,item in transport['sources'].items()):
+        raise PermissionError('MEMORY_REFRESH_ORIGINAL_TRANSPORT_SOURCE_CHANGED')
+    for auth in (transport,authority):
+        if record(auth['certificate']['path'])!=auth['certificate']:raise PermissionError('MEMORY_REFRESH_ORIGINAL_PROOF_PACKET_DRIFT')
+    if (constructor._transport_state_sha(case.compact,case.presolve,case.graph)!=transport['state_sha']
+            or constructor._c3_state_sha(case.ultra)!=authority['state_sha']
+            or read(authority['certificate']['path'])!=authority['proof']):
+        raise PermissionError('MEMORY_REFRESH_ORIGINAL_FULL_C2_C3_STATE_DRIFT')
+    if any(record(item['path'])!=item for item in checkpoint['fresh_artifacts'].values()):
+        raise PermissionError('MEMORY_REFRESH_ORIGINAL_ARTIFACT_CHANGED')
+    return dict(PASS=True,AST_identical_after_removing_single_unused_temporary_Delete=True,
+        deleted_names=list(DELETE_NAMES),producer_before=archive,
+        producer_after=record(SOURCE/producer),other_mathematical_sources_unchanged=True)
+
+
+def prepare_memory_refresh():
+    """Record and verify the old proof-bound case before changing its producer."""
+    from scipy import sparse
+    from v42_svr11.authority import _active
+    from v42_thermal.authority import current_authority
+    construction=DEV/'dates/B2'/DAY/'attempts/representative01';fresh=construction/'output'
+    previous=construction/'NATIVE_RUNTIME_LEDGER.json';prior=read(previous)
+    if prior.get('calls') or prior.get('inflight') is not None or prior.get('measured_Native_Runtime')!=0:
+        raise PermissionError('MEMORY_REFRESH_ORIGINAL_NATIVE0_REQUIRED')
+    construction_request=read(construction/'request.json')
+    if prior['source_SHA']!=construction_request['source_SHA']:raise PermissionError('MEMORY_REFRESH_ORIGINAL_NATIVE0_SOURCE_DRIFT')
+    original=OLD/'dates/B2'/DAY/'attempts/attempt_01/output';folder=OLD/'inputs/B2'/DAY
+    manifest=read(OLD/'CAMPAIGN_MANIFEST.json');bundle=read(folder/'NATIVE_INPUT.json');fixed=read(folder/'B2_FIXED_AIDC.json')
+    if record(fixed['physical']['path'])!=fixed['physical']:raise PermissionError('MEMORY_REFRESH_FIXED_INPUT_DRIFT')
+    with np.load(fixed['physical']['path'],allow_pickle=False) as z:planning={k:z[k].copy() for k in z.files}
+    payload=dict(bundle=bundle,planning=planning,identity=fixed['identity'],selected_jobs=fixed['selected_jobs'])
+    cache=DEV/'memory_refresh_inputs';cache.mkdir(parents=True,exist_ok=True)
+    path=cache/'CHECKPOINT.json'
+    if path.exists():raise PermissionError('MEMORY_REFRESH_CHECKPOINT_ALREADY_RECORDED')
+    token=_active.set(manifest);current_authority.cache_clear()
+    try:
+        case,recovery=_load_resumed_case(fresh,original,payload,fresh)
+        archived=cache/'current.before_delete.py'
+        archived.write_bytes((SOURCE/'v42_ultracompact/current.py').read_bytes())
+        sparse.save_npz(cache/'FRESH_VERIFIED_C2_A.npz',case.presolve.A)
+        np.savez_compressed(cache/'FRESH_VERIFIED_C2_DATA.npz',**case.presolve.d)
+        atomic(cache/'FRESH_VERIFIED_C2_BOUND_HISTORY.json',case.presolve.bound)
+        checkpoint=dict(PASS=True,Native_optimizer_calls=0,original_construction_source_SHA=construction_request['source_SHA'],
+            original_case_SHA=case.case_sha,original_identity=record(fresh/'SCIENTIFIC_CASE_IDENTITY.json'),
+            original_native0_ledger=record(previous),producer_source_before_delete=record(archived),
+            C2_matrix=record(cache/'FRESH_VERIFIED_C2_A.npz'),C2_data=record(cache/'FRESH_VERIFIED_C2_DATA.npz'),
+            C2_bound_history=record(cache/'FRESH_VERIFIED_C2_BOUND_HISTORY.json'),fresh_artifacts=recovery['fresh_artifacts'],
+            original_case_current_source_verification=case.identity['transport'],recovery=recovery,
+            development_only=True,production_results_promoted=0,UTC=now())
+        atomic(path,checkpoint)
+        print(json.dumps(dict(PASS=True,checkpoint=record(path),Native_optimizer_calls=0),ensure_ascii=False))
+        return checkpoint
+    finally:_active.reset(token);current_authority.cache_clear()
+
+
+def resume(seconds=30., refresh_memory=False):
     """Run one final-source smoke after an earlier construction stayed Native0."""
     if not 0<seconds<=60:raise ValueError('SHORT_SMOKE_ONLY')
     sources=source_files();source_sha=digest(sources)
@@ -322,17 +421,70 @@ def resume(seconds=30.):
     if record(fixed['physical']['path'])!=fixed['physical']:raise PermissionError('RESUME_FIXED_INPUT_SHA_DRIFT')
     with np.load(fixed['physical']['path'],allow_pickle=False) as z:planning={k:z[k].copy() for k in z.files}
     payload=dict(bundle=bundle,planning=planning,identity=fixed['identity'],selected_jobs=fixed['selected_jobs'])
-    attempt=DEV/'dates/B2'/DAY/'attempts/representative_final_source01';output=attempt/'output'
+    attempt_id='representative_memory_final01' if refresh_memory else 'representative_final_source01'
+    attempt=DEV/'dates/B2'/DAY/'attempts'/attempt_id;output=attempt/'output'
     if (attempt/'NATIVE_RUNTIME_LEDGER.json').exists():raise PermissionError('RESUME_NEW_LEDGER_ALREADY_EXISTS')
     output.mkdir(parents=True,exist_ok=True)
-    request=dict(root=str(DEV),arm='B2',day=DAY,attempt_id='representative_final_source01',output=str(output),
+    request=dict(root=str(DEV),arm='B2',day=DAY,attempt_id=attempt_id,output=str(output),
         source_SHA=source_sha,construction_source_SHA=construction_request['source_SHA'],development_only=True,production_results_promoted=0)
     atomic(attempt/'request.json',request)
     from v42_svr11.authority import _active
     from v42_thermal.authority import current_authority
     token=_active.set(old_manifest);current_authority.cache_clear()
     try:
-        case,recovery=_load_resumed_case(fresh,original,payload,output)
+        checkpoint=read(DEV/'memory_refresh_inputs/CHECKPOINT.json') if refresh_memory else None
+        if checkpoint is not None and (checkpoint['original_native0_ledger']!=prior_receipt
+                or checkpoint['original_construction_source_SHA']!=construction_request['source_SHA']):
+            raise PermissionError('MEMORY_REFRESH_CHECKPOINT_NATIVE0_BINDING_DRIFT')
+        case,recovery=_load_resumed_case(fresh,original,payload,output,checkpoint)
+        refreshed_memory=None
+        if refresh_memory:
+            import v42_may_campaign_native90.m_model as constructor
+            from v42_ultracompact.current import reduce_current_c3a,POLICY
+            from v42_common_mess.model import memory_observation
+            from v42_native.contracts import digest as case_digest
+            semantic=_verify_memory_delete_source(case,checkpoint)
+            old_identity=dict(case.identity);old_ultra=case.ultra;old_case_sha=case.case_sha
+            memory_before=memory_observation();began=time.perf_counter()
+            ultra=reduce_current_c3a(case.presolve.A,case.presolve.d,case.graph,
+                lambda value:atomic(attempt/'progress.json',dict(value,source_SHA=source_sha,UTC=now())),
+                physical_original=(case.original_A,case.original_d))
+            if (constructor.matrix_sha(ultra.A)!=old_identity['selected_matrix_sha']
+                    or constructor._domain_sha(ultra.d)!=old_identity['selected_domain_sha']
+                    or digest(ultra.certificates)!=digest(old_ultra.certificates)
+                    or digest(ultra.bounds)!=digest(old_ultra.bounds)):
+                raise PermissionError('MEMORY_REFRESH_SELECTED_C3_MATRIX_DOMAIN_OR_PROOF_CHANGED')
+            memory_after=memory_observation()
+            refreshed_memory=dict(before=memory_before,after=memory_after,
+                measured_process_peak_private_commit_bytes=memory_after['peak_private_commit_bytes'],
+                measured_process_peak_RSS_bytes=memory_after['peak_RSS_bytes'],
+                preparation_wall_seconds=time.perf_counter()-began,producer_temporaries_released_before_independent_verifier=True)
+            c3_authority=constructor._freeze_c3(ultra,output)
+            merged=dict(old_identity['transport'],C3A_policy=POLICY,
+                selected_C3A_independent_proof_PASS=ultra.proof['PASS'],
+                selected_C3A_rows_removed=ultra.proof['removed_rows'],selected_C3A_bounds_tightened=ultra.proof['bounds_tightened'],
+                selected_C3A_original_P1_bit_exact=ultra.proof['original_P1_bit_exact'],
+                selected_C3A_integer_and_full_LP_domains_identical=ultra.proof['integer_and_full_LP_domains_identical'])
+            transport=constructor._freeze_transport(case.compact,case.presolve,case.graph,merged,output)
+            case.identity=dict(old_identity,transport=merged,transport_authority=transport,c3_authority=c3_authority,
+                C2_size=ultra.proof['baseline'],C3A_size=ultra.proof['selected'])
+            case.A,case.d,case.ultra,case.output=ultra.A,ultra.d,ultra,output
+            case.case_sha=case_digest(case.identity)
+            atomic(output/'SCIENTIFIC_CASE_IDENTITY.json',dict(case_sha=case.case_sha,**case.identity))
+            atomic(output/'FIXED_AIDC_ANCHOR.json',case.anchor)
+            verified=constructor.verify_case(case)
+            if verified.get('PASS') is not True:raise PermissionError('MEMORY_REFRESH_FINAL_CASE_PROOF_FAILED')
+            equality=dict(PASS=True,source_SHA=source_sha,construction_source_SHA=construction_request['source_SHA'],
+                original_case_SHA=old_case_sha,refreshed_case_SHA=case.case_sha,
+                selected_matrix_bitwise_equal=True,selected_domain_bitwise_equal=True,
+                all_removed_row_certificates_identical=True,all_bound_certificates_identical=True,
+                mathematical_source_transition=semantic,old_native0_ledger=prior_receipt,
+                original_construction_proof=record(fresh/'CURRENT_EXACT_C3A_PROOF.json'),
+                refreshed_exact_reduction_proof=record(output/'CURRENT_EXACT_C3A_PROOF.json'),
+                refreshed_preparation_memory=refreshed_memory,Native_optimizer_calls=0,
+                Gurobi_FULL_models_rebuilt=0,development_only=True,production_results_promoted=0,UTC=now())
+            atomic(output/'MEMORY_REFRESH_EQUALITY.json',equality)
+            recovery=dict(recovery,memory_Delete_only_refresh=record(output/'MEMORY_REFRESH_EQUALITY.json'))
         # Keep original construction attribution immutable. This receipt names
         # the final-source reuse verification and separate native execution.
         atomic(attempt/'FRESH_STATE_RECOVERY.json',dict(recovery,source_SHA=source_sha,
@@ -355,6 +507,11 @@ def resume(seconds=30.):
             original_construction_validation=record(DEV/'ORIGINAL_EQUIVALENCE_VALIDATION.json'),
             prior_native0_ledger=prior_receipt,resume_recovery=recovery,
             original_incumbent_FULL_recheck=record(output/'INITIAL_DEVELOPMENT_FULL_POINT.REPLAY.json'),UTC=now())
+        final_equivalence['exact_reduction_proof']=record(case.output/'CURRENT_EXACT_C3A_PROOF.json')
+        if refresh_memory:
+            final_equivalence.update(transport=constructor.verify_case(case),refreshed_case_SHA=case.case_sha,
+                original_construction_memory=equivalence['memory'],refreshed_C3A_preparation_memory=refreshed_memory,
+                memory=refreshed_memory['after'],memory_Delete_only_equality=record(output/'MEMORY_REFRESH_EQUALITY.json'))
         atomic(DEV/'ORIGINAL_EQUIVALENCE_VALIDATION_FINAL_SOURCE.json',final_equivalence)
         from v42_svr11.resources import snapshot
         while True:
@@ -393,5 +550,7 @@ def resume(seconds=30.):
 
 
 if __name__=='__main__':
-    if len(sys.argv)>1 and sys.argv[1]=='--resume':resume(float(sys.argv[2]) if len(sys.argv)>2 else 30.)
+    if len(sys.argv)>1 and sys.argv[1]=='--prepare-memory-refresh':prepare_memory_refresh()
+    elif len(sys.argv)>1 and sys.argv[1]=='--refresh-memory':resume(float(sys.argv[2]) if len(sys.argv)>2 else 30.,True)
+    elif len(sys.argv)>1 and sys.argv[1]=='--resume':resume(float(sys.argv[2]) if len(sys.argv)>2 else 30.)
     else:run(float(sys.argv[1]) if len(sys.argv)>1 else 30.)
