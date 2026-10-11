@@ -2,8 +2,9 @@
 
 Input and Forecast authorities alone come from the held campaign. No old
 optimization point, bound or start is loaded. optimize/presolve are denied for
-the entire construction and native parameter readback. Root timing remains
-unmeasured when additional LP-safe physical reduction is zero.
+the entire construction and native parameter readback. A passing exact proof
+and actual dense compression authorize one fresh Root measurement, including
+when additional LP-safe physical exclusions are zero.
 """
 from collections import Counter
 from pathlib import Path
