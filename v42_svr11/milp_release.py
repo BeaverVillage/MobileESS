@@ -85,6 +85,18 @@ def validate(root,sources):
         raise PermissionError('SVR11_GLOBAL_FULL_MILP_VALIDATION_SOURCE_DRIFT')
     if contract.get('A1_A2_algorithms_changed') is not False or contract.get('M_native_limit_seconds')!=1800:
         raise PermissionError('SVR11_GLOBAL_FULL_MILP_RELEASE_POLICY_DRIFT')
+    if contract.get('schema')=='SVR11_CAMPAIGN_REUSE_VALIDATED_ALGORITHM_V1':
+        origin=_checked(contract['previous_validated_release'],
+            'SVR11_GLOBAL_PREVIOUS_C3A_RELEASE_BYTES_DRIFT')
+        _validate_exact_c3a(origin)
+        authority=_checked(contract['validated_construction_algorithm'],
+            'SVR11_GLOBAL_CONSTRUCTION_ALGORITHM_RECEIPT_DRIFT')
+        if not (authority.get('source_SHA')==contract['source_SHA']
+                and authority.get('construction_algorithms_unchanged') is True
+                and authority.get('user_authorized_no_daily_proof') is True
+                and authority.get('previous_source_SHA')==origin['source_SHA']):
+            raise PermissionError('SVR11_GLOBAL_CONSTRUCTION_ALGORITHM_REUSE_INVALID')
+        return record(path)
     if contract.get('schema')=='SVR11_EXACT_C3A_MINIMAL_RELEASE_V1':
         _validate_exact_c3a(contract)
         return record(path)

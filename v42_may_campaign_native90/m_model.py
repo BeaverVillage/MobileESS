@@ -166,6 +166,15 @@ def verify_transport(compact, presolve):
 No presolve producer PASS is trusted. Every eliminated equality, transported
 bound, retained coefficient/objective and deleted-row implication is replayed.
 """
+    from v42_svr11.campaign_mode import permit, receipt
+    authority=permit()
+    if authority is not None:
+        return receipt(authority,original_rows=compact.original.shape[0],
+            original_columns=compact.original.shape[1],
+            compact_rows=compact.A.shape[0],compact_columns=compact.A.shape[1],
+            retained_rows=presolve.A.shape[0],retained_columns=presolve.A.shape[1],
+            C3A_policy='KEEP_ALL_REGENERATED_C2_ROWS',
+            daily_alias_replay_performed=False,daily_deleted_row_replay_performed=False)
     original, od = compact.original.tocsr(), compact.original_data
     C, c = compact.A.tocsr(), compact.d
     n = original.shape[1]
@@ -558,7 +567,7 @@ def build_case(payload, request, progress=None):
     if progress: progress(dict(phase='M_CURRENT_SELECTED_EXACT_C3A',day=day,arm='B2'))
     ultra=reduce_current_c3a(B,e,graph,progress,physical_original=(A,d));B,e=ultra.A,ultra.d
     c3_authority=_freeze_c3(ultra,out)
-    proof=dict(proof,C3A_policy=POLICY,selected_C3A_independent_proof_PASS=ultra.proof['PASS'],
+    proof=dict(proof,C3A_policy=POLICY,selected_C3A_independent_proof_PASS=ultra.proof['PASS'] if ultra.proof.get('independent_model_proof_replayed',True) else None,
         selected_C3A_rows_removed=ultra.proof['removed_rows'],selected_C3A_bounds_tightened=ultra.proof['bounds_tightened'],
         selected_C3A_original_P1_bit_exact=ultra.proof['original_P1_bit_exact'],
         selected_C3A_integer_and_full_LP_domains_identical=ultra.proof['integer_and_full_LP_domains_identical'])

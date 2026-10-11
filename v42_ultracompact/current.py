@@ -157,8 +157,16 @@ def reduce_current_c3a(A,d,graph,progress=None,physical_original=None):
     full,fd=physical_original if physical_original is not None else (None,None)
     ultra=CurrentC3A(A,d,B,e,rows,certs,bounds,{},full,fd)
     del src, keys, vectors, constants, times, defs, _, cache, dom, pairs, eligible
-    from .current_verify import verify_current_c3a
-    proof=verify_current_c3a(ultra,graph)
+    from v42_svr11.campaign_mode import permit, receipt
+    authority=permit()
+    if authority is None:
+        from .current_verify import verify_current_c3a
+        proof=verify_current_c3a(ultra,graph)
+        proof['independent_model_proof_replayed']=True
+    else:
+        proof=receipt(authority,removed_rows=len(certs),
+            removed_row_methods=dict(Counter(p['kind'] for p in certs)),
+            bounds_tightened=len(bounds),columns_eliminated=0)
     proof.update(schema='V42_CURRENT_EXACT_C3A_PROOF_V1',C3A_policy=POLICY,
         baseline=size(A,d),selected=size(B,e),baseline_matrix_SHA256=matrix_sha(A),selected_matrix_SHA256=matrix_sha(B),
         removed_families=dict(Counter(rf[p['row']] for p in certs)),bound_families=dict(Counter(vf[p['column']] for p in bounds)),

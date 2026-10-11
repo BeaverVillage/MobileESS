@@ -452,7 +452,7 @@ class MSourceBridge:
                 read(context.output / 'CURRENT_C3A_ROW_CERTIFICATES.json'),
                 read(context.output / 'CURRENT_C3A_BOUND_PROOFS.json'), c3_proof, A, data)
             proof = dict(proof, C3A_policy=current.POLICY,
-                selected_C3A_independent_proof_PASS=c3_proof['PASS'],
+                selected_C3A_independent_proof_PASS=c3_proof['PASS'] if c3_proof.get('independent_model_proof_replayed',True) else None,
                 selected_C3A_rows_removed=c3_proof['removed_rows'],
                 selected_C3A_bounds_tightened=c3_proof['bounds_tightened'],
                 selected_C3A_original_P1_bit_exact=c3_proof['original_P1_bit_exact'],
