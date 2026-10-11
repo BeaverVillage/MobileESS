@@ -1,6 +1,6 @@
 # SVR11 May 2025 campaign
 
-Status: IN_PROGRESS; attempted terminal dates 46/124.
+Status: IN_PROGRESS; attempted terminal dates 49/124.
 
 Source SHA: `a113106e7bbfeb2ca3a0760e9dfb1ff479e0afa2d81a6bdcc71a250b23982f72`
 
@@ -20,7 +20,7 @@ Date failures do not gate later dates or policies. Unexecuted metrics remain una
 
 | B0 | 31 | 0 | 0 | 0 |
 
-| B2 | 15 | 0 | 3 | 13 |
+| B2 | 17 | 1 | 3 | 10 |
 
 | B1 | 0 | 0 | 0 | 31 |
 
@@ -36,4 +36,4 @@ Full node/phase, both-terminal current/kVA, control events/taps and loss evidenc
 
 ## Failures
 
-None recorded so far; unexecuted dates are not PASS.
+- B2 2025-05-18: ACTUAL:VOLTAGE_VIOLATION; DAYAHEAD:VOLTAGE_VIOLATION (result: D:\v42_svr11_may_20261011_10\dates\B2\2025-05-18\attempts\attempt_01\RESULT.json)

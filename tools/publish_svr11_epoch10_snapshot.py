@@ -18,7 +18,8 @@ def publish():
     names=('CAMPAIGN_MANIFEST.json','CAMPAIGN_LEDGER.json','PREDECESSOR_DRAIN_CONTRACT.json','MIGRATION_STATUS.json',
         'FORECAST_ALLOCATION_CACHE_EQUIVALENCE.json','STRICT_BYTE_EQUIVALENCE_SUPPLEMENT.json','MODEL_CHECKPOINT_REUSE_CONTRACT.json','REUSE_ADMISSION.json','B2_PRE_DISPATCH_REUSE.json',
         'TRANSFER_INTENT.json','TRANSFER_COMPLETE.json','SOURCE_SCOPE_VERIFICATION.json',
-        'MODEL_GENERATION_BOTTLENECK_AUDIT.json','TRANSFER_REGRESSION.json','IMMUTABLE_STORAGE_SHARING.json','REPORT.json','REPORT.md',
+        'MODEL_GENERATION_BOTTLENECK_AUDIT.json','TRANSFER_REGRESSION.json','IMMUTABLE_STORAGE_SHARING.json',
+        'BUS81_MAY18_VOLTAGE_CAUSE_AUDIT.json','BUS81_MAY18_VOLTAGE_CAUSE_AUDIT.md','REPORT.json','REPORT.md',
         'PERFORMANCE_COMPARISON.json','PERFORMANCE_COMPARISON.md','MONITOR_UI_RELEASE.json','MONITOR_PROCESS.json',
         'LIVE_OBSERVATION.json','WATCHDOG_LAST_RUN.json','SUPERVISOR_PROCESS.json','SUPERVISOR_HEARTBEAT.json',
         'WINDOWS_SCHEDULE_REGISTRATION.json','WINDOWS_SCHEDULE_OBSERVED_EXECUTION.json','HANDOFF_37_VALIDATION.json','HANDOFF_RECEIPT.json')
@@ -55,6 +56,12 @@ def publish():
         original_model_slots_reused=sum(len(v['slots']) for v in models['days'].values()),
         handoff37_verified=h.get('verified_PASS',0),handoff37_complete=bool(h.get('PASS') and handoff.get('PASS')),
         monitor_URL='http://127.0.0.1:8796',hourly_ACTIVE=True,monthly_campaign_complete=False,UTC=now())
+    physical_note=''
+    if (ROOT/'BUS81_MAY18_VOLTAGE_CAUSE_AUDIT.json').exists():
+        a=read(ROOT/'BUS81_MAY18_VOLTAGE_CAUSE_AUDIT.json')
+        physical_note='''B2 May18 is a retained physical FAIL: slot51, Bus81/IDC10/MESS PCC B phases, Actual1.051030026pu and Forecast1.050890442pu. Current/kVA/taps and all96 AC/control checks pass. Bus81 is upstream of the BUS82 bank and on a different branch from BUS79/BUS86. Frozen-coefficient reconstruction gives1.027409814pu at Bus81 B; local sensitivities do not certify the optimized nonlinear automatic-control trajectory. Saved evidence across49 completed same-equipment Actual trajectories finds only May18 violating Bus81 B. Keep FAIL-CONTINUE and observe independent dates; no device/setting/limit change or unchanged-physics retry. Existing BUS82 relocation beforeLine80 is a candidate only if repeated structural evidence makes it necessary, with a separate common epoch and affected-result recomputation. [Saved RCA](epoch10_snapshot/BUS81_MAY18_VOLTAGE_CAUSE_AUDIT.json), [readable RCA](epoch10_snapshot/BUS81_MAY18_VOLTAGE_CAUSE_AUDIT.md).
+
+'''
     atomic(folder/'SNAPSHOT.json',snap)
     p=SOURCE/'docs/v42_svr11_final_20261011/README.md';previous=p.read_text(encoding='utf8');marker='<!-- EPOCH10_CURRENT_END -->'
     if marker in previous:previous=previous.split(marker,1)[1].lstrip()
@@ -68,6 +75,7 @@ The same date-specific Forecast electrical model and sensitivities are shared by
 
 Current{state['counts']['completed']}/124 terminal; remaining B2→B1→B3 proceeds in original order with Worker3/1/1. Individual FAIL never gates later dates/policies; technical retries remain finite fresh Native0 attempts after following-date assignment. FULL-verified TIME_LIMIT is accepted normally. Planning/Actual autonomous controls remain independent and Actual repair/reoptimization remain0. Original voltage.95–1.05, line/SVR400A, original compiled NormalAmps and separate kVA/tap constraints remain literal.
 
+{physical_note}
 [37-date verification](epoch10_snapshot/HANDOFF_37_VALIDATION.json), [live scheduled handoff](epoch10_snapshot/HANDOFF_RECEIPT.json). HTTP200 monitor http://127.0.0.1:8796; existing hourly ACTIVE and only two existing Windows jobs target this Root/Source. May2025 remains retrospective, not an independent holdout. Full124 completion remains pending.
 
 {marker}

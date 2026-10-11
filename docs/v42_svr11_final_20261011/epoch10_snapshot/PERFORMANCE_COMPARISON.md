@@ -1,6 +1,6 @@
 # SVR11 campaign performance comparison
 
-IN_PROGRESS: 46/124 dates terminal.
+IN_PROGRESS: 49/124 dates terminal.
 
 Scientific Source SHA: `a113106e7bbfeb2ca3a0760e9dfb1ff479e0afa2d81a6bdcc71a250b23982f72`
 
@@ -12,7 +12,7 @@ Policy own PASS cohorts and paired same-date populations are separate. B0 has no
 
 | B0 | 31 | 0 | 0.7346894579860525 | 1597.3511744384796 |
 
-| B2 | 15 | 0 | 0.5990276605168456 | 1486.1156587882133 |
+| B2 | 17 | 1 | 0.6008141332681624 | 1508.2701634289217 |
 
 | B1 | 0 | 0 | None | None |
 
@@ -24,7 +24,7 @@ Pairwise deltas use only dates where both policies PASS. A lower failure rate an
 
 
 
-- B0 / B2: 15 common PASS dates; exact dates and numerical deltas in PERFORMANCE_COMPARISON.json.
+- B0 / B2: 17 common PASS dates; exact dates and numerical deltas in PERFORMANCE_COMPARISON.json.
 
 - B0 / B1: 0 common PASS dates; exact dates and numerical deltas in PERFORMANCE_COMPARISON.json.
 

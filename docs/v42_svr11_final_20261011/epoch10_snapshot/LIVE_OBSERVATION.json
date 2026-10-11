@@ -1,48 +1,57 @@
 {
-  "UTC": "2026-10-11T03:45:38.227729+00:00",
+  "UTC": "2026-10-11T04:32:09.986780+00:00",
   "source_SHA": "a113106e7bbfeb2ca3a0760e9dfb1ff479e0afa2d81a6bdcc71a250b23982f72",
   "policy": "B2",
   "counts": {
-    "PASS": 46,
-    "FAIL": 0,
+    "PASS": 48,
+    "FAIL": 1,
     "RUNNING": 3,
-    "NOT_EXECUTED": 75,
-    "completed": 46
+    "NOT_EXECUTED": 72,
+    "completed": 49
   },
   "supervisor_PID": 59532,
   "migration_status": "SUCCESSOR_WATCHDOG_INVOKED",
   "workers": [
     {
-      "day": "2025-05-16",
-      "PID": 113376,
-      "phase": "SVR11_FORECAST_MODEL_GENERATION 1/96",
+      "day": "2025-05-19",
+      "PID": 107688,
+      "phase": "SVR11_FORECAST_MODEL_GENERATION 21/96",
       "Native_Runtime": 0,
-      "completed_model_slots": 1,
-      "model_wall_seconds": 7.192531600012444,
-      "RSS_MB": 317.1
+      "completed_model_slots": 22,
+      "model_wall_seconds": 252.76669499999844,
+      "RSS_MB": 234.6
     },
     {
-      "day": "2025-05-17",
-      "PID": 120472,
-      "phase": "SVR11_FORECAST_MODEL_GENERATION 1/96",
+      "day": "2025-05-20",
+      "PID": 122372,
+      "phase": "SVR11_FORECAST_MODEL_GENERATION 19/96",
       "Native_Runtime": 0,
-      "completed_model_slots": 1,
-      "model_wall_seconds": 7.090640399954282,
-      "RSS_MB": 316.8
+      "completed_model_slots": 20,
+      "model_wall_seconds": 215.78867029992398,
+      "RSS_MB": 314.7
     },
     {
-      "day": "2025-05-18",
-      "PID": 120192,
-      "phase": "SVR11_FORECAST_MODEL_GENERATION 1/96",
+      "day": "2025-05-21",
+      "PID": 91840,
+      "phase": "SVR11_FORECAST_MODEL_GENERATION 12/96",
       "Native_Runtime": 0,
-      "completed_model_slots": 1,
-      "model_wall_seconds": 7.176973899942823,
-      "RSS_MB": 315.8
+      "completed_model_slots": 12,
+      "model_wall_seconds": 124.8923643999733,
+      "RSS_MB": 245.2
     }
   ],
   "read_only_snapshot_races": [],
   "errors": [
-    "B2 2025-05-06 (복구됨): PermissionError(13, '액세스가 거부되었습니다')"
+    "B2 2025-05-06 (복구됨): PermissionError(13, '액세스가 거부되었습니다')",
+    "B2 2025-05-18 (보존된 이전 시도): ACTUAL:VOLTAGE_VIOLATION; DAYAHEAD:VOLTAGE_VIOLATION",
+    "B2 2025-05-18: ACTUAL:VOLTAGE_VIOLATION; DAYAHEAD:VOLTAGE_VIOLATION"
   ],
-  "current_epoch_failures": []
+  "current_epoch_failures": [
+    {
+      "arm": "B2",
+      "day": "2025-05-18",
+      "reason": "ACTUAL:VOLTAGE_VIOLATION; DAYAHEAD:VOLTAGE_VIOLATION",
+      "result": "D:\\v42_svr11_may_20261011_10\\dates\\B2\\2025-05-18\\attempts\\attempt_01\\RESULT.json"
+    }
+  ]
 }
