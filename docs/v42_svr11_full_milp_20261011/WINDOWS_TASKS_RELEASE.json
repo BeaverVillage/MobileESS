@@ -1,0 +1,56 @@
+{
+  "PASS": true,
+  "UTC": "2026-10-11T17:47:42.3744665+09:00",
+  "existing_tasks_updated_only": true,
+  "new_tasks_created": 0,
+  "tasks": [
+    {
+      "name": "MobileESS_V42_May_B2_B3_Autonomous_Monitor",
+      "state": "Ready",
+      "enabled": true,
+      "MultipleInstances": 2,
+      "execute": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+      "arguments": "-B -X utf8 D:\\v42_svr11_epoch14_20261011\\tools\\svr11_monitor_ui.py safeguard D:\\v42_svr11_may_20261011_14 --monitor-only",
+      "cwd": "D:\\v42_svr11_epoch14_20261011",
+      "LastRun": "2026-10-11T17:43:13+09:00",
+      "LastExit": 0,
+      "NextRun": "2026-10-11T17:48:12+09:00",
+      "triggers": [
+        {
+          "type": "MSFT_TaskLogonTrigger",
+          "interval": null,
+          "enabled": true
+        },
+        {
+          "type": "MSFT_TaskTimeTrigger",
+          "interval": "PT5M",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "name": "MobileESS_V42_May_B2_B3_Autonomous_Supervisor",
+      "state": "Ready",
+      "enabled": true,
+      "MultipleInstances": 2,
+      "execute": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+      "arguments": "-B -X utf8 D:\\v42_svr11_epoch14_20261011\\tools\\svr11_monitor_ui.py safeguard D:\\v42_svr11_may_20261011_14",
+      "cwd": "D:\\v42_svr11_epoch14_20261011",
+      "LastRun": "2026-10-11T17:43:20+09:00",
+      "LastExit": 0,
+      "NextRun": "2026-10-11T17:48:19+09:00",
+      "triggers": [
+        {
+          "type": "MSFT_TaskLogonTrigger",
+          "interval": null,
+          "enabled": true
+        },
+        {
+          "type": "MSFT_TaskTimeTrigger",
+          "interval": "PT5M",
+          "enabled": true
+        }
+      ]
+    }
+  ]
+}
