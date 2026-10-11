@@ -16,7 +16,7 @@ def publish():
     assert state['source_SHA']==m['execution_SHA'] and Path(state['root']).resolve()==ROOT
     folder=SOURCE/'docs/v42_svr11_final_20261011/epoch10_snapshot';folder.mkdir(parents=True,exist_ok=True)
     names=('CAMPAIGN_MANIFEST.json','CAMPAIGN_LEDGER.json','PREDECESSOR_DRAIN_CONTRACT.json','MIGRATION_STATUS.json',
-        'FORECAST_ALLOCATION_CACHE_EQUIVALENCE.json','MODEL_CHECKPOINT_REUSE_CONTRACT.json','REUSE_ADMISSION.json','B2_PRE_DISPATCH_REUSE.json',
+        'FORECAST_ALLOCATION_CACHE_EQUIVALENCE.json','STRICT_BYTE_EQUIVALENCE_SUPPLEMENT.json','MODEL_CHECKPOINT_REUSE_CONTRACT.json','REUSE_ADMISSION.json','B2_PRE_DISPATCH_REUSE.json',
         'TRANSFER_INTENT.json','TRANSFER_COMPLETE.json','SOURCE_SCOPE_VERIFICATION.json','REPORT.json','REPORT.md',
         'PERFORMANCE_COMPARISON.json','PERFORMANCE_COMPARISON.md','MONITOR_UI_RELEASE.json','MONITOR_PROCESS.json',
         'LIVE_OBSERVATION.json','WATCHDOG_LAST_RUN.json','SUPERVISOR_PROCESS.json','SUPERVISOR_HEARTBEAT.json',
@@ -30,6 +30,8 @@ def publish():
         shutil.copyfile(r['path'],folder/'benchmarks'/(Path(r['path']).parent.name+'.json'))
     for name in ('ALL_FORECAST_INPUT_EQUIVALENCE.json','REGRESSION.json'):
         shutil.copyfile(ROOT/'model_benchmarks'/name,folder/'benchmarks'/name)
+    for r in read(ROOT/'STRICT_BYTE_EQUIVALENCE_SUPPLEMENT.json')['benchmarks']:
+        shutil.copyfile(r['path'],folder/'benchmarks'/(Path(r['path']).parent.name+'.json'))
     (folder/'reuse').mkdir(exist_ok=True)
     for p in (ROOT/'reuse').glob('*_B*.json'):shutil.copyfile(p,folder/'reuse'/p.name)
     atomic(folder/'MONITOR_STATE.json',state)
