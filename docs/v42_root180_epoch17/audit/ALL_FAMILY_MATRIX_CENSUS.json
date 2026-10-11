@@ -1,0 +1,3513 @@
+{
+  "schema": "V42_ALL_FAMILY_EXACT_MATRIX_CENSUS_V1",
+  "models": {
+    "old_original": {
+      "rows": 886017,
+      "columns": 316743,
+      "binary": 208312,
+      "nnz": 8447855,
+      "row_families": {
+        "flow": {
+          "count": 9216,
+          "nnz": 415760,
+          "max_row_nnz": 52
+        },
+        "terminal_location": {
+          "count": 4,
+          "nnz": 96,
+          "max_row_nnz": 24
+        },
+        "initial_SOC": {
+          "count": 4,
+          "nnz": 4,
+          "max_row_nnz": 1
+        },
+        "terminal_SOC": {
+          "count": 4,
+          "nnz": 4,
+          "max_row_nnz": 1
+        },
+        "connected_Pch": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Pdis": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_charge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_discharge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Qmax": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Qmin": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "PCS16": {
+          "count": 143072,
+          "nnz": 518636,
+          "max_row_nnz": 4
+        },
+        "energy_balance": {
+          "count": 384,
+          "nnz": 217638,
+          "max_row_nnz": 602
+        },
+        "injection_P_binding": {
+          "count": 2304,
+          "nnz": 20188,
+          "max_row_nnz": 9
+        },
+        "injection_Q_binding": {
+          "count": 2304,
+          "nnz": 11246,
+          "max_row_nnz": 5
+        },
+        "voltage_lower": {
+          "count": 36960,
+          "nnz": 1774080,
+          "max_row_nnz": 48
+        },
+        "voltage_upper": {
+          "count": 36960,
+          "nnz": 1774080,
+          "max_row_nnz": 48
+        },
+        "NormalAmps": {
+          "count": 11520,
+          "nnz": 525887,
+          "max_row_nnz": 48
+        },
+        "response_transformer_P_binding": {
+          "count": 576,
+          "nnz": 10656,
+          "max_row_nnz": 25
+        },
+        "response_transformer_Q_binding": {
+          "count": 576,
+          "nnz": 10656,
+          "max_row_nnz": 25
+        },
+        "transformer_kVA": {
+          "count": 110592,
+          "nnz": 80640,
+          "max_row_nnz": 2
+        },
+        "response_line_P_binding": {
+          "count": 25152,
+          "nnz": 121056,
+          "max_row_nnz": 25
+        },
+        "response_line_Q_binding": {
+          "count": 25152,
+          "nnz": 121056,
+          "max_row_nnz": 25
+        },
+        "response_line_correction_binding": {
+          "count": 25152,
+          "nnz": 1229747,
+          "max_row_nnz": 49
+        },
+        "line_thermal_face": {
+          "count": 402433,
+          "nnz": 1509121,
+          "max_row_nnz": 4
+        }
+      },
+      "column_families": {
+        "arc": {
+          "count": 207928,
+          "nnz": 793682,
+          "binary": 207928,
+          "fixed": 0,
+          "max_column_nnz": 22
+        },
+        "SOC": {
+          "count": 388,
+          "nnz": 776,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2
+        },
+        "charge_mode": {
+          "count": 384,
+          "nnz": 17884,
+          "binary": 384,
+          "fixed": 0,
+          "max_column_nnz": 48
+        },
+        "Pch": {
+          "count": 8942,
+          "nnz": 160956,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 18
+        },
+        "Pdis": {
+          "count": 8942,
+          "nnz": 160956,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 18
+        },
+        "Q": {
+          "count": 8942,
+          "nnz": 152014,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 17
+        },
+        "injection_P": {
+          "count": 2304,
+          "nnz": 2779706,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 1233
+        },
+        "injection_Q": {
+          "count": 2304,
+          "nnz": 2780024,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 1233
+        },
+        "rho_max": {
+          "count": 1,
+          "nnz": 402433,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 402433
+        },
+        "response_transformer_P": {
+          "count": 576,
+          "nnz": 8640,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_transformer_Q": {
+          "count": 576,
+          "nnz": 8640,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_P": {
+          "count": 25152,
+          "nnz": 377280,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_Q": {
+          "count": 25152,
+          "nnz": 377280,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_correction": {
+          "count": 25152,
+          "nnz": 427584,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 17
+        }
+      },
+      "coefficient_range": [
+        1.0006451962467139e-13,
+        400.0
+      ]
+    },
+    "old_C0": {
+      "rows": 895055,
+      "columns": 325781,
+      "binary": 9422,
+      "nnz": 8664917,
+      "row_families": {
+        "flow": {
+          "count": 9216,
+          "nnz": 415760,
+          "max_row_nnz": 52
+        },
+        "terminal_location": {
+          "count": 4,
+          "nnz": 96,
+          "max_row_nnz": 24
+        },
+        "initial_SOC": {
+          "count": 4,
+          "nnz": 4,
+          "max_row_nnz": 1
+        },
+        "terminal_SOC": {
+          "count": 4,
+          "nnz": 4,
+          "max_row_nnz": 1
+        },
+        "connected_Pch": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Pdis": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_charge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_discharge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Qmax": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Qmin": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "PCS16": {
+          "count": 143072,
+          "nnz": 518636,
+          "max_row_nnz": 4
+        },
+        "energy_balance": {
+          "count": 384,
+          "nnz": 217638,
+          "max_row_nnz": 602
+        },
+        "injection_P_binding": {
+          "count": 2304,
+          "nnz": 20188,
+          "max_row_nnz": 9
+        },
+        "injection_Q_binding": {
+          "count": 2304,
+          "nnz": 11246,
+          "max_row_nnz": 5
+        },
+        "voltage_lower": {
+          "count": 36960,
+          "nnz": 1774080,
+          "max_row_nnz": 48
+        },
+        "voltage_upper": {
+          "count": 36960,
+          "nnz": 1774080,
+          "max_row_nnz": 48
+        },
+        "NormalAmps": {
+          "count": 11520,
+          "nnz": 525887,
+          "max_row_nnz": 48
+        },
+        "response_transformer_P_binding": {
+          "count": 576,
+          "nnz": 10656,
+          "max_row_nnz": 25
+        },
+        "response_transformer_Q_binding": {
+          "count": 576,
+          "nnz": 10656,
+          "max_row_nnz": 25
+        },
+        "transformer_kVA": {
+          "count": 110592,
+          "nnz": 80640,
+          "max_row_nnz": 2
+        },
+        "response_line_P_binding": {
+          "count": 25152,
+          "nnz": 121056,
+          "max_row_nnz": 25
+        },
+        "response_line_Q_binding": {
+          "count": 25152,
+          "nnz": 121056,
+          "max_row_nnz": 25
+        },
+        "response_line_correction_binding": {
+          "count": 25152,
+          "nnz": 1229747,
+          "max_row_nnz": 49
+        },
+        "line_thermal_face": {
+          "count": 402433,
+          "nnz": 1509121,
+          "max_row_nnz": 4
+        },
+        "node_activity_link": {
+          "count": 9038,
+          "nnz": 217062,
+          "max_row_nnz": 25
+        }
+      },
+      "column_families": {
+        "route_flow": {
+          "count": 207928,
+          "nnz": 1001706,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 24
+        },
+        "SOC": {
+          "count": 388,
+          "nnz": 776,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2
+        },
+        "charge_mode": {
+          "count": 384,
+          "nnz": 17884,
+          "binary": 384,
+          "fixed": 0,
+          "max_column_nnz": 48
+        },
+        "Pch": {
+          "count": 8942,
+          "nnz": 160956,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 18
+        },
+        "Pdis": {
+          "count": 8942,
+          "nnz": 160956,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 18
+        },
+        "Q": {
+          "count": 8942,
+          "nnz": 152014,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 17
+        },
+        "injection_P": {
+          "count": 2304,
+          "nnz": 2779706,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 1233
+        },
+        "injection_Q": {
+          "count": 2304,
+          "nnz": 2780024,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 1233
+        },
+        "rho_max": {
+          "count": 1,
+          "nnz": 402433,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 402433
+        },
+        "response_transformer_P": {
+          "count": 576,
+          "nnz": 8640,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_transformer_Q": {
+          "count": 576,
+          "nnz": 8640,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_P": {
+          "count": 25152,
+          "nnz": 377280,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_Q": {
+          "count": 25152,
+          "nnz": 377280,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_correction": {
+          "count": 25152,
+          "nnz": 427584,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 17
+        },
+        "node_activity": {
+          "count": 9038,
+          "nnz": 9038,
+          "binary": 9038,
+          "fixed": 0,
+          "max_column_nnz": 1
+        }
+      },
+      "coefficient_range": [
+        1.0006451962467139e-13,
+        400.0
+      ]
+    },
+    "old_C2": {
+      "rows": 654348,
+      "columns": 306040,
+      "binary": 9322,
+      "nnz": 5584200,
+      "row_families": {
+        "flow": {
+          "count": 8942,
+          "nnz": 415760,
+          "max_row_nnz": 52
+        },
+        "terminal_location": {
+          "count": 4,
+          "nnz": 96,
+          "max_row_nnz": 24
+        },
+        "connected_Pch": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Pdis": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_charge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_discharge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Qmax": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Qmin": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "PCS16": {
+          "count": 143072,
+          "nnz": 518636,
+          "max_row_nnz": 4
+        },
+        "energy_balance": {
+          "count": 384,
+          "nnz": 217630,
+          "max_row_nnz": 602
+        },
+        "injection_P_binding": {
+          "count": 2263,
+          "nnz": 20147,
+          "max_row_nnz": 9
+        },
+        "injection_Q_binding": {
+          "count": 2237,
+          "nnz": 11153,
+          "max_row_nnz": 5
+        },
+        "voltage_upper": {
+          "count": 20733,
+          "nnz": 982660,
+          "max_row_nnz": 48
+        },
+        "voltage_lower": {
+          "count": 9603,
+          "nnz": 460420,
+          "max_row_nnz": 48
+        },
+        "response_transformer_P_binding": {
+          "count": 288,
+          "nnz": 7077,
+          "max_row_nnz": 25
+        },
+        "response_transformer_Q_binding": {
+          "count": 288,
+          "nnz": 7077,
+          "max_row_nnz": 25
+        },
+        "response_line_correction_binding": {
+          "count": 25152,
+          "nnz": 1208319,
+          "max_row_nnz": 49
+        },
+        "line_thermal_face": {
+          "count": 324871,
+          "nnz": 1216630,
+          "max_row_nnz": 4
+        },
+        "response_line_P_binding": {
+          "count": 9096,
+          "nnz": 65898,
+          "max_row_nnz": 24
+        },
+        "response_line_Q_binding": {
+          "count": 9227,
+          "nnz": 66355,
+          "max_row_nnz": 24
+        },
+        "transformer_kVA": {
+          "count": 35790,
+          "nnz": 62652,
+          "max_row_nnz": 2
+        },
+        "node_activity_link": {
+          "count": 8746,
+          "nnz": 216386,
+          "max_row_nnz": 25
+        }
+      },
+      "column_families": {
+        "route_flow": {
+          "count": 207736,
+          "nnz": 997098,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 23
+        },
+        "SOC": {
+          "count": 380,
+          "nnz": 760,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2
+        },
+        "charge_mode": {
+          "count": 384,
+          "nnz": 17884,
+          "binary": 384,
+          "fixed": 0,
+          "max_column_nnz": 48
+        },
+        "Pch": {
+          "count": 8942,
+          "nnz": 160956,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 18
+        },
+        "Pdis": {
+          "count": 8942,
+          "nnz": 160956,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 18
+        },
+        "Q": {
+          "count": 8942,
+          "nnz": 165336,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 580
+        },
+        "injection_P": {
+          "count": 2263,
+          "nnz": 1410121,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 648
+        },
+        "injection_Q": {
+          "count": 2237,
+          "nnz": 1397402,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 650
+        },
+        "rho_max": {
+          "count": 1,
+          "nnz": 324871,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 324871
+        },
+        "response_transformer_P": {
+          "count": 288,
+          "nnz": 3133,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 13
+        },
+        "response_transformer_Q": {
+          "count": 288,
+          "nnz": 3421,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 14
+        },
+        "response_line_correction": {
+          "count": 25152,
+          "nnz": 350023,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 17
+        },
+        "response_line_P": {
+          "count": 15708,
+          "nnz": 288678,
+          "binary": 0,
+          "fixed": 6612,
+          "max_column_nnz": 113
+        },
+        "response_line_Q": {
+          "count": 15839,
+          "nnz": 290591,
+          "binary": 0,
+          "fixed": 6612,
+          "max_column_nnz": 113
+        },
+        "node_activity": {
+          "count": 8938,
+          "nnz": 12970,
+          "binary": 8938,
+          "fixed": 0,
+          "max_column_nnz": 22
+        }
+      },
+      "coefficient_range": [
+        1.0006451962467139e-13,
+        400.0
+      ]
+    },
+    "old_C3A": {
+      "rows": 582808,
+      "columns": 306040,
+      "binary": 9322,
+      "nnz": 5351612,
+      "row_families": {
+        "flow": {
+          "count": 8942,
+          "nnz": 415760,
+          "max_row_nnz": 52
+        },
+        "connected_Pch": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Pdis": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_charge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_discharge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "PCS16": {
+          "count": 89420,
+          "nnz": 321912,
+          "max_row_nnz": 4
+        },
+        "energy_balance": {
+          "count": 384,
+          "nnz": 217630,
+          "max_row_nnz": 602
+        },
+        "injection_P_binding": {
+          "count": 2263,
+          "nnz": 20147,
+          "max_row_nnz": 9
+        },
+        "injection_Q_binding": {
+          "count": 2237,
+          "nnz": 11153,
+          "max_row_nnz": 5
+        },
+        "voltage_upper": {
+          "count": 20733,
+          "nnz": 982660,
+          "max_row_nnz": 48
+        },
+        "voltage_lower": {
+          "count": 9603,
+          "nnz": 460420,
+          "max_row_nnz": 48
+        },
+        "response_transformer_P_binding": {
+          "count": 288,
+          "nnz": 7077,
+          "max_row_nnz": 25
+        },
+        "response_transformer_Q_binding": {
+          "count": 288,
+          "nnz": 7077,
+          "max_row_nnz": 25
+        },
+        "response_line_correction_binding": {
+          "count": 25152,
+          "nnz": 1208319,
+          "max_row_nnz": 49
+        },
+        "line_thermal_face": {
+          "count": 324871,
+          "nnz": 1216630,
+          "max_row_nnz": 4
+        },
+        "response_line_P_binding": {
+          "count": 9096,
+          "nnz": 65898,
+          "max_row_nnz": 24
+        },
+        "response_line_Q_binding": {
+          "count": 9227,
+          "nnz": 66355,
+          "max_row_nnz": 24
+        },
+        "transformer_kVA": {
+          "count": 35790,
+          "nnz": 62652,
+          "max_row_nnz": 2
+        },
+        "node_activity_link": {
+          "count": 8746,
+          "nnz": 216386,
+          "max_row_nnz": 25
+        }
+      },
+      "column_families": {
+        "route_flow": {
+          "count": 207736,
+          "nnz": 927098,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "SOC": {
+          "count": 380,
+          "nnz": 760,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2
+        },
+        "charge_mode": {
+          "count": 384,
+          "nnz": 17884,
+          "binary": 384,
+          "fixed": 0,
+          "max_column_nnz": 48
+        },
+        "Pch": {
+          "count": 8942,
+          "nnz": 107304,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 12
+        },
+        "Pdis": {
+          "count": 8942,
+          "nnz": 107304,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 12
+        },
+        "Q": {
+          "count": 8942,
+          "nnz": 111684,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 574
+        },
+        "injection_P": {
+          "count": 2263,
+          "nnz": 1410121,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 648
+        },
+        "injection_Q": {
+          "count": 2237,
+          "nnz": 1397402,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 650
+        },
+        "rho_max": {
+          "count": 1,
+          "nnz": 324871,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 324871
+        },
+        "response_transformer_P": {
+          "count": 288,
+          "nnz": 3133,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 13
+        },
+        "response_transformer_Q": {
+          "count": 288,
+          "nnz": 3421,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 14
+        },
+        "response_line_correction": {
+          "count": 25152,
+          "nnz": 350023,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 17
+        },
+        "response_line_P": {
+          "count": 15708,
+          "nnz": 288678,
+          "binary": 0,
+          "fixed": 6612,
+          "max_column_nnz": 113
+        },
+        "response_line_Q": {
+          "count": 15839,
+          "nnz": 290591,
+          "binary": 0,
+          "fixed": 6612,
+          "max_column_nnz": 113
+        },
+        "node_activity": {
+          "count": 8938,
+          "nnz": 11338,
+          "binary": 8938,
+          "fixed": 0,
+          "max_column_nnz": 14
+        }
+      },
+      "coefficient_range": [
+        1.0006451962467139e-13,
+        392.3141121612922
+      ]
+    },
+    "current_original": {
+      "rows": 1130336,
+      "columns": 344967,
+      "binary": 208312,
+      "nnz": 16432980,
+      "row_families": {
+        "flow": {
+          "count": 9216,
+          "nnz": 415760,
+          "max_row_nnz": 52
+        },
+        "terminal_location": {
+          "count": 4,
+          "nnz": 96,
+          "max_row_nnz": 24
+        },
+        "initial_SOC": {
+          "count": 4,
+          "nnz": 4,
+          "max_row_nnz": 1
+        },
+        "terminal_SOC": {
+          "count": 4,
+          "nnz": 4,
+          "max_row_nnz": 1
+        },
+        "connected_Pch": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Pdis": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_charge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_discharge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Qmax": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Qmin": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "PCS16": {
+          "count": 143072,
+          "nnz": 518636,
+          "max_row_nnz": 4
+        },
+        "energy_balance": {
+          "count": 384,
+          "nnz": 217638,
+          "max_row_nnz": 602
+        },
+        "injection_P_binding": {
+          "count": 2304,
+          "nnz": 20188,
+          "max_row_nnz": 9
+        },
+        "injection_Q_binding": {
+          "count": 2304,
+          "nnz": 11246,
+          "max_row_nnz": 5
+        },
+        "voltage_lower": {
+          "count": 80448,
+          "nnz": 3861338,
+          "max_row_nnz": 48
+        },
+        "voltage_upper": {
+          "count": 80448,
+          "nnz": 3861338,
+          "max_row_nnz": 48
+        },
+        "NormalAmps": {
+          "count": 14688,
+          "nnz": 676974,
+          "max_row_nnz": 48
+        },
+        "response_transformer_P_binding": {
+          "count": 14688,
+          "nnz": 412956,
+          "max_row_nnz": 49
+        },
+        "response_transformer_Q_binding": {
+          "count": 14688,
+          "nnz": 713836,
+          "max_row_nnz": 49
+        },
+        "transformer_kVA": {
+          "count": 235008,
+          "nnz": 411264,
+          "max_row_nnz": 2
+        },
+        "response_line_P_binding": {
+          "count": 25152,
+          "nnz": 1232138,
+          "max_row_nnz": 49
+        },
+        "response_line_Q_binding": {
+          "count": 25152,
+          "nnz": 1232344,
+          "max_row_nnz": 49
+        },
+        "response_line_correction_binding": {
+          "count": 25152,
+          "nnz": 1229260,
+          "max_row_nnz": 49
+        },
+        "line_thermal_face": {
+          "count": 403968,
+          "nnz": 1510656,
+          "max_row_nnz": 4
+        }
+      },
+      "column_families": {
+        "arc": {
+          "count": 207928,
+          "nnz": 793682,
+          "binary": 207928,
+          "fixed": 0,
+          "max_column_nnz": 22
+        },
+        "SOC": {
+          "count": 388,
+          "nnz": 776,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2
+        },
+        "charge_mode": {
+          "count": 384,
+          "nnz": 17884,
+          "binary": 384,
+          "fixed": 0,
+          "max_column_nnz": 48
+        },
+        "Pch": {
+          "count": 8942,
+          "nnz": 160956,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 18
+        },
+        "Pdis": {
+          "count": 8942,
+          "nnz": 160956,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 18
+        },
+        "Q": {
+          "count": 8942,
+          "nnz": 152014,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 17
+        },
+        "injection_P": {
+          "count": 2304,
+          "nnz": 6555957,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2859
+        },
+        "injection_Q": {
+          "count": 2304,
+          "nnz": 6564003,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2859
+        },
+        "rho_max": {
+          "count": 1,
+          "nnz": 403968,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 403968
+        },
+        "response_transformer_P": {
+          "count": 14688,
+          "nnz": 220320,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_transformer_Q": {
+          "count": 14688,
+          "nnz": 220320,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_P": {
+          "count": 25152,
+          "nnz": 377280,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_Q": {
+          "count": 25152,
+          "nnz": 377280,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_correction": {
+          "count": 25152,
+          "nnz": 427584,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 17
+        }
+      },
+      "coefficient_range": [
+        1.0000053701775258e-13,
+        400.0
+      ]
+    },
+    "current_C3A": {
+      "rows": 984680,
+      "columns": 353601,
+      "binary": 9326,
+      "nnz": 12379878,
+      "row_families": {
+        "flow": {
+          "count": 8942,
+          "nnz": 415760,
+          "max_row_nnz": 52
+        },
+        "connected_Pch": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Pdis": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_charge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_discharge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "PCS16": {
+          "count": 89420,
+          "nnz": 321912,
+          "max_row_nnz": 4
+        },
+        "energy_balance": {
+          "count": 384,
+          "nnz": 217630,
+          "max_row_nnz": 602
+        },
+        "injection_P_binding": {
+          "count": 2263,
+          "nnz": 20147,
+          "max_row_nnz": 9
+        },
+        "injection_Q_binding": {
+          "count": 2237,
+          "nnz": 11153,
+          "max_row_nnz": 5
+        },
+        "voltage_lower": {
+          "count": 40128,
+          "nnz": 1891785,
+          "max_row_nnz": 48
+        },
+        "voltage_upper": {
+          "count": 40128,
+          "nnz": 1891785,
+          "max_row_nnz": 48
+        },
+        "NormalAmps": {
+          "count": 14682,
+          "nnz": 664971,
+          "max_row_nnz": 48
+        },
+        "response_transformer_P_binding": {
+          "count": 14590,
+          "nnz": 405753,
+          "max_row_nnz": 49
+        },
+        "response_transformer_Q_binding": {
+          "count": 14688,
+          "nnz": 701407,
+          "max_row_nnz": 49
+        },
+        "transformer_kVA": {
+          "count": 234812,
+          "nnz": 411068,
+          "max_row_nnz": 2
+        },
+        "response_line_P_binding": {
+          "count": 25152,
+          "nnz": 1210659,
+          "max_row_nnz": 49
+        },
+        "response_line_Q_binding": {
+          "count": 25152,
+          "nnz": 1210862,
+          "max_row_nnz": 49
+        },
+        "response_line_correction_binding": {
+          "count": 25152,
+          "nnz": 1207844,
+          "max_row_nnz": 49
+        },
+        "line_thermal_face": {
+          "count": 402432,
+          "nnz": 1509120,
+          "max_row_nnz": 4
+        },
+        "node_activity_link": {
+          "count": 8750,
+          "nnz": 216486,
+          "max_row_nnz": 25
+        }
+      },
+      "column_families": {
+        "route_flow": {
+          "count": 207736,
+          "nnz": 927194,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "SOC": {
+          "count": 380,
+          "nnz": 760,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2
+        },
+        "charge_mode": {
+          "count": 384,
+          "nnz": 17884,
+          "binary": 384,
+          "fixed": 0,
+          "max_column_nnz": 48
+        },
+        "Pch": {
+          "count": 8942,
+          "nnz": 107304,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 12
+        },
+        "Pdis": {
+          "count": 8942,
+          "nnz": 107304,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 12
+        },
+        "Q": {
+          "count": 8942,
+          "nnz": 150537,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2025
+        },
+        "injection_P": {
+          "count": 2263,
+          "nnz": 4538558,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2019
+        },
+        "injection_Q": {
+          "count": 2237,
+          "nnz": 4494073,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2019
+        },
+        "rho_max": {
+          "count": 1,
+          "nnz": 402432,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 402432
+        },
+        "response_transformer_P": {
+          "count": 14688,
+          "nnz": 220026,
+          "binary": 0,
+          "fixed": 98,
+          "max_column_nnz": 15
+        },
+        "response_transformer_Q": {
+          "count": 14688,
+          "nnz": 220320,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_P": {
+          "count": 25152,
+          "nnz": 377280,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_Q": {
+          "count": 25152,
+          "nnz": 377280,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_correction": {
+          "count": 25152,
+          "nnz": 427584,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 17
+        },
+        "node_activity": {
+          "count": 8942,
+          "nnz": 11342,
+          "binary": 8942,
+          "fixed": 0,
+          "max_column_nnz": 14
+        }
+      },
+      "coefficient_range": [
+        1.0000053701775258e-13,
+        392.3141121612922
+      ]
+    },
+    "current_C2": {
+      "rows": 1056220,
+      "columns": 353601,
+      "binary": 9326,
+      "nnz": 12612466,
+      "row_families": {
+        "flow": {
+          "count": 8942,
+          "nnz": 415760,
+          "max_row_nnz": 52
+        },
+        "terminal_location": {
+          "count": 4,
+          "nnz": 96,
+          "max_row_nnz": 24
+        },
+        "connected_Pch": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Pdis": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_charge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "no_simultaneous_discharge": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Qmax": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "connected_Qmin": {
+          "count": 8942,
+          "nnz": 17884,
+          "max_row_nnz": 2
+        },
+        "PCS16": {
+          "count": 143072,
+          "nnz": 518636,
+          "max_row_nnz": 4
+        },
+        "energy_balance": {
+          "count": 384,
+          "nnz": 217630,
+          "max_row_nnz": 602
+        },
+        "injection_P_binding": {
+          "count": 2263,
+          "nnz": 20147,
+          "max_row_nnz": 9
+        },
+        "injection_Q_binding": {
+          "count": 2237,
+          "nnz": 11153,
+          "max_row_nnz": 5
+        },
+        "voltage_lower": {
+          "count": 40128,
+          "nnz": 1891785,
+          "max_row_nnz": 48
+        },
+        "voltage_upper": {
+          "count": 40128,
+          "nnz": 1891785,
+          "max_row_nnz": 48
+        },
+        "NormalAmps": {
+          "count": 14682,
+          "nnz": 664971,
+          "max_row_nnz": 48
+        },
+        "response_transformer_P_binding": {
+          "count": 14590,
+          "nnz": 405753,
+          "max_row_nnz": 49
+        },
+        "response_transformer_Q_binding": {
+          "count": 14688,
+          "nnz": 701407,
+          "max_row_nnz": 49
+        },
+        "transformer_kVA": {
+          "count": 234812,
+          "nnz": 411068,
+          "max_row_nnz": 2
+        },
+        "response_line_P_binding": {
+          "count": 25152,
+          "nnz": 1210659,
+          "max_row_nnz": 49
+        },
+        "response_line_Q_binding": {
+          "count": 25152,
+          "nnz": 1210862,
+          "max_row_nnz": 49
+        },
+        "response_line_correction_binding": {
+          "count": 25152,
+          "nnz": 1207844,
+          "max_row_nnz": 49
+        },
+        "line_thermal_face": {
+          "count": 402432,
+          "nnz": 1509120,
+          "max_row_nnz": 4
+        },
+        "node_activity_link": {
+          "count": 8750,
+          "nnz": 216486,
+          "max_row_nnz": 25
+        }
+      },
+      "column_families": {
+        "route_flow": {
+          "count": 207736,
+          "nnz": 997194,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 23
+        },
+        "SOC": {
+          "count": 380,
+          "nnz": 760,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2
+        },
+        "charge_mode": {
+          "count": 384,
+          "nnz": 17884,
+          "binary": 384,
+          "fixed": 0,
+          "max_column_nnz": 48
+        },
+        "Pch": {
+          "count": 8942,
+          "nnz": 160956,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 18
+        },
+        "Pdis": {
+          "count": 8942,
+          "nnz": 160956,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 18
+        },
+        "Q": {
+          "count": 8942,
+          "nnz": 204189,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2031
+        },
+        "injection_P": {
+          "count": 2263,
+          "nnz": 4538558,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2019
+        },
+        "injection_Q": {
+          "count": 2237,
+          "nnz": 4494073,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 2019
+        },
+        "rho_max": {
+          "count": 1,
+          "nnz": 402432,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 402432
+        },
+        "response_transformer_P": {
+          "count": 14688,
+          "nnz": 220026,
+          "binary": 0,
+          "fixed": 98,
+          "max_column_nnz": 15
+        },
+        "response_transformer_Q": {
+          "count": 14688,
+          "nnz": 220320,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_P": {
+          "count": 25152,
+          "nnz": 377280,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_Q": {
+          "count": 25152,
+          "nnz": 377280,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 15
+        },
+        "response_line_correction": {
+          "count": 25152,
+          "nnz": 427584,
+          "binary": 0,
+          "fixed": 0,
+          "max_column_nnz": 17
+        },
+        "node_activity": {
+          "count": 8942,
+          "nnz": 12974,
+          "binary": 8942,
+          "fixed": 0,
+          "max_column_nnz": 22
+        }
+      },
+      "coefficient_range": [
+        1.0000053701775258e-13,
+        400.0
+      ]
+    }
+  },
+  "row_families": [
+    {
+      "family": "NormalAmps",
+      "old_original": {
+        "count": 11520,
+        "nnz": 525887,
+        "max_row_nnz": 48
+      },
+      "old_C0": {
+        "count": 11520,
+        "nnz": 525887,
+        "max_row_nnz": 48
+      },
+      "old_C2": {
+        "count": 0,
+        "nnz": 0
+      },
+      "old_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_original": {
+        "count": 14688,
+        "nnz": 676974,
+        "max_row_nnz": 48
+      },
+      "current_C3A": {
+        "count": 14682,
+        "nnz": 664971,
+        "max_row_nnz": 48
+      },
+      "current_C2": {
+        "count": 14682,
+        "nnz": 664971,
+        "max_row_nnz": 48
+      },
+      "C3A_count_delta_current_minus_old": 14682,
+      "C3A_nnz_delta_current_minus_old": 664971,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "PCS16",
+      "old_original": {
+        "count": 143072,
+        "nnz": 518636,
+        "max_row_nnz": 4
+      },
+      "old_C0": {
+        "count": 143072,
+        "nnz": 518636,
+        "max_row_nnz": 4
+      },
+      "old_C2": {
+        "count": 143072,
+        "nnz": 518636,
+        "max_row_nnz": 4
+      },
+      "old_C3A": {
+        "count": 89420,
+        "nnz": 321912,
+        "max_row_nnz": 4
+      },
+      "current_original": {
+        "count": 143072,
+        "nnz": 518636,
+        "max_row_nnz": 4
+      },
+      "current_C3A": {
+        "count": 89420,
+        "nnz": 321912,
+        "max_row_nnz": 4
+      },
+      "current_C2": {
+        "count": 143072,
+        "nnz": 518636,
+        "max_row_nnz": 4
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 53652
+    },
+    {
+      "family": "connected_Pch",
+      "old_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C0": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C3A": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_C3A": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "connected_Pdis",
+      "old_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C0": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C3A": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_C3A": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "connected_Qmax",
+      "old_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C0": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 8942
+    },
+    {
+      "family": "connected_Qmin",
+      "old_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C0": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 8942
+    },
+    {
+      "family": "energy_balance",
+      "old_original": {
+        "count": 384,
+        "nnz": 217638,
+        "max_row_nnz": 602
+      },
+      "old_C0": {
+        "count": 384,
+        "nnz": 217638,
+        "max_row_nnz": 602
+      },
+      "old_C2": {
+        "count": 384,
+        "nnz": 217630,
+        "max_row_nnz": 602
+      },
+      "old_C3A": {
+        "count": 384,
+        "nnz": 217630,
+        "max_row_nnz": 602
+      },
+      "current_original": {
+        "count": 384,
+        "nnz": 217638,
+        "max_row_nnz": 602
+      },
+      "current_C3A": {
+        "count": 384,
+        "nnz": 217630,
+        "max_row_nnz": 602
+      },
+      "current_C2": {
+        "count": 384,
+        "nnz": 217630,
+        "max_row_nnz": 602
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "flow",
+      "old_original": {
+        "count": 9216,
+        "nnz": 415760,
+        "max_row_nnz": 52
+      },
+      "old_C0": {
+        "count": 9216,
+        "nnz": 415760,
+        "max_row_nnz": 52
+      },
+      "old_C2": {
+        "count": 8942,
+        "nnz": 415760,
+        "max_row_nnz": 52
+      },
+      "old_C3A": {
+        "count": 8942,
+        "nnz": 415760,
+        "max_row_nnz": 52
+      },
+      "current_original": {
+        "count": 9216,
+        "nnz": 415760,
+        "max_row_nnz": 52
+      },
+      "current_C3A": {
+        "count": 8942,
+        "nnz": 415760,
+        "max_row_nnz": 52
+      },
+      "current_C2": {
+        "count": 8942,
+        "nnz": 415760,
+        "max_row_nnz": 52
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "initial_SOC",
+      "old_original": {
+        "count": 4,
+        "nnz": 4,
+        "max_row_nnz": 1
+      },
+      "old_C0": {
+        "count": 4,
+        "nnz": 4,
+        "max_row_nnz": 1
+      },
+      "old_C2": {
+        "count": 0,
+        "nnz": 0
+      },
+      "old_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_original": {
+        "count": 4,
+        "nnz": 4,
+        "max_row_nnz": 1
+      },
+      "current_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_C2": {
+        "count": 0,
+        "nnz": 0
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "injection_P_binding",
+      "old_original": {
+        "count": 2304,
+        "nnz": 20188,
+        "max_row_nnz": 9
+      },
+      "old_C0": {
+        "count": 2304,
+        "nnz": 20188,
+        "max_row_nnz": 9
+      },
+      "old_C2": {
+        "count": 2263,
+        "nnz": 20147,
+        "max_row_nnz": 9
+      },
+      "old_C3A": {
+        "count": 2263,
+        "nnz": 20147,
+        "max_row_nnz": 9
+      },
+      "current_original": {
+        "count": 2304,
+        "nnz": 20188,
+        "max_row_nnz": 9
+      },
+      "current_C3A": {
+        "count": 2263,
+        "nnz": 20147,
+        "max_row_nnz": 9
+      },
+      "current_C2": {
+        "count": 2263,
+        "nnz": 20147,
+        "max_row_nnz": 9
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "injection_Q_binding",
+      "old_original": {
+        "count": 2304,
+        "nnz": 11246,
+        "max_row_nnz": 5
+      },
+      "old_C0": {
+        "count": 2304,
+        "nnz": 11246,
+        "max_row_nnz": 5
+      },
+      "old_C2": {
+        "count": 2237,
+        "nnz": 11153,
+        "max_row_nnz": 5
+      },
+      "old_C3A": {
+        "count": 2237,
+        "nnz": 11153,
+        "max_row_nnz": 5
+      },
+      "current_original": {
+        "count": 2304,
+        "nnz": 11246,
+        "max_row_nnz": 5
+      },
+      "current_C3A": {
+        "count": 2237,
+        "nnz": 11153,
+        "max_row_nnz": 5
+      },
+      "current_C2": {
+        "count": 2237,
+        "nnz": 11153,
+        "max_row_nnz": 5
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "line_thermal_face",
+      "old_original": {
+        "count": 402433,
+        "nnz": 1509121,
+        "max_row_nnz": 4
+      },
+      "old_C0": {
+        "count": 402433,
+        "nnz": 1509121,
+        "max_row_nnz": 4
+      },
+      "old_C2": {
+        "count": 324871,
+        "nnz": 1216630,
+        "max_row_nnz": 4
+      },
+      "old_C3A": {
+        "count": 324871,
+        "nnz": 1216630,
+        "max_row_nnz": 4
+      },
+      "current_original": {
+        "count": 403968,
+        "nnz": 1510656,
+        "max_row_nnz": 4
+      },
+      "current_C3A": {
+        "count": 402432,
+        "nnz": 1509120,
+        "max_row_nnz": 4
+      },
+      "current_C2": {
+        "count": 402432,
+        "nnz": 1509120,
+        "max_row_nnz": 4
+      },
+      "C3A_count_delta_current_minus_old": 77561,
+      "C3A_nnz_delta_current_minus_old": 292490,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "no_simultaneous_charge",
+      "old_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C0": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C3A": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_C3A": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "no_simultaneous_discharge",
+      "old_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C0": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "old_C3A": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_original": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_C3A": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "current_C2": {
+        "count": 8942,
+        "nnz": 17884,
+        "max_row_nnz": 2
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "node_activity_link",
+      "old_original": {
+        "count": 0,
+        "nnz": 0
+      },
+      "old_C0": {
+        "count": 9038,
+        "nnz": 217062,
+        "max_row_nnz": 25
+      },
+      "old_C2": {
+        "count": 8746,
+        "nnz": 216386,
+        "max_row_nnz": 25
+      },
+      "old_C3A": {
+        "count": 8746,
+        "nnz": 216386,
+        "max_row_nnz": 25
+      },
+      "current_original": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_C3A": {
+        "count": 8750,
+        "nnz": 216486,
+        "max_row_nnz": 25
+      },
+      "current_C2": {
+        "count": 8750,
+        "nnz": 216486,
+        "max_row_nnz": 25
+      },
+      "C3A_count_delta_current_minus_old": 4,
+      "C3A_nnz_delta_current_minus_old": 100,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "response_line_P_binding",
+      "old_original": {
+        "count": 25152,
+        "nnz": 121056,
+        "max_row_nnz": 25
+      },
+      "old_C0": {
+        "count": 25152,
+        "nnz": 121056,
+        "max_row_nnz": 25
+      },
+      "old_C2": {
+        "count": 9096,
+        "nnz": 65898,
+        "max_row_nnz": 24
+      },
+      "old_C3A": {
+        "count": 9096,
+        "nnz": 65898,
+        "max_row_nnz": 24
+      },
+      "current_original": {
+        "count": 25152,
+        "nnz": 1232138,
+        "max_row_nnz": 49
+      },
+      "current_C3A": {
+        "count": 25152,
+        "nnz": 1210659,
+        "max_row_nnz": 49
+      },
+      "current_C2": {
+        "count": 25152,
+        "nnz": 1210659,
+        "max_row_nnz": 49
+      },
+      "C3A_count_delta_current_minus_old": 16056,
+      "C3A_nnz_delta_current_minus_old": 1144761,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "response_line_Q_binding",
+      "old_original": {
+        "count": 25152,
+        "nnz": 121056,
+        "max_row_nnz": 25
+      },
+      "old_C0": {
+        "count": 25152,
+        "nnz": 121056,
+        "max_row_nnz": 25
+      },
+      "old_C2": {
+        "count": 9227,
+        "nnz": 66355,
+        "max_row_nnz": 24
+      },
+      "old_C3A": {
+        "count": 9227,
+        "nnz": 66355,
+        "max_row_nnz": 24
+      },
+      "current_original": {
+        "count": 25152,
+        "nnz": 1232344,
+        "max_row_nnz": 49
+      },
+      "current_C3A": {
+        "count": 25152,
+        "nnz": 1210862,
+        "max_row_nnz": 49
+      },
+      "current_C2": {
+        "count": 25152,
+        "nnz": 1210862,
+        "max_row_nnz": 49
+      },
+      "C3A_count_delta_current_minus_old": 15925,
+      "C3A_nnz_delta_current_minus_old": 1144507,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "response_line_correction_binding",
+      "old_original": {
+        "count": 25152,
+        "nnz": 1229747,
+        "max_row_nnz": 49
+      },
+      "old_C0": {
+        "count": 25152,
+        "nnz": 1229747,
+        "max_row_nnz": 49
+      },
+      "old_C2": {
+        "count": 25152,
+        "nnz": 1208319,
+        "max_row_nnz": 49
+      },
+      "old_C3A": {
+        "count": 25152,
+        "nnz": 1208319,
+        "max_row_nnz": 49
+      },
+      "current_original": {
+        "count": 25152,
+        "nnz": 1229260,
+        "max_row_nnz": 49
+      },
+      "current_C3A": {
+        "count": 25152,
+        "nnz": 1207844,
+        "max_row_nnz": 49
+      },
+      "current_C2": {
+        "count": 25152,
+        "nnz": 1207844,
+        "max_row_nnz": 49
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": -475,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "response_transformer_P_binding",
+      "old_original": {
+        "count": 576,
+        "nnz": 10656,
+        "max_row_nnz": 25
+      },
+      "old_C0": {
+        "count": 576,
+        "nnz": 10656,
+        "max_row_nnz": 25
+      },
+      "old_C2": {
+        "count": 288,
+        "nnz": 7077,
+        "max_row_nnz": 25
+      },
+      "old_C3A": {
+        "count": 288,
+        "nnz": 7077,
+        "max_row_nnz": 25
+      },
+      "current_original": {
+        "count": 14688,
+        "nnz": 412956,
+        "max_row_nnz": 49
+      },
+      "current_C3A": {
+        "count": 14590,
+        "nnz": 405753,
+        "max_row_nnz": 49
+      },
+      "current_C2": {
+        "count": 14590,
+        "nnz": 405753,
+        "max_row_nnz": 49
+      },
+      "C3A_count_delta_current_minus_old": 14302,
+      "C3A_nnz_delta_current_minus_old": 398676,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "response_transformer_Q_binding",
+      "old_original": {
+        "count": 576,
+        "nnz": 10656,
+        "max_row_nnz": 25
+      },
+      "old_C0": {
+        "count": 576,
+        "nnz": 10656,
+        "max_row_nnz": 25
+      },
+      "old_C2": {
+        "count": 288,
+        "nnz": 7077,
+        "max_row_nnz": 25
+      },
+      "old_C3A": {
+        "count": 288,
+        "nnz": 7077,
+        "max_row_nnz": 25
+      },
+      "current_original": {
+        "count": 14688,
+        "nnz": 713836,
+        "max_row_nnz": 49
+      },
+      "current_C3A": {
+        "count": 14688,
+        "nnz": 701407,
+        "max_row_nnz": 49
+      },
+      "current_C2": {
+        "count": 14688,
+        "nnz": 701407,
+        "max_row_nnz": 49
+      },
+      "C3A_count_delta_current_minus_old": 14400,
+      "C3A_nnz_delta_current_minus_old": 694330,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "terminal_SOC",
+      "old_original": {
+        "count": 4,
+        "nnz": 4,
+        "max_row_nnz": 1
+      },
+      "old_C0": {
+        "count": 4,
+        "nnz": 4,
+        "max_row_nnz": 1
+      },
+      "old_C2": {
+        "count": 0,
+        "nnz": 0
+      },
+      "old_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_original": {
+        "count": 4,
+        "nnz": 4,
+        "max_row_nnz": 1
+      },
+      "current_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_C2": {
+        "count": 0,
+        "nnz": 0
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "terminal_location",
+      "old_original": {
+        "count": 4,
+        "nnz": 96,
+        "max_row_nnz": 24
+      },
+      "old_C0": {
+        "count": 4,
+        "nnz": 96,
+        "max_row_nnz": 24
+      },
+      "old_C2": {
+        "count": 4,
+        "nnz": 96,
+        "max_row_nnz": 24
+      },
+      "old_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_original": {
+        "count": 4,
+        "nnz": 96,
+        "max_row_nnz": 24
+      },
+      "current_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_C2": {
+        "count": 4,
+        "nnz": 96,
+        "max_row_nnz": 24
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 4
+    },
+    {
+      "family": "transformer_kVA",
+      "old_original": {
+        "count": 110592,
+        "nnz": 80640,
+        "max_row_nnz": 2
+      },
+      "old_C0": {
+        "count": 110592,
+        "nnz": 80640,
+        "max_row_nnz": 2
+      },
+      "old_C2": {
+        "count": 35790,
+        "nnz": 62652,
+        "max_row_nnz": 2
+      },
+      "old_C3A": {
+        "count": 35790,
+        "nnz": 62652,
+        "max_row_nnz": 2
+      },
+      "current_original": {
+        "count": 235008,
+        "nnz": 411264,
+        "max_row_nnz": 2
+      },
+      "current_C3A": {
+        "count": 234812,
+        "nnz": 411068,
+        "max_row_nnz": 2
+      },
+      "current_C2": {
+        "count": 234812,
+        "nnz": 411068,
+        "max_row_nnz": 2
+      },
+      "C3A_count_delta_current_minus_old": 199022,
+      "C3A_nnz_delta_current_minus_old": 348416,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "voltage_lower",
+      "old_original": {
+        "count": 36960,
+        "nnz": 1774080,
+        "max_row_nnz": 48
+      },
+      "old_C0": {
+        "count": 36960,
+        "nnz": 1774080,
+        "max_row_nnz": 48
+      },
+      "old_C2": {
+        "count": 9603,
+        "nnz": 460420,
+        "max_row_nnz": 48
+      },
+      "old_C3A": {
+        "count": 9603,
+        "nnz": 460420,
+        "max_row_nnz": 48
+      },
+      "current_original": {
+        "count": 80448,
+        "nnz": 3861338,
+        "max_row_nnz": 48
+      },
+      "current_C3A": {
+        "count": 40128,
+        "nnz": 1891785,
+        "max_row_nnz": 48
+      },
+      "current_C2": {
+        "count": 40128,
+        "nnz": 1891785,
+        "max_row_nnz": 48
+      },
+      "C3A_count_delta_current_minus_old": 30525,
+      "C3A_nnz_delta_current_minus_old": 1431365,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "voltage_upper",
+      "old_original": {
+        "count": 36960,
+        "nnz": 1774080,
+        "max_row_nnz": 48
+      },
+      "old_C0": {
+        "count": 36960,
+        "nnz": 1774080,
+        "max_row_nnz": 48
+      },
+      "old_C2": {
+        "count": 20733,
+        "nnz": 982660,
+        "max_row_nnz": 48
+      },
+      "old_C3A": {
+        "count": 20733,
+        "nnz": 982660,
+        "max_row_nnz": 48
+      },
+      "current_original": {
+        "count": 80448,
+        "nnz": 3861338,
+        "max_row_nnz": 48
+      },
+      "current_C3A": {
+        "count": 40128,
+        "nnz": 1891785,
+        "max_row_nnz": 48
+      },
+      "current_C2": {
+        "count": 40128,
+        "nnz": 1891785,
+        "max_row_nnz": 48
+      },
+      "C3A_count_delta_current_minus_old": 19395,
+      "C3A_nnz_delta_current_minus_old": 909125,
+      "current_C2_removed_count": 0
+    }
+  ],
+  "column_families": [
+    {
+      "family": "Pch",
+      "old_original": {
+        "count": 8942,
+        "nnz": 160956,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 18
+      },
+      "old_C0": {
+        "count": 8942,
+        "nnz": 160956,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 18
+      },
+      "old_C2": {
+        "count": 8942,
+        "nnz": 160956,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 18
+      },
+      "old_C3A": {
+        "count": 8942,
+        "nnz": 107304,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 12
+      },
+      "current_original": {
+        "count": 8942,
+        "nnz": 160956,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 18
+      },
+      "current_C3A": {
+        "count": 8942,
+        "nnz": 107304,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 12
+      },
+      "current_C2": {
+        "count": 8942,
+        "nnz": 160956,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 18
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "Pdis",
+      "old_original": {
+        "count": 8942,
+        "nnz": 160956,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 18
+      },
+      "old_C0": {
+        "count": 8942,
+        "nnz": 160956,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 18
+      },
+      "old_C2": {
+        "count": 8942,
+        "nnz": 160956,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 18
+      },
+      "old_C3A": {
+        "count": 8942,
+        "nnz": 107304,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 12
+      },
+      "current_original": {
+        "count": 8942,
+        "nnz": 160956,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 18
+      },
+      "current_C3A": {
+        "count": 8942,
+        "nnz": 107304,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 12
+      },
+      "current_C2": {
+        "count": 8942,
+        "nnz": 160956,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 18
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "Q",
+      "old_original": {
+        "count": 8942,
+        "nnz": 152014,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 17
+      },
+      "old_C0": {
+        "count": 8942,
+        "nnz": 152014,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 17
+      },
+      "old_C2": {
+        "count": 8942,
+        "nnz": 165336,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 580
+      },
+      "old_C3A": {
+        "count": 8942,
+        "nnz": 111684,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 574
+      },
+      "current_original": {
+        "count": 8942,
+        "nnz": 152014,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 17
+      },
+      "current_C3A": {
+        "count": 8942,
+        "nnz": 150537,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2025
+      },
+      "current_C2": {
+        "count": 8942,
+        "nnz": 204189,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2031
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 38853,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "SOC",
+      "old_original": {
+        "count": 388,
+        "nnz": 776,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2
+      },
+      "old_C0": {
+        "count": 388,
+        "nnz": 776,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2
+      },
+      "old_C2": {
+        "count": 380,
+        "nnz": 760,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2
+      },
+      "old_C3A": {
+        "count": 380,
+        "nnz": 760,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2
+      },
+      "current_original": {
+        "count": 388,
+        "nnz": 776,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2
+      },
+      "current_C3A": {
+        "count": 380,
+        "nnz": 760,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2
+      },
+      "current_C2": {
+        "count": 380,
+        "nnz": 760,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "arc",
+      "old_original": {
+        "count": 207928,
+        "nnz": 793682,
+        "binary": 207928,
+        "fixed": 0,
+        "max_column_nnz": 22
+      },
+      "old_C0": {
+        "count": 0,
+        "nnz": 0
+      },
+      "old_C2": {
+        "count": 0,
+        "nnz": 0
+      },
+      "old_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_original": {
+        "count": 207928,
+        "nnz": 793682,
+        "binary": 207928,
+        "fixed": 0,
+        "max_column_nnz": 22
+      },
+      "current_C3A": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_C2": {
+        "count": 0,
+        "nnz": 0
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "charge_mode",
+      "old_original": {
+        "count": 384,
+        "nnz": 17884,
+        "binary": 384,
+        "fixed": 0,
+        "max_column_nnz": 48
+      },
+      "old_C0": {
+        "count": 384,
+        "nnz": 17884,
+        "binary": 384,
+        "fixed": 0,
+        "max_column_nnz": 48
+      },
+      "old_C2": {
+        "count": 384,
+        "nnz": 17884,
+        "binary": 384,
+        "fixed": 0,
+        "max_column_nnz": 48
+      },
+      "old_C3A": {
+        "count": 384,
+        "nnz": 17884,
+        "binary": 384,
+        "fixed": 0,
+        "max_column_nnz": 48
+      },
+      "current_original": {
+        "count": 384,
+        "nnz": 17884,
+        "binary": 384,
+        "fixed": 0,
+        "max_column_nnz": 48
+      },
+      "current_C3A": {
+        "count": 384,
+        "nnz": 17884,
+        "binary": 384,
+        "fixed": 0,
+        "max_column_nnz": 48
+      },
+      "current_C2": {
+        "count": 384,
+        "nnz": 17884,
+        "binary": 384,
+        "fixed": 0,
+        "max_column_nnz": 48
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 0,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "injection_P",
+      "old_original": {
+        "count": 2304,
+        "nnz": 2779706,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 1233
+      },
+      "old_C0": {
+        "count": 2304,
+        "nnz": 2779706,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 1233
+      },
+      "old_C2": {
+        "count": 2263,
+        "nnz": 1410121,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 648
+      },
+      "old_C3A": {
+        "count": 2263,
+        "nnz": 1410121,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 648
+      },
+      "current_original": {
+        "count": 2304,
+        "nnz": 6555957,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2859
+      },
+      "current_C3A": {
+        "count": 2263,
+        "nnz": 4538558,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2019
+      },
+      "current_C2": {
+        "count": 2263,
+        "nnz": 4538558,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2019
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 3128437,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "injection_Q",
+      "old_original": {
+        "count": 2304,
+        "nnz": 2780024,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 1233
+      },
+      "old_C0": {
+        "count": 2304,
+        "nnz": 2780024,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 1233
+      },
+      "old_C2": {
+        "count": 2237,
+        "nnz": 1397402,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 650
+      },
+      "old_C3A": {
+        "count": 2237,
+        "nnz": 1397402,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 650
+      },
+      "current_original": {
+        "count": 2304,
+        "nnz": 6564003,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2859
+      },
+      "current_C3A": {
+        "count": 2237,
+        "nnz": 4494073,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2019
+      },
+      "current_C2": {
+        "count": 2237,
+        "nnz": 4494073,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 2019
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 3096671,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "node_activity",
+      "old_original": {
+        "count": 0,
+        "nnz": 0
+      },
+      "old_C0": {
+        "count": 9038,
+        "nnz": 9038,
+        "binary": 9038,
+        "fixed": 0,
+        "max_column_nnz": 1
+      },
+      "old_C2": {
+        "count": 8938,
+        "nnz": 12970,
+        "binary": 8938,
+        "fixed": 0,
+        "max_column_nnz": 22
+      },
+      "old_C3A": {
+        "count": 8938,
+        "nnz": 11338,
+        "binary": 8938,
+        "fixed": 0,
+        "max_column_nnz": 14
+      },
+      "current_original": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_C3A": {
+        "count": 8942,
+        "nnz": 11342,
+        "binary": 8942,
+        "fixed": 0,
+        "max_column_nnz": 14
+      },
+      "current_C2": {
+        "count": 8942,
+        "nnz": 12974,
+        "binary": 8942,
+        "fixed": 0,
+        "max_column_nnz": 22
+      },
+      "C3A_count_delta_current_minus_old": 4,
+      "C3A_nnz_delta_current_minus_old": 4,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "response_line_P",
+      "old_original": {
+        "count": 25152,
+        "nnz": 377280,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "old_C0": {
+        "count": 25152,
+        "nnz": 377280,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "old_C2": {
+        "count": 15708,
+        "nnz": 288678,
+        "binary": 0,
+        "fixed": 6612,
+        "max_column_nnz": 113
+      },
+      "old_C3A": {
+        "count": 15708,
+        "nnz": 288678,
+        "binary": 0,
+        "fixed": 6612,
+        "max_column_nnz": 113
+      },
+      "current_original": {
+        "count": 25152,
+        "nnz": 377280,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "current_C3A": {
+        "count": 25152,
+        "nnz": 377280,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "current_C2": {
+        "count": 25152,
+        "nnz": 377280,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "C3A_count_delta_current_minus_old": 9444,
+      "C3A_nnz_delta_current_minus_old": 88602,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "response_line_Q",
+      "old_original": {
+        "count": 25152,
+        "nnz": 377280,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "old_C0": {
+        "count": 25152,
+        "nnz": 377280,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "old_C2": {
+        "count": 15839,
+        "nnz": 290591,
+        "binary": 0,
+        "fixed": 6612,
+        "max_column_nnz": 113
+      },
+      "old_C3A": {
+        "count": 15839,
+        "nnz": 290591,
+        "binary": 0,
+        "fixed": 6612,
+        "max_column_nnz": 113
+      },
+      "current_original": {
+        "count": 25152,
+        "nnz": 377280,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "current_C3A": {
+        "count": 25152,
+        "nnz": 377280,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "current_C2": {
+        "count": 25152,
+        "nnz": 377280,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "C3A_count_delta_current_minus_old": 9313,
+      "C3A_nnz_delta_current_minus_old": 86689,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "response_line_correction",
+      "old_original": {
+        "count": 25152,
+        "nnz": 427584,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 17
+      },
+      "old_C0": {
+        "count": 25152,
+        "nnz": 427584,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 17
+      },
+      "old_C2": {
+        "count": 25152,
+        "nnz": 350023,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 17
+      },
+      "old_C3A": {
+        "count": 25152,
+        "nnz": 350023,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 17
+      },
+      "current_original": {
+        "count": 25152,
+        "nnz": 427584,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 17
+      },
+      "current_C3A": {
+        "count": 25152,
+        "nnz": 427584,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 17
+      },
+      "current_C2": {
+        "count": 25152,
+        "nnz": 427584,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 17
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 77561,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "response_transformer_P",
+      "old_original": {
+        "count": 576,
+        "nnz": 8640,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "old_C0": {
+        "count": 576,
+        "nnz": 8640,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "old_C2": {
+        "count": 288,
+        "nnz": 3133,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 13
+      },
+      "old_C3A": {
+        "count": 288,
+        "nnz": 3133,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 13
+      },
+      "current_original": {
+        "count": 14688,
+        "nnz": 220320,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "current_C3A": {
+        "count": 14688,
+        "nnz": 220026,
+        "binary": 0,
+        "fixed": 98,
+        "max_column_nnz": 15
+      },
+      "current_C2": {
+        "count": 14688,
+        "nnz": 220026,
+        "binary": 0,
+        "fixed": 98,
+        "max_column_nnz": 15
+      },
+      "C3A_count_delta_current_minus_old": 14400,
+      "C3A_nnz_delta_current_minus_old": 216893,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "response_transformer_Q",
+      "old_original": {
+        "count": 576,
+        "nnz": 8640,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "old_C0": {
+        "count": 576,
+        "nnz": 8640,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "old_C2": {
+        "count": 288,
+        "nnz": 3421,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 14
+      },
+      "old_C3A": {
+        "count": 288,
+        "nnz": 3421,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 14
+      },
+      "current_original": {
+        "count": 14688,
+        "nnz": 220320,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "current_C3A": {
+        "count": 14688,
+        "nnz": 220320,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "current_C2": {
+        "count": 14688,
+        "nnz": 220320,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "C3A_count_delta_current_minus_old": 14400,
+      "C3A_nnz_delta_current_minus_old": 216899,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "rho_max",
+      "old_original": {
+        "count": 1,
+        "nnz": 402433,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 402433
+      },
+      "old_C0": {
+        "count": 1,
+        "nnz": 402433,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 402433
+      },
+      "old_C2": {
+        "count": 1,
+        "nnz": 324871,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 324871
+      },
+      "old_C3A": {
+        "count": 1,
+        "nnz": 324871,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 324871
+      },
+      "current_original": {
+        "count": 1,
+        "nnz": 403968,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 403968
+      },
+      "current_C3A": {
+        "count": 1,
+        "nnz": 402432,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 402432
+      },
+      "current_C2": {
+        "count": 1,
+        "nnz": 402432,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 402432
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 77561,
+      "current_C2_removed_count": 0
+    },
+    {
+      "family": "route_flow",
+      "old_original": {
+        "count": 0,
+        "nnz": 0
+      },
+      "old_C0": {
+        "count": 207928,
+        "nnz": 1001706,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 24
+      },
+      "old_C2": {
+        "count": 207736,
+        "nnz": 997098,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 23
+      },
+      "old_C3A": {
+        "count": 207736,
+        "nnz": 927098,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "current_original": {
+        "count": 0,
+        "nnz": 0
+      },
+      "current_C3A": {
+        "count": 207736,
+        "nnz": 927194,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 15
+      },
+      "current_C2": {
+        "count": 207736,
+        "nnz": 997194,
+        "binary": 0,
+        "fixed": 0,
+        "max_column_nnz": 23
+      },
+      "C3A_count_delta_current_minus_old": 0,
+      "C3A_nnz_delta_current_minus_old": 96,
+      "current_C2_removed_count": 0
+    }
+  ],
+  "reads_saved_matrices_only": true,
+  "solver_calls": 0,
+  "wall_seconds": 18.6938908000011,
+  "evidence": [
+    {
+      "path": "D:\\v42_svr11_c3a_development_20261011\\dates\\B2\\2025-05-01\\attempts\\representative01\\output\\FULL_A.npz",
+      "sha256": "81ae1a542115e192051e250b627c61bfcea94e62f43a815b91bc11ef54d9ebb4",
+      "bytes": 68250403
+    },
+    {
+      "path": "D:\\v42_svr11_c3a_development_20261011\\dates\\B2\\2025-05-01\\attempts\\representative01\\output\\FULL_DATA.npz",
+      "sha256": "8df044d563d4e6c744e3528ed594bbce33d8302fabf8ea2aacfbb7357a76198f",
+      "bytes": 7343236
+    },
+    {
+      "path": "D:\\v42_svr11_c3a_development_20261011\\dates\\B2\\2025-05-01\\attempts\\representative01\\output\\C3A_A.npz",
+      "sha256": "8eba61d4d5607da5b33dcbb6642c1fa311b32445f6a54cc65357ad13eeb3720b",
+      "bytes": 57109430
+    },
+    {
+      "path": "D:\\v42_svr11_c3a_development_20261011\\dates\\B2\\2025-05-01\\attempts\\representative01\\output\\C3A_DATA.npz",
+      "sha256": "4b11ee2e66039af9b5e01a8d9225ad2203e5abe24c7878f01e0087d3bd2ab325",
+      "bytes": 8372191
+    },
+    {
+      "path": "D:\\v42_svr11_c3a_development_20261011\\dates\\B2\\2025-05-01\\attempts\\representative01\\output\\CURRENT_C2_AXES.npz",
+      "sha256": "8dd78f031714f9610e70ca69dab4507fc6d4ae3f5c6d12910c9958356916cc1f",
+      "bytes": 1951591
+    },
+    {
+      "path": "D:\\v42_svr11_c3a_development_20261011\\dates\\B2\\2025-05-01\\attempts\\representative01\\output\\CURRENT_C2_ALIASES.json",
+      "sha256": "8350a04415ce5ee63efa86196e143866476295f9e0226dfc1d7a6e02023aa980",
+      "bytes": 142980
+    },
+    {
+      "path": "D:\\v42_svr11_c3a_development_20261011\\dates\\B2\\2025-05-01\\attempts\\representative01\\output\\CURRENT_C3A_AXES.npz",
+      "sha256": "cb7e9bb1ead759faa80bc9d2baf1008199beea821b31f76db91de41712ad24fb",
+      "bytes": 1980673
+    }
+  ]
+}

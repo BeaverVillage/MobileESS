@@ -20,6 +20,13 @@ from .storage import write, record
 from .telemetry import admit_solver_bound, root_lp, verified_gap, summarize_full
 
 
+def full_milp_parameters(parameters=None):
+    """PR162 root/LB profile, preserving the current precision and disk policy."""
+    return dict(parameters or {}, Method=2, Threads=1, Crossover=2,
+        NodeMethod=1, MIPFocus=3, DegenMoves=0, PreCrush=1,
+        MIPGap=.03, MIPGapAbs=0., NodefileStart=.5)
+
+
 def _strict(case, path, evidence):
     from v42_m1_hybrid.final_verify import _strict_ub
     return _strict_ub(case, path, evidence)
@@ -119,6 +126,7 @@ def _trial(case, budget, path, *, validator, seconds, lower=None, upper=None,
         model.Params.MIPFocus = 1
         model.Params.SolutionLimit = 1
     pending, capture_errors = [], []
+    root_completed_runtime = None
     discovered = float(F(strict['exact_Global_UB'])) if strict else float('inf')
     before = budget.used()
     before_count = len(budget.calls)
@@ -126,7 +134,11 @@ def _trial(case, budget, path, *, validator, seconds, lower=None, upper=None,
     track = 'M_FULL_MILP' if unrestricted else 'M_START' if initialization else 'M_' + (spec['method'] if spec else 'FIXED_ROUTE')
     effective_seconds = min(float(seconds), budget.remaining())
     def capture(m, where):
-        nonlocal discovered
+        nonlocal discovered, root_completed_runtime
+        if unrestricted and where == gp.GRB.Callback.MESSAGE:
+            message = m.cbGet(gp.GRB.Callback.MSG_STRING)
+            if message.lstrip().startswith('Root relaxation:') and 'interrupted' not in message.lower():
+                root_completed_runtime = float(m.cbGet(gp.GRB.Callback.RUNTIME))
         if where != gp.GRB.Callback.MIPSOL:
             return # POLLING has no supported scientific attributes.
         try:
@@ -220,6 +232,12 @@ def _trial(case, budget, path, *, validator, seconds, lower=None, upper=None,
             native_budget_overshoot_seconds=max(0., budget.used() - NATIVE_LIMIT_SECONDS))
         logfile = _attr(model.Params, 'LogFile') or str(path / 'NATIVE_GUROBI.log')
         row.update(root_lp(logfile))
+        row['Root_completion_native_elapsed_seconds'] = root_completed_runtime
+        row['Post_root_native_seconds'] = (max(0., row['Native_Runtime']-root_completed_runtime)
+            if root_completed_runtime is not None else None)
+        from .model import memory_observation
+        row['memory_after_native'] = memory_observation()
+        row['model_build_wall_seconds'] = identity.get('build_wall_seconds')
         row['native_log'] = record(logfile) if Path(logfile).is_file() else None
         write(path / 'RESULT.json', row)
         row['telemetry_receipt'] = record(path / 'RESULT.json')
@@ -273,8 +291,7 @@ def _full_milp_phase(case, budget, point, strict, validator, progress, parameter
             progress(dict(phase='M_FULL_MILP_PHASE2', verified_UB=strict['Global_UB'],
                 native_runtime_seconds=budget.used(), remaining_native_seconds=requested,
                 source_trigger=transition_reason, fixed_binary_columns=0, hamming_constraints=0))
-        effective = dict(parameters or {}, MIPGap=.03, MIPGapAbs=0., NodefileStart=.5,
-            MIPFocus=1 if iteration == 0 else 2, Seed=iteration)
+        effective = full_milp_parameters(parameters)
         if failures:
             effective.update(NumericFocus=3, Method=1)
         path = case.output / 'PHASE2_FULL_MILP' / f'{iteration:03d}'

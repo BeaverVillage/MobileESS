@@ -66,12 +66,34 @@ def test_invalid_inconsistent_nonfinite_and_zero_objective_gap_stay_unavailable(
 def test_actual_native_root_LP_log_time_excludes_presolve(tmp_path):
     logfile=tmp_path/'native.log'
     logfile.write_text('Presolve time: 3.00s\nRoot relaxation: objective 1.000000e+00, 12 iterations, 0.41 seconds (0.03 work units)\n')
-    assert root_lp(logfile)==dict(Root_LP_seconds=.41,Root_LP_status='NATIVE_LOG_REPORTED')
+    measured=root_lp(logfile)
+    assert measured['Root_LP_seconds']==.41 and measured['Root_LP_status']=='NATIVE_LOG_REPORTED'
+    assert measured['Presolve_seconds']==3.
     logfile.write_text('Root relaxation: interrupted, 19 iterations, 60.01 seconds (0.8 work units)\n')
-    assert root_lp(logfile)==dict(Root_LP_seconds=60.01,Root_LP_status='NATIVE_LOG_ROOT_INTERRUPTED')
+    measured=root_lp(logfile)
+    assert measured['Root_LP_seconds']==60.01 and measured['Root_LP_status']=='NATIVE_LOG_ROOT_INTERRUPTED'
     logfile.write_text('Presolve: All rows and columns removed\n')
     assert root_lp(logfile)['Root_LP_seconds'] is None
     assert root_lp(logfile)['Root_LP_status']=='PRESOLVE_SOLVED_NO_ROOT_LP'
+
+
+def test_root_phase_census_incomplete_barrier_does_not_claim_completed_root(tmp_path):
+    logfile=tmp_path/'native.log'
+    logfile.write_text('Presolve time: 13.06s\nPresolved: 407856 rows, 287699 columns, 4511774 nonzeros\n'
+        'Barrier solved model in 42 iterations and 129.15 seconds\nCrossover time: 51.06 seconds\n')
+    measured=root_lp(logfile)
+    assert measured['Root_LP_seconds'] is None
+    assert measured['Barrier_seconds']==129.15 and measured['Crossover_seconds']==51.06
+    assert (measured['Presolved_Rows'],measured['Presolved_Columns'],measured['Presolved_NNZ'])==(407856,287699,4511774)
+
+
+def test_full_root_profile_preserves_precision_and_memory_policy():
+    from v42_common_mess.engine import full_milp_parameters
+    parameters=full_milp_parameters(dict(FeasibilityTol=1e-9,OptimalityTol=1e-9,
+        IntFeasTol=1e-8,NumericFocus=3,ScaleFlag=2,NodefileDir='D:/nodes'))
+    assert parameters['MIPFocus']==3 and parameters['Crossover']==2 and parameters['NodeMethod']==1
+    assert parameters['FeasibilityTol']==1e-9 and parameters['IntFeasTol']==1e-8
+    assert parameters['MIPGap']==.03 and parameters['NodefileStart']==.5 and parameters['NodefileDir']=='D:/nodes'
 
 
 def test_final_solver_summary_preserves_strongest_full_bound_after_failed_retry():

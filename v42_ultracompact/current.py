@@ -2,7 +2,8 @@
 
 No historical row ID, matrix, point or PASS packet enters this implementation.
 The selected PR162 local Farkas and unit-flow affine-support techniques are
-reused. Security rows (including new SVR/current rows) are conservatively kept.
+reused. The fresh PR160 security proof now precedes C2 so newly unconsumed
+response auxiliaries can be eliminated before these final local reductions.
 """
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -16,7 +17,8 @@ from v42_m1_hybrid.blocks import matrix_sha
 
 POLICY='SELECTED_EXACT_CURRENT_MATRIX_PROOFS'
 SOURCES=('v42_ultracompact/current.py','v42_ultracompact/current_verify.py',
-         'v42_ultracompact/polytope.py','v42_ultracompact/support.py')
+         'v42_ultracompact/polytope.py','v42_ultracompact/support.py',
+         'v42_ultracompact/security.py','v42_ultracompact/security_verify.py')
 
 def family(name):return str(name).split('[',1)[0]
 
@@ -171,7 +173,7 @@ def reduce_current_c3a(A,d,graph,progress=None,physical_original=None):
         baseline=size(A,d),selected=size(B,e),baseline_matrix_SHA256=matrix_sha(A),selected_matrix_SHA256=matrix_sha(B),
         removed_families=dict(Counter(rf[p['row']] for p in certs)),bound_families=dict(Counter(vf[p['column']] for p in bounds)),
         fresh_current_matrix_certificates=True,historical_row_indices_read=0,Native_optimize_calls=0,
-        selected_PR162_techniques_reused=True,security_rows_kept=True,wall_seconds=perf_counter()-began)
+        selected_PR162_techniques_reused=True,security_rows_kept='RETAINED_AFTER_FRESH_PRE_C2_SECURITY_PROOF',wall_seconds=perf_counter()-began)
     ultra.proof=proof
     return ultra
 

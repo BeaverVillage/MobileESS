@@ -1,0 +1,678 @@
+{
+  "PASS": true,
+  "solver_calls": 0,
+  "axes": {
+    "old": {
+      "slots": 96,
+      "controls": 60,
+      "physical_voltage_nodes": 386,
+      "voltage_endpoints": 386,
+      "branch_phases": 383,
+      "line_phases": 263,
+      "transformer_phases": 120
+    },
+    "current": {
+      "slots": 96,
+      "controls": 60,
+      "physical_voltage_nodes": 419,
+      "voltage_endpoints": 838,
+      "branch_phases": 416,
+      "line_phases": 263,
+      "transformer_phases": 153
+    },
+    "new_branch_phases": [
+      "transformer.svr_bus108_p1::A",
+      "transformer.svr_bus108_p2::B",
+      "transformer.svr_bus108_p3::C",
+      "transformer.svr_bus48_p1::A",
+      "transformer.svr_bus48_p2::B",
+      "transformer.svr_bus48_p3::C",
+      "transformer.svr_bus50_p1::A",
+      "transformer.svr_bus50_p2::B",
+      "transformer.svr_bus50_p3::C",
+      "transformer.svr_bus62_p1::A",
+      "transformer.svr_bus62_p2::B",
+      "transformer.svr_bus62_p3::C",
+      "transformer.svr_bus79_p1::A",
+      "transformer.svr_bus79_p2::B",
+      "transformer.svr_bus79_p3::C",
+      "transformer.svr_bus82_p1::A",
+      "transformer.svr_bus82_p2::B",
+      "transformer.svr_bus82_p3::C",
+      "transformer.svr_bus83_p1::A",
+      "transformer.svr_bus83_p2::B",
+      "transformer.svr_bus83_p3::C",
+      "transformer.svr_bus86_p1::A",
+      "transformer.svr_bus86_p2::B",
+      "transformer.svr_bus86_p3::C",
+      "transformer.svr_sta01_p1::A",
+      "transformer.svr_sta01_p2::B",
+      "transformer.svr_sta01_p3::C",
+      "transformer.svr_sta06_p1::A",
+      "transformer.svr_sta06_p2::B",
+      "transformer.svr_sta06_p3::C",
+      "transformer.svr_sta08_p1::A",
+      "transformer.svr_sta08_p2::B",
+      "transformer.svr_sta08_p3::C"
+    ],
+    "removed_branch_phases": [],
+    "new_physical_nodes": [
+      "svr_bus108_series_input.1",
+      "svr_bus108_series_input.2",
+      "svr_bus108_series_input.3",
+      "svr_bus48_series_input.1",
+      "svr_bus48_series_input.2",
+      "svr_bus48_series_input.3",
+      "svr_bus50_series_input.1",
+      "svr_bus50_series_input.2",
+      "svr_bus50_series_input.3",
+      "svr_bus62_series_input.1",
+      "svr_bus62_series_input.2",
+      "svr_bus62_series_input.3",
+      "svr_bus79_series_input.1",
+      "svr_bus79_series_input.2",
+      "svr_bus79_series_input.3",
+      "svr_bus82_line_input.1",
+      "svr_bus82_line_input.2",
+      "svr_bus82_line_input.3",
+      "svr_bus83_regulated.1",
+      "svr_bus83_regulated.2",
+      "svr_bus83_regulated.3",
+      "svr_bus86_series_input.1",
+      "svr_bus86_series_input.2",
+      "svr_bus86_series_input.3",
+      "svr_sta01_regulated.1",
+      "svr_sta01_regulated.2",
+      "svr_sta01_regulated.3",
+      "svr_sta06_regulated.1",
+      "svr_sta06_regulated.2",
+      "svr_sta06_regulated.3",
+      "svr_sta08_regulated.1",
+      "svr_sta08_regulated.2",
+      "svr_sta08_regulated.3"
+    ],
+    "removed_physical_nodes": [],
+    "old_branch_axis_same_order_as_current_shared": false,
+    "LDC_duplicate_node_axis_halves_bitwise_equal": true,
+    "LDC_voltage_matrix_endpoint_halves_bitwise_equal": true,
+    "LDC_voltage_constant_different_elements": 7968,
+    "LDC_affected_indices_count_by_controller": {
+      "creg4a": 27,
+      "creg4b": 25,
+      "creg4c": 31
+    },
+    "exact_coefficient_support": {
+      "old": {
+        "flow_p_matrix": {
+          "line": {
+            "rows": 25248,
+            "nnz": 95904,
+            "zero_rows": 7680,
+            "min_support": 0,
+            "max_support": 24,
+            "mean_support": 3.7984790874524714,
+            "min_abs_nonzero": 0.3333333333333333,
+            "max_abs_nonzero": 0.3333333333333333,
+            "nonzero_abs_at_most_1e_12": 0,
+            "nonzero_abs_at_most_1e_9": 0,
+            "threshold_counts_are_diagnostics_only": true
+          },
+          "transformer": {
+            "rows": 11520,
+            "nnz": 16992,
+            "zero_rows": 4032,
+            "min_support": 0,
+            "max_support": 24,
+            "mean_support": 1.475,
+            "min_abs_nonzero": 0.3333333333333333,
+            "max_abs_nonzero": 0.3333333333333333,
+            "nonzero_abs_at_most_1e_12": 0,
+            "nonzero_abs_at_most_1e_9": 0,
+            "threshold_counts_are_diagnostics_only": true
+          },
+          "cross_control": {
+            "line": {
+              "rows": 25248,
+              "nnz": 0,
+              "zero_rows": 25248,
+              "min_support": 0,
+              "max_support": 0,
+              "mean_support": 0.0,
+              "min_abs_nonzero": null,
+              "max_abs_nonzero": null,
+              "nonzero_abs_at_most_1e_12": 0,
+              "nonzero_abs_at_most_1e_9": 0,
+              "threshold_counts_are_diagnostics_only": true
+            },
+            "transformer": {
+              "rows": 11520,
+              "nnz": 0,
+              "zero_rows": 11520,
+              "min_support": 0,
+              "max_support": 0,
+              "mean_support": 0.0,
+              "min_abs_nonzero": null,
+              "max_abs_nonzero": null,
+              "nonzero_abs_at_most_1e_12": 0,
+              "nonzero_abs_at_most_1e_9": 0,
+              "threshold_counts_are_diagnostics_only": true
+            }
+          }
+        },
+        "flow_q_matrix": {
+          "line": {
+            "rows": 25248,
+            "nnz": 95904,
+            "zero_rows": 7680,
+            "min_support": 0,
+            "max_support": 24,
+            "mean_support": 3.7984790874524714,
+            "min_abs_nonzero": 0.3333333333333333,
+            "max_abs_nonzero": 0.3333333333333333,
+            "nonzero_abs_at_most_1e_12": 0,
+            "nonzero_abs_at_most_1e_9": 0,
+            "threshold_counts_are_diagnostics_only": true
+          },
+          "transformer": {
+            "rows": 11520,
+            "nnz": 16992,
+            "zero_rows": 4032,
+            "min_support": 0,
+            "max_support": 24,
+            "mean_support": 1.475,
+            "min_abs_nonzero": 0.3333333333333333,
+            "max_abs_nonzero": 0.3333333333333333,
+            "nonzero_abs_at_most_1e_12": 0,
+            "nonzero_abs_at_most_1e_9": 0,
+            "threshold_counts_are_diagnostics_only": true
+          },
+          "cross_control": {
+            "line": {
+              "rows": 25248,
+              "nnz": 0,
+              "zero_rows": 25248,
+              "min_support": 0,
+              "max_support": 0,
+              "mean_support": 0.0,
+              "min_abs_nonzero": null,
+              "max_abs_nonzero": null,
+              "nonzero_abs_at_most_1e_12": 0,
+              "nonzero_abs_at_most_1e_9": 0,
+              "threshold_counts_are_diagnostics_only": true
+            },
+            "transformer": {
+              "rows": 11520,
+              "nnz": 0,
+              "zero_rows": 11520,
+              "min_support": 0,
+              "max_support": 0,
+              "mean_support": 0.0,
+              "min_abs_nonzero": null,
+              "max_abs_nonzero": null,
+              "nonzero_abs_at_most_1e_12": 0,
+              "nonzero_abs_at_most_1e_9": 0,
+              "threshold_counts_are_diagnostics_only": true
+            }
+          }
+        },
+        "current_matrix": {
+          "line": {
+            "rows": 25248,
+            "nnz": 1207296,
+            "zero_rows": 96,
+            "min_support": 0,
+            "max_support": 48,
+            "mean_support": 47.81749049429658,
+            "min_abs_nonzero": 6.752013024754512e-17,
+            "max_abs_nonzero": 0.0003573099037631533,
+            "nonzero_abs_at_most_1e_12": 3439,
+            "nonzero_abs_at_most_1e_9": 89398,
+            "threshold_counts_are_diagnostics_only": true
+          },
+          "transformer": {
+            "rows": 11520,
+            "nnz": 552959,
+            "zero_rows": 0,
+            "min_support": 47,
+            "max_support": 48,
+            "mean_support": 47.999913194444446,
+            "min_abs_nonzero": 1.4926838112988907e-19,
+            "max_abs_nonzero": 0.00021038210417922976,
+            "nonzero_abs_at_most_1e_12": 27178,
+            "nonzero_abs_at_most_1e_9": 346091,
+            "threshold_counts_are_diagnostics_only": true
+          }
+        },
+        "voltage_matrix": {
+          "rows": 37056,
+          "nnz": 1778688,
+          "zero_rows": 0,
+          "min_support": 48,
+          "max_support": 48,
+          "mean_support": 48.0,
+          "min_abs_nonzero": 3.446798402251261e-13,
+          "max_abs_nonzero": 0.00026191718396652574,
+          "nonzero_abs_at_most_1e_12": 128,
+          "nonzero_abs_at_most_1e_9": 11179,
+          "threshold_counts_are_diagnostics_only": true
+        }
+      },
+      "current": {
+        "flow_p_matrix": {
+          "line": {
+            "rows": 25248,
+            "nnz": 1207296,
+            "zero_rows": 96,
+            "min_support": 0,
+            "max_support": 48,
+            "mean_support": 47.81749049429658,
+            "min_abs_nonzero": 2.4140693106631736e-16,
+            "max_abs_nonzero": 0.410038385619805,
+            "nonzero_abs_at_most_1e_12": 2867,
+            "nonzero_abs_at_most_1e_9": 28240,
+            "threshold_counts_are_diagnostics_only": true
+          },
+          "transformer": {
+            "rows": 14688,
+            "nnz": 705024,
+            "zero_rows": 0,
+            "min_support": 48,
+            "max_support": 48,
+            "mean_support": 48.0,
+            "min_abs_nonzero": 5.533767888672976e-20,
+            "max_abs_nonzero": 0.4100385447656663,
+            "nonzero_abs_at_most_1e_12": 320152,
+            "nonzero_abs_at_most_1e_9": 347211,
+            "threshold_counts_are_diagnostics_only": true
+          },
+          "cross_control": {
+            "line": {
+              "rows": 25248,
+              "nnz": 603648,
+              "zero_rows": 96,
+              "min_support": 0,
+              "max_support": 24,
+              "mean_support": 23.90874524714829,
+              "min_abs_nonzero": 4.384581602277044e-15,
+              "max_abs_nonzero": 0.08065047178356508,
+              "nonzero_abs_at_most_1e_12": 791,
+              "nonzero_abs_at_most_1e_9": 9869,
+              "threshold_counts_are_diagnostics_only": true
+            },
+            "transformer": {
+              "rows": 14688,
+              "nnz": 352512,
+              "zero_rows": 0,
+              "min_support": 24,
+              "max_support": 24,
+              "mean_support": 24.0,
+              "min_abs_nonzero": 9.942244035991374e-20,
+              "max_abs_nonzero": 0.08065059736231887,
+              "nonzero_abs_at_most_1e_12": 159646,
+              "nonzero_abs_at_most_1e_9": 171630,
+              "threshold_counts_are_diagnostics_only": true
+            }
+          }
+        },
+        "flow_q_matrix": {
+          "line": {
+            "rows": 25248,
+            "nnz": 1207296,
+            "zero_rows": 96,
+            "min_support": 0,
+            "max_support": 48,
+            "mean_support": 47.81749049429658,
+            "min_abs_nonzero": 3.552713678800501e-16,
+            "max_abs_nonzero": 0.6814491452152367,
+            "nonzero_abs_at_most_1e_12": 1229,
+            "nonzero_abs_at_most_1e_9": 16903,
+            "threshold_counts_are_diagnostics_only": true
+          },
+          "transformer": {
+            "rows": 14688,
+            "nnz": 705024,
+            "zero_rows": 0,
+            "min_support": 48,
+            "max_support": 48,
+            "mean_support": 48.0,
+            "min_abs_nonzero": 4.87890977618477e-19,
+            "max_abs_nonzero": 0.676631599840988,
+            "nonzero_abs_at_most_1e_12": 15613,
+            "nonzero_abs_at_most_1e_9": 55560,
+            "threshold_counts_are_diagnostics_only": true
+          },
+          "cross_control": {
+            "line": {
+              "rows": 25248,
+              "nnz": 603648,
+              "zero_rows": 96,
+              "min_support": 0,
+              "max_support": 24,
+              "mean_support": 23.90874524714829,
+              "min_abs_nonzero": 3.552713678800501e-16,
+              "max_abs_nonzero": 0.2746977442755991,
+              "nonzero_abs_at_most_1e_12": 1223,
+              "nonzero_abs_at_most_1e_9": 10696,
+              "threshold_counts_are_diagnostics_only": true
+            },
+            "transformer": {
+              "rows": 14688,
+              "nnz": 352512,
+              "zero_rows": 0,
+              "min_support": 24,
+              "max_support": 24,
+              "mean_support": 24.0,
+              "min_abs_nonzero": 4.87890977618477e-19,
+              "max_abs_nonzero": 0.2741237414907459,
+              "nonzero_abs_at_most_1e_12": 15225,
+              "nonzero_abs_at_most_1e_9": 30835,
+              "threshold_counts_are_diagnostics_only": true
+            }
+          }
+        },
+        "current_matrix": {
+          "line": {
+            "rows": 25248,
+            "nnz": 1207230,
+            "zero_rows": 96,
+            "min_support": 0,
+            "max_support": 48,
+            "mean_support": 47.814876425855516,
+            "min_abs_nonzero": 2.1253750712504903e-18,
+            "max_abs_nonzero": 0.0006270933597857687,
+            "nonzero_abs_at_most_1e_12": 8121,
+            "nonzero_abs_at_most_1e_9": 129997,
+            "threshold_counts_are_diagnostics_only": true
+          },
+          "transformer": {
+            "rows": 14688,
+            "nnz": 705024,
+            "zero_rows": 0,
+            "min_support": 48,
+            "max_support": 48,
+            "mean_support": 48.0,
+            "min_abs_nonzero": 2.541098841762901e-22,
+            "max_abs_nonzero": 0.0006270931445029326,
+            "nonzero_abs_at_most_1e_12": 30674,
+            "nonzero_abs_at_most_1e_9": 360171,
+            "threshold_counts_are_diagnostics_only": true
+          }
+        },
+        "voltage_matrix": {
+          "rows": 80448,
+          "nnz": 3861504,
+          "zero_rows": 0,
+          "min_support": 48,
+          "max_support": 48,
+          "mean_support": 48.0,
+          "min_abs_nonzero": 9.249979155357228e-16,
+          "max_abs_nonzero": 0.0016282598664291604,
+          "nonzero_abs_at_most_1e_12": 8298,
+          "nonzero_abs_at_most_1e_9": 115986,
+          "threshold_counts_are_diagnostics_only": true
+        }
+      }
+    },
+    "evidence": [
+      {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250501\\V41_ELECTRICAL_CERTIFICATE.json",
+        "sha256": "c6b649edc1b2b3e2f324b0e41f939e397bdfcb26b64fff2c7be56d3d27424d35",
+        "bytes": 136903
+      },
+      {
+        "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r4_may\\e\\20250501\\kernel\\electrical\\2025-05-01\\V40I_PLANNING_ELECTRICAL_COEFFICIENTS.npz",
+        "sha256": "735e190e1a5e5367c26ee4848192a41bdb8cc5749ebd5e3cb177f9599a314ef7",
+        "bytes": 28521980
+      },
+      {
+        "path": "D:\\v42_svr11_may_20261011_16\\models\\2025-05-01\\COEFFICIENTS.npz",
+        "sha256": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+        "bytes": 62211025
+      }
+    ],
+    "no_coefficients_dropped_or_changed": true,
+    "solver_calls": 0
+  },
+  "fixed_AIDC": {
+    "control_names_identical": true,
+    "control_axis_count": 60,
+    "AIDC_axis_count": 12,
+    "MESS_P_axis_count": 24,
+    "MESS_Q_axis_count": 24,
+    "old_fixed_AIDC_source": "Accepted A1 Planning optimization frozen before M1",
+    "current_fixed_AIDC_source": "Independent B2 same-day AIDC control input",
+    "all_control_entries_different": 1050,
+    "AIDC_entries_different": 1050,
+    "AIDC_entry_count": 1152,
+    "max_AIDC_kw_change": 54.7723975641307,
+    "MESS_controls_zero_both": true,
+    "old_AIDC_kw_range": [
+      9.148717587251218,
+      70.17075695133546
+    ],
+    "current_AIDC_kw_range": [
+      9.148717587251216,
+      70.17075698197618
+    ],
+    "old_slot0_AIDC_kw": [
+      13.315145445345692,
+      9.148717587265047,
+      13.315145445345692,
+      9.148717587265047,
+      35.664146279399546,
+      24.26962373060151,
+      9.148717587265047,
+      41.796788987010814,
+      9.148717587265047,
+      19.88783241649918,
+      11.339613223537125,
+      13.315145445345692
+    ],
+    "current_slot0_AIDC_kw": [
+      57.13305858636895,
+      31.05767394998583,
+      57.13305858636895,
+      31.05767394998583,
+      53.66817845098739,
+      56.585334672106164,
+      31.05767394998583,
+      57.13305858636895,
+      31.05767394998583,
+      57.13305858636895,
+      31.05767394998583,
+      57.13305858636895
+    ],
+    "consequence": "With coefficient tensors fixed, fixed AIDC values change affine constants/RHS, not stored MESS coefficient support. They also change which exact security-support tests are successful. Current coefficients were regenerated under a distinct hardware/control model, so old row deletion IDs/certificates are not reusable.",
+    "evidence": [
+      {
+        "path": "D:\\v42_svr11_epoch16_20261011\\docs\\v42_single_worker_single_thread_a1_m1\\INTEGRATED_A1_FREEZE_SINGLE_THREAD.json",
+        "sha256": "d16ab0194a44a52c0e2d5277ad438bf4229e5c125967b8a995125da61f0fa0e0",
+        "bytes": 669723
+      },
+      {
+        "path": "D:\\v42_svr11_c3a_development_20261011\\dates\\B2\\2025-05-01\\attempts\\representative01\\output\\FIXED_AIDC_ANCHOR.json",
+        "sha256": "7b75c9b66bbbef815335de5d7cff4f561a99edac4cc10d8bc0e643cd43b225fc",
+        "bytes": 85975
+      }
+    ]
+  },
+  "physical_and_injection_blocks": {
+    "flow": {
+      "rows": 9216,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "initial_SOC": {
+      "rows": 4,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "terminal_SOC": {
+      "rows": 4,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "terminal_location": {
+      "rows": 4,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "connected_Pch": {
+      "rows": 8942,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "connected_Pdis": {
+      "rows": 8942,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "no_simultaneous_charge": {
+      "rows": 8942,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "no_simultaneous_discharge": {
+      "rows": 8942,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "connected_Qmax": {
+      "rows": 8942,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "connected_Qmin": {
+      "rows": 8942,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "PCS16": {
+      "rows": 143072,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "energy_balance": {
+      "rows": 384,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "injection_P_binding": {
+      "rows": 2304,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    },
+    "injection_Q_binding": {
+      "rows": 2304,
+      "matrix_coefficients_and_support_bitwise_identical": true,
+      "RHS_bitwise_identical": true,
+      "row_names_bitwise_identical": true,
+      "senses_bitwise_identical": true
+    }
+  },
+  "C3A_nnz_growth_by_row_family": {
+    "NormalAmps": 664971,
+    "line_thermal_face": 292490,
+    "node_activity_link": 100,
+    "response_line_P_binding": 1144761,
+    "response_line_Q_binding": 1144507,
+    "response_line_correction_binding": -475,
+    "response_transformer_P_binding": 398676,
+    "response_transformer_Q_binding": 694330,
+    "transformer_kVA": 348416,
+    "voltage_lower": 1431365,
+    "voltage_upper": 909125
+  },
+  "C3A_column_growth_by_family": {
+    "node_activity": 4,
+    "response_line_P": 9444,
+    "response_line_Q": 9313,
+    "response_transformer_P": 14400,
+    "response_transformer_Q": 14400
+  },
+  "total_nnz_growth": 7028266,
+  "total_row_growth": 401872,
+  "total_column_growth": 47561,
+  "binary_growth": 4,
+  "historic_PR160_security_removed": {
+    "line_thermal_face": 60101,
+    "transformer_kVA": 74802,
+    "voltage_upper_lower": 43584,
+    "NormalAmps": 11520,
+    "other": 273,
+    "total": 190280
+  },
+  "production_presolve_PR160_absorption": "PARTIAL: current Static Presolve executes fixed-variable, constant-safe and primitive-dyadic duplicate/proportional rows, but no route/PQ/SOC security support proof pass. Current C3A explicitly conservatively retains all grid security rows. Historical PR161 build.py applies PR160 proof-screened C1 first and additional Q/SOC/source-node bounds before Presolve; current m_model.py does neither before Presolve.",
+  "new_security_reduction_scope": "Exact current-matrix support certificates must be regenerated; no inference of current removable count from historical counts.",
+  "extra_source_binaries_cause": "Historical PR161 build.py explicitly fixes time0 node_activity from source-flow equality+node-activity link. Current m_model.py does not execute this pre-Presolve bound transport. Four source node_activity binaries survive with 0..1 bounds.",
+  "original_baseline_distinction": "Historical PR162 original F0 starts from PR134 already-reduced 886017 rows, not its raw961472-row model. The current FULL includes235008 transformer kVA rows, whereas historical F0 already removes73728 of raw184320 kVA rows. Both hardware expansion and pre-baseline certified deletions affect the count comparison.",
+  "root180_claim": "No solver executed in this audit; performance requires the authorized final-source native Root test.",
+  "evidence_source_files": [
+    {
+      "path": "C:\\v42_m1_ultracompact_exact_20261006\\v42_supercompact\\build.py",
+      "sha256": "ab4983164f9463ee45485c5be94590dd1b253ae1e5ac2ecaa99b5afbe5ede4a6",
+      "bytes": 8776
+    },
+    {
+      "path": "D:\\v42_svr11_epoch16_20261011\\v42_supercompact\\presolve.py",
+      "sha256": "d0df652a1f6ec645bbf67750bbfeeb0884315020b69d2f552f9d24675df42365",
+      "bytes": 14593
+    },
+    {
+      "path": "D:\\v42_svr11_epoch16_20261011\\v42_may_campaign_native90\\m_model.py",
+      "sha256": "7df050abfc9ac9f4ed9e90a201caa89cfbce379d047e6f1ef5c45fb8b00e3b9e",
+      "bytes": 37850
+    },
+    {
+      "path": "D:\\v42_svr11_epoch16_20261011\\v42_ultracompact\\current.py",
+      "sha256": "df354b53d0583bf0e2f134a2b5d56f9710795a312f373f360c3f2d73f7f2220b",
+      "bytes": 10499
+    },
+    {
+      "path": "D:\\v42_svr11_epoch16_20261011\\v42_svr11\\model.py",
+      "sha256": "ecb23e17c4e89efddcb22beb7fc90c990fc7ce6d2b1eeb9fb04888df00e91135",
+      "bytes": 15836
+    },
+    {
+      "path": "D:\\v42_svr11_epoch16_20261011\\v42_svr11\\ldc_interval.py",
+      "sha256": "3c2226334e4b109470ac1c8e20735c3d618d579049cfe162798686097e99063e",
+      "bytes": 6860
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v40e\\electrical.py",
+      "sha256": "e8f2afc6a94c563d518be1ba72e004977bb0fa91ebc5bb54b575b138aff3262e",
+      "bytes": 20897
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v28r2\\electrical_subproblem.py",
+      "sha256": "7fe0aa865f849ff1ffc49f3d49519e0df2931a1c1f8cff1ae7f5416ca1e22221",
+      "bytes": 18609
+    }
+  ]
+}

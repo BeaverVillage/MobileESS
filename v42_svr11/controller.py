@@ -88,6 +88,8 @@ def pending_retry_policy(ledger):
 
 def run(root):
     root=Path(root).resolve();m=verify(root/'CAMPAIGN_MANIFEST.json')
+    from .hold import held
+    if held(root,m):return
     if m.get('development_diagnosis_only') or m.get('production_campaign') is False:
         raise PermissionError('SVR11_GLOBAL_DEVELOPMENT_ROOT_NOT_A_PRODUCTION_CAMPAIGN')
     with singleton(root/'SUPERVISOR.lock'):
@@ -96,6 +98,10 @@ def run(root):
         last_report=0.;last_policy=None
         while True:
             try:
+                if held(root,m):
+                    ledger.update(status='HOLD',new_dispatch_quiesced=True,UTC=now())
+                    atomic(root/'CAMPAIGN_LEDGER.json',ledger)
+                    return
                 verify(root/'CAMPAIGN_MANIFEST.json');active=workers(root,m['execution_SHA']);reconcile(root,m,ledger,active)
                 policy=next_policy(ledger) or pending_retry_policy(ledger);ledger.update(policy=policy,UTC=now(),source_SHA=m['execution_SHA'],active_workers=active,supervisor=identity())
                 if m.get('B3_stagewise_batch') and ledger.get('B3_batch',{}).get('status') not in (None,'COMPLETE'):
@@ -119,6 +125,7 @@ def run(root):
                         generate(root,ledger);last_report=time.monotonic()
                     time.sleep(5);continue
                 for row in dispatch_rows(ledger,policy):
+                    if held(root,m):break
                     day=row['day']
                     if len(active)>=capacity:continue
                     if policy=='B2':

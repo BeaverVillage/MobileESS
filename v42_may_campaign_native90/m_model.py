@@ -124,6 +124,8 @@ def _transport_state_sha(compact,presolve,graph):
         outgoing=[(key,value) for key,value in sorted(compact.outgoing.items())],
         parallel=sorted(compact.parallel),
         steps=presolve.steps,row_proofs=presolve.rows,bound_proofs=presolve.bound,
+        current_security=(dict(getattr(presolve,'current_security'),battery=vars(presolve.current_security['battery']))
+            if getattr(presolve,'current_security',None) is not None else None),
         row_ids=presolve.row_ids,col_ids=presolve.col_ids,initial_names=presolve.initial_names,
         graph_sites=graph[0],graph_initial=graph[1],graph_battery=vars(graph[3]))
     return storage_digest(state)
@@ -134,8 +136,9 @@ def _freeze_transport(compact,presolve,graph,proof,out):
     path=Path(out)/'ORIGINAL_DOMAIN_EQUIVALENCE.json'
     atomic(path,proof)
     root=Path(__file__).resolve().parents[1]
+    from v42_ultracompact.security import SOURCES as SECURITY_SOURCES
     sources={name:record(root/name) for name in ('v42_may_campaign_native90/m_model.py',
-        'v42_supercompact/formulation.py','v42_supercompact/presolve.py')}
+        'v42_supercompact/formulation.py','v42_supercompact/presolve.py')+SECURITY_SOURCES}
     return dict(state_sha=_transport_state_sha(compact,presolve,graph),sources=sources,certificate=record(path))
 
 
@@ -173,6 +176,7 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
             original_columns=compact.original.shape[1],
             compact_rows=compact.A.shape[0],compact_columns=compact.A.shape[1],
             retained_rows=presolve.A.shape[0],retained_columns=presolve.A.shape[1],
+            fresh_current_security=getattr(presolve,'current_security',{}).get('summary',{}),
             C3A_policy='KEEP_ALL_REGENERATED_C2_ROWS',
             daily_alias_replay_performed=False,daily_deleted_row_replay_performed=False)
     original, od = compact.original.tocsr(), compact.original_data
@@ -257,6 +261,9 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
     # The unchanged native flow rows, nonnegative route box and strict forward
     # time DAG imply a single unit path; binary nodes give integral nonparallel
     # arcs, while parallel selectors remain binary in the existing constructor.
+    from v42_ultracompact.security_verify import verify_current_security
+    security_proof,c=verify_current_security(compact,presolve)
+    independently_proven_security={int(p['row']) for p in getattr(presolve,'current_security',{}).get('certificates',[])}
     definitions = {}; alias_witnesses = {}; columns_for_witness = None
     for step in presolve.steps:
         j = int(step['column'])
@@ -307,6 +314,13 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
                     raise error
                 alias_witnesses[int(i)]=witness
         definitions[j] = step
+        if step['kind']=='UNCONSUMED_AFFINE_AUXILIARY':
+            if (not str(c['names'][j]).startswith(('response_','injection_')) or c['types'][j]!='C'
+                    or not np.isneginf(c['lower'][j]) or not np.isposinf(c['upper'][j]) or c['objective'][j]!=0):
+                raise ValueError('CURRENT_M_UNCONSUMED_AUXILIARY_DOMAIN_DRIFT')
+            # The defining equality was checked exactly above; the complete
+            # retained-row projection and every deleted implication are checked
+            # below. An unbounded continuous auxiliary needs no bound transport.
     keep = np.asarray(presolve.col_ids, dtype=np.int64)
     positions = {int(j): k for k, j in enumerate(keep)}
     if set(definitions) | set(positions) != set(range(C.shape[1])) or set(definitions) & set(positions):
@@ -324,10 +338,11 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
         else:
             step = definitions[j]; const = F(float(step['constant'])); terms = defaultdict(F)
             for key, weight in step['terms'].items():
-                if F(float(weight)) != 1:
+                if F(float(weight)) != 1 and step['kind']!='UNCONSUMED_AFFINE_AUXILIARY':
                     raise ValueError('CURRENT_M_UNPROVEN_NONUNIT_ALIAS')
-                off, deps = expand(int(key), stack+(j,)); const += off
-                for k, v in deps.items(): terms[k] += v
+                weight=F(float(weight))
+                off, deps = expand(int(key), stack+(j,)); const += weight*off
+                for k, v in deps.items(): terms[k] += weight*v
             result = (const, {k: v for k, v in terms.items() if v})
         transformed[j] = result
         return result
@@ -344,9 +359,13 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
         if c['types'][j] == 'B' and any(presolve.d['types'][k] != 'B' or weight.denominator != 1 for k, weight in terms.items()):
             raise ValueError('CURRENT_M_ELIMINATED_BINARY_DOMAIN_NOT_IMPLIED')
     T = sparse.csr_matrix((vv, (rr, cc)), shape=(C.shape[1], len(keep)))
-    projected = (C @ T).tocsr(); projected.eliminate_zeros(); projected.sort_indices()
-    rhs = c['rhs'] - C @ off
     kept_rows = np.asarray(presolve.row_ids, dtype=np.int64)
+    # Security rows already have an independent original-domain support proof.
+    # Project only retained rows: projecting removed response security rows
+    # would create dense temporary rows with no role in this proof.
+    retained_C=C[kept_rows]
+    projected = (retained_C @ T).tocsr(); projected.eliminate_zeros(); projected.sort_indices()
+    rhs = c['rhs'][kept_rows] - retained_C @ off
     B, d = presolve.A.tocsr(), presolve.d
     for key in ('names','types'):
         if not np.array_equal(c[key][keep],d[key]):
@@ -366,8 +385,8 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
         raise ValueError('CURRENT_M_RETAINED_ROW_AXIS_DRIFT')
     # Exact rational fallback addresses only a sparse summation-order mismatch;
     # it never grants a numerical tolerance to scientific coefficients.
-    delta = projected[kept_rows]-B; delta.eliminate_zeros()
-    affected = set(map(int, np.unique(delta.tocoo().row))) | set(map(int, np.flatnonzero(rhs[kept_rows] != d['rhs'])))
+    delta = projected-B; delta.eliminate_zeros()
+    affected = set(map(int, np.unique(delta.tocoo().row))) | set(map(int, np.flatnonzero(rhs != d['rhs'])))
     for row in affected:
         terms, value = _project_row(C, c['rhs'], int(kept_rows[row]), definitions)
         expected = {positions[j]: w for j, w in terms.items()}
@@ -384,7 +403,7 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
     certs = {int(row['row']): row for row in presolve.rows}
     if set(certs) != set(range(C.shape[0]))-set(map(int, kept_rows)):
         raise ValueError('CURRENT_M_DELETED_ROW_CERTIFICATE_COVER_DRIFT')
-    proven=set(map(int,kept_rows))
+    proven=set(map(int,kept_rows))|independently_proven_security
     def prove_deleted(i, stack=()):
         if i in proven:return
         if i in stack:raise ValueError('CURRENT_M_DELETED_ROW_IMPLICATION_CYCLE')
@@ -427,7 +446,7 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
         deleted_row_implications_checked=len(certs), exact_coefficient_fallback_rows=len(affected),
         original_P1_bit_exact=True, integer_and_full_LP_domains_identical=True,
         C3A_policy='KEEP_ALL_REGENERATED_C2_ROWS', historical_proof_packets_read=0,
-        Native_optimize_calls=0)
+        pre_C2_security_independent_proof=security_proof,Native_optimize_calls=0)
 
 
 def _label_grid(model, first, coefficients, cost):
@@ -551,7 +570,17 @@ def build_case(payload, request, progress=None):
     if len(thermal)!=(153 if active() is not None else 120)*96: raise ValueError('CURRENT_M_ALL_TRANSFORMER_PHASE_ROWS_REQUIRED')
     if progress: progress(dict(phase='M_EXISTING_COMPACT_STATIC_PRESOLVE',day=day,arm='B2'))
     compact=Compact(A,d,graph[2],initial,96)
-    presolve=Presolve(compact.A,compact.d);B,e=presolve.run()
+    from v42_ultracompact.security import prepare_current_security
+    pre=prepare_current_security(compact,graph,progress)
+    pre['battery']=graph[3]
+    presolve=Presolve(compact.A,dict(compact.d,lower=pre['lower'],upper=pre['upper']))
+    presolve.current_security=pre
+    presolve.bound.extend(pre['bounds'])
+    presolve.row_delete({int(p['row']) for p in pre['certificates']},pre['certificates'])
+    B,e=presolve.run()
+    atomic(out/'CURRENT_SECURITY_PRE_C2_SUMMARY.json',pre['summary'])
+    atomic(out/'CURRENT_SECURITY_PRE_C2_ROW_CERTIFICATES.json',pre['certificates'])
+    atomic(out/'CURRENT_SECURITY_PRE_C2_BOUND_CERTIFICATES.json',pre['bounds'])
     try:
         proof=verify_transport(compact,presolve)
     except Exception as error:
@@ -606,7 +635,8 @@ def verify_case(case):
     if authority['state_sha']!=_transport_state_sha(case.compact,case.presolve,case.graph):
         raise ValueError('CURRENT_M_TRANSPORT_STATE_BYTES_DRIFT')
     root=Path(__file__).resolve().parents[1]
-    expected_sources={'v42_may_campaign_native90/m_model.py','v42_supercompact/formulation.py','v42_supercompact/presolve.py'}
+    from v42_ultracompact.security import SOURCES as SECURITY_SOURCES
+    expected_sources={'v42_may_campaign_native90/m_model.py','v42_supercompact/formulation.py','v42_supercompact/presolve.py',*SECURITY_SOURCES}
     if set(authority['sources'])!=expected_sources or any(sha(root/name)!=receipt['sha256'] for name,receipt in authority['sources'].items()):
         raise ValueError('CURRENT_M_TRANSPORT_PROOF_SOURCE_DRIFT')
     receipt=authority['certificate']; path=Path(receipt['path'])

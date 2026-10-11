@@ -147,6 +147,21 @@ class Presolve:
                 fill_proxy_after=afterfill,
                 expression_coefficient_min=cfmin,expression_coefficient_max=cfmax,decision='KEEP',reason='Substitution not structurally beneficial or safe bound transport unavailable')
             kind='UNIQUE_DEFINITION'
+            # PR160 security elimination can leave an affine response with no
+            # consumer except its own equality. An unbounded continuous,
+            # objective-zero auxiliary can then be projected out exactly. No
+            # bound, inequality, binary decision or scientific coefficient is
+            # changed, and there are no consumers in which fill can occur.
+            if (getattr(self,'current_security',None) is not None
+                    and families[j].startswith(('response_','injection_')) and not down
+                    and d['types'][j]=='C' and np.isneginf(d['lower'][j])
+                    and np.isposinf(d['upper'][j]) and d['objective'][j]==0
+                    and j not in reserved and i not in reserved):
+                if execute:
+                    plans[j]=(expr,constant,i,'UNCONSUMED_AFFINE_AUXILIARY')
+                    reserved.update(expr)
+                record.update(decision='SUBSTITUTE' if execute else 'ELIGIBLE',
+                    reason='Unbounded continuous objective-zero auxiliary has only its defining equality; exact existential projection with no fill')
             if length==2 and list(expr.values())[0]==1 and constant==0:
                 k=next(iter(expr));samebounds=d['lower'][k]>=d['lower'][j] and d['upper'][k]<=d['upper'][j]
                 integerok=d['types'][j]!='B' or d['types'][k]=='B'

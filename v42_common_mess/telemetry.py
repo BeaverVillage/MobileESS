@@ -13,6 +13,9 @@ FIELDS = (
     'Root_LP_seconds', 'Root_LP_status', 'B_and_B_Node_count',
     'Full_MILP_Native_Runtime', 'Solver_MemUsed_GB', 'Solver_MaxMemUsed_GB',
     'full_MILP_telemetry', 'full_MILP_bound_identity', 'full_MILP_native_log',
+    'Presolve_seconds', 'Barrier_seconds', 'Crossover_seconds', 'Presolved_Rows',
+    'Presolved_Columns', 'Presolved_NNZ', 'Root_completion_native_elapsed_seconds',
+    'Post_root_native_seconds', 'model_build_wall_seconds', 'memory_after_native',
 )
 
 
@@ -65,14 +68,38 @@ def root_lp(logfile):
     if not path.exists():
         return dict(Root_LP_seconds=None, Root_LP_status='NATIVE_LOG_UNAVAILABLE')
     log = path.read_text(encoding='utf-8', errors='replace')
+    phases = {}
+    patterns = {
+        'Presolve_seconds': r'Presolve time:\s*([0-9.eE+-]+)s',
+        'Crossover_seconds': r'Crossover time:\s*([0-9.eE+-]+) seconds',
+        'Barrier_seconds': r'Barrier solved model in \d+ iterations and\s*([0-9.eE+-]+) seconds',
+    }
+    for key, pattern in patterns.items():
+        found = re.findall(pattern, log)
+        phases[key] = float(found[-1]) if found else None
+    dimensions = re.findall(r'Presolved:\s*(\d+) rows,\s*(\d+) columns,\s*(\d+) nonzeros', log)
+    for key, value in zip(('Presolved_Rows', 'Presolved_Columns', 'Presolved_NNZ'),
+                          dimensions[-1] if dimensions else (None, None, None)):
+        phases[key] = int(value) if value is not None else None
+    # Log timestamps are elapsed native time and have only printed precision.
+    # Crossover is included in Root relaxation; do not add it a second time.
+    timed_root = re.search(r'Root relaxation:[^\r\n]*\(([^\r\n]+)\)', log)
+    phases['Root_completion_native_elapsed_seconds'] = None
+    if timed_root:
+        elapsed = re.search(r'([0-9.eE+-]+)\s*s', timed_root[1])
+        if elapsed:
+            phases['Root_completion_native_elapsed_seconds'] = float(elapsed[1])
     # This is the native Root relaxation time, excluding presolve and later
     # root cuts; callback elapsed time would include those different costs.
     match = re.search(r'Root relaxation:([^\r\n]*?),\s*([0-9.eE+-]+) seconds', log)
     if match:
         status = 'NATIVE_LOG_ROOT_INTERRUPTED' if 'interrupted' in match[1].lower() else 'NATIVE_LOG_REPORTED'
-        return dict(Root_LP_seconds=float(match[2]), Root_LP_status=status)
+        # Root completion may be followed by a separately printed elapsed
+        # timestamp. Keep absent timestamps unknown instead of deriving them
+        # by adding overlapping presolve, barrier and crossover timings.
+        return dict(phases, Root_LP_seconds=float(match[2]), Root_LP_status=status)
     status = 'PRESOLVE_SOLVED_NO_ROOT_LP' if 'All rows and columns removed' in log else 'NOT_REPORTED_OR_ROOT_INCOMPLETE'
-    return dict(Root_LP_seconds=None, Root_LP_status=status)
+    return dict(phases, Root_LP_seconds=None, Root_LP_status=status)
 
 
 def summarize_full(history, exact_ub):

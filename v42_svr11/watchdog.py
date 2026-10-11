@@ -14,6 +14,8 @@ def launch(module,root,extra=()):
 
 def check(root,port=8796,monitor_only=False):
     root=Path(root).resolve();m=verify(root/'CAMPAIGN_MANIFEST.json');actions=[]
+    from .hold import held
+    monitor_only=monitor_only or held(root,m)
     with singleton(root/'WATCHDOG.lock'):
         supervisor_path=root/'SUPERVISOR_PROCESS.json';supervisor=read(supervisor_path) if supervisor_path.exists() else {}
         ledger=read(root/'CAMPAIGN_LEDGER.json') if (root/'CAMPAIGN_LEDGER.json').exists() else {}
