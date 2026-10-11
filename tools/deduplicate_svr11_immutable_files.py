@@ -50,6 +50,17 @@ def candidates():
             if not name.endswith('.npz'):continue
             p=ROOT/'models'/day/'FORECAST_ANCHOR'/name
             if p.exists():yield 'frozen_forecast_anchor',old,record(p)
+        # A reassembled aggregate is eligible only after its completed
+        # certificate exists and every admitted slot belongs to the origin.
+        p=ROOT/'models'/day/'ELECTRICAL_CERTIFICATE.json'
+        oldp=OLD/'models'/day/'ELECTRICAL_CERTIFICATE.json'
+        if len(value['slots'])==96 and p.exists() and oldp.exists():
+            v=read(p);ov=read(oldp);m=read(ROOT/'CAMPAIGN_MANIFEST.json')
+            assert v['source_SHA']==m['execution_SHA'] and v['day']==day
+            assert v['reused_forecast_slot_provenance']==m['model_checkpoint_reuse_contract']
+            old=ov['output'];target=v['output']
+            if (old['sha256'],old['bytes'])==(target['sha256'],target['bytes']):
+                yield 'completed_common_forecast_aggregate',old,target
 
 def run():
     if os.name!='nt':raise RuntimeError('NTFS_HARDLINK_REQUIRED')
