@@ -17,7 +17,8 @@ def publish():
     folder=SOURCE/'docs/v42_svr11_final_20261011/epoch10_snapshot';folder.mkdir(parents=True,exist_ok=True)
     names=('CAMPAIGN_MANIFEST.json','CAMPAIGN_LEDGER.json','PREDECESSOR_DRAIN_CONTRACT.json','MIGRATION_STATUS.json',
         'FORECAST_ALLOCATION_CACHE_EQUIVALENCE.json','STRICT_BYTE_EQUIVALENCE_SUPPLEMENT.json','MODEL_CHECKPOINT_REUSE_CONTRACT.json','REUSE_ADMISSION.json','B2_PRE_DISPATCH_REUSE.json',
-        'TRANSFER_INTENT.json','TRANSFER_COMPLETE.json','SOURCE_SCOPE_VERIFICATION.json','REPORT.json','REPORT.md',
+        'TRANSFER_INTENT.json','TRANSFER_COMPLETE.json','SOURCE_SCOPE_VERIFICATION.json',
+        'MODEL_GENERATION_BOTTLENECK_AUDIT.json','TRANSFER_REGRESSION.json','IMMUTABLE_STORAGE_SHARING.json','REPORT.json','REPORT.md',
         'PERFORMANCE_COMPARISON.json','PERFORMANCE_COMPARISON.md','MONITOR_UI_RELEASE.json','MONITOR_PROCESS.json',
         'LIVE_OBSERVATION.json','WATCHDOG_LAST_RUN.json','SUPERVISOR_PROCESS.json','SUPERVISOR_HEARTBEAT.json',
         'WINDOWS_SCHEDULE_REGISTRATION.json','WINDOWS_SCHEDULE_OBSERVED_EXECUTION.json','HANDOFF_37_VALIDATION.json','HANDOFF_RECEIPT.json')
@@ -62,6 +63,8 @@ def publish():
 Forecast model generation repeatedly recomputed the same exact Fraction native-load allocation in every independent prefix. Cache the original checked allocations once per96 slots while retaining every DSS load setter, order, float value, fresh compile, control, solve and clock command. No engine, solved state, taps or queue are cached or copied to Actual. All31×96 Forecast setter inputs are identical. Representative slot0/47/95 comparisons each replay121 independent base/positive/negative responses with bitwise-identical measurements and sensitivities and identical native solve times/counts. Slot47 improved24.93→14.68s (1.70×), slot95 improved46.64→24.52s (1.90×); these measured prefixes are not a full-month speed or voltage-safety certification.52 regression tests pass. Native algorithms, objectives, integer domains, physical constraints, budgets and equipment are unchanged.
 
 Only predecessor dispatch was quiesced. May13/14/15 healthy Workers finished naturally with zero terminations/hot patches. Independently qualify and reuse{snap['qualified_reused_dates']} completed dates and{snap['original_model_slots_reused']} completed Forecast slots. Original execution Source SHA, Native/Wall Runtime, physical evidence and failed attempts remain preserved. Current Source SHA labels new executions and separate revalidation, never relabels old execution. The common SVR11 equipment comparison is unchanged; older pre-Epoch09 equipment results remain separate history.
+
+The same date-specific Forecast electrical model and sensitivities are shared by B1/B2/B3 through one common models/day directory; policy-specific A/M optimization models and decisions are built against their own inputs. SHA-identical frozen raw files and admitted completed checkpoint archives use verified NTFS hardlinks, preserving every original/current path, byte, SHA and receipt. Mutable files and policy results are excluded. [Storage sharing evidence](epoch10_snapshot/IMMUTABLE_STORAGE_SHARING.json).
 
 Current{state['counts']['completed']}/124 terminal; remaining B2→B1→B3 proceeds in original order with Worker3/1/1. Individual FAIL never gates later dates/policies; technical retries remain finite fresh Native0 attempts after following-date assignment. FULL-verified TIME_LIMIT is accepted normally. Planning/Actual autonomous controls remain independent and Actual repair/reoptimization remain0. Original voltage.95–1.05, line/SVR400A, original compiled NormalAmps and separate kVA/tap constraints remain literal.
 
