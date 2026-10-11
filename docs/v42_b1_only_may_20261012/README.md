@@ -1,6 +1,6 @@
 # Source18r B1-only May 2025 detached campaign
 
-This release executes B1 only for 2025-05-01 through 2025-05-31 under the user's explicit 2026-10-12 authority. The production root is `D:\v42_b1_only_may_20261012_02`, source checkout `D:\v42_b1_only_source_20261012`, and read-only monitor `http://127.0.0.1:8801`.
+This release executes B1 only for 2025-05-01 through 2025-05-31 under the user's explicit 2026-10-12 authority. The production root is `D:\v42_b1_only_may_20261012_03`, source checkout `D:\v42_b1_only_source_20261012`, and read-only monitor `http://127.0.0.1:8801`.
 
 All scientific Python files remain byte-identical to PR207 / Source18r commit `497609b46faa14ea7e32a9483a333ab32fd264ef`, scientific source SHA `146bf39f5e4f9d720ef7118051edbcdc58b96ca3d83af31c3e7bd5349f1fecd8`. The new operations adapter and its Windows task registration have a separate immutable operations SHA. Source18r, U4, Joint16, CG, PR207/209/210 and historical results are preserved.
 
@@ -19,3 +19,4 @@ Individual TIME_LIMIT, no solution, infeasibility, gap, QoS or physical failure 
 The read-only monitor adapts the existing SVR11 UI to 31 B1 dates. It shows native budget separately from day completion, FULL/gap separately, unavailable metrics as unavailable, and RAM/commit/CPU/heartbeats. Completion generates REPORT.json/REPORT.md with all terminal dates, physical FAILs included in measured loading statistics, raw/source/hardware hashes, Native ledgers and original reasons. 31 terminal dates and 31/31 PASS remain distinct. No policy transition follows completion.
 
 Validation: 30 selected existing source regressions passed, 5 operations regressions passed. Native0 and live launch evidence are copied below as immutable snapshots when observed. The associated hourly chat automation follows this B1 campaign only and pauses after final verification/reporting.
+

@@ -1,0 +1,8 @@
+Execute the explicitly authorized B1-only May 2025 campaign under Source18r, with one worker, Threads=1, cumulative measured Native budget 5,400s/day and 0.5% global gap target. All scientific Python source bytes remain identical to PR207 commit 497609b46faa14ea7e32a9483a333ab32fd264ef. A separate immutable operations adapter owns the new root, atomic ledger, exact worker adoption, RAM/commit admission, detached watchdog and B1 monitor.
+
+The approved A-stage performs complete pricing, integer restoration and original FULL replay before freeze and independent Actual Fresh AC96. FULL feasibility, global-gap certification, freeze permission and Actual physical PASS are separate assertions. Date-local scientific/physical FAIL proceeds to the next untouched date; common integrity errors block dispatch. No B2/B3 transition, M1/M2/P2, historical PASS promotion, date retry, original-source modification or global HOLD release is authorized.
+
+Validation: 30 selected existing source regressions and five operations regressions passed. Initial May01 Native0 preflight is running; no campaign-start success or PASS is claimed until observed Native entry and ledger progression. Runtime evidence will be appended after observation. Existing PR207/209/210/CG evidence, held controllers, disabled old tasks and paused old automation are preserved. This chat's hourly automation now follows only the new B1 root.
+
+Production root: D:\v42_b1_only_may_20261012_03. Read-only monitor: http://127.0.0.1:8801. The detached Interactive logon task supports closing Codex/terminal; logoff/reboot continuation is not established. See docs/v42_b1_only_may_20261012/README.md for authority, admission, provenance and failure semantics.
+

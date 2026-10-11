@@ -1,9 +1,11 @@
-from tools import b1_only_v2 as ops
+from tools import b1_only_v3 as ops
 
 def test_date_failures_with_original_valueerrors_do_not_hold_campaign():
     for kind in ('PHYSICAL_FAILURE','TIME_LIMIT_NO_FEASIBLE','TIME_LIMIT_FEASIBLE_NOT_CERTIFIED','INCONCLUSIVE'):
         assert not ops.blocked_result({'PASS':False,'reason':kind,'scientific':{'classification':kind,'error':"ValueError('PCC_PHYSICAL_FAILURE')"}})
     assert not ops.blocked_result({'PASS':False,'reason':'ACTUAL:VOLTAGE_VIOLATION'})
+    for reason in ('CONTROL_ACTIONS_INCOMPLETE','QOS_FAILURE','WAN_VIOLATION','AC_NONCONVERGENCE'):
+        assert not ops.blocked_result({'PASS':False,'reason':"ValueError('"+reason+"')",'traceback':'saved original error'})
 
 def test_input_and_implementation_failures_block_new_dates():
     for kind in ('INPUT_FAILURE','IMPLEMENTATION_FAILURE'):
