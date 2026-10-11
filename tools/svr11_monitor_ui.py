@@ -65,6 +65,12 @@ def snapshot(root):
             for f in Path(request['output']).rglob(name):results.append((f.stat().st_mtime,f))
         if results:science=read(max(results,key=lambda item:item[0])[1])
         phase=v.get('phase','STARTING');stage=v.get('stage')
+        if (phase=='M_FULL_MILP_PHASE2' or
+            (phase=='UB' and v.get('source_trigger') is not None
+             and v.get('fixed_binary_columns')==v.get('hamming_constraints')==0)):
+            phase='전체 MILP Phase 2 · 누적 Native 1800초'
+        elif phase in ('OPTIONAL_PRIMAL_SEARCH_EXHAUSTED','NO_NEW_ROUTE_OPEN_NEIGHBORHOOD','U4_STAGNATION'):
+            phase='U4 소진 · 전체 MILP Phase 2 전환'
         if stage:phase=str(stage)+' · '+phase
         fresh='대기'
         if v.get('active_OpenDSS_trajectory'):

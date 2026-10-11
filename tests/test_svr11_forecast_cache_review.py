@@ -6,10 +6,12 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 from reuse_svr11_completed import normalized_reviewed_model
 
 OLD=Path(r'D:\v42_svr11_epoch09_20261011\v42_svr11\model.py')
-NEW=Path(__file__).resolve().parents[1]/'v42_svr11/model.py'
+NEW=Path(r'D:\v42_svr11_epoch12_20261011\v42_svr11\model.py')
+CURRENT=Path(__file__).resolve().parents[1]/'v42_svr11/model.py'
 
-def test_equivalent_cache_has_identical_reviewed_model_ast():
-    assert normalized_reviewed_model(OLD.read_text())==normalized_reviewed_model(NEW.read_text())
+def test_cache_review_does_not_hide_ldc_scientific_repair():
+    assert normalized_reviewed_model(OLD.read_text())!=normalized_reviewed_model(NEW.read_text())
+    assert normalized_reviewed_model(NEW.read_text())==normalized_reviewed_model(CURRENT.read_text())
 
 @pytest.mark.parametrize('before,after',[
     ('_set_load(engine,name,p,q)','_set_load(engine,name,p*1.01,q)'),
@@ -30,4 +32,4 @@ def test_rejects_altered_cache_values_order_or_forecast_source(before,after):
 ])
 def test_rejects_changed_sensitivity_clock_and_other_setters(before,after):
     text=NEW.read_text();assert before in text
-    assert normalized_reviewed_model(text.replace(before,after))!=normalized_reviewed_model(OLD.read_text())
+    assert normalized_reviewed_model(text.replace(before,after))!=normalized_reviewed_model(NEW.read_text())
