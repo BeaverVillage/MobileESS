@@ -107,7 +107,8 @@ class SourceCoordinator:
         from v42_pr134_b1.common import replace_file
         replace_file(temporary, path)
 
-    def run(self, authority, *, operations_factory=None, realized_inputs=None, actual_backend=None, progress=None):
+    def run(self, authority, *, operations_factory=None, realized_inputs=None, actual_backend=None, progress=None, stop_after=None):
+        require(stop_after is None or stop_after in ORDER, 'SOURCE_COORDINATOR_BATCH_STOP_STAGE')
         request = StageRequest("A1", authority)
         first = self.context_factory(request, {}, self.root / "A1")
         first.source_registry.admit(first, "COORDINATOR")  # Before any write or original import.
@@ -177,6 +178,9 @@ class SourceCoordinator:
                     self._save(state_path, state)
                 requests.append(request); outputs.append(output)
                 self.contexts[stage], self.outputs[stage], self.ledgers[stage] = context, output, ledger
+                if stage == stop_after:
+                    return dict(requests=requests,outputs=outputs,status='STAGE_COMPLETE',completed_stage=stage,
+                        evidence_kind=first.source_registry.evidence_kind,Actual_executed=False)
             result = {"requests": requests, "outputs": outputs, "status": "STAGES_COMPLETE",
                       "evidence_kind": first.source_registry.evidence_kind}
             if operations_factory is not None:

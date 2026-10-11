@@ -37,7 +37,7 @@ def workers(root,source):
             if Path(r['root']).resolve()!=Path(root).resolve() or r['source_SHA']!=source:
                 raise PermissionError('SVR11_GLOBAL_OTHER_EPOCH_WORKER_ACTIVE')
             verify_worker_cwd(p.cwd(),r['code_root'])
-            found.append(dict(identity(p),arm=r['arm'],day=r['day'],worker_slot=r['worker_slot'],request=str(Path(args[-1]).resolve())))
+            found.append(dict(identity(p),arm=r['arm'],day=r['day'],worker_slot=r['worker_slot'],request=str(Path(args[-1]).resolve()),b3_stage=r.get('b3_stage')))
         except psutil.Error:continue
     return found
 
@@ -48,7 +48,10 @@ def assert_peers(request):
         if key in keys or p['worker_slot'] in slots or p['arm']!=request['arm']:
             raise PermissionError('SVR11_GLOBAL_DUPLICATE_DAY_SLOT_OR_POLICY')
         keys.add(key);slots.add(p['worker_slot'])
-    if len(peers)>(3 if request['arm']=='B2' else 1):raise PermissionError('SVR11_GLOBAL_WORKER_COUNT_EXCEEDED')
+    batch=request.get('b3_stage')
+    cap=3 if request['arm']=='B2' or request['arm']=='B3' and batch in ('M1','M2') else 1
+    if batch and any(p.get('b3_stage')!=batch for p in peers):raise PermissionError('SVR11_GLOBAL_B3_STAGE_OVERLAP')
+    if len(peers)>cap:raise PermissionError('SVR11_GLOBAL_WORKER_COUNT_EXCEEDED')
     for p in psutil.process_iter(['pid','name']):
         try:
             if p.pid==os.getpid() or (p.info['name'] or '').lower() not in ('python.exe','pythonw.exe'):continue

@@ -77,6 +77,8 @@ def compare_original_identity(fresh, old, prepare, domain_digest):
 
 
 class B1A1ReuseBridge(ASourceBridge):
+    def _gap_accepted(self,context,result,lower,upper):
+        return upper == 0 or (upper-lower)/upper <= Fraction(1,200)
     def __init__(self, b1_output, *, reuse_input_cache=True):
         self.b1_output = Path(b1_output).resolve()
         self.reuse_input_cache = reuse_input_cache
@@ -215,7 +217,7 @@ class B1A1ReuseBridge(ASourceBridge):
         require(source.get("PASS") is True and source.get("day") == day and source.get("arm") == "B1",
                 "B1_A1_ORIGINAL_SOURCE_RECEIPT_REQUIRED")
         lower, upper = Fraction(result["exact_LB"]), Fraction(result["exact_UB"])
-        require(0 <= lower <= upper and (upper == 0 or (upper - lower) / upper <= Fraction(1, 200)),
+        require(0 <= lower <= upper and self._gap_accepted(context,result,lower,upper),
                 "B1_A1_ORIGINAL_EXACT_GAP_NOT_ACCEPTED")
         if output is not None:
             reuse = output.source_packet["b1_reuse"]

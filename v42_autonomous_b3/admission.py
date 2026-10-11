@@ -79,12 +79,14 @@ def validate_seal(seal, root):
 
 
 def validate_request(request):
-    require(request.get("arm") == "B3" and request.get("day") in DAYS and
-            type(request.get("worker_slot")) is int and request["worker_slot"] == 1,
-            "B3_EXACTLY_ONE_WORKER_MAY_DATE_REQUIRED")
-    root, output = Path(request["code_root"]).resolve(), Path(request["output"]).resolve()
     from v42_svr11.authority import active
     epoch=active()
+    batch=bool(epoch and epoch.get('B3_stagewise_batch') and request.get('b3_stage'))
+    limit=3 if batch and request['b3_stage'] in ('M1','M2') else 1
+    require(request.get("arm") == "B3" and request.get("day") in DAYS and
+            type(request.get("worker_slot")) is int and 1 <= request["worker_slot"] <= limit,
+            "B3_EXACTLY_ONE_WORKER_MAY_DATE_REQUIRED")
+    root, output = Path(request["code_root"]).resolve(), Path(request["output"]).resolve()
     owned=Path(epoch['root'])/'dates/B3'/request['day'] if epoch and request.get('svr11_campaign') else root/'runtime/b3'
     require(output.is_relative_to(owned) and output != owned,
             "ISOLATED_B3_ATTEMPT_OUTPUT_REQUIRED")

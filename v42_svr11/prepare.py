@@ -39,7 +39,10 @@ def raw(root):
 def release(root):
     root=Path(root).resolve();manifest=root/'CAMPAIGN_MANIFEST.json'
     if manifest.exists():raise PermissionError('SVR11_SOURCE_EPOCH_RELEASE_NEVER_OVERWRITTEN')
-    source=source_files();hpath=root/'hardware/HARDWARE.json';h=read(hpath)
+    source=source_files()
+    from .model_release import validate
+    validation=validate(root,source)
+    hpath=root/'hardware/HARDWARE.json';h=read(hpath)
     # Retain the initial implementation smoke receipt, bind those exact physical
     # readbacks to the final executable release without repeating AC experiments.
     atomic(root/'hardware/PROVISIONAL_IMPLEMENTATION_FREEZE.json',h)
@@ -51,6 +54,13 @@ def release(root):
         execution_sources=source,execution_SHA=digest(source),source_commit=h['source_commit'],algorithm_version=VERSION,
         native_M_limit_seconds=1800,native_A_limit_seconds=5400,A_gap=.005,A_anytime_FULL_feasible=True,A_gap_certificate_required=False,normal_TIMEOUT_restart=False,retry_new_attempt_starts_zero=True,retry_max_attempts=3,retry_authority="USER_EXPLICIT_RESTART_FROM_ZERO_20261011",M_acceptance='FULL_FEASIBLE_UB',M_gap_certificate_required=False,
         Threads=1,P2_calls=0,policy_order=list(ORDER),worker_counts=dict(B0=1,B2=3,B1=1,B3=1),FAIL_CONTINUE=True,
+        B3_stagewise_batch=True,B3_stage_worker_counts=dict(M1=3,A2=1,M2=3,ACTUAL=1),
+        B3_memory_admission=dict(system_reserve_bytes=2*1024**3,
+            worker_reservation_bytes=dict(M1=5*1024**3,A2=10*1024**3,M2=5*1024**3,ACTUAL=4*1024**3)),
+        postoptimization_DayAhead_Fresh_AC=False,Planning_AC_status='NOT_EXECUTED',
+        scientific_model_validation=validation,fresh_all_124_physical_results_required=True,
+        previous_epoch_optimization_results_promoted=0,previous_epoch_AC_PASS_promoted=0,
+        automatic_reuse_of_old_sensitivity_coefficients=False,
         original_transformer_current_authority='COMPILED_NORMALAMPS_ONLY',
         added_SVR_phase_nameplate_current_guard=True,original_winding_kVA_guard=True,
         model_probe_context_retirement='EXACT_COMPLETED_OWNER_AND_FINALIZED_CALLBACK_REGISTRY_DETACH_CFFI_GC',

@@ -94,16 +94,26 @@ def b3(request,manifest,progress):
     from v42_b3_joint.operations_bridge import SourceOperationsBridge
     from v42_b3_joint.native_ledger import SourceStageLedger
     from v42_autonomous_b3.worker import realized_inputs
-    seal=read(Path(request['root'])/'B3_SOURCE_SEAL.json');pipeline=Path(request['output'])/'PIPELINE'
+    seal=read(Path(request['root'])/'B3_SOURCE_SEAL.json')
+    batch=request.get('b3_stage')
+    pipeline=Path(request['b3_pipeline']) if batch else Path(request['output'])/'PIPELINE'
     with execution_permit(request,seal):
         authority,factory=b3_setup(request,seal,pipeline)
-        coordinator=SourceCoordinator(pipeline,factory,ASourceBridge(),MSourceBridge(),
+        if batch:
+            from .b1_reuse import CurrentEpochB1Reuse
+            a1_bridge=CurrentEpochB1Reuse.from_campaign(request)
+        else:a1_bridge=None
+        coordinator=SourceCoordinator(pipeline,factory,ASourceBridge(),MSourceBridge(),a1_bridge=a1_bridge,
             ledger_factory=lambda context:SourceStageLedger(context,progress=lambda v:progress(dict(v,stage=context.request.stage))))
-        outcome=coordinator.run(authority,operations_factory=SourceOperationsBridge,realized_inputs=realized_inputs,progress=progress)
+        outcome=coordinator.run(authority,operations_factory=SourceOperationsBridge if not batch or batch=='ACTUAL' else None,
+            realized_inputs=realized_inputs if not batch or batch=='ACTUAL' else None,progress=progress,
+            stop_after=batch if batch in ('M1','A2','M2') else None)
         stages={}
         for stage,out in coordinator.outputs.items():
             ledger=json.loads(out.ledger_receipt)
             stages[stage]=dict(native_seconds=ledger['measured_native_runtime'],native_calls=ledger['native_call_count'],
                 FULL_feasible_certified=out.physical_evidence.get('PASS'),bounds=out.global_evidence,output_SHA=out.sha)
-        return dict(PASS=outcome['status']=='COMPLETE' and outcome['validation']['PASS'],status=outcome['status'],
-            stages=stages,Native_Runtime=sum(s['native_seconds'] for s in stages.values()),outcome=outcome)
+        passed=outcome['status']=='STAGE_COMPLETE' if batch and batch!='ACTUAL' else outcome['status']=='COMPLETE' and outcome['validation']['PASS']
+        return dict(PASS=passed,status=outcome['status'],b3_stage=batch,final_date=not batch or batch=='ACTUAL',
+            stages=stages,Native_Runtime=sum(s['native_seconds'] for s in stages.values()),outcome=outcome,
+            FULL_feasible_certified=bool(passed),Actual_executed=not batch or batch=='ACTUAL')

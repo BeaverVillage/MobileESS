@@ -18,5 +18,6 @@ def run(request,manifest,progress):
     def fresh(plan,arrays,folder,output,**kwargs):
         return original_fresh(actual_plan['value'] if kwargs['namespace']=='ACTUAL' else plan,arrays,folder,output,**kwargs)
     with patch.object(b0_new,'build_actual',build),patch.object(b0_new,'fresh_environment',fresh):
-        return b0_new.run_day(request['day'],request['input_folder'],request['output'],scenario=read(manifest['scenario']['path']),
+        from .b0_direct import run_day
+        return run_day(request['day'],request['input_folder'],request['output'],scenario=read(manifest['scenario']['path']),
             source_SHA=manifest['execution_SHA'],progress=progress,design_receipt=manifest['hardware'])

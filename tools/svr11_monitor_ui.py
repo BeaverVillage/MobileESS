@@ -8,6 +8,37 @@ SOURCE=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(SOURCE))
 from v42_pr134_b1.common import atomic,read,record,now
 
+def dispatch_quiesced(root):
+    root=Path(root);path=root/'DISPATCH_QUIESCENCE_FOR_PLANNING_MODEL_REPAIR.json'
+    if not path.exists():return False
+    q=read(path);m=read(root/'CAMPAIGN_MANIFEST.json')
+    if Path(q['root']).resolve()!=root.resolve() or q['source_SHA']!=m['execution_SHA']:
+        raise PermissionError('READ_ONLY_DISPATCH_QUIESCENCE_BINDING_DRIFT')
+    return q.get('new_dispatch_quiesced') is True
+
+_observed={}
+def display_ledger(root):
+    """Read terminated own results while preserving the suspended old ledger."""
+    root=Path(root);ledger=read(root/'CAMPAIGN_LEDGER.json')
+    if not dispatch_quiesced(root):return ledger
+    from v42_svr11.processes import live
+    m=read(root/'CAMPAIGN_MANIFEST.json')
+    for row in ledger['dates'].values():
+        if row['status']!='RUNNING' or live(row.get('worker',{})):continue
+        request=read(row['request']);path=Path(request['result'])
+        if not path.exists():continue
+        key=(str(path),path.stat().st_mtime_ns,path.stat().st_size)
+        if key not in _observed:_observed[key]=read(path)
+        result=_observed[key]
+        if result['source_SHA']!=m['execution_SHA'] or (result['day'],result['arm'])!=(row['day'],row['arm']):
+            raise PermissionError('READ_ONLY_FINAL_RESULT_BINDING_DRIFT')
+        row.update(recorded_ledger_status=row['status'],status=result['status'],
+            observed_terminated_result=str(path),observed_result_source_SHA=result['source_SHA'],
+            metrics=result.get('metrics',{}),reason=result.get('reason'),Native_Runtime=result.get('Native_Runtime'),
+            wall_seconds=result.get('wall_seconds'),optimization_status=result.get('optimization_status'),AC_status=result.get('AC_status'))
+    ledger.update(status='배정 중지 · Planning 모델 검증 중',intentional_dispatch_quiescence=True)
+    return ledger
+
 def ui_files():
     return [record(Path(__file__)),record(SOURCE/'assets/svr11_monitor.html')]
 
@@ -23,7 +54,7 @@ def snapshot(root):
     from v42_svr11 import ORDER
     from v42_svr11.processes import live
     from v42_svr11.anytime import solver_label
-    root=Path(root);m=read(root/'CAMPAIGN_MANIFEST.json');ledger=read(root/'CAMPAIGN_LEDGER.json')
+    root=Path(root);m=read(root/'CAMPAIGN_MANIFEST.json');ledger=display_ledger(root)
     rows=list(ledger['dates'].values());counts={k:sum(r['status']==k for r in rows) for k in ('PASS','FAIL','RUNNING','NOT_EXECUTED')}
     counts['completed']=counts['PASS']+counts['FAIL'];peers=[]
     for r in rows:
@@ -74,8 +105,11 @@ def snapshot(root):
                 errors.append(r['arm']+' '+r['day']+' ('+recovery+'): '+str(old.get('reason')))
         if r['status']=='FAIL':errors.append(r['arm']+' '+r['day']+': '+str(r.get('reason')))
     if ledger.get('error'):errors.append(ledger['error'])
+    batch=ledger.get('B3_batch',{})
     return dict(status=ledger['status'],policy=ledger.get('policy'),counts=counts,workers=peers,policies=policies,dates=rows,
-        ETA=f'{estimate/3600:.1f} h' if known else '측정 중',
+        B3_stage=batch.get('stage'),B3_stage_completed=batch.get('completed_dates_in_stage'),B3_memory=batch.get('memory'),
+        intentional_dispatch_quiescence=bool(ledger.get('intentional_dispatch_quiescence')),
+        ETA='검증 완료 후 재산정' if ledger.get('intentional_dispatch_quiescence') else f'{estimate/3600:.1f} h' if known else '측정 중',
         errors=errors[-3:],
         source_SHA=m['execution_SHA'],root=str(root),UTC=now(),
         notice=('검증된 완료 날짜 '+str(sum(bool(r.get('reused')) for r in rows))+'일 재사용 · 원본 실행 SHA/Runtime 보존 · 현재 검증 SHA 별도 기록. '
@@ -91,9 +125,12 @@ def serve(root):
     # No running scientific process, Python source byte or model is modified.
     monitor.PAGE=(SOURCE/'assets/svr11_monitor.html').read_text(encoding='utf8')
     monitor.snapshot=snapshot
+    original_read=monitor.read
+    monitor.read=lambda path:display_ledger(root) if Path(path).resolve()==(Path(root)/'CAMPAIGN_LEDGER.json').resolve() else original_read(path)
     monitor.serve(root,8796)
 
 def watchdog(root,monitor_only=False):
+    monitor_only=monitor_only or dispatch_quiesced(root)
     from v42_svr11 import watchdog as w
     verify_ui(root);original=w.launch
     def launch(module,campaign_root,extra=()):
@@ -104,6 +141,7 @@ def watchdog(root,monitor_only=False):
     with patch.object(w,'launch',launch):return w.check(root,monitor_only=monitor_only)
 
 def safeguard(root,monitor_only=False):
+    monitor_only=monitor_only or dispatch_quiesced(root)
     # Scheduling calls the frozen scientific migration gate. While old science
     # drains, recover only the independent successor HTTP process.
     from v42_svr11.migration import check

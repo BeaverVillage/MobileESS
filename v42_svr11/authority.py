@@ -19,6 +19,10 @@ def verify(path):
     for key in ('hardware','scenario','thermal'):
         if record(m[key]['path'])!=m[key]:
             raise PermissionError('SVR11_GLOBAL_HARDWARE_INTEGRITY_FAILURE:'+key)
+    if 'scientific_model_validation' in m:
+        from .model_release import validate
+        if validate(m['root'],m['execution_sources'])!=m['scientific_model_validation']:
+            raise PermissionError('SVR11_GLOBAL_MODEL_VALIDATION_RECEIPT_DRIFT')
     if 'predecessor_drain_contract' in m and record(m['predecessor_drain_contract']['path'])!=m['predecessor_drain_contract']:
         raise PermissionError('SVR11_GLOBAL_PREDECESSOR_CONTRACT_DRIFT')
     if 'equipment_change_contract' in m and record(m['equipment_change_contract']['path'])!=m['equipment_change_contract']:

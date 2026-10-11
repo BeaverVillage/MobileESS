@@ -12,28 +12,30 @@ def wrapped(symbol,body,events,request=None):
         m=active();scenario=read(m['scenario']['path']);r=args[0]
         day,arm=r['day'],r['arm'];source=m['execution_SHA']
         if symbol=='freeze_planning':
-            from v42_voltage_control.forecast import run_fresh
-            output=Path(args[3]);folder=output.parent/'SOURCE'
-            ops=read(Path(r['input_folder'])/'OPERATIONS.json')
-            provenance=read(Path(ops['current_day_folder'])/'SOURCE_PROVENANCE.json')
-            forecast=provenance['daily_sources']['aemo_forecast.json']
-            with physical_permit(arm,day,source,scenario,namespace='DAYAHEAD',design_receipt=m['hardware']):
-                with scenario_scope(scenario,output/'SVR11',source_SHA=source,arm=arm,day=day,namespace='DAYAHEAD') as audit:
-                    result=run_fresh(day,arm,record(folder/'PLANNING_PHYSICAL.npz'),record(folder/'PLANNING_MESS.npz'),forecast,output/'FORECAST_FRESH')
-            events['Planning']=audit;events['Planning_PASS']=bool(result['PASS'] and audit.result['hardware_and_controller_PASS'])
-            return body(*args,**kwargs)
+            from .initial_context import reference
+            result=body(*args,**kwargs)
+            output=Path(args[3])
+            freeze=output/'V42_DAYAHEAD_DECISION_FREEZE.json'
+            if not freeze.is_file():raise PermissionError('SVR11_LITERAL_PLANNING_FREEZE_REQUIRED')
+            events['freeze']=record(freeze)
+            events['Planning']=reference(output,scenario,source,arm,day)
+            return result
         output=Path(args[4])
         if 'Planning' not in events:raise PermissionError('SVR11_ACTUAL_REQUIRES_OWN_FROZEN_PLANNING')
         with physical_permit(arm,day,source,scenario,namespace='ACTUAL',design_receipt=m['hardware']):
             with scenario_scope(scenario,output/'SVR11',source_SHA=source,arm=arm,day=day,namespace='ACTUAL') as audit:
                 result=body(*args,**kwargs)
-        from v42_voltage_control.isolation import measured_independence
-        isolation=measured_independence(events['Planning'],audit,source,scenario['scenario_SHA'],arm=arm,day=day)
+        from .initial_context import independence
+        isolation=independence(events['Planning'],audit,source,scenario,arm,day)
+        if record(events['freeze']['path'])!=events['freeze']:
+            raise PermissionError('SVR11_FIXED_DECISION_MUTATED_DURING_ACTUAL')
         atomic(output/'PLANNING_ACTUAL_CONTROL_INDEPENDENCE_AUDIT.json',isolation)
         if not isolation['PASS']:raise PermissionError('SVR11_INDEPENDENT_CONTROL_STATE_FAILURE')
         events['Actual']=audit;events['Actual_PASS']=bool(audit.result['hardware_and_controller_PASS'])
-        result['SVR11_Planning_PASS']=events['Planning_PASS'];result['SVR11_Actual_PASS']=events['Actual_PASS']
-        result['PASS']=bool(result['PASS'] and events['Planning_PASS'] and events['Actual_PASS'])
+        result['SVR11_Planning_AC_executed']=False;result['SVR11_Planning_AC_status']='NOT_EXECUTED'
+        result['SVR11_Actual_PASS']=events['Actual_PASS']
+        result['PASS']=bool(result['PASS'] and events['Actual_PASS'] and isolation['PASS'])
+        events['Planning'].engine.Basic.ClearAll()
         result['SVR11_independence']=record(output/'PLANNING_ACTUAL_CONTROL_INDEPENDENCE_AUDIT.json')
         return result
     return execute

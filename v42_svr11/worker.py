@@ -44,7 +44,7 @@ def run(path):
                 result.update(science,scientific_status=science.get('status'),status='PASS' if science.get('PASS') is True else 'FAIL')
                 if not result['PASS']:result['reason']=science.get('status','DATE_FAILED')
                 from .report import metrics
-                result['metrics']=metrics(request['output'])
+                result['metrics']=metrics(request['b3_pipeline']) if request.get('b3_stage')=='ACTUAL' else metrics(request['output'])
                 failures=[]
                 for ns,physical in result['metrics']['environments'].items():
                     for key,label in (('voltage_violations','VOLTAGE_VIOLATION'),('line_current_violations','LINE_CURRENT_VIOLATION'),
@@ -79,7 +79,13 @@ def run(path):
             # A crash after Native entry is never retried from zero. Retain
             # inflight Runtime uncertainty alongside every completed call.
             ledgers=[]
-            for ledger in attempt.rglob('NATIVE_RUNTIME_LEDGER.json'):
+            batch_stage=request.get('b3_stage')
+            if batch_stage:
+                pipeline=Path(request['b3_pipeline'])
+                stages=('A1','M1') if batch_stage=='M1' else ('A1','M1','A2','M2') if batch_stage=='ACTUAL' else (batch_stage,)
+                ledger_paths=[p for s in stages for p in (pipeline/s).rglob('NATIVE_RUNTIME_LEDGER.json')]
+            else:ledger_paths=list(attempt.rglob('NATIVE_RUNTIME_LEDGER.json'))
+            for ledger in ledger_paths:
                 value=read(ledger);ledgers.append(dict(receipt=record(ledger),Native_Runtime=value.get('measured_Native_Runtime',0),inflight=value.get('inflight'),runtime_unavailable=any(c.get('runtime_unavailable') for c in value.get('calls',[]))))
             result['native_ledgers']=ledgers
             result['known_completed_Native_Runtime']=sum(l['Native_Runtime'] for l in ledgers)

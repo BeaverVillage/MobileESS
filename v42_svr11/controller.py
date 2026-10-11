@@ -36,6 +36,7 @@ def record_terminal(row,path):
 def reconcile(root,m,ledger,active):
     bykey={p['arm']+'/'+p['day']:p for p in active}
     for key,row in ledger['dates'].items():
+        if row['arm']=='B3' and m.get('B3_stagewise_batch'):continue
         if row['status'] in ('PASS','FAIL'):continue
         if key in bykey:
             p=bykey[key];r=read(p['request']);row.update(status='RUNNING',worker=p,request=p['request'])
@@ -88,6 +89,8 @@ def run(root):
             try:
                 verify(root/'CAMPAIGN_MANIFEST.json');active=workers(root,m['execution_SHA']);reconcile(root,m,ledger,active)
                 policy=next_policy(ledger) or pending_retry_policy(ledger);ledger.update(policy=policy,UTC=now(),source_SHA=m['execution_SHA'],active_workers=active,supervisor=identity())
+                if m.get('B3_stagewise_batch') and ledger.get('B3_batch',{}).get('status') not in (None,'COMPLETE'):
+                    policy='B3';ledger['policy']=policy
                 if policy is None:
                     ledger['status']='COMPLETE';atomic(root/'CAMPAIGN_LEDGER.json',ledger)
                     from .report import generate
@@ -97,6 +100,15 @@ def run(root):
                 if last_policy and last_policy!=policy:
                     atomic(root/'LATEST_POLICY_TRANSITION.json',dict(previous=last_policy,current=policy,PASS_is_not_gate=True,UTC=now()))
                 last_policy=policy;slots={p['worker_slot'] for p in active};capacity=m['worker_counts'][policy]
+                if policy=='B3' and m.get('B3_stagewise_batch'):
+                    from .batch import tick
+                    active=tick(root,m,ledger,active)
+                    ledger.update(active_workers=active,status='RUNNING');atomic(root/'CAMPAIGN_LEDGER.json',ledger)
+                    atomic(root/'SUPERVISOR_HEARTBEAT.json',dict(identity(),policy=policy,B3_stage=ledger['B3_batch']['stage'],source_SHA=m['execution_SHA'],UTC=now()))
+                    if time.monotonic()-last_report>60:
+                        from .report import generate
+                        generate(root,ledger);last_report=time.monotonic()
+                    time.sleep(5);continue
                 for row in dispatch_rows(ledger,policy):
                     day=row['day']
                     if len(active)>=capacity:continue
