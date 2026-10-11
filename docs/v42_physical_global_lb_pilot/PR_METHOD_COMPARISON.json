@@ -1,0 +1,64 @@
+{
+  "schema": "V42_PHYSICAL_GLOBAL_LB_PRIOR_METHOD_COMPARISON_V1",
+  "observed_Asia_Seoul": "2026-10-12",
+  "scope": "Historical methods and reported outcomes are context only; no historical numerical bound, column, dual, pricing result, or point is used in Source18r certification.",
+  "PR147": {
+    "url": "https://github.com/BeaverVillage/MobileESS/pull/147",
+    "head": "31858f4e35b44caadeee2a72ef2ae2d35b74899b",
+    "title": "Certify original M1 arc-LP floor and bounded D-W threshold CG",
+    "historical_base": "PR143 ce5d30fb9bcb91ab8395d1313e868d24f5fde517",
+    "mathematics": [
+      "Legacy frozen FULL arc-LP retains all original matrix rows, bounds, objective, and fixed inputs while relaxing all 208312 binary variables to continuous.",
+      "Terminal OPTIMAL LP and independent exact-rational weak-duality support certificate verify a legacy original arc-LP floor.",
+      "Legacy PR143 projected feasible-set inclusion transfers the certified arc-LP floor to the same complete D-W root.",
+      "A separate restricted D-W master continuation uses columns, stabilized discovery prices, current true master duals, and four integer pricing subproblems."
+    ],
+    "reported_outcome_context_only": {
+      "arc_optimum": 0.5687116104747505,
+      "certified_arc_floor": 0.5687115725336208,
+      "corrected_pricing_LB": 0.532325936473933,
+      "materiality": "INCONCLUSIVE",
+      "CG_converged": false
+    },
+    "evidence": [
+      "PR147 body retrieved via gh pr view",
+      "Git object docs/v42_m1_certified_arc_lp_floor_and_threshold_cg/ARC_LP_RELAXATION_IDENTITY.json",
+      "Git object docs/v42_m1_certified_arc_lp_floor_and_threshold_cg/DW_ARC_FLOOR_TRANSFER_CERTIFICATE.json"
+    ]
+  },
+  "PR203": {
+    "url": "https://github.com/BeaverVillage/MobileESS/pull/203",
+    "head": "1535584eaea7162931642878a6a9728b4988bb6f",
+    "title": "Reuse legacy CG mechanics in bounded M-stage trajectory DW research",
+    "historical_base": "PR202 a5ce8685eb694f750dca7a539d010eece38ece37",
+    "mathematics": [
+      "Complete 96-slot integer vehicle domains are represented by trajectory columns and four convexity equalities.",
+      "Every original mixed coupling and nonunit grid row stays in the D-W master; finite restricted-master objective has no Global LB authority.",
+      "Current original-row dual multipliers define q_m = c_m - B_m^T y; the certificate also includes the exact nonunit-variable minimum.",
+      "Integer pricing trajectories are searched by full96 MILP, while independent binary-partition LP-dual covers certify all missing trajectories.",
+      "Discovery stabilization cannot certify bounds; columns, native BestBound, pricing incumbents, and RMP objective are not standalone certificate authorities in that method."
+    ],
+    "reported_outcome_context_only": {
+      "published_LB": 0.38895900867731903,
+      "certified_gain": 0,
+      "master_optimize_in_integrated_trial": false,
+      "new_DW_certificate": false
+    },
+    "evidence": [
+      "PR203 body retrieved via gh pr view",
+      "https://github.com/BeaverVillage/MobileESS/blob/1535584eaea7162931642878a6a9728b4988bb6f/docs/v42_m_stage_trajectory_hull/ADAPTER_CONTRACT.md",
+      "https://github.com/BeaverVillage/MobileESS/blob/1535584eaea7162931642878a6a9728b4988bb6f/docs/v42_m_stage_trajectory_hull/DESIGN.md"
+    ]
+  },
+  "current_pilot_difference": [
+    "Uses Source18r original FULL line_thermal_face coefficients, RHS, exact affine auxiliary definitions, and current fixed B2 May01 inputs.",
+    "One nonnegative convex line/time/facet weight vector yields rho_max >= sum_k w_k b_k + sum_m (sum_k w_k a_km)^T x_m.",
+    "Eliminates selected exact affine grid response/injection expressions; no grid or nonunit D-W master remains.",
+    "Solves four sequential full96 integer vehicle support subproblems with no route fractionation.",
+    "Global certificate follows original feasible-point projection into the product of vehicle relaxations and sums independently verified support lower bounds.",
+    "Cross-vehicle coupling constraints are omitted rather than copied into each vehicle model.",
+    "No column generation, pricing iteration, master dual optimization, dual stabilization, branch-and-price, or Full MILP native call."
+  ],
+  "no_historical_scientific_reuse": true,
+  "Native_optimize_calls_by_this_comparison": 0
+}
