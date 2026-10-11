@@ -17,6 +17,9 @@ def test_complete_objective_root():
     'Root relaxation: interrupted, 12 iterations, 180.21 seconds (12 work units)',
     'Root relaxation: infeasible, 12 iterations, 180.21 seconds (12 work units)',
     'Root relaxation: unbounded, 12 iterations, 180.21 seconds (12 work units)',
+    'Root relaxation: objective NaN, 12 iterations, 120.00 seconds',
+    'Root relaxation: objective Infinity, 12 iterations, 120.00 seconds',
+    'Root relaxation: objective malformed, 12 iterations, 120.00 seconds',
     'Presolve time: 180.21s',
     'Root relaxation: objective 1, 12 iterations, 180.21 seconds\nRoot relaxation: time limit, 1 iterations, 2 seconds',
 ])

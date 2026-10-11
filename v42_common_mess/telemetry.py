@@ -93,7 +93,9 @@ def root_lp(logfile):
     # root cuts; callback elapsed time would include those different costs.
     match = re.search(r'Root relaxation:([^\r\n]*?),\s*([0-9.eE+-]+) seconds', log)
     if match:
-        status = 'NATIVE_LOG_ROOT_INTERRUPTED' if 'interrupted' in match[1].lower() else 'NATIVE_LOG_REPORTED'
+        complete = match[1].lstrip().lower().startswith('objective') and not any(
+            word in match[1].lower() for word in ('interrupted','time limit','infeasible','unbounded'))
+        status = 'NATIVE_LOG_REPORTED' if complete else 'NATIVE_LOG_ROOT_INTERRUPTED'
         # Root completion may be followed by a separately printed elapsed
         # timestamp. Keep absent timestamps unknown instead of deriving them
         # by adding overlapping presolve, barrier and crossover timings.

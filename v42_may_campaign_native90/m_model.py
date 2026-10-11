@@ -44,11 +44,18 @@ class CampaignMCase:
     coefficients: object
     output: Path
     ultra: object = None
+    response: object = None
+
+    def forward(self, point):
+        """Transport a current original physical point through every stage."""
+        selected = self.presolve.forward(self.compact.forward(point))
+        return self.response.forward(selected) if self.response is not None else selected
 
     def lift(self, point):
         if np.asarray(point).shape != (self.A.shape[1],):
             raise ValueError('CURRENT_M_POINT_AXIS_DRIFT')
-        return self.compact.inverse(self.presolve.inverse(point))
+        selected = self.response.inverse(point) if self.response is not None else point
+        return self.compact.inverse(self.presolve.inverse(selected))
 
 
 def _domain_sha(d):
@@ -161,6 +168,44 @@ def _freeze_c3(ultra,out):
     atomic(Path(out)/'CURRENT_C3A_BOUND_PROOFS.json',ultra.bounds)
     np.savez_compressed(Path(out)/'CURRENT_C3A_AXES.npz',rows=ultra.row_ids,columns=np.arange(ultra.A.shape[1]))
     return dict(state_sha=_c3_state_sha(ultra),sources=sources,certificate=record(path),proof=ultra.proof)
+
+
+def _freeze_response(result, out):
+    from v42_ultracompact.response import SOURCES, state_sha
+    root=Path(__file__).resolve().parents[1]
+    sources={name:record(root/name) for name in SOURCES}
+    result.proof['scientific_source_SHAs']={name:value['sha256'] for name,value in sources.items()}
+    path=Path(out)/'DENSE_RESPONSE_EQUIVALENCE.json'
+    atomic(path,result.proof)
+    atomic(Path(out)/'DENSE_RESPONSE_PLANS.json',result.plans)
+    np.savez_compressed(Path(out)/'DENSE_RESPONSE_AXES.npz',rows=result.row_ids,columns=result.col_ids)
+    return dict(state_sha=state_sha(result),sources=sources,certificate=record(path),proof=result.proof)
+
+
+def _freeze_physical(domain, out, A, d):
+    root=Path(__file__).resolve().parents[1]
+    sources={name:record(root/name) for name in ('v42_native/mess.py','v42_native/mess_domain.py','v42_native/mess_domain_verify.py')}
+    path=Path(out)/'EXACT_PHYSICAL_PRESCREEN.json'
+    proof=domain.receipt()
+    from v42_native.mess_domain_verify import verify_original_rows
+    proof['original_matrix_bridge']=verify_original_rows(domain,A,d)
+    proof['original_matrix_bridge_required']=False
+    atomic(path,proof)
+    return dict(state_sha=domain.state_sha,sources=sources,certificate=record(path),proof=proof)
+
+
+def _freeze_grid_prescreen(grid, out, A, d, progress):
+    from v42_native.grid_prescreen import verify_grid_original_rows
+    root=Path(__file__).resolve().parents[1]
+    sources={name:record(root/name) for name in ('v42_native/grid_prescreen.py',)}
+    proof=grid.receipt()
+    proof['original_matrix_bridge']=verify_grid_original_rows(grid,A,d,progress=progress)
+    if proof['original_matrix_bridge'].get('entire_model_infeasible') is True:
+        atomic(Path(out)/'EXACT_GRID_OUTER_INFEASIBLE.json',proof)
+        raise ValueError('CURRENT_M_EXACT_GRID_OUTER_MODEL_INFEASIBLE')
+    path=Path(out)/'EXACT_GRID_OUTER_PRESCREEN.json'
+    atomic(path,proof)
+    return dict(state_sha=grid.state_sha,sources=sources,certificate=record(path),proof=proof)
 
 
 def verify_transport(compact, presolve):
@@ -500,6 +545,8 @@ def build_case(payload, request, progress=None):
     bundle=payload['bundle']; planning=payload['planning']
     if bundle['day']!=day or payload['identity']['day']!=day: raise ValueError('CURRENT_M_SAME_DAY_INPUT_REQUIRED')
     sites,initial,routes,battery,receipt=native_inputs(bundle)
+    from v42_native.mess_domain import build_domain
+    physical=build_domain(sites,initial,routes,battery,96)
     graph=(sites,initial,[(s,t,s,t+1,None) for s in sites for t in range(96)]+
            [(r.source,r.depart,r.destination,r.connect,r) for r in dict.fromkeys(routes)],battery,receipt)
     cert,_,_,_=load_power(bundle); coeff=original_coefficients_for_day(original,cert,day)
@@ -517,6 +564,8 @@ def build_case(payload, request, progress=None):
             elif name.startswith(('mess_p_kw','mess_q_kvar')): row.append(0.)
             else: raise ValueError('CURRENT_M_UNKNOWN_CONTROL')
         controls.append(row)
+    from v42_native.grid_prescreen import build_grid_prescreen
+    grid_prescreen=build_grid_prescreen(physical,coeff,controls)
     captured=[]; bindings=[]; cost=[]; thermal=[]; binding_families=set()
     anchor=dict(day=day,controls=controls,control_names=columns,
         fixed_AIDC_control_columns=[i for i,n in enumerate(columns) if n.startswith('aidc_load_kw')],
@@ -563,6 +612,8 @@ def build_case(payload, request, progress=None):
     model=captured[0]
     try: A,d=arrays(model)
     finally: model.dispose()
+    physical_authority_receipt=_freeze_physical(physical,out,A,d)
+    grid_prescreen_authority=_freeze_grid_prescreen(grid_prescreen,out,A,d,progress)
     families={str(n).split('[',1)[0] for n in d['names']}
     if not families <= {'arc','charge_mode','Pch','Pdis','Q','SOC','rho_max'}|binding_families:
         raise ValueError('CURRENT_M_AIDC_OPTIMIZATION_VARIABLE_PRESENT')
@@ -601,17 +652,27 @@ def build_case(payload, request, progress=None):
         selected_C3A_original_P1_bit_exact=ultra.proof['original_P1_bit_exact'],
         selected_C3A_integer_and_full_LP_domains_identical=ultra.proof['integer_and_full_LP_domains_identical'])
     transport_authority=_freeze_transport(compact,presolve,graph,proof,out)
-    identity=dict(schema='V42_CURRENT_DATE_B2_M_CASE_V1',day=day,arm='B2',input_identity=payload['identity'],
+    from v42_ultracompact.response import reformulate_responses
+    if progress: progress(dict(phase='M_EXACT_DENSE_RESPONSE_REFORMULATION',day=day,arm='B2'))
+    reformulation=reformulate_responses(B,e,progress=progress)
+    response_authority=_freeze_response(reformulation,out)
+    B,e=reformulation.A,reformulation.d
+    identity=dict(schema='V42_CURRENT_DATE_B2_M_CASE_V2',day=day,arm='B2',input_identity=payload['identity'],
         bundle_sha=digest(bundle),anchor_sha=digest(anchor),route_table_sha=bundle['route_table']['sha256'],
         original_matrix_sha=matrix_sha(A),original_domain_sha=_domain_sha(d),
         selected_matrix_sha=matrix_sha(B),selected_domain_sha=_domain_sha(e),
         binary_count=int(np.count_nonzero(e['types']=='B')),slots=96,units=4,sites=24,
         objective='min rho_max',C3A_policy=POLICY,transport=proof,transport_authority=transport_authority,c3_authority=c3_authority,
         C2_size=ultra.proof['baseline'],C3A_size=ultra.proof['selected'],
+        response_authority=response_authority,Dense_Response_size=reformulation.proof['selected'],
+        physical_prescreen_authority=physical_authority_receipt,
+        grid_prescreen_authority=grid_prescreen_authority,
+        C3A_matrix_sha=matrix_sha(ultra.A),C3A_domain_sha=_domain_sha(ultra.d),
         AIDC_optimization_calls=0,P2_calls=0,historical_bounds_points_columns_read=0)
-    case=CampaignMCase(B,e,A,d,None,graph,digest(identity),identity,compact,presolve,bundle,anchor,planning,coeff,out,ultra)
+    case=CampaignMCase(B,e,A,d,None,graph,digest(identity),identity,compact,presolve,bundle,anchor,planning,coeff,out,ultra,reformulation)
     sparse.save_npz(out/'FULL_A.npz',A);np.savez_compressed(out/'FULL_DATA.npz',**d)
-    sparse.save_npz(out/'C3A_A.npz',B);np.savez_compressed(out/'C3A_DATA.npz',**e)
+    sparse.save_npz(out/'C3A_A.npz',ultra.A);np.savez_compressed(out/'C3A_DATA.npz',**ultra.d)
+    sparse.save_npz(out/'DENSE_RESPONSE_A.npz',B);np.savez_compressed(out/'DENSE_RESPONSE_DATA.npz',**e)
     np.savez_compressed(out/'CURRENT_C2_AXES.npz',rows=presolve.row_ids,columns=presolve.col_ids)
     atomic(out/'CURRENT_C2_ALIASES.json',presolve.steps);atomic(out/'CURRENT_C2_ROW_PROOFS.json',presolve.rows)
     atomic(out/'SCIENTIFIC_CASE_IDENTITY.json',dict(case_sha=case.case_sha,**identity))
@@ -635,6 +696,49 @@ def verify_case(case):
     if authority['state_sha']!=_transport_state_sha(case.compact,case.presolve,case.graph):
         raise ValueError('CURRENT_M_TRANSPORT_STATE_BYTES_DRIFT')
     root=Path(__file__).resolve().parents[1]
+    physical=case.identity.get('physical_prescreen_authority')
+    if case.identity.get('schema') in ('V42_CURRENT_DATE_B2_M_CASE_V2','V42_CURRENT_DATE_B3_M_CASE_V2') and physical is None:
+        raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_AUTHORITY_MISSING')
+    if physical is not None:
+        from v42_native.mess_domain import build_domain
+        domain=build_domain(case.graph[0],case.graph[1],[a[-1] for a in case.graph[2] if a[-1] is not None],case.graph[3],96)
+        if physical['state_sha']!=domain.state_sha:
+            raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_STATE_DRIFT')
+        from v42_native.mess_domain_verify import verify_original_rows
+        bridge=verify_original_rows(domain,case.original_A,case.original_d)
+        scientific=lambda value:{k:v for k,v in value.items() if not k.endswith('wall_seconds')}
+        if scientific(bridge)!=scientific(physical['proof'].get('original_matrix_bridge',{})):
+            raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_ORIGINAL_ROW_BRIDGE_DRIFT')
+        physical_sources={'v42_native/mess.py','v42_native/mess_domain.py','v42_native/mess_domain_verify.py'}
+        if set(physical['sources'])!=physical_sources or any(sha(root/name)!=receipt['sha256'] for name,receipt in physical['sources'].items()):
+            raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_SOURCE_DRIFT')
+        receipt=physical['certificate'];path=Path(receipt['path'])
+        if (path.resolve()!=(case.output/'EXACT_PHYSICAL_PRESCREEN.json').resolve()
+                or sha(path)!=receipt['sha256'] or read(path)!=physical['proof']
+                or physical['proof'].get('PASS') is not True):
+            raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_PACKET_DRIFT')
+    grid=case.identity.get('grid_prescreen_authority')
+    if case.identity.get('schema') in ('V42_CURRENT_DATE_B2_M_CASE_V2','V42_CURRENT_DATE_B3_M_CASE_V2') and grid is None:
+        raise ValueError('CURRENT_M_GRID_PRESCREEN_AUTHORITY_MISSING')
+    if grid is not None:
+        from v42_native.grid_prescreen import build_grid_prescreen
+        if physical is None:
+            raise ValueError('CURRENT_M_GRID_PRESCREEN_PHYSICAL_AUTHORITY_MISSING')
+        current=build_grid_prescreen(domain,case.coefficients,case.anchor['controls'])
+        if current.state_sha!=grid['state_sha']:
+            raise ValueError('CURRENT_M_GRID_PRESCREEN_STATE_DRIFT')
+        if set(grid['sources'])!={'v42_native/grid_prescreen.py'} or any(sha(root/name)!=receipt['sha256'] for name,receipt in grid['sources'].items()):
+            raise ValueError('CURRENT_M_GRID_PRESCREEN_SOURCE_DRIFT')
+        receipt=grid['certificate'];path=Path(receipt['path'])
+        if (path.resolve()!=(case.output/'EXACT_GRID_OUTER_PRESCREEN.json').resolve()
+                or sha(path)!=receipt['sha256'] or read(path)!=grid['proof']
+                or grid['proof'].get('PASS') is not True):
+            raise ValueError('CURRENT_M_GRID_PRESCREEN_PACKET_DRIFT')
+        bridge=grid['proof'].get('original_matrix_bridge',{})
+        if (bridge.get('PASS') is not True or bridge.get('original_matrix_sha')!=case.identity['original_matrix_sha']
+                or bridge.get('original_domain_sha')!=case.identity['original_domain_sha']
+                or bridge.get('entire_model_infeasible') is not False):
+            raise ValueError('CURRENT_M_GRID_PRESCREEN_ORIGINAL_MATRIX_BRIDGE_DRIFT')
     from v42_ultracompact.security import SOURCES as SECURITY_SOURCES
     expected_sources={'v42_may_campaign_native90/m_model.py','v42_supercompact/formulation.py','v42_supercompact/presolve.py',*SECURITY_SOURCES}
     if set(authority['sources'])!=expected_sources or any(sha(root/name)!=receipt['sha256'] for name,receipt in authority['sources'].items()):
@@ -651,9 +755,11 @@ def verify_case(case):
     if c3 is not None:
         from v42_ultracompact.current import SOURCES, POLICY
         if case.ultra is None or c3['state_sha']!=_c3_state_sha(case.ultra):raise ValueError('CURRENT_M_C3A_PROOF_STATE_DRIFT')
-        if (c3['proof']['selected_matrix_SHA256']!=case.identity['selected_matrix_sha']
-                or matrix_sha(case.ultra.A)!=case.identity['selected_matrix_sha']
-                or _domain_sha(case.ultra.d)!=case.identity['selected_domain_sha']):
+        c3_matrix=case.identity.get('C3A_matrix_sha',case.identity['selected_matrix_sha'])
+        c3_domain=case.identity.get('C3A_domain_sha',case.identity['selected_domain_sha'])
+        if (c3['proof']['selected_matrix_SHA256']!=c3_matrix
+                or matrix_sha(case.ultra.A)!=c3_matrix
+                or _domain_sha(case.ultra.d)!=c3_domain):
             raise ValueError('CURRENT_M_C3A_SELECTED_BINDING_DRIFT')
         if set(c3['sources'])!=set(SOURCES) or any(sha(root/name)!=receipt['sha256'] for name,receipt in c3['sources'].items()):
             raise ValueError('CURRENT_M_C3A_PROOF_SOURCE_DRIFT')
@@ -661,5 +767,24 @@ def verify_case(case):
         if (path.resolve()!=(case.output/'CURRENT_EXACT_C3A_PROOF.json').resolve()
                 or sha(path)!=receipt['sha256'] or read(path)!=c3['proof'] or c3['proof'].get('PASS') is not True
                 or case.identity['C3A_policy']!=POLICY):raise ValueError('CURRENT_M_C3A_PROOF_PACKET_DRIFT')
+    response=case.identity.get('response_authority')
+    if case.identity.get('schema') in ('V42_CURRENT_DATE_B2_M_CASE_V2','V42_CURRENT_DATE_B3_M_CASE_V2') and response is None:
+        raise ValueError('CURRENT_M_DENSE_RESPONSE_AUTHORITY_MISSING')
+    if response is not None:
+        from v42_ultracompact.response import SOURCES, state_sha
+        if case.response is None or response['state_sha']!=state_sha(case.response):
+            raise ValueError('CURRENT_M_DENSE_RESPONSE_STATE_DRIFT')
+        if (case.ultra is None or not _same(case.response.original,case.ultra.A)
+                or _domain_sha(case.response.original_data)!=_domain_sha(case.ultra.d)
+                or not _same(case.response.A,case.A) or _domain_sha(case.response.d)!=_domain_sha(case.d)):
+            raise ValueError('CURRENT_M_DENSE_RESPONSE_COMPOSITION_DRIFT')
+        if set(response['sources'])!=set(SOURCES) or any(sha(root/name)!=receipt['sha256'] for name,receipt in response['sources'].items()):
+            raise ValueError('CURRENT_M_DENSE_RESPONSE_PROOF_SOURCE_DRIFT')
+        receipt=response['certificate'];path=Path(receipt['path'])
+        if (path.resolve()!=(case.output/'DENSE_RESPONSE_EQUIVALENCE.json').resolve()
+                or sha(path)!=receipt['sha256'] or read(path)!=response['proof']
+                or response['proof'].get('PASS') is not True):
+            raise ValueError('CURRENT_M_DENSE_RESPONSE_PROOF_PACKET_DRIFT')
     return dict(case.identity['transport'],proof_reused_after_all_transport_state_SHA_checks=True,
-        same_case_transport_certificate=c2_receipt)
+        same_case_transport_certificate=c2_receipt,
+        dense_response_independent_proof=response['proof'] if response is not None else None)

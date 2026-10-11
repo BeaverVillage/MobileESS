@@ -1,0 +1,148 @@
+{
+  "schema": "SOURCE18_PHYSICAL_B3_RESTORE_FINAL_REVIEW_V1",
+  "PASS": true,
+  "created_utc": "2026-10-11T13:41:40.971685+00:00",
+  "source_root": "D:\\v42_svr11_epoch18_20261011",
+  "sources": {
+    "v42_native/mess.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\v42_native\\mess.py",
+      "bytes": 10995,
+      "sha256": "a68d7831d96759e070504a44212af7f95efc085476cb53b262583ad8d86c5026"
+    },
+    "v42_native/mess_domain.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\v42_native\\mess_domain.py",
+      "bytes": 9721,
+      "sha256": "751b70b4c50bc2f6e5f84dc70bf5898a4aedbaee75a7b68966cc7c2e3a8b5f6e"
+    },
+    "v42_native/mess_domain_verify.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\v42_native\\mess_domain_verify.py",
+      "bytes": 10037,
+      "sha256": "b1184a77da8c8261a5f557c13fa735a3d9bb0fe9fb84d6882d5b1a77cea8b481"
+    },
+    "v42_b3_joint/m_source.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\v42_b3_joint\\m_source.py",
+      "bytes": 40295,
+      "sha256": "43d3fdcf67a0c1007a8b4e893fc40800262ea6521ec62870f736090430d81763"
+    },
+    "tests/test_v42_physical_prescreen.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\tests\\test_v42_physical_prescreen.py",
+      "bytes": 8862,
+      "sha256": "e2dc6c52094a5594e4ce1d4b052a49c3bad280001272f0db7cbac48f43087ade"
+    },
+    "tests/test_v42_b3_m_source.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\tests\\test_v42_b3_m_source.py",
+      "bytes": 34952,
+      "sha256": "bc20923e10f0fd4d856b69044d477a5ed87fc6855ca31ded46111d8ed6acfc91"
+    },
+    "tests/test_v42_b3_current_c3a_restore.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\tests\\test_v42_b3_current_c3a_restore.py",
+      "bytes": 16424,
+      "sha256": "2de73dc3ad7baa110a8a49e4cca33f6bc8d0f0fe7cafe846f27f93264b833bdc"
+    }
+  },
+  "tests": {
+    "command": "python -B -m pytest tests/test_v42_b3_current_c3a_restore.py tests/test_v42_physical_prescreen.py tests/test_v42_b3_m_source.py tests/test_v42_b3_source_coordinator.py -q",
+    "passed": 63,
+    "seconds": 28.37,
+    "failed": 0,
+    "optimizer_free": true,
+    "final_physical_only_repeat": {
+      "passed": 10,
+      "seconds": 0.41
+    }
+  },
+  "physical": {
+    "additional_exact_removed_arcs": 0,
+    "additional_SOC_removed_arcs": 0,
+    "original_constructor_forward_removed_arcs": 6576,
+    "meaningful_new_physical_prescreen_gain": false,
+    "original_integer_and_fractional_LP_projection_preserved": true,
+    "terminal_site_contract": "ANY_SITE_AT_H",
+    "energy_debit": "whole travel energy at departure -> SOC[depart+1]",
+    "independent_domain_and_actual_original_row_verifiers": true,
+    "coefficient_thresholds_used": 0,
+    "global_SOC_diagnostics_only": true,
+    "route_PQ_SOC_domain_unchanged_when_additional_removal_zero": true
+  },
+  "restore": {
+    "pre_C2_security_saved_boxes_rows_restored_before_static": true,
+    "independently_replayed_transport": true,
+    "C3A_baseline_reloaded": true,
+    "response_actual_matrix_domain_axes_plans_reloaded": true,
+    "response_standalone_verifier": true,
+    "physical_grid_C3A_dense_authorities_checked_by_production_verify_case": true,
+    "case_forward_includes_response": true,
+    "fresh_process_V2_roundtrip": true,
+    "missing_or_tampered_security_dense_packets_rejected": true,
+    "legacy_no_security_compatibility_excludes_all_V2": true,
+    "model_rebuilds": 0
+  },
+  "raw_incidence_spotcheck": {
+    "PASS": true,
+    "existing_removed_arcs": 6576,
+    "existing_removed_stays": 274,
+    "removed_columns": 7398,
+    "removed_rows": 6028,
+    "removed_NNZ_components": {
+      "flow": 13152,
+      "connection_mode": 3288,
+      "stored_PCS": 15892,
+      "charge_discharge_energy": 548,
+      "travel_energy": 6302,
+      "injection_binding": 822
+    },
+    "removed_NNZ": 40004,
+    "raw_model_instantiations": 0,
+    "fresh_trig_recomputation": 0
+  },
+  "latest_authority": {
+    "source": "Latest direct user instruction relayed by parent /root after physical census",
+    "one_fresh_Root600_permitted_even_if_additional_physical_exclusions_zero": true,
+    "requires_current_physical_exact_proof_and_dense_structural_gain": true,
+    "parent_owns_same_live_case_U4_then_Full": true,
+    "maximum_new_Full_calls": 1,
+    "maximum_Full_seconds": 600,
+    "Root_strict_PASS_seconds": 180,
+    "campaign_dispatch": "HOLD",
+    "earlier_census_authorization_field_is_historical": true
+  },
+  "this_agent": {
+    "Native_optimize_calls": 0,
+    "Source17_writes": 0,
+    "old_B2_bounds_points_starts_reused": 0,
+    "campaign_dispatch_calls": 0,
+    "Multi_Time_work_started": false
+  },
+  "evidence": {
+    "PHYSICAL_AND_RESTORE_REVIEW.md": {
+      "path": "D:\\v42_dense_response_audit_20261011\\PHYSICAL_AND_RESTORE_REVIEW.md",
+      "bytes": 11458,
+      "sha256": "e0688cd3d62b344f7ed469477c29ada8926745b8425188ae057258e386727ece"
+    },
+    "PHYSICAL_PRESCREEN_INPUT_CENSUS.json": {
+      "path": "D:\\v42_dense_response_audit_20261011\\PHYSICAL_PRESCREEN_INPUT_CENSUS.json",
+      "bytes": 5098,
+      "sha256": "c563d6137d43fe37622051709b9dbe97c9aa210e04b95eb1202d9c6391a534f7"
+    },
+    "PHYSICAL_PRESCREEN_PER_MESS_SLOT.csv": {
+      "path": "D:\\v42_dense_response_audit_20261011\\PHYSICAL_PRESCREEN_PER_MESS_SLOT.csv",
+      "bytes": 21237,
+      "sha256": "a241e91fc226abadc48fed6e569ac1671da85af0a5a8d0f9efd3ba3bb227f794"
+    },
+    "GLOBAL_LP_SAFE_SOC_ENVELOPES.csv": {
+      "path": "D:\\v42_dense_response_audit_20261011\\GLOBAL_LP_SAFE_SOC_ENVELOPES.csv",
+      "bytes": 16097,
+      "sha256": "9b1aa4f49b7d0acd9351ebc4f826514ad2490aa2e51b03b37fd02583c1b2c659"
+    },
+    "CURRENT_PHYSICAL_GRAPH_ARC_INDEX.csv": {
+      "path": "D:\\v42_dense_response_audit_20261011\\CURRENT_PHYSICAL_GRAPH_ARC_INDEX.csv",
+      "bytes": 2587723,
+      "sha256": "2339dba8e5d0be80a5422ae9cb4f2a173aa162428d71cf9247bc5510c47155db"
+    },
+    "ALL_STAGE_DENSE_BASELINE_METRICS.json": {
+      "path": "D:\\v42_dense_response_audit_20261011\\ALL_STAGE_DENSE_BASELINE_METRICS.json",
+      "bytes": 48147,
+      "sha256": "890f86382ab4afa6c59b5a4f2314da911415a8916f12c13ee5351888dc4d150d"
+    }
+  }
+}

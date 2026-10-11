@@ -211,7 +211,8 @@ class MSourceBridge:
             globals={"_b3_expected_thermal_rows": expected_rows, "_b3_site_count": len(inputs[0]),
                      "verify_transport": verify_transport},
             literal_replacements={"M1": stage, "M1-F3": stage + "-F3", "B2": "B3",
-                                  "V42_CURRENT_DATE_B2_M_CASE_V1": "V42_CURRENT_DATE_B3_M_CASE_V1"},
+                                  "V42_CURRENT_DATE_B2_M_CASE_V1": "V42_CURRENT_DATE_B3_M_CASE_V1",
+                                  "V42_CURRENT_DATE_B2_M_CASE_V2": "V42_CURRENT_DATE_B3_M_CASE_V2"},
             attribute_replacements={"Stage.M1": "Stage." + stage, "Stage.A1": "Stage." + stage},
             expression_replacements={"120 * 96": "_b3_expected_thermal_rows",
                                      "keyword:sites:24": "_b3_site_count"})
@@ -271,7 +272,7 @@ class MSourceBridge:
             raw, reconstruction = original.reconstruct(case.original_A, case.original_d,
                                                        names, [values[name] for name in names])
             require(reconstruction.get("PASS") is True, "M2_WARM_NEW_FULL_MATRIX_INFEASIBLE")
-            point = case.presolve.forward(case.compact.forward(raw))
+            point = case.forward(raw)
             path = case.output / "M1_CANDIDATE_UNDER_NEW_A2_POINT.npz"
             registry.resolve(MODEL_MODULE).np.savez_compressed(path, point=point)
             strict = registry.callable("v42_m1_hybrid/final_verify.py", "_strict_ub")(case, path, {})
@@ -428,7 +429,39 @@ class MSourceBridge:
         with numeric.load(context.output / "FULL_DATA.npz", allow_pickle=False) as archive:
             data = {key: archive[key].copy() for key in archive.files}
         compact = registry.resolve("v42_supercompact.formulation").Compact(A, data, graph[2], initial, 96)
-        presolve = registry.resolve("v42_supercompact.presolve").Presolve(compact.A, compact.d)
+        read = registry.callable('v42_pr134_b1/common.py', 'read')
+        # Restore the original pre-C2 security stage, including its implied
+        # boxes. The independent transport verifier replays each certificate;
+        # a checkpoint is never accepted merely because its producer said PASS.
+        identity = packet['case_identity']
+        security_proof = identity.get('transport', {}).get('pre_C2_security_independent_proof', {})
+        saved_security = any((context.output / name).is_file() for name in (
+            'CURRENT_SECURITY_PRE_C2_BOUND_CERTIFICATES.json',
+            'CURRENT_SECURITY_PRE_C2_ROW_CERTIFICATES.json', 'CURRENT_SECURITY_PRE_C2_SUMMARY.json'))
+        if (identity.get('schema') == 'V42_CURRENT_DATE_B3_M_CASE_V2' or saved_security
+                or security_proof.get('removed_rows', 0) or security_proof.get('bounds_tightened', 0)):
+            bounds = read(context.output / 'CURRENT_SECURITY_PRE_C2_BOUND_CERTIFICATES.json')
+            certificates = read(context.output / 'CURRENT_SECURITY_PRE_C2_ROW_CERTIFICATES.json')
+            lower, upper = compact.d['lower'].copy(), compact.d['upper'].copy()
+            seen = set()
+            for bound in bounds:
+                j = int(bound['column'])
+                require(j not in seen and 0 <= j < len(lower)
+                    and str(compact.d['names'][j]) == bound['name']
+                    and lower[j] == bound['old_lower'] and upper[j] == bound['old_upper'],
+                    'M_RESTORED_PRE_C2_BOUND_AXIS_DRIFT')
+                require(lower[j] <= bound['new_lower'] <= bound['new_upper'] <= upper[j],
+                    'M_RESTORED_PRE_C2_BOUND_WIDENING')
+                seen.add(j); lower[j], upper[j] = bound['new_lower'], bound['new_upper']
+            pre = dict(lower=lower, upper=upper, bounds=bounds, certificates=certificates,
+                summary=read(context.output / 'CURRENT_SECURITY_PRE_C2_SUMMARY.json'), battery=battery)
+            presolve = registry.resolve("v42_supercompact.presolve").Presolve(
+                compact.A, dict(compact.d, lower=lower, upper=upper))
+            presolve.current_security = pre
+            presolve.bound.extend(bounds)
+            presolve.row_delete({int(p['row']) for p in certificates}, certificates)
+        else:
+            presolve = registry.resolve("v42_supercompact.presolve").Presolve(compact.A, compact.d)
         B, selected = presolve.run()
         proof = model.verify_transport(compact, presolve)
         ultra = None
@@ -446,7 +479,6 @@ class MSourceBridge:
             require(rows.ndim == columns.ndim == 1 and rows.dtype.kind in 'iu'
                 and columns.dtype.kind in 'iu' and numeric.array_equal(columns, numeric.arange(B.shape[1])),
                 'M_RESTORED_C3A_COLUMN_AXIS_DRIFT')
-            read = registry.callable('v42_pr134_b1/common.py', 'read')
             c3_proof = read(context.output / 'CURRENT_EXACT_C3A_PROOF.json')
             ultra = current.CurrentC3A(presolve.A, presolve.d, B, selected, rows,
                 read(context.output / 'CURRENT_C3A_ROW_CERTIFICATES.json'),
@@ -458,11 +490,27 @@ class MSourceBridge:
                 selected_C3A_original_P1_bit_exact=c3_proof['original_P1_bit_exact'],
                 selected_C3A_integer_and_full_LP_domains_identical=c3_proof['integer_and_full_LP_domains_identical'])
         require(_plain(proof) == packet["case_identity"]["transport"], "M_RESTORED_TRANSPORT_PROOF_DRIFT")
+        response = None
+        if packet['case_identity'].get('response_authority') is not None:
+            require(ultra is not None, 'M_RESTORED_DENSE_RESPONSE_BASELINE_REQUIRED')
+            response_module = registry.resolve('v42_ultracompact.response')
+            final = sparse.load_npz(context.output / 'DENSE_RESPONSE_A.npz')
+            with numeric.load(context.output / 'DENSE_RESPONSE_DATA.npz', allow_pickle=False) as archive:
+                final_data = {key: archive[key].copy() for key in archive.files}
+            with numeric.load(context.output / 'DENSE_RESPONSE_AXES.npz', allow_pickle=False) as archive:
+                rows, columns = archive['rows'].copy(), archive['columns'].copy()
+            response = response_module.ReformulationResult(B, selected, final, final_data, rows, columns,
+                read(context.output / 'DENSE_RESPONSE_PLANS.json'),
+                read(context.output / 'DENSE_RESPONSE_EQUIVALENCE.json'))
+            registry.resolve('v42_ultracompact.response_verify').verify_response_reformulation(response)
+            require(response_module.state_sha(response) == packet['case_identity']['response_authority']['state_sha'],
+                'M_RESTORED_DENSE_RESPONSE_STATE_DRIFT')
+            B, selected = final, final_data
         coefficients = context.grid_authority.coefficients(context.original_bundle, context.request.authority.day)
         case = model.CampaignMCase(B, selected, A, data, packet["raw_point"], graph, packet["case_sha"],
                                   packet["case_identity"], compact, presolve, context.original_bundle,
                                   packet["anchor"], packet["planning_arrays"], coefficients, context.output,
-                                  **({'ultra':ultra} if ultra is not None else {}))
+                                  ultra=ultra, response=response)
         model.verify_case(case)
         self._cases[self._key(context)] = case
         return case

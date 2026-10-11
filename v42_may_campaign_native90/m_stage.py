@@ -63,7 +63,7 @@ def stationary_candidate(case):
             value=max(0.,float(np.max(required)))
             values['rho_max']=float(np.nextafter(value,np.inf))
             raw,_=reconstruct(case.original_A,case.original_d,list(values),list(values.values()))
-        point=case.presolve.forward(case.compact.forward(raw))
+        point=case.forward(raw)
         replay=validate_candidate(case,point)
         if replay['PASS']:
             from v42_m1_research.check_joint import check_exact_integer_replay

@@ -152,6 +152,10 @@ class SourceFixture:
             def forward(obj, point):
                 return point
 
+        def full_forward(compact, presolve, point):
+            self.events.append(('ALL_CURRENT_CASE_STAGES_FORWARD',))
+            return presolve.forward(compact.forward(point))
+
         def atomic(path, value):
             self.virtual_files[str(path)] = value
 
@@ -221,6 +225,7 @@ class SourceFixture:
                                        coefficients=coefficients, anchor=anchor, planning=payload["planning"],
                                        original_d={"names": list(values)}, original_A="FAKE_FULL",
                                        A=A, d=data, compact=compact, presolve=presolve,
+                                       forward=lambda point: full_forward(compact, presolve, point),
                                        output=Path(request["output"]), point=[0.0], fake_plan=plan)
                 self.last_case = case
                 return case
@@ -266,11 +271,11 @@ class SourceFixture:
             def __getitem__(archive, name):
                 return list(self.last_case.original_d[name])
 
-        def restored_case(*args):
+        def restored_case(*args, **kwargs):
             fields = ("A", "d", "original_A", "original_d", "point", "graph", "case_sha", "identity",
                       "compact", "presolve", "bundle", "anchor", "planning", "coefficients", "output")
             self.events.append(("RESTORE_ORIGINAL_CASE_WITHOUT_MODEL",))
-            return SimpleNamespace(**dict(zip(fields, args)), fake_plan=self.last_case.fake_plan)
+            return SimpleNamespace(**dict(zip(fields, args)), **kwargs, fake_plan=self.last_case.fake_plan)
 
         modules = {
             "v42_common_mess.engine": fake_module(optimize_case=optimize_case),
@@ -479,6 +484,7 @@ class RealMSourceRoutingTests(unittest.TestCase):
         second.context.source_packets["warm_mess"] = m1.source_packet
         output = MSourceBridge().execute(second.context, FakeLedger(second.context))
         self.assertTrue(any(row[0] == "M1_NEW_A2_ORIGINAL_RECONSTRUCTION" for row in second.events))
+        self.assertIn(('ALL_CURRENT_CASE_STAGES_FORWARD',), second.events)
         receipt = second.virtual_files[str(second.context.output / "B3_WARM_START_ADMISSION.json")]
         self.assertTrue(receipt["PASS"])
         self.assertIs(receipt["old_LB_UB_Runtime_transferred"], False)
@@ -530,6 +536,37 @@ class RealMSourceRoutingTests(unittest.TestCase):
         self.assertTrue(proof["PASS"])
         self.assertIn(("RESTORE_ORIGINAL_CASE_WITHOUT_MODEL",), fixture.events)
         self.assertEqual(len([row for row in fixture.events if row[0] == "FULL_SOURCE_BUILD"]), before)
+
+    def test_checkpoint_replays_saved_pre_C2_security_before_static_transport(self):
+        import numpy as np
+        fixture=SourceFixture();bridge=MSourceBridge()
+        output=bridge.execute(fixture.context,FakeLedger(fixture.context))
+        packet=dict(output.source_packet,case_identity=dict(output.source_packet['case_identity'],
+            schema='V42_CURRENT_DATE_B3_M_CASE_V2'))
+        events=[];bound=dict(column=0,name='x',old_lower=0.,old_upper=10.,new_lower=2.,new_upper=8.,proof='FAKE')
+        cert=dict(row=1,kind='FAKE_CERTIFICATE')
+        fixture.virtual_files[str(fixture.context.output/'CURRENT_SECURITY_PRE_C2_BOUND_CERTIFICATES.json')]=[bound]
+        fixture.virtual_files[str(fixture.context.output/'CURRENT_SECURITY_PRE_C2_ROW_CERTIFICATES.json')]=[cert]
+        fixture.virtual_files[str(fixture.context.output/'CURRENT_SECURITY_PRE_C2_SUMMARY.json')]={'FAKE_SOURCE_TEST':True}
+        class Compact:
+            def __init__(self,*args):
+                self.A='FAKE_COMPACT';self.d=dict(names=np.asarray(['x']),lower=np.asarray([0.]),upper=np.asarray([10.]))
+        class Presolve:
+            def __init__(self,A,d):
+                self.A=A;self.d=d;self.bound=[]
+                events.append(('pre_boxes',d['lower'].tolist(),d['upper'].tolist()))
+            def row_delete(self,ids,certificates):events.append(('pre_rows',ids,certificates))
+            def run(self):
+                events.append(('static_after_security',self.current_security['bounds'],self.bound.copy()))
+                return self.A,self.d
+        fixture.registry.modules['v42_supercompact.formulation']=fake_module(Compact=Compact)
+        fixture.registry.modules['v42_supercompact.presolve']=fake_module(Presolve=Presolve)
+        MSourceBridge()._restore_case(fixture.context,packet)
+        self.assertEqual(events,[('pre_boxes',[2.],[8.]),('pre_rows',{1},[cert]),
+            ('static_after_security',[bound],[bound])])
+        bound['old_lower']=1.
+        with self.assertRaisesRegex(ValueError,'PRE_C2_BOUND_AXIS_DRIFT'):
+            MSourceBridge()._restore_case(fixture.context,packet)
 
     def test_resume_certificate_artifacts_cannot_escape_own_stage_output(self):
         fixture = SourceFixture()

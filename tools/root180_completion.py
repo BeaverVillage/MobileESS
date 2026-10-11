@@ -2,7 +2,7 @@
 from pathlib import Path
 import math, re
 
-ROOT_OBJECTIVE=re.compile(r'^Root relaxation:\s+objective\s+\S+,.*?([\d.]+) seconds\b',re.I)
+ROOT_OBJECTIVE=re.compile(r'^Root relaxation:\s+objective\s+([^,\s]+),.*?([\d.]+) seconds\b',re.I)
 ROOT_TIMER=re.compile(r'^Root relaxation:.*?([\d.]+) seconds\b',re.I)
 
 def completion(log):
@@ -12,11 +12,15 @@ def completion(log):
             reported_elapsed_seconds=None,message=lines)
     line=lines[0];match=ROOT_TIMER.search(line);elapsed=float(match[1]) if match else None
     match=ROOT_OBJECTIVE.search(line)
-    completed=bool(match and math.isfinite(float(match[1])) and float(match[1])>0 and
+    try:
+        objective=float(match[1]) if match else None
+    except ValueError:objective=None
+    completed=bool(match and objective is not None and math.isfinite(objective)
+        and math.isfinite(float(match[2])) and float(match[2])>0 and
         not any(word in line.lower() for word in ('time limit','interrupted','infeasible','unbounded')))
     return dict(completed=completed,status='COMPLETED' if completed else 'INCOMPLETE',
-        completed_seconds=float(match[1]) if completed else None,
-        reported_elapsed_seconds=elapsed,message=line)
+        completed_seconds=float(match[2]) if completed else None,
+        reported_elapsed_seconds=elapsed,reported_objective=objective,message=line)
 
 def verified_report(report):
     import hashlib

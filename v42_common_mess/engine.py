@@ -137,7 +137,8 @@ def _trial(case, budget, path, *, validator, seconds, lower=None, upper=None,
         nonlocal discovered, root_completed_runtime
         if unrestricted and where == gp.GRB.Callback.MESSAGE:
             message = m.cbGet(gp.GRB.Callback.MSG_STRING)
-            if message.lstrip().startswith('Root relaxation:') and 'interrupted' not in message.lower():
+            if message.lstrip().startswith('Root relaxation: objective') and not any(
+                    word in message.lower() for word in ('interrupted','time limit','infeasible','unbounded')):
                 root_completed_runtime = float(m.cbGet(gp.GRB.Callback.RUNTIME))
         if where != gp.GRB.Callback.MIPSOL:
             return # POLLING has no supported scientific attributes.

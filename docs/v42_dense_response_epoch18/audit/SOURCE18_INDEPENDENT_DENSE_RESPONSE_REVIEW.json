@@ -1,0 +1,92 @@
+{
+  "PASS": true,
+  "no_blocking_findings": true,
+  "sources": {
+    "v42_ultracompact/response.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\v42_ultracompact\\response.py",
+      "sha256": "13ab079bc7ad8ff154c31ea4e2eee5bfcd2d858038560f107a34eec5aa14ca67",
+      "bytes": 8172
+    },
+    "v42_ultracompact/response_verify.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\v42_ultracompact\\response_verify.py",
+      "sha256": "547c95636e99dbda56a8d228204f0f4960062ef73228ba6c4b17485dae5db88e",
+      "bytes": 7591
+    },
+    "tests/test_v42_dense_response.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\tests\\test_v42_dense_response.py",
+      "sha256": "e688e9cb7bd204e64854a94baa7110a5ade7c00651272109578736a900ce855d",
+      "bytes": 9007
+    }
+  },
+  "authority_scope": "Fresh stored baseline must remain independently SHA-bound by parent transport; this verifier proves selected projection relative to that baseline",
+  "exact_rational_extension_projection_points": 3,
+  "fractional_original_binary_point": "3/8",
+  "additional_independent_mutation_rejections": {
+    "LOWER_BOUND_WEAKER_SOURCE": {
+      "PASS": true,
+      "rejection": "RESPONSE_PROOF_BOUND_WITNESS_DRIFT"
+    },
+    "NEW_DOMAIN_NAN": {
+      "PASS": true,
+      "rejection": "RESPONSE_PROOF_STORED_BOUND_NOT_EXACT"
+    },
+    "RETAINED_SENSE": {
+      "PASS": true,
+      "rejection": "RESPONSE_PROOF_RETAINED_ROW_METADATA_DRIFT:sense"
+    },
+    "REMOVED_FAMILY": {
+      "PASS": true,
+      "rejection": "RESPONSE_PROOF_ORIGINAL_ROW_FAMILY"
+    },
+    "ORIGINAL_COLUMN_NAME": {
+      "PASS": true,
+      "rejection": "RESPONSE_PROOF_ORIGINAL_COLUMN_METADATA_DRIFT:names"
+    },
+    "NEW_COLUMN_AXIS": {
+      "PASS": true,
+      "rejection": "RESPONSE_PROOF_TRANSPORT_AXIS_DRIFT"
+    },
+    "CONSTANT_OBJECTIVE": {
+      "PASS": true,
+      "rejection": "RESPONSE_PROOF_UNCHANGED_METADATA_DRIFT:constant"
+    },
+    "CROSS_SLOT_SOURCE": {
+      "PASS": true,
+      "rejection": "RESPONSE_PROOF_TWO_SIDED_SINGLE_SLOT_REQUIRED"
+    },
+    "FILL_PROXY_METADATA": {
+      "PASS": true,
+      "rejection": "RESPONSE_PROOF_STRUCTURAL_COST_DRIFT:fill_proxy_after"
+    },
+    "HELPER_NONUNIT": {
+      "PASS": true,
+      "rejection": "RESPONSE_PROOF_NEW_EQUALITY_COEFFICIENT_DRIFT"
+    }
+  },
+  "parent_suite": {
+    "tests": "tests/test_v42_dense_response.py",
+    "passed": 26,
+    "seconds": 0.6
+  },
+  "reviewed_properties": [
+    "Original columns, binary types, bounds and objective entries preserved",
+    "Both lower and upper actual stored voltage witnesses on identical full-coordinate LHS",
+    "Finite exact strongest stored RHS endpoints, no recomputed physical constants",
+    "All retained sparse rows reconstructed; appended equality coefficient exactly1 with negated stored LHS",
+    "All row/column axes, plans and all domains bound by state_sha",
+    "Independent verifier imports no producer; LP fractional and integer coordinate projection proof"
+  ],
+  "limitations": [
+    "Theoretical row-square proxy is not measured Gurobi fill/time improvement",
+    "Forward uses ordinary floating arithmetic for point transport; structural projection statement is over exact stored rational coefficients",
+    "Original auxiliaries deleted0; no safely dead unbounded definition-only auxiliaries in saved C3A",
+    "Current prospective physical exclusions0; latest user steering authorizes one fresh Root600 after proofs and actual compression PASS, using one freshly constructed live case"
+  ],
+  "Native_optimize_calls": 0,
+  "Native_presolve_calls": 0,
+  "Native_AC_calls": 0,
+  "large_matrices_loaded": 0,
+  "Source17_mutations": 0,
+  "Source18_source_mutations": 0,
+  "latest_measurement_authority_note": "Parent reported latest explicit user authorization for one fresh same-live-case U4→Full600 after physical/exact proof and actual model compression PASS; no agent Native call is performed."
+}

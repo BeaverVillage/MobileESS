@@ -81,8 +81,9 @@ def solve(stage,deadline,sites,initial_sites,routes,battery,horizon,grid_builder
     battery.validate();deadline.check();started=perf_counter()
     routes=tuple(dict.fromkeys(routes))
     for r in routes:r.validate(horizon);require(r.source in sites and r.destination in sites,'ROUTE_SITE')
-    arcs=[(s,t,s,t+1,None) for s in sites for t in range(horizon)]
-    arcs += [(r.source,r.depart,r.destination,r.connect,r) for r in routes]
+    from .mess_domain import build_domain
+    physical=build_domain(sites,initial_sites,routes,battery,horizon)
+    arcs=list(physical.arcs)
     domain=digest(dict(arcs=[(s,t,d,e,None if r is None else asdict(r)) for s,t,d,e,r in arcs],initial=initial_sites,battery=asdict(battery)))
     if incumbent:require(incumbent['domain_sha256']==domain,'M1_M2_DOMAIN_DRIFT')
     incoming=defaultdict(list);outgoing=defaultdict(list);by_time=defaultdict(list);stay={}
@@ -93,14 +94,11 @@ def solve(stage,deadline,sites,initial_sites,routes,battery,horizon,grid_builder
     x={};charge={};discharge={};reactive={};energy={};removed=[];charge_mode={}
     try:
         for m,origin in sorted(initial_sites.items()):
-            require(origin in sites,'INITIAL_SITE');reachable={(origin,0)}
-            for t in range(horizon):
-                for k in by_time[t]:
-                    s,b,d,e,r=arcs[k]
-                    if (s,b) in reachable:reachable.add((d,e))
+            require(origin in sites,'INITIAL_SITE')
+            unit=next(u for u in physical.units if u.mess==m);retained=set(unit.retained)
             for k,(s,t,d,e,r) in enumerate(arcs):
                 deadline.check()
-                if (s,t) not in reachable:x[m,k]=0.;removed.append((m,k))
+                if k not in retained:x[m,k]=0.;removed.append((m,k))
                 else:x[m,k]=model.addVar(vtype=GRB.BINARY,name=f'arc[{m},{k}]')
             for s in sites:
                 for t in range(horizon):
@@ -143,7 +141,7 @@ def solve(stage,deadline,sites,initial_sites,routes,battery,horizon,grid_builder
         built=perf_counter();pre=size(model)
         best,receipt=optimize(model,primary+[('movement_kwh',movement),('movement_count',count),('tie',tie)],deadline,incumbent,
             diagnostic_quadratic=mode!='MILP',progress=progress)
-        receipt.update(model_build_seconds=built-started,model_size_before_solve=pre,route_variable_count=sum(not isinstance(v,float) for v in x.values()),
+        receipt.update(model_build_seconds=built-started,model_size_before_solve=pre,physical_prescreen=physical.receipt(),route_variable_count=sum(not isinstance(v,float) for v in x.values()),
             route_move_arcs=len(routes),reachability_removed=len(removed),zero_unreachable_PQ_columns=sum(isinstance(v,float) for v in reactive.values()),PCS_mode=mode)
         if best is None:return None,receipt
         best.update(domain_sha256=domain,mode=mode,initial_sites=initial_sites,units='kW_kvar_kVA_kWh_hours',
