@@ -1,0 +1,590 @@
+{
+  "schema": "V42_SOURCE19_MULTITIME_PRIMARY_HISTORY_AUDIT_V1",
+  "UTC": "2026-10-11T14:56:04.552909+00:00",
+  "PASS": true,
+  "repository": "D:\\v42_svr11_epoch18r_20261011",
+  "base_git_head": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+  "base_execution_source_SHA": "146bf39f5e4f9d720ef7118051edbcdc58b96ca3d83af31c3e7bd5349f1fecd8",
+  "git_status": "",
+  "attachment": {
+    "path": "C:\\Users\\kjw39\\.codex\\attachments\\c67fcc1b-f7bf-49a5-b0b5-5ff665e5367e\\붙여넣은 텍스트.txt",
+    "bytes": 11892,
+    "sha256": "61b7701ba3a64ef8badb38896dd0e148da866fed118b8d6c0eeadf97b02b4190"
+  },
+  "attachment_read_entire": true,
+  "required_PRs": [
+    109,
+    110,
+    111,
+    137,
+    167,
+    169,
+    182,
+    185,
+    186,
+    187
+  ],
+  "primary_history": [
+    {
+      "pr": 109,
+      "title": "Test exact M1 relaxation strengthening without material bound gain",
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/109",
+      "head": "6dabb39e3ae6bb36c4ac47725c0e11d5bbc1b812",
+      "primary": {
+        "path": "D:\\v42_multitime_audit_20261011\\PR109_PRIMARY_HISTORY.json",
+        "bytes": 158641,
+        "sha256": "f1dbcce9dc7cbe5f83b5d5d0c4cb764d77b6f0fc3caab5fd0e493dd5270d9c71"
+      },
+      "body_read": true,
+      "primary_diff_reviewed": true,
+      "selected_diff_files": 23,
+      "candidate": "Aggregate connected charge/discharge mode hull and per-arc energy-flow extension",
+      "code": [
+        [
+          "v42_relaxation/strengthening.py",
+          12,
+          28
+        ]
+      ],
+      "finding": "Local mode cuts and the energy-flow extension preserved integer physics but their historical material-gain gate failed; per-arc energy lifting increased solve cost. Fractional location/mode witnesses alone did not establish objective cause.",
+      "implication": "Do not repeat aggregate mode rows or per-arc full-horizon energy lifting as the current objective experiment.",
+      "source_evidence": [
+        {
+          "path": "v42_relaxation/strengthening.py",
+          "start": 12,
+          "end": 28,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/6dabb39e3ae6bb36c4ac47725c0e11d5bbc1b812/v42_relaxation/strengthening.py#L12",
+          "current_path_exists": true,
+          "method": "Local git show at exact PR head",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR109_v42_relaxation__strengthening.py.source.txt",
+            "bytes": 5081,
+            "sha256": "00d7439d7bee54435f3879f0330894ccb2505270998f71990b5bc92dbde88be1"
+          },
+          "current_file_SHA": "00d7439d7bee54435f3879f0330894ccb2505270998f71990b5bc92dbde88be1",
+          "historical_file_identical_current": true
+        }
+      ]
+    },
+    {
+      "pr": 110,
+      "title": "Certify no material gain from single-slot M1 epigraph cuts",
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/110",
+      "head": "90efccb2dbcc1ab4557cedcf04ef479a225d4e47",
+      "primary": {
+        "path": "D:\\v42_multitime_audit_20261011\\PR110_PRIMARY_HISTORY.json",
+        "bytes": 123986,
+        "sha256": "d23a6ca5712cf2a66103169113cd0569ba3d8cb50e419f3b265966574334c223"
+      },
+      "body_read": true,
+      "primary_diff_reviewed": true,
+      "selected_diff_files": 16,
+      "candidate": "Single-slot location-conditioned grid epigraph",
+      "code": [
+        [
+          "v42_epigraph/oracle.py",
+          24,
+          41
+        ]
+      ],
+      "finding": "O1 retained only non-transformer P1 line faces at one slot and dropped voltage, transformer and every other-time grid row. Complete conditional upper witnesses certified no useful epigraph coefficients under that weak oracle.",
+      "implication": "This stopping proof does not reject current full-grid temporal coupling; a new candidate must keep current stored original grid authority and rebound.",
+      "source_evidence": [
+        {
+          "path": "v42_epigraph/oracle.py",
+          "start": 24,
+          "end": 41,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/90efccb2dbcc1ab4557cedcf04ef479a225d4e47/v42_epigraph/oracle.py#L24",
+          "current_path_exists": true,
+          "method": "Local git show at exact PR head",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR110_v42_epigraph__oracle.py.source.txt",
+            "bytes": 8392,
+            "sha256": "d5ff2e5c2309555620367a17fdc6e30f4155a42a878d8d2dd99c94c7f877cc7d"
+          },
+          "current_file_SHA": "d5ff2e5c2309555620367a17fdc6e30f4155a42a878d8d2dd99c94c7f877cc7d",
+          "historical_file_identical_current": true
+        }
+      ]
+    },
+    {
+      "pr": 111,
+      "title": "Certify seven-slot M1 epigraph limits and outside-window grid stress",
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/111",
+      "head": "501fec79dd402e9f1770c5a403a787ebf452cc3f",
+      "primary": {
+        "path": "D:\\v42_multitime_audit_20261011\\PR111_PRIMARY_HISTORY.json",
+        "bytes": 124656,
+        "sha256": "d155050606f5f8766a3f25a0f5c39381c394392b5dddc0b58c14297412865f97"
+      },
+      "body_read": true,
+      "primary_diff_reviewed": true,
+      "selected_diff_files": 18,
+      "candidate": "Seven-slot W7 state/pair epigraph and two-time route support",
+      "code": [
+        [
+          "v42_window/grid.py",
+          14,
+          20
+        ],
+        [
+          "v42_window/reachability.py",
+          55,
+          58
+        ]
+      ],
+      "finding": "Only registered slots40–46 retained grid rows, allowing travel repayment outside the window; historical objective stress lay outside. Pure DAG-flow path decomposition already implied the supported two-time marginals. No useful epigraph row was installed.",
+      "implication": "Do not transplant window40–46 or pure reachable-pair transport. Static current line/window selection must be independent of historical duals.",
+      "source_evidence": [
+        {
+          "path": "v42_window/grid.py",
+          "start": 14,
+          "end": 20,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/501fec79dd402e9f1770c5a403a787ebf452cc3f/v42_window/grid.py#L14",
+          "current_path_exists": false,
+          "method": "GitHub Contents at exact PR head; local commit object absent, no fetch/mutation",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR111_grid.py.source.txt",
+            "bytes": 5511,
+            "sha256": "502d4d2596903964f52eb4e56aa8c3ba6abc7b8ba6a735d8c570d36c5faee795"
+          },
+          "current_file_SHA": null,
+          "historical_file_identical_current": false
+        },
+        {
+          "path": "v42_window/reachability.py",
+          "start": 55,
+          "end": 58,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/501fec79dd402e9f1770c5a403a787ebf452cc3f/v42_window/reachability.py#L55",
+          "current_path_exists": false,
+          "method": "GitHub Contents at exact PR head; local commit object absent, no fetch/mutation",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR111_reachability.py.source.txt",
+            "bytes": 4563,
+            "sha256": "8afa3c11027ba6de88e6ac7b86f8326637f6af2ad9bf5fecbf10e61529f5a1df"
+          },
+          "current_file_SHA": null,
+          "historical_file_identical_current": false
+        }
+      ]
+    },
+    {
+      "pr": 137,
+      "title": "V42 M1: exact strengthening census and gates; retain BASE",
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/137",
+      "head": "94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef",
+      "primary": {
+        "path": "D:\\v42_multitime_audit_20261011\\PR137_PRIMARY_HISTORY.json",
+        "bytes": 120333,
+        "sha256": "085ce7e6b8a65252c94bf595b8a2f4b7edf7eedec781d042472e09fb5e15c7e6"
+      },
+      "body_read": true,
+      "primary_diff_reviewed": true,
+      "selected_diff_files": 17,
+      "candidate": "Connected C/D aggregate cuts; route-state SOC envelopes; per-arc SOC flow",
+      "code": [
+        [
+          "v42_strengthening/cuts.py",
+          9,
+          18
+        ],
+        [
+          "v42_strengthening/envelopes.py",
+          31,
+          69
+        ],
+        [
+          "v42_strengthening/envelopes.py",
+          99,
+          124
+        ],
+        [
+          "v42_strengthening/flow.py",
+          25,
+          43
+        ]
+      ],
+      "finding": "Aggregate C+D and exact route-state SOC envelopes had historical violations but no material objective gain. The SOC-flow EF added207928 continuous columns,443344 rows and2559730 NNZ; its full LP did not complete at its cap.",
+      "implication": "Integer-only SOC envelope diagnostics are not LP-safe prescreening. Current Source18 deliberately adopted none; simple SOC sums remain LP implied.",
+      "source_evidence": [
+        {
+          "path": "v42_strengthening/cuts.py",
+          "start": 9,
+          "end": 18,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef/v42_strengthening/cuts.py#L9",
+          "current_path_exists": false,
+          "method": "Local git show at exact PR head",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR137_v42_strengthening__cuts.py.source.txt",
+            "bytes": 5951,
+            "sha256": "3b916718e760e08544824ff6445fe01d9b4a85bb80cadb2ca022d2ef62d86177"
+          },
+          "current_file_SHA": null,
+          "historical_file_identical_current": false
+        },
+        {
+          "path": "v42_strengthening/envelopes.py",
+          "start": 31,
+          "end": 69,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef/v42_strengthening/envelopes.py#L31",
+          "current_path_exists": false,
+          "method": "Local git show at exact PR head",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR137_v42_strengthening__envelopes.py.source.txt",
+            "bytes": 10859,
+            "sha256": "6781587a1520957c72e950547d8e94f07f353d822cb706795a8f95f4a7095e44"
+          },
+          "current_file_SHA": null,
+          "historical_file_identical_current": false
+        },
+        {
+          "path": "v42_strengthening/envelopes.py",
+          "start": 99,
+          "end": 124,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef/v42_strengthening/envelopes.py#L99",
+          "current_path_exists": false,
+          "method": "Local git show at exact PR head",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR137_v42_strengthening__envelopes.py.source.txt",
+            "bytes": 10859,
+            "sha256": "6781587a1520957c72e950547d8e94f07f353d822cb706795a8f95f4a7095e44"
+          },
+          "current_file_SHA": null,
+          "historical_file_identical_current": false
+        },
+        {
+          "path": "v42_strengthening/flow.py",
+          "start": 25,
+          "end": 43,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef/v42_strengthening/flow.py#L25",
+          "current_path_exists": false,
+          "method": "Local git show at exact PR head",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR137_v42_strengthening__flow.py.source.txt",
+            "bytes": 13430,
+            "sha256": "b916bd53bcb82d9f0b737f249634d0c55063533b23d70c8620e49309a5da6df9"
+          },
+          "current_file_SHA": null,
+          "historical_file_identical_current": false
+        }
+      ]
+    },
+    {
+      "pr": 167,
+      "title": "M1 C3A root gap 진단 및 exact local hull 강화 검증",
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/167",
+      "head": "0d423626790a1102d42e6ba84beeb5f7d4ab1d4b",
+      "primary": {
+        "path": "D:\\v42_multitime_audit_20261011\\PR167_PRIMARY_HISTORY.json",
+        "bytes": 287736,
+        "sha256": "ef614cc7256228eb493f360a6d2063e3740452978bc41b545ce1a9b0d3ede120"
+      },
+      "body_read": true,
+      "primary_diff_reviewed": true,
+      "selected_diff_files": 23,
+      "candidate": "Connected-power and folded PCS-mode local hulls",
+      "code": [
+        [
+          "docs/v42_m1_root_gap_attribution_20261007/folded_pcs_hull.py",
+          51,
+          69
+        ]
+      ],
+      "finding": "Exact integer-state union PCS hulls added320 rows/17837NNZ in ten historical cut loops, with no material certified gain. Selective integrality did not isolate the cause; strict raw feasibility limitations were preserved.",
+      "implication": "Per-stay integer-mode PCS support is a known local hull ingredient, not a new temporal proof. Any current direction-specific support must be freshly compared to actual fractional stay rows and connected to current thermal objective.",
+      "source_evidence": [
+        {
+          "path": "docs/v42_m1_root_gap_attribution_20261007/folded_pcs_hull.py",
+          "start": 51,
+          "end": 69,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/0d423626790a1102d42e6ba84beeb5f7d4ab1d4b/docs/v42_m1_root_gap_attribution_20261007/folded_pcs_hull.py#L51",
+          "current_path_exists": false,
+          "method": "Local git show at exact PR head",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR167_docs__v42_m1_root_gap_attribution_20261007__folded_pcs_hull.py.source.txt",
+            "bytes": 10418,
+            "sha256": "bf25b40f941fb6cab569e948b7cbdd308ccdce7ec5c17e078c6a7e491bd6d93e"
+          },
+          "current_file_SHA": null,
+          "historical_file_identical_current": false
+        }
+      ]
+    },
+    {
+      "pr": 169,
+      "title": "M1 gap 귀속: 검증된 UB 개선과 trajectory hull 진단",
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/169",
+      "head": "599d9ea67f6c348bfed9d1a594dc0d1eb3fd2768",
+      "primary": {
+        "path": "D:\\v42_multitime_audit_20261011\\PR169_PRIMARY_HISTORY.json",
+        "bytes": 184143,
+        "sha256": "67a896afd8c7d7efddd1fe4a261d0e91da0f8cf1a8c7931421d3651460620b56"
+      },
+      "body_read": true,
+      "primary_diff_reviewed": true,
+      "selected_diff_files": 25,
+      "candidate": "Four-slot complete route/mode/PQ/SOC hull and controlled two-block extension",
+      "code": [
+        [
+          "docs/v42_m1_gap_rootcause_20261007/trajectory_hull.py",
+          65,
+          90
+        ],
+        [
+          "docs/v42_m1_gap_rootcause_20261007/mode_coordinate_audit.py",
+          23,
+          32
+        ]
+      ],
+      "finding": "149817 mobility paths times16 mode words yielded2397072 local patterns. Boundary SOC remained free, so this was not the96-slot global hull. A separator could be removed by changing only an objective-zero mode coordinate with all P/Q/route/SOC coordinates fixed. Historical verified UB improvement also showed incumbent choice contributed to the gap.",
+      "implication": "Do not enumerate complete local trajectories or infer LB impact from mode-coordinate separation. Preserve global terminal SOC and relocation/recharge alternatives.",
+      "source_evidence": [
+        {
+          "path": "docs/v42_m1_gap_rootcause_20261007/trajectory_hull.py",
+          "start": 65,
+          "end": 90,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/599d9ea67f6c348bfed9d1a594dc0d1eb3fd2768/docs/v42_m1_gap_rootcause_20261007/trajectory_hull.py#L65",
+          "current_path_exists": false,
+          "method": "Local git show at exact PR head",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR169_docs__v42_m1_gap_rootcause_20261007__trajectory_hull.py.source.txt",
+            "bytes": 9134,
+            "sha256": "742efa1d37747e18fee478194bbf7b810510a8e2884fa4c2451f1bdab28ace7c"
+          },
+          "current_file_SHA": null,
+          "historical_file_identical_current": false
+        },
+        {
+          "path": "docs/v42_m1_gap_rootcause_20261007/mode_coordinate_audit.py",
+          "start": 23,
+          "end": 32,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/599d9ea67f6c348bfed9d1a594dc0d1eb3fd2768/docs/v42_m1_gap_rootcause_20261007/mode_coordinate_audit.py#L23",
+          "current_path_exists": false,
+          "method": "Local git show at exact PR head",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR169_docs__v42_m1_gap_rootcause_20261007__mode_coordinate_audit.py.source.txt",
+            "bytes": 2773,
+            "sha256": "b6dd7209ad4321841635b5e615a7d38cc397abbdb90718567135f9959f6eeab5"
+          },
+          "current_file_SHA": null,
+          "historical_file_identical_current": false
+        }
+      ]
+    },
+    {
+      "pr": 182,
+      "title": "M1 공동 fleet/time/grid 정식화 검증: ROOT 계산 가능성 실패",
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/182",
+      "head": "d541a9d15a03c4a6f8dbc1906a57c7486e9700e3",
+      "primary": {
+        "path": "D:\\v42_multitime_audit_20261011\\PR182_PRIMARY_HISTORY.json",
+        "bytes": 157759,
+        "sha256": "4c0a654302c27804dca02023b06d47d3dd98296e49f70375563b866d2d3a38ef"
+      },
+      "body_read": true,
+      "primary_diff_reviewed": true,
+      "selected_diff_files": 20,
+      "candidate": "Fleet/window count Balas EF and Boolean-product RLT",
+      "code": [
+        [
+          "docs/v42_m1_joint_formulation_20261008/formulations.py",
+          49,
+          53
+        ],
+        [
+          "docs/v42_m1_joint_formulation_20261008/formulations.py",
+          77,
+          103
+        ]
+      ],
+      "finding": "A added133254 columns/312931rows; B added225952columns/1001388rows. Both600s ROOT runs failed optimal completion/material certified improvement; incomplete points were not promoted to bounds.",
+      "implication": "Both sizes greatly violate the new sparse256-row/0.5% NNZ scope. No full-size replay or EF copy is justified.",
+      "source_evidence": [
+        {
+          "path": "docs/v42_m1_joint_formulation_20261008/formulations.py",
+          "start": 49,
+          "end": 53,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/d541a9d15a03c4a6f8dbc1906a57c7486e9700e3/docs/v42_m1_joint_formulation_20261008/formulations.py#L49",
+          "current_path_exists": false,
+          "method": "Local git show at exact PR head",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR182_docs__v42_m1_joint_formulation_20261008__formulations.py.source.txt",
+            "bytes": 11127,
+            "sha256": "eb16133814a4dbb4e56bc131c3b054f393506c561c23601c865d3108f23361e9"
+          },
+          "current_file_SHA": null,
+          "historical_file_identical_current": false
+        },
+        {
+          "path": "docs/v42_m1_joint_formulation_20261008/formulations.py",
+          "start": 77,
+          "end": 103,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/d541a9d15a03c4a6f8dbc1906a57c7486e9700e3/docs/v42_m1_joint_formulation_20261008/formulations.py#L77",
+          "current_path_exists": false,
+          "method": "Local git show at exact PR head",
+          "historical_source": {
+            "path": "D:\\v42_multitime_audit_20261011\\PR182_docs__v42_m1_joint_formulation_20261008__formulations.py.source.txt",
+            "bytes": 11127,
+            "sha256": "eb16133814a4dbb4e56bc131c3b054f393506c561c23601c865d3108f23361e9"
+          },
+          "current_file_SHA": null,
+          "historical_file_identical_current": false
+        }
+      ]
+    },
+    {
+      "pr": 185,
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/185",
+      "head": "6d1d64beaf012d32ddf39245890785e3d8f01d4b",
+      "primary": {
+        "path": "D:\\v42_multitime_audit_20261011\\PR185_primary_body.json",
+        "bytes": 3276,
+        "sha256": "c512fefda100d4b79ccdb1d20147c3621c2754e6671f1a5c3bd27f6687a59acd"
+      },
+      "body_read": true,
+      "primary_diff_reviewed": true,
+      "diff_method": "gh pr diff185 --patch; extracted source/candidate summary via rg; bulk diff discarded after review",
+      "candidate": "Physical master closure, cumulative SOC substitution and route endpoint cuts",
+      "code": [
+        [
+          "v42_physics_redesign/structure.py",
+          33,
+          73
+        ],
+        [
+          "v42_physics_redesign/cumulative.py",
+          3,
+          61
+        ],
+        [
+          "v42_physics_redesign/temporal.py",
+          44,
+          52
+        ]
+      ],
+      "finding": "Pure physical master is weaker; restoring full original grid returns the original LP. Cumulative SOC is LP identical and predicts25937190 NNZ despite removing380SOC columns. All651 archived selected cuts are ARRIVAL_SOC_REACHABILITY, from795944 screened candidates.",
+      "implication": "No651 transplantation or dense cumulative elimination. Endpoint energy implications omit joint interval service/PCS and may never affect the current critical objective.",
+      "source_evidence": [
+        {
+          "path": "v42_physics_redesign/structure.py",
+          "start": 33,
+          "end": 73,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/6d1d64beaf012d32ddf39245890785e3d8f01d4b/v42_physics_redesign/structure.py#L33",
+          "current_path_exists": false,
+          "method": "Recent independent agent local git show and primary diff"
+        },
+        {
+          "path": "v42_physics_redesign/cumulative.py",
+          "start": 3,
+          "end": 61,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/6d1d64beaf012d32ddf39245890785e3d8f01d4b/v42_physics_redesign/cumulative.py#L3",
+          "current_path_exists": false,
+          "method": "Recent independent agent local git show and primary diff"
+        },
+        {
+          "path": "v42_physics_redesign/temporal.py",
+          "start": 44,
+          "end": 52,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/6d1d64beaf012d32ddf39245890785e3d8f01d4b/v42_physics_redesign/temporal.py#L44",
+          "current_path_exists": false,
+          "method": "Recent independent agent local git show and primary diff"
+        }
+      ]
+    },
+    {
+      "pr": 186,
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/186",
+      "head": "9a1b41260aff3bc70d2e36d7e1c293c03ea114de",
+      "primary": {
+        "path": "D:\\v42_multitime_audit_20261011\\PR186_primary_body.json",
+        "bytes": 3131,
+        "sha256": "6a36c182e55f23dcbe0400bbd0a22ae2d9f063db72293ba128130a86477b7c5f"
+      },
+      "body_read": true,
+      "primary_diff_reviewed": true,
+      "diff_method": "git diff --name-only base head -- *.py; source changes are A-stage and May12 rescue/pricing/activation paths, no M route/SOC formulation",
+      "candidate": "May12 A-stage activation/pricing rescue",
+      "code": [],
+      "finding": "Artificial-free Phase-I witness activation and full-domain STAY/migration pricing address the A-stage P1 implementation, not MESS Multi-Time formulation.",
+      "implication": "Relevant to preservation of legitimate actions, but supplies no M route/SOC strengthening.",
+      "source_evidence": []
+    },
+    {
+      "pr": 187,
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/187",
+      "head": "e67ecfa827e4262c2f2df17c226d6442656af18b",
+      "primary": {
+        "path": "D:\\v42_multitime_audit_20261011\\PR187_primary_body.json",
+        "bytes": 3238,
+        "sha256": "b1c3869092d3ed60d41db6366b466ec6227b565a6d76b6d8d4eaa4bc29912337"
+      },
+      "body_read": true,
+      "primary_diff_reviewed": true,
+      "diff_method": "gh pr diff187 --patch; source/summary extracted via rg; bulk diff discarded after review",
+      "candidate": "Validation of historical651 route/SOC cuts",
+      "code": [],
+      "finding": "Historical B2_ROOT_NONMATERIAL. All651 rows satisfied, none active at tested thresholds; no certified valid-bound improvement. Historical native objective variation did not establish an improvement.",
+      "implication": "Do not repeat the archived selected set or reuse its numerical results/points as current evidence.",
+      "source_evidence": []
+    }
+  ],
+  "recent_independent_audit": {
+    "path": "D:\\v42_multitime_audit_20261011\\PR185_187_RECENT_HISTORY_AUDIT.json",
+    "bytes": 6151,
+    "sha256": "de0ceb8cc952ee8420ee24f0ea1f6162f67a915b7ec4410a798c87b34747d184"
+  },
+  "current_baseline": {
+    "rows": 715596,
+    "columns": 354277,
+    "binaries": 9322,
+    "nnz": 7911369,
+    "Root_complete": false,
+    "completed_LP_point_available": false,
+    "current_native_LB_reported_by_parent": 0.289400491085489,
+    "current_gap_percent_reported_by_parent": 57.19266,
+    "interpretation": "Current parent-reported bound/gap belongs only to fresh Phase18 repaired source. No historical bound or LP vector is used as current comparison."
+  },
+  "user_limits": {
+    "max_added_rows": 256,
+    "max_added_NNZ_fraction": 0.005,
+    "max_added_NNZ_integer": 39556,
+    "new_binaries": 0,
+    "full_size_MILP_optimize_calls": 0,
+    "full_size_repeated_LP_calls": 0,
+    "full_size_LP_measurement_currently_authorized": false,
+    "reason": "Latest Root failed completion at600s; user disallows meaningless120s comparison and repeat600s."
+  },
+  "current_source_differences": [
+    "Current B2/B3 use fresh May01 Forecast/SVR11/grid/battery/route authority and exact Original->Compact->pre-C2 security->C2->C3A->Dense transport, not historical raw axes or frozen old root points.",
+    "Dense response is an exact affine extension/projection and changes no LP or integer domain. Physical backward/SOC adoption is0; legitimate continuous route flow and binary node/mode variables remain.",
+    "Current native MESS retains net-P PCS16, individual connected Pch/Pdis and binary-mode bounds, actual0.25-slot efficiency coefficients, whole travel debit atdepart+1, and original terminal SOC. Optional legacy strengthening hook defaultsNone and is not enabled by current constructor.",
+    "The old research packages for PR137/167/169/182/185 are not current production wiring. PR109/110 source directories remain as legacy reference but their study oracles are not the current model.",
+    "No completed current LP point exists; current fractional node/mode/route violations and objective-dual window cannot be inferred from old studies."
+  ],
+  "candidate_implications": {
+    "reject_pure_route_marginal": true,
+    "reject_SOC_sum_only": true,
+    "reject_651_copy": true,
+    "reject_large_EF": true,
+    "additive_DAG_energy_price_LP_implication_theorem": "If each per-stay relief-minus-energy term is bounded using existing fractional control/PCS rows, and travel/terminal/rebound energy uses a linear Lagrange combination of existing SOC equalities/bounds, whole-horizon additive DAG DP adds no LP strength. Set terminal potentials0 and p(v)=max_a(r_a+p(head(a))). Then r_a<=p(tail(a))-p(head(a)); multiplying by nonnegative route flows and summing telescopes to the source potential under existing flow conservation. Adding the per-stay and SOC row bounds proves the candidate for every existing fractional LP point.",
+    "possible_nonredundant_ingredient": "Only if exact integer-mode/connected PCS support is strictly smaller than the actual fractional stay relaxation, or another freshly proved integer temporal implication is used, can the bound strengthen LP. Integer-mode union support is already the PR167 local-hull family; objective-directed current coupling and new independent validity/redundancy checks are essential.",
+    "next_scope": "One CURRENT stored thermal line and one interval, selected statically from current sensitivity and physical support, with whole96slot terminal/recharge/travel preserved. No old critical slot, LP point or cut selected set.",
+    "current_actual_violation": "UNPROVEN_NO_COMPLETED_CURRENT_LP_POINT",
+    "current_LB_improvement": "UNPROVEN",
+    "history_adoption": "NONE"
+  },
+  "operations": {
+    "Native_calls": 0,
+    "model_builds": 0,
+    "old_LP_point_ingestion": 0,
+    "old_LB_values_reused_as_current": 0,
+    "copied_651_cut_payload": 0,
+    "full_path_enumerations": 0,
+    "candidate_generation_or_adoption": 0,
+    "source_edits": 0,
+    "Git_mutations": 0,
+    "campaign_HOLD": true,
+    "Supervisor_and_schedules_reenabled": false
+  },
+  "conclusion": "HISTORY_AUDIT_COMPLETE_MULTITIME_TIGHTENING_LB_UNPROVEN"
+}

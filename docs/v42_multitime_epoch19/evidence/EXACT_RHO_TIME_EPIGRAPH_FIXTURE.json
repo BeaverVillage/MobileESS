@@ -1,0 +1,63 @@
+{
+  "schema": "EXACT_RHO_TIME_EPIGRAPH_RATIONAL_FIXTURE_V1",
+  "PASS": true,
+  "UTC": "2026-10-11T15:04:03.838412+00:00",
+  "all_horizon_mathematical_proof": true,
+  "theorem": {
+    "original_row": "g_i(x)+c_i*rho<=b_i",
+    "condition": "All replaced normalized stored coefficients c_i<=0. All unchanged rho rows, bounds, type and objective remain exactly original.",
+    "extension": "g_i(x)+c_i*tau_t<=b_i; tau_t-rho<=0; helper continuous bounds contain the actual global rho interval; helper objective0",
+    "forward": "For every original feasible real/integer point, set all tau_t=rho. Every replaced row and link holds. No arithmetic or coefficient approximation is needed.",
+    "reverse": "For every extension feasible point, tau_t<=rho and c_i<=0 imply g_i(x)+c_i*rho<=g_i(x)+c_i*tau_t<=b_i. Drop the helpers; every original row remains feasible.",
+    "objective": "The objective uses only unchanged original coordinates, so its value and projected integer optimum and LP optimum are exactly preserved.",
+    "integer": "All original integer types/domains are untouched. New tau coordinates are continuous.",
+    "exactness": "Every stored coefficient/RHS/bound is copied unchanged; relocation of an original rho coefficient does not compute a new coefficient. Link coefficients +/-1 and RHS0 are exactly binary64-representable."
+  },
+  "small_fixture": {
+    "slots": 3,
+    "original_points_checked": 25,
+    "extended_points_checked": 3125,
+    "original_feasible_points": 13,
+    "extended_feasible_points": 495,
+    "original_integer_feasible_points": 4,
+    "unchanged_positive_rho_row": "x+rho>=1/4 retained exactly",
+    "grid": "0,1/4,1/2,3/4,1",
+    "scope": "Finite rational fixture illustrates but does not replace the general real-domain proof"
+  },
+  "counterexamples": [
+    {
+      "rho": "1",
+      "tau": "0",
+      "old_row": "rho<=1/2",
+      "wrong_new_row": "tau<=1/2",
+      "old_feasible": false,
+      "wrong_new_feasible": true
+    },
+    {
+      "x": "1",
+      "rho": "0",
+      "tau": "1",
+      "old_row": "x-rho<=0",
+      "wrong_new_rows": [
+        "x-tau<=0",
+        "rho<=tau"
+      ],
+      "old_feasible": false,
+      "wrong_new_feasible": true
+    },
+    {
+      "x": "1",
+      "rho": "1",
+      "required_tau": "1",
+      "wrong_tau_upper": "1/2",
+      "old_feasible": true,
+      "wrong_extension_feasible": false
+    }
+  ],
+  "Native_calls": 0,
+  "model_builds": 0,
+  "production_matrix_mutations": 0,
+  "rows_inserted": 0,
+  "columns_inserted": 0,
+  "wall_seconds": 0.023248599958606064
+}

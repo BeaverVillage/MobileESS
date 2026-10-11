@@ -1,0 +1,486 @@
+{
+  "schema": "V42_ROOT_THREADS_AND_MEMORY_READ_ONLY_POLICY_AUDIT_V1",
+  "UTC": "2026-10-11T15:07:19.631134+00:00",
+  "PASS": true,
+  "checks": {
+    "all_actual_readbacks_Threads1": true,
+    "Full_readback_PASS": true,
+    "Native0_readback_PASS": true,
+    "Full_TimeLimit600": true,
+    "Root_source_SHA_matches": true,
+    "current_thread_sources_match_execution_seal": true,
+    "Root_report_INCOMPLETE": true,
+    "single_Full_call": true,
+    "current_worktree_clean": true,
+    "historic_policy_actual_Threads4": true
+  },
+  "source": {
+    "path": "D:\\v42_dense_response_root_measurement_20261011\\SOURCE18_SEAL.json",
+    "bytes": 134963,
+    "sha256": "1553eae5f8f6722299039521fd35c54e0fc03c12bbcd5fa9b3e145d44d84cf6d"
+  },
+  "current_Git_HEAD": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+  "current_execution_SHA": "146bf39f5e4f9d720ef7118051edbcdc58b96ca3d83af31c3e7bd5349f1fecd8",
+  "prerequisite": "Source19 Multi-Time static verdict officially CLOSED: candidate1 LP implied, added full rows0, Native0, MULTITIME_LB_UNPROVEN.",
+  "current_user_policy": {
+    "Threads": 1,
+    "worker_policy": "UNCHANGED_CURRENT_WORKERS",
+    "Threads2_or4_recommendation": false,
+    "Threads2_or4_run_authorized": false,
+    "new_heavy_analysis": "NATIVE0_ONLY",
+    "VirtualMemory_or_paging_changes": false,
+    "StageBudget_A1_A2_NativeStop_userA_commonStop_changes": false
+  },
+  "source_force_paths": [
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_common_mess\\model.py",
+      "start": 37,
+      "end": 42,
+      "meaning": "Builder defaultsThreads1, then resetsThreads1 after arbitrary numeric_parameters overrides.",
+      "sha256": "5462bfe7670168e4e25b97b79ee4dabacc840105bb7ad7077fc9574d0a9e99ad"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_common_mess\\engine.py",
+      "start": 23,
+      "end": 27,
+      "meaning": "Unrestricted Full profile explicitly setsThreads1.",
+      "sha256": "2d9ee94cb78d9dddbc0b6669809ab6a9ee0ca12ea3eb8010fc12514b1be749e3"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_ultracompact\\native_readback.py",
+      "start": 7,
+      "end": 10,
+      "meaning": "Root requested profileThreads1.",
+      "sha256": "ea3397c8d40c22c401e0846837ef5506bcfd33949bd3779153fd18b40dbe721a"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_ultracompact\\native_readback.py",
+      "start": 27,
+      "end": 33,
+      "meaning": "Actual readback must equal every ROOT_PARAMETERS value before Native entry.",
+      "sha256": "ea3397c8d40c22c401e0846837ef5506bcfd33949bd3779153fd18b40dbe721a"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\tools\\validate_svr11_root180.py",
+      "start": 49,
+      "end": 70,
+      "meaning": "ProbeBudget rejects actualThreads!=1; applies actual cap/readback before optimize.",
+      "sha256": "e169134b40e4cdf0dcc0c434f80ba7bfa544a5b974449a7dc88aac9b127002b9"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\tools\\validate_svr11_dense_restore.py",
+      "start": 321,
+      "end": 330,
+      "meaning": "Native0 selected model is built with ROOT_PARAMETERS and actual readback is checked; optimize is denied.",
+      "sha256": "3a67136a044ff6bfc32fd5fffdd8c35c1824124df0f1c8af125ff513c7643c97"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_common_mess\\budget.py",
+      "start": 38,
+      "end": 54,
+      "meaning": "StageBudget only delegates measured time cap to parent; thread force remains builder/parent. No edits made.",
+      "sha256": "18f885cc4e5014f40c23d3d8a49ca12c7c77c9427982edbbf856838dfdc7d77a"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_may_campaign_native90\\budget.py",
+      "start": 82,
+      "end": 94,
+      "meaning": "Campaign DateBudget forcesThreads1 before Native; includes A and M scopes, unchanged.",
+      "sha256": "6626d770f9259df1a7f9aa7bc736ceaae43fbff9cc732b4579080533a083f4f8"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_may_campaign_native90\\execution.py",
+      "start": 65,
+      "end": 77,
+      "meaning": "Campaign execution guard rejects actualThreads!=1.",
+      "sha256": "dc30c43f420d72c3e00560066659694e509f125bfe5988e108c24c05d86a4862"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_native\\solver.py",
+      "start": 83,
+      "end": 89,
+      "meaning": "Native original solver forceThreads1 and measured remaining TimeLimit on each objective; unchanged.",
+      "sha256": "e24ece8d6557a5b4dccf30c7743d4aad03fc1157a6bdd70210dbc93385f71d4d"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_bootstrap\\m1.py",
+      "start": 88,
+      "end": 88,
+      "meaning": "Historical bootstrap common solve loop setsThreads1; unchanged.",
+      "sha256": "31279b85f8a69c41d80e0f19feda3cd2c9d7cd6026f1e8a4c5b046034363bae4"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_m1_research\\lb.py",
+      "start": 151,
+      "end": 158,
+      "meaning": "Inherited scientific builder setsThreads1; unchanged.",
+      "sha256": "3560a81f1c61a64c95163fff419e1ed2d13b07227d021a88e7104224e1edede4"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_svr11\\controller.py",
+      "start": 20,
+      "end": 23,
+      "meaning": "Dispatch request recordsThreads1; worker/concurrency policy unchanged.",
+      "sha256": "5e3773f37da7ed0350d0bd776b97138facdc155e12d1331122b061cccc233f2b"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_common_mess\\model.py",
+      "start": 8,
+      "end": 20,
+      "meaning": "Process RSS/private/high-water and actual RAM/commit counters are stored separately.",
+      "sha256": "5462bfe7670168e4e25b97b79ee4dabacc840105bb7ad7077fc9574d0a9e99ad"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_common_mess\\engine.py",
+      "start": 214,
+      "end": 240,
+      "meaning": "Solver MemUsed/MaxMemUsed attributes differ from whole-process memory_after_native.",
+      "sha256": "2d9ee94cb78d9dddbc0b6669809ab6a9ee0ca12ea3eb8010fc12514b1be749e3"
+    },
+    {
+      "file": "D:\\v42_svr11_epoch18r_20261011\\v42_svr11\\resources.py",
+      "start": 13,
+      "end": 32,
+      "meaning": "Windows GetPerformanceInfo commit counters and new-dispatch admission, no OS paging configuration change.",
+      "sha256": "7597dfcf73aeee6b16ee0094fa95637902b639fad074aa0a16f6aac3a1207589"
+    }
+  ],
+  "actual_pre_Native_readbacks": [
+    {
+      "path": "D:\\v42_dense_response_development_repair_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_restored\\output\\FINAL_NATIVE0_READBACK\\ACTUAL_PARAMETERS.json",
+      "bytes": 5508,
+      "sha256": "60e149dfd8f03086acc850e6781707f0a0dda7dd41cfaea885bd8df1522dd404",
+      "parameters": {
+        "Threads": 1,
+        "Method": 2,
+        "Crossover": 2,
+        "NodeMethod": 1,
+        "TimeLimit": 600.0,
+        "FeasibilityTol": 1e-09,
+        "OptimalityTol": 1e-09,
+        "IntFeasTol": 1e-08,
+        "NumericFocus": 3,
+        "ScaleFlag": 2,
+        "MIPGap": 0.03,
+        "MIPGapAbs": 0.0,
+        "NodefileStart": 0.5,
+        "NodefileDir": "D:\\v42_dense_response_development_repair_20261011\\native_nodes"
+      },
+      "verification": {
+        "PASS": true,
+        "actual_parameters_checked": true,
+        "actual_TimeLimit": 600.0,
+        "recorded_supported_parameters": 208,
+        "Native_optimize_calls": 0
+      },
+      "rows": 715596,
+      "columns": 354277,
+      "nonzeros": 7911369
+    },
+    {
+      "path": "D:\\v42_dense_response_development_repair_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_restored\\output\\INITIALIZATION\\F1_STATIONARY_FULL_REPRESENTATIVES\\ACTUAL_PARAMETERS_BEFORE_NATIVE.json",
+      "bytes": 5377,
+      "sha256": "affbfe06da2459fc245a2700fc8cb96b64420b089b55572614571d2e835826b2",
+      "parameters": {
+        "Threads": 1,
+        "Method": 1,
+        "Crossover": -1,
+        "NodeMethod": -1,
+        "TimeLimit": 120.0,
+        "FeasibilityTol": 1e-09,
+        "OptimalityTol": 1e-09,
+        "IntFeasTol": 1e-08,
+        "NumericFocus": 3,
+        "ScaleFlag": 2,
+        "MIPGap": 0.005,
+        "MIPGapAbs": 1e-10,
+        "NodefileStart": "inf",
+        "NodefileDir": "D:\\v42_dense_response_root_measurement_20261011\\native_nodes"
+      },
+      "verification": null,
+      "rows": 715596,
+      "columns": 354277,
+      "nonzeros": 7911369
+    },
+    {
+      "path": "D:\\v42_dense_response_development_repair_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_restored\\output\\FRESH_U4\\ACTUAL_PARAMETERS_BEFORE_NATIVE.json",
+      "bytes": 5337,
+      "sha256": "da71f4f25846b5933c0c4175d65e517e66c1f1dd27c4cedeba4449ccdf9de9d3",
+      "parameters": {
+        "Threads": 1,
+        "Method": 2,
+        "Crossover": -1,
+        "NodeMethod": -1,
+        "TimeLimit": 90.0,
+        "FeasibilityTol": 1e-09,
+        "OptimalityTol": 1e-09,
+        "IntFeasTol": 1e-08,
+        "NumericFocus": 3,
+        "ScaleFlag": 2,
+        "MIPGap": 0.005,
+        "MIPGapAbs": 1e-10,
+        "NodefileStart": "inf",
+        "NodefileDir": "D:\\v42_dense_response_root_measurement_20261011\\native_nodes"
+      },
+      "verification": null,
+      "rows": 715597,
+      "columns": 354277,
+      "nonzeros": 7912217
+    },
+    {
+      "path": "D:\\v42_dense_response_development_repair_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_restored\\output\\FULL_ROOT_ONCE\\ACTUAL_PARAMETERS_BEFORE_NATIVE.json",
+      "bytes": 5498,
+      "sha256": "4d0e86d1548d966da6938ef2cdb278c6d5adaf8cd36800fd4358a7ae47e31a74",
+      "parameters": {
+        "Threads": 1,
+        "Method": 2,
+        "Crossover": 2,
+        "NodeMethod": 1,
+        "TimeLimit": 600.0,
+        "FeasibilityTol": 1e-09,
+        "OptimalityTol": 1e-09,
+        "IntFeasTol": 1e-08,
+        "NumericFocus": 3,
+        "ScaleFlag": 2,
+        "MIPGap": 0.03,
+        "MIPGapAbs": 0.0,
+        "NodefileStart": 0.5,
+        "NodefileDir": "D:\\v42_dense_response_root_measurement_20261011\\native_nodes"
+      },
+      "verification": {
+        "PASS": true,
+        "actual_parameters_checked": true,
+        "actual_TimeLimit": 600.0,
+        "recorded_supported_parameters": 208,
+        "Native_optimize_calls": 0
+      },
+      "rows": 715596,
+      "columns": 354277,
+      "nonzeros": 7911369
+    }
+  ],
+  "completed_native_runtime_ledger": {
+    "path": "D:\\v42_dense_response_root_measurement_20261011\\NATIVE_RUNTIME_LEDGER.json",
+    "bytes": 3730,
+    "sha256": "29216e372bf7ca51d4829f461163634bd8824bda80f956dac69386ca479f0b68"
+  },
+  "completed_native_calls": [
+    {
+      "track": "M_START",
+      "label": "F1_STATIONARY_FULL_REPRESENTATIVES",
+      "effective_TimeLimit": 120.0,
+      "Native_Runtime": 5.328000068664551,
+      "Native_status": 2,
+      "root_completed": false
+    },
+    {
+      "track": "M_U4",
+      "label": "FRESH_U4",
+      "effective_TimeLimit": 90.0,
+      "Native_Runtime": 38.50699996948242,
+      "Native_status": 2,
+      "root_completed": false
+    },
+    {
+      "track": "M_FULL_MILP",
+      "label": "FULL_ROOT_ONCE",
+      "effective_TimeLimit": 600.0,
+      "Native_Runtime": 601.896999835968,
+      "Native_status": 9,
+      "root_completed": false
+    }
+  ],
+  "full_observation": {
+    "result": {
+      "path": "D:\\v42_dense_response_development_repair_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_restored\\output\\FULL_ROOT_ONCE\\RESULT.json",
+      "bytes": 4440,
+      "sha256": "28fea4d2a4f0d54226e670ba42db7d6d945eb99f77b03416f76bd44c7158116c"
+    },
+    "Native_Runtime": 601.896999835968,
+    "requested_TimeLimit": 600.0,
+    "Native_status": 9,
+    "Native_Work": 830.5951032362622,
+    "Root_status": "NATIVE_LOG_ROOT_INTERRUPTED",
+    "Root_incomplete_elapsed_seconds": 528.89,
+    "Root_completed_seconds": null,
+    "Presolve_seconds": 70.78,
+    "Crossover_seconds": null,
+    "Solver_MemUsed_GB": 1.113224838,
+    "Solver_MaxMemUsed_GB": 3.263167186,
+    "whole_process_and_system_after_native": {
+      "RSS_bytes": 5281120256,
+      "private_bytes": 6511312896,
+      "peak_RSS_bytes": 6404554752,
+      "peak_private_commit_bytes": 9086836736,
+      "RAM_available": 9548398592,
+      "RAM_total": 34049220608,
+      "RAM_used": 24500822016,
+      "Commit_total": 48362708992,
+      "Commit_limit": 68408958976,
+      "Commit_available": 20046249984,
+      "Commit_peak": 68408958976
+    },
+    "converted_GiB": {
+      "RSS_bytes": 4.918426513671875,
+      "private_bytes": 6.0641326904296875,
+      "peak_RSS_bytes": 5.9647064208984375,
+      "peak_private_commit_bytes": 8.462776184082031,
+      "RAM_available": 8.89263916015625,
+      "RAM_total": 31.71080780029297,
+      "RAM_used": 22.81816864013672,
+      "Commit_total": 45.041282653808594,
+      "Commit_limit": 63.71080780029297,
+      "Commit_available": 18.669525146484375,
+      "Commit_peak": 63.71080780029297
+    },
+    "RAM_used_percent_at_return": 71.95707149385802,
+    "Commit_used_percent_at_return": 70.69645513677112
+  },
+  "postvalidation_memory": {
+    "RSS_bytes": 4305661952,
+    "private_bytes": 5384048640,
+    "peak_RSS_bytes": 6404554752,
+    "peak_private_commit_bytes": 9086836736,
+    "RAM_available": 10472296448,
+    "RAM_total": 34049220608,
+    "RAM_used": 23576924160,
+    "Commit_total": 47316512768,
+    "Commit_limit": 68408958976,
+    "Commit_available": 21092446208,
+    "Commit_peak": 68408958976
+  },
+  "current_read_only_system_snapshot": {
+    "UTC": "2026-10-11T15:07:19.484330+00:00",
+    "RAM_total": 34049220608,
+    "RAM_available": 17985880064,
+    "RAM_used": 16063340544,
+    "RAM_used_percent": 47.2,
+    "Commit_total": 37953753088,
+    "Commit_limit": 68408958976,
+    "Commit_available": 30455205888,
+    "Commit_peak": 68408958976
+  },
+  "metric_scope": [
+    "Solver MemUsed/MaxMemUsed are solver attributes, not whole Python/CSR/proof/helper/baseline process memory.",
+    "peak_RSS and peak_private_commit from Windows process memory_info are process-lifetime high-water counters: restore, verification, selected-model construction, initialization/U4/Full can contribute. They are not isolated Full600 interval peaks.",
+    "RAM/commit at return, postvalidation, and current snapshot are distinct system-wide instants and include other processes. No synchronous whole-system RAM or commit peak trace is available in these saved snapshots.",
+    "System Commit_peak is a global historical high-water counter, not timestamped to this Full run. Commit_peak==Commit_limit does not prove this Root run exhausted system commit.",
+    "The user reports about90% memory with two workers. Its source/PIDs/timestamp and memory metric are not paired here with the single-process repaired Source18 Root telemetry. It is a separate user-reported operational constraint; no two-worker or multithread capacity is inferred from this Root.",
+    "NodefileStart0.5/NodefileDir onD are existing solver disk policies; they do not establish low Root matrix/factor/process memory or authorize changing OS virtual memory."
+  ],
+  "PR131_reference_only": {
+    "primary": {
+      "path": "D:\\v42_root_analysis_audit_20261012\\PR131_PRIMARY_REFERENCE_ONLY.json",
+      "bytes": 149417,
+      "sha256": "b92ed9a8ee756ef602b50375656198f26844311f9cff61950766890ad7a62b70"
+    },
+    "url": "https://github.com/BeaverVillage/MobileESS/pull/131",
+    "exact_head": "a16af252538774b2b2034a8722c31c0ffe5874a9",
+    "historical_matrix_identity": {
+      "optimizer_calls": 0,
+      "parent_exact_head": "573517629a0445472da2f755460032ee9322e968",
+      "results": {
+        "original": {
+          "parent_scientific_signature": "a2d08eae6b9194f576e134c89da1d62a003e1304f751e480f5cd235f069ae821",
+          "parent_cold_fingerprint_unsigned": 337661294,
+          "rows": 954560,
+          "columns": 316743,
+          "nnz": 8282350
+        },
+        "compact": {
+          "parent_scientific_signature": "a4eab472d9c0831a0b9cc71f51cee7f4ecfa4126b4c57fedc3afd4ef62a9fe1f",
+          "parent_cold_fingerprint_unsigned": 2166791751,
+          "rows": 972540,
+          "columns": 316839,
+          "nnz": 12678118
+        }
+      }
+    },
+    "historical_source_paths": [
+      {
+        "path": "v42_root_diagnostics/common.py",
+        "url": "https://github.com/BeaverVillage/MobileESS/blob/a16af252538774b2b2034a8722c31c0ffe5874a9/v42_root_diagnostics%2Fcommon.py",
+        "exact_head": "a16af252538774b2b2034a8722c31c0ffe5874a9",
+        "selected_lines": [
+          {
+            "line": 15,
+            "text": "LP_POLICY=dict(Threads=4,Seed=20260929,NumericFocus=1,FeasibilityTol=1e-8,OptimalityTol=1e-8)"
+          },
+          {
+            "line": 16,
+            "text": "MIP_POLICY=dict(LP_POLICY,Method=2,NodeMethod=1,IntFeasTol=1e-8,Heuristics=0,MIPGap=.005,MIPFocus=0)"
+          },
+          {
+            "line": 84,
+            "text": "        Gurobi_Threads=4,environment={k:os.environ.get(k) for k in ['OPENBLAS_NUM_THREADS','OMP_NUM_THREADS','MKL_NUM_THREADS','NUMEXPR_NUM_THREADS']})"
+          }
+        ]
+      },
+      {
+        "path": "v42_root_diagnostics/worker.py",
+        "url": "https://github.com/BeaverVillage/MobileESS/blob/a16af252538774b2b2034a8722c31c0ffe5874a9/v42_root_diagnostics%2Fworker.py",
+        "exact_head": "a16af252538774b2b2034a8722c31c0ffe5874a9",
+        "selected_lines": [
+          {
+            "line": 57,
+            "text": "        policy=dict(MIP_POLICY if mip else LP_POLICY,Method=method,TimeLimit=seconds)"
+          }
+        ]
+      }
+    ],
+    "historical_LP_Method2_seconds": {
+      "Original": 74.08,
+      "Compact": 128.812
+    },
+    "historical_MIP_original_Root_seconds": 208.621,
+    "historical_MIP_compact_Root_complete": false,
+    "historical_resource_instant_RootLP": {
+      "ORIGINAL": {
+        "UTC": "2026-10-03T03:56:11Z",
+        "Gurobi_Threads": 4,
+        "RAM": {
+          "total": 34049220608,
+          "available": 18149752832,
+          "percent": 46.7,
+          "used": 15899467776,
+          "free": 18149752832
+        },
+        "independent_jobs_allowed": true,
+        "resource_contention_absence_required": false
+      },
+      "COMPACT": {
+        "UTC": "2026-10-03T04:18:00Z",
+        "Gurobi_Threads": 4,
+        "RAM": {
+          "total": 34049220608,
+          "available": 19616256000,
+          "percent": 42.4,
+          "used": 14432964608,
+          "free": 19616256000
+        },
+        "independent_jobs_allowed": true,
+        "resource_contention_absence_required": false
+      }
+    },
+    "current_transfer_rejected": true,
+    "reasons": [
+      "Latest user withdrew higher-thread recommendation and requiresThreads1/currentworkers. Historical measurement is not authorization.",
+      "PR131 uses different PR126 science/matrix/anchor and Original954560x316743/8282350NNZ or Compact972540x316839/12678118NNZ. Current Dense is715596x354277/7911369NNZ with different Forecast/SVR11 response.",
+      "Historical fast74/129s results are fresh fully relaxed LPs; its MIP Root differed, Original208.621s and Compact incomplete at300s. Current result is one MIP Root601.897s with incomplete crossover.",
+      "Historical LP_POLICY usesThreads4/NumericFocus1/FeasibilityTol1e-8/OptimalityTol1e-8; current actual Full usesThreads1/NumericFocus3/1e-9. No same-source controlledThreads-only comparison exists.",
+      "Historical resource receipts are before-run system instants with~18–20GB RAM available and explicitly allow independent jobs. They are not matched whole-process peak or current two-worker memory evidence.",
+      "PR131 was stopped after partial diagnostics; many arms and production wereNOT_RUN, and its body explicitly authorizes no further diagnostic solve. No current runtime or memory claim can be transferred."
+    ]
+  },
+  "operations": {
+    "Native_calls_by_auditor": 0,
+    "models_built": 0,
+    "source_edits": 0,
+    "thread_or_worker_config_mutations": 0,
+    "StageBudget_A1_A2_NativeStop_userA_commonStop_edits": 0,
+    "VirtualMemory_or_paging_mutations": 0,
+    "old_LP_points_ingested": 0,
+    "new_optimization_or_campaign_dispatch": 0
+  },
+  "conclusion": "MAINTAIN_THREADS1_AND_CURRENT_WORKER_POLICY_NO_HIGHER_THREAD_RECOMMENDATION_OR_RUN"
+}

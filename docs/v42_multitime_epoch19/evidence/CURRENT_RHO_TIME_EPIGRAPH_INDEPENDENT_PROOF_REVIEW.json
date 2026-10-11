@@ -1,0 +1,221 @@
+{
+  "schema": "CURRENT_RHO_TIME_EPIGRAPH_EXACT_PROJECTION_STATIC_COST_REVIEW_V1",
+  "PASS": true,
+  "UTC": "2026-10-11T15:10:02.034690+00:00",
+  "checks": [
+    {
+      "name": "actual rho incidence certificate PASS",
+      "PASS": true
+    },
+    {
+      "name": "current source artifact bound D:\\v42_dense_response_development_repair_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_restored\\output\\DENSE_RESPONSE_A.npz",
+      "PASS": true
+    },
+    {
+      "name": "current source artifact bound D:\\v42_dense_response_development_repair_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_restored\\output\\DENSE_RESPONSE_DATA.npz",
+      "PASS": true
+    },
+    {
+      "name": "current source artifact bound D:\\v42_dense_response_development_repair_20261011\\NATIVE0_VALIDATION.json",
+      "PASS": true
+    },
+    {
+      "name": "independent unique actual rho axis",
+      "PASS": true
+    },
+    {
+      "name": "independent exact rho continuous box/objective",
+      "PASS": true
+    },
+    {
+      "name": "scalar rho certificate matches independently read stored domain",
+      "PASS": true
+    },
+    {
+      "name": "all actual replaced incidences have correct sign sense and family",
+      "PASS": true
+    },
+    {
+      "name": "all96 actual slot axes and incidences covered",
+      "PASS": true
+    },
+    {
+      "name": "exact scalar incidence cost",
+      "PASS": true
+    },
+    {
+      "name": "fanout predicted exactly from incidence",
+      "PASS": true
+    },
+    {
+      "name": "helper/link domain satisfies exact projection conditions",
+      "PASS": true
+    },
+    {
+      "name": "uncoalesced clique proxy recomputed",
+      "PASS": true
+    },
+    {
+      "name": "exact all-real projection proof and small rational fixture PASS",
+      "PASS": true
+    },
+    {
+      "name": "no unconditional fill or memory decrease follows from proxy",
+      "PASS": true
+    },
+    {
+      "name": "actual matrix not constructed and Native/model/source operations0",
+      "PASS": true
+    }
+  ],
+  "source_SHA": "146bf39f5e4f9d720ef7118051edbcdc58b96ca3d83af31c3e7bd5349f1fecd8",
+  "case_SHA": "34c0efffa9c05397552fb167667c0bbfe2f35cec89801a3169c00c64fe77f292",
+  "selected_matrix_SHA": "ed9fd6db73bf47948505cca3a616edf88c7caebdacce8f1dd1007617d6660ef0",
+  "selected_domain_SHA": "6fd03585e9544f759d4001754a7f28ff04958b078f1959c25f9b397bd45b84f4",
+  "actual_coefficient_scope": "Actual-current CSR incidence certificate covers ALL333689 rho entries: only line_thermal_face, sense<=, stored coefficient exactly-1, every slot0..95. This review independently reads original rho stored domain/objective, rehashes bound current artifacts and replays certificate scalar algebra; it does not reload the full CSR or construct an extension matrix.",
+  "mathematical_proof": {
+    "original_row": "g_i(x)+c_i*rho<=b_i",
+    "condition": "All replaced normalized stored coefficients c_i<=0. All unchanged rho rows, bounds, type and objective remain exactly original.",
+    "extension": "g_i(x)+c_i*tau_t<=b_i; tau_t-rho<=0; helper continuous bounds contain the actual global rho interval; helper objective0",
+    "forward": "For every original feasible real/integer point, set all tau_t=rho. Every replaced row and link holds. No arithmetic or coefficient approximation is needed.",
+    "reverse": "For every extension feasible point, tau_t<=rho and c_i<=0 imply g_i(x)+c_i*rho<=g_i(x)+c_i*tau_t<=b_i. Drop the helpers; every original row remains feasible.",
+    "objective": "The objective uses only unchanged original coordinates, so its value and projected integer optimum and LP optimum are exactly preserved.",
+    "integer": "All original integer types/domains are untouched. New tau coordinates are continuous.",
+    "exactness": "Every stored coefficient/RHS/bound is copied unchanged; relocation of an original rho coefficient does not compute a new coefficient. Link coefficients +/-1 and RHS0 are exactly binary64-representable."
+  },
+  "integer_and_full_LP_projection_identical": true,
+  "LP_optimum_strengthened": false,
+  "proposed_cost": {
+    "new_rows": 96,
+    "new_continuous_columns": 96,
+    "new_binary": 0,
+    "new_NNZ": 192,
+    "rows": 715692,
+    "columns": 354373,
+    "binary": 9322,
+    "NNZ": 7911561,
+    "new_NNZ_fraction_of_baseline": "64/2637123"
+  },
+  "degree": {
+    "old_global": 333689,
+    "new_global": 96,
+    "new_tau_min": 2516,
+    "new_tau_max": 3545
+  },
+  "graph_proxy": {
+    "before_uncoalesced_row_pairs": 55674007516,
+    "after_uncoalesced_row_pairs": 581040157,
+    "reduction": 55092967359,
+    "meaning": "Original rho-only uncoalesced potential row pairs. Other shared columns may already connect the same pairs; presolve, ordering and dense-column treatment are excluded. Not actual Cholesky factor NNZ, operations or RAM."
+  },
+  "memory_and_runtime": {
+    "native_presolve_retains_helpers": "UNKNOWN",
+    "actual_factor_NNZ_change": "UNKNOWN",
+    "actual_factor_Ops_change": "UNKNOWN",
+    "process_peak_RSS_nonincrease": "UNPROVEN",
+    "system_commit_nonincrease": "UNPROVEN",
+    "Root_runtime_gain": "UNPROVEN",
+    "current_Threads": 1,
+    "worker_increase_allowed": false,
+    "large_model_generation_allowed": false
+  },
+  "small_fill_counterexample": {
+    "schema": "RHO_TIME_EPIGRAPH_STRUCTURAL_FILL_ORDER_CAUTION_V1",
+    "PASS": true,
+    "UTC": "2026-10-11T15:07:39.704896+00:00",
+    "original_normal_graph_edges": 15,
+    "split_normal_graph_edges": 13,
+    "original_symbolic_factor_entries": 21,
+    "split_links_first_symbolic_factor_entries": 33,
+    "split_faces_first_symbolic_factor_entries": 21,
+    "links_first_steps": [
+      {
+        "row": "link0",
+        "remaining_degree": 4
+      },
+      {
+        "row": "link1",
+        "remaining_degree": 6
+      },
+      {
+        "row": "f0_0",
+        "remaining_degree": 5
+      },
+      {
+        "row": "f0_1",
+        "remaining_degree": 4
+      },
+      {
+        "row": "f0_2",
+        "remaining_degree": 3
+      },
+      {
+        "row": "f1_0",
+        "remaining_degree": 2
+      },
+      {
+        "row": "f1_1",
+        "remaining_degree": 1
+      },
+      {
+        "row": "f1_2",
+        "remaining_degree": 0
+      }
+    ],
+    "meaning": "The split lowers raw normal-graph edges13versus15 but a valid elimination order raises symbolic factor entries33versus21. This disproves any unconditional raw-fanout-to-fill or RAM-nonincreasing implication. It is not a measured current-Gurobi factorization or memory prediction.",
+    "actual_native_factor_or_memory_measured": false,
+    "Native_calls": 0,
+    "model_builds": 0,
+    "full_matrix_mutations": 0
+  },
+  "power_of_two_scaling": {
+    "status": "THEORETICAL_CONDITIONS_ONLY_NOT_IMPLEMENTED",
+    "row_rule": "Multiply complete stored row and RHS by a positive exact2^k; keep sense. Reject if any finite nonzero transformed value is nonrepresentable, zero, overflowed or rounded.",
+    "column_rule": "For continuous columns only let originalx=2^k*newz; multiply that column and objective by2^k, divide both finite bounds by2^k. Integer/binary columns keep k=0; global rho k=0 keeps original P1 coefficient. Exact real inverse required.",
+    "arithmetic_rule": "Independently compare every resulting binary64 value to Fraction(original)*2^k (or divided bounds). No decimal reconstruction, threshold pruning, subnormal rounding or zeroing. Infinity bounds retain signs.",
+    "inverse_rule": "A mapped native float must equal the exact rational inverse; reject a packet with underflow/rounding rather than repair or clip it.",
+    "native_rule": "Even mathematically exact binary64 shifts may create coefficients the backend omits. Future actual CSR/RHS/sense/objective/type/bound readback must match exactly before any optimization.",
+    "matrix_size": "Rows/columns/binaries/NNZ and structural graph unchanged. Scaling offers no structural fill reduction proof; current internalScaleFlag2 stays unchanged.",
+    "benefit": "Numerical conditioning and runtime benefit UNKNOWN; no scaling coefficients selected or applied."
+  },
+  "concrete_future_Native0_prototype": {
+    "scope": "Separate successor after explicit approval and memory gate, with independent producer/verifier on tiny fixture first; no production adoption here.",
+    "producer": "Append tau_t[0..95] C with exact[0,1]/objective0; relocate only certified stored-1rho entries to slot tau columns without coefficient arithmetic; append tau_t-rho<=0. Stream or reuse sparse buffers within explicit peak-memory cap; retain immutable baseline artifacts.",
+    "verifier": "Bind baseline matrix/domain/axes/source SHA; check every replacement retains all other stored row coefficients/RHS/sense; check all helpers, +/-1 links and exact domains; prove forwardtau_t=rho/inversedroptau; compose original FULL transport and strict integer/fractional-domain proof.",
+    "gates": "No Gurobi optimize/presolve/model build or full-size matrix prototype currently authorized. Any later experiment requires explicit approval, actual no-memory-increase evidence and fixedThreads1/worker budget; one experiment only, no sweeps/repeats.",
+    "warm_map": "Use tau_t=rho exactly; no clipping, rounding or repair.",
+    "actual_native_readback": "Required in any later approved native preparation; no such model was built for this report."
+  },
+  "evidence": [
+    {
+      "path": "D:\\v42_multitime_audit_20261011\\root_barrier\\CURRENT_DENSE_RHO_COLUMN_CERTIFICATE.json",
+      "sha256": "98f9530b0d9dbfc0b7aba9c89303de3869f017bb853eb9d126307fb2fa24911c",
+      "bytes": 6309
+    },
+    {
+      "path": "D:\\v42_multitime_audit_20261011\\root_barrier\\CURRENT_DENSE_RHO_PER_SLOT.csv",
+      "sha256": "db496d962388f91e726b8660381e19fd7ce2646192c22e0dcc88e5a796dd9d6b",
+      "bytes": 1386
+    },
+    {
+      "path": "D:\\v42_multitime_audit_20261011\\EXACT_RHO_TIME_EPIGRAPH_FIXTURE.json",
+      "sha256": "478e5059893c5021c1e4ff668d9ef665077548ccf16cca59655031336213d716",
+      "bytes": 2610
+    },
+    {
+      "path": "D:\\v42_multitime_audit_20261011\\RHO_EPIGRAPH_FILL_ORDER_COUNTEREXAMPLE.json",
+      "sha256": "5cc9185a0f05e9c4037c8ce3bdb297eb8dbcc11abd0e79cbad5b3b94dea165b8",
+      "bytes": 1341
+    }
+  ],
+  "rows_inserted": 0,
+  "columns_inserted": 0,
+  "binary_inserted": 0,
+  "NNZ_inserted": 0,
+  "Native_calls": 0,
+  "Gurobi_presolve_calls": 0,
+  "model_builds": 0,
+  "production_source_writes": 0,
+  "campaign_HOLD": true,
+  "conclusion": "EXACT_PROJECTION_PROVEN_STATIC_COST_SMALL_ROOT_FILL_RAM_BENEFIT_UNPROVEN_NO_ADOPTION"
+}
