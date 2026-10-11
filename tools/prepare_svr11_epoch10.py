@@ -69,7 +69,7 @@ def origin_workers():
             # read-only resample rather than relax the approved directory set.
             observed=[]
             for sample in range(25):
-                cwd=Path(p.cwd());observed.append(str(cwd))
+                cwd=Path(p.cwd()).resolve();observed.append(str(cwd))
                 if cwd in allowed:break
                 time.sleep(.02)
             else:raise PermissionError('TRANSFER_PREDECESSOR_CHECKOUT_DRIFT:'+json.dumps(dict(observed=observed,approved=list(map(str,allowed)))))
