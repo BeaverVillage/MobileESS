@@ -1,7 +1,7 @@
 {
   "schema": "V42_SVR11_CAMPAIGN_REPORT_V1",
   "status": "IN_PROGRESS",
-  "completed": 31,
+  "completed": 34,
   "total": 124,
   "source_SHA": "95f7b468808c191d7b77d7f74accb9d3622be612e050146fd12ebbede54fafc9",
   "hardware": {
@@ -26,12 +26,12 @@
     },
     {
       "policy": "B2",
-      "PASS": 0,
+      "PASS": 3,
       "FAIL": 0,
       "RUNNING": 3,
-      "NOT_EXECUTED": 28,
+      "NOT_EXECUTED": 25,
       "performance_population": "PASS dates for this policy only",
-      "mean_Actual_maximum_line_loading": null
+      "mean_Actual_maximum_line_loading": 0.6515701245067
     },
     {
       "policy": "B1",
@@ -58,8 +58,12 @@
         "B0",
         "B2"
       ],
-      "same_PASS_dates": [],
-      "n": 0
+      "same_PASS_dates": [
+        "2025-05-01",
+        "2025-05-02",
+        "2025-05-03"
+      ],
+      "n": 3
     },
     {
       "policies": [
@@ -21345,7 +21349,7 @@
     {
       "arm": "B2",
       "day": "2025-05-01",
-      "status": "RUNNING",
+      "status": "PASS",
       "attempts": [
         "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json"
       ],
@@ -21363,18 +21367,674 @@
           "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json"
         ],
         "cwd": "D:\\v42_svr11_epoch09_20261011",
-        "CPU_seconds": 60.984375,
-        "UTC": "2026-10-10T23:18:41.333358+00:00",
+        "CPU_seconds": 2596.828125,
+        "UTC": "2026-10-11T00:01:39.241579+00:00",
         "arm": "B2",
         "day": "2025-05-01",
         "worker_slot": 1,
         "request": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json"
-      }
+      },
+      "result": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\RESULT.json",
+      "result_SHA": "2b90a2ec03d40b9eb259755ce01b9a7087a599ea4204da0dd9aaea825656c9c5",
+      "reason": "COMPLETED_PHYSICAL_PASS",
+      "metrics": {
+        "environments": {
+          "ACTUAL": {
+            "slots": 96,
+            "Vmin": 0.9628531643746494,
+            "Vmax": 1.0462261333508565,
+            "voltage_violations": 0,
+            "line_current_violations": 0,
+            "transformer_current_violations": 0,
+            "transformer_nameplate_current_violations": 0,
+            "transformer_kVA_violations": 0,
+            "maximum_line_loading": 0.7095277094366702,
+            "losses_kWh": 1453.4203992101545,
+            "losses_kvarh": 2438.6850039904884,
+            "AC_converged": true,
+            "control_complete": true,
+            "Full_AC_Physical_PASS": true,
+            "SVR11_finite_rating_and_taps": true,
+            "original_RegControl_count": 7,
+            "SVR_bank_count": 11,
+            "phase_tap_operation_evidence": {
+              "bytes": 36094562,
+              "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\SVR11\\VOLTAGE_CONTROL_ACTUAL_SLOTS.json",
+              "sha256": "aa0d649aa239452d1d6134a8827300925b09443acb85e6e8054b68e76af2a3ed"
+            },
+            "SVR_tap_ranges": {
+              "STA01::1": {
+                "min": 0.9625000000000001,
+                "max": 1.0437500000000006,
+                "changes": 45
+              },
+              "STA01::2": {
+                "min": 0.9437500000000002,
+                "max": 1.0250000000000004,
+                "changes": 44
+              },
+              "STA01::3": {
+                "min": 0.9625000000000001,
+                "max": 1.0375000000000005,
+                "changes": 48
+              },
+              "STA06::1": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 32
+              },
+              "STA06::2": {
+                "min": 0.9312500000000002,
+                "max": 1.0,
+                "changes": 33
+              },
+              "STA06::3": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 32
+              },
+              "STA08::1": {
+                "min": 0.9437500000000002,
+                "max": 0.99375,
+                "changes": 13
+              },
+              "STA08::2": {
+                "min": 0.9375000000000002,
+                "max": 1.0,
+                "changes": 12
+              },
+              "STA08::3": {
+                "min": 0.9437500000000002,
+                "max": 1.0,
+                "changes": 13
+              },
+              "BUS83::1": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 14
+              },
+              "BUS83::2": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 15
+              },
+              "BUS83::3": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 12
+              },
+              "BUS79::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9687500000000001,
+                "changes": 5
+              },
+              "BUS79::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 4
+              },
+              "BUS79::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS108::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 5
+              },
+              "BUS108::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "BUS108::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 5
+              },
+              "BUS50::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 2
+              },
+              "BUS50::2": {
+                "min": 0.9812500000000001,
+                "max": 0.99375,
+                "changes": 2
+              },
+              "BUS50::3": {
+                "min": 1.0,
+                "max": 1.0,
+                "changes": 0
+              },
+              "BUS82::1": {
+                "min": 0.9562500000000002,
+                "max": 0.9687500000000001,
+                "changes": 11
+              },
+              "BUS82::2": {
+                "min": 0.9562500000000002,
+                "max": 0.9687500000000001,
+                "changes": 7
+              },
+              "BUS82::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9687500000000001,
+                "changes": 7
+              },
+              "BUS48::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 2
+              },
+              "BUS48::2": {
+                "min": 0.9812500000000001,
+                "max": 0.99375,
+                "changes": 4
+              },
+              "BUS48::3": {
+                "min": 1.0,
+                "max": 1.0,
+                "changes": 0
+              },
+              "BUS86::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 5
+              },
+              "BUS86::2": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS86::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 2
+              },
+              "BUS62::1": {
+                "min": 1.0,
+                "max": 1.0187500000000003,
+                "changes": 7
+              },
+              "BUS62::2": {
+                "min": 0.9812500000000001,
+                "max": 1.0,
+                "changes": 3
+              },
+              "BUS62::3": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 4
+              }
+            },
+            "original_RegControl_tap_ranges": {
+              "creg1a": {
+                "min": 1.0187500000000003,
+                "max": 1.0312500000000004,
+                "changes": 4
+              },
+              "creg2a": {
+                "min": 0.99375,
+                "max": 1.0,
+                "changes": 3
+              },
+              "creg3a": {
+                "min": 0.99375,
+                "max": 1.0125000000000002,
+                "changes": 33
+              },
+              "creg3c": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 27
+              },
+              "creg4a": {
+                "min": 1.0312500000000004,
+                "max": 1.0500000000000007,
+                "changes": 10
+              },
+              "creg4b": {
+                "min": 1.0125000000000002,
+                "max": 1.0250000000000004,
+                "changes": 6
+              },
+              "creg4c": {
+                "min": 1.0250000000000004,
+                "max": 1.0375000000000005,
+                "changes": 6
+              }
+            },
+            "BUS86_BUS62_original_control_interaction": {
+              "BUS86": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 4
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 2
+                }
+              ],
+              "BUS62": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 5
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 4
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 4
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 4
+                }
+              ]
+            },
+            "BUS82_BUS83_serial_interaction": {
+              "observations": [
+                {
+                  "phase": 1,
+                  "simultaneous_boundary_tap_changes": 4,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 2,
+                  "simultaneous_boundary_tap_changes": 2,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 3,
+                  "simultaneous_boundary_tap_changes": 2,
+                  "opposite_boundary_tap_changes": 0
+                }
+              ],
+              "interpretation": "Observed boundary tap co-movement only; event receipts retain subslot actions. Causal absence of interference is not certified."
+            }
+          },
+          "DAYAHEAD": {
+            "slots": 96,
+            "Vmin": 0.9603779990449071,
+            "Vmax": 1.0460161453935068,
+            "voltage_violations": 0,
+            "line_current_violations": 0,
+            "transformer_current_violations": 0,
+            "transformer_nameplate_current_violations": 0,
+            "transformer_kVA_violations": 0,
+            "maximum_line_loading": 0.6748318239836156,
+            "losses_kWh": 1449.8344868459633,
+            "losses_kvarh": 2431.2633919794403,
+            "AC_converged": true,
+            "control_complete": true,
+            "Full_AC_Physical_PASS": true,
+            "SVR11_finite_rating_and_taps": true,
+            "original_RegControl_count": 7,
+            "SVR_bank_count": 11,
+            "phase_tap_operation_evidence": {
+              "bytes": 36073525,
+              "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_SLOTS.json",
+              "sha256": "69e67675ca899c958e3064f87740e0aba5e4255986d5ad79fb2c6581dacbea53"
+            },
+            "SVR_tap_ranges": {
+              "STA01::1": {
+                "min": 0.9625000000000001,
+                "max": 1.0437500000000006,
+                "changes": 45
+              },
+              "STA01::2": {
+                "min": 0.9437500000000002,
+                "max": 1.0250000000000004,
+                "changes": 45
+              },
+              "STA01::3": {
+                "min": 0.9625000000000001,
+                "max": 1.0375000000000005,
+                "changes": 47
+              },
+              "STA06::1": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 31
+              },
+              "STA06::2": {
+                "min": 0.9312500000000002,
+                "max": 1.0,
+                "changes": 34
+              },
+              "STA06::3": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 33
+              },
+              "STA08::1": {
+                "min": 0.9375000000000002,
+                "max": 1.0,
+                "changes": 12
+              },
+              "STA08::2": {
+                "min": 0.9375000000000002,
+                "max": 1.0,
+                "changes": 10
+              },
+              "STA08::3": {
+                "min": 0.9437500000000002,
+                "max": 1.00625,
+                "changes": 12
+              },
+              "BUS83::1": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 10
+              },
+              "BUS83::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 8
+              },
+              "BUS83::3": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 10
+              },
+              "BUS79::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 7
+              },
+              "BUS79::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 2
+              },
+              "BUS79::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS108::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 6
+              },
+              "BUS108::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 2
+              },
+              "BUS108::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "BUS50::1": {
+                "min": 1.00625,
+                "max": 1.0187500000000003,
+                "changes": 4
+              },
+              "BUS50::2": {
+                "min": 0.9812500000000001,
+                "max": 0.99375,
+                "changes": 2
+              },
+              "BUS50::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 4
+              },
+              "BUS82::1": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 7
+              },
+              "BUS82::2": {
+                "min": 0.9562500000000002,
+                "max": 0.9687500000000001,
+                "changes": 3
+              },
+              "BUS82::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9687500000000001,
+                "changes": 7
+              },
+              "BUS48::1": {
+                "min": 1.00625,
+                "max": 1.0187500000000003,
+                "changes": 4
+              },
+              "BUS48::2": {
+                "min": 0.9875,
+                "max": 0.99375,
+                "changes": 1
+              },
+              "BUS48::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 2
+              },
+              "BUS86::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 3
+              },
+              "BUS86::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 2
+              },
+              "BUS86::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 2
+              },
+              "BUS62::1": {
+                "min": 1.0,
+                "max": 1.0187500000000003,
+                "changes": 7
+              },
+              "BUS62::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 1
+              },
+              "BUS62::3": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 4
+              }
+            },
+            "original_RegControl_tap_ranges": {
+              "creg1a": {
+                "min": 1.0187500000000003,
+                "max": 1.0312500000000004,
+                "changes": 4
+              },
+              "creg2a": {
+                "min": 0.99375,
+                "max": 1.0,
+                "changes": 3
+              },
+              "creg3a": {
+                "min": 0.99375,
+                "max": 1.0125000000000002,
+                "changes": 30
+              },
+              "creg3c": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 31
+              },
+              "creg4a": {
+                "min": 1.0375000000000005,
+                "max": 1.0562500000000008,
+                "changes": 13
+              },
+              "creg4b": {
+                "min": 1.0187500000000003,
+                "max": 1.0250000000000004,
+                "changes": 7
+              },
+              "creg4c": {
+                "min": 1.0250000000000004,
+                "max": 1.0375000000000005,
+                "changes": 5
+              }
+            },
+            "BUS86_BUS62_original_control_interaction": {
+              "BUS86": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 4
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 2
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 1
+                }
+              ],
+              "BUS62": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 5
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 3
+                }
+              ]
+            },
+            "BUS82_BUS83_serial_interaction": {
+              "observations": [
+                {
+                  "phase": 1,
+                  "simultaneous_boundary_tap_changes": 1,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 2,
+                  "simultaneous_boundary_tap_changes": 0,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 3,
+                  "simultaneous_boundary_tap_changes": 2,
+                  "opposite_boundary_tap_changes": 0
+                }
+              ],
+              "interpretation": "Observed boundary tap co-movement only; event receipts retain subslot actions. Causal absence of interference is not certified."
+            }
+          }
+        },
+        "evidence": [
+          {
+            "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\SVR11\\VOLTAGE_CONTROL_ACTUAL_PHYSICAL_AUDIT.json",
+            "sha256": "d939169b3ab53d644cbe25cf76b5b1385383f5722fa5d001df0b068cbd03fa67",
+            "bytes": 909268
+          },
+          {
+            "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_PHYSICAL_AUDIT.json",
+            "sha256": "a17896473f1ea30f3b53ac5450b3c0560be765ce741ded0b154db36f8f00d652",
+            "bytes": 909280
+          }
+        ]
+      },
+      "Native_Runtime": 120.41200017929077,
+      "wall_seconds": 2639.3432240000693,
+      "Planning_objective": 0.6760534504652344,
+      "FULL_feasible_certified": true,
+      "global_gap_certified": false,
+      "certified_LB": null,
+      "certified_Gap": null,
+      "optimization_status": "FEASIBLE",
+      "AC_status": "AC PASS",
+      "terminal_history": [
+        {
+          "result": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\RESULT.json",
+          "result_SHA": "2b90a2ec03d40b9eb259755ce01b9a7087a599ea4204da0dd9aaea825656c9c5",
+          "status": "PASS",
+          "reason": "COMPLETED_PHYSICAL_PASS"
+        }
+      ]
     },
     {
       "arm": "B2",
       "day": "2025-05-02",
-      "status": "RUNNING",
+      "status": "PASS",
       "attempts": [
         "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-02\\attempts\\attempt_01\\request.json"
       ],
@@ -21392,18 +22052,674 @@
           "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-02\\attempts\\attempt_01\\request.json"
         ],
         "cwd": "D:\\v42_svr11_epoch09_20261011",
-        "CPU_seconds": 60.921875,
-        "UTC": "2026-10-10T23:18:41.335352+00:00",
+        "CPU_seconds": 2673.984375,
+        "UTC": "2026-10-11T00:02:58.463548+00:00",
         "arm": "B2",
         "day": "2025-05-02",
         "worker_slot": 2,
         "request": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-02\\attempts\\attempt_01\\request.json"
-      }
+      },
+      "result": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-02\\attempts\\attempt_01\\RESULT.json",
+      "result_SHA": "5d6910372075ab38f4d159ce7191956aadfb4b096e9d4b74a39a98a39bf002d7",
+      "reason": "COMPLETED_PHYSICAL_PASS",
+      "metrics": {
+        "environments": {
+          "ACTUAL": {
+            "slots": 96,
+            "Vmin": 0.9617955374321353,
+            "Vmax": 1.048885815238717,
+            "voltage_violations": 0,
+            "line_current_violations": 0,
+            "transformer_current_violations": 0,
+            "transformer_nameplate_current_violations": 0,
+            "transformer_kVA_violations": 0,
+            "maximum_line_loading": 0.6661892056419598,
+            "losses_kWh": 1708.303039032567,
+            "losses_kvarh": 3480.473189977022,
+            "AC_converged": true,
+            "control_complete": true,
+            "Full_AC_Physical_PASS": true,
+            "SVR11_finite_rating_and_taps": true,
+            "original_RegControl_count": 7,
+            "SVR_bank_count": 11,
+            "phase_tap_operation_evidence": {
+              "bytes": 37391629,
+              "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-02\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\SVR11\\VOLTAGE_CONTROL_ACTUAL_SLOTS.json",
+              "sha256": "b2bb07289a30efb2a7b92a0b3f0aa67b8e89653d91b8f87f82afac080de6e393"
+            },
+            "SVR_tap_ranges": {
+              "STA01::1": {
+                "min": 0.9625000000000001,
+                "max": 1.0437500000000006,
+                "changes": 70
+              },
+              "STA01::2": {
+                "min": 0.9437500000000002,
+                "max": 1.0312500000000004,
+                "changes": 71
+              },
+              "STA01::3": {
+                "min": 0.9562500000000002,
+                "max": 1.0375000000000005,
+                "changes": 74
+              },
+              "STA06::1": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 75
+              },
+              "STA06::2": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 75
+              },
+              "STA06::3": {
+                "min": 0.9312500000000002,
+                "max": 1.0125000000000002,
+                "changes": 76
+              },
+              "STA08::1": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 63
+              },
+              "STA08::2": {
+                "min": 0.9312500000000002,
+                "max": 1.0,
+                "changes": 53
+              },
+              "STA08::3": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 57
+              },
+              "BUS83::1": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 31
+              },
+              "BUS83::2": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 35
+              },
+              "BUS83::3": {
+                "min": 0.9812500000000001,
+                "max": 1.0,
+                "changes": 29
+              },
+              "BUS79::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 14
+              },
+              "BUS79::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 7
+              },
+              "BUS79::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 2
+              },
+              "BUS108::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 7
+              },
+              "BUS108::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 6
+              },
+              "BUS108::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 8
+              },
+              "BUS50::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 7
+              },
+              "BUS50::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 8
+              },
+              "BUS50::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 1
+              },
+              "BUS82::1": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 18
+              },
+              "BUS82::2": {
+                "min": 0.9562500000000002,
+                "max": 0.9812500000000001,
+                "changes": 19
+              },
+              "BUS82::3": {
+                "min": 0.9562500000000002,
+                "max": 0.9812500000000001,
+                "changes": 18
+              },
+              "BUS48::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 7
+              },
+              "BUS48::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 8
+              },
+              "BUS48::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 1
+              },
+              "BUS86::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 10
+              },
+              "BUS86::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS86::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 2
+              },
+              "BUS62::1": {
+                "min": 1.0,
+                "max": 1.0187500000000003,
+                "changes": 27
+              },
+              "BUS62::2": {
+                "min": 0.9812500000000001,
+                "max": 1.0,
+                "changes": 23
+              },
+              "BUS62::3": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 36
+              }
+            },
+            "original_RegControl_tap_ranges": {
+              "creg1a": {
+                "min": 1.0125000000000002,
+                "max": 1.0312500000000004,
+                "changes": 17
+              },
+              "creg2a": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 10
+              },
+              "creg3a": {
+                "min": 0.99375,
+                "max": 1.0125000000000002,
+                "changes": 62
+              },
+              "creg3c": {
+                "min": 0.9875,
+                "max": 1.0125000000000002,
+                "changes": 64
+              },
+              "creg4a": {
+                "min": 1.0312500000000004,
+                "max": 1.0562500000000008,
+                "changes": 55
+              },
+              "creg4b": {
+                "min": 1.00625,
+                "max": 1.0375000000000005,
+                "changes": 56
+              },
+              "creg4c": {
+                "min": 1.0187500000000003,
+                "max": 1.0437500000000006,
+                "changes": 54
+              }
+            },
+            "BUS86_BUS62_original_control_interaction": {
+              "BUS86": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 10
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 12
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 9
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 10
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 12
+                }
+              ],
+              "BUS62": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 7
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 6
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 30
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 30
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 39
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 41
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 41
+                }
+              ]
+            },
+            "BUS82_BUS83_serial_interaction": {
+              "observations": [
+                {
+                  "phase": 1,
+                  "simultaneous_boundary_tap_changes": 16,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 2,
+                  "simultaneous_boundary_tap_changes": 16,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 3,
+                  "simultaneous_boundary_tap_changes": 14,
+                  "opposite_boundary_tap_changes": 0
+                }
+              ],
+              "interpretation": "Observed boundary tap co-movement only; event receipts retain subslot actions. Causal absence of interference is not certified."
+            }
+          },
+          "DAYAHEAD": {
+            "slots": 96,
+            "Vmin": 0.9613073945181493,
+            "Vmax": 1.0484459098252508,
+            "voltage_violations": 0,
+            "line_current_violations": 0,
+            "transformer_current_violations": 0,
+            "transformer_nameplate_current_violations": 0,
+            "transformer_kVA_violations": 0,
+            "maximum_line_loading": 0.6230810255067739,
+            "losses_kWh": 1655.8203710973328,
+            "losses_kvarh": 3374.176184531159,
+            "AC_converged": true,
+            "control_complete": true,
+            "Full_AC_Physical_PASS": true,
+            "SVR11_finite_rating_and_taps": true,
+            "original_RegControl_count": 7,
+            "SVR_bank_count": 11,
+            "phase_tap_operation_evidence": {
+              "bytes": 37366510,
+              "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-02\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_SLOTS.json",
+              "sha256": "15278ccbc18c4c7bc3380cf6190b9866e193bb29918339595afe4288cfe8f733"
+            },
+            "SVR_tap_ranges": {
+              "STA01::1": {
+                "min": 0.9625000000000001,
+                "max": 1.0437500000000006,
+                "changes": 73
+              },
+              "STA01::2": {
+                "min": 0.9437500000000002,
+                "max": 1.0312500000000004,
+                "changes": 72
+              },
+              "STA01::3": {
+                "min": 0.9562500000000002,
+                "max": 1.0375000000000005,
+                "changes": 73
+              },
+              "STA06::1": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 79
+              },
+              "STA06::2": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 74
+              },
+              "STA06::3": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 75
+              },
+              "STA08::1": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 55
+              },
+              "STA08::2": {
+                "min": 0.9312500000000002,
+                "max": 1.0,
+                "changes": 53
+              },
+              "STA08::3": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 56
+              },
+              "BUS83::1": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 35
+              },
+              "BUS83::2": {
+                "min": 0.9812500000000001,
+                "max": 1.00625,
+                "changes": 35
+              },
+              "BUS83::3": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 30
+              },
+              "BUS79::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 11
+              },
+              "BUS79::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 8
+              },
+              "BUS79::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS108::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 6
+              },
+              "BUS108::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 6
+              },
+              "BUS108::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS50::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 7
+              },
+              "BUS50::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 6
+              },
+              "BUS50::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 3
+              },
+              "BUS82::1": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 19
+              },
+              "BUS82::2": {
+                "min": 0.9562500000000002,
+                "max": 0.9812500000000001,
+                "changes": 17
+              },
+              "BUS82::3": {
+                "min": 0.9562500000000002,
+                "max": 0.9812500000000001,
+                "changes": 19
+              },
+              "BUS48::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 9
+              },
+              "BUS48::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 8
+              },
+              "BUS48::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 3
+              },
+              "BUS86::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 8
+              },
+              "BUS86::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 3
+              },
+              "BUS86::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS62::1": {
+                "min": 1.0,
+                "max": 1.0187500000000003,
+                "changes": 28
+              },
+              "BUS62::2": {
+                "min": 0.9812500000000001,
+                "max": 1.0,
+                "changes": 26
+              },
+              "BUS62::3": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 27
+              }
+            },
+            "original_RegControl_tap_ranges": {
+              "creg1a": {
+                "min": 1.0125000000000002,
+                "max": 1.0312500000000004,
+                "changes": 17
+              },
+              "creg2a": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 12
+              },
+              "creg3a": {
+                "min": 0.99375,
+                "max": 1.0125000000000002,
+                "changes": 59
+              },
+              "creg3c": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 64
+              },
+              "creg4a": {
+                "min": 1.0312500000000004,
+                "max": 1.0562500000000008,
+                "changes": 55
+              },
+              "creg4b": {
+                "min": 1.0,
+                "max": 1.0437500000000006,
+                "changes": 53
+              },
+              "creg4c": {
+                "min": 1.0187500000000003,
+                "max": 1.0437500000000006,
+                "changes": 55
+              }
+            },
+            "BUS86_BUS62_original_control_interaction": {
+              "BUS86": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 8
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 9
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 8
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 7
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 8
+                }
+              ],
+              "BUS62": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 6
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 5
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 26
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 29
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 36
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 35
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 36
+                }
+              ]
+            },
+            "BUS82_BUS83_serial_interaction": {
+              "observations": [
+                {
+                  "phase": 1,
+                  "simultaneous_boundary_tap_changes": 16,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 2,
+                  "simultaneous_boundary_tap_changes": 16,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 3,
+                  "simultaneous_boundary_tap_changes": 15,
+                  "opposite_boundary_tap_changes": 0
+                }
+              ],
+              "interpretation": "Observed boundary tap co-movement only; event receipts retain subslot actions. Causal absence of interference is not certified."
+            }
+          }
+        },
+        "evidence": [
+          {
+            "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-02\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\SVR11\\VOLTAGE_CONTROL_ACTUAL_PHYSICAL_AUDIT.json",
+            "sha256": "44d977a0fd5ed81d4503c68bbec4870af809a85856827c3b448d260de59eec91",
+            "bytes": 909271
+          },
+          {
+            "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-02\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_PHYSICAL_AUDIT.json",
+            "sha256": "bc4cf43866b4084938c6dcec3b55cd9907c33a8a2f6514fe04a36b111b4fdad3",
+            "bytes": 909283
+          }
+        ]
+      },
+      "Native_Runtime": 157.92400002479553,
+      "wall_seconds": 2722.415005100076,
+      "Planning_objective": 0.6076843871162905,
+      "FULL_feasible_certified": true,
+      "global_gap_certified": false,
+      "certified_LB": null,
+      "certified_Gap": null,
+      "optimization_status": "FEASIBLE",
+      "AC_status": "AC PASS",
+      "terminal_history": [
+        {
+          "result": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-02\\attempts\\attempt_01\\RESULT.json",
+          "result_SHA": "5d6910372075ab38f4d159ce7191956aadfb4b096e9d4b74a39a98a39bf002d7",
+          "status": "PASS",
+          "reason": "COMPLETED_PHYSICAL_PASS"
+        }
+      ]
     },
     {
       "arm": "B2",
       "day": "2025-05-03",
-      "status": "RUNNING",
+      "status": "PASS",
       "attempts": [
         "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\request.json"
       ],
@@ -21421,31 +22737,756 @@
           "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\request.json"
         ],
         "cwd": "D:\\v42_svr11_epoch09_20261011",
-        "CPU_seconds": 61.078125,
-        "UTC": "2026-10-10T23:18:41.331333+00:00",
+        "CPU_seconds": 2670.0,
+        "UTC": "2026-10-11T00:02:53.250407+00:00",
         "arm": "B2",
         "day": "2025-05-03",
         "worker_slot": 3,
         "request": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\request.json"
-      }
+      },
+      "result": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\RESULT.json",
+      "result_SHA": "89bb0c5f918a4fcaab6a4d2861b681c3871091a4c405a90c5c8e1bb6333902b1",
+      "reason": "COMPLETED_PHYSICAL_PASS",
+      "metrics": {
+        "environments": {
+          "ACTUAL": {
+            "slots": 96,
+            "Vmin": 0.9606341673037552,
+            "Vmax": 1.044936495647062,
+            "voltage_violations": 0,
+            "line_current_violations": 0,
+            "transformer_current_violations": 0,
+            "transformer_nameplate_current_violations": 0,
+            "transformer_kVA_violations": 0,
+            "maximum_line_loading": 0.57899345844147,
+            "losses_kWh": 1173.1427562099145,
+            "losses_kvarh": 1964.217953551713,
+            "AC_converged": true,
+            "control_complete": true,
+            "Full_AC_Physical_PASS": true,
+            "SVR11_finite_rating_and_taps": true,
+            "original_RegControl_count": 7,
+            "SVR_bank_count": 11,
+            "phase_tap_operation_evidence": {
+              "bytes": 36447518,
+              "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\SVR11\\VOLTAGE_CONTROL_ACTUAL_SLOTS.json",
+              "sha256": "6936e3a40f26f031414a8d845e5c2901100a1ac3f0cc84c8c0641c0d0a668f69"
+            },
+            "SVR_tap_ranges": {
+              "STA01::1": {
+                "min": 0.9625000000000001,
+                "max": 1.0437500000000006,
+                "changes": 64
+              },
+              "STA01::2": {
+                "min": 0.9500000000000002,
+                "max": 1.0312500000000004,
+                "changes": 66
+              },
+              "STA01::3": {
+                "min": 0.9625000000000001,
+                "max": 1.0437500000000006,
+                "changes": 65
+              },
+              "STA06::1": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 40
+              },
+              "STA06::2": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 39
+              },
+              "STA06::3": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 40
+              },
+              "STA08::1": {
+                "min": 0.9312500000000002,
+                "max": 1.0,
+                "changes": 34
+              },
+              "STA08::2": {
+                "min": 0.9375000000000002,
+                "max": 1.0,
+                "changes": 35
+              },
+              "STA08::3": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 33
+              },
+              "BUS83::1": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 21
+              },
+              "BUS83::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 16
+              },
+              "BUS83::3": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 28
+              },
+              "BUS79::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 10
+              },
+              "BUS79::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 7
+              },
+              "BUS79::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS108::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS108::2": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS108::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 5
+              },
+              "BUS50::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 3
+              },
+              "BUS50::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 6
+              },
+              "BUS50::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 2
+              },
+              "BUS82::1": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 11
+              },
+              "BUS82::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 6
+              },
+              "BUS82::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 16
+              },
+              "BUS48::1": {
+                "min": 1.00625,
+                "max": 1.0125000000000002,
+                "changes": 3
+              },
+              "BUS48::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 6
+              },
+              "BUS48::3": {
+                "min": 1.0,
+                "max": 1.00625,
+                "changes": 2
+              },
+              "BUS86::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 6
+              },
+              "BUS86::2": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS86::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 6
+              },
+              "BUS62::1": {
+                "min": 1.0,
+                "max": 1.0125000000000002,
+                "changes": 9
+              },
+              "BUS62::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 4
+              },
+              "BUS62::3": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 9
+              }
+            },
+            "original_RegControl_tap_ranges": {
+              "creg1a": {
+                "min": 1.0125000000000002,
+                "max": 1.0187500000000003,
+                "changes": 3
+              },
+              "creg2a": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 3
+              },
+              "creg3a": {
+                "min": 0.99375,
+                "max": 1.0125000000000002,
+                "changes": 38
+              },
+              "creg3c": {
+                "min": 0.9875,
+                "max": 1.0125000000000002,
+                "changes": 36
+              },
+              "creg4a": {
+                "min": 1.0250000000000004,
+                "max": 1.0500000000000007,
+                "changes": 25
+              },
+              "creg4b": {
+                "min": 1.0187500000000003,
+                "max": 1.0312500000000004,
+                "changes": 22
+              },
+              "creg4c": {
+                "min": 1.0250000000000004,
+                "max": 1.0375000000000005,
+                "changes": 17
+              }
+            },
+            "BUS86_BUS62_original_control_interaction": {
+              "BUS86": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 5
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 5
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 5
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 3
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 3
+                }
+              ],
+              "BUS62": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 1
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 5
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 5
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 12
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 7
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 7
+                }
+              ]
+            },
+            "BUS82_BUS83_serial_interaction": {
+              "observations": [
+                {
+                  "phase": 1,
+                  "simultaneous_boundary_tap_changes": 7,
+                  "opposite_boundary_tap_changes": 1
+                },
+                {
+                  "phase": 2,
+                  "simultaneous_boundary_tap_changes": 3,
+                  "opposite_boundary_tap_changes": 1
+                },
+                {
+                  "phase": 3,
+                  "simultaneous_boundary_tap_changes": 9,
+                  "opposite_boundary_tap_changes": 1
+                }
+              ],
+              "interpretation": "Observed boundary tap co-movement only; event receipts retain subslot actions. Causal absence of interference is not certified."
+            }
+          },
+          "DAYAHEAD": {
+            "slots": 96,
+            "Vmin": 0.9603938589747637,
+            "Vmax": 1.0462439570089173,
+            "voltage_violations": 0,
+            "line_current_violations": 0,
+            "transformer_current_violations": 0,
+            "transformer_nameplate_current_violations": 0,
+            "transformer_kVA_violations": 0,
+            "maximum_line_loading": 0.5568540726021491,
+            "losses_kWh": 1140.9117810945845,
+            "losses_kvarh": 1898.868546194408,
+            "AC_converged": true,
+            "control_complete": true,
+            "Full_AC_Physical_PASS": true,
+            "SVR11_finite_rating_and_taps": true,
+            "original_RegControl_count": 7,
+            "SVR_bank_count": 11,
+            "phase_tap_operation_evidence": {
+              "bytes": 36455552,
+              "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_SLOTS.json",
+              "sha256": "172103dd50f45771b2ddbc984cee565423a3e70cd25ee884a2675a2b83a4ba81"
+            },
+            "SVR_tap_ranges": {
+              "STA01::1": {
+                "min": 0.9625000000000001,
+                "max": 1.0437500000000006,
+                "changes": 64
+              },
+              "STA01::2": {
+                "min": 0.9500000000000002,
+                "max": 1.0312500000000004,
+                "changes": 66
+              },
+              "STA01::3": {
+                "min": 0.9625000000000001,
+                "max": 1.0437500000000006,
+                "changes": 65
+              },
+              "STA06::1": {
+                "min": 0.9312500000000002,
+                "max": 1.00625,
+                "changes": 40
+              },
+              "STA06::2": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 40
+              },
+              "STA06::3": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 43
+              },
+              "STA08::1": {
+                "min": 0.9312500000000002,
+                "max": 1.0,
+                "changes": 36
+              },
+              "STA08::2": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 35
+              },
+              "STA08::3": {
+                "min": 0.9375000000000002,
+                "max": 1.00625,
+                "changes": 34
+              },
+              "BUS83::1": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 27
+              },
+              "BUS83::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 22
+              },
+              "BUS83::3": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 25
+              },
+              "BUS79::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 10
+              },
+              "BUS79::2": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 9
+              },
+              "BUS79::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 6
+              },
+              "BUS108::1": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 4
+              },
+              "BUS108::2": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS108::3": {
+                "min": 0.9687500000000001,
+                "max": 0.9812500000000001,
+                "changes": 9
+              },
+              "BUS50::1": {
+                "min": 1.00625,
+                "max": 1.00625,
+                "changes": 0
+              },
+              "BUS50::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 4
+              },
+              "BUS50::3": {
+                "min": 1.0,
+                "max": 1.0,
+                "changes": 0
+              },
+              "BUS82::1": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 15
+              },
+              "BUS82::2": {
+                "min": 0.9562500000000002,
+                "max": 0.9750000000000001,
+                "changes": 9
+              },
+              "BUS82::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 13
+              },
+              "BUS48::1": {
+                "min": 1.00625,
+                "max": 1.00625,
+                "changes": 0
+              },
+              "BUS48::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 4
+              },
+              "BUS48::3": {
+                "min": 1.0,
+                "max": 1.0,
+                "changes": 0
+              },
+              "BUS86::1": {
+                "min": 0.9625000000000001,
+                "max": 0.9750000000000001,
+                "changes": 10
+              },
+              "BUS86::2": {
+                "min": 0.9687500000000001,
+                "max": 0.9750000000000001,
+                "changes": 1
+              },
+              "BUS86::3": {
+                "min": 0.9625000000000001,
+                "max": 0.9812500000000001,
+                "changes": 8
+              },
+              "BUS62::1": {
+                "min": 0.99375,
+                "max": 1.0125000000000002,
+                "changes": 7
+              },
+              "BUS62::2": {
+                "min": 0.9875,
+                "max": 1.0,
+                "changes": 4
+              },
+              "BUS62::3": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 5
+              }
+            },
+            "original_RegControl_tap_ranges": {
+              "creg1a": {
+                "min": 1.0125000000000002,
+                "max": 1.0187500000000003,
+                "changes": 3
+              },
+              "creg2a": {
+                "min": 0.99375,
+                "max": 1.00625,
+                "changes": 2
+              },
+              "creg3a": {
+                "min": 0.99375,
+                "max": 1.0125000000000002,
+                "changes": 42
+              },
+              "creg3c": {
+                "min": 0.9875,
+                "max": 1.00625,
+                "changes": 40
+              },
+              "creg4a": {
+                "min": 1.0250000000000004,
+                "max": 1.0500000000000007,
+                "changes": 22
+              },
+              "creg4b": {
+                "min": 1.0187500000000003,
+                "max": 1.0312500000000004,
+                "changes": 17
+              },
+              "creg4c": {
+                "min": 1.0250000000000004,
+                "max": 1.0375000000000005,
+                "changes": 16
+              }
+            },
+            "BUS86_BUS62_original_control_interaction": {
+              "BUS86": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 6
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 10
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 7
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 9
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 7
+                }
+              ],
+              "BUS62": [
+                {
+                  "original_control": "creg1a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg2a",
+                  "simultaneous_boundary_changes": 0
+                },
+                {
+                  "original_control": "creg3a",
+                  "simultaneous_boundary_changes": 6
+                },
+                {
+                  "original_control": "creg3c",
+                  "simultaneous_boundary_changes": 4
+                },
+                {
+                  "original_control": "creg4a",
+                  "simultaneous_boundary_changes": 8
+                },
+                {
+                  "original_control": "creg4b",
+                  "simultaneous_boundary_changes": 5
+                },
+                {
+                  "original_control": "creg4c",
+                  "simultaneous_boundary_changes": 5
+                }
+              ]
+            },
+            "BUS82_BUS83_serial_interaction": {
+              "observations": [
+                {
+                  "phase": 1,
+                  "simultaneous_boundary_tap_changes": 10,
+                  "opposite_boundary_tap_changes": 0
+                },
+                {
+                  "phase": 2,
+                  "simultaneous_boundary_tap_changes": 4,
+                  "opposite_boundary_tap_changes": 1
+                },
+                {
+                  "phase": 3,
+                  "simultaneous_boundary_tap_changes": 9,
+                  "opposite_boundary_tap_changes": 1
+                }
+              ],
+              "interpretation": "Observed boundary tap co-movement only; event receipts retain subslot actions. Causal absence of interference is not certified."
+            }
+          }
+        },
+        "evidence": [
+          {
+            "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\output\\OPERATIONS\\FRESH\\SVR11\\VOLTAGE_CONTROL_ACTUAL_PHYSICAL_AUDIT.json",
+            "sha256": "f768472b5f8f18d9a0b9437da239eaf0488681c24041a236bdb6ebd05857d36a",
+            "bytes": 909268
+          },
+          {
+            "path": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\output\\OPERATIONS\\PLANNING\\SVR11\\VOLTAGE_CONTROL_PLANNING_PHYSICAL_AUDIT.json",
+            "sha256": "7f59a4789f048f16758c0ea534c44707e5b1276c4172eb3e40e9599d46623114",
+            "bytes": 909280
+          }
+        ]
+      },
+      "Native_Runtime": 227.30000019073486,
+      "wall_seconds": 2712.941182599985,
+      "Planning_objective": 0.541553321077043,
+      "FULL_feasible_certified": true,
+      "global_gap_certified": false,
+      "certified_LB": null,
+      "certified_Gap": null,
+      "optimization_status": "FEASIBLE",
+      "AC_status": "AC PASS",
+      "terminal_history": [
+        {
+          "result": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\RESULT.json",
+          "result_SHA": "89bb0c5f918a4fcaab6a4d2861b681c3871091a4c405a90c5c8e1bb6333902b1",
+          "status": "PASS",
+          "reason": "COMPLETED_PHYSICAL_PASS"
+        }
+      ]
     },
     {
       "arm": "B2",
       "day": "2025-05-04",
-      "status": "NOT_EXECUTED",
-      "attempts": []
+      "status": "RUNNING",
+      "attempts": [
+        "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\request.json"
+      ],
+      "request": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\request.json",
+      "worker": {
+        "PID": 111044,
+        "create_time": 1791676904.8008668,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.worker",
+          "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\request.json"
+        ],
+        "cwd": "D:\\v42_svr11_epoch09_20261011",
+        "CPU_seconds": 159.828125,
+        "UTC": "2026-10-11T00:04:27.960187+00:00",
+        "arm": "B2",
+        "day": "2025-05-04",
+        "worker_slot": 1,
+        "request": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-04\\attempts\\attempt_01\\request.json"
+      }
     },
     {
       "arm": "B2",
       "day": "2025-05-05",
-      "status": "NOT_EXECUTED",
-      "attempts": []
+      "status": "RUNNING",
+      "attempts": [
+        "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-05\\attempts\\attempt_01\\request.json"
+      ],
+      "request": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-05\\attempts\\attempt_01\\request.json",
+      "worker": {
+        "PID": 84924,
+        "create_time": 1791676978.7348692,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.worker",
+          "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-05\\attempts\\attempt_01\\request.json"
+        ],
+        "cwd": "D:\\v42_svr11_epoch09_20261011",
+        "CPU_seconds": 86.578125,
+        "UTC": "2026-10-11T00:04:27.957184+00:00",
+        "arm": "B2",
+        "day": "2025-05-05",
+        "worker_slot": 3,
+        "request": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-05\\attempts\\attempt_01\\request.json"
+      }
     },
     {
       "arm": "B2",
       "day": "2025-05-06",
-      "status": "NOT_EXECUTED",
-      "attempts": []
+      "status": "RUNNING",
+      "attempts": [
+        "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-06\\attempts\\attempt_01\\request.json"
+      ],
+      "request": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-06\\attempts\\attempt_01\\request.json",
+      "worker": {
+        "PID": 112240,
+        "create_time": 1791676984.3154364,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.worker",
+          "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-06\\attempts\\attempt_01\\request.json"
+        ],
+        "cwd": "D:\\v42_svr11_epoch09_20261011",
+        "CPU_seconds": 81.75,
+        "UTC": "2026-10-11T00:04:27.961184+00:00",
+        "arm": "B2",
+        "day": "2025-05-06",
+        "worker_slot": 2,
+        "request": "D:\\v42_svr11_may_20261011_09\\dates\\B2\\2025-05-06\\attempts\\attempt_01\\request.json"
+      }
     },
     {
       "arm": "B2",
@@ -21970,5 +24011,5 @@
       "attempts": []
     }
   ],
-  "UTC": "2026-10-10T23:18:44.888794+00:00"
+  "UTC": "2026-10-11T00:04:32.589482+00:00"
 }
