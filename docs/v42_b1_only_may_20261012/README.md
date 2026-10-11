@@ -1,6 +1,6 @@
 # Source18r B1-only May 2025 detached campaign
 
-This release executes B1 only for 2025-05-01 through 2025-05-31 under the user's explicit 2026-10-12 authority. The production root is `D:\v42_b1_only_may_20261012_03`, source checkout `D:\v42_b1_only_source_20261012`, and read-only monitor `http://127.0.0.1:8801`.
+This release executes B1 only for 2025-05-01 through 2025-05-31 under the user's explicit 2026-10-12 authority. The production continuation root is `D:\v42_b1_only_may_20261012_04`, source checkout `D:\v42_b1_only_source_20261012`, and read-only monitor `http://127.0.0.1:8801`.
 
 All scientific Python files remain byte-identical to PR207 / Source18r commit `497609b46faa14ea7e32a9483a333ab32fd264ef`, scientific source SHA `146bf39f5e4f9d720ef7118051edbcdc58b96ca3d83af31c3e7bd5349f1fecd8`. The new operations adapter and its Windows task registration have a separate immutable operations SHA. Source18r, U4, Joint16, CG, PR207/209/210 and historical results are preserved.
 
@@ -20,3 +20,9 @@ The read-only monitor adapts the existing SVR11 UI to 31 B1 dates. It shows nati
 
 Validation: 30 selected existing source regressions passed, 5 operations regressions passed. Native0 and live launch evidence are copied below as immutable snapshots when observed. The associated hourly chat automation follows this B1 campaign only and pauses after final verification/reporting.
 
+
+The May01 canary entered real Native Phase I at 2026-10-11T18:58:05Z, completed one measured 2.0370001792907715s call and then failed original primal replay. The exact unmodified point has an equality residual 1/131072 (7.62939453125e-6), above the unchanged 1e-6 tolerance; dual replay passes. Native read-back proves the matrix, bounds, types and objective unchanged. The original Source18r correctly rejects this point; its original scientific IMPLEMENTATION_FAILURE and FAIL remain immutable. No FULL incumbent, gap certificate, freeze or Actual is asserted.
+
+The separately sealed V4 operations adapter requires a read-only independent raw/source/compiler/dual/exact-rational rejection audit before allowing this narrow date-local numerical failure to continue. Any missing evidence, drift, nonfinite/axis error, different implementation failure or compiler failure still blocks. No raw point, tolerance, objective, constraint, Gurobi setting, scientific file or original result is changed. May01 is never retried. Its original result and runtime are receipt-linked into the new root; all 31 current input hashes and scientific bytes were independently matched, with zero additional Native calls or model builds for qualification. V3 roots and GLOBAL_SYSTEM_ERROR remain preserved; only our V3 tasks and read-only monitor were retired. Original B2/B3 tasks and research HOLDs remain untouched.
+
+V4 Windows watchdog starts/adopts only the continuation supervisor and one untouched day worker. May02 Worker PID 128756 was observed alive after task/terminal return, with two separate progressing heartbeats and CPU observations. The monitor reports 1 FAIL, 1 RUNNING, 29 NOT_EXECUTED, 0 PASS. The hourly chat automation now follows V4 and all-terminal finalizer tools/finalize_b1_only_v4.py. Eight operations/disposition regressions passed, including fail-closed source/compiler drift and immutable real-canary rejection checks. The continuation_v4 directory contains original Native/result receipts and current qualification/dispatch snapshots. These observations establish real execution and continuation; the 31-day campaign remains in progress.
