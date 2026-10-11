@@ -30,7 +30,8 @@ def test_cached_archive_read_once_and_bitwise_equal_detached_slots(monkeypatch):
     monkeypatch.setattr(model,'record',lambda p:{'path':p,'sha256':'same'})
     monkeypatch.setattr(authority,'denominators',lambda names:axis['rating_a'].copy())
     monkeypatch.setattr(authority,'current_authority',lambda:{'transformer_current_authority_sha256':'thermal'})
-    cert=dict(day='2025-05-03',source_SHA='current',outputs={'planning_coefficients':{'path':'fixture','sha256':'same'}})
+    cert=dict(day='2025-05-03',source_SHA='current',model_version=model.VERSION,
+        outputs={'planning_coefficients':{'path':'fixture','sha256':'same'}})
     old=predecessor_loader()(cert,cert['day']);old_reads=reads.copy();reads.clear()
     new=model.load_coefficients(cert,cert['day'])
     assert all(old_reads[f]==96 and reads[f]==1 for f in model.FIELDS+('anchor_control',))
@@ -54,7 +55,10 @@ def test_review_accepts_only_exact_read_cache_not_model_math():
     from reuse_svr11_completed import normalized_reviewed_model
     old=Path(r'D:\v42_svr11_epoch06_20261011\v42_svr11\model.py').read_text()
     new=Path(model.__file__).read_text()
-    assert normalized_reviewed_model(old)==normalized_reviewed_model(new)
-    assert normalized_reviewed_model(old)!=normalized_reviewed_model(new.replace('(plus[k]-minus[k])/(2*d)','(plus[k]-minus[k])/d'))
+    # The later LDC science change cannot be authorized by a cache-only review.
+    assert normalized_reviewed_model(old)!=normalized_reviewed_model(new)
+    same_science=Path(r'D:\v42_svr11_epoch12_20261011\v42_svr11\model.py').read_text()
+    assert normalized_reviewed_model(same_science)==normalized_reviewed_model(new)
+    assert normalized_reviewed_model(same_science)!=normalized_reviewed_model(new.replace('(plus[k]-minus[k])/(2*d)','(plus[k]-minus[k])/d'))
     with pytest.raises(ValueError,match='UNREVIEWED_COEFFICIENT_CACHE'):
         normalized_reviewed_model(new.replace('cached={f:z[f]', 'cached={f:z[f]*2'))

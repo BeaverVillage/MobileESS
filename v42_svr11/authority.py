@@ -23,6 +23,10 @@ def verify(path):
         from .model_release import validate
         if validate(m['root'],m['execution_sources'])!=m['scientific_model_validation']:
             raise PermissionError('SVR11_GLOBAL_MODEL_VALIDATION_RECEIPT_DRIFT')
+    if m.get('algorithm_version')=='V42_COMMON_MESS_U4_THEN_FULL_MILP_V2':
+        from .milp_release import validate as validate_full_milp
+        if validate_full_milp(m['root'],m['execution_sources'])!=m.get('full_milp_validation'):
+            raise PermissionError('SVR11_GLOBAL_FULL_MILP_VALIDATION_RECEIPT_DRIFT')
     if 'predecessor_drain_contract' in m and record(m['predecessor_drain_contract']['path'])!=m['predecessor_drain_contract']:
         raise PermissionError('SVR11_GLOBAL_PREDECESSOR_CONTRACT_DRIFT')
     if 'equipment_change_contract' in m and record(m['equipment_change_contract']['path'])!=m['equipment_change_contract']:

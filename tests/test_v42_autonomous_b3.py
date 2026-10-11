@@ -10,7 +10,7 @@ from unittest.mock import patch
 from contextlib import nullcontext
 
 from v42_b3_joint.contracts import canonical, digest
-from v42_b3_joint.policy import require_production_authorization
+from v42_b3_joint.policy import require_production_authorization, COMMON_MESS_VERSION
 from v42_autonomous_b3.admission import (checked, record, validate_request, verify_qualification,
                                         execution_permit, source_seal, validate_seal, qualification_status,
                                         scientific_run_id, publish_qualification)
@@ -73,7 +73,7 @@ class AdmissionTests(unittest.TestCase):
         with TemporaryDirectory() as folder:
             path = Path(folder) / "qualification.json"
             document = dict(schema="B3_REAL_CANARY_QUALIFICATION_U4_V2",
-                            common_mess_version="V42_COMMON_MESS_PRIMAL_ANYTIME_U4_V1", source_sha=digest("s"),
+                            common_mess_version=COMMON_MESS_VERSION, source_sha=digest("s"),
                             day="2025-05-01", worker_count=1, evidence_kind="FAKE_SOURCE_TEST")
             path.write_text(canonical(document))
             with self.assertRaisesRegex(ValueError, "REAL_SOURCE_MATCHED"):
@@ -92,7 +92,7 @@ class AdmissionTests(unittest.TestCase):
             (previous / "B3_SOURCE_CHECKPOINT.json").write_text(canonical(dict(status="FAILED")))
             qualification = root / "qualification.json"
             qualification.write_text(canonical(dict(schema="B3_REAL_CANARY_QUALIFICATION_U4_V2",
-                common_mess_version="V42_COMMON_MESS_PRIMAL_ANYTIME_U4_V1",
+                common_mess_version=COMMON_MESS_VERSION,
                 source_sha=seal["source_sha"], day="2025-05-01", worker_count=1, evidence_kind="SOURCE",
                 canary_output=str(previous), artifacts=[])))
             status = qualification_status(qualification, seal["source_sha"], seal=seal, code_root=root)

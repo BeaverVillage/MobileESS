@@ -114,6 +114,16 @@ def run(root):
                 for row in dispatch_rows(ledger,policy):
                     day=row['day']
                     if len(active)>=capacity:continue
+                    if policy=='B2':
+                        from . import resources
+                        memory=resources.snapshot()
+                        contract=m.get('B2_memory_admission',m['B3_memory_admission'])
+                        if not resources.admits(memory,active,'M1',contract):
+                            ledger.update(status='WAITING_MEMORY_ADMISSION',memory=memory,
+                                memory_wait_policy='B2',healthy_workers_not_terminated=True)
+                            atomic(root/'MEMORY_ADMISSION_WAIT.json',dict(policy=policy,
+                                memory=memory,contract=contract,healthy_workers_not_terminated=True,UTC=now()))
+                            break
                     row.pop('retry_pending',None)
                     slot=next(n for n in range(1,capacity+1) if n not in slots);path,r=make_request(root,m,row,slot)
                     # Persist dispatch first. OS lifetime lock prevents duplicate

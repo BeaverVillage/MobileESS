@@ -1,0 +1,13 @@
+# SVR11 U4 then unrestricted C3A MILP candidate
+
+U4 exhaustion previously ended May18 after 103.778 measured Native seconds and May16 after 112.773 seconds without a certified Global Gap. The shared M engine now preserves its independently replayed FULL incumbent and continues with the original unrestricted C3A MILP, using that incumbent as the MIP Start and only the remaining portion of the cumulative 1,800-second stage budget. B2 M and B3 M1/M2 call the same implementation. A1/A2 algorithms and their 5,400-second budgets are unchanged.
+
+Every original row, objective, bound and integer type is checked against the rebuilt model. Phase 2 adds no Hamming cut or fixed binary neighborhood. Solver bounds remain diagnostics unless an original-problem independent certificate has been verified. A solver-only OPTIMAL status does not certify the Global Gap. Better candidates require the existing literal C3A/FULL integer and physical replay. A missing, worse, numerical-error or memory-error result cannot replace the incumbent. Unknown Native Runtime is reported as unknown and quarantined; its known prefix is preserved separately.
+
+The candidate also routes V2 SVR11 electrical certificates to their existing strict loader. This removes the pre-Native `KeyError('operating_day')` caused by the legacy NPZ loader. It adds actual process/system memory observations and defers new B2 workers when RAM or Windows Commit admission fails.
+
+Production release requires real May16/May18 full MILP logs, same-case cumulative Runtime and incumbent preservation evidence. `tools/validate_svr11_full_milp.py` uses the preserved development cases only for this diagnostic continuation. Those matrix/point/runtime receipts cannot be promoted to new production dates. Source13 ten-worker Forecast-only generation continues independently. Validated May01/02/03 Forecast models may be reused by the user's correction; all B2 optimization dates restart from May01 with new Native-zero attempts.
+
+The candidate is not yet a completed campaign or a global nonlinear voltage safety certificate. Existing LDC evidence retains its original validation source and limited scientific scope. The hourly automation holds Native dispatch until actual validation and all Forecast models are ready.
+
+The earlier failed-B2 deletion attempt was blocked by automatic policy. No files were deleted or space recovered by that attempt. The user's latest correction excludes Forecast models and model inputs from the old deletion plan.

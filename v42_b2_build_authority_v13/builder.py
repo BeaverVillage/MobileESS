@@ -21,7 +21,8 @@ VERSION = "B2_BUILD_SOURCE_AUTHORITY_V13_20261009"
 
 def admitted_native_limit(request, manifest=None):
     """Admit the new sealed common engine epoch with its explicit M cap."""
-    if request.get("algorithm_version") == "V42_COMMON_MESS_PRIMAL_ANYTIME_U4_V1":
+    if request.get("algorithm_version") in (
+            "V42_COMMON_MESS_PRIMAL_ANYTIME_U4_V1", "V42_COMMON_MESS_U4_THEN_FULL_MILP_V2"):
         if manifest is not None:
             require(manifest.get("schema") == "V42_COMMON_U4_QUALIFICATION_V1"
                 and manifest.get("algorithm_version") == request["algorithm_version"]
