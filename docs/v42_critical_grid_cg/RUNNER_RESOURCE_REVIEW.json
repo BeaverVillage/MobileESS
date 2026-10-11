@@ -1,0 +1,310 @@
+{
+  "schema": "V42_CRITICAL_GRID_CG_RUNNER_RESOURCE_REVIEW_V1",
+  "PASS": true,
+  "checks": {
+    "old_source_three_heads_clean": true,
+    "new_changes_only_new_two_subtrees": true,
+    "maximum_calls_exactly_two": true,
+    "requested_Native_budget_360_seconds": true,
+    "two_sequential_stages_180_seconds": true,
+    "stage2_after_stage1_native_end": true,
+    "stage2_improvement_and_integer_and_ledger_gate_PASS": true,
+    "params_readback_both_1Thread_180Seconds_MIPGap03_Focus3_Seed42_1e8": true,
+    "matrix_domain_objective_readback_both_PASS": true,
+    "size_gate_both_PASS": true,
+    "post_build_memory_floor_and_growth_admission_both_PASS": true,
+    "no_other_Gurobi_worker_before_either_solve": true,
+    "code_durable_ledger_and_exclusive_latch_before_optimize": true,
+    "code_floor_callback_normal_terminate": true,
+    "code_numeric_error_callback_normal_terminate": true,
+    "code_solver_only_one_optimize_statement": true
+  },
+  "observed_UTC": "2026-10-11T17:02:03.175166+00:00",
+  "observed_Asia_Seoul": "2026-10-12T02:02:03.175166+09:00",
+  "originals": [
+    {
+      "name": "PR207",
+      "path": "D:\\v42_svr11_epoch18r_20261011",
+      "HEAD": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+      "expected_HEAD": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+      "HEAD_matches": true,
+      "clean": true,
+      "status": ""
+    },
+    {
+      "name": "PR209",
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\work\\source18r-physical-global-lb-pilot",
+      "HEAD": "9383a99f1bdcabbd49c79b3ad9f9ee36d523868a",
+      "expected_HEAD": "9383a99f1bdcabbd49c79b3ad9f9ee36d523868a",
+      "HEAD_matches": true,
+      "clean": true,
+      "status": ""
+    },
+    {
+      "name": "PR210",
+      "path": "D:\\v42_joint_critical_grid_lb_20261012",
+      "HEAD": "6a8fd44f59f1f461c60d2d14f5f5be605e4ed640",
+      "expected_HEAD": "6a8fd44f59f1f461c60d2d14f5f5be605e4ed640",
+      "HEAD_matches": true,
+      "clean": true,
+      "status": ""
+    }
+  ],
+  "new_tree_git_status": "?? docs/v42_critical_grid_cg/\n?? tools/critical_grid_cg/",
+  "ledger": {
+    "calls": [
+      {
+        "stage": 1,
+        "TimeLimit": 180,
+        "out": "D:\\v42_critical_grid_cg_lb_20261012\\docs\\v42_critical_grid_cg\\iteration01",
+        "pid": 93192,
+        "time": 1791737723.2279994
+      },
+      {
+        "stage": 2,
+        "TimeLimit": 180,
+        "out": "D:\\v42_critical_grid_cg_lb_20261012\\docs\\v42_critical_grid_cg\\iteration02",
+        "pid": 123036,
+        "time": 1791738037.5141752
+      }
+    ],
+    "maximum_calls": 2,
+    "maximum_requested_seconds": 360
+  },
+  "stages": [
+    {
+      "stage": "iteration01",
+      "dimensions": {
+        "rows": 143292,
+        "columns": 244265,
+        "binary": 9322,
+        "nnz": 1252450
+      },
+      "parameters": {
+        "Threads": 1,
+        "TimeLimit": 180.0,
+        "MIPGap": 0.03,
+        "MIPFocus": 3,
+        "FeasibilityTol": 1e-08,
+        "IntFeasTol": 1e-08,
+        "OptimalityTol": 1e-08,
+        "Seed": 42
+      },
+      "native_readback_PASS": true,
+      "native_readback_checks": {
+        "matrix": true,
+        "rhs": true,
+        "senses": true,
+        "lower": true,
+        "upper": true,
+        "types": true,
+        "objective": true,
+        "ObjCon": true,
+        "ModelSense": true,
+        "Rows": true,
+        "Columns": true,
+        "Binary": true,
+        "NNZ": true
+      },
+      "post_build_memory_admission": {
+        "PASS": true,
+        "sample": {
+          "time": 1791737720.6161642,
+          "system": {
+            "RAM_total": 34049220608,
+            "RAM_available": 17026412544,
+            "RAM_used": 17022808064,
+            "Commit_total": 39392833536,
+            "Commit_limit": 68408958976,
+            "Commit_available": 29016125440,
+            "Commit_peak": 68408958976
+          },
+          "RSS_bytes": 291008512,
+          "Peak_RSS_bytes": 345128960,
+          "Private_Commit_bytes": 1327259648,
+          "Peak_Private_Commit_bytes": 1381584896
+        },
+        "RAM_reserve_bytes": 4294967296,
+        "commit_reserve_bytes": 6442450944,
+        "estimated_additional_bytes": 2147483648,
+        "observed_model_build_private_growth_bytes": 243617792,
+        "estimation_basis": "Model already resident. Reserve max(2 GiB,4x observed model build private growth) for single-thread presolve/root/tree; continuous monitoring enforces system reserves.",
+        "matrix_arrays_only_in_process": "JOINT only; FULL and C3A arrays disposed in prior build process"
+      },
+      "exclusive_PILOT_STARTED": {
+        "Native_optimize_max": 1,
+        "time": 1791737723.2289999,
+        "pid": 93192,
+        "git_head": "6a8fd44f59f1f461c60d2d14f5f5be605e4ed640",
+        "independent_native0_sha256": "4024296e8611798c4d2aaa2c8b75c3340a4f15f567fe84593796c92f18525ecb",
+        "parameters": {
+          "Threads": 1,
+          "TimeLimit": 180.0,
+          "MIPGap": 0.03,
+          "MIPFocus": 3,
+          "FeasibilityTol": 1e-08,
+          "IntFeasTol": 1e-08,
+          "OptimalityTol": 1e-08,
+          "Seed": 42
+        },
+        "files": {
+          "JOINT_A.npz": "5aac13bae429070a914b9dd2b347a5fc844e55160f51ac9298f4f1c547a924a8",
+          "JOINT_DATA.npz": "813b1aaab9e069d545bee7d6b11acf88bfd472a34db7fed04ba542cdb0dffbab",
+          "JOINT_AXES.npz": "0a6aa84b24d9a440875902f09e8521ac6bb6f4eb05a0b28fe56323d946cc7c63",
+          "JOINT_START.npz": "9f15aa995e5ed1ba957746d2c3ebd68a9aaaf75985e590b4e81dd81fb0c17433",
+          "CUTS_EXACT.json": "288814541b8123c2437542d34955389775dbeb67d0adfd1dfac223e7087b6c9f"
+        }
+      },
+      "native_peer_gate_PASS": true,
+      "heavy_peers_count": 0,
+      "peers_errors": []
+    },
+    {
+      "stage": "iteration02",
+      "dimensions": {
+        "rows": 143308,
+        "columns": 244265,
+        "binary": 9322,
+        "nnz": 1257052
+      },
+      "parameters": {
+        "Threads": 1,
+        "TimeLimit": 180.0,
+        "MIPGap": 0.03,
+        "MIPFocus": 3,
+        "FeasibilityTol": 1e-08,
+        "IntFeasTol": 1e-08,
+        "OptimalityTol": 1e-08,
+        "Seed": 42
+      },
+      "native_readback_PASS": true,
+      "native_readback_checks": {
+        "matrix": true,
+        "rhs": true,
+        "senses": true,
+        "lower": true,
+        "upper": true,
+        "types": true,
+        "objective": true,
+        "ObjCon": true,
+        "ModelSense": true,
+        "Rows": true,
+        "Columns": true,
+        "Binary": true,
+        "NNZ": true
+      },
+      "post_build_memory_admission": {
+        "PASS": true,
+        "sample": {
+          "time": 1791738034.528359,
+          "system": {
+            "RAM_total": 34049220608,
+            "RAM_available": 17084895232,
+            "RAM_used": 16964325376,
+            "Commit_total": 39589740544,
+            "Commit_limit": 68408958976,
+            "Commit_available": 28819218432,
+            "Commit_peak": 68408958976
+          },
+          "RSS_bytes": 292466688,
+          "Peak_RSS_bytes": 343945216,
+          "Private_Commit_bytes": 1328406528,
+          "Peak_Private_Commit_bytes": 1380126720
+        },
+        "RAM_reserve_bytes": 4294967296,
+        "commit_reserve_bytes": 6442450944,
+        "estimated_additional_bytes": 2147483648,
+        "observed_model_build_private_growth_bytes": 244838400,
+        "estimation_basis": "Model already resident. Reserve max(2 GiB,4x observed model build private growth) for single-thread presolve/root/tree; continuous monitoring enforces system reserves.",
+        "matrix_arrays_only_in_process": "JOINT only; FULL and C3A arrays disposed in prior build process"
+      },
+      "exclusive_PILOT_STARTED": {
+        "Native_optimize_max": 1,
+        "time": 1791738037.5151594,
+        "pid": 123036,
+        "git_head": "6a8fd44f59f1f461c60d2d14f5f5be605e4ed640",
+        "independent_native0_sha256": "2ab8c6f30cd4643cb14096b2c40a16bfc605a5c09685eb3fa633e0e878207b31",
+        "parameters": {
+          "Threads": 1,
+          "TimeLimit": 180.0,
+          "MIPGap": 0.03,
+          "MIPFocus": 3,
+          "FeasibilityTol": 1e-08,
+          "IntFeasTol": 1e-08,
+          "OptimalityTol": 1e-08,
+          "Seed": 42
+        },
+        "files": {
+          "JOINT_A.npz": "ab35164cd38ec71daa56b7f9702dfba49cbfa5a68a5353f174bb5dbb0d834925",
+          "JOINT_DATA.npz": "a7cf3e8d912175f6ec6f67a188090a4bf978d38f71f47dc8819ece6b8a664f27",
+          "JOINT_AXES.npz": "0a6aa84b24d9a440875902f09e8521ac6bb6f4eb05a0b28fe56323d946cc7c63",
+          "JOINT_START.npz": "9f15aa995e5ed1ba957746d2c3ebd68a9aaaf75985e590b4e81dd81fb0c17433",
+          "CUTS_EXACT.json": "d5954b0058aafcef761d891673a0266371abeb39024832d8094e40e3051d2a80"
+        }
+      },
+      "native_peer_gate_PASS": true,
+      "heavy_peers_count": 0,
+      "peers_errors": []
+    }
+  ],
+  "stage1_completed_Result": {
+    "Runtime": 180.04699993133545,
+    "optimize_wall_seconds": 180.7063634999795,
+    "Global_LB": 0.46497617639758426,
+    "Status": 9,
+    "memory_stop": false,
+    "callback_errors": []
+  },
+  "stage2_gate": {
+    "PASS": true,
+    "phase": "STAGE2_PRE_BUILD_ADMISSION",
+    "checks": {
+      "stage1_final_certificate_PASS": true,
+      "stage1_inclusion_integrity_PASS": true,
+      "certified_improvement_at_least_005": true,
+      "valid_new_integer_incumbent": true,
+      "first_call_safe_and_complete": true,
+      "complete_single_call_ledger": true,
+      "no_stage1_result_hash_drift": true,
+      "new_validated_violated_original_rows": true,
+      "exact_cut_Native0_PASS": true,
+      "model_size_PASS": true,
+      "fresh_resource_HOLD_PASS": true,
+      "new_cuts_exclude_previous_incumbent": true
+    },
+    "previous_certificate_sha256": "1111aeea18e486bb2b3b7bb03e5c769b7593a6e5d63c8ec859dea18a3fe29a73",
+    "stage1_Global_LB": 0.46497617639758426,
+    "delta_Joint16": 0.03949839321064441,
+    "remaining_requested_Native_seconds": 180,
+    "Native_optimize_calls": 0,
+    "independent_native0_sha256": "2ab8c6f30cd4643cb14096b2c40a16bfc605a5c09685eb3fa633e0e878207b31",
+    "selected_original_rows": [
+      1088650,
+      1117505,
+      1088990,
+      1117898,
+      1089383,
+      1116807,
+      1116222,
+      1116412,
+      1117165,
+      1117052,
+      511281,
+      511564,
+      1076378,
+      1076668,
+      1028936,
+      1028948
+    ],
+    "post_build_memory_and_native_readback_required_before_Optimize": true
+  },
+  "code_sha256": {
+    "tools\\critical_grid_cg\\pilot.py": "0ef4fc8c8d097c811c3a214b860e72b41de15f2af8dbee109e8fb910f142d206",
+    "tools\\critical_grid_cg\\resources.py": "b9893f1d8ede8aa8ce3bf1a0439b75f4f7b861ae7a91c0783721ce8b12f4e03f",
+    "tools\\critical_grid_cg\\gate.py": "e531bcb03d6ab7dd77977809322dc5fd9e7db7f63f5a77525aad16c556b08a2a",
+    "docs\\v42_critical_grid_cg\\PILOT_STAGE1_EXECUTED.py": "281781ec077b0f2e7b01891038126253519ee6d2438915ef46dac9c13b0c87cc"
+  },
+  "scope": "Read-only small-file/code and Git preservation review while stage2 executes. No FULL CSR, Gurobi import/model, process inventory, resource audit or process/schedule mutation. Final stage2 result and fresh POST_RUN_HOLD are still required.",
+  "Native_optimize_calls": 0,
+  "process_mutations": 0
+}
