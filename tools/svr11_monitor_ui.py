@@ -40,6 +40,7 @@ def snapshot(root):
             fresh=str(v['active_OpenDSS_trajectory'])+' '+str(v.get('OpenDSS_slot',0))+'/96'
             phase=str(v['active_OpenDSS_trajectory'])+' · Fresh AC'
         if phase=='SVR11_FORECAST_MODEL_GENERATION':phase+=' '+str(v.get('model_slot',0))+'/96'
+        if len(r.get('attempts',[]))>1:phase=f"재시도 {len(r['attempts'])} · "+phase
         peers.append(dict(arm=r['arm'],day=r['day'],PID=r['worker']['PID'],phase=phase,
             optimization_status=solver_label(science) if r['arm']!='B0' else 'Native 0 · B0',
             Native_Runtime=v.get('Native_Runtime',v.get('native_runtime_seconds',v.get('measured_native_runtime',0))),
@@ -65,9 +66,17 @@ def snapshot(root):
         if p['remaining']+p['RUNNING']:
             if durations:estimate+=(p['remaining']+p['RUNNING'])*statistics.median(durations)/m['worker_counts'][arm]
             else:known=False
+    errors=[]
+    for r in rows:
+        for old in r.get('terminal_history',[]):
+            if old.get('status')=='FAIL':
+                recovery='재시도 중' if r['status']=='RUNNING' else '복구됨' if r['status']=='PASS' else '보존된 이전 시도'
+                errors.append(r['arm']+' '+r['day']+' ('+recovery+'): '+str(old.get('reason')))
+        if r['status']=='FAIL':errors.append(r['arm']+' '+r['day']+': '+str(r.get('reason')))
+    if ledger.get('error'):errors.append(ledger['error'])
     return dict(status=ledger['status'],policy=ledger.get('policy'),counts=counts,workers=peers,policies=policies,dates=rows,
         ETA=f'{estimate/3600:.1f} h' if known else '측정 중',
-        errors=[r['arm']+' '+r['day']+': '+str(r.get('reason')) for r in rows if r['status']=='FAIL'][-3:]+([ledger['error']] if ledger.get('error') else []),
+        errors=errors[-3:],
         source_SHA=m['execution_SHA'],root=str(root),UTC=now(),
         notice=('검증된 완료 날짜 '+str(sum(bool(r.get('reused')) for r in rows))+'일 재사용 · 원본 실행 SHA/Runtime 보존 · 현재 검증 SHA 별도 기록. '
             if any(r.get('reused') for r in rows) else '')+'May19–22 네 날짜는 원본 NormalAmps·kVA·전압·SVR 정격 재검증 PASS. 기존 오판정 이력은 보존합니다.'

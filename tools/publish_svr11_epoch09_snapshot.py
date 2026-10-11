@@ -16,7 +16,7 @@ folder=SOURCE/'docs/v42_svr11_final_20261011/epoch09_snapshot';folder.mkdir(pare
 for name in ('CAMPAIGN_MANIFEST.json','CAMPAIGN_LEDGER.json','EQUIPMENT_CHANGE_CONTRACT.json',
     'PREDECESSOR_DRAIN_CONTRACT.json','MIGRATION_STATUS.json','SOURCE_SCOPE_VERIFICATION.json','REGRESSION_VALIDATION.json',
     'REPORT.json','REPORT.md','PERFORMANCE_COMPARISON.json','PERFORMANCE_COMPARISON.md',
-    'MONITOR_UI_RELEASE.json','MONITOR_PROCESS.json','LIVE_OBSERVATION.json','WATCHDOG_LAST_RUN.json',
+    'MONITOR_UI_RELEASE.json','MONITOR_PROCESS.json','MONITOR_RESTART_RECEIPT.json','LIVE_OBSERVATION.json','WATCHDOG_LAST_RUN.json',
     'SUPERVISOR_PROCESS.json','SUPERVISOR_HEARTBEAT.json','WINDOWS_SCHEDULE_OBSERVED_EXECUTION.json',
     'HANDOFF_37_VALIDATION.json','HANDOFF_RECEIPT.json'):
     if (root/name).exists():shutil.copyfile(root/name,folder/name)
@@ -39,10 +39,18 @@ for key,row in origin['dates'].items():
 atomic(folder/'PRESERVED_EPOCH08_RESULTS.json',dict(original_ledger=record(old/'CAMPAIGN_LEDGER.json'),
     results=view,original_files_modified=False,quiesced_ledger_may_still_show_naturally_finished_workers_running=True,UTC=now()))
 h=read(root/'HANDOFF_37_VALIDATION.json') if (root/'HANDOFF_37_VALIDATION.json').exists() else {}
+handoff=read(root/'HANDOFF_RECEIPT.json') if (root/'HANDOFF_RECEIPT.json').exists() else {}
+handoff_complete=bool(h.get('PASS') and h.get('verified_PASS')==37 and
+    h.get('final_all_receipt_bytes_reverified') and handoff.get('PASS') and
+    handoff.get('source_SHA')==m['execution_SHA'])
+handoff_status=('All37 handoff dates are independently verified PASS and live scheduled recovery handoff is complete. '
+    'The campaign processes continue toward all124 dates; full campaign completion remains pending.'
+    if handoff_complete else '37-date handoff and full campaign completion are pending.')
 snap=dict(root=str(root),source_SHA=m['execution_SHA'],manifest_commit=m['source_commit'],
     equipment_SHA=read(m['hardware']['path'])['equipment_SHA'],counts=state['counts'],policy=state['policy'],
     migration=read(root/'MIGRATION_STATUS.json'),workers=state['workers'],
     monitor_URL='http://127.0.0.1:8796',hourly_ACTIVE=True,handoff37_verified=h.get('verified_PASS',0),
+    handoff37_complete=handoff_complete,
     old_equipment_numerical_results_or_models_promoted=0,monthly_campaign_complete=False,UTC=now())
 atomic(folder/'SNAPSHOT.json',snap)
 p=SOURCE/'docs/v42_svr11_final_20261011/README.md';previous=p.read_text(encoding='utf8')
@@ -54,7 +62,9 @@ Epoch08 B2 May04 and May05 both have genuine Actual voltage failures at the unre
 
 Native U4/A models, algorithms, domains, objective and budgets remain unchanged. All network-coupled official physics/results and Forecast sensitivities require fresh computation under this new common equipment. Reuse exact raw inputs and descriptors; promote zero prior-equipment dates/models. Source08 numerical results remain separate history. Healthy origin Workers finish naturally, with zero terminations or hot patches; frozen migration then starts B0→B2→B1→B3, Worker1/3/1/1, all124 despite date/policy FAIL. Technical retries are finite fresh Native0 attempts after following-date allocation. Actual controls remain independent of Planning and Actual repair/reoptimization remain0.
 
-Current {state['counts']['completed']}/124 terminal, {snap['handoff37_verified']}/37 independently verified handoff dates; migration `{snap['migration']['status']}`. Monitor HTTP200 at http://127.0.0.1:8796. Existing hourly ACTIVE and two Windows jobs now target Epoch09.37-date handoff and full campaign completion are pending. Earlier sections below are preserved historical epochs.
+Current {state['counts']['completed']}/124 terminal, {snap['handoff37_verified']}/37 independently verified handoff dates; migration `{snap['migration']['status']}`. [37-date verification](epoch09_snapshot/HANDOFF_37_VALIDATION.json), [live recovery handoff](epoch09_snapshot/HANDOFF_RECEIPT.json). Monitor HTTP200 at http://127.0.0.1:8796. Existing hourly ACTIVE and two Windows jobs now target Epoch09. {handoff_status}
+
+B2 May06 first attempt failed on Windows progress-file replacement after Native169.08799982070923s; retain that FAIL and all receipts. After allocating following dates, attempt2 restarted at Native0, reused the same frozen96-slot model, and completed with Native160.02400016784668s and independently verified full physical PASS. The monitor now distinguishes retry stage and preserved/recovered errors. Only the independent HTTP process was restarted for this display update. Earlier sections below are preserved historical epochs.
 
 {marker}
 
