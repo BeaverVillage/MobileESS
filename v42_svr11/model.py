@@ -33,6 +33,57 @@ def _apply_forecast_native(engine,native,totals,slot):
         name=str(row['load_name']);p,q=totals[slot][name.lower()]
         _set_load(engine,name,p,q)
 
+
+def _forecast_setter_schedule(native,totals,background,plan,adapter,load_names,generator_names,pf_tan):
+    result=[]
+    for slot in range(96):
+        rows=[]
+        for row in native.loads:
+            name=str(row['load_name']);p,q=totals[slot][name.lower()]
+            rows.append(('native',name,p,q))
+        for row in adapter['pv_generators']:
+            bus=str(row['bus']).lower();phase='ABC'[int(row['phase'])-1]
+            rows.append(('generator',str(row['generator_name']),background.pv_generation_kw_96[slot].get((bus,phase),0.0),0.0))
+        for index in range(1,13):
+            value=float(plan[slot][index-1]);rows.append(('load',f'IDC_IDC{index:02d}',value,value*pf_tan))
+        for name in generator_names:
+            if str(name).lower().startswith('mess_dis_'):rows.append(('generator',str(name),0.0,0.0))
+        for name in load_names:
+            if str(name).lower().startswith('mess_chg_'):rows.append(('load',str(name),0.0,0.0))
+        result.append(tuple(rows))
+    return tuple(result)
+
+def _apply_forecast_schedule(engine,rows):
+    from dayahead.v28r2.opendss_mapping import _set_load
+    from dayahead import run_v16_3_voltage_candidate as original
+    for kind,name,p,q in rows:
+        if kind=='native':_set_load(engine,name,p,q)
+        elif kind=='generator':original._set_generator(engine,name,p,q)
+        elif kind=='load':original._set_load(engine,name,p,q)
+        else:raise ValueError('SVR11_FORECAST_SETTER_KIND_DRIFT')
+
+def _terminal_layout(engine,branches):
+    groups={}
+    for position,b in enumerate(branches):
+        group=groups.setdefault(b.branch_id,[])
+        engine.Circuit.SetActiveElement(b.branch_id)
+        if str(engine.CktElement.Name()).lower()!=b.branch_id.lower():raise ValueError('SVR11_TERMINAL_ELEMENT_NOT_FOUND')
+        conductors=int(engine.CktElement.NumConductors())
+        buses=[str(value).split('.',1)[0].lower() for value in engine.CktElement.BusNames()]
+        terminal=buses.index(b.parent_bus.lower());nodes=list(map(int,engine.CktElement.NodeOrder()))
+        wanted='ABC'.index(b.phase)+1
+        index=next(terminal*conductors+i for i in range(conductors) if nodes[terminal*conductors+i]==wanted)
+        group.append((position,index))
+    return tuple((name,tuple(group)) for name,group in groups.items())
+
+def _terminal_values(engine,layout,size):
+    values=np.empty((size,3))
+    for name,indices in layout:
+        engine.Circuit.SetActiveElement(name)
+        powers=list(map(float,engine.CktElement.Powers()));currents=list(map(float,engine.CktElement.CurrentsMagAng()))
+        for position,index in indices:values[position]=(powers[2*index],powers[2*index+1],currents[2*index])
+    return values
+
 def load_coefficients(certificate,day):
     from v42_thermal.authority import current_authority,denominators
     from v42_thermal.common import SCHEMA
@@ -99,6 +150,8 @@ def generate(day,input_folder,output,progress):
         install(e,scenario['svr']);branches,topology=authority.source()['oriented_branches'](e)
         nodes=tuple(sorted(n.lower() for n in e.Circuit.AllNodeNames() if n.rsplit('.',1)[-1] in ('1','2','3')))
         controls=original._control_axis(e);native=authority.source()['NativeAllocation'].from_adapter(ad)
+        load_names=tuple(e.Loads.AllNames());generator_names=tuple(e.Generators.AllNames())
+        terminal_axis=_terminal_layout(e,branches)
         ldc=descriptors(e,branches,nodes,authority.source()['inventory'](e),current_authority())
         names=tuple(f'{b.branch_id}::{b.phase}' for b in branches)
         thermal=current_authority();rows={r['branch_phase'].lower():r for r in thermal['rows']+thermal['lines']}
@@ -111,20 +164,21 @@ def generate(day,input_folder,output,progress):
     assert len(controls)==60 and sum(n.startswith('transformer.') for n in names)==153
     anchor=np.zeros((96,60));anchor[:,:12]=p
     totals_by_slot=_forecast_native_totals(native,bg)
+    setter_schedule=_forecast_setter_schedule(native,totals_by_slot,bg,p,ad,load_names,generator_names,original.PF_TAN)
     count=solves=0;started=time.perf_counter();slots=[]
     def apply(e,ad,t):
-        _apply_forecast_native(e,native,totals_by_slot,t)
-        original._set_slot(e,{**ad,'loads':[]},bg,p,t)
+        _apply_forecast_schedule(e,setter_schedule[t])
     def measurement(e):
         v=_voltage_vector(e,nodes)**2
-        pq=[original._terminal_phase(e,b.branch_id,b.parent_bus,b.phase) for b in branches]
-        a=np.asarray(pq)
+        a=_terminal_values(e,terminal_axis,len(branches))
         return v,a[:,2]/ratings,a[:,0],a[:,1]
     def probe(target,j=None,sign=0):
         nonlocal count,solves
         e,ad,_=authority.compile_verified();count+=1
         try:
             clock=CommonClock('DAYAHEAD',day);clock.bind(e);install(e,scenario['svr'])
+            if tuple(e.Loads.AllNames())!=load_names or tuple(e.Generators.AllNames())!=generator_names:
+                raise PermissionError('SVR11_FORECAST_SETTER_INVENTORY_DRIFT')
             for t in range(target+1):
                 apply(e,ad,t)
                 if t==target and j is not None:

@@ -141,6 +141,12 @@ def watchdog(root,monitor_only=False):
     with patch.object(w,'launch',launch):return w.check(root,monitor_only=monitor_only)
 
 def safeguard(root,monitor_only=False):
+    root=Path(root)
+    if ((root/'PENDING_EXACT_FORECAST_RELEASE.json').exists()
+        and not (root/'EXACT_FORECAST_SUCCESSOR_READY.json').exists()):
+        from prepare_svr11_epoch13 import pending_release
+        if not pending_release(root):
+            return dict(status='WAITING_PREDECESSOR_DRAIN',root=str(root),healthy_workers_terminated=0)
     monitor_only=monitor_only or dispatch_quiesced(root)
     # Scheduling calls the frozen scientific migration gate. While old science
     # drains, recover only the independent successor HTTP process.

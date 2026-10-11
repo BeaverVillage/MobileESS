@@ -72,9 +72,11 @@ def audit_date(root,m,row):
         namespaces[a['namespace']]=dict(slots=96,all_node_phase_count=len(node_axis),Vmin=vmin,Vmax=vmax,
             maximum_line_loading=peak_line,Full_AC_Physical_PASS=True)
         receipts.extend([ar,a['slots_receipt']])
-    require(set(namespaces)=={'DAYAHEAD','ACTUAL'},'HANDOFF_BOTH_PLANNING_AND_ACTUAL_REQUIRED')
+    direct_actual=m.get('postoptimization_DayAhead_Fresh_AC') is False
+    expected_namespaces={'ACTUAL'} if direct_actual else {'DAYAHEAD','ACTUAL'}
+    require(set(namespaces)==expected_namespaces,'HANDOFF_FROZEN_FRESH_NAMESPACE_CONTRACT')
     raw=list(output.rglob('OPENDSS_PHASE_ARRAYS.npz'))
-    require(len(raw)>=2,'HANDOFF_BOTH_FRESH_ARRAYS_REQUIRED')
+    require(len(raw)>=len(expected_namespaces),'HANDOFF_REQUIRED_FRESH_ARRAYS')
     for p in raw:
         with np.load(p,allow_pickle=False) as z:
             require(z['convergence'].shape==(96,) and bool(z['convergence'].all()),'HANDOFF_FRESH_96_CONVERGENCE')

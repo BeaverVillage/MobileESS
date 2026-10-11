@@ -27,6 +27,8 @@ def normalized_forecast_receipt_guard(text):
 def normalized_reviewed_model(text):
     """Normalize only explicitly reviewed equivalent caches/owner cleanup."""
     import ast
+    from svr11_fastpath_review import normalize_exact_forecast_fastpath
+    text=normalize_exact_forecast_fastpath(text)
     helpers=ast.parse('''def _forecast_native_totals(native,background):
     return tuple(native.allocate(background.gross_p_kw_96[t],background.gross_q_kvar_96[t])[0]
         for t in range(96))
