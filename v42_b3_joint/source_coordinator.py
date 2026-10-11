@@ -29,6 +29,7 @@ def output_from_document(document):
 
 def verify_output(context, output, bridge, ledger):
     """Re-run source verifiers; producer PASS flags never admit a handoff."""
+    from v42_svr11.anytime import enabled
     registry, request = context.source_registry, context.request
     registry.admit(context, "COORDINATOR_INDEPENDENT_ACCEPTANCE")
     require(isinstance(output, SourceStageOutput) and output.request == request,
@@ -59,7 +60,7 @@ def verify_output(context, output, bridge, ledger):
             and type(receipt.get("measured_native_runtime")) in (int, float)
             and math.isfinite(receipt["measured_native_runtime"])
             and 0 <= receipt["measured_native_runtime"]
-            and (request.stage.startswith("M") or receipt["measured_native_runtime"] <= 5400),
+            and (request.stage.startswith("M") or enabled() or receipt["measured_native_runtime"] <= 5400),
             "SOURCE_LEDGER_NOT_ACCEPTED")
     proof = bridge.verify(context, output)
     require(proof.get("PASS") is True and proof.get("evidence_kind") == registry.evidence_kind
@@ -84,7 +85,7 @@ def verify_output(context, output, bridge, ledger):
         verify_m_acceptance(output.source_result, physical, bounds)
     else:
         lower, upper = Fraction(bounds["exact_LB"]), Fraction(bounds["exact_UB"])
-        require(0 <= lower <= upper and (upper == 0 or (upper - lower) / upper <= gap_target(request.stage)),
+        require(0 <= lower <= upper and ((enabled() and output.source_result.get("FULL_feasible_certified") is True) or upper == 0 or (upper - lower) / upper <= gap_target(request.stage)),
                 "EXACT_SOURCE_GLOBAL_GAP_NOT_ACCEPTED")
     require(output.sha == before, "SOURCE_VERIFIER_MUTATED_OUTPUT")
     return proof

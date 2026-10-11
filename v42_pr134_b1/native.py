@@ -18,6 +18,9 @@ _coefficient_constructor=None
 
 def original_coefficients_for_day(original,certificate,day):
     """Keep the immutable original constructor across repeated bindings."""
+    if certificate.get('schema') == 'V42_SVR11_ELECTRICAL_CERTIFICATE_V1':
+        from v42_svr11.model import load_coefficients
+        return load_coefficients(certificate, day)
     global _coefficient_constructor
     if _coefficient_constructor is None:
         candidate=original.native_coefficients

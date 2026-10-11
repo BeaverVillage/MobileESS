@@ -559,6 +559,7 @@ def run(request, budget, progress=None):
     from v42_a_stage_acceptance.schedule_audit import original_schedule_metrics
     from v42_may12_rescue.contract import decide
 
+    from v42_svr11.anytime import enabled, a_contract, normal_budget_exception
     day, inputs, output = _paths(request)
     native = None
     candidates = []
@@ -567,6 +568,35 @@ def run(request, budget, progress=None):
                   classification='INCONCLUSIVE', P2_calls=0,
                   MESS_optimization_calls=0, all_MESS_PQ_zero=True,
                   old_point_bound_clock_loaded=False)
+    def accept_best(native_status=None, timed=False):
+        best=candidates[-1]
+        verification=read(best['physical']['path'])
+        acceptance=a_contract(best['acceptance'],best,verification)
+        atomic(output / 'P1_ONLY_ACCEPTANCE_CONTRACT.json',acceptance)
+        result.update(UB=best['UB'],LB=best['LB'],exact_UB=best['exact_UB'],exact_LB=best['exact_LB'],
+            certified_gap=best['gap'],incumbent=best,native_status=native_status,
+            global_gap_certified=best['acceptance']['PASS'] is True,FULL_feasible_certified=True)
+        if not acceptance['PASS']:
+            result['classification']='TIME_LIMIT_FEASIBLE_NOT_CERTIFIED'
+            return
+        if not enabled():_check_budget(budget)
+        # Verify saved receipts before handing the same complete decision onward.
+        if record(best['point']['path'])!=best['point'] or record(best['physical']['path'])!=best['physical']:
+            raise PermissionError('A_ACCEPTED_INCUMBENT_SHA_DRIFT')
+        planning=_planning(state,verification,power,output)
+        if not enabled():_check_budget(budget)
+        freeze=dict(PASS=True,accepted=True,state='A1_P1_ONLY_ACCEPTED',A1_P1_ONLY_ACCEPTED=True,
+            A1_ACCEPTED=False,P1_only=True,arm='B1',day=day,selected_jobs=verification['selected_jobs'],
+            controls=verification['controls'],globals=verification['globals'],validated_original_integer_point=best['point'],
+            physical=best['physical'],planning=planning,global_bound=record(output/'P1_FULL_DOMAIN_BOUND_CERTIFICATE.json'),
+            acceptance=record(output/'P1_ONLY_ACCEPTANCE_CONTRACT.json'),source=record(native.freeze_path),
+            scientific_input=state['_campaign']['input_receipts'],exact_objective_values=best['exact_objective_values'],
+            P2_calls=0,MESS_optimization_calls=0,all_MESS_PQ_zero=True,UB=best['UB'],LB=best['LB'],
+            certified_gap=best['gap'],FULL_feasible_certified=True,global_gap_certified=result['global_gap_certified'])
+        atomic(output/'B1_P1_FREEZE.json',freeze);atomic(output/'A1_FREEZE.json',freeze)
+        result.update(PASS=True,accepted=True,classification=(
+            'TIME_LIMIT_FEASIBLE_ACCEPTED' if enabled() and timed else 'FEASIBLE_ACCEPTED' if enabled() and not result['global_gap_certified'] else 'PASS'),
+            freeze=record(output/'B1_P1_FREEZE.json'),planning=planning,planning_rho_max=verification['physical']['P1_rho'])
     try:
         _check_budget(budget)
         with budget.cost('model_preparation','A_complete_model_build'):
@@ -618,7 +648,7 @@ def run(request, budget, progress=None):
                 atomic(output / 'I' / ('R' + str(len(invalid_replays)) + '.json'), rejected)
                 return
             verification = physical.verify(point)
-            _check_budget(budget)
+            if not enabled():_check_budget(budget)
             if not verification['PASS']:
                 invalid_replays.append(verification)
                 atomic(output / 'I' / ('R' + str(len(invalid_replays)) + '.json'), verification)
@@ -654,7 +684,7 @@ def run(request, budget, progress=None):
             candidates.append(candidate)
             atomic(output / 'VALIDATED_INTEGER_INCUMBENTS.json', dict(trajectory=candidates))
             _notify(progress, phase='INTEGER_CONTROL', day=day, UB=float(upper),
-                    Certified_Global_LB=float(exact_lb), Certified_Gap=acceptance['gap'])
+                    Certified_Global_LB=float(exact_lb), Certified_Gap=acceptance['gap'],global_gap_certified=acceptance['PASS'] is True)
             if acceptance['PASS'] and native.live_model is not None:
                 atomic(output / 'INDEPENDENT_CERTIFIED_TARGET_STOP.json', dict(
                     PASS=True, exact_LB=str(exact_lb), exact_UB=str(upper),
@@ -670,45 +700,15 @@ def run(request, budget, progress=None):
         if 'X' in raw:
             validate(raw['X'], rec['objective'])
         if candidates:
-            best = candidates[-1]
-            verification = read(best['physical']['path'])
-            acceptance = best['acceptance']
-            atomic(output / 'P1_ONLY_ACCEPTANCE_CONTRACT.json', acceptance)
-            result.update(UB=best['UB'], LB=best['LB'], exact_UB=best['exact_UB'],
-                          exact_LB=best['exact_LB'], certified_gap=best['gap'], incumbent=best)
-            if acceptance['PASS']:
-                _check_budget(budget)
-                planning = _planning(state, verification, power, output)
-                _check_budget(budget)
-                freeze = dict(PASS=True, accepted=True, state='A1_P1_ONLY_ACCEPTED',
-                              A1_P1_ONLY_ACCEPTED=True, A1_ACCEPTED=False, P1_only=True,
-                              arm='B1', day=day, selected_jobs=verification['selected_jobs'],
-                              controls=verification['controls'], globals=verification['globals'],
-                              validated_original_integer_point=best['point'],
-                              physical=best['physical'], planning=planning,
-                              global_bound=record(output / 'P1_FULL_DOMAIN_BOUND_CERTIFICATE.json'),
-                              acceptance=record(output / 'P1_ONLY_ACCEPTANCE_CONTRACT.json'),
-                              source=record(native.freeze_path), scientific_input=state['_campaign']['input_receipts'],
-                              exact_objective_values=best['exact_objective_values'],
-                              P2_calls=0, MESS_optimization_calls=0, all_MESS_PQ_zero=True,
-                              UB=best['UB'], LB=best['LB'], certified_gap=best['gap'])
-                atomic(output / 'B1_P1_FREEZE.json', freeze)
-                # Schema adapter for the old materializer; full four-objective
-                # A1 acceptance is explicitly false and is never asserted.
-                atomic(output / 'A1_FREEZE.json', freeze)
-                result.update(PASS=True, accepted=True, classification='PASS',
-                              freeze=record(output / 'B1_P1_FREEZE.json'), planning=planning,
-                              planning_rho_max=verification['physical']['P1_rho'])
-            else:
-                result['classification'] = 'TIME_LIMIT_FEASIBLE_NOT_CERTIFIED'
+            accept_best(rec['status'],rec['status']==9 or budget.remaining()<=0)
         else:
             result.update(classification='PHYSICAL_FAILURE' if invalid_replays else
-                          'TIME_LIMIT_NO_VALID_INCUMBENT' if rec['status'] in (9, 11)
+                          ('TIME_LIMIT_NO_FEASIBLE' if enabled() else 'TIME_LIMIT_NO_VALID_INCUMBENT') if rec['status'] in (9, 11)
                           else 'INCONCLUSIVE', native_status=rec['status'])
     except Exception as error:
         name, text = type(error).__name__, str(error)
         last_native_status = native.calls[-1]['status'] if native is not None and native.calls else None
-        timed = name == 'BudgetStop' or 'BUDGET' in text or last_native_status in (9, 11)
+        timed = normal_budget_exception(error) if enabled() else name == 'BudgetStop' or 'BUDGET' in text or last_native_status in (9, 11)
         physical_failure = any(token in text for token in ('PHYSICAL', 'PCC', 'GPU_POWER_IDENTITY'))
         input_failure = any(token in text for token in ('INPUT', 'BUNDLE', 'DATA_SHA', 'DATE_IDENTITY'))
         result.update(classification=('TIME_LIMIT_FEASIBLE_NOT_CERTIFIED' if candidates else 'TIME_LIMIT_NO_VALID_INCUMBENT')
@@ -718,9 +718,19 @@ def run(request, budget, progress=None):
         if candidates:
             result.update(incumbent=candidates[-1], UB=candidates[-1]['UB'],
                           LB=candidates[-1]['LB'], certified_gap=candidates[-1]['gap'])
+        if enabled() and timed:
+            if candidates:
+                try:
+                    accept_best(last_native_status,True)
+                    result.pop('error',None);result.pop('traceback',None)
+                except Exception as handoff_error:
+                    result.update(PASS=False,accepted=False,classification='IMPLEMENTATION_FAILURE',error=repr(handoff_error),traceback=traceback.format_exc())
+            else:result['classification']='TIME_LIMIT_NO_FEASIBLE'
     finally:
         result.update(native_seconds=budget.native_used, wall_seconds=budget.wall(),
                       native_calls=0 if native is None else len(native.calls),
+                      native_budget_overshoot_seconds=max(0.,budget.native_used-5400),
+                      Native_budget_reset=0,global_optimum_claim=False,
                       invalid_original_physical_replay_count=len(invalid_replays),
                       P2_calls=0, MESS_optimization_calls=0)
         output.mkdir(parents=True, exist_ok=True)

@@ -32,10 +32,13 @@ def physical_authority():
     try:
         from v42_thermal.authority import current_authority
         a = current_authority()
-        assert a['transformer_current_authority_sha256'] == NORMALAMPS
-        assert len(a['rows']) == 120 and len({r['transformer'] for r in a['rows']}) == 44
+        from v42_svr11.authority import active
+        epoch=active()
+        expected_sha = __import__('v42_pr134_b1.common',fromlist=['read']).read(epoch['thermal']['path'])['transformer_current_authority_sha256'] if epoch else NORMALAMPS
+        assert a['transformer_current_authority_sha256'] == expected_sha
+        assert len(a['rows']) == (153 if epoch else 120) and len({r['transformer'] for r in a['rows']}) == (77 if epoch else 44)
         assert a['Planning'] == a['Actual']
-        assert a['controls']['RegControl_count'] == 7 and a['controls']['CapControl_count'] == 0
+        assert a['controls']['RegControl_count'] == (40 if epoch else 7) and a['controls']['CapControl_count'] == 0
         assert len(a['controls']['capacitors']) == 4
         yield a
     finally:
@@ -67,7 +70,7 @@ def all_transformer_rows(builder, binding_rows=None):
                 else:
                     row = next(old_rows); row.ConstrName = label
                 if binding_rows is not None:
-                    binding_rows.append(dict(time=t, transformer=rating['transformer'], phase=rating['phase'], NormalAmps=rating['NormalAmps'], authority_SHA=NORMALAMPS, constraint_name=label))
+                    binding_rows.append(dict(time=t, transformer=rating['transformer'], phase=rating['phase'], NormalAmps=rating['NormalAmps'], authority_SHA=a['transformer_current_authority_sha256'], constraint_name=label))
             assert observed == set(ratings), 'ALL_120_PHASES_REQUIRED'
         assert next(old_rows, None) is None
         return rho
@@ -104,4 +107,5 @@ def grid_audit(coefficients, controls, rho, tolerance=1e-5):
                 errors['line_current']=max(errors['line_current'],float(np.max(faces/ap[k]+correction[k]@(x-c.anchor)+bias[k])-rho))
             if c.transformer_ratings[k] is not None:
                 errors['transformer_kVA']=max(errors['transformer_kVA'],float(np.max(faces)-c.transformer_ratings[k]*math.cos(math.pi/16)))
-    return dict(PASS=max(errors.values())<=tolerance,maximum_violations=errors,min_voltage_pu=math.sqrt(max(0,vmin)),max_voltage_pu=math.sqrt(max(0,vmax)),transformer_current_authority_sha256=NORMALAMPS,voltage_band=list(PLANNING_BAND),margin_pu=MARGIN_PU,all_transformer_phases_audited=True)
+    from v42_thermal.authority import current_authority
+    return dict(PASS=max(errors.values())<=tolerance,maximum_violations=errors,min_voltage_pu=math.sqrt(max(0,vmin)),max_voltage_pu=math.sqrt(max(0,vmax)),transformer_current_authority_sha256=current_authority()['transformer_current_authority_sha256'],voltage_band=list(PLANNING_BAND),margin_pu=MARGIN_PU,all_transformer_phases_audited=True)

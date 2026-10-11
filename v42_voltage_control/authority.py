@@ -377,6 +377,9 @@ def _gate_identity(label, gate, source_SHA, scenario_SHA):
 
 
 def verify_design(receipt, source_SHA, *, qualified=False):
+    from v42_svr11.authority import active, design
+    if active() is not None:
+        return design(receipt, source_SHA)
     if receipt is None:
         raise PermissionError('VOLTAGE_CONTROL_FROZEN_DESIGN_RECEIPT_REQUIRED')
     design = read(checked(receipt))

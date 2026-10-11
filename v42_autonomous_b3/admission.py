@@ -83,7 +83,10 @@ def validate_request(request):
             type(request.get("worker_slot")) is int and request["worker_slot"] == 1,
             "B3_EXACTLY_ONE_WORKER_MAY_DATE_REQUIRED")
     root, output = Path(request["code_root"]).resolve(), Path(request["output"]).resolve()
-    require(output.is_relative_to(root / "runtime" / "b3") and output != root / "runtime" / "b3",
+    from v42_svr11.authority import active
+    epoch=active()
+    owned=Path(epoch['root'])/'dates/B3'/request['day'] if epoch and request.get('svr11_campaign') else root/'runtime/b3'
+    require(output.is_relative_to(owned) and output != owned,
             "ISOLATED_B3_ATTEMPT_OUTPUT_REQUIRED")
     require(Path(request["campaign_root"]).resolve() != output and
             not Path(request["campaign_root"]).resolve().is_relative_to(output),
@@ -241,7 +244,13 @@ class ExecutionPermit:
 def execution_permit(request, seal):
     root, _ = validate_request(request)
     validate_seal(seal, root)
-    if request.get("canary") is True:
+    from v42_svr11.authority import active
+    if active() is not None and request.get('svr11_campaign') is True:
+        epoch=active()
+        require(request['day'] in DAYS and seal['source_sha']==epoch['execution_SHA']
+            and request['manifest_SHA']==record(request['manifest'])['sha256'], 'SVR11_B3_EPOCH_PERMIT_DRIFT')
+        mode='USER_AUTHORIZED_SVR11_FULL_MAY_FAIL_CONTINUE'
+    elif request.get("canary") is True:
         mode = "USER_AUTHORIZED_REAL_CANARY"
     else:
         verify_qualification(request["qualification"], seal["source_sha"])
