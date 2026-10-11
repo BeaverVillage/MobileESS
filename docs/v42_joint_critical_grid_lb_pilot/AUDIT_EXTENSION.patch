@@ -1,0 +1,57 @@
+diff --git a/docs/v42_joint_critical_grid_lb_pilot/MATH_REVIEW_KO.md b/docs/v42_joint_critical_grid_lb_pilot/MATH_REVIEW_KO.md
+index 2c836228..26abe01f 100644
+--- a/docs/v42_joint_critical_grid_lb_pilot/MATH_REVIEW_KO.md
++++ b/docs/v42_joint_critical_grid_lb_pilot/MATH_REVIEW_KO.md
+@@ -20,7 +20,7 @@
+ 
+ C2의 192개 DETERMINISTIC_FLOW alias, 96개 node_activity unit alias, 4개 source node 고정, 8개 SOC endpoint 대입은 기존 exact static presolve와 역방향 복원식으로 처리한다. C3A의 53,652개 PCS16 행, 17,884개 Q 접속 행, 4개 terminal_location 행 삭제에는 저장된 exact Farkas 또는 flow-sum 증거가 있다. 남은 PCS16 89,420행은 각 접속 P/Q 블록에서 10개 facet을 남긴 표현이다. 나머지 6개 facet과 Q link는 보존한 물리 행과 원본 Bounds로부터 함의되므로 실제 16면 PCS 영역을 넓히거나 축소하지 않는다.
+ 
+-독립 `joint_physical_relation_audit.py`는 각 PR209 차량 CSR을 한 번에 하나씩 읽어, 보존된 C3A 물리 행의 계수·RHS·sense를 원본 행에 exact C2 alias를 대입한 결과와 일치하는지 확인한다. 추가 node_activity_link는 저장된 실제 DAG의 outgoing/incoming arc에서 재구성한다. 이 확인은 원본 가능해를 유지하는 행 선택이라는 사실을 수치 점 하나의 replay와 별도로 검사한다.
++독립 `tools/joint_critical_grid_lb/audit_physical_relation.py`는 각 PR209 차량 CSR을 한 번에 하나씩 읽어, 보존된 원본 물리 행 134,514개의 계수·RHS·sense를 exact C2 alias 대입 결과와 비교한다. 추가 node_activity_link 8,746개는 저장된 실제 DAG의 outgoing/incoming arc에서 재구성한다. C3A에서 삭제한 71,540개 물리 행도 원본 차량 행에 alias를 대입한 좌표에서 exact Farkas 또는 flow equality 합으로 독립 재검증한다. 원본 초기·종단 SOC 8개 행은 exact tautology로 바뀜을 확인하며, C2에서 삭제한 node link는 exact tautology 또는 보존한 flow equality와 정확한 비례 관계임을 확인한다. 이 확인은 원본 가능해를 유지하는 행 선택과 모든 원본 물리 조건의 보존을 수치 점 하나의 replay와 별도로 검사한다.
+ 
+ ## Bounds와 좌표계
+ 
+diff --git a/docs/v42_joint_critical_grid_lb_pilot/PHYSICAL_RELATION_AUDIT.json b/docs/v42_joint_critical_grid_lb_pilot/PHYSICAL_RELATION_AUDIT.json
+index 52a0810a..48ced9f8 100644
+--- a/docs/v42_joint_critical_grid_lb_pilot/PHYSICAL_RELATION_AUDIT.json
++++ b/docs/v42_joint_critical_grid_lb_pilot/PHYSICAL_RELATION_AUDIT.json
+@@ -11,6 +11,8 @@
+   "retained_node_activity_links_exactly_replayed": 8746,
+   "C2_deleted_original_physical_definitions_exact_tautologies": 8,
+   "C3A_deleted_physical_rows_exact_Farkas_or_flow_sum_replayed": 71540,
++  "C2_deleted_node_links_exact_tautologies": 288,
++  "C2_deleted_node_links_exact_retained_flow_implications": 4,
+   "per_unit": [
+     {
+       "unit": "MESS01",
+@@ -68,5 +70,5 @@
+   "C3A_physical_bounds_tightened": 0,
+   "bound_implication_scope": "Source18r independently replayed exact SOC/PCS/source-flow implication receipts; mathematical derivation in MATH_REVIEW_KO.md",
+   "solver_bound_exact_certificate": false,
+-  "elapsed_seconds": 18.073338499991223
++  "elapsed_seconds": 19.303421799908392
+ }
+diff --git a/tools/joint_critical_grid_lb/verify.py b/tools/joint_critical_grid_lb/verify.py
+index 3dad90d1..865f5c2c 100644
+--- a/tools/joint_critical_grid_lb/verify.py
++++ b/tools/joint_critical_grid_lb/verify.py
+@@ -177,7 +177,9 @@ def native0(source, previous, out):
+             sum(unit['original_energy_slots_exactly_replayed'] for unit in relation['per_unit']) == 384,
+             'ORIGINAL_COMPACT_PHYSICAL_TRANSPORT_CENSUS_MISMATCH')
+     require(relation['C3A_deleted_physical_rows_exact_Farkas_or_flow_sum_replayed'] == 71540 and
+-            relation['C2_deleted_original_physical_definitions_exact_tautologies'] == 8,
++            relation['C2_deleted_original_physical_definitions_exact_tautologies'] == 8 and
++            relation['C2_deleted_node_links_exact_tautologies'] == 288 and
++            relation['C2_deleted_node_links_exact_retained_flow_implications'] == 4,
+             'DELETED_PHYSICAL_ROW_EXACT_PROOF_CENSUS_MISMATCH')
+     result['physical_relation_audit_sha256'] = sha_file(out/'PHYSICAL_RELATION_AUDIT.json')
+     A = sparse.load_npz(source / 'C3A_A.npz').tocsr()
+@@ -331,6 +333,8 @@ def native0(source, previous, out):
+                    'all_physical_C3A_rows_and_columns_retained_exactly': True,
+                    'C3A_deleted_physical_rows_exact_Farkas_or_flow_sum_replayed': 71540,
+                    'C2_deleted_original_physical_definitions_exact_tautologies': 8,
++                   'C2_deleted_node_links_exact_tautologies': 288,
++                   'C2_deleted_node_links_exact_retained_flow_implications': 4,
+                    'full_C3A_CSR_disposed_before_Joint_CSR_load': True,
+                    'all_physical_bounds_and_types_unchanged_from_certified_C3A': True,
+                    'physical_rows_are_single_vehicle': True,

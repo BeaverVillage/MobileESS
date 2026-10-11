@@ -1,0 +1,42 @@
+{
+  "schema": "V42_JOINT_LB_RUNNER_STATIC_RESOURCE_REVIEW_V1",
+  "observed_UTC": "2026-10-11T16:24:04.9764709Z",
+  "reviewed_file": "D:\\v42_joint_critical_grid_lb_20261012\\tools\\joint_critical_grid_lb\\pilot.py",
+  "reviewed_sha256": "23d8ad3f6dd650c91a7303727cf3e81f3f9552da081df81dac5cb1cea326d42d",
+  "PASS": true,
+  "native_executions_by_reviewer": 0,
+  "model_builds_by_reviewer": 0,
+  "original_state_mutations": 0,
+  "scope": "Read-only source inspection of native(); no solver, no pilot edits.",
+  "checks": {
+    "exclusive_durable_max_one_optimize_latch": true,
+    "native0_independent_and_pre_run_saved_PASS_gates": true,
+    "sealed_matrix_and_data_files_hash_rechecked": true,
+    "prebuild_actual_RAM_commit_floors_plus_growth_gate": true,
+    "native_matrix_RHS_senses_bounds_types_objective_readback": true,
+    "threads_one_TimeLimit90_MIPGap003_MIPFocus3_recorded": true,
+    "postbuild_actual_RAM_commit_gate": true,
+    "growth_estimate_is_max_2GiB_or_4times_observed_private_growth": true,
+    "fresh_peer_inventory_after_readback_excludes_own_PID": true,
+    "loaded_Gurobi_peer_or_native_command_blocks_optimize": true,
+    "memory_callback_uses_actual_system_RSS_private_and_supported_terminate": true,
+    "memory_callback_floor_is_4GiB_RAM_6GiB_commit": true,
+    "callback_numerical_or_oom_errors_terminate_and_invalidate": true,
+    "optimize_exception_and_NUMERIC_status_do_not_certify_bound": true,
+    "infinity_or_Gurobi_bound_sentinel_not_certified": true,
+    "reduced_incumbent_not_promoted_to_original_UB": true,
+    "no_auto_time_extension_or_retry_path": true
+  },
+  "blocking_findings": [],
+  "resolved_initial_findings": [
+    "Initial version relied only on saved peer audit; current version writes fresh PRE_OPTIMIZE_PEERS immediately before durable latch.",
+    "Initial version admitted finite Gurobi +/-1e100 sentinel; current valid test requires math.isfinite(bound) and abs(bound)<GRB.INFINITY.",
+    "Initial memory growth narrative asserted an unmeasured factor; current estimate records max(2GiB,4x observed build private growth)."
+  ],
+  "nonblocking_observations": [
+    "Current result peak_private_commit_bytes is the maximum sampled Private_Commit_bytes; memory() also captures OS Peak_Private_Commit_bytes, which can capture a between-callback spike. Prefer the OS peak when available, or explicitly label the field sampled peak.",
+    "Peer loaded-module scan catches a running Gurobi solve. Expanding peer command tokens to the audit helper worker tokens can also reject a new worker in its earlier import/build phase.",
+    "The .5-second resource sampling interval is callback-driven; it is not a guarantee of a callback every .5 seconds. A supported Gurobi SoftMemLimit may supplement monitoring, but the checked actual system reserve and growth gates are the admission policy."
+  ],
+  "conclusion": "Critical resource, single-optimize, readback and numerical-bound validity controls PASS by static review of the recorded version. This review is not mathematical certification, a post-build memory observation, or authorization for another Native call."
+}
