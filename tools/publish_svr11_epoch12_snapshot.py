@@ -26,6 +26,23 @@ def publish():
     for name in ('MAY18_QUANTITATIVE_CAUSE_DECOMPOSITION.json','EPOCH10_DRAIN_PRESERVATION.json'):
         shutil.copyfile(DIAG/name,folder/name)
     shutil.copyfile(DIAG/'storage/STORAGE_COMPRESSION_RECEIPT.json',folder/'STORAGE_COMPRESSION_RECEIPT.json')
+    cleanup=None;purge=None
+    cleanup_index=DIAG/'storage/LATEST_UNUSED_RESULTS_CLEANUP.json'
+    if cleanup_index.exists():
+        cleanup_record=read(cleanup_index);assert record(cleanup_record['path'])['sha256']==cleanup_record['sha256']
+        cleanup=read(cleanup_record['path']);shutil.copyfile(cleanup_record['path'],folder/'UNUSED_RESULTS_CLEANUP.json')
+        recovery=cleanup['recovery_map'];assert record(recovery['path'])['sha256']==recovery['sha256']
+        shutil.copyfile(recovery['path'],folder/'UNUSED_RESULTS_RECOVERY_MAP.json')
+        purge_index=DIAG/'storage/LATEST_BACKUP_REMOVAL.json'
+        if purge_index.exists():
+            pr=read(purge_index);assert record(pr['path'])['sha256']==pr['sha256']
+            purge=read(pr['path'])
+            assert all(not Path(r['path']).exists() for r in purge['archives'])
+            assert any(r['sha256']==cleanup['archive']['sha256'] for r in purge['archives'])
+            shutil.copyfile(pr['path'],folder/'BACKUP_REMOVAL_RECEIPT.json')
+        else:assert record(cleanup['archive']['path'])['sha256']==cleanup['archive']['sha256']
+        post=Path(cleanup_record['path']).parent/'POST_CLEANUP_VERIFICATION.json'
+        if post.exists():shutil.copyfile(post,folder/'POST_CLEANUP_VERIFICATION.json')
     shutil.copyfile(DIAG/'FINAL_GENERATOR_CONNECTION/GENERATOR_CONNECTION_VALIDATION.json',folder/'GENERATOR_CONNECTION_VALIDATION.json')
     validation=read(ROOT/'MODEL_VALIDATION_RELEASE_CONTRACT.json')
     for key in ('May18_reoptimization','normal_date_validation','May18_Actual'):
@@ -51,6 +68,9 @@ def publish():
         May18_Actual=record(validation['evidence']['May18_Actual']['path']),
         final_month_completed=False,monitor_URL='http://127.0.0.1:8796',UTC=now())
     atomic(folder/'SNAPSHOT.json',summary)
+    cleanup_text='' if cleanup is None else f''' Additional user-authorized cleanup removed {cleanup['byte_reconstructible_slot_duplicates']} obsolete slot NPZ duplicates with independently proven byte-identical reconstruction from retained merged NPZ, and {cleanup['archived_loose_arrays']} closed historical array JSON files after complete ZIP-entry SHA verification. Net allocated storage recovered, after the backup archive, is {cleanup['net_allocated_recovered']:,}bytes. Removed loose array paths are explicitly recorded rather than claimed present. May16/May18 details, failed dates, current campaign, raw/source/shared inodes, all ledgers/Native histories and performance CSV remain untouched. [Cleanup receipt](epoch12_snapshot/UNUSED_RESULTS_CLEANUP.json), [archive/reconstruction map](epoch12_snapshot/UNUSED_RESULTS_RECOVERY_MAP.json).'''
+    if purge:
+        cleanup_text=f''' User-directed obsolete-data cleanup deleted {cleanup['deleted_files']} loose files ({cleanup['byte_reconstructible_slot_duplicates']} byte-identical slot NPZ duplicates and {cleanup['archived_loose_arrays']} closed PASS detailed array JSON files). The user's subsequent instruction also removed both unnecessary ZIP backups: {purge['additional_allocated_recovered']:,} additional bytes, {purge['total_cleanup_allocated_recovered']:,}bytes total allocated recovery. **Those historical detailed arrays now have no backup and cannot be restored**; the original archive map documents prior verification rather than a currently available archive. Essential317 loose records retain their original SHA, and all239 entries in the earlier essential ZIP were proved duplicated in retained loose originals before ZIP deletion. May16/May18 details, failures, current campaign, raw/source/shared inodes, ledgers/Native histories and performance CSV remain. Obsolete slot duplicates can still be reconstructed byte-identically from retained merged files. [Cleanup history](epoch12_snapshot/UNUSED_RESULTS_CLEANUP.json), [backup removal](epoch12_snapshot/BACKUP_REMOVAL_RECEIPT.json), [original deletion map](epoch12_snapshot/UNUSED_RESULTS_RECOVERY_MAP.json).'''
     intro=f'''Current official execution: **Epoch12**, Root `{ROOT}`, Source `{m['execution_SHA']}`, manifest commit `{m['source_commit']}`. Equipment remains `{summary['equipment_SHA']}`. [Snapshot](epoch12_snapshot/SNAPSHOT.json), [ledger](epoch12_snapshot/CAMPAIGN_LEDGER.json), [validation and limitations](epoch12_snapshot/MODEL_VALIDATION_RELEASE_CONTRACT.json).
 
 May18's original Planning estimate1.027409814pu missed optimized Forecast1.050890442pu and Actual1.051030026pu. Same-P/Q diagnostic tap swaps independently separate prior-history tap contribution0.011539025145pu, current-slot AUTO tap contribution0.013581027418pu and fixed-tap affine remainder−0.001639425000pu. Original Reg4 LDC compensation couples delivered P/Q to secondary voltage; a single B0-anchored absolute-voltage secant does not represent that discrete control history. [Quantitative RCA](epoch12_snapshot/MAY18_QUANTITATIVE_CAUSE_DECOMPOSITION.json).
@@ -63,16 +83,18 @@ The new campaign starts all124 dates afresh: **B0 3Workers Native0 → B2 3Worke
 
 Official paths proceed from Forecast/model→Planning→decision freeze→Actual→Fresh96. There is no postoptimization Forecast96 replay or fabricated Planning AC PASS. Actual starts an independent native context with originalReg7/SVR11 AUTO, empty initial queue and no Planning control-state transfer. B0 May01 independently completed all96 Actual slots at Native0. [New B0 evidence](epoch12_snapshot/B0_MAY01_RESULT.json). At this snapshot {state['counts']['completed']}/124 terminal, PASS{state['counts']['PASS']}/FAIL{state['counts']['FAIL']}; full campaign completion remains pending.
 
-Only unchanged raw inputs/domain descriptors reuse original bytes. SHA-verified raw files use NTFS hardlinks; every changed sensitivity and dependent model is regenerated. Old optimized plans and physical PASS are never promoted. New date-specific electrical models are shared across B1/B2/B3. Historical312 files were compressed in place, preserving paths/decompressed SHA, with3,896,577,213bytes allocation recovered and deletion0; May18/raw/source/shared/live artifacts were excluded. [Reuse](epoch12_snapshot/SELECTIVE_REUSE_LEDGER.json), [storage](epoch12_snapshot/STORAGE_COMPRESSION_RECEIPT.json), [old124-date preservation](epoch12_snapshot/EPOCH10_DRAIN_PRESERVATION.json).
+Only unchanged raw inputs/domain descriptors reuse original bytes. SHA-verified raw files use NTFS hardlinks; every changed sensitivity and dependent model is regenerated. Old optimized plans and physical PASS are never promoted. New date-specific electrical models are shared across B1/B2/B3. The earlier historical312-file in-place compression recovered3,896,577,213bytes without deletion at that time. [Reuse](epoch12_snapshot/SELECTIVE_REUSE_LEDGER.json), [earlier compression](epoch12_snapshot/STORAGE_COMPRESSION_RECEIPT.json), [old124-date preservation](epoch12_snapshot/EPOCH10_DRAIN_PRESERVATION.json).{cleanup_text}
 
 Existing hourly heartbeat is ACTIVE and the two existing Windows safeguard registrations target this Root/Source; HTTP monitor http://127.0.0.1:8796 matches it. Old dispatch remains quiesced and healthy Epoch10 Workers all finished naturally. May2025 remains retrospective development, not an independent holdout. [Schedule](epoch12_snapshot/HOURLY_AUTOMATION.json), [migration](epoch12_snapshot/MIGRATION_STATUS.json).
+
+The existing hourly recovery was updated at the user's request for Epoch12, preserving its ACTIVE status, one-hour interval and current chat. Future approved epoch transitions require matching immutable manifest/release/migration and live process/HTTP evidence before retargeting these same schedules. [Verified schedule update](epoch12_snapshot/HOURLY_USER_UPDATE_VERIFIED_20261011.json), [direct process, memory and Windows observations](epoch12_snapshot/HEARTBEAT_DIRECT_OBSERVATION_20261011_1507.json), [all124 performance and separate PASS cohorts](epoch12_snapshot/PERFORMANCE_COMPARISON.json).
 
 <!-- EPOCH12_CURRENT_END -->
 
 '''
     p=SOURCE/'docs/v42_svr11_final_20261011/README.md';previous=p.read_text(encoding='utf8')
     if '<!-- EPOCH12_CURRENT_END -->' in previous:previous=previous.split('<!-- EPOCH12_CURRENT_END -->',1)[1].lstrip()
-    p.write_text(intro+previous,encoding='utf8')
+    p.write_bytes((intro+previous).encode('utf8'))
     body=intro.split('<!-- EPOCH12_CURRENT_END -->')[0].replace('](epoch12_snapshot/',
         '](https://github.com/BeaverVillage/MobileESS/blob/codex/v42-svr11-final-may-20261011-epoch02/docs/v42_svr11_final_20261011/epoch12_snapshot/')
     (ROOT/'DRAFT_PR_BODY.md').write_text(body,encoding='utf8')
