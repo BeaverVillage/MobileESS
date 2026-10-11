@@ -1,0 +1,42 @@
+{
+  "schema": "SOURCE19_MULTITIME_RECENT_HISTORY_STATIC_AUDIT_V1",
+  "date": "2026-10-11",
+  "repository": "D:/v42_svr11_epoch18r_20261011",
+  "current_git_head": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+  "current_execution_source_sha_given_by_parent": "146bf39f5e4f9d720ef7118051edbcdc58b96ca3d83af31c3e7bd5349f1fecd8",
+  "scope": "Read-only PR185/186/187 bodies, primary diffs, git-show historical source and current source. No model build, Native call, old-point ingestion, copied651cut payload, repository edit or current LB claim.",
+  "AGENTS": "No AGENTS.md returned by rg --files and no D:/AGENTS.md or repository-root AGENTS.md present.",
+  "primary_sources": [
+    {"pr":185,"url":"https://github.com/BeaverVillage/MobileESS/pull/185","base":"3100039d19a22ec407713f36a9e978b2e96533a8","head":"6d1d64beaf012d32ddf39245890785e3d8f01d4b","body_saved":"PR185_primary_body.json","diff_review":"gh pr diff185 --patch; extracted source/candidate summary via rg; bulk diff discarded after review"},
+    {"pr":186,"url":"https://github.com/BeaverVillage/MobileESS/pull/186","base":"0cc77b3cecf8f46c02fa58633c2ded753aff14c5","head":"9a1b41260aff3bc70d2e36d7e1c293c03ea114de","body_saved":"PR186_primary_body.json","diff_review":"git diff --name-only base head -- *.py; source changes are A-stage and May12 rescue/pricing/activation paths, no M route/SOC formulation"},
+    {"pr":187,"url":"https://github.com/BeaverVillage/MobileESS/pull/187","base":"6d1d64beaf012d32ddf39245890785e3d8f01d4b","head":"e67ecfa827e4262c2f2df17c226d6442656af18b","body_saved":"PR187_primary_body.json","diff_review":"gh pr diff187 --patch; source/summary extracted via rg; bulk diff discarded after review"}
+  ],
+  "historical_candidates": [
+    {"name":"H1 pure physical master / B1 full grid closure","source":"6d1d64b:v42_physics_redesign/structure.py:33,73","mathematical_implication":"Deleting original grid constraints gives a weaker relaxation. Restoring all original residual/grid rows recovers exactly the original LP; no LP strength gain."},
+    {"name":"H2 cumulative SOC substitution","source":"6d1d64b:v42_physics_redesign/cumulative.py:3,61; structure.py:56,71,73","mathematical_implication":"Exact forward/inverse cumulative energy substitution retains all384 energy equalities and380 intermediate SOC bound pairs. It is LP projection equivalent, not strengthening.","historical_size_only":{"removed_continuous_columns":380,"original_nnz":5351612,"predicted_H2_nnz":25937190,"predicted_rows":583188,"candidate_materialized":false}},
+    {"name":"B2 historical endpoint route/SOC disjunctions","source":"6d1d64b:v42_physics_redesign/temporal.py:44,46,51,52,61","formula":"E_arr + max(0,u_arr-u_dep+e_arc)*f_arc <= u_arr","reason_valid":"For selected integer path movement arc f=1, dispatch is zero at skipped vertices and original energy rows imply E_arr=E_dep-e_arc, so E_arr<=u_dep-e_arc. With f=0 the row reduces to original E_arr<=u_arr; outward coefficient/RHS transport preserves the original finite box.","historical_selection":{"candidate_rows_checked":795944,"delivered_rows":651,"added_nnz":1302,"all_delivered_kind":"ARRIVAL_SOC_REACHABILITY","archived_point_screen_only":true},"mathematical_limitation":"The selected set addresses only endpoint upper-energy reachability. It adds neither joint interval dispatch/PCS service coupling nor indivisible simultaneous availability. It need not cut current fractional physics and cannot be transplanted across current axes/science."}
+  ],
+  "historical_B2_result_not_current": {
+    "source":"e67ecfa:docs/v42_m1_b2_root_validation_20261008/B2_ROOT_CUT_EFFECT_AUDIT.json; PR187 body",
+    "classification":"B2_ROOT_NONMATERIAL",
+    "historical_native_objective_uplift_only":0.000001947264524737591,
+    "historical_valid_global_bound_improvement":0,
+    "all651satisfied":true,
+    "active_rows_at_1e8":0,
+    "active_rows_at_1e6":0,
+    "min_cut_slack":0.0000014409649638932203,
+    "cut_dual_absolute_mass":0.00008755320060355916,
+    "strict_original_row_replay":"FAIL; historical residual6.398198681978329e-8",
+    "certificate_note":"Native objective/ObjBound were not accepted as exact certified bound. A separate finite-box exact sign-cone bound passed but was weaker; historical injection_P/Q stationarity support loss dominated. None is current evidence."
+  },
+  "PR186_scope": "May12 P1-only Phase-I artificial-free witness activation and complete A-stage STAY/migration pricing recovery. It does not supply MESS temporal cuts, a route-SOC extended formulation, or current Multi-Time gap/tractability evidence.",
+  "current_source_checks": [
+    {"source":"497609b:v42_common_mess/model.py:48","meaning":"Build transports case.A, current RHS and senses into addMConstr."},
+    {"source":"497609b:v42_common_mess/model.py:77,90","meaning":"Original objective is checked; unrestricted identity requires all original rows and no additional cuts."},
+    {"source":"497609b:v42_may_campaign_native90/m_model.py:3-5","meaning":"Current matrix regeneration excludes historical point, deletion index and proof packet reuse."},
+    {"source":"497609b:v42_may_campaign_native90/m_model.py:567,643,666","meaning":"All per-slot thermal faces and all transformer-phase rows are retained. Any nonnegative interval sum of those existing rows is redundant in the existing LP; interval strengthening must use a genuinely new integer implication and fresh current authority."},
+    {"source":"current filesystem","meaning":"v42_physics_redesign and v42_b2_root_validation historical modules are absent; read by git show only."}
+  ],
+  "recommendation": "Reject direct651cut repeat and full cumulative H2 materialization. Parent should select one current thermal line/interval from fresh current authority, then derive/prove a small new route-energy-PCS interval implication. No current critical line or current violation inferred from historical duals. Current Root remains incomplete; no full-size Multi-Time Native authorized by this audit.",
+  "operations": {"native_calls":0,"model_builds":0,"worktrees_created":0,"repository_modifications":0,"git_status_before":"clean","git_status_after":"clean"}
+}
