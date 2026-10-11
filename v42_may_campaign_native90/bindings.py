@@ -90,6 +90,9 @@ def check_a_cells(bundle,window_rows,data):
 
 
 def check_coefficients(day,certificate,coefficients):
+    if certificate.get('schema') == 'V42_SVR11_ELECTRICAL_CERTIFICATE_V1':
+        from v42_svr11.model import verify_coefficients
+        return verify_coefficients(certificate,day,coefficients)
     _require(certificate['input_identity']['identity']['inputs']['day']==day,'SAME_DAY_ELECTRICAL_CERTIFICATE')
     outputs=certificate['outputs'];arrays={}
     for name in ('voltage','current','planning_coefficients','transformer_coefficients'):

@@ -1,0 +1,679 @@
+{
+  "capcontrol": null,
+  "case": "B",
+  "connection_manifest": {
+    "bytes": 374492,
+    "path": "D:\\v42_voltage_control_development_20261011\\SVR_DEVELOPMENT_SCENARIOS_01\\ORIGINAL_CONNECTION_MANIFEST.json",
+    "sha256": "ca80243a7ac28c539ca444e978af046504cf465b1d442d956b270ab131410a49"
+  },
+  "scenario_SHA": "0164c6979fcc74b127fd490a10e57d1fdf1cd7c8c97765d47468d851db9ccb93",
+  "schema": "V42_VOLTAGE_CONTROL_SCENARIO_V1",
+  "svr": {
+    "Q_injection_devices": 0,
+    "autonomous_native_control": true,
+    "bus_voltage_assignment": false,
+    "design_data": "Retrospective May04/May05 structural-primary correction; one existing bank relocated; May2025 is not independent holdout",
+    "independent_holdout_claim": false,
+    "schema": "V42_SERIES_SVR_CONTRACT_V1",
+    "status": "FROZEN",
+    "tap_optimization_variables": 0,
+    "units": [
+      {
+        "band_volts": 2.0,
+        "ctprim": 104.08959180101425,
+        "cut_element": "Transformer.mess_sta01_tx",
+        "cut_terminal": 1,
+        "delay_seconds": 30.0,
+        "direct_downstream_bus_coverage": [
+          "mess_sta01_pcc"
+        ],
+        "downstream_bus": "mess_sta01_pcc",
+        "endpoint_id": "MESS",
+        "engineering_assumptions": [
+          "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+          "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+          "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+          "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+          "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+          "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+        ],
+        "id": "STA01",
+        "logical_site_id": "STA01",
+        "max_tap": 1.1,
+        "max_tap_change": 1,
+        "min_tap": 0.9,
+        "no_load_loss_pct": 0.05,
+        "nominal_kv_ln": 2.4017771198288433,
+        "num_taps": 32,
+        "original_bus_spec": "28.1.2.3",
+        "phase_kva": 250.0,
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "ptratio": 20.014809331907028,
+        "remote_ptratio": 2.3094010767585034,
+        "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+        "sensed_bus": "mess_sta01_pcc",
+        "sensed_kv_ln": 0.27712812921102037,
+        "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+        "source_receipts": [
+          {
+            "bytes": 60097,
+            "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\REGCONTROL_CAPCONTROL_SOURCE_AUDIT.json",
+            "sha256": "1266ec2372e5ad6b0ea289b3a94ac9ae6d2574174c9034fd2958216dbf0a51e7"
+          }
+        ],
+        "tap_delay_seconds": 2.0,
+        "upstream_new_bus": "svr_sta01_regulated",
+        "upstream_voltage_coverage_claim": false,
+        "vreg_volts": 120.0,
+        "winding_r_pct": 0.2,
+        "xhl_pct": 1.0
+      },
+      {
+        "band_volts": 2.0,
+        "ctprim": 104.08959180101425,
+        "cut_element": "Transformer.mess_sta06_tx",
+        "cut_terminal": 1,
+        "delay_seconds": 30.0,
+        "direct_downstream_bus_coverage": [
+          "mess_sta06_pcc"
+        ],
+        "downstream_bus": "mess_sta06_pcc",
+        "endpoint_id": "MESS",
+        "engineering_assumptions": [
+          "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+          "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+          "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+          "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+          "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+          "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+        ],
+        "id": "STA06",
+        "logical_site_id": "STA06",
+        "max_tap": 1.1,
+        "max_tap_change": 1,
+        "min_tap": 0.9,
+        "no_load_loss_pct": 0.05,
+        "nominal_kv_ln": 2.4017771198288433,
+        "num_taps": 32,
+        "original_bus_spec": "98.1.2.3",
+        "phase_kva": 250.0,
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "ptratio": 20.014809331907028,
+        "remote_ptratio": 2.3094010767585034,
+        "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+        "sensed_bus": "mess_sta06_pcc",
+        "sensed_kv_ln": 0.27712812921102037,
+        "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+        "source_receipts": [
+          {
+            "bytes": 60097,
+            "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\REGCONTROL_CAPCONTROL_SOURCE_AUDIT.json",
+            "sha256": "1266ec2372e5ad6b0ea289b3a94ac9ae6d2574174c9034fd2958216dbf0a51e7"
+          }
+        ],
+        "tap_delay_seconds": 2.0,
+        "upstream_new_bus": "svr_sta06_regulated",
+        "upstream_voltage_coverage_claim": false,
+        "vreg_volts": 120.0,
+        "winding_r_pct": 0.2,
+        "xhl_pct": 1.0
+      },
+      {
+        "band_volts": 2.0,
+        "ctprim": 104.08959180101425,
+        "cut_element": "Transformer.mess_sta08_tx",
+        "cut_terminal": 1,
+        "delay_seconds": 30.0,
+        "direct_downstream_bus_coverage": [
+          "mess_sta08_pcc"
+        ],
+        "downstream_bus": "mess_sta08_pcc",
+        "endpoint_id": "MESS",
+        "engineering_assumptions": [
+          "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+          "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+          "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+          "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+          "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+          "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+        ],
+        "id": "STA08",
+        "logical_site_id": "STA08",
+        "max_tap": 1.1,
+        "max_tap_change": 1,
+        "min_tap": 0.9,
+        "no_load_loss_pct": 0.05,
+        "nominal_kv_ln": 2.4017771198288433,
+        "num_taps": 32,
+        "original_bus_spec": "67.1.2.3",
+        "phase_kva": 250.0,
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "ptratio": 20.014809331907028,
+        "remote_ptratio": 2.3094010767585034,
+        "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+        "sensed_bus": "mess_sta08_pcc",
+        "sensed_kv_ln": 0.27712812921102037,
+        "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+        "source_receipts": [
+          {
+            "bytes": 60097,
+            "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\REGCONTROL_CAPCONTROL_SOURCE_AUDIT.json",
+            "sha256": "1266ec2372e5ad6b0ea289b3a94ac9ae6d2574174c9034fd2958216dbf0a51e7"
+          }
+        ],
+        "tap_delay_seconds": 2.0,
+        "upstream_new_bus": "svr_sta08_regulated",
+        "upstream_voltage_coverage_claim": false,
+        "vreg_volts": 120.0,
+        "winding_r_pct": 0.2,
+        "xhl_pct": 1.0
+      },
+      {
+        "band_volts": 2.0,
+        "ctprim": 400.0,
+        "cut_element": "Line.l84",
+        "cut_terminal": 1,
+        "delay_seconds": 30.0,
+        "direct_downstream_bus_coverage": [
+          "83",
+          "mess_sta12_pcc"
+        ],
+        "downstream_bus": "83",
+        "endpoint_id": "MV_BRANCH",
+        "engineering_assumptions": [
+          "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+          "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+          "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+          "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+          "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+          "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+        ],
+        "id": "BUS83",
+        "logical_site_id": "FEEDER_BUS83",
+        "max_tap": 1.1,
+        "max_tap_change": 1,
+        "min_tap": 0.9,
+        "no_load_loss_pct": 0.05,
+        "nominal_kv_ln": 2.4017771198288433,
+        "num_taps": 32,
+        "original_bus_spec": "82.1.2.3",
+        "phase_kva": 960.7108479315374,
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "ptratio": 20.014809331907028,
+        "remote_ptratio": 20.014809331907028,
+        "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+        "sensed_bus": "83",
+        "sensed_kv_ln": 2.4017771198288433,
+        "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+        "source_receipts": [
+          {
+            "bytes": 60097,
+            "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\REGCONTROL_CAPCONTROL_SOURCE_AUDIT.json",
+            "sha256": "1266ec2372e5ad6b0ea289b3a94ac9ae6d2574174c9034fd2958216dbf0a51e7"
+          }
+        ],
+        "tap_delay_seconds": 2.0,
+        "upstream_new_bus": "svr_bus83_regulated",
+        "upstream_voltage_coverage_claim": false,
+        "vreg_volts": 120.0,
+        "winding_r_pct": 0.2,
+        "xhl_pct": 1.0
+      },
+      {
+        "band_volts": 2.0,
+        "ctprim": 400.0,
+        "cut_element": "Line.l79",
+        "cut_terminal": 2,
+        "delay_seconds": 30.0,
+        "direct_downstream_bus_coverage": [
+          "79",
+          "idc_idc11_pcc",
+          "mess_idc11_pcc"
+        ],
+        "downstream_bus": "79",
+        "endpoint_id": "MV_BRANCH",
+        "engineering_assumptions": [
+          "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+          "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+          "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+          "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+          "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+          "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No.",
+          "The existing line keeps its full length, LineCode, impedance and normal/emergency current ratings; only Bus2 is reconnected to the series-bank input.",
+          "The new bank is downstream of the original line and controls the original downstream MV bus. No fictitious direct line is created.",
+          "Coverage is a source topology cut, not proof that every downstream LV phase is safe or that this candidate dominates its alternative."
+        ],
+        "id": "BUS79",
+        "logical_site_id": "FEEDER_BUS79",
+        "max_tap": 1.1,
+        "max_tap_change": 1,
+        "min_tap": 0.9,
+        "no_load_loss_pct": 0.05,
+        "nominal_kv_ln": 2.4017771198288433,
+        "num_taps": 32,
+        "original_bus_spec": "79.1.2.3",
+        "phase_kva": 960.7108479315374,
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "ptratio": 20.014809331907028,
+        "remote_ptratio": 20.014809331907028,
+        "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+        "sensed_bus": "79",
+        "sensed_kv_ln": 2.4017771198288433,
+        "series_orientation": "DOWNSTREAM_OF_EXISTING_BRANCH",
+        "source_receipts": [
+          {
+            "bytes": 60097,
+            "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\REGCONTROL_CAPCONTROL_SOURCE_AUDIT.json",
+            "sha256": "1266ec2372e5ad6b0ea289b3a94ac9ae6d2574174c9034fd2958216dbf0a51e7"
+          }
+        ],
+        "tap_delay_seconds": 2.0,
+        "upstream_new_bus": "svr_bus79_series_input",
+        "upstream_voltage_coverage_claim": false,
+        "vreg_volts": 120.0,
+        "winding_r_pct": 0.2,
+        "xhl_pct": 1.0
+      },
+      {
+        "band_volts": 2.0,
+        "ctprim": 400.0,
+        "cut_element": "Line.l105",
+        "cut_terminal": 2,
+        "delay_seconds": 30.0,
+        "direct_downstream_bus_coverage": [
+          "108",
+          "109",
+          "110",
+          "111",
+          "112",
+          "113",
+          "114",
+          "300",
+          "idc_idc12_pcc",
+          "mess_idc12_pcc"
+        ],
+        "downstream_bus": "108",
+        "endpoint_id": "MV_BRANCH",
+        "engineering_assumptions": [
+          "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+          "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+          "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+          "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+          "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+          "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No.",
+          "The existing line keeps its full length, LineCode, impedance and normal/emergency current ratings; only Bus2 is reconnected to the series-bank input.",
+          "The new bank is downstream of the original line and controls the original downstream MV bus. No fictitious direct line is created.",
+          "Coverage is a source topology cut, not proof that every downstream LV phase is safe or that this candidate dominates its alternative."
+        ],
+        "id": "BUS108",
+        "logical_site_id": "FEEDER_BUS108",
+        "max_tap": 1.1,
+        "max_tap_change": 1,
+        "min_tap": 0.9,
+        "no_load_loss_pct": 0.05,
+        "nominal_kv_ln": 2.4017771198288433,
+        "num_taps": 32,
+        "original_bus_spec": "108.1.2.3",
+        "phase_kva": 960.7108479315374,
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "ptratio": 20.014809331907028,
+        "remote_ptratio": 20.014809331907028,
+        "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+        "sensed_bus": "108",
+        "sensed_kv_ln": 2.4017771198288433,
+        "series_orientation": "DOWNSTREAM_OF_EXISTING_BRANCH",
+        "source_receipts": [
+          {
+            "bytes": 60097,
+            "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\REGCONTROL_CAPCONTROL_SOURCE_AUDIT.json",
+            "sha256": "1266ec2372e5ad6b0ea289b3a94ac9ae6d2574174c9034fd2958216dbf0a51e7"
+          }
+        ],
+        "tap_delay_seconds": 2.0,
+        "upstream_new_bus": "svr_bus108_series_input",
+        "upstream_voltage_coverage_claim": false,
+        "vreg_volts": 120.0,
+        "winding_r_pct": 0.2,
+        "xhl_pct": 1.0
+      },
+      {
+        "band_volts": 2.0,
+        "ctprim": 400.0,
+        "cut_element": "Line.l49",
+        "cut_terminal": 2,
+        "delay_seconds": 30.0,
+        "direct_downstream_bus_coverage": [
+          "151",
+          "300_open",
+          "50",
+          "51",
+          "idc_idc02_pcc",
+          "idc_idc04_pcc",
+          "mess_idc02_pcc",
+          "mess_idc04_pcc"
+        ],
+        "downstream_bus": "50",
+        "endpoint_id": "MV_BRANCH",
+        "engineering_assumptions": [
+          "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+          "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+          "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+          "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+          "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+          "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No.",
+          "The existing line keeps its full length, LineCode, impedance and normal/emergency current ratings; only Bus2 is reconnected to the series-bank input.",
+          "The new bank is downstream of the original line and controls the original downstream MV bus. No fictitious direct line is created.",
+          "Coverage is a source topology cut, not proof that every downstream LV phase is safe or that this candidate dominates its alternative."
+        ],
+        "id": "BUS50",
+        "logical_site_id": "FEEDER_BUS50",
+        "max_tap": 1.1,
+        "max_tap_change": 1,
+        "min_tap": 0.9,
+        "no_load_loss_pct": 0.05,
+        "nominal_kv_ln": 2.4017771198288433,
+        "num_taps": 32,
+        "original_bus_spec": "50.1.2.3",
+        "phase_kva": 960.7108479315374,
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "ptratio": 20.014809331907028,
+        "remote_ptratio": 20.014809331907028,
+        "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+        "sensed_bus": "50",
+        "sensed_kv_ln": 2.4017771198288433,
+        "series_orientation": "DOWNSTREAM_OF_EXISTING_BRANCH",
+        "source_receipts": [
+          {
+            "bytes": 60097,
+            "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\REGCONTROL_CAPCONTROL_SOURCE_AUDIT.json",
+            "sha256": "1266ec2372e5ad6b0ea289b3a94ac9ae6d2574174c9034fd2958216dbf0a51e7"
+          }
+        ],
+        "tap_delay_seconds": 2.0,
+        "upstream_new_bus": "svr_bus50_series_input",
+        "upstream_voltage_coverage_claim": false,
+        "vreg_volts": 120.0,
+        "winding_r_pct": 0.2,
+        "xhl_pct": 1.0
+      },
+      {
+        "id": "BUS82",
+        "logical_site_id": "FEEDER_BUS82",
+        "endpoint_id": "MV_BRANCH",
+        "cut_element": "Line.l82",
+        "cut_terminal": 1,
+        "original_bus_spec": "81.1.2.3",
+        "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+        "downstream_bus": "82",
+        "sensed_bus": "82",
+        "upstream_new_bus": "svr_bus82_line_input",
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "nominal_kv_ln": 2.4017771198288433,
+        "sensed_kv_ln": 2.4017771198288433,
+        "phase_kva": 960.7108479315374,
+        "min_tap": 0.9,
+        "max_tap": 1.1,
+        "num_taps": 32,
+        "xhl_pct": 1.0,
+        "winding_r_pct": 0.2,
+        "no_load_loss_pct": 0.05,
+        "vreg_volts": 120.0,
+        "band_volts": 2.0,
+        "ptratio": 20.014809331907028,
+        "remote_ptratio": 20.014809331907028,
+        "ctprim": 400,
+        "delay_seconds": 30.0,
+        "tap_delay_seconds": 2.0,
+        "max_tap_change": 1,
+        "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+        "engineering_assumptions": [
+          "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+          "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+          "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+          "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+          "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+          "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No.",
+          "SVR8 directly senses Bus82 A/B/C to address known May03 A/B overvoltage; success is not assumed.",
+          "Serial interaction with retained Bus83 controller is evaluated and recorded, never assumed absent.",
+          "Repeated May04/May05 Actual primary-side voltage failures: existing SVR8 is relocated before line82 with remote Bus82 A/B/C sensing; no additional device, relaxed limit or monthly safety claim."
+        ],
+        "direct_downstream_bus_coverage": [
+          "82",
+          "83",
+          "mess_sta12_pcc"
+        ],
+        "upstream_voltage_coverage_claim": false,
+        "source_receipts": [
+          {
+            "bytes": 60097,
+            "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\REGCONTROL_CAPCONTROL_SOURCE_AUDIT.json",
+            "sha256": "1266ec2372e5ad6b0ea289b3a94ac9ae6d2574174c9034fd2958216dbf0a51e7"
+          }
+        ]
+      },
+      {
+        "id": "BUS48",
+        "logical_site_id": "FEEDER_BUS48",
+        "endpoint_id": "MV_BRANCH",
+        "cut_element": "Line.l47",
+        "cut_terminal": 2,
+        "original_bus_spec": "48.1.2.3",
+        "series_orientation": "DOWNSTREAM_OF_EXISTING_BRANCH",
+        "downstream_bus": "48",
+        "sensed_bus": "48",
+        "upstream_new_bus": "svr_bus48_series_input",
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "nominal_kv_ln": 2.4017771198288433,
+        "sensed_kv_ln": 2.4017771198288433,
+        "phase_kva": 960.7108479315374,
+        "min_tap": 0.9,
+        "max_tap": 1.1,
+        "num_taps": 32,
+        "xhl_pct": 1.0,
+        "winding_r_pct": 0.2,
+        "no_load_loss_pct": 0.05,
+        "vreg_volts": 120.0,
+        "band_volts": 2.0,
+        "ptratio": 20.014809331907028,
+        "remote_ptratio": 20.014809331907028,
+        "ctprim": 400.0,
+        "delay_seconds": 30.0,
+        "tap_delay_seconds": 2.0,
+        "max_tap_change": 1,
+        "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+        "engineering_assumptions": [
+          "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+          "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+          "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+          "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+          "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+          "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No.",
+          "The existing line keeps its full length, LineCode, impedance and normal/emergency current ratings; only Bus2 is reconnected to the series-bank input.",
+          "The new bank is downstream of the original line and controls the original downstream MV bus. No fictitious direct line is created.",
+          "Coverage is a source topology cut, not proof that every downstream LV phase is safe or that this candidate dominates its alternative.",
+          "SVR9 protects Bus48/IDC06 on a different branch from retained Bus50; past Bus48 development is not combined SVR9 safety proof."
+        ],
+        "direct_downstream_bus_coverage": [
+          "48",
+          "idc_idc06_pcc",
+          "mess_idc06_pcc"
+        ],
+        "upstream_voltage_coverage_claim": false,
+        "source_receipts": [
+          {
+            "bytes": 60097,
+            "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\REGCONTROL_CAPCONTROL_SOURCE_AUDIT.json",
+            "sha256": "1266ec2372e5ad6b0ea289b3a94ac9ae6d2574174c9034fd2958216dbf0a51e7"
+          }
+        ]
+      },
+      {
+        "id": "BUS86",
+        "logical_site_id": "FEEDER_BUS86",
+        "endpoint_id": "MV_BRANCH",
+        "cut_element": "Line.l77",
+        "cut_terminal": 2,
+        "original_bus_spec": "86.1.2.3",
+        "series_orientation": "DOWNSTREAM_OF_EXISTING_BRANCH",
+        "downstream_bus": "86",
+        "sensed_bus": "86",
+        "upstream_new_bus": "svr_bus86_series_input",
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "nominal_kv_ln": 2.4017771198288433,
+        "sensed_kv_ln": 2.4017771198288433,
+        "phase_kva": 960.7108479315374,
+        "min_tap": 0.9,
+        "max_tap": 1.1,
+        "num_taps": 32,
+        "xhl_pct": 1.0,
+        "winding_r_pct": 0.2,
+        "no_load_loss_pct": 0.05,
+        "vreg_volts": 120.0,
+        "band_volts": 2.0,
+        "ptratio": 20.014809331907028,
+        "remote_ptratio": 20.014809331907028,
+        "ctprim": 400.0,
+        "delay_seconds": 30.0,
+        "tap_delay_seconds": 2.0,
+        "max_tap_change": 1,
+        "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+        "engineering_assumptions": [
+          "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+          "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+          "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+          "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+          "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+          "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No.",
+          "User-selected series bank protecting STA03,STA10,STA11; original seven RegControl tap interaction is measured in every campaign slot, without a safety presumption."
+        ],
+        "direct_downstream_bus_coverage": [
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91",
+          "92",
+          "93",
+          "94",
+          "95",
+          "96",
+          "mess_sta03_pcc",
+          "mess_sta10_pcc",
+          "mess_sta11_pcc"
+        ],
+        "upstream_voltage_coverage_claim": false,
+        "source_receipts": [
+          {
+            "bytes": 60097,
+            "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\REGCONTROL_CAPCONTROL_SOURCE_AUDIT.json",
+            "sha256": "1266ec2372e5ad6b0ea289b3a94ac9ae6d2574174c9034fd2958216dbf0a51e7"
+          }
+        ]
+      },
+      {
+        "id": "BUS62",
+        "logical_site_id": "FEEDER_BUS62",
+        "endpoint_id": "MV_BRANCH",
+        "cut_element": "Line.l61",
+        "cut_terminal": 2,
+        "original_bus_spec": "62.1.2.3",
+        "series_orientation": "DOWNSTREAM_OF_EXISTING_BRANCH",
+        "downstream_bus": "62",
+        "sensed_bus": "62",
+        "upstream_new_bus": "svr_bus62_series_input",
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "nominal_kv_ln": 2.4017771198288433,
+        "sensed_kv_ln": 2.4017771198288433,
+        "phase_kva": 960.7108479315374,
+        "min_tap": 0.9,
+        "max_tap": 1.1,
+        "num_taps": 32,
+        "xhl_pct": 1.0,
+        "winding_r_pct": 0.2,
+        "no_load_loss_pct": 0.05,
+        "vreg_volts": 120.0,
+        "band_volts": 2.0,
+        "ptratio": 20.014809331907028,
+        "remote_ptratio": 20.014809331907028,
+        "ctprim": 400.0,
+        "delay_seconds": 30.0,
+        "tap_delay_seconds": 2.0,
+        "max_tap_change": 1,
+        "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+        "engineering_assumptions": [
+          "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+          "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+          "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+          "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+          "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+          "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No.",
+          "User-selected series bank protecting STA04,STA05; original seven RegControl tap interaction is measured in every campaign slot, without a safety presumption."
+        ],
+        "direct_downstream_bus_coverage": [
+          "62",
+          "63",
+          "64",
+          "65",
+          "66",
+          "mess_sta04_pcc",
+          "mess_sta05_pcc"
+        ],
+        "upstream_voltage_coverage_claim": false,
+        "source_receipts": [
+          {
+            "bytes": 60097,
+            "path": "D:\\v42voltage\\docs\\v42_autonomous_grid_controls_april_b0\\REGCONTROL_CAPCONTROL_SOURCE_AUDIT.json",
+            "sha256": "1266ec2372e5ad6b0ea289b3a94ac9ae6d2574174c9034fd2958216dbf0a51e7"
+          }
+        ]
+      }
+    ],
+    "whole_network_success_claim": false
+  },
+  "time_mode": "TIME"
+}

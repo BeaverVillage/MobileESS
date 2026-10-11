@@ -64,6 +64,9 @@ def _payload(request):
     # provenance path. Existing immutable producer receipts are never written.
     from v42_may_campaign_native90 import inputs
     canonical = Path(r"D:\MobileESS_V42")
+    from v42_svr11.authority import active
+    if active() is not None:
+        canonical = ROOT
     generator = rebound(inputs.generate_b2, dict(inputs.generate_b2.__globals__, ROOT=canonical))
     return generator(request)
 
@@ -129,18 +132,19 @@ def run(request, manifest, progress):
             initial_point=getattr(case, "point", None), strict_validator=strict,
             plan_exporter=m_stage._plan)
         result.update(day=request["day"], arm="B2", planning=case.planning,
-            Native_Runtime=ledger.used(), native_runtime_seconds=ledger.used(),
+            Native_Runtime=ledger.snapshot()['Native_Runtime'], native_runtime_seconds=ledger.snapshot()['Native_Runtime'],
             wall_seconds=time.perf_counter()-started, stage_wall_seconds=time.perf_counter()-started,
             P2_calls=0, AIDC_optimization_calls=0, output=str(output))
         result["PASS"] = result["accepted"] = result.get("feasible_accepted") is True
         if point is None or result["PASS"] is not True:
             atomic(output / "M_STAGE_RESULT.json", result)
             return dict(scientific=result, PASS=False, status="M_NO_VALID_FEASIBLE",
-                Native_Runtime=ledger.used(), stage_wall_seconds=time.perf_counter()-started)
+                Native_Runtime=ledger.snapshot()['Native_Runtime'], stage_wall_seconds=time.perf_counter()-started)
         case.point = point
         result["mess_plan"] = record(output / "OPTIMIZED_MESS_PLAN.json")
         result["mess"] = m_stage._plan(case, point)
-        result["certificate"] = dict(strict_UB=record(output / "BEST_STRICT_UB_CERTIFICATE.json"),
+        result["certificate"] = dict(result.get("certificate", {}),
+            strict_UB=record(output / "BEST_STRICT_UB_CERTIFICATE.json"),
             original_domain_equivalence=case.identity["transport"])
         atomic(output / "M_STAGE_RESULT.json", result)
         materializer = _accepted_port(operations._accepted, request, result, strict, case)
@@ -163,7 +167,7 @@ def run(request, manifest, progress):
         return dict(scientific=result, evaluation=evaluation, PASS=ac_pass,
             status=status, feasible_accepted=True,
             global_gap_certified=result.get("global_gap_certified", False),
-            actual_ac_physical_pass=ac_pass, Native_Runtime=ledger.used(),
-            native_runtime_seconds=ledger.used(), stage_wall_seconds=time.perf_counter()-started,
+            actual_ac_physical_pass=ac_pass, Native_Runtime=ledger.snapshot()['Native_Runtime'],
+            native_runtime_seconds=ledger.snapshot()['Native_Runtime'], stage_wall_seconds=time.perf_counter()-started,
             files=[record(output / "M_STAGE_RESULT.json"), record(output / "BEST_STRICT_UB_POINT.npz"),
                 record(output / "BEST_STRICT_UB_CERTIFICATE.json"), result["mess_plan"], raw_receipt])

@@ -29,6 +29,7 @@ def output_from_document(document):
 
 def verify_output(context, output, bridge, ledger):
     """Re-run source verifiers; producer PASS flags never admit a handoff."""
+    from v42_svr11.anytime import enabled
     registry, request = context.source_registry, context.request
     registry.admit(context, "COORDINATOR_INDEPENDENT_ACCEPTANCE")
     require(isinstance(output, SourceStageOutput) and output.request == request,
@@ -59,7 +60,7 @@ def verify_output(context, output, bridge, ledger):
             and type(receipt.get("measured_native_runtime")) in (int, float)
             and math.isfinite(receipt["measured_native_runtime"])
             and 0 <= receipt["measured_native_runtime"]
-            and (request.stage.startswith("M") or receipt["measured_native_runtime"] <= 5400),
+            and (request.stage.startswith("M") or enabled() or receipt["measured_native_runtime"] <= 5400),
             "SOURCE_LEDGER_NOT_ACCEPTED")
     proof = bridge.verify(context, output)
     require(proof.get("PASS") is True and proof.get("evidence_kind") == registry.evidence_kind
@@ -84,7 +85,7 @@ def verify_output(context, output, bridge, ledger):
         verify_m_acceptance(output.source_result, physical, bounds)
     else:
         lower, upper = Fraction(bounds["exact_LB"]), Fraction(bounds["exact_UB"])
-        require(0 <= lower <= upper and (upper == 0 or (upper - lower) / upper <= gap_target(request.stage)),
+        require(0 <= lower <= upper and ((enabled() and output.source_result.get("FULL_feasible_certified") is True) or upper == 0 or (upper - lower) / upper <= gap_target(request.stage)),
                 "EXACT_SOURCE_GLOBAL_GAP_NOT_ACCEPTED")
     require(output.sha == before, "SOURCE_VERIFIER_MUTATED_OUTPUT")
     return proof
@@ -106,15 +107,29 @@ class SourceCoordinator:
         from v42_pr134_b1.common import replace_file
         replace_file(temporary, path)
 
-    def run(self, authority, *, operations_factory=None, realized_inputs=None, actual_backend=None, progress=None):
+    def run(self, authority, *, operations_factory=None, realized_inputs=None, actual_backend=None, progress=None, stop_after=None, verified_prefix_root=None):
+        require(stop_after is None or stop_after in ORDER, 'SOURCE_COORDINATOR_BATCH_STOP_STAGE')
+        state_path = self.root / "B3_SOURCE_CHECKPOINT.json"
+        seed=None
+        if state_path.exists():
+            paths=json.loads(state_path.read_text(encoding='utf-8')).get('stage_paths',{})
+        elif verified_prefix_root is not None:
+            origin=Path(verified_prefix_root).resolve()
+            require(origin!=self.root and origin.is_relative_to(self.root.parent), 'SOURCE_RETRY_PREFIX_PATH_ESCAPE')
+            seed=json.loads((origin/'B3_SOURCE_CHECKPOINT.json').read_text(encoding='utf-8'))
+            require(seed['completed']==list(ORDER[:len(seed['completed'])]), 'SOURCE_RETRY_PREFIX_REQUIRED')
+            paths={s:seed.get('stage_paths',{}).get(s,str(origin/s)) for s in seed['completed']}
+        else:paths={}
+        for path in paths.values():
+            require(Path(path).resolve().is_relative_to(self.root.parent), 'SOURCE_RETRY_STAGE_PATH_ESCAPE')
+        stage_path=lambda stage:Path(paths.get(stage,str(self.root/stage))).resolve()
         request = StageRequest("A1", authority)
-        first = self.context_factory(request, {}, self.root / "A1")
+        first = self.context_factory(request, {}, stage_path('A1'))
         first.source_registry.admit(first, "COORDINATOR")  # Before any write or original import.
-        require(first.output == self.root / "A1", "COORDINATOR_CONTEXT_OUTPUT_DRIFT")
+        require(first.output == stage_path('A1'), "COORDINATOR_CONTEXT_OUTPUT_DRIFT")
         identity = {"schema": "B3_SOURCE_COORDINATOR_V1", "authority_sha": authority.sha,
                     "source_sha": authority.source_sha, "day": authority.day, "run_id": first.run_id,
                     "evidence_kind": first.source_registry.evidence_kind, "stage_order": list(ORDER)}
-        state_path = self.root / "B3_SOURCE_CHECKPOINT.json"
         if self.root.exists():
             require(state_path.exists(), "PARTIAL_SOURCE_COORDINATOR_QUARANTINE")
             state = json.loads(state_path.read_text(encoding="utf-8"))
@@ -126,7 +141,11 @@ class SourceCoordinator:
         else:
             self.root.mkdir(parents=True, exist_ok=False)
             state = {"identity": identity, "completed": [], "inflight": None, "status": "READY",
-                     "result_shas": {}, "planning_sha": None}
+                     "result_shas": {}, "planning_sha": None,"stage_paths":paths}
+            if seed is not None:
+                require(seed['identity']==identity,'SOURCE_RETRY_PREFIX_IDENTITY_DRIFT')
+                state.update(completed=seed['completed'].copy(),result_shas={s:seed['result_shas'][s] for s in seed['completed']},
+                    verified_prefix_origin=str(verified_prefix_root))
             self._save(state_path, state)
         packets, requests, outputs = {}, [], []
         try:
@@ -142,8 +161,8 @@ class SourceCoordinator:
                     request = StageRequest(stage, authority, fixed_aidc=outputs[2].aidc)
                     packets = {"fixed_aidc": output_document(outputs[2])["source_packet"],
                                "warm_mess": output_document(outputs[1])["source_packet"]}
-                context = self.context_factory(request, packets, self.root / stage)
-                require(context.output == self.root / stage and context.run_id == first.run_id
+                context = self.context_factory(request, packets, stage_path(stage))
+                require(context.output == stage_path(stage) and context.run_id == first.run_id
                         and context.source_registry is first.source_registry
                         and context.input_folder == first.input_folder
                         and context.original_bundle_json == first.original_bundle_json
@@ -176,6 +195,9 @@ class SourceCoordinator:
                     self._save(state_path, state)
                 requests.append(request); outputs.append(output)
                 self.contexts[stage], self.outputs[stage], self.ledgers[stage] = context, output, ledger
+                if stage == stop_after:
+                    return dict(requests=requests,outputs=outputs,status='STAGE_COMPLETE',completed_stage=stage,
+                        evidence_kind=first.source_registry.evidence_kind,Actual_executed=False)
             result = {"requests": requests, "outputs": outputs, "status": "STAGES_COMPLETE",
                       "evidence_kind": first.source_registry.evidence_kind}
             if operations_factory is not None:

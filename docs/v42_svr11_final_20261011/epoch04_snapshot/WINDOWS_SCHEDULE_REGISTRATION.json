@@ -1,0 +1,54 @@
+[
+  {
+    "Name": "MobileESS_V42_May_B2_B3_Autonomous_Supervisor",
+    "State": "Ready",
+    "Actions": [
+      {
+        "Execute": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+        "Arguments": "-B -X utf8 D:\\v42_svr11_epoch04_20261011\\tools\\svr11_monitor_ui.py safeguard D:\\v42_svr11_may_20261011_04",
+        "WorkingDirectory": "D:\\v42_svr11_epoch04_20261011"
+      }
+    ],
+    "Triggers": [
+      {
+        "StartBoundary": null,
+        "Enabled": true,
+        "Repeat": null
+      },
+      {
+        "StartBoundary": "2026-10-10T01:48:19+09:00",
+        "Enabled": true,
+        "Repeat": "PT5M"
+      }
+    ],
+    "LastRun": "2026-10-11T04:08:20+09:00",
+    "LastResult": 0,
+    "NextRun": "2026-10-11T04:13:19+09:00"
+  },
+  {
+    "Name": "MobileESS_V42_May_B2_B3_Autonomous_Monitor",
+    "State": "Ready",
+    "Actions": [
+      {
+        "Execute": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+        "Arguments": "-B -X utf8 D:\\v42_svr11_epoch04_20261011\\tools\\svr11_monitor_ui.py safeguard D:\\v42_svr11_may_20261011_04 --monitor-only",
+        "WorkingDirectory": "D:\\v42_svr11_epoch04_20261011"
+      }
+    ],
+    "Triggers": [
+      {
+        "StartBoundary": null,
+        "Enabled": true,
+        "Repeat": null
+      },
+      {
+        "StartBoundary": "2026-10-10T02:13:12+09:00",
+        "Enabled": true,
+        "Repeat": "PT5M"
+      }
+    ],
+    "LastRun": "2026-10-11T04:08:13+09:00",
+    "LastResult": 0,
+    "NextRun": "2026-10-11T04:13:12+09:00"
+  }
+]

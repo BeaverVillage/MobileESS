@@ -1,0 +1,98 @@
+{
+  "schema": "V42_SOURCE18_PACKET_CANONICALIZATION_DIAGNOSIS_V1",
+  "PASS": true,
+  "source_commit": "af8b279c9c8edbd287e85275ae90fea07f1bf2fe",
+  "source_SHAs": {
+    "v42_may_campaign_native90/m_model.py": "b3bf55598edc16e7ee0bb79a3fcbf795e7f12b01d157fe6e2d661ce72b9340da",
+    "v42_native/mess_domain.py": "751b70b4c50bc2f6e5f84dc70bf5898a4aedbaee75a7b68966cc7c2e3a8b5f6e",
+    "v42_native/grid_prescreen.py": "e82cf8238bb25c2ea826e3b7026fd05c8bae25c805302ef191545bdb09cc6f66",
+    "v42_pr134_b1/common.py": "04dcba88f1ffe041f788d28c395d1a7ca4686561ce051c6ee7afcfa609e1b0f7"
+  },
+  "case_sha": "c56d4566c1a1e374ad8c61686a459d5e8f94805582566ce86ccc4d8a6b088a8b",
+  "input_failure": "ValueError('CURRENT_M_PHYSICAL_PRESCREEN_PACKET_DRIFT')",
+  "root_cause": "atomic writes clean(proof), but freeze returns raw tuple-containing proof and verify_case compares it directly to JSON lists",
+  "physical_mismatch_keys": [
+    "initial",
+    "arcs"
+  ],
+  "grid_latent_mismatch_keys": [
+    "current_coefficients_and_fixed_controls"
+  ],
+  "physical_scientific_state_SHA_unchanged": true,
+  "grid_scientific_state_SHA_unchanged": true,
+  "case_SHA_equal_for_raw_tuple_and_serialized_list_identity": true,
+  "clean_physical_metadata_equals_stored_packet_exactly": true,
+  "clean_grid_metadata_equals_stored_packet_exactly": true,
+  "serialized_identity_authorities_equal_stored_packets_exactly": true,
+  "other_packet_assessment": {
+    "c3_authority": {
+      "serialized_identity_matches_packet": true,
+      "source_producer_summary_contains_no_known_tuple_payload": true
+    },
+    "response_authority": {
+      "serialized_identity_matches_packet": true,
+      "source_producer_summary_contains_no_known_tuple_payload": true
+    }
+  },
+  "mathematical_proof_flags": {
+    "physical": true,
+    "grid": true,
+    "grid_entire_model_infeasible": false,
+    "transport": true,
+    "c3": true,
+    "dense": true
+  },
+  "selected_matrix_size": {
+    "rows": 715596,
+    "columns": 354277,
+    "nnz": 7911369,
+    "binaries": 9322
+  },
+  "safest_saved_case_repair": "Restore proof authorities from the already serialized SCIENTIFIC_CASE_IDENTITY.json; frozen verify_case can compare canonical lists without changing source, case SHA, coefficients, bounds, axes or math proofs.",
+  "future_fresh_build_metadata_fix": "Canonicalize authority proof metadata from JSON readback after atomic(path,proof), or compare read(path) to clean(in-memory proof), retaining every path/source/SHA check. Physical and grid require the same fix.",
+  "provenance_requirement": "Keep original generation source SHA and proof-source receipts; distinguish any new restore/validation wrapper source SHA. Do not relabel saved matrices as a new original-model construction.",
+  "source_and_matrix_and_bound_and_proof_mutations_required": false,
+  "packet_receipts": {
+    "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\EXACT_PHYSICAL_PRESCREEN.json": {
+      "sha256": "c241c4c2dbf0519e3e87dc2d4809fc62887753c5145c38c773d3295110274f31",
+      "bytes": 24409822
+    },
+    "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\EXACT_GRID_OUTER_PRESCREEN.json": {
+      "sha256": "3c87a6e2eeb162e8070ec408e9f9802e237290fdc0884cb9a2b7529e541e6abe",
+      "bytes": 925475
+    },
+    "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\SCIENTIFIC_CASE_IDENTITY.json": {
+      "sha256": "914fc2a9cc2c1a40fe22bf7176429747fc0033270b0cfa622da06231c049575a",
+      "bytes": 30141957
+    },
+    "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\CURRENT_EXACT_C3A_PROOF.json": {
+      "sha256": "5d8dcca08b37d8984feac8767cca39c2bac33c905de95fd3ac4f0a3b24905ae1",
+      "bytes": 2409
+    },
+    "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\DENSE_RESPONSE_EQUIVALENCE.json": {
+      "sha256": "fec5cfa5ab3978615cfce9b49de0a669fd0a4bdc45c3919b654f13c9fa6413e8",
+      "bytes": 2132
+    },
+    "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\ORIGINAL_DOMAIN_EQUIVALENCE.json": {
+      "sha256": "5c6b7a8f236dacb84913f212b72b64e12cea6aa2052d82507ae9b78f7ebf6a92",
+      "bytes": 1299
+    },
+    "D:\\v42_dense_response_development_20261011\\VALIDATION_ERROR.json": {
+      "sha256": "10f14f4d2e5d4cbb539d363a274987df9f94b66e97eb1abdbb7d16ec966a359f",
+      "bytes": 767
+    },
+    "D:\\v42_dense_response_development_20261011\\NATIVE0_STARTED.json": {
+      "sha256": "99f8555b441a82587ad3d8c2e5350d33b03f69e9f344470245cb13042a17979f",
+      "bytes": 134337
+    }
+  },
+  "Native_optimize_calls": 0,
+  "Gurobi_model_construction_calls": 0,
+  "prescreen_or_domain_verification_calls": 0,
+  "matrix_loads": 0,
+  "AC_calls": 0,
+  "runtime_source_writes": 0,
+  "method": "Evaluate only scientific_state metadata expressions with JSON-backed stand-ins; no producer, verifier, graph traversal, solver or numerical model is invoked.",
+  "UTC": "2026-10-11T14:12:57.439159+00:00",
+  "review_program_sha256": "b8f36686c1b42ac61520f71bb687eacdbb9bf73a667722cd0ccff1775816a1fd"
+}

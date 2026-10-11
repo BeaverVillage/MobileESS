@@ -222,6 +222,9 @@ def _controls(engine, scenario, authority=None):
 
 def measure_full_network(engine, original_nodes, original_equipment):
     """Read every phase voltage and every terminal current/kVA, including additions."""
+    from v42_svr11.authority import active as svr11_active
+    epoch=svr11_active()
+    normalamps_original=bool(epoch and epoch.get('original_transformer_current_authority')=='COMPILED_NORMALAMPS_ONLY')
     all_names = list(map(str,engine.Circuit.AllNodeNames()))
     all_v = np.asarray(engine.Circuit.AllBusMagPu(),dtype=float)
     require(len(all_names) == len(all_v),'VOLTAGE_CONTROL_FULL_NODE_AXIS_DRIFT')
@@ -276,12 +279,18 @@ def measure_full_network(engine, original_nodes, original_equipment):
     bad_nodes=[r for r in nodes if not .95<=r['voltage_pu']<=1.05]
     bad_current=[r for r in currents if r['loading_pu']>1]
     bad_kva=[r for r in transformers if r['loading_pu']>1]
-    bad_nameplate=[r for r in currents if r['nameplate_current_loading_pu'] is not None and r['nameplate_current_loading_pu']>1]
+    nameplate_exceedances=[r for r in currents if r['nameplate_current_loading_pu'] is not None and r['nameplate_current_loading_pu']>1]
+    # Original source authority uses compiled NormalAmps, with winding kVA
+    # checked separately. The inferred nominal phase current remains diagnostic.
+    # Added single-phase SVRs retain their finite phase nameplate current guard.
+    bad_nameplate=[r for r in nameplate_exceedances if not (normalamps_original and r['original'])]
     return dict(nodes=nodes,currents=currents,transformers=transformers,
         voltage_min_pu=min(r['voltage_pu'] for r in nodes),voltage_max_pu=max(r['voltage_pu'] for r in nodes),
         voltage_violation_cells=len(bad_nodes),line_current_violation_cells=sum(r['element'].startswith('line.') for r in bad_current),
         transformer_current_violation_cells=sum(r['element'].startswith('transformer.') for r in bad_current),
         transformer_nameplate_current_violation_cells=len(bad_nameplate),
+        original_nominal_phase_current_diagnostic_exceedance_cells=sum(r['original'] for r in nameplate_exceedances),
+        original_transformer_current_authority='COMPILED_NORMALAMPS_ONLY' if normalamps_original else 'LEGACY_NORMALAMPS_AND_NOMINAL_PHASE_GUARD',
         original_transformer_nameplate_current_violation_cells=sum(r['original'] for r in bad_nameplate),
         added_transformer_nameplate_current_violation_cells=sum(not r['original'] for r in bad_nameplate),
         transformer_kva_violation_cells=len(bad_kva),all_original_and_added_axes_checked=True,
@@ -489,6 +498,8 @@ class PhysicalScenario:
             original_input_setpoints_unchanged=all(r['original_input_setpoints_unchanged'] for r in self.rows) if self.rows else None,
             transformer_nameplate_current_violation_cells=sum(r['physical']['transformer_nameplate_current_violation_cells'] for r in self.rows),
             original_transformer_nameplate_current_violation_cells=sum(r['physical']['original_transformer_nameplate_current_violation_cells'] for r in self.rows),
+            original_nominal_phase_current_diagnostic_exceedance_cells=sum(r['physical']['original_nominal_phase_current_diagnostic_exceedance_cells'] for r in self.rows),
+            original_transformer_current_authority=self.rows[0]['physical']['original_transformer_current_authority'] if self.rows else None,
             added_transformer_nameplate_current_violation_cells=sum(r['physical']['added_transformer_nameplate_current_violation_cells'] for r in self.rows),
             retired_objects_count=0 if self.sessions else None,retired_Q_injection_devices=0 if self.sessions else None,
             Actual_optimizer_calls=0,Native_optimizer_calls=0,

@@ -36,11 +36,13 @@ def _identity(request, stage='PLANNING_FREEZE'):
 def _accepted(request, stage, output):
     """Verify and materialize the newly accepted arm's own frozen arrays."""
     arm, day = request['arm'], request['day']
+    from v42_svr11.anytime import enabled
+    anytime=enabled() and arm=='B1' and stage.get('FULL_feasible_certified') is True
     gap = stage.get('certified_gap', stage.get('gap'))
     if (arm not in ('B1', 'B2') or day not in DAYS or stage.get('PASS') is not True
             or stage.get('accepted') is not True or stage.get('arm') != arm
             or stage.get('day') != day or gap is None or not np.isfinite(gap)
-            or not 0 <= gap <= (.005 if arm == 'B1' else .03)
+            or not (0 <= gap and (anytime or gap <= (.005 if arm == 'B1' else .03)))
             or stage.get('P2_calls') != 0 or stage.get('UB') is None or stage.get('LB') is None
             or not np.isfinite([stage['UB'], stage['LB']]).all() or stage['UB'] < stage['LB']):
         raise ValueError('NEW_CURRENT_P1_ACCEPTED_STAGE_REQUIRED')
@@ -55,6 +57,12 @@ def _accepted(request, stage, output):
             raise ValueError('NEW_B1_P1_ONLY_FREEZE_REQUIRED')
         for name in ('physical', 'acceptance', 'global_bound'):
             _verified(accepted[name])
+        if anytime:
+            from v42_svr11.anytime import a_contract
+            physical=read(_verified(accepted['physical']))
+            contract=read(_verified(accepted['acceptance']))
+            original=dict(contract,PASS=contract.get('original_gap_contract_PASS',contract.get('PASS')))
+            a_contract(original,stage['incumbent'],physical)
         with np.load(_verified(stage['planning']), allow_pickle=False) as archive:
             planning = {k: archive[k].copy() for k in archive.files}
         selected = accepted['selected_jobs']
@@ -215,7 +223,8 @@ def actual_sources(request, output):
     destination = output / 'INPUT/BUNDLE' / day_folder(request['day'])
     destination.mkdir(parents=True, exist_ok=True)
     atomic(destination / 'SOURCE_PROVENANCE.json', provenance)
-    if request['arm'] == 'B2':
+    from v42_svr11.authority import active
+    if request['arm'] == 'B2' or active() is not None:
         from v42_holdout import realization
         from v42_holdout.common import source_freeze
         raw = output / 'RAW' / request['day']
@@ -350,6 +359,10 @@ def fresh(request, planning, actual_folder, source_folder, output, progress=None
         identity=lambda *args: expected, _campaign_trajectory=trajectory,
         _campaign_apply=apply_mapping, _campaign_applied=applied,
         _campaign_mess_zero=bool(np.all(mess['P_kw'] == 0) and np.all(mess['Q_kvar'] == 0)))
+    from v42_svr11.authority import active
+    if active() is not None:
+        from v42_thermal.authority import current_authority
+        namespace['CHECKER']=current_authority()['transformer_current_authority_sha256']
     namespace['build_day'] = rebound(replay.build_day, namespace)
     from v42_regcontrol import authority
     from unittest.mock import patch
@@ -374,7 +387,7 @@ def fresh(request, planning, actual_folder, source_folder, output, progress=None
     from v42_voltage_control.integration import current_declared_capcontrol_count
     expected_capcontrols = current_declared_capcontrol_count()
     passed = (_summary_pass(result['summary'], result['converged'])
-        and receipt['checker_SHA'] == replay.CHECKER and receipt['NormalAmps_current'] is True
+        and receipt['checker_SHA'] == namespace['CHECKER'] and receipt['NormalAmps_current'] is True
         and receipt['Planning_tap_replay'] is False and receipt['Actual_reoptimization'] == 0
         and receipt['local_PQ_repair'] == 0 and receipt['global_PQ_repair'] == 0
         and len(controls) == len(inputs) == 96

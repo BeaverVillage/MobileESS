@@ -48,6 +48,10 @@ def compiled(odd,branches):
 
 @lru_cache(None)
 def current_authority():
+    from v42_svr11.authority import thermal
+    successor = thermal()
+    if successor is not None:
+        return successor
     from v42_regcontrol.authority import source,compile_verified,assert_inventory
     import os
     m=source();odd,adapter,actual_controls=compile_verified()

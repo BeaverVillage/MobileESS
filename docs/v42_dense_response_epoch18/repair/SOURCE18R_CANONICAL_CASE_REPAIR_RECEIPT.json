@@ -1,0 +1,248 @@
+{
+  "schema": "V42_SOURCE18R_CANONICAL_CASE_REPAIR_V1",
+  "UTC": "2026-10-11T14:19:28.930060+00:00",
+  "PASS": true,
+  "checks": {
+    "failed_error_is_physical_packet_drift": true,
+    "failed_native_optimize_calls_zero": true,
+    "failed_native_runtime_zero": true,
+    "failed_runtime_ledger_absent": true,
+    "persisted_identity_physical_equals_persisted_receipt": true,
+    "persisted_identity_grid_equals_persisted_receipt": true,
+    "raw_physical_representation_differs": true,
+    "raw_physical_canonical_sha_identical": true,
+    "raw_grid_representation_differs": true,
+    "raw_grid_canonical_sha_identical": true,
+    "actual_physical_original_row_bridge_PASS": true,
+    "actual_grid_original_row_bridge_PASS": true,
+    "fresh_dense_equivalence_PASS": true,
+    "frozen_m_model_matches_launch": true,
+    "repair_m_model_matches_independent_review": true
+  },
+  "frozen_source_commit": "af8b279c9c8edbd287e85275ae90fea07f1bf2fe",
+  "frozen_execution_source_SHA": "4f6142c38017199a85afb0c80d13059b5644b972af79c894c94309d1194dc261",
+  "failed_case_SHA": "c56d4566c1a1e374ad8c61686a459d5e8f94805582566ce86ccc4d8a6b088a8b",
+  "frozen_source": "D:\\v42_svr11_epoch18_20261011",
+  "repair_source": "D:\\v42_svr11_epoch18r_20261011",
+  "diagnosis": "Physical receipt contains tuple-valued initial/arcs in memory; JSON persists lists. Exact dict equality rejects the live case despite identical canonical SHA. Grid input tuples have the same next potential failure.",
+  "repair": "Freeze physical and grid proof by reading their persisted JSON after atomic write. Preserve the input-only PhysicalDomain on the case; restore it from saved scientific packet and exact actual graph without producer/BFS, then independently replay original rows.",
+  "unchanged_scientific_identity": {
+    "original_matrix_sha": "0eca025d99a24d2ae91117cdfe3ae48dade189336ada61b3f8234d9bf99f3cec",
+    "original_domain_sha": "9247e42b8119f60ef149d0963e31dd8a697af5426a5aaeec9450b2a2f246481e",
+    "C3A_matrix_sha": "d67a073fc06a7537fd585de8ff786a01a854df5ee4f52be17f39fa66da6292a9",
+    "C3A_domain_sha": "821842e0ef3a83df4bb9a6466a1f7a5e952710dd2f695801b1de168becd4d6e5",
+    "selected_matrix_sha": "ed9fd6db73bf47948505cca3a616edf88c7caebdacce8f1dd1007617d6660ef0",
+    "selected_domain_sha": "6fd03585e9544f759d4001754a7f28ff04958b078f1959c25f9b397bd45b84f4"
+  },
+  "physical_state_SHA": "b75c4c169086062105b22804f8435ec366fd8ab4eef1559b07e3000ebaf67717",
+  "grid_state_SHA": "d57f0c5df955f2d6c6d1510c52b20d990996c98c126ec68486fd78d68e9b5933",
+  "fresh_dense_structure": {
+    "baseline": {
+      "rows": 730486,
+      "columns": 339387,
+      "nnz": 8609710,
+      "binaries": 9322
+    },
+    "selected": {
+      "rows": 715596,
+      "columns": 354277,
+      "nnz": 7911369,
+      "binaries": 9322
+    },
+    "nnz_reduction": 698341,
+    "row_reduction": 14890
+  },
+  "proof_elapsed_seconds": {
+    "physical_producer": 4.921001199982129,
+    "physical_lookup": 4.952963799936697,
+    "physical_actual_original_row_bridge": 2.5413010000484064
+  },
+  "measurements": {
+    "failed_Native_optimize_calls": 0,
+    "failed_Native_Runtime": 0,
+    "failed_runtime_ledger": null,
+    "this_review_model_builds": 0,
+    "this_review_Native_optimize_calls": 0,
+    "this_review_producer_prescreens": 0,
+    "Root_performance_of_repair": "UNMEASURED",
+    "campaign_disposition": "HOLD"
+  },
+  "tests": {
+    "command": "python -B -m pytest tests/test_v42_canonical_physical_restore.py tests/test_v42_b3_current_c3a_restore.py tests/test_v42_physical_prescreen.py tests/test_v42_dense_response_integration.py -k 'not actual_parameter_readback' -q",
+    "passed": 40,
+    "deselected": 1,
+    "elapsed_seconds": 37.19,
+    "exclusion": "The actual solver-parameter test was excluded under agent no-model/no-Native assignment. Root owns final solver readback."
+  },
+  "owned_repair_files": [
+    {
+      "path": "D:\\v42_svr11_epoch18r_20261011\\v42_may_campaign_native90\\m_model.py",
+      "bytes": 51851,
+      "sha256": "1f4d556081e0814b7af1378635e2174fd2340ba245d9c67f661c0f02245405c9"
+    },
+    {
+      "path": "D:\\v42_svr11_epoch18r_20261011\\tests\\test_v42_b3_current_c3a_restore.py",
+      "bytes": 16670,
+      "sha256": "fbfb9d04e276b3ae9db26ba9d9c4db90de39326852cb8438edd189b03710151c"
+    },
+    {
+      "path": "D:\\v42_svr11_epoch18r_20261011\\tests\\test_v42_canonical_physical_restore.py",
+      "bytes": 4922,
+      "sha256": "f9b1a69d35cdf6fd39c898cf7b77dd2a11cbabac3d06c39fd74eced6161d0097"
+    }
+  ],
+  "frozen_failure_records": [
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\NATIVE0_STARTED.json",
+      "bytes": 134337,
+      "sha256": "99f8555b441a82587ad3d8c2e5350d33b03f69e9f344470245cb13042a17979f"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\VALIDATION_ERROR.json",
+      "bytes": 767,
+      "sha256": "10f14f4d2e5d4cbb539d363a274987df9f94b66e97eb1abdbb7d16ec966a359f"
+    }
+  ],
+  "frozen_output_inventory": [
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\C3A_A.npz",
+      "bytes": 40396053,
+      "sha256": "4cdb1df77ecc5ac71a91c56f8bba15b3d9c194eedd8fb653b52d442c0d929d80"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\C3A_DATA.npz",
+      "bytes": 6384880,
+      "sha256": "98ae638d6de001003e20e6bab829f87d743b47f267e6d68adc59bcdcd3a67b04"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\CURRENT_C2_ALIASES.json",
+      "bytes": 31225636,
+      "sha256": "e17e1359ff34752660aeeefffca9d70fe67d19dd5ae1a62f64c92fb231f22562"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\CURRENT_C2_AXES.npz",
+      "bytes": 1582396,
+      "sha256": "be502a493d83443c88fab30e92a05957fac607958cb85e711f4bd44751ae30c2"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\CURRENT_C2_ROW_PROOFS.json",
+      "bytes": 96391874,
+      "sha256": "63454993791b154b590e1d824f0c2b79d170b95cdcd36d888c5bb2ac26d3632a"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\CURRENT_C3A_AXES.npz",
+      "bytes": 1576222,
+      "sha256": "e62bfe968751c8439f1adecf75278cda68d7385ac395de8f05896086385dd271"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\CURRENT_C3A_BOUND_PROOFS.json",
+      "bytes": 25194415,
+      "sha256": "7a10ed48c3dc8546a43e071a6635c1457d4de8b1b8447a9faea79fd7006ec393"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\CURRENT_C3A_ROW_CERTIFICATES.json",
+      "bytes": 34330372,
+      "sha256": "c113d70328f69218fb33af6290810f25e80f10ba566150dbd2530f878aacb3c2"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\CURRENT_EXACT_C3A_PROOF.json",
+      "bytes": 2409,
+      "sha256": "5d8dcca08b37d8984feac8767cca39c2bac33c905de95fd3ac4f0a3b24905ae1"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\CURRENT_SECURITY_PRE_C2_BOUND_CERTIFICATES.json",
+      "bytes": 2072127,
+      "sha256": "79ea31609b6e2dcab1067e2713122e2e806402834d4c48161bec2e7635626004"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\CURRENT_SECURITY_PRE_C2_ROW_CERTIFICATES.json",
+      "bytes": 90175274,
+      "sha256": "a0d3e77dcadb13aeaae6df92c4394eba5c2dc3cd3efcd829b0d1c997564e7ea0"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\CURRENT_SECURITY_PRE_C2_SUMMARY.json",
+      "bytes": 675,
+      "sha256": "1dc860eb6fc472b0eeb470dcb07488f26a4c3fe0e90dd449831642f007a68e6c"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\DENSE_RESPONSE_A.npz",
+      "bytes": 39973301,
+      "sha256": "e9e0c8a4f042f4014a6068662077e186fb6aa611e9ec2f51d83c886c197c523c"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\DENSE_RESPONSE_AXES.npz",
+      "bytes": 1576106,
+      "sha256": "5e3c453a21e5d00d969247e6134ce349224272ab35b073c545ee0906993004f7"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\DENSE_RESPONSE_DATA.npz",
+      "bytes": 6374768,
+      "sha256": "48cf0469e934c1ef63147afda89c67b7ecf91092ad903089baeca8d7a5fdb5a8"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\DENSE_RESPONSE_EQUIVALENCE.json",
+      "bytes": 2132,
+      "sha256": "fec5cfa5ab3978615cfce9b49de0a669fd0a4bdc45c3919b654f13c9fa6413e8"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\DENSE_RESPONSE_PLANS.json",
+      "bytes": 6964788,
+      "sha256": "37a73b736666ec934888a607ef4b40943adf1005c92a2d43563363e8cc59610b"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\EXACT_GRID_OUTER_PRESCREEN.json",
+      "bytes": 925475,
+      "sha256": "3c87a6e2eeb162e8070ec408e9f9802e237290fdc0884cb9a2b7529e541e6abe"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\EXACT_PHYSICAL_PRESCREEN.json",
+      "bytes": 24409822,
+      "sha256": "c241c4c2dbf0519e3e87dc2d4809fc62887753c5145c38c773d3295110274f31"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\FIXED_AIDC_ANCHOR.json",
+      "bytes": 85975,
+      "sha256": "3821b3428733dd5f67a76c0f4cec04708913e6819f3bf50f3ae268f0c20ae20a"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\FULL_A.npz",
+      "bytes": 68250403,
+      "sha256": "81ae1a542115e192051e250b627c61bfcea94e62f43a815b91bc11ef54d9ebb4"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\FULL_DATA.npz",
+      "bytes": 7343236,
+      "sha256": "8df044d563d4e6c744e3528ed594bbce33d8302fabf8ea2aacfbb7357a76198f"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\INPUT_AND_SOURCE_IDENTITY.json",
+      "bytes": 3689,
+      "sha256": "987320040dfe9fde038a0b5d5370e8d653d69ab1f7ccdea78ade5c71319362bc"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\ORIGINAL_DOMAIN_EQUIVALENCE.json",
+      "bytes": 1299,
+      "sha256": "5c6b7a8f236dacb84913f212b72b64e12cea6aa2052d82507ae9b78f7ebf6a92"
+    },
+    {
+      "path": "D:\\v42_dense_response_development_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_once\\output\\SCIENTIFIC_CASE_IDENTITY.json",
+      "bytes": 30141957,
+      "sha256": "914fc2a9cc2c1a40fe22bf7176429747fc0033270b0cfa622da06231c049575a"
+    }
+  ],
+  "independent_review": {
+    "path": "D:\\v42_dense_response_audit_20261011\\SOURCE18R_CANONICAL_METADATA_RESTORE_INDEPENDENT_REVIEW.json",
+    "bytes": 6111,
+    "sha256": "046e404d1219b75c89722ead27fa6da02ae28a59f3c7236f0bf407ab55b544f4"
+  },
+  "rebind_rules": [
+    "Preserve failed Source18 source, launch seal, failure receipt and all Native0 output bytes. Create repair attempt records in a separate root.",
+    "Use saved original FULL, C3A baseline, Dense selected matrices and their exact domain arrays/axes/plans/certificates. Do not recreate the original model.",
+    "Rebuild graph only from the immutable current input bundle. restore_physical_domain(proof, graph) checks schema, full saved scientific state, reconstructed state and exact native graph/battery/initial/site key without producer or BFS.",
+    "Set case.physical_domain to that result before verify_case. Independent original-row and stage proofs remain mandatory; saved producer PASS alone is insufficient.",
+    "Rebind record paths and active scientific source authorities to repair output/source. m_model.py changed, so transport source authority and case SHA must change; original/C3A/Dense matrix and domain SHAs must remain identical.",
+    "Use raw_point=None and case.point=None; read no old B2 incumbent, UB/LB/gap, candidate or MIP start. These saved matrices are fresh failed Native0 scientific artifacts, not old optimization results.",
+    "Separate prior original-build wall time from repair restoration/replay wall time. Zero Native calls and absent failed runtime ledger do not establish Root success or a performance estimate.",
+    "Freeze repair source and proofs before exactly the root-owned authorized fresh U4/Full measurement. Perform complete numerical parameter readback there; campaign remains HOLD until latest Root<=180 gate passes."
+  ]
+}

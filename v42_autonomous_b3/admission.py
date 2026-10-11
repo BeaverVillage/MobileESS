@@ -79,11 +79,16 @@ def validate_seal(seal, root):
 
 
 def validate_request(request):
+    from v42_svr11.authority import active
+    epoch=active()
+    batch=bool(epoch and epoch.get('B3_stagewise_batch') and request.get('b3_stage'))
+    limit=3 if batch and request['b3_stage'] in ('M1','M2') else 1
     require(request.get("arm") == "B3" and request.get("day") in DAYS and
-            type(request.get("worker_slot")) is int and request["worker_slot"] == 1,
+            type(request.get("worker_slot")) is int and 1 <= request["worker_slot"] <= limit,
             "B3_EXACTLY_ONE_WORKER_MAY_DATE_REQUIRED")
     root, output = Path(request["code_root"]).resolve(), Path(request["output"]).resolve()
-    require(output.is_relative_to(root / "runtime" / "b3") and output != root / "runtime" / "b3",
+    owned=Path(epoch['root'])/'dates/B3'/request['day'] if epoch and request.get('svr11_campaign') else root/'runtime/b3'
+    require(output.is_relative_to(owned) and output != owned,
             "ISOLATED_B3_ATTEMPT_OUTPUT_REQUIRED")
     require(Path(request["campaign_root"]).resolve() != output and
             not Path(request["campaign_root"]).resolve().is_relative_to(output),
@@ -241,7 +246,13 @@ class ExecutionPermit:
 def execution_permit(request, seal):
     root, _ = validate_request(request)
     validate_seal(seal, root)
-    if request.get("canary") is True:
+    from v42_svr11.authority import active
+    if active() is not None and request.get('svr11_campaign') is True:
+        epoch=active()
+        require(request['day'] in DAYS and seal['source_sha']==epoch['execution_SHA']
+            and request['manifest_SHA']==record(request['manifest'])['sha256'], 'SVR11_B3_EPOCH_PERMIT_DRIFT')
+        mode='USER_AUTHORIZED_SVR11_FULL_MAY_FAIL_CONTINUE'
+    elif request.get("canary") is True:
         mode = "USER_AUTHORIZED_REAL_CANARY"
     else:
         verify_qualification(request["qualification"], seal["source_sha"])

@@ -233,7 +233,7 @@ def test_trial_recovers_durable_no_return_ledger_receipt(tmp_path, monkeypatch):
     assert row['native_receipt']['precision_parameters']['FeasibilityTol'] == 1e-9
 
 
-def test_real_native_trial_keeps_original_rows_and_never_promotes_bound(tmp_path):
+def test_real_native_full_trial_keeps_original_rows_and_reports_global_solver_bound(tmp_path):
     from v42_common_mess.engine import _trial
     from v42_m1_research.check_ub import vector_sha
     A = sparse.csr_matrix([[0., 1., 0.], [1., -1., 0.], [0., -2., 1.]])
@@ -242,11 +242,13 @@ def test_real_native_trial_keeps_original_rows_and_never_promotes_bound(tmp_path
         objective=np.array([0., 1., 0.]), constant=np.asarray(0.),
         row_names=np.array(['grid_floor[0]', 'mode_grid_coupling[0]', 'grid_helper_binding[0]']),
         sense=np.array(['>', '<', '=']), rhs=np.array([.5, 0., 0.]))
-    case = SimpleNamespace(A=A, d=d, original_A=A, original_d=d, identity={},
+    case = SimpleNamespace(A=A, d=d, original_A=A, original_d=d, identity=dict(transport=dict(
+        PASS=True,original_P1_bit_exact=True,integer_and_full_LP_domains_identical=True)),
         case_sha='b' * 64, output=tmp_path, lift=lambda x:x.copy())
     class RealBudget(ParentBudget):
         def native_optimize(self, model, callback=None, **kwargs):
             model.Params.TimeLimit = kwargs['requested_seconds']; model.Params.OutputFlag = 0
+            model.Params.LogFile = str(tmp_path / 'OVERRIDDEN_NATIVE.log')
             try:
                 model.optimize(callback)
             finally:
@@ -270,16 +272,24 @@ def test_real_native_trial_keeps_original_rows_and_never_promotes_bound(tmp_path
     seed_packet = tmp_path / 'valid_seed.npz'; np.savez_compressed(seed_packet, point=initial)
     seed_strict = validator(case, seed_packet, {})
     point, certificate, row = _trial(case, budget, tmp_path / 'actual_native',
-        validator=validator, seconds=2., point=initial, strict=seed_strict)
+        validator=validator, seconds=2., point=initial, strict=seed_strict, unrestricted=True)
     assert certificate['exact_Global_UB'] == '1/2'
     assert np.array_equal(point, np.array([0., .5, 1.]))
-    assert row['Native_Runtime'] >= 0 and len(budget.calls) == 1 and row['Global_LB_candidate'] is None
+    assert row['Native_Runtime'] >= 0 and len(budget.calls) == 1 and row['Global_LB_candidate'] == .5
+    assert row['Solver_ObjVal'] == row['Solver_ObjBound'] == .5 and row['Solver_MIPGap'] == 0.
+    assert row['solver_global_LB'] == .5 and row['solver_global_gap'] == 0.
+    assert row['solver_global_gap_valid'] and row['solver_global_gap_target_met']
+    assert not row['full_MILP_bound_independently_certified']
+    assert row['native_log']['path'] == str(tmp_path / 'OVERRIDDEN_NATIVE.log')
     assert not row['restricted_BestBound_is_Global_LB']
     identity = json.loads((tmp_path / 'actual_native' / 'MODEL_IDENTITY.json').read_text())
     assert all(identity['checks'].values()) and identity['objective'] == 'minimize rho_max'
     assert identity['equality_defined_helper_rows'] == 1
     assert identity['mip_start_helper_equalities_checked_by_original_FULL_replay']
-    assert VERSION == 'V42_COMMON_MESS_PRIMAL_ANYTIME_U4_V1'
+    assert identity['unrestricted_original_C3A_MILP'] and all(identity['unrestricted_checks'].values())
+    assert row['effective_MIPGap']==.03 and row['effective_MIPGapAbs']==0.
+    assert identity['memory_after']['RSS_bytes']>0
+    assert VERSION == 'V42_COMMON_MESS_U4_THEN_FULL_MILP_V2'
 
 
 def test_shared_engine_order_budget_and_acceptance_are_identical_for_all_stages(route_case, monkeypatch):
@@ -291,12 +301,17 @@ def test_shared_engine_order_budget_and_acceptance_are_identical_for_all_stages(
     monkeypatch.setattr(engine, 'current_grid', lambda *args:grid)
     calls = []
     def trial(case, budget, path, **kwargs):
-        spec = kwargs['spec']
-        calls.append((spec['method'], spec['hamming_radius'], kwargs['seconds'],
-                      spec['neighborhood_signature']))
+        spec = kwargs.get('spec')
+        method = spec['method'] if spec else 'FULL_MILP'
+        calls.append((method, spec['hamming_radius'] if spec else 0, kwargs['seconds'],
+                      spec['neighborhood_signature'] if spec else None))
+        if method == 'FULL_MILP':
+            assert kwargs['unrestricted'] and kwargs.get('lower') is kwargs.get('upper') is None
+            assert kwargs['numeric_parameters']['MIPGap'] == .03
+            assert kwargs['numeric_parameters']['MIPGapAbs'] == 0
         budget.native_optimize(SimpleNamespace(Params=SimpleNamespace()),
-            requested_seconds=kwargs['seconds'], track='M_' + spec['method'])
-        return kwargs['point'], kwargs['strict'], dict(method=spec['method'],
+            requested_seconds=kwargs['seconds'], track='M_' + method)
+        return kwargs['point'], kwargs['strict'], dict(method=method,
             certified_gain=0., Native_status=2, native_best_bound_diagnostic=.999,
             Native_Runtime=budget.calls[-1]['Native_Runtime'])
     monkeypatch.setattr(engine, '_trial', trial)
@@ -320,11 +335,118 @@ def test_shared_engine_order_budget_and_acceptance_are_identical_for_all_stages(
             stage_identity=dict(arm=arm, stage=stage), strict_validator=validator, plan_exporter=exporter)
         results.append(result); sequences.append(list(calls))
         assert np.array_equal(point, route_case.point)
-        assert result['feasible_accepted'] and result['status'] == 'FEASIBLE_ACCEPTED'
+        assert result['feasible_accepted'] and result['status'] in ('TIME_LIMIT_FEASIBLE','TIME_LIMIT_FEASIBLE_ACCEPTED')
+        assert result['Phase2_started'] and result['Phase2_calls'] == 1
+        assert result['initial_verified_UB'] == result['UB'] == 1.
         assert not result['global_gap_certified']
         assert result['certified_Global_LB'] is result['certified_gap'] is None
         assert result['native_best_bound_diagnostic'] == .999
         assert result['LB_optimizer_calls'] == result['DW_CG_Benders_calls'] == 0
     assert sequences[0] == sequences[1] == sequences[2]
-    assert [(r[0], r[1], r[2]) for r in sequences[0]] == [('U4', 48, 90.), ('U4', 96, 180.), ('U1', 144, 180.)]
+    assert [(r[0], r[1], r[2]) for r in sequences[0]][:3] == [('U4', 48, 90.), ('U4', 96, 180.), ('U1', 144, 180.)]
+    assert sequences[0][-1][:3] == ('FULL_MILP', 0, 1349.25)
     assert len({r['native_runtime_seconds'] for r in results}) == 1
+
+
+@pytest.mark.parametrize('failure', ['no_solution', 'worse_solution', 'memory', 'numeric'])
+def test_full_trial_retains_validated_best_on_missing_worse_or_failed_solver(route_case, monkeypatch, failure):
+    import gurobipy as gp
+    from v42_common_mess import engine
+    from v42_m1_research.check_ub import vector_sha
+    point = route_case.point.copy()
+    strict = dict(PASS=True, Global_UB=1., exact_Global_UB='1', point_vector_sha256=vector_sha(point))
+    route_case.identity['transport'].update(original_P1_bit_exact=True, integer_and_full_LP_domains_identical=True)
+    variables = SimpleNamespace(X=point*2)
+    model = SimpleNamespace(Params=SimpleNamespace(), SolCount=1 if failure=='worse_solution' else 0,
+        Status=gp.GRB.NUMERIC if failure=='numeric' else gp.GRB.TIME_LIMIT,
+        ObjVal=2., ObjBound=.99, dispose=lambda:None)
+    monkeypatch.setattr(engine, 'build', lambda *args, **kwargs:(model, variables,
+        dict(unrestricted_original_C3A_MILP=True,unrestricted_checks={k:True for k in (
+            'all_original_bounds_exact','all_original_integer_types_exact',
+            'all_original_rows_and_no_additional_cuts','no_neighborhood_or_hamming_constraint','original_minimization')})))
+    class FailedBudget(ParentBudget):
+        def native_optimize(self, model, callback=None, **kwargs):
+            super().native_optimize(model, callback, **kwargs)
+            if failure in ('memory','numeric'):
+                raise gp.GurobiError(gp.GRB.ERROR_OUT_OF_MEMORY if failure=='memory' else gp.GRB.ERROR_NUMERIC, failure)
+            return self.calls[-1]
+    def reject_worse(case, path, evidence):
+        raise ValueError('WORSE_RAW_SOLUTION_FAILS_FULL')
+    got, certificate, row = engine._trial(route_case, StageBudget(FailedBudget(1700.)),
+        route_case.output/'full_trial', validator=reject_worse, seconds=100.,
+        point=point, strict=strict, unrestricted=True)
+    assert np.array_equal(got, point) and certificate == strict
+    assert row['best_validated_UB'] == 1.
+    assert row['Global_LB_candidate'] == (None if failure=='numeric' else .99)
+    assert row['native_best_bound_diagnostic'] == .99
+    assert row['Native_Runtime'] == 100.25
+    assert not row['full_MILP_bound_independently_certified']
+
+
+def test_phase2_model_build_oom_preserves_checkpoint_and_does_not_invent_native_runtime(route_case, monkeypatch):
+    from v42_common_mess import engine
+    from v42_m1_research.check_ub import vector_sha
+    strict=dict(PASS=True,Global_UB=1.,exact_Global_UB='1',point_vector_sha256=vector_sha(route_case.point))
+    def oom(*args, **kwargs):
+        raise MemoryError('FULL_MODEL_BUILD_ALLOCATION')
+    monkeypatch.setattr(engine, '_trial', oom)
+    parent=ParentBudget(112.773)
+    point, certificate, rows, reason=engine._full_milp_phase(route_case,StageBudget(parent),
+        route_case.point,strict,None,None,None,None,'U4_STAGNATION')
+    assert np.array_equal(point,route_case.point) and certificate==strict
+    assert len(rows)==3 and parent.used()==112.773 and not parent.calls
+    assert reason=='RESOURCE_OR_NUMERIC_LIMIT_BEST_FULL_PRESERVED'
+    with np.load(route_case.output/'PHASE1_BEST_FULL_POINT.npz') as z:
+        assert np.array_equal(z['point'],route_case.point)
+
+
+def test_phase2_does_not_repeat_after_unknown_runtime(route_case, monkeypatch):
+    from v42_common_mess import engine
+    import gurobipy as gp
+    strict=dict(Global_UB=1.,exact_Global_UB='1')
+    parent=ParentBudget(103.778)
+    def unknown(*args, **kwargs):
+        parent.calls.append(dict(runtime_unavailable=True,Native_Runtime=None))
+        raise gp.GurobiError(gp.GRB.ERROR_OUT_OF_MEMORY,'Runtime unavailable')
+    monkeypatch.setattr(engine,'_trial',unknown)
+    with pytest.raises(RuntimeError,match='UNAVAILABLE_QUARANTINE'):
+        engine._full_milp_phase(route_case,StageBudget(parent),route_case.point,strict,
+            None,None,None,None,'OPTIONAL_PRIMAL_SEARCH_EXHAUSTED')
+    assert len(parent.calls)==1 and parent.calls[0]['Native_Runtime'] is None
+
+
+def test_independent_gap_is_only_early_exit_and_bad_lb_is_rejected():
+    from v42_common_mess.engine import _certified_gap_met
+    strict=dict(exact_Global_UB='100')
+    assert not _certified_gap_met(strict,None)
+    assert not _certified_gap_met(strict,Fraction(96))
+    assert _certified_gap_met(strict,Fraction(97))
+    with pytest.raises(ValueError,match='LB_EXCEEDS'):
+        _certified_gap_met(strict,Fraction(101))
+
+
+def test_unknown_full_milp_runtime_is_null_in_final_result_and_prior_full_survives(route_case,monkeypatch):
+    from v42_common_mess import engine
+    from v42_common_mess.storage import write
+    from v42_m1_research.check_ub import vector_sha
+    grid=([dict(unit='U',site='B',slot=62,numeric_score=1.)],dict(active_voltage_observations=[]))
+    monkeypatch.setattr(engine,'current_grid',lambda *args:grid)
+    def trial(case,budget,path,**kwargs):
+        if kwargs.get('unrestricted'):
+            budget.calls.append(dict(Native_Runtime=None,runtime_unavailable=True))
+            raise RuntimeError('COMMON_M_NATIVE_RUNTIME_UNAVAILABLE_QUARANTINE')
+        budget.native_optimize(SimpleNamespace(Params=SimpleNamespace()),requested_seconds=kwargs['seconds'])
+        return kwargs['point'],kwargs['strict'],dict(certified_gain=0.,Native_status=2)
+    monkeypatch.setattr(engine,'_trial',trial)
+    def validator(case,path,evidence):
+        with np.load(path) as z:point=z['point']
+        return dict(PASS=True,Global_UB=1.,exact_Global_UB='1',point_vector_sha256=vector_sha(point),
+            strict_raw_C3A_and_FULL_integer_and_binary_pattern_exact=True,
+            original_matrix_and_96_slot_physical_replay=dict(PASS=True,case_sha=case.case_sha))
+    result,point=engine.optimize_case(route_case,ParentBudget(),strict_validator=validator,
+        plan_exporter=lambda *args:pytest.fail('UNKNOWN Runtime cannot be handed off'))
+    assert result['Native_Runtime'] is result['native_seconds'] is result['native_runtime_seconds'] is None
+    assert result['Native_runtime_unknown_quarantined'] and not result['feasible_accepted']
+    assert result['measured_known_native_runtime_seconds']>0
+    assert np.array_equal(point,route_case.point)
+    assert (route_case.output/'BEST_STRICT_UB_POINT.npz').exists()

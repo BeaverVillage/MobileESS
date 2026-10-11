@@ -1,0 +1,160 @@
+........................................................................ [ 30%]
+........................................................................ [ 60%]
+......................................................................FF [ 90%]
+.F.F..F.................                                                 [100%]
+================================== FAILURES ===================================
+___________ test_equivalent_cache_has_identical_reviewed_model_ast ____________
+
+    def test_equivalent_cache_has_identical_reviewed_model_ast():
+>       assert normalized_reviewed_model(OLD.read_text())==normalized_reviewed_model(NEW.read_text())
+E       AssertionError: assert 'Module(body=...e_ignores=[])' == 'Module(body=...e_ignores=[])'
+E         
+E         Skipping 832 identical leading characters in diff, use -v to show
+E         - level=1), ImportFrom(module='ldc_interval', names=[alias(name='descriptors'), alias(name='project'), alias(name='VERSION', asname='LDC_VERSION')], level=1), Assign(targets=[Name(id='VERSION', ctx=Store())], value=Constant(value='V42_SVR11_LDC_INTERVAL_ELECTRICAL_CERTIFICATE_V2')), Assign(targets=[Name(id='FIELDS', ctx=Store())], value=Tuple(elts=[Constant(value='voltage_constant'), Constant(value='voltage_matrix'), Constant(value='current_constant'), Constant(value='current_matrix'), Constant(value='flow...
+E         
+E         ...Full output truncated (4 lines hidden), use '-vv' to show
+
+tests\test_svr11_forecast_cache_review.py:12: AssertionError
+_ test_rejects_altered_cache_values_order_or_forecast_source[_set_load(engine,name,p,q)-_set_load(engine,name,p*1.01,q)] _
+
+before = '_set_load(engine,name,p,q)', after = '_set_load(engine,name,p*1.01,q)'
+
+    @pytest.mark.parametrize('before,after',[
+        ('_set_load(engine,name,p,q)','_set_load(engine,name,p*1.01,q)'),
+        ('background.gross_q_kvar_96[t]','background.gross_q_kvar_96[0]'),
+        ('for row in native.loads:', 'for row in reversed(native.loads):'),
+        ('totals_by_slot=_forecast_native_totals(native,bg)', 'totals_by_slot=_forecast_native_totals(native,actual)'),
+        ('_apply_forecast_native(e,native,totals_by_slot,t)', '_apply_forecast_native(e,native,totals_by_slot,0)'),
+    ])
+    def test_rejects_altered_cache_values_order_or_forecast_source(before,after):
+        text=NEW.read_text();assert before in text
+        with pytest.raises(ValueError,match='REUSE_UNREVIEWED_FORECAST_CACHE'):
+>           normalized_reviewed_model(text.replace(before,after))
+
+tests\test_svr11_forecast_cache_review.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\reuse_svr11_completed.py:31: in normalized_reviewed_model
+    text=normalize_exact_forecast_fastpath(text)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+text = '"""Forecast-only independent-prefix AUTO/TIME finite-response generation.\n\nEvery signed probe recompiles from sourc...\n    atomic(cert_path,cert);verify_coefficients(cert,day,load_coefficients(cert,day))\n    return record(cert_path)\n'
+
+    def normalize_exact_forecast_fastpath(text):
+     tree=ast.parse(text);helpers={n.name:n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in HELPERS}
+     if not helpers:return text
+>    if set(helpers)!=set(HELPERS) or any(hashlib.sha256(signature(n).encode()).hexdigest()!=HELPERS[k] for k,n in helpers.items()):raise ValueError('REUSE_UNREVIEWED_FASTPATH_HELPER')
+E    ValueError: REUSE_UNREVIEWED_FASTPATH_HELPER
+
+tools\svr11_fastpath_review.py:12: ValueError
+
+During handling of the above exception, another exception occurred:
+
+before = '_set_load(engine,name,p,q)', after = '_set_load(engine,name,p*1.01,q)'
+
+    @pytest.mark.parametrize('before,after',[
+        ('_set_load(engine,name,p,q)','_set_load(engine,name,p*1.01,q)'),
+        ('background.gross_q_kvar_96[t]','background.gross_q_kvar_96[0]'),
+        ('for row in native.loads:', 'for row in reversed(native.loads):'),
+        ('totals_by_slot=_forecast_native_totals(native,bg)', 'totals_by_slot=_forecast_native_totals(native,actual)'),
+        ('_apply_forecast_native(e,native,totals_by_slot,t)', '_apply_forecast_native(e,native,totals_by_slot,0)'),
+    ])
+    def test_rejects_altered_cache_values_order_or_forecast_source(before,after):
+        text=NEW.read_text();assert before in text
+>       with pytest.raises(ValueError,match='REUSE_UNREVIEWED_FORECAST_CACHE'):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'REUSE_UNREVIEWED_FORECAST_CACHE'
+E        Input: 'REUSE_UNREVIEWED_FASTPATH_HELPER'
+
+tests\test_svr11_forecast_cache_review.py:23: AssertionError
+_ test_rejects_altered_cache_values_order_or_forecast_source[for row in native.loads:-for row in reversed(native.loads):] _
+
+before = 'for row in native.loads:'
+after = 'for row in reversed(native.loads):'
+
+    @pytest.mark.parametrize('before,after',[
+        ('_set_load(engine,name,p,q)','_set_load(engine,name,p*1.01,q)'),
+        ('background.gross_q_kvar_96[t]','background.gross_q_kvar_96[0]'),
+        ('for row in native.loads:', 'for row in reversed(native.loads):'),
+        ('totals_by_slot=_forecast_native_totals(native,bg)', 'totals_by_slot=_forecast_native_totals(native,actual)'),
+        ('_apply_forecast_native(e,native,totals_by_slot,t)', '_apply_forecast_native(e,native,totals_by_slot,0)'),
+    ])
+    def test_rejects_altered_cache_values_order_or_forecast_source(before,after):
+        text=NEW.read_text();assert before in text
+        with pytest.raises(ValueError,match='REUSE_UNREVIEWED_FORECAST_CACHE'):
+>           normalized_reviewed_model(text.replace(before,after))
+
+tests\test_svr11_forecast_cache_review.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tools\reuse_svr11_completed.py:31: in normalized_reviewed_model
+    text=normalize_exact_forecast_fastpath(text)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+text = '"""Forecast-only independent-prefix AUTO/TIME finite-response generation.\n\nEvery signed probe recompiles from sourc...\n    atomic(cert_path,cert);verify_coefficients(cert,day,load_coefficients(cert,day))\n    return record(cert_path)\n'
+
+    def normalize_exact_forecast_fastpath(text):
+     tree=ast.parse(text);helpers={n.name:n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in HELPERS}
+     if not helpers:return text
+>    if set(helpers)!=set(HELPERS) or any(hashlib.sha256(signature(n).encode()).hexdigest()!=HELPERS[k] for k,n in helpers.items()):raise ValueError('REUSE_UNREVIEWED_FASTPATH_HELPER')
+E    ValueError: REUSE_UNREVIEWED_FASTPATH_HELPER
+
+tools\svr11_fastpath_review.py:12: ValueError
+
+During handling of the above exception, another exception occurred:
+
+before = 'for row in native.loads:'
+after = 'for row in reversed(native.loads):'
+
+    @pytest.mark.parametrize('before,after',[
+        ('_set_load(engine,name,p,q)','_set_load(engine,name,p*1.01,q)'),
+        ('background.gross_q_kvar_96[t]','background.gross_q_kvar_96[0]'),
+        ('for row in native.loads:', 'for row in reversed(native.loads):'),
+        ('totals_by_slot=_forecast_native_totals(native,bg)', 'totals_by_slot=_forecast_native_totals(native,actual)'),
+        ('_apply_forecast_native(e,native,totals_by_slot,t)', '_apply_forecast_native(e,native,totals_by_slot,0)'),
+    ])
+    def test_rejects_altered_cache_values_order_or_forecast_source(before,after):
+        text=NEW.read_text();assert before in text
+>       with pytest.raises(ValueError,match='REUSE_UNREVIEWED_FORECAST_CACHE'):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'REUSE_UNREVIEWED_FORECAST_CACHE'
+E        Input: 'REUSE_UNREVIEWED_FASTPATH_HELPER'
+
+tests\test_svr11_forecast_cache_review.py:23: AssertionError
+_ test_rejects_altered_cache_values_order_or_forecast_source[_apply_forecast_native(e,native,totals_by_slot,t)-_apply_forecast_native(e,native,totals_by_slot,0)] _
+
+before = '_apply_forecast_native(e,native,totals_by_slot,t)'
+after = '_apply_forecast_native(e,native,totals_by_slot,0)'
+
+    @pytest.mark.parametrize('before,after',[
+        ('_set_load(engine,name,p,q)','_set_load(engine,name,p*1.01,q)'),
+        ('background.gross_q_kvar_96[t]','background.gross_q_kvar_96[0]'),
+        ('for row in native.loads:', 'for row in reversed(native.loads):'),
+        ('totals_by_slot=_forecast_native_totals(native,bg)', 'totals_by_slot=_forecast_native_totals(native,actual)'),
+        ('_apply_forecast_native(e,native,totals_by_slot,t)', '_apply_forecast_native(e,native,totals_by_slot,0)'),
+    ])
+    def test_rejects_altered_cache_values_order_or_forecast_source(before,after):
+>       text=NEW.read_text();assert before in text
+E       assert '_apply_forecast_native(e,native,totals_by_slot,t)' in '"""Forecast-only independent-prefix AUTO/TIME finite-response generation.\n\nEvery signed probe recompiles from sourc...\n    atomic(cert_path,cert);verify_coefficients(cert,day,load_coefficients(cert,day))\n    return record(cert_path)\n'
+
+tests\test_svr11_forecast_cache_review.py:22: AssertionError
+_ test_rejects_changed_sensitivity_clock_and_other_setters[original._set_slot(e,{**ad,'loads':[]},bg,p,t)-original._set_slot(e,{**ad,'loads':[]},bg,p,0)] _
+
+before = "original._set_slot(e,{**ad,'loads':[]},bg,p,t)"
+after = "original._set_slot(e,{**ad,'loads':[]},bg,p,0)"
+
+    @pytest.mark.parametrize('before,after',[
+        ('(plus[k]-minus[k])/(2*d)','(plus[k]-minus[k])/d'),
+        ('clock.settle_slot(e,t,capture_events=False)','clock.settle_slot(e,0,capture_events=False)'),
+        ('original._set_slot(e,{**ad,\'loads\':[]},bg,p,t)', 'original._set_slot(e,{**ad,\'loads\':[]},bg,p,0)'),
+    ])
+    def test_rejects_changed_sensitivity_clock_and_other_setters(before,after):
+>       text=NEW.read_text();assert before in text
+E       assert "original._set_slot(e,{**ad,'loads':[]},bg,p,t)" in '"""Forecast-only independent-prefix AUTO/TIME finite-response generation.\n\nEvery signed probe recompiles from sourc...\n    atomic(cert_path,cert);verify_coefficients(cert,day,load_coefficients(cert,day))\n    return record(cert_path)\n'
+
+tests\test_svr11_forecast_cache_review.py:32: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_svr11_forecast_cache_review.py::test_equivalent_cache_has_identical_reviewed_model_ast
+FAILED tests/test_svr11_forecast_cache_review.py::test_rejects_altered_cache_values_order_or_forecast_source[_set_load(engine,name,p,q)-_set_load(engine,name,p*1.01,q)]
+FAILED tests/test_svr11_forecast_cache_review.py::test_rejects_altered_cache_values_order_or_forecast_source[for row in native.loads:-for row in reversed(native.loads):]
+FAILED tests/test_svr11_forecast_cache_review.py::test_rejects_altered_cache_values_order_or_forecast_source[_apply_forecast_native(e,native,totals_by_slot,t)-_apply_forecast_native(e,native,totals_by_slot,0)]
+FAILED tests/test_svr11_forecast_cache_review.py::test_rejects_changed_sensitivity_clock_and_other_setters[original._set_slot(e,{**ad,'loads':[]},bg,p,t)-original._set_slot(e,{**ad,'loads':[]},bg,p,0)]
+5 failed, 235 passed in 81.44s (0:01:21)

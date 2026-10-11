@@ -138,8 +138,14 @@ class SourceOperationsBridge:
 
     def _operation(self, symbol, **routing):
         imports = dict(routing.pop("import_replacements", {}), authorize=self.authorize)
-        return self.registry.rebind("v42_may_campaign_native90.operations", symbol,
+        body=self.registry.rebind("v42_may_campaign_native90.operations", symbol,
             import_replacements=imports, **routing)
+        from v42_svr11.authority import active
+        if active() is not None:
+            from v42_svr11.operations import wrapped
+            if not hasattr(self,'_svr11_events'):self._svr11_events={}
+            return wrapped(symbol,body,self._svr11_events)
+        return body
 
     def _request(self):
         return dict(run_id=self.context.run_id, day=self.context.request.authority.day,

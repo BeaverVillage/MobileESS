@@ -86,7 +86,9 @@ class CommonClock:
         require(seconds(engine) == value, 'TIME_CLOCK_NATIVE_READBACK_DRIFT')
 
     def settle_slot(self, engine, slot, *, bank=None, observer=None, solve=None,
-                    initial_solve_already_done=False):
+                    initial_solve_already_done=False, capture_events=True):
+        require(capture_events or (bank is None and observer is None),
+                'TIME_TRACE_FREE_PROBE_CANNOT_SKIP_OBSERVER')
         require(engine is self.engine, 'TIME_OWNED_ENGINE_REQUIRED')
         require(type(slot) is int and slot == self.next_slot and 0 <= slot < 96,
                 'TIME_CHRONOLOGICAL_SLOTS_REQUIRED')
@@ -104,6 +106,11 @@ class CommonClock:
             require(bool(engine.Solution.ControlActionsDone()), 'TIME_NATIVE_DUE_CONTROL_ACTIONS_INCOMPLETE')
             pending = queue(engine)
             require(all(r['absolute_seconds'] > now for r in pending), 'TIME_NATIVE_OVERDUE_QUEUE_REMAINS')
+            if not capture_events:
+                # Forecast probes discard these receipts. Keep every solve,
+                # clock action and strict convergence/control/queue check;
+                # avoid copying the growing native EventLog and unused rows.
+                return pending
             logs = list(engine.Solution.EventLog())
             # A native log reset is recorded; never silently lose events.
             delta = logs[self._log_count:] if len(logs) >= self._log_count else logs
@@ -119,15 +126,16 @@ class CommonClock:
             events.append(row)
             if observer is not None and not already_completed:
                 observer(row)
+            return pending
 
         if initial_solve_already_done:
-            observe('INITIAL_ALREADY_COMPLETED', True)
+            pending = observe('INITIAL_ALREADY_COMPLETED', True)
         else:
             solve()
-            observe('SLOT_INPUT_SAMPLE_AND_DUE_ACTIONS')
+            pending = observe('SLOT_INPUT_SAMPLE_AND_DUE_ACTIONS')
         extra = 0
         while True:
-            pending = queue(engine)
+            if capture_events: pending = queue(engine)
             if not pending or pending[0]['absolute_seconds'] >= end:
                 break
             require(extra < self.max_event_solves, 'TIME_EVENT_SOLVE_LIMIT_EXCEEDED')
@@ -136,9 +144,9 @@ class CommonClock:
             # applying due actions and resamples after every executed action.
             solve()
             extra += 1
-            observe('NATIVE_QUEUED_EVENT')
+            pending = observe('NATIVE_QUEUED_EVENT')
         last_solve = seconds(engine)
-        carried = queue(engine)
+        carried = queue(engine) if capture_events else pending
         self._at(engine, end)  # Do not execute boundary events with old inputs.
         self.next_slot += 1
         self.total_physical_solve_count += 1 + extra

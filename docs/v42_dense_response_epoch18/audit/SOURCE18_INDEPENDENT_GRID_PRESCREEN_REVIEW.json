@@ -1,0 +1,79 @@
+{
+  "PASS": true,
+  "no_blocking_findings": true,
+  "sources": {
+    "v42_native/grid_prescreen.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\v42_native\\grid_prescreen.py",
+      "sha256": "e82cf8238bb25c2ea826e3b7026fd05c8bae25c805302ef191545bdb09cc6f66",
+      "bytes": 12855
+    },
+    "v42_native/mess_domain.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\v42_native\\mess_domain.py",
+      "sha256": "751b70b4c50bc2f6e5f84dc70bf5898a4aedbaee75a7b68966cc7c2e3a8b5f6e",
+      "bytes": 9721
+    },
+    "v42_native/mess_domain_verify.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\v42_native\\mess_domain_verify.py",
+      "sha256": "b1184a77da8c8261a5f557c13fa735a3d9bb0fe9fb84d6882d5b1a77cea8b481",
+      "bytes": 10037
+    },
+    "tests/test_v42_grid_prescreen.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\tests\\test_v42_grid_prescreen.py",
+      "sha256": "5986706774825ca67ce62c533f371d47c722a15f42ce80dd58eb1528c198cad4",
+      "bytes": 7796
+    },
+    "v42_may_campaign_native90/m_model.py": {
+      "path": "D:\\v42_svr11_epoch18_20261011\\v42_may_campaign_native90\\m_model.py",
+      "sha256": "b3bf55598edc16e7ee0bb79a3fcbf795e7f12b01d157fe6e2d661ce72b9340da",
+      "bytes": 48781
+    }
+  },
+  "suite": {
+    "test": "tests/test_v42_grid_prescreen.py",
+    "passed": 12,
+    "seconds": 0.39
+  },
+  "additional_independent_rejections": {
+    "RAW_INTEGER_TYPE": {
+      "PASS": true,
+      "rejection": "GRID_OUTER_ORIGINAL_RAW_PQ_BOX_DRIFT"
+    },
+    "CROSS_SLOT_INJECTION": {
+      "PASS": true,
+      "rejection": "GRID_OUTER_ORIGINAL_INJECTION_EQUALITY_DRIFT"
+    },
+    "EXTRA_RAW_PQ": {
+      "PASS": true,
+      "rejection": "GRID_OUTER_ORIGINAL_RAW_PQ_COVER_DRIFT"
+    },
+    "DUPLICATE_DEFINITION": {
+      "PASS": true,
+      "rejection": "GRID_OUTER_ORIGINAL_DUPLICATE_AFFINE_DEFINITION"
+    }
+  },
+  "extra_adversarial_checks": [
+    "Nested exact response gives outer minimum-2699 and strict witness margin1 at rhs-2700",
+    "Lost correlation remains an overlap at rhs-2500, despite actual expression minimum-2099; absence of witness is not feasibility",
+    "Cyclic equalities explicitly unmeasured, never guessed0"
+  ],
+  "mathematical_review": [
+    "Raw P=Pdis-Pch lies in [-n*p,n*p] even in fractional LP mode",
+    "Raw Q lies in [-n*S,n*S]; no path/SOC/PCS strengthening assumed",
+    "Actual FULL raw variable types/boxes and injection members/signs/RHS bridge input masks",
+    "Unit-pivot affine equalities recursively use exact stored rational coefficients/RHS",
+    "Intervals deliberately ignore correlations and enlarge domain; normalized minimum>actualRHS proves entire-model infeasibility only",
+    "Unknown/nonunit/cyclic response definitions cannot yield an infeasibility witness",
+    "No model bound, route, row or column is changed",
+    "Adapter binds state to current physical graph/coefficient identities/fixedcontrols; source, original matrix/domain and summary/certificate SHA/content checked"
+  ],
+  "limitations": [
+    "Grid prescreen PASS is diagnostic/provenance success, not a feasibility certificate or new physical reduction",
+    "Input coefficient/fixed-control scientific provenance is the upstream frozen case authority; bridge evaluates actual stored FULL equations",
+    "No actual fresh large matrix run performed by reviewer; parent owns integrated readback and one authorized root probe"
+  ],
+  "Native_optimize_calls": 0,
+  "Native_presolve_calls": 0,
+  "Native_AC_calls": 0,
+  "large_matrices_loaded": 0,
+  "source_mutations": 0
+}

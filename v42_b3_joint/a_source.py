@@ -746,7 +746,9 @@ class ASourceBridge:
         lower = Fraction(priced["full_domain_phase1_lower_bound"])
         require(lower <= upper and str(lower) == output.source_result["exact_LB"] and
                 str(upper) == output.source_result["exact_UB"], "A_SOURCE_VERIFIER_EXACT_GLOBAL_BOUND_DRIFT")
-        require((upper - lower) / max(abs(upper), Fraction(1, 10**12)) <= Fraction("0.005"),
+        from v42_svr11.anytime import enabled
+        gap_certified=(upper - lower) / max(abs(upper), Fraction(1, 10**12)) <= Fraction("0.005")
+        require(gap_certified or (enabled() and output.source_result.get("FULL_feasible_certified") is True),
                 "A_SOURCE_VERIFIER_EXACT_GLOBAL_GAP_TARGET_FAILED")
         verifier_sha = self._source_digest(context, ("v42_a_stage_acceptance/physical.py",
             "v42_pr134_sc/snapshot.py", "v42_exact/validation.py", "v42_a_stage_canary/pricing.py",
@@ -762,7 +764,7 @@ class ASourceBridge:
             "verifier_source_sha": verifier_sha, "global_domain_sha": context.request.authority.physical_domain_sha,
             "source_complete_domain_sha": digest(packet["complete_domain_hashes"]),
             "complete_pricing_replay_sha": digest(_scientific(jsonable(priced))), "source_static_verification": jsonable(static),
-            "source_original_integer_type_proof": jsonable(types), "joint_global_optimality_claim": False,
+            "source_original_integer_type_proof": jsonable(types), "joint_global_optimality_claim": False, "global_gap_certified": bool(gap_certified),
             "sealed_source_proof_inputs_sha": digest(packet["proof_input_receipts"]),
             "numerical_policy_receipts": numerical,
             "evidence_kind": registry.evidence_kind}

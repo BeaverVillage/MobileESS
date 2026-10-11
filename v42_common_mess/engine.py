@@ -1,4 +1,4 @@
-"""Measured 1800-second primal-only production MESS optimizer.
+"""Measured 1800-second U4 then unrestricted original MILP optimizer.
 
 No pricing, DW, CG, Benders, full-LP bound solve or LB strengthening is called.
 Restricted BestBound is persisted only as a native diagnostic.
@@ -17,6 +17,14 @@ from .fixed_pattern import integer_representatives, stationary_paths, values_for
 from .model import build
 from .neighborhood import current_grid, select, inventory
 from .storage import write, record
+from .telemetry import admit_solver_bound, root_lp, verified_gap, summarize_full
+
+
+def full_milp_parameters(parameters=None):
+    """PR162 root/LB profile, preserving the current precision and disk policy."""
+    return dict(parameters or {}, Method=2, Threads=1, Crossover=2,
+        NodeMethod=1, MIPFocus=3, DegenMoves=0, PreCrush=1,
+        MIPGap=.03, MIPGapAbs=0., NodefileStart=.5)
 
 
 def _strict(case, path, evidence):
@@ -88,7 +96,7 @@ def _completed_native_receipt(budget, before_count, before_used, *, component,
 
 def _trial(case, budget, path, *, validator, seconds, lower=None, upper=None,
            point=None, strict=None, continuous=False, spec=None, initialization=False,
-           numeric_parameters=None):
+           numeric_parameters=None, unrestricted=False):
     """Extract final/callback incumbents even after a native budget exception."""
     import gurobipy as gp
     from v42_m1_research.check_ub import vector_sha
@@ -96,18 +104,42 @@ def _trial(case, budget, path, *, validator, seconds, lower=None, upper=None,
     with budget.cost('model_build', path.name):
         model, variables, identity = build(case, path, lower=lower, upper=upper,
             continuous=continuous, start=point, spec=spec, numeric_parameters=numeric_parameters)
+    if unrestricted:
+        transport = case.identity.get('transport', {})
+        if (not identity.get('unrestricted_original_C3A_MILP')
+                or not all(identity.get('unrestricted_checks', {}).get(k) is True for k in (
+                    'all_original_bounds_exact', 'all_original_integer_types_exact',
+                    'all_original_rows_and_no_additional_cuts',
+                    'no_neighborhood_or_hamming_constraint', 'original_minimization'))
+                or not all(transport.get(k) is True for k in
+                    ('PASS', 'original_P1_bit_exact', 'integer_and_full_LP_domains_identical'))
+                or strict is None or strict.get('PASS') is not True or point is None
+                or strict.get('point_vector_sha256') != vector_sha(point)):
+            model.dispose()
+            raise ValueError('COMMON_M_FULL_MILP_INDEPENDENT_EQUIVALENCE_AND_START_REQUIRED')
+        # The exact equivalent full model has a valid whole-domain solver gap.
+        # This stopping target does not manufacture an independent certificate.
+        model.Params.MIPGap = .03
+        model.Params.MIPGapAbs = 0.
+        model.Params.SolutionLimit = gp.GRB.MAXINT
     if initialization and not continuous:
         model.Params.MIPFocus = 1
         model.Params.SolutionLimit = 1
     pending, capture_errors = [], []
+    root_completed_runtime = None
     discovered = float(F(strict['exact_Global_UB'])) if strict else float('inf')
     before = budget.used()
     before_count = len(budget.calls)
     component = 'FEASIBILITY_LP' if continuous else 'FEASIBILITY_MIP' if initialization else 'UB'
-    track = 'M_START' if initialization else 'M_' + (spec['method'] if spec else 'FIXED_ROUTE')
+    track = 'M_FULL_MILP' if unrestricted else 'M_START' if initialization else 'M_' + (spec['method'] if spec else 'FIXED_ROUTE')
     effective_seconds = min(float(seconds), budget.remaining())
     def capture(m, where):
-        nonlocal discovered
+        nonlocal discovered, root_completed_runtime
+        if unrestricted and where == gp.GRB.Callback.MESSAGE:
+            message = m.cbGet(gp.GRB.Callback.MSG_STRING)
+            if message.lstrip().startswith('Root relaxation: objective') and not any(
+                    word in message.lower() for word in ('interrupted','time limit','infeasible','unbounded')):
+                root_completed_runtime = float(m.cbGet(gp.GRB.Callback.RUNTIME))
         if where != gp.GRB.Callback.MIPSOL:
             return # POLLING has no supported scientific attributes.
         try:
@@ -150,30 +182,161 @@ def _trial(case, budget, path, *, validator, seconds, lower=None, upper=None,
             admitted.append(dict(packet=record(packet), exact_Global_UB=certificate['exact_Global_UB']))
             if best_strict is None or F(certificate['exact_Global_UB']) < F(best_strict['exact_Global_UB']):
                 best, best_strict = raw.copy(), certificate
+        solver_bound, bound_rejection = admit_solver_bound(identity,
+            getattr(case, 'identity', {}).get('transport', {}), unrestricted=unrestricted,
+            bound=_attr(model, 'ObjBound'), status=_attr(model, 'Status'),
+            native_error_code=getattr(native_failure, 'errno', None),
+            runtime_known=not any(r.get('runtime_unavailable') for r in budget.calls))
+        solver_gap = verified_gap(None if best_strict is None else best_strict['exact_Global_UB'], solver_bound)
+        if solver_bound is not None and best_strict is not None and solver_gap is None:
+            bound_rejection = 'SOLVER_BOUND_EXCEEDS_VERIFIED_UB_OR_ZERO_UB'
+            solver_bound = None
+        solver_mip_gap = _attr(model, 'MIPGap')
         row = dict(case_sha=case.case_sha, label=path.name,
-            method=spec['method'] if spec else 'INITIALIZATION' if initialization else 'FIXED_ROUTE',
+            method='FULL_MILP' if unrestricted else spec['method'] if spec else 'INITIALIZATION' if initialization else 'FIXED_ROUTE',
             requested_seconds=seconds, native_receipt=native,
             Native_Runtime=budget.used() - before, Native_Work=_attr(model, 'Work'),
             Native_status=_attr(model, 'Status'), Native_SolCount=_attr(model, 'SolCount'),
             native_best_bound_diagnostic=_attr(model, 'ObjBound'),
-            restricted_BestBound_is_Global_LB=False, Global_LB_candidate=None,
+            restricted_BestBound_is_Global_LB=False, Global_LB_candidate=solver_bound,
+            Solver_ObjVal=_attr(model, 'ObjVal'), Solver_ObjBound=_attr(model, 'ObjBound'),
+            Solver_MIPGap=solver_mip_gap,
+            Solver_MIPGap_percent=None if solver_mip_gap is None else 100 * solver_mip_gap,
+            solver_global_LB=solver_bound, solver_global_gap=solver_gap,
+            solver_global_gap_percent=None if solver_gap is None else 100 * solver_gap,
+            solver_global_gap_valid=solver_gap is not None,
+            solver_global_gap_target_met=solver_gap is not None and solver_gap <= .03,
+            solver_bound_provenance='EXACT_FULL_C3A_MILP_SOLVER_BOUND' if solver_bound is not None else None,
+            solver_bound_rejection_reason=bound_rejection,
+            full_MILP_bound_valid_for_global_evaluation=solver_bound is not None,
+            independent_dual_status='MIP_API_DOES_NOT_EXPOSE_ORIGINAL_ROW_PI_NO_ADDITIONAL_LP',
+            Root_LP_callback_does_not_supply_Pi=True,
+            B_and_B_Node_count=_attr(model, 'NodeCount'),
+            Full_MILP_Native_Runtime=budget.used() - before if unrestricted else None,
+            Solver_MemUsed_GB=_attr(model, 'MemUsed'), Solver_MaxMemUsed_GB=_attr(model, 'MaxMemUsed'),
+            initial_verified_UB=None if strict is None else strict['Global_UB'],
+            final_verified_UB=None if best_strict is None else best_strict['Global_UB'],
             start_UB=None if strict is None else strict['Global_UB'],
             best_validated_UB=None if best_strict is None else best_strict['Global_UB'],
             certified_gain=0. if strict is None or best_strict is None else
                 float(F(strict['exact_Global_UB']) - F(best_strict['exact_Global_UB'])),
             accepted_candidates=admitted, rejected_candidates=rejected,
             capture_errors=capture_errors, native_error=error,
+            native_error_code=getattr(native_failure, 'errno', None),
+            unrestricted_original_C3A_MILP=unrestricted,
+            full_MILP_bound_independently_certified=False,
+            original_model_identity=record(path / 'MODEL_IDENTITY.json') if (path / 'MODEL_IDENTITY.json').exists() else None,
+            effective_MIPGap=_attr(model.Params, 'MIPGap'),
+            effective_MIPGapAbs=_attr(model.Params, 'MIPGapAbs'),
+            effective_TimeLimit=_attr(model.Params, 'TimeLimit'),
             cumulative_native_runtime_seconds=budget.used(),
             native_budget_overshoot_seconds=max(0., budget.used() - NATIVE_LIMIT_SECONDS))
+        logfile = _attr(model.Params, 'LogFile') or str(path / 'NATIVE_GUROBI.log')
+        row.update(root_lp(logfile))
+        row['Root_completion_native_elapsed_seconds'] = root_completed_runtime
+        row['Post_root_native_seconds'] = (max(0., row['Native_Runtime']-root_completed_runtime)
+            if root_completed_runtime is not None else None)
+        from .model import memory_observation
+        row['memory_after_native'] = memory_observation()
+        row['model_build_wall_seconds'] = identity.get('build_wall_seconds')
+        row['native_log'] = record(logfile) if Path(logfile).is_file() else None
         write(path / 'RESULT.json', row)
+        row['telemetry_receipt'] = record(path / 'RESULT.json')
         if any(r.get('runtime_unavailable') for r in budget.calls):
             raise RuntimeError('COMMON_M_NATIVE_RUNTIME_UNAVAILABLE_QUARANTINE')
+        from v42_svr11.anytime import enabled,normal_budget_exception
+        recoverable = isinstance(native_failure, MemoryError) or isinstance(native_failure, gp.GurobiError) and native_failure.errno in (
+            gp.GRB.ERROR_OUT_OF_MEMORY, gp.GRB.ERROR_NUMERIC)
+        if enabled() and native_failure is not None and not normal_budget_exception(native_failure) and not (unrestricted and recoverable):
+            raise native_failure
         if isinstance(native_failure, (PermissionError, ValueError)) or error and (
                 'ADMISSION' in error or 'SOURCE' in error or 'DRIFT' in error):
             raise RuntimeError(error)
         return best, best_strict, row
     finally:
         model.dispose()
+
+
+def _certified_gap_met(strict, lb):
+    if strict is None or lb is None:
+        return False
+    ub = F(strict['exact_Global_UB'])
+    if lb > ub:
+        raise ValueError('COMMON_M_LB_EXCEEDS_INDEPENDENT_FULL_UB')
+    return ub == lb or ub != 0 and (ub-lb) / abs(ub) <= F(3, 100)
+
+
+def _full_milp_phase(case, budget, point, strict, validator, progress, parameters, lb,
+                     transition_reason):
+    """Use the remaining measured stage budget without a restricted domain."""
+    import gurobipy as gp
+    from .model import memory_observation
+    start_ub = F(strict['exact_Global_UB'])
+    checkpoint = case.output / 'PHASE1_BEST_FULL_POINT.npz'
+    np.savez_compressed(checkpoint, point=point)
+    write(case.output / 'PHASE1_BEST_FULL_CERTIFICATE.json', strict)
+    entry = dict(PASS=True, trigger=transition_reason,
+        initial_verified_UB=strict['Global_UB'], exact_initial_UB=str(start_ub),
+        measured_native_used_seconds=budget.used(), remaining_native_seconds=budget.remaining(),
+        verified_point=record(checkpoint), objective='minimize rho_max',
+        fixed_binary_columns=0, hamming_constraints=0, neighborhood_restrictions=0,
+        MIP_Start=record(checkpoint), budget_reset=False, memory=memory_observation())
+    write(case.output / 'PHASE2_ENTRY.json', entry)
+    history, failures, iteration = [], 0, 0
+    termination = 'NATIVE_1800_SECONDS_EXHAUSTED'
+    while budget.remaining() > 0:
+        if _certified_gap_met(strict, lb):
+            termination = 'INDEPENDENT_GLOBAL_GAP_3_PERCENT_CERTIFIED'; break
+        requested = budget.remaining()
+        if progress:
+            progress(dict(phase='M_FULL_MILP_PHASE2', verified_UB=strict['Global_UB'],
+                native_runtime_seconds=budget.used(), remaining_native_seconds=requested,
+                source_trigger=transition_reason, fixed_binary_columns=0, hamming_constraints=0))
+        effective = full_milp_parameters(parameters)
+        if failures:
+            effective.update(NumericFocus=3, Method=1)
+        path = case.output / 'PHASE2_FULL_MILP' / f'{iteration:03d}'
+        before = budget.used()
+        try:
+            point, strict, row = _trial(case, budget, path, validator=validator,
+                seconds=requested, point=point, strict=strict,
+                unrestricted=True, numeric_parameters=effective)
+        except (MemoryError, gp.GurobiError) as failure:
+            if not isinstance(failure, MemoryError) and failure.errno not in (
+                    gp.GRB.ERROR_OUT_OF_MEMORY, gp.GRB.ERROR_NUMERIC):
+                raise
+            if any(r.get('runtime_unavailable') for r in budget.calls):
+                raise RuntimeError('COMMON_M_NATIVE_RUNTIME_UNAVAILABLE_QUARANTINE') from failure
+            row = dict(method='FULL_MILP', native_error=repr(failure),
+                native_error_code=getattr(failure, 'errno', gp.GRB.ERROR_OUT_OF_MEMORY),
+                Native_Runtime=budget.used()-before, Native_status=None,
+                best_validated_UB=strict['Global_UB'], prior_best_FULL_preserved=True)
+            write(path / 'RESOURCE_FAILURE.json', row)
+        if F(strict['exact_Global_UB']) > start_ub:
+            raise ValueError('COMMON_M_FULL_PHASE_BEST_UB_REGRESSION')
+        history.append(row)
+        checkpoint = case.output / 'PHASE2_BEST_FULL_POINT.npz'
+        np.savez_compressed(checkpoint, point=point)
+        write(case.output / 'PHASE2_BEST_FULL_CERTIFICATE.json', strict)
+        write(case.output / 'PHASE2_AUDIT.json', dict(entry=entry, history=history,
+            best_verified_UB=strict['Global_UB'], certified_Global_LB=None if lb is None else str(lb),
+            native_bound_is_not_independent_global_certificate=True,
+            cumulative_native_runtime_seconds=budget.used(), checkpoint=record(checkpoint)))
+        if row.get('solver_global_gap_target_met') is True:
+            termination = 'FULL_MILP_SOLVER_GLOBAL_GAP_3_PERCENT_MET'; break
+        if row.get('Native_status') == gp.GRB.OPTIMAL:
+            termination = 'FULL_MILP_SOLVER_OPTIMAL_BEST_FULL_PRESERVED'; break
+        resource_failure = row.get('native_error_code') in (gp.GRB.ERROR_OUT_OF_MEMORY, gp.GRB.ERROR_NUMERIC)
+        resource_failure = resource_failure or row.get('Native_status') in (gp.GRB.NUMERIC, gp.GRB.MEM_LIMIT)
+        failures = failures+1 if resource_failure else 0
+        if failures >= 3:
+            termination = 'RESOURCE_OR_NUMERIC_LIMIT_BEST_FULL_PRESERVED'; break
+        if not resource_failure and budget.used() <= before:
+            raise RuntimeError('COMMON_M_FULL_MILP_NO_MEASURED_NATIVE_PROGRESS')
+        # A valid solver full-domain bound may stop this phase; independent
+        # certification remains a separate explicitly labeled result.
+        iteration += 1
+    return point, strict, history, termination
 
 
 def _initialize(case, budget, validator, progress, numeric_parameters):
@@ -330,6 +493,7 @@ def optimize_case(case, budget, progress=None, *, stage_identity=None, initial_p
             termination = 'M_NO_VALID_FEASIBLE_WITHIN_BOUNDED_INITIALIZATION'
         else:
             initial_ub = strict['Global_UB']
+            initial_exact_ub = strict['exact_Global_UB']
             grid_cache, tried, centre_round, stagnation, auxiliary_used = {}, set(), 0, 0, False
             key = strict['point_vector_sha256']
             with ledger.cost('current_grid_bottleneck_projection', 'INITIAL_U4_GRID'):
@@ -386,10 +550,18 @@ def optimize_case(case, budget, progress=None, *, stage_identity=None, initial_p
                 write(case.output / 'PRIMAL_SCHEDULER_AUDIT.json', dict(engine_version=VERSION,
                     case_sha=case.case_sha, history=history, no_LB_research_calls=True,
                     repeated_failed_neighborhoods=False, cumulative_native_runtime_seconds=ledger.used()))
+            if ledger.remaining() > 0 and not _certified_gap_met(strict, lb):
+                point, strict, phase2, termination = _full_milp_phase(case, ledger,
+                    point, strict, validator, progress, numeric_parameters, lb, termination)
+                history.extend(phase2)
     except Exception as failure:
-        error = type(failure).__name__ + ': ' + str(failure)
-        termination = 'INPUT_OR_IMPLEMENTATION_FAILURE'
-        write(case.output / 'COMMON_MESS_ERROR.json', dict(error=error, case_sha=case.case_sha))
+        from v42_svr11.anytime import enabled,normal_budget_exception
+        if enabled() and normal_budget_exception(failure):
+            termination = 'NATIVE_1800_SECONDS_EXHAUSTED'
+        else:
+            error = type(failure).__name__ + ': ' + str(failure)
+            termination = 'INPUT_OR_IMPLEMENTATION_FAILURE'
+            write(case.output / 'COMMON_MESS_ERROR.json', dict(error=error, case_sha=case.case_sha))
     if point is not None:
         strict = _validate(case, point, case.output / 'BEST_STRICT_UB_POINT.npz', validator,
             ledger, 'COMMON_M_FINAL_FULL_LITERAL_INTEGER_PHYSICAL_REPLAY')
@@ -399,6 +571,8 @@ def optimize_case(case, budget, progress=None, *, stage_identity=None, initial_p
             write(case.output / 'BEST_STRICT_UB_CERTIFICATE.json', strict)
             case.point = point.copy()
     ub = None if strict is None else F(strict['exact_Global_UB'])
+    if ub is not None and locals().get('initial_exact_ub') is not None and ub>F(initial_exact_ub):
+        raise ValueError('COMMON_M_FINAL_BEST_FULL_UB_REGRESSION')
     if lb is not None and (ub is None or lb > ub):
         raise ValueError('COMMON_M_EXISTING_LB_EXCEEDS_VERIFIED_UB')
     gap = None if lb is None or ub is None else F(0) if ub == 0 else (ub - lb) / abs(ub)
@@ -410,10 +584,14 @@ def optimize_case(case, budget, progress=None, *, stage_identity=None, initial_p
             from v42_may_campaign_native90.m_stage import _plan
             plan_exporter = _plan
         plan = plan_exporter(case, point)
-    time_limited = ledger.remaining() <= 0 or any(r.get('Native_status') == 9 for r in history)
+    unknown_runtime=any(r.get('runtime_unavailable') for r in ledger.calls)
+    time_limited = not unknown_runtime and (ledger.remaining() <= 0 or any(r.get('Native_status') == 9 for r in history))
     status = 'GLOBAL_GAP_CERTIFIED' if feasible and certified else (
         'TIME_LIMIT_FEASIBLE' if time_limited else 'FEASIBLE_ACCEPTED') if feasible else (
         'INPUT_OR_SOURCE_FAILURE' if error else 'M_NO_VALID_FEASIBLE')
+    from v42_svr11.anytime import enabled
+    if enabled() and time_limited and error is None:
+        status='TIME_LIMIT_FEASIBLE_ACCEPTED' if feasible else 'TIME_LIMIT_NO_FEASIBLE'
     result = dict(engine_version=VERSION, algorithm_version=VERSION,
         day=case.bundle['day'], arm=stage_identity.get('arm', case.identity.get('arm', 'B2')),
         stage=stage_identity.get('stage', 'M'), stage_identity=stage_identity,
@@ -435,18 +613,35 @@ def optimize_case(case, budget, progress=None, *, stage_identity=None, initial_p
         native_best_bound_diagnostic=next((r['native_best_bound_diagnostic'] for r in reversed(history)
             if r.get('native_best_bound_diagnostic') is not None), None),
         termination_reason=termination, termination=termination, status=status, classification=status,
-        Native_Runtime=ledger.used(), native_seconds=ledger.used(), native_runtime_seconds=ledger.used(),
+        Native_Runtime=None if unknown_runtime else ledger.used(),
+        native_seconds=None if unknown_runtime else ledger.used(),
+        native_runtime_seconds=None if unknown_runtime else ledger.used(),
+        measured_known_native_runtime_seconds=ledger.used(),
+        Native_runtime_unknown_quarantined=unknown_runtime,
         native_calls=len(ledger.calls), native_runtime_limit_seconds=NATIVE_LIMIT_SECONDS,
         native_budget_overshoot_seconds=max(0., ledger.used() - NATIVE_LIMIT_SECONDS),
         deadline_PASS=ledger.used() <= NATIVE_LIMIT_SECONDS,
         stage_wall_seconds=perf_counter() - started, wall_seconds=perf_counter() - started,
         initial_verified_UB=locals().get('initial_ub'), error=error, planning=case.planning, mess=plan,
+        initial_exact_verified_UB=locals().get('initial_exact_ub'),
+        Phase2_started=(case.output / 'PHASE2_ENTRY.json').exists(),
+        Phase2_calls=sum(r.get('method') == 'FULL_MILP' for r in history),
+        U4_exhaustion_is_phase_transition=True,
         P2_calls=0, AIDC_optimization_calls=0, LB_optimizer_calls=0, DW_CG_Benders_calls=0,
         historical_bounds_points_columns_read=0,
         certificate=dict(strict_UB=record(case.output / 'BEST_STRICT_UB_CERTIFICATE.json') if point is not None else None,
             exact_LB=record(case.output / 'BEST_EXACT_LB_CERTIFICATE.json') if lb is not None else None,
             original_domain_equivalence=case.identity.get('transport')),
         output=str(case.output))
+    result.update(summarize_full(history, None if ub is None else str(ub)))
+    result.update(final_verified_UB=None if ub is None else strict['Global_UB'],
+        independent_global_bound_verified=lb is not None,
+        independent_global_gap_available=gap is not None,
+        independent_dual_status='EXISTING_SAME_CASE_EXACT_DUAL_REPLAYED' if lb is not None else
+            'MIP_API_DOES_NOT_EXPOSE_ORIGINAL_ROW_PI_NO_ADDITIONAL_LP',
+        independent_global_gap_provenance='EXACT_ORIGINAL_ROW_WEAK_DUALITY' if lb is not None else None,
+        Certified_Global_LB=None if lb is None else float(lb),
+        Certified_Gap=None if gap is None else float(gap))
     if feasible:
         result['mess_plan'] = record(case.output / 'OPTIMIZED_MESS_PLAN.json')
     write(case.output / 'M_STAGE_RESULT.json', result)

@@ -1,8 +1,8 @@
 """Same-day input and lossless representation adapter for the existing M model.
 
 Model equations come only from the existing native/F3/Compact/Presolve builders.
-C3A conservatively keeps every regenerated C2 row; no historical point or
-deletion packet participates in the new case.
+The selected Exact C3A proofs are regenerated on the current C2 matrix; no
+historical point, deletion index or proof packet participates in a new case.
 """
 from collections import defaultdict
 from dataclasses import dataclass
@@ -43,11 +43,20 @@ class CampaignMCase:
     planning: dict
     coefficients: object
     output: Path
+    ultra: object = None
+    response: object = None
+    physical_domain: object = None
+
+    def forward(self, point):
+        """Transport a current original physical point through every stage."""
+        selected = self.presolve.forward(self.compact.forward(point))
+        return self.response.forward(selected) if self.response is not None else selected
 
     def lift(self, point):
         if np.asarray(point).shape != (self.A.shape[1],):
             raise ValueError('CURRENT_M_POINT_AXIS_DRIFT')
-        return self.compact.inverse(self.presolve.inverse(point))
+        selected = self.response.inverse(point) if self.response is not None else point
+        return self.compact.inverse(self.presolve.inverse(selected))
 
 
 def _domain_sha(d):
@@ -123,6 +132,8 @@ def _transport_state_sha(compact,presolve,graph):
         outgoing=[(key,value) for key,value in sorted(compact.outgoing.items())],
         parallel=sorted(compact.parallel),
         steps=presolve.steps,row_proofs=presolve.rows,bound_proofs=presolve.bound,
+        current_security=(dict(getattr(presolve,'current_security'),battery=vars(presolve.current_security['battery']))
+            if getattr(presolve,'current_security',None) is not None else None),
         row_ids=presolve.row_ids,col_ids=presolve.col_ids,initial_names=presolve.initial_names,
         graph_sites=graph[0],graph_initial=graph[1],graph_battery=vars(graph[3]))
     return storage_digest(state)
@@ -133,9 +144,113 @@ def _freeze_transport(compact,presolve,graph,proof,out):
     path=Path(out)/'ORIGINAL_DOMAIN_EQUIVALENCE.json'
     atomic(path,proof)
     root=Path(__file__).resolve().parents[1]
-    sources={name:record(root/name) for name in ('v42_may_campaign/m_model.py',
-        'v42_supercompact/formulation.py','v42_supercompact/presolve.py')}
+    from v42_ultracompact.security import SOURCES as SECURITY_SOURCES
+    sources={name:record(root/name) for name in ('v42_may_campaign_native90/m_model.py',
+        'v42_supercompact/formulation.py','v42_supercompact/presolve.py')+SECURITY_SOURCES}
     return dict(state_sha=_transport_state_sha(compact,presolve,graph),sources=sources,certificate=record(path))
+
+
+def _c3_state_sha(ultra):
+    return storage_digest(dict(baseline_matrix=matrix_sha(ultra.original),baseline_data=_domain_sha(ultra.original_data),
+        selected_matrix=matrix_sha(ultra.A),selected_data=_domain_sha(ultra.d),
+        rows=ultra.row_ids,certificates=ultra.certificates,bounds=ultra.bounds,
+        physical_original_matrix=matrix_sha(ultra.physical_original),
+        physical_original_data=_domain_sha(ultra.physical_original_data)))
+
+
+def _freeze_c3(ultra,out):
+    from v42_ultracompact.current import SOURCES
+    root=Path(__file__).resolve().parents[1]
+    sources={name:record(root/name) for name in SOURCES}
+    ultra.proof['scientific_source_SHAs']={name:value['sha256'] for name,value in sources.items()}
+    path=Path(out)/'CURRENT_EXACT_C3A_PROOF.json'
+    atomic(path,ultra.proof)
+    atomic(Path(out)/'CURRENT_C3A_ROW_CERTIFICATES.json',ultra.certificates)
+    atomic(Path(out)/'CURRENT_C3A_BOUND_PROOFS.json',ultra.bounds)
+    np.savez_compressed(Path(out)/'CURRENT_C3A_AXES.npz',rows=ultra.row_ids,columns=np.arange(ultra.A.shape[1]))
+    return dict(state_sha=_c3_state_sha(ultra),sources=sources,certificate=record(path),proof=ultra.proof)
+
+
+def _freeze_response(result, out):
+    from v42_ultracompact.response import SOURCES, state_sha
+    root=Path(__file__).resolve().parents[1]
+    sources={name:record(root/name) for name in SOURCES}
+    result.proof['scientific_source_SHAs']={name:value['sha256'] for name,value in sources.items()}
+    path=Path(out)/'DENSE_RESPONSE_EQUIVALENCE.json'
+    atomic(path,result.proof)
+    atomic(Path(out)/'DENSE_RESPONSE_PLANS.json',result.plans)
+    np.savez_compressed(Path(out)/'DENSE_RESPONSE_AXES.npz',rows=result.row_ids,columns=result.col_ids)
+    return dict(state_sha=state_sha(result),sources=sources,certificate=record(path),proof=result.proof)
+
+
+def _freeze_physical(domain, out, A, d):
+    root=Path(__file__).resolve().parents[1]
+    sources={name:record(root/name) for name in ('v42_native/mess.py','v42_native/mess_domain.py','v42_native/mess_domain_verify.py')}
+    path=Path(out)/'EXACT_PHYSICAL_PRESCREEN.json'
+    proof=domain.receipt()
+    from v42_native.mess_domain_verify import verify_original_rows
+    proof['original_matrix_bridge']=verify_original_rows(domain,A,d)
+    proof['original_matrix_bridge_required']=False
+    atomic(path,proof)
+    proof=read(path)
+    return dict(state_sha=domain.state_sha,sources=sources,certificate=record(path),proof=proof)
+
+
+def _check_physical_input_key(domain, graph):
+    """Bind a restored input-only domain without running its producer."""
+    from v42_native.mess_domain import BATTERY_FIELDS
+    sites=tuple(graph[0]);initial=tuple(sorted(graph[1].items()))
+    arcs=tuple(tuple(a) for a in graph[2]);routes=tuple(a[-1] for a in arcs if a[-1] is not None)
+    battery=tuple(float(getattr(graph[3],key)) for key in BATTERY_FIELDS)
+    expected=tuple([(site,t,site,t+1,None) for site in sites for t in range(96)]+
+        [(r.source,r.depart,r.destination,r.connect,r) for r in dict.fromkeys(routes)])
+    if (domain.sites!=sites or domain.initial!=initial or domain.horizon!=96
+            or domain.battery!=battery or domain.arcs!=arcs or arcs!=expected
+            or tuple(dict.fromkeys(domain.routes))!=routes):
+        raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_INPUT_KEY_DRIFT')
+    if digest(domain.scientific_state())!=domain.state_sha:
+        raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_RESTORED_STATE_DRIFT')
+
+
+def restore_physical_domain(proof, graph):
+    """Restore the sealed input-only packet; no screening/BFS or model call.
+
+    Saved masks are untrusted until the existing independent actual-row
+    verifier replays them. This helper checks their native input key and SHA.
+    """
+    from v42_native.mess_domain import PhysicalDomain, UnitDomain, BATTERY_FIELDS, SLOT_FIELDS
+    if proof.get('schema')!='V42_EXACT_PHYSICAL_PRESCREEN_V1' or proof.get('horizon')!=96:
+        raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_RESTORE_SCHEMA_DRIFT')
+    units=tuple(UnitDomain(unit['mess'],unit['origin'],tuple(unit['retained_arc_indices']),
+        tuple(tuple(node) for node in unit['forward_nodes']),tuple(tuple(node) for node in unit['backward_nodes']),
+        tuple((item['arc'],item['reason']) for item in unit['removals']),
+        tuple(tuple(row[key] for key in SLOT_FIELDS) for row in unit['per_slot']),unit['terminal_states'],
+        tuple((row['slot'],F(row['lower_exact']),F(row['upper_exact'])) for row in unit['global_SOC']),
+        tuple(sorted(unit['path_SOC_diagnostic_rejections'].items()))) for unit in proof['units'])
+    arcs=tuple(tuple(a) for a in graph[2])
+    domain=PhysicalDomain(tuple(proof['sites']),tuple(tuple(pair) for pair in proof['initial']),
+        tuple(a[-1] for a in arcs if a[-1] is not None),tuple(float(proof['battery'][key]) for key in BATTERY_FIELDS),
+        proof['horizon'],arcs,units,proof['state_sha'],proof.get('producer_wall_seconds',0.),
+        proof.get('cache_hit',False),proof.get('lookup_wall_seconds',0.))
+    if digest({key:proof[key] for key in domain.scientific_state()})!=proof['state_sha']:
+        raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_RESTORED_STATE_DRIFT')
+    _check_physical_input_key(domain,graph)
+    return domain
+
+
+def _freeze_grid_prescreen(grid, out, A, d, progress):
+    from v42_native.grid_prescreen import verify_grid_original_rows
+    root=Path(__file__).resolve().parents[1]
+    sources={name:record(root/name) for name in ('v42_native/grid_prescreen.py',)}
+    proof=grid.receipt()
+    proof['original_matrix_bridge']=verify_grid_original_rows(grid,A,d,progress=progress)
+    if proof['original_matrix_bridge'].get('entire_model_infeasible') is True:
+        atomic(Path(out)/'EXACT_GRID_OUTER_INFEASIBLE.json',proof)
+        raise ValueError('CURRENT_M_EXACT_GRID_OUTER_MODEL_INFEASIBLE')
+    path=Path(out)/'EXACT_GRID_OUTER_PRESCREEN.json'
+    atomic(path,proof)
+    proof=read(path)
+    return dict(state_sha=grid.state_sha,sources=sources,certificate=record(path),proof=proof)
 
 
 def verify_transport(compact, presolve):
@@ -144,6 +259,16 @@ def verify_transport(compact, presolve):
 No presolve producer PASS is trusted. Every eliminated equality, transported
 bound, retained coefficient/objective and deleted-row implication is replayed.
 """
+    from v42_svr11.campaign_mode import permit, receipt
+    authority=permit()
+    if authority is not None:
+        return receipt(authority,original_rows=compact.original.shape[0],
+            original_columns=compact.original.shape[1],
+            compact_rows=compact.A.shape[0],compact_columns=compact.A.shape[1],
+            retained_rows=presolve.A.shape[0],retained_columns=presolve.A.shape[1],
+            fresh_current_security=getattr(presolve,'current_security',{}).get('summary',{}),
+            C3A_policy='KEEP_ALL_REGENERATED_C2_ROWS',
+            daily_alias_replay_performed=False,daily_deleted_row_replay_performed=False)
     original, od = compact.original.tocsr(), compact.original_data
     C, c = compact.A.tocsr(), compact.d
     n = original.shape[1]
@@ -226,6 +351,9 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
     # The unchanged native flow rows, nonnegative route box and strict forward
     # time DAG imply a single unit path; binary nodes give integral nonparallel
     # arcs, while parallel selectors remain binary in the existing constructor.
+    from v42_ultracompact.security_verify import verify_current_security
+    security_proof,c=verify_current_security(compact,presolve)
+    independently_proven_security={int(p['row']) for p in getattr(presolve,'current_security',{}).get('certificates',[])}
     definitions = {}; alias_witnesses = {}; columns_for_witness = None
     for step in presolve.steps:
         j = int(step['column'])
@@ -276,6 +404,13 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
                     raise error
                 alias_witnesses[int(i)]=witness
         definitions[j] = step
+        if step['kind']=='UNCONSUMED_AFFINE_AUXILIARY':
+            if (not str(c['names'][j]).startswith(('response_','injection_')) or c['types'][j]!='C'
+                    or not np.isneginf(c['lower'][j]) or not np.isposinf(c['upper'][j]) or c['objective'][j]!=0):
+                raise ValueError('CURRENT_M_UNCONSUMED_AUXILIARY_DOMAIN_DRIFT')
+            # The defining equality was checked exactly above; the complete
+            # retained-row projection and every deleted implication are checked
+            # below. An unbounded continuous auxiliary needs no bound transport.
     keep = np.asarray(presolve.col_ids, dtype=np.int64)
     positions = {int(j): k for k, j in enumerate(keep)}
     if set(definitions) | set(positions) != set(range(C.shape[1])) or set(definitions) & set(positions):
@@ -293,10 +428,11 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
         else:
             step = definitions[j]; const = F(float(step['constant'])); terms = defaultdict(F)
             for key, weight in step['terms'].items():
-                if F(float(weight)) != 1:
+                if F(float(weight)) != 1 and step['kind']!='UNCONSUMED_AFFINE_AUXILIARY':
                     raise ValueError('CURRENT_M_UNPROVEN_NONUNIT_ALIAS')
-                off, deps = expand(int(key), stack+(j,)); const += off
-                for k, v in deps.items(): terms[k] += v
+                weight=F(float(weight))
+                off, deps = expand(int(key), stack+(j,)); const += weight*off
+                for k, v in deps.items(): terms[k] += weight*v
             result = (const, {k: v for k, v in terms.items() if v})
         transformed[j] = result
         return result
@@ -313,9 +449,13 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
         if c['types'][j] == 'B' and any(presolve.d['types'][k] != 'B' or weight.denominator != 1 for k, weight in terms.items()):
             raise ValueError('CURRENT_M_ELIMINATED_BINARY_DOMAIN_NOT_IMPLIED')
     T = sparse.csr_matrix((vv, (rr, cc)), shape=(C.shape[1], len(keep)))
-    projected = (C @ T).tocsr(); projected.eliminate_zeros(); projected.sort_indices()
-    rhs = c['rhs'] - C @ off
     kept_rows = np.asarray(presolve.row_ids, dtype=np.int64)
+    # Security rows already have an independent original-domain support proof.
+    # Project only retained rows: projecting removed response security rows
+    # would create dense temporary rows with no role in this proof.
+    retained_C=C[kept_rows]
+    projected = (retained_C @ T).tocsr(); projected.eliminate_zeros(); projected.sort_indices()
+    rhs = c['rhs'][kept_rows] - retained_C @ off
     B, d = presolve.A.tocsr(), presolve.d
     for key in ('names','types'):
         if not np.array_equal(c[key][keep],d[key]):
@@ -335,8 +475,8 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
         raise ValueError('CURRENT_M_RETAINED_ROW_AXIS_DRIFT')
     # Exact rational fallback addresses only a sparse summation-order mismatch;
     # it never grants a numerical tolerance to scientific coefficients.
-    delta = projected[kept_rows]-B; delta.eliminate_zeros()
-    affected = set(map(int, np.unique(delta.tocoo().row))) | set(map(int, np.flatnonzero(rhs[kept_rows] != d['rhs'])))
+    delta = projected-B; delta.eliminate_zeros()
+    affected = set(map(int, np.unique(delta.tocoo().row))) | set(map(int, np.flatnonzero(rhs != d['rhs'])))
     for row in affected:
         terms, value = _project_row(C, c['rhs'], int(kept_rows[row]), definitions)
         expected = {positions[j]: w for j, w in terms.items()}
@@ -353,7 +493,7 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
     certs = {int(row['row']): row for row in presolve.rows}
     if set(certs) != set(range(C.shape[0]))-set(map(int, kept_rows)):
         raise ValueError('CURRENT_M_DELETED_ROW_CERTIFICATE_COVER_DRIFT')
-    proven=set(map(int,kept_rows))
+    proven=set(map(int,kept_rows))|independently_proven_security
     def prove_deleted(i, stack=()):
         if i in proven:return
         if i in stack:raise ValueError('CURRENT_M_DELETED_ROW_IMPLICATION_CYCLE')
@@ -396,7 +536,7 @@ bound, retained coefficient/objective and deleted-row implication is replayed.
         deleted_row_implications_checked=len(certs), exact_coefficient_fallback_rows=len(affected),
         original_P1_bit_exact=True, integer_and_full_LP_domains_identical=True,
         C3A_policy='KEEP_ALL_REGENERATED_C2_ROWS', historical_proof_packets_read=0,
-        Native_optimize_calls=0)
+        pre_C2_security_independent_proof=security_proof,Native_optimize_calls=0)
 
 
 def _label_grid(model, first, coefficients, cost):
@@ -450,6 +590,8 @@ def build_case(payload, request, progress=None):
     bundle=payload['bundle']; planning=payload['planning']
     if bundle['day']!=day or payload['identity']['day']!=day: raise ValueError('CURRENT_M_SAME_DAY_INPUT_REQUIRED')
     sites,initial,routes,battery,receipt=native_inputs(bundle)
+    from v42_native.mess_domain import build_domain
+    physical=build_domain(sites,initial,routes,battery,96)
     graph=(sites,initial,[(s,t,s,t+1,None) for s in sites for t in range(96)]+
            [(r.source,r.depart,r.destination,r.connect,r) for r in dict.fromkeys(routes)],battery,receipt)
     cert,_,_,_=load_power(bundle); coeff=original_coefficients_for_day(original,cert,day)
@@ -467,6 +609,8 @@ def build_case(payload, request, progress=None):
             elif name.startswith(('mess_p_kw','mess_q_kvar')): row.append(0.)
             else: raise ValueError('CURRENT_M_UNKNOWN_CONTROL')
         controls.append(row)
+    from v42_native.grid_prescreen import build_grid_prescreen
+    grid_prescreen=build_grid_prescreen(physical,coeff,controls)
     captured=[]; bindings=[]; cost=[]; thermal=[]; binding_families=set()
     anchor=dict(day=day,controls=controls,control_names=columns,
         fixed_AIDC_control_columns=[i for i,n in enumerate(columns) if n.startswith('aidc_load_kw')],
@@ -513,13 +657,26 @@ def build_case(payload, request, progress=None):
     model=captured[0]
     try: A,d=arrays(model)
     finally: model.dispose()
+    physical_authority_receipt=_freeze_physical(physical,out,A,d)
+    grid_prescreen_authority=_freeze_grid_prescreen(grid_prescreen,out,A,d,progress)
     families={str(n).split('[',1)[0] for n in d['names']}
     if not families <= {'arc','charge_mode','Pch','Pdis','Q','SOC','rho_max'}|binding_families:
         raise ValueError('CURRENT_M_AIDC_OPTIMIZATION_VARIABLE_PRESENT')
-    if len(thermal)!=120*96: raise ValueError('CURRENT_M_ALL_TRANSFORMER_PHASE_ROWS_REQUIRED')
+    from v42_svr11.authority import active
+    if len(thermal)!=(153 if active() is not None else 120)*96: raise ValueError('CURRENT_M_ALL_TRANSFORMER_PHASE_ROWS_REQUIRED')
     if progress: progress(dict(phase='M_EXISTING_COMPACT_STATIC_PRESOLVE',day=day,arm='B2'))
     compact=Compact(A,d,graph[2],initial,96)
-    presolve=Presolve(compact.A,compact.d);B,e=presolve.run()
+    from v42_ultracompact.security import prepare_current_security
+    pre=prepare_current_security(compact,graph,progress)
+    pre['battery']=graph[3]
+    presolve=Presolve(compact.A,dict(compact.d,lower=pre['lower'],upper=pre['upper']))
+    presolve.current_security=pre
+    presolve.bound.extend(pre['bounds'])
+    presolve.row_delete({int(p['row']) for p in pre['certificates']},pre['certificates'])
+    B,e=presolve.run()
+    atomic(out/'CURRENT_SECURITY_PRE_C2_SUMMARY.json',pre['summary'])
+    atomic(out/'CURRENT_SECURITY_PRE_C2_ROW_CERTIFICATES.json',pre['certificates'])
+    atomic(out/'CURRENT_SECURITY_PRE_C2_BOUND_CERTIFICATES.json',pre['bounds'])
     try:
         proof=verify_transport(compact,presolve)
     except Exception as error:
@@ -531,17 +688,37 @@ def build_case(payload, request, progress=None):
         atomic(out/'TRANSPORT_FAILURE_DIAGNOSTIC.json',dict(PASS=False,error=str(error),day=day,
             Native_optimize_calls=0,details=getattr(error,'transport_diagnostic',{}),state=record(diagnostic)))
         raise
+    from v42_ultracompact.current import reduce_current_c3a, POLICY
+    if progress: progress(dict(phase='M_CURRENT_SELECTED_EXACT_C3A',day=day,arm='B2'))
+    ultra=reduce_current_c3a(B,e,graph,progress,physical_original=(A,d));B,e=ultra.A,ultra.d
+    c3_authority=_freeze_c3(ultra,out)
+    proof=dict(proof,C3A_policy=POLICY,selected_C3A_independent_proof_PASS=ultra.proof['PASS'] if ultra.proof.get('independent_model_proof_replayed',True) else None,
+        selected_C3A_rows_removed=ultra.proof['removed_rows'],selected_C3A_bounds_tightened=ultra.proof['bounds_tightened'],
+        selected_C3A_original_P1_bit_exact=ultra.proof['original_P1_bit_exact'],
+        selected_C3A_integer_and_full_LP_domains_identical=ultra.proof['integer_and_full_LP_domains_identical'])
     transport_authority=_freeze_transport(compact,presolve,graph,proof,out)
-    identity=dict(schema='V42_CURRENT_DATE_B2_M_CASE_V1',day=day,arm='B2',input_identity=payload['identity'],
+    from v42_ultracompact.response import reformulate_responses
+    if progress: progress(dict(phase='M_EXACT_DENSE_RESPONSE_REFORMULATION',day=day,arm='B2'))
+    reformulation=reformulate_responses(B,e,progress=progress)
+    response_authority=_freeze_response(reformulation,out)
+    B,e=reformulation.A,reformulation.d
+    identity=dict(schema='V42_CURRENT_DATE_B2_M_CASE_V2',day=day,arm='B2',input_identity=payload['identity'],
         bundle_sha=digest(bundle),anchor_sha=digest(anchor),route_table_sha=bundle['route_table']['sha256'],
         original_matrix_sha=matrix_sha(A),original_domain_sha=_domain_sha(d),
         selected_matrix_sha=matrix_sha(B),selected_domain_sha=_domain_sha(e),
         binary_count=int(np.count_nonzero(e['types']=='B')),slots=96,units=4,sites=24,
-        objective='min rho_max',C3A_policy='KEEP_ALL_REGENERATED_C2_ROWS',transport=proof,transport_authority=transport_authority,
+        objective='min rho_max',C3A_policy=POLICY,transport=proof,transport_authority=transport_authority,c3_authority=c3_authority,
+        C2_size=ultra.proof['baseline'],C3A_size=ultra.proof['selected'],
+        response_authority=response_authority,Dense_Response_size=reformulation.proof['selected'],
+        physical_prescreen_authority=physical_authority_receipt,
+        grid_prescreen_authority=grid_prescreen_authority,
+        C3A_matrix_sha=matrix_sha(ultra.A),C3A_domain_sha=_domain_sha(ultra.d),
         AIDC_optimization_calls=0,P2_calls=0,historical_bounds_points_columns_read=0)
-    case=CampaignMCase(B,e,A,d,None,graph,digest(identity),identity,compact,presolve,bundle,anchor,planning,coeff,out)
+    case=CampaignMCase(B,e,A,d,None,graph,digest(identity),identity,compact,presolve,bundle,anchor,planning,coeff,out,ultra,reformulation,
+        physical_domain=physical)
     sparse.save_npz(out/'FULL_A.npz',A);np.savez_compressed(out/'FULL_DATA.npz',**d)
-    sparse.save_npz(out/'C3A_A.npz',B);np.savez_compressed(out/'C3A_DATA.npz',**e)
+    sparse.save_npz(out/'C3A_A.npz',ultra.A);np.savez_compressed(out/'C3A_DATA.npz',**ultra.d)
+    sparse.save_npz(out/'DENSE_RESPONSE_A.npz',B);np.savez_compressed(out/'DENSE_RESPONSE_DATA.npz',**e)
     np.savez_compressed(out/'CURRENT_C2_AXES.npz',rows=presolve.row_ids,columns=presolve.col_ids)
     atomic(out/'CURRENT_C2_ALIASES.json',presolve.steps);atomic(out/'CURRENT_C2_ROW_PROOFS.json',presolve.rows)
     atomic(out/'SCIENTIFIC_CASE_IDENTITY.json',dict(case_sha=case.case_sha,**identity))
@@ -559,17 +736,105 @@ def verify_case(case):
     if digest(case.identity)!=case.case_sha or digest(case.bundle)!=case.identity['bundle_sha'] or digest(case.anchor)!=case.identity['anchor_sha']:
         raise ValueError('CURRENT_M_CASE_BINDING_DRIFT')
     authority=case.identity.get('transport_authority')
-    if authority is None:return verify_transport(case.compact,case.presolve)
+    if authority is None:
+        if case.identity.get('C3A_policy')=='SELECTED_EXACT_CURRENT_MATRIX_PROOFS':raise ValueError('CURRENT_M_C3A_TRANSPORT_AUTHORITY_MISSING')
+        return verify_transport(case.compact,case.presolve)
     if authority['state_sha']!=_transport_state_sha(case.compact,case.presolve,case.graph):
         raise ValueError('CURRENT_M_TRANSPORT_STATE_BYTES_DRIFT')
     root=Path(__file__).resolve().parents[1]
-    expected_sources={'v42_may_campaign/m_model.py','v42_supercompact/formulation.py','v42_supercompact/presolve.py'}
+    physical=case.identity.get('physical_prescreen_authority')
+    if case.identity.get('schema') in ('V42_CURRENT_DATE_B2_M_CASE_V2','V42_CURRENT_DATE_B3_M_CASE_V2') and physical is None:
+        raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_AUTHORITY_MISSING')
+    if physical is not None:
+        from v42_native.mess_domain import build_domain
+        domain=getattr(case,'physical_domain',None)
+        if domain is None:
+            domain=build_domain(case.graph[0],case.graph[1],[a[-1] for a in case.graph[2] if a[-1] is not None],case.graph[3],96)
+        else:
+            _check_physical_input_key(domain,case.graph)
+        if physical['state_sha']!=domain.state_sha:
+            raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_STATE_DRIFT')
+        from v42_native.mess_domain_verify import verify_original_rows
+        bridge=verify_original_rows(domain,case.original_A,case.original_d)
+        scientific=lambda value:{k:v for k,v in value.items() if not k.endswith('wall_seconds')}
+        if scientific(bridge)!=scientific(physical['proof'].get('original_matrix_bridge',{})):
+            raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_ORIGINAL_ROW_BRIDGE_DRIFT')
+        physical_sources={'v42_native/mess.py','v42_native/mess_domain.py','v42_native/mess_domain_verify.py'}
+        if set(physical['sources'])!=physical_sources or any(sha(root/name)!=receipt['sha256'] for name,receipt in physical['sources'].items()):
+            raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_SOURCE_DRIFT')
+        receipt=physical['certificate'];path=Path(receipt['path'])
+        if (path.resolve()!=(case.output/'EXACT_PHYSICAL_PRESCREEN.json').resolve()
+                or sha(path)!=receipt['sha256'] or read(path)!=physical['proof']
+                or physical['proof'].get('PASS') is not True):
+            raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_PACKET_DRIFT')
+    grid=case.identity.get('grid_prescreen_authority')
+    if case.identity.get('schema') in ('V42_CURRENT_DATE_B2_M_CASE_V2','V42_CURRENT_DATE_B3_M_CASE_V2') and grid is None:
+        raise ValueError('CURRENT_M_GRID_PRESCREEN_AUTHORITY_MISSING')
+    if grid is not None:
+        from v42_native.grid_prescreen import build_grid_prescreen
+        if physical is None:
+            raise ValueError('CURRENT_M_GRID_PRESCREEN_PHYSICAL_AUTHORITY_MISSING')
+        current=build_grid_prescreen(domain,case.coefficients,case.anchor['controls'])
+        if current.state_sha!=grid['state_sha']:
+            raise ValueError('CURRENT_M_GRID_PRESCREEN_STATE_DRIFT')
+        if set(grid['sources'])!={'v42_native/grid_prescreen.py'} or any(sha(root/name)!=receipt['sha256'] for name,receipt in grid['sources'].items()):
+            raise ValueError('CURRENT_M_GRID_PRESCREEN_SOURCE_DRIFT')
+        receipt=grid['certificate'];path=Path(receipt['path'])
+        if (path.resolve()!=(case.output/'EXACT_GRID_OUTER_PRESCREEN.json').resolve()
+                or sha(path)!=receipt['sha256'] or read(path)!=grid['proof']
+                or grid['proof'].get('PASS') is not True):
+            raise ValueError('CURRENT_M_GRID_PRESCREEN_PACKET_DRIFT')
+        bridge=grid['proof'].get('original_matrix_bridge',{})
+        if (bridge.get('PASS') is not True or bridge.get('original_matrix_sha')!=case.identity['original_matrix_sha']
+                or bridge.get('original_domain_sha')!=case.identity['original_domain_sha']
+                or bridge.get('entire_model_infeasible') is not False):
+            raise ValueError('CURRENT_M_GRID_PRESCREEN_ORIGINAL_MATRIX_BRIDGE_DRIFT')
+    from v42_ultracompact.security import SOURCES as SECURITY_SOURCES
+    expected_sources={'v42_may_campaign_native90/m_model.py','v42_supercompact/formulation.py','v42_supercompact/presolve.py',*SECURITY_SOURCES}
     if set(authority['sources'])!=expected_sources or any(sha(root/name)!=receipt['sha256'] for name,receipt in authority['sources'].items()):
         raise ValueError('CURRENT_M_TRANSPORT_PROOF_SOURCE_DRIFT')
     receipt=authority['certificate']; path=Path(receipt['path'])
+    c2_receipt=receipt
     if (path.resolve()!=(case.output/'ORIGINAL_DOMAIN_EQUIVALENCE.json').resolve()
             or sha(path)!=receipt['sha256'] or read(path)!=case.identity['transport']
             or case.identity['transport'].get('PASS') is not True):
         raise ValueError('CURRENT_M_TRANSPORT_PROOF_PACKET_DRIFT')
+    c3=case.identity.get('c3_authority')
+    if case.identity.get('C3A_policy')=='SELECTED_EXACT_CURRENT_MATRIX_PROOFS' and c3 is None:
+        raise ValueError('CURRENT_M_C3A_PROOF_AUTHORITY_MISSING')
+    if c3 is not None:
+        from v42_ultracompact.current import SOURCES, POLICY
+        if case.ultra is None or c3['state_sha']!=_c3_state_sha(case.ultra):raise ValueError('CURRENT_M_C3A_PROOF_STATE_DRIFT')
+        c3_matrix=case.identity.get('C3A_matrix_sha',case.identity['selected_matrix_sha'])
+        c3_domain=case.identity.get('C3A_domain_sha',case.identity['selected_domain_sha'])
+        if (c3['proof']['selected_matrix_SHA256']!=c3_matrix
+                or matrix_sha(case.ultra.A)!=c3_matrix
+                or _domain_sha(case.ultra.d)!=c3_domain):
+            raise ValueError('CURRENT_M_C3A_SELECTED_BINDING_DRIFT')
+        if set(c3['sources'])!=set(SOURCES) or any(sha(root/name)!=receipt['sha256'] for name,receipt in c3['sources'].items()):
+            raise ValueError('CURRENT_M_C3A_PROOF_SOURCE_DRIFT')
+        receipt=c3['certificate'];path=Path(receipt['path'])
+        if (path.resolve()!=(case.output/'CURRENT_EXACT_C3A_PROOF.json').resolve()
+                or sha(path)!=receipt['sha256'] or read(path)!=c3['proof'] or c3['proof'].get('PASS') is not True
+                or case.identity['C3A_policy']!=POLICY):raise ValueError('CURRENT_M_C3A_PROOF_PACKET_DRIFT')
+    response=case.identity.get('response_authority')
+    if case.identity.get('schema') in ('V42_CURRENT_DATE_B2_M_CASE_V2','V42_CURRENT_DATE_B3_M_CASE_V2') and response is None:
+        raise ValueError('CURRENT_M_DENSE_RESPONSE_AUTHORITY_MISSING')
+    if response is not None:
+        from v42_ultracompact.response import SOURCES, state_sha
+        if case.response is None or response['state_sha']!=state_sha(case.response):
+            raise ValueError('CURRENT_M_DENSE_RESPONSE_STATE_DRIFT')
+        if (case.ultra is None or not _same(case.response.original,case.ultra.A)
+                or _domain_sha(case.response.original_data)!=_domain_sha(case.ultra.d)
+                or not _same(case.response.A,case.A) or _domain_sha(case.response.d)!=_domain_sha(case.d)):
+            raise ValueError('CURRENT_M_DENSE_RESPONSE_COMPOSITION_DRIFT')
+        if set(response['sources'])!=set(SOURCES) or any(sha(root/name)!=receipt['sha256'] for name,receipt in response['sources'].items()):
+            raise ValueError('CURRENT_M_DENSE_RESPONSE_PROOF_SOURCE_DRIFT')
+        receipt=response['certificate'];path=Path(receipt['path'])
+        if (path.resolve()!=(case.output/'DENSE_RESPONSE_EQUIVALENCE.json').resolve()
+                or sha(path)!=receipt['sha256'] or read(path)!=response['proof']
+                or response['proof'].get('PASS') is not True):
+            raise ValueError('CURRENT_M_DENSE_RESPONSE_PROOF_PACKET_DRIFT')
     return dict(case.identity['transport'],proof_reused_after_all_transport_state_SHA_checks=True,
-        same_case_transport_certificate=receipt)
+        same_case_transport_certificate=c2_receipt,
+        dense_response_independent_proof=response['proof'] if response is not None else None)
