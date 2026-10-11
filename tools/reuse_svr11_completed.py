@@ -25,8 +25,25 @@ def normalized_forecast_receipt_guard(text):
     return ast.dump(Guard().visit(ast.parse(text)),include_attributes=False)
 
 def normalized_reviewed_model(text):
-    """Recognize only completed-owner cleanup and an exact NPZ read cache."""
+    """Normalize only explicitly reviewed equivalent caches/owner cleanup."""
     import ast
+    helpers=ast.parse('''def _forecast_native_totals(native,background):
+    return tuple(native.allocate(background.gross_p_kw_96[t],background.gross_q_kvar_96[t])[0]
+        for t in range(96))
+def _apply_forecast_native(engine,native,totals,slot):
+    from dayahead.v28r2.opendss_mapping import _set_load
+    for row in native.loads:
+        name=str(row['load_name']);p,q=totals[slot][name.lower()]
+        _set_load(engine,name,p,q)
+''').body
+    helper_axis={n.name:ast.dump(n,include_attributes=False) for n in helpers}
+    approved_assignment=ast.parse('totals_by_slot=_forecast_native_totals(native,bg)').body[0]
+    approved_apply=ast.parse('_apply_forecast_native(e,native,totals_by_slot,t)',mode='eval').body
+    original_apply=ast.parse('native.apply(e,bg,t)',mode='eval').body
+    def same(a,b):return ast.dump(a,include_attributes=False)==ast.dump(b,include_attributes=False)
+    tree=ast.parse(text)
+    helper_names=[n.name for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in helper_axis]
+    require(not helper_names or sorted(helper_names)==sorted(helper_axis),'REUSE_INCOMPLETE_FORECAST_CACHE')
     class CacheNames(ast.NodeTransformer):
         def visit_Assign(self,node):
             if any(isinstance(t,ast.Name) and t.id=='cached' for t in node.targets):
@@ -38,10 +55,21 @@ def normalized_reviewed_model(text):
             return ast.copy_location(ast.Name(id='z',ctx=node.ctx),node) if node.id=='cached' else node
     class Reviewed(ast.NodeTransformer):
         def visit_FunctionDef(self,node):
+            if node.name in helper_axis:
+                require(ast.dump(node,include_attributes=False)==helper_axis[node.name],'REUSE_UNREVIEWED_FORECAST_CACHE_HELPER')
+                return None
             if node.name=='load_coefficients':
                 node=CacheNames().visit(node)
             return self.generic_visit(node)
+        def visit_Assign(self,node):
+            if any(isinstance(t,ast.Name) and t.id=='totals_by_slot' for t in node.targets):
+                require(bool(helper_names) and same(node,approved_assignment),'REUSE_UNREVIEWED_FORECAST_CACHE_INPUT')
+                return None
+            return self.generic_visit(node)
         def visit_Call(self,node):
+            if isinstance(node.func,ast.Name) and node.func.id=='_apply_forecast_native':
+                require(bool(helper_names) and same(node,approved_apply),'REUSE_UNREVIEWED_FORECAST_CACHE_APPLY')
+                return original_apply
             approved=ast.parse("owned.get('generation_source_SHA',contract['generation_source_SHA'])",mode='eval').body
             if ast.dump(node,include_attributes=False)==ast.dump(approved,include_attributes=False):
                 return node.args[1]
@@ -58,7 +86,7 @@ def normalized_reviewed_model(text):
                 or (isinstance(call.func,ast.Attribute) and isinstance(call.func.value,ast.Name)
                     and call.func.value.id=='gc' and call.func.attr=='collect')):return None
             return self.generic_visit(node)
-    return ast.dump(Reviewed().visit(ast.parse(text)),include_attributes=False)
+    return ast.dump(Reviewed().visit(tree),include_attributes=False)
 
 def qualify(root,origin,day,arm='B0'):
     root=Path(root).resolve();origin=Path(origin).resolve()

@@ -79,8 +79,9 @@ def snapshot(root):
         errors=errors[-3:],
         source_SHA=m['execution_SHA'],root=str(root),UTC=now(),
         notice=('검증된 완료 날짜 '+str(sum(bool(r.get('reused')) for r in rows))+'일 재사용 · 원본 실행 SHA/Runtime 보존 · 현재 검증 SHA 별도 기록. '
-            if any(r.get('reused') for r in rows) else '')+'May19–22 네 날짜는 원본 NormalAmps·kVA·전압·SVR 정격 재검증 PASS. 기존 오판정 이력은 보존합니다.'
-            if (root/'NORMALAMPS_CLASSIFICATION_CORRECTION.json').exists() else '')
+            if any(r.get('reused') for r in rows) else '')+(
+            'May19–22 네 날짜는 원본 NormalAmps·kVA·전압·SVR 정격 재검증 PASS. 기존 오판정 이력은 보존합니다.'
+            if (root/'NORMALAMPS_CLASSIFICATION_CORRECTION.json').exists() else ''))
 
 def serve(root):
     from v42_svr11.authority import verify

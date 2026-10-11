@@ -100,7 +100,8 @@ def reuse():
     atomic(root/'REUSE_ADMISSION.json',dict(PASS=True,reused_completed_dates=31,
         completed_model_slots_reused=sum(len(v['slots']) for v in contract['days'].values()),original_execution_SHA_and_Runtime_preserved=True,
         healthy_workers_terminated=0,model_reuse_contract=m['model_checkpoint_reuse_contract'],AC_calls=0,Native_calls=0,UTC=now()))
-    shutil.copyfile(old/'NORMALAMPS_CLASSIFICATION_CORRECTION.json',root/'NORMALAMPS_CLASSIFICATION_CORRECTION.json')
+    if (old/'NORMALAMPS_CLASSIFICATION_CORRECTION.json').exists():
+        shutil.copyfile(old/'NORMALAMPS_CLASSIFICATION_CORRECTION.json',root/'NORMALAMPS_CLASSIFICATION_CORRECTION.json')
     print('ADMITTED_B0_31_AND_MODEL_SLOTS',m['execution_SHA'])
 
 if __name__=='__main__':{'quiesce':quiesce,'prepare':prepare,'freeze_slots':freeze_slots,'reuse':reuse}[sys.argv[1]]()

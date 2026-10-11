@@ -15,6 +15,21 @@ from .context_lifecycle import retire_completed_probe,flush_completed_probes
 FIELDS=('voltage_constant','voltage_matrix','current_constant','current_matrix',
     'flow_p_constant','flow_q_constant','flow_p_matrix','flow_q_matrix','branch_limits')
 
+def _forecast_native_totals(native,background):
+    # Immutable Forecast inputs and native shares are identical in every
+    # independent prefix. Execute the original exact Fraction allocation and
+    # full bus/phase conservation checks once for each of the 96 slots.
+    return tuple(native.allocate(background.gross_p_kw_96[t],background.gross_q_kvar_96[t])[0]
+        for t in range(96))
+
+def _apply_forecast_native(engine,native,totals,slot):
+    from dayahead.v28r2.opendss_mapping import _set_load
+    # Preserve every original setter, load order and exact IEEE double value.
+    # No engine, tap, queue, controller or solved state is cached.
+    for row in native.loads:
+        name=str(row['load_name']);p,q=totals[slot][name.lower()]
+        _set_load(engine,name,p,q)
+
 def load_coefficients(certificate,day):
     from v42_thermal.authority import current_authority,denominators
     from v42_thermal.common import SCHEMA
@@ -89,9 +104,10 @@ def generate(day,input_folder,output,progress):
     flush_completed_probes()
     assert len(controls)==60 and sum(n.startswith('transformer.') for n in names)==153
     anchor=np.zeros((96,60));anchor[:,:12]=p
+    totals_by_slot=_forecast_native_totals(native,bg)
     count=solves=0;started=time.perf_counter();slots=[]
     def apply(e,ad,t):
-        native.apply(e,bg,t)
+        _apply_forecast_native(e,native,totals_by_slot,t)
         original._set_slot(e,{**ad,'loads':[]},bg,p,t)
     def measurement(e):
         v=_voltage_vector(e,nodes)**2
