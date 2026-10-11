@@ -17,7 +17,7 @@ from v42_common_campaign.authority import source_files
 
 OLD=Path(r'D:\v42_svr11_may_20261011_16')
 DEV=Path(r'D:\v42_dense_response_root_measurement_20261011')
-NATIVE0=Path(r'D:\v42_dense_response_development_20261011')
+NATIVE0=Path(r'D:\v42_dense_response_development_repair_20261011')
 DAY='2025-05-01'
 PRECISION=dict(FeasibilityTol=1e-9,OptimalityTol=1e-9,IntFeasTol=1e-8,
     NumericFocus=3,ScaleFlag=2)
@@ -126,7 +126,7 @@ def measure_case_once(case,request,*,sources,source_sha,source_commit,build_wall
     output=case.output;folder=OLD/'inputs/B2'/DAY;bundle=case.bundle
     runner_sources={name:record(SOURCE/name) for name in (
         'tools/validate_svr11_dense_response.py','tools/validate_svr11_root180.py',
-        'tools/root180_completion.py')}
+        'tools/root180_completion.py','tools/validate_svr11_dense_restore.py')}
     atomic(DEV/'SOURCE18_SEAL.json',dict(source_SHA=source_sha,source_commit=source_commit,
         execution_sources=sources,runner_sources=runner_sources,
         actual_selected_matrix_SHA=case.identity['selected_matrix_sha'],

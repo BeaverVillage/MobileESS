@@ -217,6 +217,9 @@ def save_v2_packet(folder):
     atomic(folder/'CURRENT_SECURITY_PRE_C2_ROW_CERTIFICATES.json',pre['certificates'])
     atomic(folder/'CURRENT_SECURITY_PRE_C2_BOUND_CERTIFICATES.json',pre['bounds'])
     atomic(folder/'RESTORE_PACKET.json',packet)
+    return m_model.CampaignMCase(response.A,response.d,A,data,None,graph,packet['case_sha'],identity,
+        compact,presolve,bundle,anchor,{},[SimpleNamespace(**c) for c in coefficients],folder,ultra,response,
+        physical_domain=physical)
 
 
 @pytest.fixture(scope='module')

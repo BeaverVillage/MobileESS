@@ -45,6 +45,7 @@ class CampaignMCase:
     output: Path
     ultra: object = None
     response: object = None
+    physical_domain: object = None
 
     def forward(self, point):
         """Transport a current original physical point through every stage."""
@@ -191,7 +192,50 @@ def _freeze_physical(domain, out, A, d):
     proof['original_matrix_bridge']=verify_original_rows(domain,A,d)
     proof['original_matrix_bridge_required']=False
     atomic(path,proof)
+    proof=read(path)
     return dict(state_sha=domain.state_sha,sources=sources,certificate=record(path),proof=proof)
+
+
+def _check_physical_input_key(domain, graph):
+    """Bind a restored input-only domain without running its producer."""
+    from v42_native.mess_domain import BATTERY_FIELDS
+    sites=tuple(graph[0]);initial=tuple(sorted(graph[1].items()))
+    arcs=tuple(tuple(a) for a in graph[2]);routes=tuple(a[-1] for a in arcs if a[-1] is not None)
+    battery=tuple(float(getattr(graph[3],key)) for key in BATTERY_FIELDS)
+    expected=tuple([(site,t,site,t+1,None) for site in sites for t in range(96)]+
+        [(r.source,r.depart,r.destination,r.connect,r) for r in dict.fromkeys(routes)])
+    if (domain.sites!=sites or domain.initial!=initial or domain.horizon!=96
+            or domain.battery!=battery or domain.arcs!=arcs or arcs!=expected
+            or tuple(dict.fromkeys(domain.routes))!=routes):
+        raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_INPUT_KEY_DRIFT')
+    if digest(domain.scientific_state())!=domain.state_sha:
+        raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_RESTORED_STATE_DRIFT')
+
+
+def restore_physical_domain(proof, graph):
+    """Restore the sealed input-only packet; no screening/BFS or model call.
+
+    Saved masks are untrusted until the existing independent actual-row
+    verifier replays them. This helper checks their native input key and SHA.
+    """
+    from v42_native.mess_domain import PhysicalDomain, UnitDomain, BATTERY_FIELDS, SLOT_FIELDS
+    if proof.get('schema')!='V42_EXACT_PHYSICAL_PRESCREEN_V1' or proof.get('horizon')!=96:
+        raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_RESTORE_SCHEMA_DRIFT')
+    units=tuple(UnitDomain(unit['mess'],unit['origin'],tuple(unit['retained_arc_indices']),
+        tuple(tuple(node) for node in unit['forward_nodes']),tuple(tuple(node) for node in unit['backward_nodes']),
+        tuple((item['arc'],item['reason']) for item in unit['removals']),
+        tuple(tuple(row[key] for key in SLOT_FIELDS) for row in unit['per_slot']),unit['terminal_states'],
+        tuple((row['slot'],F(row['lower_exact']),F(row['upper_exact'])) for row in unit['global_SOC']),
+        tuple(sorted(unit['path_SOC_diagnostic_rejections'].items()))) for unit in proof['units'])
+    arcs=tuple(tuple(a) for a in graph[2])
+    domain=PhysicalDomain(tuple(proof['sites']),tuple(tuple(pair) for pair in proof['initial']),
+        tuple(a[-1] for a in arcs if a[-1] is not None),tuple(float(proof['battery'][key]) for key in BATTERY_FIELDS),
+        proof['horizon'],arcs,units,proof['state_sha'],proof.get('producer_wall_seconds',0.),
+        proof.get('cache_hit',False),proof.get('lookup_wall_seconds',0.))
+    if digest({key:proof[key] for key in domain.scientific_state()})!=proof['state_sha']:
+        raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_RESTORED_STATE_DRIFT')
+    _check_physical_input_key(domain,graph)
+    return domain
 
 
 def _freeze_grid_prescreen(grid, out, A, d, progress):
@@ -205,6 +249,7 @@ def _freeze_grid_prescreen(grid, out, A, d, progress):
         raise ValueError('CURRENT_M_EXACT_GRID_OUTER_MODEL_INFEASIBLE')
     path=Path(out)/'EXACT_GRID_OUTER_PRESCREEN.json'
     atomic(path,proof)
+    proof=read(path)
     return dict(state_sha=grid.state_sha,sources=sources,certificate=record(path),proof=proof)
 
 
@@ -669,7 +714,8 @@ def build_case(payload, request, progress=None):
         grid_prescreen_authority=grid_prescreen_authority,
         C3A_matrix_sha=matrix_sha(ultra.A),C3A_domain_sha=_domain_sha(ultra.d),
         AIDC_optimization_calls=0,P2_calls=0,historical_bounds_points_columns_read=0)
-    case=CampaignMCase(B,e,A,d,None,graph,digest(identity),identity,compact,presolve,bundle,anchor,planning,coeff,out,ultra,reformulation)
+    case=CampaignMCase(B,e,A,d,None,graph,digest(identity),identity,compact,presolve,bundle,anchor,planning,coeff,out,ultra,reformulation,
+        physical_domain=physical)
     sparse.save_npz(out/'FULL_A.npz',A);np.savez_compressed(out/'FULL_DATA.npz',**d)
     sparse.save_npz(out/'C3A_A.npz',ultra.A);np.savez_compressed(out/'C3A_DATA.npz',**ultra.d)
     sparse.save_npz(out/'DENSE_RESPONSE_A.npz',B);np.savez_compressed(out/'DENSE_RESPONSE_DATA.npz',**e)
@@ -701,7 +747,11 @@ def verify_case(case):
         raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_AUTHORITY_MISSING')
     if physical is not None:
         from v42_native.mess_domain import build_domain
-        domain=build_domain(case.graph[0],case.graph[1],[a[-1] for a in case.graph[2] if a[-1] is not None],case.graph[3],96)
+        domain=getattr(case,'physical_domain',None)
+        if domain is None:
+            domain=build_domain(case.graph[0],case.graph[1],[a[-1] for a in case.graph[2] if a[-1] is not None],case.graph[3],96)
+        else:
+            _check_physical_input_key(domain,case.graph)
         if physical['state_sha']!=domain.state_sha:
             raise ValueError('CURRENT_M_PHYSICAL_PRESCREEN_STATE_DRIFT')
         from v42_native.mess_domain_verify import verify_original_rows
