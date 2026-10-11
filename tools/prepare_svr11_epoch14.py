@@ -153,7 +153,9 @@ def forecast_contract(state,receipts):
     for day in DAYS:
         dest=ROOT/'models'/day;v=read(dest/'ELECTRICAL_CERTIFICATE.json')
         coefficients=record(dest/'COEFFICIENTS.npz')
-        v.update(source_SHA=state['source_SHA'],generation_source_SHA=old['execution_SHA'],
+        v.update(source_SHA=state['source_SHA'],generation_source_SHA=v.get('generation_source_SHA',old['execution_SHA']),
+            coefficient_certificate_origin_source_SHA=old['execution_SHA'],
+            physical_slot_generation_SHA_by_slot={t:s['generation_source_SHA'] for t,s in days[day]['slots'].items()},
             original_generation_certificate=days[day]['certificate'],revalidation_contract=ref,
             reused_forecast_slot_provenance=ref,output=coefficients)
         v['outputs']={k:coefficients for k in v['outputs']}
