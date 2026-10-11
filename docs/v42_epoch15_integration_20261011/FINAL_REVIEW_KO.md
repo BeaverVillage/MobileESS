@@ -1,10 +1,8 @@
 # V42 Exact C3A 현재 모델 통합·Global Gap 복구·Epoch15 전환 검토
 
-작성 기준: 2026-10-11 20:01 KST. Exact C3A 통합·최소 검증·Epoch15 B2 재시작 및 기존 예약 전환을 완료했다. 정식 31일 캠페인은 진행 중이다. 과거 연구 성능, 단위 검사 결과, 현재 SVR11/LDC의 실측 결과를 구분한다.
+과거 Epoch15 통합 검토의 수학·코드 검증 기록이다. 2026-10-11 사용자 중단·삭제 지시에 따라 Epoch14/15/16 및 C3A 개발 B2 실행 산출물과 성능 복사본을 삭제했다. 해당 B2 최종 처분은 USER_CANCELLED_DISCARDED이며 새 실행의 성능 근거로 사용하지 않는다.
 
 최종 Scientific Source SHA: `7961f1b3a1837b017a5d8229cd1f9f7cdead95e614698da1ca8bd4be15491597`
-
-최종 캠페인·Worker·예약 상태: Epoch15가 RUNNING이다. May01은 새 Native0 Worker에서 현재 행렬을 생성하며 May02는 RAM/Commit 신규 입장 대기다. B0 PASS31을 보존하고 B2/B1/B3 새 완료 결과는 0건이다. 기존 시간별 예약은 ACTIVE이며 기존 두 Windows 작업과 HTTP Monitor가 새 root/source를 가리킨다.
 
 ## 1. 현재 모델과 PR #162 선정 C3A의 차이
 
@@ -65,25 +63,7 @@ Solver MIPGap은 Solver incumbent를 사용한다. `solver_global_gap`은 독립
 
 M 목표는 3%이다. Full MILP는 `MIPGap=.03`, `MIPGapAbs=0`을 사용하고 유효 전체 Solver gap 목표 또는 Solver OPTIMAL에서 종료할 수 있다. 이것이 `global_gap_certified=true`라는 독립 인증 주장을 만들지는 않는다. A 단계 목표와 Native 예산은 변경하지 않았다.
 
-개발용 대표 smoke의 실제 값: [실측 Native packet](CURRENT_RUNTIME_SMOKE.json)과 [독립 exact proof](CURRENT_EXACT_C3A_PROOF.json)를 확인했다.
-
-| 대표 개발 검증 항목 | 실제 값 |
-|---|---|
-| Native Runtime / 요청 TimeLimit | 30.254999876초 / 30초 |
-| Gurobi status | TIME_LIMIT (9), Native SolCount 2 |
-| 최초·최종 검증 UB | 0.6760534504652341 / 0.6760534504652341 |
-| Solver ObjVal | 0.6760534504652341 |
-| Solver ObjBound / MIPGap | null / null; `NO_FINITE_SOLVER_BOUND` |
-| 전체 Solver Global LB / Gap | null / null, 유효 bound 없음 |
-| 독립 인증 Global LB / Gap | null / null, 독립 dual 증거 없음 |
-| Root LP 시간 / 상태 | null / `NOT_REPORTED_OR_ROOT_INCOMPLETE` |
-| B&B Node 수 | 0 |
-| Full scope / 원본 FULL 가능해 / UB 비회귀 | PASS / PASS / PASS |
-| 적용한 MIPGap / MIPGapAbs | 0.03 / 0 |
-
-MIP Start가 실제 채택됐다. Presolve 29.95초 뒤 시간 제한에 도달했으며 native log에 Root relaxation 기록이 없다. 따라서 이 호출의 Gap은 0%나 100%가 아니라 미측정이다. 요청 TimeLimit 대비 0.255초 종료 비용도 실측 Native ledger에 포함됐으며 1,800초 누적 예산은 초과하지 않았다. 정식 May01은 아직 모델 생성 단계이므로 Solver Gap 및 Actual Fresh는 대기 상태다.
-
-정식 Epoch15의 실시간 값은 별도 운영 snapshot에 기록한다. 개발 smoke의 해·Gap은 정식 캠페인 결과로 승격하지 않는다.
+이전 B2 개발 smoke의 Native·UB·LB·Gap·Root·RAM 및 해/PASS 측정 기록은 사용자 삭제 범위에 포함되어 현재 문서에서 제거했다. 수학적 exact proof와 코드 검사는 보존했다.
 
 ### 짧은 smoke에서 Root LP 미완료인 경우의 판정
 
@@ -92,10 +72,6 @@ MIP Start가 실제 채택됐다. Presolve 29.95초 뒤 시간 제한에 도달�
 Solver ObjBound가 유한하고 전체-domain admission을 통과하면 Root 미완료 중에도 Solver 기반 LB/Gap은 기록할 수 있다. 예를 들어 검증 UB>0에서 유효 LB=0이면 Gap은 100%이며, 계산 결과가 없는 상태와 구분된다. 독립 certificate가 없다면 독립 인증 Gap은 계속 미인증이다. Source SHA drift로 입장이 거절된 호출은 Native 0의 admission failure이며 실행 성공·Root 성능으로 집계하지 않는다.
 
 ## 5. Root LP 시간 및 최대 RAM
-
-현재 측정 범위와 관측값: [실측 packet](CURRENT_RUNTIME_SMOKE.json)의 최종 재개 프로세스는 C3 proof 재생성·모델 clone·짧은 Native를 포함해 peak RSS 11,191,271,424 bytes (10.423 GiB), peak private commit 12,339,372,032 bytes (11.492 GiB)를 기록했다. Gurobi 내부 MaxMemUsed는 1.906106324 GB이며 전체 프로세스 RAM과 별도 계측이다. C3 준비 965.327초는 Native·Root LP 시간이 아니다. 전체 1,800초 solve의 최대 RAM 및 완료 Root 시간은 이번 작업에서 미측정이다. 신규 M reservation은 이 peak에 1GiB 이상의 여유를 더해 13GiB로 고정했다.
-
-보존된 Epoch14 May01 Native log는 `Root relaxation: time limit, ... 1665.13 seconds`를 기록했다. Root relaxation이 시간 제한에 도달할 때까지 1,665.13초 경과했으며, 완료 Root 시간은 미측정이다. 이 날짜의 누적 Native는 1,800.329초, 최종 검증 UB는 0.6760534504652341이다. [원본 receipt](EPOCH14_RETAINED_BASELINE.json)의 `NATIVE_LOG_REPORTED`는 시간의 log 존재를 뜻하며 Root 완료를 인증하지 않는다. 결과와 log의 SHA를 보존하고 원본 파일을 수정하지 않았다. Full clone 시점까지 관측한 프로세스 peak는 RSS 6,588,575,744 bytes, private commit 10,347,618,304 bytes다. 이 값은 완료된 전체 solve의 최대 RAM을 측정한 값이 아니다. 새 source의 짧은 smoke 및 C3A proof 재생성 관측값과 측정 범위가 다르므로 RAM 감소율도 계산하지 않는다.
 
 과거 212.29→180.21초 및 Work 452.05→359.99는 과거의 동등 C2/C3A 쌍에 한정한다. 현재는 별도의 반복 Full C2/C3A tournament를 수행하지 않으므로 현재 Root 개선율을 추정하지 않는다. 짧은 smoke에서 Root가 미완료하면 현재 완료 Root 시간 비교는 미측정으로 보고한다.
 
@@ -113,7 +89,7 @@ M 단계는 초기화·U4·Full MILP를 합쳐 측정 Native 1,800초를 공유�
 
 ## 7. 수행한 최소 검증과 생략한 장시간 FULL 검증
 
-확인된 Gap/공통 M suite는 [45개 검사](GAP_TESTS.xml), orchestration/source/batch/anytime/release 연계 suite는 [125개 검사](GAP_INTEGRATION_TESTS.xml) 모두 통과했다. [B3 저장·복원과 현재 C3A 검사 41개](B3_RESTORE_TESTS.xml)는 새 프로세스에서 선택 C3A 복원을 확인하고 행렬·bound·증명·축·Source SHA 변조를 거절했다. 이 복원 검사는 Native optimizer를 호출하지 않았다. [Gap admission 검증 receipt](GAP_VALIDATION.json)는 Source SHA, 독립/solver 구분 및 추가 LB optimizer 0회를 명시한다. C3A의 수학적·builder/source fixture suite 74개, 운영/release/batch suite 30개도 통과했다. suite의 검사 수는 중복될 수 있으며 고유 검사 수로 합산하지 않는다. 현재 대표 모델의 [독립 exact proof](CURRENT_EXACT_C3A_PROOF.json), [실측 smoke](CURRENT_RUNTIME_SMOKE.json), [원본·교차 연결 receipt](CURRENT_VALIDATION_ORIGINS.json)가 최소 릴리스 근거다.
+확인된 Gap/공통 M suite는 [45개 검사](GAP_TESTS.xml), orchestration/source/batch/anytime/release 연계 suite는 [125개 검사](GAP_INTEGRATION_TESTS.xml) 모두 통과했다. [B3 저장·복원과 현재 C3A 검사 41개](B3_RESTORE_TESTS.xml)는 새 프로세스에서 선택 C3A 복원을 확인하고 행렬·bound·증명·축·Source SHA 변조를 거절했다. 이 복원 검사는 Native optimizer를 호출하지 않았다. [Gap admission 검증 receipt](GAP_VALIDATION.json)는 Source SHA, 독립/solver 구분 및 추가 LB optimizer 0회를 명시한다. C3A의 수학적·builder/source fixture suite 74개, 운영/release/batch suite 30개도 통과했다. suite의 검사 수는 중복될 수 있으며 고유 검사 수로 합산하지 않는다. 현재 대표 모델의 [독립 exact proof](CURRENT_EXACT_C3A_PROOF.json), [원본·교차 연결 receipt](CURRENT_VALIDATION_ORIGINS.json)가 최소 릴리스 근거다.
 
 최종 메모리 해제 변경은 affine 임시 배열을 삭제하는 한 문장뿐이다. 변경 전 AST와 이 한 문장을 제외한 변경 후 AST의 동등성을 확인했고, 같은 최종 Source SHA에서 [현재 C3A 경량 검사 10개](../v42_svr11_exact_c3a_integration_20261011/CURRENT_C3A_MEMORY_TESTS.xml)가 통과했다. 이 검사도 Native optimizer를 호출하지 않았다.
 
@@ -136,24 +112,17 @@ M 단계는 초기화·U4·Full MILP를 합쳐 측정 Native 1,800초를 공유�
 
 최종 Git commit·Source checkout·Epoch Root·Release receipt: manifest의 source_commit은 `e14bf3c6afb8cdcf85862c6900fde49deee3388e`이다. Source checkout은 `D:\v42_svr11_epoch15_20261011`, Epoch Root는 `D:\v42_svr11_may_20261011_15`다. `EXACT_C3A_SUCCESSOR_READY.json` PASS, 최소 source/proof/case/Native 교차 seal PASS, Forecast31 PASS, B0 qualified31 보존, B2/B1/B3 fresh zero-start가 확인됐다. [최소 검증 요약](MINIMAL_VALIDATION_SUMMARY.json)과 [운영 전환 snapshot](OPERATIONAL_HANDOFF.json)을 보존했다. 이후 문서 commit은 science SHA를 변경하지 않는다.
 
-Scientific Source는 실행에 쓰이는 `v42_*` Python 파일의 SHA 집합으로 고정한다. 문서·보고서 갱신은 이 science snapshot과 구분하고 원본 execution SHA를 바꾸어 과거 증거를 재라벨하지 않는다. 현재 C3A 증명·Gap 검증·Native smoke는 최종 source에 바인딩한 release contract로 검증한다. 대표 FULL 최초 생성은 construction SHA `9d3141a694adb2c2634cafa83d249c7393c5301747e27bab1bd01c1e2768d6f3`이며 당시 Native0 기록을 보존했다. 최종 SHA에서는 저장된 새 C2/FULL의 exact state·수학 소스 일치를 확인한 뒤 C3 생산·독립 검증을 다시 실행했고, 모든 행렬/도메인/행 인증/경계 인증의 동일성을 확인했다. 최종 30초 Native는 최종 SHA에서 실제 실행했다. 이 개발 과정의 해/PASS는 정식 결과로 이식하지 않는다.
+Scientific Source는 실행에 쓰이는 `v42_*` Python 파일의 SHA 집합으로 고정한다. 문서·보고서 갱신은 이 science snapshot과 구분하고 원본 execution SHA를 바꾸어 과거 증거를 재라벨하지 않는다. 현재 C3A 증명과 Gap 검증의 수학·코드 기록은 원래 source 식별자를 유지한다. 대표 FULL 최초 생성은 construction SHA `9d3141a694adb2c2634cafa83d249c7393c5301747e27bab1bd01c1e2768d6f3`이며 당시 Native0 기록을 보존했다. 최종 SHA에서는 저장된 새 C2/FULL의 exact state·수학 소스 일치를 확인한 뒤 C3 생산·독립 검증을 다시 실행했고, 모든 행렬/도메인/행 인증/경계 인증의 동일성을 확인했다. 이 개발 과정의 B2 실행 증거와 해/PASS는 삭제되었으며 재사용하지 않는다.
 
-Epoch14의 새 날짜 배정은 중지했다. 마지막 May03 Worker는 FULL 가능해 및 Actual Fresh 96슬롯 PASS, 측정 Native 1,800.690초로 자연 종료했다. 정상 Worker 강제 종료는 0회다. 기존 결과·Native ledger·실패 증거와 SHA/runtime 요약은 보존한다.
+Epoch14/15/16 B2 실행은 중단·폐기되었다. 정상 Worker의 강제 종료는 없었으며 최종 Native Runtime·status와 삭제 경로/바이트 수만 최소 감사 receipt에 남겼다.
 
-[저장공간 검토](STORAGE_REVIEW.json)는 과거 대용량 행렬·원시 입력·민감도·물리 검증·실패 증거를 검토했다. 증거를 보존하면서 안전하게 삭제할 수 있다고 확인된 대용량 과거 파일은 없어 보존했고, 이번 작업의 삭제량은 0 bytes다. 같은 민감도 파일은 이미 NTFS hardlink로 공유 중이다. 새 Epoch도 검증한 불변 캐시를 hardlink로 재사용한다. 임시 fixture 6개(2,537 bytes) 삭제는 자동 승인 검토가 `blocked by policy` 사유로 거절했으므로 보존하고 커밋에서 제외했다.
+[저장공간 검토](STORAGE_REVIEW.json)의 원시 입력·Forecast·모델 coefficients·B0 기록은 보존했다. 이전 B2 산출물 보존 결론은 이번 사용자 삭제 지시로 대체되었으며, 실제 삭제의 최소 감사는 별도 B2 deletion receipt에 기록했다.
 
 새 Epoch의 B2 2025-05-01~31은 모든 날짜 Native0에서 신규 최적화한다. 이전 Epoch의 해/PASS는 재사용하지 않는다. 동일성이 검증된 원시 입력·Forecast 민감도는 재사용 가능하지만 현재 변경된 MILP rows/bounds는 새로 생성한다. 같은 설비·물리 정책의 기존 B0은 Source SHA와 동일성 확인 후 보존할 수 있다.
 
-## 9. B2 May01/02 Worker 실제 실행 상태
+## 9. Worker 및 단계 계약
 
-실제 PID·request·단계·Native 사용량·입장 상태: 2026-10-11 20:01 KST의 실제 snapshot 기준이다. May01 request는 `dates/B2/2025-05-01/attempts/attempt_01/request.json`, Source SHA는 위 최종 SHA이며 `previous_attempts=[]`, Native 예산1,800초·Threads1·target_gap0.03·retry_starts_from_native_zero=true다.
-
-| B2 날짜 | 실제 상태 | PID | Native | Actual Fresh |
-|---|---|---:|---:|---|
-| May01 | RUNNING, 현재 새 FULL/Compact/Static Presolve 모델 생성 | 105376 | 0초 | 대기 |
-| May02 | NOT_EXECUTED, RAM/Commit 신규 입장 대기, attempt 없음 | 없음 | 0초 | 대기 |
-
-실제 Worker create_time은 `1791716380.3288803`, cwd는 `D:\v42_svr11_epoch15_20261011`다. 날짜별 상세 phase는 [운영 snapshot](OPERATIONAL_HANDOFF.json)과 live Monitor에서 확인한다. 최초 Worker 시작은 월간 완료를 뜻하지 않는다.
+이전 B2 May01/May02 Worker snapshot은 삭제했다. 아래 단계별 상한과 입력·Barrier 계약은 보존한 과거 운영 설계다.
 
 | 정책·단계 | Worker 상한 |
 |---|---:|
@@ -170,8 +139,8 @@ B2 완료 후 B1→B3로 진행한다. B3는 M1 31일 → 전체 M1 Barrier → 
 
 ## 10. 1시간 예약·Windows Supervisor·Monitor 전환
 
-기존 1시간 Codex 예약, Windows Supervisor 및 Monitor의 새 Epoch/Source/2-Worker 정책 전환 receipt와 실제 상태: [운영 전환 receipt](OPERATIONAL_HANDOFF.json)를 확인했다. 기존 heartbeat `v42-may-b2-b3-autonomous-recovery`는 같은 이름·같은 대상 chat·시간별 주기를 유지하고 ACTIVE로 갱신했다. 별도 과거 cron은 PAUSED를 유지했다. Windows `MobileESS_V42_May_B2_B3_Autonomous_Supervisor` 및 `..._Monitor`의 action/cwd를 Source15/Root15로 갱신했고 기존 logon·5분 주기·동시 실행 정책은 보존했다. Supervisor PID72476, HTTP Monitor PID122232가 새 root/최종 SHA에서 동작하며 HTTP8796은200이다. 이전 HTTP monitor만 교체했고 healthy worker 종료 및 Native ledger reset은0회다. [Live Monitor](http://127.0.0.1:8796)는 정식 캠페인 상태를 표시한다.
+사용자 중단 지시에 따른 최종 stop receipt는 기존 hourly heartbeat PAUSED와 두 Windows 작업 Disabled를 확인했다. 이전 B2 실행의 자동 재시작은 허용되지 않는다.
 
 Monitor는 Solver ObjVal/ObjBound/MIPGap, 검증 UB 기준 전체 Solver Global Gap, 독립 인증 LB/Gap을 구분해 표시한다. 실행 중 Native 진단은 제한 U4인지 전체 모델인지와 provisional 상태를 명시하며 최종 admission 전 독립 인증으로 표시하지 않는다. Root가 중단됐거나 값이 아직 없는 경우는 각각 중단/미측정으로 남긴다.
 
-최종 릴리스 판정은 새 Source seal·현재 exact C3A proof·원본 동등성·짧은 측정 Native smoke·검증 UB 비회귀·보존한 물리/Actual Fresh 및 운영 전환 receipt를 근거로 PASS다. 새 정식 B2 May01/02의 Actual Fresh 결과는 아직 없으며 정상 실행 흐름에서 검증한다. 현재 완료 Root 성능 및 3% 달성은 주장하지 않는다. 개발 smoke의 해·PASS는 정식 31일 캠페인 결과로 승격하지 않는다.
+보존한 source·exact proof·원본 동등성·코드 검사 기록은 수학적 감사 근거다. 이전 B2 실행 결과와 성능 증거는 삭제했으며 현재 캠페인 통과나 완료 Root 성능을 주장하지 않는다.

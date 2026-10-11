@@ -1,0 +1,97 @@
+{
+  "schema": "V42_B2_EXACT_ALLOWLIST_DELETE_RECEIPT_V1",
+  "UTC": "2026-10-11T12:33:05.129684+00:00",
+  "deletion_executed": true,
+  "targets": [
+    {
+      "path": "D:\\v42_svr11_may_20261011_16\\dates\\B2",
+      "files": 232,
+      "bytes": 694138578,
+      "exists_after": false
+    },
+    {
+      "path": "D:\\v42_svr11_c3a_development_20261011\\dates\\B2",
+      "files": 45,
+      "bytes": 287107819,
+      "exists_after": false
+    },
+    {
+      "path": "D:\\v42_svr11_may_20261011_16\\B2_MAY01_MAY02_STARTED.json",
+      "files": 1,
+      "bytes": 2382,
+      "exists_after": false
+    },
+    {
+      "path": "D:\\v42_svr11_c3a_development_20261011\\RUNTIME_SMOKE.json",
+      "files": 1,
+      "bytes": 6770,
+      "exists_after": false
+    },
+    {
+      "path": "D:\\v42_svr11_c3a_development_20261011\\EPOCH15_MINIMAL_VALIDATION.json",
+      "files": 1,
+      "bytes": 28420,
+      "exists_after": false
+    },
+    {
+      "path": "D:\\v42_svr11_c3a_development_20261011\\PR207_BODY.txt",
+      "files": 1,
+      "bytes": 4481,
+      "exists_after": false
+    }
+  ],
+  "total_files": 281,
+  "total_bytes": 981288450,
+  "all_targets_absent": true,
+  "sanitized": [
+    {
+      "path": "D:\\v42_svr11_may_20261011_16\\CAMPAIGN_LEDGER.json",
+      "removed_B2_results": true,
+      "other_policy_payloads_identical": true
+    },
+    {
+      "path": "D:\\v42_svr11_may_20261011_16\\REPORT.json",
+      "removed_B2_results": true,
+      "other_policy_payloads_identical": true
+    },
+    {
+      "path": "D:\\v42_svr11_may_20261011_16\\REPORT.md",
+      "B2_rows_removed": true
+    },
+    {
+      "path": "D:\\v42_svr11_may_20261011_16\\SUPERVISOR_HEARTBEAT.json",
+      "dispatch_status": "HOLD"
+    }
+  ],
+  "no_worker_killed": true,
+  "no_old_performance_reused": true,
+  "authoritative_B2_disposition": "USER_CANCELLED_DISCARDED",
+  "immutable_manifests_not_modified": true,
+  "scheduled_restart_tasks": [
+    {
+      "TaskName": "MobileESS_V42_May_B2_B3_Autonomous_Monitor",
+      "TaskPath": "\\",
+      "State": "Disabled",
+      "Arguments": "-B -X utf8 D:\\v42_svr11_epoch16_20261011\\tools\\svr11_monitor_ui.py safeguard D:\\v42_svr11_may_20261011_16 --monitor-only",
+      "Execute": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe"
+    },
+    {
+      "TaskName": "MobileESS_V42_May_B2_B3_Autonomous_Supervisor",
+      "TaskPath": "\\",
+      "State": "Disabled",
+      "Arguments": "-B -X utf8 D:\\v42_svr11_epoch16_20261011\\tools\\svr11_monitor_ui.py safeguard D:\\v42_svr11_may_20261011_16",
+      "Execute": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe"
+    }
+  ],
+  "hourly_automations": [
+    {
+      "path": "C:\\Users\\kjw39\\.codex\\automations\\v42-may-b2-b3-autonomous-recovery\\automation.toml",
+      "id": "v42-may-b2-b3-autonomous-recovery",
+      "status": "PAUSED",
+      "sha256": "06717aa27114ba27541d776f99adbfd72ec12c2e169f977f3df962180e286a35"
+    }
+  ],
+  "scoped_processes_before_delete": [],
+  "controller_termination_receipt": "D:\\v42_root180_audit_20261011\\HELD_CONTROLLER_TERMINATION_16_development.json",
+  "minimal_final_runtime_receipt": "D:\\v42_root180_audit_20261011\\MINIMAL_STOP_RUNTIME_RECEIPT_FINAL_16_development.json"
+}

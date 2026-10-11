@@ -1,6 +1,6 @@
-사용자의 2026-10-11 추가 지시에 따라 기존 Epoch15 May01 실행을 중단하고 B2 May01/May02를 새 Native0 실행으로 재시작한다. 중단된 시도의 Native ledger와 로그는 원래 경로에 보존한다.
+과거 Epoch16 실행 모드의 코드·수학 계약 기록이다. 이후 사용자 중단·삭제 지시에 따라 Epoch14/15/16 B2 실행 산출물은 삭제되었으며, 최종 처분은 USER_CANCELLED_DISCARDED다. 최종 Native Runtime·status 및 삭제 감사만 별도 receipt에 보존한다.
 
-날짜별 C2 transport 및 C3A independent certificate replay를 생략한다. 기존 Epoch15 대표 모델의 검증·실제 Native 증거를 원래 Source SHA로 유지하고, 새 소스에서 모델 생성 알고리즘이 달라지지 않았음을 AST 비교로 확인했다. 기존 검증 결과의 Source SHA를 새 실행 SHA로 바꾸지 않는다.
+날짜별 C2 transport 및 C3A independent certificate replay를 생략한다. 기존 Epoch15 대표 모델의 수학 검증 기록을 원래 Source SHA로 유지하고, 새 소스에서 모델 생성 알고리즘이 달라지지 않았음을 AST 비교로 확인했다. 기존 검증 결과의 Source SHA를 새 실행 SHA로 바꾸지 않는다.
 
 날짜별 원시 입력·Forecast·모델 행렬·경계는 해당 날짜 기준으로 생성한다. PCS/Farkas 감소와 affine support 경계 생성 알고리즘은 유지한다. 최종 가능해의 원본 FULL 제약 검사 및 결정 동결 이후 Actual Fresh OpenDSS 96슬롯은 유지한다. 새 독립 증명을 수행하지 않은 receipt에는 independent_model_proof_replayed=false를 기록하며, selected_C3A_independent_proof_PASS는 null이다.
 

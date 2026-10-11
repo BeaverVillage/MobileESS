@@ -69,7 +69,8 @@ class ProbeBudget:
             runtime=float(m.cbGet(gp.GRB.Callback.RUNTIME))
             if full and where==gp.GRB.Callback.MESSAGE:
                 message=m.cbGet(gp.GRB.Callback.MSG_STRING)
-                if message.lstrip().startswith('Root relaxation:') and 'interrupted' not in message.lower():
+                if message.lstrip().startswith('Root relaxation: objective') and not any(
+                        word in message.lower() for word in ('interrupted','time limit','infeasible','unbounded')):
                     completed[0]=True;row['root_completed_native_elapsed_seconds']=runtime
             if full and completed[0] and where!=gp.GRB.Callback.MESSAGE:
                 m.terminate()
@@ -180,10 +181,13 @@ def run():
         final=_validate(case,point,output/'FINAL_FULL_POINT.npz',validator,stage,'FINAL_ORIGINAL_FULL_REPLAY')
         if final is None:raise ValueError('ROOT180_FINAL_FULL_REPLAY_FAILED')
         if source_files()!=sources:raise PermissionError('ROOT180_FINAL_SOURCE_DRIFT')
-        root=full['Root_LP_seconds'];complete=full['Root_LP_status']=='NATIVE_LOG_REPORTED' and root is not None
+        from root180_completion import verified_report
+        root_completion=verified_report(dict(full=full))
+        root=root_completion['completed_seconds'];complete=root_completion['completed']
         met=complete and 0<root<=200. and full.get('native_error') is None
         report=dict(PASS=True,exact_reduction_proven=True,root180_validated=met,
             classification='EXACT_REDUCTION_AND_ROOT180_VALIDATED' if met else 'EXACT_REDUCTION_VALID_ROOT180_UNMET',
+            native_root_completion=root_completion,
             root180_acceptance_seconds=200.,historical_reference_seconds=180.21,
             source_SHA=source_sha,source_commit=source_commit,source_seal=record(DEV/'SOURCE17_SEAL.json'),
             fresh_inputs={name:record(folder/name) for name in ('NATIVE_INPUT.json','B2_FIXED_AIDC.json')},

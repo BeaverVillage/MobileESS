@@ -1,0 +1,817 @@
+{
+  "PASS": true,
+  "exact_reduction_proven": true,
+  "root180_validated": false,
+  "classification": "EXACT_REDUCTION_VALID_ROOT180_UNMET",
+  "root180_acceptance_seconds": 200.0,
+  "historical_reference_seconds": 180.21,
+  "source_SHA": "d38bdce9f15feaf642934f4139e786eb1707652539e1e865ef2bf2bc0c09bc7b",
+  "source_commit": "5ddd2c8ebf882277c556c97c03c63373dd9b90b5",
+  "source_seal": {
+    "path": "D:\\v42_root180_development_20261011\\SOURCE17_SEAL.json",
+    "sha256": "5ff7f5180c50114d29c949cbd214e1a44c85edb8265c3a20d14d965673dd41e3",
+    "bytes": 159630
+  },
+  "fresh_inputs": {
+    "NATIVE_INPUT.json": {
+      "path": "D:\\v42_svr11_may_20261011_16\\inputs\\B2\\2025-05-01\\NATIVE_INPUT.json",
+      "sha256": "00c6045617e0da3c58c72d4ab9ab64ef9657c1a8f28c49ba187b468e7dddd4e0",
+      "bytes": 2421257
+    },
+    "B2_FIXED_AIDC.json": {
+      "path": "D:\\v42_svr11_may_20261011_16\\inputs\\B2\\2025-05-01\\B2_FIXED_AIDC.json",
+      "sha256": "c96faf6a3a1264d55ef7c6cf1e783f0ce9c355a9ad63e14501ce1ab38aa3936c",
+      "bytes": 2815957
+    }
+  },
+  "coefficient_input": {
+    "path": "D:\\v42_svr11_may_20261011_16\\models\\2025-05-01\\ELECTRICAL_CERTIFICATE.json",
+    "sha256": "70d381c607cae03f88df55acf3f1bffdc5f43d2cf3c6c2e6e147dbe0a7c33177",
+    "bytes": 227322
+  },
+  "original_matrix_SHA": "0eca025d99a24d2ae91117cdfe3ae48dade189336ada61b3f8234d9bf99f3cec",
+  "original_domain_SHA": "9247e42b8119f60ef149d0963e31dd8a697af5426a5aaeec9450b2a2f246481e",
+  "selected_matrix_SHA": "d67a073fc06a7537fd585de8ff786a01a854df5ee4f52be17f39fa66da6292a9",
+  "selected_domain_SHA": "821842e0ef3a83df4bb9a6466a1f7a5e952710dd2f695801b1de168becd4d6e5",
+  "selected_Bound_SHA": "35001e4fee1aa806bda82fb3d08e7ff887a35b9b6b1cbe2856447d7299dc8736",
+  "original_and_LP_and_integer_domains_identical": true,
+  "model_build_wall_seconds": 986.5070632999996,
+  "sizes": {
+    "original": {
+      "rows": 1130336,
+      "columns": 344967,
+      "binary": 208312,
+      "nnz": 16432980,
+      "row_families": {
+        "NormalAmps": {
+          "rows": 14688,
+          "nnz": 676974
+        },
+        "PCS16": {
+          "rows": 143072,
+          "nnz": 518636
+        },
+        "connected_Pch": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "connected_Pdis": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "connected_Qmax": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "connected_Qmin": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "energy_balance": {
+          "rows": 384,
+          "nnz": 217638
+        },
+        "flow": {
+          "rows": 9216,
+          "nnz": 415760
+        },
+        "initial_SOC": {
+          "rows": 4,
+          "nnz": 4
+        },
+        "injection_P_binding": {
+          "rows": 2304,
+          "nnz": 20188
+        },
+        "injection_Q_binding": {
+          "rows": 2304,
+          "nnz": 11246
+        },
+        "line_thermal_face": {
+          "rows": 403968,
+          "nnz": 1510656
+        },
+        "no_simultaneous_charge": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "no_simultaneous_discharge": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "response_line_P_binding": {
+          "rows": 25152,
+          "nnz": 1232138
+        },
+        "response_line_Q_binding": {
+          "rows": 25152,
+          "nnz": 1232344
+        },
+        "response_line_correction_binding": {
+          "rows": 25152,
+          "nnz": 1229260
+        },
+        "response_transformer_P_binding": {
+          "rows": 14688,
+          "nnz": 412956
+        },
+        "response_transformer_Q_binding": {
+          "rows": 14688,
+          "nnz": 713836
+        },
+        "terminal_SOC": {
+          "rows": 4,
+          "nnz": 4
+        },
+        "terminal_location": {
+          "rows": 4,
+          "nnz": 96
+        },
+        "transformer_kVA": {
+          "rows": 235008,
+          "nnz": 411264
+        },
+        "voltage_lower": {
+          "rows": 80448,
+          "nnz": 3861338
+        },
+        "voltage_upper": {
+          "rows": 80448,
+          "nnz": 3861338
+        }
+      },
+      "column_families": {
+        "arc": 207928,
+        "SOC": 388,
+        "charge_mode": 384,
+        "Pch": 8942,
+        "Pdis": 8942,
+        "Q": 8942,
+        "injection_P": 2304,
+        "injection_Q": 2304,
+        "rho_max": 1,
+        "response_transformer_P": 14688,
+        "response_transformer_Q": 14688,
+        "response_line_P": 25152,
+        "response_line_Q": 25152,
+        "response_line_correction": 25152
+      }
+    },
+    "compact": {
+      "rows": 1139374,
+      "columns": 354005,
+      "binary": 9422,
+      "nnz": 16650042,
+      "row_families": {
+        "NormalAmps": {
+          "rows": 14688,
+          "nnz": 676974
+        },
+        "PCS16": {
+          "rows": 143072,
+          "nnz": 518636
+        },
+        "connected_Pch": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "connected_Pdis": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "connected_Qmax": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "connected_Qmin": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "energy_balance": {
+          "rows": 384,
+          "nnz": 217638
+        },
+        "flow": {
+          "rows": 9216,
+          "nnz": 415760
+        },
+        "initial_SOC": {
+          "rows": 4,
+          "nnz": 4
+        },
+        "injection_P_binding": {
+          "rows": 2304,
+          "nnz": 20188
+        },
+        "injection_Q_binding": {
+          "rows": 2304,
+          "nnz": 11246
+        },
+        "line_thermal_face": {
+          "rows": 403968,
+          "nnz": 1510656
+        },
+        "no_simultaneous_charge": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "no_simultaneous_discharge": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "node_activity_link": {
+          "rows": 9038,
+          "nnz": 217062
+        },
+        "response_line_P_binding": {
+          "rows": 25152,
+          "nnz": 1232138
+        },
+        "response_line_Q_binding": {
+          "rows": 25152,
+          "nnz": 1232344
+        },
+        "response_line_correction_binding": {
+          "rows": 25152,
+          "nnz": 1229260
+        },
+        "response_transformer_P_binding": {
+          "rows": 14688,
+          "nnz": 412956
+        },
+        "response_transformer_Q_binding": {
+          "rows": 14688,
+          "nnz": 713836
+        },
+        "terminal_SOC": {
+          "rows": 4,
+          "nnz": 4
+        },
+        "terminal_location": {
+          "rows": 4,
+          "nnz": 96
+        },
+        "transformer_kVA": {
+          "rows": 235008,
+          "nnz": 411264
+        },
+        "voltage_lower": {
+          "rows": 80448,
+          "nnz": 3861338
+        },
+        "voltage_upper": {
+          "rows": 80448,
+          "nnz": 3861338
+        }
+      },
+      "column_families": {
+        "route_flow": 207928,
+        "SOC": 388,
+        "charge_mode": 384,
+        "Pch": 8942,
+        "Pdis": 8942,
+        "Q": 8942,
+        "injection_P": 2304,
+        "injection_Q": 2304,
+        "rho_max": 1,
+        "response_transformer_P": 14688,
+        "response_transformer_Q": 14688,
+        "response_line_P": 25152,
+        "response_line_Q": 25152,
+        "response_line_correction": 25152,
+        "node_activity": 9038
+      }
+    },
+    "C2": {
+      "rows": 802026,
+      "columns": 339387,
+      "binary": 9322,
+      "nnz": 8842298,
+      "row_families": {
+        "NormalAmps": {
+          "rows": 2,
+          "nnz": 96
+        },
+        "PCS16": {
+          "rows": 143072,
+          "nnz": 518636
+        },
+        "connected_Pch": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "connected_Pdis": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "connected_Qmax": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "connected_Qmin": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "energy_balance": {
+          "rows": 384,
+          "nnz": 217630
+        },
+        "flow": {
+          "rows": 8942,
+          "nnz": 415760
+        },
+        "injection_P_binding": {
+          "rows": 2263,
+          "nnz": 20147
+        },
+        "injection_Q_binding": {
+          "rows": 2237,
+          "nnz": 11153
+        },
+        "line_thermal_face": {
+          "rows": 333689,
+          "nnz": 1251736
+        },
+        "no_simultaneous_charge": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "no_simultaneous_discharge": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "node_activity_link": {
+          "rows": 8746,
+          "nnz": 216386
+        },
+        "response_line_P_binding": {
+          "rows": 25152,
+          "nnz": 1210659
+        },
+        "response_line_Q_binding": {
+          "rows": 25152,
+          "nnz": 1210862
+        },
+        "response_line_correction_binding": {
+          "rows": 25152,
+          "nnz": 1207844
+        },
+        "response_transformer_P_binding": {
+          "rows": 7583,
+          "nnz": 74595
+        },
+        "response_transformer_Q_binding": {
+          "rows": 7583,
+          "nnz": 366215
+        },
+        "terminal_location": {
+          "rows": 4,
+          "nnz": 96
+        },
+        "transformer_kVA": {
+          "rows": 120756,
+          "nnz": 211380
+        },
+        "voltage_lower": {
+          "rows": 17033,
+          "nnz": 815477
+        },
+        "voltage_upper": {
+          "rows": 20624,
+          "nnz": 986322
+        }
+      },
+      "column_families": {
+        "route_flow": 207736,
+        "SOC": 380,
+        "charge_mode": 384,
+        "Pch": 8942,
+        "Pdis": 8942,
+        "Q": 8942,
+        "injection_P": 2263,
+        "injection_Q": 2237,
+        "rho_max": 1,
+        "response_line_P": 25152,
+        "response_line_Q": 25152,
+        "response_line_correction": 25152,
+        "response_transformer_P": 7583,
+        "response_transformer_Q": 7583,
+        "node_activity": 8938
+      }
+    },
+    "C3A": {
+      "rows": 730486,
+      "columns": 339387,
+      "binary": 9322,
+      "nnz": 8609710,
+      "row_families": {
+        "NormalAmps": {
+          "rows": 2,
+          "nnz": 96
+        },
+        "PCS16": {
+          "rows": 89420,
+          "nnz": 321912
+        },
+        "connected_Pch": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "connected_Pdis": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "energy_balance": {
+          "rows": 384,
+          "nnz": 217630
+        },
+        "flow": {
+          "rows": 8942,
+          "nnz": 415760
+        },
+        "injection_P_binding": {
+          "rows": 2263,
+          "nnz": 20147
+        },
+        "injection_Q_binding": {
+          "rows": 2237,
+          "nnz": 11153
+        },
+        "line_thermal_face": {
+          "rows": 333689,
+          "nnz": 1251736
+        },
+        "no_simultaneous_charge": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "no_simultaneous_discharge": {
+          "rows": 8942,
+          "nnz": 17884
+        },
+        "node_activity_link": {
+          "rows": 8746,
+          "nnz": 216386
+        },
+        "response_line_P_binding": {
+          "rows": 25152,
+          "nnz": 1210659
+        },
+        "response_line_Q_binding": {
+          "rows": 25152,
+          "nnz": 1210862
+        },
+        "response_line_correction_binding": {
+          "rows": 25152,
+          "nnz": 1207844
+        },
+        "response_transformer_P_binding": {
+          "rows": 7583,
+          "nnz": 74595
+        },
+        "response_transformer_Q_binding": {
+          "rows": 7583,
+          "nnz": 366215
+        },
+        "transformer_kVA": {
+          "rows": 120756,
+          "nnz": 211380
+        },
+        "voltage_lower": {
+          "rows": 17033,
+          "nnz": 815477
+        },
+        "voltage_upper": {
+          "rows": 20624,
+          "nnz": 986322
+        }
+      },
+      "column_families": {
+        "route_flow": 207736,
+        "SOC": 380,
+        "charge_mode": 384,
+        "Pch": 8942,
+        "Pdis": 8942,
+        "Q": 8942,
+        "injection_P": 2263,
+        "injection_Q": 2237,
+        "rho_max": 1,
+        "response_line_P": 25152,
+        "response_line_Q": 25152,
+        "response_line_correction": 25152,
+        "response_transformer_P": 7583,
+        "response_transformer_Q": 7583,
+        "node_activity": 8938
+      }
+    }
+  },
+  "transport": {
+    "PASS": true,
+    "original_rows": 1130336,
+    "original_columns": 344967,
+    "compact_rows": 1139374,
+    "compact_columns": 354005,
+    "retained_rows": 802026,
+    "retained_columns": 339387,
+    "exact_aliases_checked": 14618,
+    "exact_identical_affine_binding_witnesses_checked": 0,
+    "deleted_row_implications_checked": 337348,
+    "exact_coefficient_fallback_rows": 0,
+    "original_P1_bit_exact": true,
+    "integer_and_full_LP_domains_identical": true,
+    "C3A_policy": "SELECTED_EXACT_CURRENT_MATRIX_PROOFS",
+    "historical_proof_packets_read": 0,
+    "pre_C2_security_independent_proof": {
+      "PASS": true,
+      "removed_rows": 287097,
+      "removed_families": {
+        "voltage_lower": 46380,
+        "voltage_upper": 43036,
+        "NormalAmps": 14686,
+        "transformer_kVA": 114252,
+        "line_thermal_face": 68743
+      },
+      "bounds_tightened": 8986,
+      "independent_exact_support_fallbacks": 0,
+      "independent_support_evaluations": 244116,
+      "original_integer_and_full_LP_domain_preserved": true,
+      "Native_optimize_calls": 0
+    },
+    "Native_optimize_calls": 0,
+    "selected_C3A_independent_proof_PASS": true,
+    "selected_C3A_rows_removed": 71540,
+    "selected_C3A_bounds_tightened": 95122,
+    "selected_C3A_original_P1_bit_exact": true,
+    "selected_C3A_integer_and_full_LP_domains_identical": true
+  },
+  "C3A_proof": {
+    "path": "D:\\v42_root180_development_20261011\\dates\\B2\\2025-05-01\\attempts\\root180_once\\output\\CURRENT_EXACT_C3A_PROOF.json",
+    "sha256": "824daab60a9f15ba1c8535497ae3487374d4524d650510454821e02752c75df9",
+    "bytes": 2409
+  },
+  "old_optimization_results_read": 0,
+  "old_UB_LB_gap_reused": 0,
+  "fresh_initial_UB": 0.6760534504652342,
+  "fresh_U4_start_vector_SHA": "1a1212368b833a14c225bd1ceff22ba8334fdef4e4a12c6b9a08b2a578166072",
+  "fresh_U4_result": {
+    "case_sha": "35ea2a1b9f0ded4d91333933fad3e9182437f021a19d773915b74d47c30cd4df",
+    "label": "FRESH_U4",
+    "method": "U4",
+    "requested_seconds": 90.0,
+    "native_receipt": {
+      "component": "UB",
+      "track": "M_U4",
+      "label": "FRESH_U4",
+      "requested_seconds": 90.0,
+      "effective_TimeLimit": 90.0,
+      "entered_native": true,
+      "status": "FINISHED",
+      "UTC": "2026-10-11T12:50:16.491565+00:00",
+      "Native_Runtime": 28.332000017166138,
+      "Native_status": 2,
+      "runtime_unavailable": false,
+      "root_completed": false,
+      "finished_UTC": "2026-10-11T12:50:44.826527+00:00"
+    },
+    "Native_Runtime": 28.332000017166138,
+    "Native_Work": 39.2622017482342,
+    "Native_status": 2,
+    "Native_SolCount": 1,
+    "native_best_bound_diagnostic": 0.6760534504652342,
+    "restricted_BestBound_is_Global_LB": false,
+    "Global_LB_candidate": null,
+    "Solver_ObjVal": 0.6760534504652342,
+    "Solver_ObjBound": 0.6760534504652342,
+    "Solver_MIPGap": 0.0,
+    "Solver_MIPGap_percent": 0.0,
+    "solver_global_LB": null,
+    "solver_global_gap": null,
+    "solver_global_gap_percent": null,
+    "solver_global_gap_valid": false,
+    "solver_global_gap_target_met": false,
+    "solver_bound_provenance": null,
+    "solver_bound_rejection_reason": "RESTRICTED_OR_UNPROVEN_DOMAIN",
+    "full_MILP_bound_valid_for_global_evaluation": false,
+    "independent_dual_status": "MIP_API_DOES_NOT_EXPOSE_ORIGINAL_ROW_PI_NO_ADDITIONAL_LP",
+    "Root_LP_callback_does_not_supply_Pi": true,
+    "B_and_B_Node_count": 0.0,
+    "Full_MILP_Native_Runtime": null,
+    "Solver_MemUsed_GB": 1.079395889,
+    "Solver_MaxMemUsed_GB": 3.357769487,
+    "initial_verified_UB": 0.6760534504652342,
+    "final_verified_UB": 0.6760534504652342,
+    "start_UB": 0.6760534504652342,
+    "best_validated_UB": 0.6760534504652342,
+    "certified_gain": 0.0,
+    "accepted_candidates": [
+      {
+        "packet": {
+          "path": "D:\\v42_root180_development_20261011\\dates\\B2\\2025-05-01\\attempts\\root180_once\\output\\FRESH_U4\\RAW_00.npz",
+          "sha256": "6b445ef853d01d7a3c73755c73b91c060d3be9689ad547d20859146879ed50a4"
+        },
+        "exact_Global_UB": "3044674067597767/4503599627370496"
+      }
+    ],
+    "rejected_candidates": [],
+    "capture_errors": [],
+    "native_error": null,
+    "native_error_code": null,
+    "unrestricted_original_C3A_MILP": false,
+    "full_MILP_bound_independently_certified": false,
+    "original_model_identity": {
+      "path": "D:\\v42_root180_development_20261011\\dates\\B2\\2025-05-01\\attempts\\root180_once\\output\\FRESH_U4\\MODEL_IDENTITY.json",
+      "sha256": "678c57126aded188cb3194d92e835e12329bea789ca9615a746b143888abebe3"
+    },
+    "effective_MIPGap": 0.005,
+    "effective_MIPGapAbs": 1e-10,
+    "effective_TimeLimit": 90.0,
+    "cumulative_native_runtime_seconds": 31.13599991798401,
+    "native_budget_overshoot_seconds": 0.0,
+    "Presolve_seconds": 23.29,
+    "Crossover_seconds": null,
+    "Barrier_seconds": null,
+    "Presolved_Rows": 589864,
+    "Presolved_Columns": 327443,
+    "Presolved_NNZ": 7802065,
+    "Root_completion_native_elapsed_seconds": null,
+    "Root_LP_seconds": null,
+    "Root_LP_status": "NOT_REPORTED_OR_ROOT_INCOMPLETE",
+    "Post_root_native_seconds": null,
+    "memory_after_native": {
+      "RSS_bytes": 5656199168,
+      "private_bytes": 6898782208,
+      "peak_RSS_bytes": 10190266368,
+      "peak_private_commit_bytes": 11359748096,
+      "RAM_available": 13467652096,
+      "RAM_total": 34049220608,
+      "RAM_used": 20581568512,
+      "Commit_total": 44169699328,
+      "Commit_limit": 68408958976,
+      "Commit_available": 24239259648,
+      "Commit_peak": 68408958976
+    },
+    "model_build_wall_seconds": 2.6759023999329656,
+    "native_log": {
+      "path": "D:\\v42_root180_development_20261011\\dates\\B2\\2025-05-01\\attempts\\root180_once\\output\\FRESH_U4\\NATIVE_GUROBI.log",
+      "sha256": "d457b1a50c378c89bfb9088c7d40e6fc245a6fd8b32a503688effffb496c1543"
+    },
+    "telemetry_receipt": {
+      "path": "D:\\v42_root180_development_20261011\\dates\\B2\\2025-05-01\\attempts\\root180_once\\output\\FRESH_U4\\RESULT.json",
+      "sha256": "6ff1e166b4a8c6893d4ec6c0726eb4b0e4d7f700ad09d0436f9bc07d60319b33"
+    }
+  },
+  "final_UB": 0.6760534504652342,
+  "final_original_FULL_replay": {
+    "path": "D:\\v42_root180_development_20261011\\dates\\B2\\2025-05-01\\attempts\\root180_once\\output\\FINAL_FULL_POINT.REPLAY.json",
+    "sha256": "ae2635a1b6eb72523a2989b1184489187728ee8747458984836150cf2d6b4b0c",
+    "bytes": 3678
+  },
+  "full": {
+    "case_sha": "35ea2a1b9f0ded4d91333933fad3e9182437f021a19d773915b74d47c30cd4df",
+    "label": "FULL_ROOT_ONCE",
+    "method": "FULL_MILP",
+    "requested_seconds": 600.0,
+    "native_receipt": {
+      "component": "UB",
+      "track": "M_FULL_MILP",
+      "label": "FULL_ROOT_ONCE",
+      "requested_seconds": 600.0,
+      "effective_TimeLimit": 600.0,
+      "entered_native": true,
+      "status": "FINISHED",
+      "UTC": "2026-10-11T12:50:50.135710+00:00",
+      "root_completed_native_elapsed_seconds": 600.0250000953674,
+      "Native_Runtime": 600.2009999752045,
+      "Native_status": 9,
+      "runtime_unavailable": false,
+      "root_completed": true,
+      "finished_UTC": "2026-10-11T13:00:50.339668+00:00"
+    },
+    "Native_Runtime": 600.2009999752045,
+    "Native_Work": 943.5866653238452,
+    "Native_status": 9,
+    "Native_SolCount": 1,
+    "native_best_bound_diagnostic": 0.2898247524586287,
+    "restricted_BestBound_is_Global_LB": false,
+    "Global_LB_candidate": 0.2898247524586287,
+    "Solver_ObjVal": 0.6760534504652342,
+    "Solver_ObjBound": 0.2898247524586287,
+    "Solver_MIPGap": 0.5712990559264473,
+    "Solver_MIPGap_percent": 57.129905592644725,
+    "solver_global_LB": 0.2898247524586287,
+    "solver_global_gap": 0.5712990559264473,
+    "solver_global_gap_percent": 57.129905592644725,
+    "solver_global_gap_valid": true,
+    "solver_global_gap_target_met": false,
+    "solver_bound_provenance": "EXACT_FULL_C3A_MILP_SOLVER_BOUND",
+    "solver_bound_rejection_reason": null,
+    "full_MILP_bound_valid_for_global_evaluation": true,
+    "independent_dual_status": "MIP_API_DOES_NOT_EXPOSE_ORIGINAL_ROW_PI_NO_ADDITIONAL_LP",
+    "Root_LP_callback_does_not_supply_Pi": true,
+    "B_and_B_Node_count": 1.0,
+    "Full_MILP_Native_Runtime": 600.2009999752045,
+    "Solver_MemUsed_GB": 1.143094045,
+    "Solver_MaxMemUsed_GB": 4.664949765,
+    "initial_verified_UB": 0.6760534504652342,
+    "final_verified_UB": 0.6760534504652342,
+    "start_UB": 0.6760534504652342,
+    "best_validated_UB": 0.6760534504652342,
+    "certified_gain": 0.0,
+    "accepted_candidates": [
+      {
+        "packet": {
+          "path": "D:\\v42_root180_development_20261011\\dates\\B2\\2025-05-01\\attempts\\root180_once\\output\\FULL_ROOT_ONCE\\RAW_00.npz",
+          "sha256": "2b684c27dcec0cef1faacf5aa28940cd23bbd080079bd3d867a3c5b7424e3c34"
+        },
+        "exact_Global_UB": "3044674067597767/4503599627370496"
+      }
+    ],
+    "rejected_candidates": [],
+    "capture_errors": [],
+    "native_error": null,
+    "native_error_code": null,
+    "unrestricted_original_C3A_MILP": true,
+    "full_MILP_bound_independently_certified": false,
+    "original_model_identity": {
+      "path": "D:\\v42_root180_development_20261011\\dates\\B2\\2025-05-01\\attempts\\root180_once\\output\\FULL_ROOT_ONCE\\MODEL_IDENTITY.json",
+      "sha256": "4fac7f0976d3a12b7473a8f0bea868663154149f9c5866992d4ced9c601c6bcb"
+    },
+    "effective_MIPGap": 0.03,
+    "effective_MIPGapAbs": 0.0,
+    "effective_TimeLimit": 600.0,
+    "cumulative_native_runtime_seconds": 631.3369998931885,
+    "native_budget_overshoot_seconds": 0.0,
+    "Presolve_seconds": 66.0,
+    "Crossover_seconds": null,
+    "Barrier_seconds": 558.02,
+    "Presolved_Rows": 624655,
+    "Presolved_Columns": 339287,
+    "Presolved_NNZ": 8719504,
+    "Root_completion_native_elapsed_seconds": 600.0250000953674,
+    "Root_LP_seconds": 532.16,
+    "Root_LP_status": "NATIVE_LOG_REPORTED",
+    "Post_root_native_seconds": 0.17599987983703613,
+    "memory_after_native": {
+      "RSS_bytes": 5692743680,
+      "private_bytes": 6950154240,
+      "peak_RSS_bytes": 10190266368,
+      "peak_private_commit_bytes": 11359748096,
+      "RAM_available": 13589733376,
+      "RAM_total": 34049220608,
+      "RAM_used": 20459487232,
+      "Commit_total": 43486347264,
+      "Commit_limit": 68408958976,
+      "Commit_available": 24922611712,
+      "Commit_peak": 68408958976
+    },
+    "model_build_wall_seconds": 2.8481900000479072,
+    "native_log": {
+      "path": "D:\\v42_root180_development_20261011\\dates\\B2\\2025-05-01\\attempts\\root180_once\\output\\FULL_ROOT_ONCE\\NATIVE_GUROBI.log",
+      "sha256": "61c01b072d41c33ff3035c63aeaa9ecef031c305cd473d305ea1f98f2c093602"
+    },
+    "telemetry_receipt": {
+      "path": "D:\\v42_root180_development_20261011\\dates\\B2\\2025-05-01\\attempts\\root180_once\\output\\FULL_ROOT_ONCE\\RESULT.json",
+      "sha256": "d23293d97e46c20604a7829c3585f5c8acbb561bebb0d229b058f5b76ebb60ea"
+    }
+  },
+  "U4_bound_global": false,
+  "Native_Runtime": 631.3369998931885,
+  "Full_native_calls": 1,
+  "memory": {
+    "RSS_bytes": 4678430720,
+    "private_bytes": 5791936512,
+    "peak_RSS_bytes": 10190266368,
+    "peak_private_commit_bytes": 11359748096,
+    "RAM_available": 14603030528,
+    "RAM_total": 34049220608,
+    "RAM_used": 19446190080,
+    "Commit_total": 42245963776,
+    "Commit_limit": 68408958976,
+    "Commit_available": 26162995200,
+    "Commit_peak": 68408958976
+  },
+  "copy_elision": {
+    "source_sha": "9f494fb54dc966cea62dd537b7708cdfcab72b8afb2fc85d5f1a3e8b8db75443",
+    "original_ast_sha": "b17acf1fa91b1ec5465ff652821218c312176099791cf5834b7da3939997e189",
+    "routed_ast_sha": "38ecde5b88ff2f9c716ee6c02b24850a594f558a500ffa4c2468bb2da5dd64c7",
+    "only_loader_routing_and_phase_scopes": false,
+    "numeric_constants_changed": false,
+    "source_statements_preserved": true,
+    "FULL_Compact_C3A_builds_preserved": true,
+    "model_copy_elision": {
+      "applied": true,
+      "eliminated_model_copies": 1,
+      "fresh_FULL_models": 1,
+      "snapshot": "ORIGINAL_UPDATED_MODEL_BEFORE_NATIVE_SOLVE_FINALLY_DISPOSE",
+      "original_native_owner_disposal_preserved": true,
+      "scientific_AST_roundtrip_identical": true,
+      "numeric_constants_changed": false,
+      "candidates_removed": 0,
+      "matrices_reused_from_other_builds": 0
+    }
+  },
+  "production_results_promoted": 0,
+  "development_only": true,
+  "campaign_automatically_released": false,
+  "UTC": "2026-10-11T13:00:53.347199+00:00"
+}

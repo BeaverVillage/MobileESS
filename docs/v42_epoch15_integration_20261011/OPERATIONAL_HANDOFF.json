@@ -1,6 +1,5 @@
 {
   "schema": "SVR11_EPOCH15_OPERATIONAL_HANDOFF_V1",
-  "PASS": true,
   "observed_UTC": "2026-10-11T11:02:14.347760+00:00",
   "observed_KST": "2026-10-11T20:02:14.363761+09:00",
   "root": "D:\\v42_svr11_may_20261011_15",
@@ -45,15 +44,6 @@
       "bytes": 2368
     }
   },
-  "campaign_ledger_snapshot_receipt": {
-    "path": "D:\\v42_svr11_may_20261011_15\\CAMPAIGN_LEDGER.json",
-    "sha256": "a8371ddc6dbcc2b2b42828be59d85475ff77c4cdf129c3ee02f8511050e1f7cf",
-    "bytes": 435425,
-    "captured_UTC": "2026-10-11T11:02:06.973370+00:00",
-    "mutable_runtime_snapshot": true
-  },
-  "campaign_status": "RUNNING",
-  "current_policy": "B2",
   "policy_inventory": {
     "B0": {
       "counts": {
@@ -66,18 +56,6 @@
       "reused_results": 31,
       "old_optimization_reused": false,
       "attempt_namespaces_owned_by_new_epoch": false
-    },
-    "B2": {
-      "counts": {
-        "PASS": 0,
-        "FAIL": 0,
-        "RUNNING": 1,
-        "NOT_EXECUTED": 30
-      },
-      "attempts": 1,
-      "reused_results": 0,
-      "old_optimization_reused": false,
-      "attempt_namespaces_owned_by_new_epoch": true
     },
     "B1": {
       "counts": {
@@ -102,60 +80,6 @@
       "reused_results": 0,
       "old_optimization_reused": false,
       "attempt_namespaces_owned_by_new_epoch": true
-    }
-  },
-  "May01_May02": {
-    "2025-05-01": {
-      "status": "RUNNING",
-      "attempts": [
-        "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json"
-      ],
-      "request": "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json",
-      "worker": {
-        "PID": 105376,
-        "create_time": 1791716380.3288803,
-        "command": [
-          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
-          "-B",
-          "-X",
-          "utf8",
-          "-m",
-          "v42_svr11.worker",
-          "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json"
-        ],
-        "cwd": "D:\\v42_svr11_epoch15_20261011",
-        "CPU_seconds": 142.046875,
-        "UTC": "2026-10-11T11:02:06.380928+00:00",
-        "arm": "B2",
-        "day": "2025-05-01",
-        "worker_slot": 1,
-        "request": "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json",
-        "b3_stage": null
-      },
-      "Native_Runtime": null,
-      "previous_epoch_Native_Runtime": 1800.3289999961853,
-      "old_optimization_reused": false,
-      "fresh_Native_zero_required": true,
-      "fresh_request_receipt": {
-        "path": "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json",
-        "sha256": "0830c624085059b1e16327f66e21740e96388f33da6fcddff8fb0ee938382edf",
-        "bytes": 1482,
-        "captured_UTC": "2026-10-11T11:02:10.140585+00:00",
-        "mutable_runtime_snapshot": false
-      },
-      "retry_starts_from_native_zero": true
-    },
-    "2025-05-02": {
-      "status": "NOT_EXECUTED",
-      "attempts": [],
-      "request": null,
-      "worker": null,
-      "Native_Runtime": 0,
-      "previous_epoch_Native_Runtime": 1800.3960001468658,
-      "old_optimization_reused": false,
-      "fresh_Native_zero_required": true,
-      "new_attempt_not_admitted": true,
-      "Native_optimization_entered": false
     }
   },
   "supervisor": {
@@ -245,134 +169,9 @@
       "actual_private_bytes": 541933568
     }
   },
-  "active_workers": [
-    {
-      "process": {
-        "PID": 105376,
-        "create_time": 1791716380.3288803,
-        "command": [
-          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
-          "-B",
-          "-X",
-          "utf8",
-          "-m",
-          "v42_svr11.worker",
-          "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json"
-        ],
-        "cwd": "D:\\v42_svr11_epoch15_20261011",
-        "CPU_seconds": 145.65625,
-        "UTC": "2026-10-11T11:02:10.107079+00:00",
-        "arm": "B2",
-        "day": "2025-05-01",
-        "worker_slot": 1,
-        "request": "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json",
-        "b3_stage": null,
-        "live": true,
-        "actual_create_time": 1791716380.3288803,
-        "actual_command": [
-          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
-          "-B",
-          "-X",
-          "utf8",
-          "-m",
-          "v42_svr11.worker",
-          "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json"
-        ],
-        "actual_cwd": "D:\\v42_svr11_epoch15_20261011",
-        "process_status": "running",
-        "actual_CPU_seconds": 145.6875,
-        "actual_RSS_bytes": 4707631104,
-        "actual_private_bytes": 5822713856
-      },
-      "source_SHA": "7961f1b3a1837b017a5d8229cd1f9f7cdead95e614698da1ca8bd4be15491597",
-      "request": {
-        "path": "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json",
-        "sha256": "0830c624085059b1e16327f66e21740e96388f33da6fcddff8fb0ee938382edf",
-        "bytes": 1482,
-        "captured_UTC": "2026-10-11T11:02:10.126085+00:00",
-        "mutable_runtime_snapshot": false
-      },
-      "request_summary": {
-        "arm": "B2",
-        "day": "2025-05-01",
-        "attempt_id": "attempt_01",
-        "source_SHA": "7961f1b3a1837b017a5d8229cd1f9f7cdead95e614698da1ca8bd4be15491597",
-        "code_root": "D:\\v42_svr11_epoch15_20261011",
-        "root": "D:\\v42_svr11_may_20261011_15",
-        "output": "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\output",
-        "native_budget_seconds": 1800,
-        "retry_starts_from_native_zero": true
-      },
-      "progress_receipt": {
-        "path": "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\progress.json",
-        "sha256": "9fdc1ac2067b02fbec21f755fca36745efd47c8f516538b6acce7b705714e63f",
-        "bytes": 788,
-        "captured_UTC": "2026-10-11T11:02:10.126085+00:00",
-        "mutable_runtime_snapshot": true
-      },
-      "progress": {
-        "phase": "M_EXISTING_COMPACT_STATIC_PRESOLVE",
-        "arm": "B2",
-        "day": "2025-05-01",
-        "source_SHA": "7961f1b3a1837b017a5d8229cd1f9f7cdead95e614698da1ca8bd4be15491597",
-        "worker": {
-          "PID": 105376,
-          "create_time": 1791716380.3288803,
-          "command": [
-            "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
-            "-B",
-            "-X",
-            "utf8",
-            "-m",
-            "v42_svr11.worker",
-            "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\request.json"
-          ],
-          "cwd": "D:\\v42_svr11_epoch15_20261011",
-          "CPU_seconds": 0.265625,
-          "UTC": "2026-10-11T10:59:40.641876+00:00"
-        },
-        "Native_Runtime": 0,
-        "UTC": "2026-10-11T11:02:07.636339+00:00",
-        "wall_seconds": 146.99977689993102,
-        "native_runtime_seconds": 0
-      },
-      "native_ledgers": [
-        {
-          "receipt": {
-            "path": "D:\\v42_svr11_may_20261011_15\\dates\\B2\\2025-05-01\\attempts\\attempt_01\\NATIVE_RUNTIME_LEDGER.json",
-            "sha256": "b2b5a3fec298eb9047deee7bdf62537c7d090753087fe3a5e720204cb32f1fac",
-            "bytes": 497,
-            "captured_UTC": "2026-10-11T11:02:10.131081+00:00",
-            "mutable_runtime_snapshot": true
-          },
-          "ledger": {
-            "wall_ceiling_seconds": null,
-            "Native_ceiling_seconds": 1800.0,
-            "policy_version": "NATIVE90_V2",
-            "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
-            "inclusive_T0": 588441.7116911,
-            "UTC": "2026-10-11T10:59:43.624869+00:00",
-            "wall_seconds": 1.989991869777441e-05,
-            "measured_Native_Runtime": 0.0,
-            "calls": [],
-            "costs": [],
-            "admission_failures": [],
-            "inflight": null,
-            "P2_calls": 0,
-            "historical_costs_reused": false,
-            "prior_attempt": null,
-            "date_runtime_reset": false
-          }
-        }
-      ],
-      "known_completed_Native_Runtime": 0.0,
-      "native_call_count": 0,
-      "native_call_inflight": false
-    }
-  ],
+  "active_workers": [],
   "worker_counts": {
     "B0": 3,
-    "B2": 2,
     "B1": 1,
     "B3": 2
   },
@@ -612,44 +411,7 @@
         "bytes": 6666
       }
     },
-    "old_May03_worker": {
-      "PID": 120944,
-      "create_time": 1791712598.6048033,
-      "command": [
-        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
-        "-B",
-        "-X",
-        "utf8",
-        "-m",
-        "v42_svr11.worker",
-        "D:\\v42_svr11_may_20261011_14\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\request.json"
-      ],
-      "cwd": "D:\\v42_svr11_epoch14_20261011",
-      "CPU_seconds": 857.21875,
-      "UTC": "2026-10-11T10:12:05.439044+00:00",
-      "arm": "B2",
-      "day": "2025-05-03",
-      "worker_slot": 1,
-      "request": "D:\\v42_svr11_may_20261011_14\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\request.json",
-      "b3_stage": null,
-      "live": false
-    },
-    "old_May03_result": {
-      "path": "D:\\v42_svr11_may_20261011_14\\dates\\B2\\2025-05-03\\attempts\\attempt_01\\RESULT.json",
-      "sha256": "8cc6caa6f039664e1a80c17d3151b145fb567b389611a0f818b67545a8a1da39",
-      "bytes": 15004566,
-      "captured_UTC": "2026-10-11T11:02:14.346760+00:00",
-      "mutable_runtime_snapshot": false
-    },
-    "old_May03_result_summary": {
-      "PASS": true,
-      "status": "PASS",
-      "source_SHA": "7d500e43d6b6fbd1b148918bada3c7533b1ee6eb070ef732a62dd2cb4904922c",
-      "Native_Runtime": 1800.690000295639,
-      "AC_status": "AC PASS"
-    },
     "old_result_promoted_to_new_B2": false,
-    "old_ledger_status_preserved": "RUNNING",
     "healthy_workers_terminated": 0,
     "predecessor_isolation": {
       "path": "D:\\v42_svr11_may_20261011_14\\SOURCE_EPOCH_SUCCESSOR_ISOLATION.json",
@@ -657,98 +419,9 @@
       "bytes": 6666
     }
   },
-  "memory_admission_wait": {
-    "receipt": {
-      "path": "D:\\v42_svr11_may_20261011_15\\MEMORY_ADMISSION_WAIT.json",
-      "sha256": "63a15a69fc67eaa399a3949ad6101e420ed65920e41352a03636f337a214eeae",
-      "bytes": 557
-    },
-    "snapshot": {
-      "policy": "B2",
-      "memory": {
-        "RAM_total": 34049220608,
-        "RAM_available": 13936447488,
-        "RAM_used": 20112773120,
-        "Commit_total": 46978355200,
-        "Commit_limit": 68408958976,
-        "Commit_available": 21430603776,
-        "Commit_peak": 68408958976
-      },
-      "contract": {
-        "system_reserve_bytes": 2147483648,
-        "worker_reservation_bytes": {
-          "M1": 13958643712,
-          "A2": 10737418240,
-          "M2": 13958643712,
-          "ACTUAL": 4294967296
-        }
-      },
-      "healthy_workers_not_terminated": true,
-      "UTC": "2026-10-11T11:02:11.560169+00:00"
-    }
-  },
   "monitoring_API": {
     "URL": "http://127.0.0.1:8796/api/state",
-    "HTTP_status": 200,
-    "response_sha256": "b49f8eaff6feb6be25be5f162c834a0c3f69178b0964110166eb54fc91d2921f",
-    "response_bytes": 259269,
-    "snapshot": {
-      "UTC": "2026-10-11T11:02:10.149588+00:00",
-      "root": "D:\\v42_svr11_may_20261011_15",
-      "source_SHA": "7961f1b3a1837b017a5d8229cd1f9f7cdead95e614698da1ca8bd4be15491597",
-      "status": "RUNNING",
-      "policy": "B2",
-      "counts": {
-        "PASS": 31,
-        "FAIL": 0,
-        "RUNNING": 1,
-        "NOT_EXECUTED": 92,
-        "completed": 31
-      },
-      "workers": [
-        {
-          "arm": "B2",
-          "day": "2025-05-01",
-          "PID": 105376,
-          "phase": "M_EXISTING_COMPACT_STATIC_PRESOLVE",
-          "optimization_status": "대기",
-          "Native_Runtime": 0,
-          "UB": null,
-          "Solver_ObjVal": null,
-          "Solver_ObjBound": null,
-          "Solver_MIPGap": null,
-          "Solver_MIPGap_percent": null,
-          "solver_global_LB": null,
-          "solver_global_gap": null,
-          "solver_global_gap_percent": null,
-          "solver_global_gap_valid": null,
-          "solver_global_gap_target_met": null,
-          "solver_bound_provenance": null,
-          "solver_bound_rejection_reason": null,
-          "Root_LP_seconds": null,
-          "Root_LP_status": null,
-          "B_and_B_Node_count": null,
-          "Full_MILP_Native_Runtime": null,
-          "Solver_MemUsed_GB": null,
-          "Solver_MaxMemUsed_GB": null,
-          "full_MILP_telemetry": null,
-          "full_MILP_bound_identity": null,
-          "full_MILP_native_log": null,
-          "initial_verified_UB": null,
-          "final_verified_UB": null,
-          "certified_LB": null,
-          "certified_Gap": null,
-          "independent_global_bound_verified": false,
-          "independent_global_gap_available": false,
-          "independent_global_gap_provenance": null,
-          "independent_dual_status": null,
-          "global_gap_certified": false,
-          "Fresh": "대기"
-        }
-      ],
-      "ETA": "측정 중",
-      "errors": []
-    }
+    "HTTP_status": 200
   },
   "Windows_jobs": [
     {
@@ -838,5 +511,7 @@
     "Windows_jobs_changed": 0,
     "automation_changed": 0,
     "only_this_report_written": true
-  }
+  },
+  "B2_runtime_evidence_discarded": true,
+  "B2_final_disposition": "USER_CANCELLED_DISCARDED"
 }

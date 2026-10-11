@@ -1,0 +1,126 @@
+{
+  "schema": "V42_B2_EXACT_ALLOWLIST_DELETE_INVENTORY_V1",
+  "UTC": "2026-10-11T12:20:03.277806+00:00",
+  "targets": [
+    {
+      "path": "D:\\v42_svr11_may_20261011_14\\dates\\B2",
+      "exists": true,
+      "file_count": 272,
+      "bytes": 822399969,
+      "directory_count": 83
+    },
+    {
+      "path": "D:\\v42_svr11_may_20261011_15\\dates\\B2",
+      "exists": true,
+      "file_count": 77,
+      "bytes": 225833526,
+      "directory_count": 18
+    },
+    {
+      "path": "D:\\v42_svr11_may_20261011_14\\B2_FIRST3_USER_HANDOFF.json",
+      "exists": true,
+      "file_count": 1,
+      "bytes": 10949,
+      "directory_count": 0
+    }
+  ],
+  "total_files": 350,
+  "total_bytes": 1048244444,
+  "reparse_points": 0,
+  "mutable_mixed_files_to_sanitize": [
+    "CAMPAIGN_LEDGER.json",
+    "REPORT.json",
+    "REPORT.md"
+  ],
+  "immutable_manifests_not_modified": true,
+  "preserved_directories": [
+    "raw",
+    "inputs",
+    "models",
+    "hardware",
+    "dates/B0",
+    "dates/B1",
+    "dates/B3",
+    "reuse"
+  ],
+  "scoped_processes": [
+    {
+      "PID": 110748,
+      "create_time": 1791708403.3228476,
+      "parent_PID": 99996,
+      "status": "stopped",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_svr11.controller",
+        "D:\\v42_svr11_may_20261011_14"
+      ],
+      "kind": "SUPERVISOR",
+      "descendants": [
+        {
+          "PID": 110560,
+          "create_time": 1791708403.3343155,
+          "command": [
+            "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+            "0x4"
+          ]
+        }
+      ]
+    }
+  ],
+  "controllers": [
+    {
+      "PID": 110748,
+      "create_time": 1791708403.3228476,
+      "status": "stopped",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_svr11.controller",
+        "D:\\v42_svr11_may_20261011_14"
+      ],
+      "state": "LIVE",
+      "descendants": [
+        {
+          "PID": 110560,
+          "create_time": 1791708403.3343155,
+          "command": [
+            "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+            "0x4"
+          ]
+        }
+      ],
+      "root": "D:\\v42_svr11_may_20261011_14"
+    },
+    {
+      "PID": 72476,
+      "expected_created": 1791716379.4973118,
+      "state": "EXITED",
+      "root": "D:\\v42_svr11_may_20261011_15"
+    }
+  ],
+  "scheduled_restart_tasks": [
+    {
+      "TaskName": "MobileESS_V42_May_B2_B3_Autonomous_Monitor",
+      "TaskPath": "\\",
+      "State": "Disabled",
+      "Arguments": "-B -X utf8 D:\\v42_svr11_epoch16_20261011\\tools\\svr11_monitor_ui.py safeguard D:\\v42_svr11_may_20261011_16 --monitor-only",
+      "Execute": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe"
+    },
+    {
+      "TaskName": "MobileESS_V42_May_B2_B3_Autonomous_Supervisor",
+      "TaskPath": "\\",
+      "State": "Disabled",
+      "Arguments": "-B -X utf8 D:\\v42_svr11_epoch16_20261011\\tools\\svr11_monitor_ui.py safeguard D:\\v42_svr11_may_20261011_16",
+      "Execute": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe"
+    }
+  ],
+  "hourly_automations": [],
+  "deletion_executed": false
+}

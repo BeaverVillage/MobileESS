@@ -1,0 +1,49 @@
+{
+  "PASS": true,
+  "patch": {
+    "path": "D:\\v42_root180_audit_20261011\\EPOCH17_B0_REUSE_PATCH.diff",
+    "sha256": "5ad3a2d4d4aa356a242f999c465411867fea746bcf5b9dd336cdd2a50b38debf",
+    "bytes": 11731
+  },
+  "candidate": {
+    "path": "D:\\v42_root180_audit_20261011\\prepare_svr11_epoch17_B0_candidate.py",
+    "sha256": "0b77770eb49def1ba1c8bed37324aa6654413ebff886fcffcb918c3e67572c74",
+    "bytes": 15456
+  },
+  "attacks": [
+    {
+      "name": "ORIGINAL_RESULT_SHA",
+      "rejected": true,
+      "reason": "REUSE_PROOF_IDENTITY"
+    },
+    {
+      "name": "CURRENT_PROTECTED_SOURCE",
+      "rejected": true,
+      "reason": "EPOCH15_UNCHANGED_PHYSICAL_OR_A_SCIENCE_DRIFT:['v42_svr11/b0_direct.py']"
+    },
+    {
+      "name": "CURRENT_RAW_RECEIPT_SHA",
+      "rejected": true,
+      "reason": "ROOT180_B0_PROTECTED_BYTE_DRIFT:D:\\v42_root180_audit_20261011\\EPOCH17_B0_REUSE_DRYRUN\\raw\\2025-05-01\\POWER_AUTHORITY.json"
+    },
+    {
+      "name": "CURRENT_THERMAL_RECEIPT_SHA",
+      "rejected": true,
+      "reason": "ROOT180_B0_PROTECTED_BYTE_DRIFT:D:\\v42_root180_audit_20261011\\EPOCH17_B0_REUSE_DRYRUN\\hardware\\THERMAL.json"
+    },
+    {
+      "name": "INHERITED_PROOF_SHA",
+      "rejected": true,
+      "reason": "ROOT180_B0_PROTECTED_BYTE_DRIFT:D:\\v42_svr11_may_20261011_15\\reuse\\2025-05-01_B0.json"
+    },
+    {
+      "name": "ORIGINAL_B0_NOT_PASS",
+      "rejected": true,
+      "reason": "ROOT180_QUALIFIED_B0_REQUIRED"
+    }
+  ],
+  "live_or_original_files_mutated": 0,
+  "Native_calls": 0,
+  "AC_calls": 0,
+  "UTC": "2026-10-11T12:54:25.754383+00:00"
+}
