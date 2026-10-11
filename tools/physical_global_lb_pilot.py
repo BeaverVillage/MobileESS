@@ -277,7 +277,10 @@ def unit_solve(unit):
         model = gp.Model('SOURCE18R_PHYSICAL_' + unit)
         for name, value in dict(Threads=1, TimeLimit=29., MIPGap=0., MIPGapAbs=0.,
             FeasibilityTol=1e-8, OptimalityTol=1e-8, IntFeasTol=1e-8, SoftMemLimit=2.,
-            LogFile=str(target/'NATIVE_GUROBI.log'), OutputFlag=1).items():
+            # Gurobi's Windows log writer rejects the Unicode absolute path
+            # exposed by the workspace junction. The ASCII relative path points
+            # to the same owned file and changes no mathematical input.
+            LogFile=str((target/'NATIVE_GUROBI.log').relative_to(ROOT)), OutputFlag=1).items():
             setattr(model.Params, name, value)
         variables = model.addMVar(A.shape[1], lb=d['lower'], ub=d['upper'], vtype=d['types'], obj=d['objective'])
         variables.VarName = d['names'].tolist()
@@ -408,13 +411,50 @@ def run_pilot():
         units=results))
 
 
+def repair_pre_native_logpath():
+    """Archive ONLY the proved zero-optimize file-IO failure; never reset budget.
+
+    No numerical, memory, interrupted, or post-optimize trial can use this path.
+    All original physics/weights/source artifacts stay byte-for-byte in place.
+    """
+    require(not (OUT/'PRE_NATIVE_LOGPATH_REPAIR.json').exists(), 'LOGPATH_REPAIR_ALREADY_USED')
+    stop = read(OUT/'STOP.json')
+    failed = read(OUT/'MESS01/ERROR.json')
+    require(stop['optimize_calls'] == 0 and stop['Native_Runtime'] == 0.
+        and stop['failed_unit'] == 'MESS01' and stop['reason'] == 'UNIT_FAILURE', 'REPAIR_REQUIRES_PROVEN_ZERO_NATIVE')
+    require(failed['error'] == "GurobiError(10013, 'Unable to write file')"
+        and failed['Native_Runtime'] == 0. and failed['optimize_started'] is False
+        and not (OUT/'MESS01/STARTED.json').exists(), 'REPAIR_NOT_PRE_NATIVE_LOGPATH_ONLY')
+    require(not any((OUT/u).exists() for u in UNITS[1:]), 'REPAIR_PREVIOUS_OTHER_UNITS_EXIST')
+    before = {n: file_sha(OUT/n) for n in ('NATIVE0.json', 'WEIGHTS.json', 'INDEPENDENT_NATIVE0.json')}
+    archive = OUT/'failed_pre_native_logpath'
+    archive.mkdir(exist_ok=False)
+    archived = {}
+    for name in ('MESS01', 'MESS01.console.log', 'PILOT_STARTED.json', 'NATIVE_LEDGER.json', 'STOP.json'):
+        origin, target = OUT/name, archive/name
+        require(origin.resolve().is_relative_to(OUT.resolve()) and target.resolve().is_relative_to(OUT.resolve()),
+                'REPAIR_MOVE_OUTSIDE_OWNED_WORKSPACE')
+        origin.rename(target)
+    for p in archive.rglob('*'):
+        if p.is_file():
+            archived[str(p.relative_to(archive))] = file_sha(p)
+    require(before == {n: file_sha(OUT/n) for n in before}, 'REPAIR_MATHEMATICAL_PACKET_DRIFT')
+    write(OUT/'PRE_NATIVE_LOGPATH_REPAIR.json', dict(PASS=True, prior_optimize_calls=0, prior_Native_Runtime=0.,
+        numerical_errors=0, memory_errors=0, mathematical_packets_unchanged=before, archived_files=archived,
+        repair='absolute Unicode LogFile -> ASCII relative LogFile; same owned output; no equation/weight/parameter change',
+        budget_reset=False, Native_budget_remaining=120.))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--native0', action='store_true')
     parser.add_argument('--run-pilot', action='store_true')
     parser.add_argument('--unit', choices=UNITS)
+    parser.add_argument('--repair-pre-native-logpath', action='store_true')
     args = parser.parse_args()
-    if args.native0:
+    if args.repair_pre_native_logpath:
+        repair_pre_native_logpath()
+    elif args.native0:
         native0()
     elif args.unit:
         unit_solve(args.unit)
