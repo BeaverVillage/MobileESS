@@ -22,7 +22,8 @@ def predecessors(root,m):
         if record(q['path'])!=q:raise PermissionError('SVR11_GLOBAL_DISPATCH_QUIESCENCE_DRIFT')
         quiescence=read(q['path'])
         if (Path(quiescence['root']).resolve()!=oldroot or quiescence['source_SHA']!=old['execution_SHA']
-            or not quiescence.get('new_dispatch_quiesced') or quiescence['worker_terminated']!=0):
+            or not quiescence.get('new_dispatch_quiesced')
+            or quiescence.get('worker_terminated',quiescence.get('healthy_workers_terminated'))!=0):
             raise PermissionError('SVR11_GLOBAL_DISPATCH_QUIESCENCE_BINDING_DRIFT')
     if old['execution_SHA']!=receipt['source_SHA'] or oldroot==root or oldcode==ROOT:
         raise PermissionError('SVR11_GLOBAL_PREDECESSOR_BINDING_DRIFT')
@@ -38,7 +39,8 @@ def predecessors(root,m):
             args=p.cmdline();module=args[args.index('-m')+1] if '-m' in args else ''
             if module=='v42_svr11.controller' and Path(args[-1]).resolve()==oldroot:
                 me=identity(p)
-                quiesced=bool(quiescence and live(quiescence['process']) and p.pid==quiescence['process']['PID'])
+                bound=quiescence.get('process',quiescence.get('supervisor',{})) if quiescence else {}
+                quiesced=bool(quiescence and live(bound) and p.pid==bound['PID'] and p.status()==psutil.STATUS_STOPPED)
                 old_supervisors.append(dict(me,dispatch_quiesced=quiesced));continue
             if module!='v42_svr11.worker':continue
             r=read(args[-1]);rroot=Path(r['root']).resolve()
@@ -70,8 +72,8 @@ def check(root,monitor_only=False):
             atomic(isolated,dict(state,reason=receipt.get('reason','Classifier and transient DSS cwd guard corrected in immutable successor'),
                 old_ledger=record(oldroot/'CAMPAIGN_LEDGER.json'),all_prior_results=results,
                 original_results_and_ledger_preserved=True,new_epoch_all_124_recalculated=False,
-                new_epoch_requires_all_124_fresh_physical_results=bool(receipt.get('physical_equipment_change')),
-                qualified_completed_dates_reused=receipt.get('qualified_completed_dates_reused',True)))
+                new_epoch_requires_all_124_fresh_physical_results=bool(receipt.get('physical_equipment_change') or receipt.get('scientific_model_change')),
+                qualified_completed_dates_reused=receipt.get('qualified_completed_dates_reused',not receipt.get('scientific_model_change'))))
         # Only the obsolete read-only HTTP process is stopped after workers drain.
         monitor_root=Path(read(state['predecessor_monitor_manifest']['path'])['root'])
         mp=monitor_root/'MONITOR_PROCESS.json';monitor=read(mp) if mp.exists() else {}

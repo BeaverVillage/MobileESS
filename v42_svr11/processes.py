@@ -49,7 +49,7 @@ def assert_peers(request):
             raise PermissionError('SVR11_GLOBAL_DUPLICATE_DAY_SLOT_OR_POLICY')
         keys.add(key);slots.add(p['worker_slot'])
     batch=request.get('b3_stage')
-    cap=3 if request['arm']=='B2' or request['arm']=='B3' and batch in ('M1','M2') else 1
+    cap=3 if request['arm'] in ('B0','B2') or request['arm']=='B3' and batch in ('M1','M2') else 1
     if batch and any(p.get('b3_stage')!=batch for p in peers):raise PermissionError('SVR11_GLOBAL_B3_STAGE_OVERLAP')
     if len(peers)>cap:raise PermissionError('SVR11_GLOBAL_WORKER_COUNT_EXCEEDED')
     for p in psutil.process_iter(['pid','name']):

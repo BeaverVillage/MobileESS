@@ -29,6 +29,8 @@ def run(path):
             FULL_feasible_certified=False,global_gap_certified=False,metrics={'environments':{}},request=record(path))
         try:
             with scope(request['manifest']) as manifest:
+                if manifest.get('development_diagnosis_only') or manifest.get('production_campaign') is False:
+                    raise PermissionError('SVR11_GLOBAL_DEVELOPMENT_ROOT_NOT_A_PRODUCTION_CAMPAIGN')
                 verify_request(request);assert_peers(request)
                 from .stages import inputs,b1,b3
                 progress(dict(phase='FRESH_INPUT_AND_SVR11_MODEL_PREPARATION'));inputs(request,progress)
@@ -76,14 +78,17 @@ def run(path):
                 result['metrics']=metrics(request['output'])
             except Exception as metric_error:result['metrics_error']=repr(metric_error)
         finally:
-            # A crash after Native entry is never retried from zero. Retain
-            # inflight Runtime uncertainty alongside every completed call.
+            # Explicitly authorized technical recovery uses a separate Native0
+            # attempt. Preserve this original measured/unknown Runtime intact.
             ledgers=[]
             batch_stage=request.get('b3_stage')
             if batch_stage:
                 pipeline=Path(request['b3_pipeline'])
                 stages=('A1','M1') if batch_stage=='M1' else ('A1','M1','A2','M2') if batch_stage=='ACTUAL' else (batch_stage,)
-                ledger_paths=[p for s in stages for p in (pipeline/s).rglob('NATIVE_RUNTIME_LEDGER.json')]
+                checkpoint=pipeline/'B3_SOURCE_CHECKPOINT.json'
+                inherited=read(checkpoint).get('stage_paths',{}) if checkpoint.exists() else {}
+                ledger_paths=[p for s in stages for p in
+                    (Path(inherited.get(s,str(pipeline/s))) if batch_stage=='ACTUAL' else pipeline/s).rglob('NATIVE_RUNTIME_LEDGER.json')]
             else:ledger_paths=list(attempt.rglob('NATIVE_RUNTIME_LEDGER.json'))
             for ledger in ledger_paths:
                 value=read(ledger);ledgers.append(dict(receipt=record(ledger),Native_Runtime=value.get('measured_Native_Runtime',0),inflight=value.get('inflight'),runtime_unavailable=any(c.get('runtime_unavailable') for c in value.get('calls',[]))))

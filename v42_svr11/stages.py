@@ -105,9 +105,15 @@ def b3(request,manifest,progress):
         else:a1_bridge=None
         coordinator=SourceCoordinator(pipeline,factory,ASourceBridge(),MSourceBridge(),a1_bridge=a1_bridge,
             ledger_factory=lambda context:SourceStageLedger(context,progress=lambda v:progress(dict(v,stage=context.request.stage))))
-        outcome=coordinator.run(authority,operations_factory=SourceOperationsBridge if not batch or batch=='ACTUAL' else None,
+        def operations_factory(context):
+            if batch:
+                from dataclasses import replace
+                context=replace(context,output=pipeline/'ACTUAL_CONTEXT')
+            return SourceOperationsBridge(context)
+        outcome=coordinator.run(authority,operations_factory=operations_factory if not batch or batch=='ACTUAL' else None,
             realized_inputs=realized_inputs if not batch or batch=='ACTUAL' else None,progress=progress,
-            stop_after=batch if batch in ('M1','A2','M2') else None)
+            stop_after=batch if batch in ('M1','A2','M2') else None,
+            verified_prefix_root=request.get('verified_prefix_root'))
         stages={}
         for stage,out in coordinator.outputs.items():
             ledger=json.loads(out.ledger_receipt)

@@ -11,6 +11,9 @@ import numpy as np
 from v42_pr134_b1.common import read,record,atomic,digest,now
 from .authority import active
 from .context_lifecycle import retire_completed_probe,flush_completed_probes
+from .ldc_interval import descriptors,project,VERSION as LDC_VERSION
+
+VERSION='V42_SVR11_LDC_INTERVAL_ELECTRICAL_CERTIFICATE_V2'
 
 FIELDS=('voltage_constant','voltage_matrix','current_constant','current_matrix',
     'flow_p_constant','flow_q_constant','flow_p_matrix','flow_q_matrix','branch_limits')
@@ -35,6 +38,8 @@ def load_coefficients(certificate,day):
     from v42_thermal.common import SCHEMA
     if certificate['day']!=day or active() is None or certificate['source_SHA']!=active()['execution_SHA']:
         raise PermissionError('SVR11_COEFFICIENT_EPOCH_DRIFT')
+    if certificate.get('model_version')!=VERSION:
+        raise PermissionError('SVR11_GLOBAL_OLD_MODEL_COEFFICIENTS_NOT_ADMITTED')
     ref=certificate['outputs']['planning_coefficients']
     if record(ref['path'])!=ref:raise PermissionError('SVR11_COEFFICIENT_BYTES_DRIFT')
     with np.load(ref['path']) as z:
@@ -94,6 +99,7 @@ def generate(day,input_folder,output,progress):
         install(e,scenario['svr']);branches,topology=authority.source()['oriented_branches'](e)
         nodes=tuple(sorted(n.lower() for n in e.Circuit.AllNodeNames() if n.rsplit('.',1)[-1] in ('1','2','3')))
         controls=original._control_axis(e);native=authority.source()['NativeAllocation'].from_adapter(ad)
+        ldc=descriptors(e,branches,nodes,authority.source()['inventory'](e),current_authority())
         names=tuple(f'{b.branch_id}::{b.phase}' for b in branches)
         thermal=current_authority();rows={r['branch_phase'].lower():r for r in thermal['rows']+thermal['lines']}
         ratings=np.array([rows[n.lower()]['NormalAmps'] for n in names])
@@ -132,6 +138,8 @@ def generate(day,input_folder,output,progress):
         checkpoint=output/f'SLOT_{t:02d}.json'
         if checkpoint.is_file():
             saved=read(checkpoint)
+            if saved.get('model_version')!=VERSION or saved.get('LDC_contract_SHA')!=digest(ldc):
+                raise PermissionError('SVR11_GLOBAL_MODEL_CHECKPOINT_FORMULA_DRIFT')
             if saved['source_SHA']!=m['execution_SHA'] or saved['day']!=day or record(saved['data']['path'])!=saved['data']:
                 raise PermissionError('SVR11_MODEL_CHECKPOINT_DRIFT')
             if saved.get('reused'):
@@ -152,8 +160,13 @@ def generate(day,input_folder,output,progress):
             row[f+'_constant']=base[k]-anchor[t]@mat[k]
             row[f+'_matrix']=mat[k] if k<2 else mat[k].T
         row['branch_limits']=limits
+        # Final coefficients are regenerated under the new native-LDC formula.
+        # These source-initial signed responses are not old policy solutions,
+        # and neither their engine state nor their tap queue leaves this model.
+        row=project(row,ldc)
         np.savez_compressed(output/f'SLOT_{t:02d}.npz',**row)
-        atomic(checkpoint,dict(day=day,source_SHA=m['execution_SHA'],data=record(output/f'SLOT_{t:02d}.npz')))
+        atomic(checkpoint,dict(day=day,source_SHA=m['execution_SHA'],model_version=VERSION,
+            LDC_contract_SHA=digest(ldc),data=record(output/f'SLOT_{t:02d}.npz')))
         slots.append(row)
         # All target-slot results are detached NumPy arrays. Release finished
         # probe object cycles before the next prefix; physics stays identical.
@@ -161,13 +174,18 @@ def generate(day,input_folder,output,progress):
         atomic(output/'MODEL_GENERATION_PROGRESS.json',dict(day=day,completed_slots=t+1,independent_compiles=count,
             physical_solves=solves,wall_seconds=time.perf_counter()-started,source_SHA=m['execution_SHA'],Actual_inputs_read=0))
     np.savez_compressed(output/'COEFFICIENTS.npz',**{f:np.array([r[f] for r in slots]) for f in FIELDS},
-        node_names=nodes,branch_names=names,control_names=controls,anchor_control=anchor,rating_a=ratings,transformer_ratings=kva)
+        node_names=np.r_[nodes,nodes],branch_names=names,control_names=controls,anchor_control=anchor,rating_a=ratings,transformer_ratings=kva)
     old=read(read(Path(input_folder)/'NATIVE_INPUT.json')['electrical_certificate']['path'])
     cert=copy.deepcopy(old);ref=record(output/'COEFFICIENTS.npz')
-    cert.update(schema='V42_SVR11_ELECTRICAL_CERTIFICATE_V1',day=day,source_SHA=m['execution_SHA'],scenario_SHA=scenario['scenario_SHA'],
+    cert.update(schema=VERSION,model_version=VERSION,LDC_formula_version=LDC_VERSION,LDC_contracts=ldc,
+        LDC_contract_SHA=digest(ldc),tap_optimization_variables=0,
+        global_nonlinear_envelope_certified=False,
+        validity_scope='Settled unsaturated original LDC deadband endpoints; local relative-voltage and delivered-power approximation; independent AC remains decisive',
+        previous_epoch_coefficients_promoted=0,
+        day=day,source_SHA=m['execution_SHA'],scenario_SHA=scenario['scenario_SHA'],
         equipment_SHA=read(m['hardware']['path'])['equipment_SHA'],model_regenerated=True,Actual_inputs_read=0,
         control_semantics='Independent source-initial native TIME prefix for each slot/control/sign; no tap setters',
-        sensitivity_semantics='Local central secant with identical unperturbed prefix; discrete AUTO response; no global nonlinear feasibility guarantee',
+        sensitivity_semantics='Native LDC physical deadband interval with fixed-capacitor physical bounds; local relative central secants with identical causal AUTO prefix; no global nonlinear feasibility guarantee',
         output=ref,independent_compiles=count,physical_solves=solves,wall_seconds=time.perf_counter()-started,UTC=now(),
         unused_probe_EventLog_receipt_copy=False,
         reused_forecast_slot_provenance=m.get('model_checkpoint_reuse_contract'))

@@ -14,7 +14,7 @@ def validate(root,sources):
         raise PermissionError('SVR11_GLOBAL_MODEL_CAUSALITY_OR_TAP_VARIABLE_FAILURE')
     if not c.get('independent_Holdout_claim') is False:
         raise PermissionError('SVR11_GLOBAL_DEVELOPMENT_DIAGNOSIS_IS_NOT_HOLDOUT')
-    for key in ('root_cause','frozen_plan_prediction','May18_reoptimization','normal_date_validation','regression_validation'):
+    for key in ('root_cause','frozen_plan_prediction','May18_reoptimization','normal_date_validation','May18_Actual','regression_validation'):
         r=c['evidence'][key]
         if record(r['path'])!=r:raise PermissionError('SVR11_GLOBAL_MODEL_EVIDENCE_SHA_DRIFT:'+key)
         e=read(r['path'])
@@ -23,13 +23,17 @@ def validate(root,sources):
         if key=='frozen_plan_prediction':
             if not abs(e['new_prediction_pu']-e['Forecast_AC_pu'])<abs(e['old_prediction_pu']-e['Forecast_AC_pu']):
                 raise PermissionError('SVR11_GLOBAL_FROZEN_PLAN_ERROR_NOT_IMPROVED')
-        elif key in ('May18_reoptimization','normal_date_validation'):
-            if not (e.get('Forecast_only') is True and e.get('FULL_feasible_certified') is True
+        elif key in ('May18_reoptimization','normal_date_validation','May18_Actual'):
+            expected_context=e.get('Actual_only') is True if key=='May18_Actual' else e.get('Forecast_only') is True
+            if not (expected_context and e.get('FULL_feasible_certified') is True
                 and e.get('physical_slots')==96 and e.get('voltage_violations')==0
                 and e.get('line_current_violations')==0 and e.get('transformer_current_violations')==0
                 and e.get('transformer_kVA_violations')==0 and e.get('SVR_rating_violations')==0
                 and e.get('AC_converged') is True and e.get('control_complete') is True
                 and e.get('controller_settings_changed')==0):
                 raise PermissionError('SVR11_GLOBAL_FORECAST_DEVELOPMENT_AC_VALIDATION_INCOMPLETE:'+key)
+            if key=='May18_Actual' and (e.get('Planning_taps_transferred_to_Actual')!=0 or e.get('Actual_reoptimization')!=0
+                or e.get('Actual_PQ_repair')!=0 or e.get('postoptimization_DayAhead_Fresh_AC') is not False):
+                raise PermissionError('SVR11_GLOBAL_DIRECT_ACTUAL_PATH_VALIDATION_INCOMPLETE')
         elif e.get('PASS') is not True:raise PermissionError('SVR11_GLOBAL_MODEL_DIAGNOSTIC_NOT_PASSED:'+key)
     return record(path)

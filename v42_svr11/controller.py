@@ -20,7 +20,7 @@ def make_request(root,m,row,slot):
         arm=row['arm'],day=row['day'],worker_slot=slot,attempt_id=attempt_id,manifest=str(root/'CAMPAIGN_MANIFEST.json'),manifest_SHA=sha(root/'CAMPAIGN_MANIFEST.json'),
         source_SHA=m['execution_SHA'],input_folder=str(root/'inputs'/row['arm']/row['day']),output=str(attempt/'output'),
         result=str(attempt/'RESULT.json'),progress=str(attempt/'progress.json'),error=str(attempt/'error.json'),
-        source_seal=str(root/'B3_SOURCE_SEAL.json'),retry_starts_from_native_zero=True,previous_attempts=list(row['attempts']),retry_authority='USER_EXPLICIT_RESTART_FROM_ZERO_20261011',started_UTC=now(),Threads=1,P2_calls=0,native_budget_seconds=1800 if row['arm'] in ('B2','B3') else 5400,
+        source_seal=str(root/'B3_SOURCE_SEAL.json'),retry_starts_from_native_zero=True,previous_attempts=list(row['attempts']),retry_authority='USER_EXPLICIT_RESTART_FROM_ZERO_20261011',started_UTC=now(),Threads=1,P2_calls=0,native_budget_seconds=0 if row['arm']=='B0' else 1800 if row['arm'] in ('B2','B3') else 5400,
         wall_budget_seconds=None,target_gap=.005 if row['arm']=='B1' else .03,algorithm_version=VERSION)
     path=attempt/'request.json';atomic(path,r);return path,r
 
@@ -81,6 +81,8 @@ def pending_retry_policy(ledger):
 
 def run(root):
     root=Path(root).resolve();m=verify(root/'CAMPAIGN_MANIFEST.json')
+    if m.get('development_diagnosis_only') or m.get('production_campaign') is False:
+        raise PermissionError('SVR11_GLOBAL_DEVELOPMENT_ROOT_NOT_A_PRODUCTION_CAMPAIGN')
     with singleton(root/'SUPERVISOR.lock'):
         atomic(root/'SUPERVISOR_PROCESS.json',dict(identity(),root=str(root),source_SHA=m['execution_SHA']))
         ledger=read(root/'CAMPAIGN_LEDGER.json') if (root/'CAMPAIGN_LEDGER.json').exists() else initial()

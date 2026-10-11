@@ -92,3 +92,38 @@ def test_stage_stop_resumes_verified_prefix_without_native_duplicate(tmp_path):
     assert bridge.executions==['A1','M1','A2']
     assert coordinator().run(authority,stop_after='M2')['status']=='STAGE_COMPLETE'
     assert bridge.executions==['A1','M1','A2','M2']
+
+def test_technical_retry_waits_for_next_date_and_does_not_cross_barrier(tmp_path):
+    state=batch.initial();row=state['stages']['M1'][DAYS[0]]
+    result=tmp_path/'RESULT.json';request=tmp_path/'request.json'
+    atomic(result,dict(PASS=False,reason='file lock',retryable_technical_error=True,Native_Runtime=17))
+    atomic(request,dict(result=str(result),source_SHA='a'*64))
+    row.update(status='RUNNING',request=str(request),attempts=[str(request)])
+    batch.reconcile(state,[])
+    assert row['retry_pending'] and row['terminal_history'][0]['result']==batch.record(result)
+    assert batch.dispatch_rows(state,'M1')[0]['day']==DAYS[1]
+    state['stages']['M1'][DAYS[1]]['attempts']=['next-date-attempt']
+    assert batch.dispatch_rows(state,'M1')[0]['day']==DAYS[0]
+    terminal(state,'M1')
+    assert batch.next_stage(state,[],MEM)=='M1'
+
+def test_new_retry_pipeline_reverifies_prefix_preserves_failed_stage(tmp_path):
+    from tests.test_v42_b3_source_coordinator import FixtureLedger,FixtureBridge
+    from v42_b3_joint.dry_run import fixture_authority
+    from v42_b3_joint.source_runtime import RealStageContext,FakeSourceRegistry
+    from v42_b3_joint.source_coordinator import SourceCoordinator
+    from v42_b3_joint.contracts import canonical
+    bridge=FixtureBridge();authority=fixture_authority();registry=FakeSourceRegistry();grid=object()
+    def factory(request,packets,path):return RealStageContext(request,tmp_path/'input',path,canonical({'day':authority.day}),registry,grid,packets,authority.source_sha,'FIXTURE')
+    def coordinator(root):return SourceCoordinator(root,factory,bridge,bridge,ledger_factory=FixtureLedger)
+    old=tmp_path/'old';new=tmp_path/'retry'
+    bridge.fail='A2'
+    with pytest.raises(ValueError,match='SOURCE_FAILURE'):coordinator(old).run(authority,stop_after='A2')
+    old_sha=sha(old/'B3_SOURCE_CHECKPOINT.json');bridge.fail=None
+    out=coordinator(new).run(authority,stop_after='A2',verified_prefix_root=old)
+    assert out['status']=='STAGE_COMPLETE' and bridge.executions==['A1','M1','A2','A2']
+    assert sha(old/'B3_SOURCE_CHECKPOINT.json')==old_sha
+    assert (new/'A2/B3_SOURCE_STAGE_OUTPUT.json').exists()
+    assert not (new/'M1').exists()
+    assert coordinator(new).run(authority,stop_after='M2')['status']=='STAGE_COMPLETE'
+    assert bridge.executions==['A1','M1','A2','A2','M2']
