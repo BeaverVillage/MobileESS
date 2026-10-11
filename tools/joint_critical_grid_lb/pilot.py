@@ -30,6 +30,7 @@ from v42_may_campaign_native90.m_model import _domain_sha
 
 SAVED = Path(r'D:\v42_dense_response_development_repair_20261011\dates\B2\2025-05-01\attempts\native0_restored\output')
 OUT = ROOT / 'docs/v42_joint_critical_grid_lb_pilot'
+TIME_LIMIT = 90
 PRIOR = ROOT / 'docs/v42_physical_global_lb_pilot'
 BASE = '497609b46faa14ea7e32a9483a333ab32fd264ef'
 PARENT = '9383a99f1bdcabbd49c79b3ad9f9ee36d523868a'
@@ -218,6 +219,10 @@ def safe_attr(model, name):
 
 def native():
     require(not (OUT / 'PILOT_STARTED.json').exists(), 'OPTIMIZE_LATCH_EXISTS_NO_RERUN')
+    if TIME_LIMIT == 360:
+        authorization = read(OUT / 'USER_EXTENSION_AUTHORIZATION.json')
+        require(authorization['time_limit_seconds'] == 360 and
+                authorization['user_request'] == '90초 짧아 360초 돌려', 'EXPLICIT_360_SECOND_AUTHORIZATION_REQUIRED')
     for p in ['NATIVE0.json', 'INDEPENDENT_NATIVE0.json', 'PHYSICAL_RELATION_AUDIT.json',
               'PRE_RUN_RESOURCE_HOLD.json', 'PRE_LAUNCH_RESOURCE_HOLD.json']:
         require(read(OUT/p)['PASS'], 'PRE_NATIVE_GATE:' + p)
@@ -234,7 +239,7 @@ def native():
     env.setParam('LogFile', str(OUT / 'NATIVE.log'))
     env.start()
     model = gp.Model('Source18r_Joint16_LB_ONLY', env=env)
-    for k,v in dict(Threads=1, TimeLimit=90, MIPGap=.03, MIPFocus=3,
+    for k,v in dict(Threads=1, TimeLimit=TIME_LIMIT, MIPGap=.03, MIPFocus=3,
                     FeasibilityTol=1e-8, IntFeasTol=1e-8, OptimalityTol=1e-8, Seed=42).items():
         model.setParam(k,v)
     create = time.perf_counter()
@@ -376,7 +381,11 @@ def native():
 if __name__ == '__main__':
     ap=argparse.ArgumentParser()
     ap.add_argument('--mode',choices=['build','native'],required=True)
+    ap.add_argument('--out',type=Path,default=OUT)
+    ap.add_argument('--time-limit',type=int,choices=[90,360],default=90)
     args=ap.parse_args()
+    OUT = args.out.resolve()
+    TIME_LIMIT = args.time_limit
     try:
         build() if args.mode=='build' else native()
     except Exception as exc:

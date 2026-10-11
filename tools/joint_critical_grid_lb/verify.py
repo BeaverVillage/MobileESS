@@ -360,8 +360,70 @@ def native0(source, previous, out):
     return result
 
 
-def final(out):
+def reuse_review(out):
+    """Check authorized 360-second reuse using file hashes only, never CSR."""
+    authorization = load_json(out/'USER_EXTENSION_AUTHORIZATION.json')
+    require(authorization['user_request'] == '90초 짧아 360초 돌려' and
+            authorization['time_limit_seconds'] == 360 and
+            authorization['additional_optimize_max'] == 1, 'EXPLICIT_360_SECOND_AUTHORIZATION_MISMATCH')
+    for key in ('preserve_prior_90_second_result', 'same_frozen_Joint16_model'):
+        require(authorization[key] is True, f'AUTHORIZED_REUSE_SCOPE_FAILED_{key}')
+    for key in ('model_or_weight_iterations', 'full_MILP_calls', 'separate_LP_calls', 'campaign_calls'):
+        require(authorization[key] == 0, f'UNAUTHORIZED_EXTENSION_SCOPE_{key}')
+    require(authorization['Worker'] == authorization['Threads'] == 1, 'EXTENSION_WORKER_OR_THREADS_CHANGED')
+    reuse = load_json(out/'MODEL_REUSE.json')
+    require(reuse['PASS'] and reuse['model_regenerations'] == 0 and reuse['source'] == '..',
+            '360_MODEL_REUSE_DECLARATION_FAILED')
+    parent = out.parent
+    expected_files = {'JOINT_A.npz', 'JOINT_DATA.npz', 'JOINT_AXES.npz', 'JOINT_START.npz',
+                      'K16_EXACT_ROWS.json', 'NATIVE0.json', 'INDEPENDENT_NATIVE0.json',
+                      'PHYSICAL_RELATION_AUDIT.json'}
+    require(set(reuse['copy_sha256']) == expected_files, 'REUSE_EIGHT_FROZEN_ARTIFACTS_MISMATCH')
+    for name, expected in reuse['copy_sha256'].items():
+        require(sha_file(parent/name) == expected and sha_file(out/name) == expected,
+                f'REUSED_MODEL_OR_PROOF_BYTES_CHANGED_{name}')
+    old = load_json(parent/'INDEPENDENT_CERTIFICATE.json')
+    old_result = load_json(parent/'RESULT.json')
+    require(old['PASS'] and old['Native_calls_audited'] == 1 and
+            old['Global_LB'] == old_result['ObjBound'] and old_result['Native_optimize_calls'] == 1,
+            'ORIGINAL_90_SECOND_CERTIFICATE_NOT_PRESERVED')
+    require(old['file_sha256']['RESULT.json'] == sha_file(parent/'RESULT.json'),
+            'ORIGINAL_90_SECOND_RESULT_BYTES_CHANGED')
+    require(load_json(parent/'PILOT_STARTED.json')['parameters']['TimeLimit'] == 90,
+            'ORIGINAL_90_SECOND_EXECUTION_LATCH_CHANGED')
+    old_native0 = load_json(out/'INDEPENDENT_NATIVE0.json')
+    require(old_native0['PASS'] and old_native0['phase'] == 'Native0' and
+            old_native0['provenance']['case_sha'] == CASE and
+            old_native0['provenance']['source18r'] == SOURCE18R,
+            'REUSED_ORIGINAL_EXACT_DOMAIN_CERTIFICATE_FAILED')
+    return {'PASS': True, 'schema': 'V42_JOINT_360_INDEPENDENT_FROZEN_MODEL_REUSE_V1',
+            'Native_optimize_calls': 0, 'FULL_or_C3A_matrix_loaded': False,
+            'model_regenerations': 0, 'Native0_regenerations': 0,
+            'new_model_definitions': 0, 'weight_iterations': 0,
+            'copied_artifacts': len(expected_files), 'copy_sha256': reuse['copy_sha256'],
+            'user_request': authorization['user_request'], 'time_limit_seconds': 360,
+            'Worker': 1, 'Threads': 1, 'additional_optimize_max': 1,
+            'original_90_second_Global_LB': old['Global_LB'],
+            'original_90_second_result_sha256': sha_file(parent/'RESULT.json'),
+            'original_90_second_certificate_sha256': sha_file(parent/'INDEPENDENT_CERTIFICATE.json'),
+            'USER_EXTENSION_AUTHORIZATION_sha256': sha_file(out/'USER_EXTENSION_AUTHORIZATION.json'),
+            'MODEL_REUSE_sha256': sha_file(out/'MODEL_REUSE.json'),
+            'new_execution_latch_already_exists': (out/'PILOT_STARTED.json').exists(),
+            'proof_scope': 'Eight identical frozen model/certificate files; explicit user authorization changes only one additional run time limit to 360 seconds.'}
+
+
+def final(out, time_limit=90):
     """Audit the one numerical solver bound against the frozen exact domain."""
+    require(time_limit in (90, 360), 'INVALID_AUTHORIZED_TIME_LIMIT')
+    extension = None
+    if time_limit == 360:
+        extension = reuse_review(out)
+        preview = load_json(out/'PRE_NATIVE_MODEL_REUSE_REVIEW.json')
+        require(preview['PASS'] and preview['new_execution_latch_already_exists'] is False and
+                preview['copy_sha256'] == extension['copy_sha256'] and
+                preview['USER_EXTENSION_AUTHORIZATION_sha256'] == extension['USER_EXTENSION_AUTHORIZATION_sha256'] and
+                preview['MODEL_REUSE_sha256'] == extension['MODEL_REUSE_sha256'],
+                'PRE_NATIVE_360_REUSE_REVIEW_CHANGED_OR_NOT_PRE_NATIVE')
     prior = load_json(out / 'INDEPENDENT_NATIVE0.json')
     require(prior['PASS'] and prior['phase'] == 'Native0', 'INDEPENDENT_NATIVE0_NOT_PASS')
     relation = load_json(out/'PHYSICAL_RELATION_AUDIT.json')
@@ -393,7 +455,7 @@ def final(out):
               'ObjCon', 'ModelSense', 'Rows', 'Columns', 'Binary', 'NNZ'}
     require(checks <= set(readback['checks']), 'NATIVE_READBACK_REQUIRED_CHECK_ABSENT')
     require(readback['matrix_sha'] == prior['joint_actual_matrix_sha256'], 'NATIVE_ACTUAL_MATRIX_SHA_MISMATCH')
-    parameters = {'Threads': 1, 'TimeLimit': 90., 'MIPGap': .03, 'MIPFocus': 3,
+    parameters = {'Threads': 1, 'TimeLimit': float(time_limit), 'MIPGap': .03, 'MIPFocus': 3,
                   'FeasibilityTol': 1e-8, 'IntFeasTol': 1e-8, 'OptimalityTol': 1e-8}
     for key, expected in parameters.items():
         require(readback['parameters'][key] == expected, f'NATIVE_PARAMETER_DRIFT_{key}')
@@ -494,7 +556,7 @@ def final(out):
                             'FULL_feasibility_certified': False, 'new_UB': False}
         del J, d, point
         gc.collect()
-    return {'PASS': True, 'schema': 'V42_JOINT_CRITICAL_GRID_INDEPENDENT_V1',
+    answer = {'PASS': True, 'schema': 'V42_JOINT_CRITICAL_GRID_INDEPENDENT_V1',
             'phase': 'Final', 'classification': classification, 'Global_LB': bound,
             'native_source_attribute': 'ObjBound', 'Native_calls_audited': 1,
             'verifier_Native_optimize_calls': 0, 'Full_MILP_calls': 0, 'separate_LP_calls': 0,
@@ -518,22 +580,40 @@ def final(out):
                 'PHYSICAL_RELATION_AUDIT.json', 'PRE_OPTIMIZE_PEERS.json',
                 'MEMORY_ADMISSION.json', 'PILOT_STARTED.json', 'RESULT.json',
                 'MEMORY_TRACE.json', 'NATIVE_EVENTS.json', 'NATIVE.log')}}
+    if extension is not None:
+        original = load_json(out.parent/'RESULT.json')
+        answer['authorized_additional_run_TimeLimit'] = 360
+        answer['original_90_second_Global_LB'] = extension['original_90_second_Global_LB']
+        answer['total_authorized_Native_calls_audited'] = original['Native_optimize_calls'] + result['Native_optimize_calls']
+        answer['combined_actual_Native_Runtime'] = original['Runtime'] + runtime
+        answer['delta_original_90_second_ObjBound'] = bound-extension['original_90_second_Global_LB']
+        answer['extension_proof_scope'] = extension['proof_scope']
+        for name in ('USER_EXTENSION_AUTHORIZATION.json', 'MODEL_REUSE.json', 'PRE_NATIVE_MODEL_REUSE_REVIEW.json'):
+            answer['file_sha256'][name] = sha_file(out/name)
+    return answer
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--mode', choices=('native0', 'final'), required=True)
+    parser.add_argument('--mode', choices=('native0', 'final', 'reuse'), required=True)
     parser.add_argument('--source', type=Path, default=SOURCE)
     parser.add_argument('--previous', type=Path, default=PREVIOUS)
     parser.add_argument('--out', type=Path, default=OUT)
+    parser.add_argument('--time-limit', type=int, choices=(90, 360), default=90)
     args = parser.parse_args()
     start = time.perf_counter()
-    output = args.out / ('INDEPENDENT_NATIVE0.json' if args.mode == 'native0' else 'INDEPENDENT_CERTIFICATE.json')
+    output_names = {'native0': 'INDEPENDENT_NATIVE0.json', 'final': 'INDEPENDENT_CERTIFICATE.json',
+                    'reuse': 'PRE_NATIVE_MODEL_REUSE_REVIEW.json'}
+    output = args.out / output_names[args.mode]
     try:
         if args.mode == 'native0':
+            require(args.time_limit == 90, '360_EXECUTION_MUST_REUSE_NATIVE0_WITHOUT_REGENERATION')
             answer = native0(args.source, args.previous, args.out)
+        elif args.mode == 'reuse':
+            require(args.time_limit == 360, 'MODEL_REUSE_REVIEW_IS_FOR_AUTHORIZED_360_RUN_ONLY')
+            answer = reuse_review(args.out)
         else:
-            answer = final(args.out)
+            answer = final(args.out, time_limit=args.time_limit)
         answer['wall_seconds'] = time.perf_counter() - start
         save_json(output, answer)
         print(json.dumps({key: answer.get(key) for key in ('PASS', 'phase', 'classification', 'Global_LB', 'wall_seconds')}, ensure_ascii=False))

@@ -1,0 +1,86 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Set parameter LogFile to value "D:\v42_joint_critical_grid_lb_20261012\docs\v42_joint_critical_grid_lb_pilot\NATIVE.log"
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter Threads to value 1
+Set parameter TimeLimit to value 90
+Set parameter MIPGap to value 0.03
+Set parameter MIPFocus to value 3
+Set parameter FeasibilityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter Seed to value 42
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  90
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0.03
+OptimalityTol  1e-08
+MIPFocus  3
+Seed  42
+Threads  1
+
+Optimize a model with 143276 rows, 244265 columns and 1247848 nonzeros (Min)
+Model fingerprint: 0xa2a24793
+Model has 1 linear objective coefficients
+Variable types: 234943 continuous, 9322 integer (9322 binary)
+Coefficient statistics:
+  Matrix range     [2e-12, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [4e-01, 8e+02]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Loaded user MIP start with objective 0.676053
+
+Presolve removed 100 rows and 100 columns
+Presolve time: 1.23s
+Presolved: 143176 rows, 244165 columns, 1050474 nonzeros
+Variable types: 234839 continuous, 9326 integer (9326 binary)
+Root relaxation presolve removed 7 rows and 183 columns
+Root relaxation presolved: 143169 rows, 243982 columns, 1050284 nonzeros
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   52073    5.0018588e-02   7.664003e+04   0.000000e+00      5s
+   73794    2.0613567e-01   4.152284e+06   0.000000e+00     10s
+   83742    4.7450107e-01   6.560076e+03   0.000000e+00     15s
+   98171    4.7494779e-01   9.608891e+03   0.000000e+00     20s
+  104561    4.7508978e-01   9.355052e+03   0.000000e+00     25s
+  109132    4.7516150e-01   2.127779e+03   0.000000e+00     30s
+  113259    4.7522967e-01   6.957287e+03   0.000000e+00     35s
+  116389    4.7526279e-01   1.574456e+03   0.000000e+00     40s
+  119299    4.7528453e-01   5.941342e+02   0.000000e+00     45s
+  122069    4.7529722e-01   7.564855e+02   0.000000e+00     50s
+  124449    4.7530236e-01   4.028284e+01   0.000000e+00     55s
+  131272    4.2548613e-01   0.000000e+00   4.161911e-01     60s
+  135966    4.2547778e-01   0.000000e+00   0.000000e+00     64s
+  135966    4.2547778e-01   0.000000e+00   0.000000e+00     64s
+
+Root relaxation: objective 4.254778e-01, 135966 iterations, 62.93 seconds (122.23 work units)
+Total elapsed time = 75.78s (DegenMoves)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.42548    0 1270    0.67605    0.42548  37.1%     -   90s
+
+Explored 1 nodes (250226 simplex iterations) in 90.03 seconds (170.27 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 1: 0.676053 
+
+Time limit reached
+Best objective 6.760534504652e-01, best bound 4.254777831869e-01, gap 37.0645%
+
+User-callback calls 2321, time in user-callback 0.41 sec
+{"classification": "JOINT_LB_VALID_MATERIAL", "numerical_bound_candidate_valid": true, "Native_optimize_calls": 1, "full_MILP_calls": 0, "separate_LP_calls": 0, "campaign_calls": 0, "Status": 9, "ObjBound": 0.42547778318693985, "ObjBoundC": 0.42547778318693985, "ObjVal": 0.676053450465234, "MIPGap": 0.37064475760882165, "NodeCount": 1.0, "IterCount": 250226.0, "BarIterCount": 0, "SolCount": 1, "Runtime": 90.03500008583069, "optimize_wall_seconds": 91.69859669997822, "model_build_seconds": 0.4177828999236226, "MaxMemUsed_GB": 0.858131338, "MemUsed_GB": 0.312843166, "UB": 0.6760534504652341, "PR209_LB": 0.11666465693783702, "Source18r_Full_ObjBound": 0.28940049108548904, "goal_LB": 0.6557718469512771, "global_gap": 0.37064475760882176, "delta_PR209": 0.30881312624910284, "delta_Source18r_Full": 0.1360772921014508, "goal_3percent": false, "memory_stop": false, "callback_errors": [], "optimize_error": null, "peak_process_RSS_bytes": 816332800, "peak_private_commit_bytes": 1099677696, "peak_sampled_private_commit_bytes": 1098498048, "minimum_RAM_available": 16035225600, "minimum_commit_available": 27620085760, "exact_numeric_BB_certificate": false, "incumbent_is_full_UB": false, "incumbent_joint_replay": {"max_violation": 0.0, "rho": 0.676053450465234, "full_feasibility_tested": false, "promoted_to_UB": false}, "root_relaxation_completed": true, "presolve_summary": ["Presolve removed 100 rows and 100 columns", "Presolved: 143176 rows, 244165 columns, 1050474 nonzeros", "Root relaxation: objective 4.254778e-01, 135966 iterations, 62.93 seconds (122.23 work units)", "Explored 1 nodes (250226 simplex iterations) in 90.03 seconds (170.27 work units)"]}
