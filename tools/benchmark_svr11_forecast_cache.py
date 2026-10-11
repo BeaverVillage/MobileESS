@@ -51,6 +51,9 @@ def coefficients(v):
         out[f+'_constant']=base[k]-v['anchor']@mat[k];out[f+'_matrix']=mat[k] if k<2 else mat[k].T
     return out
 
+def same_bytes(a,b):
+    return a.dtype==b.dtype and a.shape==b.shape and a.tobytes(order='C')==b.tobytes(order='C')
+
 def setter_equivalence(day,manifest,native=None):
     from v42_voltage_control.bindings import original_bindings
     from v42_regcontrol.runner import background
@@ -104,16 +107,22 @@ def run(day,slot,tag):
     a,b=results['original'],results['cached']
     assert a['independent_compiles']==b['independent_compiles']==121 and a['physical_solves']==b['physical_solves']
     assert traces['original']==traces['cached']
-    assert all(np.array_equal(x,y) for left,right in zip(a['samples'],b['samples']) for x,y in zip(left,right))
+    assert all(same_bytes(x,y) for left,right in zip(a['samples'],b['samples']) for x,y in zip(left,right))
     ca,cb=coefficients(a),coefficients(b)
     with np.load(read(OLD/'models'/day/f'SLOT_{slot:02d}.json')['data']['path']) as z:
-        exact={f:np.array_equal(ca[f],cb[f]) and np.array_equal(cb[f],z[f]) for f in ca}
+        exact={f:same_bytes(ca[f],cb[f]) and same_bytes(cb[f],z[f]) for f in ca}
     assert all(exact.values())
+    artifacts=[]
+    for label,v in results.items():
+        path=folder/(label+'_ARRAYS.npz')
+        np.savez_compressed(path,**{f'raw_response_{k}':np.array([row[k] for row in v['samples']]) for k in range(4)},**coefficients(v))
+        artifacts.append(record(path))
     out=dict(PASS=True,day=day,slot=slot,timings_seconds=timings,speedup=timings['original']/timings['cached'],
         original_and_cached_all121_responses_bitwise_equal=True,fields=exact,
         independent_compiles=121,physical_solves=a['physical_solves'],all_solve_timestamps_identical=True,
         setter_equivalence=setters,source_before=record(oldcode),source_after=record(SOURCE/'v42_svr11/model.py'),
         reference_checkpoint=record(OLD/'models'/day/f'SLOT_{slot:02d}.json'),
+        comparison_includes_dtype_shape_all_bytes_and_signed_zero=True,response_artifacts=artifacts,
         Actual_inputs_read=0,Native_optimizer_calls=0,campaign_workers_modified=0,UTC=now())
     atomic(folder/'EQUIVALENCE.json',out);print(json.dumps(out))
 
