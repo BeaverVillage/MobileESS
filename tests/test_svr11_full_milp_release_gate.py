@@ -16,12 +16,14 @@ def candidate(tmp_path,monkeypatch):
     monkeypatch.setattr(release,'source_files',lambda:sources)
     monkeypatch.setattr(release,'sha',lambda path:'old')
     monkeypatch.setattr(release,'REVIEWED',set(sources))
-    atomic(old/'CAMPAIGN_MANIFEST.json',dict(code_root=str(old/'code'),
+    atomic(old/'CAMPAIGN_MANIFEST.json',dict(code_root=str(old/'code'),execution_SHA='origin',
         execution_sources={'v42_common_mess/engine.py':'old'}))
     atomic(dev/'SOURCE_SEAL.json',dict(sources=sources,source_SHA=digest(sources)))
     atomic(old/'MODEL_PRECOMPUTE_REQUEST.json',dict(campaign_resume_held_for_V2_schema_binding_repair=True))
     ledger=dict(dates={d:dict(status='PASS') for d in release.DAYS},counts=dict(PASS=31),active_workers=[])
     atomic(old/'MODEL_PRECOMPUTE_LEDGER.json',ledger)
+    atomic(old/'MODEL_PRECOMPUTE_READY.json',dict(PASS=True,source_SHA='origin',
+        successful_models=31,failed_models=0,Native_optimizer_calls=0,Actual_calls=0))
     return old,root,dev,ledger
 
 
@@ -42,6 +44,13 @@ def test_live_model_worker_must_exit_naturally(candidate,monkeypatch):
 
 def test_missing_actual_milp_log_result_is_not_release(candidate):
     assert release.readiness()['reason']=='WAITING_REAL_FULL_MILP_VALIDATION'
+
+
+def test_final_coordinator_cannot_restart_old_monitor_during_transition(candidate,monkeypatch):
+    old,root,dev,ledger=candidate
+    atomic(old/'MODEL_PRECOMPUTE_PROCESS.json',dict(PID=456))
+    monkeypatch.setattr(release,'live',lambda peer:True)
+    assert release.readiness()['reason']=='WAITING_MODEL_COORDINATOR_FINAL_AUDIT_AND_EXIT'
 
 
 def test_native_hold_must_not_be_cleared_to_force_release(candidate):

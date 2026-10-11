@@ -40,6 +40,14 @@ def readiness():
         return dict(ready=False,reason='WAITING_FORECAST31',counts=ledger['counts'])
     if any(live(p) for p in ledger.get('active_workers',[])):
         return dict(ready=False,reason='WAITING_MODEL_WORKERS_NATURAL_EXIT')
+    process=OLD/'MODEL_PRECOMPUTE_PROCESS.json';ready=OLD/'MODEL_PRECOMPUTE_READY.json'
+    if not ready.exists() or (process.exists() and live(read(process))):
+        return dict(ready=False,reason='WAITING_MODEL_COORDINATOR_FINAL_AUDIT_AND_EXIT')
+    completed=read(ready)
+    if not (completed['PASS'] and completed['source_SHA']==old['execution_SHA']
+            and completed['successful_models']==31 and completed['failed_models']==0
+            and completed['Native_optimizer_calls']==completed['Actual_calls']==0):
+        raise PermissionError('EPOCH13_FINAL_MODEL_READY_PROOF_REQUIRED')
     results={}
     for day in ('2025-05-16','2025-05-18'):
         p=DEV/'dates/B2'/day/'attempts/phase2_01/RESULT.json'
@@ -181,6 +189,8 @@ def forecast_contract(state,receipts):
         v.update(source_SHA=state['source_SHA'],generation_source_SHA=v.get('generation_source_SHA',old['execution_SHA']),
             coefficient_certificate_origin_source_SHA=old['execution_SHA'],
             physical_slot_generation_SHA_by_slot={t:s['generation_source_SHA'] for t,s in days[day]['slots'].items()},
+            model_reused=True,regenerated_in_current_execution_epoch=False,
+            validation_source_SHA=state['source_SHA'],
             original_generation_certificate=days[day]['certificate'],revalidation_contract=ref,
             reused_forecast_slot_provenance=ref,output=coefficients)
         v['outputs']={k:coefficients for k in v['outputs']}
@@ -246,6 +256,9 @@ def release():
             implementation=dict(version=m['implementation']['version'],sources=state['sources']),
             builder_original_sources=state['sources'],predecessor_drain_contract=record(ROOT/'PREDECESSOR_DRAIN_CONTRACT.json'),
             model_checkpoint_reuse_contract=forecast,B2_memory_admission=memory,B3_memory_admission=memory,
+            forecast_precompute_origin_ready=record(OLD/'MODEL_PRECOMPUTE_READY.json'),
+            forecast_precompute_origin_ledger=record(OLD/'MODEL_PRECOMPUTE_LEDGER.json'),
+            Forecast_precomputation_wall_external_to_policy_dates=True,
             full_MILP_measured_peak_bytes=peak,optimization_results_reused=0,B2_all31_fresh_Native_zero=True,
             same_Forecast_31_shared_by_B1_B2_B3=True,qualified_same_scientific_release_reuse=False,
             user_latest_20261011_B2_from_May01=True,UTC=now())
