@@ -1,0 +1,816 @@
+{
+  "schema": "V42_CRITICAL_GRID_CG_READONLY_RESOURCE_HOLD_V1",
+  "phase": "PRE_LAUNCH_READONLY",
+  "observed_UTC": "2026-10-11T16:55:01.446212+00:00",
+  "observed_Asia_Seoul": "2026-10-12T01:55:01.446212+09:00",
+  "PASS": true,
+  "checks": {
+    "original_PR207_PR209_PR210_HEAD_and_clean": true,
+    "seven_controller_identities_match": true,
+    "held_controller_computational_descendants_empty": true,
+    "no_other_observed_Gurobi_or_native_worker": true,
+    "no_process_scan_errors": true,
+    "held_markers_byte_identical_to_PR209": true,
+    "two_schedules_disabled": true,
+    "relevant_automations_PAUSED_and_unchanged": true,
+    "current_sample_memory_floors_PASS": true,
+    "current_sample_estimated_growth_headroom_PASS": true,
+    "remote_PR207_PR209_PR210_HEAD_matches": true
+  },
+  "observation_seconds": 2.85999999998603,
+  "system_before": {
+    "RAM_total": 34049220608,
+    "RAM_available": 17329012736,
+    "RAM_used": 16720207872,
+    "Commit_total": 38061703168,
+    "Commit_limit": 68408958976,
+    "Commit_available": 30347255808,
+    "Commit_peak": 68408958976
+  },
+  "system_after": {
+    "RAM_total": 34049220608,
+    "RAM_available": 17330077696,
+    "RAM_used": 16719142912,
+    "Commit_total": 38057312256,
+    "Commit_limit": 68408958976,
+    "Commit_available": 30351646720,
+    "Commit_peak": 68408958976
+  },
+  "memory_floors": {
+    "RAM_available_min_bytes": 4294967296,
+    "Commit_available_min_bytes": 6442450944
+  },
+  "estimated_additional_native_growth_bytes": 2147483648,
+  "is_post_build_native_admission": false,
+  "recommendation": "Refresh actual RAM/commit after native readback. Reserve max(2 GiB, 4x observed model-build private growth), above the 4 GiB RAM and 6 GiB commit floors; normally terminate on a floor breach.",
+  "originals": [
+    {
+      "name": "PR207_Source18r",
+      "path": "D:\\v42_svr11_epoch18r_20261011",
+      "HEAD": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+      "expected_HEAD": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+      "HEAD_matches": true,
+      "clean": true,
+      "git_status": "",
+      "remote": {
+        "baseRefName": "codex/v42-capcontrol-svr-20261011",
+        "headRefName": "codex/v42-svr11-final-may-20261011-epoch02",
+        "headRefOid": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+        "isDraft": true,
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/207"
+      },
+      "remote_HEAD_matches": true
+    },
+    {
+      "name": "PR209_physical_global_lb",
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\work\\source18r-physical-global-lb-pilot",
+      "HEAD": "9383a99f1bdcabbd49c79b3ad9f9ee36d523868a",
+      "expected_HEAD": "9383a99f1bdcabbd49c79b3ad9f9ee36d523868a",
+      "HEAD_matches": true,
+      "clean": true,
+      "git_status": "",
+      "remote": {
+        "baseRefName": "codex/v42-svr11-final-may-20261011-epoch02",
+        "headRefName": "codex/v42-source18r-physical-global-lb-pilot-20261012",
+        "headRefOid": "9383a99f1bdcabbd49c79b3ad9f9ee36d523868a",
+        "isDraft": true,
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/209"
+      },
+      "remote_HEAD_matches": true
+    },
+    {
+      "name": "PR210_Joint16",
+      "path": "D:\\v42_joint_critical_grid_lb_20261012",
+      "HEAD": "6a8fd44f59f1f461c60d2d14f5f5be605e4ed640",
+      "expected_HEAD": "6a8fd44f59f1f461c60d2d14f5f5be605e4ed640",
+      "HEAD_matches": true,
+      "clean": true,
+      "git_status": "",
+      "remote": {
+        "baseRefName": "codex/v42-source18r-physical-global-lb-pilot-20261012",
+        "headRefName": "codex/v42-joint-critical-grid-lb-pilot-20261012",
+        "headRefOid": "6a8fd44f59f1f461c60d2d14f5f5be605e4ed640",
+        "isDraft": true,
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/210"
+      },
+      "remote_HEAD_matches": true
+    }
+  ],
+  "controllers": [
+    {
+      "epoch": "03",
+      "expected_PID": 114236,
+      "current": {
+        "PID": 114236,
+        "create_time": 1791659002.4026976,
+        "name": "pythonw.exe",
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.controller",
+          "D:\\v42_svr11_may_20261011_03"
+        ],
+        "cwd": "D:\\v42_svr11_epoch03_20261011",
+        "status": "stopped",
+        "CPU_seconds": 20.25,
+        "RSS_bytes": 22073344,
+        "Peak_RSS_bytes": 152350720,
+        "Private_Commit_bytes": 1157210112,
+        "gurobi_loaded_modules": [],
+        "descendants": [],
+        "CPU_delta_seconds": 0.0
+      },
+      "matches_PR209_baseline_identity": true,
+      "computational_descendants": [],
+      "computational_descendants_empty": true,
+      "observed_CPU_delta_seconds": 0.0,
+      "note": "Status labels can transiently toggle. Existing conhost console children are recorded and are not computational workers. A tiny CPU tick alone is not a Native solve."
+    },
+    {
+      "epoch": "04",
+      "expected_PID": 85272,
+      "current": {
+        "PID": 85272,
+        "create_time": 1791661009.4743235,
+        "name": "python.exe",
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.controller",
+          "D:\\v42_svr11_may_20261011_04"
+        ],
+        "cwd": "D:\\v42_svr11_epoch04_20261011",
+        "status": "stopped",
+        "CPU_seconds": 10.890625,
+        "RSS_bytes": 48058368,
+        "Peak_RSS_bytes": 156499968,
+        "Private_Commit_bytes": 1159168000,
+        "gurobi_loaded_modules": [],
+        "descendants": [
+          {
+            "PID": 48728,
+            "create_time": 1791661009.4853497,
+            "command": [
+              "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+              "0x4"
+            ]
+          }
+        ],
+        "CPU_delta_seconds": 0.0
+      },
+      "matches_PR209_baseline_identity": true,
+      "computational_descendants": [],
+      "computational_descendants_empty": true,
+      "observed_CPU_delta_seconds": 0.0,
+      "note": "Status labels can transiently toggle. Existing conhost console children are recorded and are not computational workers. A tiny CPU tick alone is not a Native solve."
+    },
+    {
+      "epoch": "06",
+      "expected_PID": 87196,
+      "current": {
+        "PID": 87196,
+        "create_time": 1791662705.4286742,
+        "name": "python.exe",
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.controller",
+          "D:\\v42_svr11_may_20261011_06"
+        ],
+        "cwd": "D:\\v42_svr11_epoch06_20261011",
+        "status": "stopped",
+        "CPU_seconds": 93.9375,
+        "RSS_bytes": 48234496,
+        "Peak_RSS_bytes": 157696000,
+        "Private_Commit_bytes": 1159499776,
+        "gurobi_loaded_modules": [],
+        "descendants": [
+          {
+            "PID": 103624,
+            "create_time": 1791662705.4363968,
+            "command": [
+              "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+              "0x4"
+            ]
+          }
+        ],
+        "CPU_delta_seconds": 0.0
+      },
+      "matches_PR209_baseline_identity": true,
+      "computational_descendants": [],
+      "computational_descendants_empty": true,
+      "observed_CPU_delta_seconds": 0.0,
+      "note": "Status labels can transiently toggle. Existing conhost console children are recorded and are not computational workers. A tiny CPU tick alone is not a Native solve."
+    },
+    {
+      "epoch": "08",
+      "expected_PID": 101520,
+      "current": {
+        "PID": 101520,
+        "create_time": 1791667402.4996073,
+        "name": "pythonw.exe",
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.controller",
+          "D:\\v42_svr11_may_20261011_08"
+        ],
+        "cwd": "D:\\v42_svr11_epoch08_20261011",
+        "status": "stopped",
+        "CPU_seconds": 322.71875,
+        "RSS_bytes": 46505984,
+        "Peak_RSS_bytes": 246398976,
+        "Private_Commit_bytes": 1166155776,
+        "gurobi_loaded_modules": [],
+        "descendants": [],
+        "CPU_delta_seconds": 0.0
+      },
+      "matches_PR209_baseline_identity": true,
+      "computational_descendants": [],
+      "computational_descendants_empty": true,
+      "observed_CPU_delta_seconds": 0.0,
+      "note": "Status labels can transiently toggle. Existing conhost console children are recorded and are not computational workers. A tiny CPU tick alone is not a Native solve."
+    },
+    {
+      "epoch": "09",
+      "expected_PID": 73208,
+      "current": {
+        "PID": 73208,
+        "create_time": 1791672658.896896,
+        "name": "python.exe",
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.controller",
+          "D:\\v42_svr11_may_20261011_09"
+        ],
+        "cwd": "D:\\v42_svr11_epoch09_20261011",
+        "status": "stopped",
+        "CPU_seconds": 627.875,
+        "RSS_bytes": 22986752,
+        "Peak_RSS_bytes": 245751808,
+        "Private_Commit_bytes": 1171517440,
+        "gurobi_loaded_modules": [],
+        "descendants": [
+          {
+            "PID": 113264,
+            "create_time": 1791672658.9104695,
+            "command": [
+              "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+              "0x4"
+            ]
+          }
+        ],
+        "CPU_delta_seconds": 0.0
+      },
+      "matches_PR209_baseline_identity": true,
+      "computational_descendants": [],
+      "computational_descendants_empty": true,
+      "observed_CPU_delta_seconds": 0.0,
+      "note": "Status labels can transiently toggle. Existing conhost console children are recorded and are not computational workers. A tiny CPU tick alone is not a Native solve."
+    },
+    {
+      "epoch": "10",
+      "expected_PID": 59532,
+      "current": {
+        "PID": 59532,
+        "create_time": 1791690319.195433,
+        "name": "python.exe",
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.controller",
+          "D:\\v42_svr11_may_20261011_10"
+        ],
+        "cwd": "D:\\v42_svr11_epoch10_20261011",
+        "status": "stopped",
+        "CPU_seconds": 262.53125,
+        "RSS_bytes": 40271872,
+        "Peak_RSS_bytes": 238518272,
+        "Private_Commit_bytes": 1162686464,
+        "gurobi_loaded_modules": [],
+        "descendants": [
+          {
+            "PID": 117332,
+            "create_time": 1791690319.2040713,
+            "command": [
+              "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+              "0x4"
+            ]
+          }
+        ],
+        "CPU_delta_seconds": 0.0
+      },
+      "matches_PR209_baseline_identity": true,
+      "computational_descendants": [],
+      "computational_descendants_empty": true,
+      "observed_CPU_delta_seconds": 0.0,
+      "note": "Status labels can transiently toggle. Existing conhost console children are recorded and are not computational workers. A tiny CPU tick alone is not a Native solve."
+    },
+    {
+      "epoch": "12",
+      "expected_PID": 75404,
+      "current": {
+        "PID": 75404,
+        "create_time": 1791698600.272839,
+        "name": "python.exe",
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_svr11.controller",
+          "D:\\v42_svr11_may_20261011_12"
+        ],
+        "cwd": "D:\\v42_svr11_epoch12_20261011",
+        "status": "stopped",
+        "CPU_seconds": 76.28125,
+        "RSS_bytes": 34246656,
+        "Peak_RSS_bytes": 155471872,
+        "Private_Commit_bytes": 1157373952,
+        "gurobi_loaded_modules": [],
+        "descendants": [
+          {
+            "PID": 117540,
+            "create_time": 1791698600.2828503,
+            "command": [
+              "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+              "0x4"
+            ]
+          }
+        ],
+        "CPU_delta_seconds": 0.0
+      },
+      "matches_PR209_baseline_identity": true,
+      "computational_descendants": [],
+      "computational_descendants_empty": true,
+      "observed_CPU_delta_seconds": 0.0,
+      "note": "Status labels can transiently toggle. Existing conhost console children are recorded and are not computational workers. A tiny CPU tick alone is not a Native solve."
+    }
+  ],
+  "python_and_Gurobi_processes": [
+    {
+      "PID": 41292,
+      "create_time": 1791311675.8489833,
+      "name": "python.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_pr134_b1.host",
+        "monitor",
+        "C:\\v42_pr134_sc_execution_20261007"
+      ],
+      "cwd": "C:\\v42_a1_pr134_supercompact_exact_20261007",
+      "status": "running",
+      "CPU_seconds": 180.390625,
+      "RSS_bytes": 3276800,
+      "Peak_RSS_bytes": 43323392,
+      "Private_Commit_bytes": 534814720,
+      "gurobi_loaded_modules": [],
+      "descendants": [
+        {
+          "PID": 62020,
+          "create_time": 1791311675.8573892,
+          "command": [
+            "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+            "0x4"
+          ]
+        }
+      ],
+      "CPU_delta_seconds": 0.0
+    },
+    {
+      "PID": 59532,
+      "create_time": 1791690319.195433,
+      "name": "python.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_svr11.controller",
+        "D:\\v42_svr11_may_20261011_10"
+      ],
+      "cwd": "D:\\v42_svr11_epoch10_20261011",
+      "status": "stopped",
+      "CPU_seconds": 262.53125,
+      "RSS_bytes": 40271872,
+      "Peak_RSS_bytes": 238518272,
+      "Private_Commit_bytes": 1162686464,
+      "gurobi_loaded_modules": [],
+      "descendants": [
+        {
+          "PID": 117332,
+          "create_time": 1791690319.2040713,
+          "command": [
+            "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+            "0x4"
+          ]
+        }
+      ],
+      "CPU_delta_seconds": 0.0
+    },
+    {
+      "PID": 73208,
+      "create_time": 1791672658.896896,
+      "name": "python.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_svr11.controller",
+        "D:\\v42_svr11_may_20261011_09"
+      ],
+      "cwd": "D:\\v42_svr11_epoch09_20261011",
+      "status": "stopped",
+      "CPU_seconds": 627.875,
+      "RSS_bytes": 22986752,
+      "Peak_RSS_bytes": 245751808,
+      "Private_Commit_bytes": 1171517440,
+      "gurobi_loaded_modules": [],
+      "descendants": [
+        {
+          "PID": 113264,
+          "create_time": 1791672658.9104695,
+          "command": [
+            "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+            "0x4"
+          ]
+        }
+      ],
+      "CPU_delta_seconds": 0.0
+    },
+    {
+      "PID": 75404,
+      "create_time": 1791698600.272839,
+      "name": "python.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_svr11.controller",
+        "D:\\v42_svr11_may_20261011_12"
+      ],
+      "cwd": "D:\\v42_svr11_epoch12_20261011",
+      "status": "stopped",
+      "CPU_seconds": 76.28125,
+      "RSS_bytes": 34246656,
+      "Peak_RSS_bytes": 155471872,
+      "Private_Commit_bytes": 1157373952,
+      "gurobi_loaded_modules": [],
+      "descendants": [
+        {
+          "PID": 117540,
+          "create_time": 1791698600.2828503,
+          "command": [
+            "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+            "0x4"
+          ]
+        }
+      ],
+      "CPU_delta_seconds": 0.0
+    },
+    {
+      "PID": 79020,
+      "create_time": 1791719054.0554614,
+      "name": "python.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "D:\\v42_svr11_epoch16_20261011\\tools\\svr11_monitor_ui.py",
+        "serve",
+        "D:\\v42_svr11_may_20261011_16"
+      ],
+      "cwd": "D:\\v42_svr11_epoch16_20261011",
+      "status": "running",
+      "CPU_seconds": 51.578125,
+      "RSS_bytes": 61956096,
+      "Peak_RSS_bytes": 399626240,
+      "Private_Commit_bytes": 669081600,
+      "gurobi_loaded_modules": [],
+      "descendants": [
+        {
+          "PID": 124008,
+          "create_time": 1791719054.0618358,
+          "command": [
+            "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+            "0x4"
+          ]
+        }
+      ],
+      "CPU_delta_seconds": 0.0
+    },
+    {
+      "PID": 85272,
+      "create_time": 1791661009.4743235,
+      "name": "python.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_svr11.controller",
+        "D:\\v42_svr11_may_20261011_04"
+      ],
+      "cwd": "D:\\v42_svr11_epoch04_20261011",
+      "status": "stopped",
+      "CPU_seconds": 10.890625,
+      "RSS_bytes": 48058368,
+      "Peak_RSS_bytes": 156499968,
+      "Private_Commit_bytes": 1159168000,
+      "gurobi_loaded_modules": [],
+      "descendants": [
+        {
+          "PID": 48728,
+          "create_time": 1791661009.4853497,
+          "command": [
+            "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+            "0x4"
+          ]
+        }
+      ],
+      "CPU_delta_seconds": 0.0
+    },
+    {
+      "PID": 87196,
+      "create_time": 1791662705.4286742,
+      "name": "python.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_svr11.controller",
+        "D:\\v42_svr11_may_20261011_06"
+      ],
+      "cwd": "D:\\v42_svr11_epoch06_20261011",
+      "status": "stopped",
+      "CPU_seconds": 93.9375,
+      "RSS_bytes": 48234496,
+      "Peak_RSS_bytes": 157696000,
+      "Private_Commit_bytes": 1159499776,
+      "gurobi_loaded_modules": [],
+      "descendants": [
+        {
+          "PID": 103624,
+          "create_time": 1791662705.4363968,
+          "command": [
+            "\\??\\C:\\WINDOWS\\system32\\conhost.exe",
+            "0x4"
+          ]
+        }
+      ],
+      "CPU_delta_seconds": 0.0
+    },
+    {
+      "PID": 99224,
+      "create_time": 1791563237.319706,
+      "name": "pythonw.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_b2_monitor_v18.host",
+        "monitor",
+        "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01"
+      ],
+      "cwd": "D:\\MobileESS_V42",
+      "status": "running",
+      "CPU_seconds": 236.046875,
+      "RSS_bytes": 4194304,
+      "Peak_RSS_bytes": 169902080,
+      "Private_Commit_bytes": 647966720,
+      "gurobi_loaded_modules": [],
+      "descendants": [],
+      "CPU_delta_seconds": 0.0
+    },
+    {
+      "PID": 101520,
+      "create_time": 1791667402.4996073,
+      "name": "pythonw.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_svr11.controller",
+        "D:\\v42_svr11_may_20261011_08"
+      ],
+      "cwd": "D:\\v42_svr11_epoch08_20261011",
+      "status": "stopped",
+      "CPU_seconds": 322.71875,
+      "RSS_bytes": 46505984,
+      "Peak_RSS_bytes": 246398976,
+      "Private_Commit_bytes": 1166155776,
+      "gurobi_loaded_modules": [],
+      "descendants": [],
+      "CPU_delta_seconds": 0.0
+    },
+    {
+      "PID": 114236,
+      "create_time": 1791659002.4026976,
+      "name": "pythonw.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "-m",
+        "v42_svr11.controller",
+        "D:\\v42_svr11_may_20261011_03"
+      ],
+      "cwd": "D:\\v42_svr11_epoch03_20261011",
+      "status": "stopped",
+      "CPU_seconds": 20.25,
+      "RSS_bytes": 22073344,
+      "Peak_RSS_bytes": 152350720,
+      "Private_Commit_bytes": 1157210112,
+      "gurobi_loaded_modules": [],
+      "descendants": [],
+      "CPU_delta_seconds": 0.0
+    }
+  ],
+  "other_heavy_candidates": [],
+  "process_scan_errors": [],
+  "scheduled_tasks": [
+    {
+      "TaskName": "MobileESS_V42_May_B2_B3_Autonomous_Monitor",
+      "TaskPath": "\\",
+      "State": "Disabled",
+      "Enabled": false,
+      "Actions": [
+        {
+          "Execute": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+          "Arguments": "-B -X utf8 D:\\v42_svr11_epoch16_20261011\\tools\\svr11_monitor_ui.py safeguard D:\\v42_svr11_may_20261011_16 --monitor-only",
+          "WorkingDirectory": "D:\\v42_svr11_epoch16_20261011"
+        }
+      ]
+    },
+    {
+      "TaskName": "MobileESS_V42_May_B2_B3_Autonomous_Supervisor",
+      "TaskPath": "\\",
+      "State": "Disabled",
+      "Enabled": false,
+      "Actions": [
+        {
+          "Execute": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+          "Arguments": "-B -X utf8 D:\\v42_svr11_epoch16_20261011\\tools\\svr11_monitor_ui.py safeguard D:\\v42_svr11_may_20261011_16",
+          "WorkingDirectory": "D:\\v42_svr11_epoch16_20261011"
+        }
+      ]
+    }
+  ],
+  "automations": [
+    {
+      "path": "C:\\Users\\kjw39\\.codex\\automations\\v42-may-b2-b3-autonomous-recovery\\automation.toml",
+      "bytes": 3421,
+      "sha256": "918799f9f5f5fabb67da2a1303ad3fab30dfbf2ea094abf94f164955768cdcd4",
+      "status": "PAUSED",
+      "sha256_matches_PR209": true
+    },
+    {
+      "path": "C:\\Users\\kjw39\\.codex\\automations\\v42-may-b1-b2-hourly-recovery\\automation.toml",
+      "bytes": 5409,
+      "sha256": "37cd98d444b1fb7f0553519ccc2b655e42aa041ffdee8d08ebc61257c54c14c2",
+      "status": "PAUSED",
+      "sha256_matches_PR209": true
+    }
+  ],
+  "hold_markers": [
+    {
+      "path": "D:\\v42_svr11_may_20261011_16\\STOP_REQUEST.json",
+      "bytes": 259,
+      "sha256": "357d79f8fb19faeac61e534cc2df8c03903ac50bfd029f833c0d1c3a34f5e6b4",
+      "content": {
+        "status": "HOLD",
+        "requested_UTC": "2026-10-11T12:18:12.291816+00:00",
+        "reason": "User requested old B2 deletion and exact Root180 audit; workers must drain naturally",
+        "new_dispatch_allowed": false,
+        "healthy_workers_force_terminated": 0
+      },
+      "sha256_matches_PR209": true
+    },
+    {
+      "path": "D:\\v42_svr11_may_20261011_16\\DISPATCH_QUIESCENCE_FOR_PLANNING_MODEL_REPAIR.json",
+      "bytes": 398,
+      "sha256": "e4c01039c75985de62f0d58c8f4a03d03fe9ca648b1aa0a9e23aa04618e2e651",
+      "content": {
+        "root": "D:\\v42_svr11_may_20261011_16",
+        "source_SHA": "c069a285ad0135c68d3824d7c45df0f960b9e7faa03b1a8105a0dc4bcfefa839",
+        "new_dispatch_quiesced": true,
+        "status": "HOLD_ROOT180_REDUCTION",
+        "reason": "User request: stop Epoch16, delete B2 after workers exit, validate exact root180 before successor release",
+        "worker_terminated": 0,
+        "UTC": "2026-10-11T12:12:30.9430227Z"
+      },
+      "sha256_matches_PR209": true
+    },
+    {
+      "path": "D:\\v42_svr11_may_20261011_17\\ROOT180_HOLD.json",
+      "bytes": 1603,
+      "sha256": "aec5401c6024e8e17d92a18d2bff65d85209cf6ad9acbd654d33caca0fb8e772",
+      "content": {
+        "schema": "SVR11_ROOT180_CANDIDATE_HOLD_V1",
+        "root": "D:\\v42_svr11_may_20261011_17",
+        "code_root": "D:\\v42_svr11_epoch17_20261011",
+        "source_SHA": "d38bdce9f15feaf642934f4139e786eb1707652539e1e865ef2bf2bc0c09bc7b",
+        "source_seal": {
+          "path": "D:\\v42_root180_development_20261011\\SOURCE17_SEAL.json",
+          "sha256": "5ff7f5180c50114d29c949cbd214e1a44c85edb8265c3a20d14d965673dd41e3",
+          "bytes": 159630
+        },
+        "classification": "EXACT_REDUCTION_VALID_ROOT180_UNMET",
+        "reason": "ROOT_LP_INCOMPLETE_AND_ROOT180_UNMET",
+        "representative_validation": {
+          "path": "D:\\v42_root180_development_20261011\\ROOT180_VALIDATION.json",
+          "sha256": "51c281e9ba31a2fe984e36460d796e67b4073a79c6c775448cbd70cda53708f2",
+          "bytes": 25108
+        },
+        "native_completion_audit": {
+          "path": "D:\\v42_root180_development_20261011\\ROOT180_COMPLETION_AUDIT.json",
+          "sha256": "8b8a5939c9319ffaa91c6b00753c75cb2710f0998617183d22d329622adebff7",
+          "bytes": 1596
+        },
+        "dispatch_allowed": false,
+        "automatic_restart_allowed": false,
+        "official_manifest_released": false,
+        "Native_Runtime": 0,
+        "Native_optimizer_calls": 0,
+        "old_B2_results_reused": 0,
+        "B2_dates": {
+          "2025-05-01": {
+            "status": "HOLD_NOT_RELEASED",
+            "Native_Runtime": 0,
+            "attempts": [],
+            "worker": null
+          },
+          "2025-05-02": {
+            "status": "HOLD_NOT_RELEASED",
+            "Native_Runtime": 0,
+            "attempts": [],
+            "worker": null
+          }
+        },
+        "Windows_tasks": "Disabled",
+        "hourly_automation": "PAUSED",
+        "new_optimization_calls_authorized": false,
+        "UTC": "2026-10-11T13:03:27.508206+00:00"
+      },
+      "sha256_matches_PR209": true
+    },
+    {
+      "path": "D:\\v42_svr11_may_20261011_17\\STOP_REQUEST.json",
+      "bytes": 209,
+      "sha256": "8da5a0e477543dc6ef5fe3efdc366c86d8eafd66785d393cf35d615a6c22dd90",
+      "content": {
+        "source_SHA": "d38bdce9f15feaf642934f4139e786eb1707652539e1e865ef2bf2bc0c09bc7b",
+        "reason": "ROOT_LP_INCOMPLETE_AND_ROOT180_UNMET",
+        "dispatch_hold": true,
+        "UTC": "2026-10-11T13:03:27.509211+00:00"
+      },
+      "sha256_matches_PR209": true
+    }
+  ],
+  "PR209_HOLD_baseline": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\work\\source18r-physical-global-lb-pilot\\docs\\v42_physical_global_lb_pilot\\HOLD_READONLY.json",
+    "bytes": 9995,
+    "sha256": "2a4126d87cd892c9727e4d27333463e5de1086830dbf0eb3c7bc70385b6a3c17"
+  },
+  "state_mutations": 0,
+  "model_builds": 0,
+  "Native_optimize_calls": 0,
+  "scope": "Read-only observation. Only new research-branch evidence is written. PRE_BUILD does not authorize Optimize."
+}
