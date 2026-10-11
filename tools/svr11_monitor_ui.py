@@ -147,7 +147,14 @@ def safeguard(root,monitor_only=False):
         from prepare_svr11_epoch13 import pending_release
         if not pending_release(root):
             return dict(status='WAITING_PREDECESSOR_DRAIN',root=str(root),healthy_workers_terminated=0)
-    monitor_only=monitor_only or dispatch_quiesced(root)
+    precompute_required=(root/'MODEL_PRECOMPUTE_REQUEST.json').exists()
+    precompute_ready=False
+    if precompute_required:
+        from svr11_model_precompute import ensure
+        precompute_ready=ensure(root)
+        if read(root/'MODEL_PRECOMPUTE_REQUEST.json').get('campaign_resume_held_for_V2_schema_binding_repair'):
+            precompute_ready=False
+    monitor_only=monitor_only or dispatch_quiesced(root) or (precompute_required and not precompute_ready)
     # Scheduling calls the frozen scientific migration gate. While old science
     # drains, recover only the independent successor HTTP process.
     from v42_svr11.migration import check
