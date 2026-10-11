@@ -47,6 +47,21 @@ def verify_ui(root):
     if r['files']!=ui_files():raise PermissionError('READ_ONLY_MONITOR_UI_RELEASE_DRIFT')
     return r
 
+def gap_display(science,progress=None):
+    """A finite solver gap and an independent certificate have separate labels."""
+    value=dict(progress or {});value.update(science)
+    gap_available=bool(value.get('independent_global_gap_available') or value.get('global_gap_certified'))
+    bound_verified=bool(value.get('independent_global_bound_verified') or gap_available)
+    from v42_common_mess.telemetry import select_fields
+    return dict(select_fields(value),
+        initial_verified_UB=value.get('initial_verified_UB'),final_verified_UB=value.get('final_verified_UB'),
+        certified_LB=value.get('certified_Global_LB',value.get('certified_LB',value.get('Certified_Global_LB'))) if bound_verified else None,
+        certified_Gap=value.get('certified_gap',value.get('certified_Gap',value.get('Certified_Gap'))) if gap_available else None,
+        independent_global_bound_verified=bound_verified,independent_global_gap_available=gap_available,
+        independent_global_gap_provenance=value.get('independent_global_gap_provenance'),
+        independent_dual_status=value.get('independent_dual_status'),
+        global_gap_certified=bool(value.get('global_gap_certified')))
+
 def snapshot(root):
     # Worker heartbeat already includes the Fresh slot. Do not open the
     # physics writer's unretried *_PROGRESS.json files from this read-only UI.
@@ -82,8 +97,7 @@ def snapshot(root):
             optimization_status=solver_label(science) if r['arm']!='B0' else 'Native 0 · B0',
             Native_Runtime=v.get('Native_Runtime',v.get('native_runtime_seconds',v.get('measured_native_runtime',0))),
             UB=v.get('Best_Feasible_UB',v.get('verified_UB',v.get('UB',science.get('verified_UB',science.get('UB'))))),
-            certified_LB=v.get('Certified_Global_LB',science.get('certified_Global_LB',science.get('LB'))),
-            certified_Gap=science.get('certified_gap',v.get('Certified_Gap')) if science.get('global_gap_certified') else None,Fresh=fresh))
+            **gap_display(science,v),Fresh=fresh))
     migration=read(root/'MIGRATION_STATUS.json') if (root/'MIGRATION_STATUS.json').exists() else {}
     if migration.get('status')=='WAITING_PREDECESSOR_DRAIN':
         for old in migration['predecessor_workers']:
@@ -172,7 +186,8 @@ def safeguard(root,monitor_only=False):
     # dates. Audit before the immutable migration can dispatch fresh Workers.
     m=read(root/'CAMPAIGN_MANIFEST.json')
     predecessor=read(m['predecessor_drain_contract']['path'])
-    if (predecessor.get('qualified_completed_dates_reused',True) and
+    if (not m.get('B2_all31_fresh_Native_zero') and
+        predecessor.get('qualified_completed_dates_reused',True) and
         m.get('model_probe_context_retirement')=='EXACT_COMPLETED_OWNER_AND_FINALIZED_CALLBACK_REGISTRY_DETACH_CFFI_GC'):
         from reuse_svr11_completed import admit_before_first_dispatch
         admit_before_first_dispatch(root)

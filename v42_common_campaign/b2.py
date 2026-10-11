@@ -143,7 +143,8 @@ def run(request, manifest, progress):
         case.point = point
         result["mess_plan"] = record(output / "OPTIMIZED_MESS_PLAN.json")
         result["mess"] = m_stage._plan(case, point)
-        result["certificate"] = dict(strict_UB=record(output / "BEST_STRICT_UB_CERTIFICATE.json"),
+        result["certificate"] = dict(result.get("certificate", {}),
+            strict_UB=record(output / "BEST_STRICT_UB_CERTIFICATE.json"),
             original_domain_equivalence=case.identity["transport"])
         atomic(output / "M_STAGE_RESULT.json", result)
         materializer = _accepted_port(operations._accepted, request, result, strict, case)

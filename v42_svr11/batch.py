@@ -76,6 +76,12 @@ def reconcile(state,active):
         if result.get('source_global_integrity_block'):raise PermissionError('SVR11_GLOBAL_B3_STAGE_SOURCE_FAILURE:'+result['reason'])
         row.update(status='PASS' if result['PASS'] else 'FAIL',result=str(path),result_SHA=sha(path),
             reason=result.get('reason'),Native_Runtime=result.get('Native_Runtime'),UTC=now())
+        from v42_common_mess.telemetry import select_fields
+        row.update(select_fields(result))
+        row.update({key:result.get(key) for key in (
+            'initial_verified_UB','final_verified_UB','certified_LB','certified_Gap',
+            'global_gap_certified','independent_global_bound_verified',
+            'independent_global_gap_available','independent_global_gap_provenance','stages')})
         row.setdefault('terminal_history',[]).append(dict(result=record(path),status=row['status'],reason=row['reason']))
         if not result['PASS'] and result.get('retryable_technical_error') and len(row['attempts'])<3:
             i=DAYS.index(day)
@@ -108,7 +114,10 @@ def tick(root,m,ledger,active,*,memory=None,spawn=None):
     state['memory']=memory
     if stage is None:
         publish_dates(ledger,state);atomic(root/'B3_BATCH_LEDGER.json',state);return active
-    dependencies(state,stage);capacity=CAP[stage]
+    dependencies(state,stage);capacity=m.get('B3_stage_worker_counts',CAP)[stage]
+    if type(capacity) is not int or not 1<=capacity<=CAP[stage]:
+        raise PermissionError('SVR11_GLOBAL_B3_STAGE_WORKER_POLICY_DRIFT')
+    state['effective_stage_worker_capacity']=capacity
     if len(active)>capacity:raise PermissionError('SVR11_GLOBAL_B3_BATCH_CAPACITY')
     slots={p['worker_slot'] for p in active}
     atomic(root/'B3_BATCH_LEDGER.json',state)

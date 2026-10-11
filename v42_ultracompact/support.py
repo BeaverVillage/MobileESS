@@ -1,29 +1,33 @@
 """Correlated unit-flow/PCS/SOC-safe union support with certified rounding."""
-from .common import *
+import numpy as np
 from fractions import Fraction as F
 from collections import defaultdict
 import hashlib,time
-from v42_strengthening.analysis import graph_inputs
+def family(n):return str(n).split('[',1)[0]
 
-def domains(A,d):
-    sites,initial,arcs,battery,receipt=graph_inputs();units=sorted(initial);N=len(sites)
+def domains(A,d,graph=None):
+    if graph is None:
+        from v42_strengthening.analysis import graph_inputs
+        graph=graph_inputs()
+    sites,initial,arcs,battery,receipt=graph;units=sorted(initial);N=len(sites)
+    H=max(a[3] for a in arcs)
     live=defaultdict(list);stay={}
     for j,n in enumerate(d['names']):
         if family(n)=='route_flow':
             u,k=str(n)[11:-1].split(',');live[u].append((int(k),arcs[int(k)]))
         elif family(n)=='Pch':
             u,s,t=str(n)[4:-1].split(',');stay[u,s,int(t)]=True
-    reach=np.zeros((4,96,N),bool);records={}
+    reach=np.zeros((len(units),H,N),bool);records={}
     for z,u in enumerate(units):
         # Removed deterministic end stays have node_activity replacements.
         nodes={(initial[u],0)};edges=live[u]
-        for t in range(97):
+        for t in range(H+1):
             for k,a in edges:
                 if a[1]==t and a[:2] in nodes:nodes.add(a[2:4])
         for (uu,s,t) in stay:
             if uu==u:reach[z,t,sites.index(s)]=True
         records[u]=dict(actual_flow_arcs=len(edges),reachable_connected_states=int(reach[z].sum()),graph_nodes=len(nodes))
-    return dict(sites=sites,units=units,reach=reach,arcs=arcs,initial=initial,battery=battery,records=records)
+    return dict(sites=sites,units=units,reach=reach,arcs=arcs,initial=initial,battery=battery,records=records,p_limit=F(float(battery.p_limit)))
 
 def exact_sources(A,d,dom):
     """Canonical rational sparse directions shared across times and aliases."""
@@ -93,14 +97,14 @@ def exact_screen(A,d,dom,verts,src):
 def union_upper(mid,err,ts,dom,verts,base=None):
     N=len(dom['sites']);K=len(mid);result=np.zeros(K) if base is None else base.copy()
     lo=np.nextafter(mid-err,-np.inf);hi=np.nextafter(mid+err,np.inf)
-    for z in range(4):
+    for z in range(len(dom['units'])):
         chlo=lo[:,(3*z)*N:(3*z+1)*N];chhi=hi[:,(3*z)*N:(3*z+1)*N]
         pl=lo[:,(3*z+1)*N:(3*z+2)*N];ph=hi[:,(3*z+1)*N:(3*z+2)*N]
         ql=lo[:,(3*z+2)*N:(3*z+3)*N];qh=hi[:,(3*z+2)*N:(3*z+3)*N]
         # ch/dis anti-correlation follows the injection definitions. This term
         # also conservatively covers simultaneous LP charging/discharging and
         # any affine rounding radius. Pch <= 300*connected stay mass.
-        mismatch=np.nextafter(np.maximum(0,chhi+ph)*300,np.inf)
+        mismatch=np.nextafter(np.maximum(0,np.nextafter(chhi+ph,np.inf))*float(dom.get('p_limit',300)),np.inf)
         values=np.zeros((K,N))
         for p,q in verts:
             xl,xh=float(p),float(p);yl,yh=float(q),float(q)

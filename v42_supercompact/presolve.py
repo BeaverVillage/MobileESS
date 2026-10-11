@@ -17,7 +17,9 @@ def represent(x):
 
 class Presolve:
     def __init__(self,A,d):
-        self.A=A.copy();self.d={k:v.copy() if isinstance(v,np.ndarray) else v for k,v in d.items()}
+        # The CSR is read only until a substitution/subset replaces it. Only
+        # bounds are edited in place; other metadata is replaced by new arrays.
+        self.A=A.tocsr(copy=False);self.d=dict(d,lower=d['lower'].copy(),upper=d['upper'].copy())
         self.row_ids=np.arange(A.shape[0]);self.col_ids=np.arange(A.shape[1]);self.steps=[];self.rounds=[];self.rows=[];self.bound=[];self.costs={};self.rejected=[]
         self.initial_names=d['names'].copy();self.initial_d=d;self.fixed_known={}
     def row_delete(self,gone,proofs):

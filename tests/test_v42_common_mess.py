@@ -233,7 +233,7 @@ def test_trial_recovers_durable_no_return_ledger_receipt(tmp_path, monkeypatch):
     assert row['native_receipt']['precision_parameters']['FeasibilityTol'] == 1e-9
 
 
-def test_real_native_trial_keeps_original_rows_and_never_promotes_bound(tmp_path):
+def test_real_native_full_trial_keeps_original_rows_and_reports_global_solver_bound(tmp_path):
     from v42_common_mess.engine import _trial
     from v42_m1_research.check_ub import vector_sha
     A = sparse.csr_matrix([[0., 1., 0.], [1., -1., 0.], [0., -2., 1.]])
@@ -248,6 +248,7 @@ def test_real_native_trial_keeps_original_rows_and_never_promotes_bound(tmp_path
     class RealBudget(ParentBudget):
         def native_optimize(self, model, callback=None, **kwargs):
             model.Params.TimeLimit = kwargs['requested_seconds']; model.Params.OutputFlag = 0
+            model.Params.LogFile = str(tmp_path / 'OVERRIDDEN_NATIVE.log')
             try:
                 model.optimize(callback)
             finally:
@@ -274,14 +275,19 @@ def test_real_native_trial_keeps_original_rows_and_never_promotes_bound(tmp_path
         validator=validator, seconds=2., point=initial, strict=seed_strict, unrestricted=True)
     assert certificate['exact_Global_UB'] == '1/2'
     assert np.array_equal(point, np.array([0., .5, 1.]))
-    assert row['Native_Runtime'] >= 0 and len(budget.calls) == 1 and row['Global_LB_candidate'] is None
+    assert row['Native_Runtime'] >= 0 and len(budget.calls) == 1 and row['Global_LB_candidate'] == .5
+    assert row['Solver_ObjVal'] == row['Solver_ObjBound'] == .5 and row['Solver_MIPGap'] == 0.
+    assert row['solver_global_LB'] == .5 and row['solver_global_gap'] == 0.
+    assert row['solver_global_gap_valid'] and row['solver_global_gap_target_met']
+    assert not row['full_MILP_bound_independently_certified']
+    assert row['native_log']['path'] == str(tmp_path / 'OVERRIDDEN_NATIVE.log')
     assert not row['restricted_BestBound_is_Global_LB']
     identity = json.loads((tmp_path / 'actual_native' / 'MODEL_IDENTITY.json').read_text())
     assert all(identity['checks'].values()) and identity['objective'] == 'minimize rho_max'
     assert identity['equality_defined_helper_rows'] == 1
     assert identity['mip_start_helper_equalities_checked_by_original_FULL_replay']
     assert identity['unrestricted_original_C3A_MILP'] and all(identity['unrestricted_checks'].values())
-    assert row['effective_MIPGap']==row['effective_MIPGapAbs']==0.
+    assert row['effective_MIPGap']==.03 and row['effective_MIPGapAbs']==0.
     assert identity['memory_after']['RSS_bytes']>0
     assert VERSION == 'V42_COMMON_MESS_U4_THEN_FULL_MILP_V2'
 
@@ -301,7 +307,8 @@ def test_shared_engine_order_budget_and_acceptance_are_identical_for_all_stages(
                       spec['neighborhood_signature'] if spec else None))
         if method == 'FULL_MILP':
             assert kwargs['unrestricted'] and kwargs.get('lower') is kwargs.get('upper') is None
-            assert kwargs['numeric_parameters']['MIPGap'] == kwargs['numeric_parameters']['MIPGapAbs'] == 0
+            assert kwargs['numeric_parameters']['MIPGap'] == .03
+            assert kwargs['numeric_parameters']['MIPGapAbs'] == 0
         budget.native_optimize(SimpleNamespace(Params=SimpleNamespace()),
             requested_seconds=kwargs['seconds'], track='M_' + method)
         return kwargs['point'], kwargs['strict'], dict(method=method,
@@ -369,7 +376,8 @@ def test_full_trial_retains_validated_best_on_missing_worse_or_failed_solver(rou
         route_case.output/'full_trial', validator=reject_worse, seconds=100.,
         point=point, strict=strict, unrestricted=True)
     assert np.array_equal(got, point) and certificate == strict
-    assert row['best_validated_UB'] == 1. and row['Global_LB_candidate'] is None
+    assert row['best_validated_UB'] == 1.
+    assert row['Global_LB_candidate'] == (None if failure=='numeric' else .99)
     assert row['native_best_bound_diagnostic'] == .99
     assert row['Native_Runtime'] == 100.25
     assert not row['full_MILP_bound_independently_certified']

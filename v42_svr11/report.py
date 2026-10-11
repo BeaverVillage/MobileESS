@@ -62,11 +62,31 @@ def generate(root,ledger):
         completed=len(terminal),total=124,source_SHA=m['execution_SHA'],hardware=m['hardware'],scenario=m['scenario'],
         policies=policies,paired_comparison_populations=paired,retrospective_design=True,independent_holdout_claim=False,
         old_SVR7_May03_FAIL_unchanged=True,monthly_zero_violation_assumed=False,dates=rows,UTC=now())
+    from v42_common_mess.telemetry import select_fields
+    document['M_full_MILP_telemetry']=[dict(arm=r['arm'],day=r['day'],
+        **select_fields(r),initial_verified_UB=r.get('initial_verified_UB'),
+        final_verified_UB=r.get('final_verified_UB'),
+        independently_certified_Global_LB=r.get('certified_LB'),
+        independently_certified_Global_Gap=r.get('certified_Gap'),
+        independent_global_gap_provenance=r.get('independent_global_gap_provenance'))
+        for r in rows if r['arm'] in ('B2','B3') and r.get('Full_MILP_Native_Runtime') is not None]
     atomic(root/'REPORT.json',document)
     lines=['# SVR11 May 2025 campaign',f"Status: {document['status']}; attempted terminal dates {len(terminal)}/124.",f"Source SHA: `{m['execution_SHA']}`",f"Hardware equipment SHA: `{read(m['hardware']['path'])['equipment_SHA']}`",'',
         'May03-informed retrospective design. May 2025 is not an independent holdout. Original SVR7 evidence and PR #206 are preserved.',
         'Date failures do not gate later dates or policies. Unexecuted metrics remain unavailable.', '', '| Policy | PASS | FAIL | RUNNING | NOT_EXECUTED |','|---|---:|---:|---:|---:|']
     lines += [f"| {p['policy']} | {p['PASS']} | {p['FAIL']} | {p['RUNNING']} | {p['NOT_EXECUTED']} |" for p in policies]
+    def show(value):
+        return 'unavailable' if value is None else f'{value:.6g}' if isinstance(value,(int,float)) else str(value)
+    lines += ['', '## Full M MILP bounds',
+        'Solver MIPGap uses the solver incumbent. Whole-domain solver gap uses the independently verified final UB and an admitted exact equivalent full C3A solver bound. Independent certified gap is reported separately; unavailable certificates remain unavailable.',
+        '| Policy/day | First verified UB | Final verified UB | Solver ObjVal | Solver ObjBound | Solver MIPGap | Whole-domain solver gap | Independent certified LB | Independent certified gap | Root LP s | Nodes | Full Native s |',
+        '|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|']
+    for row in document['M_full_MILP_telemetry']:
+        values=[row.get(key) for key in ('initial_verified_UB','final_verified_UB',
+            'Solver_ObjVal','Solver_ObjBound','Solver_MIPGap','solver_global_gap',
+            'independently_certified_Global_LB','independently_certified_Global_Gap',
+            'Root_LP_seconds','B_and_B_Node_count','Full_MILP_Native_Runtime')]
+        lines.append('| '+row['arm']+'/'+row['day']+' | '+' | '.join(show(value) for value in values)+' |')
     lines += ['', 'Policy performance uses each policy’s PASS dates. Pairwise performance must use the separate same-date intersection recorded in REPORT.json.',
         'Full node/phase, both-terminal current/kVA, control events/taps and loss evidence are linked per date. No violation tolerance is relaxed. Local planning secants do not certify nonlinear AC feasibility.', '', '## Failures']
     lines += [f"- {r['arm']} {r['day']}: {r.get('reason','FAIL')} (result: {r.get('result','unavailable')})" for r in rows if r['status']=='FAIL']

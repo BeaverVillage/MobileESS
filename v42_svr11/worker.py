@@ -58,6 +58,13 @@ def run(path):
                 result['physical_failures']=failures
                 if failures:result.update(PASS=False,status='FAIL',reason='; '.join(f["environment"]+':'+f['reason'] for f in failures))
                 scientific=science.get('scientific',science)
+                from v42_common_mess.telemetry import select_fields
+                if request['arm'] in ('B2','B3'):
+                    result.update(select_fields(scientific))
+                    result.update({key:scientific.get(key) for key in (
+                        'initial_verified_UB','final_verified_UB','independent_dual_status',
+                        'independent_global_bound_verified','independent_global_gap_available',
+                        'independent_global_gap_provenance')})
                 result['retryable_technical_error']=not result['PASS'] and not failures and scientific.get('classification') in ('IMPLEMENTATION_FAILURE','INPUT_OR_SOURCE_FAILURE')
                 from .anytime import solver_label
                 result['optimization_status']=solver_label(scientific) if request['arm']!='B0' else 'Native 0 · B0'
@@ -66,8 +73,8 @@ def run(path):
                 result['Planning_objective']=scientific.get('verified_UB',scientific.get('UB'))
                 result['FULL_feasible_certified']=scientific.get('feasible_accepted',result.get('FULL_feasible_certified',False))
                 result['global_gap_certified']=scientific.get('global_gap_certified',result.get('global_gap_certified',False))
-                result['certified_LB']=scientific.get('Certified_Global_LB',scientific.get('LB')) if result['global_gap_certified'] else None
-                result['certified_Gap']=scientific.get('Certified_Gap',scientific.get('certified_gap')) if result['global_gap_certified'] else None
+                result['certified_LB']=scientific.get('Certified_Global_LB',scientific.get('certified_Global_LB',scientific.get('LB')))
+                result['certified_Gap']=scientific.get('Certified_Gap',scientific.get('certified_gap'))
         except Exception as error:
             result.update(PASS=False,status='FAIL',reason=repr(error),traceback=traceback.format_exc(),source_global_integrity_block=global_error(error))
             result['retryable_pre_native_technical_error']=isinstance(error,OSError) and getattr(error,'winerror',None) in (32,33)

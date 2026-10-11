@@ -25,11 +25,11 @@ def build(case, output, *, lower=None, upper=None, continuous=False,
     import gurobipy as gp
     began = perf_counter()
     memory_before = memory_observation()
-    lower = case.d['lower'].copy() if lower is None else np.asarray(lower, dtype=float)
-    upper = case.d['upper'].copy() if upper is None else np.asarray(upper, dtype=float)
+    lower = case.d['lower'] if lower is None else np.asarray(lower, dtype=float)
+    upper = case.d['upper'] if upper is None else np.asarray(upper, dtype=float)
     if np.any(lower < case.d['lower']) or np.any(upper > case.d['upper']) or np.any(lower > upper):
         raise ValueError('COMMON_M_RESTRICTION_OUTSIDE_ORIGINAL_DOMAIN')
-    types = np.full(len(case.d['types']), 'C') if continuous else case.d['types'].copy()
+    types = np.full(len(case.d['types']), 'C') if continuous else case.d['types']
     unrestricted = not continuous and spec is None and (
         np.array_equal(lower, case.d['lower']) and np.array_equal(upper, case.d['upper']))
     model = gp.Model(VERSION)
@@ -38,6 +38,7 @@ def build(case, output, *, lower=None, upper=None, continuous=False,
             IntFeasTol=1e-8, MIPGap=.005, Method=1 if continuous else 2, MIPFocus=1)
         parameters.update(numeric_parameters or {})
         parameters['Threads'] = 1
+        parameters['LogFile'] = str(output / 'NATIVE_GUROBI.log')
         for name, value in parameters.items():
             setattr(model.Params, name, value)
         variables = model.addMVar(case.A.shape[1], lb=lower, ub=upper,
@@ -61,10 +62,16 @@ def build(case, output, *, lower=None, upper=None, continuous=False,
                 raise ValueError('COMMON_M_LITERAL_INTEGER_START_REQUIRED')
             variables.Start = start
         model.update()
-        difference = model.getA()[:case.A.shape[0]] - case.A
-        difference.eliminate_zeros()
+        # One temporary native CSR is sufficient. Subtracting two large sparse
+        # matrices duplicated both coefficients and index storage at each build.
+        native_matrix = model.getA().tocsr()
+        source_nnz = int(native_matrix.indptr[case.A.shape[0]])
+        matrix_exact = (np.array_equal(native_matrix.indptr[:case.A.shape[0]+1], case.A.indptr)
+            and np.array_equal(native_matrix.indices[:source_nnz], case.A.indices)
+            and np.array_equal(native_matrix.data[:source_nnz], case.A.data))
+        del native_matrix
         continuous_columns = case.d['types'] == 'C'
-        checks = dict(original_source_rows_exact=difference.nnz == 0,
+        checks = dict(original_source_rows_exact=matrix_exact,
             original_RHS_exact=np.array_equal(np.asarray(model.getAttr('RHS'))[:case.A.shape[0]], case.d['rhs']),
             original_senses_exact=np.array_equal(np.asarray(model.getAttr('Sense'))[:case.A.shape[0]], case.d['sense']),
             original_objective_exact=np.array_equal(np.asarray(model.getAttr('Obj')), case.d['objective'])

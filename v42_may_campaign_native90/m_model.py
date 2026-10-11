@@ -1,8 +1,8 @@
 """Same-day input and lossless representation adapter for the existing M model.
 
 Model equations come only from the existing native/F3/Compact/Presolve builders.
-C3A conservatively keeps every regenerated C2 row; no historical point or
-deletion packet participates in the new case.
+The selected Exact C3A proofs are regenerated on the current C2 matrix; no
+historical point, deletion index or proof packet participates in a new case.
 """
 from collections import defaultdict
 from dataclasses import dataclass
@@ -43,6 +43,7 @@ class CampaignMCase:
     planning: dict
     coefficients: object
     output: Path
+    ultra: object = None
 
     def lift(self, point):
         if np.asarray(point).shape != (self.A.shape[1],):
@@ -133,9 +134,30 @@ def _freeze_transport(compact,presolve,graph,proof,out):
     path=Path(out)/'ORIGINAL_DOMAIN_EQUIVALENCE.json'
     atomic(path,proof)
     root=Path(__file__).resolve().parents[1]
-    sources={name:record(root/name) for name in ('v42_may_campaign/m_model.py',
+    sources={name:record(root/name) for name in ('v42_may_campaign_native90/m_model.py',
         'v42_supercompact/formulation.py','v42_supercompact/presolve.py')}
     return dict(state_sha=_transport_state_sha(compact,presolve,graph),sources=sources,certificate=record(path))
+
+
+def _c3_state_sha(ultra):
+    return storage_digest(dict(baseline_matrix=matrix_sha(ultra.original),baseline_data=_domain_sha(ultra.original_data),
+        selected_matrix=matrix_sha(ultra.A),selected_data=_domain_sha(ultra.d),
+        rows=ultra.row_ids,certificates=ultra.certificates,bounds=ultra.bounds,
+        physical_original_matrix=matrix_sha(ultra.physical_original),
+        physical_original_data=_domain_sha(ultra.physical_original_data)))
+
+
+def _freeze_c3(ultra,out):
+    from v42_ultracompact.current import SOURCES
+    root=Path(__file__).resolve().parents[1]
+    sources={name:record(root/name) for name in SOURCES}
+    ultra.proof['scientific_source_SHAs']={name:value['sha256'] for name,value in sources.items()}
+    path=Path(out)/'CURRENT_EXACT_C3A_PROOF.json'
+    atomic(path,ultra.proof)
+    atomic(Path(out)/'CURRENT_C3A_ROW_CERTIFICATES.json',ultra.certificates)
+    atomic(Path(out)/'CURRENT_C3A_BOUND_PROOFS.json',ultra.bounds)
+    np.savez_compressed(Path(out)/'CURRENT_C3A_AXES.npz',rows=ultra.row_ids,columns=np.arange(ultra.A.shape[1]))
+    return dict(state_sha=_c3_state_sha(ultra),sources=sources,certificate=record(path),proof=ultra.proof)
 
 
 def verify_transport(compact, presolve):
@@ -532,15 +554,24 @@ def build_case(payload, request, progress=None):
         atomic(out/'TRANSPORT_FAILURE_DIAGNOSTIC.json',dict(PASS=False,error=str(error),day=day,
             Native_optimize_calls=0,details=getattr(error,'transport_diagnostic',{}),state=record(diagnostic)))
         raise
+    from v42_ultracompact.current import reduce_current_c3a, POLICY
+    if progress: progress(dict(phase='M_CURRENT_SELECTED_EXACT_C3A',day=day,arm='B2'))
+    ultra=reduce_current_c3a(B,e,graph,progress,physical_original=(A,d));B,e=ultra.A,ultra.d
+    c3_authority=_freeze_c3(ultra,out)
+    proof=dict(proof,C3A_policy=POLICY,selected_C3A_independent_proof_PASS=ultra.proof['PASS'],
+        selected_C3A_rows_removed=ultra.proof['removed_rows'],selected_C3A_bounds_tightened=ultra.proof['bounds_tightened'],
+        selected_C3A_original_P1_bit_exact=ultra.proof['original_P1_bit_exact'],
+        selected_C3A_integer_and_full_LP_domains_identical=ultra.proof['integer_and_full_LP_domains_identical'])
     transport_authority=_freeze_transport(compact,presolve,graph,proof,out)
     identity=dict(schema='V42_CURRENT_DATE_B2_M_CASE_V1',day=day,arm='B2',input_identity=payload['identity'],
         bundle_sha=digest(bundle),anchor_sha=digest(anchor),route_table_sha=bundle['route_table']['sha256'],
         original_matrix_sha=matrix_sha(A),original_domain_sha=_domain_sha(d),
         selected_matrix_sha=matrix_sha(B),selected_domain_sha=_domain_sha(e),
         binary_count=int(np.count_nonzero(e['types']=='B')),slots=96,units=4,sites=24,
-        objective='min rho_max',C3A_policy='KEEP_ALL_REGENERATED_C2_ROWS',transport=proof,transport_authority=transport_authority,
+        objective='min rho_max',C3A_policy=POLICY,transport=proof,transport_authority=transport_authority,c3_authority=c3_authority,
+        C2_size=ultra.proof['baseline'],C3A_size=ultra.proof['selected'],
         AIDC_optimization_calls=0,P2_calls=0,historical_bounds_points_columns_read=0)
-    case=CampaignMCase(B,e,A,d,None,graph,digest(identity),identity,compact,presolve,bundle,anchor,planning,coeff,out)
+    case=CampaignMCase(B,e,A,d,None,graph,digest(identity),identity,compact,presolve,bundle,anchor,planning,coeff,out,ultra)
     sparse.save_npz(out/'FULL_A.npz',A);np.savez_compressed(out/'FULL_DATA.npz',**d)
     sparse.save_npz(out/'C3A_A.npz',B);np.savez_compressed(out/'C3A_DATA.npz',**e)
     np.savez_compressed(out/'CURRENT_C2_AXES.npz',rows=presolve.row_ids,columns=presolve.col_ids)
@@ -560,17 +591,36 @@ def verify_case(case):
     if digest(case.identity)!=case.case_sha or digest(case.bundle)!=case.identity['bundle_sha'] or digest(case.anchor)!=case.identity['anchor_sha']:
         raise ValueError('CURRENT_M_CASE_BINDING_DRIFT')
     authority=case.identity.get('transport_authority')
-    if authority is None:return verify_transport(case.compact,case.presolve)
+    if authority is None:
+        if case.identity.get('C3A_policy')=='SELECTED_EXACT_CURRENT_MATRIX_PROOFS':raise ValueError('CURRENT_M_C3A_TRANSPORT_AUTHORITY_MISSING')
+        return verify_transport(case.compact,case.presolve)
     if authority['state_sha']!=_transport_state_sha(case.compact,case.presolve,case.graph):
         raise ValueError('CURRENT_M_TRANSPORT_STATE_BYTES_DRIFT')
     root=Path(__file__).resolve().parents[1]
-    expected_sources={'v42_may_campaign/m_model.py','v42_supercompact/formulation.py','v42_supercompact/presolve.py'}
+    expected_sources={'v42_may_campaign_native90/m_model.py','v42_supercompact/formulation.py','v42_supercompact/presolve.py'}
     if set(authority['sources'])!=expected_sources or any(sha(root/name)!=receipt['sha256'] for name,receipt in authority['sources'].items()):
         raise ValueError('CURRENT_M_TRANSPORT_PROOF_SOURCE_DRIFT')
     receipt=authority['certificate']; path=Path(receipt['path'])
+    c2_receipt=receipt
     if (path.resolve()!=(case.output/'ORIGINAL_DOMAIN_EQUIVALENCE.json').resolve()
             or sha(path)!=receipt['sha256'] or read(path)!=case.identity['transport']
             or case.identity['transport'].get('PASS') is not True):
         raise ValueError('CURRENT_M_TRANSPORT_PROOF_PACKET_DRIFT')
+    c3=case.identity.get('c3_authority')
+    if case.identity.get('C3A_policy')=='SELECTED_EXACT_CURRENT_MATRIX_PROOFS' and c3 is None:
+        raise ValueError('CURRENT_M_C3A_PROOF_AUTHORITY_MISSING')
+    if c3 is not None:
+        from v42_ultracompact.current import SOURCES, POLICY
+        if case.ultra is None or c3['state_sha']!=_c3_state_sha(case.ultra):raise ValueError('CURRENT_M_C3A_PROOF_STATE_DRIFT')
+        if (c3['proof']['selected_matrix_SHA256']!=case.identity['selected_matrix_sha']
+                or matrix_sha(case.ultra.A)!=case.identity['selected_matrix_sha']
+                or _domain_sha(case.ultra.d)!=case.identity['selected_domain_sha']):
+            raise ValueError('CURRENT_M_C3A_SELECTED_BINDING_DRIFT')
+        if set(c3['sources'])!=set(SOURCES) or any(sha(root/name)!=receipt['sha256'] for name,receipt in c3['sources'].items()):
+            raise ValueError('CURRENT_M_C3A_PROOF_SOURCE_DRIFT')
+        receipt=c3['certificate'];path=Path(receipt['path'])
+        if (path.resolve()!=(case.output/'CURRENT_EXACT_C3A_PROOF.json').resolve()
+                or sha(path)!=receipt['sha256'] or read(path)!=c3['proof'] or c3['proof'].get('PASS') is not True
+                or case.identity['C3A_policy']!=POLICY):raise ValueError('CURRENT_M_C3A_PROOF_PACKET_DRIFT')
     return dict(case.identity['transport'],proof_reused_after_all_transport_state_SHA_checks=True,
-        same_case_transport_certificate=receipt)
+        same_case_transport_certificate=c2_receipt)

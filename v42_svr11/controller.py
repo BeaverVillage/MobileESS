@@ -26,6 +26,13 @@ def make_request(root,m,row,slot):
 
 def record_terminal(row,path):
     r=read(path)
+    from v42_common_mess.telemetry import select_fields
+    if row['arm'] in ('B2','B3'):
+        row.update(select_fields(r))
+        row.update({key:r.get(key) for key in (
+            'initial_verified_UB','final_verified_UB','independent_dual_status',
+            'independent_global_bound_verified','independent_global_gap_available',
+            'independent_global_gap_provenance','stages')})
     row.update(status='PASS' if r['PASS'] else 'FAIL',result=str(path),result_SHA=sha(path),reason=r.get('reason',r.get('scientific_status')),
         metrics=r.get('metrics',{}),Native_Runtime=r.get('Native_Runtime'),wall_seconds=r.get('wall_seconds'),
         Planning_objective=r.get('Planning_objective'),FULL_feasible_certified=r.get('FULL_feasible_certified'),global_gap_certified=r.get('global_gap_certified'),

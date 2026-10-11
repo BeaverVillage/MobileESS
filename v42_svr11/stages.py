@@ -119,7 +119,16 @@ def b3(request,manifest,progress):
             ledger=json.loads(out.ledger_receipt)
             stages[stage]=dict(native_seconds=ledger['measured_native_runtime'],native_calls=ledger['native_call_count'],
                 FULL_feasible_certified=out.physical_evidence.get('PASS'),bounds=out.global_evidence,output_SHA=out.sha)
+            from v42_common_mess.telemetry import select_fields
+            stages[stage].update(select_fields(out.source_result))
+            stages[stage].update({key:out.source_result.get(key) for key in (
+                'verified_UB','initial_verified_UB','final_verified_UB','certified_Global_LB',
+                'certified_gap','global_gap_certified','independent_global_bound_verified',
+                'independent_global_gap_available','independent_global_gap_provenance')})
         passed=outcome['status']=='STAGE_COMPLETE' if batch and batch!='ACTUAL' else outcome['status']=='COMPLETE' and outcome['validation']['PASS']
+        current_stage=batch if batch in stages else 'M2' if 'M2' in stages else 'M1' if 'M1' in stages else 'A1'
+        scientific=coordinator.outputs[current_stage].source_result if current_stage in coordinator.outputs else {}
         return dict(PASS=passed,status=outcome['status'],b3_stage=batch,final_date=not batch or batch=='ACTUAL',
+            scientific=scientific,
             stages=stages,Native_Runtime=sum(s['native_seconds'] for s in stages.values()),outcome=outcome,
             FULL_feasible_certified=bool(passed),Actual_executed=not batch or batch=='ACTUAL')
