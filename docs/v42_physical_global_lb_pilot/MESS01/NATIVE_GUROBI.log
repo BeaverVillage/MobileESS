@@ -1,0 +1,60 @@
+
+Gurobi 13.0.2 (win64) logging started Mon Oct 12 00:55:09 2026
+
+Set parameter LogFile to value "docs\v42_physical_global_lb_pilot\MESS01\NATIVE_GUROBI.log"
+Set parameter OutputFlag to value 1
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  29
+SoftMemLimit  2
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  0
+MIPGapAbs  0
+OptimalityTol  1e-08
+Threads  1
+
+Optimize a model with 51458 rows, 58814 columns and 314503 nonzeros (Min)
+Model fingerprint: 0xb009dbe9
+Model has 1152 linear objective coefficients
+Variable types: 6796 continuous, 52018 integer (52018 binary)
+Coefficient statistics:
+  Matrix range     [2e-01, 4e+02]
+  Objective range  [1e-13, 2e-05]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [1e+00, 8e+02]
+
+Loaded user MIP start with objective 0.00640483
+
+Presolve removed 8934 rows and 2 columns
+Presolve time: 0.86s
+Presolved: 42524 rows, 58812 columns, 292169 nonzeros
+Variable types: 6794 continuous, 52018 integer (52018 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   35296   -1.1328311e-01   2.798366e+03   0.000000e+00      5s
+   44386   -1.1441770e-01   0.000000e+00   0.000000e+00      7s
+   44386   -1.1441770e-01   0.000000e+00   0.000000e+00      7s
+
+Root relaxation: objective -1.144177e-01, 44386 iterations, 6.02 seconds (12.87 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0      -0.1144177   -0.11442  0.00%     -    8s
+
+Explored 1 nodes (52665 simplex iterations) in 8.08 seconds (15.49 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 2: -0.114418 0.00640483 
+
+Optimal solution found (tolerance 0.00e+00)
+Best objective -1.144177027850e-01, best bound -1.144177027850e-01, gap 0.0000%
+
+User-callback calls 761, time in user-callback 0.97 sec
