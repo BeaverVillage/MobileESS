@@ -1,0 +1,93 @@
+{
+  "arm": "B1",
+  "day": "2025-05-01",
+  "identity": {
+    "run_id": "B1_ONLY_MAY2025_v42_b1_only_may_20261012_03",
+    "arm": "B1",
+    "day": "2025-05-01",
+    "source_SHA": "146bf39f5e4f9d720ef7118051edbcdc58b96ca3d83af31c3e7bd5349f1fecd8",
+    "attempt_id": "attempt_01"
+  },
+  "worker": {
+    "PID": 127100,
+    "create_time": 1791742209.9123144,
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\pythonw.exe",
+      "-B",
+      "-X",
+      "utf8",
+      "-m",
+      "v42_svr11.worker",
+      "D:\\v42_b1_only_may_20261012_03\\dates\\B1\\2025-05-01\\attempts\\attempt_01\\request.json"
+    ],
+    "cwd": "D:\\v42_b1_only_source_20261012",
+    "CPU_seconds": 0.140625,
+    "UTC": "2026-10-11T18:10:10.098176+00:00"
+  },
+  "source_SHA": "146bf39f5e4f9d720ef7118051edbcdc58b96ca3d83af31c3e7bd5349f1fecd8",
+  "PASS": false,
+  "status": "FAIL",
+  "started_UTC": "2026-10-11T18:10:10.101178+00:00",
+  "Native_Runtime": 2.0370001792907715,
+  "FULL_feasible_certified": false,
+  "global_gap_certified": false,
+  "metrics": {
+    "environments": {},
+    "evidence": []
+  },
+  "request": {
+    "path": "D:\\v42_b1_only_may_20261012_03\\dates\\B1\\2025-05-01\\attempts\\attempt_01\\request.json",
+    "sha256": "abd21eb9848f2f74e0ca428cebd96c0edf28998f27892545357e7abdea1340c3",
+    "bytes": 1442
+  },
+  "scientific": {
+    "PASS": false,
+    "accepted": false,
+    "day": "2025-05-01",
+    "arm": "B1",
+    "classification": "IMPLEMENTATION_FAILURE",
+    "P2_calls": 0,
+    "MESS_optimization_calls": 0,
+    "all_MESS_PQ_zero": true,
+    "old_point_bound_clock_loaded": false,
+    "error": "ValueError('PHASE_I_RAW_REPLAY_FAIL')",
+    "traceback": "Traceback (most recent call last):\n  File \"D:\\v42_b1_only_source_20261012\\v42_may_campaign_native90\\a_stage.py\", line 613, in run\n    state, _, expanded, priced = phase_group['run'](native, state, day)\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_b1_only_source_20261012\\v42_a_stage_canary\\phase.py\", line 65, in run\n    if not rp['PASS'] or not sign['PASS']:raise ValueError('PHASE_I_RAW_REPLAY_FAIL')\n                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: PHASE_I_RAW_REPLAY_FAIL\n",
+    "scientific_infeasibility_proven": false,
+    "native_seconds": 2.0370001792907715,
+    "wall_seconds": 2866.270950600039,
+    "native_calls": 1,
+    "native_budget_overshoot_seconds": 0.0,
+    "Native_budget_reset": 0,
+    "global_optimum_claim": false,
+    "invalid_original_physical_replay_count": 0
+  },
+  "scientific_status": "IMPLEMENTATION_FAILURE",
+  "reason": "IMPLEMENTATION_FAILURE",
+  "physical_failures": [],
+  "retryable_technical_error": true,
+  "optimization_status": "IMPLEMENTATION_FAILURE",
+  "AC_status": "NOT_EXECUTED",
+  "stage_optimization_statuses": {},
+  "Planning_objective": null,
+  "certified_LB": null,
+  "certified_Gap": null,
+  "native_ledgers": [
+    {
+      "receipt": {
+        "path": "D:\\v42_b1_only_may_20261012_03\\dates\\B1\\2025-05-01\\attempts\\attempt_01\\NATIVE_RUNTIME_LEDGER.json",
+        "sha256": "3fb39210073247b86829ab352edccbeb0957ed5a7a51bf17c6e0b4c7b89dcfe7",
+        "bytes": 1673
+      },
+      "Native_Runtime": 2.0370001792907715,
+      "inflight": null,
+      "runtime_unavailable": false
+    }
+  ],
+  "known_completed_Native_Runtime": 2.0370001792907715,
+  "Native_Runtime_uncertain": false,
+  "finished_UTC": "2026-10-11T18:58:10.836537+00:00",
+  "wall_seconds": 2880.763113900088,
+  "Actual_PQ_repair": 0,
+  "Actual_reoptimization": 0,
+  "next_date_blocked_by_FAIL": false
+}

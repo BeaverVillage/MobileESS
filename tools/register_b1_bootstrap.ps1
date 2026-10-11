@@ -1,0 +1,12 @@
+$ErrorActionPreference='Stop'
+$v42Root='D:\v42_b1_only_may_20261012_03'
+$v42Source='D:\v42_b1_only_source_20261012'
+$v42Name='MobileESS_V42_B1_Only_May2025_20261012_V3_Bootstrap'
+$v42Action=New-ScheduledTaskAction -Execute 'C:\Users\kjw39\AppData\Local\Programs\Python\Python311\pythonw.exe' -Argument ('-B -X utf8 '+$v42Source+'\tools\b1_bootstrap.py') -WorkingDirectory $v42Source
+$v42Trigger=New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 1)
+$v42Settings=New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 5) -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+$v42Principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited
+if(Get-ScheduledTask -TaskName $v42Name -ErrorAction SilentlyContinue){throw 'B1_BOOTSTRAP_ALREADY_REGISTERED'}
+Register-ScheduledTask -TaskName $v42Name -Action $v42Action -Trigger $v42Trigger -Settings $v42Settings -Principal $v42Principal | Out-Null
+Start-ScheduledTask -TaskName $v42Name
+Export-ScheduledTask -TaskName $v42Name | Set-Content -LiteralPath (Join-Path $v42Root 'WINDOWS_BOOTSTRAP_TASK.xml') -Encoding utf8
