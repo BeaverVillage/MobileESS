@@ -66,14 +66,32 @@ def link_or_check(origin,target):
 
 
 def validation_contract(state):
+    normalized={}
+    for day,receipt in state['real_validation'].items():
+        if record(receipt['path'])!=receipt:raise PermissionError('REAL_VALIDATION_ORIGIN_RESULT_DRIFT')
+        value=copy.deepcopy(read(receipt['path']))
+        if value.get('PASS') is not True:
+            raise PermissionError('SVR11_GLOBAL_FULL_MILP_REAL_VALIDATION_INCOMPLETE:'+day)
+        for row in value['Phase2_rows']:
+            thin=row['original_model_identity'];full=record(thin['path'])
+            if (set(thin) not in ({'path','sha256'},{'path','sha256','bytes'})
+                    or any(full.get(k)!=v for k,v in thin.items())):
+                raise PermissionError('REAL_VALIDATION_IDENTITY_SHA_OR_SCHEMA_DRIFT')
+            row['original_model_identity']=full
+        value['receipt_schema_normalization']=dict(original_result=receipt,
+            changed_fields=['Phase2_rows[*].original_model_identity.bytes'],
+            original_sha_matches=True,Native_calls=0,Runtime_and_UB_unchanged=True,
+            production_results_promoted=0,normalizer=record(__file__))
+        path=DEV/'normalized_receipts'/(day+'.json');atomic(path,value);normalized[day]=record(path)
     result=dict(source_SHA=state['source_SHA'],algorithm_version=VERSION,
         A1_A2_algorithms_changed=False,M_native_limit_seconds=1800,
-        real_validation=state['real_validation'],development_results_promoted=0,UTC=now())
+        real_validation=normalized,original_real_validation=state['real_validation'],
+        development_results_promoted=0,UTC=now())
     atomic(ROOT/'FULL_MILP_VALIDATION_RELEASE_CONTRACT.json',result)
     from v42_svr11.milp_release import validate
     receipt=validate(ROOT,state['sources'])
     peaks=[]
-    for r in state['real_validation'].values():
+    for r in normalized.values():
         v=read(r['path']);memory=v['memory']
         peaks.extend([memory['peak_RSS_bytes'],memory['peak_private_commit_bytes']])
         for row in v['Phase2_rows']:
