@@ -1,6 +1,6 @@
 """Exact Forecast allocation cache: immutable successor, natural worker drain."""
 from pathlib import Path
-import sys,shutil,copy,json,subprocess
+import sys,shutil,copy,json,subprocess,time
 import numpy as np
 import psutil
 SOURCE=Path(__file__).resolve().parents[1];sys.path.insert(0,str(SOURCE));sys.path.insert(0,str(SOURCE/'tools'))
@@ -64,7 +64,15 @@ def origin_workers():
             args=p.cmdline()
             if '-m' not in args or args[args.index('-m')+1]!='v42_svr11.worker':continue
             r=read(args[-1]);assert Path(r['root'])==OLD and r['source_SHA']==old['execution_SHA']
-            assert Path(r['code_root'])==Path(old['code_root']) and Path(p.cwd()) in allowed
+            assert Path(r['code_root'])==Path(old['code_root'])
+            # Compile/Redirect temporarily changes process cwd; make a bounded
+            # read-only resample rather than relax the approved directory set.
+            observed=[]
+            for sample in range(25):
+                cwd=Path(p.cwd());observed.append(str(cwd))
+                if cwd in allowed:break
+                time.sleep(.02)
+            else:raise PermissionError('TRANSFER_PREDECESSOR_CHECKOUT_DRIFT:'+json.dumps(dict(observed=observed,approved=list(map(str,allowed)))))
             peers.append(dict(identity(p),arm=r['arm'],day=r['day'],request=record(args[-1])))
         except psutil.Error:continue
     return peers
