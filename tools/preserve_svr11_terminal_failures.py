@@ -26,6 +26,15 @@ def admit(root,origin):
         if result.get('PASS'):continue
         assert result['source_SHA']==old['execution_SHA'] and result['status']=='FAIL'
         assert not result.get('source_global_integrity_block'),'COMMON_ORIGIN_INTEGRITY_FAILURE_REQUIRES_DIAGNOSIS'
+        axes=[]
+        for authority in (old,m):
+            axis={}
+            for r in authority['input_receipts'][current['day']]:
+                assert record(r['path'])==r
+                if Path(r['path']).name in ('OPERATIONS_TEMPLATE_B1.json','OPERATIONS_TEMPLATE_B2.json','NATIVE_INPUT_TEMPLATE_B1.json'):continue
+                axis[Path(r['path']).name]=(r['sha256'],r['bytes'])
+            axes.append(axis)
+        assert axes[0]==axes[1],'TERMINAL_FAILURE_RAW_INPUTS_DIFFERENT'
         row=copy.deepcopy(original)
         if row['status']=='RUNNING':record_terminal(row,path)
         assert row['status']=='FAIL' and row['result_SHA']==record(path)['sha256']
