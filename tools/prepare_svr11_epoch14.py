@@ -118,10 +118,34 @@ def raw_and_hardware(state):
 
 
 def forecast_contract(state,receipts):
-    from svr11_model_precompute import check_model
     old=state['old'];days={};links=[]
+    # Each immutable authority must inspect its own source bytes. Importing
+    # the Source14 guard while checking a Source13 manifest would correctly
+    # reject it; recheck origin models in a separate Source13 read-only process.
+    origin_check=ROOT/'FORECAST_ORIGIN_REVALIDATION.json'
+    program="\n".join([
+        'from pathlib import Path', 'import sys',
+        'sys.path.insert(0,'+repr(str(Path(old['code_root'])/'tools'))+')',
+        'from svr11_model_precompute import check_model',
+        'from v42_pr134_b1.common import read,atomic,record,now',
+        'from v42_svr11 import DAYS',
+        'root=Path('+repr(str(OLD))+')',
+        "m=read(root/'CAMPAIGN_MANIFEST.json')",
+        'evidence={day:check_model(root,m,day) for day in DAYS}',
+        'atomic('+repr(str(origin_check))+',dict(PASS=True,source_SHA=m["execution_SHA"],'
+            'evidence=evidence,Native_optimizer_calls=0,Actual_calls=0,UTC=now()))'])
+    result=subprocess.run([sys.executable,'-B','-X','utf8','-c',program],cwd=old['code_root'],
+        text=True,capture_output=True,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
+    if result.returncode:
+        atomic(ROOT/'FORECAST_ORIGIN_REVALIDATION_ERROR.json',dict(returncode=result.returncode,
+            stdout=result.stdout,stderr=result.stderr,Native_calls=0,UTC=now()))
+        raise PermissionError('EPOCH13_FORECAST_READ_ONLY_REVALIDATION_FAILED')
+    validated=read(origin_check)
+    if not validated['PASS'] or validated['source_SHA']!=old['execution_SHA']:
+        raise PermissionError('EPOCH13_FORECAST_REVALIDATION_SOURCE_DRIFT')
     for day in DAYS:
-        certificate=check_model(OLD,old,day)
+        certificate=validated['evidence'][day]
+        if record(certificate['path'])!=certificate:raise PermissionError('EPOCH13_FORECAST_CERTIFICATE_DRIFT')
         # Source14 changes no Forecast-generation or electrical-model byte.
         excluded={'OPERATIONS_TEMPLATE_B1.json','OPERATIONS_TEMPLATE_B2.json'}
         axes=[{Path(r['path']).name:(r['sha256'],r['bytes']) for r in refs
@@ -149,6 +173,7 @@ def forecast_contract(state,receipts):
         Actual_inputs_read_by_model=0,Planning_tap_or_queue_transferred_to_Actual=False,
         reused_complete_slots=2976,previous_policy_optimization_reuse=0,coefficient_NTFS_hardlinks=links,
         source_changes_reviewed=state['changes'],UTC=now())
+    contract['origin_independent_revalidation']=record(origin_check)
     p=ROOT/'MODEL_CHECKPOINT_REUSE_CONTRACT.json';atomic(p,contract);ref=record(p)
     for day in DAYS:
         dest=ROOT/'models'/day;v=read(dest/'ELECTRICAL_CERTIFICATE.json')
