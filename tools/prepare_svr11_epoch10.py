@@ -125,6 +125,8 @@ def release_and_reuse():
     release(ROOT)
     import prepare_svr11_epoch07 as helper
     helper.root=ROOT;helper.old=OLD;helper.reuse()
+    from preserve_svr11_terminal_failures import admit
+    admit(ROOT,OLD)
     from reuse_svr11_completed import admit_before_first_dispatch
     admit_before_first_dispatch(ROOT)
     ledger=read(ROOT/'CAMPAIGN_LEDGER.json');rows=list(ledger['dates'].values())
