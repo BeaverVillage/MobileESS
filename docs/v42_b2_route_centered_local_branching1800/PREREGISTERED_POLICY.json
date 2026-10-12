@@ -1,0 +1,248 @@
+{
+  "Native_limit": 1800,
+  "Threads": 1,
+  "heavy_workers": 1,
+  "initial_budget": {
+    "ABLATION": 250,
+    "R1_R2": 500,
+    "R3": 400,
+    "R4": 400,
+    "R5_reserve": 250
+  },
+  "ablation_call_cap": 40,
+  "first_Local_Branching_cap": 120,
+  "max_Local_Branching_cap": 300,
+  "return_reserve_seconds": 8,
+  "UB_tolerance": 1e-08,
+  "strict_delta": 1e-05,
+  "material_vs_N1": 0.5411621302242249,
+  "Global_gap_goal": 0.03,
+  "Hamming": "Actual free route Node-Activity only, witness maximum distance plus preregistered slack; all384 modes excluded",
+  "no_improvement_goal_row_excluding_center": true,
+  "improving_raw_stop": "First MIPSOL below current verified center by1e-5, then immediate original FULL replay",
+  "primary_descriptors": [
+    {
+      "label": "R1_FIRST_SMALL",
+      "stage": "R1",
+      "units": [
+        "MESS03"
+      ],
+      "start": 0,
+      "stop": 24,
+      "size": 3,
+      "slack": 4,
+      "cap": 120
+    },
+    {
+      "label": "R2_LATE_SMALL",
+      "stage": "R2",
+      "units": [
+        "MESS03"
+      ],
+      "start": 60,
+      "stop": 96,
+      "size": 4,
+      "slack": 8,
+      "cap": 120
+    },
+    {
+      "label": "R1_FIRST_EXPANDED",
+      "stage": "R1",
+      "units": [
+        "MESS03"
+      ],
+      "start": 0,
+      "stop": 40,
+      "size": 5,
+      "slack": 8,
+      "cap": 130
+    },
+    {
+      "label": "R2_LATE_EXPANDED",
+      "stage": "R2",
+      "units": [
+        "MESS03"
+      ],
+      "start": 48,
+      "stop": 96,
+      "size": 6,
+      "slack": 12,
+      "cap": 130
+    },
+    {
+      "label": "R3_WHOLE_MESS03_FOUR_SITES",
+      "stage": "R3",
+      "units": [
+        "MESS03"
+      ],
+      "start": 0,
+      "stop": 96,
+      "size": 4,
+      "slack": 16,
+      "cap": 180
+    },
+    {
+      "label": "R3_WHOLE_MESS03_24_SITES",
+      "stage": "R3",
+      "units": [
+        "MESS03"
+      ],
+      "start": 0,
+      "stop": 96,
+      "size": 24,
+      "slack": 32,
+      "cap": 220
+    },
+    {
+      "label": "R4_MESS03_MESS01",
+      "stage": "R4",
+      "units": [
+        "MESS03",
+        "MESS01"
+      ],
+      "start": 0,
+      "stop": 96,
+      "size": 6,
+      "partner_size": 3,
+      "slack": 24,
+      "cap": 130
+    },
+    {
+      "label": "R4_MESS03_MESS04",
+      "stage": "R4",
+      "units": [
+        "MESS03",
+        "MESS04"
+      ],
+      "start": 0,
+      "stop": 96,
+      "size": 6,
+      "partner_size": 3,
+      "slack": 24,
+      "cap": 130
+    },
+    {
+      "label": "R4_MESS03_MESS02",
+      "stage": "R4",
+      "units": [
+        "MESS03",
+        "MESS02"
+      ],
+      "start": 0,
+      "stop": 96,
+      "size": 6,
+      "partner_size": 3,
+      "slack": 24,
+      "cap": 130
+    }
+  ],
+  "reserve_descriptors": [
+    {
+      "label": "R5_BEAM_CORRIDOR_0",
+      "stage": "R5",
+      "units": [
+        "MESS03",
+        "MESS01"
+      ],
+      "start": 0,
+      "stop": 96,
+      "size": 6,
+      "partner_size": 4,
+      "slack": 32,
+      "cap": 125,
+      "beam_ordinal": 0
+    },
+    {
+      "label": "R5_BEAM_CORRIDOR_1",
+      "stage": "R5",
+      "units": [
+        "MESS03",
+        "MESS04"
+      ],
+      "start": 0,
+      "stop": 96,
+      "size": 8,
+      "partner_size": 5,
+      "slack": 40,
+      "cap": 125,
+      "beam_ordinal": 1
+    },
+    {
+      "label": "R5_BEAM_CORRIDOR_2",
+      "stage": "R5",
+      "units": [
+        "MESS03",
+        "MESS02"
+      ],
+      "start": 0,
+      "stop": 96,
+      "size": 10,
+      "partner_size": 6,
+      "slack": 48,
+      "cap": 150,
+      "beam_ordinal": 2
+    },
+    {
+      "label": "R5_BEAM_CORRIDOR_3",
+      "stage": "R5",
+      "units": [
+        "MESS03",
+        "MESS01"
+      ],
+      "start": 0,
+      "stop": 96,
+      "size": 12,
+      "partner_size": 7,
+      "slack": 56,
+      "cap": 150,
+      "beam_ordinal": 3
+    },
+    {
+      "label": "R5_BEAM_CORRIDOR_4",
+      "stage": "R5",
+      "units": [
+        "MESS03",
+        "MESS04"
+      ],
+      "start": 0,
+      "stop": 96,
+      "size": 14,
+      "partner_size": 8,
+      "slack": 64,
+      "cap": 150,
+      "beam_ordinal": 4
+    },
+    {
+      "label": "R5_BEAM_CORRIDOR_5",
+      "stage": "R5",
+      "units": [
+        "MESS03",
+        "MESS02"
+      ],
+      "start": 0,
+      "stop": 96,
+      "size": 16,
+      "partner_size": 9,
+      "slack": 72,
+      "cap": 150,
+      "beam_ordinal": 5
+    }
+  ],
+  "priority_partners": [
+    "MESS01",
+    "MESS04",
+    "MESS02"
+  ],
+  "R5_only_after_R1_R4_stagnation": true,
+  "beam_candidates_are_corridor_assistance_not56_route_fixed_restarts": true,
+  "warm_start_authority": {
+    "path": "D:\\v42_b2_route_centered_local_branching1800_20261012\\docs\\v42_b2_route_centered_local_branching1800\\PR219_WARM_START_CERTIFICATE.json",
+    "sha256": "e255f957de50f68896bcb10c85759f352735f031b1d60c4649d660d6d470d253"
+  },
+  "ACTUAL": "ACTUAL_NOT_RUN",
+  "new_LB_calls": 0,
+  "unrestricted_FULL_calls": 0,
+  "source_policy_frozen_before_Native": true,
+  "unchanged_original_tolerances": true,
+  "Raw_repair": false
+}
