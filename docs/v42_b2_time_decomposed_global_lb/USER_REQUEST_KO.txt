@@ -1,0 +1,442 @@
+# V42 — B2 Multi-Time Global LB Decomposition 연구
+## 4-MESS Joint Snapshot MILP → Critical Window MILP
+
+Repository: `BeaverVillage/MobileESS`
+
+## 0. 최우선 목표
+
+Source18r의 기존 Full MILP와 U4 엔진을 변경하지 않고, **시간별·구간별 소규모 정수 MILP를 통해 Global LB를 개선할 수 있는지 검증하라.**
+
+이번 연구에서는 기존 K48 MILP에 제약을 반복 추가하는 방식을 사용하지 않는다.
+
+현재 기준:
+
+- Source18r / PR207: `497609b46faa14ea7e32a9483a333ab32fd264ef`
+- Critical-Grid CG / PR211: `d12315a3757aec187c8da0685c28ef901466386a`
+- Root LP 연구 / PR214: `40ab888b884255e76fd6c89fd01933570b60c242`
+- 대상: IEEE123, B2, 2025-05-01
+- 원본 Case SHA: `34c0efffa9c05397552fb167667c0bbfe2f35cec89801a3169c00c64fe77f292`
+- 기존 인증 Global LB: `0.46498486997548166`
+- 검증된 원본 U4 UB: `0.6760534504652341`
+- 현재 Global Gap: `31.22069421%`
+- 목표 Global Gap: 3%
+- 현재 UB에서 필요한 목표 LB: `0.6557718469512771`
+
+**성능 목표는 기존 Global LB를 최소 0.001 이상 개선하는 것이다.**
+
+개선이 확인되지 않더라도 수학적 유효성, 계산속도, 정수변수 규모를 독립적으로 기록하라.
+
+## 1. 신규 연구 브랜치 및 기존 결과 보존
+
+PR214의 정확한 HEAD를 부모로 새 연구 브랜치를 생성한다.
+
+기존 Source18r, U4, PR207/209/210/211/214 및 기존 Native Ledger는 수정하지 않는다.
+
+PR213 및 PR212의 B1 Source·결과·실행 상태도 변경하지 않는다.
+
+**B1은 사용자의 최신 지시에 따라 실행하지 않는다.**
+
+B1 Supervisor, Worker, Windows Task, 자동화 또는 예약을 시작하거나 활성화하지 마라.
+
+현재 다른 Heavy Gurobi 프로세스가 실행 중이라면 이를 강제 종료하지 말고, 자원 안전 조건을 확인하여 B2 실행을 보류한다.
+
+## 2. 연구 방향 변경
+
+기존 K48 정식화는 다음 특징을 가진다.
+
+- MESS 4대
+- 96슬롯 전체
+- Binary 9,322개
+- 계통 제약 K48
+- 143,308행 / 244,265열
+- Root LP 최적 목적값 약 0.464985
+
+이번 연구에서는 Full96 문제를 다시 구성하지 않는다.
+
+대신 **선택한 특정 슬롯에서 실제 차량 4대의 정수 위치·충방전 결정을 함께 최적화**한다.
+
+해당 슬롯의 원본 배전계통 Security 제약은 모두 유지한다.
+
+시간 간 이동경로와 SOC 결합을 완화하기 때문에 원본 정수 가능영역을 제거하지 않는 것이 중요하다.
+
+## 3. Step A — 시간별 4-MESS Joint Snapshot 정식화
+
+슬롯 t에서 MESS m의 접속 위치를 다음과 같이 정의한다.
+
+`z[m,s,t] ∈ {0,1}`
+
+여기서 s는 원본 Source18r의 실제 MESS 접속 가능 위치다.
+
+차량당 한 위치만 선택하도록 한다.
+
+`sum_s z[m,s,t] <= 1`
+
+모든 z=0인 경우는 차량이 이동 중이거나 계통에 미접속한 상태를 표현한다.
+
+원본에서 가능한 접속 위치를 임의로 제외하지 않는다.
+
+각 MESS의 충전·방전 Mode를 원본 의미 그대로 Binary로 유지한다.
+
+`d[m,t] ∈ {0,1}`
+
+각 위치에는 원본과 동일한 연속 결정변수를 적용한다.
+
+- Pch[m,s,t]
+- Pdis[m,s,t]
+- Q[m,s,t]
+
+원본에서 보존해야 할 제약:
+
+- 위치별 접속 P/Q 제한
+- Pch/Pdis 상호 배타성
+- 충전·방전 정격
+- PCS16 Facet
+- 이동/미접속 상태의 P/Q=0
+- 차량 4대의 실제 P/Q를 합산하는 injection 식
+
+**ESS 4대 각각의 Binary 위치를 유지하고, 한 차량을 분수적으로 여러 접속 위치에 배치하는 정수해를 허용하지 마라.**
+
+단, 미접속 상태도 원본 가능해의 사영에 포함되도록 허용한다.
+
+### 시간 간 물리 제약의 완화
+
+시간별 Snapshot 모델에서는 다음 제약을 제거하거나 보수적으로 완화한다.
+
+- 96슬롯 전체 Route 연결
+- 시간 간 이동 가능성
+- 시간 간 SOC Energy Balance
+- 이동에너지 누적
+- 초기/종단 SOC 결합
+- 충전 Rebound의 시간 간 결합
+
+이것은 시간별 LB 계산을 위한 의도적인 Relaxation이다.
+
+그 대신 선택 슬롯의 즉시 충방전 Mode, P/Q, PCS16과 접속 상태는 정확히 유지한다.
+
+원본 FULL 가능해의 해당 슬롯 사영이 새로운 Snapshot 가능영역에 반드시 포함되어야 한다.
+
+## 4. Step B — 해당 슬롯의 원본 Grid Security 전체 적용
+
+기존 K48의 몇 개 선로만 재사용하지 않는다.
+
+선택 슬롯에 존재하는 원본 Source18r Security 제약을 모두 복원한다.
+
+대상:
+
+- line_thermal_face
+- transformer_kVA
+- NormalAmps
+- voltage_upper
+- voltage_lower
+
+원본 FULL의 실제 저장된 계수를 사용한다.
+
+- Forecast 고정 배경전력
+- AIDC 고정 P/Q
+- response_line_P/Q
+- response_voltage
+- response_correction
+- transformer 및 전류 정격
+- 원본 RHS 및 Sense
+- 원본 rho_max 계수
+
+원본 injection/response helper 등식은 Fraction 기반 소거로 정확히 반영한다.
+
+원본 FULL의 다른 시간과 결합된 원시 행이 있다면 단순히 시간별 행이라고 가정하지 마라.
+
+그러한 행은 정확한 사영·완화가 가능할 때만 사용하고, 그렇지 않으면 생략하여 원본 가능해 포함관계를 보존한다.
+
+Native coefficient 변환 시에는 기존 PR210~214의 보수적 Outward Rounding 절차를 재사용한다.
+
+단위 변환, 부호 변경 또는 수치적인 편의를 위한 작은 계수 삭제는 금지한다.
+
+## 5. Global LB의 수학적 증명
+
+Snapshot t의 최적 목적값을 다음과 같이 정의한다.
+
+`LB_t = min rho_t`
+
+subject to:
+
+- 해당 슬롯의 MESS 4대 Joint Integer Physics
+- 해당 슬롯의 원본 Grid Security
+- 원본 rho_max와 동등한 목적·Bound 계약
+
+임의의 원본 FULL 가능해 x에 대해 슬롯 t로 사영한 해가 반드시 Snapshot에서도 가능해야 한다.
+
+따라서
+
+`LB_t <= OPT_FULL`
+
+가 성립한다.
+
+여러 슬롯의 결과를 종합할 때에는 다음을 사용한다.
+
+`LB_global = max(LB_existing, LB_t1, LB_t2, LB_t3)`
+
+단, 각 LB_t는 **유효한 Solver Global Bound 또는 독립적으로 증명한 하한**이어야 한다.
+
+Snapshot MILP의 Incumbent ObjVal을 원본 Global LB로 사용하지 마라.
+
+Solver가 중단됐을 때 유효한 Bound가 없으면 해당 슬롯의 신규 LB는 미인증으로 기록한다.
+
+서로 다른 날짜·Source·Hardware의 LB를 합산하지 마라.
+
+원본 FULL의 유효한 U4 해를 Snapshot으로 사영하여 모든 제약의 만족을 독립 검증한다.
+
+이 검증이 실패하면 Native를 실행하지 않는다.
+
+## 6. Step C — 사전등록한 3개 슬롯 파일럿
+
+PR214의 실제 Fractional Grid 위반을 기준으로 다음 세 슬롯을 우선 선정한다.
+
+- Slot 75
+- Slot 82
+- Slot 94
+
+모두 0-based Slot이다.
+
+선정 근거는 PR214의 실제 위반 Thermal/Voltage 행에 둔다. 선정 후 수치를 보고 다른 슬롯으로 임의 변경하지 마라.
+
+각 슬롯마다 다음을 수행한다.
+
+1. 원본 FULL 계수·입력 Authority 검증
+2. 차량 4대의 위치/Mode/P/Q/PCS 모델 생성
+3. 전체 해당 슬롯 Security 복원
+4. 원본 FULL→Snapshot 포함관계 증명
+5. 원본 U4 Snapshot Replay
+6. 실제 Gurobi Native Readback
+7. RAM/Commit Admission
+8. 최대 30초 MILP Optimize
+9. 독립 Global Bound 검증
+10. 결과·Solver Log·Source SHA 저장
+
+총 3개 슬롯을 순차 실행한다.
+
+기본 설정:
+
+- Worker=1
+- Threads=1
+- TimeLimit=30초/슬롯
+- Optimize 최대 3회
+- 누적 Snapshot Native 요청 예산 90초
+- 원본 Full96 MILP Optimize 0회
+
+각 슬롯의 TimeLimit은 원본 Solver 반환 오버헤드와 별도로 실제 Runtime을 기록한다.
+
+**30초에 최적값을 확정하지 못하더라도 유효한 Global Solver Bound가 확보되면 이를 보존한다.**
+
+Snapshot 목적값·Global Bound·Incumbent·Gap·Root 완료 여부·NodeCount·Rows·Columns·Binary·NNZ·Memory를 모두 기록한다.
+
+기존 Global LB를 개선하지 못한 슬롯이 있어도 이를 실패한 연구 증거로 삭제하지 마라.
+
+## 7. 계산성 및 조기 중단 평가
+
+각 Snapshot에 대해 다음을 구분한다.
+
+- LP Relaxation Bound
+- MILP Solver Global Bound
+- MILP Incumbent
+- 기존 K48 Certified LB 대비 개선량
+- 인증을 통과한 최종 Global LB
+
+특히 Snapshot에서 원본 FULL보다 완화한 이동·SOC가 LB를 얼마나 약화시켰는지 진단하라.
+
+Snapshot의 유효한 정수 가능해가 기존 LB+0.001 이하의 목적값을 갖는다면 해당 Snapshot의 최적값 역시 그 이하임을 이용해, 그 슬롯만으로 Material LB 개선이 불가능하다는 조기 판정을 기록할 수 있다.
+
+다만 이 판정은 해당 Snapshot에만 적용된다.
+
+단일 슬롯의 하한이 약하다는 사실만으로 모든 다기간 Window의 개선 가능성을 배제했다고 주장하지 마라.
+
+## 8. Step D — Conditional Critical Window MILP
+
+3개 Snapshot 중 하나 이상에서 기존 Global LB 대비 최소 0.001 개선이 독립 인증된 경우에만 Critical Window 실행 후보를 준비한다.
+
+그 외에는 Window의 설계·Native0 감사까지만 수행하며 실제 Heavy Optimize는 실행하지 않는다.
+
+Window 길이는 최대 8슬롯으로 제한한다.
+
+예: `[72,80)` 또는 `[88,96)`.
+
+구간 선정은 기존 실제 Grid 위반·Critical Line·Rebound·Snapshot 결과로 사전에 고정한다.
+
+**Window를 원본 Full96 물리 영역의 보수적인 사영 Relaxation으로 설계하라.**
+
+Window 내부:
+
+- MESS 4대의 정수 경로 선택
+- 이동시간
+- 이동 중 충방전 금지
+- Pch/Pdis/Q 및 PCS16
+- SOC Energy Balance
+- 이동에너지 차감
+- 구간 내 충전 Rebound
+- 해당 구간의 원본 Grid Security
+
+Window 밖의 운전은 자유로운 가능영역으로 완화한다.
+
+### Window 경계 처리
+
+가장 중요한 조건이다.
+
+- 시작 위치를 원래 초기 위치로 임의 고정하지 않는다.
+- 시작 SOC를 원본 initial SOC로 임의 고정하지 않는다.
+- 종료 SOC를 original terminal SOC로 임의 고정하지 않는다.
+- Window 경계를 가로지르는 이동 Arc를 삭제하지 않는다.
+- 구간 진입 시 이동 중이던 차량을 배제하지 않는다.
+- 구간 종료 후 충전·이동 가능성을 임의로 제한하지 않는다.
+- 이동에너지는 원본 departure debit 시점을 유지한다.
+- 이동 중 SOC 및 P/Q 의미를 원본과 일치시킨다.
+
+필요하다면 Window boundary에 위치·이동 중 상태와 자유로운 SOC interface를 추가하라.
+
+새 interface는 모든 원본 Full96 정수 가능해의 해당 Window 사영을 포함해야 한다.
+
+엄격한 양방향 모델 동등성까지는 요구하지 않지만, **원본 FULL→Window 포함관계는 필수**다.
+
+독립 정수 유효성 증명, 원본 U4 lift, 원본 저장 행과의 대조, 실제 Native0 검증을 통과하지 못하면 Window Optimize를 실행하지 마라.
+
+### 조건부 Window Native
+
+승인조건이 모두 통과한 경우에만:
+
+- Window MILP 1개
+- Optimize 최대 1회
+- TimeLimit=120초
+- Threads=1
+- Worker=1
+- 기존 원본 U4 사영을 유효한 MIP Start로 사용
+- 메모리 안전 게이트 유지
+
+시간별 Snapshot과 Window를 동시에 실행하지 마라.
+
+## 9. 계산량 및 메모리 제한
+
+Snapshot은 원본 Full96 Binary 9,322개를 그대로 복제하지 않고, 차량별 해당 슬롯의 위치·Mode Binary만 구성해야 한다.
+
+정확한 변수 수와 행렬 규모는 Native0에서 측정한다.
+
+Snapshot 안전 상한:
+
+- Binary <= 256
+- Rows <= 30,000
+- NNZ <= 500,000
+
+Window 안전 상한:
+
+- Binary <= 1,500
+- Rows <= 100,000
+- NNZ <= 1,500,000
+
+상한을 초과하면 Native를 실행하지 않고 원인을 보고하라.
+
+모델 생성 이후 실제 RAM Available과 Commit Available을 측정하고, 기존 PR214의 안정적인 RAM/Commit Admission 계약을 유지한다.
+
+다른 Heavy Solver가 있거나 Windows 메모리 압력이 높으면 신규 Solver를 시작하지 않는다.
+
+RAM을 확보하기 위해 기존 연구·B1 프로세스를 임의 종료하지 마라.
+
+## 10. Selective Integrality 후속 후보
+
+시간별 Snapshot과 Window 결과를 검토한 다음, 필요하면 Selective Integrality를 별도 후속 연구 후보로 평가한다.
+
+즉:
+
+- 기존 K48의 전체 96슬롯 연속완화는 유지
+- 실제 Critical Slot의 node_activity/charge_mode만 정수 유지
+- 나머지 Binary는 연속으로 완화
+- 기존 Route/SOC/PCS/계통 제약 보존
+
+이번 작업에서는 Selective Integrality의 실제 Native Solve를 실행하지 않는다.
+
+다음 자료만 보고하라.
+
+- 선택할 Critical Slot
+- 활성 Binary 예상 개수
+- 기존 LP 대비 수학적 포함관계
+- 예상 모델 크기
+- 실험 우선순위
+
+이것은 추후 별도 승인 대상이다.
+
+## 11. 성능 판정
+
+기존 Global LB:
+
+`0.46498486997548166`
+
+검증 U4 UB:
+
+`0.6760534504652341`
+
+모든 신규 후보의 수학·수치 인증이 통과한 경우:
+
+`Global_LB_new = max(Global_LB_old, Certified_Snapshot_LBs, Certified_Window_LB)`
+
+`Global_Gap = (UB - Global_LB_new) / UB`
+
+판정 기준:
+
+- `TIME_DECOMPOSITION_MATERIAL`
+  - 신규 Global LB 개선 >= 0.001
+
+- `TIME_DECOMPOSITION_NONMATERIAL`
+  - 유효한 신규 Bound는 있으나 개선 < 0.001
+
+- `TIME_DECOMPOSITION_NOT_CERTIFIED`
+  - 신규 Bound의 수학 또는 수치 인증 실패
+
+- `TIME_DECOMPOSITION_RESOURCE_STOP`
+  - RAM/Commit/모델 규모 안전 게이트로 중단
+
+- `GLOBAL_GAP_3PCT_PASS`
+  - 신규 인증 LB와 동일 원본 FULL의 검증 UB로 Gap <= 3%
+
+어떤 결과에서도 Snapshot/Window Incumbent를 원본 FULL UB 또는 Actual AC PASS로 사용하지 않는다.
+
+## 12. 실제 실행 예산
+
+이번 연구의 신규 Native 상한:
+
+- Snapshot 최대 3회 × 30초 = 90초
+- 조건부 Window 최대 1회 × 120초 = 120초
+- 신규 Optimize 최대 4회
+- 전체 요청 TimeLimit 합 최대 210초
+
+서로 다른 후보 간 예산 이월, 동일 모델 반복 실행, 자동 연장, Solver Parameter Sweep은 금지한다.
+
+TimeLimit 종료 반환 오버헤드는 실제 Runtime대로 기록한다.
+
+B1 실행은 0회, 원본 Full96 MILP Optimize는 0회, 공식 5월 캠페인 실행은 0회로 유지한다.
+
+## 13. Git·보고서·완료 조건
+
+다음 파일을 작성하라.
+
+`B2_TIME_DECOMPOSED_GLOBAL_LB_FINAL_KO.md`
+
+필수 내용:
+
+1. PR214와 Source18r의 고정 Source/Case Authority
+2. Snapshot과 원본 FULL의 정확한 수학적 포함관계
+3. 각 슬롯의 4-MESS Binary 위치·Mode·PCS 모델
+4. 원본 Grid Security 행의 추출·소거·검증
+5. 3개 슬롯의 Rows/Columns/Binary/NNZ
+6. 각 Native의 Root/Node/ObjBound/ObjVal/Runtime
+7. Snapshot의 인증 Global LB 및 기존 대비 개선량
+8. Window의 원본 경계 이동·SOC 사영 증명
+9. 조건부 Window 실행 여부와 실제 결과
+10. Global Gap 3% 달성 여부
+11. Peak RAM/Commit 및 전체 Native Ledger
+12. 과거 PR111/169/182 등의 Window·Joint Hull 연구와의 차이
+13. Source18r/U4/B1 Source·결과·실행상태 보존 감사
+14. Selective Integrality 후속 후보 판단
+15. 정식화 채택 또는 기각 결론
+
+코드·증거·원시 로그를 Commit/Push한다.
+
+PR214 정확한 연구 브랜치를 Base로 하는 Draft PR을 생성한다.
+
+추가 알고리즘이나 더 큰 Window를 자동 개발·실행하지 않는다.
+
+**최종 목표: 기존 96슬롯 전체 K48 MILP에서 벗어나, MESS 4대의 실제 정수 접속·P/Q와 원본 배전계통 Security를 작은 시간별/구간별 MILP로 계산함으로써, Global LB 0.46498487을 더 빠르고 강하게 개선할 수 있는지 검증한다.**

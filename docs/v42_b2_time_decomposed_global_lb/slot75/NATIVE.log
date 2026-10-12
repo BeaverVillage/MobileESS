@@ -1,0 +1,72 @@
+
+Gurobi 13.0.2 (win64, Python) logging started Mon Oct 12 10:57:38 2026
+
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Set parameter LogFile to value "D:\v42_b2_time_decomposed_global_lb_20261012\docs\v42_b2_time_decomposed_global_lb\slot75\NATIVE.log"
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter Threads to value 1
+Set parameter TimeLimit to value 30
+Set parameter Method to value 1
+Set parameter FeasibilityTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter MIPGap to value 1e-06
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  30
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  1e-06
+OptimalityTol  1e-08
+Method  1
+Threads  1
+
+Optimize a model with 11741 rows, 1529 columns and 164884 nonzeros (Min)
+Model fingerprint: 0x1a04a13a
+Model has 1 linear objective coefficients
+Variable types: 1429 continuous, 100 integer (100 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 4e+02]
+  RHS range        [4e-25, 2e+03]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Loaded user MIP start with objective 0.676053
+
+Presolve removed 4460 rows and 330 columns
+Presolve time: 0.11s
+Presolved: 7281 rows, 1199 columns, 89800 nonzeros
+Variable types: 1099 continuous, 100 integer (100 binary)
+
+Root relaxation: objective 4.154922e-01, 2226 iterations, 0.20 seconds (0.48 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.41549    0    5    0.67605    0.41549  38.5%     -    0s
+H    0     0                       0.4510920    0.41549  7.89%     -    0s
+     0     0    0.41549    0    5    0.45109    0.41549  7.89%     -    1s
+     0     0    0.41549    0    5    0.45109    0.41549  7.89%     -    1s
+     0     2    0.41549    0    5    0.45109    0.41549  7.89%     -    1s
+*   26    24              19       0.4163557    0.41550  0.20%  14.2    1s
+*   31    23              21       0.4162984    0.41550  0.19%  13.4    1s
+*   38    16               5       0.4158057    0.41551  0.07%  12.4    1s
+*   60    12               9       0.4157929    0.41564  0.04%  11.6    2s
+
+Explored 87 nodes (3190 simplex iterations) in 2.31 seconds (3.54 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 7: 0.415793 0.415793 0.415806 ... 0.676053
+
+Optimal solution found (tolerance 1.00e-06)
+Best objective 4.157928992775e-01, best bound 4.157928992775e-01, gap 0.0000%
+
+User-callback calls 1030, time in user-callback 1.63 sec

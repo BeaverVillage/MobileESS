@@ -1,0 +1,201 @@
+"""JSON-only final report renderer. Never imports a solver or matrix library.
+
+Execute only after root has sealed all three RESULT/CERTIFICATE and FINAL_RESULT.
+This renderer consumes saved evidence; it does not build or optimize a model.
+"""
+from pathlib import Path
+import argparse
+import hashlib
+import json
+import math
+
+ROOT=Path(__file__).resolve().parents[2]
+DOCS=ROOT/'docs/v42_b2_time_decomposed_global_lb'
+SOURCE='497609b46faa14ea7e32a9483a333ab32fd264ef'
+PARENT='40ab888b884255e76fd6c89fd01933570b60c242'
+CG='d12315a3757aec187c8da0685c28ef901466386a'
+CASE='34c0efffa9c05397552fb167667c0bbfe2f35cec89801a3169c00c64fe77f292'
+OLDLB=0.46498486997548166
+UB=0.6760534504652341
+TARGET=0.6557718469512771
+SLOTS=(75,82,94)
+
+
+def require(ok,msg):
+    if not ok:raise ValueError(msg)
+
+
+def read(path):
+    return json.loads(Path(path).read_text(encoding='utf-8-sig'))
+
+
+def sha(path):
+    with Path(path).open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
+
+
+def cell(v,decimals=8):
+    if v is None:return '미확보'
+    if isinstance(v,bool):return 'PASS' if v else '아니오'
+    if isinstance(v,int):return f'{v:,}'
+    if isinstance(v,float):
+        require(math.isfinite(v),'NONFINITE_REPORT_NUMBER')
+        return f'{v:.{decimals}f}'
+    return str(v).replace('|','\\|').replace('\n',' ')
+
+
+def table(head,rows):
+    return '\n'.join(['|'+'|'.join(head)+'|','|'+'|'.join('---' for _ in head)+'|']+
+                     ['|'+'|'.join(cell(v) for v in row)+'|' for row in rows])
+
+
+def get(d,*keys,default=None):
+    for k in keys:
+        if k in d:return d[k]
+    return default
+
+
+def render():
+    # Hard completion guard: no partial report posing as a finished experiment.
+    required=['FINAL_RESULT.json','NATIVE_LEDGER.json','POST_RUN_RESOURCE_SOURCE_AUDIT.json',
+              'PR214_FIXED_SLOT_SELECTION_AUTHORITY.json','HISTORICAL_WINDOW_JOINT_AUDIT.json',
+              'SELECTIVE_INTEGRALITY_PROPOSAL.json','window_native0/WINDOW_NATIVE0_DESIGN.json']
+    for slot in SLOTS:
+        required += [f'slot{slot:02d}/'+n for n in ['RESULT.json','INDEPENDENT_CERTIFICATE.json','INDEPENDENT_NATIVE0.json','NATIVE0.json','NATIVE_READBACK.json']]
+    for n in required:require((DOCS/n).exists(),'FINAL_REPORT_DEPENDENCY_MISSING:'+n)
+    final=read(DOCS/'FINAL_RESULT.json');ledger=read(DOCS/'NATIVE_LEDGER.json')
+    protected=read(DOCS/'POST_RUN_RESOURCE_SOURCE_AUDIT.json');selection=read(DOCS/'PR214_FIXED_SLOT_SELECTION_AUTHORITY.json')
+    history=read(DOCS/'HISTORICAL_WINDOW_JOINT_AUDIT.json');selective=read(DOCS/'SELECTIVE_INTEGRALITY_PROPOSAL.json')
+    window=read(DOCS/'window_native0/WINDOW_NATIVE0_DESIGN.json');policy=read(DOCS/'RESOURCE_POLICY_NATIVE0.json')
+    extraction=read(DOCS/'GRID_EXTRACTION.json')
+    records=[]
+    for slot in SLOTS:
+        p=DOCS/f'slot{slot:02d}'
+        records.append(dict(slot=slot,result=read(p/'RESULT.json'),cert=read(p/'INDEPENDENT_CERTIFICATE.json'),
+            native0=read(p/'NATIVE0.json'),independent_native0=read(p/'INDEPENDENT_NATIVE0.json'),readback=read(p/'NATIVE_READBACK.json')))
+    require(all(r['result']['slot']==r['slot'] for r in records),'REPORT_SLOT_IDENTITY')
+    calls=ledger['calls'];snapcalls=[c for c in calls if c['kind']=='SNAPSHOT'];windowcalls=[c for c in calls if c['kind']=='WINDOW']
+    require([c['slot'] for c in snapcalls]==list(SLOTS) and len(windowcalls)==0,'REPORT_NATIVE_CALL_SEQUENCE')
+    require(sum(c['TimeLimit'] for c in snapcalls)==90.,'REPORT_REQUEST_BUDGET')
+    certified=[get(r['cert'],'certified_Global_LB','Certified_LB') for r in records if r['cert'].get('PASS')]
+    certified=[v for v in certified if isinstance(v,(int,float)) and math.isfinite(v)]
+    new=max([OLDLB]+certified);gap=(UB-new)/UB;improvement=new-OLDLB
+    classification=get(final,'classification','Classification','result_classification')
+    require(classification is not None,'FINAL_CLASSIFICATION_MISSING')
+    recorded_new=get(final,'Global_LB_new','global_LB_new','Global_LB','global_lb','new_global_lb','GlobalLB_new')
+    if recorded_new is not None:require(abs(new-recorded_new)<=1e-15,'FINAL_GLOBAL_LB_MISMATCH')
+    material=improvement>=.001
+    runtime=sum(r['result']['Runtime'] or 0 for r in records)
+    wall=sum(r['result']['optimize_wall_seconds'] or 0 for r in records)
+    peak_rss=max(r['result']['peak_process_RSS_bytes'] for r in records)
+    peak_private=max(r['result']['peak_private_commit_bytes'] for r in records)
+    min_ram=min(r['result']['minimum_RAM_available'] for r in records)
+    min_commit=min(r['result']['minimum_commit_available'] for r in records)
+    pass3=gap<=.03
+    notes=[]
+    if material:
+        conclusion=f'판정은 **{classification}**이다. 인증 Global LB는 **{new:.17g}**, 기존 대비 개선은 **{improvement:.10f}**이며, 동일 원본 U4 UB 대비 Global Gap은 **{gap*100:.8f}%**다.'
+        decision='선정 슬롯의 Joint Snapshot은 인증 Global LB 개선을 확인했으므로 하한 전용 정식화로 채택한다. [88,96) 원본 이동 arc Window는 Binary 안전 상한을 초과하여 실행 후보로 채택하지 않는다.'
+    elif certified:
+        conclusion=f'판정은 **{classification}**이다. 유효한 Snapshot Solver Global Bound는 확보했으나 기존 대비 개선이 0.001에 미달했다. 최종 Global LB는 **{new:.17g}**, 동일 원본 U4 UB 대비 Global Gap은 **{gap*100:.8f}%**다.'
+        decision='세 선정 슬롯의 Snapshot은 유효성을 확인했으나 Material Global LB 강화 방법으로 채택하지 않는다. 이것은 선택한 단일 슬롯의 결과이며 모든 다기간 Window의 가능성을 배제하지 않는다.'
+    else:
+        conclusion=f'판정은 **{classification}**이다. 신규 Snapshot Bound의 인증을 완료하지 못해 기존 Global LB **{OLDLB:.17g}**와 Global Gap **{gap*100:.8f}%**를 유지한다.'
+        decision='신규 Snapshot Bound를 Global LB로 채택하지 않는다. 인증 실패 원인과 세 실행의 원시 증거를 보존한다.'
+    lines=['# B2 Time-Decomposed Global LB 최종 보고', '', conclusion, '',
+        f'3% 목표 판정은 **{"GLOBAL_GAP_3PCT_PASS" if pass3 else "GLOBAL_GAP_3PCT_NOT_ACHIEVED"}**다. Snapshot Optimize는 사전등록 순서 75→82→94의 3회, 요청 TimeLimit 합 90초, 실제 Native Runtime 합 {runtime:.6f}초다. Window Optimize·원본 Full96 Optimize·B1 실행·공식 캠페인 실행은 모두 0회다.', '',
+        '## 1. Source·Case Authority와 결과 계약', '',
+        table(['항목','고정 값'],[['대상','IEEE123 / B2 / 2025-05-01'],['Source18r PR207',SOURCE],['Critical-Grid CG PR211',CG],['정확한 부모 PR214',PARENT],['원본 Case SHA',CASE],['기존 인증 Global LB',f'{OLDLB:.17g}'],['검증 원본 U4 UB',f'{UB:.17g}'],['3%에 필요한 LB',f'{TARGET:.17g}']]),'',
+        '새 브랜치는 PR214 정확한 HEAD를 부모로 한다. 기존 Source18r/U4, K48 및 PR207/209/210/211/214·B1 PR212/213 결과와 Native Ledger는 읽기 전용 authority다. 이번 신규 Bound만 동일 Source·날짜의 기존 인증 하한과 max로 결합한다. Snapshot/Window incumbent는 원본 FULL UB나 Actual AC PASS로 승격하지 않는다.', '',
+        '## 2. FULL→Snapshot 포함관계', '',
+        r'원본 정수 가능해 x에서 슬롯 t의 원본 STAY arc를 z[m,s,t]로 복사하고, charge_mode·Pch/Pdis/Q·rho_max와 계통 helper 값을 복사한다. 원본 nonnegative Binary unit-flow는 엄격한 시간 DAG의 한 경로이므로 z∈{0,1}, Σ_s z≤1이다. 이동 중이면 모든 STAY가 0이며 원본 접속 gate에 의해 P/Q=0이다. 기존 unused Mode 값은 그대로 허용한다.', '',
+        '위치·Mode·접속 P/Q·PCS16의 원본 저장 행을 STAY→z의 이름 치환만 거쳐 복사했다. 원본 전체 정수 가능해가 해당 슬롯에서 만족하던 모든 Grid 행과 helper 등식도 그대로 만족한다. 96슬롯 Route 연결·이동 가능성·SOC Balance·이동에너지·초기/종단 SOC·시간 간 Rebound 결합은 제거한다. 제거한 결합은 가능영역을 넓히므로 원본 FULL의 슬롯 사영을 제거하지 않는다.', '',
+        r'따라서 π_t(F_FULL_integer) ⊆ F_Snapshot_t이고, 동일 rho bound/objective에서 OPT_Snapshot_t ≤ OPT_FULL이다. 인증 Solver Global Bound_t ≤ OPT_Snapshot_t이므로 Global_LB_new=max(Global_LB_old, Certified_LB_75, Certified_LB_82, Certified_LB_94)는 FULL의 유효한 Global LB다. 서로 다른 슬롯의 LB를 합산하지 않는다.', '',
+        '## 3. 4-MESS 즉시 정수 물리', '',
+        '각 MESS에서 원본 실제 접속 위치 24개(IDC01–12, STA01–12)를 전부 유지했다. 각 슬롯은 위치 Binary 96개와 원래 charge_mode Binary 4개, Pch/Pdis/Q 연속변수 288개를 가진다. 원본 Pch/Pdis box는 [0,300], Q box는 [-400,400]이며 원본 저장 gate와 PCS16의 더 강한 접속·Mode 제한을 함께 적용한다.', '',
+        '원본 즉시 행은 위치별 Pch≤300z, Pdis≤300z, -400z≤Q≤400z, Pch≤300d, Pdis≤300(1-d) 및 16개 PCS facet이다. PCS는 원본 저장 sin/cos 계수와 RHS를 그대로 사용하며 작은 계수를 삭제하지 않는다. Σz≤1의 4행을 포함해 즉시 물리 2,116행이다. z를 분수 위치로 허용하는 정수해는 없다. 모든 z=0 상태도 허용한다.', '',
+        '## 4. 해당 슬롯 전체 원본 Grid·Helper 복원', '',
+        table(['Security 계열','슬롯별 원본 행','세 슬롯 합계'],[[f,n,selection['aggregate_family_counts'][f]] for f,n in selection['grid_family_counts_per_slot'].items()]),'',
+        '슬롯당 Security 8,485행을 전부 보존한다. Forecast/AIDC 고정항, injection P/Q, response line P/Q·transformer P/Q·line correction, 원본 RHS/Sense·rho 계수를 frozen FULL 저장 행에서 복원했다. Voltage는 실제 저장된 injection 직접 연결 행을 사용한다. 존재하지 않는 별도 response_voltage auxiliary를 가정하지 않았다.', '',
+        '원본 injection/response helper에는 고유 +1 pivot 등식이 있고 의존 그래프는 acyclic이다. 모든 저장 binary64를 정확한 Fraction으로 해석하여 helper를 재귀 소거했으며, 소거 후 rho 이외의 모든 leaf는 선택 슬롯의 원본 Pch/Pdis/Q다. 다른 시간 leaf·생략 Grid 행은 0개다. 고정항은 각 원본 등식 RHS에서 정확히 전파했다.', '',
+        '완전 소거 행렬은 슬롯별 약 239만 NNZ로 500,000 안전 상한을 초과한다. Native는 같은 수학적 영역의 원본 helper extended formulation을 사용한다: 원본 helper 등식 1,140행·원본 Security 8,485행, 158,068 NNZ. Helper에 원본 free bound(-inf,+inf)와 목적계수 0을 유지한다. 삼각 등식의 유일한 helper lift를 소거하면 정확히 같은 Fraction 물리 좌표식이 되므로 factoring은 가능영역을 바꾸지 않는다.', '',
+        'Native에는 모든 원본 저장 binary64 coefficient/RHS/Sense를 그대로 복사하므로 변환 오차가 정확히 0이다. Fraction 완전 소거식의 별도 binary64 검산에는 기존 보수적 절차 ceil_binary64(rhs_exact+Σmax((c_native-c_exact)lb,(c_native-c_exact)ub))를 사용했으며, 이 dense outward 식은 증거로만 저장했다. helper bound를 임의 유한화하거나 작은 계수·Security 행을 제거하지 않았다.', '',
+        '## 5. 사전등록 슬롯과 실제 행렬 규모', '',
+        table(['Slot (0-based)','PR214 실제 선정 위반 수','최대 Thermal 위반','Rows','Columns','Binary','NNZ','dense 소거 Grid NNZ'],
+            [[r['slot'],len(next(s for s in selection['actual_violations'] if s['slot']==r['slot'])['actual_selected_violations']),
+              max(v['normalized_violation'] for v in next(s for s in selection['actual_violations'] if s['slot']==r['slot'])['actual_selected_violations']),
+              r['native0']['dimensions']['rows'],r['native0']['dimensions']['columns'],r['native0']['dimensions']['binary'],r['native0']['dimensions']['nnz'],r['native0']['flattened_grid_nnz']] for r in records]),'',
+        '슬롯 75/82/94는 PR214 검증 Fractional BASE point의 실제 Thermal 위반으로 결과 이전에 고정했다. Snapshot 수치를 보고 재선정하지 않았다. 최종 Native 행렬은 Binary≤256, Rows≤30,000, NNZ≤500,000 세 상한을 모두 통과한다. Full96 CSR/model을 구성하지 않고 원본 raw NPZ member를 임시 read-only NPY memmap으로 읽어 필요한 슬롯/helper closure만 추출했다.', '',
+        '## 6. Native Readback·U4 Replay·실행 결과', '',
+        '각 슬롯 Native0는 독립 원본 행 재도출·모든 위치/Mode/PCS 대조·FULL 포함관계·원본 U4 사영 Replay를 통과한 뒤 실행했다. 실제 Gurobi Native Readback에서 matrix/RHS/Sense/Bounds/Types/Objective/ObjCon/행·열·Binary·NNZ를 저장 모델과 대조했다. Native는 Worker1, Threads1, TimeLimit30초, FeasibilityTol/OptimalityTol/IntFeasTol=1e-8, MIPGap=1e-6으로 3회 순차 실행했다.', '',
+        table(['Slot','Status','Root 완료','Root LP log 값¹','Solver ObjBound','Incumbent ObjVal','MIPGap','NodeCount'],
+            [[r['slot'],r['result']['Status'],r['result']['root_complete'],r['result']['LP_relaxation_log_objective'],r['result']['ObjBound'],r['result']['ObjVal'],r['result']['MIPGap'],r['result']['NodeCount']] for r in records]),'',
+        '¹ Root LP 목적값은 Gurobi log에 반올림 출력된 관측값이다. Root 완료 flag는 root log/OPTIMAL node 또는 최종 OPTIMAL 상태의 관측이며, presolve에서 종료했으면 별도 Root LP 값을 확보했다는 뜻이 아니다. 별도 LP Optimize를 실행하거나 그 log 값을 정확한 LP optimum·독립 Global LB로 승격하지 않았다. ObjBound는 해당 Snapshot MILP의 Solver Global Lower Bound이며 ObjVal은 해당 완화 Snapshot의 incumbent다.', '',
+        table(['Slot','Native model 생성(s)','Native Runtime(s)','Optimize wall(s)','Callback wall(s)','U4 Native0 최대 위반','Native0·Readback·독립 인증'],
+            [[r['slot'],r['result']['model_build_seconds'],r['result']['Runtime'],r['result']['optimize_wall_seconds'],r['result']['callback_seconds'],r['native0']['U4_max_violation'],
+              f'{cell(r["independent_native0"]["PASS"])}/{cell(r["readback"]["PASS"])}/{cell(r["cert"]["PASS"])}'] for r in records]),'',
+        '## 7. 신규 Global Bound 독립 인증', '',
+        table(['Slot','독립 인증','Certified Snapshot LB','기존 LB 대비 Δ','정확한 Snapshot 가능점 상한','Snapshot optimum Material 불가능 조기 증인'],
+            [[r['slot'],r['cert']['PASS'],get(r['cert'],'certified_Global_LB','Certified_LB'),
+              (get(r['cert'],'certified_Global_LB','Certified_LB')-OLDLB) if get(r['cert'],'certified_Global_LB','Certified_LB') is not None else None,
+              r['cert'].get('exact_snapshot_feasible_point_certificate',{}).get('objective_upper_outward') if r['cert'].get('exact_snapshot_feasible_point_certificate',{}).get('PASS') else None,
+              r['cert'].get('snapshot_material_impossible_from_incumbent',False)] for r in records]),'',
+        '인증은 original FULL→Snapshot 포함관계와 원본 저장 계수·Bound 계약, Native readback, 실제 Solver 상태/Global Bound/log, numerical error·resource stop 여부 및 incumbent replay를 독립 확인한다. Global Bound의 계산은 Gurobi 수치 B&B 계약을 사용한다. 전체 B&B 분기마다 exact arithmetic proof를 재구성한 인증이라고 주장하지 않는다. Incumbent/Root log를 Global LB로 대체하지 않는다.', '',
+        '## 8. 시간 결합 완화의 영향과 조기 판정', '',
+        'Snapshot은 각 시간의 네 차량 정수 접속·Mode/PQ/PCS와 전체 Grid를 보존하지만, 그 선택을 다른 시간에 연결하는 경로·SOC·Rebound를 제거했다. 따라서 Snapshot 목적값이 FULL보다 낮을 수 있다. 유효한 Snapshot 정수 가능해 목적값이 기존 LB+0.001 이하이면 해당 Snapshot optimum도 그 이하이며, 그 슬롯 단독 Material 강화가 불가능하다. 이 증인은 Snapshot 상한이며 FULL UB가 아니다.', '']
+    for r in records:
+        c=r['cert'];early=c.get('snapshot_material_impossible_from_incumbent',False)
+        point=c.get('exact_snapshot_feasible_point_certificate',{})
+        detail='선택 위치/Mode의 정수 pattern을 유지한 power clamp·PCS scale·rho 계산을 거쳐 모든11,741개 행을 정확한 Fraction으로 검사한 증인이다.' if point.get('PASS') else '정확한 가능점 증인이 미확정이면 incumbent 수치만으로 조기 불가능성을 인증하지 않는다.'
+        upper=point.get('objective_upper_outward') if point.get('PASS') else None
+        lines += [f'- Slot {r["slot"]}: 조기 판정 {cell(early)}. exact Snapshot 가능점 인증 {cell(point.get("PASS",False))}, 보수적 목적값 상한 {cell(upper,12)}. {detail} 상세 rational 값·repair·잔차는 슬롯 INDEPENDENT_CERTIFICATE.json에 보존했다.']
+    lines += ['', 'Solver Global Bound의 수치 B&B 인증과 optional exact incumbent 가능점 증인은 별도 계약이다. 수치 incumbent replay가 허용오차를 통과하더라도 정확한 Fraction Grid 검산에서 미세 위반이 남으면 그 점의 strict upper 증인은 미인증으로 남기고 조기 불가능성을 주장하지 않는다.', '',
+        '세 단일 슬롯의 성능으로 모든 다기간 Window의 개선 가능성을 배제하지 않는다. Route/SOC 완화의 원인 분리는 동일 물리를 추가한 대조 Solve 없이 정량 확정하지 않으며 이번 범위에서 추가 Solver를 실행하지 않았다.', '',
+        '## 9. 최종 Global LB·3% 목표', '',
+        table(['항목','결과'],[['최종 Global LB',f'{new:.17g}'],['기존 대비 개선량',f'{improvement:.17g}'],['Material 기준 ≥0.001',material],['검증 원본 U4 UB',f'{UB:.17g}'],['Global Gap (%)',gap*100],['3% 목표', 'GLOBAL_GAP_3PCT_PASS' if pass3 else '미달성'],['성능 판정',classification]]),'',
+        '## 10. 조건부 Window [88,96) 경계 사영·안전 중단', '',
+        'Window는 슬롯94의 사전 Grid 위반과 종단 경계 부담으로 결과 전에 [88,96)로 고정했다. 원본 Arc는 depart<96 및 connect>88이면 모두 유지했다. 시작 이전 출발·구간 진입 transit arc도 자유 interface로 들어오며, 구간 내부 원본 incidence와 실제 이동시간을 유지한다. 시작 위치는 원래 origin에 고정하지 않고 시작/종료 SOC는 원본 box만 적용했다. 원본 initial/terminal SOC=760 등식은 부과하지 않았다.', '',
+        '이동에너지는 원본 departure debit 시점을 보존한다. 88 이전에 출발한 이동은 이전 시점에 이미 debit되므로 자유 E88 interface에 포함되고, [88,96)에서 출발한 이동은 해당 원본 energy_balance 행에서 차감한다. 진입 transit는 원본 도착 전까지 STAY=0·P/Q=0이다. 내부 SOC Balance·Mode·PCS·접속 gate를 유지하며 창 밖 미래 이동/충전·Rebound를 추가 제한하지 않는다. 원본 한 경로는 entry/exit cut을 각 한 번 통과하므로 이 boundary 사영이 원본 FULL을 포함한다.', '',
+        table(['Window 물리 부분','Rows','Columns','Binary','NNZ','원본 U4 사영'],[['[88,96)',window['physical_dimensions']['rows'],window['physical_dimensions']['columns'],window['physical_dimensions']['binary'],window['physical_dimensions']['nnz'],window['original_u4_physical_lift']['max_row_violation']]]),'',
+        'Literal 원본 Arc/Mode Binary가 **16,236개**로 Window 상한1,500을 넘는다. 물리 부분과 U4 lift의 사영 감사만 수행하고, 전체 8슬롯 Grid 변환·완전 모델·Native Readback까지 완료했다고 주장하지 않는다. 이 size gate 실패로 Window Optimize는 **0회**다. Snapshot Material 조건이 충족되어도 이 독립 안전 gate가 우선하며, 압축·새 알고리즘·더 큰 창·자동 예산 이월을 개발하지 않는다.', '',
+        '## 11. RAM·Commit·Native Ledger', '',
+        table(['Slot','Peak RSS (GiB)','Peak private commit (GiB)','Gurobi MaxMemUsed (GB)','최소 RAM Available (GiB)','최소 Commit Available (GiB)'],
+            [[r['slot'],r['result']['peak_process_RSS_bytes']/2**30,r['result']['peak_private_commit_bytes']/2**30,r['result']['MaxMemUsed_GB'],r['result']['minimum_RAM_available']/2**30,r['result']['minimum_commit_available']/2**30] for r in records]),'',
+        f'Native Runtime 합 {runtime:.6f}초, Optimize wall 합 {wall:.6f}초, 요청 TimeLimit 합90초다. Callback 안전 감사시간이 Runtime/wall에 포함되므로 순수 Solver 속도와 동일시하지 않는다. Native Peak RSS {peak_rss/2**30:.6f}GiB·Peak private commit {peak_private/2**30:.6f}GiB, 실행 중 최소 Available RAM {min_ram/2**30:.6f}GiB·Commit {min_commit/2**30:.6f}GiB다.', '',
+        f'공통 원본 Fraction grid 추출 Native0 wall은 {extraction["wall_seconds"]:.6f}초다. Native 모델 생성시간·각 슬롯 추출시간·독립 Native0 검증시간은 각각 원시 JSON에 분리 기록했다. 작은 Native solve의 시간만으로 전체 감사 pipeline 비용이 사라졌다고 주장하지 않는다.', '',
+        '모델 생성 후 실제 Available RAM≥4GiB, Commit≥6GiB에 max(2GiB,4×실제 private 증가) 추가 reserve를 적용한다. 다른 실제 Heavy Native Solver·unknown Gurobi DLL peer가 있으면 보류하며 기존 프로세스를 종료하지 않는다. Callback은 own B2 모델만 안전 중단할 수 있다. Native Ledger는 신규 세 Snapshot 호출만 추가했으며 기존 Ledger를 수정하지 않았다.', '',
+        table(['실행 구분','실제 호출','요청 TimeLimit 합'],[['Snapshot MILP',len(snapcalls),90],['조건부 Window',len(windowcalls),0],['원본 Full96 Optimize',0,0],['B1 Supervisor/Worker/Campaign',0,0],['공식 5월 캠페인',0,0],['Selective Integrality',0,0]]),'',
+        '## 12. 과거 PR111/169/182와의 수학적 차이', '',
+        table(['연구','이전 실제 영역','이번 연구와의 차이'],[
+            ['PR111 W7','슬롯40–46 Grid와 네 차량96슬롯 물리를 유지한 연속완화 및 조건부 epigraph 셀 감사','이번 Snapshot은 실제 Binary 위치/Mode를 남기고 시간 물리를 완화한다. 조건부 epigraph나 과거 상한을 현재 LB에 합산하지 않는다.'],
+            ['PR169 Joint trajectory hull','MESS04 국소 경로·mode disjunction의 hull EF와 기존 Full96 모든 행, 이후 Selective Integrality 진단','이번 모델은 hull EF를 Full96 위에 쌓지 않는다. Window 경계 사영 위험은 같은 물리 문제지만 과거 LB/UB 결과를 Source18r 인증으로 재사용하지 않는다.'],
+            ['PR182 fleet/time/grid EF','occupancy disjunction 또는 Boolean selector RLT·symmetry를 Full96 위에 추가한 동등 EF','이번 Snapshot은 의도적인 사영 완화다. 최대256/1500 Binary·행/NNZ 상한으로 작은 MILP의 실용성을 검증한다.']]),'',
+        'PR111의 한 창 feasible-upper와 당시 default 값, PR169의 다른 Source 선택 Binary 비개선, PR182의600초 미완료 ROOT 결과는 현재 B2 LB가 아니다. 한 약한 창의 결과가 모든 시간 분해를 배제하지 않는 점과 대규모 EF 계산비용만 설계 교훈으로 반영했다. 정확한 Git blob/SHA·일차 코드/증명/CSV 보존본은 HISTORICAL_WINDOW_JOINT_AUDIT.json과 historical_primary에 있으며 실행/import하지 않았다.', '',
+        '## 13. Source18r·U4·B1 및 실행 상태 보존', '',
+        table(['보존 감사','결과'],[[k,v] for k,v in protected['checks'].items()]),'',
+        f'POST_RUN_RESOURCE_SOURCE_AUDIT.json 관측 시각은 {protected.get("observed_Asia_Seoul","원시 JSON 참조")} (Asia/Seoul)이며 전체 감사 PASS={protected["PASS"]}다. 기존 Source HEAD/clean·remote HEAD, 보호 원본 파일943개·기존 Native Ledger, B1 중지 receipt·결과, Windows Task action/enabled 계약 및 PAUSED 자동화를 대조했다. 이 작업은 B1 Supervisor/Worker/Task/예약/자동화를 시작·활성화하거나 기존 프로세스를 종료하지 않았다.', '',
+        'B1 현재 사용자 중지 상태와 기존 5월 HOLD를 유지한다. 과거 Task State나 monitor 관측만으로 실제 Native 실행·31일 완료를 추정하지 않는다. B1 전체31일 완료는 이번 보고의 주장에 포함하지 않는다.', '',
+        '## 14. Selective Integrality 별도 후속 후보', '',
+        table(['후속 항목','Native0 측정/설계'],[['Critical slots','75 / 82 / 94'],['정수 유지 예상','node_activity288 + charge_mode12 =300 Binary'],['나머지 원래 Binary 연속완화',selective['relaxed_remaining_original_binary_count']],['Rows',selective['expected_model_size']['rows']],['Columns',selective['expected_model_size']['columns']],['NNZ',selective['expected_model_size']['nnz']],['새 행/열','0 / 0'],['이번 Native Solve',0]]),'',
+        '기존 K48의96슬롯 모든 Route/SOC/PCS/Grid 행·RHS/Sense/Bounds/Objective는 그대로 두고 Critical Slot의 원래 node_activity/charge_mode만 C→B로 되돌리는 후보이다. 원본 FULL 정수 가능해의 K48 사영이 F_selective에 포함되고 F_selective⊆F_K48_LP이다. 검증 Global Solver Bound만 FULL 하한으로 옮길 수 있다. Saved BASE LP에서 선택300개 중82개가 fractional이라는 사실은 향후 개선의 인증이 아니다.', '',
+        '현재 모델 재구성·Native는0회이며 별도 후속 승인 대상으로 보류한다. Binary300개가 적어도 기존143,308행/244,265열 연속 행렬의 Root 시간·RAM 부담을 유지하므로 값싼 실행이나 Material 향상을 가정하지 않는다.', '',
+        '## 15. 정식화 채택·기각과 증거', '', decision, '',
+        'Window literal 모델은 Binary 규모에서 중단했으며 더 큰 창·경로 압축·가중치 반복·Constraint Generation·Parameter sweep·동일 Snapshot 반복 실행은 수행하지 않았다. 후속 Selective Integrality는 현재 결과 검토 후 별도 연구 후보로만 남긴다. 원본 Planning 가능해 판정과 U4 UB 엔진에는 어떤 새 하한 모델도 적용하지 않았다.', '',
+        '결과·전체 Solver log·Memory/Resource trace·Native ledger·실제 실행 소스 사본·원본/소거 계수·독립 인증을 새 연구 디렉터리에 보존한다. FINAL_RESULT.json의 집계, 각 슬롯 RESULT/INDEPENDENT_CERTIFICATE, WINDOW_NATIVE0_DESIGN 및 보호 감사가 수치 authority다. 이후 Evidence Index는 실행 byte와 Git 저장 byte를 대조한다.', '']
+    report=DOCS/'B2_TIME_DECOMPOSED_GLOBAL_LB_FINAL_KO.md'
+    report.write_text('\n'.join(lines),encoding='utf-8')
+    description='\n'.join([
+        'Source18r B2 May01의 Full96/U4를 보존하고 사전등록 슬롯75/82/94에서 네 MESS의 실제 Binary 위치·Mode/PQ/PCS와 모든 원본 해당 슬롯 Grid Security를 유지하는 Joint Snapshot MILP를 검증합니다. 시간 간 Route/SOC는 FULL 사영을 포함하도록 완화하고, 정확한 Fraction helper 소거와 원본 helper lift의 동등성을 독립 감사했습니다.', '',
+        f'결과: {classification}. 인증 Global LB {new:.17g}, 기존 대비 Δ {improvement:.10f}, 원본 U4 UB 대비 Gap {gap*100:.8f}%. Snapshot incumbent는 FULL UB/Actual PASS로 사용하지 않습니다.', '',
+        f'검증: 세 슬롯 Native0·U4 사영·Native readback·독립 Global Bound 인증을 보존. 각 Snapshot100 Binary,11,741행,1,529열,약164.9k NNZ. Optimize3회×30초(요청90초), 실제 Runtime 합{runtime:.6f}초, Peak RSS{peak_rss/2**30:.6f}GiB. Window[88,96) 물리 사영은16,236 Binary로1,500 안전 상한을 초과해 Native0에서 중단했습니다.', '',
+        'Source18r/U4 및 기존 PR207/209/210/211/214·B1 PR212/213 Source/결과/Ledger·중지/예약 상태 보존. Window/Full96/B1/캠페인/Selective Integrality Native0회. 모든 코드·원시 log·정확한 계수·독립 인증·최종 한국어 보고서를 이 PR에 보존합니다.', ''])
+    (DOCS/'PR_DESCRIPTION_KO.md').write_text(description,encoding='utf-8')
+    receipt=dict(PASS=True,json_only_inputs=True,Native_calls=0,Full96_model_builds=0,classification=classification,
+        Global_LB_new=new,Global_Gap=gap,source_files={n:sha(DOCS/n) for n in required},code_sha256=sha(__file__),
+        outputs={p.name:sha(p) for p in [report,DOCS/'PR_DESCRIPTION_KO.md']})
+    (DOCS/'REPORT_RENDER_RECEIPT.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    return receipt
+
+
+if __name__=='__main__':
+    ap=argparse.ArgumentParser();ap.add_argument('--final',action='store_true',required=True);ap.parse_args()
+    value=render();print(json.dumps({k:value[k] for k in ['PASS','classification','Global_LB_new','Global_Gap','outputs']}))

@@ -1,0 +1,421 @@
+"""Independent exact factorized Window projection and numeric MIP-bound audit.
+
+Snapshot seals are never edited. All full-source arrays are accessed read-only,
+selectively; no Full96 CSR/model or optimizer is constructed. Exact original
+helper equations prove the physical security projection algebraically, without
+duplicating 19 million dense facet coefficients in this verifier.
+"""
+from __future__ import annotations
+import argparse
+from collections import Counter,defaultdict
+from fractions import Fraction as F
+import gc
+import json
+import math
+from pathlib import Path
+import sys
+import subprocess
+import time
+import traceback
+import numpy as np
+from scipy import sparse
+
+ROOT=Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT))
+from tools.time_decomposed_lb.verify import (OriginalRows,gzread,row_sha,SOURCE,SOURCE18R,PARENT,CASE,OLD_LB,UB,OLD,
+    SECURITY,GATES,read,write,sha,npz,require,canonical_data,axis,digests,replay)
+
+DOCS=ROOT/'docs/v42_b2_time_decomposed_global_lb'
+PHYSICAL=DOCS/'window_native0'
+OUT=DOCS/'window360'
+
+
+def compact_projection(compact,literal=PHYSICAL):
+    """Actual no-parallel DAG and boundary-entry integer lifting proof."""
+    proof,W,d,x,boxes=physical_projection(literal)
+    C=sparse.load_npz(compact/'WINDOW_PHYSICS_A.npz').tocsr();cd=canonical_data(npz(compact/'WINDOW_PHYSICS_DATA.npz'));cx=npz(compact/'WINDOW_PHYSICS_U4.npz')['x']
+    n=W.shape[1];require(C.shape[0]==W.shape[0]+864 and C.shape[1]==n+864,'COMPACT_NODE_LINK_CENSUS_CHANGED')
+    require(all(np.array_equal(getattr(C[:W.shape[0],:n].tocsr(),k),getattr(W,k)) for k in ('indptr','indices','data')) and C[:W.shape[0],n:].nnz==0,
+            'COMPACT_LITERAL_PHYSICAL_CSR_CHANGED')
+    for k in ('names','lb','ub','c'):require(np.array_equal(cd[k][:n],d[k]),'COMPACT_SOURCE_COLUMN_METADATA_CHANGED:'+k)
+    for k in ('rhs','senses','row_names'):require(np.array_equal(cd[k][:W.shape[0]],d[k]),'COMPACT_SOURCE_ROW_METADATA_CHANGED:'+k)
+    require(float(cd['constant'])==0 and np.count_nonzero(cd['c'])==0,'COMPACT_PHYSICAL_OBJECTIVE_CHANGED')
+    domain=read(SOURCE/'SCIENTIFIC_CASE_IDENTITY.json')['physical_prescreen_authority']['proof'];graph=domain['arcs']
+    outgoing=defaultdict(list);incoming=defaultdict(list);entry_groups=defaultdict(list);internal=defaultdict(list);all_arc=[]
+    for c,name in enumerate(d['names']):
+        family,coord=axis(name)
+        if family!='arc':require(cd['vtypes'][c]==d['vtypes'][c],'COMPACT_NONROUTE_TYPE_CHANGED');continue
+        unit,k=coord[0],int(coord[1]);site,depart,dest,end,route=graph[k];all_arc.append(c)
+        require(cd['vtypes'][c]=='C' and cd['lb'][c]==0 and cd['ub'][c]==1 and depart<end,'COMPACT_ROUTE_NOT_NONNEGATIVE_CONTINUOUS_DAG')
+        outgoing[unit,site,depart].append(c);incoming[unit,dest,end].append(c)
+        if depart>=88:internal[unit,site,depart,dest,end].append(c)
+        else:entry_groups[unit,dest,end].append(c)
+    require(len(all_arc)==16204 and all(len(v)==1 for v in internal.values()),'COMPACT_INTERNAL_PARALLEL_ARCS_REQUIRE_BINARY_SELECTORS')
+    csc=W.tocsc();entry_receipts=[]
+    for key,group in entry_groups.items():
+        signatures=[]
+        for c in group:
+            lo,hi=csc.indptr[c:c+2];rows=csc.indices[lo:hi];values=csc.data[lo:hi]
+            require(all(str(d['row_names'][r]).startswith(('window_flow[','window_free_entry[','window_free_exit[')) for r in rows),
+                    'PAST_ENTRY_ARC_AFFECTS_WINDOW_ENERGY_PQ_OR_OTHER_PHYSICS')
+            signatures.append(tuple(zip(map(int,rows),map(float,values))))
+        require(len(set(signatures))==1,'PAST_ENTRY_PARALLEL_GROUP_NOT_IDENTICAL_INSIDE_WINDOW')
+        entry_receipts.append({'unit':key[0],'connect_site':key[1],'connect_slot':key[2],'original_entry_arc_count':len(group),
+                               'literal_physical_column_signature':[[r,v] for r,v in signatures[0]],'no_internal_departure_debit_or_PQ_terms':True})
+    lookup={str(name):c for c,name in enumerate(cd['names'])};expected_links=[];start_expected=list(x)
+    for c in range(n,C.shape[1]):
+        family,coord=axis(cd['names'][c]);require(family=='node_activity','COMPACT_NEW_VARIABLE_NOT_SOURCE_STYLE_NODE_ACTIVITY')
+        unit,site,t=coord[0],coord[1],int(coord[2]);require(unit in ('MESS01','MESS02','MESS03','MESS04') and site in domain['sites'] and 88<=t<=96,
+                                                       'COMPACT_NODE_OUTSIDE_ORIGINAL_WINDOW_SITES')
+        incident=outgoing[unit,site,t] if t==88 else incoming[unit,site,t]
+        terms={c:1.};terms.update({a:-1. for a in incident});expected_links.append(('=',0.,tuple(sorted(terms.items()))))
+        require(cd['vtypes'][c]=='B' and cd['lb'][c]==0 and cd['ub'][c]==1 and cd['c'][c]==0,'COMPACT_NODE_BINARY_BOX_CHANGED')
+        boxes[str(cd['names'][c])]=(0.,1.,'B');start_expected.append(float(sum(x[a] for a in incident)))
+    require(len(lookup)==C.shape[1] and len({str(n) for n in cd['names'][n:]})==864,'COMPACT_NODE_COVER_DUPLICATE')
+    wanted={f'node_activity[{u},{s},{t}]' for u in ('MESS01','MESS02','MESS03','MESS04') for s in domain['sites'] for t in range(88,97)}
+    require(set(map(str,cd['names'][n:]))==wanted,'COMPACT_ALL_NODE_ACTIVITY_COVER_INCOMPLETE')
+    actual_links=[]
+    for r in range(W.shape[0],C.shape[0]):
+        lo,hi=C.indptr[r:r+2];actual_links.append((str(cd['senses'][r]),float(cd['rhs'][r]),tuple(zip(map(int,C.indices[lo:hi]),map(float,C.data[lo:hi])))))
+    require(Counter(actual_links)==Counter(expected_links),'COMPACT_NODE_LINK_EQUATIONS_CHANGED')
+    for c in all_arc:boxes[str(cd['names'][c])]=(0.,1.,'C')
+    require(np.array_equal(cx,np.asarray(start_expected)),'COMPACT_ORIGINAL_U4_NODE_LIFT_CHANGED')
+    rep=replay(C,cd,cx);require(max(rep[k] for k in ('max_row_violation','max_box_violation','max_integer_error'))<=1e-7,'COMPACT_U4_LIFT_FAILED')
+    path='v42_supercompact/formulation.py'
+    original_blob=subprocess.check_output(['git','rev-parse',SOURCE18R+':'+path],cwd=ROOT,text=True).strip()
+    parent_blob=subprocess.check_output(['git','rev-parse',PARENT+':'+path],cwd=ROOT,text=True).strip()
+    require(original_blob==parent_blob=='6ffe46cacf2521a96f5142216085d9c595074476','SOURCE18R_COMPACT_POLICY_AUTHORITY_CHANGED')
+    proof.update(compact_integer_equivalence_PASS=True,internal_parallel_groups=0,continuous_original_arc_columns=16204,
+                 binary_node_activity_columns=864,binary_modes=32,binary_total=896,entry_group_lift_receipts=entry_receipts,
+                 original_compact_policy={'path':path,'Source18r_Git_blob':original_blob,'PR214_Git_blob':parent_blob,
+                                          'source_policy':'Nonparallel route_flow continuous, binary node_activity and original DAG incidence; parallel internal selectors stay binary in Source.'},
+                 boundary_coordinate_equivalence_scope='Internal path/Mode/PQ/SOC/rho/grid/objective projection equivalence; raw past-entry arc coordinates may change on integer lift.',
+                 compact_proof='Binary node activity and unit boundary-cut flow force a unique earliest visited node. Unique internal endpoint arcs make the first edge integral; by strict-time induction every internal edge on the unique path is integral. If the path enters in transit, all entry mass reaches one earliest arrival node. The only fractional freedom is a group of past-boundary arcs with that same destination/time. Actual CSC signatures are identical and only affect entry/arrival/exit flow; no internal departure energy or P/Q row uses them. Selecting one group member with mass1 preserves all inside physical values, node activities, grid and objective. Original integer literal Window points lift to binary visited nodes. Hence both integer physical projections coincide.')
+    return proof,C,cd,cx,boxes
+
+
+def physical_projection(physical):
+    """Independent original-unit slice and boundary-cut incidence comparison."""
+    prior=read(physical/'WINDOW_NATIVE0_DESIGN.json');require(prior['PASS'] and prior['window']==[88,96],'PHYSICAL_WINDOW_PREREGISTRATION_FAILED')
+    for n,h in prior['file_sha256'].items():require(sha(physical/n)==h,'SEALED_PHYSICAL_WINDOW_CHANGED:'+n)
+    for p,h in prior['source_records'].items():require(sha(p)==h,'PHYSICAL_WINDOW_ORIGINAL_SOURCE_CHANGED:'+p)
+    W=sparse.load_npz(physical/'WINDOW_PHYSICS_A.npz').tocsr();d=canonical_data(npz(physical/'WINDOW_PHYSICS_DATA.npz'))
+    x=npz(physical/'WINDOW_PHYSICS_U4.npz')['x'];lookup={str(n):c for c,n in enumerate(d['names'])}
+    require(len(lookup)==W.shape[1],'DUPLICATE_WINDOW_PHYSICAL_AXIS')
+    identity=read(SOURCE/'SCIENTIFIC_CASE_IDENTITY.json');domain=identity['physical_prescreen_authority']['proof'];graph=domain['arcs']
+    expected=[];boxes={};starts={};unit_proofs=[];a,b=88,96
+    for unit in ('MESS01','MESS02','MESS03','MESS04'):
+        A=sparse.load_npz(OLD/f'UNIT_{unit}_A.npz').tocsr();u=canonical_data(npz(OLD/f'UNIT_{unit}_DATA.npz'))
+        ux=npz(OLD/f'UNIT_{unit}_START.npz')['point'];names=list(map(str,u['names']));selected=set();arcs={}
+        for c,n in enumerate(names):
+            family,coord=axis(n)
+            if family=='arc':
+                k=int(coord[1]);arcs[k]=c
+                if graph[k][1]<b and graph[k][3]>a:selected.add(c)
+            elif family in ('Pch','Pdis','Q') and a<=int(coord[2])<b:selected.add(c)
+            elif family=='charge_mode' and a<=int(coord[1])<b:selected.add(c)
+            elif family=='SOC' and a<=int(coord[1])<=b:selected.add(c)
+        retained={k:c for k,c in arcs.items() if c in selected};nodes=defaultdict(dict);entry={};exit={};cross_in=0;cross_out=0
+        for k,c in retained.items():
+            site,depart,dest,end,route=graph[k];n=names[c]
+            require(depart<end and u['vtypes'][c]=='B' and u['lb'][c]==0 and u['ub'][c]==1,'WINDOW_ORIGINAL_ROUTE_NOT_BINARY_STRICT_TIME_DAG')
+            if a<depart<b:nodes[site,depart][n]=1.
+            if a<end<b:nodes[dest,end][n]=-1.
+            if depart<=a<end:entry[n]=1.
+            if depart<b<=end:exit[n]=1.
+            cross_in+=depart<a<end;cross_out+=depart<b<end
+        energy=set();families=Counter()
+        for r,label in enumerate(u['row_names']):
+            fam=axis(label)[0]
+            if fam not in GATES|{'energy_balance'}:continue
+            lo,hi=A.indptr[r:r+2];cols=A.indices[lo:hi];coeff=A.data[lo:hi]
+            powers=[int(c) for c in cols if axis(names[c])[0] in ('Pch','Pdis','Q')]
+            require(powers,'WINDOW_ORIGINAL_PHYSICAL_ROW_WITHOUT_POWER_AXIS')
+            times={int(axis(names[c])[1][2]) for c in powers};require(len(times)==1,'WINDOW_IMMEDIATE_PHYSICS_CROSS_TIME')
+            t=next(iter(times))
+            if not a<=t<b:continue
+            require(all(int(c) in selected for c in cols),'WINDOW_SOURCE_ROW_BOUNDARY_DEPENDENCY_DROPPED')
+            expected.append((str(u['senses'][r]),float(u['rhs'][r]),{names[int(c)]:float(v) for c,v in zip(cols,coeff)}));families[fam]+=1
+            if fam=='energy_balance':
+                energy.add(t)
+                actual_moves={int(c):F(float(v)) for c,v in zip(cols,coeff) if axis(names[int(c)])[0]=='arc'}
+                should_moves={c:F(float(graph[k][4]['energy_kwh'])) for k,c in retained.items() if graph[k][1]==t and graph[k][4] is not None and graph[k][4]['energy_kwh']!=0}
+                require(actual_moves==should_moves,'WINDOW_TRAVEL_DEBIT_NOT_ORIGINAL_DEPARTURE_TIME')
+        require(energy==set(range(a,b)),'WINDOW_INTERNAL_ENERGY_BALANCE_COVER_INCOMPLETE')
+        for terms in nodes.values():expected.append(('=',0.,terms))
+        expected.append(('=',1.,entry));expected.append(('=',1.,exit))
+        for c in selected:
+            n=names[c];boxes[n]=(float(u['lb'][c]),float(u['ub'][c]),str(u['vtypes'][c]));starts[n]=float(ux[c])
+            if axis(n)[0]=='SOC':require(u['lb'][c]==440 and u['ub'][c]==1080,'WINDOW_FREE_SOC_INTERFACE_BOX_CHANGED')
+        require(set(arcs)==set(next(v for v in domain['units'] if v['mess']==unit)['retained_arc_indices']),'ORIGINAL_UNIT_ARC_AXIS_CHANGED')
+        unit_proofs.append({'unit':unit,'original_arcs_kept':len(retained),'all_crossing_entry_arcs_kept':cross_in,
+                            'all_crossing_exit_arcs_kept':cross_out,'interior_flow_nodes':len(nodes),'energy_rows':8,
+                            'free_boundary_SOC_box':[440,1080],'source_temporal_and_physical_rows':dict(families)})
+        del A,u,ux;gc.collect()
+    require(set(lookup)==set(boxes),'WINDOW_PHYSICAL_VARIABLE_OR_CROSSING_ARC_COVER_CHANGED')
+    for n,(lo,hi,ty) in boxes.items():
+        c=lookup[n];require(d['lb'][c]==lo and d['ub'][c]==hi and d['vtypes'][c]==ty,'WINDOW_ORIGINAL_PHYSICAL_BOX_OR_INTEGRALITY_CHANGED')
+    signatures=Counter((s,r,tuple(sorted((lookup[n],v) for n,v in terms.items()))) for s,r,terms in expected)
+    actual=Counter()
+    for r in range(W.shape[0]):
+        lo,hi=W.indptr[r:r+2];actual[(str(d['senses'][r]),float(d['rhs'][r]),tuple(zip(map(int,W.indices[lo:hi]),map(float,W.data[lo:hi]))))]+=1
+    require(actual==signatures,'LITERAL_WINDOW_PHYSICAL_AND_FREE_BOUNDARY_ROWS_CHANGED')
+    require(np.array_equal(x,np.asarray([starts[str(n)] for n in d['names']])),'ORIGINAL_U4_WINDOW_PHYSICAL_PROJECTION_CHANGED')
+    rep=replay(W,d,x);require(max(rep[k] for k in ('max_row_violation','max_box_violation','max_integer_error'))<=1e-7,'U4_WINDOW_PHYSICAL_REPLAY_FAILED')
+    return {'PASS':True,'original_FULL_to_window_physical_projection_proved':True,'all_boundary_crossing_arcs_preserved':True,
+            'entry_and_exit_are_free_path_cut_interfaces':True,'free_SOC_no_origin_or_terminal_760_fixing':True,
+            'original_departure_debit_preserved':True,'units':unit_proofs,'U4_replay':rep,
+            'proof':'The original strict-time binary unit path crosses each boundary cut once. Retaining every depart<b,connect>a arc preserves every original crossing and every interior node incidence. Sum of arcs active at each cut is one; no original start location or outside path is imposed. E_88,...,E_96 keep original boxes and internal energy rows only; incoming moves were debited before88, while every departure88..95 keeps its original debit. Copy original stay P/Q/mode/PCS16 rows. Remove original initial/terminal SOC and outside temporal rows, enlarging the projection.'},W,d,x,boxes
+
+
+def grid_projection(physical):
+    """Exact sparse helper-lift proof; dense producer SHA is supplemental only."""
+    raw=gzread(physical/'WINDOW_GRID_RAW_CLOSURE.json.gz');auth=read(physical/'WINDOW_GRID_AUTHORITY.json')
+    require(raw['source']==SOURCE18R and raw['case_sha']==CASE and raw['parent']==PARENT and raw['window']==[88,96],
+            'WINDOW_GRID_SOURCE_CASE_OR_PREREGISTRATION_CHANGED')
+    require(auth['PASS'] and auth['omitted_security_rows']==[] and auth['cross_time_leaf_rows']==[],'WINDOW_GRID_PRODUCER_AUTHORITY_FAILED')
+    for n,h in auth['evidence'].items():require(sha(physical/n)==h,'WINDOW_GRID_EVIDENCE_CHANGED')
+    source=OriginalRows()
+    try:
+        require(source.sources==raw['source_files']==auth['source_files'],'WINDOW_ORIGINAL_SOURCE_SHA_AUTHORITY_CHANGED')
+        rows={int(r['original_row']):r for r in raw['rows']};cols={int(c):p for c,p in raw['columns'].items()}
+        require(len(rows)==len(raw['rows']),'WINDOW_DUPLICATE_RAW_SOURCE_ROW')
+        security=[];counts=Counter()
+        for r,name in enumerate(source.maps['row_names']):
+            fam=str(name).split('[',1)[0]
+            if fam in SECURITY:
+                _,coord=axis(name)
+                if 88<=int(coord[0])<96:security.append(r);counts[fam]+=1
+        require(security==raw['original_security_rows'] and len(security)==67880,'WINDOW_ALL_8_SLOT_SECURITY_COVER_INCOMPLETE')
+        definitions={};helpers=Counter();terms={}
+        for rid,row in rows.items():
+            original=source.row(rid)
+            require({k:row[k] for k in original}==original and row['source_row_sha256']==row_sha(original),'WINDOW_RAW_ROW_DIFFERS_FROM_STORED_SOURCE')
+            terms[rid]={int(c):F(float.fromhex(h)) for c,h in row['terms']};fam,coord=axis(row['name'])
+            if fam not in SECURITY:
+                require(row['sense']=='=' and fam.endswith('_binding') and fam.startswith(('injection_','response_')),'WINDOW_UNKNOWN_OR_NONEQUALITY_HELPER')
+                pivots=[c for c,v in terms[rid].items() if v==1 and axis(cols[c]['name'])[0]+'_binding'==fam]
+                require(len(pivots)==1 and pivots[0] not in definitions,'WINDOW_HELPER_PIVOT_NOT_UNIQUE_POSITIVE_ONE')
+                pivot=pivots[0];pivot_axis=axis(cols[pivot]['name'])[1];require(not coord or coord==pivot_axis,'WINDOW_HELPER_AXIS_MISMATCH')
+                if fam.startswith('injection_'):
+                    require(fam in ('injection_P_binding','injection_Q_binding') and float.fromhex(row['rhs_hex'])==0,'WINDOW_INJECTION_CONSTANT_OR_FAMILY_CHANGED')
+                    allowed={'Pch','Pdis'} if fam=='injection_P_binding' else {'Q'}
+                    for c,v in terms[rid].items():
+                        if c==pivot:continue
+                        f,p=axis(cols[c]['name']);require(f in allowed and p[1:]==pivot_axis and v==(1 if f=='Pch' else -1),'WINDOW_INJECTION_SIGN_OR_AXIS_CHANGED')
+                definitions[pivot]=rid;helpers[fam]+=1
+        for c,p in cols.items():
+            expected={'name':str(source.maps['names'][c]),'lower_hex':float(source.maps['lower'][c]).hex(),
+                      'upper_hex':float(source.maps['upper'][c]).hex(),'type':str(source.maps['types'][c]),
+                      'objective_hex':float(source.maps['objective'][c]).hex()}
+            require(p==expected,'WINDOW_RAW_COLUMN_DOMAIN_DIFFERS_FROM_STORED_SOURCE')
+        cache={};constant_cache={};visited=0
+        def leaves(c,seen=()):
+            nonlocal visited
+            if c in cache:return cache[c]
+            require(c not in seen,'WINDOW_HELPER_DEPENDENCY_CYCLE')
+            if c not in definitions:
+                n=cols[c]['name'];fam,coord=axis(n)
+                require(fam in ('Pch','Pdis','Q') or n=='rho_max','WINDOW_NONPHYSICAL_SECURITY_LEAF')
+                require(n=='rho_max' or 88<=int(coord[2])<96,'WINDOW_SECURITY_LEAF_OUTSIDE_WINDOW')
+                answer={c}
+            else:
+                rid=definitions[c];answer=set();constant=F(float.fromhex(rows[rid]['rhs_hex']))
+                for j,v in terms[rid].items():
+                    if j==c:continue
+                    answer|=leaves(j,seen+(c,))
+                    # Exact affine constants are independently propagated.
+                    constant-=v*constant_cache.get(j,F(0))
+                constant_cache[c]=constant;visited+=1
+            cache[c]=answer;return answer
+        for c in definitions:leaves(c)
+        used=set()
+        for rid in security:
+            _,coord=axis(rows[rid]['name']);t=int(coord[0]);rowleaves=set()
+            for c in terms[rid]:rowleaves|=leaves(c)
+            for c in rowleaves:
+                n=cols[c]['name'];require(n=='rho_max' or int(axis(n)[1][2])==t,'WINDOW_ORIGINAL_SECURITY_CROSSES_TIME')
+            # Every coefficient is a stored dyadic rational. Triangular pivot1
+            # equations uniquely define the original rational affine helper
+            # values; no native coefficient conversion is involved.
+        require(visited==len(definitions)==9120 and len(rows)==77000,'WINDOW_COMPLETE_HELPER_CLOSURE_CENSUS_CHANGED')
+        actual_nnz=sum(len(p) for p in terms.values())
+        require(auth['grid_nnz']==actual_nnz,'WINDOW_SOURCE_SPARSE_GRID_NNZ_CHANGED')
+        return {'PASS':True,'security_rows':67880,'helper_rows':9120,'rows':77000,'nnz':actual_nnz,
+                'source_files':source.sources,'family_counts':dict(counts),'helper_families':dict(helpers),
+                'all_source_RHS_senses_dyadic_coefficients_and_bounds_exact':True,'same_slot_recursive_physical_leaf_audit_PASS':True,
+                'all_helper_pivots_positive_one_unique_and_acyclic':True,'exact_rational_helper_constants_propagated':True,
+                'response_and_correction_helpers_retained_exactly':True,'helper_original_infinite_bounds_preserved':True,
+                'zero_native_coefficient_rounding_error':True,'dense_projected_row_SHAs_independently_recomputed':False,
+                'proof_scope':'Independent exact factorized original-source equality lift. Dense producer projected SHA receipts are supplemental, not independent authority.',
+                'proof':'Each original helper equality has a unique +1 pivot and an acyclic dependency graph, hence a unique exact rational affine expansion in same-slot original Pch/Pdis/Q. Retaining those original equations and source security inequalities is exactly the graph of that expansion. Its projection equals Fraction elimination, with all constants/correction/injection signs retained. Native coefficients/RHS are original stored dyadics, so conversion error is identically zero.'},raw
+    finally:source.close()
+
+
+def native0(out=OUT,physical=PHYSICAL):
+    started=time.perf_counter();is_compact=physical.name=='window_compact_native0'
+    phys,W,pd,px,boxes=compact_projection(physical) if is_compact else physical_projection(physical)
+    grid,raw=grid_projection(PHYSICAL)
+    A=sparse.load_npz(out/'WINDOW_A.npz').tocsr();rawdata=npz(out/'WINDOW_DATA.npz');d=canonical_data(rawdata);lookup={str(n):c for c,n in enumerate(d['names'])}
+    require(len(lookup)==A.shape[1] and A.shape==(len(d['rhs']),len(d['names'])),'WINDOW_NATIVE_AXES_DUPLICATE_OR_DIMENSION_CHANGED')
+    columns={int(c):p for c,p in raw['columns'].items()}
+    for c,p in columns.items():
+        expected=(float.fromhex(p['lower_hex']),float.fromhex(p['upper_hex']),p['type'])
+        if p['name'] in boxes:require(boxes[p['name']]==expected,'WINDOW_GRID_PHYSICAL_BOX_CONFLICT')
+        else:boxes[p['name']]=expected
+    require(set(lookup)==set(boxes),'WINDOW_NATIVE_VARIABLE_OR_ALL_SITE_COVER_CHANGED')
+    for n,(lo,hi,ty) in boxes.items():
+        c=lookup[n];require(d['lb'][c]==lo and d['ub'][c]==hi and d['vtypes'][c]==ty,'WINDOW_BOUND_OR_INTEGER_TYPE_CHANGED')
+    rho=lookup['rho_max'];require(d['c'][rho]==1 and np.count_nonzero(d['c'])==1 and float(d['constant'])==0 and d['lb'][rho]==0 and d['ub'][rho]==1,'WINDOW_ORIGINAL_RHO_OBJECTIVE_CHANGED')
+    expected=Counter()
+    for r in range(W.shape[0]):
+        lo,hi=W.indptr[r:r+2];co=tuple(sorted((lookup[str(pd['names'][c])],float(v)) for c,v in zip(W.indices[lo:hi],W.data[lo:hi])))
+        expected[(str(pd['senses'][r]),float(pd['rhs'][r]),co)]+=1
+    for row in raw['rows']:
+        co=tuple(sorted((lookup[columns[int(c)]['name']],float.fromhex(h)) for c,h in row['terms']))
+        expected[(row['sense'],float.fromhex(row['rhs_hex']),co)]+=1
+    actual=Counter()
+    for r in range(A.shape[0]):
+        lo,hi=A.indptr[r:r+2];actual[(str(d['senses'][r]),float(d['rhs'][r]),tuple(zip(map(int,A.indices[lo:hi]),map(float,A.data[lo:hi]))))]+=1
+    require(actual==expected,'WINDOW_SOURCE_PHYSICAL_OR_GRID_CSR_ROWS_CHANGED')
+    starts={str(n):F(float(v)) for n,v in zip(pd['names'],px)};starts['rho_max']=F(UB);defs={}
+    for row in raw['rows']:
+        fam=axis(row['name'])[0]
+        if not fam.endswith('_binding'):continue
+        pivots=[int(c) for c,h in row['terms'] if float.fromhex(h)==1 and axis(columns[int(c)]['name'])[0]+'_binding'==fam]
+        require(len(pivots)==1,'WINDOW_U4_HELPER_PIVOT_CHANGED');defs[columns[pivots[0]]['name']]=(pivots[0],row)
+    def lift(n,seen=()):
+        if n in starts:return starts[n]
+        require(n in defs and n not in seen,'WINDOW_U4_HELPER_CYCLE_OR_UNKNOWN')
+        pivot,row=defs[n];value=F(float.fromhex(row['rhs_hex']))
+        for c,h in row['terms']:
+            if int(c)!=pivot:value-=F(float.fromhex(h))*lift(columns[int(c)]['name'],seen+(n,))
+        starts[n]=value;return value
+    for n in defs:lift(n)
+    x=npz(out/'WINDOW_START.npz')['x'];expected_x=np.asarray([float(starts[str(n)]) for n in d['names']])
+    require(np.array_equal(x,expected_x),'WINDOW_ORIGINAL_U4_LIFT_COORDINATES_CHANGED')
+    rep=replay(A,d,x);require(max(rep[k] for k in ('max_row_violation','max_box_violation','max_integer_error'))<=1e-7 and rep['objective']==UB,'WINDOW_ORIGINAL_U4_REPLAY_FAILED')
+    msha,dsha=digests(A,rawdata);dimensions={'rows':A.shape[0],'columns':A.shape[1],'binary':int(np.count_nonzero(d['vtypes']=='B')),'nnz':int(A.nnz)}
+    expected={'rows':W.shape[0]+grid['rows'],'columns':W.shape[1]+9121,'binary':896 if is_compact else 16236,'nnz':int(W.nnz)+grid['nnz']}
+    require(dimensions==expected,'WINDOW_EXPECTED_FACTORIZED_SIZE_CHANGED')
+    require(dimensions['rows']<=100000 and dimensions['nnz']<=1500000,'WINDOW_ROWS_OR_NNZ_CAP_EXCEEDED')
+    override=read(DOCS/'USER_WINDOW_360_OVERRIDE.json')
+    time_authorized=(override.get('Window_TimeLimit_seconds')==360 and override.get('Window_Optimize_maximum_calls')==1 and
+                override.get('explicit_Window_execution_requested_despite_nonmaterial_snapshots') is True)
+    authorized=(time_authorized and (is_compact or override.get('binary_cap_override_authorized') is True and override.get('approved_binary_cap')==16236) and
+                override.get('Window_TimeLimit_seconds')==360 and override.get('Window_Optimize_maximum_calls')==1 and
+                override.get('explicit_Window_execution_requested_despite_nonmaterial_snapshots') is True and
+                override.get('other_original_safety_limits_unchanged') is True)
+    return {'PASS':True,'schema':'V42_WINDOW360_INDEPENDENT_NATIVE0_V1','phase':'Native0','source18r':SOURCE18R,'PR214':PARENT,'case_sha':CASE,
+            'window':[88,96],'Native_optimize_calls':0,'Gurobi_imported':False,'FULL_CSR_constructed':False,'FULL96_model_reconstructed':False,
+            'FULL_projection_subset_window':True,'physical_projection':phys,'grid_projection':grid,'same_original_rho_objective_and_bounds':True,
+            'dimensions':dimensions,'formulation':'COMPACT_BINARY_NODE_CONTINUOUS_ROUTE' if is_compact else 'LITERAL_BINARY_ARC',
+            'compact_integer_equivalence_PASS':is_compact and phys['compact_integer_equivalence_PASS'],
+            'original_binary_cap_PASS':dimensions['binary']<=1500,'original_binary_cap':1500,
+            'current_binary_cap_authority_required':not authorized,'current_binary_cap_authorized':authorized,
+            'effective_binary_cap':1500 if is_compact else 16236 if authorized else 1500,'effective_binary_cap_PASS':authorized and dimensions['binary']<=(1500 if is_compact else 16236),
+            'user_Window_360_override_sha256':sha(DOCS/'USER_WINDOW_360_OVERRIDE.json'),'Nativeexecutionauthorized':False,
+            'math_PASS_does_not_authorize_Binary_cap_exception_or_Optimize':True,'U4_window_replay':rep,
+            'actual_matrix_sha256':msha,'actual_domain_sha256':dsha,
+            'file_sha256':{n:sha(out/n) for n in ('WINDOW_A.npz','WINDOW_DATA.npz','WINDOW_START.npz')},
+            'physical_evidence_sha256':{str(physical/n):sha(physical/n) for n in ('WINDOW_NATIVE0_DESIGN.json','WINDOW_PHYSICS_A.npz','WINDOW_PHYSICS_DATA.npz','WINDOW_PHYSICS_U4.npz')},
+            'grid_evidence_sha256':{str(PHYSICAL/n):sha(PHYSICAL/n) for n in ('WINDOW_GRID_RAW_CLOSURE.json.gz','WINDOW_GRID_AUTHORITY.json','WINDOW_GRID_FRACTION_PROJECTION.json.gz')},
+            'source_files':grid['source_files'],'exact_BB_trace_certificate':False,'wall_seconds':time.perf_counter()-started}
+
+
+def final(out=OUT,physical=PHYSICAL):
+    started=time.perf_counter();zero=read(out/'INDEPENDENT_NATIVE0.json');build=read(out/'NATIVE0.json')
+    require(zero['PASS'] and build['PASS'] and zero['FULL_projection_subset_window'] and zero['case_sha']==CASE and
+            zero['current_binary_cap_authorized'] and zero['effective_binary_cap_PASS'],'WINDOW_INDEPENDENT_NATIVE0_OR_USER_CAP_AUTHORITY_FAILED')
+    require(zero['actual_matrix_sha256']==build['matrix_sha'] and zero['actual_domain_sha256']==build['domain_sha'] and
+            zero['file_sha256']==build['file_sha256'],'WINDOW_BUILDER_INDEPENDENT_HASH_MISMATCH')
+    for n,h in zero['file_sha256'].items():require(sha(out/n)==h,'WINDOW_MODEL_CHANGED_AFTER_NATIVE0')
+    for n,h in zero['physical_evidence_sha256'].items():require(sha(n)==h,'WINDOW_PHYSICAL_PROOF_CHANGED_AFTER_NATIVE0')
+    for n,h in zero['grid_evidence_sha256'].items():require(sha(n)==h,'WINDOW_GRID_PROOF_CHANGED_AFTER_NATIVE0')
+    for p,h in zero['source_files'].items():require(sha(p)==h,'WINDOW_ORIGINAL_SOURCE_CHANGED_AFTER_NATIVE0')
+    authority=read(DOCS/'USER_WINDOW_360_OVERRIDE.json');override_sha=sha(DOCS/'USER_WINDOW_360_OVERRIDE.json')
+    require(override_sha==zero['user_Window_360_override_sha256'] and authority['binary_cap_override_authorized'] is True and
+            authority['approved_binary_cap']==16236 and authority['Window_Optimize_maximum_calls']==1 and authority['Window_TimeLimit_seconds']==360 and
+            authority['total_maximum_calls']==4 and authority['total_maximum_requested_seconds']==450,'WINDOW_LATEST_USER_AUTHORITY_CHANGED')
+    result=read(out/'RESULT.json');latch=read(out/'PILOT_STARTED.json');rb=read(out/'NATIVE_READBACK.json')
+    params={'Threads':1,'TimeLimit':360.,'Method':1,'FeasibilityTol':1e-8,'OptimalityTol':1e-8,'IntFeasTol':1e-8,'MIPGap':1e-6}
+    needed={'matrix','RHS','senses','lb','ub','types','objective','ObjCon','ModelSense','Rows','Columns','Binary','NNZ','IsMIP'}
+    require(rb['PASS'] and needed<=set(rb['checks']) and all(rb['checks'].values()) and rb['parameters']==params and latch['parameters']==params,
+            'WINDOW_ACTUAL_NATIVE_READBACK_OR_FIXED_PARAMETERS_FAILED')
+    require(rb['matrix_sha']==zero['actual_matrix_sha256'] and rb['domain_sha']==zero['actual_domain_sha256'] and
+            latch['files']==zero['file_sha256'] and latch['independent_native0_sha256']==sha(out/'INDEPENDENT_NATIVE0.json') and
+            latch['user_override_sha256']==override_sha,'WINDOW_EXECUTION_LATCH_MODEL_OR_USER_AUTHORITY_CHANGED')
+    require(result['kind']==latch['kind']=='WINDOW' and result['window']==latch['window']==[88,96] and result['Native_optimize_calls']==latch['Native_optimize_calls']==1 and
+            result['TimeLimit']==360 and result['Threads']==1,'WINDOW_NATIVE_CALL_SCOPE_OR_DURATION_CHANGED')
+    require(all(result[k]==0 for k in ('full_MILP_calls','B1_launches','campaign_calls')) and result['incumbent_is_original_FULL_UB'] is False and result['Actual_AC_PASS'] is False,
+            'WINDOW_UNAUTHORIZED_FULL_OR_CAMPAIGN_SCOPE')
+    frozen=read(DOCS/'SNAPSHOT_NATIVE_LEDGER.json');ledger=read(DOCS/'NATIVE_LEDGER.json');calls=ledger['calls']
+    require(len(calls)==4 and calls[:3]==frozen['calls'] and [c['slot'] for c in calls[:3]]==[75,82,94] and
+            all(c['kind']=='SNAPSHOT' and c['TimeLimit']==30 for c in calls[:3]) and calls[3]['kind']=='WINDOW' and calls[3]['window']==[88,96] and calls[3]['TimeLimit']==360,
+            'WINDOW_EXTRA_REPEAT_OR_SNAPSHOT_PREFIX_DRIFT')
+    require(ledger['maximum_requested_seconds']==450 and ledger['original_maximum_requested_seconds']==210 and
+            ledger['user_window_override_sha256']==override_sha and sum(c['TimeLimit'] for c in calls)==450 and
+            Path(calls[3]['out']).resolve()==out.resolve(),'WINDOW_GLOBAL_NATIVE_REQUEST_BUDGET_INVALID')
+    require(latch['ledger_sha256']==sha(DOCS/'NATIVE_LEDGER.json'),'WINDOW_GLOBAL_LEDGER_CHANGED_AFTER_EXECUTION_LATCH')
+    require(read(out/'PRE_NATIVE_PEERS.json')['PASS'] and read(out/'MEMORY_RESOURCE_ADMISSION.json')['PASS'],'WINDOW_RESOURCE_ADMISSION_NOT_PASSED')
+    A=sparse.load_npz(out/'WINDOW_A.npz').tocsr();raw=npz(out/'WINDOW_DATA.npz');d=canonical_data(raw);msha,dsha=digests(A,raw)
+    require(msha==zero['actual_matrix_sha256'] and dsha==zero['actual_domain_sha256'],'WINDOW_FINAL_STORED_MODEL_CHANGED')
+    dims=zero['dimensions'];require((result['Rows'],result['Columns'],result['Binary'],result['NNZ'])==(dims['rows'],dims['columns'],dims['binary'],dims['nnz']),
+                                  'WINDOW_NATIVE_DIMENSION_ATTRIBUTES_CHANGED')
+    trace=read(out/'MEMORY_TRACE.json');samples=trace['samples'];require(len(samples)>=2,'WINDOW_MEMORY_TRACE_MISSING')
+    require(result['minimum_RAM_available']==min(s['system']['RAM_available'] for s in samples) and
+            result['minimum_commit_available']==min(s['system']['Commit_available'] for s in samples) and
+            result['peak_process_RSS_bytes']==max(s['Peak_RSS_bytes'] for s in samples) and
+            result['peak_private_commit_bytes']==max(s['Peak_Private_Commit_bytes'] or s['Private_Commit_bytes'] for s in samples),'WINDOW_MEMORY_SUMMARIES_MISMATCH')
+    log=(out/'NATIVE.log').read_text(encoding='utf-8',errors='replace');numeric=any(t in log.lower() for t in ('numerical trouble','out of memory','numeric error'))
+    bound=result.get('ObjBound');value=result.get('ObjVal')
+    valid=(result['Status'] in (2,9) and bound is not None and math.isfinite(float(bound)) and abs(float(bound))<1e99 and
+           result['optimize_error'] is None and not result['numeric_errors'] and not result['resource_stops'] and not result['memory_stops'] and not numeric)
+    rep=None
+    if result['SolCount']>0:
+        x=npz(out/'INCUMBENT.npz')['x'];rep=replay(A,d,x)
+        require(max(rep[k] for k in ('max_row_violation','max_box_violation','max_integer_error'))<=1e-7 and abs(rep['objective']-value)<=1e-9,
+                'WINDOW_NUMERICAL_INCUMBENT_REPLAY_FAILED')
+        require(bound is None or bound<=value+1e-7,'WINDOW_GLOBAL_BOUND_EXCEEDS_INCUMBENT')
+    if valid:require(-1e-8<=bound<=UB+1e-7,'WINDOW_SOLVER_BOUND_EXCEEDS_ORIGINAL_U4_REFERENCE')
+    certified=float(bound) if valid else None
+    snapshot_bounds=[]
+    for t in (75,82,94):
+        c=read(DOCS/f'slot{t}/INDEPENDENT_CERTIFICATE.json')
+        require(c['PASS'] and c['source18r']==SOURCE18R and c['case_sha']==CASE,'PRESERVED_SNAPSHOT_CERTIFICATE_INVALID')
+        snapshot_bounds.append(c['Certified_LB'])
+    global_lb=max([OLD_LB]+snapshot_bounds+([] if certified is None else [certified]))
+    root_observed=bool(result['root_log_messages'] or any(r['status']==2 for r in result['root_node_observations']))
+    return {'PASS':valid,'schema':'V42_WINDOW360_INDEPENDENT_GLOBAL_BOUND_V1','phase':'Final','source18r':SOURCE18R,'PR214':PARENT,'case_sha':CASE,
+            'window':[88,96],'Certified_LB':certified,'certified_Global_LB':certified,'Global_LB_after_Window':global_lb,
+            'formulation':zero['formulation'],'compact_integer_equivalence_PASS':zero['compact_integer_equivalence_PASS'],
+            'actual_binary_count':dims['binary'],'original_binary_cap_PASS':dims['binary']<=1500,
+            'Global_Gap_after_Window':(UB-global_lb)/UB,'solver_status':result['Status'],'ObjBound':bound,'ObjVal':value,
+            'MILP_solver_global_bound_valid':valid,'GlobalBound_source':'Gurobi numerical global MIP ObjBound after exact original-domain/CSR/helper audit and actual Native readback' if valid else None,
+            'incumbent_replay':rep,'incumbent_valid':rep is not None,'exact_BB_trace_certificate':False,
+            'exact_Window_incumbent_feasible_point_certificate':None,'exact_incumbent_upper_bound_or_nonmaterial_impossibility_claimed':False,
+            'root_relaxation_observed':root_observed,'LP_relaxation_log_objective':result.get('LP_relaxation_log_objective'),'LP_log_rounded_diagnostic_only':True,
+            'original_projection_and_source_helper_proofs_PASS':True,'user_binary_cap_16236_and_Window_360_override_verified':True,
+            'Snapshot_calls_preserved':3,'Window_Native_calls':1,'total_Native_calls':4,'total_requested_seconds':450,
+            'new_Global_LB_uses_max_of_same_Source_Case_bounds':True,'Window_incumbent_promoted_as_Global_LB':False,
+            'incumbent_is_original_FULL_UB':False,'Actual_AC_PASS':False,'full_MILP_calls':0,'B1_launches':0,'campaign_calls':0,
+            'file_sha256':zero['file_sha256'],'native0_sha256':sha(out/'INDEPENDENT_NATIVE0.json'),'native_result_sha256':sha(out/'RESULT.json'),
+            'native_latch_sha256':sha(out/'PILOT_STARTED.json'),'user_override_sha256':override_sha,'ledger_sha256':sha(DOCS/'NATIVE_LEDGER.json'),
+            'wall_seconds':time.perf_counter()-started}
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('--mode',choices=('native0','final','compact'),required=True);p.add_argument('--out',type=Path,default=OUT);p.add_argument('--physical',type=Path,default=PHYSICAL);args=p.parse_args()
+    try:
+        if args.mode=='compact':
+            value,C,cd,cx,boxes=compact_projection(args.physical)
+            value.update(schema='V42_COMPACT_WINDOW_INDEPENDENT_INTEGER_EQUIVALENCE_V1',source18r=SOURCE18R,case_sha=CASE,
+                         dimensions={'rows':C.shape[0],'columns':C.shape[1],'binary':int(np.count_nonzero(cd['vtypes']=='B')),'nnz':int(C.nnz)},
+                         Native_optimize_calls=0,Gurobi_imported=False,FULL_CSR_constructed=False)
+            filename='INDEPENDENT_COMPACT_NATIVE0.json';write(args.physical/filename,value)
+        else:
+            value=native0(args.out,args.physical) if args.mode=='native0' else final(args.out,args.physical)
+            filename='INDEPENDENT_NATIVE0.json' if args.mode=='native0' else 'INDEPENDENT_CERTIFICATE.json';write(args.out/filename,value)
+        print({'PASS':value['PASS'],'mode':args.mode,'dimensions':value.get('dimensions')})
+    except Exception as error:
+        write(args.out/('INDEPENDENT_'+args.mode.upper()+'_FAILED.json'),{'PASS':False,'phase':args.mode,'reason':str(error),'exception':traceback.format_exc(),'Native_optimize_calls':0,'Gurobi_imported':False});raise

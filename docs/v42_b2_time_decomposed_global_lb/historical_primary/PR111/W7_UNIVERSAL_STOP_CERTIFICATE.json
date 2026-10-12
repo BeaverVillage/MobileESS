@@ -1,0 +1,71 @@
+{
+  "PASS": true,
+  "G1_states": 600,
+  "G3_reachable_pairs": 4952,
+  "G2_state_pairs": 11250,
+  "all_six_idle_pairs": [
+    {
+      "pair": [
+        "MESS01",
+        "MESS02"
+      ],
+      "rho": 0.3441896824355409,
+      "full_W7_matrix_max_violation": 4.0609737794738976e-12,
+      "PASS": true
+    },
+    {
+      "pair": [
+        "MESS01",
+        "MESS03"
+      ],
+      "rho": 0.34418968243554116,
+      "full_W7_matrix_max_violation": 3.464895037552651e-12,
+      "PASS": true
+    },
+    {
+      "pair": [
+        "MESS01",
+        "MESS04"
+      ],
+      "rho": 0.34418968243554127,
+      "full_W7_matrix_max_violation": 1.0397016581009666e-11,
+      "PASS": true
+    },
+    {
+      "pair": [
+        "MESS02",
+        "MESS03"
+      ],
+      "rho": 0.3441896824355411,
+      "full_W7_matrix_max_violation": 8.88655815600714e-12,
+      "PASS": true
+    },
+    {
+      "pair": [
+        "MESS02",
+        "MESS04"
+      ],
+      "rho": 0.3441896824355414,
+      "full_W7_matrix_max_violation": 1.942934702015009e-11,
+      "PASS": true
+    },
+    {
+      "pair": [
+        "MESS03",
+        "MESS04"
+      ],
+      "rho": 0.3441896824355408,
+      "full_W7_matrix_max_violation": 1.2222001188888498e-11,
+      "PASS": true
+    }
+  ],
+  "upper_max": 0.3441896824355414,
+  "upper_never_used_as_beta": true,
+  "complete_native_physics_lifts": true,
+  "all_window_grid_rows_unmodified": true,
+  "scope": "All 600 G1 states, all 11250 G2 same-time pairs and every authority-reachable G3 time-state pair",
+  "proof": "For each inactive pair the stored full W7 feasible upper point satisfies every original retained grid row. Replace one inactive unit with a validated zero-window-P/Q route/charge/SOC lift for any G1 or G3 condition, or both units independently for G2. All native unit constraints remain satisfied; all window grid activities are identical. Therefore every conditional W7 optimum <= corresponding feasible upper < inherited global default. No future W7 solve can improve any beta beyond default or change any separation decision.",
+  "priority_states_stopped_by_proof": true,
+  "states_not_pruned": true,
+  "not_full_horizon_grid_incumbents": true
+}

@@ -1,0 +1,60 @@
+{
+  "PASS": true,
+  "source": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+  "case_sha": "34c0efffa9c05397552fb167667c0bbfe2f35cec89801a3169c00c64fe77f292",
+  "parent": "40ab888b884255e76fd6c89fd01933570b60c242",
+  "slot": 82,
+  "exact_flattened_security_rows": 8485,
+  "exact_flattened_security_nnz": 2396540,
+  "flattened_nnz_cap": 500000,
+  "flattened_formulation_size_admission": false,
+  "actual_native_formulation": "LITERAL_ORIGINAL_HELPER_EXTENDED_FORMULATION",
+  "original_security_rows": 8485,
+  "original_helper_equality_rows": 1140,
+  "compact_grid_rows": 9625,
+  "compact_grid_nnz": 158051,
+  "compact_grid_columns": 1429,
+  "compact_helper_columns": 1140,
+  "source_family_counts": {
+    "voltage_lower": 838,
+    "voltage_upper": 838,
+    "NormalAmps": 153,
+    "transformer_kVA": 2448,
+    "line_thermal_face": 4208
+  },
+  "rounding": {
+    "native_coefficients_and_rhs_original_stored_binary64": true,
+    "coefficient_conversion_error_exact": "0",
+    "rhs_conversion_error_exact": "0",
+    "equality_helper_rows_unchanged": true,
+    "inequality_senses_unchanged": true,
+    "small_coefficient_deletion": false,
+    "auxiliary_bounds_original_free": true,
+    "finite_physical_bounds_unchanged": true,
+    "flattened_outward_rows_saved_as_independent_projection_evidence_only": true
+  },
+  "proof": {
+    "helper_system": "Each dependency helper has a unique +1 pivot in an original equality; recursive Fraction expansion is acyclic.",
+    "existence": "For every original FULL feasible point, copy the selected-slot physical Pch/Pdis/Q and rho, then copy its original helper values. All retained helper and security rows are literal original rows.",
+    "uniqueness": "The triangular helper equalities uniquely determine each helper from the selected-slot physical leaves and fixed original RHS constants.",
+    "elimination": "Recursively substituting those equalities gives exactly GRID_EXACT coeff/rhs before Native outward transport; no security row is removed.",
+    "equivalence": "Projection of the literal helper extended formulation onto physical P/Q and rho equals the exact eliminated slot security polyhedron.",
+    "bound_contract": "rho_max retains original [0,1], objective +1, ObjCon 0. All helper objective coefficients are 0 and original helper bounds are retained.",
+    "conclusion": "Using helper coordinates changes matrix sparsity only; it neither strengthens nor weakens the exact source slot security projection."
+  },
+  "all_original_security_rows_retained": true,
+  "all_grid_helper_dependencies_retained": true,
+  "same_slot_leaf_audit": {
+    "PASS": true,
+    "all_projected_nonrho_leaves_in_selected_slot": true,
+    "cross_time_rows": [],
+    "omitted_original_security_rows": []
+  },
+  "Native_optimize_calls": 0,
+  "Full96_model_builds": 0,
+  "evidence_sha256": {
+    "GRID_RAW_CLOSURE.json.gz": "0b74b92ba8b22ea7c9d137098246685fae96f81988baaf28f95ea74565e12425",
+    "GRID_EXACT.json.gz": "da2a9b4901adc1a962fa63046a343d98a14afacaaa7c28487556204115d65eb9",
+    "GRID_AUTHORITY.json": "b6bff3eebf140e1070cd012d58cee5167947228c678889746f58670c7167d1a6"
+  }
+}

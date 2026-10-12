@@ -1,0 +1,106 @@
+"""Native0 exact eight-slot grid authority, with streamed projection receipts.
+
+Only the original sparse helper/security rows are serialized. Each eliminated
+Fraction row is independently hashed after a same-slot leaf audit, then freed.
+No FULL CSR construction, solver import, model build, or Optimize occurs.
+"""
+from collections import Counter
+from fractions import Fraction as F
+from pathlib import Path
+import argparse
+import gc
+import json
+import time
+
+from tools.time_decomposed_lb.grid import (SelectiveAuthority, SOURCE, CASE, PARENT,
+    FAMILIES, PHYSICAL, ROOT, require, sha, read, write, canonical_sha)
+
+
+def build(out):
+    started=time.perf_counter()
+    out=Path(out)
+    require(not (out/'WINDOW_GRID_AUTHORITY.json').exists(),'SEALED_WINDOW_GRID_NO_REBUILD')
+    out.mkdir(parents=True,exist_ok=True)
+    slots=list(range(88,96))
+    authority=SelectiveAuthority()
+    security_ids=set();helper_ids=set();projections=[];families=Counter();slot_reports=[]
+    try:
+        for slot in slots:
+            rows=authority.security_by_slot[slot]
+            counts=Counter();dense_nnz=0;used_helpers=set();exact_digest_rows=[]
+            for i in rows:
+                # Geometry exact expansion retains every nonzero stored term;
+                # the native formulation will retain original raw helper rows.
+                sense=str(authority.maps['sense'][i]);require(sense in ('<','>'),'WINDOW_SECURITY_SENSE')
+                sign=F(1) if sense=='<' else F(-1)
+                constant=F(0);terms={};used=set()
+                for j,w in authority.terms(i):
+                    offset,pieces,deps=authority.expand(j)
+                    factor=sign*F(w);constant+=factor*offset
+                    for q,value in pieces.items():terms[q]=terms.get(q,F(0))+factor*value
+                    used.update(deps)
+                terms={q:c for q,c in terms.items() if c}
+                rhs=sign*F(float(authority.maps['rhs'][i]))-constant
+                named={}
+                for j,c in terms.items():
+                    name=str(authority.maps['names'][j])
+                    if name!='rho_max':
+                        match=PHYSICAL.fullmatch(name)
+                        require(match is not None and int(match.group(4))==slot,'WINDOW_HELPER_OTHER_TIME_OR_NONPHYSICAL_LEAF:'+name)
+                    named[name]=str(c)
+                signature=canonical_sha(dict(rhs=str(rhs),coeff=dict(sorted(named.items()))))
+                original=authority.raw(i)
+                item=dict(original_row=i,name=original['name'],source_row_sha256=original['source_row_sha256'],
+                    projected_Fraction_row_sha256=signature,normalized_sense='<',exact_rhs=str(rhs),
+                    eliminated_constant=str(constant),exact_nonzero_terms=len(terms),helper_rows=sorted(used),
+                    nonrho_leaf_slots=[slot] if len(named)>('rho_max' in named) else [],cross_time_leaves=[])
+                projections.append(item);exact_digest_rows.append([i,signature])
+                security_ids.add(i);helper_ids.update(used);used_helpers.update(used)
+                family=original['name'].split('[',1)[0];counts[family]+=1;families[family]+=1;dense_nnz+=len(terms)
+            require(sum(counts.values())==8485 and set(counts)==set(FAMILIES),'WINDOW_COMPLETE_SLOT_SECURITY_COVER')
+            require(len(used_helpers)==1140,'WINDOW_COMPLETE_SLOT_HELPER_CLOSURE')
+            slot_reports.append(dict(slot=slot,security_rows=len(rows),helper_rows=len(used_helpers),
+                family_counts=dict(counts),dense_eliminated_grid_nnz=dense_nnz,
+                projected_rows_digest_sha256=canonical_sha(exact_digest_rows),exact_same_slot_leaf_audit_PASS=True,
+                omitted_original_security_rows=[]))
+            print(json.dumps(dict(Native0=True,slot_complete=slot,security_rows=len(rows),dense_nnz=dense_nnz)),flush=True)
+        all_ids=security_ids|helper_ids
+        raw_rows=[authority.raw(i) for i in sorted(all_ids)]
+        cols={int(j) for r in raw_rows for j,_ in r['terms']}
+        axis={str(j):dict(name=str(authority.maps['names'][j]),lower_hex=float(authority.maps['lower'][j]).hex(),
+            upper_hex=float(authority.maps['upper'][j]).hex(),type=str(authority.maps['types'][j]),
+            objective_hex=float(authority.maps['objective'][j]).hex()) for j in sorted(cols)}
+        raw=dict(schema='V42_WINDOW_GRID_RAW_CLOSURE_V1',source=SOURCE,case_sha=CASE,parent=PARENT,window=[88,96],slots=slots,
+            original_full_shape=list(authority.shape),source_files=authority.records,columns=axis,rows=raw_rows,
+            original_security_rows=sorted(security_ids),helper_rows=sorted(helper_ids),
+            Native_optimize_calls=0,FULL_CSR_constructed=False,FULL96_model_reconstructed=False)
+        projection=dict(schema='V42_WINDOW_GRID_FRACTION_PROJECTION_RECEIPT_V1',source=SOURCE,case_sha=CASE,parent=PARENT,
+            window=[88,96],rows=projections,slot_reports=slot_reports,source_files=authority.records,
+            exact_coefficients_materialized_then_freed=True,exact_coefficient_deletion=False,
+            certificate='Each original security row exactly projected by acyclic original +1 pivot helper equalities; row SHA hashes named exactFractioncoeff/rhs. All nonrho leaves are the row own slot physical Pch/Pdis/Q.',
+            Native_optimize_calls=0,Gurobi_imported=False,FULL_CSR_constructed=False)
+        write(out/'WINDOW_GRID_RAW_CLOSURE.json.gz',raw)
+        write(out/'WINDOW_GRID_FRACTION_PROJECTION.json.gz',projection)
+        report=dict(PASS=True,schema='V42_WINDOW_GRID_AUTHORITY_V1',source=SOURCE,case_sha=CASE,parent=PARENT,
+            window=[88,96],slots=slots,security_rows=len(security_ids),helper_rows=len(helper_ids),
+            grid_rows=len(raw_rows),grid_columns=len(cols),grid_nnz=sum(len(r['terms']) for r in raw_rows),
+            family_counts=dict(families),slot_reports=slot_reports,source_files=authority.records,
+            rho_contract=dict(name='rho_max',original_column=authority.rho,lower=0.,upper=1.,objective=1.,objective_constant=0.),
+            actual_native_representation='Literal original equalityhelper/security lift, exact source stored binary64 coefficients/RHS/senses/bounds; no native conversion error.',
+            mathematical_helper_equivalence='Triangular unique helper lift projection equals the exact Fraction-eliminated physical security rows.',
+            original_helper_infinite_bounds_preserved=True,source_rhs_and_coefficients_binary64_exact=True,
+            original_FULL_to_window_grid_projection_proved=True,all_slot_original_security_families_retained=True,
+            omitted_security_rows=[],cross_time_leaf_rows=[],Native_optimize_calls=0,Gurobi_imported=False,
+            Full96_model_builds=0,FULL_CSR_constructed=False,
+            evidence={n:sha(out/n) for n in ['WINDOW_GRID_RAW_CLOSURE.json.gz','WINDOW_GRID_FRACTION_PROJECTION.json.gz']},
+            wall_seconds=time.perf_counter()-started,code_sha256=sha(__file__),grid_accessor_code_sha256=sha(ROOT/'tools/time_decomposed_lb/grid.py'))
+    finally:
+        authority.close()
+    report['temp_NPY_memmaps_removed']=True
+    write(out/'WINDOW_GRID_AUTHORITY.json',report)
+    print(json.dumps({k:report[k] for k in ['PASS','security_rows','helper_rows','grid_rows','grid_columns','grid_nnz','wall_seconds']}),flush=True)
+    return report
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);a=p.parse_args();build(a.out)

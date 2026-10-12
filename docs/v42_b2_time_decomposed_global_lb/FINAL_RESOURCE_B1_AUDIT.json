@@ -1,0 +1,778 @@
+{
+  "schema": "V42_TIME_DECOMPOSITION_FINAL_RESOURCE_B1_SOURCE_AUDIT_V1",
+  "PASS": true,
+  "checks": {
+    "fresh_all_seven_local_remote_sources_and_current_B1_stopped_state_PASS": true,
+    "exact_three_preregistered_sequential_snapshot_calls": true,
+    "exact_90_second_snapshot_requested_budget": true,
+    "no_overlapping_snapshot_optimize_intervals": true,
+    "all_stage_native_readback_source_copy_admission_and_resource_checks_PASS": true,
+    "Window_not_executed_and_literal_binary_cap_failure_preserved": true,
+    "no_candidate_Bound_material_trigger": true,
+    "B1_user_stop_ledger_result_bytes_and_original_task_contracts_preserved": true
+  },
+  "observed_UTC": "2026-10-12T02:03:08.471634+00:00",
+  "observed_Asia_Seoul": "2026-10-12T11:03:08.471634+09:00",
+  "final_readonly_audit": {
+    "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\POST_RUN_RESOURCE_SOURCE_AUDIT.json",
+    "bytes": 37926,
+    "sha256": "cf783c909e431b33b455231448a78db3bcd11325505ea7ede5027c026de29657"
+  },
+  "protected_baseline": {
+    "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\PROTECTED_BASELINE.json",
+    "bytes": 308833,
+    "sha256": "1cc69742342ef7c0ea2c38a53bb3e3defa869e2a32562b0d88ccd825a88327bc"
+  },
+  "protected_file_count": 943,
+  "protected_file_bytes": 115081907,
+  "protected_task_contract_count": 59,
+  "originals": [
+    {
+      "name": "PR207",
+      "path": "D:\\v42_svr11_epoch18r_20261011",
+      "HEAD": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+      "expected_HEAD": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+      "HEAD_matches": true,
+      "clean": true,
+      "git_status": "",
+      "remote": {
+        "headRefName": "codex/v42-svr11-final-may-20261011-epoch02",
+        "headRefOid": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/207"
+      },
+      "remote_HEAD_matches": true
+    },
+    {
+      "name": "PR209",
+      "path": "D:\\ChatGPT\\Mobile ESS 2\\work\\source18r-physical-global-lb-pilot",
+      "HEAD": "9383a99f1bdcabbd49c79b3ad9f9ee36d523868a",
+      "expected_HEAD": "9383a99f1bdcabbd49c79b3ad9f9ee36d523868a",
+      "HEAD_matches": true,
+      "clean": true,
+      "git_status": "",
+      "remote": {
+        "headRefName": "codex/v42-source18r-physical-global-lb-pilot-20261012",
+        "headRefOid": "9383a99f1bdcabbd49c79b3ad9f9ee36d523868a",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/209"
+      },
+      "remote_HEAD_matches": true
+    },
+    {
+      "name": "PR210",
+      "path": "D:\\v42_joint_critical_grid_lb_20261012",
+      "HEAD": "6a8fd44f59f1f461c60d2d14f5f5be605e4ed640",
+      "expected_HEAD": "6a8fd44f59f1f461c60d2d14f5f5be605e4ed640",
+      "HEAD_matches": true,
+      "clean": true,
+      "git_status": "",
+      "remote": {
+        "headRefName": "codex/v42-joint-critical-grid-lb-pilot-20261012",
+        "headRefOid": "6a8fd44f59f1f461c60d2d14f5f5be605e4ed640",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/210"
+      },
+      "remote_HEAD_matches": true
+    },
+    {
+      "name": "PR211",
+      "path": "D:\\v42_critical_grid_cg_lb_20261012",
+      "HEAD": "d12315a3757aec187c8da0685c28ef901466386a",
+      "expected_HEAD": "d12315a3757aec187c8da0685c28ef901466386a",
+      "HEAD_matches": true,
+      "clean": true,
+      "git_status": "",
+      "remote": {
+        "headRefName": "codex/v42-critical-grid-constraint-generation-20261012",
+        "headRefOid": "d12315a3757aec187c8da0685c28ef901466386a",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/211"
+      },
+      "remote_HEAD_matches": true
+    },
+    {
+      "name": "PR212",
+      "path": "D:\\v42_b1_only_source_20261012",
+      "HEAD": "4a969c59823c67dc5f52474491b24a9d55107e3d",
+      "expected_HEAD": "4a969c59823c67dc5f52474491b24a9d55107e3d",
+      "HEAD_matches": true,
+      "clean": true,
+      "git_status": "",
+      "remote": {
+        "headRefName": "codex/v42-b1-only-may-20261012",
+        "headRefOid": "4a969c59823c67dc5f52474491b24a9d55107e3d",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/212"
+      },
+      "remote_HEAD_matches": true
+    },
+    {
+      "name": "PR213",
+      "path": "D:\\v42_b1_repair_source_20261012",
+      "HEAD": "21c84ee6d8127d56ab69bd267f7d8f3fdb8d80ef",
+      "expected_HEAD": "21c84ee6d8127d56ab69bd267f7d8f3fdb8d80ef",
+      "HEAD_matches": true,
+      "clean": true,
+      "git_status": "",
+      "remote": {
+        "headRefName": "codex/v42-b1-numerical-pricing-repair-20261012",
+        "headRefOid": "21c84ee6d8127d56ab69bd267f7d8f3fdb8d80ef",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/213"
+      },
+      "remote_HEAD_matches": true
+    },
+    {
+      "name": "PR214",
+      "path": "D:\\v42_b2_root_lp_tightening_20261012",
+      "HEAD": "40ab888b884255e76fd6c89fd01933570b60c242",
+      "expected_HEAD": "40ab888b884255e76fd6c89fd01933570b60c242",
+      "HEAD_matches": true,
+      "clean": true,
+      "git_status": "",
+      "remote": {
+        "headRefName": "codex/v42-b2-root-lp-tightening-20261012",
+        "headRefOid": "40ab888b884255e76fd6c89fd01933570b60c242",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/214"
+      },
+      "remote_HEAD_matches": true
+    }
+  ],
+  "native_ledger": {
+    "calls": [
+      {
+        "kind": "SNAPSHOT",
+        "slot": 75,
+        "TimeLimit": 30.0,
+        "pid": 129696,
+        "time": 1791770264.6320593,
+        "out": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot75"
+      },
+      {
+        "kind": "SNAPSHOT",
+        "slot": 82,
+        "TimeLimit": 30.0,
+        "pid": 118660,
+        "time": 1791770362.3320692,
+        "out": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot82"
+      },
+      {
+        "kind": "SNAPSHOT",
+        "slot": 94,
+        "TimeLimit": 30.0,
+        "pid": 69508,
+        "time": 1791770472.0849912,
+        "out": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot94"
+      }
+    ],
+    "snapshot_maximum_calls": 3,
+    "window_maximum_calls": 1,
+    "maximum_requested_seconds": 210
+  },
+  "native_ledger_digest": {
+    "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\NATIVE_LEDGER.json",
+    "bytes": 884,
+    "sha256": "6571375547f6501338a9a5c6c88c496b67de3ad0d803af98225695e2ddcdb028"
+  },
+  "stages": [
+    {
+      "slot": 75,
+      "PASS": true,
+      "checks": {
+        "native_readback_PASS": true,
+        "fresh_post_build_source_resource_admission_PASS": true,
+        "exact_single_thread_30_second_parameter_contract": true,
+        "consumed_one_Optimize_call": true,
+        "no_observed_callback_resource_errors": true,
+        "no_memory_or_numeric_stop": true,
+        "actual_sampled_memory_floors_PASS": true,
+        "execution_source_copy_hashes_exact": true,
+        "independent_Global_Solver_Bound_certificate_PASS": true,
+        "no_Full96_MILP_campaign_B1_launch": true,
+        "incumbent_not_FULL_UB_or_Actual_PASS": true
+      },
+      "result": {
+        "kind": "SNAPSHOT",
+        "slot": 75,
+        "Status": 2,
+        "SolCount": 7,
+        "ObjVal": 0.41579289927745045,
+        "ObjBound": 0.41579289927745045,
+        "ObjBoundC": 0.4157928992774505,
+        "MIPGap": 0.0,
+        "NodeCount": 87.0,
+        "IterCount": 3190.0,
+        "Runtime": 2.306000232696533,
+        "Work": 3.540503228068155,
+        "MaxMemUsed_GB": 0.071524797,
+        "TimeLimit": 30.0,
+        "Threads": 1,
+        "Native_optimize_calls": 1,
+        "model_build_seconds": 0.020008699968457222,
+        "optimize_wall_seconds": 4.596091900020838,
+        "callback_seconds": 1.628382000257261,
+        "Rows": 11741,
+        "Columns": 1529,
+        "Binary": 100,
+        "NNZ": 164884,
+        "LP_relaxation_log_objective": 0.4154922,
+        "LP_relaxation_value_is_log_rounded": true,
+        "root_complete": true,
+        "root_relaxation_observed": true,
+        "integer_optimal": true,
+        "root_node_observations": [
+          {
+            "status": 2,
+            "bound": 0.4154921610383673
+          },
+          {
+            "status": 2,
+            "bound": 0.4154921610383673
+          },
+          {
+            "status": 2,
+            "bound": 0.4154921610383673
+          }
+        ],
+        "simplex_completed_observations": [],
+        "root_log_messages": [
+          "Root relaxation: objective 4.154922e-01, 2226 iterations, 0.20 seconds (0.48 work units)"
+        ],
+        "peak_process_RSS_bytes": 152489984,
+        "peak_private_commit_bytes": 1199955968,
+        "minimum_RAM_available": 17323048960,
+        "minimum_commit_available": 28636278784,
+        "optimize_error": null,
+        "numeric_errors": [],
+        "resource_stops": [],
+        "memory_stops": [],
+        "full_MILP_calls": 0,
+        "campaign_calls": 0,
+        "B1_launches": 0,
+        "incumbent_is_original_FULL_UB": false,
+        "Actual_AC_PASS": false
+      },
+      "execution_source_copies": [
+        {
+          "name": "authority_report.py",
+          "expected_execution_sha256": "2cd5096ff235560d9e12143bdc7c61c4415642c8f890303b07a324f64b6391e3",
+          "saved_copy_sha256": "2cd5096ff235560d9e12143bdc7c61c4415642c8f890303b07a324f64b6391e3",
+          "exact_execution_copy": true,
+          "current_source_sha256": "2cd5096ff235560d9e12143bdc7c61c4415642c8f890303b07a324f64b6391e3",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "finish.py",
+          "expected_execution_sha256": "f1331e99fcacfe1b94b453ac37a74d5526e01f6065770f5495fce02468712c2d",
+          "saved_copy_sha256": "f1331e99fcacfe1b94b453ac37a74d5526e01f6065770f5495fce02468712c2d",
+          "exact_execution_copy": true,
+          "current_source_sha256": "f1331e99fcacfe1b94b453ac37a74d5526e01f6065770f5495fce02468712c2d",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "grid.py",
+          "expected_execution_sha256": "a1b60d844a8b4de6603f65f1983e33098fc05c6156d08451dfa3d180f2812bdd",
+          "saved_copy_sha256": "a1b60d844a8b4de6603f65f1983e33098fc05c6156d08451dfa3d180f2812bdd",
+          "exact_execution_copy": true,
+          "current_source_sha256": "a1b60d844a8b4de6603f65f1983e33098fc05c6156d08451dfa3d180f2812bdd",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "history.py",
+          "expected_execution_sha256": "861c05a1d5c74513efce567e025bfe9cf0998365283c446eff432e9251ac5c14",
+          "saved_copy_sha256": "861c05a1d5c74513efce567e025bfe9cf0998365283c446eff432e9251ac5c14",
+          "exact_execution_copy": true,
+          "current_source_sha256": "861c05a1d5c74513efce567e025bfe9cf0998365283c446eff432e9251ac5c14",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "make_report.py",
+          "expected_execution_sha256": "a82e1fca2687687728b1879d9c329b7915dfa62e09c4ba0e3915212901246ee0",
+          "saved_copy_sha256": "a82e1fca2687687728b1879d9c329b7915dfa62e09c4ba0e3915212901246ee0",
+          "exact_execution_copy": true,
+          "current_source_sha256": "c8a795e9a87b87534099b4f6965f7cee0b01806978c2d3f9f1d64f68a9779fee",
+          "current_source_matches_execution": false
+        },
+        {
+          "name": "pilot.py",
+          "expected_execution_sha256": "eed837e4cb232e919a1c4a3c8aa3e997fdfeb60befdaf5818fccb87ec38eef37",
+          "saved_copy_sha256": "eed837e4cb232e919a1c4a3c8aa3e997fdfeb60befdaf5818fccb87ec38eef37",
+          "exact_execution_copy": true,
+          "current_source_sha256": "eed837e4cb232e919a1c4a3c8aa3e997fdfeb60befdaf5818fccb87ec38eef37",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "resources.py",
+          "expected_execution_sha256": "83020f12f35c16b8b4472005cdfd90e6c79b2e95831b10ce46a83ac5ace04ef6",
+          "saved_copy_sha256": "83020f12f35c16b8b4472005cdfd90e6c79b2e95831b10ce46a83ac5ace04ef6",
+          "exact_execution_copy": true,
+          "current_source_sha256": "83020f12f35c16b8b4472005cdfd90e6c79b2e95831b10ce46a83ac5ace04ef6",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "verify.py",
+          "expected_execution_sha256": "f47d4e1aab43378f2fd0307bc9002100800c263ab1dbeee815f3772e6302f917",
+          "saved_copy_sha256": "f47d4e1aab43378f2fd0307bc9002100800c263ab1dbeee815f3772e6302f917",
+          "exact_execution_copy": true,
+          "current_source_sha256": "f47d4e1aab43378f2fd0307bc9002100800c263ab1dbeee815f3772e6302f917",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "window_audit.py",
+          "expected_execution_sha256": "9d4472a8a62f6b057f70b735eaa06e08dcd1b2ad269f58a590fe2da81500c47b",
+          "saved_copy_sha256": "9d4472a8a62f6b057f70b735eaa06e08dcd1b2ad269f58a590fe2da81500c47b",
+          "exact_execution_copy": true,
+          "current_source_sha256": "9d4472a8a62f6b057f70b735eaa06e08dcd1b2ad269f58a590fe2da81500c47b",
+          "current_source_matches_execution": true
+        }
+      ],
+      "independent_certificate": {
+        "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot75\\INDEPENDENT_CERTIFICATE.json",
+        "bytes": 3443,
+        "sha256": "2a9d19f8291f4c8f39a2c311b674a0c20db91e2b5b4c6f478a9f69fa6164496a"
+      },
+      "evidence": {
+        "RESULT.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot75\\RESULT.json",
+          "bytes": 1632,
+          "sha256": "9afabc9be1015377c467d650f2e7391453ad092d114e28da10e881fd9957c470"
+        },
+        "MEMORY_RESOURCE_ADMISSION.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot75\\MEMORY_RESOURCE_ADMISSION.json",
+          "bytes": 37469,
+          "sha256": "d319aa75a3d3bd8c428613a7db250e689aef47b154415ec21b58d232d8dfc364"
+        },
+        "NATIVE_READBACK.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot75\\NATIVE_READBACK.json",
+          "bytes": 789,
+          "sha256": "a4293c769f1fda8dcb034b9ebec814e3b0fc12e6f1ca596d71ae84b0025b9240"
+        },
+        "MEMORY_TRACE.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot75\\MEMORY_TRACE.json",
+          "bytes": 4031,
+          "sha256": "9592d9d64bddcd302bc3f4a5901d0fcf738a344e843de1ee9a622eda02e44af4"
+        },
+        "RESOURCE_TRACE.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot75\\RESOURCE_TRACE.json",
+          "bytes": 47,
+          "sha256": "ec1acba9c84998bf5848828ae96e19292238fe7425a637dfee48c9063bdf1fa7"
+        },
+        "PILOT_STARTED.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot75\\PILOT_STARTED.json",
+          "bytes": 2100,
+          "sha256": "121bd54778af06e28709cf8cbd2fa5bb927fd3827f9526ad9499d4a284b92b2e"
+        },
+        "EXECUTION_SOURCES.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot75\\EXECUTION_SOURCES.json",
+          "bytes": 783,
+          "sha256": "4ad5554387133315ffc3e5afe0a254a4ae4bc5907070debaec1cc50b4fa145b7"
+        }
+      },
+      "continuous_all_instants_no_conflict_certified": false,
+      "note": "Fresh admission and periodic structured callback observation passed. Periodic samples do not prove continuous absence of peers between samples; no peer is forcibly stopped by this study."
+    },
+    {
+      "slot": 82,
+      "PASS": true,
+      "checks": {
+        "native_readback_PASS": true,
+        "fresh_post_build_source_resource_admission_PASS": true,
+        "exact_single_thread_30_second_parameter_contract": true,
+        "consumed_one_Optimize_call": true,
+        "no_observed_callback_resource_errors": true,
+        "no_memory_or_numeric_stop": true,
+        "actual_sampled_memory_floors_PASS": true,
+        "execution_source_copy_hashes_exact": true,
+        "independent_Global_Solver_Bound_certificate_PASS": true,
+        "no_Full96_MILP_campaign_B1_launch": true,
+        "incumbent_not_FULL_UB_or_Actual_PASS": true
+      },
+      "result": {
+        "kind": "SNAPSHOT",
+        "slot": 82,
+        "Status": 9,
+        "SolCount": 10,
+        "ObjVal": 0.3580577339320287,
+        "ObjBound": 0.35779883299591836,
+        "ObjBoundC": 0.35779883299591836,
+        "MIPGap": 0.0007230703642879846,
+        "NodeCount": 1101.0,
+        "IterCount": 14880.0,
+        "Runtime": 30.003000020980835,
+        "Work": 37.039445829697975,
+        "MaxMemUsed_GB": 0.098832237,
+        "TimeLimit": 30.0,
+        "Threads": 1,
+        "Native_optimize_calls": 1,
+        "model_build_seconds": 0.01816610002424568,
+        "optimize_wall_seconds": 32.03336100000888,
+        "callback_seconds": 11.247894303989597,
+        "Rows": 11741,
+        "Columns": 1529,
+        "Binary": 100,
+        "NNZ": 164867,
+        "LP_relaxation_log_objective": 0.3575727,
+        "LP_relaxation_value_is_log_rounded": true,
+        "root_complete": true,
+        "root_relaxation_observed": true,
+        "integer_optimal": false,
+        "root_node_observations": [
+          {
+            "status": 2,
+            "bound": 0.3575726819575912
+          },
+          {
+            "status": 2,
+            "bound": 0.3575726819575912
+          },
+          {
+            "status": 2,
+            "bound": 0.3575726819575912
+          }
+        ],
+        "simplex_completed_observations": [],
+        "root_log_messages": [
+          "Root relaxation: objective 3.575727e-01, 2005 iterations, 0.17 seconds (0.39 work units)"
+        ],
+        "peak_process_RSS_bytes": 182837248,
+        "peak_private_commit_bytes": 1228128256,
+        "minimum_RAM_available": 17323470848,
+        "minimum_commit_available": 28740227072,
+        "optimize_error": null,
+        "numeric_errors": [],
+        "resource_stops": [],
+        "memory_stops": [],
+        "full_MILP_calls": 0,
+        "campaign_calls": 0,
+        "B1_launches": 0,
+        "incumbent_is_original_FULL_UB": false,
+        "Actual_AC_PASS": false
+      },
+      "execution_source_copies": [
+        {
+          "name": "authority_report.py",
+          "expected_execution_sha256": "2cd5096ff235560d9e12143bdc7c61c4415642c8f890303b07a324f64b6391e3",
+          "saved_copy_sha256": "2cd5096ff235560d9e12143bdc7c61c4415642c8f890303b07a324f64b6391e3",
+          "exact_execution_copy": true,
+          "current_source_sha256": "2cd5096ff235560d9e12143bdc7c61c4415642c8f890303b07a324f64b6391e3",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "finish.py",
+          "expected_execution_sha256": "f1331e99fcacfe1b94b453ac37a74d5526e01f6065770f5495fce02468712c2d",
+          "saved_copy_sha256": "f1331e99fcacfe1b94b453ac37a74d5526e01f6065770f5495fce02468712c2d",
+          "exact_execution_copy": true,
+          "current_source_sha256": "f1331e99fcacfe1b94b453ac37a74d5526e01f6065770f5495fce02468712c2d",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "grid.py",
+          "expected_execution_sha256": "a1b60d844a8b4de6603f65f1983e33098fc05c6156d08451dfa3d180f2812bdd",
+          "saved_copy_sha256": "a1b60d844a8b4de6603f65f1983e33098fc05c6156d08451dfa3d180f2812bdd",
+          "exact_execution_copy": true,
+          "current_source_sha256": "a1b60d844a8b4de6603f65f1983e33098fc05c6156d08451dfa3d180f2812bdd",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "history.py",
+          "expected_execution_sha256": "861c05a1d5c74513efce567e025bfe9cf0998365283c446eff432e9251ac5c14",
+          "saved_copy_sha256": "861c05a1d5c74513efce567e025bfe9cf0998365283c446eff432e9251ac5c14",
+          "exact_execution_copy": true,
+          "current_source_sha256": "861c05a1d5c74513efce567e025bfe9cf0998365283c446eff432e9251ac5c14",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "make_report.py",
+          "expected_execution_sha256": "a82e1fca2687687728b1879d9c329b7915dfa62e09c4ba0e3915212901246ee0",
+          "saved_copy_sha256": "a82e1fca2687687728b1879d9c329b7915dfa62e09c4ba0e3915212901246ee0",
+          "exact_execution_copy": true,
+          "current_source_sha256": "c8a795e9a87b87534099b4f6965f7cee0b01806978c2d3f9f1d64f68a9779fee",
+          "current_source_matches_execution": false
+        },
+        {
+          "name": "pilot.py",
+          "expected_execution_sha256": "eed837e4cb232e919a1c4a3c8aa3e997fdfeb60befdaf5818fccb87ec38eef37",
+          "saved_copy_sha256": "eed837e4cb232e919a1c4a3c8aa3e997fdfeb60befdaf5818fccb87ec38eef37",
+          "exact_execution_copy": true,
+          "current_source_sha256": "eed837e4cb232e919a1c4a3c8aa3e997fdfeb60befdaf5818fccb87ec38eef37",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "resources.py",
+          "expected_execution_sha256": "83020f12f35c16b8b4472005cdfd90e6c79b2e95831b10ce46a83ac5ace04ef6",
+          "saved_copy_sha256": "83020f12f35c16b8b4472005cdfd90e6c79b2e95831b10ce46a83ac5ace04ef6",
+          "exact_execution_copy": true,
+          "current_source_sha256": "83020f12f35c16b8b4472005cdfd90e6c79b2e95831b10ce46a83ac5ace04ef6",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "verify.py",
+          "expected_execution_sha256": "f47d4e1aab43378f2fd0307bc9002100800c263ab1dbeee815f3772e6302f917",
+          "saved_copy_sha256": "f47d4e1aab43378f2fd0307bc9002100800c263ab1dbeee815f3772e6302f917",
+          "exact_execution_copy": true,
+          "current_source_sha256": "f47d4e1aab43378f2fd0307bc9002100800c263ab1dbeee815f3772e6302f917",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "window_audit.py",
+          "expected_execution_sha256": "9d4472a8a62f6b057f70b735eaa06e08dcd1b2ad269f58a590fe2da81500c47b",
+          "saved_copy_sha256": "9d4472a8a62f6b057f70b735eaa06e08dcd1b2ad269f58a590fe2da81500c47b",
+          "exact_execution_copy": true,
+          "current_source_sha256": "9d4472a8a62f6b057f70b735eaa06e08dcd1b2ad269f58a590fe2da81500c47b",
+          "current_source_matches_execution": true
+        }
+      ],
+      "independent_certificate": {
+        "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot82\\INDEPENDENT_CERTIFICATE.json",
+        "bytes": 3287,
+        "sha256": "655c0d372fe678bf99b07f3397674623d3bf38b4605853764d51cfefab7cfedd"
+      },
+      "evidence": {
+        "RESULT.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot82\\RESULT.json",
+          "bytes": 1657,
+          "sha256": "988fdaa5dbc3cd24d9cb10572945dc890b3567e74ecf447f01fffb55dc59a4e6"
+        },
+        "MEMORY_RESOURCE_ADMISSION.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot82\\MEMORY_RESOURCE_ADMISSION.json",
+          "bytes": 37468,
+          "sha256": "a26594e891ac0b6efe5b08e8fe68ec8e9517a72d7f3edbb2377d0d2297b8f023"
+        },
+        "NATIVE_READBACK.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot82\\NATIVE_READBACK.json",
+          "bytes": 788,
+          "sha256": "5262709244a7d04e03082a38ab5bf287e96061e9b20b8cb5e7b933e6c5b6aa4b"
+        },
+        "MEMORY_TRACE.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot82\\MEMORY_TRACE.json",
+          "bytes": 22947,
+          "sha256": "548f25b8f1ef38c7216b08edb6fdcaa449b5e02bec006fd326c5a313486baf09"
+        },
+        "RESOURCE_TRACE.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot82\\RESOURCE_TRACE.json",
+          "bytes": 47,
+          "sha256": "ec1acba9c84998bf5848828ae96e19292238fe7425a637dfee48c9063bdf1fa7"
+        },
+        "PILOT_STARTED.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot82\\PILOT_STARTED.json",
+          "bytes": 2100,
+          "sha256": "ad67d4e2ee7220ad0bdd24fbf4f9febc47bebd824de7331063ce83cb21de37a8"
+        },
+        "EXECUTION_SOURCES.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot82\\EXECUTION_SOURCES.json",
+          "bytes": 783,
+          "sha256": "4ad5554387133315ffc3e5afe0a254a4ae4bc5907070debaec1cc50b4fa145b7"
+        }
+      },
+      "continuous_all_instants_no_conflict_certified": false,
+      "note": "Fresh admission and periodic structured callback observation passed. Periodic samples do not prove continuous absence of peers between samples; no peer is forcibly stopped by this study."
+    },
+    {
+      "slot": 94,
+      "PASS": true,
+      "checks": {
+        "native_readback_PASS": true,
+        "fresh_post_build_source_resource_admission_PASS": true,
+        "exact_single_thread_30_second_parameter_contract": true,
+        "consumed_one_Optimize_call": true,
+        "no_observed_callback_resource_errors": true,
+        "no_memory_or_numeric_stop": true,
+        "actual_sampled_memory_floors_PASS": true,
+        "execution_source_copy_hashes_exact": true,
+        "independent_Global_Solver_Bound_certificate_PASS": true,
+        "no_Full96_MILP_campaign_B1_launch": true,
+        "incumbent_not_FULL_UB_or_Actual_PASS": true
+      },
+      "result": {
+        "kind": "SNAPSHOT",
+        "slot": 94,
+        "Status": 2,
+        "SolCount": 3,
+        "ObjVal": 0.28155936106370183,
+        "ObjBound": 0.28155936106370183,
+        "ObjBoundC": 0.28155936106370183,
+        "MIPGap": 0.0,
+        "NodeCount": 700.0,
+        "IterCount": 7970.0,
+        "Runtime": 6.531999826431274,
+        "Work": 8.73646442620914,
+        "MaxMemUsed_GB": 0.071559301,
+        "TimeLimit": 30.0,
+        "Threads": 1,
+        "Native_optimize_calls": 1,
+        "model_build_seconds": 0.018754399963654578,
+        "optimize_wall_seconds": 8.545801300089806,
+        "callback_seconds": 3.2353116023587063,
+        "Rows": 11741,
+        "Columns": 1529,
+        "Binary": 100,
+        "NNZ": 164912,
+        "LP_relaxation_log_objective": 0.2814109,
+        "LP_relaxation_value_is_log_rounded": true,
+        "root_complete": true,
+        "root_relaxation_observed": true,
+        "integer_optimal": true,
+        "root_node_observations": [
+          {
+            "status": 2,
+            "bound": 0.2814109294903599
+          },
+          {
+            "status": 2,
+            "bound": 0.2814109294903599
+          },
+          {
+            "status": 2,
+            "bound": 0.2814109294903599
+          }
+        ],
+        "simplex_completed_observations": [],
+        "root_log_messages": [
+          "Root relaxation: objective 2.814109e-01, 2317 iterations, 0.21 seconds (0.53 work units)"
+        ],
+        "peak_process_RSS_bytes": 153026560,
+        "peak_private_commit_bytes": 1199890432,
+        "minimum_RAM_available": 17379627008,
+        "minimum_commit_available": 28801622016,
+        "optimize_error": null,
+        "numeric_errors": [],
+        "resource_stops": [],
+        "memory_stops": [],
+        "full_MILP_calls": 0,
+        "campaign_calls": 0,
+        "B1_launches": 0,
+        "incumbent_is_original_FULL_UB": false,
+        "Actual_AC_PASS": false
+      },
+      "execution_source_copies": [
+        {
+          "name": "authority_report.py",
+          "expected_execution_sha256": "2cd5096ff235560d9e12143bdc7c61c4415642c8f890303b07a324f64b6391e3",
+          "saved_copy_sha256": "2cd5096ff235560d9e12143bdc7c61c4415642c8f890303b07a324f64b6391e3",
+          "exact_execution_copy": true,
+          "current_source_sha256": "2cd5096ff235560d9e12143bdc7c61c4415642c8f890303b07a324f64b6391e3",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "finish.py",
+          "expected_execution_sha256": "f1331e99fcacfe1b94b453ac37a74d5526e01f6065770f5495fce02468712c2d",
+          "saved_copy_sha256": "f1331e99fcacfe1b94b453ac37a74d5526e01f6065770f5495fce02468712c2d",
+          "exact_execution_copy": true,
+          "current_source_sha256": "f1331e99fcacfe1b94b453ac37a74d5526e01f6065770f5495fce02468712c2d",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "grid.py",
+          "expected_execution_sha256": "a1b60d844a8b4de6603f65f1983e33098fc05c6156d08451dfa3d180f2812bdd",
+          "saved_copy_sha256": "a1b60d844a8b4de6603f65f1983e33098fc05c6156d08451dfa3d180f2812bdd",
+          "exact_execution_copy": true,
+          "current_source_sha256": "a1b60d844a8b4de6603f65f1983e33098fc05c6156d08451dfa3d180f2812bdd",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "history.py",
+          "expected_execution_sha256": "861c05a1d5c74513efce567e025bfe9cf0998365283c446eff432e9251ac5c14",
+          "saved_copy_sha256": "861c05a1d5c74513efce567e025bfe9cf0998365283c446eff432e9251ac5c14",
+          "exact_execution_copy": true,
+          "current_source_sha256": "861c05a1d5c74513efce567e025bfe9cf0998365283c446eff432e9251ac5c14",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "make_report.py",
+          "expected_execution_sha256": "c8a795e9a87b87534099b4f6965f7cee0b01806978c2d3f9f1d64f68a9779fee",
+          "saved_copy_sha256": "c8a795e9a87b87534099b4f6965f7cee0b01806978c2d3f9f1d64f68a9779fee",
+          "exact_execution_copy": true,
+          "current_source_sha256": "c8a795e9a87b87534099b4f6965f7cee0b01806978c2d3f9f1d64f68a9779fee",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "pilot.py",
+          "expected_execution_sha256": "eed837e4cb232e919a1c4a3c8aa3e997fdfeb60befdaf5818fccb87ec38eef37",
+          "saved_copy_sha256": "eed837e4cb232e919a1c4a3c8aa3e997fdfeb60befdaf5818fccb87ec38eef37",
+          "exact_execution_copy": true,
+          "current_source_sha256": "eed837e4cb232e919a1c4a3c8aa3e997fdfeb60befdaf5818fccb87ec38eef37",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "resources.py",
+          "expected_execution_sha256": "83020f12f35c16b8b4472005cdfd90e6c79b2e95831b10ce46a83ac5ace04ef6",
+          "saved_copy_sha256": "83020f12f35c16b8b4472005cdfd90e6c79b2e95831b10ce46a83ac5ace04ef6",
+          "exact_execution_copy": true,
+          "current_source_sha256": "83020f12f35c16b8b4472005cdfd90e6c79b2e95831b10ce46a83ac5ace04ef6",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "verify.py",
+          "expected_execution_sha256": "f47d4e1aab43378f2fd0307bc9002100800c263ab1dbeee815f3772e6302f917",
+          "saved_copy_sha256": "f47d4e1aab43378f2fd0307bc9002100800c263ab1dbeee815f3772e6302f917",
+          "exact_execution_copy": true,
+          "current_source_sha256": "f47d4e1aab43378f2fd0307bc9002100800c263ab1dbeee815f3772e6302f917",
+          "current_source_matches_execution": true
+        },
+        {
+          "name": "window_audit.py",
+          "expected_execution_sha256": "9d4472a8a62f6b057f70b735eaa06e08dcd1b2ad269f58a590fe2da81500c47b",
+          "saved_copy_sha256": "9d4472a8a62f6b057f70b735eaa06e08dcd1b2ad269f58a590fe2da81500c47b",
+          "exact_execution_copy": true,
+          "current_source_sha256": "9d4472a8a62f6b057f70b735eaa06e08dcd1b2ad269f58a590fe2da81500c47b",
+          "current_source_matches_execution": true
+        }
+      ],
+      "independent_certificate": {
+        "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot94\\INDEPENDENT_CERTIFICATE.json",
+        "bytes": 3890,
+        "sha256": "535556e3f59fdbd2eaa888d1ba76f1e6d56f1f6d133f7fbc969c68efd175afc6"
+      },
+      "evidence": {
+        "RESULT.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot94\\RESULT.json",
+          "bytes": 1634,
+          "sha256": "467d7b443c49fc0b54f8a655ad2a4138e6aef931463f7423a2560848546189dd"
+        },
+        "MEMORY_RESOURCE_ADMISSION.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot94\\MEMORY_RESOURCE_ADMISSION.json",
+          "bytes": 37471,
+          "sha256": "4fa6353cebf595112daa0ff05ad43204b6a981ed664e821a29ef9b7aa628da3e"
+        },
+        "NATIVE_READBACK.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot94\\NATIVE_READBACK.json",
+          "bytes": 789,
+          "sha256": "2fe6df1061ba81df2c7a827325def8ddfb174f1cb3d2e27ff980f3d4b77cc83a"
+        },
+        "MEMORY_TRACE.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot94\\MEMORY_TRACE.json",
+          "bytes": 7016,
+          "sha256": "33ea463cdf7e01ad326700b27c576ad05a480195cea7d629a7a8ddada905f83c"
+        },
+        "RESOURCE_TRACE.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot94\\RESOURCE_TRACE.json",
+          "bytes": 47,
+          "sha256": "ec1acba9c84998bf5848828ae96e19292238fe7425a637dfee48c9063bdf1fa7"
+        },
+        "PILOT_STARTED.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot94\\PILOT_STARTED.json",
+          "bytes": 2100,
+          "sha256": "9d81399ac54fc0d28ed5ea6fd81e1a20e031fa9d899a539313f0b033a86f0ee2"
+        },
+        "EXECUTION_SOURCES.json": {
+          "path": "D:\\v42_b2_time_decomposed_global_lb_20261012\\docs\\v42_b2_time_decomposed_global_lb\\slot94\\EXECUTION_SOURCES.json",
+          "bytes": 783,
+          "sha256": "8c2ce135280ccd043a8c2c15e9e6c340a80a27ef6fa6169bb5fe367bc04a05d5"
+        }
+      },
+      "continuous_all_instants_no_conflict_certified": false,
+      "note": "Fresh admission and periodic structured callback observation passed. Periodic samples do not prove continuous absence of peers between samples; no peer is forcibly stopped by this study."
+    }
+  ],
+  "total_actual_Native_Runtime_seconds": 38.84100008010864,
+  "total_optimize_wall_seconds": 45.175254200119525,
+  "total_callback_seconds": 16.111587906605564,
+  "peak_process_RSS_bytes": 182837248,
+  "peak_private_commit_bytes": 1228128256,
+  "minimum_system_RAM_available_bytes": 17323048960,
+  "minimum_system_commit_available_bytes": 28636278784,
+  "maximum_Gurobi_MaxMemUsed_GB": 0.098832237,
+  "B1_launches_by_this_study": 0,
+  "B1_source_result_process_schedule_automation_mutations": 0,
+  "Full96_MILP_calls": 0,
+  "official_campaign_calls": 0,
+  "Window_Native_calls": 0,
+  "audits_Native_calls": 0,
+  "audits_solver_imports": 0,
+  "runtime_comparison_limitation": "Actual Solver Runtime, wall and callback cost are recorded separately. A smaller model or different elapsed Native time does not isolate a formulation-only speedup across differing solve tasks or monitoring overhead."
+}
