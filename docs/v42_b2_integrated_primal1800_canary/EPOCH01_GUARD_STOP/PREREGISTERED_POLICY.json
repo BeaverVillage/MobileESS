@@ -1,0 +1,28 @@
+{
+  "Native_limit": 1800,
+  "initial_stage_allocation": {
+    "A": 180,
+    "N1": 150,
+    "N2plus": 900,
+    "N3plus": 570
+  },
+  "per_call_caps": {
+    "initialization": 120,
+    "U4": 90,
+    "N1": 150,
+    "N2plus": 150,
+    "N3plus": 180
+  },
+  "return_reserve_seconds": 5,
+  "Worker": 1,
+  "Threads": 1,
+  "next_type_rule": "N1 then N2+; no gain => switch N2+/N3+; verified gain => reset current signed-grid queue, prioritize N2+.",
+  "finite_queue": "4 primary +4 expanded single-vehicle domains, 6 pairs per current verified center; mathematical model signatures never repeated.",
+  "root_stall_rule": "After two consecutive TIME_LIMIT root-incomplete calls of a type at one center, defer that type until the other queue is exhausted; then try distinct next domains.",
+  "Route_Hamming_only": true,
+  "all384_Mode_free_in_N2plus_N3plus": true,
+  "stop_on_first_raw_route_improvement_to_validate_after_worker_exit": true,
+  "no_previous_incumbent_cold_start": true,
+  "new_global_LB_solves": 0,
+  "unrestricted_full_BB_calls": 0
+}

@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\tools\integrated_primal1800\pilot.py", line 431, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\tools\integrated_primal1800\pilot.py", line 239, in main
+    elif args.mode=='resume':run(resume=True)
+                             ^^^^^^^^^^^^^^^^
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\tools\integrated_primal1800\pilot.py", line 100, in run
+    guard();began=time.perf_counter()
+    ^^^^^^^
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\tools\integrated_primal1800\adapter.py", line 40, in guard
+    v.require(v.file_sha(ROOT/path) == expected, 'EXECUTION_SOURCE_DRIFT:'+path)
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\tools\u4_primal_alns\verify.py", line 43, in require
+    raise ValueError(message)
+ValueError: EXECUTION_SOURCE_DRIFT:tools\integrated_primal1800\pilot.py
