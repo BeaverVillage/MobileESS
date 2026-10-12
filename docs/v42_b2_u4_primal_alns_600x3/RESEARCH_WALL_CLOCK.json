@@ -1,0 +1,53 @@
+{
+  "schema": "V42_U4_PRIMAL_ALNS_POST_RUN_WALL_TIMING_V1",
+  "PASS": true,
+  "anchor_UTC": "2026-10-12T03:11:44+00:00",
+  "anchor_provenance": "Observed research worktree CreationTimeUtc, rounded to seconds; human message receipt and pre-worktree activity were not measured.",
+  "recorded_UTC": "2026-10-12T04:30:23.907936+00:00",
+  "observed_worktree_to_timing_receipt_seconds": 4719.907936,
+  "execution_epochs_wall_seconds": 3003.0021482920274,
+  "algorithm_wall_sum_seconds": 1629.7768199000275,
+  "execution_epochs_outside_method_wall_seconds": 1373.225328392,
+  "actual_Native_sum_seconds": 1217.7610006332397,
+  "methods": {
+    "N1": {
+      "algorithm_wall_seconds": 86.89081389992498,
+      "actual_Native_seconds": 39.5550000667572,
+      "pre_Optimize_build_wall_seconds": 24.190443700063042,
+      "external_Optimize_return_wall_seconds": 42.22894359997008,
+      "external_return_minus_Runtime_seconds": 2.673943533212878,
+      "candidate_FULL_replay_wall_seconds": 13.748699400108308,
+      "neighborhood_preparation_wall_seconds": 5.619627299951389
+    },
+    "N2": {
+      "algorithm_wall_seconds": 792.4185873999959,
+      "actual_Native_seconds": 579.0060005187988,
+      "pre_Optimize_build_wall_seconds": 119.09276819985826,
+      "external_Optimize_return_wall_seconds": 590.2566259999294,
+      "external_return_minus_Runtime_seconds": 11.250625481130555,
+      "candidate_FULL_replay_wall_seconds": 37.24710419983603,
+      "neighborhood_preparation_wall_seconds": 40.463037000154145
+    },
+    "N3": {
+      "algorithm_wall_seconds": 750.4674186001066,
+      "actual_Native_seconds": 599.2000000476837,
+      "pre_Optimize_build_wall_seconds": 88.35769680002704,
+      "external_Optimize_return_wall_seconds": 607.3241264000535,
+      "external_return_minus_Runtime_seconds": 8.124126352369785,
+      "candidate_FULL_replay_wall_seconds": 26.411299700150266,
+      "neighborhood_preparation_wall_seconds": 24.58061019994784
+    }
+  },
+  "scope": {
+    "observed_span": "Includes setup, historical/source/resource review, failed preparation, Native0 regressions, both execution epochs, pause/recovery and post-run independent validation up to recorded_UTC. Report rendering and Git delivery occur later and are separately timestamped.",
+    "execution_epochs": "Both execution epochs, shared Native0, source-epoch recovery and independent validation; report/audit wall is added separately in final study timing.",
+    "method_wall": "Measured algorithm entry through all restricted calls and independent candidate FULL Replay; each method starts its own original U4 point.",
+    "pre_Optimize_build": "Worker entry through model load/construction/readback/Native0/admission; not a pure model assembly benchmark.",
+    "component_accounting": "Component times are measured subscopes, not quantities to add to algorithm or execution wall. Overlapping or concurrent independent preparation is not assigned invented exclusive durations.",
+    "unmeasured": "No exact human receipt timestamp, no exclusive initial setup/history phase durations; no zero-time claim for these activities.",
+    "report_end": "REPORT_RENDER_RECEIPT.json separately records observed worktree-to-report time including report construction."
+  },
+  "comparison_sha256": "1e33ace8f0b66415d0a6cbeb6843f25fa08995b2f4ebd7bb67eefe888d0ccb79",
+  "Native_optimize_calls_by_timer": 0,
+  "Gurobi_imports_by_timer": 0
+}

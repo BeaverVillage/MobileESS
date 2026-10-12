@@ -1,0 +1,67 @@
+{
+  "schema": "V42_INDEPENDENT_LIVE_RESOURCE_OBSERVATION_V1",
+  "PASS": true,
+  "checks": {
+    "at_most_one_declared_current_Native_worker": true,
+    "no_other_Heavy_or_unknown_Gurobi": true,
+    "no_actual_B1_launch": true,
+    "inventory_errors_absent": true,
+    "RAM_floor_4GiB": true,
+    "Commit_floor_6GiB": true
+  },
+  "declared_current_Native_workers": [
+    {
+      "PID": 132640,
+      "create_time": 1791777783.5565467,
+      "name": "python.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-m",
+        "tools.u4_primal_alns.pilot",
+        "--mode",
+        "native",
+        "--method",
+        "N2",
+        "--output",
+        "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration03\\native",
+        "--center",
+        "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\INITIAL_U4_POINT.npz",
+        "--spec",
+        "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration03\\SPEC.json",
+        "--seconds",
+        "150.0"
+      ],
+      "cwd": "D:\\v42_b2_u4_primal_alns_600x3_20261012",
+      "status": "running",
+      "CPU_seconds": 0.40625,
+      "RSS_bytes": 58695680,
+      "Private_Commit_bytes": 1086705664,
+      "gurobi_loaded_modules": [],
+      "reviewed_SHA_pinned_Native0_audit": false,
+      "method": "N2",
+      "declared_output": "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration03\\native"
+    }
+  ],
+  "other_Heavy_candidates": [],
+  "B1_native_processes": [],
+  "inventory_errors": [],
+  "memory": {
+    "time": 1791777786.6151562,
+    "system": {
+      "RAM_total": 34049220608,
+      "RAM_available": 16643809280,
+      "RAM_used": 17405411328,
+      "Commit_total": 40832122880,
+      "Commit_limit": 68408958976,
+      "Commit_available": 27576836096,
+      "Commit_peak": 68408958976
+    },
+    "RSS_bytes": 23400448,
+    "Peak_RSS_bytes": 23400448,
+    "Private_Commit_bytes": 13099008,
+    "Peak_Private_Commit_bytes": 13099008
+  },
+  "observed_epoch_seconds": 1791777786.6181562,
+  "Native_optimize_calls_by_auditor": 0,
+  "note": "Read-only observation of declared worker; original pre/post-build and callback admissions remain authoritative. No mutations."
+}

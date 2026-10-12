@@ -1,0 +1,60 @@
+{
+  "schema": "V42_INDEPENDENT_LIVE_RESOURCE_OBSERVATION_V1",
+  "PASS": true,
+  "checks": {
+    "at_most_one_declared_Native_worker": true,
+    "no_other_Heavy_or_unknown_Gurobi": true,
+    "no_actual_B1": true,
+    "inventory_errors_absent": true,
+    "RAM_floor4GiB": true,
+    "Commit_floor6GiB": true
+  },
+  "declared_current_Native_workers": [],
+  "other_Heavy_candidates": [],
+  "inventory_errors": [],
+  "memory": {
+    "time": 1791778563.8819835,
+    "system": {
+      "RAM_total": 34049220608,
+      "RAM_available": 15938211840,
+      "RAM_used": 18111008768,
+      "Commit_total": 40660017152,
+      "Commit_limit": 68408958976,
+      "Commit_available": 27748941824,
+      "Commit_peak": 68408958976
+    },
+    "RSS_bytes": 22712320,
+    "Peak_RSS_bytes": 23515136,
+    "Private_Commit_bytes": 13266944,
+    "Peak_Private_Commit_bytes": 13266944
+  },
+  "observed_algorithm_ledger_summaries": {
+    "N1": {
+      "actual_Native_sum": 39.5550000667572,
+      "requested_Native_sum": 599.0,
+      "final_verified_UB": 0.5461621302242249,
+      "stopped_reason": "WHOLE_96_SLOT_MODE_MODEL_OPTIMAL_WITH_APPROVED_MIPGAP",
+      "classification": "UB_GAIN_STRONG",
+      "recorded_calls": 1
+    },
+    "N2": {
+      "actual_Native_sum": 579.0060005187988,
+      "requested_Native_sum": 1050.0,
+      "final_verified_UB": 0.6760534504652341,
+      "stopped_reason": "FINITE_NONREPEATING_CANDIDATE_POLICY_EXHAUSTED",
+      "classification": "NO_VALID_IMPROVEMENT",
+      "recorded_calls": 7
+    },
+    "N3": {
+      "actual_Native_sum": 202.75,
+      "requested_Native_sum": 200.0,
+      "final_verified_UB": 0.6760534504652341,
+      "stopped_reason": null,
+      "classification": null,
+      "recorded_calls": 1
+    }
+  },
+  "observed_epoch_seconds": 1791778563.900985,
+  "Native_optimize_calls_by_auditor": 0,
+  "note": "Live recorded ledgers are diagnostic until all independent final audits complete; no mutation."
+}

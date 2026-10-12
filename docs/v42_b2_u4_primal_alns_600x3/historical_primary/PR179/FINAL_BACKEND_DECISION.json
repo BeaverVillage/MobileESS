@@ -1,0 +1,98 @@
+{
+  "UTC": "2026-10-08T00:44:17.608119+00:00",
+  "classification": "M_EXACT_BB_TRACTABILITY_FAIL",
+  "optimize_calls": 0,
+  "scientific_objective": "minimize rho",
+  "scientific_model_modifications": 0,
+  "selected_backend": "external checkpointable exact best-bound B&B with cold barrier child LPs",
+  "selection_is_measured_reference_candidate_not_target_acceptance": true,
+  "current_bounds": {
+    "LB": 0.5687116104049206,
+    "UB": 0.6306505800203936,
+    "gap": 0.09821440204410836,
+    "initial_LB": 0.5687116003498334,
+    "initial_UB": 0.6306505800203936,
+    "LB_gain": 1.0055087207305746e-08,
+    "UB_gain": 0.0
+  },
+  "comparison": {
+    "cold_children": {
+      "attempts": 53,
+      "OPTIMAL": 52,
+      "median_Runtime": 197.5659999847412,
+      "p90_Runtime": 275.12900004386904,
+      "certified_OPTIMAL_nodes_per_native_Runtime_hour": 17.193699795833616,
+      "raw_original_relaxed_replay_PASS": 1,
+      "max_original_row_violation": 5.334702217063558e-05,
+      "median_native_objective_to_exact_bound_loss": 0.0031157596757308004,
+      "peak_RSS": 2085220352,
+      "fractional_binaries": {
+        "min": 6861,
+        "median": 7926.0,
+        "max": 9318
+      }
+    },
+    "native_control": {
+      "source": "runs/cuts0_control/RESULT.json",
+      "backend": "native",
+      "name": "cuts0_control",
+      "status": 9,
+      "Runtime": 1800.1829998493195,
+      "Work": 3803.5252811277314,
+      "nodes": 2.0,
+      "nodes_per_runtime_hour": 3.9995933750083523,
+      "root_LP_seconds": 221.92,
+      "root_processing_end": 237.75600004196167,
+      "first_nonroot": 286.80200004577637,
+      "post_root_seconds": 1562.4269998073578,
+      "peak_RSS": 2539651072,
+      "cuts_generated": [],
+      "valid_UB": 0.6306505800203936,
+      "accepted_LB": 0.5687116104049206,
+      "scientific_replay_and_independent_audit_PASS": true,
+      "new_optimize_calls": 1
+    },
+    "native_production": {
+      "source": "runs/native_production_initial/RESULT.json",
+      "backend": "native",
+      "name": "native_production_initial",
+      "status": 11,
+      "Runtime": 3603.0950000286102,
+      "Work": 7504.217134146692,
+      "nodes": 1.0,
+      "nodes_per_runtime_hour": 0.9991410162572495,
+      "root_LP_seconds": 205.05,
+      "root_processing_end": 220.43099999427795,
+      "first_nonroot": null,
+      "post_root_seconds": 3382.6640000343323,
+      "peak_RSS": 2368479232,
+      "cuts_generated": [],
+      "valid_UB": 0.6306505800203936,
+      "accepted_LB": 0.5687116104049206,
+      "scientific_replay_and_independent_audit_PASS": true,
+      "new_optimize_calls": 1
+    },
+    "production_tail_LP_attempts_per_controller_wall_hour": 15.960997068049803,
+    "production_tail_setup_excluded": true
+  },
+  "recommended_configuration": "재시작 가능한 external best-bound OPEN 큐와 cold child LP(Method=2, Crossover=0, LPWarmStart=0, BarConvTol=1e-8, Threads=1, 기존 오차/Seed), 원본 행렬에 대한 OPTIMAL 후 exact dyadic bounded-Lagrangian 인증, full incumbent replay, 양쪽 binary 자식 보존 및 crash-safe ledger. 현재는 측정된 후속 조사용 production candidate이며 0.5% 달성에 실용적인 solver로 승인하지 않음.",
+  "remaining_bottleneck": "native는 ROOT 완료 후 실질적인 tree/bound 진전이 없었다. cold barrier는 새 자식 52개를 OPTIMAL로 끝냈지만 중앙값 약 198초와 인증값 손실 중앙값 약 0.0031을 보였고, 원본 injection_P/Q의 stationarity 잔차와 넓은 경계가 그 손실을 주도했다. inherited global floor를 넘는 노드 LB나 exact fathoming이 전혀 없어 gap 9.821440204%가 유지되었다. warm child 2개는 basis가 수용됐어도 큰 잔차/Kappa와 TIME_LIMIT 때문에 속도 개선 근거가 되지 못했다.",
+  "next_action": "저장된 OPTIMAL LP 쌍대 벡터에 대해 injection_P/Q와 연결된 PCS 등식 블록의 stationarity 잔차를 함께 보정하고, 원본 목적함수·행렬·경계를 그대로 사용해 exact bounded-Lagrangian 인증이 inherited LB를 넘는지 검사하는 optimize=0 파일럿을 정확히 한 번 사전 등록한다. 이번 작업에서는 실행하지 않는다.",
+  "next_action_count": 1,
+  "next_action_executed": false,
+  "proof_state": {
+    "complete_OPEN_partition": true,
+    "OPEN": 54,
+    "unresolved_OPEN": [
+      53
+    ],
+    "exact_fathomed": 0,
+    "full_original_incumbent_replay_PASS": true
+  },
+  "evidence_SHA256": {
+    "PACKAGE_AUDIT.json": "8f12f40f26fdfba2085e8aa623dcf914509aa1252ed65860008d016e6908e075",
+    "ARCHITECTURE_COMPARISON.json": "52a08459ede4d9e67c1abe3ada5e46fdf34b23f2e0d63da622c7b85072a933ab",
+    "CERTIFICATE_LOSS_ATTRIBUTION.json": "91e7f13be651b3a03bdaf769dbbbf3ec90a454da1cbe6676ffba5dd3e00ec461",
+    "INJECTION_DUAL_REPAIR_CHECK.json": "fef8e8ee414fb8dc2f849b1f9eae0eaffdab2f7cd134158cfaf19a6ed1015a22"
+  }
+}
