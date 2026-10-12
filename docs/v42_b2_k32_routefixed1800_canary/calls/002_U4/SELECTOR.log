@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\v42_b2_k32_routefixed1800_canary_20261012\tools\k32_routefixed1800\worker.py", line 212, in <module>
+    spec=make_spec(case,x,'U4',{},args.replay)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_b2_k32_routefixed1800_canary_20261012\tools\integrated_primal1800\adapter.py", line 178, in make_spec
+    low,high,ham,coeff,rhs,_=restriction(case,center,spec)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_b2_k32_routefixed1800_canary_20261012\tools\integrated_primal1800\adapter.py", line 79, in restriction
+    v.require(np.all(low>=d['lower']) and np.all(high<=d['upper']) and np.all(center>=low) and np.all(center<=high),'CENTER_SOURCE_BOX')
+  File "D:\v42_b2_k32_routefixed1800_canary_20261012\tools\u4_primal_alns\verify.py", line 43, in require
+    raise ValueError(message)
+ValueError: CENTER_SOURCE_BOX

@@ -1,0 +1,138 @@
+
+Gurobi 13.0.2 (win64) logging started Mon Oct 12 20:00:23 2026
+
+Set parameter LogFile to value "D:\v42_b2_k32_routefixed1800_canary_20261012\docs\v42_b2_k32_routefixed1800_canary\calls\019_ROUTE_FIXED\native\NATIVE_GUROBI.log"
+Set parameter TimeLimit to value 120
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  120
+FeasibilityTol  1e-09
+IntFeasTol  1e-08
+MIPGap  0.005
+OptimalityTol  1e-09
+Method  2
+ScaleFlag  2
+MIPFocus  1
+NumericFocus  3
+Threads  1
+
+Optimize a model with 715596 rows, 354277 columns and 7911369 nonzeros (Min)
+Model fingerprint: 0x32f2a14f
+Model has 1 linear objective coefficients
+Variable types: 344955 continuous, 9322 integer (9322 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [4e-08, 2e+03]
+  RHS range        [2e-25, 2e+03]
+Warning: Model contains large matrix coefficient range
+
+Presolve removed 235205 rows and 256308 columns (presolve time = 5s)...
+Presolve removed 599648 rows and 277051 columns
+Presolve time: 7.55s
+Presolved: 115948 rows, 77226 columns, 825135 nonzeros
+Variable types: 76850 continuous, 376 integer (376 binary)
+Performing another presolve...
+Presolve removed 9093 rows and 1081 columns
+Presolve time: 2.30s
+Root barrier log...
+
+Ordering time: 0.03s
+
+Barrier statistics:
+ Dense cols : 760
+ AA' NZ     : 6.644e+05
+ Factor NZ  : 1.242e+06 (roughly 70 MB of memory)
+ Factor Ops : 1.587e+08 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   3.65901347e+01 -4.16813789e+08  1.53e+06 0.00e+00  2.94e+08    13s
+   1   5.33798183e+01 -4.45490398e+08  1.18e+06 2.33e+02  2.08e+08    13s
+   2   3.62140870e+01 -4.48354040e+08  1.05e+06 1.79e+02  1.79e+08    13s
+   3   9.53115890e+00 -4.70487699e+08  3.48e+05 2.36e+01  6.35e+07    13s
+   4   3.24610581e+00 -3.76449650e+08  9.02e+04 3.92e-10  1.72e+07    13s
+   5   1.45489026e+00 -2.31268966e+08  2.17e+04 3.64e-10  4.36e+06    13s
+   6   1.14277242e+00 -1.27404918e+08  9.35e+03 2.10e-09  1.82e+06    13s
+   7   9.67947430e-01 -5.42958894e+07  2.41e+03 2.08e-10  4.86e+05    13s
+   8   9.41394224e-01 -2.46107467e+07  1.16e+03 1.40e-09  1.98e+05    13s
+   9   9.26653711e-01 -1.08257657e+07  3.74e+02 1.84e-11  6.51e+04    14s
+  10   9.21617578e-01 -3.12552838e+06  5.98e+01 1.00e-11  1.37e+04    14s
+  11   9.21797580e-01 -5.85542183e+05  5.98e+00 6.46e-11  2.16e+03    14s
+  12   9.21969822e-01 -7.35878578e+04  5.92e-01 1.32e-11  2.59e+02    14s
+  13   9.21952023e-01 -7.76185265e+03  5.87e-02 5.68e-13  2.69e+01    14s
+  14   9.21819451e-01 -7.83027047e+02  5.82e-03 2.27e-13  2.71e+00    14s
+  15   9.19840342e-01 -8.38246255e+01  5.76e-04 5.68e-14  2.93e-01    14s
+  16   8.92293902e-01 -1.28956813e+01  5.71e-05 7.99e-15  4.77e-02    14s
+  17   7.17617769e-01 -2.23404713e+00  5.66e-06 1.89e-15  1.02e-02    14s
+  18   6.76160870e-01 -8.95765255e-01  4.82e-06 1.05e-15  5.43e-03    14s
+  19   6.61466237e-01 -7.53099479e-01  4.52e-06 5.19e-14  4.89e-03    14s
+  20   6.27865707e-01 -3.65360958e-01  3.69e-06 4.95e-13  3.43e-03    14s
+  21   5.82656865e-01  9.72190425e-03  2.46e-06 2.10e-13  1.98e-03    15s
+  22   5.76480235e-01  1.50719816e-01  2.22e-06 1.63e-13  1.47e-03    15s
+  23   5.65734430e-01  3.15687410e-01  1.63e-06 3.03e-13  8.64e-04    15s
+  24   5.60494398e-01  3.50197408e-01  1.33e-06 3.33e-13  7.27e-04    15s
+  25   5.56669456e-01  3.83623129e-01  9.40e-07 3.64e-13  5.98e-04    15s
+  26   5.56016896e-01  4.96808565e-01  5.54e-07 1.23e-13  2.05e-04    16s
+  27   5.53815878e-01  5.32330521e-01  3.16e-07 8.90e-13  7.43e-05    16s
+  28   5.52915020e-01  5.41627520e-01  1.99e-07 3.78e-13  3.90e-05    16s
+  29   5.52220438e-01  5.47168175e-01  1.12e-07 7.00e-10  1.75e-05    16s
+  30   5.51978467e-01  5.49482732e-01  7.80e-08 1.17e-09  8.63e-06    16s
+  31   5.51748290e-01  5.50743520e-01  4.63e-08 1.24e-09  3.48e-06    17s
+  32   5.51571585e-01  5.51261538e-01  2.05e-08 1.37e-09  1.07e-06    17s
+  33   5.51494499e-01  5.51380829e-01  9.34e-09 1.36e-09  4.02e-07    17s
+  34   5.51444399e-01  5.51425681e-01  2.01e-09 1.37e-09  7.44e-08    17s
+  35   5.51440576e-01  5.51430829e-01  1.45e-09 1.38e-09  4.19e-08    17s
+  36   5.51434049e-01  5.51431641e-01  5.02e-10 1.38e-09  1.63e-08    17s
+  37   5.51431039e-01  5.51432339e-01  1.51e-10 1.38e-09  3.24e-09    17s
+  38   5.51430548e-01  5.51432624e-01  5.84e-10 1.38e-09  3.93e-10    18s
+  39   5.51430445e-01  5.51432614e-01  5.36e-09 1.38e-09  1.31e-10    18s
+  40   5.51430396e-01  5.51432601e-01  6.81e-09 1.38e-09  3.93e-11    18s
+  41   5.51430331e-01  5.51432585e-01  2.61e-09 1.38e-09  5.68e-12    18s
+
+Barrier solved model in 41 iterations and 17.82 seconds (31.74 work units)
+Optimal objective 5.51430331e-01
+
+
+Root crossover log...
+
+     209 DPushes remaining with DInf 0.0000000e+00                18s
+       0 DPushes remaining with DInf 0.0000000e+00                18s
+
+    1472 PPushes remaining with PInf 0.0000000e+00                18s
+       0 PPushes remaining with PInf 0.0000000e+00                18s
+
+  Push phase complete: Pinf 0.0000000e+00, Dinf 8.6736174e-19     18s
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+    1658    5.5142986e-01   0.000000e+00   4.026352e-03     18s
+    1682    5.5142985e-01   0.000000e+00   0.000000e+00     19s
+Crossover time: 0.68 seconds (1.32 work units)
+    1682    5.5142985e-01   0.000000e+00   0.000000e+00     19s
+
+Root relaxation: objective 5.514299e-01, 1682 iterations, 6.16 seconds (9.49 work units)
+Total elapsed time = 18.63s (DegenMoves)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.55143    0   64          -    0.55143      -     -   18s
+*    0     0               0       0.5514299    0.55143  0.00%     -   19s
+
+Explored 1 nodes (1854 simplex iterations) in 19.32 seconds (34.10 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 1: 0.55143 
+
+Optimal solution found (tolerance 5.00e-03)
+Best objective 5.514298505824e-01, best bound 5.514298505824e-01, gap 0.0000%
+
+User-callback calls 2867, time in user-callback 2.09 sec

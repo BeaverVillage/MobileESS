@@ -1,0 +1,80 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter Threads to value 1
+Set parameter FeasibilityTol to value 1e-09
+Set parameter OptimalityTol to value 1e-09
+Set parameter IntFeasTol to value 1e-08
+Set parameter MIPGap to value 0.005
+Set parameter Method to value 1
+Set parameter MIPFocus to value 1
+Set parameter NumericFocus to value 3
+Set parameter ScaleFlag to value 2
+Set parameter Seed to value 0
+Set parameter MIPGapAbs to value 1e-10
+Set parameter LogFile to value "D:\v42_b2_k32_routefixed1800_canary_20261012\docs\v42_b2_k32_routefixed1800_canary\calls\001_INITIALIZE\native\NATIVE_GUROBI.log"
+Set parameter TimeLimit to value 120
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  120
+FeasibilityTol  1e-09
+IntFeasTol  1e-08
+MIPGap  0.005
+OptimalityTol  1e-09
+Method  1
+ScaleFlag  2
+MIPFocus  1
+NumericFocus  3
+Threads  1
+
+Optimize a model with 715596 rows, 354277 columns and 7911369 nonzeros (Min)
+Model fingerprint: 0xb0071863
+Model has 1 linear objective coefficients
+Variable types: 344955 continuous, 9322 integer (9322 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [4e-08, 2e+03]
+  RHS range        [2e-25, 2e+03]
+Warning: Model contains large matrix coefficient range
+
+Presolve removed 247179 rows and 264459 columns (presolve time = 5s)...
+Presolve removed 334204 rows and 266154 columns
+Presolve time: 7.59s
+Presolved: 381392 rows, 88123 columns, 1861503 nonzeros
+Variable types: 88122 continuous, 1 integer (0 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    8.9042642e-02   1.068355e+08   0.000000e+00      9s
+     808    8.4551845e+01   6.317357e+07   0.000000e+00     10s
+    8073    2.4175285e+02   3.214660e+06   0.000000e+00     15s
+   20496    2.8495515e+02   1.511901e+06   0.000000e+00     20s
+   32111    3.3367345e+02   9.743024e+03   0.000000e+00     25s
+   40292    3.3629114e+02   1.439373e+03   0.000000e+00     30s
+   49786    3.3648532e+02   1.326565e+02   0.000000e+00     35s
+   56856    3.3649105e+02   1.483229e+01   0.000000e+00     40s
+   63204    6.7605345e-01   0.000000e+00   0.000000e+00     44s
+
+Root relaxation: objective 6.760535e-01, 63204 iterations, 34.66 seconds (83.34 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0       0.6760535    0.67605  0.00%     -   44s
+
+Explored 1 nodes (63204 simplex iterations) in 44.18 seconds (101.76 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 1: 0.676053 
+
+Optimal solution found (tolerance 5.00e-03)
+Best objective 6.760534504652e-01, best bound 6.760534504652e-01, gap 0.0000%
+
+User-callback calls 2809, time in user-callback 4.21 sec
+{"output": "D:\\v42_b2_k32_routefixed1800_canary_20261012\\docs\\v42_b2_k32_routefixed1800_canary\\calls\\001_INITIALIZE\\native", "status": "FINISHED", "Native_Runtime": 44.187999963760376, "ObjVal": 0.6760534504652341, "restricted_ObjBound": 0.6760534504652341}
