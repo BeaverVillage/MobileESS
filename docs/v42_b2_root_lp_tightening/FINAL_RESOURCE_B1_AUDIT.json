@@ -1,0 +1,254 @@
+{
+  "schema": "V42_B2_ROOT_LP_FINAL_RESOURCE_B1_AUDIT_V1",
+  "PASS": true,
+  "checks": {
+    "final_actual_resource_and_protected_source_HOLD_PASS": true,
+    "old_PR207_PR209_PR210_local_remote_HEADs_unchanged": true,
+    "PR211_remote_exact_original_parent": true,
+    "PR212_remote_original_HEAD_preserved": true,
+    "B1_all_original_scientific_result_Native_ledger_bytes_unchanged": true,
+    "B1_original_source_local_HEAD_clean": true,
+    "latest_user_B2_priority_record_valid": true,
+    "user_B1_disabled_stop_observed_without_our_task_mutation": true,
+    "all_three_single_thread_LP_readbacks_PASS": true,
+    "all_three_post_build_memory_admissions_PASS": true,
+    "three_LP_calls_and_720_second_requested_budget_exact": true,
+    "no_Full_MIP_campaign_or_IEEE8500_calls": true,
+    "no_memory_or_solver_numeric_stop": true,
+    "BASE_and_SOC_callback_no_observed_conflicts": true,
+    "GRID_interruption_not_retried_or_zeroed": true,
+    "current_other_heavy_Native_or_GP_workers_none": true
+  },
+  "observed_UTC": "2026-10-12T01:02:53.667496+00:00",
+  "observed_Asia_Seoul": "2026-10-12T10:02:53.667496+09:00",
+  "remote_PR211": {
+    "headRefName": "codex/v42-critical-grid-constraint-generation-20261012",
+    "headRefOid": "d12315a3757aec187c8da0685c28ef901466386a",
+    "url": "https://github.com/BeaverVillage/MobileESS/pull/211"
+  },
+  "remote_PR212": {
+    "headRefName": "codex/v42-b1-only-may-20261012",
+    "headRefOid": "4a969c59823c67dc5f52474491b24a9d55107e3d",
+    "url": "https://github.com/BeaverVillage/MobileESS/pull/212"
+  },
+  "post_resource_receipt": {
+    "path": "D:\\v42_b2_root_lp_tightening_20261012\\docs\\v42_b2_root_lp_tightening\\POST_RUN_RESOURCE_HOLD.json",
+    "bytes": 46419,
+    "sha256": "40766496a6aba4da9830ece1cc8ac8b0d8480af4591fcf7fae593243b81461f5"
+  },
+  "user_override": {
+    "path": "D:\\v42_b2_root_lp_tightening_20261012\\docs\\v42_b2_root_lp_tightening\\USER_PRIORITY_OVERRIDE.json",
+    "bytes": 509,
+    "sha256": "8a022499f2672383d697e150c6bb4d21857a4111ce3742f3ced6f3217442094b"
+  },
+  "B1_final_status": "GLOBAL_INTEGRITY_ERROR",
+  "B1_date_counts": {
+    "FAIL": 2,
+    "PASS": 1,
+    "NOT_EXECUTED": 28
+  },
+  "B1_all31_complete": false,
+  "B1_launches_by_this_research": 0,
+  "B1_mutations_by_this_research": 0,
+  "task_state_changed_by_user_or_other_thread": true,
+  "actual_other_Native_conflicts_identified": 0,
+  "all_instants_conflict_absence_certified": false,
+  "GRID_stop_interpretation": "The original generic callback false triggered normal B2 termination. It did not identify a PID, changed protected file, or actual Solver conflict. Exact cause is unproven. A relative-path matching defect and natural-exit false-error race were independently reproduced/fixed, but neither is asserted as the historical cause. Original stop receipt and consumed one-call budget are preserved.",
+  "known_B1_diagnostics_interpretation": "Pricing/history audits were reviewed as Native=0 stored-evidence comparisons; Gurobi module residency does not itself prove an optimize call. Their prior conservative admission denials preceded any GRID optimize; latest user B2-priority authority permits reviewed SHA-pinned audits subject to memory/CPU gates.",
+  "stages": [
+    {
+      "kind": "base",
+      "Result": {
+        "kind": "BASE",
+        "Status": 2,
+        "Native_optimize_calls": 1,
+        "TimeLimit": 240,
+        "full_MILP_calls": 0,
+        "campaign_calls": 0,
+        "IEEE8500_calls": 0,
+        "ObjVal": 0.4649848699754816,
+        "ObjBound": 0.4649848699754816,
+        "Runtime": 86.83999991416931,
+        "IterCount": 154124.0,
+        "BarIterCount": 0,
+        "model_build_seconds": 0.3954013000475243,
+        "optimize_wall_seconds": 88.18029440008104,
+        "MaxMemUsed_GB": 0.39475252,
+        "peak_process_RSS_bytes": 543068160,
+        "peak_private_commit_bytes": 1682063360,
+        "minimum_RAM_available": 16748711936,
+        "minimum_commit_available": 27154997248,
+        "callback_errors": [],
+        "optimize_error": null,
+        "b1_conflict_stop": false,
+        "memory_stop": false,
+        "LP_OPTIMAL_candidate": true,
+        "independent_certificate_required": true,
+        "reduced_primal_is_FULL_UB": false
+      },
+      "callback_trace": {
+        "conflicts": [],
+        "mutations": 0,
+        "normal_B2_terminate_on_B1_appearance": true
+      },
+      "Readback_PASS": true,
+      "parameters": {
+        "Threads": 1,
+        "TimeLimit": 240.0,
+        "Method": 1,
+        "FeasibilityTol": 1e-08,
+        "OptimalityTol": 1e-08
+      },
+      "memory_admission_PASS": true,
+      "evidence_SHA256": {
+        "RESULT.json": "66d545f49d14d5a6debf2a11b0a24cb3dd1f601be31f1f59b5b842acc2af31b3",
+        "NATIVE_READBACK.json": "2a4ca3e07992a7426fb29fd0fe7dddf6ab078841dff37ba2ad12c1964f3c87a5",
+        "MEMORY_ADMISSION.json": "c510845210f3b514c4fbf9e59d707731dce6289de4c41eb659276e0ead664f15",
+        "B1_PRIORITY_TRACE.json": "4615d2ed9c9425090a67485145b68bad54d1715a4b1ca2a35b6168d892a85486"
+      }
+    },
+    {
+      "kind": "grid",
+      "Result": {
+        "kind": "GRID",
+        "Status": 11,
+        "Native_optimize_calls": 1,
+        "TimeLimit": 240,
+        "full_MILP_calls": 0,
+        "campaign_calls": 0,
+        "IEEE8500_calls": 0,
+        "ObjVal": null,
+        "ObjBound": 0.0,
+        "Runtime": 34.98800015449524,
+        "IterCount": 144847.0,
+        "BarIterCount": 0,
+        "model_build_seconds": 0.3860476000700146,
+        "optimize_wall_seconds": 35.83248390001245,
+        "MaxMemUsed_GB": 0.390966024,
+        "peak_process_RSS_bytes": 541818880,
+        "peak_private_commit_bytes": 1675530240,
+        "minimum_RAM_available": 16151392256,
+        "minimum_commit_available": 27038646272,
+        "callback_errors": [],
+        "optimize_error": null,
+        "b1_conflict_stop": true,
+        "memory_stop": false,
+        "LP_OPTIMAL_candidate": false,
+        "independent_certificate_required": true,
+        "reduced_primal_is_FULL_UB": false
+      },
+      "callback_trace": {
+        "conflicts": [
+          {
+            "time": 1791766362.8932288,
+            "PASS": false,
+            "reason": "B1 protected bytes or active worker changed"
+          }
+        ],
+        "mutations": 0,
+        "normal_B2_terminate_on_B1_appearance": true
+      },
+      "Readback_PASS": true,
+      "parameters": {
+        "Threads": 1,
+        "TimeLimit": 240.0,
+        "Method": 1,
+        "FeasibilityTol": 1e-08,
+        "OptimalityTol": 1e-08
+      },
+      "memory_admission_PASS": true,
+      "evidence_SHA256": {
+        "RESULT.json": "ce83bcbcc74753dcfb75c30d6e95f66f281961b3fd75498e6518de23c2eb28b9",
+        "NATIVE_READBACK.json": "8f9b852139c58adcc69e6be335fe5a5f7fa191a2e1c187031a4dbc9f3c2fc4f4",
+        "MEMORY_ADMISSION.json": "5e239184bb816c26c1e0f25d98d3ecc1a373a4988ddec7a88e9f087ae484e9f0",
+        "B1_PRIORITY_TRACE.json": "20bd6937429c51a4e430a9b3476ae0c63c0b3c2f0bb0c39a1227bcf059d3c352"
+      }
+    },
+    {
+      "kind": "soc",
+      "Result": {
+        "kind": "SOC",
+        "Status": 2,
+        "Native_optimize_calls": 1,
+        "TimeLimit": 240,
+        "full_MILP_calls": 0,
+        "campaign_calls": 0,
+        "IEEE8500_calls": 0,
+        "ObjVal": 0.46498486997548155,
+        "ObjBound": 0.46498486997548155,
+        "Runtime": 100.46399998664856,
+        "IterCount": 152804.0,
+        "BarIterCount": 0,
+        "model_build_seconds": 0.3946107999654487,
+        "optimize_wall_seconds": 102.33709050004836,
+        "MaxMemUsed_GB": 0.398158917,
+        "peak_process_RSS_bytes": 544415744,
+        "peak_private_commit_bytes": 1684721664,
+        "minimum_RAM_available": 16767610880,
+        "minimum_commit_available": 27558854656,
+        "callback_errors": [],
+        "optimize_error": null,
+        "b1_conflict_stop": false,
+        "memory_stop": false,
+        "LP_OPTIMAL_candidate": true,
+        "independent_certificate_required": true,
+        "reduced_primal_is_FULL_UB": false
+      },
+      "callback_trace": {
+        "conflicts": [],
+        "mutations": 0,
+        "normal_B2_terminate_on_B1_appearance": true
+      },
+      "Readback_PASS": true,
+      "parameters": {
+        "Threads": 1,
+        "TimeLimit": 240.0,
+        "Method": 1,
+        "FeasibilityTol": 1e-08,
+        "OptimalityTol": 1e-08
+      },
+      "memory_admission_PASS": true,
+      "evidence_SHA256": {
+        "RESULT.json": "391b63ba387e9dddf28f04e14f853f8531340b573e34ad1421cd2722e659f4b4",
+        "NATIVE_READBACK.json": "86f2411a93000f83ff332e9322f4e0a00a46188c85e50eb680aae46d002e2aa0",
+        "MEMORY_ADMISSION.json": "6ef1267993eb9fe8239c7c5195ee2b2155b841afa3bf4fc64b1c6a9379180c2a",
+        "B1_PRIORITY_TRACE.json": "4615d2ed9c9425090a67485145b68bad54d1715a4b1ca2a35b6168d892a85486"
+      }
+    }
+  ],
+  "ledger": {
+    "calls": [
+      {
+        "kind": "BASE",
+        "TimeLimit": 240,
+        "time": 1791765247.6407719,
+        "pid": 125872,
+        "out": "D:\\v42_b2_root_lp_tightening_20261012\\docs\\v42_b2_root_lp_tightening\\base"
+      },
+      {
+        "kind": "GRID",
+        "TimeLimit": 240,
+        "time": 1791766327.0603714,
+        "pid": 121336,
+        "out": "D:\\v42_b2_root_lp_tightening_20261012\\docs\\v42_b2_root_lp_tightening\\grid"
+      },
+      {
+        "kind": "SOC",
+        "TimeLimit": 240,
+        "time": 1791766707.3823938,
+        "pid": 133596,
+        "out": "D:\\v42_b2_root_lp_tightening_20261012\\docs\\v42_b2_root_lp_tightening\\soc"
+      }
+    ],
+    "maximum_calls": 3,
+    "maximum_requested_seconds": 720
+  },
+  "total_actual_Native_seconds": 222.2920000553131,
+  "total_optimize_wall_seconds": 226.34986880014185,
+  "peak_process_RSS_bytes": 544415744,
+  "peak_private_commit_bytes": 1684721664,
+  "minimum_system_RAM_available_bytes": 16151392256,
+  "minimum_system_commit_available_bytes": 27038646272,
+  "maximum_Gurobi_MaxMemUsed_GB": 0.398158917,
+  "Native_calls_by_this_auditor": 0
+}

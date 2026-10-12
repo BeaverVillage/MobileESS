@@ -1,0 +1,115 @@
+{
+  "PASS": true,
+  "schema": "V42_B2_ROOT_LP_FINAL_INDEPENDENT_REVIEW_V1",
+  "checks": {
+    "frozen_final_report_SHA_matches": true,
+    "PR211_parent_and_all_73_inherited_files_unchanged": true,
+    "all_three_Native0_original_integer_projection_preserved": true,
+    "literal_CSR_RHS_bounds_columns_objective_preserved_only_B_to_C": true,
+    "actual_pure_LP_readbacks_and_single_thread_parameters_reviewed": true,
+    "GRID_original_Fraction_rows_and_outward_transport_valid": true,
+    "SOC_all_768_original_integer_validity_proofs_audited": true,
+    "SOC_selected_32_B1_only_B2_effect_not_tested": true,
+    "actual_384_slot_fractional_C_D_T_E_diagnostics_reviewed": true,
+    "BASE_SOC_OPTIMAL_and_exact_finite_box_weak_dual_certificates_PASS": true,
+    "exact_LP_optimum_or_FULL_incumbent_not_claimed": true,
+    "GRID_incomplete_no_point_no_bound_no_retry": true,
+    "opaque_guard_failure_is_not_collision_proof": true,
+    "three_calls_720_requested_222_292_actual_preserved": true,
+    "execution_time_ledger_prefix_hashes_match": true,
+    "SOC_tiny_dual_correction_delta_is_not_material_formulation_gain": true,
+    "published_Global_LB_UB_and_gap_unchanged": true,
+    "no_fourth_combined_or_expanded_solver_call": true,
+    "SOC_rejected_GRID_effect_unresolved_no_adoption": true,
+    "remaining_41_SOC_violations_recorded_without_insertion": true,
+    "latest_human_B2_priority_authority_preserved": true,
+    "B1_source_ledger_results_and_separate_disabled_observation_preserved": true,
+    "memory_commit_and_actual_heavy_solver_gates_reviewed": true,
+    "callback_overhead_and_interruption_confounding_reported": true,
+    "historical_strengthening_audit_and_no_first_novelty_claim_reviewed": true,
+    "no_FULL_MILP_IEEE8500_campaign_or_production": true,
+    "git_changes_confined_to_two_new_subtrees": true
+  },
+  "report_sha256": "79cc3298e0fbfc58776634f4abd9ac2657b716dcfef01a352528834527d53d08",
+  "FINAL_RESULT_sha256": "3bdab4f154b3d0158aab1654ff68bc18f62cc4b60dbca914f21775f7046cd538",
+  "review_time_UTC": "2026-10-12T01:13:19.439240+00:00",
+  "Native_optimize_calls": 0,
+  "Gurobi_imported": false,
+  "FULL_CSR_loaded": false,
+  "Global_LB": 0.46498486997548166,
+  "UB": 0.6760534504652341,
+  "GlobalGap_percent": 31.22069421352752,
+  "BASE_LP_lower_bound": 0.4649847749345196,
+  "SOC_LP_lower_bound": 0.4649847989295757,
+  "SOC_Delta_certified_bound": 2.3995056108727653e-08,
+  "SOC_Delta_numerical_objective": -5.551115123125783e-17,
+  "GRID_LP_effect_certified": false,
+  "GRID_exact_cut_math_valid": true,
+  "all_768_SOC_integer_valid": true,
+  "selected_SOC_family": "B1 only",
+  "native_calls": 3,
+  "requested_seconds": 720,
+  "actual_runtime": 222.2920000553131,
+  "model_dimensions": {
+    "BASE": {
+      "rows": 143308,
+      "columns": 244265,
+      "binary": 0,
+      "nnz": 1257052
+    },
+    "GRID": {
+      "rows": 143324,
+      "columns": 244265,
+      "binary": 0,
+      "nnz": 1261672
+    },
+    "SOC": {
+      "rows": 143340,
+      "columns": 244265,
+      "binary": 0,
+      "nnz": 1275516
+    }
+  },
+  "execution_time_ledger_prefix_hash_audit": [
+    {
+      "kind": "BASE",
+      "calls": 1,
+      "sha256": "6394221ef91160e1888fb46686b54be7b4cd983f0cf8c923249d7ec32b5be0cc",
+      "certificate_match": true
+    },
+    {
+      "kind": "GRID",
+      "calls": 2,
+      "sha256": "82fe51d05ede57d5e1a38c5e05254a3eec9d4168b5bd1e89daf576e770dead78",
+      "certificate_match": true
+    },
+    {
+      "kind": "SOC",
+      "calls": 3,
+      "sha256": "35a47d376037c373946bd86dd3a81f816885c28ecd6fcd97449143dd8d0e0166",
+      "certificate_match": true
+    }
+  ],
+  "inherited_file_count": 73,
+  "adopted_candidates": [],
+  "GRID_decision": "UNRESOLVED_EFFECT_NO_ADOPTION",
+  "SOC_decision": "REJECT_NONMATERIAL",
+  "exact_LP_optimum_claim": false,
+  "tracked_diff": [],
+  "new_paths_count_before_receipt": 115,
+  "sealed_evidence": {
+    "BASE": {
+      "independent_certificate_sha256": "a9680e5629213e1e13f1cd83f742780049204804f0bc0d1110258e21ac669d96",
+      "independent_native0_sha256": "3cd2080bc4f4ba3d8f261a9e5abef35b5b5438a6e98b191dac2a4c6efa558d79"
+    },
+    "GRID": {
+      "independent_certificate_sha256": "bb92b70f349ee82d0aa74aeec7eb2f5b57ae60967dcc283dbacc38be79810577",
+      "independent_native0_sha256": "3a06068b8118c47799f64319d5bd5e3f4f4315e96e3e309c0dfa4806e77f6517"
+    },
+    "SOC": {
+      "independent_certificate_sha256": "d5a1bf54b7f106db9525c25c9dc6e9730422a6ff4b86cb68f54ee0da4b5ee42e",
+      "independent_native0_sha256": "531cb96c524cf9d3ca58cbc291f41a612811225a0ae12904f2e4765077edae07"
+    }
+  },
+  "scope": "Independent report, source, numeric certificates, Native0 proof, readback, safety and ledger review after Native processes exited. Prior exact derivations and final certificates were inspected; no new solver call, model regeneration, FULL/C3A CSR load or sealed artifact mutation."
+}
