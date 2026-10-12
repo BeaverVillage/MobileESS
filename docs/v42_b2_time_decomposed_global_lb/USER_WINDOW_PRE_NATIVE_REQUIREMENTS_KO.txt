@@ -1,0 +1,11 @@
+Window 16,236 Binary와 TimeLimit 360초 실행을 승인한다. 단, 이는 Binary 수 제한과 TimeLimit만 변경한 것이며 기존 수학적 포함관계·원본 물리·RAM/Commit·Native0 검증 조건을 완화하는 승인은 아니다.
+
+실행 전 반드시 다음을 확인하라.
+
+1. 8슬롯 Window가 전체 96슬롯 Compact 모델(9,322 Binary)보다 Binary가 많은 원인을 분석한다.
+2. 경계 이동 Arc를 모두 Binary로 유지해야 하는지, 기존 Source18r의 Continuous Route Flow + Binary Node-Activity를 재사용할 수 있는지 검토한다.
+3. 기존 16,236 Binary 정식화가 불필요하게 큰 경우에는 수학적 정수 동등성 인증을 통과한 Compact 정식화를 우선한다.
+4. 기존 Window 실행 조건·원본 FULL→Window 포함관계·U4 Replay·RAM/Commit Gate를 유지한다.
+5. 실제 Native는 1 Worker, Threads=1, 최대 360초, Optimize 1회로 제한한다. Root 미완료 또는 TIME_LIMIT이면 유효하게 인증된 Solver Bound만 LB로 사용한다.
+
+추가 Solver 반복이나 자동 시간 연장은 금지한다. Source18r·U4와 기존 연구 결과를 보존하고 B1은 실행하지 마라.

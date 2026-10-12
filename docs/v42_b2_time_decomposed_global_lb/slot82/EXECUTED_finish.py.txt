@@ -1,0 +1,49 @@
+"""Aggregate certified lower bounds by max, never snapshot incumbents."""
+from pathlib import Path
+import math,sys
+ROOT=Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT))
+from tools.time_decomposed_lb.grid import read,write,sha,require
+DOCS=ROOT/'docs/v42_b2_time_decomposed_global_lb'
+
+def main():
+    contract=read(DOCS/'TASK_CONTRACT.json');old=contract['existing_Global_LB'];ub=contract['validated_original_U4_UB']
+    ledger=read(DOCS/'NATIVE_LEDGER.json');stages=[];bounds=[]
+    for slot in contract['snapshot_slots_0_based']:
+        out=DOCS/f'slot{slot:02d}';z=read(out/'NATIVE0.json');r=read(out/'RESULT.json');c=read(out/'INDEPENDENT_CERTIFICATE.json')
+        valid=bool(c['PASS']) and c.get('Certified_LB') is not None
+        lb=c.get('Certified_LB') if valid else None
+        require(lb is None or math.isfinite(lb) and 0<=lb<=ub+1e-8,'CERTIFIED_BOUND_INVALID')
+        if lb is not None:bounds.append(lb)
+        stages.append(dict(slot=slot,dimensions=z['dimensions'],certificate_PASS=c['PASS'],Certified_LB=lb,
+            certified_gain_over_existing=None if lb is None else lb-old,ObjBound=r.get('ObjBound'),ObjVal=r.get('ObjVal'),
+            MIPGap=r.get('MIPGap'),LP_relaxation_log_objective=r.get('LP_relaxation_log_objective'),
+            root_complete=r.get('root_complete'),NodeCount=r.get('NodeCount'),Runtime=r.get('Runtime'),
+            model_build_seconds=r['model_build_seconds'],model_extraction_seconds=z['model_extraction_seconds'],
+            optimize_wall_seconds=r['optimize_wall_seconds'],peak_process_RSS_bytes=r['peak_process_RSS_bytes'],
+            peak_private_commit_bytes=r['peak_private_commit_bytes'],certificate_sha256=sha(out/'INDEPENDENT_CERTIFICATE.json')))
+    snapshot_calls=[c for c in ledger['calls'] if c['kind']=='SNAPSHOT'];window_calls=[c for c in ledger['calls'] if c['kind']=='WINDOW']
+    require(len(snapshot_calls)==3 and len(window_calls)==0 and [c['slot'] for c in snapshot_calls]==[75,82,94], 'UNEXPECTED_CALLS')
+    require(sum(c['TimeLimit'] for c in snapshot_calls)==90 and sum(c['TimeLimit'] for c in ledger['calls'])<=210,'UNEXPECTED_BUDGET')
+    new=max([old]+bounds);gain=new-old;material=gain>=.001
+    classification='TIME_DECOMPOSITION_MATERIAL' if material else 'TIME_DECOMPOSITION_NONMATERIAL' if bounds else 'TIME_DECOMPOSITION_NOT_CERTIFIED'
+    window=read(DOCS/'window_native0/WINDOW_NATIVE0_DESIGN.json')
+    require(window['PASS'] and window['Native_optimize_calls']==0,'WINDOW_PROJECTION_AUDIT')
+    value=dict(PASS=bool(bounds),classification=classification,parent_PR214=contract['parent_PR214'],source18r=contract['source18r_PR207'],case_sha=contract['case_sha'],
+        Global_LB_old=old,Global_LB_new=new,Global_LB=new,validated_U4_UB=ub,UB=ub,improvement=gain,material=material,
+        Global_Gap=(ub-new)/ub,Global_Gap_percent=100*(ub-new)/ub,global_gap_3pct=(ub-new)/ub<=.03,
+        global_gap_3pct_classification='GLOBAL_GAP_3PCT_PASS' if (ub-new)/ub<=.03 else 'GLOBAL_GAP_3PCT_NOT_REACHED',
+        stages=stages,snapshot_material_trigger=material,Window_execute=False,Window_Native_calls=0,
+        Window_stage_classification='TIME_DECOMPOSITION_RESOURCE_STOP',
+        Window_why='Literal original boundary-preserving 8-slot projection has16,236 binary variables>1,500 cap; no full-grid/readback/Optimize or automatic compression. Material trigger is evaluated separately.',
+        snapshot_calls=len(snapshot_calls),Native_calls=len(ledger['calls']),requested_Native_seconds=sum(c['TimeLimit'] for c in ledger['calls']),
+        actual_Native_Runtime=sum(s['Runtime'] for s in stages),optimize_wall_seconds=sum(s['optimize_wall_seconds'] for s in stages),
+        peak_process_RSS_bytes=max(s['peak_process_RSS_bytes'] for s in stages),peak_private_commit_bytes=max(s['peak_private_commit_bytes'] for s in stages),
+        B1_launches=0,full_MILP_calls=0,campaign_calls=0,selective_integrality_Native_calls=0,repeated_or_extra_calls=0,
+        bound_combination='max(existing same-Source/Case Global LB, independently certified snapshot lower bounds); no addition',
+        snapshot_or_window_incumbent_is_FULL_UB=False,Actual_AC_PASS=False,original_source_U4_protected=True,
+        adopted_formulation='Snapshot lower-bound research only' if material else 'No material lower-bound formulation adopted',
+        production_integration=False,ledger_sha256=sha(DOCS/'NATIVE_LEDGER.json'))
+    write(DOCS/'FINAL_RESULT.json',value);print({k:value[k] for k in ('PASS','classification','Global_LB_new','Global_Gap_percent','Native_calls','actual_Native_Runtime')})
+
+if __name__=='__main__':main()

@@ -1,0 +1,80 @@
+
+Gurobi 13.0.2 (win64, Python) logging started Mon Oct 12 10:59:16 2026
+
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Set parameter LogFile to value "D:\v42_b2_time_decomposed_global_lb_20261012\docs\v42_b2_time_decomposed_global_lb\slot82\NATIVE.log"
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter Threads to value 1
+Set parameter TimeLimit to value 30
+Set parameter Method to value 1
+Set parameter FeasibilityTol to value 1e-08
+Set parameter OptimalityTol to value 1e-08
+Set parameter IntFeasTol to value 1e-08
+Set parameter MIPGap to value 1e-06
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  30
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  1e-06
+OptimalityTol  1e-08
+Method  1
+Threads  1
+
+Optimize a model with 11741 rows, 1529 columns and 164867 nonzeros (Min)
+Model fingerprint: 0x51a0bf33
+Model has 1 linear objective coefficients
+Variable types: 1429 continuous, 100 integer (100 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 4e+02]
+  RHS range        [4e-25, 2e+03]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Loaded user MIP start with objective 0.676053
+
+Presolve removed 4443 rows and 335 columns
+Presolve time: 0.10s
+Presolved: 7298 rows, 1194 columns, 89766 nonzeros
+Variable types: 1094 continuous, 100 integer (100 binary)
+
+Root relaxation: objective 3.575727e-01, 2005 iterations, 0.17 seconds (0.39 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.35757    0   10    0.67605    0.35757  47.1%     -    0s
+H    0     0                       0.3589561    0.35757  0.39%     -    0s
+     0     0    0.35757    0   10    0.35896    0.35757  0.39%     -    0s
+     0     0    0.35757    0   10    0.35896    0.35757  0.39%     -    0s
+     0     0    0.35757    0   10    0.35896    0.35757  0.39%     -    0s
+     0     2    0.35757    0   10    0.35896    0.35757  0.39%     -    1s
+*   54    35              10       0.3582711    0.35763  0.18%  10.4    1s
+*  184   110              37       0.3582609    0.35763  0.18%   6.9    2s
+*  333   183              25       0.3582107    0.35763  0.16%   7.0    2s
+*  352   173              17       0.3581142    0.35763  0.13%   7.0    2s
+   432   204 infeasible    6         0.35811    0.35766  0.13%   7.3    5s
+*  496   220              12       0.3581015    0.35768  0.12%   7.4    5s
+*  576   239              13       0.3580584    0.35769  0.10%   7.3    5s
+* 1032   295              24       0.3580577    0.35779  0.07%   7.8    8s
+  1085   314    0.35790   24   10    0.35806    0.35780  0.07%   7.7   10s
+  1093   321    0.35784   16   10    0.35806    0.35780  0.07%   9.0   22s
+  1098   326    0.35785   19    8    0.35806    0.35780  0.07%  10.0   28s
+
+Explored 1101 nodes (14880 simplex iterations) in 30.00 seconds (37.04 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 10: 0.358058 0.358058 0.358058 ... 0.676053
+
+Time limit reached
+Best objective 3.580577339320e-01, best bound 3.577988329959e-01, gap 0.0723%
+
+User-callback calls 10663, time in user-callback 9.66 sec

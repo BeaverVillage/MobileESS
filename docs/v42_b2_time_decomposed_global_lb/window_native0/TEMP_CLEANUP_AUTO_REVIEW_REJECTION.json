@@ -1,0 +1,14 @@
+{
+  "automatic_approval_review_rejected": true,
+  "action": "Remove only derived temporary NPY memmaps from the superseded own no-Gurobi Native0 process",
+  "resolved_named_target": "C:\\Users\\Public\\Documents\\ESTsoft\\CreatorTemp\\v42_time_grid_02phwbyz",
+  "command": "$v42TempTarget = (Resolve-Path -LiteralPath 'C:\\Users\\Public\\Documents\\ESTsoft\\CreatorTemp\\v42_time_grid_02phwbyz').ProviderPath\nif ($v42TempTarget -ne 'C:\\Users\\Public\\Documents\\ESTsoft\\CreatorTemp\\v42_time_grid_02phwbyz') { throw 'Unexpected temporary authority target' }\n$v42TempItem = Get-Item -LiteralPath $v42TempTarget\nif (($v42TempItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'Unexpected temporary directory reparse point' }\nRemove-Item -LiteralPath $v42TempTarget -Recurse -Force\nWrite-Output 'Own terminated Native0 temporary memmaps removed'",
+  "stated_reason": "blocked by policy",
+  "more_specific_reason_provided": false,
+  "filesystem_mutation_performed": false,
+  "temporary_files_preserved": true,
+  "alternate_deletion_attempts": 0,
+  "effect_on_Native_model_or_solver": false,
+  "B1_or_other_processes_terminated": false,
+  "Native_optimize_calls": 0
+}
