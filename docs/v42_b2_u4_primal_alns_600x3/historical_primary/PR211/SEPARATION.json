@@ -1,0 +1,135 @@
+{
+  "PASS": true,
+  "source": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+  "case_sha": "34c0efffa9c05397552fb167667c0bbfe2f35cec89801a3169c00c64fe77f292",
+  "scan_original_security_rows": 814560,
+  "families": {
+    "line_thermal_face": {
+      "original_rows": 403968,
+      "missing_rows": 403942,
+      "numerical_positive_over_1e8": 3662,
+      "screened_positive": 3662,
+      "maximum_raw_violation": 0.358331045130234
+    },
+    "transformer_kVA": {
+      "original_rows": 235008,
+      "missing_rows": 235006,
+      "numerical_positive_over_1e8": 24,
+      "screened_positive": 24,
+      "maximum_raw_violation": 16.366443726962643
+    },
+    "voltage_upper": {
+      "original_rows": 80448,
+      "missing_rows": 80446,
+      "numerical_positive_over_1e8": 222,
+      "screened_positive": 222,
+      "maximum_raw_violation": 1.465985759954016
+    },
+    "voltage_lower": {
+      "original_rows": 80448,
+      "missing_rows": 80446,
+      "numerical_positive_over_1e8": 140,
+      "screened_positive": 140,
+      "maximum_raw_violation": 0.35270154071471255
+    },
+    "NormalAmps": {
+      "original_rows": 14688,
+      "missing_rows": 14688,
+      "numerical_positive_over_1e8": 0,
+      "screened_positive": 0,
+      "maximum_raw_violation": -0.23961982380703653
+    }
+  },
+  "uncertainty": {
+    "line_thermal_face": {
+      "count": 0,
+      "row_ids": [],
+      "reason": "search interval intersects zero or positive violation <=1e-8; no exact completeness claim"
+    },
+    "transformer_kVA": {
+      "count": 0,
+      "row_ids": [],
+      "reason": "search interval intersects zero or positive violation <=1e-8; no exact completeness claim"
+    },
+    "voltage_upper": {
+      "count": 0,
+      "row_ids": [],
+      "reason": "search interval intersects zero or positive violation <=1e-8; no exact completeness claim"
+    },
+    "voltage_lower": {
+      "count": 2,
+      "row_ids": [
+        506913,
+        507203
+      ],
+      "reason": "search interval intersects zero or positive violation <=1e-8; no exact completeness claim"
+    },
+    "NormalAmps": {
+      "count": 0,
+      "row_ids": [],
+      "reason": "search interval intersects zero or positive violation <=1e-8; no exact completeness claim"
+    }
+  },
+  "candidate_count": 4048,
+  "selected_count": 16,
+  "selected_original_rows": [
+    1088650,
+    1117505,
+    1088990,
+    1117898,
+    1089383,
+    1116807,
+    1116222,
+    1116412,
+    1117165,
+    1117052,
+    511281,
+    511564,
+    1076378,
+    1076668,
+    1028936,
+    1028948
+  ],
+  "helper_equalities": 109440,
+  "helper_numerical_replay_max_residual": 2.2737367544323206e-13,
+  "original_integer_pattern_max_residual": 0.0,
+  "rho": 0.4812227124583283,
+  "source_files": {
+    "D:\\v42_dense_response_development_repair_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_restored\\output\\FULL_A.npz": "81ae1a542115e192051e250b627c61bfcea94e62f43a815b91bc11ef54d9ebb4",
+    "D:\\v42_dense_response_development_repair_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_restored\\output\\FULL_DATA.npz": "8df044d563d4e6c744e3528ed594bbce33d8302fabf8ea2aacfbb7357a76198f",
+    "D:\\v42_dense_response_development_repair_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_restored\\output\\CURRENT_C2_AXES.npz": "be502a493d83443c88fab30e92a05957fac607958cb85e711f4bd44751ae30c2",
+    "D:\\v42_dense_response_development_repair_20261011\\dates\\B2\\2025-05-01\\attempts\\native0_restored\\output\\CURRENT_C2_ALIASES.json": "e17e1359ff34752660aeeefffca9d70fe67d19dd5ae1a62f64c92fb231f22562",
+    "D:\\v42_svr11_may_20261011_16\\models\\2025-05-01\\COEFFICIENTS.npz": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+    "docs\\v42_critical_grid_cg\\iteration01\\JOINT_INCUMBENT.npz": "0ea9b0d478648675d45126c32a72f30d7bab5202c21c5064aaf9029be88c0bbf",
+    "docs\\v42_critical_grid_cg\\iteration01\\JOINT_AXES.npz": "0a6aa84b24d9a440875902f09e8521ac6bb6f4eb05a0b28fe56323d946cc7c63",
+    "docs\\v42_critical_grid_cg\\iteration01\\JOINT_DATA.npz": "813b1aaab9e069d545bee7d6b11acf88bfd472a34db7fed04ba542cdb0dffbab"
+  },
+  "files": {
+    "CUTS_A.npz": "b70b3dc0017b1b87e28b5c242d52bdea588c92d23c89bb1e12a64c10c5c47637",
+    "CUTS_DATA.npz": "bb5ba636f804cb1e727359d26e8f4884c6f80cf196356f2742f507718e64d1b5",
+    "CUTS_EXACT.json": "d5954b0058aafcef761d891673a0266371abeb39024832d8094e40e3051d2a80",
+    "CANDIDATES.json": "0d127bf2463e6fab1a31012e524e8af81bbf342c33e4d1039369dfa98382a3e3"
+  },
+  "fixed_family_quotas": {
+    "line_thermal_face": 10,
+    "transformer_kVA": 2,
+    "voltage_upper": 2,
+    "voltage_lower": 2,
+    "NormalAmps": 0
+  },
+  "family_refill_order": [
+    "line_thermal_face",
+    "transformer_kVA",
+    "voltage_upper",
+    "voltage_lower",
+    "NormalAmps"
+  ],
+  "selection": "family-specific normalized rank, exact-duplicate rejection, asset/phase/slot representatives, then unused-quota refill",
+  "failures": [],
+  "Native_optimize_calls": 0,
+  "full_model_builds": 0,
+  "full_solver_calls": 0,
+  "authority": "stored FULL binary64 interpreted as exact Fraction; frozen Planning coefficients metadata only",
+  "exact_completeness_claim": false,
+  "wall_seconds": 10.692797900061123
+}

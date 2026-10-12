@@ -1,0 +1,42 @@
+{
+  "PASS": true,
+  "reviewed_sources": {
+    "tools/u4_primal_alns/verify.py": "0d9fea6caa78932146838fe43915954f1218e7004b8f21fc7aaf4eb770a0e902",
+    "tools/u4_primal_alns/pilot.py": "82d2f6b307e9cf2b8c820a7339843fa3d2e83f4d65dd69c48f115c6433d7112f",
+    "tools/u4_primal_alns/analyze.py": "1b5a517b1ba4ab0101a3fa323e5d06c4dcfedbe5ac1bc9d5a720438fdb9d6e20",
+    "v42_common_mess/model.py": "d8e96386f87d976359ecc5b14cd231e54fb951e709af306430ed680ad6dd8e95",
+    "v42_common_mess/engine.py": "a8f9eb3ba6d746cfa89474aeace3caa0b57ee551b48c9466887f04994a6631c3",
+    "v42_m1_research/check_ub.py": "92ebe7d05225b91921ce910638ea4325279962f6efee2cbfb3503e87aab34b6e"
+  },
+  "independent_original_FULL_replay": {
+    "path": "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\INITIAL_U4_INDEPENDENT_REPLAY.json",
+    "sha256": "f894939eaa83a9dc6d6d00803df818b65c162818d327b22c818efdc05ba6d27c"
+  },
+  "meaningful_regression_tests": {
+    "path": "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\INDEPENDENT_REGRESSION_TESTS.json",
+    "sha256": "82676f57916413ecf03b7c6bcfc8389581038e2f4897d5e430f3b49ee3ea27db"
+  },
+  "checks": {
+    "all_algorithms_identical_initial_vector": true,
+    "own_algorithm_center_only_after_sealed_FULL_replay": true,
+    "original_Dense_model_all_rows_and_objective_cloned": true,
+    "manual_continuous_route_only_fixings_independently_audited": true,
+    "Hamming_native_coefficients_RHS_readback": true,
+    "no_unrestricted_fallback_or_new_LB_optimization": true,
+    "no_restricted_ObjBound_Global_LB_admission": true,
+    "worker_subprocess_exits_before_independent_FULL_replay": true,
+    "literal_raw_integrality_and_exact_original_objective_identity": true,
+    "actual_runtime_cumulative_budget_no_iteration_reset": true,
+    "failed_raw_candidates_preserved": true,
+    "source_U4_functions_unchanged": true
+  },
+  "report_measurement_scope": {
+    "native_receipt_model_build_wall": "Source loading, admission, fixing, independent Native0 plus native build/readback overhead",
+    "common_MODEL_IDENTITY_build_wall": "Actual common Gurobi model construction/readback",
+    "worker_process_wall": "Entire child process wall including startup and exit"
+  },
+  "known_preNative_adapter_fix": "Signed ranking RouteArc.route_id is a Source string; notified owner to replace int(route_id) with str before freezing/Native0.",
+  "validation_tolerances": "Original scientific tolerance contract unchanged; exact B and exact objective transport; not an exact rational all-continuous-row feasibility proof.",
+  "Native_optimize_calls": 0,
+  "Actual": "ACTUAL_NOT_RUN"
+}

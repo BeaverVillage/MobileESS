@@ -1,0 +1,15 @@
+{
+  "PASS": false,
+  "stage": "TEST_AUTHORITY_SELECTION",
+  "Native_optimize_calls": 0,
+  "error": "INDEPENDENT_LITERAL_UNIT_SOURCE_ALIAS_PROJECTION_DRIFT:MESS01",
+  "root_cause": "The first regression compared historical UNIT_START bound to FRESH_U4/RAW_00 against FINAL_FULL_POINT instead. Those two independently verified U4 packets have identical rho but slightly different continuous coordinates.",
+  "example": {
+    "name": "Q[MESS01,STA01,95]",
+    "historical_UNIT_START": -337.47727788987527,
+    "FINAL_FULL_POINT_inverse": -337.4772778898754
+  },
+  "resolution": "Compare historical UNIT_START against its SHA-frozen actual FRESH_U4/RAW_00 authority; keep all N1/N2/N3 initial centers at the identical FULL-verified FINAL_FULL_POINT SHA.",
+  "raw_point_modified": false,
+  "source_files_modified": false
+}

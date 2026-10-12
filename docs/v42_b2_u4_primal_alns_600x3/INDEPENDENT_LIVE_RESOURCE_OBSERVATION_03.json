@@ -1,0 +1,135 @@
+{
+  "schema": "V42_INDEPENDENT_LIVE_RESOURCE_OBSERVATION_V1",
+  "PASS": true,
+  "checks": {
+    "at_most_one_declared_Native_worker": true,
+    "no_other_Heavy_or_unknown_Gurobi": true,
+    "no_actual_B1": true,
+    "inventory_errors_absent": true,
+    "RAM_floor4GiB": true,
+    "Commit_floor6GiB": true,
+    "epoch02_all_sealed_source_policies_unchanged": true,
+    "old42_N1_epoch01_files_unchanged": true
+  },
+  "declared_current_Native_workers": [
+    {
+      "PID": 135668,
+      "create_time": 1791777974.5889618,
+      "name": "python.exe",
+      "command": [
+        "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "-m",
+        "tools.u4_primal_alns.pilot",
+        "--mode",
+        "native",
+        "--method",
+        "N2",
+        "--output",
+        "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration07\\native",
+        "--center",
+        "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\INITIAL_U4_POINT.npz",
+        "--spec",
+        "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration07\\SPEC.json",
+        "--seconds",
+        "150.0"
+      ],
+      "cwd": "D:\\v42_b2_u4_primal_alns_600x3_20261012",
+      "status": "running",
+      "CPU_seconds": 100.046875,
+      "RSS_bytes": 2299891712,
+      "Private_Commit_bytes": 3460792320,
+      "gurobi_loaded_modules": [
+        "gurobi130.dll"
+      ],
+      "reviewed_SHA_pinned_Native0_audit": false,
+      "method": "N2",
+      "declared_output": "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration07\\native"
+    }
+  ],
+  "other_Heavy_candidates": [],
+  "inventory_errors": [],
+  "memory": {
+    "time": 1791778090.6235857,
+    "system": {
+      "RAM_total": 34049220608,
+      "RAM_available": 14683963392,
+      "RAM_used": 19365257216,
+      "Commit_total": 43117629440,
+      "Commit_limit": 68408958976,
+      "Commit_available": 25291329536,
+      "Commit_peak": 68408958976
+    },
+    "RSS_bytes": 23490560,
+    "Peak_RSS_bytes": 23490560,
+    "Private_Commit_bytes": 13135872,
+    "Peak_Private_Commit_bytes": 13135872
+  },
+  "method_receipt_observations": {
+    "N1": {
+      "calls": [
+        {
+          "receipt_path": "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N1\\iteration01\\native\\NATIVE_CALL.json",
+          "status": "FINISHED",
+          "entered_native": true,
+          "terminal_measured_Runtime": 39.5550000667572,
+          "effective_TimeLimit": 599.0
+        }
+      ],
+      "completed_measured_Native_seconds_only": 39.5550000667572
+    },
+    "N2": {
+      "calls": [
+        {
+          "receipt_path": "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration01\\native\\NATIVE_CALL.json",
+          "status": "FINISHED",
+          "entered_native": true,
+          "terminal_measured_Runtime": 152.03200006484985,
+          "effective_TimeLimit": 150.0
+        },
+        {
+          "receipt_path": "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration02\\native\\NATIVE_CALL.json",
+          "status": "FINISHED",
+          "entered_native": true,
+          "terminal_measured_Runtime": 29.676000118255615,
+          "effective_TimeLimit": 150.0
+        },
+        {
+          "receipt_path": "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration03\\native\\NATIVE_CALL.json",
+          "status": "FINISHED",
+          "entered_native": true,
+          "terminal_measured_Runtime": 32.19700002670288,
+          "effective_TimeLimit": 150.0
+        },
+        {
+          "receipt_path": "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration04\\native\\NATIVE_CALL.json",
+          "status": "FINISHED",
+          "entered_native": true,
+          "terminal_measured_Runtime": 32.81399989128113,
+          "effective_TimeLimit": 150.0
+        },
+        {
+          "receipt_path": "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration06\\native\\NATIVE_CALL.json",
+          "status": "FINISHED",
+          "entered_native": true,
+          "terminal_measured_Runtime": 31.901000022888184,
+          "effective_TimeLimit": 150.0
+        },
+        {
+          "receipt_path": "D:\\v42_b2_u4_primal_alns_600x3_20261012\\docs\\v42_b2_u4_primal_alns_600x3\\N2\\iteration07\\native\\NATIVE_CALL.json",
+          "status": "INFLIGHT",
+          "entered_native": true,
+          "terminal_measured_Runtime": null,
+          "effective_TimeLimit": 150.0
+        }
+      ],
+      "completed_measured_Native_seconds_only": 278.62000012397766
+    },
+    "N3": {
+      "calls": [],
+      "completed_measured_Native_seconds_only": 0.0
+    }
+  },
+  "observed_epoch_seconds": 1791778090.656093,
+  "Native_optimize_calls_by_auditor": 0,
+  "note": "Completed-only runtime is diagnostic while a Native call may still be inflight. No incumbent is newly certified here. No process, code, model or budget mutation."
+}
