@@ -1,0 +1,82 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter Threads to value 1
+Set parameter FeasibilityTol to value 1e-09
+Set parameter OptimalityTol to value 1e-09
+Set parameter IntFeasTol to value 1e-08
+Set parameter MIPGap to value 0.005
+Set parameter Method to value 1
+Set parameter MIPFocus to value 1
+Set parameter NumericFocus to value 3
+Set parameter ScaleFlag to value 2
+Set parameter Seed to value 0
+Set parameter MIPGapAbs to value 1e-10
+Set parameter LogFile to value "D:\v42_b2_minimax_beam1800_20261012\docs\v42_b2_minimax_beam1800\calls\001_INITIALIZE\native\NATIVE_GUROBI.log"
+Set parameter TimeLimit to value 120
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  120
+FeasibilityTol  1e-09
+IntFeasTol  1e-08
+MIPGap  0.005
+OptimalityTol  1e-09
+Method  1
+ScaleFlag  2
+MIPFocus  1
+NumericFocus  3
+Threads  1
+
+Optimize a model with 715596 rows, 354277 columns and 7911369 nonzeros (Min)
+Model fingerprint: 0xb0071863
+Model has 1 linear objective coefficients
+Variable types: 344955 continuous, 9322 integer (9322 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [4e-08, 2e+03]
+  RHS range        [2e-25, 2e+03]
+Warning: Model contains large matrix coefficient range
+
+Presolve removed 247179 rows and 264459 columns (presolve time = 5s)...
+Presolve removed 334204 rows and 266154 columns
+Presolve time: 7.74s
+Presolved: 381392 rows, 88123 columns, 1861503 nonzeros
+Variable types: 88122 continuous, 1 integer (0 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    8.9042642e-02   1.068355e+08   0.000000e+00     10s
+     606    5.8964762e+01   7.286148e+07   0.000000e+00     10s
+    4033    2.2792454e+02   2.723029e+06   0.000000e+00     15s
+   16456    2.7895247e+02   4.739979e+05   0.000000e+00     20s
+   22415    2.9085111e+02   4.756797e+05   0.000000e+00     25s
+   33525    3.3512527e+02   7.088595e+03   0.000000e+00     30s
+   43423    3.3637716e+02   6.386872e+02   0.000000e+00     35s
+   47968    3.3648394e+02   2.046252e+02   0.000000e+00     40s
+   56856    3.3649105e+02   1.483229e+01   0.000000e+00     45s
+   61098    3.3649122e+02   2.798685e-01   0.000000e+00     50s
+   63204    6.7605345e-01   0.000000e+00   0.000000e+00     51s
+
+Root relaxation: objective 6.760535e-01, 63204 iterations, 42.10 seconds (83.34 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0       0.6760535    0.67605  0.00%     -   51s
+
+Explored 1 nodes (63204 simplex iterations) in 51.74 seconds (101.76 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 1: 0.676053 
+
+Optimal solution found (tolerance 5.00e-03)
+Best objective 6.760534504652e-01, best bound 6.760534504652e-01, gap 0.0000%
+
+User-callback calls 2808, time in user-callback 12.96 sec
+{"output": "D:\\v42_b2_minimax_beam1800_20261012\\docs\\v42_b2_minimax_beam1800\\calls\\001_INITIALIZE\\native", "status": "FINISHED", "Native_Runtime": 51.75, "ObjVal": 0.6760534504652341, "restricted_ObjBound": 0.6760534504652341}

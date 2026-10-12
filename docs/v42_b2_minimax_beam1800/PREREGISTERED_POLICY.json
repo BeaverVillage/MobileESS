@@ -1,0 +1,50 @@
+{
+  "Native_limit": 1800,
+  "Threads": 1,
+  "Heavy_workers": 1,
+  "GPU": false,
+  "RAM_reserve_GiB": 4,
+  "Commit_reserve_GiB": 6,
+  "initial_plan": {
+    "cold": 120,
+    "LP": 240,
+    "MILP": 1260,
+    "reserve": 180
+  },
+  "per_call_caps": {
+    "INITIALIZE": 120,
+    "CONDITIONAL_LP": 30,
+    "ROUTE_FIXED": 75
+  },
+  "improvement_delta": 1e-05,
+  "strict_baseline_delta": 1e-05,
+  "material_baseline_delta": 0.005,
+  "UB_tolerance": 1e-08,
+  "global_gap_target": 0.03,
+  "cold_U4_only_if_initialization_fails": true,
+  "no_N1_upfront": true,
+  "no_historical_solver_start": true,
+  "no_new_Global_LB_optimize": true,
+  "stationary_control_maximum": 1,
+  "stationary_control_after_Native": 300,
+  "stationary_control_only_before_moving_baseline_match": true,
+  "LP_pilot_candidates": 8,
+  "LP_budget_cap": 240,
+  "LP_gate": {
+    "median_Native_max": 5,
+    "median_build_wall_max": 15,
+    "minimum_certified_ratio": 0.75,
+    "minimum_prune_ratio": 0.125,
+    "weak_gap_threshold": 0.02
+  },
+  "LP_gate_logic": "Disable after8 if slow, less75% certified, or no prunes and median matched unrestricted MILP-minus-LP gap>.02; release unused LP budget",
+  "mode_objective_and_FULL_constraints_unchanged": true,
+  "goal_policy": "Pilot unrestricted, thereafter3of4 moving models rho<=currentUB-1e-5; every4th unrestricted",
+  "search_beam_width": 64,
+  "max_MOVE_per_vehicle": 3,
+  "ranking_frozen_before_Native": true,
+  "no_budget_reset": true,
+  "ACTUAL": "ACTUAL_NOT_RUN",
+  "May01_only": true,
+  "algorithm": "Certified Matheuristic / Bound-Guided Anytime MILP"
+}
