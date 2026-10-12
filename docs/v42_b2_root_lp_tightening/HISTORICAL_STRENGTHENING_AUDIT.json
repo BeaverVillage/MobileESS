@@ -1,0 +1,227 @@
+{
+  "PASS": true,
+  "scope": "Read-only original Git code/proofs and official PR metadata; no solver or saved FULL matrix loaded. Historical numbers are not current Source18r certificates.",
+  "PR211_parent": "d12315a3757aec187c8da0685c28ef901466386a",
+  "source18r": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+  "Native_calls": 0,
+  "full_matrix_loaded": false,
+  "old_results_reused_as_current": false,
+  "records": [
+    {
+      "PR": 109,
+      "metadata": {
+        "baseRefName": "codex/v42-m1-root-cut-exit",
+        "body": "The frozen M1-F3 root optimum splits location, violates 313 mode-hull rows, and cannot extend to the specified arc-energy flow. This successor captures the complete optimum, adds only witness-authorized S1/S2/S3 strengthening, and preserves the physical integer feasible set. The energy IIS also yields an independent 49.983509 kWh arithmetic contradiction.\r\n\r\nS0/S1/S2 reached overall Gurobi OPTIMAL. S3 had two numerical crossover failures, an aborted Crossover=0 trial with an estimated 27 GB factor, and an API capture correction. The final call preserves Method=2/Threads=1/default Crossover and saves BarX/BarPi after barrier completion. Its overall solver status remains INTERRUPTED(11), while BarStatus is OPTIMAL(2); the overall status is not relabeled. A full-matrix feasible S3 point and the completed S2 lower bound certify the S3 optimum interval within the inherited 1e-7 tolerance. S3's reported lower bound is the conservative S2 bound. All interrupted source/logs and costs are retained; total S3 LP wall below includes four interrupted wall estimates. Every MIP proof setting stays frozen. No parameter grid/search or objective-driven tuning was performed.\r\n\r\nSelected S2 raises the root lower bound by 0.0003630437, below the preregistered 0.001 material threshold. The required STOP gate therefore prevents both the 600-second MIP canary and the 1800-second production solve. These LP implied gaps use the same existing UB=0.6696147314213984 and are not MIP certificates.\r\n\r\n| Candidate | LP lower bound | Gain vs captured S0 | Same-UB implied gap | LP wall seconds |\r\n| --- | ---: | ---: | ---: | ---: |\r\n| S0 | 0.5718494602 | 0.0000000000 | 14.600227% | 203.38 |\r\n| S1 | 0.5718494600 | -0.0000000002 | 14.600227% | 515.74 |\r\n| S2 | 0.5722125039 | 0.0003630437 | 14.546010% | 2076.01 |\r\n| S3 | 0.5722125039 | 0.0003630437 | 14.546010% | 5513.52 |\r\n\r\nThe optional native model hook defaults to None and retains fingerprint 0x9cfd10ec and the exact original matrix dimensions. A hash-specific preservation adapter recognizes this authorized hook only after the full default-model regression; historical evidence stays unchanged. Original SOC equations, route alternatives, individual PCS inner16, objectives, A1/AIDC/CC4/Runtime and robust voltage limits remain frozen. A1 optimize calls=0; A2/M2/Actual/Fresh AC/IEEE8500 were not run. M1_ACCEPTED=false and PROBLEM13_FINAL_VALIDATED=false.\r\n\r\nValidation: 520 tests passed; default-path identity and incumbent residual matched; all 20 exhaustive tiny-route cases passed for every candidate; the exact PR108 incumbent extended into all four models; all other legacy bytes were preserved; git diff --check passed. Residual ranking distinguishes measured fractional location/Q support from the untested decomposition of averaged grid-feasible trajectories.\r\n\r\nEvidence: [50-question Korean review](docs/v42_m1_relaxation_strengthening/FINAL_REVIEW_KO.md), [root comparison](docs/v42_m1_relaxation_strengthening/ROOT_LP_STRENGTHENING_COMPARISON.csv), [integer projection proof](docs/v42_m1_relaxation_strengthening/INTEGER_PROJECTION_PROOF.md), and [verification](docs/v42_m1_relaxation_strengthening/VERIFICATION.json).\r\n\r\nStacked on PR #108 exact head c9233bd9d3977984e6de31e1d2924f10d1287a84.\r\n",
+        "headRefName": "codex/v42-m1-relaxation-strengthening",
+        "headRefOid": "6dabb39e3ae6bb36c4ac47725c0e11d5bbc1b812",
+        "mergedAt": null,
+        "number": 109,
+        "state": "OPEN",
+        "title": "Test exact M1 relaxation strengthening without material bound gain",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/109"
+      },
+      "source_documents": [
+        {
+          "path": "docs/v42_m1_relaxation_strengthening/S1_MODE_HULL_FORMULATION.md",
+          "git_revision": "6dabb39e3ae6bb36c4ac47725c0e11d5bbc1b812",
+          "git_blob_sha256": "1849c5a996f68aab062f176a5bfab85682ae963d7cab6c301529e7ec9431a8fb",
+          "bytes": 1124,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/6dabb39e3ae6bb36c4ac47725c0e11d5bbc1b812/docs/v42_m1_relaxation_strengthening/S1_MODE_HULL_FORMULATION.md"
+        },
+        {
+          "path": "docs/v42_m1_relaxation_strengthening/S2_ARC_ENERGY_FORMULATION.md",
+          "git_revision": "6dabb39e3ae6bb36c4ac47725c0e11d5bbc1b812",
+          "git_blob_sha256": "a33aa58732ac11834d7d6d46431cf747c63c30d4891ff357062246bc5be04295",
+          "bytes": 1109,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/6dabb39e3ae6bb36c4ac47725c0e11d5bbc1b812/docs/v42_m1_relaxation_strengthening/S2_ARC_ENERGY_FORMULATION.md"
+        },
+        {
+          "path": "docs/v42_m1_relaxation_strengthening/INTEGER_PROJECTION_PROOF.md",
+          "git_revision": "6dabb39e3ae6bb36c4ac47725c0e11d5bbc1b812",
+          "git_blob_sha256": "2d8a84a327d4310e3d947717ad9f0d1896b4798016bb72648eaa37447ebe88c1",
+          "bytes": 3259,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/6dabb39e3ae6bb36c4ac47725c0e11d5bbc1b812/docs/v42_m1_relaxation_strengthening/INTEGER_PROJECTION_PROOF.md"
+        }
+      ]
+    },
+    {
+      "PR": 137,
+      "metadata": {
+        "baseRefName": "codex/v42-m1-cutpass-loop-campaign-orchestrator",
+        "body": "This freezes the exact PR136 M1 and tests integer-equivalent formulation strengthening against its root relaxation. No candidate established the required material bound improvement, so BASE remains selected and production formulation sources remain unchanged.\n\nBase: `37ffd404e7d0d598ddb84fec084e3ac332ed99c0` on `codex/v42-m1-cutpass-loop-campaign-orchestrator`.\n\n- Reused and audited the stored continuous primal vector; fresh baseline LP calls=0. Census: 138,644 fractional binaries, 377 unit/slot location splits, up to 24 simultaneous fractional sites.\n- CUT-A: 254 violations (all aggregate C+D), maximum 13.368823 kW. Integer validity and exhaustive continuous-domain projection proof pass. LP objective 0.5687116104305803, delta 8.07e-11; material gate fails.\n- SOC envelope: exact interval-union forward/backward DP with departure energy and explicit transit states; 18 baseline violations, maximum 5.124232 kWh. LP objective 0.5687116102532198, delta -9.66e-11; numerical variation, material gate fails.\n- SOC flow: rational symbolic equivalence and a native 4-slot prototype pass. Adds 207,928 continuous columns, 443,344 rows and 2,559,730 nonzeros (+30.30%), with zero new binaries. The one full LP reached the inherited 300s cap without an optimal LP certificate or returned primal vector. Final printed barrier values remain diagnostics; new root LB is NULL and effect is inconclusive.\n\nSelected BASE LB: 0.5687116103498322. Zero-action 0.6715884801665905 is a diagnostic reference, never a new UB certificate. No 600s MIP canary because its material-improvement gate did not pass. No 1800s production, retries or parameter sweep. Three candidate LP optimize calls, one worker and Threads=1 throughout; pytest ran after optimization.\n\nValidation: 108 semantic tests and 1,628 full tests pass (one inherited warning). Exact model arrays/native row names, A1 freeze, NormalAmps, source data and P1/P2 identity pass. All 5,070 prior tracked files remain byte-identical. Initial Unicode log-path preparation failure and the full-test missing historical-fixture failure are preserved; the latter was resolved with SHA-validated read-only fixture junctions, without changing legacy code or models.\n\nPR136 campaign sources and the 1,458-stage dry plan remain byte-identical and semantically equal: B0→B1→B2→B3 L1, then B3 L2/L3/L4; A1→M1→A2→M2 and previous-Planning-only firewall unchanged. Campaign optimizer/Actual/Fresh AC calls=0. Problem13 FINAL_VALIDATED=false.\n\nEvidence, proofs, saved primal vectors, logs, ordered Korean review, final flags and SHA manifest: `docs/v42_m1_exact_formulation_strengthening/`. One next hypothesis is exact route/location-conditioned PCS–grid epigraph coupling; no further experiment is part of this PR.\n",
+        "headRefName": "codex/v42-m1-exact-formulation-strengthening-v1",
+        "headRefOid": "94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef",
+        "mergedAt": null,
+        "number": 137,
+        "state": "OPEN",
+        "title": "V42 M1: exact strengthening census and gates; retain BASE",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/137"
+      },
+      "source_documents": [
+        {
+          "path": "v42_strengthening/cuts.py",
+          "git_revision": "94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef",
+          "git_blob_sha256": "3b916718e760e08544824ff6445fe01d9b4a85bb80cadb2ca022d2ef62d86177",
+          "bytes": 5951,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef/v42_strengthening/cuts.py"
+        },
+        {
+          "path": "v42_strengthening/envelopes.py",
+          "git_revision": "94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef",
+          "git_blob_sha256": "6781587a1520957c72e950547d8e94f07f353d822cb706795a8f95f4a7095e44",
+          "bytes": 10859,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef/v42_strengthening/envelopes.py"
+        },
+        {
+          "path": "docs/v42_m1_exact_formulation_strengthening/FINAL_REVIEW_KO.md",
+          "git_revision": "94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef",
+          "git_blob_sha256": "69972db58cf0287290ee689dfeb03a7638e7aed411620b5210734a58f53d3123",
+          "bytes": 6381,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/94f8a38b7ef7b60cf5d7ffd91c86b109589fcaef/docs/v42_m1_exact_formulation_strengthening/FINAL_REVIEW_KO.md"
+        }
+      ]
+    },
+    {
+      "PR": 167,
+      "metadata": {
+        "baseRefName": "codex/v42-m1-ultracompact-exact",
+        "body": "C3A의 LP/root 하한 약 0.568712와 알려진 정수 incumbent 0.669416 사이의 약 15.04% 차이를 진단했다. incumbent의 정수 최적성은 증명되지 않았으므로 차이 전체를 진짜 integrality gap으로 단정하지 않는다. 기존 1시간 실험은 사용자 지시로 정확한 PID만 종료하고 중단 증거를 별도 provenance로 보존했다.\n\n원본 이산 변수 9,322개를 의미별로 완전히 매핑했고 7,454개(79.9614%)의 분수 상태와 실제 critical line/time의 P/Q 기여를 추적했다. 원래 정수 상태에서 유효한 connected-power 및 folded PCS 계열을 독립적으로 증명한 뒤 10회 LP loop에서 320행·17,837nnz를 추가했다. 최고 유효 global LB는 0.5687116003498334로 유지돼 material 기준 ΔLB≥0.001을 충족하지 못했다. 두 selective-integrality 진단도 각각 TimeLimit=300/Threads=1의 root 한 노드 결과로 기여 계열을 확정하지 못했다.\n\n- 최종 분류: `ROOT_GAP_NOT_EXPLAINED_BY_TESTED_LOCAL_HULLS`\n- 과학 base: Draft PR #162 exact head `1d922c91eb27056a5ccc79c92ef18146707099ab`; 원본 matrix/data/start, 물리 조건, P1/P2 및 1e-8 tolerance 유지. 원래 행 삭제 0.\n- 검증: workflow/hash/proof 검사 PASS, 엄격 raw numeric feasibility 전체 FAIL을 별도로 보존. 13,964개 국소 정수 상태·30,616개 연속 꼭짓점, 변조 거부 14건 및 exact dyadic 하한 재계산 포함.\n- 실행 수: 최초 pure LP capture 실패 + 사용자가 승인한 동일 설정 recovery로 pure LP 2회; cut LP 10회; partial-integrality 2회; 조건부 native C3S root-only 0회. 추가 full 3600초 MILP는 실행하지 않았다.\n- 다음 권고는 MESS04의 0-based 69–72 네 슬롯 joint route/mode/PQ/SOC hull 하나이며 이번에 실행하지 않았다.\n\n현재 최종 HEAD: `0d423626790a1102d42e6ba84beeb5f7d4ab1d4b`\n\n[한국어 35개 문답과 결과](https://github.com/BeaverVillage/MobileESS/blob/0d423626790a1102d42e6ba84beeb5f7d4ab1d4b/docs/v42_m1_root_gap_attribution_20261007/FINAL_REVIEW_KO.md)",
+        "headRefName": "codex/v42-m1-root-gap-attribution-20261007",
+        "headRefOid": "0d423626790a1102d42e6ba84beeb5f7d4ab1d4b",
+        "mergedAt": null,
+        "number": 167,
+        "state": "OPEN",
+        "title": "M1 C3A root gap 진단 및 exact local hull 강화 검증",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/167"
+      },
+      "source_documents": [
+        {
+          "path": "docs/v42_m1_root_gap_attribution_20261007/local_hull_proof.md",
+          "git_revision": "0d423626790a1102d42e6ba84beeb5f7d4ab1d4b",
+          "git_blob_sha256": "9c6f15c30ee5e5a7127e7fec9d19f8998a58a47965176aaf639011e009bc7f1b",
+          "bytes": 8576,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/0d423626790a1102d42e6ba84beeb5f7d4ab1d4b/docs/v42_m1_root_gap_attribution_20261007/local_hull_proof.md"
+        },
+        {
+          "path": "docs/v42_m1_root_gap_attribution_20261007/folded_pcs_hull_proof.md",
+          "git_revision": "0d423626790a1102d42e6ba84beeb5f7d4ab1d4b",
+          "git_blob_sha256": "d0c6276425c5a208451a742ca4f080cca89cef0156435de3ada59bfa923f23c3",
+          "bytes": 3472,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/0d423626790a1102d42e6ba84beeb5f7d4ab1d4b/docs/v42_m1_root_gap_attribution_20261007/folded_pcs_hull_proof.md"
+        }
+      ]
+    },
+    {
+      "PR": 169,
+      "metadata": {
+        "baseRefName": "codex/v42-m1-root-gap-attribution-20261007",
+        "body": "기존 M1 incumbent는 384개 charge_mode가 모두 0이어서 유효전력 충·방전과 이동을 사용하지 못했습니다. 원래 물리를 유지한 300초 제한 neighborhood에서 검증된 UB를 0.6694159238756877 → 0.6339776033797229로 개선했습니다. 초기 UB–LB 차이의 최소 35.1905%가 incumbent 선택에서 발생했음을 입증했습니다.\n\n검증된 global LB는 0.5687116003498334로 유지되며 gap은 15.043610% → 10.294686%입니다. Primary 분류는 `GAP_PARTIALLY_ATTRIBUTED`, 관측 개선 축은 `UB_DOMINATED`입니다. 남은 차이의 dominant cause는 확정하지 않았습니다.\n\n- MESS04 69–72의 전체 local joint hull: mobility paths 149,817 × 16 mode words = 2,397,072. 생성기와 독립인 모든 EF 행·계수·bound·geometry 재구성 및 adversarial mutation 검사 PASS. Boundary SOC는 자유 interface이며 global96-slot hull은 아닙니다.\n- 저장 LP 점의 exact mode/location/PQ separator 위반은 0.2982020917827489입니다. 목적함수0인 mode71만 변경하면 동일 P/Q/route/SOC에서 separator가 제거돼, 그 위반만으로 다기간 SOC 약함을 gap 원인으로 단정하지 않았습니다.\n- 단일 창과 한 번의 controlled two-block generalization(MESS04+MESS03): certified ΔLB=0. 두block native ObjBound=0.5687116103495242, exact certificate=0.5687115940354054. 두block strict original/augmented replay PASS, 최대 잔차7.488e-11. Primal ObjVal을 valid LB로 승격하지 않았습니다.\n- 실제 t72 동시 sw1A/l3A coupling의 local integrality gap 상한은0.000198055241(<0.001)입니다. One-time master 밖의 global coupling은 배제하지 않았습니다. 선택적 정수화는 총3회, 각 TimeLimit300/Threads1이며 8-slot root는 crossover 중 time limit으로 종료해 long-horizon 효과는 미확정입니다.\n- 제한: 단일 창 Crossover0 point는 strict raw FAIL이며 postcapture 코드 오류로 native API ObjBound 및 정확한 API Runtime/Work를 잃었습니다. 저장된 primal/dual/RC/slack에서 solve 없이 회수했고, 완료 로그의 소수2자리 Runtime/Work와 실패 코드를 보존했습니다. `VERIFICATION.json`에 이 미완전성과 raw 실패를 분리해 기록했습니다.\n- 원래 incumbent와 새 UB의 원래 all-integer/route/SOC/PCS/grid/A1 replay PASS. 이전263개 증거 파일, 원래 model/data/start SHA 유지. Frozen original inputs를 byte-identical 복사해 solver 없는 독립 proof/bound 검증을 재현하도록 했습니다.\n\n새 full B&B, Benders/DW/B&P, solver tournament, physics 변경은 없습니다. 다음 실험 하나(새 UB에서 같은64–84/Hamming48/300초 neighborhood)는 권고만 했으며 실행하지 않았습니다.\n\nExact base(PR167): `0d423626790a1102d42e6ba84beeb5f7d4ab1d4b`\nScientific base(PR162 selected C3A): `1d922c91eb27056a5ccc79c92ef18146707099ab`\nFinal HEAD: `599d9ea67f6c348bfed9d1a594dc0d1eb3fd2768`\n\n[한국어 33개 질문 최종 검토](https://github.com/BeaverVillage/MobileESS/blob/599d9ea67f6c348bfed9d1a594dc0d1eb3fd2768/docs/v42_m1_gap_rootcause_20261007/FINAL_REVIEW_KO.md)",
+        "headRefName": "codex/v42-m1-gap-rootcause-20261007",
+        "headRefOid": "599d9ea67f6c348bfed9d1a594dc0d1eb3fd2768",
+        "mergedAt": null,
+        "number": 169,
+        "state": "OPEN",
+        "title": "M1 gap 귀속: 검증된 UB 개선과 trajectory hull 진단",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/169"
+      },
+      "source_documents": [
+        {
+          "path": "docs/v42_m1_gap_rootcause_20261007/EXACT_LOCAL_HULL_PROOF_KO.md",
+          "git_revision": "599d9ea67f6c348bfed9d1a594dc0d1eb3fd2768",
+          "git_blob_sha256": "7f925336acd35d1130a3c8fdf5d4c1fe5846f091edc18e902aaddcbcc89b627b",
+          "bytes": 5603,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/599d9ea67f6c348bfed9d1a594dc0d1eb3fd2768/docs/v42_m1_gap_rootcause_20261007/EXACT_LOCAL_HULL_PROOF_KO.md"
+        },
+        {
+          "path": "docs/v42_m1_gap_rootcause_20261007/trajectory_hull.py",
+          "git_revision": "599d9ea67f6c348bfed9d1a594dc0d1eb3fd2768",
+          "git_blob_sha256": "742efa1d37747e18fee478194bbf7b810510a8e2884fa4c2451f1bdab28ace7c",
+          "bytes": 9134,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/599d9ea67f6c348bfed9d1a594dc0d1eb3fd2768/docs/v42_m1_gap_rootcause_20261007/trajectory_hull.py"
+        }
+      ]
+    },
+    {
+      "PR": 185,
+      "metadata": {
+        "baseRefName": "codex/v42-m1-route-mode-benders-20261008",
+        "body": "PR183의 integer-first master가 SOC·충전·PCS·P/Q를 거대 recourse로 넘겨 물리적으로 불가능한 경로를 생성한 원인을 원본 CSR과 archived ROOT에서 진단하고, 전체 96-slot 물리를 보유한 compact monolithic 후보를 구현했습니다. 직접 기준은 PR183 `3100039d19a22ec407713f36a9e978b2e96533a8`, 과학적 기준은 PR162 C3A입니다.\n\n최종 분류는 **M1_PHYSICS_REDESIGN_RESOURCE_PENDING**입니다. 다른 A-stage native worker가 실행 중이므로 새 full-scale ROOT·canary·production은 모두 **0회**입니다. 실제 certified LB 및 Runtime 개선은 **NOT_MEASURED**이며 production solver로 승인하지 않았습니다. LB `0.5687116104049206`, UB `0.6284141956452488`, gap `9.500515051%`, M1_ACCEPTED=false를 유지합니다.\n\n원래 grid까지 포함한 B1은 C3A와 같은 LP라 중복 solve를 생략했습니다. H2는 SOC 380열을 제거하는 별도 matrix-free exact cumulative operator를 구현·검증했지만, 같은 LP 강도와 예상 25,937,190 nnz 때문에 ROOT 후보에서 제외했습니다. B2는 모든 MESS/96-slot 이동 arc의 원래 계수로 795,944개 정수 유효 route–SOC 후보를 검사하고 archived LP가 위반하는 651행·1,302 nnz를 추가합니다. 새 열·새 binary는 없으며 총 306,040열·583,459행·5,352,914 nnz입니다. 모든 원래 행·objective·ObjCon·bounds·types를 유지합니다.\n\n검증:\n\n- PR162 objective/variable-axis bit identity, FULL energy 384행의 C3A exact identity, 양방향 정수 projection 및 H2 forward/inverse PASS.\n- 독립 rational 계수/RHS/outward transport 검사, 잘못된 travel energy/RHS 변조 거부, 기존 witness 20개와 최선 UB full original route/SOC/PQ/PCS/grid/A1 replay PASS.\n- 작은 fixture 32개 정수 assignment에서 최적값·projection 일치. HiGHS LP 100회, 합계 약 0.055초. Fixture LP 0.25→0.5를 실제 M1 성과로 해석하지 않습니다.\n- 원래 과학 입력과 이전 `(z,f)` 작업의 81개 파일 byte-identical 보존. 늦게 완료된 별도 배터리 certificate의 원본 사본·exact payload·multiplier·SHA를 동봉했으며 기존 native TIME_LIMIT 상태는 그대로입니다.\n- 모든 원래 행의 fractional/integer separation, D: I/O audit, process/resource audit, source/evidence SHA256 및 Git 저장 바이트 대조 PASS. Python compile과 Git diff --check PASS.\n\n증거는 `docs/v42_m1_physics_strengthened_20261008/`에 있습니다. RAM은 관측만 하며 유한 MemLimit/SoftMemLimit이나 RAM 자동 종료를 추가하지 않습니다. 다른 A/M 프로세스·source·worktree·checkpoint·로그는 수정하지 않습니다.\n\n다음 행동은 하나입니다. 다른 native 작업과 분리된 시간에 사전등록 B2 ROOT를 최대 900초·Threads=1로 한 번 실행해 실제 certified ΔLB를 측정합니다. 동치성·ΔLB≥0.001·tractability gate 전에는 canary·production·downstream을 실행하지 않습니다.\n",
+        "headRefName": "codex/v42-m1-physics-strengthened-redesign",
+        "headRefOid": "6d1d64beaf012d32ddf39245890785e3d8f01d4b",
+        "mergedAt": null,
+        "number": 185,
+        "state": "OPEN",
+        "title": "M1 전체 시간 물리 재설계·동치성 검증 — ROOT 자원 대기",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/185"
+      },
+      "source_documents": [
+        {
+          "path": "docs/v42_m1_physics_strengthened_20261008/TEMPORAL_SOC_PCS_ROUTE_COUPLING_PROOF.md",
+          "git_revision": "6d1d64beaf012d32ddf39245890785e3d8f01d4b",
+          "git_blob_sha256": "84dc96d9d34383423b22616ecde1bc03cd9d1fe9d85580adc4f63982cd0a9d7f",
+          "bytes": 1844,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/6d1d64beaf012d32ddf39245890785e3d8f01d4b/docs/v42_m1_physics_strengthened_20261008/TEMPORAL_SOC_PCS_ROUTE_COUPLING_PROOF.md"
+        },
+        {
+          "path": "docs/v42_m1_physics_strengthened_20261008/ORIGINAL_INTEGER_EQUIVALENCE_PROOF.md",
+          "git_revision": "6d1d64beaf012d32ddf39245890785e3d8f01d4b",
+          "git_blob_sha256": "3eaf99e08a4392e184af7ec1feae1829b5225001347beb111c91bc0b6e545a6b",
+          "bytes": 1546,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/6d1d64beaf012d32ddf39245890785e3d8f01d4b/docs/v42_m1_physics_strengthened_20261008/ORIGINAL_INTEGER_EQUIVALENCE_PROOF.md"
+        }
+      ]
+    },
+    {
+      "PR": 186,
+      "metadata": {
+        "baseRefName": "codex/v42-a-stage-acceptance-fourday",
+        "body": "May12 P1-only now has certified global gap **0.0620078%**: full-domain LP LB **0.6588875395606518**, independently verified original integer UB **0.6592963546281192**. Phase-I artificial-free zero, 130-class complete STAY/migration pricing closure, original physical replay and the separate P1-only Freeze all pass. P2 and downstream stages were not run; the original four-objective A1 acceptance remains false.\n\nThe saved historical run had already reached Phi=0 and P1. Its activation failed when an artificial-free P1 point was incorrectly subjected to an artificial-weight equality check after support expansion changed 80 weights on 40 global rows. The actual saved-matrix regression reproduces this before repair. P1 activation now verifies original-point inclusion without artificials; the positive-Phi frozen-weight/sign guard and all original equations, objectives, types, candidate domains and tolerances remain intact.\n\nThe recovery reuses 285 historical solves, 192 verified concrete columns and 92 negative supports. Exact batch ledger construction, completed-pricing revalidation and immutable activation checkpoints reduce repeated Python work. S0 and S1 each complete all 130 original class oracles (208,957 STAY and 50,756,904 migration paths); S1 closes with no negative block. An additional 39,993 exact-negative STAY columns were verified in a shadow full-matrix comparison but were not needed for activation.\n\nValidation includes 389 A-stage/recovery tests, 22 focused execution/cache tests, 16 post-run accounting/acceptance/JSON identity tests, and independent exact dyadic replay of the saved 3,184,901-row / 1,141,597-column integer model with integrality residual zero and original physical checks for 1,782 jobs. Source epochs 1–8, original input files and 47 grid arrays, native RAW/matrix receipts and historical bytes verify unchanged. Initial failed regression and serialization checks are retained with their corrections.\n\nThere were 261 new sequential native calls, Runtime **208.870002s** / 3,600s and Work **180.850507**, Threads=1, with no finite memory limits or RAM-triggered stops. The integer solve used 173.380s and ended at status 11 because the independently validated target gap triggered termination. The final resumed run wall was 662.308s; cumulative attempted-run wall was 4,009.185s, so the full 60-minute practicality criterion fails. Scientific acceptance and practical wall-time acceptance are reported separately.\n\nThe branch directly descends from actual historical May12 source HEAD 1b891dbe5b1dd454d89b657efec7cba469c0cf94, including its unpublished local changes after PR181. PR181 and PR184 are preserved. All required reports/certificates are under docs/v42_may12_p1_exact_rescue_20261008/. Large binary payloads remain on D: with SHA256 receipts. No automatic follow-up is scheduled.\r\n",
+        "headRefName": "codex/v42-may12-phase1-p1-exact-rescue",
+        "headRefOid": "9a1b41260aff3bc70d2e36d7e1c293c03ea114de",
+        "mergedAt": null,
+        "number": 186,
+        "state": "OPEN",
+        "title": "Certify May12 P1-only global gap after Phase-I witness recovery",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/186"
+      },
+      "source_documents": [
+        {
+          "path": "docs/v42_may12_p1_exact_rescue_20261008/FINAL_REVIEW_KO.md",
+          "git_revision": "9a1b41260aff3bc70d2e36d7e1c293c03ea114de",
+          "git_blob_sha256": "1fe12aa3a2b3e7256d94947f4e91a899f46c57910cce599d82fa4e455a968cb7",
+          "bytes": 7769,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/9a1b41260aff3bc70d2e36d7e1c293c03ea114de/docs/v42_may12_p1_exact_rescue_20261008/FINAL_REVIEW_KO.md"
+        }
+      ]
+    },
+    {
+      "PR": 187,
+      "metadata": {
+        "baseRefName": "codex/v42-m1-physics-strengthened-redesign",
+        "body": "PR185의 기존 651개 Route–SOC 제약을 더한 B2 ROOT를 사전등록 설정 그대로 native optimize **1회** 실행했다. ROOT는 900초 예산 안에 OPTIMAL로 완료됐지만, 독립 인증값이 기존 하한보다 약해 판정은 **B2_ROOT_NONMATERIAL**, Material Gate는 FAIL이다.\n\n| 지표 | 결과 |\n|---|---:|\n| Runtime / Work | 210.22599983215332 s / 387.4427666794086 |\n| Native LP objective | 0.5687138902579907 |\n| Archived native LP 대비 차이 | +0.000001947264524737591 |\n| 새 exact certified B2 LB | 0.5659508784310822 |\n| 새 인증값 − 기존 LB | -0.002760731973838415 |\n| 최종 valid global LB | 0.5687116104049206 — 기존 값 보존 |\n| 최종 global LB 개선량 | 0 |\n| 검증된 UB | 0.6284141956452488 — 기존 값 보존 |\n| Global gap | 9.500515051068552% |\n\n새 분수점은 651개 제약을 모두 만족한다. Scientific 1e-8 기준 fractional binary는 7,454→8,019개지만 1e-6 진단 기준에서는 둘 다 7,446개다. 원본 strict 행 replay는 residual 6.398198681978329e-8로 FAIL이므로 exact LP optimum의 상승·동일성이나 정수 incumbent라고 주장하지 않는다.\n\nRaw Pi 부호 오류 20,566개를 거부하고 원시값을 보존했다. 별도 sign-cone multiplier의 exact finite-box LB를 독립 CSR-row dyadic 계산으로 재검증했다. 모든 306,040 finite-bound 항을 포함한 이 약한 하한은 PASS지만 native 목적값 상승을 인증하지 못했다. Native ObjBound는 채택하지 않았다. 인증 손실의 float 진단 분해에서는 injection_P/Q가 finite-box support 손실의 약 99.99955%를 차지한다.\n\nPR185 exact HEAD `6d1d64beaf012d32ddf39245890785e3d8f01d4b`에 stacked Draft로 올린다. 기존 15개 구현과 71개 증거의 SHA를 두 작업공간에서 확인했으며, 원본 objective/ObjCon/axis/CSR/RHS/senses/bounds/types 및 실제 native transport를 검증했다. 20개 원본 정수 witness와 검증된 UB의 full physical replay를 통과했다.\n\n독립 exact checker의 analytic 하한 및 네 가지 잘못된 certificate 거부 검사, 새 모듈 compile, 저장 raw/proof 재계산, SHA manifest 및 staged Git blob 일치, git diff --check를 통과했다. Native raw·barrier/presolve trajectory·peak RSS·분수 구조·수치 진단·한국어 보고서를 `docs/v42_m1_b2_root_validation_20261008/`에 저장했다. 실행 직전 resource gate는 PASS였지만 실행 중 외부 May12 pytest가 관측돼 archived 비교를 통제된 인과적 속도 향상으로 해석하지 않는다. 다른 작업·프로세스는 수정하지 않았다.\n\nM1_ACCEPTED=false다. 추가 ROOT·새 cut·canary·production·downstream은 실행하지 않았다. 다음 행동은 **injection_P/Q의 원래 binding 등식으로 stationarity residual을 상쇄하는 exact multiplier repair 한 건을 optimize=0의 별도 실험으로 검증**하는 것만 추천하며, 이번에는 실행하지 않았다.\n",
+        "headRefName": "codex/v42-m1-b2-root-validation-20261008",
+        "headRefOid": "e67ecfa827e4262c2f2df17c226d6442656af18b",
+        "mergedAt": null,
+        "number": 187,
+        "state": "OPEN",
+        "title": "V42 M1: B2 ROOT 단일 실행과 비실질 하한 개선 검증",
+        "url": "https://github.com/BeaverVillage/MobileESS/pull/187"
+      },
+      "source_documents": [
+        {
+          "path": "docs/v42_m1_b2_root_validation_20261008/FINAL_REVIEW_KO.md",
+          "git_revision": "e67ecfa827e4262c2f2df17c226d6442656af18b",
+          "git_blob_sha256": "f4e2444722310cf9719b94d62db6d8deae616419b1f5d83c29a533ea705347c4",
+          "bytes": 5538,
+          "url": "https://github.com/BeaverVillage/MobileESS/blob/e67ecfa827e4262c2f2df17c226d6442656af18b/docs/v42_m1_b2_root_validation_20261008/FINAL_REVIEW_KO.md"
+        }
+      ]
+    }
+  ],
+  "key_non_novelty_caveats": [
+    "PR109 mode canonicalization preserves physical projection but can remove original unused mode-bit assignments.",
+    "PR167/169 local joint state/hull physics already contains SOC-mode-travel reasoning; requested B is a small explicit projection family, not a novel physical theorem.",
+    "PR185/187 tested per-travel-arc endpoint SOC reachability, not the requested aggregate one-slot D+T and charge-headroom inequalities.",
+    "PR186 is A-stage P1 exact recovery, not an M-stage Mode/PCS/Reachability failed experiment."
+  ]
+}

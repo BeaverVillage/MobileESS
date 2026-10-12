@@ -1,0 +1,56 @@
+{
+  "PASS": true,
+  "schema": "V42_SOC_MODE_TRAVEL_INDEPENDENT_NATIVE0_V1",
+  "candidate_count": 768,
+  "source18r": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+  "case_sha": "34c0efffa9c05397552fb167667c0bbfe2f35cec89801a3169c00c64fe77f292",
+  "Native_optimize_calls": 0,
+  "Gurobi_imported": false,
+  "FULL_CSR_loaded": false,
+  "literal_UNIT_CSRs_loaded_sequentially": true,
+  "all_768_signs_coefficients_bounds_aliases_RHS_audited": true,
+  "original_integer_feasible_points_preserved": true,
+  "no_added_physical_conditions_or_binary_variables": true,
+  "units": [
+    {
+      "unit": "MESS01",
+      "flow_rows_independently_matched": 2233,
+      "energy_rows_checked": 96,
+      "power_mode_gates_checked": 4466,
+      "power_stay_gates_checked": 4466,
+      "exact_original_one_path_argument": true,
+      "C_positive_implies_D_and_departure_T_zero": true
+    },
+    {
+      "unit": "MESS02",
+      "flow_rows_independently_matched": 2236,
+      "energy_rows_checked": 96,
+      "power_mode_gates_checked": 4472,
+      "power_stay_gates_checked": 4472,
+      "exact_original_one_path_argument": true,
+      "C_positive_implies_D_and_departure_T_zero": true
+    },
+    {
+      "unit": "MESS03",
+      "flow_rows_independently_matched": 2239,
+      "energy_rows_checked": 96,
+      "power_mode_gates_checked": 4478,
+      "power_stay_gates_checked": 4478,
+      "exact_original_one_path_argument": true,
+      "C_positive_implies_D_and_departure_T_zero": true
+    },
+    {
+      "unit": "MESS04",
+      "flow_rows_independently_matched": 2234,
+      "energy_rows_checked": 96,
+      "power_mode_gates_checked": 4468,
+      "power_stay_gates_checked": 4468,
+      "exact_original_one_path_argument": true,
+      "C_positive_implies_D_and_departure_T_zero": true
+    }
+  ],
+  "SOC_CANDIDATES_EXACT_sha256": "d5d8f0683c89e7592d2474bc80399a5e0b71bf956db2e62750c18dd49197c412",
+  "proof": "Original nonnegative binary unit-flow on a strict-time DAG is one source-to-slot96 path. Positive aggregate charge implies a selected stay at that slot and binary charge_mode=1; hence aggregate discharge and all departing move flows are zero. Split C=0 versus C>0. For C=0, energy recurrence and next-SOC minimum prove B1; current-SOC maximum proves B2. For C>0, B1 is current-SOC minimum and B2 is next-SOC maximum through E_next=E+alpha*C.",
+  "LP_implication_scope": "Integer validity of all 768 candidates is proved. LP redundancy is not blanket classified; only robust actual fractional-point violations may be selected.",
+  "wall_seconds": 9.406393700046465
+}
