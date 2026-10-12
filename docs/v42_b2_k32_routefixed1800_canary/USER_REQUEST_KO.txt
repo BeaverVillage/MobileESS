@@ -1,0 +1,750 @@
+# V42 B2 — K32-Certified Route-Fixed MILP Optimization
+## IEEE123 May01 · 1,800초 Primal–Dual 통합 Canary
+
+Repository: `BeaverVillage/MobileESS`
+
+### 0. 최종 목표
+
+IEEE123 B2의 2025-05-01을 대상으로 다음 알고리즘을 구현하고 **실제 Native Optimize 누적 최대 1,800초** 실행하라.
+
+**K32-Certified Route-Fixed MILP Optimization**
+
+알고리즘 구성:
+
+1. U4 및 N1으로 초기 FULL 가능해와 UB 확보
+2. K32/K48의 기존 인증 Global LB 계승
+3. 원본 MESS Route DAG 기반 이동경로 생성
+4. 각 이동경로를 고정하고 Exact C3A 기반 MILP로 4대 Charge Mode/P/Q/SOC 재최적화
+5. Original FULL Replay PASS 시 UB 갱신
+6. 조건부 K32/K48 Valid Grid Constraint 강화로 LB 갱신
+7. Global Gap 계산
+8. Gap ≤ 3% 또는 누적 Native 예산 종료까지 적응적 반복
+
+이는 단순 ALNS 또는 단순 후보 평가 실험이 아니다.
+
+**원본 수리최적화 기반 Primal UB 탐색과 인증 가능한 MILP Global LB 계산을 결합하는 Anytime Primal–Dual 알고리즘**으로 구현하라.
+
+단, 경로 후보를 일부만 평가하는 단계는 Matheuristic 성격을 갖는다. 전역 최적성 3%를 실제로 인증하지 못했다면 Exact Global Solver라고 주장하지 않는다.
+
+이번 실험은 공식 Production 동결이 아니라 독립 연구용 Canary다.
+
+---
+
+## 1. 반드시 참조할 GitHub Authority
+
+정확한 PR HEAD를 확인하고 작업한다.
+
+- Scientific Source18r / PR207:
+  `497609b46faa14ea7e32a9483a333ab32fd264ef`
+- K32/K48 / PR211:
+  `d12315a3757aec187c8da0685c28ef901466386a`
+- Root LP 강화 연구 / PR214:
+  `40ab888b884255e76fd6c89fd01933570b60c242`
+- U4/N1/N2/N3 비교 / PR216:
+  `38d98b99d1ea5ce9021fe0d727ab80309910b63d`
+- 통합 Canary / PR217:
+  `114f44330fbd995221c55385c6fde5b5b9e40d95`
+
+PR217 정확한 HEAD 위에 새로운 독립 연구 브랜치를 생성한다.
+
+PR207의 원본 Scientific Source, PR211의 LB 증명 및 PR216/217의 실측 결과를 수정하지 않는다.
+
+연구용 실행 Adapter를 별도 디렉터리에 추가하라.
+
+참고할 실제 코드:
+
+- `v42_common_mess/fixed_pattern.py`
+- `v42_common_mess/model.py`
+- `v42_common_mess/neighborhood.py`
+- `tools/u4_primal_alns/`
+- `tools/integrated_primal1800/`
+- `tools/critical_grid_cg/`
+- PR214의 검증된 Grid Constraint Separation 코드
+
+모델을 새로 만들기보다 기존 검증된 Source18r 구성기와 Original FULL Validator를 재사용한다.
+
+### Scientific Case Identity
+
+- Case SHA:
+  `34c0efffa9c05397552fb167667c0bbfe2f35cec89801a3169c00c64fe77f292`
+- FULL Matrix SHA:
+  `0eca025d99a24d2ae91117cdfe3ae48dade189336ada61b3f8234d9bf99f3cec`
+- FULL Domain SHA:
+  `9247e42b8119f60ef149d0963e31dd8a697af5426a5aaeec9450b2a2f246481e`
+
+Source나 Case가 다르면 기존 UB/LB를 혼합하지 말고 FAIL-CLOSED 처리한다.
+
+---
+
+## 2. 기존 성능 기준
+
+B2 May01에서 검증된 값:
+
+| 항목 | 기준 |
+|---|---:|
+| U4 FULL UB | 0.6760534504652341 |
+| N1 FULL UB | 0.5461621302242249 |
+| K32 Global LB | 0.46497617639758426 |
+| K48 Global LB | 0.46498486997548166 |
+| 현재 Global Gap | 14.86321657% |
+| 기존 최종 MESS 이동 | 0회 |
+| Target Global Gap | 3% |
+
+PR217은 N1 UB를 Cold Start에서 재현했다.
+
+N2+ 14회와 N3+ 11회에서도 추가 UB 개선은 없었다.
+
+이번에는 같은 N2+/N3+ Neighborhood를 반복하지 않는다.
+
+**핵심 변경: 이동경로 Binary를 동시에 대량 개방하는 대신, 실제 이동경로를 별도로 생성한 뒤 Route-Fixed MILP로 충방전 최적화를 수행한다.**
+
+---
+
+## 3. Stage A — 초기 FULL 가능해 확보
+
+PR217의 검증된 Cold-Start 흐름을 재사용한다.
+
+- 원본 stationary representative 생성
+- 초기 FULL 가능해 확보
+- U4 실행
+- N1 전체 Charge Mode 최적화
+
+초기 Native 실행은 모두 이번 1,800초 Ledger에 포함한다.
+
+기존 PR217의 N1 최선점을 처음부터 Solver Start로 주지 않는다.
+
+다만 기존 저장점은 독립 회귀 및 성능 비교에는 사용할 수 있다.
+
+N1은 다음 구조를 유지한다.
+
+- 4대 Route 고정
+- 전체 Charge Mode 384개 자유
+- Pch/Pdis/Q/SOC 재최적화
+- 전체 96슬롯 Grid 제약 유지
+- 원본 Objective `min rho_max`
+
+N1에서 FULL 검증 가능해를 확보하면 BEST_UB로 등록한다.
+
+N1 모델이 해당 제한영역에서 OPTIMAL로 종료했다면 같은 모델을 장시간 재실행하지 않는다.
+
+---
+
+## 4. Stage B — 실제 MESS 이동경로 생성
+
+이번 작업의 핵심 신규 모듈이다.
+
+### 4.1 원본 Route DAG 재사용
+
+원본 Source18r의 4-MESS·24개 접속 위치·96슬롯 DAG를 그대로 사용한다.
+
+각 경로는 실제 저장된 다음 정보를 이용해야 한다.
+
+- 출발 위치와 시간
+- 도착 위치와 시간
+- 원래 ETA
+- 원래 이동에너지
+- STAY / MOVE Arc
+- 이동 이후 연결 가능 시간
+- 원본 terminal slot96 의미
+
+존재하지 않는 이동경로를 합성하지 않는다.
+
+새로운 시간·거리·에너지 계수를 만들지 않는다.
+
+출발 위치로 반드시 복귀해야 한다는 신규 제약도 추가하지 않는다.
+
+### 4.2 Route Search
+
+**Resource-Constrained Shortest Path Labeling + Bounded Beam Search**를 연구용 경로 후보 생성기로 사용한다.
+
+시간확장 그래프의 Vertex:
+
+`(MESS, Site, Slot)`
+
+자원정보:
+
+- 실제 도달시간
+- 누적 이동에너지
+- 연결 가능 시점
+- 이후 충방전 기회
+- SOC 가용성에 대한 안전한 필요조건
+
+명백히 물리적으로 불가능하다고 증명할 수 있는 경로만 Hard Pruning한다.
+
+충전량·SOC가 아직 결정되지 않았다는 이유만으로 가능한 경로를 임의 제거하지 않는다.
+
+경로 Score 및 Beam 폭에 따른 선별은 Heuristic Ranking으로 분류하고, Exact Prescreening과 혼동하지 않는다.
+
+### 4.3 계통 민감도 기반 우선순위
+
+현재 N1의 FULL 검증점에서 원본 Grid Security를 다시 평가한다.
+
+특히 다음을 반영한다.
+
+- 최대 Thermal Loading 발생 Line/Phase/Slot
+- 상위 복수 Critical Grid Row
+- MESS 위치별 signed Pch/Pdis/Q 계수
+- 이동 전 기존 위치의 계통 기여 상실
+- 도착 위치의 혼잡 완화 가능성
+- 실제 이동 ETA
+- 이동에너지
+- 이동 이후 충전 Rebound
+- SOC 복원 가능 시간대
+
+혼잡 슬롯 하나만 줄이는 경로를 선택하지 않는다.
+
+특정 슬롯에서 개선되더라도 다른 시간대의 최대 부하율이 상승할 수 있으므로 **전체 96슬롯 최대 목적함수를 후속 MILP에서 다시 계산**한다.
+
+Score는 경로 순위용이며 원본 목적함수를 변경하지 않는다.
+
+### 4.4 경로 유형
+
+다음 실제 물리 경로 후보를 포함한다.
+
+1. 1대 MESS의 단일 이동
+2. 이동 후 일정 시간 체류
+3. 충전을 위해 다른 위치로 이동한 뒤 필요한 위치에서 방전
+4. 2회 이상의 실제 허용 MOVE Arc를 갖는 경로
+5. 차량 2대의 협조 위치 변경
+
+최초에는 단일 차량 후보를 우선 평가한다.
+
+다중 이동 및 2대 협조 경로는 계산예산과 초기 결과에 따라 확대한다.
+
+경로 평가 순위가 한 위치나 한 차량에만 편중되지 않도록 Candidate Diversity를 관리한다.
+
+---
+
+## 5. Stage C — Route-Fixed Exact MILP
+
+이동경로 후보가 생성되면 해당 경로를 고정하고 원본 Exact C3A + Dense MILP를 푼다.
+
+### 수학적 정식화
+
+차량 4대의 선택 경로를 π라고 하면,
+
+`z(π) = min rho_max`
+
+subject to:
+
+- 선택한 Route π 고정
+- 4대 Charge Mode 384개 자유
+- 전체 Pch/Pdis/Q 자유
+- 전체 97개 SOC 경계
+- 이동 중 P/Q 금지
+- 모든 원본 PCS16
+- 전체 Line Thermal/NormalAmps
+- 전체 Transformer Security
+- 전압 상하한
+- SVR11 및 기존 Capacitor Authority
+- 고정 AIDC Forecast/PCC
+- 원본 초기·종단 SOC
+- 원본 96슬롯 Energy Conservation
+
+N1과 차이점은 **Route가 기존 정차 경로가 아니라 새롭게 생성한 이동 경로라는 것**이다.
+
+### 구현 주의
+
+원본 DAG의 Path를 모든 관련 Node-Activity, Arc, continuous Route Flow 및 alias 좌표에 정확하게 변환한다.
+
+원본 검증된 Path Reconstruction을 재사용한다.
+
+선택한 경로를 부분적으로만 고정하거나, 다른 경로가 암묵적으로 혼합되지 않도록 실제 Native 모델을 검증한다.
+
+기존 N1 해가 새로운 이동경로 고정 조건과 모순되면 그대로 MIP Start로 입력하지 않는다.
+
+Solver Start는 신규 고정경로의 조건을 만족한다는 것이 검증된 경우에만 재사용한다.
+
+나머지 충방전 연속 Bounds는 원본과 동일하게 유지한다.
+
+Full MILP의 모든 이동경로를 다시 개방하는 Unrestricted Solve로 바꾸지 않는다.
+
+### Solver 종료 처리
+
+Route-Fixed MILP가 제한된 시간 내 좋은 가능해를 찾으면 원본 FULL Replay를 수행한다.
+
+해당 Restricted MILP의 Solver Gap과 전체 Original FULL Global Gap을 구분한다.
+
+TIME_LIMIT에 도달하더라도 유효한 원본 FULL 가능해가 있으면 UB 후보로 사용할 수 있다.
+
+TIME_LIMIT이며 유효한 가능해가 없으면 해당 경로를 `UNRESOLVED`로 분류한다.
+
+TIME_LIMIT을 INFEASIBLE로 바꾸지 않는다.
+
+---
+
+## 6. Stage D — 이동성 검증과 UB 갱신
+
+이번에는 다음 두 값을 별도로 보존하라.
+
+**BEST_GLOBAL_UB**
+
+이동 여부와 관계없이 원본 FULL Replay를 통과한 가장 낮은 목적값.
+
+**BEST_MOVING_FEASIBLE_UB**
+
+실제 MOVE Arc가 최소 1개 포함되고 원본 FULL Replay를 통과한 가장 낮은 목적값.
+
+각 이동 후보에 대해 다음 상태를 구분한다.
+
+- DAG_ROUTE_VALID
+- ROUTE_FIXED_MILP_OPTIMAL
+- ROUTE_FIXED_TIME_LIMIT
+- FULL_FEASIBLE_MOVING
+- FULL_FEASIBLE_NONMOVING
+- FULL_REPLAY_FAIL
+- MOVING_UB_IMPROVEMENT
+- MOVING_FEASIBLE_BUT_WORSE
+
+다음 조건에서만 BEST_GLOBAL_UB를 변경한다.
+
+`FULL Replay PASS AND candidate_UB < existing_UB`
+
+수치 허용오차 이내의 동등 목적값은 새로운 개선으로 판정하지 않는다.
+
+더 좋은 이동 운전계획을 찾지 못하더라도 기존 N1 FULL 검증 UB를 유지한다.
+
+### 이동성 진단
+
+경로 후보 생성과 최적화가 정상 동작했는지 확인하기 위해, 실제 MOVE Arc가 있는 후보 경로를 고정한 진단용 MILP를 최소 한 번 시험한다.
+
+이 진단은 원본 Objective를 유지한다.
+
+단, 이동을 강제한 진단용 결과를 전체 Proposed의 최적해로 주장하지 않는다.
+
+이동 FULL 가능해를 발견하지 못한 경우 다음을 구분한다.
+
+- 물리적으로 불가능함을 Solver가 증명
+- 시간 부족
+- 생성한 경로 후보 부족
+- FULL 제약 위반
+- 탐색은 가능했지만 개선 UB 없음
+
+이동 0회를 곧바로 이동성 무용의 증거로 해석하지 않는다.
+
+---
+
+## 7. Stage E — K32/K48 기반 Global LB
+
+### 7.1 기존 인증 LB 계승
+
+같은 Source18r과 May01의 기존 K32/K48 인증을 검증하고 사용한다.
+
+`LB_K32 = 0.46497617639758426`
+
+`LB_K48 = 0.46498486997548166`
+
+초기 Global LB는 더 강한 인증값인 K48을 사용한다.
+
+기존 May01의 K32/K48을 이유 없이 다시 계산하지 않는다.
+
+이전 인증 모델·계수·출처와 현재 FULL Problem Identity가 일치하는지 독립 검증한다.
+
+### 7.2 K32/K48의 수학적 계약
+
+K32/K48은 원본 FULL보다 완화된 문제이며,
+
+`FULL feasible projection ⊆ K32/K48 feasible domain`
+
+이 반드시 성립해야 한다.
+
+따라서 K32/K48의 유효한 Gurobi ObjBound는 Original FULL의 Global LB로 사용할 수 있다.
+
+단,
+
+- K32 ObjVal은 Original FULL UB가 아님
+- K32 ObjBound만 인증 LB 후보
+- Route-Fixed MILP ObjBound는 Original FULL Global LB가 아님
+
+이 구분을 모든 코드와 보고서에서 유지한다.
+
+### 7.3 기존 K32 모델의 한계 인식
+
+기존 K32에는 목적값 `0.4812227124583283`인 축소 정수 가능해가 존재한다.
+
+이 모델을 그대로 풀어서는 현재 UB 0.546162 기준으로 필요한 LB 0.529777에 도달할 수 없다.
+
+따라서 단순 K32 B&B 연장은 금지한다.
+
+### 7.4 조건부 Dynamic Valid Grid Constraint Strengthening
+
+추가 LB 개선이 필요한 경우에만 기존 K32/K48의 인증된 축소 문제를 강화한다.
+
+우선 참고:
+
+- PR211의 K32/K48 위반 원본 Row
+- PR214에서 독립 검증됐으나 효과가 미확정인 Fractional Grid Row
+- K32/K48 축소 정수해의 원본 FULL 위반 Row
+- 기존 Root 분수해의 원본 계통 제약 위반
+
+추가하는 모든 제약은 다음을 만족해야 한다.
+
+1. 원본 FULL에서 유효한 제약
+2. Original FULL → Compact 사영 검증
+3. Fixed AIDC/Forecast/Correction 항 보존
+4. 원본 Phase/Slot/Asset 정합성
+5. Binary64 외향 반올림으로 가능영역 보존
+6. 기존 행 및 Original Objective 보존
+7. 독립 Native Readback PASS
+
+기존 PR211과 같은 제약을 중복 추가하지 않는다.
+
+이미 효과가 없었던 동일 제약 조합을 무조건 반복하지 않는다.
+
+새 강화 모델은 여전히 Original FULL의 유효한 Relaxation이어야 한다.
+
+### LB 업데이트
+
+새 강화 MILP의 실제 Solver ObjBound가 독립 인증을 통과한 경우에만:
+
+`LB_next = max(LB_existing, LB_new_certified)`
+
+Restricted Incumbent ObjVal을 Global LB로 사용하지 않는다.
+
+새 LB가 기존보다 실질적으로 증가하지 않으면 동일한 강화 정책에 계속 시간을 쓰지 않는다.
+
+기준 Material LB Gain은 우선 `0.001`로 설정하고, 그 미만의 증가도 실제 값과 인증 증거는 보존한다.
+
+추가 제약 후보를 유효하게 구성할 수 없으면 LB 신규 Optimize를 건너뛰고 잔여 예산을 Primal 탐색에 배분한다.
+
+3% Gap을 달성하지 못하더라도 허위 인증을 만들지 않는다.
+
+---
+
+## 8. Stage F — Adaptive Primal–Dual Controller
+
+단순히 경로 20개 평가 후 종료하는 구조로 만들지 않는다.
+
+다음 반복 구조를 구현한다.
+
+```text
+INITIALIZE:
+    Cold U4/N1 FULL feasible UB
+    Inherit verified K32/K48 Global LB
+
+WHILE Native Runtime budget remains:
+
+    GlobalGap = (BestUB - CertifiedLB) / BestUB
+
+    IF GlobalGap <= 0.03:
+        STOP with 3% certificate
+
+    Assess:
+        recent UB improvement
+        recent LB improvement
+        remaining runtime
+        available route candidates
+        valid strengthening candidates
+
+    IF promising route candidates exist:
+        Generate/select an original DAG route
+        Solve Route-Fixed Exact C3A MILP
+        Validate with Original FULL Replay
+
+        IF verified improvement:
+            Update BestUB
+            Update route-search center and grid scores
+
+    IF qualified LB strengthening exists:
+        Solve bounded strengthened K32/K48 MILP
+        Verify original-relaxation inclusion
+        Verify solver bound
+
+        IF valid:
+            Update CertifiedLB
+
+    Avoid duplicated mathematical models
+    Avoid repeated failed candidates
+    Keep previous verified bounds
+
+END WHILE
+```
+
+각 개선 후 Gap을 즉시 다시 계산한다.
+
+Primal과 Dual 중 현재 더 유망한 엔진으로 Native 예산을 전환할 수 있어야 한다.
+
+목적값이 같은 다른 Raw Point를 무의미하게 새 중심점으로 계속 등록하지 않는다.
+
+경로 후보를 모두 사용했다고 판단하는 것은 현재 Beam/Screening 후보 집합의 소진이지, 원본 전체 경로 공간의 완전한 탐색을 뜻하지 않는다.
+
+---
+
+## 9. 실제 1,800초 Native 예산
+
+총 Native Optimize 누적 상한:
+
+**1,800초**
+
+최초 예산 계획:
+
+| 단계 | 기본 배정 |
+|---|---:|
+| U4 + N1 Cold Start | 210초 |
+| Route-Fixed MILP 기반 UB 탐색 | 1,000초 |
+| 조건부 K32/K48 LB 강화 | 300초 |
+| Adaptive Reserve | 290초 |
+| **합계** | **1,800초** |
+
+각 구간의 조기 종료 후 잔여시간은 Controller가 재배분할 수 있다.
+
+단, 총 Native 누적 상한은 절대 초기화하지 않는다.
+
+실제 사용시간은 Gurobi Runtime으로 측정하고, 모든 Optimize 호출을 포함한다.
+
+권장 개별 Solver 시간:
+
+- U4: 최대 90초
+- N1: 최대 150초
+- Route-Fixed MILP: 초기 60~120초
+- 어려운 유망 Route는 조건부 연장하되 누적 예산 엄수
+- 강화 K32/K48: 한 번 최대 300초
+- 전체 Unrestricted Full MILP: 실행 금지
+
+전체 1,800초를 강제로 소모할 필요는 없다.
+
+동일한 후보만 남았거나 안전하게 실행할 수 없으면 조기 종료한다.
+
+Native Runtime과 전체 Wall Time은 분리 보고한다.
+
+---
+
+## 10. 자원 제약
+
+실제 실행 환경은 RAM 약 32GiB이므로 다음을 유지한다.
+
+- Heavy Gurobi Worker 1개
+- Gurobi Threads=1
+- 다른 Heavy Solver와 병렬 실행 금지
+- 원래 B1 Worker 재개 금지
+- Windows RAM Reserve 최소 4GiB
+- Commit Reserve 최소 6GiB
+- 모델 생성 후 관측 메모리 증가에 따른 추가 Reserve
+- Solver Nodefile 및 TEMP/TMP 위치 사전 점검
+- Source SHA Drift 발생 시 FAIL-CLOSED
+
+기존 실행 중인 외부 프로세스를 강제로 종료하지 않는다.
+
+모델 크기가 비정상적으로 커지거나 메모리 Reserve를 만족하지 못하면 그 후보를 실행하지 않는다.
+
+Source18r의 승인된 수치 정밀도와 Gurobi 설정을 유지한다.
+
+기존 Kappa 및 coefficient range 경고를 숨기지 않는다.
+
+---
+
+## 11. 원본 물리 조건 유지
+
+절대 변경 금지:
+
+- MESS 4대 및 용량
+- 기존 초기 위치
+- 원래 24개 접속 위치
+- 모든 원본 이동 Arc
+- 실제 이동시간 및 에너지
+- 96슬롯
+- 원본 SOC 상하한
+- 초기·종단 SOC
+- Charge Mode
+- P/Q/PCS16
+- 이동 중 P/Q 사용 금지
+- 전체 배전계통 전압·전류·변압기 제약
+- SVR11 / Capacitor Authority
+- AIDC Workload 및 Forecast
+- 원래 Objective `min rho_max`
+- Original FULL 검증 수치 기준
+
+Rebound 완화를 위해 충전 에너지를 삭제하거나 뒤로 미루어 96슬롯 외부로 보내지 않는다.
+
+원본 Terminal SOC 복원 의무를 완화하지 않는다.
+
+임의의 충전지점·이동경로를 추가하지 않는다.
+
+경로 후보 Ranking과 실제 MILP 목적함수를 혼합하지 않는다.
+
+---
+
+## 12. 검증 및 연구 결과 분류
+
+각 운전계획은 Native Raw를 보존하고 Original FULL Replay를 수행한다.
+
+확인 항목:
+
+- 원본 FULL CSR/RHS/Sense
+- 원본 Binary/Integer Pattern
+- Route DAG 및 Arc
+- 이동에너지
+- 전체 SOC
+- 충전·방전 Mode
+- P/Q 및 PCS16
+- Line/Phase/Slot Thermal
+- NormalAmps
+- 전압
+- Transformer
+- AIDC
+- Original Objective
+
+검증 실패 Raw는 삭제하지 않는다.
+
+Raw rounding, clipping, P/Q Repair 금지.
+
+다음 결과를 별도로 판정한다.
+
+1. **FULL_FEASIBLE_FOUND**
+2. **MOVING_FULL_FEASIBLE_FOUND**
+3. **MOVING_UB_MATERIAL_GAIN**
+4. **GLOBAL_LB_MATERIAL_GAIN**
+5. **GLOBAL_GAP_3PCT_CERTIFIED**
+6. **TIME_LIMIT_WITH_FEASIBLE**
+7. **TIME_LIMIT_NO_FEASIBLE**
+8. **CANDIDATE_EXHAUSTED**
+9. **SOURCE_OR_RESOURCE_STOP**
+
+전체 FULL 가능해와 3% 최적성 인증을 같은 PASS 값으로 표시하지 않는다.
+
+---
+
+## 13. Actual / May Campaign Gate
+
+이번 작업은 IEEE123 B2의 **May01 단일 연구 Canary**다.
+
+실행 금지:
+
+- B1 재실행
+- B1 예약 활성화
+- B3 M단계
+- IEEE8500
+- 5월 31일 전체 캠페인
+- 기존 PR217 운전계획 변경
+- 다른 날짜 자동 실행
+
+Actual은 기존 Frozen Planning 및 Fresh OpenDSS 계약을 읽기 전용 감사한다.
+
+B2의 기존 승인 조건인 Global Gap 3% 및 해당 Planning 자체 Freeze Interface가 없으면 Actual을 임의 실행하지 않는다.
+
+따라서 계약이 충족되지 않았을 경우 `ACTUAL_NOT_RUN`을 명확히 기록한다.
+
+Planning FULL PASS를 Actual AC PASS로 해석하지 않는다.
+
+---
+
+## 14. 최종 정량 비교
+
+다음 비교표를 작성한다.
+
+| Algorithm | Verified UB | Certified LB | Global Gap | Moves | Native(s) |
+|---|---|---|---|---|---|
+| U4 historical | | | | | |
+| N1 historical | | | | | |
+| PR217 integrated | | | | | |
+| New Route-Fixed MILP | | | | | |
+| K32/K48 strengthened | | | | | |
+| Final proposed controller | | | | | |
+
+실제 측정하지 않은 값은 추정해서 채우지 않는다.
+
+### 이동성 분석
+
+반드시 다음을 보고한다.
+
+- 생성된 DAG 이동경로 후보 수
+- Exact Physical Screening 탈락 수
+- Heuristic Ranking 탈락 수
+- Route-Fixed MILP 평가 수
+- 실제 FULL 가능 이동경로 수
+- 이동 포함 최선 UB
+- 이동 없는 N1 대비 UB 차이
+- 이동 횟수
+- 이동에너지
+- 차량별 충전/방전 AC kWh
+- 차량별 P/Q
+- SOC 최소/최대
+- 새로운 Critical Line/Phase/Slot
+- Rebound가 발생한 슬롯 및 계통 기여
+
+이동해가 발견되지 않은 경우 원인이 Route 생성인지, Recourse 가능성인지, Solver 시간인지 분리해 보고한다.
+
+### LB 분석
+
+다음을 반드시 보고한다.
+
+- K32 인증 하한
+- K48 인증 하한
+- 신규 강화 모델 하한
+- 추가한 원본 Grid Row
+- 새 모델의 K32/K48 포함관계
+- K32/K48 Solver Runtime
+- 실제 LB 증가량
+- 최종 인증 Global Gap
+- 3%까지 필요한 추가 LB
+- 현재 LB로 3%를 달성하기 위해 필요한 UB
+
+---
+
+## 15. 논문 기여 관점 평가
+
+다음 연구 질문에 명확히 답하라.
+
+**Q1. 원본 MESS Route DAG에서 실제 이동하는 운전계획을 찾을 수 있는가?**
+
+**Q2. Route-Fixed MILP로 평가한 이동해가 기존 N1보다 좋은 UB를 제공하는가?**
+
+**Q3. 기존 N2+/N3+의 대규모 이진 동시 탐색보다 계산 효율이 높은가?**
+
+**Q4. K32/K48 인증 Global LB를 유지하면서 추가 강화가 가능한가?**
+
+**Q5. 최종 Global Gap이 개선되고, 목표 3%에 접근하는가?**
+
+**Q6. 이 알고리즘을 논문에서 Exact Global Solver, Certified Matheuristic, Bound-Guided Anytime MILP 중 어떤 범주로 정직하게 표현해야 하는가?**
+
+실제 수학적 보증과 검증 결과에 따라 분류하라.
+
+개선이 없으면 없다고 보고한다.
+
+---
+
+## 16. 최종 산출물 및 Git
+
+새 연구 디렉터리:
+
+`docs/v42_b2_k32_routefixed1800_canary/`
+
+최종 보고서:
+
+`K32_ROUTE_FIXED_1800_CANARY_FINAL_KO.md`
+
+반드시 다음 파일을 제공한다.
+
+- SOURCE_AND_CASE_AUTHORITY.json
+- ALGORITHM_CONTRACT_KO.md
+- EXACT_ROUTE_DAG_AUDIT.json
+- ROUTE_CANDIDATES.json
+- ROUTE_FIXED_MILP_RESULTS.json
+- MOVING_FEASIBILITY_DIAGNOSTICS.json
+- FULL_REPLAY_CERTIFICATES.json
+- BEST_UB_TRAJECTORY.json
+- K32_K48_LB_CERTIFICATES.json
+- VALID_GRID_STRENGTHENING_AUDIT.json
+- GLOBAL_GAP_TRAJECTORY.json
+- NATIVE_RUNTIME_LEDGER.json
+- MEMORY_NUMERIC_AUDIT.json
+- ACTUAL_COMPATIBILITY.json
+- FINAL_INDEPENDENT_REVIEW.json
+- 최선 96슬롯 MESS 운전계획 CSV
+- UB/LB/Gap vs Native Runtime 그래프
+
+실제 결과와 코드·로그·검증 증거를 Commit/Push하고 **PR217 정확한 HEAD 위에 새로운 Draft PR**을 생성한다.
+
+작업 디렉터리 Clean 상태를 검증한다.
+
+### 최종 실행 지시
+
+계획서 작성만 하지 말고, Source/Native0/자원/물리 검증을 통과하면 **IEEE123 B2 May01 실제 Native 최대 1,800초 Canary를 수행**하라.
+
+실행 중 의미 있는 UB 또는 LB 개선이 있으면 해당 후보와 인증서를 즉시 보존한다.
+
+3% 도달 여부와 관계없이 최종 FULL 검증 UB, 인증 Global LB, Global Gap, 이동 횟수, 계산시간을 보고한다.
+
+**절대 임의로 원본 물리를 완화하거나, Restricted Bound를 Global LB로 사용하거나, 이동을 강제한 진단해를 Proposed 최적해로 승격하지 마라.**
+
+최종 목적은 **Mobile ESS 이동경로를 실제 수리최적화에 반영하면서, 계산시간 1,800초 안에서 검증 가능한 UB와 인증 Global LB를 함께 관리하는 알고리즘의 성능을 검증하는 것**이다.

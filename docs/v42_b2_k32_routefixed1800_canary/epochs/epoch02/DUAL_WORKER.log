@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\v42_b2_k32_routefixed1800_canary_20261012\tools\k32_routefixed1800\dual.py", line 118, in <module>
+    parser=argparse.ArgumentParser();parser.add_argument('--seconds',type=float,required=True);args=parser.parse_args();main(args.seconds)
+                                                                                                                        ^^^^^^^^^^^^^^^^^^
+  File "D:\v42_b2_k32_routefixed1800_canary_20261012\tools\k32_routefixed1800\dual.py", line 52, in main
+    before=r.memory();guard()
+                      ^^^^^^^
+  File "D:\v42_b2_k32_routefixed1800_canary_20261012\tools\integrated_primal1800\adapter.py", line 40, in guard
+    v.require(v.file_sha(ROOT/path) == expected, 'EXECUTION_SOURCE_DRIFT:'+path)
+  File "D:\v42_b2_k32_routefixed1800_canary_20261012\tools\u4_primal_alns\verify.py", line 43, in require
+    raise ValueError(message)
+ValueError: EXECUTION_SOURCE_DRIFT:tools\k32_routefixed1800\controller.py

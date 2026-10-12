@@ -1,0 +1,146 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter Threads to value 1
+Set parameter FeasibilityTol to value 1e-09
+Set parameter OptimalityTol to value 1e-09
+Set parameter IntFeasTol to value 1e-08
+Set parameter MIPGap to value 0.005
+Set parameter Method to value 2
+Set parameter MIPFocus to value 1
+Set parameter NumericFocus to value 3
+Set parameter ScaleFlag to value 2
+Set parameter Seed to value 0
+Set parameter MIPGapAbs to value 1e-10
+Set parameter LogFile to value "D:\v42_b2_k32_routefixed1800_canary_20261012\docs\v42_b2_k32_routefixed1800_canary\calls\045_ROUTE_FIXED\native\NATIVE_GUROBI.log"
+Set parameter TimeLimit to value 120
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  120
+FeasibilityTol  1e-09
+IntFeasTol  1e-08
+MIPGap  0.005
+OptimalityTol  1e-09
+Method  2
+ScaleFlag  2
+MIPFocus  1
+NumericFocus  3
+Threads  1
+
+Optimize a model with 715596 rows, 354277 columns and 7911369 nonzeros (Min)
+Model fingerprint: 0x444aa80a
+Model has 1 linear objective coefficients
+Variable types: 344955 continuous, 9322 integer (9322 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [4e-08, 2e+03]
+  RHS range        [2e-25, 2e+03]
+Warning: Model contains large matrix coefficient range
+
+Presolve removed 234313 rows and 255891 columns (presolve time = 5s)...
+Presolve removed 599849 rows and 276253 columns
+Presolve time: 7.50s
+Presolved: 115747 rows, 78024 columns, 841353 nonzeros
+Variable types: 77644 continuous, 380 integer (380 binary)
+Performing another presolve...
+Presolve removed 7477 rows and 734 columns
+Presolve time: 1.83s
+Root barrier log...
+
+Ordering time: 0.04s
+
+Barrier statistics:
+ Dense cols : 774
+ AA' NZ     : 6.781e+05
+ Factor NZ  : 1.258e+06 (roughly 70 MB of memory)
+ Factor Ops : 1.658e+08 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.29937286e+03 -3.75139646e+10  8.17e+05 0.00e+00  1.65e+08    13s
+   1   1.69166276e+03 -4.07361751e+10  5.72e+05 2.88e+02  1.07e+08    13s
+   2   1.55243674e+03 -4.02751737e+10  5.29e+05 5.92e+01  9.34e+07    13s
+   3   4.18130352e+02 -3.63864333e+10  1.62e+05 1.73e+00  2.98e+07    13s
+   4   8.26345613e+01 -2.03885229e+10  3.16e+04 7.92e-09  6.17e+06    13s
+   5   2.27186781e+01 -7.81806101e+09  8.30e+03 4.19e-09  1.65e+06    13s
+   6   1.06233009e+01 -2.59552144e+09  3.66e+03 2.84e-08  6.47e+05    13s
+   7   4.12068117e+00 -7.31843076e+08  1.19e+03 9.78e-09  1.95e+05    13s
+   8   2.17031218e+00 -3.15245337e+08  4.50e+02 1.14e-12  7.21e+04    13s
+   9   1.14075996e+00 -1.09049454e+08  6.99e+01 1.14e-12  1.35e+04    13s
+  10   9.91904069e-01 -3.03563955e+07  1.61e+01 1.30e-08  2.94e+03    13s
+  11   9.52881792e-01 -7.28182786e+06  1.61e+00 1.14e-12  4.93e+02    13s
+  12   9.49065851e-01 -1.29645442e+06  1.61e-01 1.14e-12  7.67e+01    13s
+  13   9.48731432e-01 -1.50322237e+05  1.60e-02 1.14e-12  8.49e+00    13s
+  14   9.48690637e-01 -1.57208934e+04  1.59e-03 6.82e-13  8.74e-01    13s
+  15   9.48632316e-01 -1.59342327e+03  1.57e-04 2.98e-13  8.82e-02    14s
+  16   9.48082551e-01 -1.64121526e+02  1.56e-05 6.39e-14  9.13e-03    14s
+  17   9.42461324e-01 -2.09131445e+01  1.55e-06 5.68e-14  1.21e-03    14s
+  18   8.98153692e-01 -6.36481070e+00  1.53e-07 6.55e-15  4.02e-04    14s
+  19   6.92810114e-01 -1.70064312e+00  5.86e-08 1.49e-13  1.32e-04    14s
+  20   6.36540899e-01 -1.06446961e+00  4.50e-08 5.47e-13  9.40e-05    15s
+  21   6.14652285e-01 -2.85766333e-01  3.89e-08 8.27e-13  4.98e-05    15s
+  22   5.88410399e-01 -9.59539825e-02  3.13e-08 1.48e-12  3.78e-05    15s
+  23   5.74198878e-01  5.62914684e-02  2.62e-08 1.41e-11  2.86e-05    16s
+  24   5.58925067e-01  3.60898945e-01  1.48e-08 1.55e-10  1.09e-05    17s
+  25   5.51780966e-01  4.42799949e-01  8.96e-09 2.32e-10  5.98e-06    17s
+  26   5.49501892e-01  4.70609914e-01  6.23e-09 2.40e-10  4.32e-06    17s
+  27   5.48068514e-01  5.00130734e-01  4.60e-09 1.44e-10  2.59e-06    18s
+  28   5.47169848e-01  5.14335578e-01  3.14e-09 2.27e-10  1.75e-06    18s
+  29   5.46766405e-01  5.23676240e-01  1.57e-09 1.91e-10  1.21e-06    18s
+  30   5.46294056e-01  5.33782816e-01  1.05e-09 1.58e-10  6.45e-07    18s
+  31   5.46247535e-01  5.42963963e-01  2.91e-10 4.37e-11  1.70e-07    18s
+  32   5.46172150e-01  5.45825379e-01  4.27e-10 2.91e-11  1.79e-08    18s
+  33   5.46163648e-01  5.46128290e-01  7.83e-10 3.21e-12  1.83e-09    18s
+  34   5.46162388e-01  5.46158731e-01  8.76e-11 2.43e-13  1.89e-10    19s
+  35   5.46162160e-01  5.46161788e-01  5.99e-11 1.22e-13  1.92e-11    19s
+  36   5.46162133e-01  5.46162096e-01  5.82e-11 1.29e-14  1.93e-12    19s
+  37   5.46162131e-01  5.46162127e-01  1.71e-10 1.58e-15  1.94e-13    19s
+
+Barrier solved model in 37 iterations and 18.92 seconds (32.62 work units)
+Optimal objective 5.46162131e-01
+
+
+Root crossover log...
+
+      25 DPushes remaining with DInf 0.0000000e+00                19s
+       0 DPushes remaining with DInf 0.0000000e+00                19s
+
+    1485 PPushes remaining with PInf 0.0000000e+00                19s
+       0 PPushes remaining with PInf 0.0000000e+00                19s
+
+  Push phase complete: Pinf 0.0000000e+00, Dinf 0.0000000e+00     19s
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+    1504    5.4616213e-01   0.000000e+00   8.074194e-04     19s
+    1505    5.4616213e-01   0.000000e+00   0.000000e+00     19s
+Crossover time: 0.34 seconds (0.79 work units)
+    1505    5.4616213e-01   0.000000e+00   0.000000e+00     19s
+
+Root relaxation: objective 5.461621e-01, 1505 iterations, 7.37 seconds (11.28 work units)
+Total elapsed time = 19.38s (DegenMoves)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.54616    0   90          -    0.54616      -     -   19s
+*    0     0               0       0.5461621    0.54616  0.00%     -   20s
+
+Explored 1 nodes (1802 simplex iterations) in 20.16 seconds (34.73 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 1: 0.546162 
+
+Optimal solution found (tolerance 5.00e-03)
+Best objective 5.461621302242e-01, best bound 5.461621302242e-01, gap 0.0000%
+
+User-callback calls 2814, time in user-callback 2.13 sec
+{"output": "D:\\v42_b2_k32_routefixed1800_canary_20261012\\docs\\v42_b2_k32_routefixed1800_canary\\calls\\045_ROUTE_FIXED\\native", "status": "FINISHED", "Native_Runtime": 20.169000148773193, "ObjVal": 0.5461621302242249, "restricted_ObjBound": 0.5461621302242249}
