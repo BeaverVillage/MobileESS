@@ -1,0 +1,25 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\tools\integrated_primal1800\pilot.py", line 402, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\tools\integrated_primal1800\pilot.py", line 217, in main
+    if args.mode=='prepare':prepare()
+                            ^^^^^^^^^
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\tools\integrated_primal1800\pilot.py", line 44, in prepare
+    spec=make_spec(case,center,method,candidate,ref_replay)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\tools\integrated_primal1800\adapter.py", line 148, in make_spec
+    grid=current_grid(case,center,DOCS/'COLD_U4_SOURCE_GRID.json')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\v42_common_mess\neighborhood.py", line 62, in current_grid
+    targets, provenance = grid_candidates(case, point, path)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\v42_m1_hybrid\neighborhood.py", line 65, in grid_candidates
+    vertices, pcs_rows = _pcs_vertices(case)
+                         ^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_b2_integrated_primal1800_canary_20261012\v42_m1_hybrid\neighborhood.py", line 26, in _pcs_vertices
+    a, b = case.original_A.indptr[i:i+2]
+           ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'LazyCSR' object has no attribute 'indptr'

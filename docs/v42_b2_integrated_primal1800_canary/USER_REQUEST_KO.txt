@@ -1,0 +1,565 @@
+# V42 B2 — U4–N1–Route/Mode Adaptive Primal Optimization
+## IEEE123 May01 Cold-Start 1,800초 통합 Canary
+
+Repository: `BeaverVillage/MobileESS`
+
+## 0. 이번 작업의 최종 목표
+
+IEEE123 B2의 2025-05-01을 대상으로 다음 알고리즘을 하나의 반복 실행 구조로 구현하고, **Native Optimize 누적 최대 1,800초**로 실제 실행하라.
+
+**U4 초기 FULL 가능해 → N1 전체 Charge Mode 최적화 → N1 개선해 중심의 MESS 이동·Mode 공동 탐색 → 원본 FULL 검증 → UB 갱신 → K32/K48 인증 LB와 Global Gap 평가 → 예산이 남고 개선 가능성이 있으면 반복**
+
+이번 작업은 최종 Production 동결이 아니라 **통합 알고리즘의 첫 30분 Cold-Start Canary**다.
+
+설계·테스트·Native0만 수행하고 종료하지 않는다. 실제 Source·모델·자원 검증을 통과하면 승인된 1,800초 내에서 Native Optimize까지 실행하라.
+
+### 고정된 연구 Authority
+
+- Source18r / PR207: `497609b46faa14ea7e32a9483a333ab32fd264ef`
+- Critical Grid CG / PR211: `d12315a3757aec187c8da0685c28ef901466386a`
+- PR215: `6ca7624d7eafd45d5b061ff33e262b0de32bfe8d`
+- PR216 정확한 HEAD: `38d98b99d1ea5ce9021fe0d727ab80309910b63d`
+- Case SHA: `34c0efffa9c05397552fb167667c0bbfe2f35cec89801a3169c00c64fe77f292`
+- 원본 FULL matrix SHA: `0eca025d99a24d2ae91117cdfe3ae48dade189336ada61b3f8234d9bf99f3cec`
+- 원본 FULL domain SHA: `9247e42b8119f60ef149d0963e31dd8a697af5426a5aaeec9450b2a2f246481e`
+- 기존 원본 검증 U4 UB: `0.6760534504652341`
+- PR216 N1 원본 FULL 검증 UB: `0.5461621302242249`
+- K32 인증 Global LB: `0.46497617639758426`
+- K48 누적 인증 Global LB: `0.46498486997548166`
+- Global Gap 종료 목표: 3%
+
+원본 전력망·AIDC 입력·MESS 물리·전압·선로 정격·목적함수·수치 정책을 변경하지 않는다.
+
+## 1. PR216을 잠정 동결하고 코드 재사용
+
+PR216의 다음 실제 코드를 우선 재사용하라.
+
+- `tools/u4_primal_alns/neighborhood.py`
+- `tools/u4_primal_alns/pilot.py`
+- `tools/u4_primal_alns/current_grid.py`
+- `tools/u4_primal_alns/verify.py`
+- `tools/u4_primal_alns/resources.py`
+
+PR216의 N1/N2/N3 기존 원본 코드·결과·Native Ledger는 수정하지 않는다.
+
+신규 연구 브랜치와 독립적인 실행 Adapter를 생성한다.
+
+기존 `v42_common_mess` 및 PR207의 Scientific Source를 직접 변경하지 않는다.
+
+기존 코드의 구조를 이해한 뒤 최소한의 확장으로 통합 Controller를 구현하라.
+
+**N1은 현재 가장 우수한 검증 후보로 잠정 채택하지만, 아직 5월 전체 또는 이동성 효과까지 검증된 최종 알고리즘은 아니다.**
+
+## 2. Cold Start 정의
+
+이번 1,800초 실행에서는 PR216에서 저장한 N1 최선해를 MIP Start로 직접 가져오지 않는다.
+
+Source18r의 동일 원본 과학 입력에서 실제 초기화 및 U4 운전계획 탐색을 실행한다.
+
+Cold Start의 의미는 다음과 같다.
+
+1. 원본 입력·계수·정식화 Authority는 읽기 전용 재사용 가능
+2. 과거 결과는 코드 검증과 성능 비교용으로만 활용
+3. 기존 PR216 최선 N1 해를 새 Solver Start로 사용하지 않음
+4. 초기 FULL 가능해는 이번 Canary의 U4/초기화 실행에서 새로 확보
+5. U4와 N1의 실제 Native Runtime을 이번 1,800초 Ledger에 포함
+6. N1에서 새로 검증된 FULL 가능해만 이후 이동 탐색의 중심점으로 사용
+
+동일 입력에서 과거와 수치적으로 완전히 같은 UB를 얻지 못해도 결과를 숨기거나 이전 해로 대체하지 않는다.
+
+새 초기화 또는 U4에서 FULL 가능해를 확보하지 못하면 이후 단계로 임의 진입하지 말고 원인을 기록한다.
+
+## 3. Step A — U4 초기 FULL 가능해
+
+원본 Source18r의 U4를 활용한다.
+
+목표는 가능한 빠르게 원본 FULL에서 검증된 시작 운전계획을 얻는 것이다.
+
+기존 Source18r 참고 실측:
+
+- 초기화 Native: 5.328초
+- U4 Native: 38.507초
+- 검증 UB: 0.6760534504652341
+
+다만 위 숫자를 이번 실행 결과로 복사하지 않는다.
+
+현재 Case SHA, 모델 Identity 및 정확한 Source가 일치하는지 확인한다.
+
+U4 초기화에서 모든 원본 이동·SOC·PCS·P/Q·Grid 제약을 유지한다.
+
+종료 후 다음을 기록한다.
+
+- 신규 FULL 검증 UB
+- MESS 4대 이동경로
+- 차량별 충전·방전·무효전력
+- SOC96 및 terminal 상태
+- 충전 Mode 활성화 수
+- U4 실제 Native Runtime
+- 전체 Wall Runtime
+- 원본 FULL 검증 증거
+
+초기 후보가 원본 FULL Replay를 통과하지 못하면 이후 최적화의 중심점으로 사용하지 않는다.
+
+## 4. Step B — N1 전체 Mode Activation
+
+U4에서 새로 검증된 FULL 가능해를 중심점으로 N1을 실행한다.
+
+### N1 정식화
+
+- 차량 4대의 원래 Route/Node-Activity 고정
+- 모든 차량의 96슬롯 Charge Mode 384개 개방
+- 전체 차량 Pch/Pdis/Q 연속 재최적화
+- 전체 96슬롯 SOC 유지
+- 초기·종단 SOC 유지
+- 원본 PCS16 유지
+- 모든 원본 Grid Security 유지
+- 원본 Objective `min rho_max` 유지
+
+이번 N1은 PR216과 같은 과학적 정식화여야 한다.
+
+PR216 참고 실측:
+
+- Native 39.555초
+- 검증 UB 0.5461621302242249
+- 전체 충전 AC 4,976.312412 kWh
+- 전체 방전 AC 4,491.121952 kWh
+- 차량 이동 0회
+
+실제로 더 좋은 UB를 얻었다면 즉시 원본 FULL Replay를 수행한다.
+
+검증을 통과한 N1 점은 새로운 Best UB이자 다음 Route/Mode 탐색의 중심점으로 보존한다.
+
+N1 Restricted MILP에서 허용 Gap으로 OPTIMAL 종료한 경우, 동일 모델을 단순히 더 오래 재실행하지 않는다.
+
+## 5. Step C — N1 기반 N2+ 단일 MESS 이동 탐색
+
+**이번 연구의 가장 중요한 신규 실험이다.**
+
+과거 PR216의 N2는 기존 U4 초기점에서 출발했고 다른 차량의 Mode도 고정했다.
+
+이번 N2+는 다음과 같이 변경한다.
+
+### N2+의 핵심 변경
+
+- N1의 새 FULL 검증점에서 시작
+- 선택한 MESS 1대의 이동경로를 변경 가능하게 개방
+- **차량 4대의 Charge Mode 384개를 모두 개방**
+- 다른 3대의 Route는 고정
+- 4대 모두 Pch/Pdis/Q/SOC 연속 재최적화
+- 원본 FULL의 모든 Grid/물리 제약 유지
+
+즉, 이동을 담당하는 차량이 1대이더라도 나머지 차량의 충전·방전은 협조적으로 다시 결정할 수 있어야 한다.
+
+### Hamming Radius 적용 시 주의
+
+전체 Mode를 개방한다고 해놓고 Hamming Radius 48에 모든 Mode 변경까지 포함해 N1의 충전 계획을 사실상 고정하지 마라.
+
+이동 경로의 Node-Activity 변경량과 Mode 변경량은 별도로 관리한다.
+
+기본적으로 Local Branching Radius는 실제 선택 차량의 이동·위치 결정에 적용하고, 전체 384개 Mode는 원본 제약 안에서 다시 선택 가능하게 한다.
+
+변경한 Hamming 정의는 기존 PR216과 구분해 명시적으로 저장하고, 중심 FULL 가능해가 항상 해당 Neighborhood에 포함되는지 검증한다.
+
+### Grid 기반 경로 선정
+
+N1에서 개선된 새로운 FULL 가능해를 기준으로 원본 Security 814,560행을 다시 검사한다.
+
+과거 U4 기준 Critical Row를 그대로 재사용하지 않는다.
+
+다음 항목으로 실제 이동 후보를 정한다.
+
+- Thermal Active Row
+- 해당 Line/Phase/Slot
+- signed Pch/Pdis/Q 계통 민감도
+- 현재 차량 위치
+- 원래 허용 이동 Arc
+- ETA 및 이동에너지
+- 사전 충전 가능 시점
+- 혼잡구간 방전 가능 시점
+- 사후 SOC 복원 시간
+- 충전 Rebound에 따른 다른 시간대의 혼잡
+
+다음 전체 운전을 동시에 고려하라.
+
+**사전 충전 → 이동 → 도착 후 방전 → 다른 시간대 충전/SOC 복원**
+
+별도의 임의 복귀 제약은 추가하지 않는다.
+
+후보 경로는 원래 96슬롯 Route DAG의 실제 Arc로만 구성한다.
+
+새 물리적 이동경로·ETA·에너지 계수를 만들어내지 않는다.
+
+### 반복 정책
+
+첫 번째 이동 후보에서 새로운 FULL 검증 UB를 발견했다면, 해당 운전계획을 새로운 중심점으로 사용한다.
+
+중심점이 바뀌면 Critical Grid Row 및 Signed Sensitivity를 다시 계산한다.
+
+개선이 없으면 다음 차량 또는 다음 유효 이동경로를 선택한다.
+
+동일 중심·동일 자유변수·동일 Radius의 실패 Neighborhood는 반복하지 않는다.
+
+동일 유형의 모델이 지속적으로 Root에서 정체된다면 남은 시간을 무조건 소모하지 말고 N3+ 또는 다음 유망 Neighborhood로 넘어간다.
+
+한 번의 Native 최적화 요청시간은 원칙적으로 150초 이내로 제한한다.
+
+## 6. Step D — N1 기반 N3+ Two-MESS Coordination
+
+N3+는 두 차량의 Route를 동시에 변경한다.
+
+### 기존 N3와의 차이
+
+기존 PR216 N3는 초기 U4를 중심으로 2대의 Route/Mode를 개방했다.
+
+이번에는 N1 또는 이후 N2+가 찾은 **최선 FULL 검증 운전계획**에서 출발한다.
+
+- MESS 2대 Route/Node-Activity 개방
+- 나머지 2대 Route 고정
+- **4대의 모든 Charge Mode 개방**
+- 4대의 Pch/Pdis/Q/SOC 공동 재최적화
+- 모든 원본 Grid Security 유지
+- 4대 각각의 개별 SOC 및 PCS 유지
+
+두 차량을 하나의 가상 ESS로 합치지 않는다.
+
+선택한 차량이 서로 다른 시간대·위치에서 방전하거나 충전하는 협조 운전을 탐색한다.
+
+최선 FULL 검증 UB가 개선되면 새 중심점으로 다음 반복을 수행한다.
+
+후보 쌍의 선정 근거는 현재 FULL 가능해의 계통 병목과 차량별 실제 충방전 운전에 둔다.
+
+모든 6개 쌍을 무조건 실행할 필요는 없다.
+
+동일한 실패 Neighborhood를 반복하지 않는다.
+
+한 번의 Native 최적화 요청시간은 원칙적으로 180초 이내로 제한한다.
+
+## 7. Step E — Adaptive UB 반복 Controller
+
+N1/N2+/N3+를 단순히 한 번씩 호출하고 종료하지 마라.
+
+하나의 Best-UB Controller를 구현한다.
+
+반복 r에서:
+
+`UB_next = min(UB_current, verified_FULL_UB_candidate)`
+
+단, 후보가 원본 FULL Replay를 통과해야 한다.
+
+### 다음 Neighborhood 선택
+
+- N1 종료 후에는 N2+를 우선 시험한다.
+- N2+에서 이동을 포함한 유효한 개선해가 나오면 해당 중심으로 N2+ 재탐색 또는 N3+를 수행한다.
+- N2+에서 개선이 없으면 N3+로 전환한다.
+- N3+에서 개선이 있으면 새 중심으로 Signed Grid를 다시 평가한다.
+- 개선이 없는 동일한 Neighborhood를 자동으로 반복하지 않는다.
+- 남은 계산예산과 최근 UB 개선량을 기준으로 후속 후보를 선택한다.
+
+개선 후보는 발견 즉시 원본 FULL에서 검증하여 보존한다.
+
+**원본 FULL의 가능해가 확보돼 있는 상태에서 개선 탐색에 실패해도 기존 Best UB는 절대 버리지 않는다.**
+
+### 종료 조건
+
+- 검증 Global Gap ≤ 3%
+- 누적 Native Runtime 예산 소진
+- 더 이상 생성할 수 있는 비중복 유효 Neighborhood가 없음
+- 자원 또는 Source 무결성 위반으로 안전 종료
+
+예산 소진이나 Neighborhood 고갈은 Global Optimality 증명이 아니다.
+
+3% 달성 여부와 FULL 가능해 확보 여부를 별도의 판정값으로 보고하라.
+
+## 8. K32/K48 Global LB 평가
+
+기존 K32를 기본 하한 알고리즘으로 유지한다.
+
+이번 Canary에서는 동일한 B2 May01의 기존 인증 하한을 우선 재사용한다.
+
+- K32 LB: `0.46497617639758426`
+- K48 누적 LB: `0.46498486997548166`
+
+둘의 Source·Case·Objective·물리 조건 및 기존 인증 영수증이 정확히 일치해야 한다.
+
+서로 다른 Case 또는 Scientific Source의 LB를 사용하지 않는다.
+
+### 이번 실행의 LB 정책
+
+**K32를 새로 최적화하지 않는다.**
+
+이미 같은 Case에서 인증된 더 높은 K48 하한이 있으므로 이번 30분 연구의 Native 예산은 UB 개선에 우선 배정한다.
+
+현재 기준 최종 계산:
+
+`LB_valid = 0.46498486997548166`
+
+`Gap = (UB_verified - LB_valid) / UB_verified`
+
+K32와 K48의 인증 출처는 따로 보존한다.
+
+Restricted N1/N2+/N3+ Solver `ObjBound`를 새로운 Global LB로 승격하지 않는다.
+
+3% Gap을 달성하지 못한 경우에는 현재 UB에 필요한 LB와 현재 LB에서 필요한 UB를 계산하여 보고한다.
+
+별도의 K32 B&B 또는 Dynamic Constraint Generation Native 실행은 이번 Canary 범위에서 금지한다.
+
+## 9. 총 1,800초 Native 예산
+
+원본 M단계와 동일한 누적 Native Optimization Budget을 사용한다.
+
+### 초기 예산 계획
+
+| 단계 | 단계별 최초 최대 배정 |
+|---|---:|
+| U4 초기화 및 초기 FULL 가능해 | 180초 |
+| N1 전체 Mode Activation | 150초 |
+| N2+ 이동·충방전 공동 탐색 | 900초 |
+| N3+ 2대 협조 이동 탐색 | 570초 |
+| **합계** | **1,800초** |
+
+각 값은 최초 배정 기준이다.
+
+N1이 40초 정도에 최적 종료한다면 남은 110초를 버리지 않고 후속 UB 탐색에 활용할 수 있다.
+
+반대로 N2+에서 장시간 정체되면 N3+ 시도를 위해 예산을 남겨야 한다.
+
+단계 간 남은 예산을 재배분할 때에도 전체 누적 Native 1,800초를 초과하지 않는다.
+
+각 Native 호출의 유효 TimeLimit은 실제 측정 잔여예산과 단계별 제한을 함께 고려해 결정한다.
+
+기존 PR216의 실행 예산은 새 연구의 1,800초에 합산하지 않지만, 이번 Cold-Start 과정에서 신규 발생한 모든 Optimize Runtime은 포함한다.
+
+Native Runtime과 전체 Wall Time을 구분한다.
+
+- Native Optimize 총합 ≤ 1,800초
+- Worker = 1
+- Threads = 1
+- Gurobi GPU 사용 없음
+- 다른 Heavy Solver와 동시 실행 없음
+- 기존 Solver·Worker 강제 종료 없음
+
+각 호출의 TimeLimit 반환 초과는 실제 Runtime대로 기록하고 숨기지 않는다.
+
+계산예산을 초기화하거나 무제한 자동 재시도하지 않는다.
+
+모든 결과는 실제 동일 Case의 Original FULL Replay를 통해 판단한다.
+
+## 10. 전력계통 및 원본 물리 유지
+
+모든 Restricted Neighborhood MILP는 Source18r의 원래 물리·계통 제약을 유지한다.
+
+- MESS 4대
+- 96슬롯
+- 원본 24개 접속 위치
+- 원래 이동 Arc·ETA·이동에너지
+- Charging/Discharging Mode
+- Pch/Pdis/Q 및 PCS16
+- 97개 SOC 경계
+- 초기·종단 SOC
+- 원래 terminal 위치
+- 이동 중 충방전 금지
+- 원본 AIDC Forecast 및 PCC
+- 원본 선로 Thermal/NormalAmps
+- 변압기 kVA/전류
+- 전압 상하한
+- SVR11 및 Fixed Capacitor Authority
+
+Planning의 전압·전류 기준을 임의 완화하지 않는다.
+
+AIDC Scheduling을 새 결정변수로 추가하지 않는다.
+
+다른 Stage의 운전계획을 B2의 초기해로 사용하지 않는다.
+
+원본 수치 설정과 목적함수 의미도 변경하지 않는다.
+
+제약이나 변수 삭제를 통한 새로운 압축이 필요하면 원본 정수 가능영역을 보존하는 독립 증명을 먼저 요구한다. 이번 작업의 기본 목표는 정식화 교체가 아니라 **Neighborhood 탐색 개선**이다.
+
+## 11. Native0·수치·자원 검증
+
+기존 PR216의 Source/Memory/Resource Guard를 유지한다.
+
+매 Native 실행 전:
+
+1. Git Source 및 Scientific Case SHA 검증
+2. 기존 보호 자료 SHA 검증
+3. 원본 Matrix/Domain/Objective Authority 확인
+4. 신규 Neighborhood의 고정·자유 Binary 확인
+5. 변경 가능한 Mode 수 및 Route 변수 확인
+6. 중심점 원본 FULL Replay PASS
+7. 중심점이 신규 Restricted Model을 만족하는지 확인
+8. 실제 Gurobi Readback
+9. RAM/Commit Resource Admission
+10. Native Runtime Ledger 및 실행 Source SHA 동결
+
+검증에 실패한 경우 해당 Native를 실행하지 않는다.
+
+기존 원본 FULL 검증기는 수정하지 않는다.
+
+Raw Point의 반올림·Clipping·임의 P/Q Repair를 금지한다.
+
+RAM Reserve는 최소 4GiB, Commit Reserve는 최소 6GiB를 유지하고 모델 생성 시 측정한 실제 메모리 증가량에 따른 추가 Reserve도 적용한다.
+
+전용 실행에서는 다른 Heavy Gurobi 프로세스와 충돌하지 않아야 한다.
+
+실행 중 보호 Source/Model Drift가 발생하면 해당 B2 연구만 안전하게 종료한다.
+
+## 12. B1 및 기존 캠페인 보존
+
+현재 B1은 사용자의 지시로 중지되어 있다.
+
+B1을 실행·재개·재예약하지 마라.
+
+기존 B1 PR212/213의 Source, Ledger, FAIL/PASS 및 PAUSED 상태를 보존한다.
+
+PR207/209/210/211/214/215/216의 기존 증거를 수정하지 않는다.
+
+공식 5월 캠페인, B3, IEEE8500은 실행하지 않는다.
+
+이번 실행은 IEEE123 B2 May01 단일 날짜의 연구용 Canary다.
+
+## 13. Actual Fresh OpenDSS 검증
+
+30분 Native Canary 종료 후, 최선 FULL 검증 운전계획을 대상으로 기존 Actual Evaluation 경로가 동일 Source와 입력으로 안전하게 실행 가능한지 검사하라.
+
+Planning FULL 검증과 Actual Fresh AC 검증을 구분한다.
+
+- Actual에서 운전계획 재최적화 금지
+- P/Q 사후 Repair 금지
+- 기존 결정 동결
+- 원본 Fresh OpenDSS 96슬롯 사용
+- 모든 Line/Phase/Transformer/Voltage 위반 보고
+- Planning Objective와 Actual 계통 결과 분리
+
+기존 Frozen Actual 평가와 동일한 Source/입력 계약을 독립적으로 증명하고 새로운 Gurobi Optimize 없이 실행할 수 있다면 최종 최선 계획 1개만 Fresh AC96으로 검증한다.
+
+필수 입력·동결 Interface가 없거나 호환성이 검증되지 않으면 임의 보정이나 입력 대체 없이 `ACTUAL_NOT_RUN`으로 기록한다.
+
+Planning FULL PASS를 Actual PASS로 승격하지 않는다.
+
+## 14. 정량 성능지표
+
+이번 연구에서는 다음 값을 모두 보고한다.
+
+### 최적화 성능
+
+- 기존 U4 UB
+- 새 Cold-Start U4 UB
+- 새 N1 UB
+- N2+ 최선 FULL 검증 UB
+- N3+ 최선 FULL 검증 UB
+- 통합 Controller 최종 UB
+- 절대 UB 개선량
+- 상대 UB 개선율
+- 기존 K32/K48 인증 LB
+- 최종 Global Gap
+- 3% 인증 달성 여부
+
+### 계산 성능
+
+- 초기 가능해 발견 Runtime
+- N1 첫 UB 개선시간
+- N2+ 첫 이동해 발견시간
+- N3+ 첫 이동해 발견시간
+- 개별 Native Runtime
+- 누적 Native Runtime
+- 모델 생성시간
+- FULL Replay 시간
+- 전체 Wall Time
+- Solver Root 완료 여부
+- NodeCount
+- Restricted MIPGap
+- Peak RSS/Commit
+
+### 물리적 운전 성능
+
+- MESS 4대 실제 이동 횟수
+- 각 이동의 출발·도착 위치 및 ETA
+- 이동에너지
+- 차량별 충전 AC kWh
+- 차량별 방전 AC kWh
+- 차량별 Q
+- SOC 최소/최대
+- 초기·종단 SOC
+- 충전 Rebound
+- Critical Line/Phase/Slot 변화
+- Planning 최대 Thermal Loading
+- Actual AC 결과가 실행됐으면 실제 물리 위반 여부
+
+## 15. 핵심 성과 판단
+
+PR216에서는 N1이 UB를 19.21% 개선했지만 이동은 0회였다.
+
+이번 실험의 주요 질문은 다음과 같다.
+
+**Q1. Cold Start에서 N1의 약 0.546162 성능을 재현할 수 있는가?**
+
+**Q2. N1을 중심점으로 사용할 때, 기존 N2/N3 실패와 달리 실제 이동을 포함한 개선 운전계획을 찾을 수 있는가?**
+
+**Q3. 4대 Mode를 모두 개방하면서 1~2대 Route를 변경하는 방법이 UB를 더 낮출 수 있는가?**
+
+**Q4. 1,800초 내에서 UB와 Global Gap이 어느 정도 개선되는가?**
+
+**Q5. 실제 이동을 발견했다면 그 이점은 이동에너지·충전 Rebound를 모두 반영해도 유지되는가?**
+
+이동 횟수가 증가했다는 사실만으로 성능 개선이라고 판단하지 않는다.
+
+목적함수는 여전히 원래 `min rho_max`다.
+
+이동이 0회라면 원본 조건에서 이동이 전역적으로 불필요하다고 주장하지 말고, 이번 탐색범위와 계산예산의 한계를 보고한다.
+
+### 분류
+
+- `COLD_START_N1_REPRODUCED`
+- `N1_PLUS_ROUTE_MATERIAL_GAIN`
+- `N1_PLUS_ROUTE_NONMATERIAL`
+- `NO_NEW_FULL_FEASIBLE`
+- `TIME_LIMIT_FEASIBLE`
+- `RESOURCE_OR_NUMERIC_STOP`
+- `GLOBAL_GAP_3PCT_CERTIFIED`
+
+하나의 주 판정과 필요한 보조 결과를 구분해 기록한다.
+
+## 16. 최종 산출물
+
+신규 연구 디렉터리를 생성한다.
+
+`docs/v42_b2_integrated_primal1800_canary/`
+
+필수 보고서:
+
+`B2_INTEGRATED_PRIMAL_1800_CANARY_FINAL_KO.md`
+
+포함 내용:
+
+1. PR216 기반 Source 동결·재사용 구조
+2. U4 Cold-Start 재현 결과
+3. N1 Mode Activation 재현 결과
+4. N1→N2+→N3+ 중심점 전달 검증
+5. 전체 384 Mode 및 Route 개방의 정확한 정식화
+6. Iteration별 Neighborhood 설명
+7. 실제 Native Runtime 및 사용예산
+8. 개선해별 원본 FULL 독립 검증
+9. 원본 FULL UB 개선 궤적
+10. K32/K48 Global LB 적용 증거
+11. 최종 Global Gap과 3% 달성 여부
+12. 이동횟수·이동에너지·충방전·SOC
+13. Critical Grid Line/Phase/Slot 비교
+14. Planning 및 Actual AC 검증 상태
+15. RAM/Commit 및 Solver 수치 상태
+16. 기존 B1/Source/캠페인 보존 감사
+17. May02/03 재현성 검증을 위한 후속 조건
+18. 최종 알고리즘 잠정 채택 여부
+
+원본 좌표 기준 차량별 96슬롯 운전계획 CSV, UB 개선 그래프, Native Runtime 그래프, 원본 모델 검증 영수증 및 전체 Solver Log를 보존한다.
+
+### Git 완료
+
+PR216 정확한 HEAD를 Base로 하는 신규 Draft PR을 생성한다.
+
+코드·원본 증거·최종 보고서 및 실행 Source SHA를 Commit/Push한다.
+
+기존 동결된 PR의 결과를 수정하지 않는다.
+
+**이번 작업의 최종 목표는 U4와 N1로 얻은 검증 운전계획을 출발점으로 MESS 이동·충방전을 함께 반복 최적화하여, 원본 96슬롯 물리·계통조건을 만족하는 더 낮은 UB를 1,800초 내에 찾을 수 있는지 실제로 검증하는 것이다.**
+
+임의의 추가 Solver Sweep, Full MILP 장시간 B&B, 새로운 LB 연구, 공식 5월 캠페인 및 자동 재실행은 수행하지 않는다.
