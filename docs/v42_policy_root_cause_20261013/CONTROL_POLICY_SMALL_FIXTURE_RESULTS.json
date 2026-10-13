@@ -1,0 +1,744 @@
+{
+  "schema": "V42_CONTROL_POLICY_SMALL_FIXTURE_RESULTS_V1",
+  "status": "PASS",
+  "scope": "CONTROLLED_NAMED_SYNTHETIC_FIXTURE_ONLY_NOT_REAL_MAY01_ACTION_EVIDENCE",
+  "immutable_snapshot_source_sha": "f488f3a99555eb2354ef52d0835078be816d2d988a2bf37010b9b09ff36568d8",
+  "source_receipts": [
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\sensitivity_policy.py",
+      "sha256": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428"
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\policy.py",
+      "sha256": "2182c740a84bc3c9de6a601c748b1c768639becd04a3cdd4fd8fb3a87c8cf6c2"
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\tests\\test_v42_integration_sensitivity_policy.py",
+      "sha256": "0a4c6d5c5a04bbf074cf26facd44893a68602fb35cdadab07be56c53f723c726"
+    }
+  ],
+  "runner_sha": "29d665e57631567ba93c14145e38a72c03d6c5986e68bfaa1ca9cf8129bcae0c",
+  "Native_Optimize_calls": 0,
+  "global_optimizer_calls": 0,
+  "Fresh_AC_calls": 0,
+  "real_May01_Actual_runs": 0,
+  "source_edits": 0,
+  "fixture_cases": [
+    {
+      "name": "DELAY_15",
+      "named_synthetic_fixture": true,
+      "real_May01": false,
+      "policy_sha": "e758072ba201bd13efc685b75179901bc2ec02a83d061782138e4f7e86371e39",
+      "policy_file_sha": "34acd45c14aeadc21bbf464553d7873a7f9b9b876d050e997641d13dc52e0804",
+      "reload_identical_policy_sha": true,
+      "compiler_status": "OFFLINE_POLICY_OPTIMIZATION_VALIDATED",
+      "compiler_metrics": {
+        "compile_wall_seconds": 0.004370800001197495,
+        "RSS_bytes_at_compile_end": 90951680,
+        "process_lifetime_peak_RSS_bytes": 90951680,
+        "peak_RSS_scope": "PROCESS_LIFETIME_INCLUDING_SOURCE_PACKET_LOAD",
+        "templates": 1,
+        "bounded_candidates": 5,
+        "grid_evaluation_calls": 5,
+        "cache_hits": 5,
+        "scenario_tree_nodes": 0,
+        "Native_Optimize_calls": 0
+      },
+      "candidate_comparison": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.9,
+            "HIGH_DEMAND_Q90": 0.9
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "uid": "OBSERVED_FIXTURE_JOB",
+        "action": "DELAY",
+        "policy_action": "DELAY_15",
+        "site": "A",
+        "start_seconds": 900,
+        "nominal_end_seconds": 1800.0,
+        "additional_start_delay_seconds": 900.0,
+        "rule_id": "T0_0",
+        "estimated_worst_peak": 0.6000000000000001,
+        "scenario_scores": {
+          "HIGH_DEMAND_Q90": 0.6000000000000001,
+          "NOMINAL_Q50": 0.6000000000000001
+        },
+        "segments": [
+          {
+            "resource": "gpu:A",
+            "begin": 900,
+            "end": 1800.0,
+            "quantity": 1
+          }
+        ],
+        "status": "SELECTED_FROZEN_OFFLINE_RANK",
+        "policy_sha": "e758072ba201bd13efc685b75179901bc2ec02a83d061782138e4f7e86371e39",
+        "rejected_candidates": [],
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0,
+        "affine_approximation_only": true,
+        "grid_safety_guaranteed": false,
+        "Fresh_AC_status": "NOT_RUN"
+      },
+      "reservation_count": 1
+    },
+    {
+      "name": "PREPLACE",
+      "named_synthetic_fixture": true,
+      "real_May01": false,
+      "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+      "policy_file_sha": "0c0d01e57a6cbc5f0c0df2b99e738b974935097a8be88191039196f8a7586119",
+      "reload_identical_policy_sha": true,
+      "compiler_status": "OFFLINE_POLICY_OPTIMIZATION_VALIDATED",
+      "compiler_metrics": {
+        "compile_wall_seconds": 0.00560599999880651,
+        "RSS_bytes_at_compile_end": 93835264,
+        "process_lifetime_peak_RSS_bytes": 94826496,
+        "peak_RSS_scope": "PROCESS_LIFETIME_INCLUDING_SOURCE_PACKET_LOAD",
+        "templates": 1,
+        "bounded_candidates": 10,
+        "grid_evaluation_calls": 10,
+        "cache_hits": 10,
+        "scenario_tree_nodes": 0,
+        "Native_Optimize_calls": 0
+      },
+      "candidate_comparison": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.9,
+            "HIGH_DEMAND_Q90": 0.9
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.4,
+            "HIGH_DEMAND_Q90": 0.4
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "uid": "OBSERVED_FIXTURE_JOB",
+        "action": "PREPLACE",
+        "policy_action": "PREPLACE",
+        "site": "B",
+        "start_seconds": 0,
+        "nominal_end_seconds": 900.0,
+        "additional_start_delay_seconds": 0.0,
+        "rule_id": "T0_0",
+        "estimated_worst_peak": 0.4,
+        "scenario_scores": {
+          "HIGH_DEMAND_Q90": 0.4,
+          "NOMINAL_Q50": 0.4
+        },
+        "segments": [
+          {
+            "resource": "gpu:B",
+            "begin": 0,
+            "end": 900.0,
+            "quantity": 1
+          }
+        ],
+        "status": "SELECTED_FROZEN_OFFLINE_RANK",
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "rejected_candidates": [],
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0,
+        "affine_approximation_only": true,
+        "grid_safety_guaranteed": false,
+        "Fresh_AC_status": "NOT_RUN"
+      },
+      "reservation_count": 1
+    },
+    {
+      "name": "START_NOW_ZERO_DELAY_BUDGET",
+      "named_synthetic_fixture": true,
+      "real_May01": false,
+      "policy_sha": "e758072ba201bd13efc685b75179901bc2ec02a83d061782138e4f7e86371e39",
+      "policy_file_sha": "79b3da19f0ce0401a9e05e30c0eb9a534d1a109ab387d3dfa6a6347dc446c88f",
+      "reload_identical_policy_sha": true,
+      "compiler_status": "OFFLINE_POLICY_OPTIMIZATION_VALIDATED",
+      "compiler_metrics": {
+        "compile_wall_seconds": 0.0037436000056914054,
+        "RSS_bytes_at_compile_end": 93876224,
+        "process_lifetime_peak_RSS_bytes": 94826496,
+        "peak_RSS_scope": "PROCESS_LIFETIME_INCLUDING_SOURCE_PACKET_LOAD",
+        "templates": 1,
+        "bounded_candidates": 5,
+        "grid_evaluation_calls": 5,
+        "cache_hits": 5,
+        "scenario_tree_nodes": 0,
+        "Native_Optimize_calls": 0
+      },
+      "candidate_comparison": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.9,
+            "HIGH_DEMAND_Q90": 0.9
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "uid": "OBSERVED_FIXTURE_JOB",
+        "action": "START",
+        "policy_action": "START_NOW",
+        "site": "A",
+        "start_seconds": 0,
+        "nominal_end_seconds": 900.0,
+        "additional_start_delay_seconds": 0.0,
+        "rule_id": "T0_0",
+        "estimated_worst_peak": 0.9,
+        "scenario_scores": {
+          "HIGH_DEMAND_Q90": 0.9,
+          "NOMINAL_Q50": 0.9
+        },
+        "segments": [
+          {
+            "resource": "gpu:A",
+            "begin": 0,
+            "end": 900.0,
+            "quantity": 1
+          }
+        ],
+        "status": "SELECTED_FROZEN_OFFLINE_RANK",
+        "policy_sha": "e758072ba201bd13efc685b75179901bc2ec02a83d061782138e4f7e86371e39",
+        "rejected_candidates": [],
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0,
+        "affine_approximation_only": true,
+        "grid_safety_guaranteed": false,
+        "Fresh_AC_status": "NOT_RUN"
+      },
+      "reservation_count": 1
+    },
+    {
+      "name": "CHECKPOINT_MIGRATE",
+      "named_synthetic_fixture": true,
+      "real_May01": false,
+      "policy_sha": "36c2e96997933fb99d0e51d6b308777a1fc0eb4120dcb51d99c1ad16391a4e1f",
+      "policy_file_sha": "73b3d77e3ca42a889f1b2e8b9aad27c4465ba1d124d7d6fa939b980ef8b7cc65",
+      "reload_identical_policy_sha": true,
+      "compiler_status": "OFFLINE_POLICY_OPTIMIZATION_VALIDATED",
+      "compiler_metrics": {
+        "compile_wall_seconds": 0.0032737000001361594,
+        "RSS_bytes_at_compile_end": 93876224,
+        "process_lifetime_peak_RSS_bytes": 94826496,
+        "peak_RSS_scope": "PROCESS_LIFETIME_INCLUDING_SOURCE_PACKET_LOAD",
+        "templates": 1,
+        "bounded_candidates": 2,
+        "grid_evaluation_calls": 2,
+        "cache_hits": 2,
+        "scenario_tree_nodes": 0,
+        "Native_Optimize_calls": 0
+      },
+      "candidate_comparison": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.7000000000000002,
+            "HIGH_DEMAND_Q90": 0.7000000000000002
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "CHECKPOINT_MIGRATE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.40000000000000013,
+            "HIGH_DEMAND_Q90": 0.40000000000000013
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "CHECKPOINT_MIGRATE",
+        "status": "SELECTED_FROZEN_OFFLINE_RANK",
+        "migration": {
+          "id": "CHECKPOINT:OBSERVED_FIXTURE_JOB",
+          "job_id": "OBSERVED_FIXTURE_JOB",
+          "source": "A",
+          "destination": "B",
+          "physical_checkpoint_seconds": 0.0,
+          "control_checkpoint_seconds": 0.0,
+          "times": {
+            "checkpoint": 0.0,
+            "transfer_start": 0.0,
+            "transfer_end": 900.0,
+            "restart_start": 900.0,
+            "restart_end": 1800.0
+          },
+          "interruption_seconds": 1800.0,
+          "accumulated_compute_seconds": 1800.0,
+          "capability_source_sha": "NAMED_SYNTHETIC_PHYSICAL_CONTRACT",
+          "capability_assumption": false,
+          "hold_contract": {
+            "source_hold_until": "transfer_start",
+            "destination_hold_from": "transfer_end"
+          },
+          "segments": [
+            {
+              "resource": "wan:AB",
+              "begin": 0.0,
+              "end": 900.0,
+              "quantity": 100.0
+            },
+            {
+              "resource": "active:WAN",
+              "begin": 0.0,
+              "end": 900.0,
+              "quantity": 1
+            },
+            {
+              "resource": "gpu:B",
+              "begin": 900.0,
+              "end": 2700.0,
+              "quantity": 1
+            }
+          ],
+          "completed_at": 1800.0
+        },
+        "rule_id": "T0_0",
+        "policy_sha": "36c2e96997933fb99d0e51d6b308777a1fc0eb4120dcb51d99c1ad16391a4e1f",
+        "estimated_worst_peak": 0.40000000000000013,
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0,
+        "rejected_candidates": [],
+        "affine_approximation_only": true,
+        "grid_safety_guaranteed": false,
+        "Fresh_AC_status": "NOT_RUN"
+      },
+      "reservation_count": 1
+    },
+    {
+      "name": "STAY_SHARED_INTERRUPTION_BUDGET_REJECTION",
+      "named_synthetic_fixture": true,
+      "real_May01": false,
+      "policy_sha": "36c2e96997933fb99d0e51d6b308777a1fc0eb4120dcb51d99c1ad16391a4e1f",
+      "policy_file_sha": "ba27760fc7c4e4bab1691c081891be6a7c99ce21e32c2786d2f8db673adfc79d",
+      "reload_identical_policy_sha": true,
+      "compiler_status": "OFFLINE_POLICY_OPTIMIZATION_VALIDATED",
+      "compiler_metrics": {
+        "compile_wall_seconds": 0.0014971999989938922,
+        "RSS_bytes_at_compile_end": 93876224,
+        "process_lifetime_peak_RSS_bytes": 94826496,
+        "peak_RSS_scope": "PROCESS_LIFETIME_INCLUDING_SOURCE_PACKET_LOAD",
+        "templates": 1,
+        "bounded_candidates": 2,
+        "grid_evaluation_calls": 2,
+        "cache_hits": 6,
+        "scenario_tree_nodes": 0,
+        "Native_Optimize_calls": 0
+      },
+      "candidate_comparison": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.7000000000000002,
+            "HIGH_DEMAND_Q90": 0.7000000000000002
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "CHECKPOINT_MIGRATE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.40000000000000013,
+            "HIGH_DEMAND_Q90": 0.40000000000000013
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "status": "SELECTED_FROZEN_OFFLINE_RANK",
+        "rule_id": "T0_0",
+        "reason": "SHARED_DELAY_INTERRUPTION_BUDGET_EXCEEDED",
+        "rejected_candidates": [
+          {
+            "site": "B",
+            "reason": "SHARED_DELAY_INTERRUPTION_BUDGET_EXCEEDED"
+          }
+        ],
+        "grid_safety_guaranteed": false
+      },
+      "reservation_count": 0
+    },
+    {
+      "name": "QUEUE_CAPACITY_REJECTION",
+      "named_synthetic_fixture": true,
+      "real_May01": false,
+      "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+      "policy_file_sha": "17a0d9aa453dc2f2643ad0fc0d9485f6f0b4108ab68b2583f135fd4e2324acc6",
+      "reload_identical_policy_sha": true,
+      "compiler_status": "OFFLINE_POLICY_OPTIMIZATION_VALIDATED",
+      "compiler_metrics": {
+        "compile_wall_seconds": 0.004871400000411086,
+        "RSS_bytes_at_compile_end": 93876224,
+        "process_lifetime_peak_RSS_bytes": 94826496,
+        "peak_RSS_scope": "PROCESS_LIFETIME_INCLUDING_SOURCE_PACKET_LOAD",
+        "templates": 1,
+        "bounded_candidates": 10,
+        "grid_evaluation_calls": 10,
+        "cache_hits": 10,
+        "scenario_tree_nodes": 0,
+        "Native_Optimize_calls": 0
+      },
+      "candidate_comparison": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.9,
+            "HIGH_DEMAND_Q90": 0.9
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.4,
+            "HIGH_DEMAND_Q90": 0.4
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "uid": "OBSERVED_FIXTURE_JOB",
+        "action": "QUEUE",
+        "status": "NO_FEASIBLE_ACTION",
+        "reason": "NO_CAPACITY",
+        "rejected_candidates": [
+          {
+            "action": "PREPLACE",
+            "site": "B",
+            "reason": "NO_CAPACITY"
+          },
+          {
+            "action": "DELAY_15",
+            "site": "A",
+            "reason": "NO_CAPACITY"
+          },
+          {
+            "action": "PREPLACE",
+            "site": "B",
+            "reason": "NO_CAPACITY"
+          },
+          {
+            "action": "DELAY_30",
+            "site": "A",
+            "reason": "NO_CAPACITY"
+          },
+          {
+            "action": "PREPLACE",
+            "site": "B",
+            "reason": "NO_CAPACITY"
+          },
+          {
+            "action": "DELAY_45",
+            "site": "A",
+            "reason": "NO_CAPACITY"
+          },
+          {
+            "action": "PREPLACE",
+            "site": "B",
+            "reason": "NO_CAPACITY"
+          },
+          {
+            "action": "DELAY_60",
+            "site": "A",
+            "reason": "NO_CAPACITY"
+          },
+          {
+            "action": "PREPLACE",
+            "site": "B",
+            "reason": "NO_CAPACITY"
+          },
+          {
+            "action": "START_NOW",
+            "site": "A",
+            "reason": "NO_CAPACITY"
+          }
+        ],
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "grid_safety_guaranteed": false,
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0
+      },
+      "reservation_count": 2
+    }
+  ],
+  "rebound_counterexample": {
+    "START_NOW_peak": 0.9,
+    "DELAY_15_peak": 1.15,
+    "DELAY_15_hard_feasible": false,
+    "remaining_slots": 96
+  },
+  "real_May01_policy_improvement": "NOT_ESTABLISHED"
+}

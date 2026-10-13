@@ -1,0 +1,172 @@
+{
+  "schema": "INDEPENDENT_FINAL_B_CLAIM_REVIEW_V1",
+  "written_utc": "2026-10-13T15:04:38.535091+00:00",
+  "status": "PASS",
+  "reviewer": "audit_sources",
+  "mode": "READ_ONLY_REPORT_RECEIPT_REVIEW",
+  "source_edits": 0,
+  "Native_Optimize_calls": 0,
+  "Actual_replays": 0,
+  "AC_calls": 0,
+  "reviewed_artifacts": [
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\CONTROL_POLICY_ROOT_CAUSE_FINAL_KO.md",
+      "sha256": "4d03d4d52a2083ab26fa62d7ce8f7e88bbfb59746504af4056a551af90939e9f",
+      "bytes": 10417
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\POLICY_COMPILER_ONLY_FIRST_FAILURE.json",
+      "sha256": "42a181c58131c6fcc5af60d84677608004e9f83ad57338bf98349e625c7bb219",
+      "bytes": 8076
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\CONTROL_POLICY_ROOT_CAUSE_MATRIX.json",
+      "sha256": "07812da9059a61cb2c7a036fc12b7f5c96f44344bc5a87864ce74fe1e9338450",
+      "bytes": 9922
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\CONTROL_POLICY_EXECUTION_CALLGRAPH.json",
+      "sha256": "35b4826af14b5d09a6b79847938131c9777e375e5ad2b7c959c40e1486df4eaa",
+      "bytes": 34463
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\CONTROL_POLICY_PATCH_VALIDATION.json",
+      "sha256": "949245c598c711bde9b5b7416503ac82c8e34c8ef3328ef21223eb0e8dd7ae65",
+      "bytes": 2455
+    }
+  ],
+  "checks": [
+    {
+      "id": "candidate_variant_count",
+      "PASS": true,
+      "evidence": "4392 counted variants; not2392"
+    },
+    {
+      "id": "candidate_partition",
+      "PASS": true,
+      "evidence": "3111+972+309"
+    },
+    {
+      "id": "score_counts",
+      "PASS": true,
+      "evidence": "309 serialized variants versus1083 evaluator cache misses/endpoints"
+    },
+    {
+      "id": "separate_migration_attempts",
+      "PASS": true,
+      "evidence": "792 source-capability refusals are not part of4392 materialized partition"
+    },
+    {
+      "id": "scenario_Q50_Q90",
+      "PASS": true,
+      "evidence": "Q50pass112/Q90pass0; finite numerical scores are present"
+    },
+    {
+      "id": "actual_population",
+      "PASS": true,
+      "evidence": "Known1546+OriginUnknown774;324RUNNING+1300PENDING+696DdayUnknown"
+    },
+    {
+      "id": "actual_dispatch_scope",
+      "PASS": true,
+      "evidence": "814UID outer dispatch;5816events"
+    },
+    {
+      "id": "actual_first_guard",
+      "PASS": true,
+      "evidence": "5763 observed support mismatch +53horizon-end support absence"
+    },
+    {
+      "id": "actual_lookup_inference",
+      "PASS": true,
+      "evidence": "Zero literal select/lookup reconstructed from guarded branches;timing metric is not comprehensive profiler"
+    },
+    {
+      "id": "actual_policy_effect",
+      "PASS": true,
+      "evidence": "No optimized May action or benefit certified"
+    },
+    {
+      "id": "source_binding",
+      "PASS": true,
+      "evidence": "Exact finalA2/M2 identities match; no SourceBindingFailure"
+    },
+    {
+      "id": "QoS_capability_separation",
+      "PASS": true,
+      "evidence": "Zero temporal budget does not imply no initial placement; Known flags1245 are fixed-command path;Unknown explicitPREPLACE flags0"
+    },
+    {
+      "id": "fixture_bug_may_separation",
+      "PASS": true,
+      "evidence": "Controlled source bugs remain independent of production guards/Q90future95"
+    },
+    {
+      "id": "full_joint_gap",
+      "PASS": true,
+      "evidence": "Restricted M bound never transferred to original fullJointLB"
+    },
+    {
+      "id": "future95_scope",
+      "PASS": true,
+      "evidence": "Fixed target single-action obstruction;no other multiJobQueue global infeasibility certificate"
+    },
+    {
+      "id": "V5_V6_epoch",
+      "PASS": true,
+      "evidence": "V5 real execution separated from V6 source-only fix"
+    },
+    {
+      "id": "V6_production_not_run",
+      "PASS": true,
+      "evidence": "No V6 A/M/Full96Actual/Fresh; old receipts are not reissued"
+    },
+    {
+      "id": "focused_test_scope",
+      "PASS": true,
+      "evidence": "40=16new+24existing controlled tests;not all16 necessarily failed before"
+    },
+    {
+      "id": "HOLD_no_new_solver",
+      "PASS": true,
+      "evidence": "No heavy solve/AC/campaign restart in B/C"
+    }
+  ],
+  "core_checks_PASS": true,
+  "corrections": [
+    {
+      "id": "R1",
+      "severity": "LOW_PACKAGING_CONSISTENCY",
+      "target": "CONTROL_POLICY_EXECUTION_CALLGRAPH.json:confirmed_masked_fixture_bugs",
+      "observed": 3,
+      "expected": 3,
+      "reason": "Callgraph retained the original two-condition source partition count while aggregate lists three separately reproduced conditions,including source_siteNone explicitPREPLACE permission bypass.",
+      "requested": "Set3 or explicitly label two-source-partition plus one additional condition.",
+      "resolved": true
+    },
+    {
+      "id": "R2",
+      "severity": "LOW_SCIENTIFIC_SCOPE_WORDING",
+      "target": "CONTROL_POLICY_ROOT_CAUSE_FINAL_KO.md:first paragraph and CC4 answer7",
+      "reason": "Opening unqualified Q90 Resource/Grid infeasibility could be read globally. Later single-action limitation is correct but target meaning should be explicit at the conclusion.",
+      "requested": "State fixedA2Q90arrival-target scenario unsupported for current single-action candidates; target is not capacity-backed achievedreserve. OriginalP1FULL legitimately permits reserve shortfall, exact sourcebindingPASS; other queue/carryout models are not globally ruled out.",
+      "resolved": true,
+      "resolution": "Opening explicitly fixedA2Q90target/current-single-action;CC4 target not capacity-backed achievedreserve and P1FULL shortfall permitted;sourcebinding PASS."
+    }
+  ],
+  "scientific_invalidation_found": false,
+  "root_cause_classification": "POLICY_MULTIPLE_ROOT_CAUSES",
+  "CC4_target_semantic_scope": {
+    "source_binding_PASS": true,
+    "target_capacity_supported": false,
+    "target_equals_capacity_backed_achieved_reserve": false,
+    "original_A2_FULL_decomposition_legitimate": true,
+    "original_P1_permits_shortfall": true,
+    "global_queue_infeasibility_certified": false,
+    "future95_single_action_failure_independent_of_fixed_bugs": true
+  },
+  "final_May_effect": "NOT_ESTABLISHED",
+  "V6_Production_A_M_Actual_Fresh": "NOT_RUN",
+  "followup_submission_scope": "Root updates final PR URL/commit after submission; audit placeholder was correct at write time",
+  "unresolved_corrections": 0
+}

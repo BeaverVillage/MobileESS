@@ -1,0 +1,167 @@
+{
+  "schema": "POLICY_COMPILER_ONLY_FIRST_FAILURE_V1",
+  "classification": "POLICY_MULTIPLE_ROOT_CAUSES",
+  "workstream": "B_INDEPENDENT_ROOT_CAUSE",
+  "real_execution_source_sha": "f488f3a99555eb2354ef52d0835078be816d2d988a2bf37010b9b09ff36568d8",
+  "A_exact_pushed_commit": "8f0ea6e8f97147bb425530e8d787ca89f4a05053",
+  "case_sha": "623efbcbd6344b9c18540ff2a496a112b43c93b1d277c50d9c9b682fc11bcce0",
+  "policy_sha": "26cd02b14fa81a5ec44bf64f963ddf0d54efde1d8a74cc270d52cc96f38fdd0a",
+  "final_A2_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+  "final_M2_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+  "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+  "Native_Optimize_calls": 0,
+  "production_Actual_replays": 0,
+  "AC_calls": 0,
+  "campaign_HOLD": true,
+  "campaign_auto_restart_authorized": false,
+  "May_optimized_action_effect": "NOT_ESTABLISHED",
+  "Original_joint_global_gap": "NOT_CERTIFIED",
+  "facts": {
+    "raw_UIDs": 2498,
+    "original_known_UIDs": 1649,
+    "active_known_UIDs": 1546,
+    "historical_known_UIDs": 103,
+    "post_issue_unknown_UIDs": 849,
+    "historical_unknown_UIDs": 75,
+    "historical_total_UIDs": 178,
+    "initial_running_UIDs": 324,
+    "initial_pending_UIDs": 1300,
+    "pre_Dday_observed_origin_unknown_UIDs": 78,
+    "Dday_unknown_UIDs": 696,
+    "active_origin_unknown_UIDs": 774,
+    "active_UIDs": 2320,
+    "policy_controller_dispatch_unique_UIDs": 814,
+    "unknown_dispatch_UIDs": 766,
+    "known_dispatch_UIDs": 48,
+    "unknown_no_due_policy_event_UIDs": 8,
+    "known_no_unknown_dispatch_UIDs": 1498,
+    "Dday_pending_dispatch_UIDs": 693,
+    "late_Dday_no_admit_boundary_UIDs": 3,
+    "valid_observed_QoS_cohort_UIDs": 0,
+    "extra_delay_budget_UIDs": 0,
+    "explicit_preplacement_flag_active_UIDs": 1245,
+    "explicit_preplacement_flag_unknown_UIDs": 0,
+    "migration_capability_packet_UIDs": 0,
+    "offline_templates": 144,
+    "offline_materialized_variants": 4392,
+    "offline_reference_skipped_variants": 3111,
+    "offline_envelope_rejected_variants": 972,
+    "offline_resource_guard_passed_and_scored_variants": 309,
+    "offline_Q50_hard_passed_variants": 112,
+    "offline_Q90_hard_passed_variants": 0,
+    "offline_both_scenarios_hard_passed_variants": 0,
+    "grid_evaluation_calls_including_bucket_endpoints": 1083,
+    "missing_capability_migration_destination_attempts_before_materialization": 792,
+    "offline_approved_actions": 0,
+    "actual_dispatch_events": 5816,
+    "actual_resource_outside_support_events": 5763,
+    "actual_no_horizon_support_events": 53,
+    "actual_pending_policy_attempts": 748,
+    "actual_running_policy_attempts": 5068,
+    "actual_policy_select_or_lookup_invocations_reconstructed": 0,
+    "actual_generated_individual_candidates": 0,
+    "actual_online_grid_score_calls": 0,
+    "actual_selected_optimized_control_actions": 0,
+    "actual_completed_UIDs": 1690,
+    "actual_carryout_UIDs": 630
+  },
+  "compiler_first_failure_branches": [
+    {
+      "function": "compile_sensitivity_policy",
+      "source_module": "v42_integration/sensitivity_policy.py",
+      "condition": "baseline_supported = np.all(reference_profile <= anonymous + 1e-8)",
+      "location_line": 348,
+      "templates": 102,
+      "variants": 3111,
+      "first_reason": "PROTOTYPE_REFERENCE_NOT_IN_ANONYMOUS_ENVELOPE",
+      "meaning": "Whole gang and continuous service unavailable in the fixed anonymous reference; Known service not borrowed."
+    },
+    {
+      "function": "ReservationLedger.feasible",
+      "source_module": "v42_integration/policy.py",
+      "entry": "compile_sensitivity_policy resource_reason before scoring",
+      "variants": 972,
+      "first_reason": "NO_ENVELOPE_CAPACITY"
+    },
+    {
+      "function": "compile_sensitivity_policy;OriginalGridPacket.evaluate",
+      "source_module": "v42_integration/sensitivity_policy.py",
+      "variants": 309,
+      "first_reason": "ORIGINAL_GRID_OR_RESOURCE_HARD_CONSTRAINT",
+      "nominal_hard_pass": 112,
+      "high_Q90_hard_pass": 0,
+      "future_failure_independent_of_past_capacity_bug": {
+        "scope": "Single anonymous whole-gang delta evaluated against the fixed Q90 target scenario; not a global infeasibility certificate for a different multi-job queue model.",
+        "slot": 95,
+        "Known_plus_nominal_GPU": 259.05852837966495,
+        "Q90_extra_target_GPU": 750.786081893315,
+        "Q90_total_GPU": 1009.8446102729799,
+        "installed_GPU": 780.0,
+        "excess_GPU": 229.84461027297993,
+        "largest_compatible_single_gang_GPU": 100.0,
+        "optimistic_Q90_total_after_removing_one_maximum_gang_GPU": 909.8446102729799,
+        "optimistic_residual_excess_GPU": 129.84461027297993,
+        "any_remaining_horizon_start_slot_0_to_95_contains_this_slot": true,
+        "adding_current_API_whole_gang_prototypes_cannot_make_this_fixed_scenario_hard_feasible": true
+      }
+    }
+  ],
+  "exact_status_condition": {
+    "function": "compile_sensitivity_policy",
+    "condition": "template status is validated iff len(scores)>=2 and ordered; body validated iff any validated template",
+    "effect": "All144 templates have empty ordered_actions. Body status POLICY_COMPILER_ONLY."
+  },
+  "Actual_first_failure": {
+    "function": "JobEventController._policy_resource_guard",
+    "source_module": "v42_integration/actual.py",
+    "location_line": 226,
+    "call_sites": "JobEventController.admit;JobEventController.migration before policy.select/select_migration",
+    "earliest_reasons": {
+      "OBSERVED_RESOURCE_OUTSIDE_FROZEN_TEMPLATE_SUPPORT": 5763,
+      "NO_FROZEN_RESOURCE_SUPPORT_AUTHORITY": 53
+    },
+    "events": 5816,
+    "unique_UIDs": 814,
+    "policy_lookup_reached": 0,
+    "later_QOS_capability_and_template_guards_not_reached_in_recorded_execution": true,
+    "horizon_missing53": "43 at exact end plus10 off-grid checkpoint round-up to exact end; all lookup_at=end_seconds"
+  },
+  "independent_authority_blockers": {
+    "strict_TRAIN_provenance_filter_rows": 439534,
+    "active_observed_qos_UNCONFIRMED": 2320,
+    "active_protection_unconfirmed": 2320,
+    "active_batch_unconfirmed": 2320,
+    "all_delay_budget_zero": true,
+    "explicit_unknown_can_prestart_place_TRUE": 0,
+    "migration_capability_packets": 0,
+    "unassigned_source_site_None_semantics": "Grid-blind initial FCFS placement may choose a compatible site; that is distinct from an explicit ranked PREPLACE authority or extra temporal budget."
+  },
+  "confirmed_masked_implementation_bugs": [
+    "universal batch gate vetoes zero-delay source-authorized placement",
+    "past-only GPU overcapacity vetoes current/future action despite grid remaining horizon",
+    "explicit PREPLACE permission omitted when source_site=None"
+  ],
+  "causal_separation": "Bugs reproduced on controlled inputs and fixed in separate V6 source; current May Q90 future overload, unsupported rights and resource guard remain independent. No new May action certified.",
+  "receipts": [
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\GRID_SCORE_EXECUTION_AUDIT.json",
+      "bytes": 10947,
+      "sha256": "73099d3050e61217150ea879d9e29bb764a5626318cc000dbc9cb521fa8bcd98"
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\QOS_ZERO_BUDGET_CAUSE_AUDIT.json",
+      "bytes": 3939,
+      "sha256": "564b544ff02f78896f3048f2d991394174ec2956a27d3af0479699e376580f3b"
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\POLICY_FREEZE_RELOAD_RUNTIME_AUDIT.json",
+      "bytes": 37271,
+      "sha256": "7364141fc63fab8d658e81ca3d830d1ea396aee3d98ab284f592ed600a5236bc"
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\CONTROL_POLICY_BEFORE_AFTER_REPLAY.json",
+      "bytes": 17817,
+      "sha256": "05ab57bf4b55d66840a1d7062f251e41c5868dd659fc04a7493621da87fdcf13"
+    }
+  ]
+}
