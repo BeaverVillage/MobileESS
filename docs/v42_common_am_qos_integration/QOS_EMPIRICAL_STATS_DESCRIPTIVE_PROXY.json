@@ -1,0 +1,2009 @@
+{
+  "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+  "cutoff_seconds": 1735689600.0,
+  "source_sha": "0783273c06d8a5e7ecf804b18221d7ac66c0c8ab432162490c0afef282bd343e",
+  "bucket_definition": {
+    "GPU": [
+      "1",
+      "2-4",
+      "5-16",
+      "17-64",
+      "65+"
+    ],
+    "requested_walltime": [
+      "<=1h",
+      "1-4h",
+      "4-24h",
+      ">24h"
+    ]
+  },
+  "quantile": 0.9,
+  "quantile_method": "higher",
+  "normalization": "W/max(T,900)",
+  "minimum_cohort_unique_uids": 100,
+  "input_rows": 439534,
+  "accepted_unique_uids": 439534,
+  "accepted_uid_sha": "afddc0e92dbfd21cdafe9681f6afb60dc88b8540d7ed0db0fb5eaa44deb2996f",
+  "exclusions": {
+    "CONFLICTING_UID_EXCLUDED": 0
+  },
+  "descriptive_only": true,
+  "provenance_note": "PR75_FINAL_ACCOUNTING_PROXY_REQUEST_VERSION_AND_OBSERVATION_UNVERIFIED",
+  "cohorts": [
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "debug-gpu",
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 17,
+      "q90_higher_z": 0.016666666666666666
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "debug-gpu",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 8,
+      "q90_higher_z": 0.02
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "1",
+        "1-4h"
+      ],
+      "n_unique_uids": 99,
+      "q90_higher_z": 0.024966309667352294
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "1",
+        "4-24h"
+      ],
+      "n_unique_uids": 105,
+      "q90_higher_z": 0.0077777777777777776
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 6,
+      "q90_higher_z": 5.814444444444445
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "1",
+        ">24h"
+      ],
+      "n_unique_uids": 106,
+      "q90_higher_z": 0.14724691308369867
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "17-64",
+        "1-4h"
+      ],
+      "n_unique_uids": 13,
+      "q90_higher_z": 10.378535170413343
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "17-64",
+        "4-24h"
+      ],
+      "n_unique_uids": 10,
+      "q90_higher_z": 2.6738436274062587
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "17-64",
+        "<=1h"
+      ],
+      "n_unique_uids": 12,
+      "q90_higher_z": 6.703333333333333
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "17-64",
+        ">24h"
+      ],
+      "n_unique_uids": 3,
+      "q90_higher_z": 11.511111111111111
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "2-4",
+        "1-4h"
+      ],
+      "n_unique_uids": 6,
+      "q90_higher_z": 0.2208267922553637
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "2-4",
+        "4-24h"
+      ],
+      "n_unique_uids": 24,
+      "q90_higher_z": 1.8755555555555556
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 361,
+      "q90_higher_z": 6.022222222222222
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "2-4",
+        ">24h"
+      ],
+      "n_unique_uids": 88,
+      "q90_higher_z": 0.46753148804585565
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "5-16",
+        "1-4h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 1.1322222222222222
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "5-16",
+        "4-24h"
+      ],
+      "n_unique_uids": 4,
+      "q90_higher_z": 5.492222222222222
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "5-16",
+        "<=1h"
+      ],
+      "n_unique_uids": 6,
+      "q90_higher_z": 0.027777777777777776
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "65+",
+        "1-4h"
+      ],
+      "n_unique_uids": 2,
+      "q90_higher_z": 25.14036144578313
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100",
+        "65+",
+        "<=1h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 1.65
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100l",
+        "2-4",
+        ">24h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 7.014112060778728
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100s",
+        "1",
+        "1-4h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 0.199350487134649
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100s",
+        "2-4",
+        "1-4h"
+      ],
+      "n_unique_uids": 8,
+      "q90_higher_z": 0.6866666666666666
+    },
+    {
+      "level": 0,
+      "key": [
+        "high",
+        true,
+        "gpu-h100s",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 8,
+      "q90_higher_z": 8.545555555555556
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "debug-gpu",
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 899,
+      "q90_higher_z": 0.7374663072776281
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "debug-gpu",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 291,
+      "q90_higher_z": 0.014444444444444444
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-a100",
+        "1",
+        "1-4h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 0.0
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-a100",
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 13,
+      "q90_higher_z": 0.0
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-a100",
+        "17-64",
+        "<=1h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 0.0
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-a100",
+        "2-4",
+        "1-4h"
+      ],
+      "n_unique_uids": 225,
+      "q90_higher_z": 0.0022222222222222222
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-a100",
+        "2-4",
+        "4-24h"
+      ],
+      "n_unique_uids": 7,
+      "q90_higher_z": 0.00012605571662674902
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-a100",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 168,
+      "q90_higher_z": 0.0
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-a100",
+        "5-16",
+        "1-4h"
+      ],
+      "n_unique_uids": 65,
+      "q90_higher_z": 0.0
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-a100",
+        "5-16",
+        "<=1h"
+      ],
+      "n_unique_uids": 36,
+      "q90_higher_z": 0.0033333333333333335
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "1",
+        "1-4h"
+      ],
+      "n_unique_uids": 14932,
+      "q90_higher_z": 7.214444444444444
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "1",
+        "4-24h"
+      ],
+      "n_unique_uids": 11781,
+      "q90_higher_z": 3.207736389684814
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 29632,
+      "q90_higher_z": 0.2544444444444444
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "1",
+        ">24h"
+      ],
+      "n_unique_uids": 14020,
+      "q90_higher_z": 5.279432186390989
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "17-64",
+        "1-4h"
+      ],
+      "n_unique_uids": 953,
+      "q90_higher_z": 4.754756242568371
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "17-64",
+        "4-24h"
+      ],
+      "n_unique_uids": 675,
+      "q90_higher_z": 1.4128529698149952
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "17-64",
+        "<=1h"
+      ],
+      "n_unique_uids": 797,
+      "q90_higher_z": 0.7817697937458417
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "17-64",
+        ">24h"
+      ],
+      "n_unique_uids": 31,
+      "q90_higher_z": 0.03333333333333333
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "2-4",
+        "1-4h"
+      ],
+      "n_unique_uids": 68483,
+      "q90_higher_z": 9.267995570321151
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "2-4",
+        "4-24h"
+      ],
+      "n_unique_uids": 19514,
+      "q90_higher_z": 10.067777777777778
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 162386,
+      "q90_higher_z": 0.14777777777777779
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "2-4",
+        ">24h"
+      ],
+      "n_unique_uids": 6563,
+      "q90_higher_z": 2.5877777777777777
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "5-16",
+        "1-4h"
+      ],
+      "n_unique_uids": 2484,
+      "q90_higher_z": 0.49217391304347824
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "5-16",
+        "4-24h"
+      ],
+      "n_unique_uids": 1681,
+      "q90_higher_z": 0.28107314277527046
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "5-16",
+        "<=1h"
+      ],
+      "n_unique_uids": 34548,
+      "q90_higher_z": 2.34
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "5-16",
+        ">24h"
+      ],
+      "n_unique_uids": 158,
+      "q90_higher_z": 0.05167044711852678
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "65+",
+        "1-4h"
+      ],
+      "n_unique_uids": 97,
+      "q90_higher_z": 1.3611111111111112
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "65+",
+        "4-24h"
+      ],
+      "n_unique_uids": 73,
+      "q90_higher_z": 5.093333333333334
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "65+",
+        "<=1h"
+      ],
+      "n_unique_uids": 347,
+      "q90_higher_z": 1.2057111172719712
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100",
+        "65+",
+        ">24h"
+      ],
+      "n_unique_uids": 4,
+      "q90_higher_z": 3.381116296749942
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100-stdby",
+        "1",
+        ">24h"
+      ],
+      "n_unique_uids": 2,
+      "q90_higher_z": 0.0038394415357766143
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100-stdby",
+        "2-4",
+        "1-4h"
+      ],
+      "n_unique_uids": 9,
+      "q90_higher_z": 0.27980316052120874
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100-stdby",
+        "2-4",
+        "4-24h"
+      ],
+      "n_unique_uids": 49,
+      "q90_higher_z": 0.05567858272698513
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100-stdby",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 158,
+      "q90_higher_z": 1.261111111111111
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100-stdby",
+        "2-4",
+        ">24h"
+      ],
+      "n_unique_uids": 92,
+      "q90_higher_z": 0.016666666666666666
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100-stdby",
+        "5-16",
+        "4-24h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 0.0007118996769070697
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100l",
+        "1",
+        "4-24h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 0.0
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100l",
+        "1",
+        ">24h"
+      ],
+      "n_unique_uids": 382,
+      "q90_higher_z": 142.86111111111111
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100l",
+        "2-4",
+        "4-24h"
+      ],
+      "n_unique_uids": 6,
+      "q90_higher_z": 0.13777777777777778
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100l",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 154,
+      "q90_higher_z": 1.0922222222222222
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100l",
+        "2-4",
+        ">24h"
+      ],
+      "n_unique_uids": 603,
+      "q90_higher_z": 23.566892898526735
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100l",
+        "5-16",
+        ">24h"
+      ],
+      "n_unique_uids": 46,
+      "q90_higher_z": 1.1004654008346626
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100s",
+        "1",
+        "1-4h"
+      ],
+      "n_unique_uids": 17036,
+      "q90_higher_z": 30.274444444444445
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100s",
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 7591,
+      "q90_higher_z": 12.495555555555555
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100s",
+        "17-64",
+        "1-4h"
+      ],
+      "n_unique_uids": 8,
+      "q90_higher_z": 8.337777777777777
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100s",
+        "17-64",
+        "<=1h"
+      ],
+      "n_unique_uids": 24,
+      "q90_higher_z": 36.672222222222224
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100s",
+        "2-4",
+        "1-4h"
+      ],
+      "n_unique_uids": 83,
+      "q90_higher_z": 2.956148282097649
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100s",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 127,
+      "q90_higher_z": 0.5066666666666667
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100s",
+        "5-16",
+        "1-4h"
+      ],
+      "n_unique_uids": 19,
+      "q90_higher_z": 9.234444444444444
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100s",
+        "5-16",
+        "<=1h"
+      ],
+      "n_unique_uids": 27,
+      "q90_higher_z": 1.5622222222222222
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-h100s",
+        "65+",
+        "<=1h"
+      ],
+      "n_unique_uids": 19,
+      "q90_higher_z": 127.69555555555556
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-hpe",
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 806,
+      "q90_higher_z": 0.7422222222222222
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-hpe",
+        "17-64",
+        "4-24h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 0.0011111111111111111
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-hpe",
+        "2-4",
+        "4-24h"
+      ],
+      "n_unique_uids": 3023,
+      "q90_higher_z": 4.355555555555555
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-hpe",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 5509,
+      "q90_higher_z": 0.6422222222222222
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-hpe",
+        "5-16",
+        "4-24h"
+      ],
+      "n_unique_uids": 2264,
+      "q90_higher_z": 1.39
+    },
+    {
+      "level": 0,
+      "key": [
+        "normal",
+        false,
+        "gpu-hpe",
+        "5-16",
+        "<=1h"
+      ],
+      "n_unique_uids": 4431,
+      "q90_higher_z": 0.3688888888888889
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "debug-gpu-stdby",
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 5,
+      "q90_higher_z": 0.012222222222222223
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "debug-gpu-stdby",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 3,
+      "q90_higher_z": 0.004165509580672035
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "1",
+        "1-4h"
+      ],
+      "n_unique_uids": 190,
+      "q90_higher_z": 8.805427408412482
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "1",
+        "4-24h"
+      ],
+      "n_unique_uids": 8482,
+      "q90_higher_z": 20.648638006944196
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 375,
+      "q90_higher_z": 1.3855555555555557
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "1",
+        ">24h"
+      ],
+      "n_unique_uids": 13835,
+      "q90_higher_z": 14.227734030758734
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "17-64",
+        "1-4h"
+      ],
+      "n_unique_uids": 39,
+      "q90_higher_z": 0.9327485380116959
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "17-64",
+        "4-24h"
+      ],
+      "n_unique_uids": 352,
+      "q90_higher_z": 3.1880148024352395
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "17-64",
+        "<=1h"
+      ],
+      "n_unique_uids": 49,
+      "q90_higher_z": 0.2833333333333333
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "17-64",
+        ">24h"
+      ],
+      "n_unique_uids": 38,
+      "q90_higher_z": 0.016666666666666666
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "2-4",
+        "1-4h"
+      ],
+      "n_unique_uids": 11,
+      "q90_higher_z": 3.2541467138593934
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "2-4",
+        "4-24h"
+      ],
+      "n_unique_uids": 614,
+      "q90_higher_z": 41.46333333333333
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 109,
+      "q90_higher_z": 0.3022222222222222
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "2-4",
+        ">24h"
+      ],
+      "n_unique_uids": 582,
+      "q90_higher_z": 0.772500120959102
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "5-16",
+        "1-4h"
+      ],
+      "n_unique_uids": 134,
+      "q90_higher_z": 0.48444444444444446
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "5-16",
+        "4-24h"
+      ],
+      "n_unique_uids": 152,
+      "q90_higher_z": 1.9917627677100493
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "5-16",
+        "<=1h"
+      ],
+      "n_unique_uids": 218,
+      "q90_higher_z": 13.408888888888889
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "5-16",
+        ">24h"
+      ],
+      "n_unique_uids": 97,
+      "q90_higher_z": 0.042222222222222223
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "65+",
+        "1-4h"
+      ],
+      "n_unique_uids": 14,
+      "q90_higher_z": 47.278888888888886
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "65+",
+        "4-24h"
+      ],
+      "n_unique_uids": 8,
+      "q90_higher_z": 62.467777777777776
+    },
+    {
+      "level": 0,
+      "key": [
+        "standby",
+        false,
+        "gpu-h100-stdby",
+        "65+",
+        "<=1h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 133.53333333333333
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "1",
+        "1-4h"
+      ],
+      "n_unique_uids": 100,
+      "q90_higher_z": 0.06378411530205458
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "1",
+        "4-24h"
+      ],
+      "n_unique_uids": 105,
+      "q90_higher_z": 0.0077777777777777776
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 23,
+      "q90_higher_z": 0.66
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "1",
+        ">24h"
+      ],
+      "n_unique_uids": 106,
+      "q90_higher_z": 0.14724691308369867
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "17-64",
+        "1-4h"
+      ],
+      "n_unique_uids": 13,
+      "q90_higher_z": 10.378535170413343
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "17-64",
+        "4-24h"
+      ],
+      "n_unique_uids": 10,
+      "q90_higher_z": 2.6738436274062587
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "17-64",
+        "<=1h"
+      ],
+      "n_unique_uids": 12,
+      "q90_higher_z": 6.703333333333333
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "17-64",
+        ">24h"
+      ],
+      "n_unique_uids": 3,
+      "q90_higher_z": 11.511111111111111
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "2-4",
+        "1-4h"
+      ],
+      "n_unique_uids": 14,
+      "q90_higher_z": 0.37444444444444447
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "2-4",
+        "4-24h"
+      ],
+      "n_unique_uids": 24,
+      "q90_higher_z": 1.8755555555555556
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 377,
+      "q90_higher_z": 6.024444444444445
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "2-4",
+        ">24h"
+      ],
+      "n_unique_uids": 89,
+      "q90_higher_z": 2.1875101291124195
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "5-16",
+        "1-4h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 1.1322222222222222
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "5-16",
+        "4-24h"
+      ],
+      "n_unique_uids": 4,
+      "q90_higher_z": 5.492222222222222
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "5-16",
+        "<=1h"
+      ],
+      "n_unique_uids": 6,
+      "q90_higher_z": 0.027777777777777776
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "65+",
+        "1-4h"
+      ],
+      "n_unique_uids": 2,
+      "q90_higher_z": 25.14036144578313
+    },
+    {
+      "level": 1,
+      "key": [
+        "high",
+        true,
+        "65+",
+        "<=1h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 1.65
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "1",
+        "1-4h"
+      ],
+      "n_unique_uids": 31969,
+      "q90_higher_z": 29.335555555555555
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "1",
+        "4-24h"
+      ],
+      "n_unique_uids": 11782,
+      "q90_higher_z": 3.207736389684814
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 38941,
+      "q90_higher_z": 2.7333333333333334
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "1",
+        ">24h"
+      ],
+      "n_unique_uids": 14404,
+      "q90_higher_z": 5.38
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "17-64",
+        "1-4h"
+      ],
+      "n_unique_uids": 961,
+      "q90_higher_z": 4.983202974740351
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "17-64",
+        "4-24h"
+      ],
+      "n_unique_uids": 676,
+      "q90_higher_z": 1.4128529698149952
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "17-64",
+        "<=1h"
+      ],
+      "n_unique_uids": 822,
+      "q90_higher_z": 0.8951010240797121
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "17-64",
+        ">24h"
+      ],
+      "n_unique_uids": 31,
+      "q90_higher_z": 0.03333333333333333
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "2-4",
+        "1-4h"
+      ],
+      "n_unique_uids": 68800,
+      "q90_higher_z": 9.190973871733966
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "2-4",
+        "4-24h"
+      ],
+      "n_unique_uids": 22599,
+      "q90_higher_z": 9.4
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 168793,
+      "q90_higher_z": 0.1711111111111111
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "2-4",
+        ">24h"
+      ],
+      "n_unique_uids": 7258,
+      "q90_higher_z": 3.6237993596584843
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "5-16",
+        "1-4h"
+      ],
+      "n_unique_uids": 2568,
+      "q90_higher_z": 0.4855555555555556
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "5-16",
+        "4-24h"
+      ],
+      "n_unique_uids": 3946,
+      "q90_higher_z": 1.1355555555555557
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "5-16",
+        "<=1h"
+      ],
+      "n_unique_uids": 39042,
+      "q90_higher_z": 1.9366666666666668
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "5-16",
+        ">24h"
+      ],
+      "n_unique_uids": 204,
+      "q90_higher_z": 0.33257624918883844
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "65+",
+        "1-4h"
+      ],
+      "n_unique_uids": 97,
+      "q90_higher_z": 1.3611111111111112
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "65+",
+        "4-24h"
+      ],
+      "n_unique_uids": 73,
+      "q90_higher_z": 5.093333333333334
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "65+",
+        "<=1h"
+      ],
+      "n_unique_uids": 366,
+      "q90_higher_z": 2.4844444444444442
+    },
+    {
+      "level": 1,
+      "key": [
+        "normal",
+        false,
+        "65+",
+        ">24h"
+      ],
+      "n_unique_uids": 4,
+      "q90_higher_z": 3.381116296749942
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "1",
+        "1-4h"
+      ],
+      "n_unique_uids": 190,
+      "q90_higher_z": 8.805427408412482
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "1",
+        "4-24h"
+      ],
+      "n_unique_uids": 8482,
+      "q90_higher_z": 20.648638006944196
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "1",
+        "<=1h"
+      ],
+      "n_unique_uids": 380,
+      "q90_higher_z": 1.3855555555555557
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "1",
+        ">24h"
+      ],
+      "n_unique_uids": 13835,
+      "q90_higher_z": 14.227734030758734
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "17-64",
+        "1-4h"
+      ],
+      "n_unique_uids": 39,
+      "q90_higher_z": 0.9327485380116959
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "17-64",
+        "4-24h"
+      ],
+      "n_unique_uids": 352,
+      "q90_higher_z": 3.1880148024352395
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "17-64",
+        "<=1h"
+      ],
+      "n_unique_uids": 49,
+      "q90_higher_z": 0.2833333333333333
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "17-64",
+        ">24h"
+      ],
+      "n_unique_uids": 38,
+      "q90_higher_z": 0.016666666666666666
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "2-4",
+        "1-4h"
+      ],
+      "n_unique_uids": 11,
+      "q90_higher_z": 3.2541467138593934
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "2-4",
+        "4-24h"
+      ],
+      "n_unique_uids": 614,
+      "q90_higher_z": 41.46333333333333
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "2-4",
+        "<=1h"
+      ],
+      "n_unique_uids": 112,
+      "q90_higher_z": 0.2477777777777778
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "2-4",
+        ">24h"
+      ],
+      "n_unique_uids": 582,
+      "q90_higher_z": 0.772500120959102
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "5-16",
+        "1-4h"
+      ],
+      "n_unique_uids": 134,
+      "q90_higher_z": 0.48444444444444446
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "5-16",
+        "4-24h"
+      ],
+      "n_unique_uids": 152,
+      "q90_higher_z": 1.9917627677100493
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "5-16",
+        "<=1h"
+      ],
+      "n_unique_uids": 218,
+      "q90_higher_z": 13.408888888888889
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "5-16",
+        ">24h"
+      ],
+      "n_unique_uids": 97,
+      "q90_higher_z": 0.042222222222222223
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "65+",
+        "1-4h"
+      ],
+      "n_unique_uids": 14,
+      "q90_higher_z": 47.278888888888886
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "65+",
+        "4-24h"
+      ],
+      "n_unique_uids": 8,
+      "q90_higher_z": 62.467777777777776
+    },
+    {
+      "level": 1,
+      "key": [
+        "standby",
+        false,
+        "65+",
+        "<=1h"
+      ],
+      "n_unique_uids": 1,
+      "q90_higher_z": 133.53333333333333
+    },
+    {
+      "level": 2,
+      "key": [
+        "high",
+        true,
+        "1-4h"
+      ],
+      "n_unique_uids": 130,
+      "q90_higher_z": 0.37444444444444447
+    },
+    {
+      "level": 2,
+      "key": [
+        "high",
+        true,
+        "4-24h"
+      ],
+      "n_unique_uids": 143,
+      "q90_higher_z": 0.18888888888888888
+    },
+    {
+      "level": 2,
+      "key": [
+        "high",
+        true,
+        "<=1h"
+      ],
+      "n_unique_uids": 419,
+      "q90_higher_z": 6.018888888888889
+    },
+    {
+      "level": 2,
+      "key": [
+        "high",
+        true,
+        ">24h"
+      ],
+      "n_unique_uids": 198,
+      "q90_higher_z": 0.2677777777777778
+    },
+    {
+      "level": 2,
+      "key": [
+        "normal",
+        false,
+        "1-4h"
+      ],
+      "n_unique_uids": 104395,
+      "q90_higher_z": 27.243333333333332
+    },
+    {
+      "level": 2,
+      "key": [
+        "normal",
+        false,
+        "4-24h"
+      ],
+      "n_unique_uids": 39076,
+      "q90_higher_z": 6.914600550964187
+    },
+    {
+      "level": 2,
+      "key": [
+        "normal",
+        false,
+        "<=1h"
+      ],
+      "n_unique_uids": 247964,
+      "q90_higher_z": 0.4222222222222222
+    },
+    {
+      "level": 2,
+      "key": [
+        "normal",
+        false,
+        ">24h"
+      ],
+      "n_unique_uids": 21901,
+      "q90_higher_z": 4.344444444444444
+    },
+    {
+      "level": 2,
+      "key": [
+        "standby",
+        false,
+        "1-4h"
+      ],
+      "n_unique_uids": 388,
+      "q90_higher_z": 4.323050058207218
+    },
+    {
+      "level": 2,
+      "key": [
+        "standby",
+        false,
+        "4-24h"
+      ],
+      "n_unique_uids": 9608,
+      "q90_higher_z": 20.85381800092385
+    },
+    {
+      "level": 2,
+      "key": [
+        "standby",
+        false,
+        "<=1h"
+      ],
+      "n_unique_uids": 760,
+      "q90_higher_z": 2.0342446837890087
+    },
+    {
+      "level": 2,
+      "key": [
+        "standby",
+        false,
+        ">24h"
+      ],
+      "n_unique_uids": 14552,
+      "q90_higher_z": 14.003767598651596
+    },
+    {
+      "level": 3,
+      "key": [
+        "high",
+        true
+      ],
+      "n_unique_uids": 890,
+      "q90_higher_z": 5.492222222222222
+    },
+    {
+      "level": 3,
+      "key": [
+        "normal",
+        false
+      ],
+      "n_unique_uids": 413336,
+      "q90_higher_z": 2.8238072744449694
+    },
+    {
+      "level": 3,
+      "key": [
+        "standby",
+        false
+      ],
+      "n_unique_uids": 25308,
+      "q90_higher_z": 15.393173342443134
+    }
+  ]
+}

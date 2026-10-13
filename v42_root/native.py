@@ -58,7 +58,7 @@ def local_units(m,jobs,bounds,r,graphs,classes,kind,context=None,*,preserve_sing
             context.progress(dict(phase='CLASS_UNITS',formulation=kind,classes_complete=index+1,classes_required=len(classes),seconds=perf_counter()-started))
     return units
 
-def build(context,data,kind):
+def build(context,data,kind,*,grid_context=None,stage=Stage.A1):
     if kind in ('F2','F2-BASE'):
         from v42_exact.native import build as baseline
         m,v,o,c,b=baseline(context,data,'F2')
@@ -79,7 +79,7 @@ def build(context,data,kind):
     byte_scale=2.**20 if cfg['scale_wan'] else 1.
     wanrows={(l,t):m.addConstr(gp.LinExpr()<=(rate-r.fixed_wan.get((l,t),0))/byte_scale,name='physical_WAN') for (l,t),rate in r.wan_capacities.items()}
     active={t:m.addConstr(gp.LinExpr()<=r.max_active_transfers-r.fixed_transfers.get(t,0),name='physical_ACTIVE') for t in range(r.control_end)}
-    primary,timing,controls=grid(m,bundle,known,risk,stage=Stage.A1);m.update();grid_seconds=perf_counter()-started;global_vars=m.NumVars
+    primary,timing,controls=grid(m,bundle,known,risk,stage=stage,grid_context=grid_context);m.update();grid_seconds=perf_counter()-started;global_vars=m.NumVars
     classes=prep['classes'];units=local_units(m,jobs,bounds,r,graphs,classes,kind,context,
         preserve_singleton_mixed_flow=prep.get('preserve_singleton_mixed_flow',()))
     metrics=[gp.LinExpr() for _ in range(3)];finish_groups=defaultdict(list);representative={};runtime_vectors={};tie=gp.LinExpr();rank=0
@@ -138,7 +138,8 @@ def build(context,data,kind):
         scientific_full_domain_optimal=False,
         optimization_scope='restricted_domain_optimum' if not prep.get('full_migration_domain_active',True) else 'historical_active_domain')
     m._v42_domain_status=stats['domain_status']
-    dump(kind+'_MODEL_STATS.json',stats);atomic(context.folder/(kind+'_MODEL_COMPLETE.json'),stats)
+    if grid_context is None:dump(kind+'_MODEL_STATS.json',stats)
+    atomic(context.folder/(kind+'_MODEL_COMPLETE.json'),stats)
     levels=primary+[('CC4_reference_deviation',timing['deviation'])]+list(zip(('migration_count','shift_slots','prestart_changes'),metrics))
     if cfg['tie']:levels.append(('physical_event_tie',tie))
     return m,units,levels,controls,dict(known=known,risk=risk,timing=timing,Runtime_finish_counts=runtime_counts)

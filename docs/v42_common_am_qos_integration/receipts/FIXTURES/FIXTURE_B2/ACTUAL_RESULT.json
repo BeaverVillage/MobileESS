@@ -1,0 +1,5231 @@
+{
+  "engine": "PR125_COMMON_JOB_EVENT_ACTUAL_V1",
+  "arm": "B2",
+  "sites": [
+    "A",
+    "B"
+  ],
+  "occupancy_GPU": [
+    [
+      2.0,
+      0.0
+    ],
+    [
+      2.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ]
+  ],
+  "compute_occupancy_GPU": [
+    [
+      2.0,
+      0.0
+    ],
+    [
+      2.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ]
+  ],
+  "physical": {
+    "IT_kw": [
+      [
+        1.2,
+        0.2
+      ],
+      [
+        1.2,
+        0.2
+      ],
+      [
+        0.2,
+        0.2
+      ],
+      [
+        0.2,
+        0.2
+      ],
+      [
+        0.2,
+        0.2
+      ],
+      [
+        0.2,
+        0.2
+      ]
+    ],
+    "PCC_P_kw": [
+      [
+        1.32,
+        0.22000000000000003
+      ],
+      [
+        1.32,
+        0.22000000000000003
+      ],
+      [
+        0.22000000000000003,
+        0.22000000000000003
+      ],
+      [
+        0.22000000000000003,
+        0.22000000000000003
+      ],
+      [
+        0.22000000000000003,
+        0.22000000000000003
+      ],
+      [
+        0.22000000000000003,
+        0.22000000000000003
+      ]
+    ],
+    "PCC_Q_kvar": [
+      [
+        0.43386301883609946,
+        0.07231050313934992
+      ],
+      [
+        0.43386301883609946,
+        0.07231050313934992
+      ],
+      [
+        0.07231050313934992,
+        0.07231050313934992
+      ],
+      [
+        0.07231050313934992,
+        0.07231050313934992
+      ],
+      [
+        0.07231050313934992,
+        0.07231050313934992
+      ],
+      [
+        0.07231050313934992,
+        0.07231050313934992
+      ]
+    ],
+    "authority_sha": "EXPLICIT_SYNTHETIC_C1_FIXTURE",
+    "IT_recomputed_from_actual_occupation": true,
+    "planning_power_copied": false,
+    "anonymous_forecast_or_runtime_reserve_added": false
+  },
+  "job_event_ledger": [
+    {
+      "uid": "known-a",
+      "time_seconds": 0.0,
+      "event": "SUBMISSION_OBSERVED",
+      "origin_unknown": false,
+      "qos_budget_seconds": 3600
+    },
+    {
+      "uid": "known-b",
+      "time_seconds": 0.0,
+      "event": "SUBMISSION_OBSERVED",
+      "origin_unknown": false,
+      "qos_budget_seconds": 3600
+    },
+    {
+      "uid": "known-a",
+      "time_seconds": 0.0,
+      "event": "RUNNING",
+      "site": "A",
+      "action": "START"
+    },
+    {
+      "uid": "known-b",
+      "time_seconds": 0.0,
+      "event": "RUNNING",
+      "site": "A",
+      "action": "START"
+    },
+    {
+      "uid": "known-b",
+      "time_seconds": 900.0,
+      "event": "COMPLETION_OBSERVED",
+      "release_control_seconds": 900
+    },
+    {
+      "uid": "unknown-observed",
+      "time_seconds": 900.0,
+      "event": "SUBMISSION_OBSERVED",
+      "origin_unknown": true,
+      "qos_budget_seconds": 3600
+    },
+    {
+      "uid": "unknown-observed",
+      "time_seconds": 900.0,
+      "event": "RUNNING",
+      "site": "A",
+      "action": "START"
+    },
+    {
+      "uid": "known-b",
+      "time_seconds": 900.0,
+      "event": "GPU_RELEASE_CONTROL"
+    },
+    {
+      "uid": "known-a",
+      "time_seconds": 1800.0,
+      "event": "COMPLETION_OBSERVED",
+      "release_control_seconds": 1800
+    },
+    {
+      "uid": "unknown-observed",
+      "time_seconds": 1800.0,
+      "event": "COMPLETION_OBSERVED",
+      "release_control_seconds": 1800
+    },
+    {
+      "uid": "known-a",
+      "time_seconds": 1800.0,
+      "event": "GPU_RELEASE_CONTROL"
+    },
+    {
+      "uid": "unknown-observed",
+      "time_seconds": 1800.0,
+      "event": "GPU_RELEASE_CONTROL"
+    }
+  ],
+  "reservation_ledger": {
+    "capacities": {
+      "gpu:A": 2,
+      "gpu:B": 2,
+      "active:WAN": 1
+    },
+    "reservations": {
+      "known-a": {
+        "uid": "known-a",
+        "segments": [
+          {
+            "resource": "gpu:A",
+            "begin": 0.0,
+            "end": 1800.0,
+            "quantity": 1.0,
+            "scope": "physical"
+          }
+        ],
+        "status": "RELEASED",
+        "scope": "physical"
+      },
+      "known-b": {
+        "uid": "known-b",
+        "segments": [
+          {
+            "resource": "gpu:A",
+            "begin": 0.0,
+            "end": 900.0,
+            "quantity": 1.0,
+            "scope": "physical"
+          }
+        ],
+        "status": "RELEASED",
+        "scope": "physical"
+      },
+      "unknown-observed": {
+        "uid": "unknown-observed",
+        "segments": [
+          {
+            "resource": "gpu:A",
+            "begin": 900.0,
+            "end": 1800.0,
+            "quantity": 1.0,
+            "scope": "physical"
+          }
+        ],
+        "status": "RELEASED",
+        "scope": "physical"
+      }
+    },
+    "audit": [
+      {
+        "uid": "known-a",
+        "status": "RESERVED",
+        "segments": [
+          {
+            "resource": "gpu:A",
+            "begin": 0.0,
+            "end": 900.0,
+            "quantity": 1.0,
+            "scope": "physical"
+          }
+        ]
+      },
+      {
+        "uid": "known-b",
+        "status": "RESERVED",
+        "segments": [
+          {
+            "resource": "gpu:A",
+            "begin": 0.0,
+            "end": 900.0,
+            "quantity": 1.0,
+            "scope": "physical"
+          }
+        ]
+      },
+      {
+        "uid": "unknown-observed",
+        "status": "RESERVED",
+        "segments": [
+          {
+            "resource": "gpu:A",
+            "begin": 900.0,
+            "end": 1800.0,
+            "quantity": 1.0,
+            "scope": "physical"
+          }
+        ]
+      },
+      {
+        "uid": "known-b",
+        "status": "RELEASED",
+        "at": 900.0
+      },
+      {
+        "uid": "known-a",
+        "status": "RELEASED",
+        "at": 1800.0
+      },
+      {
+        "uid": "unknown-observed",
+        "status": "RELEASED",
+        "at": 1800.0
+      }
+    ]
+  },
+  "cc4_depletion_ledger": [
+    {
+      "uid": "unknown-observed",
+      "hour": 0,
+      "observed_at": 900.0,
+      "realized_submitted_nominal_work_GPUh": 0.25,
+      "remaining_CC4_Q50_GPUh": 0.25,
+      "remaining_CC4_Q90_GPUh": 0.25,
+      "remaining_CC4_reserve_GPUh": 0.0,
+      "cohort_closed": false,
+      "explicit_plus_anonymous_nominal_GPUh": 0.5,
+      "expired_unsubmitted_Q50_GPUh": 0.0,
+      "excess_submitted_nominal_GPUh": 0.0,
+      "depletion_count": 1,
+      "anonymous_forecast_is_physical": false
+    }
+  ],
+  "migration_receipts": [],
+  "qos_ledger": [
+    {
+      "uid": "known-a",
+      "budget_seconds": 3600,
+      "intentional_start_delay_seconds": 0.0,
+      "migration_interruption_seconds": 0.0,
+      "total_intentional_burden_seconds": 0.0,
+      "actual_wait_seconds": 0.0,
+      "latest_start_excess_seconds": 0.0,
+      "unfinished": false,
+      "actual_completion_deadline_excess_seconds": null,
+      "window_status": "AUTHORIZED"
+    },
+    {
+      "uid": "known-b",
+      "budget_seconds": 3600,
+      "intentional_start_delay_seconds": 0.0,
+      "migration_interruption_seconds": 0.0,
+      "total_intentional_burden_seconds": 0.0,
+      "actual_wait_seconds": 0.0,
+      "latest_start_excess_seconds": 0.0,
+      "unfinished": false,
+      "actual_completion_deadline_excess_seconds": null,
+      "window_status": "AUTHORIZED"
+    },
+    {
+      "uid": "unknown-observed",
+      "budget_seconds": 3600,
+      "intentional_start_delay_seconds": 0.0,
+      "migration_interruption_seconds": 0.0,
+      "total_intentional_burden_seconds": 0.0,
+      "actual_wait_seconds": 0.0,
+      "latest_start_excess_seconds": 0.0,
+      "unfinished": false,
+      "actual_completion_deadline_excess_seconds": null,
+      "window_status": "AUTHORIZED"
+    }
+  ],
+  "qos_budget_ledger": {
+    "known-a": {
+      "uid": "known-a",
+      "case_sha": "fixture-integration",
+      "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+      "stats_sha": "76f5ed9e12d63d1eec7d872f4b3f4914f3a83f87e7028cb08aa1bc9a4759c453",
+      "provider_sha": "fixture-runtime",
+      "reference_sha": "fixture-shadow",
+      "authority_sha": "98a0abb89f48283bfdc06a32211d6e8f8cdc955a5f7c78509470f65bee63f076",
+      "issued_at_seconds": 0,
+      "reference_start_seconds": 0,
+      "reference_wait_seconds": 0,
+      "t50_seconds": 900,
+      "empirical_wait_seconds": 4500.0,
+      "budget_seconds": 3600,
+      "latest_start_seconds": 3600,
+      "allowed_starts_seconds": [
+        0,
+        900,
+        1800,
+        2700,
+        3600
+      ],
+      "cohort_level": 0,
+      "cohort_n": 100,
+      "q90_higher_z": 5.0,
+      "status": "AUTHORIZED",
+      "reasons": [],
+      "origin_unknown": false,
+      "is_observed": true,
+      "batch_eligible": true,
+      "state_at_issue": "PENDING",
+      "hard_contract": {
+        "release_seconds": null,
+        "hard_earliest_start_seconds": null,
+        "hard_latest_start_seconds": null,
+        "completion_deadline_seconds": null,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "nominal_service_seconds": null,
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow",
+        "batch_eligible": true,
+        "qos": "normal",
+        "protected": false,
+        "partition": "fixture-gpu",
+        "gpu": 1,
+        "requested_walltime_seconds": 3600
+      },
+      "hard_contract_sha": "ed41134d7721d358c5d24a26d731220171c8710fcad6387b9f2897face06fe06",
+      "receipt_sha": "9f11e564ad26bc0a3c99447a7bf925c45a9ea3613a530b366e9ea314766c919c"
+    },
+    "known-b": {
+      "uid": "known-b",
+      "case_sha": "fixture-integration",
+      "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+      "stats_sha": "76f5ed9e12d63d1eec7d872f4b3f4914f3a83f87e7028cb08aa1bc9a4759c453",
+      "provider_sha": "fixture-runtime",
+      "reference_sha": "fixture-shadow",
+      "authority_sha": "3b666e9b2550d12bd34657bd3c8467970182d37cda74b217e24d1140f573c6d4",
+      "issued_at_seconds": 0,
+      "reference_start_seconds": 0,
+      "reference_wait_seconds": 0,
+      "t50_seconds": 900,
+      "empirical_wait_seconds": 4500.0,
+      "budget_seconds": 3600,
+      "latest_start_seconds": 3600,
+      "allowed_starts_seconds": [
+        0,
+        900,
+        1800,
+        2700,
+        3600
+      ],
+      "cohort_level": 0,
+      "cohort_n": 100,
+      "q90_higher_z": 5.0,
+      "status": "AUTHORIZED",
+      "reasons": [],
+      "origin_unknown": false,
+      "is_observed": true,
+      "batch_eligible": true,
+      "state_at_issue": "PENDING",
+      "hard_contract": {
+        "release_seconds": null,
+        "hard_earliest_start_seconds": null,
+        "hard_latest_start_seconds": null,
+        "completion_deadline_seconds": null,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "nominal_service_seconds": null,
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow",
+        "batch_eligible": true,
+        "qos": "normal",
+        "protected": false,
+        "partition": "fixture-gpu",
+        "gpu": 1,
+        "requested_walltime_seconds": 3600
+      },
+      "hard_contract_sha": "ed41134d7721d358c5d24a26d731220171c8710fcad6387b9f2897face06fe06",
+      "receipt_sha": "c601553e6acdc59b2e4d6b1808e02f154d5014d52f4cd76b0de122d4386e26b8"
+    },
+    "unknown-observed": {
+      "uid": "unknown-observed",
+      "case_sha": "fixture-integration",
+      "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+      "stats_sha": "76f5ed9e12d63d1eec7d872f4b3f4914f3a83f87e7028cb08aa1bc9a4759c453",
+      "provider_sha": "fixture-runtime",
+      "reference_sha": "fixture-shadow",
+      "authority_sha": "c76bb0d56b0ff83d0926162e7c67350bcd4a0703298be51fbfab0587dd3278be",
+      "issued_at_seconds": 900.0,
+      "reference_start_seconds": 900,
+      "reference_wait_seconds": 0,
+      "t50_seconds": 900,
+      "empirical_wait_seconds": 4500.0,
+      "budget_seconds": 3600,
+      "latest_start_seconds": 4500,
+      "allowed_starts_seconds": [
+        900,
+        1800,
+        2700,
+        3600,
+        4500
+      ],
+      "cohort_level": 0,
+      "cohort_n": 100,
+      "q90_higher_z": 5.0,
+      "status": "AUTHORIZED",
+      "reasons": [],
+      "origin_unknown": true,
+      "is_observed": true,
+      "batch_eligible": true,
+      "state_at_issue": "PENDING",
+      "hard_contract": {
+        "release_seconds": null,
+        "hard_earliest_start_seconds": null,
+        "hard_latest_start_seconds": null,
+        "completion_deadline_seconds": null,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "nominal_service_seconds": null,
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow",
+        "batch_eligible": true,
+        "qos": "normal",
+        "protected": false,
+        "partition": "fixture-gpu",
+        "gpu": 1,
+        "requested_walltime_seconds": 3600
+      },
+      "hard_contract_sha": "ed41134d7721d358c5d24a26d731220171c8710fcad6387b9f2897face06fe06",
+      "receipt_sha": "e7af594406b806da680be4ad482bfb2109edaa2fc9aefd36316768f4ad9ecc41"
+    }
+  },
+  "rule_consumption_receipt": [],
+  "queue_ledger": [
+    {
+      "job_uid": "known-a",
+      "submit_time": 0,
+      "initial_admission_attempt": 0.0,
+      "admitted_time": 0.0,
+      "capacity_wait_seconds": 0.0,
+      "capacity_wait_slots": 0,
+      "site": "A",
+      "GPU_gang": 1,
+      "queue_position": 1,
+      "completion_observed_time": 1800.0,
+      "release_control_time": 1800,
+      "grid_reads": 0,
+      "future_end_reads": 0,
+      "future_duration_reads": 0,
+      "optimizer_calls": 0,
+      "timeshift_optimization": false,
+      "migration_optimization": false,
+      "plan_start_seconds": 0.0,
+      "plan_actual_start_deviation_seconds": 0.0,
+      "intentional_delay_seconds": 0.0,
+      "unavoidable_queue_seconds": 0.0,
+      "policy_action": "START",
+      "rule_id": null,
+      "carryout": false,
+      "latest_state": "COMPLETED",
+      "origin_unknown": false,
+      "migration_count": 0,
+      "accumulated_compute_seconds": 1800.0
+    },
+    {
+      "job_uid": "known-b",
+      "submit_time": 0,
+      "initial_admission_attempt": 0.0,
+      "admitted_time": 0.0,
+      "capacity_wait_seconds": 0.0,
+      "capacity_wait_slots": 0,
+      "site": "A",
+      "GPU_gang": 1,
+      "queue_position": 2,
+      "completion_observed_time": 900.0,
+      "release_control_time": 900,
+      "grid_reads": 0,
+      "future_end_reads": 0,
+      "future_duration_reads": 0,
+      "optimizer_calls": 0,
+      "timeshift_optimization": false,
+      "migration_optimization": false,
+      "plan_start_seconds": 0.0,
+      "plan_actual_start_deviation_seconds": 0.0,
+      "intentional_delay_seconds": 0.0,
+      "unavoidable_queue_seconds": 0.0,
+      "policy_action": "START",
+      "rule_id": null,
+      "carryout": false,
+      "latest_state": "COMPLETED",
+      "origin_unknown": false,
+      "migration_count": 0,
+      "accumulated_compute_seconds": 900.0
+    },
+    {
+      "job_uid": "unknown-observed",
+      "submit_time": 900,
+      "initial_admission_attempt": 900.0,
+      "admitted_time": 900.0,
+      "capacity_wait_seconds": 0.0,
+      "capacity_wait_slots": 0,
+      "site": "A",
+      "GPU_gang": 1,
+      "queue_position": 1,
+      "completion_observed_time": 1800.0,
+      "release_control_time": 1800,
+      "grid_reads": 0,
+      "future_end_reads": 0,
+      "future_duration_reads": 0,
+      "optimizer_calls": 0,
+      "timeshift_optimization": false,
+      "migration_optimization": false,
+      "plan_start_seconds": 900.0,
+      "plan_actual_start_deviation_seconds": 0.0,
+      "intentional_delay_seconds": 0.0,
+      "unavoidable_queue_seconds": 0.0,
+      "policy_action": "START",
+      "rule_id": null,
+      "carryout": false,
+      "latest_state": "COMPLETED",
+      "origin_unknown": true,
+      "migration_count": 0,
+      "accumulated_compute_seconds": 900.0
+    }
+  ],
+  "carryout": {
+    "case_sha": "fixture-integration",
+    "policy_sha": "ad1705cd85e4fa88c732be89b1ba81334e48c94e84fd3b05e09a40ffd55558d6",
+    "controller": {
+      "arm": "B2",
+      "at_seconds": 5400.0,
+      "episode_jobs": {
+        "known-a": {
+          "job_id": "known-a",
+          "episode_id": "COMMON_ACTUAL:known-a",
+          "initial_site": "A",
+          "current_site": "A",
+          "submit_time": 0,
+          "start_time": 0.0,
+          "latest_observed_state": "COMPLETED",
+          "gpu": 1,
+          "q50_seconds": 900.0,
+          "completion_observed_time": 1800.0,
+          "release_control_time": 1800,
+          "migration_receipt": null
+        },
+        "known-b": {
+          "job_id": "known-b",
+          "episode_id": "COMMON_ACTUAL:known-b",
+          "initial_site": "A",
+          "current_site": "A",
+          "submit_time": 0,
+          "start_time": 0.0,
+          "latest_observed_state": "COMPLETED",
+          "gpu": 1,
+          "q50_seconds": 900.0,
+          "completion_observed_time": 900.0,
+          "release_control_time": 900,
+          "migration_receipt": null
+        },
+        "unknown-observed": {
+          "job_id": "unknown-observed",
+          "episode_id": "COMMON_ACTUAL:unknown-observed",
+          "initial_site": "A",
+          "current_site": "A",
+          "submit_time": 900,
+          "start_time": 900.0,
+          "latest_observed_state": "COMPLETED",
+          "gpu": 1,
+          "q50_seconds": 900.0,
+          "completion_observed_time": 1800.0,
+          "release_control_time": 1800,
+          "migration_receipt": null
+        }
+      },
+      "used_receipts": [],
+      "in_flight": {},
+      "requests": {
+        "known-a": {
+          "uid": "known-a",
+          "submit": 0,
+          "gpu": 1,
+          "compatible": [
+            "A",
+            "B"
+          ],
+          "q50": 900,
+          "source_site": "A",
+          "metadata": {
+            "partition": "fixture-gpu",
+            "batch_eligible": true,
+            "representation_starts_seconds": [
+              0,
+              900,
+              1800,
+              2700,
+              3600,
+              4500,
+              5400,
+              6300,
+              7200,
+              8100,
+              9000,
+              9900,
+              10800,
+              11700,
+              12600,
+              13500,
+              14400
+            ],
+            "origin_unknown": false,
+            "can_prestart_place": true
+          }
+        },
+        "known-b": {
+          "uid": "known-b",
+          "submit": 0,
+          "gpu": 1,
+          "compatible": [
+            "A",
+            "B"
+          ],
+          "q50": 900,
+          "source_site": "A",
+          "metadata": {
+            "partition": "fixture-gpu",
+            "batch_eligible": true,
+            "representation_starts_seconds": [
+              0,
+              900,
+              1800,
+              2700,
+              3600,
+              4500,
+              5400,
+              6300,
+              7200,
+              8100,
+              9000,
+              9900,
+              10800,
+              11700,
+              12600,
+              13500,
+              14400
+            ],
+            "origin_unknown": false,
+            "can_prestart_place": true
+          }
+        },
+        "unknown-observed": {
+          "uid": "unknown-observed",
+          "submit": 900,
+          "gpu": 1,
+          "compatible": [
+            "A",
+            "B"
+          ],
+          "q50": 900,
+          "source_site": "A",
+          "metadata": {
+            "partition": "fixture-gpu",
+            "batch_eligible": true,
+            "representation_starts_seconds": [
+              0,
+              900,
+              1800,
+              2700,
+              3600,
+              4500,
+              5400,
+              6300,
+              7200,
+              8100,
+              9000,
+              9900,
+              10800,
+              11700,
+              12600,
+              13500,
+              14400
+            ],
+            "origin_unknown": true,
+            "can_prestart_place": true
+          }
+        }
+      },
+      "pending": [],
+      "audit": {
+        "known-a": {
+          "job_uid": "known-a",
+          "submit_time": 0,
+          "initial_admission_attempt": 0.0,
+          "admitted_time": 0.0,
+          "capacity_wait_seconds": 0.0,
+          "capacity_wait_slots": 0,
+          "site": "A",
+          "GPU_gang": 1,
+          "queue_position": 1,
+          "completion_observed_time": 1800.0,
+          "release_control_time": 1800,
+          "grid_reads": 0,
+          "future_end_reads": 0,
+          "future_duration_reads": 0,
+          "optimizer_calls": 0,
+          "timeshift_optimization": false,
+          "migration_optimization": false,
+          "plan_start_seconds": 0.0,
+          "plan_actual_start_deviation_seconds": 0.0,
+          "intentional_delay_seconds": 0.0,
+          "unavoidable_queue_seconds": 0.0,
+          "policy_action": "START",
+          "rule_id": null,
+          "carryout": false,
+          "latest_state": "COMPLETED",
+          "origin_unknown": false,
+          "migration_count": 0,
+          "accumulated_compute_seconds": 1800.0
+        },
+        "known-b": {
+          "job_uid": "known-b",
+          "submit_time": 0,
+          "initial_admission_attempt": 0.0,
+          "admitted_time": 0.0,
+          "capacity_wait_seconds": 0.0,
+          "capacity_wait_slots": 0,
+          "site": "A",
+          "GPU_gang": 1,
+          "queue_position": 2,
+          "completion_observed_time": 900.0,
+          "release_control_time": 900,
+          "grid_reads": 0,
+          "future_end_reads": 0,
+          "future_duration_reads": 0,
+          "optimizer_calls": 0,
+          "timeshift_optimization": false,
+          "migration_optimization": false,
+          "plan_start_seconds": 0.0,
+          "plan_actual_start_deviation_seconds": 0.0,
+          "intentional_delay_seconds": 0.0,
+          "unavoidable_queue_seconds": 0.0,
+          "policy_action": "START",
+          "rule_id": null,
+          "carryout": false,
+          "latest_state": "COMPLETED",
+          "origin_unknown": false,
+          "migration_count": 0,
+          "accumulated_compute_seconds": 900.0
+        },
+        "unknown-observed": {
+          "job_uid": "unknown-observed",
+          "submit_time": 900,
+          "initial_admission_attempt": 900.0,
+          "admitted_time": 900.0,
+          "capacity_wait_seconds": 0.0,
+          "capacity_wait_slots": 0,
+          "site": "A",
+          "GPU_gang": 1,
+          "queue_position": 1,
+          "completion_observed_time": 1800.0,
+          "release_control_time": 1800,
+          "grid_reads": 0,
+          "future_end_reads": 0,
+          "future_duration_reads": 0,
+          "optimizer_calls": 0,
+          "timeshift_optimization": false,
+          "migration_optimization": false,
+          "plan_start_seconds": 900.0,
+          "plan_actual_start_deviation_seconds": 0.0,
+          "intentional_delay_seconds": 0.0,
+          "unavoidable_queue_seconds": 0.0,
+          "policy_action": "START",
+          "rule_id": null,
+          "carryout": false,
+          "latest_state": "COMPLETED",
+          "origin_unknown": true,
+          "migration_count": 0,
+          "accumulated_compute_seconds": 900.0
+        }
+      },
+      "metadata": {
+        "known-a": {
+          "partition": "fixture-gpu",
+          "batch_eligible": true,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "origin_unknown": false,
+          "can_prestart_place": true,
+          "uid": "known-a",
+          "submit_seconds": 0,
+          "event_seconds": 0.0,
+          "reference_start_seconds": 0,
+          "t50_seconds": 900,
+          "qos": "normal",
+          "protected": false,
+          "gpu": 1,
+          "requested_walltime_seconds": 3600,
+          "is_observed": true,
+          "state": "COMPLETED",
+          "release_seconds": null,
+          "hard_earliest_start_seconds": null,
+          "hard_latest_start_seconds": null,
+          "completion_deadline_seconds": null,
+          "nominal_service_seconds": 900,
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow",
+          "compatible_sites": [
+            "A",
+            "B"
+          ],
+          "source_site": "A",
+          "additional_start_delay_seconds": 0.0,
+          "cumulative_migration_interruption_seconds": 0.0,
+          "accumulated_compute_seconds": 1800.0,
+          "migration_count": 0,
+          "current_site": "A"
+        },
+        "known-b": {
+          "partition": "fixture-gpu",
+          "batch_eligible": true,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "origin_unknown": false,
+          "can_prestart_place": true,
+          "uid": "known-b",
+          "submit_seconds": 0,
+          "event_seconds": 0.0,
+          "reference_start_seconds": 0,
+          "t50_seconds": 900,
+          "qos": "normal",
+          "protected": false,
+          "gpu": 1,
+          "requested_walltime_seconds": 3600,
+          "is_observed": true,
+          "state": "COMPLETED",
+          "release_seconds": null,
+          "hard_earliest_start_seconds": null,
+          "hard_latest_start_seconds": null,
+          "completion_deadline_seconds": null,
+          "nominal_service_seconds": 900,
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow",
+          "compatible_sites": [
+            "A",
+            "B"
+          ],
+          "source_site": "A",
+          "additional_start_delay_seconds": 0.0,
+          "cumulative_migration_interruption_seconds": 0.0,
+          "accumulated_compute_seconds": 900.0,
+          "migration_count": 0,
+          "current_site": "A"
+        },
+        "unknown-observed": {
+          "partition": "fixture-gpu",
+          "batch_eligible": true,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "origin_unknown": true,
+          "can_prestart_place": true,
+          "uid": "unknown-observed",
+          "submit_seconds": 900,
+          "event_seconds": 900.0,
+          "reference_start_seconds": 900,
+          "t50_seconds": 900,
+          "qos": "normal",
+          "protected": false,
+          "gpu": 1,
+          "requested_walltime_seconds": 3600,
+          "is_observed": true,
+          "state": "COMPLETED",
+          "release_seconds": null,
+          "hard_earliest_start_seconds": null,
+          "hard_latest_start_seconds": null,
+          "completion_deadline_seconds": null,
+          "nominal_service_seconds": 900,
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow",
+          "compatible_sites": [
+            "A",
+            "B"
+          ],
+          "source_site": "A",
+          "additional_start_delay_seconds": 0.0,
+          "cumulative_migration_interruption_seconds": 0.0,
+          "accumulated_compute_seconds": 900.0,
+          "migration_count": 0,
+          "current_site": "A"
+        }
+      },
+      "observed": {
+        "known-a": {
+          "uid": "known-a",
+          "submit_seconds": 0,
+          "event_seconds": 0.0,
+          "reference_start_seconds": 0,
+          "t50_seconds": 900,
+          "qos": "normal",
+          "protected": false,
+          "batch_eligible": true,
+          "partition": "fixture-gpu",
+          "gpu": 1,
+          "requested_walltime_seconds": 3600,
+          "origin_unknown": false,
+          "is_observed": true,
+          "state": "PENDING",
+          "release_seconds": null,
+          "hard_earliest_start_seconds": null,
+          "hard_latest_start_seconds": null,
+          "completion_deadline_seconds": null,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "nominal_service_seconds": null,
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow"
+        },
+        "known-b": {
+          "uid": "known-b",
+          "submit_seconds": 0,
+          "event_seconds": 0.0,
+          "reference_start_seconds": 0,
+          "t50_seconds": 900,
+          "qos": "normal",
+          "protected": false,
+          "batch_eligible": true,
+          "partition": "fixture-gpu",
+          "gpu": 1,
+          "requested_walltime_seconds": 3600,
+          "origin_unknown": false,
+          "is_observed": true,
+          "state": "PENDING",
+          "release_seconds": null,
+          "hard_earliest_start_seconds": null,
+          "hard_latest_start_seconds": null,
+          "completion_deadline_seconds": null,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "nominal_service_seconds": null,
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow"
+        },
+        "unknown-observed": {
+          "uid": "unknown-observed",
+          "submit_seconds": 900,
+          "event_seconds": 900.0,
+          "reference_start_seconds": 900,
+          "t50_seconds": 900,
+          "qos": "normal",
+          "protected": false,
+          "batch_eligible": true,
+          "partition": "fixture-gpu",
+          "gpu": 1,
+          "requested_walltime_seconds": 3600,
+          "origin_unknown": true,
+          "is_observed": true,
+          "state": "PENDING",
+          "release_seconds": null,
+          "hard_earliest_start_seconds": null,
+          "hard_latest_start_seconds": null,
+          "completion_deadline_seconds": null,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "nominal_service_seconds": null,
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow"
+        }
+      },
+      "qos_budget_ledger": {
+        "known-a": {
+          "uid": "known-a",
+          "case_sha": "fixture-integration",
+          "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+          "stats_sha": "76f5ed9e12d63d1eec7d872f4b3f4914f3a83f87e7028cb08aa1bc9a4759c453",
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow",
+          "authority_sha": "98a0abb89f48283bfdc06a32211d6e8f8cdc955a5f7c78509470f65bee63f076",
+          "issued_at_seconds": 0,
+          "reference_start_seconds": 0,
+          "reference_wait_seconds": 0,
+          "t50_seconds": 900,
+          "empirical_wait_seconds": 4500.0,
+          "budget_seconds": 3600,
+          "latest_start_seconds": 3600,
+          "allowed_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600
+          ],
+          "cohort_level": 0,
+          "cohort_n": 100,
+          "q90_higher_z": 5.0,
+          "status": "AUTHORIZED",
+          "reasons": [],
+          "origin_unknown": false,
+          "is_observed": true,
+          "batch_eligible": true,
+          "state_at_issue": "PENDING",
+          "hard_contract": {
+            "release_seconds": null,
+            "hard_earliest_start_seconds": null,
+            "hard_latest_start_seconds": null,
+            "completion_deadline_seconds": null,
+            "representation_starts_seconds": [
+              0,
+              900,
+              1800,
+              2700,
+              3600,
+              4500,
+              5400,
+              6300,
+              7200,
+              8100,
+              9000,
+              9900,
+              10800,
+              11700,
+              12600,
+              13500,
+              14400
+            ],
+            "nominal_service_seconds": null,
+            "provider_sha": "fixture-runtime",
+            "reference_sha": "fixture-shadow",
+            "batch_eligible": true,
+            "qos": "normal",
+            "protected": false,
+            "partition": "fixture-gpu",
+            "gpu": 1,
+            "requested_walltime_seconds": 3600
+          },
+          "hard_contract_sha": "ed41134d7721d358c5d24a26d731220171c8710fcad6387b9f2897face06fe06",
+          "receipt_sha": "9f11e564ad26bc0a3c99447a7bf925c45a9ea3613a530b366e9ea314766c919c"
+        },
+        "known-b": {
+          "uid": "known-b",
+          "case_sha": "fixture-integration",
+          "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+          "stats_sha": "76f5ed9e12d63d1eec7d872f4b3f4914f3a83f87e7028cb08aa1bc9a4759c453",
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow",
+          "authority_sha": "3b666e9b2550d12bd34657bd3c8467970182d37cda74b217e24d1140f573c6d4",
+          "issued_at_seconds": 0,
+          "reference_start_seconds": 0,
+          "reference_wait_seconds": 0,
+          "t50_seconds": 900,
+          "empirical_wait_seconds": 4500.0,
+          "budget_seconds": 3600,
+          "latest_start_seconds": 3600,
+          "allowed_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600
+          ],
+          "cohort_level": 0,
+          "cohort_n": 100,
+          "q90_higher_z": 5.0,
+          "status": "AUTHORIZED",
+          "reasons": [],
+          "origin_unknown": false,
+          "is_observed": true,
+          "batch_eligible": true,
+          "state_at_issue": "PENDING",
+          "hard_contract": {
+            "release_seconds": null,
+            "hard_earliest_start_seconds": null,
+            "hard_latest_start_seconds": null,
+            "completion_deadline_seconds": null,
+            "representation_starts_seconds": [
+              0,
+              900,
+              1800,
+              2700,
+              3600,
+              4500,
+              5400,
+              6300,
+              7200,
+              8100,
+              9000,
+              9900,
+              10800,
+              11700,
+              12600,
+              13500,
+              14400
+            ],
+            "nominal_service_seconds": null,
+            "provider_sha": "fixture-runtime",
+            "reference_sha": "fixture-shadow",
+            "batch_eligible": true,
+            "qos": "normal",
+            "protected": false,
+            "partition": "fixture-gpu",
+            "gpu": 1,
+            "requested_walltime_seconds": 3600
+          },
+          "hard_contract_sha": "ed41134d7721d358c5d24a26d731220171c8710fcad6387b9f2897face06fe06",
+          "receipt_sha": "c601553e6acdc59b2e4d6b1808e02f154d5014d52f4cd76b0de122d4386e26b8"
+        },
+        "unknown-observed": {
+          "uid": "unknown-observed",
+          "case_sha": "fixture-integration",
+          "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+          "stats_sha": "76f5ed9e12d63d1eec7d872f4b3f4914f3a83f87e7028cb08aa1bc9a4759c453",
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow",
+          "authority_sha": "c76bb0d56b0ff83d0926162e7c67350bcd4a0703298be51fbfab0587dd3278be",
+          "issued_at_seconds": 900.0,
+          "reference_start_seconds": 900,
+          "reference_wait_seconds": 0,
+          "t50_seconds": 900,
+          "empirical_wait_seconds": 4500.0,
+          "budget_seconds": 3600,
+          "latest_start_seconds": 4500,
+          "allowed_starts_seconds": [
+            900,
+            1800,
+            2700,
+            3600,
+            4500
+          ],
+          "cohort_level": 0,
+          "cohort_n": 100,
+          "q90_higher_z": 5.0,
+          "status": "AUTHORIZED",
+          "reasons": [],
+          "origin_unknown": true,
+          "is_observed": true,
+          "batch_eligible": true,
+          "state_at_issue": "PENDING",
+          "hard_contract": {
+            "release_seconds": null,
+            "hard_earliest_start_seconds": null,
+            "hard_latest_start_seconds": null,
+            "completion_deadline_seconds": null,
+            "representation_starts_seconds": [
+              0,
+              900,
+              1800,
+              2700,
+              3600,
+              4500,
+              5400,
+              6300,
+              7200,
+              8100,
+              9000,
+              9900,
+              10800,
+              11700,
+              12600,
+              13500,
+              14400
+            ],
+            "nominal_service_seconds": null,
+            "provider_sha": "fixture-runtime",
+            "reference_sha": "fixture-shadow",
+            "batch_eligible": true,
+            "qos": "normal",
+            "protected": false,
+            "partition": "fixture-gpu",
+            "gpu": 1,
+            "requested_walltime_seconds": 3600
+          },
+          "hard_contract_sha": "ed41134d7721d358c5d24a26d731220171c8710fcad6387b9f2897face06fe06",
+          "receipt_sha": "e7af594406b806da680be4ad482bfb2109edaa2fc9aefd36316768f4ad9ecc41"
+        }
+      },
+      "decisions": {
+        "known-a": {
+          "action": "START",
+          "site": "A",
+          "start_seconds": 0.0,
+          "nominal_end_seconds": 900.0,
+          "status": "CAUSAL_REFERENCE_START",
+          "uid": "known-a",
+          "additional_start_delay_seconds": 0.0
+        },
+        "known-b": {
+          "action": "START",
+          "site": "A",
+          "start_seconds": 0.0,
+          "nominal_end_seconds": 900.0,
+          "status": "CAUSAL_REFERENCE_START",
+          "uid": "known-b",
+          "additional_start_delay_seconds": 0.0
+        },
+        "unknown-observed": {
+          "action": "START",
+          "site": "A",
+          "start_seconds": 900.0,
+          "nominal_end_seconds": 1800.0,
+          "status": "CAUSAL_REFERENCE_START",
+          "uid": "unknown-observed",
+          "additional_start_delay_seconds": 0.0
+        }
+      },
+      "reservations": {
+        "capacities": {
+          "gpu:A": 2,
+          "gpu:B": 2,
+          "active:WAN": 1
+        },
+        "reservations": {
+          "known-a": {
+            "uid": "known-a",
+            "segments": [
+              {
+                "resource": "gpu:A",
+                "begin": 0.0,
+                "end": 1800.0,
+                "quantity": 1.0,
+                "scope": "physical"
+              }
+            ],
+            "status": "RELEASED",
+            "scope": "physical"
+          },
+          "known-b": {
+            "uid": "known-b",
+            "segments": [
+              {
+                "resource": "gpu:A",
+                "begin": 0.0,
+                "end": 900.0,
+                "quantity": 1.0,
+                "scope": "physical"
+              }
+            ],
+            "status": "RELEASED",
+            "scope": "physical"
+          },
+          "unknown-observed": {
+            "uid": "unknown-observed",
+            "segments": [
+              {
+                "resource": "gpu:A",
+                "begin": 900.0,
+                "end": 1800.0,
+                "quantity": 1.0,
+                "scope": "physical"
+              }
+            ],
+            "status": "RELEASED",
+            "scope": "physical"
+          }
+        },
+        "audit": [
+          {
+            "uid": "known-a",
+            "status": "RESERVED",
+            "segments": [
+              {
+                "resource": "gpu:A",
+                "begin": 0.0,
+                "end": 900.0,
+                "quantity": 1.0,
+                "scope": "physical"
+              }
+            ]
+          },
+          {
+            "uid": "known-b",
+            "status": "RESERVED",
+            "segments": [
+              {
+                "resource": "gpu:A",
+                "begin": 0.0,
+                "end": 900.0,
+                "quantity": 1.0,
+                "scope": "physical"
+              }
+            ]
+          },
+          {
+            "uid": "unknown-observed",
+            "status": "RESERVED",
+            "segments": [
+              {
+                "resource": "gpu:A",
+                "begin": 900.0,
+                "end": 1800.0,
+                "quantity": 1.0,
+                "scope": "physical"
+              }
+            ]
+          },
+          {
+            "uid": "known-b",
+            "status": "RELEASED",
+            "at": 900.0
+          },
+          {
+            "uid": "known-a",
+            "status": "RELEASED",
+            "at": 1800.0
+          },
+          {
+            "uid": "unknown-observed",
+            "status": "RELEASED",
+            "at": 1800.0
+          }
+        ]
+      },
+      "reference": {
+        "capacities": {
+          "A": 2,
+          "B": 2
+        },
+        "reference_sha": "fixture-shadow",
+        "reservations": {
+          "A": [
+            [
+              0,
+              900,
+              1
+            ],
+            [
+              0,
+              900,
+              1
+            ],
+            [
+              900,
+              1800,
+              1
+            ]
+          ],
+          "B": []
+        },
+        "assigned": {
+          "known-a": {
+            "uid": "known-a",
+            "reference_start_seconds": 0,
+            "reference_site": "A",
+            "nominal_release_seconds": 900,
+            "origin": "CAUSAL_REFERENCE_START",
+            "reference_sha": "fixture-shadow",
+            "request_sha": "371217bed7eed5d34a7a564c554b2b4f33627b8f393fc2279133b48af69da3f3",
+            "grid_reads": 0,
+            "realized_completion_reads": 0,
+            "solver_calls": 0
+          },
+          "known-b": {
+            "uid": "known-b",
+            "reference_start_seconds": 0,
+            "reference_site": "A",
+            "nominal_release_seconds": 900,
+            "origin": "CAUSAL_REFERENCE_START",
+            "reference_sha": "fixture-shadow",
+            "request_sha": "d244830a6f59f032419a39e6ed3a9dd1543522d40a3e6b449eaf4f98a05ef78b",
+            "grid_reads": 0,
+            "realized_completion_reads": 0,
+            "solver_calls": 0
+          },
+          "unknown-observed": {
+            "uid": "unknown-observed",
+            "reference_start_seconds": 900,
+            "reference_site": "A",
+            "nominal_release_seconds": 1800,
+            "origin": "CAUSAL_REFERENCE_START",
+            "reference_sha": "fixture-shadow",
+            "request_sha": "37c85d1155182b7bf21c8d55930c21dd01eb6758ad86d47f9613f4a37f64a0bc",
+            "grid_reads": 0,
+            "realized_completion_reads": 0,
+            "solver_calls": 0
+          }
+        },
+        "last_event_seconds": 900.0,
+        "last_pending_start_seconds": 900
+      },
+      "forecast": {
+        "q50": [
+          0.5,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "q90": [
+          0.5,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "day_start": 0,
+        "consumed": {
+          "0": 0.25
+        },
+        "submissions": {
+          "unknown-observed": {
+            "hour": 0,
+            "nominal_GPUh": 0.25,
+            "submit_time": 900
+          }
+        },
+        "last_event": 900.0
+      },
+      "job_event_ledger": [
+        {
+          "uid": "known-a",
+          "time_seconds": 0.0,
+          "event": "SUBMISSION_OBSERVED",
+          "origin_unknown": false,
+          "qos_budget_seconds": 3600
+        },
+        {
+          "uid": "known-b",
+          "time_seconds": 0.0,
+          "event": "SUBMISSION_OBSERVED",
+          "origin_unknown": false,
+          "qos_budget_seconds": 3600
+        },
+        {
+          "uid": "known-a",
+          "time_seconds": 0.0,
+          "event": "RUNNING",
+          "site": "A",
+          "action": "START"
+        },
+        {
+          "uid": "known-b",
+          "time_seconds": 0.0,
+          "event": "RUNNING",
+          "site": "A",
+          "action": "START"
+        },
+        {
+          "uid": "known-b",
+          "time_seconds": 900.0,
+          "event": "COMPLETION_OBSERVED",
+          "release_control_seconds": 900
+        },
+        {
+          "uid": "unknown-observed",
+          "time_seconds": 900.0,
+          "event": "SUBMISSION_OBSERVED",
+          "origin_unknown": true,
+          "qos_budget_seconds": 3600
+        },
+        {
+          "uid": "unknown-observed",
+          "time_seconds": 900.0,
+          "event": "RUNNING",
+          "site": "A",
+          "action": "START"
+        },
+        {
+          "uid": "known-b",
+          "time_seconds": 900.0,
+          "event": "GPU_RELEASE_CONTROL"
+        },
+        {
+          "uid": "known-a",
+          "time_seconds": 1800.0,
+          "event": "COMPLETION_OBSERVED",
+          "release_control_seconds": 1800
+        },
+        {
+          "uid": "unknown-observed",
+          "time_seconds": 1800.0,
+          "event": "COMPLETION_OBSERVED",
+          "release_control_seconds": 1800
+        },
+        {
+          "uid": "known-a",
+          "time_seconds": 1800.0,
+          "event": "GPU_RELEASE_CONTROL"
+        },
+        {
+          "uid": "unknown-observed",
+          "time_seconds": 1800.0,
+          "event": "GPU_RELEASE_CONTROL"
+        }
+      ],
+      "migration_receipts": [],
+      "cc4_depletion_ledger": [
+        {
+          "uid": "unknown-observed",
+          "hour": 0,
+          "observed_at": 900.0,
+          "realized_submitted_nominal_work_GPUh": 0.25,
+          "remaining_CC4_Q50_GPUh": 0.25,
+          "remaining_CC4_Q90_GPUh": 0.25,
+          "remaining_CC4_reserve_GPUh": 0.0,
+          "cohort_closed": false,
+          "explicit_plus_anonymous_nominal_GPUh": 0.5,
+          "expired_unsubmitted_Q50_GPUh": 0.0,
+          "excess_submitted_nominal_GPUh": 0.0,
+          "depletion_count": 1,
+          "anonymous_forecast_is_physical": false
+        }
+      ],
+      "rule_consumption": []
+    },
+    "simulator_only_remaining_compute_seconds": {
+      "known-a": 0.0,
+      "known-b": 0.0,
+      "unknown-observed": 0.0
+    },
+    "simulator_state_provenance": "private realized service; forbidden controller/provider input"
+  },
+  "receipt": {
+    "capacity_violations": 0,
+    "dropped_jobs": 0,
+    "submitted_jobs": 3,
+    "completed_jobs": 3,
+    "carryout_jobs": 0,
+    "max_per_site_GPU": {
+      "A": 2.0,
+      "B": 0.0
+    },
+    "actual_compute_GPUh": 1.0,
+    "actual_occupation_GPUh": 1.0,
+    "anonymous_physical_GPU": 0,
+    "runtime_reserve_physical_GPU": 0,
+    "optimizer_calls": 0,
+    "actual_global_reoptimization": 0,
+    "future_duration_controller_reads": 0,
+    "future_completion_controller_reads": 0,
+    "actual_power_recomputed": true,
+    "planning_power_copied": false,
+    "physical_ac_status": "NOT_EXECUTED"
+  },
+  "MESS_execution": {
+    "engine": "LITERAL_FROZEN_MESS_EXECUTOR_V1",
+    "plan_sha": "24ee1c90347235d98b1aa4e2ceeb5c737f3562f1e9305b5116ad9ee04caabf0d",
+    "commands": [
+      {
+        "control_seconds": 0.0,
+        "P_by_site": {
+          "A": 1.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": -4.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.215,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 1,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 900.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": -1.0
+        },
+        "Q_by_site": {
+          "A": -3.0,
+          "B": -1.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.215,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 4.937222222222222,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 1800.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": -0.5479999999999999
+        },
+        "Q_by_site": {
+          "A": -3.0,
+          "B": -1.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 4.937222222222222,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 4.775,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 2700.0,
+        "P_by_site": {
+          "A": 1.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": -4.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 4.775,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 1,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 3600.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 4500.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 5400.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 6300.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 7200.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 8100.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 9000.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 9900.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 10800.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 11700.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 12600.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 13500.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 14400.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 15300.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 16200.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 17100.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 18000.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 18900.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 19800.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 20700.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 21600.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 22500.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 23400.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 24300.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 25200.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 26100.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 27000.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 27900.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 28800.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 29700.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 30600.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 31500.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 32400.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 33300.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 34200.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 35100.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 36000.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 36900.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 37800.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 38700.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 39600.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 40500.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 41400.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 42300.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 43200.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 44100.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 45000.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 45900.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 46800.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 47700.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 48600.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 49500.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 50400.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 51300.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 52200.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 53100.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 54000.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 54900.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 55800.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 56700.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 57600.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 58500.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 59400.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 60300.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 61200.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 62100.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 63000.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 63900.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 64800.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 65700.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 66600.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 67500.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 68400.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 69300.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 70200.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 71100.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 72000.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 72900.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 73800.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 74700.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 75600.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 76500.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 77400.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 78300.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 79200.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 80100.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 81000.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 81900.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 82800.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 83700.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 84600.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      },
+      {
+        "control_seconds": 85500.0,
+        "P_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "Q_by_site": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "SOC_begin": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "SOC_end": {
+          "MESS01": 5.0,
+          "MESS02": 5.0,
+          "MESS03": 5.0,
+          "MESS04": 5.0
+        },
+        "Mode": {
+          "MESS01": 0,
+          "MESS02": 0,
+          "MESS03": 0,
+          "MESS04": 0
+        },
+        "connection_site": {
+          "MESS01": null,
+          "MESS02": null,
+          "MESS03": null,
+          "MESS04": null
+        }
+      }
+    ],
+    "routes": {
+      "MESS01": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "MESS02": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "MESS03": [
+        8,
+        5,
+        9,
+        3
+      ],
+      "MESS04": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "moves": [],
+    "original_FULL_feasibility_precondition": true,
+    "evidence_kind": "SYNTHETIC_FIXTURE",
+    "frozen_execution_validated": true,
+    "original_FULL_reused": true,
+    "validation_scope": "FROZEN_SHA_AXES_AND_ORIGINAL_FULL_PRECONDITION",
+    "P_Q_repair_calls": 0,
+    "global_optimize_calls": 0,
+    "Actual_travel_uncertainty_simulated": false,
+    "electrical_consumer_status": "AWAITING_FRESH_AC",
+    "fresh_AC_PASS": null
+  }
+}

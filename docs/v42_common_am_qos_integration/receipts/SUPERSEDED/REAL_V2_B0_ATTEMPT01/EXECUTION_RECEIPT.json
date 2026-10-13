@@ -1,0 +1,25 @@
+{
+  "arm": "B0",
+  "scope": "ONE_DAY_ISOLATED_VALIDATION",
+  "campaign_HOLD": true,
+  "campaign_started": false,
+  "source_freeze": {
+    "path": "D:\\v42_common_am_qos_integration_20261013\\docs\\v42_common_am_qos_integration\\SOURCE_FREEZE_EXECUTION_V2.json",
+    "sha256": "b26e8b18a39d136c7b250060c3e926f1165bf170a4dd3e7807e9e5c39d3c1b71",
+    "bytes": 381819
+  },
+  "initial_site_authority": {
+    "path": "D:\\v42_common_am_qos_integration_20261013\\docs\\v42_common_am_qos_integration\\ADOPTED_INITIALIZATION\\SYNTHETIC_INITIALIZATION_POLICY.json",
+    "sha256": "cd4c0c8d23232ad519fad95fafd154bafc2809a35195426d6241ef2badd1bc1a",
+    "bytes": 349273
+  },
+  "integration_solve_seconds_before": 120.61592281798949,
+  "case_sha": "b81a103f284bacc3d1beb3eb5d792b2ef17a6169c932cb46e57ca82874bbc751",
+  "preparation": "NATIVE0_PASS",
+  "status": "FAILED",
+  "error": "ValueError('MESS_OFF_ARM_MUST_HAVE_NO_ACTIVE_MESS_PLAN')",
+  "traceback": "Traceback (most recent call last):\n  File \"D:\\v42_common_am_qos_integration_20261013\\v42_integration\\real_validation.py\", line 43, in main\n    result=run_arm(args.arm,case,budget,args.output/args.arm)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_common_am_qos_integration_20261013\\v42_integration\\coordinator.py\", line 156, in run_arm\n    actual['Fresh_AC']=case.fresh_evaluator(trace,mess,output/'FRESH_PHYSICAL',budget)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_common_am_qos_integration_20261013\\v42_integration\\production_case.py\", line 465, in fresh_evaluator\n    receipt=fresh_ac_minimum(archive/'raw'/day,folder.parent,folder,\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual_validation.py\", line 598, in fresh_ac_minimum\n    raise ValueError(\"MESS_OFF_ARM_MUST_HAVE_NO_ACTIVE_MESS_PLAN\")\nValueError: MESS_OFF_ARM_MUST_HAVE_NO_ACTIVE_MESS_PLAN\n",
+  "wall_seconds": 71.80422759999783,
+  "integration_solve_seconds_after": 120.61592281798949,
+  "new_solve_seconds": 0.0
+}

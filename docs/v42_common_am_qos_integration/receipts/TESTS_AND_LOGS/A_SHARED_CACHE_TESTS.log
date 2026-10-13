@@ -1,0 +1,42 @@
+......F                                                                  [100%]
+================================== FAILURES ===================================
+________ test_zero_budget_cannot_authorize_positive_restart_migration _________
+
+    def test_zero_budget_cannot_authorize_positive_restart_migration():
+        c=case()
+        for receipt in c.qos_receipts.values():receipt['budget_seconds']=0
+>       d,domains=authorized_data(c)
+
+tests\test_v42_integration_a.py:88: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+v42_integration\a_engine.py:115: in authorized_data
+    domain=physical_domain(changed[uid],newbound,resources,gen=shared_generator)
+v42_a_stage_domain_v2\domain.py:98: in physical_domain
+    validate(job, option, wide, resources)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+job = Job(uid='a', state='PENDING', submit=0, event=0, reference_start=2, reference_site='A', service_slots=5, gpu=2, qos='n...s_allowed_starts=(1, 2, 3), qos_budget_seconds=0.0, qos_start_delay_seconds=0.0, is_observed=True, batch_eligible=True)
+option = Option(start=3, initial_site='A', segments=(('A', 3, 8),), checkpoint=-1, physical_checkpoint_seconds=-1, destination='', transfer_start=-1, transfer_end=-1, restart_end=-1, wan=())
+boundary = ServiceBoundary(authority_id='FIXTURE', finalized=True, synthetic=True, allowed_starts=(1, 2, 3), latest_completion=12)
+resources = Resources(capacities={'A': 8, 'B': 8}, rack_limits={'A': (8,), 'B': (8,)}, wan_capacities={('ab', 0): 1000, ('ab', 1):...trol_end=15, bytes_per_gpu=10, fixed_gpu={}, fixed_wan={}, fixed_transfers={}, restart_slots=1, max_active_transfers=1)
+
+    def validate(job, option, boundary, resources):
+        boundary.require()
+        if not job.admitted:
+            raise ValueError('UNADMITTED_REQUIRES_SEPARATE_BACKLOG_LEDGER')
+        if option.start not in boundary.allowed_starts or option.start < max(job.submit, job.event):
+            raise ValueError('START_WINDOW')
+        if job.qos_policy_id:
+            if not job.is_observed or option.start not in job.qos_allowed_starts:
+                raise ValueError('AUTHORIZED_QOS_WINDOW')
+            burden = job.qos_start_delay_seconds + max(0, option.start-job.reference_start)*SLOT_SECONDS
+            if option.migrated:
+                burden += (option.restart_end-option.checkpoint)*SLOT_SECONDS
+            if burden > job.qos_budget_seconds + 1e-9:
+>               raise ValueError('SHARED_DELAY_INTERRUPTION_BUDGET')
+E               ValueError: SHARED_DELAY_INTERRUPTION_BUDGET
+
+v42_job_capability.py:233: ValueError
+=========================== short test summary info ===========================
+FAILED tests/test_v42_integration_a.py::test_zero_budget_cannot_authorize_positive_restart_migration
+1 failed, 6 passed in 1.04s

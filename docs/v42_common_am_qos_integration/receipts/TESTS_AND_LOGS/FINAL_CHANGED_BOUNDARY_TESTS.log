@@ -1,0 +1,501 @@
+..............EEEEEEE............................................        [100%]
+=================================== ERRORS ====================================
+_ ERROR at setup of test_midnight_roster_history_gangs_queue_and_private_service _
+
+    @pytest.fixture
+    def boundary_fixture():
+        begin = pd.Timestamp('2025-05-01', tz='Etc/GMT-10').timestamp()
+        issue = begin-21600
+        def row(uid, submit, gpu=1, q50=900):
+            return dict(job_uid=uid, submit_time=submit, GPU_gang=gpu, Q50_total_seconds=q50,
+                compatible_sites=['A','B'], source_member='NAMED_SYNTHETIC_BOUNDARY_FIXTURE', source_row=len(uid))
+        known = [row('fixed-overrun',issue-10000,2,50), row('known-transition',issue-10000),
+                 row('known-pending',issue-9000), row('gone44',issue-10000)]
+        unknown = [row('prefix-running',begin-2000),row('prefix-pending',begin-1200),
+                   row('prefix-completed',begin-4000),row('future-submit',begin+900)]
+        starts = {'fixed-overrun':issue-900,'known-transition':begin-450,
+            'known-pending':begin+5000,'gone44':issue-1000,'prefix-running':begin-1000,
+            'prefix-pending':begin+1000,'prefix-completed':begin-3000,'future-submit':begin+2000}
+        ends = {uid:begin+50000 for uid in starts}
+        ends.update(gone44=begin-1,**{'prefix-completed':begin-1})
+        truth = {uid:dict(start_time=start,end_time=ends[uid],realized_seconds=ends[uid]-start)
+                 for uid,start in starts.items()}
+        native = dict(known_population=[dict(r,state='RUNNING' if i in (0,3) else 'PENDING',
+            current_site_if_running='A' if i==0 else None,
+            elapsed_seconds=issue-starts[r['job_uid']] if i in (0,3) else 0) for i,r in enumerate(known)])
+        plan = dict(day='2025-05-01',issue_time=issue,known_population=known,
+            capacities={'A':8,'B':8},rack_compatibility={'A':[8],'B':[8]},
+            forecast_inputs=dict(current_CC4=dict(Q50_GPUh=[1.]*24,Q90_GPUh=[2.]*24)))
+        actual = dict(post_issue_arrivals=unknown)
+        population = known+unknown
+        events = prefix_events(truth,population,begin)
+        candidate,_,_ = build_boundary_candidate(plan,native,actual,events,{'gone44'})
+>       freeze = initialize_from_candidate(candidate,plan,native,actual)
+
+tests\test_v42_integration_dday_actual_loader.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+candidate = {'Actual_begin_seconds': 1746021600.0, 'Actual_end_seconds': 1746108000.0, 'Apr30_queue_replay_performed': False, 'day': '2025-05-01', ...}
+plan = {'capacities': {'A': 8, 'B': 8}, 'day': '2025-05-01', 'forecast_inputs': {'current_CC4': {'Q50_GPUh': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, ...], 'Q90_GPUh': [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, ...]}}, 'issue_time': 1746000000.0, ...}
+native = {'known_population': [{'GPU_gang': 2, 'Q50_total_seconds': 50, 'compatible_sites': ['A', 'B'], 'current_site_if_runnin......}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'current_site_if_running': None, ...}]}
+actual = {'post_issue_arrivals': [{'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'prefix-...ed', ...}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'future-submit', ...}]}
+
+    def initialize_from_candidate(candidate, plan, native, actual, *, pr129_recovery=None,
+                                  provider_identifiers=None, source_receipts=(), expected_counts=None):
+        """Pure adapter of observed midnight records to unchanged PR125 rules."""
+        if digest({k:v for k,v in candidate.items() if k!="initial_state_sha"}) != candidate["initial_state_sha"]:
+            raise ValueError("DDAY_BOUNDARY_CANDIDATE_SHA_DRIFT")
+        begin,end=candidate["Actual_begin_seconds"],candidate["Actual_end_seconds"]
+        if end-begin!=86400 or begin%900 or candidate["slots"]!=96:
+            raise ValueError("DDAY_INITIALIZATION_96_SLOT_EPOCH_AXIS")
+        roster=candidate["initial_source_roster"]
+        if len({r["job_uid"] for r in roster})!=len(roster):raise ValueError("DDAY_INITIAL_UID_DUPLICATE")
+        source_rows={r["job_uid"]:r for r in plan["known_population"]+actual["post_issue_arrivals"]}
+        native_rows={r["job_uid"]:r for r in native["known_population"]}
+        running=[r for r in roster if r["boundary_source_state"]=="RUNNING"]
+        pending=[r for r in roster if r["boundary_source_state"]=="PENDING"]
+        excluded=set(candidate["excluded_UIDs"])
+        if excluded.intersection(r["job_uid"] for r in running+pending):
+            raise ValueError("DDAY_PRECOMPLETED44_ACTIVE_OR_QUEUED")
+        fixed={r["job_uid"]:r["current_model_site"] for r in running if r["current_model_site"] is not None}
+        counts=dict(running=len(running),running_GPU=sum(r["GPU_gang"] for r in running),
+            fixed=len(fixed),fixed_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] in fixed),
+            unresolved=len(running)-len(fixed),unresolved_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] not in fixed),
+            pending=len(pending),pending_GPU=sum(r["GPU_gang"] for r in pending),excluded=len(excluded))
+        if expected_counts and any(counts[key]!=value for key,value in expected_counts.items()):
+            raise ValueError("DDAY_INITIAL_POPULATION_COUNTS_DRIFT")
+        recovery=pr129_recovery or {}
+        if recovery.get("audit_completed") is not True:
+>           raise ValueError("PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK")
+E           ValueError: PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK
+
+v42_integration\dday_initialization.py:101: ValueError
+_ ERROR at setup of test_future_realizations_do_not_change_public_requests_or_reference _
+
+    @pytest.fixture
+    def boundary_fixture():
+        begin = pd.Timestamp('2025-05-01', tz='Etc/GMT-10').timestamp()
+        issue = begin-21600
+        def row(uid, submit, gpu=1, q50=900):
+            return dict(job_uid=uid, submit_time=submit, GPU_gang=gpu, Q50_total_seconds=q50,
+                compatible_sites=['A','B'], source_member='NAMED_SYNTHETIC_BOUNDARY_FIXTURE', source_row=len(uid))
+        known = [row('fixed-overrun',issue-10000,2,50), row('known-transition',issue-10000),
+                 row('known-pending',issue-9000), row('gone44',issue-10000)]
+        unknown = [row('prefix-running',begin-2000),row('prefix-pending',begin-1200),
+                   row('prefix-completed',begin-4000),row('future-submit',begin+900)]
+        starts = {'fixed-overrun':issue-900,'known-transition':begin-450,
+            'known-pending':begin+5000,'gone44':issue-1000,'prefix-running':begin-1000,
+            'prefix-pending':begin+1000,'prefix-completed':begin-3000,'future-submit':begin+2000}
+        ends = {uid:begin+50000 for uid in starts}
+        ends.update(gone44=begin-1,**{'prefix-completed':begin-1})
+        truth = {uid:dict(start_time=start,end_time=ends[uid],realized_seconds=ends[uid]-start)
+                 for uid,start in starts.items()}
+        native = dict(known_population=[dict(r,state='RUNNING' if i in (0,3) else 'PENDING',
+            current_site_if_running='A' if i==0 else None,
+            elapsed_seconds=issue-starts[r['job_uid']] if i in (0,3) else 0) for i,r in enumerate(known)])
+        plan = dict(day='2025-05-01',issue_time=issue,known_population=known,
+            capacities={'A':8,'B':8},rack_compatibility={'A':[8],'B':[8]},
+            forecast_inputs=dict(current_CC4=dict(Q50_GPUh=[1.]*24,Q90_GPUh=[2.]*24)))
+        actual = dict(post_issue_arrivals=unknown)
+        population = known+unknown
+        events = prefix_events(truth,population,begin)
+        candidate,_,_ = build_boundary_candidate(plan,native,actual,events,{'gone44'})
+>       freeze = initialize_from_candidate(candidate,plan,native,actual)
+
+tests\test_v42_integration_dday_actual_loader.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+candidate = {'Actual_begin_seconds': 1746021600.0, 'Actual_end_seconds': 1746108000.0, 'Apr30_queue_replay_performed': False, 'day': '2025-05-01', ...}
+plan = {'capacities': {'A': 8, 'B': 8}, 'day': '2025-05-01', 'forecast_inputs': {'current_CC4': {'Q50_GPUh': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, ...], 'Q90_GPUh': [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, ...]}}, 'issue_time': 1746000000.0, ...}
+native = {'known_population': [{'GPU_gang': 2, 'Q50_total_seconds': 50, 'compatible_sites': ['A', 'B'], 'current_site_if_runnin......}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'current_site_if_running': None, ...}]}
+actual = {'post_issue_arrivals': [{'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'prefix-...ed', ...}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'future-submit', ...}]}
+
+    def initialize_from_candidate(candidate, plan, native, actual, *, pr129_recovery=None,
+                                  provider_identifiers=None, source_receipts=(), expected_counts=None):
+        """Pure adapter of observed midnight records to unchanged PR125 rules."""
+        if digest({k:v for k,v in candidate.items() if k!="initial_state_sha"}) != candidate["initial_state_sha"]:
+            raise ValueError("DDAY_BOUNDARY_CANDIDATE_SHA_DRIFT")
+        begin,end=candidate["Actual_begin_seconds"],candidate["Actual_end_seconds"]
+        if end-begin!=86400 or begin%900 or candidate["slots"]!=96:
+            raise ValueError("DDAY_INITIALIZATION_96_SLOT_EPOCH_AXIS")
+        roster=candidate["initial_source_roster"]
+        if len({r["job_uid"] for r in roster})!=len(roster):raise ValueError("DDAY_INITIAL_UID_DUPLICATE")
+        source_rows={r["job_uid"]:r for r in plan["known_population"]+actual["post_issue_arrivals"]}
+        native_rows={r["job_uid"]:r for r in native["known_population"]}
+        running=[r for r in roster if r["boundary_source_state"]=="RUNNING"]
+        pending=[r for r in roster if r["boundary_source_state"]=="PENDING"]
+        excluded=set(candidate["excluded_UIDs"])
+        if excluded.intersection(r["job_uid"] for r in running+pending):
+            raise ValueError("DDAY_PRECOMPLETED44_ACTIVE_OR_QUEUED")
+        fixed={r["job_uid"]:r["current_model_site"] for r in running if r["current_model_site"] is not None}
+        counts=dict(running=len(running),running_GPU=sum(r["GPU_gang"] for r in running),
+            fixed=len(fixed),fixed_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] in fixed),
+            unresolved=len(running)-len(fixed),unresolved_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] not in fixed),
+            pending=len(pending),pending_GPU=sum(r["GPU_gang"] for r in pending),excluded=len(excluded))
+        if expected_counts and any(counts[key]!=value for key,value in expected_counts.items()):
+            raise ValueError("DDAY_INITIAL_POPULATION_COUNTS_DRIFT")
+        recovery=pr129_recovery or {}
+        if recovery.get("audit_completed") is not True:
+>           raise ValueError("PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK")
+E           ValueError: PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK
+
+v42_integration\dday_initialization.py:101: ValueError
+_ ERROR at setup of test_known_pending_to_running_reuses_budget_without_rewriting_history _
+
+    @pytest.fixture
+    def boundary_fixture():
+        begin = pd.Timestamp('2025-05-01', tz='Etc/GMT-10').timestamp()
+        issue = begin-21600
+        def row(uid, submit, gpu=1, q50=900):
+            return dict(job_uid=uid, submit_time=submit, GPU_gang=gpu, Q50_total_seconds=q50,
+                compatible_sites=['A','B'], source_member='NAMED_SYNTHETIC_BOUNDARY_FIXTURE', source_row=len(uid))
+        known = [row('fixed-overrun',issue-10000,2,50), row('known-transition',issue-10000),
+                 row('known-pending',issue-9000), row('gone44',issue-10000)]
+        unknown = [row('prefix-running',begin-2000),row('prefix-pending',begin-1200),
+                   row('prefix-completed',begin-4000),row('future-submit',begin+900)]
+        starts = {'fixed-overrun':issue-900,'known-transition':begin-450,
+            'known-pending':begin+5000,'gone44':issue-1000,'prefix-running':begin-1000,
+            'prefix-pending':begin+1000,'prefix-completed':begin-3000,'future-submit':begin+2000}
+        ends = {uid:begin+50000 for uid in starts}
+        ends.update(gone44=begin-1,**{'prefix-completed':begin-1})
+        truth = {uid:dict(start_time=start,end_time=ends[uid],realized_seconds=ends[uid]-start)
+                 for uid,start in starts.items()}
+        native = dict(known_population=[dict(r,state='RUNNING' if i in (0,3) else 'PENDING',
+            current_site_if_running='A' if i==0 else None,
+            elapsed_seconds=issue-starts[r['job_uid']] if i in (0,3) else 0) for i,r in enumerate(known)])
+        plan = dict(day='2025-05-01',issue_time=issue,known_population=known,
+            capacities={'A':8,'B':8},rack_compatibility={'A':[8],'B':[8]},
+            forecast_inputs=dict(current_CC4=dict(Q50_GPUh=[1.]*24,Q90_GPUh=[2.]*24)))
+        actual = dict(post_issue_arrivals=unknown)
+        population = known+unknown
+        events = prefix_events(truth,population,begin)
+        candidate,_,_ = build_boundary_candidate(plan,native,actual,events,{'gone44'})
+>       freeze = initialize_from_candidate(candidate,plan,native,actual)
+
+tests\test_v42_integration_dday_actual_loader.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+candidate = {'Actual_begin_seconds': 1746021600.0, 'Actual_end_seconds': 1746108000.0, 'Apr30_queue_replay_performed': False, 'day': '2025-05-01', ...}
+plan = {'capacities': {'A': 8, 'B': 8}, 'day': '2025-05-01', 'forecast_inputs': {'current_CC4': {'Q50_GPUh': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, ...], 'Q90_GPUh': [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, ...]}}, 'issue_time': 1746000000.0, ...}
+native = {'known_population': [{'GPU_gang': 2, 'Q50_total_seconds': 50, 'compatible_sites': ['A', 'B'], 'current_site_if_runnin......}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'current_site_if_running': None, ...}]}
+actual = {'post_issue_arrivals': [{'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'prefix-...ed', ...}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'future-submit', ...}]}
+
+    def initialize_from_candidate(candidate, plan, native, actual, *, pr129_recovery=None,
+                                  provider_identifiers=None, source_receipts=(), expected_counts=None):
+        """Pure adapter of observed midnight records to unchanged PR125 rules."""
+        if digest({k:v for k,v in candidate.items() if k!="initial_state_sha"}) != candidate["initial_state_sha"]:
+            raise ValueError("DDAY_BOUNDARY_CANDIDATE_SHA_DRIFT")
+        begin,end=candidate["Actual_begin_seconds"],candidate["Actual_end_seconds"]
+        if end-begin!=86400 or begin%900 or candidate["slots"]!=96:
+            raise ValueError("DDAY_INITIALIZATION_96_SLOT_EPOCH_AXIS")
+        roster=candidate["initial_source_roster"]
+        if len({r["job_uid"] for r in roster})!=len(roster):raise ValueError("DDAY_INITIAL_UID_DUPLICATE")
+        source_rows={r["job_uid"]:r for r in plan["known_population"]+actual["post_issue_arrivals"]}
+        native_rows={r["job_uid"]:r for r in native["known_population"]}
+        running=[r for r in roster if r["boundary_source_state"]=="RUNNING"]
+        pending=[r for r in roster if r["boundary_source_state"]=="PENDING"]
+        excluded=set(candidate["excluded_UIDs"])
+        if excluded.intersection(r["job_uid"] for r in running+pending):
+            raise ValueError("DDAY_PRECOMPLETED44_ACTIVE_OR_QUEUED")
+        fixed={r["job_uid"]:r["current_model_site"] for r in running if r["current_model_site"] is not None}
+        counts=dict(running=len(running),running_GPU=sum(r["GPU_gang"] for r in running),
+            fixed=len(fixed),fixed_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] in fixed),
+            unresolved=len(running)-len(fixed),unresolved_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] not in fixed),
+            pending=len(pending),pending_GPU=sum(r["GPU_gang"] for r in pending),excluded=len(excluded))
+        if expected_counts and any(counts[key]!=value for key,value in expected_counts.items()):
+            raise ValueError("DDAY_INITIAL_POPULATION_COUNTS_DRIFT")
+        recovery=pr129_recovery or {}
+        if recovery.get("audit_completed") is not True:
+>           raise ValueError("PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK")
+E           ValueError: PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK
+
+v42_integration\dday_initialization.py:101: ValueError
+_ ERROR at setup of test_prefix_origin_unknown_observed_once_without_cc4_day_debit _
+
+    @pytest.fixture
+    def boundary_fixture():
+        begin = pd.Timestamp('2025-05-01', tz='Etc/GMT-10').timestamp()
+        issue = begin-21600
+        def row(uid, submit, gpu=1, q50=900):
+            return dict(job_uid=uid, submit_time=submit, GPU_gang=gpu, Q50_total_seconds=q50,
+                compatible_sites=['A','B'], source_member='NAMED_SYNTHETIC_BOUNDARY_FIXTURE', source_row=len(uid))
+        known = [row('fixed-overrun',issue-10000,2,50), row('known-transition',issue-10000),
+                 row('known-pending',issue-9000), row('gone44',issue-10000)]
+        unknown = [row('prefix-running',begin-2000),row('prefix-pending',begin-1200),
+                   row('prefix-completed',begin-4000),row('future-submit',begin+900)]
+        starts = {'fixed-overrun':issue-900,'known-transition':begin-450,
+            'known-pending':begin+5000,'gone44':issue-1000,'prefix-running':begin-1000,
+            'prefix-pending':begin+1000,'prefix-completed':begin-3000,'future-submit':begin+2000}
+        ends = {uid:begin+50000 for uid in starts}
+        ends.update(gone44=begin-1,**{'prefix-completed':begin-1})
+        truth = {uid:dict(start_time=start,end_time=ends[uid],realized_seconds=ends[uid]-start)
+                 for uid,start in starts.items()}
+        native = dict(known_population=[dict(r,state='RUNNING' if i in (0,3) else 'PENDING',
+            current_site_if_running='A' if i==0 else None,
+            elapsed_seconds=issue-starts[r['job_uid']] if i in (0,3) else 0) for i,r in enumerate(known)])
+        plan = dict(day='2025-05-01',issue_time=issue,known_population=known,
+            capacities={'A':8,'B':8},rack_compatibility={'A':[8],'B':[8]},
+            forecast_inputs=dict(current_CC4=dict(Q50_GPUh=[1.]*24,Q90_GPUh=[2.]*24)))
+        actual = dict(post_issue_arrivals=unknown)
+        population = known+unknown
+        events = prefix_events(truth,population,begin)
+        candidate,_,_ = build_boundary_candidate(plan,native,actual,events,{'gone44'})
+>       freeze = initialize_from_candidate(candidate,plan,native,actual)
+
+tests\test_v42_integration_dday_actual_loader.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+candidate = {'Actual_begin_seconds': 1746021600.0, 'Actual_end_seconds': 1746108000.0, 'Apr30_queue_replay_performed': False, 'day': '2025-05-01', ...}
+plan = {'capacities': {'A': 8, 'B': 8}, 'day': '2025-05-01', 'forecast_inputs': {'current_CC4': {'Q50_GPUh': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, ...], 'Q90_GPUh': [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, ...]}}, 'issue_time': 1746000000.0, ...}
+native = {'known_population': [{'GPU_gang': 2, 'Q50_total_seconds': 50, 'compatible_sites': ['A', 'B'], 'current_site_if_runnin......}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'current_site_if_running': None, ...}]}
+actual = {'post_issue_arrivals': [{'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'prefix-...ed', ...}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'future-submit', ...}]}
+
+    def initialize_from_candidate(candidate, plan, native, actual, *, pr129_recovery=None,
+                                  provider_identifiers=None, source_receipts=(), expected_counts=None):
+        """Pure adapter of observed midnight records to unchanged PR125 rules."""
+        if digest({k:v for k,v in candidate.items() if k!="initial_state_sha"}) != candidate["initial_state_sha"]:
+            raise ValueError("DDAY_BOUNDARY_CANDIDATE_SHA_DRIFT")
+        begin,end=candidate["Actual_begin_seconds"],candidate["Actual_end_seconds"]
+        if end-begin!=86400 or begin%900 or candidate["slots"]!=96:
+            raise ValueError("DDAY_INITIALIZATION_96_SLOT_EPOCH_AXIS")
+        roster=candidate["initial_source_roster"]
+        if len({r["job_uid"] for r in roster})!=len(roster):raise ValueError("DDAY_INITIAL_UID_DUPLICATE")
+        source_rows={r["job_uid"]:r for r in plan["known_population"]+actual["post_issue_arrivals"]}
+        native_rows={r["job_uid"]:r for r in native["known_population"]}
+        running=[r for r in roster if r["boundary_source_state"]=="RUNNING"]
+        pending=[r for r in roster if r["boundary_source_state"]=="PENDING"]
+        excluded=set(candidate["excluded_UIDs"])
+        if excluded.intersection(r["job_uid"] for r in running+pending):
+            raise ValueError("DDAY_PRECOMPLETED44_ACTIVE_OR_QUEUED")
+        fixed={r["job_uid"]:r["current_model_site"] for r in running if r["current_model_site"] is not None}
+        counts=dict(running=len(running),running_GPU=sum(r["GPU_gang"] for r in running),
+            fixed=len(fixed),fixed_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] in fixed),
+            unresolved=len(running)-len(fixed),unresolved_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] not in fixed),
+            pending=len(pending),pending_GPU=sum(r["GPU_gang"] for r in pending),excluded=len(excluded))
+        if expected_counts and any(counts[key]!=value for key,value in expected_counts.items()):
+            raise ValueError("DDAY_INITIAL_POPULATION_COUNTS_DRIFT")
+        recovery=pr129_recovery or {}
+        if recovery.get("audit_completed") is not True:
+>           raise ValueError("PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK")
+E           ValueError: PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK
+
+v42_integration\dday_initialization.py:101: ValueError
+_ ERROR at setup of test_public_request_or_budget_tampering_rejected_before_registration _
+
+    @pytest.fixture
+    def boundary_fixture():
+        begin = pd.Timestamp('2025-05-01', tz='Etc/GMT-10').timestamp()
+        issue = begin-21600
+        def row(uid, submit, gpu=1, q50=900):
+            return dict(job_uid=uid, submit_time=submit, GPU_gang=gpu, Q50_total_seconds=q50,
+                compatible_sites=['A','B'], source_member='NAMED_SYNTHETIC_BOUNDARY_FIXTURE', source_row=len(uid))
+        known = [row('fixed-overrun',issue-10000,2,50), row('known-transition',issue-10000),
+                 row('known-pending',issue-9000), row('gone44',issue-10000)]
+        unknown = [row('prefix-running',begin-2000),row('prefix-pending',begin-1200),
+                   row('prefix-completed',begin-4000),row('future-submit',begin+900)]
+        starts = {'fixed-overrun':issue-900,'known-transition':begin-450,
+            'known-pending':begin+5000,'gone44':issue-1000,'prefix-running':begin-1000,
+            'prefix-pending':begin+1000,'prefix-completed':begin-3000,'future-submit':begin+2000}
+        ends = {uid:begin+50000 for uid in starts}
+        ends.update(gone44=begin-1,**{'prefix-completed':begin-1})
+        truth = {uid:dict(start_time=start,end_time=ends[uid],realized_seconds=ends[uid]-start)
+                 for uid,start in starts.items()}
+        native = dict(known_population=[dict(r,state='RUNNING' if i in (0,3) else 'PENDING',
+            current_site_if_running='A' if i==0 else None,
+            elapsed_seconds=issue-starts[r['job_uid']] if i in (0,3) else 0) for i,r in enumerate(known)])
+        plan = dict(day='2025-05-01',issue_time=issue,known_population=known,
+            capacities={'A':8,'B':8},rack_compatibility={'A':[8],'B':[8]},
+            forecast_inputs=dict(current_CC4=dict(Q50_GPUh=[1.]*24,Q90_GPUh=[2.]*24)))
+        actual = dict(post_issue_arrivals=unknown)
+        population = known+unknown
+        events = prefix_events(truth,population,begin)
+        candidate,_,_ = build_boundary_candidate(plan,native,actual,events,{'gone44'})
+>       freeze = initialize_from_candidate(candidate,plan,native,actual)
+
+tests\test_v42_integration_dday_actual_loader.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+candidate = {'Actual_begin_seconds': 1746021600.0, 'Actual_end_seconds': 1746108000.0, 'Apr30_queue_replay_performed': False, 'day': '2025-05-01', ...}
+plan = {'capacities': {'A': 8, 'B': 8}, 'day': '2025-05-01', 'forecast_inputs': {'current_CC4': {'Q50_GPUh': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, ...], 'Q90_GPUh': [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, ...]}}, 'issue_time': 1746000000.0, ...}
+native = {'known_population': [{'GPU_gang': 2, 'Q50_total_seconds': 50, 'compatible_sites': ['A', 'B'], 'current_site_if_runnin......}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'current_site_if_running': None, ...}]}
+actual = {'post_issue_arrivals': [{'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'prefix-...ed', ...}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'future-submit', ...}]}
+
+    def initialize_from_candidate(candidate, plan, native, actual, *, pr129_recovery=None,
+                                  provider_identifiers=None, source_receipts=(), expected_counts=None):
+        """Pure adapter of observed midnight records to unchanged PR125 rules."""
+        if digest({k:v for k,v in candidate.items() if k!="initial_state_sha"}) != candidate["initial_state_sha"]:
+            raise ValueError("DDAY_BOUNDARY_CANDIDATE_SHA_DRIFT")
+        begin,end=candidate["Actual_begin_seconds"],candidate["Actual_end_seconds"]
+        if end-begin!=86400 or begin%900 or candidate["slots"]!=96:
+            raise ValueError("DDAY_INITIALIZATION_96_SLOT_EPOCH_AXIS")
+        roster=candidate["initial_source_roster"]
+        if len({r["job_uid"] for r in roster})!=len(roster):raise ValueError("DDAY_INITIAL_UID_DUPLICATE")
+        source_rows={r["job_uid"]:r for r in plan["known_population"]+actual["post_issue_arrivals"]}
+        native_rows={r["job_uid"]:r for r in native["known_population"]}
+        running=[r for r in roster if r["boundary_source_state"]=="RUNNING"]
+        pending=[r for r in roster if r["boundary_source_state"]=="PENDING"]
+        excluded=set(candidate["excluded_UIDs"])
+        if excluded.intersection(r["job_uid"] for r in running+pending):
+            raise ValueError("DDAY_PRECOMPLETED44_ACTIVE_OR_QUEUED")
+        fixed={r["job_uid"]:r["current_model_site"] for r in running if r["current_model_site"] is not None}
+        counts=dict(running=len(running),running_GPU=sum(r["GPU_gang"] for r in running),
+            fixed=len(fixed),fixed_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] in fixed),
+            unresolved=len(running)-len(fixed),unresolved_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] not in fixed),
+            pending=len(pending),pending_GPU=sum(r["GPU_gang"] for r in pending),excluded=len(excluded))
+        if expected_counts and any(counts[key]!=value for key,value in expected_counts.items()):
+            raise ValueError("DDAY_INITIAL_POPULATION_COUNTS_DRIFT")
+        recovery=pr129_recovery or {}
+        if recovery.get("audit_completed") is not True:
+>           raise ValueError("PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK")
+E           ValueError: PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK
+
+v42_integration\dday_initialization.py:101: ValueError
+_______ ERROR at setup of test_pre_midnight_known_start_is_not_replayed _______
+
+    @pytest.fixture
+    def boundary_fixture():
+        begin = pd.Timestamp('2025-05-01', tz='Etc/GMT-10').timestamp()
+        issue = begin-21600
+        def row(uid, submit, gpu=1, q50=900):
+            return dict(job_uid=uid, submit_time=submit, GPU_gang=gpu, Q50_total_seconds=q50,
+                compatible_sites=['A','B'], source_member='NAMED_SYNTHETIC_BOUNDARY_FIXTURE', source_row=len(uid))
+        known = [row('fixed-overrun',issue-10000,2,50), row('known-transition',issue-10000),
+                 row('known-pending',issue-9000), row('gone44',issue-10000)]
+        unknown = [row('prefix-running',begin-2000),row('prefix-pending',begin-1200),
+                   row('prefix-completed',begin-4000),row('future-submit',begin+900)]
+        starts = {'fixed-overrun':issue-900,'known-transition':begin-450,
+            'known-pending':begin+5000,'gone44':issue-1000,'prefix-running':begin-1000,
+            'prefix-pending':begin+1000,'prefix-completed':begin-3000,'future-submit':begin+2000}
+        ends = {uid:begin+50000 for uid in starts}
+        ends.update(gone44=begin-1,**{'prefix-completed':begin-1})
+        truth = {uid:dict(start_time=start,end_time=ends[uid],realized_seconds=ends[uid]-start)
+                 for uid,start in starts.items()}
+        native = dict(known_population=[dict(r,state='RUNNING' if i in (0,3) else 'PENDING',
+            current_site_if_running='A' if i==0 else None,
+            elapsed_seconds=issue-starts[r['job_uid']] if i in (0,3) else 0) for i,r in enumerate(known)])
+        plan = dict(day='2025-05-01',issue_time=issue,known_population=known,
+            capacities={'A':8,'B':8},rack_compatibility={'A':[8],'B':[8]},
+            forecast_inputs=dict(current_CC4=dict(Q50_GPUh=[1.]*24,Q90_GPUh=[2.]*24)))
+        actual = dict(post_issue_arrivals=unknown)
+        population = known+unknown
+        events = prefix_events(truth,population,begin)
+        candidate,_,_ = build_boundary_candidate(plan,native,actual,events,{'gone44'})
+>       freeze = initialize_from_candidate(candidate,plan,native,actual)
+
+tests\test_v42_integration_dday_actual_loader.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+candidate = {'Actual_begin_seconds': 1746021600.0, 'Actual_end_seconds': 1746108000.0, 'Apr30_queue_replay_performed': False, 'day': '2025-05-01', ...}
+plan = {'capacities': {'A': 8, 'B': 8}, 'day': '2025-05-01', 'forecast_inputs': {'current_CC4': {'Q50_GPUh': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, ...], 'Q90_GPUh': [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, ...]}}, 'issue_time': 1746000000.0, ...}
+native = {'known_population': [{'GPU_gang': 2, 'Q50_total_seconds': 50, 'compatible_sites': ['A', 'B'], 'current_site_if_runnin......}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'current_site_if_running': None, ...}]}
+actual = {'post_issue_arrivals': [{'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'prefix-...ed', ...}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'future-submit', ...}]}
+
+    def initialize_from_candidate(candidate, plan, native, actual, *, pr129_recovery=None,
+                                  provider_identifiers=None, source_receipts=(), expected_counts=None):
+        """Pure adapter of observed midnight records to unchanged PR125 rules."""
+        if digest({k:v for k,v in candidate.items() if k!="initial_state_sha"}) != candidate["initial_state_sha"]:
+            raise ValueError("DDAY_BOUNDARY_CANDIDATE_SHA_DRIFT")
+        begin,end=candidate["Actual_begin_seconds"],candidate["Actual_end_seconds"]
+        if end-begin!=86400 or begin%900 or candidate["slots"]!=96:
+            raise ValueError("DDAY_INITIALIZATION_96_SLOT_EPOCH_AXIS")
+        roster=candidate["initial_source_roster"]
+        if len({r["job_uid"] for r in roster})!=len(roster):raise ValueError("DDAY_INITIAL_UID_DUPLICATE")
+        source_rows={r["job_uid"]:r for r in plan["known_population"]+actual["post_issue_arrivals"]}
+        native_rows={r["job_uid"]:r for r in native["known_population"]}
+        running=[r for r in roster if r["boundary_source_state"]=="RUNNING"]
+        pending=[r for r in roster if r["boundary_source_state"]=="PENDING"]
+        excluded=set(candidate["excluded_UIDs"])
+        if excluded.intersection(r["job_uid"] for r in running+pending):
+            raise ValueError("DDAY_PRECOMPLETED44_ACTIVE_OR_QUEUED")
+        fixed={r["job_uid"]:r["current_model_site"] for r in running if r["current_model_site"] is not None}
+        counts=dict(running=len(running),running_GPU=sum(r["GPU_gang"] for r in running),
+            fixed=len(fixed),fixed_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] in fixed),
+            unresolved=len(running)-len(fixed),unresolved_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] not in fixed),
+            pending=len(pending),pending_GPU=sum(r["GPU_gang"] for r in pending),excluded=len(excluded))
+        if expected_counts and any(counts[key]!=value for key,value in expected_counts.items()):
+            raise ValueError("DDAY_INITIAL_POPULATION_COUNTS_DRIFT")
+        recovery=pr129_recovery or {}
+        if recovery.get("audit_completed") is not True:
+>           raise ValueError("PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK")
+E           ValueError: PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK
+
+v42_integration\dday_initialization.py:101: ValueError
+_ ERROR at setup of test_public_loader_requires_intact_freeze_before_private_join _
+
+    @pytest.fixture
+    def boundary_fixture():
+        begin = pd.Timestamp('2025-05-01', tz='Etc/GMT-10').timestamp()
+        issue = begin-21600
+        def row(uid, submit, gpu=1, q50=900):
+            return dict(job_uid=uid, submit_time=submit, GPU_gang=gpu, Q50_total_seconds=q50,
+                compatible_sites=['A','B'], source_member='NAMED_SYNTHETIC_BOUNDARY_FIXTURE', source_row=len(uid))
+        known = [row('fixed-overrun',issue-10000,2,50), row('known-transition',issue-10000),
+                 row('known-pending',issue-9000), row('gone44',issue-10000)]
+        unknown = [row('prefix-running',begin-2000),row('prefix-pending',begin-1200),
+                   row('prefix-completed',begin-4000),row('future-submit',begin+900)]
+        starts = {'fixed-overrun':issue-900,'known-transition':begin-450,
+            'known-pending':begin+5000,'gone44':issue-1000,'prefix-running':begin-1000,
+            'prefix-pending':begin+1000,'prefix-completed':begin-3000,'future-submit':begin+2000}
+        ends = {uid:begin+50000 for uid in starts}
+        ends.update(gone44=begin-1,**{'prefix-completed':begin-1})
+        truth = {uid:dict(start_time=start,end_time=ends[uid],realized_seconds=ends[uid]-start)
+                 for uid,start in starts.items()}
+        native = dict(known_population=[dict(r,state='RUNNING' if i in (0,3) else 'PENDING',
+            current_site_if_running='A' if i==0 else None,
+            elapsed_seconds=issue-starts[r['job_uid']] if i in (0,3) else 0) for i,r in enumerate(known)])
+        plan = dict(day='2025-05-01',issue_time=issue,known_population=known,
+            capacities={'A':8,'B':8},rack_compatibility={'A':[8],'B':[8]},
+            forecast_inputs=dict(current_CC4=dict(Q50_GPUh=[1.]*24,Q90_GPUh=[2.]*24)))
+        actual = dict(post_issue_arrivals=unknown)
+        population = known+unknown
+        events = prefix_events(truth,population,begin)
+        candidate,_,_ = build_boundary_candidate(plan,native,actual,events,{'gone44'})
+>       freeze = initialize_from_candidate(candidate,plan,native,actual)
+
+tests\test_v42_integration_dday_actual_loader.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+candidate = {'Actual_begin_seconds': 1746021600.0, 'Actual_end_seconds': 1746108000.0, 'Apr30_queue_replay_performed': False, 'day': '2025-05-01', ...}
+plan = {'capacities': {'A': 8, 'B': 8}, 'day': '2025-05-01', 'forecast_inputs': {'current_CC4': {'Q50_GPUh': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, ...], 'Q90_GPUh': [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, ...]}}, 'issue_time': 1746000000.0, ...}
+native = {'known_population': [{'GPU_gang': 2, 'Q50_total_seconds': 50, 'compatible_sites': ['A', 'B'], 'current_site_if_runnin......}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'current_site_if_running': None, ...}]}
+actual = {'post_issue_arrivals': [{'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'prefix-...ed', ...}, {'GPU_gang': 1, 'Q50_total_seconds': 900, 'compatible_sites': ['A', 'B'], 'job_uid': 'future-submit', ...}]}
+
+    def initialize_from_candidate(candidate, plan, native, actual, *, pr129_recovery=None,
+                                  provider_identifiers=None, source_receipts=(), expected_counts=None):
+        """Pure adapter of observed midnight records to unchanged PR125 rules."""
+        if digest({k:v for k,v in candidate.items() if k!="initial_state_sha"}) != candidate["initial_state_sha"]:
+            raise ValueError("DDAY_BOUNDARY_CANDIDATE_SHA_DRIFT")
+        begin,end=candidate["Actual_begin_seconds"],candidate["Actual_end_seconds"]
+        if end-begin!=86400 or begin%900 or candidate["slots"]!=96:
+            raise ValueError("DDAY_INITIALIZATION_96_SLOT_EPOCH_AXIS")
+        roster=candidate["initial_source_roster"]
+        if len({r["job_uid"] for r in roster})!=len(roster):raise ValueError("DDAY_INITIAL_UID_DUPLICATE")
+        source_rows={r["job_uid"]:r for r in plan["known_population"]+actual["post_issue_arrivals"]}
+        native_rows={r["job_uid"]:r for r in native["known_population"]}
+        running=[r for r in roster if r["boundary_source_state"]=="RUNNING"]
+        pending=[r for r in roster if r["boundary_source_state"]=="PENDING"]
+        excluded=set(candidate["excluded_UIDs"])
+        if excluded.intersection(r["job_uid"] for r in running+pending):
+            raise ValueError("DDAY_PRECOMPLETED44_ACTIVE_OR_QUEUED")
+        fixed={r["job_uid"]:r["current_model_site"] for r in running if r["current_model_site"] is not None}
+        counts=dict(running=len(running),running_GPU=sum(r["GPU_gang"] for r in running),
+            fixed=len(fixed),fixed_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] in fixed),
+            unresolved=len(running)-len(fixed),unresolved_GPU=sum(r["GPU_gang"] for r in running if r["job_uid"] not in fixed),
+            pending=len(pending),pending_GPU=sum(r["GPU_gang"] for r in pending),excluded=len(excluded))
+        if expected_counts and any(counts[key]!=value for key,value in expected_counts.items()):
+            raise ValueError("DDAY_INITIAL_POPULATION_COUNTS_DRIFT")
+        recovery=pr129_recovery or {}
+        if recovery.get("audit_completed") is not True:
+>           raise ValueError("PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK")
+E           ValueError: PR129_REFERENCE_REUSE_AUDIT_REQUIRED_BEFORE_FALLBACK
+
+v42_integration\dday_initialization.py:101: ValueError
+=========================== short test summary info ===========================
+ERROR tests/test_v42_integration_dday_actual_loader.py::test_midnight_roster_history_gangs_queue_and_private_service
+ERROR tests/test_v42_integration_dday_actual_loader.py::test_future_realizations_do_not_change_public_requests_or_reference
+ERROR tests/test_v42_integration_dday_actual_loader.py::test_known_pending_to_running_reuses_budget_without_rewriting_history
+ERROR tests/test_v42_integration_dday_actual_loader.py::test_prefix_origin_unknown_observed_once_without_cc4_day_debit
+ERROR tests/test_v42_integration_dday_actual_loader.py::test_public_request_or_budget_tampering_rejected_before_registration
+ERROR tests/test_v42_integration_dday_actual_loader.py::test_pre_midnight_known_start_is_not_replayed
+ERROR tests/test_v42_integration_dday_actual_loader.py::test_public_loader_requires_intact_freeze_before_private_join
+58 passed, 7 errors in 5.25s

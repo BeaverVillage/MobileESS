@@ -1,0 +1,2473 @@
+{
+  "schema": "V42_REAL_POLICY_FEASIBILITY_DIAGNOSTIC_V1",
+  "written_utc": "2026-10-13T14:27:03.430659+00:00",
+  "mode": "READ_ONLY_FROZEN_ARTIFACT_DIAGNOSIS",
+  "input_receipts": [
+    {
+      "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+      "sha256": "4de8a542a15c8b2f023675c30df45ba6ddc42e854180ee274bf121e51635c05d",
+      "bytes": 1362546
+    },
+    {
+      "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\A2\\A_RESULT.json",
+      "sha256": "5fdef059bd52cbc1cd4cdca537e24473e0efd96001c012e7ac8303bb45f44b73",
+      "bytes": 1096718
+    }
+  ],
+  "source_edits": 0,
+  "alternative_policy_compiles": 0,
+  "Native_Optimize_calls": 0,
+  "Actual_runs": 0,
+  "Fresh_AC_runs": 0,
+  "future_Actual_data_used": false,
+  "forecast_scaling_or_clipping": false,
+  "training_or_calibrator_calls": 0,
+  "policy_status": "POLICY_COMPILER_ONLY",
+  "real_May_policy_optimized_action_claim": false,
+  "ordered_template_count": 0,
+  "template_status_counts": {
+    "NO_FEASIBLE_ACTION": 144
+  },
+  "metrics": {
+    "Native_Optimize_calls": 0,
+    "RSS_bytes_at_compile_end": 6409297920,
+    "bounded_candidates": 4392,
+    "cache_hits": 154,
+    "compile_wall_seconds": 2.572313500000746,
+    "grid_evaluation_calls": 1083,
+    "peak_RSS_scope": "PROCESS_LIFETIME_INCLUDING_SOURCE_PACKET_LOAD",
+    "process_lifetime_peak_RSS_bytes": 13514489856,
+    "scenario_tree_nodes": 0,
+    "templates": 144
+  },
+  "prototype_grammar": {
+    "critical_time_slots_ranked": [
+      80,
+      70,
+      72,
+      74,
+      76,
+      77,
+      31,
+      71
+    ],
+    "gpu_gangs": [
+      1,
+      4,
+      16
+    ],
+    "runtime_upper_seconds": [
+      900.0,
+      3600.0,
+      14400.0
+    ],
+    "runtime_lower_seconds": [
+      0.0,
+      900.0,
+      3600.0
+    ],
+    "states": {
+      "PENDING": 72,
+      "RUNNING": 72
+    },
+    "reference_resource_scope": "ANONYMOUS; Known service never borrowed",
+    "RUNNING_migration_capability_status": {
+      "MIGRATION_CAPABILITY_UNCONFIRMED": 72
+    }
+  },
+  "rejection_occurrence_counts_not_partition_of_generated_candidates": {
+    "ORIGINAL_GRID_OR_RESOURCE_HARD_CONSTRAINT": 309,
+    "NO_ENVELOPE_CAPACITY": 972,
+    "NO_AUTHORITY_CAPABILITY_UNCONFIRMED": 792,
+    "PROTOTYPE_REFERENCE_NOT_IN_ANONYMOUS_ENVELOPE": 102
+  },
+  "template_reference_support": {
+    "missing_continuous_anonymous_reference": 102,
+    "templates_with_numeric_comparisons": 42,
+    "numerically_compared_candidates": 309,
+    "by_state": {
+      "PENDING": {
+        "templates": 72,
+        "missing_reference": 51,
+        "numeric_comparison_templates": 21
+      },
+      "RUNNING": {
+        "templates": 72,
+        "missing_reference": 51,
+        "numeric_comparison_templates": 21
+      }
+    }
+  },
+  "scenario_candidate_counts": {
+    "NOMINAL_Q50": {
+      "evaluated_candidates": 309,
+      "hard_feasible": 112,
+      "hard_infeasible": 197,
+      "min_remaining_horizon_peak": 0.6412659916027483,
+      "max_remaining_horizon_peak": 0.6466252932498341
+    },
+    "HIGH_DEMAND_Q90": {
+      "evaluated_candidates": 309,
+      "hard_feasible": 0,
+      "hard_infeasible": 309,
+      "min_remaining_horizon_peak": 1.0259840136281946,
+      "max_remaining_horizon_peak": 1.0276210098556682
+    }
+  },
+  "candidate_violation_reason_occurrences": {
+    "NOMINAL_Q50": {
+      "WHOLE_GANG_SITE_GPU_CAPACITY": 158,
+      "ORIGINAL_PLANNING_VOLTAGE": 94
+    },
+    "HIGH_DEMAND_Q90": {
+      "ORIGINAL_ALL_TRANSFORMER_CURRENT": 309,
+      "ORIGINAL_LINE_CURRENT": 309,
+      "ORIGINAL_PLANNING_VOLTAGE": 309,
+      "ORIGINAL_TRANSFORMER_KVA": 309,
+      "WHOLE_GANG_SITE_GPU_CAPACITY": 309
+    }
+  },
+  "A2_full_row_validation": {
+    "FULL_feasible": true,
+    "FULL_max_residual": 3.446132268436486e-13,
+    "rho": 0.6412659916027482,
+    "aidc_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464"
+  },
+  "reserve_semantics": {
+    "source_export_meaning": "CC4_ARRIVAL_TARGET_DISTRIBUTION_NOT_CAPACITY_BACKED_ACHIEVED_RESERVE",
+    "policy_stress_source": "CC4_ARRIVAL_TARGET_NOT_CAPACITY_BACKED_ACHIEVED_RESERVE",
+    "stress_allocation_source": "A_STAGE_OPTIMIZED_RESERVE",
+    "A2_CC4_reserve_shortfall_GPU_slots": 75650.0,
+    "A2_CC4_reserve_shortfall_GPUh": 18912.5,
+    "A2_runtime_reserve_shortfall_GPU_slots": 17398.0,
+    "A2_runtime_reserve_shortfall_GPUh": 4349.5,
+    "achieved_CC4_reserve_site_GPU": 0.0,
+    "achieved_runtime_reserve_site_GPU": 0.0,
+    "interpretation": "A2 FULL-feasible permits reserve shortfall in its original model. The policy retains the literal target demand as a stress scenario and rejects site/grid overflow. Achieved zero reserve cannot be substituted for full Q90 demand without changing the scenario and losing demand mass."
+  },
+  "CC4_mass": {
+    "Q50_GPUh": 5503.441472156033,
+    "Q90_GPUh": 24408.063227293504,
+    "Q90_minus_Q50_GPUh": 18904.62175513747,
+    "Q90_stress_day_GPUh": 18904.358833501537,
+    "Q90_stress_tail_GPUh": 0.26292163593063833,
+    "nominal_carryout_GPUh": 2278.28398903905,
+    "TRAIN_BURST_STRESS": "INSUFFICIENT_SUPPORT"
+  },
+  "installed_total_GPU": 780.0,
+  "installed_full_24h_GPUh": 18720.0,
+  "Q90_stress_extra_day_alone_exceeds_full_24h_installed_GPUh": true,
+  "hard_failure_single_action_bound": {
+    "scope": "Single anonymous whole-gang delta evaluated against the fixed Q90 target scenario; not a global infeasibility certificate for a different multi-job queue model.",
+    "slot": 95,
+    "Known_plus_nominal_GPU": 259.05852837966495,
+    "Q90_extra_target_GPU": 750.786081893315,
+    "Q90_total_GPU": 1009.8446102729799,
+    "installed_GPU": 780.0,
+    "excess_GPU": 229.84461027297993,
+    "largest_compatible_single_gang_GPU": 100.0,
+    "optimistic_Q90_total_after_removing_one_maximum_gang_GPU": 909.8446102729799,
+    "optimistic_residual_excess_GPU": 129.84461027297993,
+    "any_remaining_horizon_start_slot_0_to_95_contains_this_slot": true,
+    "adding_current_API_whole_gang_prototypes_cannot_make_this_fixed_scenario_hard_feasible": true
+  },
+  "all96_slot_profile_summary": [
+    {
+      "slot": 0,
+      "max_nominal_site_GPU": 2.4720460492513774,
+      "max_sites": [
+        "AIDC02"
+      ],
+      "nominal_total_GPU": 3.579712698556616,
+      "known_total_GPU": 401.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 404.57971269855665,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 1,
+      "max_nominal_site_GPU": 2.8837816546920796,
+      "max_sites": [
+        "AIDC02"
+      ],
+      "nominal_total_GPU": 3.154447215418241,
+      "known_total_GPU": 401.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 404.15444721541826,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 2,
+      "max_nominal_site_GPU": 16.475450117428615,
+      "max_sites": [
+        "AIDC01"
+      ],
+      "nominal_total_GPU": 16.475450117428615,
+      "known_total_GPU": 403.0,
+      "Q90_extra_target_total_GPU": 1.5293296732991744,
+      "Q90_total_GPU": 421.00477979072775,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 3,
+      "max_nominal_site_GPU": 7.058431447138686,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 12.509204908370513,
+      "known_total_GPU": 406.0,
+      "Q90_extra_target_total_GPU": 84.78451795981682,
+      "Q90_total_GPU": 503.29372286818733,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 4,
+      "max_nominal_site_GPU": 68.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 101.0,
+      "known_total_GPU": 462.0,
+      "Q90_extra_target_total_GPU": 4874.41589714168,
+      "Q90_total_GPU": 5437.41589714168,
+      "Q90_total_excess_over_installed_GPU": 4657.41589714168,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 5,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 155.45119167559972,
+      "known_total_GPU": 476.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 631.4511916755997,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 6,
+      "max_nominal_site_GPU": 63.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 92.0,
+      "known_total_GPU": 480.0,
+      "Q90_extra_target_total_GPU": 1.0005465137572962,
+      "Q90_total_GPU": 573.0005465137573,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 7,
+      "max_nominal_site_GPU": 0.0,
+      "max_sites": [
+        "AIDC01",
+        "AIDC02",
+        "AIDC03",
+        "AIDC04",
+        "AIDC05",
+        "AIDC06",
+        "AIDC07",
+        "AIDC08",
+        "AIDC09",
+        "AIDC10",
+        "AIDC11",
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 0.0,
+      "known_total_GPU": 480.0,
+      "Q90_extra_target_total_GPU": 55.46930485059161,
+      "Q90_total_GPU": 535.4693048505916,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 8,
+      "max_nominal_site_GPU": 0.0,
+      "max_sites": [
+        "AIDC01",
+        "AIDC02",
+        "AIDC03",
+        "AIDC04",
+        "AIDC05",
+        "AIDC06",
+        "AIDC07",
+        "AIDC08",
+        "AIDC09",
+        "AIDC10",
+        "AIDC11",
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 0.0,
+      "known_total_GPU": 478.0,
+      "Q90_extra_target_total_GPU": 1145.8740309652705,
+      "Q90_total_GPU": 1623.8740309652705,
+      "Q90_total_excess_over_installed_GPU": 843.8740309652705,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 9,
+      "max_nominal_site_GPU": 20.598276036653058,
+      "max_sites": [
+        "AIDC11"
+      ],
+      "nominal_total_GPU": 20.598276036653058,
+      "known_total_GPU": 489.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 509.59827603665303,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 10,
+      "max_nominal_site_GPU": 60.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 98.87533739757066,
+      "known_total_GPU": 602.0,
+      "Q90_extra_target_total_GPU": 1.7748678005055294,
+      "Q90_total_GPU": 702.6502051980763,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 11,
+      "max_nominal_site_GPU": 60.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 82.47093898443042,
+      "known_total_GPU": 603.0,
+      "Q90_extra_target_total_GPU": 98.39690783193468,
+      "Q90_total_GPU": 783.867846816365,
+      "Q90_total_excess_over_installed_GPU": 3.867846816365045,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 12,
+      "max_nominal_site_GPU": 52.41595218906412,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 63.41595218906412,
+      "known_total_GPU": 592.0,
+      "Q90_extra_target_total_GPU": 2723.1049467060684,
+      "Q90_total_GPU": 3378.5208988951326,
+      "Q90_total_excess_over_installed_GPU": 2598.5208988951326,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 13,
+      "max_nominal_site_GPU": 37.337934501588094,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 57.967140491062125,
+      "known_total_GPU": 491.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 548.9671404910621,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 14,
+      "max_nominal_site_GPU": 63.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 83.43393457546819,
+      "known_total_GPU": 491.0,
+      "Q90_extra_target_total_GPU": 2.1999710597269897,
+      "Q90_total_GPU": 576.6339056351951,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 15,
+      "max_nominal_site_GPU": 68.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 141.39225183833258,
+      "known_total_GPU": 491.0,
+      "Q90_extra_target_total_GPU": 121.96421025567301,
+      "Q90_total_GPU": 754.3564620940057,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 16,
+      "max_nominal_site_GPU": 63.88293652285854,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 72.88293652285854,
+      "known_total_GPU": 483.0,
+      "Q90_extra_target_total_GPU": 1634.4856030461626,
+      "Q90_total_GPU": 2190.368539569021,
+      "Q90_total_excess_over_installed_GPU": 1410.3685395690209,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 17,
+      "max_nominal_site_GPU": 68.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 177.93510819417685,
+      "known_total_GPU": 482.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 659.9351081941768,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 18,
+      "max_nominal_site_GPU": 36.0,
+      "max_sites": [
+        "AIDC11"
+      ],
+      "nominal_total_GPU": 86.32050065938532,
+      "known_total_GPU": 483.0,
+      "Q90_extra_target_total_GPU": 1.1177362204656673,
+      "Q90_total_GPU": 570.4382368798509,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 19,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 145.87528006025678,
+      "known_total_GPU": 479.0,
+      "Q90_extra_target_total_GPU": 61.96618578254086,
+      "Q90_total_GPU": 686.8414658427976,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 20,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 217.0,
+      "known_total_GPU": 483.0,
+      "Q90_extra_target_total_GPU": 3562.5485446152616,
+      "Q90_total_GPU": 4262.548544615262,
+      "Q90_total_excess_over_installed_GPU": 3482.5485446152616,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 21,
+      "max_nominal_site_GPU": 64.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 98.04330853777739,
+      "known_total_GPU": 508.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 606.0433085377774,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 22,
+      "max_nominal_site_GPU": 46.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 49.131330193385146,
+      "known_total_GPU": 508.0,
+      "Q90_extra_target_total_GPU": 0.8517915867386242,
+      "Q90_total_GPU": 557.9831217801237,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 23,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 114.63376477515223,
+      "known_total_GPU": 516.0,
+      "Q90_extra_target_total_GPU": 47.22247945929576,
+      "Q90_total_GPU": 677.856244234448,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 24,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 108.0,
+      "known_total_GPU": 491.0,
+      "Q90_extra_target_total_GPU": 996.1085070190422,
+      "Q90_total_GPU": 1595.1085070190422,
+      "Q90_total_excess_over_installed_GPU": 815.1085070190422,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 25,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 283.0,
+      "known_total_GPU": 497.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 780.0,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 26,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 289.9969108615984,
+      "known_total_GPU": 489.0,
+      "Q90_extra_target_total_GPU": 1.5274520311813837,
+      "Q90_total_GPU": 780.5243628927798,
+      "Q90_total_excess_over_installed_GPU": 0.5243628927797772,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 27,
+      "max_nominal_site_GPU": 68.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 148.86842779096526,
+      "known_total_GPU": 494.0,
+      "Q90_extra_target_total_GPU": 84.68042334592334,
+      "Q90_total_GPU": 727.5488511368886,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 28,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 122.94686587095713,
+      "known_total_GPU": 494.0,
+      "Q90_extra_target_total_GPU": 1331.2838759013603,
+      "Q90_total_GPU": 1948.2307417723173,
+      "Q90_total_excess_over_installed_GPU": 1168.2307417723173,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 29,
+      "max_nominal_site_GPU": 36.0,
+      "max_sites": [
+        "AIDC11"
+      ],
+      "nominal_total_GPU": 63.10868369585512,
+      "known_total_GPU": 494.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 557.1086836958551,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 30,
+      "max_nominal_site_GPU": 67.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 116.0,
+      "known_total_GPU": 494.0,
+      "Q90_extra_target_total_GPU": 0.9390843520174342,
+      "Q90_total_GPU": 610.9390843520174,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 31,
+      "max_nominal_site_GPU": 0.0,
+      "max_sites": [
+        "AIDC01",
+        "AIDC02",
+        "AIDC03",
+        "AIDC04",
+        "AIDC05",
+        "AIDC06",
+        "AIDC07",
+        "AIDC08",
+        "AIDC09",
+        "AIDC10",
+        "AIDC11",
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 0.0,
+      "known_total_GPU": 494.0,
+      "Q90_extra_target_total_GPU": 52.06190365589638,
+      "Q90_total_GPU": 546.0619036558963,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 32,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 154.24382017217692,
+      "known_total_GPU": 494.0,
+      "Q90_extra_target_total_GPU": 1075.484604730381,
+      "Q90_total_GPU": 1723.7284249025581,
+      "Q90_total_excess_over_installed_GPU": 943.7284249025581,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 33,
+      "max_nominal_site_GPU": 67.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 132.89089227838437,
+      "known_total_GPU": 494.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 626.8908922783843,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 34,
+      "max_nominal_site_GPU": 68.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 117.0,
+      "known_total_GPU": 429.0,
+      "Q90_extra_target_total_GPU": 0.8815827930335899,
+      "Q90_total_GPU": 546.8815827930337,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 35,
+      "max_nominal_site_GPU": 100.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 279.0,
+      "known_total_GPU": 421.0,
+      "Q90_extra_target_total_GPU": 48.87407434381221,
+      "Q90_total_GPU": 748.8740743438123,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 36,
+      "max_nominal_site_GPU": 100.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 219.53134662563355,
+      "known_total_GPU": 421.0,
+      "Q90_extra_target_total_GPU": 1030.9471629611567,
+      "Q90_total_GPU": 1671.47850958679,
+      "Q90_total_excess_over_installed_GPU": 891.4785095867901,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 37,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 146.8315395500124,
+      "known_total_GPU": 412.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 558.8315395500124,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 38,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 229.76227280091743,
+      "known_total_GPU": 386.0,
+      "Q90_extra_target_total_GPU": 0.845786833632827,
+      "Q90_total_GPU": 616.6080596345503,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 39,
+      "max_nominal_site_GPU": 100.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 153.17826351079475,
+      "known_total_GPU": 382.0,
+      "Q90_extra_target_total_GPU": 46.889581911807234,
+      "Q90_total_GPU": 582.067845422602,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 40,
+      "max_nominal_site_GPU": 64.0,
+      "max_sites": [
+        "AIDC08"
+      ],
+      "nominal_total_GPU": 133.87489235662326,
+      "known_total_GPU": 356.0,
+      "Q90_extra_target_total_GPU": 4163.772797419714,
+      "Q90_total_GPU": 4653.647689776337,
+      "Q90_total_excess_over_installed_GPU": 3873.647689776337,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 41,
+      "max_nominal_site_GPU": 96.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 238.50803776154504,
+      "known_total_GPU": 339.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 577.508037761545,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 42,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 309.5011575841952,
+      "known_total_GPU": 281.0,
+      "Q90_extra_target_total_GPU": 1.3569266101499393,
+      "Q90_total_GPU": 591.8580841943451,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 43,
+      "max_nominal_site_GPU": 96.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 214.321757185246,
+      "known_total_GPU": 279.0,
+      "Q90_extra_target_total_GPU": 75.22666339182774,
+      "Q90_total_GPU": 568.5484205770738,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 44,
+      "max_nominal_site_GPU": 56.268455019270505,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 56.268455019270505,
+      "known_total_GPU": 264.0,
+      "Q90_extra_target_total_GPU": 1217.519720740634,
+      "Q90_total_GPU": 1537.7881757599046,
+      "Q90_total_excess_over_installed_GPU": 757.7881757599046,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 45,
+      "max_nominal_site_GPU": 100.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 144.0,
+      "known_total_GPU": 257.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 401.0,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 46,
+      "max_nominal_site_GPU": 68.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 68.0,
+      "known_total_GPU": 238.0,
+      "Q90_extra_target_total_GPU": 0.7521980924752344,
+      "Q90_total_GPU": 306.7521980924752,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 47,
+      "max_nominal_site_GPU": 68.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 146.28251374379073,
+      "known_total_GPU": 232.0,
+      "Q90_extra_target_total_GPU": 2084.85814629662,
+      "Q90_total_GPU": 2463.1406600404107,
+      "Q90_total_excess_over_installed_GPU": 1683.1406600404107,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 48,
+      "max_nominal_site_GPU": 31.0,
+      "max_sites": [
+        "AIDC04"
+      ],
+      "nominal_total_GPU": 75.59844479996175,
+      "known_total_GPU": 213.0,
+      "Q90_extra_target_total_GPU": 2397.4728299433627,
+      "Q90_total_GPU": 2686.0712747433245,
+      "Q90_total_excess_over_installed_GPU": 1906.0712747433245,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 49,
+      "max_nominal_site_GPU": 100.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 148.1327592114261,
+      "known_total_GPU": 226.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 374.1327592114261,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 50,
+      "max_nominal_site_GPU": 64.0,
+      "max_sites": [
+        "AIDC08"
+      ],
+      "nominal_total_GPU": 184.0,
+      "known_total_GPU": 226.0,
+      "Q90_extra_target_total_GPU": 0.7314995442198837,
+      "Q90_total_GPU": 410.7314995442199,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 51,
+      "max_nominal_site_GPU": 58.0,
+      "max_sites": [
+        "AIDC06"
+      ],
+      "nominal_total_GPU": 124.26755112252614,
+      "known_total_GPU": 192.0,
+      "Q90_extra_target_total_GPU": 40.55360811166053,
+      "Q90_total_GPU": 356.82115923418667,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 52,
+      "max_nominal_site_GPU": 68.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 195.4408189440291,
+      "known_total_GPU": 198.0,
+      "Q90_extra_target_total_GPU": 2331.5005713616133,
+      "Q90_total_GPU": 2724.9413903056425,
+      "Q90_total_excess_over_installed_GPU": 1944.9413903056425,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 53,
+      "max_nominal_site_GPU": 68.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 174.28298445817137,
+      "known_total_GPU": 198.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 372.28298445817137,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 54,
+      "max_nominal_site_GPU": 59.0,
+      "max_sites": [
+        "AIDC06"
+      ],
+      "nominal_total_GPU": 156.9886524835062,
+      "known_total_GPU": 197.0,
+      "Q90_extra_target_total_GPU": 1.8571976817593128,
+      "Q90_total_GPU": 355.8458501652655,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 55,
+      "max_nominal_site_GPU": 68.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 207.6971152947411,
+      "known_total_GPU": 197.0,
+      "Q90_extra_target_total_GPU": 102.96119466796566,
+      "Q90_total_GPU": 507.65830996270677,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 56,
+      "max_nominal_site_GPU": 44.0,
+      "max_sites": [
+        "AIDC03"
+      ],
+      "nominal_total_GPU": 129.84796859392202,
+      "known_total_GPU": 174.0,
+      "Q90_extra_target_total_GPU": 1476.865597175133,
+      "Q90_total_GPU": 1780.713565769055,
+      "Q90_total_excess_over_installed_GPU": 1000.7135657690551,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 57,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 212.7291501232508,
+      "known_total_GPU": 158.0,
+      "Q90_extra_target_total_GPU": 1260.551306666302,
+      "Q90_total_GPU": 1631.280456789553,
+      "Q90_total_excess_over_installed_GPU": 851.280456789553,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 58,
+      "max_nominal_site_GPU": 100.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 349.42824301179553,
+      "known_total_GPU": 170.0,
+      "Q90_extra_target_total_GPU": 1.2859836445715953,
+      "Q90_total_GPU": 520.7142266563671,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 59,
+      "max_nominal_site_GPU": 5.714897961102417,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 5.995025377639737,
+      "known_total_GPU": 170.0,
+      "Q90_extra_target_total_GPU": 71.29365584988678,
+      "Q90_total_GPU": 247.2886812275265,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 60,
+      "max_nominal_site_GPU": 68.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 252.9752849790341,
+      "known_total_GPU": 170.0,
+      "Q90_extra_target_total_GPU": 4098.801736476687,
+      "Q90_total_GPU": 4521.777021455722,
+      "Q90_total_excess_over_installed_GPU": 3741.777021455722,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 61,
+      "max_nominal_site_GPU": 59.0366318795462,
+      "max_sites": [
+        "AIDC06"
+      ],
+      "nominal_total_GPU": 119.95323001709147,
+      "known_total_GPU": 170.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 289.9532300170915,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 62,
+      "max_nominal_site_GPU": 64.48676989357995,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 138.04919174799727,
+      "known_total_GPU": 170.0,
+      "Q90_extra_target_total_GPU": 0.4724871781096191,
+      "Q90_total_GPU": 308.5216789261069,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 63,
+      "max_nominal_site_GPU": 44.0,
+      "max_sites": [
+        "AIDC03"
+      ],
+      "nominal_total_GPU": 112.0,
+      "known_total_GPU": 170.0,
+      "Q90_extra_target_total_GPU": 26.194219819065484,
+      "Q90_total_GPU": 308.1942198190655,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 64,
+      "max_nominal_site_GPU": 100.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 216.5694227086105,
+      "known_total_GPU": 167.0,
+      "Q90_extra_target_total_GPU": 3224.750851380821,
+      "Q90_total_GPU": 3608.3202740894317,
+      "Q90_total_excess_over_installed_GPU": 2828.3202740894317,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 65,
+      "max_nominal_site_GPU": 76.0,
+      "max_sites": [
+        "AIDC06"
+      ],
+      "nominal_total_GPU": 168.98669313220933,
+      "known_total_GPU": 129.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 297.9866931322093,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 66,
+      "max_nominal_site_GPU": 78.0,
+      "max_sites": [
+        "AIDC03"
+      ],
+      "nominal_total_GPU": 201.5062969362613,
+      "known_total_GPU": 113.0,
+      "Q90_extra_target_total_GPU": 3910.0792118109584,
+      "Q90_total_GPU": 4224.58550874722,
+      "Q90_total_excess_over_installed_GPU": 3444.58550874722,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 67,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC06"
+      ],
+      "nominal_total_GPU": 180.80623872115405,
+      "known_total_GPU": 95.0,
+      "Q90_extra_target_total_GPU": 2968.6433978862706,
+      "Q90_total_GPU": 3244.4496366074245,
+      "Q90_total_excess_over_installed_GPU": 2464.4496366074245,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 68,
+      "max_nominal_site_GPU": 100.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 230.6155313733297,
+      "known_total_GPU": 95.0,
+      "Q90_extra_target_total_GPU": 1996.7732699498517,
+      "Q90_total_GPU": 2322.3888013231817,
+      "Q90_total_excess_over_installed_GPU": 1542.3888013231817,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 69,
+      "max_nominal_site_GPU": 100.0,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 331.0,
+      "known_total_GPU": 91.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 422.0,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 70,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC12"
+      ],
+      "nominal_total_GPU": 161.49858176887565,
+      "known_total_GPU": 95.0,
+      "Q90_extra_target_total_GPU": 1.1067473064509743,
+      "Q90_total_GPU": 257.6053290753266,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 71,
+      "max_nominal_site_GPU": 72.47921916297337,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 144.47921916297338,
+      "known_total_GPU": 95.0,
+      "Q90_extra_target_total_GPU": 1979.0057466104454,
+      "Q90_total_GPU": 2218.484965773419,
+      "Q90_total_excess_over_installed_GPU": 1438.484965773419,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 72,
+      "max_nominal_site_GPU": 25.0,
+      "max_sites": [
+        "AIDC02"
+      ],
+      "nominal_total_GPU": 38.91811940828103,
+      "known_total_GPU": 95.0,
+      "Q90_extra_target_total_GPU": 3527.5236980431096,
+      "Q90_total_GPU": 3661.4418174513908,
+      "Q90_total_excess_over_installed_GPU": 2881.4418174513908,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 73,
+      "max_nominal_site_GPU": 25.0,
+      "max_sites": [
+        "AIDC02"
+      ],
+      "nominal_total_GPU": 54.207970958712764,
+      "known_total_GPU": 95.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 149.20797095871276,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 74,
+      "max_nominal_site_GPU": 36.0,
+      "max_sites": [
+        "AIDC04"
+      ],
+      "nominal_total_GPU": 74.15565666917409,
+      "known_total_GPU": 98.0,
+      "Q90_extra_target_total_GPU": 3107.6926443114844,
+      "Q90_total_GPU": 3279.8483009806587,
+      "Q90_total_excess_over_installed_GPU": 2499.8483009806587,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 75,
+      "max_nominal_site_GPU": 24.0,
+      "max_sites": [
+        "AIDC01"
+      ],
+      "nominal_total_GPU": 43.82326114392632,
+      "known_total_GPU": 98.0,
+      "Q90_extra_target_total_GPU": 16.34802434587623,
+      "Q90_total_GPU": 158.17128548980253,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 76,
+      "max_nominal_site_GPU": 39.03643766577669,
+      "max_sites": [
+        "AIDC08"
+      ],
+      "nominal_total_GPU": 74.11431502801688,
+      "known_total_GPU": 99.0,
+      "Q90_extra_target_total_GPU": 2718.789727076211,
+      "Q90_total_GPU": 2891.9040421042278,
+      "Q90_total_excess_over_installed_GPU": 2111.9040421042278,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 77,
+      "max_nominal_site_GPU": 75.0,
+      "max_sites": [
+        "AIDC08"
+      ],
+      "nominal_total_GPU": 105.2421787594777,
+      "known_total_GPU": 98.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 203.2421787594777,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 78,
+      "max_nominal_site_GPU": 76.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 135.98261983181757,
+      "known_total_GPU": 94.0,
+      "Q90_extra_target_total_GPU": 0.27737147879851387,
+      "Q90_total_GPU": 230.25999131061607,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 79,
+      "max_nominal_site_GPU": 66.48025186098286,
+      "max_sites": [
+        "AIDC03"
+      ],
+      "nominal_total_GPU": 126.48025186098286,
+      "known_total_GPU": 94.0,
+      "Q90_extra_target_total_GPU": 15.37719926338805,
+      "Q90_total_GPU": 235.85745112437093,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 80,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC03"
+      ],
+      "nominal_total_GPU": 228.08069646502855,
+      "known_total_GPU": 106.0,
+      "Q90_extra_target_total_GPU": 884.0631090041522,
+      "Q90_total_GPU": 1218.1438054691807,
+      "Q90_total_excess_over_installed_GPU": 438.14380546918073,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 81,
+      "max_nominal_site_GPU": 22.21039953836187,
+      "max_sites": [
+        "AIDC04"
+      ],
+      "nominal_total_GPU": 22.21039953836187,
+      "known_total_GPU": 106.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 128.21039953836186,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 82,
+      "max_nominal_site_GPU": 63.64532767725944,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 198.64532767725944,
+      "known_total_GPU": 105.0,
+      "Q90_extra_target_total_GPU": 4442.802949174983,
+      "Q90_total_GPU": 4746.448276852242,
+      "Q90_total_excess_over_installed_GPU": 3966.448276852242,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 83,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC06"
+      ],
+      "nominal_total_GPU": 125.45784206330036,
+      "known_total_GPU": 118.0,
+      "Q90_extra_target_total_GPU": 13.443867801816008,
+      "Q90_total_GPU": 256.9017098651164,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 84,
+      "max_nominal_site_GPU": 67.54403752634286,
+      "max_sites": [
+        "AIDC06"
+      ],
+      "nominal_total_GPU": 132.20262878109628,
+      "known_total_GPU": 118.0,
+      "Q90_extra_target_total_GPU": 772.9123725548712,
+      "Q90_total_GPU": 1023.1150013359675,
+      "Q90_total_excess_over_installed_GPU": 243.11500133596746,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 85,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC03"
+      ],
+      "nominal_total_GPU": 108.70336744417953,
+      "known_total_GPU": 139.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 247.70336744417952,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 86,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC06"
+      ],
+      "nominal_total_GPU": 225.85296211329052,
+      "known_total_GPU": 141.0,
+      "Q90_extra_target_total_GPU": 0.248644255080839,
+      "Q90_total_GPU": 367.10160636837134,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 87,
+      "max_nominal_site_GPU": 91.60457535555116,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 211.60457535555116,
+      "known_total_GPU": 141.0,
+      "Q90_extra_target_total_GPU": 13.784590516071598,
+      "Q90_total_GPU": 366.38916587162277,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 88,
+      "max_nominal_site_GPU": 68.4205394637759,
+      "max_sites": [
+        "AIDC08"
+      ],
+      "nominal_total_GPU": 116.4205394637759,
+      "known_total_GPU": 136.0,
+      "Q90_extra_target_total_GPU": 792.5011401134938,
+      "Q90_total_GPU": 1044.9216795772695,
+      "Q90_total_excess_over_installed_GPU": 264.9216795772695,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 89,
+      "max_nominal_site_GPU": 76.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 156.94531774029653,
+      "known_total_GPU": 136.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 292.94531774029656,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 90,
+      "max_nominal_site_GPU": 75.56323836478694,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 137.02466301324154,
+      "known_total_GPU": 136.0,
+      "Q90_extra_target_total_GPU": 2277.205004057433,
+      "Q90_total_GPU": 2550.229667070675,
+      "Q90_total_excess_over_installed_GPU": 1770.229667070675,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 91,
+      "max_nominal_site_GPU": 80.0,
+      "max_sites": [
+        "AIDC08"
+      ],
+      "nominal_total_GPU": 111.0,
+      "known_total_GPU": 136.0,
+      "Q90_extra_target_total_GPU": 33.75558378965733,
+      "Q90_total_GPU": 280.7555837896573,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 92,
+      "max_nominal_site_GPU": 64.48930456080323,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 97.09047019199821,
+      "known_total_GPU": 136.0,
+      "Q90_extra_target_total_GPU": 1940.6698086033346,
+      "Q90_total_GPU": 2173.760278795333,
+      "Q90_total_excess_over_installed_GPU": 1393.7602787953329,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 93,
+      "max_nominal_site_GPU": 76.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 111.11303438486061,
+      "known_total_GPU": 136.0,
+      "Q90_extra_target_total_GPU": 0.0,
+      "Q90_total_GPU": 247.11303438486064,
+      "Q90_total_excess_over_installed_GPU": 0.0,
+      "Q90_site_capacity_violation_count": 0
+    },
+    {
+      "slot": 94,
+      "max_nominal_site_GPU": 76.0,
+      "max_sites": [
+        "AIDC10"
+      ],
+      "nominal_total_GPU": 150.18489834821986,
+      "known_total_GPU": 136.0,
+      "Q90_extra_target_total_GPU": 1785.6350407584896,
+      "Q90_total_GPU": 2071.8199391067096,
+      "Q90_total_excess_over_installed_GPU": 1291.8199391067096,
+      "Q90_site_capacity_violation_count": 1
+    },
+    {
+      "slot": 95,
+      "max_nominal_site_GPU": 92.05852837966493,
+      "max_sites": [
+        "AIDC05"
+      ],
+      "nominal_total_GPU": 123.05852837966493,
+      "known_total_GPU": 136.0,
+      "Q90_extra_target_total_GPU": 750.786081893315,
+      "Q90_total_GPU": 1009.8446102729799,
+      "Q90_total_excess_over_installed_GPU": 229.84461027297993,
+      "Q90_site_capacity_violation_count": 1
+    }
+  ],
+  "all96_site_profile_summary": [
+    {
+      "site": "AIDC01",
+      "installed_GPU": 80,
+      "nominal_max_GPU": 24.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 30.868862529357152,
+      "nominal_positive_slots": 9,
+      "nominal_ge_1_GPU_slots": 9,
+      "nominal_ge_4_GPU_slots": 8,
+      "nominal_ge_16_GPU_slots": 5,
+      "Q90_max_GPU": 4949.41589714168,
+      "Q90_capacity_violation_slots": [
+        3,
+        4,
+        6,
+        7,
+        8,
+        10,
+        11,
+        12,
+        14,
+        15,
+        16,
+        18,
+        19,
+        20,
+        22,
+        23,
+        24,
+        26,
+        27,
+        28,
+        30,
+        31,
+        32,
+        34,
+        35,
+        36,
+        38,
+        39,
+        40,
+        43,
+        44,
+        47,
+        48,
+        50,
+        51,
+        52,
+        54,
+        55,
+        56,
+        57,
+        59,
+        60,
+        62,
+        63,
+        64,
+        66,
+        67,
+        68,
+        71,
+        72,
+        74,
+        75,
+        76,
+        79,
+        80,
+        82,
+        83,
+        84,
+        86,
+        87,
+        88,
+        90,
+        91,
+        92,
+        94,
+        95
+      ]
+    },
+    {
+      "site": "AIDC02",
+      "installed_GPU": 40,
+      "nominal_max_GPU": 33.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 236.593341577254,
+      "nominal_positive_slots": 40,
+      "nominal_ge_1_GPU_slots": 40,
+      "nominal_ge_4_GPU_slots": 36,
+      "nominal_ge_16_GPU_slots": 33,
+      "Q90_max_GPU": 40.0,
+      "Q90_capacity_violation_slots": []
+    },
+    {
+      "site": "AIDC03",
+      "installed_GPU": 80,
+      "nominal_max_GPU": 80.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 213.94547007124214,
+      "nominal_positive_slots": 28,
+      "nominal_ge_1_GPU_slots": 28,
+      "nominal_ge_4_GPU_slots": 28,
+      "nominal_ge_16_GPU_slots": 13,
+      "Q90_max_GPU": 80.0,
+      "Q90_capacity_violation_slots": []
+    },
+    {
+      "site": "AIDC04",
+      "installed_GPU": 40,
+      "nominal_max_GPU": 40.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 209.02764542508288,
+      "nominal_positive_slots": 28,
+      "nominal_ge_1_GPU_slots": 28,
+      "nominal_ge_4_GPU_slots": 28,
+      "nominal_ge_16_GPU_slots": 25,
+      "Q90_max_GPU": 40.0,
+      "Q90_capacity_violation_slots": []
+    },
+    {
+      "site": "AIDC05",
+      "installed_GPU": 100,
+      "nominal_max_GPU": 100.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 602.156065554173,
+      "nominal_positive_slots": 44,
+      "nominal_ge_1_GPU_slots": 42,
+      "nominal_ge_4_GPU_slots": 40,
+      "nominal_ge_16_GPU_slots": 34,
+      "Q90_max_GPU": 100.0,
+      "Q90_capacity_violation_slots": []
+    },
+    {
+      "site": "AIDC06",
+      "installed_GPU": 80,
+      "nominal_max_GPU": 80.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 273.19402168463046,
+      "nominal_positive_slots": 22,
+      "nominal_ge_1_GPU_slots": 22,
+      "nominal_ge_4_GPU_slots": 21,
+      "nominal_ge_16_GPU_slots": 20,
+      "Q90_max_GPU": 80.0,
+      "Q90_capacity_violation_slots": []
+    },
+    {
+      "site": "AIDC07",
+      "installed_GPU": 40,
+      "nominal_max_GPU": 40.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 103.43488653480267,
+      "nominal_positive_slots": 14,
+      "nominal_ge_1_GPU_slots": 14,
+      "nominal_ge_4_GPU_slots": 14,
+      "nominal_ge_16_GPU_slots": 12,
+      "Q90_max_GPU": 40.0,
+      "Q90_capacity_violation_slots": []
+    },
+    {
+      "site": "AIDC08",
+      "installed_GPU": 80,
+      "nominal_max_GPU": 80.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 237.67839770952241,
+      "nominal_positive_slots": 22,
+      "nominal_ge_1_GPU_slots": 22,
+      "nominal_ge_4_GPU_slots": 21,
+      "nominal_ge_16_GPU_slots": 16,
+      "Q90_max_GPU": 80.0,
+      "Q90_capacity_violation_slots": []
+    },
+    {
+      "site": "AIDC09",
+      "installed_GPU": 40,
+      "nominal_max_GPU": 37.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 86.73815270956436,
+      "nominal_positive_slots": 17,
+      "nominal_ge_1_GPU_slots": 17,
+      "nominal_ge_4_GPU_slots": 16,
+      "nominal_ge_16_GPU_slots": 9,
+      "Q90_max_GPU": 40.0,
+      "Q90_capacity_violation_slots": []
+    },
+    {
+      "site": "AIDC10",
+      "installed_GPU": 80,
+      "nominal_max_GPU": 76.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 606.2339708525469,
+      "nominal_positive_slots": 48,
+      "nominal_ge_1_GPU_slots": 47,
+      "nominal_ge_4_GPU_slots": 45,
+      "nominal_ge_16_GPU_slots": 41,
+      "Q90_max_GPU": 80.0,
+      "Q90_capacity_violation_slots": []
+    },
+    {
+      "site": "AIDC11",
+      "installed_GPU": 40,
+      "nominal_max_GPU": 36.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 250.2153317130823,
+      "nominal_positive_slots": 37,
+      "nominal_ge_1_GPU_slots": 37,
+      "nominal_ge_4_GPU_slots": 35,
+      "nominal_ge_16_GPU_slots": 29,
+      "Q90_max_GPU": 40.0,
+      "Q90_capacity_violation_slots": []
+    },
+    {
+      "site": "AIDC12",
+      "installed_GPU": 80,
+      "nominal_max_GPU": 80.0,
+      "nominal_min_GPU": 0.0,
+      "nominal_day_GPUh": 375.07133675572516,
+      "nominal_positive_slots": 25,
+      "nominal_ge_1_GPU_slots": 25,
+      "nominal_ge_4_GPU_slots": 24,
+      "nominal_ge_16_GPU_slots": 22,
+      "Q90_max_GPU": 80.0,
+      "Q90_capacity_violation_slots": []
+    }
+  ],
+  "whole_gang_continuous_reference_coverage": [
+    {
+      "gpu": 1,
+      "service_upper_seconds": 900,
+      "all_96_supported_time_count": 93,
+      "all_96_supported_site_time_count": 331,
+      "supported_slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95
+      ],
+      "top8_supported_time_count": 7,
+      "top8_source_support": {
+        "80": [
+          "AIDC01",
+          "AIDC03",
+          "AIDC08",
+          "AIDC12"
+        ],
+        "70": [
+          "AIDC04",
+          "AIDC09",
+          "AIDC11",
+          "AIDC12"
+        ],
+        "72": [
+          "AIDC02",
+          "AIDC09"
+        ],
+        "74": [
+          "AIDC01",
+          "AIDC03",
+          "AIDC04",
+          "AIDC11"
+        ],
+        "76": [
+          "AIDC01",
+          "AIDC08",
+          "AIDC10"
+        ],
+        "77": [
+          "AIDC02",
+          "AIDC08",
+          "AIDC12"
+        ],
+        "31": [],
+        "71": [
+          "AIDC04",
+          "AIDC05",
+          "AIDC11"
+        ]
+      }
+    },
+    {
+      "gpu": 1,
+      "service_upper_seconds": 3600,
+      "all_96_supported_time_count": 31,
+      "all_96_supported_site_time_count": 36,
+      "supported_slots": [
+        10,
+        12,
+        13,
+        14,
+        15,
+        17,
+        18,
+        19,
+        23,
+        24,
+        25,
+        26,
+        27,
+        32,
+        33,
+        34,
+        35,
+        38,
+        39,
+        40,
+        52,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        84
+      ],
+      "top8_supported_time_count": 0,
+      "top8_source_support": {
+        "80": [],
+        "70": [],
+        "72": [],
+        "74": [],
+        "76": [],
+        "77": [],
+        "31": [],
+        "71": []
+      }
+    },
+    {
+      "gpu": 1,
+      "service_upper_seconds": 14400,
+      "all_96_supported_time_count": 0,
+      "all_96_supported_site_time_count": 0,
+      "supported_slots": [],
+      "top8_supported_time_count": 0,
+      "top8_source_support": {
+        "80": [],
+        "70": [],
+        "72": [],
+        "74": [],
+        "76": [],
+        "77": [],
+        "31": [],
+        "71": []
+      }
+    },
+    {
+      "gpu": 4,
+      "service_upper_seconds": 900,
+      "all_96_supported_time_count": 91,
+      "all_96_supported_site_time_count": 316,
+      "supported_slots": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95
+      ],
+      "top8_supported_time_count": 7,
+      "top8_source_support": {
+        "80": [
+          "AIDC01",
+          "AIDC03",
+          "AIDC08",
+          "AIDC12"
+        ],
+        "70": [
+          "AIDC04",
+          "AIDC09",
+          "AIDC11",
+          "AIDC12"
+        ],
+        "72": [
+          "AIDC02",
+          "AIDC09"
+        ],
+        "74": [
+          "AIDC01",
+          "AIDC03",
+          "AIDC04",
+          "AIDC11"
+        ],
+        "76": [
+          "AIDC01",
+          "AIDC08",
+          "AIDC10"
+        ],
+        "77": [
+          "AIDC02",
+          "AIDC08",
+          "AIDC12"
+        ],
+        "31": [],
+        "71": [
+          "AIDC04",
+          "AIDC05",
+          "AIDC11"
+        ]
+      }
+    },
+    {
+      "gpu": 4,
+      "service_upper_seconds": 3600,
+      "all_96_supported_time_count": 29,
+      "all_96_supported_site_time_count": 32,
+      "supported_slots": [
+        10,
+        12,
+        13,
+        14,
+        15,
+        17,
+        18,
+        23,
+        24,
+        25,
+        26,
+        27,
+        32,
+        33,
+        34,
+        35,
+        38,
+        39,
+        40,
+        52,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
+      "top8_supported_time_count": 0,
+      "top8_source_support": {
+        "80": [],
+        "70": [],
+        "72": [],
+        "74": [],
+        "76": [],
+        "77": [],
+        "31": [],
+        "71": []
+      }
+    },
+    {
+      "gpu": 4,
+      "service_upper_seconds": 14400,
+      "all_96_supported_time_count": 0,
+      "all_96_supported_site_time_count": 0,
+      "supported_slots": [],
+      "top8_supported_time_count": 0,
+      "top8_source_support": {
+        "80": [],
+        "70": [],
+        "72": [],
+        "74": [],
+        "76": [],
+        "77": [],
+        "31": [],
+        "71": []
+      }
+    },
+    {
+      "gpu": 16,
+      "service_upper_seconds": 900,
+      "all_96_supported_time_count": 89,
+      "all_96_supported_site_time_count": 259,
+      "supported_slots": [
+        2,
+        4,
+        5,
+        6,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95
+      ],
+      "top8_supported_time_count": 7,
+      "top8_source_support": {
+        "80": [
+          "AIDC03",
+          "AIDC08",
+          "AIDC12"
+        ],
+        "70": [
+          "AIDC04",
+          "AIDC11",
+          "AIDC12"
+        ],
+        "72": [
+          "AIDC02"
+        ],
+        "74": [
+          "AIDC01",
+          "AIDC04"
+        ],
+        "76": [
+          "AIDC01",
+          "AIDC08"
+        ],
+        "77": [
+          "AIDC02",
+          "AIDC08"
+        ],
+        "31": [],
+        "71": [
+          "AIDC04",
+          "AIDC05",
+          "AIDC11"
+        ]
+      }
+    },
+    {
+      "gpu": 16,
+      "service_upper_seconds": 3600,
+      "all_96_supported_time_count": 26,
+      "all_96_supported_site_time_count": 26,
+      "supported_slots": [
+        10,
+        13,
+        14,
+        15,
+        17,
+        18,
+        23,
+        25,
+        26,
+        27,
+        32,
+        33,
+        35,
+        38,
+        39,
+        40,
+        52,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
+      "top8_supported_time_count": 0,
+      "top8_source_support": {
+        "80": [],
+        "70": [],
+        "72": [],
+        "74": [],
+        "76": [],
+        "77": [],
+        "31": [],
+        "71": []
+      }
+    },
+    {
+      "gpu": 16,
+      "service_upper_seconds": 14400,
+      "all_96_supported_time_count": 0,
+      "all_96_supported_site_time_count": 0,
+      "supported_slots": [],
+      "top8_supported_time_count": 0,
+      "top8_source_support": {
+        "80": [],
+        "70": [],
+        "72": [],
+        "74": [],
+        "76": [],
+        "77": [],
+        "31": [],
+        "71": []
+      }
+    }
+  ],
+  "top8_template_summary": [
+    {
+      "time_slot": 80,
+      "templates": 18,
+      "reference_supported_templates": 6,
+      "numeric_candidates": 50,
+      "ordered_actions": 0,
+      "nominal_GPU_by_site": {
+        "AIDC01": 8.0,
+        "AIDC02": 0.0,
+        "AIDC03": 80.0,
+        "AIDC04": 0.0,
+        "AIDC05": 0.0,
+        "AIDC06": 0.0,
+        "AIDC07": 0.0,
+        "AIDC08": 63.42248093217198,
+        "AIDC09": 0.0,
+        "AIDC10": 0.0,
+        "AIDC11": 0.0,
+        "AIDC12": 76.65821553285654
+      }
+    },
+    {
+      "time_slot": 70,
+      "templates": 18,
+      "reference_supported_templates": 6,
+      "numeric_candidates": 45,
+      "ordered_actions": 0,
+      "nominal_GPU_by_site": {
+        "AIDC01": 0.0,
+        "AIDC02": 0.0,
+        "AIDC03": 0.0,
+        "AIDC04": 36.0,
+        "AIDC05": 0.0,
+        "AIDC06": 0.0,
+        "AIDC07": 0.0,
+        "AIDC08": 0.0,
+        "AIDC09": 9.498581768875644,
+        "AIDC10": 0.0,
+        "AIDC11": 36.0,
+        "AIDC12": 80.0
+      }
+    },
+    {
+      "time_slot": 72,
+      "templates": 18,
+      "reference_supported_templates": 6,
+      "numeric_candidates": 39,
+      "ordered_actions": 0,
+      "nominal_GPU_by_site": {
+        "AIDC01": 0.0,
+        "AIDC02": 25.0,
+        "AIDC03": 0.0,
+        "AIDC04": 0.0,
+        "AIDC05": 0.0,
+        "AIDC06": 0.0,
+        "AIDC07": 0.0,
+        "AIDC08": 0.0,
+        "AIDC09": 13.918119408281031,
+        "AIDC10": 0.0,
+        "AIDC11": 0.0,
+        "AIDC12": 0.0
+      }
+    },
+    {
+      "time_slot": 74,
+      "templates": 18,
+      "reference_supported_templates": 6,
+      "numeric_candidates": 44,
+      "ordered_actions": 0,
+      "nominal_GPU_by_site": {
+        "AIDC01": 24.0,
+        "AIDC02": 0.0,
+        "AIDC03": 6.8004708397904965,
+        "AIDC04": 36.0,
+        "AIDC05": 0.0,
+        "AIDC06": 0.0,
+        "AIDC07": 0.0,
+        "AIDC08": 0.0,
+        "AIDC09": 0.0,
+        "AIDC10": 0.0,
+        "AIDC11": 7.355185829383584,
+        "AIDC12": 0.0
+      }
+    },
+    {
+      "time_slot": 76,
+      "templates": 18,
+      "reference_supported_templates": 6,
+      "numeric_candidates": 48,
+      "ordered_actions": 0,
+      "nominal_GPU_by_site": {
+        "AIDC01": 20.0,
+        "AIDC02": 0.0,
+        "AIDC03": 0.0,
+        "AIDC04": 0.0,
+        "AIDC05": 0.0,
+        "AIDC06": 0.0,
+        "AIDC07": 0.0,
+        "AIDC08": 39.03643766577669,
+        "AIDC09": 0.0,
+        "AIDC10": 15.077877362240182,
+        "AIDC11": 0.0,
+        "AIDC12": 0.0
+      }
+    },
+    {
+      "time_slot": 77,
+      "templates": 18,
+      "reference_supported_templates": 6,
+      "numeric_candidates": 43,
+      "ordered_actions": 0,
+      "nominal_GPU_by_site": {
+        "AIDC01": 0.0,
+        "AIDC02": 26.0,
+        "AIDC03": 0.0,
+        "AIDC04": 0.0,
+        "AIDC05": 0.0,
+        "AIDC06": 0.0,
+        "AIDC07": 0.0,
+        "AIDC08": 75.0,
+        "AIDC09": 0.0,
+        "AIDC10": 0.0,
+        "AIDC11": 0.0,
+        "AIDC12": 4.2421787594777
+      }
+    },
+    {
+      "time_slot": 31,
+      "templates": 18,
+      "reference_supported_templates": 0,
+      "numeric_candidates": 0,
+      "ordered_actions": 0,
+      "nominal_GPU_by_site": {
+        "AIDC01": 0.0,
+        "AIDC02": 0.0,
+        "AIDC03": 0.0,
+        "AIDC04": 0.0,
+        "AIDC05": 0.0,
+        "AIDC06": 0.0,
+        "AIDC07": 0.0,
+        "AIDC08": 0.0,
+        "AIDC09": 0.0,
+        "AIDC10": 0.0,
+        "AIDC11": 0.0,
+        "AIDC12": 0.0
+      }
+    },
+    {
+      "time_slot": 71,
+      "templates": 18,
+      "reference_supported_templates": 6,
+      "numeric_candidates": 40,
+      "ordered_actions": 0,
+      "nominal_GPU_by_site": {
+        "AIDC01": 0.0,
+        "AIDC02": 0.0,
+        "AIDC03": 0.0,
+        "AIDC04": 36.0,
+        "AIDC05": 72.47921916297337,
+        "AIDC06": 0.0,
+        "AIDC07": 0.0,
+        "AIDC08": 0.0,
+        "AIDC09": 0.0,
+        "AIDC10": 0.0,
+        "AIDC11": 36.0,
+        "AIDC12": 0.0
+      }
+    }
+  ],
+  "existing_API_recommendation": {
+    "supported_without_source_edits": "bounded_prototypes permits explicit source-defined time_slots, gpu_gangs, runtime_bounds; compile_sensitivity_policy accepts explicit anonymous prototypes. Broader frozen Planning-only coverage can increase continuous-reference eligible nominal conditions.",
+    "robust_feasibility_under_current_frozen_scenario": "NO: the final-slot whole-gang bound remains violated for any compatible single-action prototype, irrespective of time/gang/runtime coverage. The 309 evaluated candidates already show Q90 hard infeasibility.",
+    "do_not_promote": "Do not classify May as OFFLINE_POLICY_OPTIMIZATION_VALIDATED, optimized Unknown action efficacy, or robust safety. Actual/Fresh-AC PASS verifies the executed fallback/known-control trace only; it does not create a feasible ranked Q90 policy.",
+    "scientific_followup_requires_new_explicit_case": "If a new experiment is authorized, define a capacity-respecting Q90 admission/queue/carryout response with the full unchanged forecast mass, hard per-job contracts and source-proven site/queue authority. Retest all original grid/resource constraints. This is not obtainable solely by changing current prototype enumeration or replacing target demand with achieved-zero reserve.",
+    "migration_authority_gap": "All72 RUNNING templates explicitly retain MIGRATION_CAPABILITY_UNCONFIRMED; genuine source capability is required before migration candidates can be ranked.",
+    "current_actions": "Keep current compiler-only status and QUEUE/STAY guarded fallbacks; preserve source/budget/Native/Actual receipts. No alternate compile/run was performed."
+  },
+  "concise_recommendation_ko": "May01 실정책은 144개 템플릿 모두 NO_FEASIBLE_ACTION이며 POLICY_COMPILER_ONLY로 유지해야 합니다. 102개는 익명 연속 Reference가 없고, 수치 평가 309개는 전부 Q90 Hard Constraint를 위반했습니다. 마지막 Slot의 수요 1009.8446 GPU는 설치 780 GPU보다 229.8446 GPU 많아 최대 단일 Gang 100 GPU를 완전히 제거해도 해결되지 않습니다. 현재 API로 익명 프로토타입 범위는 늘릴 수 있지만 같은 Q90 수요를 유지한 강건 정책은 만들 수 없습니다. Actual/Fresh AC PASS는 실행된 Guarded Fallback 및 Known 계획의 검증으로 별도 보고해야 합니다."
+}

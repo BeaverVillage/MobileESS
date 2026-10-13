@@ -1,0 +1,27 @@
+.................................................F...................... [ 67%]
+...................................                                      [100%]
+================================== FAILURES ===================================
+_ test_planning_only_freezes_and_reloads_policy_without_unknown_registration_or_actual _
+
+tmp_path = WindowsPath('C:/Users/Public/Documents/ESTsoft/CreatorTemp/pytest-of-kjw39/pytest-1302/test_planning_only_freezes_and0')
+
+    def test_planning_only_freezes_and_reloads_policy_without_unknown_registration_or_actual(tmp_path):
+        case=build_fixture(tmp_path/'INPUT')
+        case.evidence_kind='REAL_DATA'
+        case.actual_gate=dict(status='INITIAL_QUEUE_UNVERIFIED',initial_queue_verified=False,
+                              active_running_site_authority=False)
+        original_uids=set(case.qos_provider.receipts)
+        result=run_arm('B0',case,NoSolveBudget(),tmp_path/'PLAN_ONLY',planning_only=True)
+        assert result['actual'] is None and result['planning_only']
+        assert set(case.qos_provider.receipts)==original_uids and 'unknown-observed' not in original_uids
+        receipt=json.loads((tmp_path/'PLAN_ONLY/RELOAD_CONSUMPTION_RECEIPT.json').read_text())
+>       assert receipt['status']=='RELOADED_NOT_EXECUTED_INITIAL_QUEUE_UNVERIFIED'
+E       AssertionError: assert 'RELOADED_PLA...CTUAL_NOT_RUN' == 'RELOADED_NOT...UE_UNVERIFIED'
+E         
+E         - RELOADED_NOT_EXECUTED_INITIAL_QUEUE_UNVERIFIED
+E         + RELOADED_PLANNING_ONLY_ACTUAL_NOT_RUN
+
+tests\test_v42_integration_actual_final_guards.py:82: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_v42_integration_actual_final_guards.py::test_planning_only_freezes_and_reloads_policy_without_unknown_registration_or_actual
+1 failed, 106 passed in 6.23s

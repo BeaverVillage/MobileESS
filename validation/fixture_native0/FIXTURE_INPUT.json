@@ -1,0 +1,242 @@
+{
+  "bundle": {
+    "day": "2025-05-01",
+    "issue_time": "2025-04-30T18:00:00+10:00",
+    "capacities": {
+      "A": 2,
+      "B": 2
+    },
+    "C0_Q50": [
+      0.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "C0_Q90": [
+      0.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "runtime_reserve_gamma": 0.0,
+    "runtime_survival_kernel": [
+      1.0
+    ],
+    "evidence_kind": "SYNTHETIC_FIXTURE"
+  },
+  "train_source": "FIXTURE_ONLY",
+  "jobs": {
+    "known-a": {
+      "uid": "known-a",
+      "state": "PENDING",
+      "submit": 24,
+      "event": 24,
+      "reference_start": 24,
+      "reference_site": "A",
+      "service_slots": 1,
+      "gpu": 1,
+      "qos": "normal",
+      "protected": false,
+      "admitted": true,
+      "initial_sites": [
+        "A",
+        "B"
+      ],
+      "checkpoint_authorized": false,
+      "elapsed_seconds": null,
+      "unknown_arrival": false,
+      "duration_authority": "EXPLICIT_SYNTHETIC_FIXTURE",
+      "migrations_used": 0,
+      "standby_candidate_authorized": false,
+      "qos_policy_id": "",
+      "qos_receipt_sha": "",
+      "qos_allowed_starts": null,
+      "qos_budget_seconds": 0.0,
+      "qos_start_delay_seconds": 0.0,
+      "is_observed": true,
+      "batch_eligible": false
+    },
+    "known-b": {
+      "uid": "known-b",
+      "state": "PENDING",
+      "submit": 24,
+      "event": 24,
+      "reference_start": 24,
+      "reference_site": "A",
+      "service_slots": 1,
+      "gpu": 1,
+      "qos": "normal",
+      "protected": false,
+      "admitted": true,
+      "initial_sites": [
+        "A",
+        "B"
+      ],
+      "checkpoint_authorized": false,
+      "elapsed_seconds": null,
+      "unknown_arrival": false,
+      "duration_authority": "EXPLICIT_SYNTHETIC_FIXTURE",
+      "migrations_used": 0,
+      "standby_candidate_authorized": false,
+      "qos_policy_id": "",
+      "qos_receipt_sha": "",
+      "qos_allowed_starts": null,
+      "qos_budget_seconds": 0.0,
+      "qos_start_delay_seconds": 0.0,
+      "is_observed": true,
+      "batch_eligible": false
+    }
+  },
+  "actual_requests": [
+    {
+      "uid": "known-a",
+      "submit": 0,
+      "gpu": 1,
+      "compatible": [
+        "A",
+        "B"
+      ],
+      "q50": 900,
+      "source_site": "A",
+      "metadata": {
+        "partition": "fixture-gpu",
+        "batch_eligible": true,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "origin_unknown": false,
+        "can_prestart_place": true
+      }
+    },
+    {
+      "uid": "known-b",
+      "submit": 0,
+      "gpu": 1,
+      "compatible": [
+        "A",
+        "B"
+      ],
+      "q50": 900,
+      "source_site": "A",
+      "metadata": {
+        "partition": "fixture-gpu",
+        "batch_eligible": true,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "origin_unknown": false,
+        "can_prestart_place": true
+      }
+    },
+    {
+      "uid": "unknown-observed",
+      "submit": 900,
+      "gpu": 1,
+      "compatible": [
+        "A",
+        "B"
+      ],
+      "q50": 900,
+      "source_site": "A",
+      "metadata": {
+        "partition": "fixture-gpu",
+        "batch_eligible": true,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "origin_unknown": true,
+        "can_prestart_place": true
+      }
+    }
+  ],
+  "science": "EXPLICIT_SYNTHETIC_FIXTURE",
+  "real_May_actions_claimed": false
+}

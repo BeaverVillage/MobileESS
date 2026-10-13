@@ -28,6 +28,22 @@ def require_coefficient(c,authority=None):
     # Every real feeder response is authority-bound; unbound IEEE123 rows fail.
     physical=any(n.lower().startswith(('transformer.reg','transformer.idc_','transformer.mess_','transformer.xfm')) for n in c.branch_names)
     if hasattr(c,'transformer_current_contract') or physical:
+        explicit = getattr(authority,'thermal_authority',None) if authority is not None else None
+        if explicit is not None:
+            # An isolated integration case supplies the SAME compiled ratings
+            # by immutable receipt, without changing a campaign ContextVar.
+            from .authority import digest
+            expected_sha = explicit.get('transformer_current_authority_sha256')
+            if (explicit.get('PASS') is not True or digest(explicit['identity']) != expected_sha
+                    or c.transformer_current_contract != SCHEMA
+                    or c.transformer_current_authority_sha256 != expected_sha
+                    or authority.transformer_current_authority_sha256 != expected_sha):
+                raise ValueError('EXPLICIT_COMPILED_THERMAL_AUTHORITY_MISMATCH')
+            mapping={r['branch_phase'].lower():r['NormalAmps'] for r in explicit['rows']+explicit['lines']}
+            expected=np.asarray([mapping[n.lower()] for n in c.branch_names],float)
+            if not np.array_equal(c.current_denominators_A,expected):
+                raise ValueError('PLANNING_ACTUAL_CURRENT_DENOMINATOR_MISMATCH')
+            return True
         require_certificate(vars(c))
         if not np.array_equal(c.current_denominators_A,denominators(c.branch_names)):
             raise ValueError('PLANNING_ACTUAL_CURRENT_DENOMINATOR_MISMATCH')

@@ -1,0 +1,99 @@
+{
+  "schema": "Q50_Q90_BURST_POLICY_INPUT_COMPARISON_V1",
+  "scope": "SCENARIO_INPUT_AND_PROVENANCE_ONLY",
+  "source_binding": {
+    "path": "D:\\v42_integration_validation_20261013\\CC4_POLICY_SOURCE_AUDIT\\CC4_V21_SOURCE_BINDING_AUDIT.json",
+    "sha256": "d7798baeb9de2bfb126756ae6a083f10d4299575ee53317b3b4e13a01b8b88df",
+    "bytes": 14876
+  },
+  "scenarios": [
+    {
+      "scenario": "NOMINAL_Q50",
+      "status": "FROZEN_AGGREGATE_INPUT_VALIDATED",
+      "hourly_lifetime_GPUh": 5503.441472156033,
+      "full_convolved_GPUh": 5503.441472155906,
+      "first96_GPUh": 3697.0929357830983,
+      "full_carryout_after96_GPUh": 1806.3485363728078,
+      "first96_peak_GPU": 454.26902759465474,
+      "first96_peak_slot": 20,
+      "all_profile_mass_retained": true,
+      "Actual_occupancy": false,
+      "site_distribution_status": "INSUFFICIENT_SOURCE_SITE_DISTRIBUTION",
+      "action_rankings": "NOT_RUN"
+    },
+    {
+      "scenario": "HIGH_DEMAND_Q90",
+      "status": "FROZEN_AGGREGATE_INPUT_VALIDATED",
+      "hourly_lifetime_GPUh": 24408.063227293504,
+      "full_convolved_GPUh": 24408.063227292936,
+      "first96_GPUh": 15151.567443783799,
+      "full_carryout_after96_GPUh": 9256.495783509137,
+      "first96_peak_GPU": 1386.7444603661124,
+      "first96_peak_slot": 12,
+      "all_profile_mass_retained": true,
+      "Actual_occupancy": false,
+      "site_distribution_status": "INSUFFICIENT_SOURCE_SITE_DISTRIBUTION",
+      "action_rankings": "NOT_RUN"
+    },
+    {
+      "scenario": "TRAIN_BURST_STRESS",
+      "status": "INSUFFICIENT_SUPPORT",
+      "selected_burst": null,
+      "reasons": [
+        "No frozen burst-selection and workgroup/request provenance artifact was supplied.",
+        "Aggregate completed-cohort CDF and pooled lag kernel do not identify a verified burst workgroup."
+      ],
+      "TRAIN_rows": 371864,
+      "completed_execution_rows": 371713,
+      "TRAIN_source_declared": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext9_distributional_runtime\\.local\\fold1\\TRAIN.parquet",
+        "sha256": "ff12ac92b5a8a881310e2d31e71eba6c0f9abc877676aac0f950f666418bdbf1",
+        "bytes": 10283822
+      },
+      "TRAIN_source_available_at_declared_path": true,
+      "TRAIN_source_bytes_verified": true,
+      "existing_cohort_cdf_columns": [
+        "submission_hour",
+        "jobs",
+        "total_observed_GPUh",
+        "lag_slot",
+        "cumulative_fraction",
+        "supported_through_lag"
+      ],
+      "TRAIN_cutoff": "2024-10-18T00:00:00+00:00",
+      "May_future_inputs_used": false,
+      "invented_burst_values": false,
+      "source_receipts": [
+        {
+          "path": "D:\\MobileESS_V42\\docs\\v42_final_integration\\CC4_EXECUTION_LAG_AUDIT.json",
+          "sha256": "2de5b18f6ae08cb2bee15f3459beb03cc790c49b4d9ecd9f63fe41ca1e446010",
+          "bytes": 1135
+        },
+        {
+          "path": "D:\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext9_distributional_runtime\\.local\\fold1\\TRAIN.parquet",
+          "sha256": "ff12ac92b5a8a881310e2d31e71eba6c0f9abc877676aac0f950f666418bdbf1",
+          "bytes": 10283822,
+          "original_path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\runtime_vnext6_callable_total_pr\\docs\\runtime_vnext9_distributional_runtime\\.local\\fold1\\TRAIN.parquet",
+          "explicit_path_recovery": false
+        },
+        {
+          "path": "D:\\MobileESS_V42\\docs\\v42_ts_cc4_temporal_refinement\\CC4_SERVICE_COHORT_CDF.csv",
+          "sha256": "77952c9e8014702ce4bc1c931d3b24c31211c750c2f7943e6fa7bda205129712",
+          "bytes": 13569168
+        }
+      ]
+    }
+  ],
+  "prediction_values_changed": false,
+  "q90_added_to_nominal_twice": false,
+  "reserve_as_Actual_load": false,
+  "offline_scoring_rule": "existing optimized nominal baseline + validated Q90-minus-Q50 stress allocation",
+  "optimized_A_timing_need_not_equal_fixed_kernel_reference": true,
+  "stress_partition_API": "v42_integration.cc4_policy_inputs.validate_optimized_reserve",
+  "no_site_weights_invented": true,
+  "comparison_is_actual_policy_performance": false,
+  "real_final_A2_M2_policy_validation": "NOT_RUN",
+  "Full96_Fresh_AC": "NOT_RUN",
+  "wall_seconds": 0.5880405000025348,
+  "solver_seconds": 0.0
+}

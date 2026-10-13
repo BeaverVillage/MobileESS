@@ -1,0 +1,84 @@
+........................................F.                               [100%]
+================================== FAILURES ===================================
+____________ test_b0_b2_same_common_actual_and_b2_common_m_native0 ____________
+
+tmp_path = WindowsPath('C:/Users/Public/Documents/ESTsoft/CreatorTemp/pytest-of-kjw39/pytest-1253/test_b0_b2_same_common_actual_0')
+
+    def test_b0_b2_same_common_actual_and_b2_common_m_native0(tmp_path):
+        result = {}
+        for arm in ("B0", "B2"):
+            case = build_fixture(tmp_path/(arm+"_INPUT"))
+            producer = case.make_m_case
+            def readback_case(*args):
+                current = producer(*args)
+                def readback(current, budget, packet, folder, seconds):
+                    return _native_joint(current, budget, packet, folder, 0., native0=True)
+                current.joint_solver = readback
+                return current
+            case.make_m_case = readback_case
+>           result[arm] = run_arm(arm, case, Native0Budget(), tmp_path/arm)
+
+tests\test_v42_integration_coordinator.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+arm = 'B0'
+case = IntegrationCase(case_sha='fixture-integration', science_sha='FIXTURE_SCIENCE', qos_provider=<v42_integration.qos.QoSWi...calls_before_freeze': 0}, evidence_kind='SYNTHETIC_FIXTURE', planning_slot_zero_seconds=-21600.0, fresh_evaluator=None)
+budget = <test_v42_integration_coordinator.Native0Budget object at 0x000001E6BF7CC050>
+output = WindowsPath('C:/Users/Public/Documents/ESTsoft/CreatorTemp/pytest-of-kjw39/pytest-1253/test_b0_b2_same_common_actual_0/B0')
+
+    def run_arm(arm, case, budget, output):
+        """Final A2+M2 policy is recompiled, reloaded, then used by common Actual."""
+        if arm not in ('B0','B2','B1','B3'):
+            raise ValueError('COMPARISON_ARM_REQUIRED')
+        verify_sources(case.source_freeze,case.input_receipts)
+        output=Path(output);output.mkdir(parents=True,exist_ok=False)
+        calls=[];handoffs=[];aidc=case.reference_aidc;mess=case.initial_mess
+        initial=None;registry=[]
+        stages={'B0':(),'B2':('M1',),'B1':('A1',),'B3':('A1','M1','A2','M2')}[arm]
+        results={}
+        for stage in stages:
+            verify_sources(case.source_freeze,case.input_receipts)
+            before=dict(AIDC_anchor=aidc['aidc_anchor'],MESS_anchor=mess['plan_sha'])
+            if stage.startswith('A'):
+                a_case=case.make_a_case(arm,stage,mess,output/stage)
+                result=optimize_aidc(a_case,mess,case.qos_provider,budget)
+                aidc=_full_a(result)
+                consumed=dict(fixed_mess_plan_sha=mess['plan_sha'],QoS_SHA=case.qos_provider.stats.sha)
+            else:
+                m_case=case.make_m_case(arm,stage,aidc,output/stage)
+                if m_case.identity.get('aidc_anchor')!=aidc['aidc_anchor']:
+                    raise ValueError('M_STAGE_AIDC_ANCHOR_MISMATCH')
+                # A new anchor receives the old vector only as a FULL-replayed warm
+                # candidate; registry bindings/LB do not transfer to this new case.
+                result,initial=optimize_mess(m_case,initial,registry,budget)
+                mess=_full_m(result);registry=result['incumbent_registry']
+                consumed=dict(fixed_aidc_anchor=aidc['aidc_anchor'],full_PQ_and_anonymous_frozen=True)
+            results[stage]=result
+            calls.append(dict(stage=stage,arm=arm,engine=result.get('engine',result.get('engine_version')),case_sha=result['case_sha']))
+            handoffs.append(dict(stage=stage,producer_anchor_before=before,consumed=consumed,
+                result_AIDC_anchor=aidc['aidc_anchor'],result_MESS_anchor=mess['plan_sha']))
+            _write(output/'A_M_CALLGRAPH.json',calls);_write(output/'STAGE_HANDOFF_AUDIT.json',handoffs)
+        bindings=dict(science_sha=case.science_sha,qos_sha=case.qos_provider.stats.sha,
+            case_sha=case.case_sha,aidc_anchor=aidc['aidc_anchor'],mess_anchor=mess['plan_sha'])
+        # Native slot 24 is planning-day midnight; Actual has its own explicit
+        # seconds origin. This is a conversion, never an inferred array offset.
+        midnight=case.planning_slot_zero_seconds+24*900
+        envelope=[dict(r,slot_start=r['slot_start']+midnight,slot_end=r['slot_end']+midnight,
+            carryout_end=r.get('carryout_end',86400.)+midnight) for r in aidc['anonymous_resource_envelope']]
+        effects={(s,t+midnight):v for (s,t),v in case.signed_grid_coefficients.items()}
+        policy=compile_policy(envelope,bindings,effects)
+        path=output/'UNKNOWN_CONTROL_POLICY.json';policy.save(path)
+        reload=FrozenControlPolicy.load(path,bindings=bindings)
+        from .m_engine import file_record
+>       freeze=dict(science_version=case.source_freeze['science_version'],**bindings,
+            Known_schedule=aidc['selected_jobs'],QoS_receipts=case.qos_provider.to_dict(),
+            resource_envelope=aidc['anonymous_resource_envelope'],MESS_plan=mess,
+            source_freeze=case.source_freeze,inputs=case.input_receipts,policy_file=file_record(path),
+            stages=results,campaign_HOLD=True,campaign_started=False,
+            global_AIDC_MESS_gap='NOT_CERTIFIED',evidence_kind=case.evidence_kind)
+E       KeyError: 'science_version'
+
+v42_integration\coordinator.py:108: KeyError
+=========================== short test summary info ===========================
+FAILED tests/test_v42_integration_coordinator.py::test_b0_b2_same_common_actual_and_b2_common_m_native0
+1 failed, 41 passed in 1.69s

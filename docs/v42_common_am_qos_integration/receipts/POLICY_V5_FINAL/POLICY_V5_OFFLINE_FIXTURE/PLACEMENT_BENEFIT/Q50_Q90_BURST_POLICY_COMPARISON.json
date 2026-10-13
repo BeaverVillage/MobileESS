@@ -1,0 +1,156 @@
+{
+  "scenarios": {
+    "status": "SOURCE_BOUND_SCENARIOS_READY",
+    "Q50_GPUh": 48.0,
+    "Q90_GPUh": 48.0,
+    "nominal_carryout_GPUh": 0.0,
+    "Q90_minus_Q50_GPUh": 0.0,
+    "Q90_stress_day_GPUh": 0.0,
+    "Q90_stress_tail_GPUh": 0.0,
+    "scenario_names": [
+      "NOMINAL_Q50",
+      "HIGH_DEMAND_Q90"
+    ],
+    "TRAIN_BURST_STRESS": "INSUFFICIENT_SUPPORT",
+    "Q50_already_in_AIDC_baseline": true,
+    "Q90_actual_load_addition": false,
+    "stress_allocation_role": "FROZEN_Q90_MINUS_Q50_KERNEL_STRESS;NOT_ACTUAL_GPU",
+    "model_retraining_calls": 0,
+    "new_calibrators": 0,
+    "prediction_scaling_or_clipping": false,
+    "source_authority": {
+      "model_id": "LGBM_weighted_c1_s20260924",
+      "prediction_sha": "FIXTURE_CC4_PREDICTION",
+      "runtime_sha": "FIXTURE_RUNTIME_Q50",
+      "kernel_sha": "FIXTURE_TRAIN_KERNEL_SHA"
+    }
+  },
+  "comparisons": [
+    {
+      "template_id": "T0_0",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.9,
+            "HIGH_DEMAND_Q90": 0.9
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.4,
+            "HIGH_DEMAND_Q90": 0.4
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "PREPLACE",
+        "site": "B",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.4,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.4,
+          "HIGH_DEMAND_Q90": 0.4
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[B,0]"
+        ]
+      },
+      "remaining_all_line_slots": 96
+    }
+  ],
+  "Q90_is_Actual_load": false
+}

@@ -1,0 +1,1167 @@
+{
+  "case_sha": "fixture-integration",
+  "policy_sha": "cee8630851598217bcb87f23f111c21438e5f009192f346e5a4c456d6471ab34",
+  "controller": {
+    "arm": "B3",
+    "at_seconds": 5400.0,
+    "episode_jobs": {
+      "known-a": {
+        "job_id": "known-a",
+        "episode_id": "COMMON_ACTUAL:known-a",
+        "initial_site": "B",
+        "current_site": "B",
+        "submit_time": 0,
+        "start_time": 1800.0,
+        "latest_observed_state": "COMPLETED",
+        "gpu": 1,
+        "q50_seconds": 900.0,
+        "completion_observed_time": 3600.0,
+        "release_control_time": 3600,
+        "migration_receipt": null
+      },
+      "known-b": {
+        "job_id": "known-b",
+        "episode_id": "COMMON_ACTUAL:known-b",
+        "initial_site": "B",
+        "current_site": "B",
+        "submit_time": 0,
+        "start_time": 1800.0,
+        "latest_observed_state": "COMPLETED",
+        "gpu": 1,
+        "q50_seconds": 900.0,
+        "completion_observed_time": 2700.0,
+        "release_control_time": 2700,
+        "migration_receipt": null
+      },
+      "unknown-observed": {
+        "job_id": "unknown-observed",
+        "episode_id": "COMMON_ACTUAL:unknown-observed",
+        "initial_site": "B",
+        "current_site": "B",
+        "submit_time": 900,
+        "start_time": 900.0,
+        "latest_observed_state": "COMPLETED",
+        "gpu": 1,
+        "q50_seconds": 900.0,
+        "completion_observed_time": 1800.0,
+        "release_control_time": 1800,
+        "migration_receipt": null
+      }
+    },
+    "used_receipts": [],
+    "in_flight": {},
+    "requests": {
+      "known-a": {
+        "uid": "known-a",
+        "submit": 0,
+        "gpu": 1,
+        "compatible": [
+          "A",
+          "B"
+        ],
+        "q50": 900,
+        "source_site": "A",
+        "metadata": {
+          "partition": "fixture-gpu",
+          "batch_eligible": true,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "origin_unknown": false,
+          "can_prestart_place": true
+        }
+      },
+      "known-b": {
+        "uid": "known-b",
+        "submit": 0,
+        "gpu": 1,
+        "compatible": [
+          "A",
+          "B"
+        ],
+        "q50": 900,
+        "source_site": "A",
+        "metadata": {
+          "partition": "fixture-gpu",
+          "batch_eligible": true,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "origin_unknown": false,
+          "can_prestart_place": true
+        }
+      },
+      "unknown-observed": {
+        "uid": "unknown-observed",
+        "submit": 900,
+        "gpu": 1,
+        "compatible": [
+          "A",
+          "B"
+        ],
+        "q50": 900,
+        "source_site": "A",
+        "metadata": {
+          "partition": "fixture-gpu",
+          "batch_eligible": true,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "origin_unknown": true,
+          "can_prestart_place": true
+        }
+      }
+    },
+    "pending": [],
+    "audit": {
+      "known-a": {
+        "job_uid": "known-a",
+        "submit_time": 0,
+        "initial_admission_attempt": 0.0,
+        "admitted_time": 1800.0,
+        "capacity_wait_seconds": 1800.0,
+        "capacity_wait_slots": 2,
+        "site": "B",
+        "GPU_gang": 1,
+        "queue_position": 1,
+        "completion_observed_time": 3600.0,
+        "release_control_time": 3600,
+        "grid_reads": 0,
+        "future_end_reads": 0,
+        "future_duration_reads": 0,
+        "optimizer_calls": 0,
+        "timeshift_optimization": false,
+        "migration_optimization": false,
+        "plan_start_seconds": 1800.0,
+        "plan_actual_start_deviation_seconds": 0.0,
+        "intentional_delay_seconds": 1800.0,
+        "unavoidable_queue_seconds": 0.0,
+        "policy_action": "START",
+        "rule_id": null,
+        "carryout": false,
+        "latest_state": "COMPLETED",
+        "origin_unknown": false,
+        "migration_count": 0,
+        "accumulated_compute_seconds": 1800.0
+      },
+      "known-b": {
+        "job_uid": "known-b",
+        "submit_time": 0,
+        "initial_admission_attempt": 0.0,
+        "admitted_time": 1800.0,
+        "capacity_wait_seconds": 1800.0,
+        "capacity_wait_slots": 2,
+        "site": "B",
+        "GPU_gang": 1,
+        "queue_position": 2,
+        "completion_observed_time": 2700.0,
+        "release_control_time": 2700,
+        "grid_reads": 0,
+        "future_end_reads": 0,
+        "future_duration_reads": 0,
+        "optimizer_calls": 0,
+        "timeshift_optimization": false,
+        "migration_optimization": false,
+        "plan_start_seconds": 1800.0,
+        "plan_actual_start_deviation_seconds": 0.0,
+        "intentional_delay_seconds": 1800.0,
+        "unavoidable_queue_seconds": 0.0,
+        "policy_action": "START",
+        "rule_id": null,
+        "carryout": false,
+        "latest_state": "COMPLETED",
+        "origin_unknown": false,
+        "migration_count": 0,
+        "accumulated_compute_seconds": 900.0
+      },
+      "unknown-observed": {
+        "job_uid": "unknown-observed",
+        "submit_time": 900,
+        "initial_admission_attempt": 900.0,
+        "admitted_time": 900.0,
+        "capacity_wait_seconds": 0.0,
+        "capacity_wait_slots": 0,
+        "site": "B",
+        "GPU_gang": 1,
+        "queue_position": 3,
+        "completion_observed_time": 1800.0,
+        "release_control_time": 1800,
+        "grid_reads": 0,
+        "future_end_reads": 0,
+        "future_duration_reads": 0,
+        "optimizer_calls": 0,
+        "timeshift_optimization": false,
+        "migration_optimization": false,
+        "plan_start_seconds": 900.0,
+        "plan_actual_start_deviation_seconds": 0.0,
+        "intentional_delay_seconds": 0.0,
+        "unavoidable_queue_seconds": 0.0,
+        "policy_action": "PREPLACE",
+        "rule_id": "A_ENVELOPE:3",
+        "carryout": false,
+        "latest_state": "COMPLETED",
+        "origin_unknown": true,
+        "migration_count": 0,
+        "accumulated_compute_seconds": 900.0
+      }
+    },
+    "metadata": {
+      "known-a": {
+        "partition": "fixture-gpu",
+        "batch_eligible": true,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "origin_unknown": false,
+        "can_prestart_place": true,
+        "uid": "known-a",
+        "submit_seconds": 0,
+        "event_seconds": 0.0,
+        "reference_start_seconds": 0,
+        "t50_seconds": 900,
+        "qos": "normal",
+        "protected": false,
+        "gpu": 1,
+        "requested_walltime_seconds": 3600,
+        "is_observed": true,
+        "state": "COMPLETED",
+        "release_seconds": null,
+        "hard_earliest_start_seconds": null,
+        "hard_latest_start_seconds": null,
+        "completion_deadline_seconds": null,
+        "nominal_service_seconds": 900,
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow",
+        "compatible_sites": [
+          "A",
+          "B"
+        ],
+        "source_site": "A",
+        "reference_site": "A",
+        "additional_start_delay_seconds": 1800.0,
+        "cumulative_migration_interruption_seconds": 0.0,
+        "accumulated_compute_seconds": 1800.0,
+        "migration_count": 0,
+        "current_site": "B"
+      },
+      "known-b": {
+        "partition": "fixture-gpu",
+        "batch_eligible": true,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "origin_unknown": false,
+        "can_prestart_place": true,
+        "uid": "known-b",
+        "submit_seconds": 0,
+        "event_seconds": 0.0,
+        "reference_start_seconds": 0,
+        "t50_seconds": 900,
+        "qos": "normal",
+        "protected": false,
+        "gpu": 1,
+        "requested_walltime_seconds": 3600,
+        "is_observed": true,
+        "state": "COMPLETED",
+        "release_seconds": null,
+        "hard_earliest_start_seconds": null,
+        "hard_latest_start_seconds": null,
+        "completion_deadline_seconds": null,
+        "nominal_service_seconds": 900,
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow",
+        "compatible_sites": [
+          "A",
+          "B"
+        ],
+        "source_site": "A",
+        "reference_site": "A",
+        "additional_start_delay_seconds": 1800.0,
+        "cumulative_migration_interruption_seconds": 0.0,
+        "accumulated_compute_seconds": 900.0,
+        "migration_count": 0,
+        "current_site": "B"
+      },
+      "unknown-observed": {
+        "partition": "fixture-gpu",
+        "batch_eligible": true,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "origin_unknown": true,
+        "can_prestart_place": true,
+        "uid": "unknown-observed",
+        "submit_seconds": 900,
+        "event_seconds": 900.0,
+        "reference_start_seconds": 900,
+        "t50_seconds": 900,
+        "qos": "normal",
+        "protected": false,
+        "gpu": 1,
+        "requested_walltime_seconds": 3600,
+        "is_observed": true,
+        "state": "COMPLETED",
+        "release_seconds": null,
+        "hard_earliest_start_seconds": null,
+        "hard_latest_start_seconds": null,
+        "completion_deadline_seconds": null,
+        "nominal_service_seconds": 900,
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow",
+        "compatible_sites": [
+          "A",
+          "B"
+        ],
+        "source_site": "A",
+        "reference_site": "A",
+        "additional_start_delay_seconds": 0.0,
+        "cumulative_migration_interruption_seconds": 0.0,
+        "accumulated_compute_seconds": 900.0,
+        "migration_count": 0,
+        "current_site": "B"
+      }
+    },
+    "observed": {
+      "known-a": {
+        "uid": "known-a",
+        "submit_seconds": 0,
+        "event_seconds": 0.0,
+        "reference_start_seconds": 0,
+        "t50_seconds": 900,
+        "qos": "normal",
+        "protected": false,
+        "batch_eligible": true,
+        "partition": "fixture-gpu",
+        "gpu": 1,
+        "requested_walltime_seconds": 3600,
+        "origin_unknown": false,
+        "is_observed": true,
+        "state": "PENDING",
+        "release_seconds": null,
+        "hard_earliest_start_seconds": null,
+        "hard_latest_start_seconds": null,
+        "completion_deadline_seconds": null,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "nominal_service_seconds": null,
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow"
+      },
+      "known-b": {
+        "uid": "known-b",
+        "submit_seconds": 0,
+        "event_seconds": 0.0,
+        "reference_start_seconds": 0,
+        "t50_seconds": 900,
+        "qos": "normal",
+        "protected": false,
+        "batch_eligible": true,
+        "partition": "fixture-gpu",
+        "gpu": 1,
+        "requested_walltime_seconds": 3600,
+        "origin_unknown": false,
+        "is_observed": true,
+        "state": "PENDING",
+        "release_seconds": null,
+        "hard_earliest_start_seconds": null,
+        "hard_latest_start_seconds": null,
+        "completion_deadline_seconds": null,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "nominal_service_seconds": null,
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow"
+      },
+      "unknown-observed": {
+        "uid": "unknown-observed",
+        "submit_seconds": 900,
+        "event_seconds": 900.0,
+        "reference_start_seconds": 900,
+        "t50_seconds": 900,
+        "qos": "normal",
+        "protected": false,
+        "batch_eligible": true,
+        "partition": "fixture-gpu",
+        "gpu": 1,
+        "requested_walltime_seconds": 3600,
+        "origin_unknown": true,
+        "is_observed": true,
+        "state": "PENDING",
+        "release_seconds": null,
+        "hard_earliest_start_seconds": null,
+        "hard_latest_start_seconds": null,
+        "completion_deadline_seconds": null,
+        "representation_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600,
+          4500,
+          5400,
+          6300,
+          7200,
+          8100,
+          9000,
+          9900,
+          10800,
+          11700,
+          12600,
+          13500,
+          14400
+        ],
+        "nominal_service_seconds": null,
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow"
+      }
+    },
+    "qos_budget_ledger": {
+      "known-a": {
+        "uid": "known-a",
+        "case_sha": "fixture-integration",
+        "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+        "stats_sha": "76f5ed9e12d63d1eec7d872f4b3f4914f3a83f87e7028cb08aa1bc9a4759c453",
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow",
+        "authority_sha": "98a0abb89f48283bfdc06a32211d6e8f8cdc955a5f7c78509470f65bee63f076",
+        "issued_at_seconds": 0,
+        "reference_start_seconds": 0,
+        "reference_wait_seconds": 0,
+        "t50_seconds": 900,
+        "empirical_wait_seconds": 4500.0,
+        "budget_seconds": 3600,
+        "latest_start_seconds": 3600,
+        "allowed_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600
+        ],
+        "cohort_level": 0,
+        "cohort_n": 100,
+        "q90_higher_z": 5.0,
+        "status": "AUTHORIZED",
+        "reasons": [],
+        "origin_unknown": false,
+        "is_observed": true,
+        "batch_eligible": true,
+        "state_at_issue": "PENDING",
+        "hard_contract": {
+          "release_seconds": null,
+          "hard_earliest_start_seconds": null,
+          "hard_latest_start_seconds": null,
+          "completion_deadline_seconds": null,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "nominal_service_seconds": null,
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow",
+          "batch_eligible": true,
+          "qos": "normal",
+          "protected": false,
+          "partition": "fixture-gpu",
+          "gpu": 1,
+          "requested_walltime_seconds": 3600
+        },
+        "hard_contract_sha": "ed41134d7721d358c5d24a26d731220171c8710fcad6387b9f2897face06fe06",
+        "receipt_sha": "9f11e564ad26bc0a3c99447a7bf925c45a9ea3613a530b366e9ea314766c919c"
+      },
+      "known-b": {
+        "uid": "known-b",
+        "case_sha": "fixture-integration",
+        "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+        "stats_sha": "76f5ed9e12d63d1eec7d872f4b3f4914f3a83f87e7028cb08aa1bc9a4759c453",
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow",
+        "authority_sha": "3b666e9b2550d12bd34657bd3c8467970182d37cda74b217e24d1140f573c6d4",
+        "issued_at_seconds": 0,
+        "reference_start_seconds": 0,
+        "reference_wait_seconds": 0,
+        "t50_seconds": 900,
+        "empirical_wait_seconds": 4500.0,
+        "budget_seconds": 3600,
+        "latest_start_seconds": 3600,
+        "allowed_starts_seconds": [
+          0,
+          900,
+          1800,
+          2700,
+          3600
+        ],
+        "cohort_level": 0,
+        "cohort_n": 100,
+        "q90_higher_z": 5.0,
+        "status": "AUTHORIZED",
+        "reasons": [],
+        "origin_unknown": false,
+        "is_observed": true,
+        "batch_eligible": true,
+        "state_at_issue": "PENDING",
+        "hard_contract": {
+          "release_seconds": null,
+          "hard_earliest_start_seconds": null,
+          "hard_latest_start_seconds": null,
+          "completion_deadline_seconds": null,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "nominal_service_seconds": null,
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow",
+          "batch_eligible": true,
+          "qos": "normal",
+          "protected": false,
+          "partition": "fixture-gpu",
+          "gpu": 1,
+          "requested_walltime_seconds": 3600
+        },
+        "hard_contract_sha": "ed41134d7721d358c5d24a26d731220171c8710fcad6387b9f2897face06fe06",
+        "receipt_sha": "c601553e6acdc59b2e4d6b1808e02f154d5014d52f4cd76b0de122d4386e26b8"
+      },
+      "unknown-observed": {
+        "uid": "unknown-observed",
+        "case_sha": "fixture-integration",
+        "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+        "stats_sha": "76f5ed9e12d63d1eec7d872f4b3f4914f3a83f87e7028cb08aa1bc9a4759c453",
+        "provider_sha": "fixture-runtime",
+        "reference_sha": "fixture-shadow",
+        "authority_sha": "c76bb0d56b0ff83d0926162e7c67350bcd4a0703298be51fbfab0587dd3278be",
+        "issued_at_seconds": 900.0,
+        "reference_start_seconds": 900,
+        "reference_wait_seconds": 0,
+        "t50_seconds": 900,
+        "empirical_wait_seconds": 4500.0,
+        "budget_seconds": 3600,
+        "latest_start_seconds": 4500,
+        "allowed_starts_seconds": [
+          900,
+          1800,
+          2700,
+          3600,
+          4500
+        ],
+        "cohort_level": 0,
+        "cohort_n": 100,
+        "q90_higher_z": 5.0,
+        "status": "AUTHORIZED",
+        "reasons": [],
+        "origin_unknown": true,
+        "is_observed": true,
+        "batch_eligible": true,
+        "state_at_issue": "PENDING",
+        "hard_contract": {
+          "release_seconds": null,
+          "hard_earliest_start_seconds": null,
+          "hard_latest_start_seconds": null,
+          "completion_deadline_seconds": null,
+          "representation_starts_seconds": [
+            0,
+            900,
+            1800,
+            2700,
+            3600,
+            4500,
+            5400,
+            6300,
+            7200,
+            8100,
+            9000,
+            9900,
+            10800,
+            11700,
+            12600,
+            13500,
+            14400
+          ],
+          "nominal_service_seconds": null,
+          "provider_sha": "fixture-runtime",
+          "reference_sha": "fixture-shadow",
+          "batch_eligible": true,
+          "qos": "normal",
+          "protected": false,
+          "partition": "fixture-gpu",
+          "gpu": 1,
+          "requested_walltime_seconds": 3600
+        },
+        "hard_contract_sha": "ed41134d7721d358c5d24a26d731220171c8710fcad6387b9f2897face06fe06",
+        "receipt_sha": "e7af594406b806da680be4ad482bfb2109edaa2fc9aefd36316768f4ad9ecc41"
+      }
+    },
+    "decisions": {
+      "known-a": {
+        "uid": "known-a",
+        "action": "START",
+        "site": "B",
+        "start_seconds": 1800.0,
+        "nominal_end_seconds": 2700.0,
+        "status": "KNOWN_EXECUTION_COMMAND",
+        "plan_start_seconds": 1800.0,
+        "additional_start_delay_seconds": 1800.0
+      },
+      "known-b": {
+        "uid": "known-b",
+        "action": "START",
+        "site": "B",
+        "start_seconds": 1800.0,
+        "nominal_end_seconds": 2700.0,
+        "status": "KNOWN_EXECUTION_COMMAND",
+        "plan_start_seconds": 1800.0,
+        "additional_start_delay_seconds": 1800.0
+      },
+      "unknown-observed": {
+        "action": "PREPLACE",
+        "uid": "unknown-observed",
+        "site": "B",
+        "start_seconds": 900.0,
+        "nominal_end_seconds": 1800.0,
+        "additional_start_delay_seconds": 0.0,
+        "rule_id": "A_ENVELOPE:3",
+        "signed_grid_effect_vector": [
+          0.1
+        ],
+        "segments": [
+          {
+            "resource": "gpu:B",
+            "begin": 900.0,
+            "end": 1800.0,
+            "quantity": 1
+          }
+        ],
+        "status": "SELECTED",
+        "rejected_candidates": [],
+        "policy_sha": "cee8630851598217bcb87f23f111c21438e5f009192f346e5a4c456d6471ab34"
+      }
+    },
+    "reservations": {
+      "capacities": {
+        "gpu:A": 2,
+        "gpu:B": 2,
+        "active:WAN": 1
+      },
+      "reservations": {
+        "unknown-observed": {
+          "uid": "unknown-observed",
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 900.0,
+              "end": 1800.0,
+              "quantity": 1.0,
+              "scope": "anonymous"
+            }
+          ],
+          "status": "RELEASED",
+          "scope": "anonymous"
+        },
+        "known-a": {
+          "uid": "known-a",
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 1800.0,
+              "end": 3600.0,
+              "quantity": 1.0,
+              "scope": "physical"
+            }
+          ],
+          "status": "RELEASED",
+          "scope": "physical"
+        },
+        "known-b": {
+          "uid": "known-b",
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 1800.0,
+              "end": 2700.0,
+              "quantity": 1.0,
+              "scope": "physical"
+            }
+          ],
+          "status": "RELEASED",
+          "scope": "physical"
+        }
+      },
+      "audit": [
+        {
+          "uid": "unknown-observed",
+          "status": "RESERVED",
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 900.0,
+              "end": 1800.0,
+              "quantity": 1.0,
+              "scope": "anonymous"
+            }
+          ]
+        },
+        {
+          "uid": "known-a",
+          "status": "RESERVED",
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 1800.0,
+              "end": 2700.0,
+              "quantity": 1.0,
+              "scope": "physical"
+            }
+          ]
+        },
+        {
+          "uid": "known-b",
+          "status": "RESERVED",
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 1800.0,
+              "end": 2700.0,
+              "quantity": 1.0,
+              "scope": "physical"
+            }
+          ]
+        },
+        {
+          "uid": "unknown-observed",
+          "status": "RELEASED",
+          "at": 1800.0
+        },
+        {
+          "uid": "known-b",
+          "status": "RELEASED",
+          "at": 2700.0
+        },
+        {
+          "uid": "known-a",
+          "status": "RELEASED",
+          "at": 3600.0
+        }
+      ]
+    },
+    "reference": {
+      "capacities": {
+        "A": 2,
+        "B": 2
+      },
+      "reference_sha": "fixture-shadow",
+      "reservations": {
+        "A": [
+          [
+            0,
+            900,
+            1
+          ],
+          [
+            0,
+            900,
+            1
+          ],
+          [
+            900,
+            1800,
+            1
+          ]
+        ],
+        "B": []
+      },
+      "assigned": {
+        "known-a": {
+          "uid": "known-a",
+          "reference_start_seconds": 0,
+          "reference_site": "A",
+          "nominal_release_seconds": 900,
+          "origin": "CAUSAL_REFERENCE_START",
+          "reference_sha": "fixture-shadow",
+          "request_sha": "371217bed7eed5d34a7a564c554b2b4f33627b8f393fc2279133b48af69da3f3",
+          "grid_reads": 0,
+          "realized_completion_reads": 0,
+          "solver_calls": 0
+        },
+        "known-b": {
+          "uid": "known-b",
+          "reference_start_seconds": 0,
+          "reference_site": "A",
+          "nominal_release_seconds": 900,
+          "origin": "CAUSAL_REFERENCE_START",
+          "reference_sha": "fixture-shadow",
+          "request_sha": "d244830a6f59f032419a39e6ed3a9dd1543522d40a3e6b449eaf4f98a05ef78b",
+          "grid_reads": 0,
+          "realized_completion_reads": 0,
+          "solver_calls": 0
+        },
+        "unknown-observed": {
+          "uid": "unknown-observed",
+          "reference_start_seconds": 900,
+          "reference_site": "A",
+          "nominal_release_seconds": 1800,
+          "origin": "CAUSAL_REFERENCE_START",
+          "reference_sha": "fixture-shadow",
+          "request_sha": "37c85d1155182b7bf21c8d55930c21dd01eb6758ad86d47f9613f4a37f64a0bc",
+          "grid_reads": 0,
+          "realized_completion_reads": 0,
+          "solver_calls": 0
+        }
+      },
+      "last_event_seconds": 900.0,
+      "last_pending_start_seconds": 900
+    },
+    "forecast": {
+      "q50": [
+        0.5,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "q90": [
+        0.5,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "day_start": 0,
+      "consumed": {
+        "0": 0.25
+      },
+      "submissions": {
+        "unknown-observed": {
+          "hour": 0,
+          "nominal_GPUh": 0.25,
+          "submit_time": 900
+        }
+      },
+      "last_event": 900.0
+    },
+    "job_event_ledger": [
+      {
+        "uid": "known-a",
+        "time_seconds": 0.0,
+        "event": "SUBMISSION_OBSERVED",
+        "origin_unknown": false,
+        "qos_budget_seconds": 3600
+      },
+      {
+        "uid": "known-b",
+        "time_seconds": 0.0,
+        "event": "SUBMISSION_OBSERVED",
+        "origin_unknown": false,
+        "qos_budget_seconds": 3600
+      },
+      {
+        "uid": "unknown-observed",
+        "time_seconds": 900.0,
+        "event": "SUBMISSION_OBSERVED",
+        "origin_unknown": true,
+        "qos_budget_seconds": 3600
+      },
+      {
+        "uid": "unknown-observed",
+        "time_seconds": 900.0,
+        "event": "RUNNING",
+        "site": "B",
+        "action": "PREPLACE"
+      },
+      {
+        "uid": "unknown-observed",
+        "time_seconds": 1800.0,
+        "event": "COMPLETION_OBSERVED",
+        "release_control_seconds": 1800
+      },
+      {
+        "uid": "known-a",
+        "time_seconds": 1800.0,
+        "event": "RUNNING",
+        "site": "B",
+        "action": "START"
+      },
+      {
+        "uid": "known-b",
+        "time_seconds": 1800.0,
+        "event": "RUNNING",
+        "site": "B",
+        "action": "START"
+      },
+      {
+        "uid": "unknown-observed",
+        "time_seconds": 1800.0,
+        "event": "GPU_RELEASE_CONTROL"
+      },
+      {
+        "uid": "known-b",
+        "time_seconds": 2700.0,
+        "event": "COMPLETION_OBSERVED",
+        "release_control_seconds": 2700
+      },
+      {
+        "uid": "known-b",
+        "time_seconds": 2700.0,
+        "event": "GPU_RELEASE_CONTROL"
+      },
+      {
+        "uid": "known-a",
+        "time_seconds": 3600.0,
+        "event": "COMPLETION_OBSERVED",
+        "release_control_seconds": 3600
+      },
+      {
+        "uid": "known-a",
+        "time_seconds": 3600.0,
+        "event": "GPU_RELEASE_CONTROL"
+      }
+    ],
+    "migration_receipts": [],
+    "cc4_depletion_ledger": [
+      {
+        "uid": "unknown-observed",
+        "hour": 0,
+        "observed_at": 900.0,
+        "realized_submitted_nominal_work_GPUh": 0.25,
+        "remaining_CC4_Q50_GPUh": 0.25,
+        "remaining_CC4_Q90_GPUh": 0.25,
+        "remaining_CC4_reserve_GPUh": 0.0,
+        "cohort_closed": false,
+        "explicit_plus_anonymous_nominal_GPUh": 0.5,
+        "expired_unsubmitted_Q50_GPUh": 0.0,
+        "excess_submitted_nominal_GPUh": 0.0,
+        "depletion_count": 1,
+        "anonymous_forecast_is_physical": false
+      }
+    ],
+    "rule_consumption": [
+      {
+        "time_seconds": 900.0,
+        "action": "PREPLACE",
+        "uid": "unknown-observed",
+        "site": "B",
+        "start_seconds": 900.0,
+        "nominal_end_seconds": 1800.0,
+        "additional_start_delay_seconds": 0.0,
+        "rule_id": "A_ENVELOPE:3",
+        "signed_grid_effect_vector": [
+          0.1
+        ],
+        "segments": [
+          {
+            "resource": "gpu:B",
+            "begin": 900.0,
+            "end": 1800.0,
+            "quantity": 1
+          }
+        ],
+        "status": "SELECTED",
+        "rejected_candidates": [],
+        "policy_sha": "cee8630851598217bcb87f23f111c21438e5f009192f346e5a4c456d6471ab34"
+      }
+    ]
+  },
+  "simulator_only_remaining_compute_seconds": {
+    "unknown-observed": 0.0,
+    "known-a": 0.0,
+    "known-b": 0.0
+  },
+  "simulator_state_provenance": "private realized service; forbidden controller/provider input"
+}

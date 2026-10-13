@@ -40,6 +40,8 @@ def support_metadata(prep,graphs,physical_domains):
 
 
 def flexible(job):
+    if job.qos_policy_id:
+        return job.is_observed and job.state == 'PENDING' and bool(job.qos_allowed_starts)
     return (job.admitted and job.state == 'PENDING' and not job.protected
             and job.qos not in ('high', 'urgent') and not job.unknown_arrival)
 
@@ -57,6 +59,13 @@ def physical_starts(job, bound, control_end=120, hard_release=None):
         raise ValueError('HARD_RELEASE_INTEGER_REQUIRED')
     lo = max(job.submit, job.event, hard_release if hard_release is not None else 0)
     hi = bound.latest_completion - job.service_slots
+    if job.qos_policy_id:
+        if not job.is_observed:
+            return ()
+        starts = job.qos_allowed_starts
+        if job.state == 'RUNNING':
+            starts = (job.reference_start,) if job.reference_start in starts else ()
+        return tuple(t for t in starts if lo <= t <= hi)
     if not flexible(job):
         return (job.reference_start,) if lo <= job.reference_start <= hi else ()
     return tuple(range(lo, hi + 1))
@@ -88,7 +97,13 @@ def physical_domain(job, bound, resources, gen=None, hard_release=None):
                 option = Option(start, site, ((site, start, start + job.service_slots),))
                 validate(job, option, wide, resources)
                 stays.append((start, site))
-            if not job.checkpoint_authorized or job.unknown_arrival or job.migrations_used:
+            if not job.checkpoint_authorized or (job.unknown_arrival and not job.qos_policy_id) or not job.is_observed or job.migrations_used:
+                continue
+            if (job.qos_policy_id and job.qos_start_delay_seconds + max(0,start-job.reference_start)*900
+                    + resources.restart_slots*900 > job.qos_budget_seconds):
+                # Positive inherited restart is an exact lower bound on every
+                # migration's shared interruption burden. No physical option
+                # can survive this guard; avoid constructing its WAN series.
                 continue
             for cp, physical in checkpoint_records(job, start, min(start + job.service_slots, resources.control_end)):
                 remaining = job.service_slots - (cp - start)
@@ -105,6 +120,9 @@ def physical_domain(job, bound, resources, gen=None, hard_release=None):
                     feasible, restarts = gen.transfer_series(site, dest, job.gpu)
                     good = feasible[ids] & (restarts[ids] + remaining <= bound.latest_completion)
                     good &= gen.mask(remaining, job.gpu, dest)[np.minimum(restarts[ids], gen.max_slot)]
+                    if job.qos_policy_id:
+                        burden = job.qos_start_delay_seconds + max(0, start-job.reference_start)*900
+                        good &= burden + (restarts[ids]-cp)*900 <= job.qos_budget_seconds
                     taus = tuple(int(t) for t in ids[good])
                     if taus:
                         # Validate a representative for adapter identity. All
