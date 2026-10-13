@@ -33,6 +33,12 @@ def run(path):
                     raise PermissionError('SVR11_GLOBAL_DEVELOPMENT_ROOT_NOT_A_PRODUCTION_CAMPAIGN')
                 verify_request(request);assert_peers(request)
                 from .stages import inputs,b1,b3
+                if request['arm'] in ('B2','B3'):
+                    from v42_may_final.pr221 import optimize_case,verify_tools
+                    verify_tools(manifest)
+                    import v42_common_mess,v42_common_mess.engine
+                    v42_common_mess.optimize_case=optimize_case
+                    v42_common_mess.engine.optimize_case=optimize_case
                 progress(dict(phase='FRESH_INPUT_AND_SVR11_MODEL_PREPARATION'));inputs(request,progress)
                 if request['arm']=='B0':
                     atomic(attempt/'NATIVE_RUNTIME_LEDGER.json',dict(schema='V42_B0_NATIVE_ZERO_LEDGER_V1',measured_Native_Runtime=0,calls=[],inflight=None,Native_ceiling_seconds=0,source_SHA=manifest['execution_SHA'],UTC=now()))
@@ -76,7 +82,7 @@ def run(path):
                 result['certified_LB']=scientific.get('Certified_Global_LB',scientific.get('certified_Global_LB',scientific.get('LB')))
                 result['certified_Gap']=scientific.get('Certified_Gap',scientific.get('certified_gap'))
         except Exception as error:
-            result.update(PASS=False,status='FAIL',reason=repr(error),traceback=traceback.format_exc(),source_global_integrity_block=global_error(error))
+            result.update(PASS=False,status='BLOCKED' if type(error).__name__=='InterfaceBlocked' else 'FAIL',reason=repr(error),traceback=traceback.format_exc(),source_global_integrity_block=global_error(error))
             result['retryable_pre_native_technical_error']=isinstance(error,OSError) and getattr(error,'winerror',None) in (32,33)
             result['retryable_technical_error']=not result['source_global_integrity_block'] and (isinstance(error,OSError) or 'NATIVE_RUNTIME_UNAVAILABLE' in str(error) or 'UNMEASURED_RUNTIME' in str(error) or type(error).__name__=='GurobiError')
             atomic(attempt/'error.json',result)
