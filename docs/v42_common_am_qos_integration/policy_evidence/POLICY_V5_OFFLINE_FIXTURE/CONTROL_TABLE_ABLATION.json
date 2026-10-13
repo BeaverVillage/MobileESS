@@ -1,0 +1,363 @@
+{
+  "evidence_kind": "NAMED_SYNTHETIC_OFFLINE_ABLATION_ONLY",
+  "ablations": [
+    {
+      "fixture": "REBOUND_COUNTEREXAMPLE",
+      "evidence_kind": "NAMED_SYNTHETIC_96_SLOT_SIGNED_GEOMETRY_FIXTURE",
+      "rows": [
+        {
+          "method": "C_FIXED",
+          "selected_action": "START_NOW",
+          "target_site": "A",
+          "predicted_peak_line_loading": 0.9,
+          "QoS_violations": 0,
+          "resource_violations": 0,
+          "original_grid_hard_violations": 0,
+          "action_count": 0,
+          "migration_count": 0,
+          "queue_count": 0,
+          "carryout_GPUh": 0,
+          "delay_seconds": 0,
+          "forced_actions": false
+        },
+        {
+          "method": "C_GREEDY",
+          "selected_action": "START_NOW",
+          "target_site": "A",
+          "predicted_peak_line_loading": 0.9,
+          "QoS_violations": 0,
+          "resource_violations": 0,
+          "original_grid_hard_violations": 0,
+          "action_count": 0,
+          "migration_count": 0,
+          "queue_count": 0,
+          "carryout_GPUh": 0,
+          "delay_seconds": 0,
+          "forced_actions": false
+        },
+        {
+          "method": "C_GRID",
+          "selected_action": "PREPLACE",
+          "target_site": "B",
+          "predicted_peak_line_loading": 0.6499999999999999,
+          "QoS_violations": 0,
+          "resource_violations": 0,
+          "original_grid_hard_violations": 0,
+          "action_count": 1,
+          "migration_count": 0,
+          "queue_count": 0,
+          "carryout_GPUh": 0,
+          "delay_seconds": 900,
+          "forced_actions": false
+        }
+      ],
+      "source_fixture": {
+        "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_sensitivity_policy.py",
+        "sha256": "0a4c6d5c5a04bbf074cf26facd44893a68602fb35cdadab07be56c53f723c726",
+        "bytes": 17965
+      },
+      "policy_artifacts": {
+        "A_STAGE_RESOURCE_ENVELOPE.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\REBOUND_COUNTEREXAMPLE\\A_STAGE_RESOURCE_ENVELOPE.json",
+          "sha256": "9751b8acbb9dbef5c925ccb31143498dd64be3b000de7b488a8d903819771d4d",
+          "bytes": 38579
+        },
+        "GRID_SENSITIVITY_SCORE_AUDIT.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\REBOUND_COUNTEREXAMPLE\\GRID_SENSITIVITY_SCORE_AUDIT.json",
+          "sha256": "aa88c693d8c995c10fade68e6db366c99afa833ac0592743cb24e191fb88a49d",
+          "bytes": 17511
+        },
+        "CONTROL_CANDIDATE_GENERATION.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\REBOUND_COUNTEREXAMPLE\\CONTROL_CANDIDATE_GENERATION.json",
+          "sha256": "be7d802b37a8fadb7db5f6b2946b752d8c4b3338e7d93bda671dfeda96f1699e",
+          "bytes": 10569
+        },
+        "Q50_Q90_BURST_POLICY_COMPARISON.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\REBOUND_COUNTEREXAMPLE\\Q50_Q90_BURST_POLICY_COMPARISON.json",
+          "sha256": "cc028b576726e5f5745c7c8413bf5a61d0bc0df20c761afd4a3e79e0e5b173d1",
+          "bytes": 4331
+        },
+        "CONTROL_POLICY_SHA_MANIFEST.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\REBOUND_COUNTEREXAMPLE\\CONTROL_POLICY_SHA_MANIFEST.json",
+          "sha256": "09d48c33504ba23fd8a1b449b32857d0e5b72dce76dc9b79c3f522bb07e63abc",
+          "bytes": 809
+        },
+        "CONTROL_POLICY_RUNTIME_MEMORY.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\REBOUND_COUNTEREXAMPLE\\CONTROL_POLICY_RUNTIME_MEMORY.json",
+          "sha256": "309947f569052a68dceab44c44ae0e4a2934ee553f46c0f013fd147c8460f257",
+          "bytes": 529
+        },
+        "CONTROL_POLICY_RELOAD_TEST.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\REBOUND_COUNTEREXAMPLE\\CONTROL_POLICY_RELOAD_TEST.json",
+          "sha256": "bbcf1bf3e9bbdc2a1f6dcd9f14601fa5efcca541c2ae813d98ade2641debfe72",
+          "bytes": 209
+        },
+        "OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\REBOUND_COUNTEREXAMPLE\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+          "sha256": "84a10addd34b0f5f6ec3f796876bd473fe95d72bfc3ccd25264dea79eff302bf",
+          "bytes": 49475
+        }
+      },
+      "policy_sha": "4d306d74daa1daf9bb9231aa12a0975bcaf2c320306b83a45d9182a9f3e02200",
+      "offline_native_Optimize_calls": 0,
+      "C_GREEDY_definition": "RESOURCE_ONLY_FIRST_AUTHORIZED_FEASIBLE_START_SITE",
+      "legacy_compiler_comparison": {
+        "algorithm": "SIGNED_EFFECT_VECTOR_LEXICOGRAPHIC_SUM",
+        "selected_action": "PREPLACE",
+        "site": "B",
+        "start_seconds": 0.0,
+        "predicted_peak_line_loading": 0.85
+      },
+      "current_slot_only_delay_counterexample": {
+        "action": "DELAY_15",
+        "predicted_peak_line_loading": 1.15,
+        "current_slot_loading": 0.6,
+        "full96_original_grid_hard_violation": true
+      },
+      "Actual_status": "NOT_RUN",
+      "Fresh_AC_status": "NOT_RUN",
+      "real_May_efficacy_established": false
+    },
+    {
+      "fixture": "PLACEMENT_BENEFIT",
+      "evidence_kind": "NAMED_SYNTHETIC_96_SLOT_SIGNED_GEOMETRY_FIXTURE",
+      "rows": [
+        {
+          "method": "C_FIXED",
+          "selected_action": "START_NOW",
+          "target_site": "A",
+          "predicted_peak_line_loading": 0.9,
+          "QoS_violations": 0,
+          "resource_violations": 0,
+          "original_grid_hard_violations": 0,
+          "action_count": 0,
+          "migration_count": 0,
+          "queue_count": 0,
+          "carryout_GPUh": 0,
+          "delay_seconds": 0,
+          "forced_actions": false
+        },
+        {
+          "method": "C_GREEDY",
+          "selected_action": "START_NOW",
+          "target_site": "A",
+          "predicted_peak_line_loading": 0.9,
+          "QoS_violations": 0,
+          "resource_violations": 0,
+          "original_grid_hard_violations": 0,
+          "action_count": 0,
+          "migration_count": 0,
+          "queue_count": 0,
+          "carryout_GPUh": 0,
+          "delay_seconds": 0,
+          "forced_actions": false
+        },
+        {
+          "method": "C_GRID",
+          "selected_action": "PREPLACE",
+          "target_site": "B",
+          "predicted_peak_line_loading": 0.4,
+          "QoS_violations": 0,
+          "resource_violations": 0,
+          "original_grid_hard_violations": 0,
+          "action_count": 1,
+          "migration_count": 0,
+          "queue_count": 0,
+          "carryout_GPUh": 0,
+          "delay_seconds": 0,
+          "forced_actions": false
+        }
+      ],
+      "source_fixture": {
+        "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_sensitivity_policy.py",
+        "sha256": "0a4c6d5c5a04bbf074cf26facd44893a68602fb35cdadab07be56c53f723c726",
+        "bytes": 17965
+      },
+      "policy_artifacts": {
+        "A_STAGE_RESOURCE_ENVELOPE.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\PLACEMENT_BENEFIT\\A_STAGE_RESOURCE_ENVELOPE.json",
+          "sha256": "9751b8acbb9dbef5c925ccb31143498dd64be3b000de7b488a8d903819771d4d",
+          "bytes": 38579
+        },
+        "GRID_SENSITIVITY_SCORE_AUDIT.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\PLACEMENT_BENEFIT\\GRID_SENSITIVITY_SCORE_AUDIT.json",
+          "sha256": "38b6ceb8b6173a92ecb3d94fe4a6460f6aba5b32c7bbcc46203eb8092f65a95b",
+          "bytes": 17655
+        },
+        "CONTROL_CANDIDATE_GENERATION.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\PLACEMENT_BENEFIT\\CONTROL_CANDIDATE_GENERATION.json",
+          "sha256": "ae2398d4aca3ddbf51df75416314645cf51961131256a897a82cadb70c231244",
+          "bytes": 10043
+        },
+        "Q50_Q90_BURST_POLICY_COMPARISON.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\PLACEMENT_BENEFIT\\Q50_Q90_BURST_POLICY_COMPARISON.json",
+          "sha256": "a6112af981fd74e05390f5e0a172cffc2bff736eb206a02f4cfc7f8688bbe2f4",
+          "bytes": 4475
+        },
+        "CONTROL_POLICY_SHA_MANIFEST.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\PLACEMENT_BENEFIT\\CONTROL_POLICY_SHA_MANIFEST.json",
+          "sha256": "21c7f354552845ebfc4c865df0e468699e7b7dfd6b34c2aba1cfacd7e2c7add3",
+          "bytes": 809
+        },
+        "CONTROL_POLICY_RUNTIME_MEMORY.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\PLACEMENT_BENEFIT\\CONTROL_POLICY_RUNTIME_MEMORY.json",
+          "sha256": "372ef795cb33ad97290fa6876aa93bd4ff0cc8eed00fd4da36289b7304fc6259",
+          "bytes": 531
+        },
+        "CONTROL_POLICY_RELOAD_TEST.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\PLACEMENT_BENEFIT\\CONTROL_POLICY_RELOAD_TEST.json",
+          "sha256": "eb51a036b027747cd1bb07c775d4b22104c06fe6d03a36493ac7ea54da7818ba",
+          "bytes": 209
+        },
+        "OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\PLACEMENT_BENEFIT\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+          "sha256": "ad5a5f752ab1376fc599a35044accb9f88b0568662a26047e35bd4831a977adf",
+          "bytes": 49664
+        }
+      },
+      "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+      "offline_native_Optimize_calls": 0,
+      "C_GREEDY_definition": "RESOURCE_ONLY_FIRST_AUTHORIZED_FEASIBLE_START_SITE",
+      "legacy_compiler_comparison": {
+        "algorithm": "SIGNED_EFFECT_VECTOR_LEXICOGRAPHIC_SUM",
+        "selected_action": "PREPLACE",
+        "site": "B",
+        "start_seconds": 0.0,
+        "predicted_peak_line_loading": 0.4
+      },
+      "current_slot_only_delay_counterexample": {
+        "action": "DELAY_15",
+        "predicted_peak_line_loading": 0.6000000000000001,
+        "current_slot_loading": 0.6,
+        "full96_original_grid_hard_violation": false
+      },
+      "Actual_status": "NOT_RUN",
+      "Fresh_AC_status": "NOT_RUN",
+      "real_May_efficacy_established": false
+    },
+    {
+      "fixture": "NO_IMPROVEMENT_NO_FORCED_ACTION",
+      "evidence_kind": "NAMED_SYNTHETIC_96_SLOT_SIGNED_GEOMETRY_FIXTURE",
+      "rows": [
+        {
+          "method": "C_FIXED",
+          "selected_action": "START_NOW",
+          "target_site": "A",
+          "predicted_peak_line_loading": 0.9,
+          "QoS_violations": 0,
+          "resource_violations": 0,
+          "original_grid_hard_violations": 0,
+          "action_count": 0,
+          "migration_count": 0,
+          "queue_count": 0,
+          "carryout_GPUh": 0,
+          "delay_seconds": 0,
+          "forced_actions": false
+        },
+        {
+          "method": "C_GREEDY",
+          "selected_action": "START_NOW",
+          "target_site": "A",
+          "predicted_peak_line_loading": 0.9,
+          "QoS_violations": 0,
+          "resource_violations": 0,
+          "original_grid_hard_violations": 0,
+          "action_count": 0,
+          "migration_count": 0,
+          "queue_count": 0,
+          "carryout_GPUh": 0,
+          "delay_seconds": 0,
+          "forced_actions": false
+        },
+        {
+          "method": "C_GRID",
+          "selected_action": "START_NOW",
+          "target_site": "A",
+          "predicted_peak_line_loading": 0.9,
+          "QoS_violations": 0,
+          "resource_violations": 0,
+          "original_grid_hard_violations": 0,
+          "action_count": 0,
+          "migration_count": 0,
+          "queue_count": 0,
+          "carryout_GPUh": 0,
+          "delay_seconds": 0,
+          "forced_actions": false
+        }
+      ],
+      "source_fixture": {
+        "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_sensitivity_policy.py",
+        "sha256": "0a4c6d5c5a04bbf074cf26facd44893a68602fb35cdadab07be56c53f723c726",
+        "bytes": 17965
+      },
+      "policy_artifacts": {
+        "A_STAGE_RESOURCE_ENVELOPE.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\NO_IMPROVEMENT_NO_FORCED_ACTION\\A_STAGE_RESOURCE_ENVELOPE.json",
+          "sha256": "9751b8acbb9dbef5c925ccb31143498dd64be3b000de7b488a8d903819771d4d",
+          "bytes": 38579
+        },
+        "GRID_SENSITIVITY_SCORE_AUDIT.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\NO_IMPROVEMENT_NO_FORCED_ACTION\\GRID_SENSITIVITY_SCORE_AUDIT.json",
+          "sha256": "7a6c22b3899a7123c3398193ecc1f43b9bdb67b3e1367f29a2d15d19c9d6a2e2",
+          "bytes": 17422
+        },
+        "CONTROL_CANDIDATE_GENERATION.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\NO_IMPROVEMENT_NO_FORCED_ACTION\\CONTROL_CANDIDATE_GENERATION.json",
+          "sha256": "9ac5ddeb72d00ac931a744891ad2993d9a145ea6a470bda372e10262a69305e2",
+          "bytes": 11468
+        },
+        "Q50_Q90_BURST_POLICY_COMPARISON.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\NO_IMPROVEMENT_NO_FORCED_ACTION\\Q50_Q90_BURST_POLICY_COMPARISON.json",
+          "sha256": "e12ccfbe6c04d1d3fee2ea04652ecb0afef834cb9bf015ae3749249bca76da35",
+          "bytes": 4242
+        },
+        "CONTROL_POLICY_SHA_MANIFEST.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\NO_IMPROVEMENT_NO_FORCED_ACTION\\CONTROL_POLICY_SHA_MANIFEST.json",
+          "sha256": "bb70ec637be668323118079e0fd20a68f95d42e6abac4aa75587d5dabe7460a0",
+          "bytes": 809
+        },
+        "CONTROL_POLICY_RUNTIME_MEMORY.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\NO_IMPROVEMENT_NO_FORCED_ACTION\\CONTROL_POLICY_RUNTIME_MEMORY.json",
+          "sha256": "18d381a9dbd069659fbf53ac6b1b7d2ae1f66e9f17e5b2e09aea3c5a29efe47e",
+          "bytes": 531
+        },
+        "CONTROL_POLICY_RELOAD_TEST.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\NO_IMPROVEMENT_NO_FORCED_ACTION\\CONTROL_POLICY_RELOAD_TEST.json",
+          "sha256": "572fd9e38e388ef0f2340a74829ccfbdea56d7704f5f5843a16e1a1b664668bb",
+          "bytes": 209
+        },
+        "OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json": {
+          "path": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\NO_IMPROVEMENT_NO_FORCED_ACTION\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+          "sha256": "c62f1191a3fc89ad890e0a1b589188bfc31320d8c2b72785e9b3e58e0885cbfa",
+          "bytes": 49727
+        }
+      },
+      "policy_sha": "fc79029a512cbcfbcbd9a8301c11b4fb50c1baf3e279c01ad540a12be8c625a2",
+      "offline_native_Optimize_calls": 0,
+      "C_GREEDY_definition": "RESOURCE_ONLY_FIRST_AUTHORIZED_FEASIBLE_START_SITE",
+      "legacy_compiler_comparison": {
+        "algorithm": "SIGNED_EFFECT_VECTOR_LEXICOGRAPHIC_SUM",
+        "selected_action": "START",
+        "site": "A",
+        "start_seconds": 0.0,
+        "predicted_peak_line_loading": 0.9
+      },
+      "current_slot_only_delay_counterexample": {
+        "action": "DELAY_15",
+        "predicted_peak_line_loading": 1.15,
+        "current_slot_loading": 0.6,
+        "full96_original_grid_hard_violation": true
+      },
+      "Actual_status": "NOT_RUN",
+      "Fresh_AC_status": "NOT_RUN",
+      "real_May_efficacy_established": false
+    }
+  ],
+  "Peak_objective": "max every remaining line/time",
+  "Actual_executed": false,
+  "Fresh_AC_executed": false,
+  "Original_full_case_certificate": false,
+  "solver_seconds": 0,
+  "Source_Raw_Ledger_modified": false,
+  "campaign_HOLD": true
+}

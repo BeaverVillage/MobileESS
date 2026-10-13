@@ -1,0 +1,134 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter Threads to value 1
+Set parameter FeasibilityTol to value 1e-09
+Set parameter OptimalityTol to value 1e-09
+Set parameter IntFeasTol to value 1e-08
+Set parameter MIPGap to value 0.005
+Set parameter Method to value 2
+Set parameter MIPFocus to value 1
+Set parameter NumericFocus to value 3
+Set parameter ScaleFlag to value 2
+Set parameter Seed to value 0
+Set parameter MIPGapAbs to value 1e-10
+Set parameter LogFile to value "D:\v42_integration_validation_20261013\FIXTURE_B2\M1\COMMON_M_PR222\JOINT\NATIVE_GUROBI.log"
+Set parameter TimeLimit to value 5
+Set parameter Threads to value 1
+Set parameter TimeLimit to value 5
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  5
+FeasibilityTol  1e-09
+IntFeasTol  1e-08
+MIPGap  0.005
+OptimalityTol  1e-09
+Method  2
+ScaleFlag  2
+MIPFocus  1
+NumericFocus  3
+Threads  1
+
+Optimize a model with 133 rows, 93 columns and 162 nonzeros (Min)
+Model fingerprint: 0xefc1cb30
+Model has 1 linear objective coefficients
+Variable types: 69 continuous, 24 integer (24 binary)
+Coefficient statistics:
+  Matrix range     [1e-02, 1e+00]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+01]
+  RHS range        [4e-01, 5e+00]
+
+Loaded user MIP start with objective 0.604
+
+Presolve removed 124 rows and 80 columns
+Presolve time: 0.00s
+Presolved: 9 rows, 13 columns, 25 nonzeros
+Variable types: 8 continuous, 5 integer (5 binary)
+Root barrier log...
+
+Ordering time: 0.00s
+
+Barrier statistics:
+ AA' NZ     : 4.000e+00
+ Factor NZ  : 1.500e+01
+ Factor Ops : 5.500e+01 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   4.04000000e-01  4.04000000e-01  2.50e+03 0.00e+00  3.60e+05     0s
+   1   4.04000000e-01 -2.69840655e+03  2.53e+02 0.00e+00  3.66e+04     0s
+   2   4.04000000e-01 -2.94220657e+03  2.51e+01 0.00e+00  3.73e+03     0s
+   3   4.04000000e-01 -2.75533841e+03  2.48e+00 0.00e+00  4.68e+02     0s
+   4   4.04000000e-01 -1.50570410e+03  2.46e-01 0.00e+00  9.34e+01     0s
+   5   4.04000000e-01 -2.02149012e+02  2.44e-02 0.00e+00  1.04e+01     0s
+   6   4.04000000e-01 -1.98518865e+01  2.42e-03 0.00e+00  1.02e+00     0s
+   7   4.04000000e-01 -1.62160052e+00  2.40e-04 0.00e+00  1.01e-01     0s
+   8   4.04000000e-01  2.01438304e-01  2.37e-05 0.00e+00  1.01e-02     0s
+   9   4.04000000e-01  3.83743627e-01  2.35e-06 0.00e+00  1.01e-03     0s
+  10   4.04000000e-01  4.01974342e-01  2.33e-07 0.00e+00  1.01e-04     0s
+  11   4.04000000e-01  4.03797432e-01  2.31e-08 0.00e+00  1.01e-05     0s
+  12   4.04000000e-01  4.03979743e-01  2.29e-09 0.00e+00  1.01e-06     0s
+  13   4.04000000e-01  4.03997974e-01  2.27e-10 0.00e+00  1.01e-07     0s
+  14   4.04000000e-01  4.03999797e-01  2.25e-11 0.00e+00  1.01e-08     0s
+  15   4.04000000e-01  4.03999980e-01  2.23e-12 0.00e+00  1.01e-09     0s
+  16   4.04000000e-01  4.03999998e-01  2.21e-13 0.00e+00  1.01e-10     0s
+
+Barrier solved model in 16 iterations and 0.00 seconds (0.00 work units)
+Optimal objective 4.04000000e-01
+
+Crossover time: 0.00 seconds (0.00 work units)
+
+Root relaxation: objective 4.040000e-01, 10 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0       0.4040000    0.40400  0.00%     -    0s
+     0     0          -    0         0.40400    0.40400  0.00%     -    0s
+
+Explored 1 nodes (10 simplex iterations) in 0.00 seconds (0.00 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 2: 0.404 0.604 
+
+Optimal solution found (tolerance 5.00e-03)
+Best objective 4.040000000000e-01, best bound 4.040000000000e-01, gap 0.0000%
+
+User-callback calls 372, time in user-callback 0.00 sec
+{
+  "evidence_kind": "SYNTHETIC_FIXTURE",
+  "arm": "B2",
+  "stage_calls": [
+    "M1"
+  ],
+  "Actual": {
+    "capacity_violations": 0,
+    "dropped_jobs": 0,
+    "submitted_jobs": 3,
+    "completed_jobs": 3,
+    "carryout_jobs": 0,
+    "max_per_site_GPU": {
+      "A": 2.0,
+      "B": 0.0
+    },
+    "actual_compute_GPUh": 1.0,
+    "actual_occupation_GPUh": 1.0,
+    "anonymous_physical_GPU": 0,
+    "runtime_reserve_physical_GPU": 0,
+    "optimizer_calls": 0,
+    "actual_global_reoptimization": 0,
+    "future_duration_controller_reads": 0,
+    "future_completion_controller_reads": 0,
+    "actual_power_recomputed": true,
+    "planning_power_copied": false,
+    "physical_ac_status": "NOT_EXECUTED"
+  },
+  "campaign_HOLD": true,
+  "actual_real_data_actions_claimed": false
+}

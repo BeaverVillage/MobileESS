@@ -75,7 +75,7 @@ def pcs_rows(model,p,q,connected,S,mode='MILP'):
 
 
 def solve(stage,deadline,sites,initial_sites,routes,battery,horizon,grid_builder,
-          incumbent=None,*,mode='MILP',diagnostic=False,progress=None,strengthening_hook=None):
+          incumbent=None,*,mode='MILP',diagnostic=False,progress=None,strengthening_hook=None,optimizer=None):
     require(stage in ('M1','M2') and stage==deadline.stage,'MESS_STAGE')
     require(mode=='MILP' or diagnostic,'DIAGNOSTIC_CIRCLE_NOT_PRODUCTION')
     battery.validate();deadline.check();started=perf_counter()
@@ -139,7 +139,7 @@ def solve(stage,deadline,sites,initial_sites,routes,battery,horizon,grid_builder
         count=gp.quicksum(x[m,k] for m in initial_sites for k,a in enumerate(arcs) if a[-1] is not None)
         tie=gp.quicksum((k+1)*x[m,k] for m in initial_sites for k in range(len(arcs)))
         built=perf_counter();pre=size(model)
-        best,receipt=optimize(model,primary+[('movement_kwh',movement),('movement_count',count),('tie',tie)],deadline,incumbent,
+        best,receipt=(optimizer or optimize)(model,primary+[('movement_kwh',movement),('movement_count',count),('tie',tie)],deadline,incumbent,
             diagnostic_quadratic=mode!='MILP',progress=progress)
         receipt.update(model_build_seconds=built-started,model_size_before_solve=pre,physical_prescreen=physical.receipt(),route_variable_count=sum(not isinstance(v,float) for v in x.values()),
             route_move_arcs=len(routes),reachability_removed=len(removed),zero_unreachable_PQ_columns=sum(isinstance(v,float) for v in reactive.values()),PCS_mode=mode)

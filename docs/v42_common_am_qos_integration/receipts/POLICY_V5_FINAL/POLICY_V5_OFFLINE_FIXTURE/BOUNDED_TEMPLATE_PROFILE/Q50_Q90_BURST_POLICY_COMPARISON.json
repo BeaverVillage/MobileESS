@@ -1,0 +1,4447 @@
+{
+  "scenarios": {
+    "status": "SOURCE_BOUND_SCENARIOS_READY",
+    "Q50_GPUh": 48.0,
+    "Q90_GPUh": 48.0,
+    "nominal_carryout_GPUh": 0.0,
+    "Q90_minus_Q50_GPUh": 0.0,
+    "Q90_stress_day_GPUh": 0.0,
+    "Q90_stress_tail_GPUh": 0.0,
+    "scenario_names": [
+      "NOMINAL_Q50",
+      "HIGH_DEMAND_Q90"
+    ],
+    "TRAIN_BURST_STRESS": "INSUFFICIENT_SUPPORT",
+    "Q50_already_in_AIDC_baseline": true,
+    "Q90_actual_load_addition": false,
+    "stress_allocation_role": "FROZEN_Q90_MINUS_Q50_KERNEL_STRESS;NOT_ACTUAL_GPU",
+    "model_retraining_calls": 0,
+    "new_calibrators": 0,
+    "prediction_scaling_or_clipping": false,
+    "source_authority": {
+      "model_id": "LGBM_weighted_c1_s20260924",
+      "prediction_sha": "FIXTURE_CC4_PREDICTION",
+      "runtime_sha": "FIXTURE_RUNTIME_Q50",
+      "kernel_sha": "FIXTURE_TRAIN_KERNEL_SHA"
+    }
+  },
+  "comparisons": [
+    {
+      "template_id": "T0_0",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.9,
+            "HIGH_DEMAND_Q90": 0.9
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8999999999994445,
+            "HIGH_DEMAND_Q90": 0.8999999999994445
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 1.15,
+            "HIGH_DEMAND_Q90": 1.15
+          },
+          "hard_feasible": false
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8999999999996667,
+            "HIGH_DEMAND_Q90": 0.8999999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8999999999996667,
+            "HIGH_DEMAND_Q90": 0.8999999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8999999999996667,
+            "HIGH_DEMAND_Q90": 0.8999999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8999999999996667,
+            "HIGH_DEMAND_Q90": 0.8999999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8999999999996667,
+            "HIGH_DEMAND_Q90": 0.8999999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8999999999996667,
+            "HIGH_DEMAND_Q90": 0.8999999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8999999999996667,
+            "HIGH_DEMAND_Q90": 0.8999999999996667
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "PREPLACE",
+        "site": "B",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.8999999999994445,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.8999999999994445,
+          "HIGH_DEMAND_Q90": 0.8999999999994445
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[B,0]"
+        ]
+      },
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T1_0",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.9,
+            "HIGH_DEMAND_Q90": 0.9
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.9,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.9,
+          "HIGH_DEMAND_Q90": 0.9
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,0]"
+        ]
+      },
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T2_0",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.9,
+            "HIGH_DEMAND_Q90": 0.9
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 1.15,
+            "HIGH_DEMAND_Q90": 1.15
+          },
+          "hard_feasible": false
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6499999999999999,
+            "HIGH_DEMAND_Q90": 0.6499999999999999
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "PREPLACE",
+        "site": "B",
+        "delay_seconds": 900,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 900,
+        "worst_peak_score": 0.6499999999999999,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.6499999999999999,
+          "HIGH_DEMAND_Q90": 0.6499999999999999
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[B,1]",
+          "anonymous_GPU[B,2]",
+          "anonymous_GPU[B,3]",
+          "anonymous_GPU[B,4]"
+        ]
+      },
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T3_0",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.9,
+            "HIGH_DEMAND_Q90": 0.9
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.9,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.9,
+          "HIGH_DEMAND_Q90": 0.9
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,0]",
+          "anonymous_GPU[A,1]",
+          "anonymous_GPU[A,2]",
+          "anonymous_GPU[A,3]"
+        ]
+      },
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T4_0",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.9,
+            "HIGH_DEMAND_Q90": 0.9
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.4,
+            "HIGH_DEMAND_Q90": 0.4
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.6000000000000001,
+            "HIGH_DEMAND_Q90": 0.6000000000000001
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "PREPLACE",
+        "site": "B",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.4,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.4,
+          "HIGH_DEMAND_Q90": 0.4
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[B,0]",
+          "anonymous_GPU[B,10]",
+          "anonymous_GPU[B,11]",
+          "anonymous_GPU[B,12]",
+          "anonymous_GPU[B,13]",
+          "anonymous_GPU[B,14]",
+          "anonymous_GPU[B,15]",
+          "anonymous_GPU[B,1]",
+          "anonymous_GPU[B,2]",
+          "anonymous_GPU[B,3]",
+          "anonymous_GPU[B,4]",
+          "anonymous_GPU[B,5]",
+          "anonymous_GPU[B,6]",
+          "anonymous_GPU[B,7]",
+          "anonymous_GPU[B,8]",
+          "anonymous_GPU[B,9]"
+        ]
+      },
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T5_0",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.9,
+            "HIGH_DEMAND_Q90": 0.9
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.9,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.9,
+          "HIGH_DEMAND_Q90": 0.9
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,0]",
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,1]",
+          "anonymous_GPU[A,2]",
+          "anonymous_GPU[A,3]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T6_0",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T7_0",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T8_0",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T9_0",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T10_0",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T11_0",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 96
+    },
+    {
+      "template_id": "T12_1",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8499999999994444,
+            "HIGH_DEMAND_Q90": 0.8499999999994444
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8499999999996667,
+            "HIGH_DEMAND_Q90": 0.8499999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8499999999996667,
+            "HIGH_DEMAND_Q90": 0.8499999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8499999999996667,
+            "HIGH_DEMAND_Q90": 0.8499999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8499999999996667,
+            "HIGH_DEMAND_Q90": 0.8499999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8499999999996667,
+            "HIGH_DEMAND_Q90": 0.8499999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8499999999996667,
+            "HIGH_DEMAND_Q90": 0.8499999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8499999999996667,
+            "HIGH_DEMAND_Q90": 0.8499999999996667
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.8499999999996667,
+            "HIGH_DEMAND_Q90": 0.8499999999996667
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "PREPLACE",
+        "site": "B",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.8499999999994444,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.8499999999994444,
+          "HIGH_DEMAND_Q90": 0.8499999999994444
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[B,1]"
+        ]
+      },
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T13_1",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.85,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.85,
+          "HIGH_DEMAND_Q90": 0.85
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,1]"
+        ]
+      },
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T14_1",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.35,
+            "HIGH_DEMAND_Q90": 0.35
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "PREPLACE",
+        "site": "B",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.35,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.35,
+          "HIGH_DEMAND_Q90": 0.35
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[B,1]",
+          "anonymous_GPU[B,2]",
+          "anonymous_GPU[B,3]",
+          "anonymous_GPU[B,4]"
+        ]
+      },
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T15_1",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.85,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.85,
+          "HIGH_DEMAND_Q90": 0.85
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,1]",
+          "anonymous_GPU[A,2]",
+          "anonymous_GPU[A,3]",
+          "anonymous_GPU[A,4]"
+        ]
+      },
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T16_1",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.35,
+            "HIGH_DEMAND_Q90": 0.35
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.55,
+            "HIGH_DEMAND_Q90": 0.55
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "PREPLACE",
+        "site": "B",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.35,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.35,
+          "HIGH_DEMAND_Q90": 0.35
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[B,10]",
+          "anonymous_GPU[B,11]",
+          "anonymous_GPU[B,12]",
+          "anonymous_GPU[B,13]",
+          "anonymous_GPU[B,14]",
+          "anonymous_GPU[B,15]",
+          "anonymous_GPU[B,16]",
+          "anonymous_GPU[B,1]",
+          "anonymous_GPU[B,2]",
+          "anonymous_GPU[B,3]",
+          "anonymous_GPU[B,4]",
+          "anonymous_GPU[B,5]",
+          "anonymous_GPU[B,6]",
+          "anonymous_GPU[B,7]",
+          "anonymous_GPU[B,8]",
+          "anonymous_GPU[B,9]"
+        ]
+      },
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T17_1",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.85,
+            "HIGH_DEMAND_Q90": 0.85
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.85,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.85,
+          "HIGH_DEMAND_Q90": 0.85
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,1]",
+          "anonymous_GPU[A,2]",
+          "anonymous_GPU[A,3]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T18_1",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T19_1",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T20_1",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T21_1",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T22_1",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T23_1",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 95
+    },
+    {
+      "template_id": "T24_2",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,2]"
+        ]
+      },
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T25_2",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,2]"
+        ]
+      },
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T26_2",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,2]",
+          "anonymous_GPU[A,3]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]"
+        ]
+      },
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T27_2",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,2]",
+          "anonymous_GPU[A,3]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]"
+        ]
+      },
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T28_2",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,2]",
+          "anonymous_GPU[A,3]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T29_2",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,2]",
+          "anonymous_GPU[A,3]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T30_2",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T31_2",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T32_2",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T33_2",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T34_2",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T35_2",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 94
+    },
+    {
+      "template_id": "T36_3",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,3]"
+        ]
+      },
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T37_3",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,3]"
+        ]
+      },
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T38_3",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,3]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]"
+        ]
+      },
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T39_3",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,3]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]"
+        ]
+      },
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T40_3",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,18]",
+          "anonymous_GPU[A,3]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T41_3",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,18]",
+          "anonymous_GPU[A,3]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T42_3",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T43_3",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T44_3",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T45_3",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T46_3",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T47_3",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 93
+    },
+    {
+      "template_id": "T48_4",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,4]"
+        ]
+      },
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T49_4",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,4]"
+        ]
+      },
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T50_4",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]"
+        ]
+      },
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T51_4",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]"
+        ]
+      },
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T52_4",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,18]",
+          "anonymous_GPU[A,19]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T53_4",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,18]",
+          "anonymous_GPU[A,19]",
+          "anonymous_GPU[A,4]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T54_4",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T55_4",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T56_4",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T57_4",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T58_4",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T59_4",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 92
+    },
+    {
+      "template_id": "T60_5",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,5]"
+        ]
+      },
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T61_5",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,5]"
+        ]
+      },
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T62_5",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]"
+        ]
+      },
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T63_5",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]"
+        ]
+      },
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T64_5",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,18]",
+          "anonymous_GPU[A,19]",
+          "anonymous_GPU[A,20]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T65_5",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,18]",
+          "anonymous_GPU[A,19]",
+          "anonymous_GPU[A,20]",
+          "anonymous_GPU[A,5]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T66_5",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T67_5",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T68_5",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T69_5",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T70_5",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T71_5",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 91
+    },
+    {
+      "template_id": "T72_6",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,6]"
+        ]
+      },
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T73_6",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,6]"
+        ]
+      },
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T74_6",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T75_6",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T76_6",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,18]",
+          "anonymous_GPU[A,19]",
+          "anonymous_GPU[A,20]",
+          "anonymous_GPU[A,21]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T77_6",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,18]",
+          "anonymous_GPU[A,19]",
+          "anonymous_GPU[A,20]",
+          "anonymous_GPU[A,21]",
+          "anonymous_GPU[A,6]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T78_6",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T79_6",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T80_6",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T81_6",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T82_6",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T83_6",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 90
+    },
+    {
+      "template_id": "T84_7",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,7]"
+        ]
+      },
+      "remaining_all_line_slots": 89
+    },
+    {
+      "template_id": "T85_7",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 900.0,
+        "compute_service_GPUh": 0.25,
+        "reference_service_GPUh": 0.25,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,7]"
+        ]
+      },
+      "remaining_all_line_slots": 89
+    },
+    {
+      "template_id": "T86_7",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 89
+    },
+    {
+      "template_id": "T87_7",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 3600.0,
+        "compute_service_GPUh": 1.0,
+        "reference_service_GPUh": 1.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 89
+    },
+    {
+      "template_id": "T88_7",
+      "candidate_scores": [
+        {
+          "action": "START_NOW",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_15",
+          "site": "A",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 900,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_30",
+          "site": "A",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 1800,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_45",
+          "site": "A",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 2700,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "DELAY_60",
+          "site": "A",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.5,
+            "HIGH_DEMAND_Q90": 0.5
+          },
+          "hard_feasible": true
+        },
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "delay_seconds": 3600,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "START_NOW",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,18]",
+          "anonymous_GPU[A,19]",
+          "anonymous_GPU[A,20]",
+          "anonymous_GPU[A,21]",
+          "anonymous_GPU[A,22]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 89
+    },
+    {
+      "template_id": "T89_7",
+      "candidate_scores": [
+        {
+          "action": "STAY",
+          "site": "A",
+          "delay_seconds": 0,
+          "scenario_scores": {
+            "NOMINAL_Q50": 0.2,
+            "HIGH_DEMAND_Q90": 0.2
+          },
+          "hard_feasible": true
+        }
+      ],
+      "selected": {
+        "action": "STAY",
+        "site": "A",
+        "delay_seconds": 0,
+        "tail_GPUh": 0.0,
+        "qos_consumption_seconds": 0,
+        "worst_peak_score": 0.2,
+        "scenario_scores": {
+          "NOMINAL_Q50": 0.2,
+          "HIGH_DEMAND_Q90": 0.2
+        },
+        "service_seconds": 14400.0,
+        "compute_service_GPUh": 4.0,
+        "reference_service_GPUh": 4.0,
+        "service_preserved": true,
+        "original_A_source_variables": [
+          "anonymous_GPU[A,10]",
+          "anonymous_GPU[A,11]",
+          "anonymous_GPU[A,12]",
+          "anonymous_GPU[A,13]",
+          "anonymous_GPU[A,14]",
+          "anonymous_GPU[A,15]",
+          "anonymous_GPU[A,16]",
+          "anonymous_GPU[A,17]",
+          "anonymous_GPU[A,18]",
+          "anonymous_GPU[A,19]",
+          "anonymous_GPU[A,20]",
+          "anonymous_GPU[A,21]",
+          "anonymous_GPU[A,22]",
+          "anonymous_GPU[A,7]",
+          "anonymous_GPU[A,8]",
+          "anonymous_GPU[A,9]"
+        ]
+      },
+      "remaining_all_line_slots": 89
+    },
+    {
+      "template_id": "T90_7",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 89
+    },
+    {
+      "template_id": "T91_7",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 89
+    },
+    {
+      "template_id": "T92_7",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 89
+    },
+    {
+      "template_id": "T93_7",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 89
+    },
+    {
+      "template_id": "T94_7",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 89
+    },
+    {
+      "template_id": "T95_7",
+      "candidate_scores": [],
+      "selected": null,
+      "remaining_all_line_slots": 89
+    }
+  ],
+  "Q90_is_Actual_load": false
+}

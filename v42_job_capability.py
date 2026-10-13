@@ -36,6 +36,14 @@ class Job:
     duration_authority: str = ''
     migrations_used: int = 0
     standby_candidate_authorized: bool = False
+    # Issued once by the empirical provider. None retains historical semantics.
+    qos_policy_id: str = ''
+    qos_receipt_sha: str = ''
+    qos_allowed_starts: tuple | None = None
+    qos_budget_seconds: float = 0.
+    qos_start_delay_seconds: float = 0.
+    is_observed: bool = True
+    batch_eligible: bool = False
 
     def __post_init__(self):
         if self.state not in ('PENDING', 'RUNNING'):
@@ -54,6 +62,12 @@ class Job:
             raise ValueError('INVALID_CAUSAL_ELAPSED')
         if self.migrations_used not in (0, 1):
             raise ValueError('ONE_MIGRATION_MAXIMUM')
+        if self.qos_policy_id:
+            if (len(self.qos_receipt_sha) != 64 or self.qos_allowed_starts is None
+                    or any(type(t) is not int for t in self.qos_allowed_starts)
+                    or not isfinite(self.qos_budget_seconds) or self.qos_budget_seconds < 0
+                    or not 0 <= self.qos_start_delay_seconds <= self.qos_budget_seconds):
+                raise ValueError('ISSUED_QOS_RECEIPT_REQUIRED')
 
 
 @dataclass(frozen=True)
@@ -209,7 +223,15 @@ def validate(job, option, boundary, resources):
         raise ValueError('UNADMITTED_REQUIRES_SEPARATE_BACKLOG_LEDGER')
     if option.start not in boundary.allowed_starts or option.start < max(job.submit, job.event):
         raise ValueError('START_WINDOW')
-    if option.start != job.reference_start and (job.protected or job.qos in ('high','urgent') or job.unknown_arrival):
+    if job.qos_policy_id:
+        if not job.is_observed or option.start not in job.qos_allowed_starts:
+            raise ValueError('AUTHORIZED_QOS_WINDOW')
+        burden = job.qos_start_delay_seconds + max(0, option.start-job.reference_start)*SLOT_SECONDS
+        if option.migrated:
+            burden += (option.restart_end-option.checkpoint)*SLOT_SECONDS
+        if burden > job.qos_budget_seconds + 1e-9:
+            raise ValueError('SHARED_DELAY_INTERRUPTION_BUDGET')
+    elif option.start != job.reference_start and (job.protected or job.qos in ('high','urgent') or job.unknown_arrival):
         raise ValueError('TEMPORAL_AUTHORITY')
     if job.state == 'RUNNING' and (option.start, option.initial_site) != (job.reference_start, job.reference_site):
         raise ValueError('RUNNING_HISTORY_CHANGED')
@@ -230,7 +252,7 @@ def validate(job, option, boundary, resources):
     if parts[-1][2] > boundary.latest_completion:
         raise ValueError('SERVICE_CARRYOVER_BOUNDARY')
     if option.migrated:
-        if (not job.checkpoint_authorized or job.unknown_arrival or job.migrations_used or len(parts) != 2
+        if (not job.checkpoint_authorized or (job.unknown_arrival and not job.qos_policy_id) or not job.is_observed or job.migrations_used or len(parts) != 2
                 or option.destination == option.initial_site or option.destination not in job.initial_sites):
             raise ValueError('MIGRATION_AUTHORITY')
         if (option.checkpoint, option.physical_checkpoint_seconds) not in checkpoint_records(job, option.start, option.start+job.service_slots):

@@ -1,0 +1,220 @@
+{
+  "schema": "READ_ONLY_M_PREPROCESSING_BOTTLENECK_AUDIT_V1",
+  "generated_at": "2026-10-13T13:35:56.177183+00:00",
+  "status": "MEASURED_ROUND_COST_WITH_SOURCE_INSPECTION",
+  "scope": "Existing frozen M preparation only; no implementation edit, model rerun, optimizer or benchmark.",
+  "evidence_log_snapshot": {
+    "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01.log",
+    "sha256": "1ff62ca92f208369ccfb4a14babb9d6b9dd35f5f3173214e85461224f0ec06ae",
+    "bytes": 9110
+  },
+  "static_rounds": [
+    {
+      "round": 1,
+      "rows_before": 852170,
+      "columns_before": 354005,
+      "nnz_before": 11217052,
+      "fixed": 94,
+      "rows_deleted": 35569,
+      "substitutions": 14220,
+      "rows_after": 802291,
+      "columns_after": 339691,
+      "nnz_after": 8842856,
+      "wall": 35.522658499998215,
+      "categories": "{'CONSTANT_SAFE': 274, 'PROPORTIONAL': 34359, 'SINGLETON_BOUND_IMPLIED': 1, 'DOMINATED': 935}"
+    },
+    {
+      "round": 2,
+      "rows_before": 802291,
+      "columns_before": 339691,
+      "nnz_before": 8842856,
+      "fixed": 98,
+      "rows_deleted": 0,
+      "substitutions": 209,
+      "rows_after": 801984,
+      "columns_after": 339384,
+      "nnz_after": 8838256,
+      "wall": 29.17889649999779,
+      "categories": "{}"
+    },
+    {
+      "round": 3,
+      "rows_before": 801984,
+      "columns_before": 339384,
+      "nnz_before": 8838256,
+      "fixed": 0,
+      "rows_deleted": 0,
+      "substitutions": 1,
+      "rows_after": 801983,
+      "columns_after": 339383,
+      "nnz_after": 8838207,
+      "wall": 28.14911470000152,
+      "categories": "{}"
+    },
+    {
+      "round": 4,
+      "rows_before": 801983,
+      "columns_before": 339383,
+      "nnz_before": 8838207,
+      "fixed": 0,
+      "rows_deleted": 0,
+      "substitutions": 0,
+      "rows_after": 801983,
+      "columns_after": 339383,
+      "nnz_after": 8838207,
+      "wall": 27.42832129999806,
+      "categories": "{}"
+    }
+  ],
+  "measured_totals": {
+    "four_round_wall_seconds": 120.27899099999559,
+    "last_two_round_wall_seconds": 55.57743599999958,
+    "last_two_fraction_of_static_wall": 0.46207101953492125,
+    "initial_matrix": [
+      852170,
+      354005
+    ],
+    "final_matrix": [
+      801983,
+      339383
+    ],
+    "initial_nnz": 11217052,
+    "final_nnz": 8838207,
+    "rows_visited_by_four_full_row_scans": 3258428,
+    "nnz_in_four_round_inputs": 37736371,
+    "round3_only_one_pivot": true,
+    "round4_no_changes": true
+  },
+  "why_four_rounds": [
+    {
+      "phase": "Presolve.fixed",
+      "work": "Scan singleton equalities/bounds, exact Fraction RHS/coefficient division; substitute fixed values and independently audit affected rows."
+    },
+    {
+      "phase": "Presolve.row_scan",
+      "work": "Visit every row every round; exact dyadic primitive coefficient/GCD key, Fraction-normalized RHS, proportional/dominance/singleton-bound implication checks. Fresh Python dictionaries and keys."
+    },
+    {
+      "phase": "Presolve.audit_pivots",
+      "work": "Rebuild CSC, locate eligible defining equations, consumer supports and cost records; batch dependency conflicts defer unit aliases to later rounds."
+    },
+    {
+      "phase": "Presolve.substitute",
+      "work": "Sparse A@T and RHS offset projection, then exact Fraction verification and binary64 representability checks for affected rows."
+    },
+    {
+      "phase": "Presolve.run termination",
+      "work": "A final full no-change pass establishes the current static fixed point; hence round4 still costs27.428s after round3 discovers one final alias."
+    }
+  ],
+  "subphase_wall_times_measured": false,
+  "remaining_preparation_stages": [
+    "current independent transport/equality/bound/deleted-row implication verification",
+    "current exact C3A security/bound/row proofs",
+    "exact dense-response reformulation and independent equivalence proof",
+    "current state hashing and proof/matrix serialization"
+  ],
+  "remaining_stage_timings": "NOT_MEASURED_BY_THIS_AUDIT",
+  "future_exact_low_risk_opportunities": [
+    {
+      "candidate": "Within-case immutable coefficient dyadic-ratio and canonical-support memoization",
+      "scope": "Cache float binary64 ratios / exact primitive row keys by unchanged support+coefficient bytes; recompute current normalized RHS and all bound implications.",
+      "necessary_guards": [
+        "bit-exact binary64 keys",
+        "sense/sign included",
+        "no tolerance-based proportionality",
+        "current row/column original IDs maintained"
+      ],
+      "performance_status": "UNBENCHMARKED; no speedup claimed"
+    },
+    {
+      "candidate": "Dirty-row worklists within the same exact presolve case",
+      "scope": "Invalidate rows touched by substitutions or changed variable bounds; retain unaffected canonical row descriptions. A final independent full replay remains required.",
+      "necessary_guards": [
+        "CSC consumers for every changed column",
+        "rebuild affected proportional groups and representatives",
+        "bound changes invalidate singleton implications",
+        "identical inverse mapping and selected matrix/domain bytes"
+      ],
+      "performance_status": "UNIMPLEMENTED; requires focused equivalence tests before use"
+    },
+    {
+      "candidate": "Input-only physical route-domain cache already supported by the source contract",
+      "scope": "Same-day route/battery/site/origin/horizon packet may be restored only by its exact scientific input key and independent current original-row bridge.",
+      "necessary_guards": [
+        "route SHA and all battery fields",
+        "origin/site/time axes",
+        "producer source SHA",
+        "current original matrix bridge replay"
+      ],
+      "does_not_cover": "AIDC-dependent grid screening, static row proofs, bound reductions, UB or LB",
+      "performance_status": "Potential reusable input-only component; no additional execution authorized"
+    },
+    {
+      "candidate": "Memoize hashes/CSR-vs-CSC views only while arrays are immutable",
+      "scope": "Avoid repeated hashing/conversion in one sealed state; invalidate after any substitution, RHS/bound/objective/domain mutation.",
+      "necessary_guards": [
+        "matrix+domain complete key",
+        "immutable array ownership",
+        "no stale state accepted"
+      ],
+      "performance_status": "UNBENCHMARKED"
+    }
+  ],
+  "why_A1_A2_static_proofs_cannot_blindly_transfer": {
+    "fixed_AIDC_anchor_changes": true,
+    "grid_rhs_and_affine_constants_depend_on_current_AIDC_PQ": true,
+    "duplicate_affine_aliases_require_equal_current_constants": true,
+    "proportional_dominance_and_constant_row_proofs_depend_on_current_RHS": true,
+    "grid_prescreen_and_bound_implications_depend_on_current_anchor_and_bounds": true,
+    "same_topology_or_coefficient_matrix_SHA_alone_is_sufficient": false,
+    "required_complete_key": [
+      "original matrix SHA",
+      "original domain SHA including RHS, bounds, types, objective and constants",
+      "current AIDC anchor/control values",
+      "route/battery/domain identity",
+      "source/thermal/electrical authority SHAs",
+      "selected row and column axes",
+      "all inverse substitutions and proof receipts"
+    ],
+    "prior_primal_point_allowed_only_as": "candidate that is newly FULL-replayed for the current Case; no old certificate/UB/LB transfer"
+  },
+  "source_functions": [
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_supercompact\\presolve.py",
+      "sha256": "ba26e011919e031ccaa11c589e86d76ff7edbebaf514e1607ebf1140553d95b2",
+      "bytes": 15721,
+      "symbols": {
+        "Presolve": 18,
+        "run": 197,
+        "fixed": 75,
+        "row_scan": 92,
+        "audit_pivots": 122,
+        "substitute": 30
+      }
+    },
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_may_campaign_native90\\m_model.py",
+      "sha256": "870a394919ab697106c9c05350b3ba540f26a807bcac69d51b137f61ff837651",
+      "bytes": 53531,
+      "symbols": {
+        "build_case": 575,
+        "verify_transport": 256,
+        "_transport_state_sha": 122,
+        "verify_case": 744
+      }
+    },
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_ultracompact\\current.py",
+      "sha256": "c5594d5ee80ea41ade2342d562c1dd99fc4c34f3da35178f9588493bb64d1757",
+      "bytes": 10689,
+      "symbols": {
+        "reduce_current_c3a": 45
+      }
+    }
+  ],
+  "Frozen_source_modified": false,
+  "Native_calls": 0,
+  "model_preparation_calls": 0,
+  "historical_points_or_proofs_promoted": false
+}

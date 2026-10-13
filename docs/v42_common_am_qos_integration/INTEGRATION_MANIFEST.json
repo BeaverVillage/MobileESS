@@ -1,0 +1,1932 @@
+{
+  "schema": "FUNCTIONAL_INTEGRATION_MANIFEST_V5",
+  "draft": false,
+  "root_must_fill_final_execution_status": false,
+  "root": "D:\\v42_common_am_qos_integration_20261013",
+  "basis_commit": "12594e281bb89611331950f11f775a2612d3cb48",
+  "current_user_boundary": "DDAY_2025_05_01_00_TO_24_AEST_96SLOTS;44 PRE_DDAY_COMPLETED excluded from Actual only; no future completion in Planning",
+  "synthetic_initialization_current_authority": true,
+  "synthetic_initialization_history_status": "PREDAY_V1_CANCELLED_DDAY_COMMON_V1_AUTHORIZED",
+  "families": [
+    {
+      "family": "PR75",
+      "purpose": "R0 provenance, frozen TRAIN and original fixed bucket definitions",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_flexibility_pr\\docs\\v42_aidc_workload_flexibility\\study.py",
+          "symbol": "prepare",
+          "exists": true,
+          "sha256": "b8874d5bf3817841b59696d5855d9e40eb3f3eaac9d8e726f8fdec7bb140c17f",
+          "bytes": 22897,
+          "definition_lines": [
+            45
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_job_capability.py",
+          "symbol": "legacy_r0_bounds",
+          "exists": true,
+          "sha256": "33a2e0a5a17ee28c3632aead1a3723b5bac97e1f8d88f25714830799737172ce",
+          "bytes": 22761,
+          "definition_lines": [
+            123
+          ],
+          "symbol_found": true
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\empirical_stats.py",
+          "symbol": "materialize",
+          "exists": true,
+          "sha256": "e04d8a5bd8e88110532fbe6188b0362ac0f0da2ae9a7128abbf54a7a969eebfc",
+          "bytes": 2961,
+          "definition_lines": [
+            18
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\qos.py",
+          "symbol": "TrainingStatistics.from_records",
+          "exists": true,
+          "sha256": "4de5204e1f941179e48204e6d5f82f9b8faefac9246bed7aef0e074b702478f4",
+          "bytes": 27259,
+          "definition_lines": [
+            95
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\qos.py",
+          "symbol": "QoSWindowProvider.issue",
+          "exists": true,
+          "sha256": "4de5204e1f941179e48204e6d5f82f9b8faefac9246bed7aef0e074b702478f4",
+          "bytes": 27259,
+          "definition_lines": [
+            336
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "Frozen PR75 TRAIN_MEMBERSHIP.csv.gz -> strict and descriptive-only empirical distributions",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\docs\\v42_common_am_qos_integration\\QOS_EMPIRICAL_STATS.json",
+          "kind": "real TRAIN provenance/statistics receipt",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\docs\\v42_common_am_qos_integration\\QOS_EMPIRICAL_STATS_STRICT.json",
+          "kind": "issuer authority; strict0 accepted unique UID",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\docs\\v42_common_am_qos_integration\\QOS_EMPIRICAL_STATS_DESCRIPTIVE_PROXY.json",
+          "kind": "descriptive proxy; cannot authorize",
+          "exists_at_draft": true
+        }
+      ],
+      "consumer": "prepare_actual loads STRICT_ONLY; Known and observed Unknown share QoSWindowProvider",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_qos.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "cc33f8c6c80c534c7f0968acd92f608b6c2d320fa53a85fe43959448947c091c",
+          "bytes": 7967
+        }
+      ],
+      "current_scope": "Real frozen TRAIN processed; strict0 coverage, descriptive439534 unique completed UIDs. Empirical higher Q90, N100, cap3600 fixed before May; no model refit.",
+      "limitations": "PR75 request-version/observation timing not verified; descriptive proxy never grants real action authority. R1/R2 rejected rules remain historical.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": true,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "IMPLEMENTED_CONNECTED_SCOPED_VALIDATION",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    },
+    {
+      "family": "PR79/90",
+      "purpose": "Episode continuity, TS/PREPLACE/checkpoint capability and whole service/gang preservation",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\ChatGPT\\Mobile ESS 2\\v42_reference_episode_pr\\v42_reference_episode.py",
+          "symbol": "ReferenceBuilder",
+          "exists": true,
+          "sha256": "9aadfbb991c59cfd0357b861576638cbc117370c5e1e3549bf5903183d9cf555",
+          "bytes": 18697,
+          "definition_lines": [
+            172
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_job_capability.py",
+          "symbol": "Job",
+          "exists": true,
+          "sha256": "33a2e0a5a17ee28c3632aead1a3723b5bac97e1f8d88f25714830799737172ce",
+          "bytes": 22761,
+          "definition_lines": [
+            20
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_job_capability.py",
+          "symbol": "checkpoint_records",
+          "exists": true,
+          "sha256": "33a2e0a5a17ee28c3632aead1a3723b5bac97e1f8d88f25714830799737172ce",
+          "bytes": 22761,
+          "definition_lines": [
+            175
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_job_capability.py",
+          "symbol": "validate",
+          "exists": true,
+          "sha256": "33a2e0a5a17ee28c3632aead1a3723b5bac97e1f8d88f25714830799737172ce",
+          "bytes": 22761,
+          "definition_lines": [
+            220
+          ],
+          "symbol_found": true
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\qos.py",
+          "symbol": "bind_native_job",
+          "exists": true,
+          "sha256": "4de5204e1f941179e48204e6d5f82f9b8faefac9246bed7aef0e074b702478f4",
+          "bytes": 27259,
+          "definition_lines": [
+            421
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\a_engine.py",
+          "symbol": "authorized_data",
+          "exists": true,
+          "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+          "bytes": 14521,
+          "definition_lines": [
+            98
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\policy.py",
+          "symbol": "migration_guard",
+          "exists": true,
+          "sha256": "2182c740a84bc3c9de6a601c748b1c768639becd04a3cdd4fd8fb3a87c8cf6c2",
+          "bytes": 25523,
+          "definition_lines": [
+            384
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual.py",
+          "symbol": "JobEventController",
+          "exists": true,
+          "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+          "bytes": 45124,
+          "definition_lines": [
+            99
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "Issued once QoS receipt -> exact domain; issue-observed UID/episode source audit; checkpoint records from actual accumulated compute",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\docs\\v42_common_am_qos_integration\\R0_REFERENCE_SITE_RECOVERY.json",
+          "kind": "historical scoped prior model-site recovery evidence; oneUID4GPU",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\docs\\v42_common_am_qos_integration\\UNASSIGNED_RUNNING_44_LEDGER.csv",
+          "kind": "44 source records preserved",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\MIGRATION_RECEIPTS.json",
+          "kind": "fixture checkpoint/WAN/compute receipts if present",
+          "exists_at_draft": false
+        }
+      ],
+      "consumer": "A domain/validator and Actual reserve/admission/checkpoint execution",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_a.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "23a9303e4e984ac526bc161b9585289f386ef1aea11afdc50359a2357be59254",
+          "bytes": 4142
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_actual.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "084433e8fe8ce7745c48b5c052b73e423f709f859421447466d4fb5acd8298f6",
+          "bytes": 15460
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_source_recovery.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "656c094720d0c9630432bc32b390171fa31e9ed1d63af6a9a454b24171755c09",
+          "bytes": 3790
+        }
+      ],
+      "current_scope": "New common observation/QoS fields consumed by original Job domain and FULL validator; origin_unknown does not prohibit observed eligible jobs. Seven-condition prior modelsite proof is evidence only after latestuser directive.",
+      "limitations": "PR79 whole Reference globalreadyfalse is never promoted. Cancelled synthetic initialplacement artifacts are SUPERSEDED_BY_DDAY_BOUNDARY_POLICY. No43synthetic sites in current execution; recoveredUID8568682 site not forced into Actual.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": true,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "IMPLEMENTED_CONNECTED_SCOPED_VALIDATION",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    },
+    {
+      "family": "PR95/96",
+      "purpose": "Frozen V10 Q50, Planning reserve, EpisodeLedger and ForecastBook",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_final\\runtime.py",
+          "symbol": "FrozenQ50",
+          "exists": true,
+          "sha256": "86f578f315c39dd0c4e858df5d0ee04a79f16bc2c3d033af4beac7fe9ebd5e2a",
+          "bytes": 3224,
+          "definition_lines": [
+            15
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_final\\reserve.py",
+          "symbol": "bind_headroom",
+          "exists": true,
+          "sha256": "44ad22dc6071cd0523e29711e255dc1bbeb46245269aa2b918b310787980668b",
+          "bytes": 3350,
+          "definition_lines": [
+            39
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_final\\state.py",
+          "symbol": "EpisodeLedger",
+          "exists": true,
+          "sha256": "0a7723650697869d4c7023a53d2ae9a8444c9859ccf1b11acf17338472ef0e36",
+          "bytes": 5635,
+          "definition_lines": [
+            29
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_final\\workload.py",
+          "symbol": "ForecastBook",
+          "exists": true,
+          "sha256": "10320df9beaa0df89fd0d80b763595ee95fb57eb82f5a3d53ed9373d4517daed",
+          "bytes": 4374,
+          "definition_lines": [
+            42
+          ],
+          "symbol_found": true
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual_validation.py",
+          "symbol": "prepare_actual",
+          "exists": true,
+          "sha256": "3834469372344d1d84b8dd05df43e1ff8719a10c11e983c039eafcc3f4e2025c",
+          "bytes": 63957,
+          "definition_lines": [
+            350
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual.py",
+          "symbol": "ExecutionLedger",
+          "exists": true,
+          "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+          "bytes": 45124,
+          "definition_lines": [
+            46
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual.py",
+          "symbol": "run_actual",
+          "exists": true,
+          "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+          "bytes": 45124,
+          "definition_lines": [
+            535
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\a_engine.py",
+          "symbol": "PlanningGridContext.bind",
+          "exists": true,
+          "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+          "bytes": 14521,
+          "definition_lines": [
+            39
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "Existing frozen event Q50 predictions + original nominal/reserve provider/CC4 quantities -> planning bindings; simulator private realized work -> physical ledger",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\PLANNING_FREEZE.json",
+          "kind": "fixture runtime/QoS/anchor freeze",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\CC4_DEPLETION_LEDGER.json",
+          "kind": "observed submissions only",
+          "exists_at_draft": false
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\CARRYOUT_RECEIPT.json",
+          "kind": "service and runtime state",
+          "exists_at_draft": false
+        }
+      ],
+      "consumer": "A headroom constraints and common Actual submit/start/observed completion/overrun",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_actual.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "084433e8fe8ce7745c48b5c052b73e423f709f859421447466d4fb5acd8298f6",
+          "bytes": 15460
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_qos.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "cc33f8c6c80c534c7f0968acd92f608b6c2d320fa53a85fe43959448947c091c",
+          "bytes": 7967
+        }
+      ],
+      "current_scope": "Original FrozenQ50 model and calibration are preserved. Real loader consumes event-time cached frozen predictions; it does not retrain or claim runtime reserve as physical IT load.",
+      "limitations": "Forecast/reserve never becomes physical execution. Real full96 needs independently authorized D00 state/queue; old issue-prefix simulation is superseded.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": true,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "IMPLEMENTED_CONNECTED_SCOPED_VALIDATION",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    },
+    {
+      "family": "PR97/98",
+      "purpose": "CC4 service/carryout, original Known windows and Live TS boundaries",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_temporal\\timeshift.py",
+          "symbol": "WaitAuthority",
+          "exists": true,
+          "sha256": "0f14ac822defc85cff7cad08927e7d08ea390501309cac9bba31b318ae7e8770",
+          "bytes": 4788,
+          "definition_lines": [
+            17
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_temporal\\service.py",
+          "symbol": "bind_forecast",
+          "exists": true,
+          "sha256": "f17bea519bd340a03dda22dc4508352b145a6c09b87b227702d1b09be1390909",
+          "bytes": 3885,
+          "definition_lines": [
+            47
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_temporal\\service.py",
+          "symbol": "bind_service",
+          "exists": true,
+          "sha256": "f17bea519bd340a03dda22dc4508352b145a6c09b87b227702d1b09be1390909",
+          "bytes": 3885,
+          "definition_lines": [
+            13
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_temporal\\native.py",
+          "symbol": "temporal_domain",
+          "exists": true,
+          "sha256": "e3325724a2de55f81d97a5d6b19633f6b673bc7821eb31ad6f904695370d4b54",
+          "bytes": 12785,
+          "definition_lines": [
+            26
+          ],
+          "symbol_found": true
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\qos.py",
+          "symbol": "receipt_slot_domain",
+          "exists": true,
+          "sha256": "4de5204e1f941179e48204e6d5f82f9b8faefac9246bed7aef0e074b702478f4",
+          "bytes": 27259,
+          "definition_lines": [
+            410
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\a_engine.py",
+          "symbol": "PlanningGridContext.bind",
+          "exists": true,
+          "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+          "bytes": 14521,
+          "definition_lines": [
+            39
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual.py",
+          "symbol": "JobEventController.submit",
+          "exists": true,
+          "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+          "bytes": 45124,
+          "definition_lines": [
+            128
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\policy.py",
+          "symbol": "FrozenControlPolicy.candidates",
+          "exists": true,
+          "sha256": "2182c740a84bc3c9de6a601c748b1c768639becd04a3cdd4fd8fb3a87c8cf6c2",
+          "bytes": 25523,
+          "definition_lines": [
+            296
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "QoS receipt intersection with real hard contracts and original service/rack/WAN domain; optimized anonymous CC4 service/resource arrays",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\UNKNOWN_CONTROL_POLICY.json",
+          "kind": "serialized envelope/grammar/signed rankings",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\CC4_DEPLETION_LEDGER.json",
+          "kind": "one depletion per observed unknown submission",
+          "exists_at_draft": false
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\QOS_BUDGET_LEDGER.json",
+          "kind": "single immutable budget per observed Job",
+          "exists_at_draft": false
+        }
+      ],
+      "consumer": "Original physical domain/FULL validator and reloaded conditional Actual controller",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_qos.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "cc33f8c6c80c534c7f0968acd92f608b6c2d320fa53a85fe43959448947c091c",
+          "bytes": 7967
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_a.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "23a9303e4e984ac526bc161b9585289f386ef1aea11afdc50359a2357be59254",
+          "bytes": 4142
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_actual.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "084433e8fe8ce7745c48b5c052b73e423f709f859421447466d4fb5acd8298f6",
+          "bytes": 15460
+        }
+      ],
+      "current_scope": "New EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1 replaces historical research wait bounds, preserves hard contracts; tests exercise Known/Unknown shared budgets and CC4 under/over-arrivals.",
+      "limitations": "Legacy can_timeshift/window research blocks are not customer SLA. Real positive flex actions cannot be asserted from unsupported source metadata.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": true,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "IMPLEMENTED_CONNECTED_SCOPED_VALIDATION",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    },
+    {
+      "family": "PR99/103/134_AND_ADOPTED_A_STAGE",
+      "purpose": "Complete domain, exact class compression, pricing history and integer recovery",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_root\\native.py",
+          "symbol": "build",
+          "exists": true,
+          "sha256": "9f09b7aa1857762dd0284076ca35438d97e4ba9eb6cd4c01f6302f970453d8dc",
+          "bytes": 12829,
+          "definition_lines": [
+            61
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_root\\native.py",
+          "symbol": "reconstruct",
+          "exists": true,
+          "sha256": "9f09b7aa1857762dd0284076ca35438d97e4ba9eb6cd4c01f6302f970453d8dc",
+          "bytes": 12829,
+          "definition_lines": [
+            147
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_a_stage_domain_v2\\domain.py",
+          "symbol": "physical_domain",
+          "exists": true,
+          "sha256": "bb5e4af35781d4c3d415f9f32734c7be3a4c3e1a5f1a09a862b6444e02047a49",
+          "bytes": 19127,
+          "definition_lines": [
+            74
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_a_stage_phase1\\producer.py",
+          "symbol": "complete_graph",
+          "exists": true,
+          "sha256": "bda2a9e1771ed05574fa1decb40028287d33a1983c10149d0a17c11bf82eb65f",
+          "bytes": 16372,
+          "definition_lines": [
+            40
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_a_stage_phase1\\producer.py",
+          "symbol": "price_snapshot",
+          "exists": true,
+          "sha256": "bda2a9e1771ed05574fa1decb40028287d33a1983c10149d0a17c11bf82eb65f",
+          "bytes": 16372,
+          "definition_lines": [
+            233
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_pr134_b1\\inputs.py",
+          "symbol": "produce",
+          "exists": true,
+          "sha256": "39a703bf2b634e01738f80cf2f1249ac3885ae14a24766618f68f1348d9fb8c7",
+          "bytes": 17138,
+          "definition_lines": [
+            22
+          ],
+          "symbol_found": true
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\a_engine.py",
+          "symbol": "authorized_data",
+          "exists": true,
+          "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+          "bytes": 14521,
+          "definition_lines": [
+            98
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\a_engine.py",
+          "symbol": "optimize_aidc",
+          "exists": true,
+          "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+          "bytes": 14521,
+          "definition_lines": [
+            138
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\production_case.py",
+          "symbol": "build_integration_case",
+          "exists": true,
+          "sha256": "6f9839ad739c3c42eff31302821c263f3b0abd0f10a013057b029e5fd78fe3e8",
+          "bytes": 44889,
+          "definition_lines": [
+            379
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "Issued QoS native starts -> complete original graphs/classes -> original F2-CRA native model -> integer reconstruction/FULL rows",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\A1\\A_STAGE_RESULT.json",
+          "kind": "fixture original A core result if present",
+          "exists_at_draft": false
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\A2\\A_STAGE_RESULT.json",
+          "kind": "fixture fixedM1 A2 result if present",
+          "exists_at_draft": false
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\INITIALIZATION_V2_NATIVE0_FACTORY_01\\CASE\\FULL_NATIVE_PACKET_SCHEMA_MERGE.json",
+          "kind": "historical schema-only preflight; syntheticinit now superseded",
+          "exists_at_draft": true
+        }
+      ],
+      "consumer": "Coordinator fullA gate -> M frozen complete AIDC P/Q/CC4 anchor -> final policy compiler",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_a.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "23a9303e4e984ac526bc161b9585289f386ef1aea11afdc50359a2357be59254",
+          "bytes": 4142
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_coordinator.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "051d682e81fe56cbb855826378fb3a9c5d10b37c30bfe006b893eb371baef5c5",
+          "bytes": 5184
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_production_packet.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "659928f171962d141e7633b93f78a9016753cec2611583aa835df5e6e2af670f",
+          "bytes": 3631
+        }
+      ],
+      "current_scope": "Common A core uses original full native F2-CRA with new QoS domain, class signatures include receipt/starts/service/contracts. Fixture demonstrates original rows and recoveries.",
+      "limitations": "Historical lazy-pricing orchestration/certificates are NOT called or reused by current full-enumeration path (lazy_pricing_calls=0). Current real A execution outcome pending root; fullnewdomain optimality never inferred from old pricing receipts.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": true,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "IMPLEMENTED_CONNECTED_SCOPED_VALIDATION",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    },
+    {
+      "family": "PR104",
+      "purpose": "Historical two-objective contract; adopted P1-only production policy",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_two\\contract.py",
+          "symbol": "passes",
+          "exists": true,
+          "sha256": "fb3d67325b07138d6643f008796547c9eb0bd6088763d6cdfc82ccaae6efa467",
+          "bytes": 1870,
+          "definition_lines": [
+            35
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_two\\production.py",
+          "symbol": "run",
+          "exists": true,
+          "sha256": "f7f0852b5ec2b19dca29c63437363385fc294fc45f1c3bc6408cb79a47758d30",
+          "bytes": 10865,
+          "definition_lines": [
+            29
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_a_stage_domain_v2\\solver_policy.py",
+          "symbol": "solver_policy",
+          "exists": true,
+          "sha256": "9aa3c9827a3dc6493798b520ccf150faea15af9e9724cd293254ae60dae81e09",
+          "bytes": 3901,
+          "definition_lines": [
+            28
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_b3_joint\\policy.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "7252756b40b043be28788208936118111a70f8207bace1707c42a421c94a9b1f",
+          "bytes": 1601
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\a_engine.py",
+          "symbol": "optimize_aidc",
+          "exists": true,
+          "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+          "bytes": 14521,
+          "definition_lines": [
+            138
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\m_engine.py",
+          "symbol": "optimize_mess",
+          "exists": true,
+          "sha256": "86fc0c272963c5477a95304bacc8f38a05161aa79b1dcae94729debe39f0a058",
+          "bytes": 37291,
+          "definition_lines": [
+            601
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "Original fixed-physics P1 objective minrho; no secondary Native optimization",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\A1\\A_STAGE_RESULT.json",
+          "kind": "A P2_calls=0",
+          "exists_at_draft": false
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\attempt02\\warm_2025-05-01\\COMMON_M_PR222\\M_STAGE_RESULT.json",
+          "kind": "M single Joint minrho result",
+          "exists_at_draft": true
+        }
+      ],
+      "consumer": "Shared A/M stage calls and result objective/gap scopes",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_coordinator.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "051d682e81fe56cbb855826378fb3a9c5d10b37c30bfe006b893eb371baef5c5",
+          "bytes": 5184
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_m.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "ebdf8cb2c44248f344d1b41552c2c42a14de80775b0e2ea60ea3f60f997f7e7d",
+          "bytes": 12036
+        }
+      ],
+      "current_scope": "P1-only maintained; A reports P2_calls0, M optimizes original rho objective with all four vehicles simultaneously.",
+      "limitations": "PR104 P2 is historical, not reactivated. Results do not establish minimum migration/intervention.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": true,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "IMPLEMENTED_CONNECTED_SCOPED_VALIDATION",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    },
+    {
+      "family": "PR118",
+      "purpose": "Immutable Planning freeze vs Actual physical execution and separate Fresh AC",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_native\\actual.py",
+          "symbol": "run_dday_actual",
+          "exists": true,
+          "sha256": "a830c6f31a74bdb686514ff0f6d721712fd0ae9e9bca1b4df0435188b1a28a9a",
+          "bytes": 10214,
+          "definition_lines": [
+            82
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_native\\actual.py",
+          "symbol": "ActualBackend",
+          "exists": true,
+          "sha256": "a830c6f31a74bdb686514ff0f6d721712fd0ae9e9bca1b4df0435188b1a28a9a",
+          "bytes": 10214,
+          "definition_lines": [
+            72
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_native\\actual.py",
+          "symbol": "require_frozen_replay",
+          "exists": true,
+          "sha256": "a830c6f31a74bdb686514ff0f6d721712fd0ae9e9bca1b4df0435188b1a28a9a",
+          "bytes": 10214,
+          "definition_lines": [
+            66
+          ],
+          "symbol_found": true
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\coordinator.py",
+          "symbol": "run_arm",
+          "exists": true,
+          "sha256": "ee8572414da16935b08f8b7f81d0dbb9be1bb68437b96f76f375590fb6f82177",
+          "bytes": 16940,
+          "definition_lines": [
+            81
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\mess_actual.py",
+          "symbol": "consume_frozen_mess",
+          "exists": true,
+          "sha256": "22910c80ef951d5c908bbcfa24d33ea31a89fb12552c5862fa4cc9e6d50caebd",
+          "bytes": 2681,
+          "definition_lines": [
+            6
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual_validation.py",
+          "symbol": "fresh_ac_minimum",
+          "exists": true,
+          "sha256": "3834469372344d1d84b8dd05df43e1ff8719a10c11e983c039eafcc3f4e2025c",
+          "bytes": 63957,
+          "definition_lines": [
+            783
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "Final A2/M2 or Arm final anchors -> frozen policy/Planning packet -> common Job-event Actual -> separate fixed-MESS Fresh AC",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\PLANNING_FREEZE.json",
+          "kind": "immutable planning/model/budget/anchor receipts",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\RELOAD_CONSUMPTION_RECEIPT.json",
+          "kind": "serialized policy reload consumed by Actual",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\MESS_ACTUAL_EXECUTION_RECEIPT.json",
+          "kind": "complete frozen P/Q/SOC/Mode consumption",
+          "exists_at_draft": true
+        }
+      ],
+      "consumer": "Original full-MESS validation gate, actual source recomputed power, Fresh OpenDSS consumer",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_coordinator.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "051d682e81fe56cbb855826378fb3a9c5d10b37c30bfe006b893eb371baef5c5",
+          "bytes": 5184
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_actual.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "084433e8fe8ce7745c48b5c052b73e423f709f859421447466d4fb5acd8298f6",
+          "bytes": 15460
+        }
+      ],
+      "current_scope": "Generic historical API is distinguished from new connected physical pipeline. Four-Arm synthetic fixtures completed callgraph/serialization/Actual; physical AC absent in fixture.",
+      "limitations": "Real full96+FreshAC pending D00 initializer authority. No localP/Qrepair/fullreoptimization or fixedPlanning P/Q copied as AIDC Actual.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": true,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "IMPLEMENTED_CONNECTED_SCOPED_VALIDATION",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    },
+    {
+      "family": "PR125",
+      "purpose": "Shared Job events/queue/physical GPU/PCC power core",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_capacity\\actual.py",
+          "symbol": "Controller",
+          "exists": true,
+          "sha256": "2343d8b3f169d3009cb99b07157bce1cdb3c4fb13c76d10602491ce36305a294",
+          "bytes": 7078,
+          "definition_lines": [
+            27
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_capacity\\actual.py",
+          "symbol": "Environment",
+          "exists": true,
+          "sha256": "2343d8b3f169d3009cb99b07157bce1cdb3c4fb13c76d10602491ce36305a294",
+          "bytes": 7078,
+          "definition_lines": [
+            67
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_capacity\\actual.py",
+          "symbol": "replay",
+          "exists": true,
+          "sha256": "2343d8b3f169d3009cb99b07157bce1cdb3c4fb13c76d10602491ce36305a294",
+          "bytes": 7078,
+          "definition_lines": [
+            79
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_voltage_control\\b0_new.py",
+          "symbol": "_truth",
+          "exists": true,
+          "sha256": "4b0d628c2f41be5aba9152e749f2a6dc4ea98ad7630e631bb4857ae702ea70e8",
+          "bytes": 24324,
+          "definition_lines": [
+            133
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_voltage_control\\b0_new.py",
+          "symbol": "_c1",
+          "exists": true,
+          "sha256": "4b0d628c2f41be5aba9152e749f2a6dc4ea98ad7630e631bb4857ae702ea70e8",
+          "bytes": 24324,
+          "definition_lines": [
+            53
+          ],
+          "symbol_found": true
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual.py",
+          "symbol": "JobEventController",
+          "exists": true,
+          "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+          "bytes": 45124,
+          "definition_lines": [
+            99
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual.py",
+          "symbol": "run_actual",
+          "exists": true,
+          "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+          "bytes": 45124,
+          "definition_lines": [
+            535
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual.py",
+          "symbol": "FrozenPowerModel",
+          "exists": true,
+          "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+          "bytes": 45124,
+          "definition_lines": [
+            722
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual_validation.py",
+          "symbol": "prepare_actual",
+          "exists": true,
+          "sha256": "3834469372344d1d84b8dd05df43e1ff8719a10c11e983c039eafcc3f4e2025c",
+          "bytes": 63957,
+          "definition_lines": [
+            350
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "Observed submissions/completions + simulator-private actual work; actual compute/occupation -> original frozenC1 and causal weather -> PCCP/Q",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\ACTUAL_RESULT.json",
+          "kind": "fixture actualexecution receipt",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\ACTUAL_OCCUPANCY_POWER_TRACE.npz",
+          "kind": "recomputed physical trace",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\REAL_JOB_COMPONENT",
+          "kind": "isolated real source Job component outputs",
+          "exists_at_draft": true
+        }
+      ],
+      "consumer": "Same run_actual for B0/B1/B2/B3; queues preserve overrun and gang, arrivals only at event; actual trace feeds FreshAC",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_actual.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "084433e8fe8ce7745c48b5c052b73e423f709f859421447466d4fb5acd8298f6",
+          "bytes": 15460
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_coordinator.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "051d682e81fe56cbb855826378fb3a9c5d10b37c30bfe006b893eb371baef5c5",
+          "bytes": 5184
+        }
+      ],
+      "current_scope": "Direct subclass/reuse of PR125 Request/Controller/Environment and PR95/96 EpisodeLedger/ForecastBook; actual never invokes online global optimizer.",
+      "limitations": "Isolated realJob component cannot prove fullMay01 queue/population. Latestuser requires D00start96scope and excludes44completedwithoutsynthetic sites; initialqueueunverified keeps fullActual gated.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": true,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "IMPLEMENTED_CONNECTED_SCOPED_VALIDATION",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    },
+    {
+      "family": "PR189",
+      "purpose": "Existing campaign/monitor/ledgers and historical fixed-trajectory Actual limitation",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_may_campaign_native90\\operations.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "5bd0ad8df4a137a9b3453e316706a4ac287c0b10ef4496f862dd2e97e16eb72d",
+          "bytes": 27140
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_pr134_b1\\replay.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "18c7821aaeb644bd1c76c103a0f1ea079626e97e0799f73db7df65243593cd70",
+          "bytes": 11229
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_campaign_monitor\\monitor.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "f2442146516e36fd1c7409caffd0cfaaa40017bc815dd104474783b5b2d31b67",
+          "bytes": 13624
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\freeze.py",
+          "symbol": "preservation_snapshot",
+          "exists": true,
+          "sha256": "b343523d6a40f79989c3985a69c70fb0d531ebccef18930f52c06b559ed965ca",
+          "bytes": 2116,
+          "definition_lines": [
+            24
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\coordinator.py",
+          "symbol": "run_arm",
+          "exists": true,
+          "sha256": "ee8572414da16935b08f8b7f81d0dbb9be1bb68437b96f76f375590fb6f82177",
+          "bytes": 16940,
+          "definition_lines": [
+            81
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "Read-only preservation receipts for originalSource/Raw/Matrix/ledger/monitor/HOLD; historical B1audit evidence",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\PRESERVATION_BEFORE.json",
+          "kind": "existing historical files/process/monitor guards",
+          "exists_at_draft": true
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\B1_UNKNOWN_AUDIT_20261013\\final_review_ko.html",
+          "kind": "historical fixed-trajectory Actual audit",
+          "exists_at_draft": true
+        },
+        {
+          "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\B1_UNKNOWN_AUDIT_20261013\\evidence_comparison.csv",
+          "kind": "historical evidence comparison",
+          "exists_at_draft": true
+        }
+      ],
+      "consumer": "New isolated coordinator never invokes old31daydispatcher; existingmonitor127.0.0.1:8793 remains unchanged",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_coordinator.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "051d682e81fe56cbb855826378fb3a9c5d10b37c30bfe006b893eb371baef5c5",
+          "bytes": 5184
+        }
+      ],
+      "current_scope": "Existing B0/B1 results/processes and B2/B3 HOLD protected. PR189 completedB1 lineage is historical V39E_FROZEN_DA_FIXED_REPLAY, not new Unknown Job execution.",
+      "limitations": "Historical completion/AC/model certification cannot transfer to Source18r/currentQoS/D00 policy. No campaign restart is authorized.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": true,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "IMPLEMENTED_CONNECTED_SCOPED_VALIDATION",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    },
+    {
+      "family": "PR191/204",
+      "purpose": "B3 handoffs and common A/M core with explicit complete fixed anchors",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_b3_joint\\handoff.py",
+          "symbol": "next_request",
+          "exists": true,
+          "sha256": "6661b40f29d0ff38db4b0b7c3db70e4e5ad84297acbb5075af94aa07c440e385",
+          "bytes": 1239,
+          "definition_lines": [
+            6
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_b3_joint\\contracts.py",
+          "symbol": "AIDCDecision",
+          "exists": true,
+          "sha256": "d0964d5548de93e68378c752eaac3a2a3c2041bd84e2ab25be97691fdd9ff6c2",
+          "bytes": 10508,
+          "definition_lines": [
+            94
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_b3_joint\\contracts.py",
+          "symbol": "MESSDecision",
+          "exists": true,
+          "sha256": "d0964d5548de93e68378c752eaac3a2a3c2041bd84e2ab25be97691fdd9ff6c2",
+          "bytes": 10508,
+          "definition_lines": [
+            119
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_b3_joint\\adapters.py",
+          "symbol": "NativeStageAdapter",
+          "exists": true,
+          "sha256": "4b28b54b0cc8377c424ab7554d2766a879ba7f9f9023bbf2b76a77af3062a8b3",
+          "bytes": 26103,
+          "definition_lines": [
+            327
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_common_mess\\engine.py",
+          "symbol": "optimize_case",
+          "exists": true,
+          "sha256": "a8f9eb3ba6d746cfa89474aeace3caa0b57ee551b48c9466887f04994a6631c3",
+          "bytes": 40009,
+          "definition_lines": [
+            469
+          ],
+          "symbol_found": true
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\coordinator.py",
+          "symbol": "run_arm",
+          "exists": true,
+          "sha256": "ee8572414da16935b08f8b7f81d0dbb9be1bb68437b96f76f375590fb6f82177",
+          "bytes": 16940,
+          "definition_lines": [
+            81
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\a_engine.py",
+          "symbol": "optimize_aidc",
+          "exists": true,
+          "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+          "bytes": 14521,
+          "definition_lines": [
+            138
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\m_engine.py",
+          "symbol": "optimize_mess",
+          "exists": true,
+          "sha256": "86fc0c272963c5477a95304bacc8f38a05161aa79b1dcae94729debe39f0a058",
+          "bytes": 37291,
+          "definition_lines": [
+            601
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "A1->M1->A2->M2 full anchor freeze checks; Arm/Stage only select fixed inputs/output/budget labels",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\A_M_CALLGRAPH.json",
+          "kind": "shared engines called A1M1A2M2",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\STAGE_HANDOFF_AUDIT.json",
+          "kind": "completeAIDC/MESS before/after consumption",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\UNKNOWN_CONTROL_POLICY.json",
+          "kind": "final A2+M2 anchors recompiled/reloaded",
+          "exists_at_draft": true
+        }
+      ],
+      "consumer": "Common Actual consumes final frozencommands/policy; M2 gets freshly rebound A2 Case, oldvector only candidateFULL replay",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_coordinator.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "051d682e81fe56cbb855826378fb3a9c5d10b37c30bfe006b893eb371baef5c5",
+          "bytes": 5184
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_m.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "ebdf8cb2c44248f344d1b41552c2c42a14de80775b0e2ea60ea3f60f997f7e7d",
+          "bytes": 12036
+        }
+      ],
+      "current_scope": "Fourstage callgraph actually executed on synthetic fixture, real B2/M1/M2 core same function; productioncase preparation is lazy and explicit.",
+      "limitations": "Fixture stages do not validate fullrealB3. Onealternating cycle/localJoint is not wholeAIDC-MESS global optimality.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": true,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "IMPLEMENTED_CONNECTED_SCOPED_VALIDATION",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    },
+    {
+      "family": "PR207/219/220/221/222",
+      "purpose": "Current fullphysics, cold initializer, adaptive Beam/Joint and verified incumbent monotonicity",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_may_campaign_native90\\m_model.py",
+          "symbol": "build_case",
+          "exists": true,
+          "sha256": "870a394919ab697106c9c05350b3ba540f26a807bcac69d51b137f61ff837651",
+          "bytes": 53531,
+          "definition_lines": [
+            575
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_common_mess\\engine.py",
+          "symbol": "_initialize",
+          "exists": true,
+          "sha256": "a8f9eb3ba6d746cfa89474aeace3caa0b57ee551b48c9466887f04994a6631c3",
+          "bytes": 40009,
+          "definition_lines": [
+            342
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tools\\adaptive_compact_joint\\beam.py",
+          "symbol": "generate",
+          "exists": true,
+          "sha256": "9330de4a1ac131abe9ad67fbbe55da3f1e1fdafee6eebf3afd6c6f8d76ff6f96",
+          "bytes": 11896,
+          "definition_lines": [
+            41
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tools\\adaptive_compact_joint\\direct.py",
+          "symbol": "transform",
+          "exists": true,
+          "sha256": "6834a63744cf643b5749020b2b2a461cfbb939d5f8e57973b002e3936840059a",
+          "bytes": 5749,
+          "definition_lines": [
+            8
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_may_final\\incumbent.py",
+          "symbol": "Bank",
+          "exists": true,
+          "sha256": "d6c0df220d12be0defcc64c47b1f8678267cc825831ba06e4481b10cf749e505",
+          "bytes": 5202,
+          "definition_lines": [
+            59
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_may_final\\dispatch_score.py",
+          "symbol": "DispatchScore",
+          "exists": true,
+          "sha256": "088350f9dbd7a7a48271bd9cd3958aead44e0f790d6c5ea2cef96139c48b314f",
+          "bytes": 7368,
+          "definition_lines": [
+            19
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_may_final\\pr221.py",
+          "symbol": "optimize_case",
+          "exists": true,
+          "sha256": "c04a99605b589fdef085f5d987b291008334b3dce537e52e0e7f2fd3242ab7a1",
+          "bytes": 19772,
+          "definition_lines": [
+            289
+          ],
+          "symbol_found": true
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\m_engine.py",
+          "symbol": "optimize_mess",
+          "exists": true,
+          "sha256": "86fc0c272963c5477a95304bacc8f38a05161aa79b1dcae94729debe39f0a058",
+          "bytes": 37291,
+          "definition_lines": [
+            601
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\m_engine.py",
+          "symbol": "IncumbentBank",
+          "exists": true,
+          "sha256": "86fc0c272963c5477a95304bacc8f38a05161aa79b1dcae94729debe39f0a058",
+          "bytes": 37291,
+          "definition_lines": [
+            258
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\m_engine.py",
+          "symbol": "direct_joint",
+          "exists": true,
+          "sha256": "86fc0c272963c5477a95304bacc8f38a05161aa79b1dcae94729debe39f0a058",
+          "bytes": 37291,
+          "definition_lines": [
+            363
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\m_candidates.py",
+          "symbol": "generate",
+          "exists": true,
+          "sha256": "a4e1a0d5e91d317c6bc62e37eaa15b6012f10593c198aa2d7eaef9cc5227cd66",
+          "bytes": 25055,
+          "definition_lines": [
+            328
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\pr222_regression.py",
+          "symbol": "run",
+          "exists": true,
+          "sha256": "ed0582b94326fdf6179b563ffa39fb8b363096100af8202ca7e20d06d259fe21",
+          "bytes": 11258,
+          "definition_lines": [
+            138
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "Exactcurrentmatrix/domain/date/AIDC/QoS binding -> FULL rawadmission->global+movingbanks->completewinner/STAYpinning->fresh DAGbeam->boundedjointredispatchLP->allvehicleExactDirectJointMILP",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\attempt02\\warm_2025-05-01\\PR222_REGRESSION.json",
+          "kind": "real legacyidenticalMay01 warmOptimize Startaccepted",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\attempt02\\cold_2025-05-01\\PR222_REGRESSION.json",
+          "kind": "real legacyidenticalMay01 cold no witness/pool",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\attempt02\\binding_2025-05-02",
+          "kind": "newdate Native0binding no Raw transfer",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\attempt02\\warm_2025-05-01\\COMMON_M_PR222\\SAME_CASE_INCUMBENT_REGISTRY.json",
+          "kind": "byteexactFULL global/movingregistry",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\attempt02\\cold_2025-05-01\\COMMON_M_PR222\\FRESH_BEAM_AND_REDISPATCH_ADMISSION.json",
+          "kind": "cold fresh topology/score counters if generated",
+          "exists_at_draft": true
+        }
+      ],
+      "consumer": "Full originalmatrix/physical validator; budgetmeasurednative+HiGHS; exporter emits fullP/Q/SOC/modes/routes for A2/Actual",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_m.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "ebdf8cb2c44248f344d1b41552c2c42a14de80775b0e2ea60ea3f60f997f7e7d",
+          "bytes": 12036
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_pr221_current_date_binding.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "3ee1d0ed8218a076f4c0eb027658a7842738b9e712c50f8601e8428f0aef2d1e",
+          "bytes": 2067
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\v42_may_final\\test_dispatch_score.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "ea1e4d66c49e8fa16bc8e4ac642cfb35eb104bed5358b1ad06cec3152b84e348",
+          "bytes": 2134
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\v42_may_final\\test_incumbent.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "b06858af3793c5c377aa96efccac652be42deeac24527056edf36669299f6f73",
+          "bytes": 3183
+        }
+      ],
+      "current_scope": "Warm realNative60.332seconds TIME_LIMIT, FULL UB.5398310226338695 and movingbank preserved, Startaccepted. Cold real60.251922974seconds, FULL UB.6760534504652344, no historicalwitness. ExistingPR222remainsparent.",
+      "limitations": "Restricted poolObjBound is not GlobalLB; noGlobalgapcertified. Cold STAY initialization+boundedbeam success does not establish recovery of historical3MOVEwinner or fullcoldsearchperformance. No oldUBautomatic transfer to newQoS/D00AIDCcase.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": true,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "IMPLEMENTED_CONNECTED_SCOPED_VALIDATION",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    },
+    {
+      "family": "PR211",
+      "purpose": "Same numerical Case only certificate LB/point reuse; reject changed physics/domain/anchors",
+      "defining_existing_modules": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_autonomous_b3\\reuse.py",
+          "symbol": "compare_original_identity",
+          "exists": true,
+          "sha256": "1c1c1648e0ae56dd156dee9c470414efedf96e70319708ff702e3c460fcd7ac2",
+          "bytes": 25810,
+          "definition_lines": [
+            55
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_autonomous_b3\\reuse.py",
+          "symbol": "graph_compiler_equivalence",
+          "exists": true,
+          "sha256": "1c1c1648e0ae56dd156dee9c470414efedf96e70319708ff702e3c460fcd7ac2",
+          "bytes": 25810,
+          "definition_lines": [
+            29
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_common_mess\\engine.py",
+          "symbol": "_same_case_lb",
+          "exists": true,
+          "sha256": "a8f9eb3ba6d746cfa89474aeace3caa0b57ee551b48c9466887f04994a6631c3",
+          "bytes": 40009,
+          "definition_lines": [
+            448
+          ],
+          "symbol_found": true
+        }
+      ],
+      "actual_new_entrypoints": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\m_engine.py",
+          "symbol": "binding",
+          "exists": true,
+          "sha256": "86fc0c272963c5477a95304bacc8f38a05161aa79b1dcae94729debe39f0a058",
+          "bytes": 37291,
+          "definition_lines": [
+            124
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\m_engine.py",
+          "symbol": "admit_registry",
+          "exists": true,
+          "sha256": "86fc0c272963c5477a95304bacc8f38a05161aa79b1dcae94729debe39f0a058",
+          "bytes": 37291,
+          "definition_lines": [
+            292
+          ],
+          "symbol_found": true
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\a_engine.py",
+          "symbol": "authorized_data",
+          "exists": true,
+          "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+          "bytes": 14521,
+          "definition_lines": [
+            98
+          ],
+          "symbol_found": true
+        }
+      ],
+      "producer": "Fullnumericmatrix/domain/route/anchor/hash gate; original exact dual would require independent checker",
+      "serialized_artifacts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\attempt02\\binding_2025-05-02",
+          "kind": "foreign-date/Raw/anchor binding checks",
+          "exists_at_draft": true
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\attempt02\\warm_2025-05-01\\COMMON_M_PR222\\M_STAGE_RESULT.json",
+          "kind": "certified_Global_LB null/restricted bound explicitlylocal",
+          "exists_at_draft": true
+        }
+      ],
+      "consumer": "Currentincumbentregistry FULL checks; newA-domain does not consume oldLB/pricingcertificates",
+      "tests": [
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_m.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "ebdf8cb2c44248f344d1b41552c2c42a14de80775b0e2ea60ea3f60f997f7e7d",
+          "bytes": 12036
+        },
+        {
+          "path": "D:\\v42_common_am_qos_integration_20261013\\tests\\test_v42_integration_a.py",
+          "symbol": null,
+          "exists": true,
+          "sha256": "23a9303e4e984ac526bc161b9585289f386ef1aea11afdc50359a2357be59254",
+          "bytes": 4142
+        }
+      ],
+      "current_scope": "Failclosed identity controls connected; legacyexact-LBreuse module retained but notcalled by newQoS pipeline.",
+      "limitations": "No fullGlobalLBcertification reuse in currentengine. HistoricalnumericalCase certificates cannottransfer to changedQoS/initialstate/powerCase.",
+      "stage_status": {
+        "IMPLEMENTED": true,
+        "CONNECTED": false,
+        "EXECUTED": {
+          "fixture": true,
+          "real": true
+        },
+        "VALIDATED": {
+          "fixture": true,
+          "real": "CURRENT_RECEIPTS_ONLY_NO_HISTORICAL_TRANSFER"
+        }
+      },
+      "final_status": "LEGACY_CERTIFICATE_REUSE_INTENTIONALLY_DISABLED",
+      "final_real_execution_receipts": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+          "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+          "bytes": 4220601
+        }
+      ],
+      "current_authority_note": "V5 Source; authorized common Dday model initial state; see scoped execution receipt rather than old INITIAL_QUEUE_UNVERIFIED diagnosis"
+    }
+  ],
+  "fixture_receipts": [
+    {
+      "arm": "B0",
+      "receipt": {
+        "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B0\\FIXTURE_EXECUTION_RECEIPT.json",
+        "symbol": null,
+        "exists": true,
+        "sha256": "44ff6017f26ef63cc6ea70c894f87ac9643a6f6c277dd94c4e9e6eedff03c238",
+        "bytes": 794
+      },
+      "scope": "SYNTHETIC_FIXTURE; originalAmodel/commonMfixturebackend/control-flow/Jobevents only; no realpopulation/FreshAC"
+    },
+    {
+      "arm": "B1",
+      "receipt": {
+        "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B1\\FIXTURE_EXECUTION_RECEIPT.json",
+        "symbol": null,
+        "exists": true,
+        "sha256": "080a28de75a785179c6a9de18772d9f11d398c0323b034d93f55a5850b2127df",
+        "bytes": 808
+      },
+      "scope": "SYNTHETIC_FIXTURE; originalAmodel/commonMfixturebackend/control-flow/Jobevents only; no realpopulation/FreshAC"
+    },
+    {
+      "arm": "B2",
+      "receipt": {
+        "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B2\\FIXTURE_EXECUTION_RECEIPT.json",
+        "symbol": null,
+        "exists": true,
+        "sha256": "fafa7aa1bd0c4a44e066e21fb3317e9477f2b6b9c60375407a86135e7b6fd847",
+        "bytes": 808
+      },
+      "scope": "SYNTHETIC_FIXTURE; originalAmodel/commonMfixturebackend/control-flow/Jobevents only; no realpopulation/FreshAC"
+    },
+    {
+      "arm": "B3",
+      "receipt": {
+        "path": "D:\\v42_integration_validation_20261013\\FIXTURE_B3\\FIXTURE_EXECUTION_RECEIPT.json",
+        "symbol": null,
+        "exists": true,
+        "sha256": "42e25a3629df7148ab52699d80854b0658fb8fd542eac9e44b137f119e7d6f57",
+        "bytes": 841
+      },
+      "scope": "SYNTHETIC_FIXTURE; originalAmodel/commonMfixturebackend/control-flow/Jobevents only; no realpopulation/FreshAC"
+    }
+  ],
+  "legacy_current_numerical_M_receipts": [
+    {
+      "mode": "warm",
+      "receipt": {
+        "path": "D:\\v42_integration_validation_20261013\\attempt02\\warm_2025-05-01\\PR222_REGRESSION.json",
+        "symbol": null,
+        "exists": true,
+        "sha256": "e018ee24105ed2de5da37cce9f0c73c883b2f56b04bc7947271017a66dd5a1e8",
+        "bytes": 9556
+      },
+      "scope": "HISTORICAL_EXACT_MAY01_NUMERICAL_CASE_ONLY",
+      "execution_completion": true,
+      "FULL_validated": true,
+      "BEST_GLOBAL_UB": 0.5398310226338695,
+      "BEST_MOVING_FEASIBLE_UB": 0.5398310226338695,
+      "Native_seconds": 60.33200001716614,
+      "start": {
+        "attribute_readback": true,
+        "Optimize_entered": true,
+        "messages": [
+          "Loaded user MIP start with objective 0.539831"
+        ],
+        "classification": "ACCEPTED_DURING_OPTIMIZE"
+      },
+      "globalLB": null,
+      "new_QoS_case_UB_transfer": false
+    },
+    {
+      "mode": "cold",
+      "receipt": {
+        "path": "D:\\v42_integration_validation_20261013\\attempt02\\cold_2025-05-01\\PR222_REGRESSION.json",
+        "symbol": null,
+        "exists": true,
+        "sha256": "75d9a7e620385124bedc4c2444b4bb315829a73311345282c24fecf30a2b0864",
+        "bytes": 13141
+      },
+      "scope": "HISTORICAL_EXACT_MAY01_NUMERICAL_CASE_ONLY",
+      "execution_completion": true,
+      "FULL_validated": true,
+      "BEST_GLOBAL_UB": 0.6760534504652344,
+      "BEST_MOVING_FEASIBLE_UB": null,
+      "Native_seconds": 60.25192297439207,
+      "start": {
+        "attribute_readback": true,
+        "Optimize_entered": true,
+        "messages": [
+          "Loaded user MIP start with objective 0.676053"
+        ],
+        "classification": "ACCEPTED_DURING_OPTIMIZE"
+      },
+      "globalLB": null,
+      "new_QoS_case_UB_transfer": false
+    }
+  ],
+  "global_claims": {
+    "fullrealB3_validated": true,
+    "newpolicyFull96Actual_validated": true,
+    "newpolicyFull96Fresh_AC_PASS": true,
+    "wholeAIDC_MESSGlobalGapCertified": false,
+    "historical_results_transfer": false,
+    "campaign_restart_authorized": false,
+    "production_policy_status": "POLICY_COMPILER_ONLY",
+    "production_Unknown_optimized_actions_executed": false,
+    "production_Unknown_control_improvement_certified": false,
+    "full96_actual_ac_scope": "CURRENT_11SVR_153_PHASE_AUTHORITY_WITH_APPROVED_MODEL_INITIAL_STATE",
+    "current_real_arm_status": {
+      "B0": "NOT_RUN",
+      "B1": "NOT_RUN",
+      "B2": "NOT_RUN",
+      "B3": "EXECUTED"
+    },
+    "four_arm_initial_loader_fixture_validation": true,
+    "whole_Actual_QoS_compliance_certified": false,
+    "hard_deadline_authorized_jobs": 0,
+    "unavoidable_wait_sum_seconds": 291483659,
+    "unavoidable_wait_max_seconds": 312828
+  },
+  "pending_root": [],
+  "current_science": "V42_COMMON_AM_JOB_ACTUAL_EMPIRICAL_QOS_DDAY_GRID_POLICY_V5",
+  "source_sha": "f488f3a99555eb2354ef52d0835078be816d2d988a2bf37010b9b09ff36568d8",
+  "Dday_model_initialization_authorized": true,
+  "synthetic_initialization_current_policy": "V42_DDAY_COMMON_GRID_BLIND_INITIAL_SITE_V1",
+  "final_execution_receipt": {
+    "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\EXECUTION_RECEIPT.json",
+    "sha256": "d8d1065b030198cf1d5c094113ceadc2791d81b0a431801c76dc5239d1daa9be",
+    "bytes": 4220601
+  }
+}

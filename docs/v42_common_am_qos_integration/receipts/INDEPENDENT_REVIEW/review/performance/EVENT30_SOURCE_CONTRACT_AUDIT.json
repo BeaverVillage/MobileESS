@@ -1,0 +1,134 @@
+{
+  "schema": "EVENT30_SOURCE_CONTRACT_AUDIT_V1",
+  "status": "SOURCE_PREDICATE_VERIFIED_PRODUCTION_TRIGGER_AUTHORITY_UNAVAILABLE",
+  "sources": [
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_native\\actual.py",
+      "sha256": "a830c6f31a74bdb686514ff0f6d721712fd0ae9e9bca1b4df0435188b1a28a9a",
+      "bytes": 10214
+    },
+    {
+      "path": "D:\\MobileESS_V42\\docs\\v42_native_integration_mess_milp\\EVENT_ACTUAL_CONTROL_CONTRACT.md",
+      "sha256": "6e5f51507d33e01f6cfde0ce49bad0207c9520ebdda07411c9edc8c59ac454a4",
+      "bytes": 2062
+    },
+    {
+      "path": "D:\\MobileESS_V42\\docs\\v42_final_integration\\README.md",
+      "sha256": "66f71c5fc9e021a5025193f79f8f92c6b2a9006bff6ef9981104abf75d33f04a",
+      "bytes": 6741
+    },
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\policy.py",
+      "sha256": "2ad535a95a5ee28f37a7a268f4dd0e3ce5f9b773ba2fc22592b41a692c99ad23",
+      "bytes": 24460
+    },
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual.py",
+      "sha256": "1eb990133e8fcba547b7fcc107a66d9b1870ba0952b86ab320ee2c79b33fb126",
+      "bytes": 38740
+    }
+  ],
+  "paper_policies": [
+    "M1_PROPOSED_EVENT30_LOCAL_REPAIR_MOBILE",
+    "M2_FIXED30_MOBILE",
+    "M3_EVENT30_NO_LOCAL_REPAIR_MOBILE",
+    "M4_FIXED_LOCATION_ESS_MOBILITY_ABLATION"
+  ],
+  "optimization_stages_are_distinct_from_paper_policy_ids": true,
+  "source_predicate": "v42_native.actual.event_due(slot,policy,observed_deviation,threshold=...)",
+  "control_grid_seconds": 900,
+  "event_period_seconds": 1800,
+  "clock_gate": "DDAY_CONTROL_SLOT_INDEX_MODULO_2_EQUALS_0",
+  "proposed_trigger": "OBSERVED_DEVIATION_STRICTLY_GREATER_THAN_FROZEN_THRESHOLD",
+  "fixed30_trigger": "EVERY_ELIGIBLE_EVEN_SLOT",
+  "threshold_authority_required": "EXTERNAL_FROZEN_POLICY_AUTHORITY_NO_FITTED_OR_DEFAULT_PROMOTION",
+  "production_threshold_value": null,
+  "observed_deviation_metric": null,
+  "observed_deviation_units": null,
+  "metric_and_threshold_source_receipt": null,
+  "production_Event30_activation_authorized": false,
+  "separate_last_event_cooldown_state_defined": false,
+  "same_boundary_repeat_suppression_defined": false,
+  "checkpoint_period_seconds": 1800,
+  "checkpoint_clock": "EXECUTION_START_ANCHORED_ACCUMULATED_COMPUTE_NOT_DDAY_SLOT_PARITY",
+  "physical_checkpoint_may_be_off_control_grid": true,
+  "execution_change_control_time": "CEIL_PHYSICAL_CHECKPOINT_TO_900_SECONDS",
+  "interruption_includes_roundup_wait_transfer_restart": true,
+  "job_QoS_budget_not_Event30_period": true,
+  "integration_Event30_source_hook_present": false,
+  "integration_control_lookup_hook": "JOB_EVENT_CONTROLLER_AT_OBSERVED_EVENTS_WITH_900_SLOT_AUTHORIZED_STARTS",
+  "integration_checkpoint_hook": "run_actual.schedule_compute/JobEventController.migration/migration_guard",
+  "fixture_predicate_cases": [
+    {
+      "slot": 0,
+      "synthetic_observed_deviation": 1.0,
+      "synthetic_test_threshold": 1.0,
+      "proposed_due": false,
+      "fixed30_due": true
+    },
+    {
+      "slot": 0,
+      "synthetic_observed_deviation": 1.1,
+      "synthetic_test_threshold": 1.0,
+      "proposed_due": true,
+      "fixed30_due": true
+    },
+    {
+      "slot": 1,
+      "synthetic_observed_deviation": 2.0,
+      "synthetic_test_threshold": 1.0,
+      "proposed_due": false,
+      "fixed30_due": false
+    },
+    {
+      "slot": 2,
+      "synthetic_observed_deviation": 1.0,
+      "synthetic_test_threshold": 1.0,
+      "proposed_due": false,
+      "fixed30_due": true
+    },
+    {
+      "slot": 2,
+      "synthetic_observed_deviation": 1.1,
+      "synthetic_test_threshold": 1.0,
+      "proposed_due": true,
+      "fixed30_due": true
+    },
+    {
+      "slot": 3,
+      "synthetic_observed_deviation": 100.0,
+      "synthetic_test_threshold": 1.0,
+      "proposed_due": false,
+      "fixed30_due": false
+    },
+    {
+      "slot": 4,
+      "synthetic_observed_deviation": 0.0,
+      "synthetic_test_threshold": 1.0,
+      "proposed_due": false,
+      "fixed30_due": true
+    }
+  ],
+  "fixture_threshold_is_not_production_authority": true,
+  "new_default_or_fitted_thresholds": 0,
+  "electrical_PQ_repair": 0,
+  "online_global_MILP": 0,
+  "Actual_runs": 0,
+  "Fresh_AC_runs": 0,
+  "source_edits": 0,
+  "integration_action_guard_contract": "ONE_MIGRATION_AND_SHARED_DELAY_INTERRUPTION_BUDGET_WITH_SOURCE_CAPABILITY",
+  "action": "PRESERVE_SOURCE_PREDICATE_AND_RECORD_MISSING_THRESHOLD_METRIC_AUTHORITY_DO_NOT_FABRICATE_EVENT30_ACTIVATION",
+  "final_actual_source_receipt": {
+    "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual.py",
+    "bytes": 45124,
+    "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38"
+  },
+  "new_policy_source_receipt": {
+    "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\sensitivity_policy.py",
+    "bytes": 50524,
+    "sha256": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428"
+  },
+  "final_integration_activation": "NOT_AUTHORIZED_THRESHOLD_METRIC_SOURCE_MISSING",
+  "aligned_execution_checkpoint_migration": "FROZEN_PHASE_CONTRACT_MATCH_REQUIRED",
+  "off_grid_new_grid_ranked_migration": "STAY_OFF_GRID_CHECKPOINT_OUTSIDE_FROZEN_SCORE_TEMPLATE"
+}

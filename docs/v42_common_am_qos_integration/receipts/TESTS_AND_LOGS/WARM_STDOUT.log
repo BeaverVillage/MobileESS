@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\v42_common_am_qos_integration_20261013\v42_integration\pr222_regression.py", line 215, in <module>
+    main()
+  File "D:\v42_common_am_qos_integration_20261013\v42_integration\pr222_regression.py", line 208, in main
+    result = run(args.mode, args.seconds, args.output, args.ledger, args.day)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_common_am_qos_integration_20261013\v42_integration\pr222_regression.py", line 154, in run
+    candidates, candidate_record = archived_candidates(case)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_common_am_qos_integration_20261013\v42_integration\pr222_regression.py", line 116, in archived_candidates
+    return pools, file_record(path)
+                  ^^^^^^^^^^^^^^^^^
+  File "D:\v42_common_am_qos_integration_20261013\v42_integration\m_engine.py", line 92, in file_record
+    path = Path(path).resolve()
+           ^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 871, in __new__
+    self = cls._from_parts(args)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 509, in _from_parts
+    drv, root, parts = self._parse_args(args)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 493, in _parse_args
+    a = os.fspath(a)
+        ^^^^^^^^^^^^
+TypeError: expected str, bytes or os.PathLike object, not list

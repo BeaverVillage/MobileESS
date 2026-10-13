@@ -22,6 +22,8 @@ class GridAuthority:
     frozen:bool=False
     stage:Stage|None=None
     transformer_current_authority_sha256:str|None=None
+    thermal_authority:dict|None=None
+    require_all_transformer_currents:bool=False
 
     def validate(self):
         require(self.frozen and all(len(s)==64 for s in (self.topology_sha,self.mapping_sha,self.service_sha,self.pq_sha)),'GRID_FREEZE_MISSING')
@@ -51,7 +53,7 @@ def add_grid(model,coefficients,controls,authority):
         bias=c.current_constant+c.current_matrix.T@c.anchor-np.max(raw,axis=1)
         for k,name in enumerate(c.branch_names):
             p=expr(c.flow_p_constant[k],c.flow_p_matrix[k],x);q=expr(c.flow_q_constant[k],c.flow_q_matrix[k],x)
-            if not dominated(name):
+            if not dominated(name) or authority.require_all_transformer_currents:
                 if name.lower().startswith('transformer.'):
                     model.addConstr(expr(c.current_constant[k],c.current_matrix[:,k],x)<=1,name='transformer_current')
                 else:

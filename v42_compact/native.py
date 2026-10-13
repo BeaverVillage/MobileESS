@@ -16,7 +16,9 @@ def completion_risk(j,row,site,end,bundle):
     adjusted=int(row['risk_nominal_completion_issue_slot']+end-row['reference_end'])
     return {key:bundle['runtime_reserve_gamma']*x for key,x in risk_exposure(j.gpu,adjusted,site,bundle['runtime_survival_kernel'],range(24,120)).items()}
 
-def grid(m,bundle,known,risk,mess_p=None,mess_q=None,*,stage=Stage.A1):
+def grid(m,bundle,known,risk,mess_p=None,mess_q=None,*,stage=Stage.A1,grid_context=None):
+    if grid_context is not None:
+        return grid_context.bind(m,bundle,known,risk,stage=stage)
     require(stage in (Stage.A1,Stage.A2),"AIDC_GRID_STAGE")
     require(stage!=Stage.A1 or (mess_p is None and mess_q is None),"BOOTSTRAP_MESS_MUST_BE_ZERO")
     require(stage!=Stage.A2 or (mess_p is not None and mess_q is not None),"A2_ACCEPTED_MESS_ANCHOR_REQUIRED")

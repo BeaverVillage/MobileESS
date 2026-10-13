@@ -1,0 +1,26 @@
+{
+  "arm": "B3",
+  "scope": "ONE_DAY_ISOLATED_VALIDATION",
+  "campaign_HOLD": true,
+  "campaign_started": false,
+  "source_freeze": {
+    "path": "D:\\v42_common_am_qos_integration_20261013\\docs\\v42_common_am_qos_integration\\SOURCE_FREEZE_DDAY_COMMON_V4.json",
+    "sha256": "69b243110f4f6f12a2ee959a02cac7d0860e17017f2d2db5d78ef03144e77f98",
+    "bytes": 384310
+  },
+  "initial_site_authority": null,
+  "initial_state_freeze": {
+    "path": "D:\\v42_common_am_qos_integration_20261013\\docs\\v42_common_am_qos_integration\\V42_MAY01_DDAY_INITIAL_STATE_FREEZE.json",
+    "sha256": "d8aae451858d7ab8579f087ac9811d04f83a8c10bd7e6fc1b2156e35b2db7003",
+    "bytes": 6973987
+  },
+  "integration_solve_seconds_before": 120.61592281798949,
+  "case_sha": "9450fde3c449e97164729d61fd659622110ca8a265903434deeee763f71bd65b",
+  "preparation": "NATIVE0_PASS",
+  "status": "FAILED",
+  "error": "RuntimeError('A_FULL_HANDOFF_NOT_ESTABLISHED')",
+  "traceback": "Traceback (most recent call last):\n  File \"D:\\v42_common_am_qos_integration_20261013\\v42_integration\\real_validation.py\", line 47, in main\n    result=run_arm(args.arm,case,budget,args.output/args.arm,planning_only=args.planning_only)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_common_am_qos_integration_20261013\\v42_integration\\coordinator.py\", line 101, in run_arm\n    aidc=_full_a(result)\n         ^^^^^^^^^^^^^^^\n  File \"D:\\v42_common_am_qos_integration_20261013\\v42_integration\\coordinator.py\", line 51, in _full_a\n    raise RuntimeError('A_FULL_HANDOFF_NOT_ESTABLISHED')\nRuntimeError: A_FULL_HANDOFF_NOT_ESTABLISHED\n",
+  "wall_seconds": 356.5304327999984,
+  "integration_solve_seconds_after": 360.8239227626764,
+  "new_solve_seconds": 240.2079999446869
+}

@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\v42_common_am_qos_integration_20261013\v42_integration\real_validation.py", line 58, in <module>
+    main()
+  File "D:\v42_common_am_qos_integration_20261013\v42_integration\real_validation.py", line 43, in main
+    result=run_arm(args.arm,case,budget,args.output/args.arm)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_common_am_qos_integration_20261013\v42_integration\coordinator.py", line 156, in run_arm
+    actual['Fresh_AC']=case.fresh_evaluator(trace,mess,output/'FRESH_PHYSICAL',budget)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_common_am_qos_integration_20261013\v42_integration\production_case.py", line 465, in fresh_evaluator
+    receipt=fresh_ac_minimum(archive/'raw'/day,folder.parent,folder,
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_common_am_qos_integration_20261013\v42_integration\actual_validation.py", line 598, in fresh_ac_minimum
+    raise ValueError("MESS_OFF_ARM_MUST_HAVE_NO_ACTIVE_MESS_PLAN")
+ValueError: MESS_OFF_ARM_MUST_HAVE_NO_ACTIVE_MESS_PLAN

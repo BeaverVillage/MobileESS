@@ -1,0 +1,35 @@
+{
+  "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+  "cutoff_seconds": 1735689600.0,
+  "source_sha": "0783273c06d8a5e7ecf804b18221d7ac66c0c8ab432162490c0afef282bd343e",
+  "bucket_definition": {
+    "GPU": [
+      "1",
+      "2-4",
+      "5-16",
+      "17-64",
+      "65+"
+    ],
+    "requested_walltime": [
+      "<=1h",
+      "1-4h",
+      "4-24h",
+      ">24h"
+    ]
+  },
+  "quantile": 0.9,
+  "quantile_method": "higher",
+  "normalization": "W/max(T,900)",
+  "minimum_cohort_unique_uids": 100,
+  "input_rows": 439534,
+  "accepted_unique_uids": 0,
+  "accepted_uid_sha": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "exclusions": {
+    "UNSUPPORTED_REQUEST_PROVENANCE": 439534,
+    "CONFLICTING_UID_EXCLUDED": 0
+  },
+  "descriptive_only": false,
+  "provenance_note": "VERIFIED_REQUEST_AND_OBSERVATION_ONLY",
+  "cohorts": [],
+  "uids": []
+}

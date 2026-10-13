@@ -1,0 +1,107 @@
+{
+  "capacities": {
+    "gpu:A": 2,
+    "gpu:B": 2,
+    "active:WAN": 1
+  },
+  "reservations": {
+    "unknown-observed": {
+      "uid": "unknown-observed",
+      "segments": [
+        {
+          "resource": "gpu:B",
+          "begin": 900.0,
+          "end": 1800.0,
+          "quantity": 1.0,
+          "scope": "anonymous"
+        }
+      ],
+      "status": "RELEASED",
+      "scope": "anonymous"
+    },
+    "known-a": {
+      "uid": "known-a",
+      "segments": [
+        {
+          "resource": "gpu:B",
+          "begin": 1800.0,
+          "end": 3600.0,
+          "quantity": 1.0,
+          "scope": "physical"
+        }
+      ],
+      "status": "RELEASED",
+      "scope": "physical"
+    },
+    "known-b": {
+      "uid": "known-b",
+      "segments": [
+        {
+          "resource": "gpu:B",
+          "begin": 1800.0,
+          "end": 2700.0,
+          "quantity": 1.0,
+          "scope": "physical"
+        }
+      ],
+      "status": "RELEASED",
+      "scope": "physical"
+    }
+  },
+  "audit": [
+    {
+      "uid": "unknown-observed",
+      "status": "RESERVED",
+      "segments": [
+        {
+          "resource": "gpu:B",
+          "begin": 900.0,
+          "end": 1800.0,
+          "quantity": 1.0,
+          "scope": "anonymous"
+        }
+      ]
+    },
+    {
+      "uid": "known-a",
+      "status": "RESERVED",
+      "segments": [
+        {
+          "resource": "gpu:B",
+          "begin": 1800.0,
+          "end": 2700.0,
+          "quantity": 1.0,
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "uid": "known-b",
+      "status": "RESERVED",
+      "segments": [
+        {
+          "resource": "gpu:B",
+          "begin": 1800.0,
+          "end": 2700.0,
+          "quantity": 1.0,
+          "scope": "physical"
+        }
+      ]
+    },
+    {
+      "uid": "unknown-observed",
+      "status": "RELEASED",
+      "at": 1800.0
+    },
+    {
+      "uid": "known-b",
+      "status": "RELEASED",
+      "at": 2700.0
+    },
+    {
+      "uid": "known-a",
+      "status": "RELEASED",
+      "at": 3600.0
+    }
+  ]
+}

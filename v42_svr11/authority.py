@@ -10,6 +10,33 @@ _active=ContextVar('svr11_epoch',default=None)
 def active():
     return _active.get()
 
+@contextmanager
+def integration_physical_scope(source_freeze, *, hardware, scenario, thermal_receipt):
+    """Isolated, user-authorized physical validation of the frozen integration.
+
+    Exact inherited hardware/scenario/thermal bytes remain authoritative. This
+    admits no worker, optimization, scheduler, equipment change or campaign.
+    """
+    from v42_integration.coordinator import verify_sources
+    verify_sources(source_freeze,[hardware,scenario,thermal_receipt])
+    h=read(hardware['path']); t=read(thermal_receipt['path'])
+    if (h.get('PASS') is not True or h.get('SVR_count')!=11 or t.get('PASS') is not True
+            or digest(t['identity'])!=t['transformer_current_authority_sha256']):
+        raise PermissionError('INTEGRATION_EXACT_HARDWARE_THERMAL_RECEIPT_REQUIRED')
+    from v42_voltage_control.integration import validate_scenario
+    validate_scenario(read(scenario['path']))
+    m=dict(hardware=hardware,scenario=scenario,thermal=thermal_receipt,
+        execution_SHA=source_freeze['source_sha'],integration_validation_only=True,
+        production_campaign=False,campaign_HOLD=True,
+        original_transformer_current_authority='COMPILED_NORMALAMPS_ONLY')
+    token=_active.set(m)
+    from v42_thermal.authority import current_authority
+    current_authority.cache_clear()
+    try:yield m
+    finally:
+        _active.reset(token);current_authority.cache_clear()
+        verify_sources(source_freeze,[hardware,scenario,thermal_receipt])
+
 def verify(path):
     m=read(path)
     if m.get('svr11_campaign') is not True or m.get('authorization')!='V42_FINAL_USER_20261011':

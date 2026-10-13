@@ -572,7 +572,7 @@ def _label_grid(model, first, coefficients, cost):
     model.update()
 
 
-def build_case(payload, request, progress=None):
+def build_case(payload, request, progress=None, *, integration_context=None):
     import gurobipy as gp
     from v42_bootstrap.m1 import native_inputs
     import v42_native.mess as native
@@ -594,7 +594,11 @@ def build_case(payload, request, progress=None):
     physical=build_domain(sites,initial,routes,battery,96)
     graph=(sites,initial,[(s,t,s,t+1,None) for s in sites for t in range(96)]+
            [(r.source,r.depart,r.destination,r.connect,r) for r in dict.fromkeys(routes)],battery,receipt)
-    cert,_,_,_=load_power(bundle); coeff=original_coefficients_for_day(original,cert,day)
+    if integration_context is None:
+        cert,_,_,_=load_power(bundle); coeff=original_coefficients_for_day(original,cert,day)
+    else:
+        integration_context.verify()
+        cert=integration_context.certificate;coeff=integration_context.coefficients
     if len(coeff)!=96 or any(c.slot!=t for t,c in enumerate(coeff)): raise ValueError('CURRENT_M_96_COEFFICIENT_AXIS_REQUIRED')
     pcc=np.asarray(planning['PCC_P_kw'],dtype=float); aidc_sites=list(map(str,planning['sites']))
     if pcc.shape!=(96,12) or len(set(aidc_sites))!=12 or set(aidc_sites)!=set(bundle['capacities']) or not np.isfinite(pcc).all():
@@ -616,7 +620,7 @@ def build_case(payload, request, progress=None):
         fixed_AIDC_control_columns=[i for i,n in enumerate(columns) if n.startswith('aidc_load_kw')],
         independent_AIDC_identity=payload['identity'])
     class ConstructionDeadline:
-        stage='M1'
+        stage=request.get('stage','M1')
         sampled=0.
         def check(self):
             budget=request.get('_budget')
@@ -638,6 +642,9 @@ def build_case(payload, request, progress=None):
         ga=GridAuthority(cert['input_identity']['identity']['inputs']['OpenDSS_master']['sha256'],
             digest(bundle['capacities']),digest(bundle),digest(bundle['battery']),voltage.lower_squared,voltage.upper_squared,
             True,stage=Stage.M1,transformer_current_authority_sha256=coeff[0].transformer_current_authority_sha256)
+        if integration_context is not None:
+            from dataclasses import replace
+            ga=replace(ga,stage=Stage(request.get('stage','M1')),thermal_authority=integration_context.thermal)
         model.update();first=model.NumConstrs
         builder=lambda m,c,x,a:add_compressed(m,c,x,a,'M1-F3',bindings,cost)
         rho=all_transformer_rows(builder,thermal)(model,coeff,actual,ga)
@@ -650,10 +657,14 @@ def build_case(payload, request, progress=None):
         binding_families.update(v.VarName.split('[',1)[0] for v,_ in bindings)
         captured.append(model.copy())
         return None,dict(Native_optimize_calls=0,P1_only=True,P2_calls=0)
-    with physical_authority():
+    scope=physical_authority() if integration_context is None else integration_context.physical_scope()
+    with scope:
         anchor['voltage_authority_sha256']=authority_sha(Stage.A1)
-        with patch.object(native,'optimize',capture):
-            native.solve('M1',ConstructionDeadline(),sites,initial,routes,battery,96,grid)
+        if integration_context is None:
+            with patch.object(native,'optimize',capture):
+                native.solve('M1',ConstructionDeadline(),sites,initial,routes,battery,96,grid)
+        else:
+            native.solve(request.get('stage','M1'),ConstructionDeadline(),sites,initial,routes,battery,96,grid,optimizer=capture)
     model=captured[0]
     try: A,d=arrays(model)
     finally: model.dispose()
@@ -663,7 +674,9 @@ def build_case(payload, request, progress=None):
     if not families <= {'arc','charge_mode','Pch','Pdis','Q','SOC','rho_max'}|binding_families:
         raise ValueError('CURRENT_M_AIDC_OPTIMIZATION_VARIABLE_PRESENT')
     from v42_svr11.authority import active
-    if len(thermal)!=(153 if active() is not None else 120)*96: raise ValueError('CURRENT_M_ALL_TRANSFORMER_PHASE_ROWS_REQUIRED')
+    expected_phases=(len(integration_context.thermal['rows']) if integration_context is not None
+        else 153 if active() is not None else 120)
+    if len(thermal)!=expected_phases*96: raise ValueError('CURRENT_M_ALL_TRANSFORMER_PHASE_ROWS_REQUIRED')
     if progress: progress(dict(phase='M_EXISTING_COMPACT_STATIC_PRESOLVE',day=day,arm='B2'))
     compact=Compact(A,d,graph[2],initial,96)
     from v42_ultracompact.security import prepare_current_security

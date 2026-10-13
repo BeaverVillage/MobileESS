@@ -12,6 +12,18 @@ let state;const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 async function update(){try{state=await(await fetch('/api/state',{cache:'no-store'})).json();let c=state.counts;cards.innerHTML=[['완료 / 전체',c.completed+' / 124'],['현재 정책',state.policy||state.status],['PASS / FAIL',c.PASS+' / '+c.FAIL],['활성 Worker / ETA',state.workers.length+' / '+state.ETA]].map(([k,v])=>'<div class="card"><small>'+esc(k)+'</small><div class="value">'+esc(v)+'</div></div>').join('');policies.innerHTML=state.policies.map(p=>'<tr><td>'+p.policy+'</td><td class="PASS">'+p.PASS+'</td><td class="FAIL">'+p.FAIL+'</td><td class="RUNNING">'+p.RUNNING+'</td><td>'+p.remaining+'</td></tr>').join('');current.innerHTML=state.workers.length?state.workers.map(w=>'<p><b>'+esc(w.arm+' '+w.day)+'</b> · '+esc(w.phase)+' · <span class="'+(w.optimization_status.includes('NO SOLUTION')?'FAIL':'FEASIBLE')+'">'+esc(w.optimization_status)+'</span><br>Native '+num(w.Native_Runtime)+' s · Best feasible UB '+num(w.UB)+'<br><small>인증 LB '+num(w.certified_LB)+' · 인증 Gap '+num(w.certified_Gap)+' · Fresh '+esc(w.Fresh)+' · PID '+w.PID+'</small></p>').join(''):'<p>'+esc(state.status)+'</p>';errors.innerHTML=state.errors.length?state.errors.map(e=>'<p class="err">'+esc(e)+'</p>').join(''):'기록된 오류 없음';updated.textContent='자동 갱신 · '+new Date().toLocaleTimeString();source.textContent='Source '+state.source_SHA+' · '+state.root;days()}catch(e){updated.textContent='HTTP 연결 오류: '+e.message}}function days(){if(!state)return;let a=policy.value;document.getElementById('days').innerHTML=state.dates.filter(r=>r.arm===a).map(r=>'<button class="'+r.status+'" onclick="show(\''+r.arm+'/'+r.day+'\')">'+r.day.slice(-2)+' · '+r.status+'</button>').join('')}async function show(key){let r=await(await fetch('/api/date?key='+encodeURIComponent(key))).json();detailbody.innerHTML='<h3>'+esc(r.arm+' '+r.day+' · '+r.status)+'</h3><p>'+esc(r.optimization_status||'')+' · '+esc(r.AC_status||'')+'</p><p>'+esc(r.reason||'')+'</p><pre>'+esc(JSON.stringify(r.metrics||{},null,2))+'</pre><details><summary>상세 실행 근거</summary><pre>'+esc(JSON.stringify(r,null,2))+'</pre></details>';detail.showModal()}update();setInterval(update,5000);
 </script></html>'''
 
+def integration_status(root):
+    """Optional existing-schema sidecar; never infer PASS from completion."""
+    path=Path(root)/'INTEGRATION_VALIDATION_STATUS.json'
+    if not path.is_file():return None
+    doc=read(path)
+    fields=('science_version','policy_version','A_engine','M_engine','source_sha','AIDC_anchor','MESS_anchor',
+        'Known_observed','Unknown_observed','rule_queries','rule_unmatched','rule_selected','rule_executed',
+        'QoS_violations','queued','overrun','carryout','actual_power_recomputed','current_pool_ObjVal',
+        'BEST_GLOBAL_UB','BEST_MOVING_FEASIBLE_UB','same_case_LB','gap_status','solve_seconds','wall_seconds',
+        'memory','HOLD_reason','execution_completion','FULL','Actual_physical_PASS','Fresh_AC')
+    return {key:doc.get(key) for key in fields}
+
 def snapshot(root):
     root=Path(root);m=read(root/'CAMPAIGN_MANIFEST.json');ledger=read(root/'CAMPAIGN_LEDGER.json') if (root/'CAMPAIGN_LEDGER.json').exists() else {'dates':{},'status':'NOT_STARTED'}
     rows=list(ledger['dates'].values());counts={s:sum(r['status']==s for r in rows) for s in ('PASS','FAIL','RUNNING','NOT_EXECUTED')};counts['completed']=counts['PASS']+counts['FAIL']
@@ -44,7 +56,7 @@ def snapshot(root):
             else:estimate+=(p['remaining']+p['RUNNING'])*statistics.median(durations)/m['worker_counts'][arm]
     return dict(status=ledger['status'],policy=ledger.get('policy'),counts=counts,workers=peers,policies=policies,dates=rows,
         ETA=f'{estimate/3600:.1f} h' if known else '측정 중',errors=[r['arm']+' '+r['day']+': '+str(r.get('reason')) for r in rows if r['status']=='FAIL'][-3:]+([ledger['error']] if ledger.get('error') else []),
-        source_SHA=m['execution_SHA'],root=str(root),UTC=now())
+        source_SHA=m['execution_SHA'],root=str(root),UTC=now(),integration=integration_status(root))
 
 def serve(root,port):
     root=Path(root).resolve()
