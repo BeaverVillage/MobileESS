@@ -1,0 +1,62 @@
+{
+  "schema": "D_SOURCE_ONLY_NOMINAL_AND_RECOURSE_REPLAY_V1",
+  "status": "PASS",
+  "source_packet": {
+    "path": "D:\\v42_experimental_flex_qos_20261014\\audit\\cc4_service\\A2_SERVICE_TIMING_SOURCE_PACKET.json",
+    "sha256": "b76271ffbb35506ff1d33553bef46ebf70a2ef0f9517354037d45548a62f5357",
+    "bytes": 475394
+  },
+  "source_module": {
+    "path": "D:\\v42_q90_service_recourse_20261014\\v42_integration\\q90_recourse.py",
+    "sha256": "1f2b15cae21d443e22f660a30b1be864d15199966c1018b6480d5963d3c374e9",
+    "bytes": 22091
+  },
+  "frozen_A2_aidc_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+  "nominal_replay": {
+    "per_cohort_mass_max_error_GPUh": 2.2737367544323206e-13,
+    "site_projection_max_error_GPU": 3.410605131648481e-13,
+    "CDF_max_violation_GPUh": 1.7053025658242404e-13,
+    "audit_numerical_tolerance": 1e-07,
+    "original_model_hard_constraint_tolerance_changed": false
+  },
+  "original_A2_nominal_served_GPUh": 3225.157483116982,
+  "original_A2_nominal_carryout_GPUh": 2278.28398903905,
+  "old_A2_reserve_target_served_GPUh": 18904.35883350153,
+  "old_A2_achieved_CC4_reserve_GPUh": 0.0,
+  "original_A2_reserve_target_is_executable_capacity_certificate": false,
+  "recourse_mass": {
+    "extra_arrived_GPUh": 18904.62175513747,
+    "extra_served_GPUh": 3848.076402896199,
+    "extra_terminal_backlog_GPUh": 15056.545352241272,
+    "conservation_PASS": true
+  },
+  "risk_total_unfinished_GPUh": 17334.82934128032,
+  "physical_hard_feasible": true,
+  "CDF_timing_status": "LOWER_BOUND_UNMET",
+  "CDF_lower_max_deficit_GPUh": 791.6994510967967,
+  "CDF_timing_violation_count": 1057,
+  "peak_line_loading": 0.7058031341938754,
+  "grid_admission": {
+    "method": "ALL_ORIGINAL_SIGNED_AFFINE_ROWS_WITH_ORIGINAL_SCALAR_BOUNDARY_GUARD",
+    "scalar_guard_calls": 122,
+    "scalar_boundary_backoffs": 2,
+    "vectorized_original_guard_calls": 421,
+    "original_grid_hard_tolerance": 1e-09
+  },
+  "recourse_seconds": 0.9828267999982927,
+  "total_loader_audit_seconds": 6.012170699999842,
+  "Native_Optimize_calls": 0,
+  "Actual_runs": 0,
+  "Fresh_AC_calls": 0,
+  "models_created": 0,
+  "shared_solver_budget_debit": 0,
+  "job_QoS_certified": false,
+  "whole_gang_schedulability_certified": false,
+  "physical_scope": "ORIGINAL_SIGNED_AFFINE_PLANNING_ROWS;NO_NEW_AC_EXECUTION",
+  "future_UID_or_actual_completion_inputs_used": false,
+  "nominal_schedule_changed": false,
+  "forecast_scaled_or_clipped": false,
+  "kernel_reference_not_fixed_service": true,
+  "B2_B3_campaign_HOLD": true,
+  "May31_started": false
+}
