@@ -1,0 +1,137 @@
+{
+  "PASS": true,
+  "Optimize_calls": 0,
+  "new_reference_FULL": {
+    "path": "D:\\v42_b2_adaptive_compact_joint_20261013\\docs\\v42_b2_adaptive_compact_joint_fresh1800\\v2_feedback\\calls\\016_E010_DIRECT\\FULL_REPLAY_000.json",
+    "sha256": "a7613a261ecaf14656c9950240a252a61b731ba6b6fc9f6af22aa5eff96a54d3"
+  },
+  "new_source_static_identity": {
+    "version": "INTEGER_ALIAS_OPERATOR_V3_1",
+    "source_SHA": "497609b46faa14ea7e32a9483a333ab32fd264ef",
+    "case_SHA": "34c0efffa9c05397552fb167667c0bbfe2f35cec89801a3169c00c64fe77f292",
+    "matrix_SHA": "ed9fd6db73bf47948505cca3a616edf88c7caebdacce8f1dd1007617d6660ef0",
+    "domain_SHA": "6fd03585e9544f759d4001754a7f28ff04958b078f1959c25f9b397bd45b84f4",
+    "original_matrix_SHA": "0eca025d99a24d2ae91117cdfe3ae48dade189336ada61b3f8234d9bf99f3cec",
+    "original_domain_SHA": "9247e42b8119f60ef149d0963e31dd8a697af5426a5aaeec9450b2a2f246481e",
+    "original_aliases_SHA": "453e561f2df41818b84d5622ee8408a6aeb29f84c4cb43a1a83ad882f0ac6309"
+  },
+  "all_four_STAY_single_multiple_DAG_ETA_energy": true,
+  "unchanged_Physical_Grid_PCS16_Mode384_SOC_objective": true,
+  "models": {
+    "DIRECT": {
+      "path": "D:\\v42_b2_adaptive_perf_v3_20261013\\docs\\v42_b2_adaptive_perf_v3\\packages\\INITIAL_1001\\DIRECT\\SPEC.json",
+      "sha256": "d48f21cab0f29366f622817dcc4a6c213706a856d670a355566d96aa1f7b552d"
+    },
+    "EF": {
+      "path": "D:\\v42_b2_adaptive_perf_v3_20261013\\docs\\v42_b2_adaptive_perf_v3\\packages\\INITIAL_1001\\EF\\SPEC.json",
+      "sha256": "80401cbc4b7d64ffaf7961b194eefdf1cb9618b884384950da5a8ff76c2faa0b"
+    }
+  },
+  "matrix_structures": {
+    "DIRECT": {
+      "PASS": true,
+      "source_rows": 715596,
+      "rows": 715600,
+      "columns": 137635,
+      "NNZ": 7008176,
+      "matrix_density": 7.115505863514907e-05,
+      "source_NNZ": 7911369,
+      "global_fill_in_ratio": 0.8858360670574208,
+      "row_NNZ_percentiles": [
+        0.0,
+        4.0,
+        49.0,
+        49.0,
+        53.0
+      ],
+      "column_NNZ_percentiles": [
+        1.0,
+        13.0,
+        17.0,
+        1128.0,
+        333689.0
+      ],
+      "dense_rows_gt100": 0,
+      "high_degree_columns_gt1000": 4525,
+      "original_row_NNZ_delta_min": -552,
+      "original_row_NNZ_delta_max": 7,
+      "rows_with_local_fill_in": 7296,
+      "rows_with_NNZ_reduction": 105616,
+      "coefficient_absolute_min": 1.0000053701775258e-13,
+      "coefficient_absolute_max": 392.3141121612922
+    },
+    "EF": {
+      "PASS": true,
+      "source_rows": 715596,
+      "rows": 718899,
+      "columns": 354309,
+      "NNZ": 7920505,
+      "matrix_density": 3.1095876925667206e-05,
+      "source_NNZ": 7911369,
+      "global_fill_in_ratio": 1.001154793816342,
+      "row_NNZ_percentiles": [
+        1.0,
+        4.0,
+        49.0,
+        49.0,
+        602.0
+      ],
+      "column_NNZ_percentiles": [
+        1.0,
+        4.0,
+        15.0,
+        1119.0,
+        333689.0
+      ],
+      "dense_rows_gt100": 368,
+      "high_degree_columns_gt1000": 4493,
+      "original_row_NNZ_delta_min": 0,
+      "original_row_NNZ_delta_max": 0,
+      "rows_with_local_fill_in": 0,
+      "rows_with_NNZ_reduction": 0,
+      "coefficient_absolute_min": 1.0000053701775258e-13,
+      "coefficient_absolute_max": 392.3141121612922
+    }
+  },
+  "timing": {
+    "parts": {
+      "Source_Case_load": 2.280837999889627,
+      "static_identity_SHA": 0.8439556999364868,
+      "static_cache_SHA_and_readonly_restore": 0.3212983999401331,
+      "Grid_SOC_rebound_context": 11.244706099969335,
+      "incumbent_feedback": 3.3590093000093475,
+      "Beam_label_generation": 0.0,
+      "Score_admission_and_candidate_IO": 70.36506650003139,
+      "candidate_diagnostics_score_and_SOC": 2.195872300071642,
+      "dynamic_DAG_Alias_links_Start_proof": 10.543224100139923,
+      "CSR_product_exact_coefficients_and_packet_IO": 15.872078999993391,
+      "EF_CSR_generation": 6.5256780999479815,
+      "EF_packet_and_structure_IO": 6.9028004999272525,
+      "matrix_structure_analysis": 0.9593796000117436
+    },
+    "total_wall": 131.96968909993302,
+    "other_control_and_IO_wall": 0.5557815000647679,
+    "accounting_residual": 0.0,
+    "disjoint_stage_timings": true
+  },
+  "memory": {
+    "time": 1791862670.047036,
+    "system": {
+      "RAM_total": 34049220608,
+      "RAM_available": 11868368896,
+      "RAM_used": 22180851712,
+      "Commit_total": 38551760896,
+      "Commit_limit": 68408958976,
+      "Commit_available": 29857198080,
+      "Commit_peak": 68408958976
+    },
+    "RSS_bytes": 908328960,
+    "Peak_RSS_bytes": 1371467776,
+    "Private_Commit_bytes": 1934954496,
+    "Peak_Private_Commit_bytes": 2399023104
+  },
+  "original_huge_FULL_CSR_not_resident": true,
+  "independent_integer_alias_and_exact_dyadic_coefficients": true,
+  "previous_execution_not_stopped_or_modified": true,
+  "Native_readback_required_before_Optimize": true
+}

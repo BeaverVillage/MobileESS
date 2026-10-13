@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\v42_b2_global_local_multistart_dual1800_20261013\tools\global_local_multistart1800\prepare.py", line 105, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "D:\v42_b2_global_local_multistart_dual1800_20261013\tools\global_local_multistart1800\prepare.py", line 45, in main
+    minimax_context,context_path=minimax_grid.refresh(case,x,0)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\v42_b2_global_local_multistart_dual1800_20261013\tools\minimax_beam1800\grid.py", line 61, in refresh
+    path=DOCS/f'grid/epoch{epoch:02d}';path.mkdir(parents=True,exist_ok=False)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1116, in mkdir
+    os.mkdir(self, mode)
+FileExistsError: [WinError 183] 파일이 이미 있으므로 만들 수 없습니다: 'D:\\v42_b2_global_local_multistart_dual1800_20261013\\docs\\v42_b2_global_local_multistart_dual1800\\grid\\epoch00'
