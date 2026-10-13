@@ -1,0 +1,74 @@
+{
+  "Actual_runs": 0,
+  "Fresh_AC_calls": 0,
+  "Native_calls": 0,
+  "complexity_review": [
+    {
+      "cost": "One all-active segment full96 projection per UID selection, even current-grid rejects",
+      "exact_candidate": "Pass-cached profile keyed full serial reservation frame; invalidate any reserve/release/retain/start",
+      "function": "_choose"
+    },
+    {
+      "cost": "Current affine geometry repeated before q50/q90 cache for each site/time candidate",
+      "exact_candidate": "Cache exact current(slot,instantaneousGPU bytes,response identity) geometry; no averaged GPU or forecast support shortcut",
+      "function": "_score"
+    },
+    {
+      "cost": "Immutable receipt/window serialization and digest on every retry",
+      "exact_candidate": "Cache immutable sealed receipt body; runtime fields and window SHA remain separately recomputed",
+      "function": "_receipt_window"
+    },
+    {
+      "cost": "Each UID scans ledger/current geometry before checking whether new proof or old proof may advance",
+      "exact_candidate": "Check proof due eligibility first; preserve terminal old deadline and timely continuous-block chain semantics",
+      "function": "_execution_reference"
+    },
+    {
+      "cost": "Runs same full-day static recurrence for each distinct hard-pass candidate, guarded cache32",
+      "exact_candidate": "Existing exact \u03b4 cache128 helps; lower primary Q50 tie groups only if all physical-hard rejections handled and audit states NOT_EVALUATED explicit",
+      "function": "evaluate_q90_recourse"
+    }
+  ],
+  "not_proposed_during_running_case": "NO_PRODUCTION_EDITS_OR_SOURCE_SUPERSESSION;WAIT_FIRST_CASE_RECEIPT",
+  "rows": [
+    {
+      "P95_seconds": 6.606499882764182e-05,
+      "median_seconds": 5.4700001783203334e-05,
+      "operation": "exact_resource_fit",
+      "retained_records": 324
+    },
+    {
+      "P95_seconds": 0.0018830550034181215,
+      "median_seconds": 0.0017333499999949709,
+      "operation": "full96_profile_reconstruction",
+      "retained_records": 324
+    },
+    {
+      "P95_seconds": 0.00042793000247911547,
+      "median_seconds": 0.0003920499984815251,
+      "operation": "exact_resource_fit",
+      "retained_records": 2320
+    },
+    {
+      "P95_seconds": 0.013580410000213304,
+      "median_seconds": 0.012765699997544289,
+      "operation": "full96_profile_reconstruction",
+      "retained_records": 2320
+    },
+    {
+      "P95_seconds": 0.000657080004020827,
+      "median_seconds": 0.0005118000008224044,
+      "operation": "digest_literal_D_nominal_json",
+      "source_bytes": 76195,
+      "source_path": "D:\\v42_q90_service_recourse_20261014\\audit\\recourse\\FROZEN_A2_NOMINAL_SERVICE.json"
+    }
+  ],
+  "scope": "FROZEN_SOURCE_FUNCTION_MICROBENCH_NAMED_SYNTHETIC_RESERVATIONS_NOT_MAY_REPLAY",
+  "source_edited": false,
+  "source_files": {
+    "v42_integration/experimental_policy.py": "151fdbd0bdf1b19486974cfc77172bab8eddc08ff079f98f36ae44206f95ff6a",
+    "v42_integration/policy.py": "2182c740a84bc3c9de6a601c748b1c768639becd04a3cdd4fd8fb3a87c8cf6c2",
+    "v42_integration/q90_recourse.py": "bc7425ecda1b0915c4836ae18cade29b79db332c4a1616f95e34de91fe138ec5"
+  },
+  "unit_of_work": "ONE_CALL_NOT_FULL_REPLAY_ESTIMATE"
+}

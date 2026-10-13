@@ -1,0 +1,64 @@
+# Prepared append-only control regressions. NOT APPLIED during Source4a replay.
+
+def test_lazy_profile_skips_all_current_grid_rejects_and_preserves_choices(monkeypatch):
+    provider=research_provider();job,receipt=participant(provider);p=policy(provider)
+    ledger=ReservationLedger({'A':8,'B':8});ledger.retain_running('BG','B',0,86400,8)
+    p.set_observed_context(now=0,observed_gpu={'A':0,'B':8},pending_nominal_work={},
+        remaining_q50=[0.]*24,remaining_q90=[0.]*24,forecast_depletion={})
+    m=metadata(provider,job,receipt)
+    # Named current-grid obstruction at every candidate, no future truth.
+    p.packet.voltage_lower=2.;p.packet.voltage_upper=3.
+    before=p.reservation_profile_cache_misses
+    selected=p.select(m,receipt,0,ledger,reserve=False)
+    assert selected['action']=='QUEUE'
+    assert p.reservation_profile_cache_misses==before
+    assert p.audit[-1]['generated']>0 and p.audit[-1]['rejected']
+
+
+def test_exact_profile_frame_cache_tracks_reserve_activate_retain_release_and_copies():
+    provider=research_provider();job,receipt=participant(provider);p=policy(provider)
+    m=metadata(provider,job,receipt);ledger=ReservationLedger({'A':8,'B':8})
+    first=p._reservation_frame_profile(m,0,ledger)
+    np.testing.assert_array_equal(first,0.)
+    assert ledger.reserve('BG',[dict(resource='gpu:B',begin=0,end=900,quantity=1)])[0]
+    planned=p._reservation_frame_profile(m,0,ledger)
+    assert planned[0,1]==1
+    planned[0,1]=999
+    assert p._reservation_frame_profile(m,0,ledger)[0,1]==1
+    misses=p.reservation_profile_cache_misses
+    ledger.activate('BG')
+    np.testing.assert_array_equal(p._reservation_frame_profile(m,0,ledger),
+        p._reservation_frame_profile(m,0,ledger))
+    assert p.reservation_profile_cache_misses==misses+1
+    ledger.retain_running('BG','B',900,1800,1)
+    assert p._reservation_frame_profile(m,900,ledger)[1,1]==1
+    ledger.release('BG',1800)
+    np.testing.assert_array_equal(p._reservation_frame_profile(m,1800,ledger),0.)
+
+
+def test_exact_running_profile_key_preserves_uid_exclusion_and_offgrid_past():
+    provider=research_provider();job,receipt=participant(provider);p=policy(provider)
+    m=metadata(provider,job,receipt);m.update(state='RUNNING',current_site='A')
+    ledger=ReservationLedger({'A':8,'B':8});ledger.retain_running(job.uid,'A',0,5400,1)
+    ledger.retain_running('BG','B',0,86400,1)
+    half=p._reservation_frame_profile(m,450,ledger,replace=True)
+    whole=p._reservation_frame_profile(m,900,ledger,replace=True)
+    assert half[0,0]==.5 and whole[0,0]==1
+    assert half[1,0]==0 and whole[1,0]==0
+    other=p._reservation_frame_profile(dict(m,uid='OTHER'),450,ledger,replace=True)
+    assert other[1,0]==1
+
+
+def test_lazy_cached_profile_matches_uncached_score_and_full_action(monkeypatch):
+    provider=research_provider();job,receipt=participant(provider);p=policy(provider,q90=1)
+    context(p,job);m=metadata(provider,job,receipt)
+    def fresh_ledger():
+        result=ReservationLedger({'A':8,'B':8});result.retain_running('BG','B',0,86400,1);return result
+    cached=p.select(deepcopy(m),receipt,0,fresh_ledger(),reserve=False)
+    original=p._reservation_frame_profile
+    def uncached(*args,**kwargs):
+        p.reservation_profile_cache.clear();return original(*args,**kwargs)
+    monkeypatch.setattr(p,'_reservation_frame_profile',uncached)
+    plain=p.select(deepcopy(m),receipt,0,fresh_ledger(),reserve=False)
+    for row in (cached,plain):row.pop('online_grid_horizon_evaluations')
+    assert cached==plain

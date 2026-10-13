@@ -1,0 +1,159 @@
+{
+  "schema": "INDEPENDENT_EXPERIMENTAL_SIGNED_GRID_REVIEW_V1",
+  "written_utc": "2026-10-13T16:11:43.518872+00:00",
+  "status": "PASS_RECORDED_BOUNDED_IEEE123_NUMERIC_SCOPE",
+  "review_mode": "SOURCE_AND_EXISTING_RECEIPTS_READ_ONLY;NO_NEW_REPLAYS",
+  "source_epoch": "995fc85937862963391e338254d58af97edab6bb29a4e651fa49a0659ecba090",
+  "source_files": [
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\v42_integration\\experimental_grid.py",
+      "sha256": "aa14c4655d2a1638a52d54eafd6099952bf41c65e486c2e423937931ac0d1cdf",
+      "bytes": 7966
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\v42_integration\\sensitivity_policy.py",
+      "sha256": "2fff62ec450beefc557a509fbec592bf19fe11800e461ae24b20469ff87d0f57",
+      "bytes": 50919
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\v42_integration\\experimental_replay.py",
+      "sha256": "e06f4856b163509f9928b11715058f99f200e01b764d4930f893ffca7b3e021c",
+      "bytes": 6525
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\tests\\test_v42_experimental_grid.py",
+      "sha256": "6d5c987091d9e95bc3be918256a3a025e58cc702112529a66addc801eb73e04a",
+      "bytes": 2232
+    }
+  ],
+  "evidence": [
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\audit\\SOURCE_FREEZE_C_BENCHMARK_EPOCH02.json",
+      "sha256": "1bf82583158cc6047edfaf2d93745a5cef92153e0c9850f54e56496f903a99fb",
+      "bytes": 310084
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\audit\\GRID_VECTOR_EQUIVALENCE_AND_TIMING.json",
+      "sha256": "ab1fee5e8dab1329040c650af5e8d2d752b9364d7a603376f6f3d1c50350da2a",
+      "bytes": 405
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\audit\\GRID_BATCH_EQUIVALENCE_AND_TIMING.json",
+      "sha256": "9973ee594137eff0f7a7dc218b8600983089402a3efd17eacd2469e131b65487",
+      "bytes": 2810
+    }
+  ],
+  "checks": [
+    {
+      "id": "signed_control_PQ",
+      "PASS": true,
+      "evidence": "Same frozen control vector, aidc_load_kw columns and per-site P slope; original coupledQ already in signed response, no additionalQ term."
+    },
+    {
+      "id": "voltage_axis",
+      "PASS": true,
+      "evidence": "einsum(tkn,tk->tn) equals voltage_matrix.T@control per slot; same constant and squared-pu bounds."
+    },
+    {
+      "id": "P_Q_faces",
+      "PASS": true,
+      "evidence": "einsum(tbk,tk->tb) equals branch flow matrices@control;16cos/sin faces kept in signed form."
+    },
+    {
+      "id": "current_correction",
+      "PASS": true,
+      "evidence": "Same correction@(control-anchor)+bias and same branch_limits*cos(pi/16) denominators."
+    },
+    {
+      "id": "line_peak",
+      "PASS": true,
+      "evidence": "max(0,max(all originallineindices/all16faces)) across every remaining slot; negative signed sensitivity retained."
+    },
+    {
+      "id": "transformer_current",
+      "PASS": true,
+      "evidence": "Same current_constant+current_matrix.T@control and same transformerindices>1+1e-9 guard."
+    },
+    {
+      "id": "transformer_kVA",
+      "PASS": true,
+      "evidence": "All original non-None ratings are checked; max signedPcos+Qsin against rating*cos(pi/16)+1e-9. np.nan forNone skips exactly as original."
+    },
+    {
+      "id": "violation_order",
+      "PASS": true,
+      "evidence": "voltage,linecurrent,transformercurrent,then ascendingoriginalbranchindex kVA; per-slot ascending remaining horizon."
+    },
+    {
+      "id": "hard_tolerance",
+      "PASS": true,
+      "evidence": "Every physical comparison retains1e-9.1e-7 is fallback-trigger radius, not relaxedhardthreshold."
+    },
+    {
+      "id": "near_guard_fallback",
+      "PASS": true,
+      "evidence": "Any voltage/current/line/kVA row within1e-7 of its originalboundary reruns scalar expressions; near rows never use a softenedphysicalguard."
+    },
+    {
+      "id": "exact_peak_recompute",
+      "PASS": true,
+      "evidence": "All remaining slots within1e-10 of approximate maximum recompute literal scalar expression; tested peak objective exactlymatches original."
+    },
+    {
+      "id": "remaining_horizon",
+      "PASS": true,
+      "evidence": "Touchedslots earlierthanremaining_slot excluded; violations and max restricted toremaining96; future rebound included."
+    },
+    {
+      "id": "cache_deepcopy",
+      "PASS": true,
+      "evidence": "Keys include remaining_slot,fullstressbytes,fulldeltabytes; cachehit/result deepcopies preserve storedreceipts; bounded256scenarioresult/4scenarioarrays."
+    },
+    {
+      "id": "fixed_packet_source_no_drift",
+      "PASS": true,
+      "evidence": "Current experimental_grid.py SHA/bytes match Epoch02frozenrecord; producer uses fixed constructoranchor and no baselinecoefficient mutation found in current experimentalcallpath."
+    },
+    {
+      "id": "E0_preservation",
+      "PASS": true,
+      "evidence": "Researchsubclass only; original sensitivity_policy.OriginalGridPacket source and originalphysicalauthorities are unchanged."
+    }
+  ],
+  "checks_PASS": 15,
+  "current_source_drift": false,
+  "numeric_receipts": {
+    "originalIEEE123_scalar_comparisons": 288,
+    "scalar_peak_and_ordered_violations_bitwise_equal": true,
+    "batch_profiles": 9,
+    "all_batch_hard_verdict_and_objective_exact": true,
+    "max_batch_per_slot_difference": 1.1102230246251565e-16,
+    "reported_focused_tests_PASS": 2,
+    "focused_tests_run_by_this_reviewer": false
+  },
+  "speed_scope": {
+    "vector_median_speedup": 1.9083993065287563,
+    "batch_mean_speedup": 2.0107370283600035,
+    "component": "NUMERIC_GRID_EVALUATION_ONLY",
+    "fullPolicy_or_Actual_wall_speedup": "NOT_ESTABLISHED_FROM_THIS_KERNEL_BENCHMARK",
+    "compiler_optimization_or_behavior_claim": false,
+    "Native_Optimize_calls": 0,
+    "AC_calls": 0
+  },
+  "limitations": [
+    "Recorded288scalar/9batch profiles and2focused tests establish this bounded currentIEEE123 numeric scope;not a formal error bound for arbitrary unbounded numeric inputs.",
+    "1e-10 exactmax near-tie coverage relies on batch roundoff smallerthan that radius;observed maximum per-slot difference1.11e-16 is substantiallysmaller. Physicalfallback1e-7 leaves original1e-9 guards unchanged.",
+    "Inheritedcache treats complete sourcepacket/baseline immutable. Keys do not include changedbaselinecontrols/coefficients; any future mutation must construct a newpacket or invalidate both caches/tables. Currentproducer doesnot mutate these fields.",
+    "Cachedtable arrays are readonly;original coefficient/control arrays are not mechanically readonly. This is an explicit fixedconstructorinput contract,not a source-drift profiler.",
+    "Numericperf receipts omit detailed cold/warm cache counters and do not claim totalpolicy/Actual throughput improvement;exact sourceEpoch/hash matched independently."
+  ],
+  "required_source_or_guard_corrections": [],
+  "blocking_issue_found": false,
+  "Q50_original_hard_constraints_strict": true,
+  "Q90_only_admitted_fluid_risk": true,
+  "original_A_M_FULL_UB_LB_or_AC_certificate_transferred": false,
+  "Native_Optimize_calls": 0,
+  "Actual_replays": 0,
+  "Fresh_AC_calls": 0,
+  "source_edits": 0
+}
