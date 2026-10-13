@@ -1,0 +1,161 @@
+{
+  "schema": "INDEPENDENT_C_PATCH_READONLY_REVIEW_V1",
+  "PASS": true,
+  "concrete_issues": [],
+  "scope": "9_LINE_SENSITIVITY_POLICY_DIFF_AND_16_PARAMETERIZED_REGRESSION_CASES_REVIEW",
+  "verification": "SOURCE_AND_TEST_CASE_READ_ONLY_REVIEW_NOT_TEST_EXECUTION",
+  "checks": {
+    "source_None_PREPLACE_requires_explicit_permission": true,
+    "positive_delay_retains_batch_rights": true,
+    "protection_remains_explicit_False": true,
+    "Running_batch_remains_required": true,
+    "start_receipt_window_and_shared_budget_unchanged": true,
+    "site_and_hard_earliest_latest_deadline_guards_retained": true,
+    "current_and_all_future_capacity_included": true,
+    "expired_capacity_only_excluded": true,
+    "migration_checkpoint_packet_budget_and_hold_code_unchanged": true,
+    "regression_source_None_both_batch_states": true,
+    "regression_current_future_last_slot_preserved": true,
+    "regression_frozen_reload_checked": true,
+    "runtime_unknown_partition": true,
+    "runtime_known_partition": true,
+    "runtime_Dday_unknown_partition": true,
+    "runtime_no_all_Unknown_entered_claim": true
+  },
+  "review_findings": [
+    "Same-start PREPLACE with explicit permission no longer requires unrelated batch-delay authority; protected=False remains mandatory.",
+    "Source_site=None cannot bypass explicit can_prestart_place for PREPLACE.",
+    "Positive additional delay still requires batch=True, allowed start membership and same immutable remaining budget.",
+    "RUNNING batch/checkpoint/WAN/one-migration/hold/migration-budget semantics are unchanged.",
+    "Capacity slice includes the current slot and every remaining slot through95; only expired slots are excluded, matching the signed-grid scorer.",
+    "Regression cases cover batchNone/False, sourceA/None, protectedNone/True, RunningbatchNone, past/current/future/95capacity and frozenreload."
+  ],
+  "test_cases_reviewed": 16,
+  "test_reruns": 0,
+  "Native_Optimize_calls": 0,
+  "AC_reruns": 0,
+  "actual_May_action_improvement_established": false,
+  "May_production_no_selected_candidate_or_action_claim_unchanged": true,
+  "runtime_partitions": {
+    "active_known": 1546,
+    "known_dispatch": 48,
+    "known_no_dispatch": 1498,
+    "active_unknown": 774,
+    "unknown_dispatch": 766,
+    "unknown_no_dispatch": 8,
+    "Dday_unknown": 696,
+    "Dday_pending_dispatch": 693,
+    "Dday_late_carryout_no_dispatch": 3,
+    "initial_unknown_running_no_checkpoint_before_completion": 5
+  },
+  "aggregate_report_review": [
+    {
+      "name": "CONTROL_POLICY_ROOT_CAUSE_FINAL_KO.md",
+      "exists": true,
+      "receipt": {
+        "path": "D:\\v42_policy_root_cause_20261013\\audit\\CONTROL_POLICY_ROOT_CAUSE_FINAL_KO.md",
+        "bytes": 10141,
+        "sha256": "7baa22cbc8056b0712f7f0cdd2b0411fd5392f7452f909a17f30c8ba100af253"
+      }
+    },
+    {
+      "name": "CONTROL_POLICY_ROOT_CAUSE_MATRIX.json",
+      "exists": true,
+      "receipt": {
+        "path": "D:\\v42_policy_root_cause_20261013\\audit\\CONTROL_POLICY_ROOT_CAUSE_MATRIX.json",
+        "bytes": 9922,
+        "sha256": "07812da9059a61cb2c7a036fc12b7f5c96f44344bc5a87864ce74fe1e9338450"
+      }
+    },
+    {
+      "name": "POLICY_COMPILER_ONLY_FIRST_FAILURE.json",
+      "exists": true,
+      "receipt": {
+        "path": "D:\\v42_policy_root_cause_20261013\\audit\\POLICY_COMPILER_ONLY_FIRST_FAILURE.json",
+        "bytes": 8076,
+        "sha256": "42a181c58131c6fcc5af60d84677608004e9f83ad57338bf98349e625c7bb219"
+      }
+    },
+    {
+      "name": "POLICY_FREEZE_RELOAD_RUNTIME_AUDIT.json",
+      "exists": true,
+      "receipt": {
+        "path": "D:\\v42_policy_root_cause_20261013\\audit\\POLICY_FREEZE_RELOAD_RUNTIME_AUDIT.json",
+        "bytes": 37271,
+        "sha256": "7364141fc63fab8d658e81ca3d830d1ea396aee3d98ab284f592ed600a5236bc"
+      }
+    },
+    {
+      "name": "CONTROL_POLICY_EXECUTION_CALLGRAPH.json",
+      "exists": true,
+      "receipt": {
+        "path": "D:\\v42_policy_root_cause_20261013\\audit\\CONTROL_POLICY_EXECUTION_CALLGRAPH.json",
+        "bytes": 34207,
+        "sha256": "411f47f8a07cfd82df27025e485e3e729310ddbe5b92bf7f1b19302fb81155d8"
+      }
+    }
+  ],
+  "aggregate_report_status": "PASS_FINAL_AGGREGATE_CLAIM_REVIEW",
+  "sources": [
+    {
+      "path": "D:\\v42_policy_root_cause_fix_20261013\\v42_integration\\sensitivity_policy.py",
+      "bytes": 50919,
+      "sha256": "2fff62ec450beefc557a509fbec592bf19fe11800e461ae24b20469ff87d0f57"
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_fix_20261013\\tests\\test_v42_policy_root_cause_regressions.py",
+      "bytes": 5587,
+      "sha256": "ba1964363bd45dfb550da2cd01f6e5f2e1432027e27f18cf9cdd6dd0323164d9"
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\job_actual\\POLICY_FREEZE_RELOAD_RUNTIME_AUDIT.json",
+      "bytes": 27962,
+      "sha256": "1e3c3a4d0c6dcf05763e9ae3aa58937a687f8f427911b452d57a696cfdc5579c"
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\job_actual\\review_c_patch.py",
+      "bytes": 5708,
+      "sha256": "f54631af6745fb347b3e4e48a2191a3852cd442a123dafa1715865a2f788074c"
+    }
+  ],
+  "diff_sha256": "13bb31e6cdfb07de65c8b4dc80e57e1e277e043106d82ef6966cfa82f26bd53d",
+  "source_index_or_original_artifact_mutations": 0,
+  "aggregate_report_checks": {
+    "matrix_facts_correct": true,
+    "first_failure_facts_correct": true,
+    "runtime_unknown_partition": true,
+    "runtime_known_partition": true,
+    "runtime_Dday_partition": true,
+    "lookup_counter_limit_disclosed": true,
+    "unassigned_FCFS_not_PREPLACE_authority": true,
+    "known_preplace_flag_and_Unknown_no_authority_disclosed": true,
+    "V6_source_only_and_NOT_RUN": true,
+    "actual_effect_NOT_ESTABLISHED": true,
+    "no_global_Q90_infeasibility_overclaim": true
+  },
+  "aggregate_fact_fields_verified": {
+    "raw_UIDs": 2498,
+    "historical_total_UIDs": 178,
+    "active_known_UIDs": 1546,
+    "known_dispatch_UIDs": 48,
+    "known_no_unknown_dispatch_UIDs": 1498,
+    "active_origin_unknown_UIDs": 774,
+    "unknown_dispatch_UIDs": 766,
+    "unknown_no_due_policy_event_UIDs": 8,
+    "Dday_unknown_UIDs": 696,
+    "Dday_pending_dispatch_UIDs": 693,
+    "late_Dday_no_admit_boundary_UIDs": 3,
+    "explicit_preplacement_flag_active_UIDs": 1245,
+    "explicit_preplacement_flag_unknown_UIDs": 0
+  },
+  "existing_test_receipt_read_only_checked": {
+    "cases": 40,
+    "failures": 0,
+    "reruns_by_reviewer": 0,
+    "receipt": {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\fixtures\\PATCH_FOCUSED_TESTS.xml",
+      "bytes": 6719,
+      "sha256": "4c64d3afee36a62455fc1f3beb8c171375316a8496e3e3ed72cc4b42ba78b931"
+    }
+  }
+}

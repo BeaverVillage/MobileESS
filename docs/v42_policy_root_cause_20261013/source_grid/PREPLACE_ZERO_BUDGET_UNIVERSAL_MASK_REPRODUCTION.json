@@ -1,0 +1,133 @@
+{
+  "scope": "CONTROLLED_SOURCE_CAPABILITY_FIXTURE_ONLY;NOT_A_MAY_ACTION",
+  "source_policy": "D:\\v42_integration_validation_20261013\\POLICY_V5_OFFLINE_FIXTURE\\PLACEMENT_BENEFIT\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+  "unchanged_policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+  "unchanged_job_budget_seconds": 0.0,
+  "outcomes": [
+    {
+      "protected": false,
+      "batch_eligible": true,
+      "candidate_reason": "MATCH",
+      "candidates": [
+        {
+          "action": "PREPLACE",
+          "site": "B",
+          "start_seconds": 0.0,
+          "additional_start_delay_seconds": 0.0
+        },
+        {
+          "action": "START",
+          "site": "A",
+          "start_seconds": 0.0,
+          "additional_start_delay_seconds": 0.0
+        }
+      ],
+      "selection": {
+        "uid": "CONTROLLED_OBSERVED_PLACEMENT_REQUEST",
+        "action": "PREPLACE",
+        "policy_action": "PREPLACE",
+        "site": "B",
+        "start_seconds": 0.0,
+        "nominal_end_seconds": 900.0,
+        "additional_start_delay_seconds": 0.0,
+        "rule_id": "T0_0",
+        "estimated_worst_peak": 0.4,
+        "scenario_scores": {
+          "HIGH_DEMAND_Q90": 0.4,
+          "NOMINAL_Q50": 0.4
+        },
+        "segments": [
+          {
+            "resource": "gpu:B",
+            "begin": 0.0,
+            "end": 900.0,
+            "quantity": 1
+          }
+        ],
+        "status": "SELECTED_FROZEN_OFFLINE_RANK",
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "rejected_candidates": [],
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0,
+        "affine_approximation_only": true,
+        "grid_safety_guaranteed": false,
+        "Fresh_AC_status": "NOT_RUN"
+      }
+    },
+    {
+      "protected": false,
+      "batch_eligible": null,
+      "candidate_reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+      "candidates": [],
+      "selection": {
+        "uid": "CONTROLLED_OBSERVED_PLACEMENT_REQUEST",
+        "action": "QUEUE",
+        "status": "NO_FEASIBLE_ACTION",
+        "reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+        "rejected_candidates": [],
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "grid_safety_guaranteed": false,
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0
+      }
+    },
+    {
+      "protected": false,
+      "batch_eligible": false,
+      "candidate_reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+      "candidates": [],
+      "selection": {
+        "uid": "CONTROLLED_OBSERVED_PLACEMENT_REQUEST",
+        "action": "QUEUE",
+        "status": "NO_FEASIBLE_ACTION",
+        "reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+        "rejected_candidates": [],
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "grid_safety_guaranteed": false,
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0
+      }
+    },
+    {
+      "protected": null,
+      "batch_eligible": null,
+      "candidate_reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+      "candidates": [],
+      "selection": {
+        "uid": "CONTROLLED_OBSERVED_PLACEMENT_REQUEST",
+        "action": "QUEUE",
+        "status": "NO_FEASIBLE_ACTION",
+        "reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+        "rejected_candidates": [],
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "grid_safety_guaranteed": false,
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0
+      }
+    },
+    {
+      "protected": true,
+      "batch_eligible": null,
+      "candidate_reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+      "candidates": [],
+      "selection": {
+        "uid": "CONTROLLED_OBSERVED_PLACEMENT_REQUEST",
+        "action": "QUEUE",
+        "status": "NO_FEASIBLE_ACTION",
+        "reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+        "rejected_candidates": [],
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "grid_safety_guaranteed": false,
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0
+      }
+    }
+  ],
+  "original_source_validator_accepts_zero_delay_preplacement": true,
+  "implementation_bug": "FrozenSensitivityPolicy.lookup checks delay batch/protection authority before independent zero-delay placement capability.",
+  "current_May_causal_effect": "MASKED_BY_COMPILER_ZERO_ORDERED_ACTIONS_AND_OBSERVED_RESOURCE_GUARD",
+  "production_actual_replayed": false,
+  "Native_Optimize_calls": 0,
+  "AC_calls": 0,
+  "source_edits": 0
+}

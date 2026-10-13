@@ -1,0 +1,57 @@
+{
+  "schema": "CONTROL_POLICY_FIX_DIFF_AUDIT_V1",
+  "status": "MINIMAL_MASKED_BUG_FIX_SOURCE_ONLY",
+  "base_commit": "8f0ea6e8f97147bb425530e8d787ca89f4a05053",
+  "previous_executed_source_sha": "f488f3a99555eb2354ef52d0835078be816d2d988a2bf37010b9b09ff36568d8",
+  "followup_source_sha": "f1381aab980ed7ced26184294a7abc82e1062af2bd6d41e6f0d9429b226c2358",
+  "source_epoch_scope": "FOLLOWUP_SOURCE_ONLY_EPOCH;PRODUCTION_A_M_ACTUAL_FRESH_NOT_RUN",
+  "May01_V5_policy_status": "POLICY_COMPILER_ONLY",
+  "May01_optimized_control_effect": "NOT_ESTABLISHED",
+  "production_V6_A_M_Actual_Fresh": "NOT_RUN",
+  "Native_Optimize_calls": 0,
+  "AC_calls": 0,
+  "campaign_HOLD": true,
+  "campaign_auto_restart_authorized": false,
+  "source_files": [
+    {
+      "relative": "v42_integration/sensitivity_policy.py",
+      "before": {
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\sensitivity_policy.py",
+        "bytes": 50524,
+        "sha256": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428"
+      },
+      "after": {
+        "path": "D:\\v42_policy_root_cause_fix_20261013\\v42_integration\\sensitivity_policy.py",
+        "bytes": 50919,
+        "sha256": "2fff62ec450beefc557a509fbec592bf19fe11800e461ae24b20469ff87d0f57"
+      }
+    },
+    {
+      "relative": "tests/test_v42_policy_root_cause_regressions.py",
+      "before": null,
+      "after": {
+        "path": "D:\\v42_policy_root_cause_fix_20261013\\tests\\test_v42_policy_root_cause_regressions.py",
+        "bytes": 5587,
+        "sha256": "ba1964363bd45dfb550da2cd01f6e5f2e1432027e27f18cf9cdd6dd0323164d9"
+      }
+    }
+  ],
+  "exact_tracked_source_diff": "diff --git a/v42_integration/sensitivity_policy.py b/v42_integration/sensitivity_policy.py\nindex 854a5cfbf..8e8cca9c3 100644\n--- a/v42_integration/sensitivity_policy.py\n+++ b/v42_integration/sensitivity_policy.py\n@@ -425,7 +425,9 @@ def compile_sensitivity_policy(packet,envelope,cc4_q50,cc4_q90,kernel,prototypes\n                                     after+=profile\n                         delta=after-reference_profile\n                         score=packet.evaluate(delta,remaining_slot=slot,scenario_gpu=stress)\n-                        total=packet.known_gpu+anonymous+stress+delta\n+                        # A decision at this event cannot alter expired slots.\n+                        # Match the remaining horizon used by the grid evaluator.\n+                        total=(packet.known_gpu+anonymous+stress+delta)[slot:]\n                         if np.any(total>np.asarray([packet.capacities[s] for s in packet.sites])+1e-8) or np.any(total<-1e-8):\n                             score=dict(score,hard_feasible=False,violations=score['violations']+\n                                 [dict(reason='WHOLE_GANG_SITE_GPU_CAPACITY')])\n@@ -635,7 +637,8 @@ class FrozenSensitivityPolicy(FrozenControlPolicy):\n             return None,'NOT_YET_SUBMITTED'\n         if now%DT:return None,'CONTROL_GRID_EVENT_NOT_DUE'\n         state=metadata.get('state','PENDING')\n-        if metadata.get('protected') is not False or metadata.get('batch_eligible') is not True:\n+        if metadata.get('protected') is not False or (\n+                state=='RUNNING' and metadata.get('batch_eligible') is not True):\n             return None,'ACTION_QOS_AUTHORITY_UNCONFIRMED'\n         service=(float(metadata['t50_seconds'])-float(metadata.get('accumulated_compute_seconds',0))\n             if state=='RUNNING' else float(metadata.get('nominal_service_seconds',metadata['t50_seconds'])))\n@@ -662,7 +665,9 @@ class FrozenSensitivityPolicy(FrozenControlPolicy):\n             delay=max(0.,start-receipt['reference_start_seconds'])\n             consumed=delay+float(metadata.get('cumulative_migration_interruption_seconds',0))\n             if (start not in receipt['allowed_starts_seconds'] or consumed>receipt['budget_seconds']+1e-9\n+                    or (delay>1e-9 and metadata.get('batch_eligible') is not True)\n                     or site not in metadata.get('compatible_sites',())\n+                    or (row['action']=='PREPLACE' and metadata.get('can_prestart_place') is not True)\n                     or (metadata.get('source_site') is not None and site!=metadata['source_site']\n                         and metadata.get('can_prestart_place') is not True)):\n                 continue\n",
+  "changed_conditions": [
+    "PENDING batch authority moves from universal lookup to positive intentional delay candidate",
+    "Explicit PREPLACE requires can_prestart_place=True even source_site=None",
+    "Capacity upper/lower feasibility uses total[slot:] matching remaining grid horizon"
+  ],
+  "preserved": [
+    "confirmed nonprotected policy scope",
+    "RUNNING/migration protection and batch rights",
+    "immutable QoS budget/allowed starts",
+    "GPU/Rack/WAN/checkpoint/1migration",
+    "all current/future grid and capacity constraints",
+    "CC4/Q50/Q90/kernel/model values",
+    "source private durations",
+    "common Actual engine and power materializer"
+  ],
+  "difference_check_PASS": true,
+  "source_snapshot_1779_files_unchanged": true
+}

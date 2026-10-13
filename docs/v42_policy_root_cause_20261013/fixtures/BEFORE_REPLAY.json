@@ -1,0 +1,182 @@
+{
+  "schema": "CONTROLLED_BEFORE_AFTER_REPLAY_SIDE_V1",
+  "source_root": "D:\\v42_policy_root_cause_20261013",
+  "runtime_source_sha": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428",
+  "cases": [
+    {
+      "name": "ZERO_DELAY_PREPLACE_BATCH_True",
+      "public_input_sha": "c334c538d83131298030a3066045eb4a4c2a701e3a5459abf5eb584393d4f148",
+      "selected": {
+        "uid": "OBSERVED_FIXTURE_JOB",
+        "action": "PREPLACE",
+        "policy_action": "PREPLACE",
+        "site": "B",
+        "start_seconds": 0,
+        "nominal_end_seconds": 900.0,
+        "additional_start_delay_seconds": 0.0,
+        "rule_id": "T0_0",
+        "estimated_worst_peak": 0.4,
+        "scenario_scores": {
+          "HIGH_DEMAND_Q90": 0.4,
+          "NOMINAL_Q50": 0.4
+        },
+        "segments": [
+          {
+            "resource": "gpu:B",
+            "begin": 0,
+            "end": 900.0,
+            "quantity": 1
+          }
+        ],
+        "status": "SELECTED_FROZEN_OFFLINE_RANK",
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "rejected_candidates": [],
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0,
+        "affine_approximation_only": true,
+        "grid_safety_guaranteed": false,
+        "Fresh_AC_status": "NOT_RUN"
+      }
+    },
+    {
+      "name": "ZERO_DELAY_PREPLACE_BATCH_None",
+      "public_input_sha": "4de97647e76425d9e243ad43f2b1bc4bb3ea582d16a1563fc0464d12b1917b73",
+      "selected": {
+        "uid": "OBSERVED_FIXTURE_JOB",
+        "action": "QUEUE",
+        "status": "NO_FEASIBLE_ACTION",
+        "reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+        "rejected_candidates": [],
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "grid_safety_guaranteed": false,
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0
+      }
+    },
+    {
+      "name": "ZERO_DELAY_PREPLACE_BATCH_False",
+      "public_input_sha": "ada3922534db06990ae3762d02318f6332131ae14ddea4b6a34b04704ed0e922",
+      "selected": {
+        "uid": "OBSERVED_FIXTURE_JOB",
+        "action": "QUEUE",
+        "status": "NO_FEASIBLE_ACTION",
+        "reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+        "rejected_candidates": [],
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "grid_safety_guaranteed": false,
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0
+      }
+    },
+    {
+      "name": "SOURCE_NONE_PREPLACE_PERMISSION_False",
+      "public_input_sha": "29d7a4aaea37a52b4cbdf3454a1a19dcf1a993e02349a23d5bda69835515c68a",
+      "selected": {
+        "uid": "OBSERVED_FIXTURE_JOB",
+        "action": "PREPLACE",
+        "policy_action": "PREPLACE",
+        "site": "B",
+        "start_seconds": 0,
+        "nominal_end_seconds": 900.0,
+        "additional_start_delay_seconds": 0.0,
+        "rule_id": "T0_0",
+        "estimated_worst_peak": 0.4,
+        "scenario_scores": {
+          "HIGH_DEMAND_Q90": 0.4,
+          "NOMINAL_Q50": 0.4
+        },
+        "segments": [
+          {
+            "resource": "gpu:B",
+            "begin": 0,
+            "end": 900.0,
+            "quantity": 1
+          }
+        ],
+        "status": "SELECTED_FROZEN_OFFLINE_RANK",
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "rejected_candidates": [],
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0,
+        "affine_approximation_only": true,
+        "grid_safety_guaranteed": false,
+        "Fresh_AC_status": "NOT_RUN"
+      }
+    },
+    {
+      "name": "SOURCE_NONE_PREPLACE_PERMISSION_True",
+      "public_input_sha": "0e90547caf26dba83aca01a26762cceceb40cefdc0f8f956c6582f6e808c6cf8",
+      "selected": {
+        "uid": "OBSERVED_FIXTURE_JOB",
+        "action": "PREPLACE",
+        "policy_action": "PREPLACE",
+        "site": "B",
+        "start_seconds": 0,
+        "nominal_end_seconds": 900.0,
+        "additional_start_delay_seconds": 0.0,
+        "rule_id": "T0_0",
+        "estimated_worst_peak": 0.4,
+        "scenario_scores": {
+          "HIGH_DEMAND_Q90": 0.4,
+          "NOMINAL_Q50": 0.4
+        },
+        "segments": [
+          {
+            "resource": "gpu:B",
+            "begin": 0,
+            "end": 900.0,
+            "quantity": 1
+          }
+        ],
+        "status": "SELECTED_FROZEN_OFFLINE_RANK",
+        "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+        "rejected_candidates": [],
+        "online_global_optimizer_calls": 0,
+        "online_grid_horizon_evaluations": 0,
+        "affine_approximation_only": true,
+        "grid_safety_guaranteed": false,
+        "Fresh_AC_status": "NOT_RUN"
+      }
+    },
+    {
+      "name": "PAST_ONLY_Q90_CAPACITY_AT_EVENT_SLOT2",
+      "public_input_sha": "3d524c67f96b34211b6cc25526c49740bb122e6fab6967ffe27ecfd55dee19a7",
+      "ordered_actions": 0,
+      "numeric_candidates": 10,
+      "source_policy_sha": "a7e5f0a572404571bcb7a7c41b53ea1b15c3a5d9e9837cca66fb5abef12f31be",
+      "numeric_hard_pass": 0
+    },
+    {
+      "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_2",
+      "public_input_sha": "2a54ff1ad5abbd40c6bddcee222f75d3c8f5b2b4b34f9e511f5c85af025cb73c",
+      "ordered_actions": 0,
+      "numeric_candidates": 10,
+      "source_policy_sha": "86eaac02755eb8d090856ecdbe0774a798b28ea656fba4f25d9f2475ad5169c7",
+      "numeric_hard_pass": 0
+    },
+    {
+      "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_3",
+      "public_input_sha": "696dfd8b10394f5162e2a41fab697ea3bc0bf794448da22ea6e4a40b42f3c833",
+      "ordered_actions": 0,
+      "numeric_candidates": 10,
+      "source_policy_sha": "72a50cd53354c70515c37863cdd8c6413731c0567ca27b4af579eae17e91c0ea",
+      "numeric_hard_pass": 0
+    },
+    {
+      "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_95",
+      "public_input_sha": "eac9fc16ab98b4f4366130f5157004ef120f2b2dffaaf7c5166785a3c2b69e01",
+      "ordered_actions": 0,
+      "numeric_candidates": 10,
+      "source_policy_sha": "409a26102dfe8a55476af36a2d59e70aa5125e14a388c848abdd65968698bf40",
+      "numeric_hard_pass": 0
+    }
+  ],
+  "frozen_real_V5_policy_load_identical_sha": "26cd02b14fa81a5ec44bf64f963ddf0d54efde1d8a74cc270d52cc96f38fdd0a",
+  "frozen_real_V5_policy_status": "POLICY_COMPILER_ONLY",
+  "frozen_real_V5_ordered_actions": 0,
+  "source_case_inputs_changed": false,
+  "forecast_model_or_values_changed": false,
+  "Native_Optimize_calls": 0,
+  "production_Actual_runs": 0,
+  "Fresh_AC_runs": 0
+}

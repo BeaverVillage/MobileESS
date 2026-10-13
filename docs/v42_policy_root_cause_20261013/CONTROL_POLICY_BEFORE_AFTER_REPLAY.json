@@ -1,0 +1,452 @@
+{
+  "schema": "CONTROL_POLICY_BEFORE_AFTER_REPLAY_V1",
+  "status": "PASS_SAME_CONTROLLED_PUBLIC_INPUTS",
+  "base_commit": "8f0ea6e8f97147bb425530e8d787ca89f4a05053",
+  "previous_executed_source_sha": "f488f3a99555eb2354ef52d0835078be816d2d988a2bf37010b9b09ff36568d8",
+  "followup_source_sha": "f1381aab980ed7ced26184294a7abc82e1062af2bd6d41e6f0d9429b226c2358",
+  "source_epoch_scope": "FOLLOWUP_SOURCE_ONLY_EPOCH;PRODUCTION_A_M_ACTUAL_FRESH_NOT_RUN",
+  "May01_V5_policy_status": "POLICY_COMPILER_ONLY",
+  "May01_optimized_control_effect": "NOT_ESTABLISHED",
+  "production_V6_A_M_Actual_Fresh": "NOT_RUN",
+  "Native_Optimize_calls": 0,
+  "AC_calls": 0,
+  "campaign_HOLD": true,
+  "campaign_auto_restart_authorized": false,
+  "named_synthetic_only": true,
+  "real_May01_failure_read_only_load": {
+    "policy_sha": "26cd02b14fa81a5ec44bf64f963ddf0d54efde1d8a74cc270d52cc96f38fdd0a",
+    "after_policy_sha": "26cd02b14fa81a5ec44bf64f963ddf0d54efde1d8a74cc270d52cc96f38fdd0a",
+    "before_ordered": 0,
+    "after_ordered": 0,
+    "note": "V5 file load/read-only reproduction only. No V6 May recompilation or Actual execution."
+  },
+  "comparisons": [
+    {
+      "name": "ZERO_DELAY_PREPLACE_BATCH_True",
+      "exact_same_public_input_sha": "c334c538d83131298030a3066045eb4a4c2a701e3a5459abf5eb584393d4f148",
+      "before": {
+        "name": "ZERO_DELAY_PREPLACE_BATCH_True",
+        "public_input_sha": "c334c538d83131298030a3066045eb4a4c2a701e3a5459abf5eb584393d4f148",
+        "selected": {
+          "uid": "OBSERVED_FIXTURE_JOB",
+          "action": "PREPLACE",
+          "policy_action": "PREPLACE",
+          "site": "B",
+          "start_seconds": 0,
+          "nominal_end_seconds": 900.0,
+          "additional_start_delay_seconds": 0.0,
+          "rule_id": "T0_0",
+          "estimated_worst_peak": 0.4,
+          "scenario_scores": {
+            "HIGH_DEMAND_Q90": 0.4,
+            "NOMINAL_Q50": 0.4
+          },
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 0,
+              "end": 900.0,
+              "quantity": 1
+            }
+          ],
+          "status": "SELECTED_FROZEN_OFFLINE_RANK",
+          "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+          "rejected_candidates": [],
+          "online_global_optimizer_calls": 0,
+          "online_grid_horizon_evaluations": 0,
+          "affine_approximation_only": true,
+          "grid_safety_guaranteed": false,
+          "Fresh_AC_status": "NOT_RUN"
+        }
+      },
+      "after": {
+        "name": "ZERO_DELAY_PREPLACE_BATCH_True",
+        "public_input_sha": "c334c538d83131298030a3066045eb4a4c2a701e3a5459abf5eb584393d4f148",
+        "selected": {
+          "uid": "OBSERVED_FIXTURE_JOB",
+          "action": "PREPLACE",
+          "policy_action": "PREPLACE",
+          "site": "B",
+          "start_seconds": 0,
+          "nominal_end_seconds": 900.0,
+          "additional_start_delay_seconds": 0.0,
+          "rule_id": "T0_0",
+          "estimated_worst_peak": 0.4,
+          "scenario_scores": {
+            "HIGH_DEMAND_Q90": 0.4,
+            "NOMINAL_Q50": 0.4
+          },
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 0,
+              "end": 900.0,
+              "quantity": 1
+            }
+          ],
+          "status": "SELECTED_FROZEN_OFFLINE_RANK",
+          "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+          "rejected_candidates": [],
+          "online_global_optimizer_calls": 0,
+          "online_grid_horizon_evaluations": 0,
+          "affine_approximation_only": true,
+          "grid_safety_guaranteed": false,
+          "Fresh_AC_status": "NOT_RUN"
+        }
+      }
+    },
+    {
+      "name": "ZERO_DELAY_PREPLACE_BATCH_None",
+      "exact_same_public_input_sha": "4de97647e76425d9e243ad43f2b1bc4bb3ea582d16a1563fc0464d12b1917b73",
+      "before": {
+        "name": "ZERO_DELAY_PREPLACE_BATCH_None",
+        "public_input_sha": "4de97647e76425d9e243ad43f2b1bc4bb3ea582d16a1563fc0464d12b1917b73",
+        "selected": {
+          "uid": "OBSERVED_FIXTURE_JOB",
+          "action": "QUEUE",
+          "status": "NO_FEASIBLE_ACTION",
+          "reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+          "rejected_candidates": [],
+          "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+          "grid_safety_guaranteed": false,
+          "online_global_optimizer_calls": 0,
+          "online_grid_horizon_evaluations": 0
+        }
+      },
+      "after": {
+        "name": "ZERO_DELAY_PREPLACE_BATCH_None",
+        "public_input_sha": "4de97647e76425d9e243ad43f2b1bc4bb3ea582d16a1563fc0464d12b1917b73",
+        "selected": {
+          "uid": "OBSERVED_FIXTURE_JOB",
+          "action": "PREPLACE",
+          "policy_action": "PREPLACE",
+          "site": "B",
+          "start_seconds": 0,
+          "nominal_end_seconds": 900.0,
+          "additional_start_delay_seconds": 0.0,
+          "rule_id": "T0_0",
+          "estimated_worst_peak": 0.4,
+          "scenario_scores": {
+            "HIGH_DEMAND_Q90": 0.4,
+            "NOMINAL_Q50": 0.4
+          },
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 0,
+              "end": 900.0,
+              "quantity": 1
+            }
+          ],
+          "status": "SELECTED_FROZEN_OFFLINE_RANK",
+          "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+          "rejected_candidates": [],
+          "online_global_optimizer_calls": 0,
+          "online_grid_horizon_evaluations": 0,
+          "affine_approximation_only": true,
+          "grid_safety_guaranteed": false,
+          "Fresh_AC_status": "NOT_RUN"
+        }
+      }
+    },
+    {
+      "name": "ZERO_DELAY_PREPLACE_BATCH_False",
+      "exact_same_public_input_sha": "ada3922534db06990ae3762d02318f6332131ae14ddea4b6a34b04704ed0e922",
+      "before": {
+        "name": "ZERO_DELAY_PREPLACE_BATCH_False",
+        "public_input_sha": "ada3922534db06990ae3762d02318f6332131ae14ddea4b6a34b04704ed0e922",
+        "selected": {
+          "uid": "OBSERVED_FIXTURE_JOB",
+          "action": "QUEUE",
+          "status": "NO_FEASIBLE_ACTION",
+          "reason": "ACTION_QOS_AUTHORITY_UNCONFIRMED",
+          "rejected_candidates": [],
+          "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+          "grid_safety_guaranteed": false,
+          "online_global_optimizer_calls": 0,
+          "online_grid_horizon_evaluations": 0
+        }
+      },
+      "after": {
+        "name": "ZERO_DELAY_PREPLACE_BATCH_False",
+        "public_input_sha": "ada3922534db06990ae3762d02318f6332131ae14ddea4b6a34b04704ed0e922",
+        "selected": {
+          "uid": "OBSERVED_FIXTURE_JOB",
+          "action": "PREPLACE",
+          "policy_action": "PREPLACE",
+          "site": "B",
+          "start_seconds": 0,
+          "nominal_end_seconds": 900.0,
+          "additional_start_delay_seconds": 0.0,
+          "rule_id": "T0_0",
+          "estimated_worst_peak": 0.4,
+          "scenario_scores": {
+            "HIGH_DEMAND_Q90": 0.4,
+            "NOMINAL_Q50": 0.4
+          },
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 0,
+              "end": 900.0,
+              "quantity": 1
+            }
+          ],
+          "status": "SELECTED_FROZEN_OFFLINE_RANK",
+          "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+          "rejected_candidates": [],
+          "online_global_optimizer_calls": 0,
+          "online_grid_horizon_evaluations": 0,
+          "affine_approximation_only": true,
+          "grid_safety_guaranteed": false,
+          "Fresh_AC_status": "NOT_RUN"
+        }
+      }
+    },
+    {
+      "name": "SOURCE_NONE_PREPLACE_PERMISSION_False",
+      "exact_same_public_input_sha": "29d7a4aaea37a52b4cbdf3454a1a19dcf1a993e02349a23d5bda69835515c68a",
+      "before": {
+        "name": "SOURCE_NONE_PREPLACE_PERMISSION_False",
+        "public_input_sha": "29d7a4aaea37a52b4cbdf3454a1a19dcf1a993e02349a23d5bda69835515c68a",
+        "selected": {
+          "uid": "OBSERVED_FIXTURE_JOB",
+          "action": "PREPLACE",
+          "policy_action": "PREPLACE",
+          "site": "B",
+          "start_seconds": 0,
+          "nominal_end_seconds": 900.0,
+          "additional_start_delay_seconds": 0.0,
+          "rule_id": "T0_0",
+          "estimated_worst_peak": 0.4,
+          "scenario_scores": {
+            "HIGH_DEMAND_Q90": 0.4,
+            "NOMINAL_Q50": 0.4
+          },
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 0,
+              "end": 900.0,
+              "quantity": 1
+            }
+          ],
+          "status": "SELECTED_FROZEN_OFFLINE_RANK",
+          "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+          "rejected_candidates": [],
+          "online_global_optimizer_calls": 0,
+          "online_grid_horizon_evaluations": 0,
+          "affine_approximation_only": true,
+          "grid_safety_guaranteed": false,
+          "Fresh_AC_status": "NOT_RUN"
+        }
+      },
+      "after": {
+        "name": "SOURCE_NONE_PREPLACE_PERMISSION_False",
+        "public_input_sha": "29d7a4aaea37a52b4cbdf3454a1a19dcf1a993e02349a23d5bda69835515c68a",
+        "selected": {
+          "uid": "OBSERVED_FIXTURE_JOB",
+          "action": "START",
+          "policy_action": "START_NOW",
+          "site": "A",
+          "start_seconds": 0,
+          "nominal_end_seconds": 900.0,
+          "additional_start_delay_seconds": 0.0,
+          "rule_id": "T0_0",
+          "estimated_worst_peak": 0.9,
+          "scenario_scores": {
+            "HIGH_DEMAND_Q90": 0.9,
+            "NOMINAL_Q50": 0.9
+          },
+          "segments": [
+            {
+              "resource": "gpu:A",
+              "begin": 0,
+              "end": 900.0,
+              "quantity": 1
+            }
+          ],
+          "status": "SELECTED_FROZEN_OFFLINE_RANK",
+          "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+          "rejected_candidates": [],
+          "online_global_optimizer_calls": 0,
+          "online_grid_horizon_evaluations": 0,
+          "affine_approximation_only": true,
+          "grid_safety_guaranteed": false,
+          "Fresh_AC_status": "NOT_RUN"
+        }
+      }
+    },
+    {
+      "name": "SOURCE_NONE_PREPLACE_PERMISSION_True",
+      "exact_same_public_input_sha": "0e90547caf26dba83aca01a26762cceceb40cefdc0f8f956c6582f6e808c6cf8",
+      "before": {
+        "name": "SOURCE_NONE_PREPLACE_PERMISSION_True",
+        "public_input_sha": "0e90547caf26dba83aca01a26762cceceb40cefdc0f8f956c6582f6e808c6cf8",
+        "selected": {
+          "uid": "OBSERVED_FIXTURE_JOB",
+          "action": "PREPLACE",
+          "policy_action": "PREPLACE",
+          "site": "B",
+          "start_seconds": 0,
+          "nominal_end_seconds": 900.0,
+          "additional_start_delay_seconds": 0.0,
+          "rule_id": "T0_0",
+          "estimated_worst_peak": 0.4,
+          "scenario_scores": {
+            "HIGH_DEMAND_Q90": 0.4,
+            "NOMINAL_Q50": 0.4
+          },
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 0,
+              "end": 900.0,
+              "quantity": 1
+            }
+          ],
+          "status": "SELECTED_FROZEN_OFFLINE_RANK",
+          "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+          "rejected_candidates": [],
+          "online_global_optimizer_calls": 0,
+          "online_grid_horizon_evaluations": 0,
+          "affine_approximation_only": true,
+          "grid_safety_guaranteed": false,
+          "Fresh_AC_status": "NOT_RUN"
+        }
+      },
+      "after": {
+        "name": "SOURCE_NONE_PREPLACE_PERMISSION_True",
+        "public_input_sha": "0e90547caf26dba83aca01a26762cceceb40cefdc0f8f956c6582f6e808c6cf8",
+        "selected": {
+          "uid": "OBSERVED_FIXTURE_JOB",
+          "action": "PREPLACE",
+          "policy_action": "PREPLACE",
+          "site": "B",
+          "start_seconds": 0,
+          "nominal_end_seconds": 900.0,
+          "additional_start_delay_seconds": 0.0,
+          "rule_id": "T0_0",
+          "estimated_worst_peak": 0.4,
+          "scenario_scores": {
+            "HIGH_DEMAND_Q90": 0.4,
+            "NOMINAL_Q50": 0.4
+          },
+          "segments": [
+            {
+              "resource": "gpu:B",
+              "begin": 0,
+              "end": 900.0,
+              "quantity": 1
+            }
+          ],
+          "status": "SELECTED_FROZEN_OFFLINE_RANK",
+          "policy_sha": "40367b1fc14c40072255255988fd7b0d58a1c14158a533cbb68f7fffd92fedeb",
+          "rejected_candidates": [],
+          "online_global_optimizer_calls": 0,
+          "online_grid_horizon_evaluations": 0,
+          "affine_approximation_only": true,
+          "grid_safety_guaranteed": false,
+          "Fresh_AC_status": "NOT_RUN"
+        }
+      }
+    },
+    {
+      "name": "PAST_ONLY_Q90_CAPACITY_AT_EVENT_SLOT2",
+      "exact_same_public_input_sha": "3d524c67f96b34211b6cc25526c49740bb122e6fab6967ffe27ecfd55dee19a7",
+      "before": {
+        "name": "PAST_ONLY_Q90_CAPACITY_AT_EVENT_SLOT2",
+        "public_input_sha": "3d524c67f96b34211b6cc25526c49740bb122e6fab6967ffe27ecfd55dee19a7",
+        "ordered_actions": 0,
+        "numeric_candidates": 10,
+        "source_policy_sha": "a7e5f0a572404571bcb7a7c41b53ea1b15c3a5d9e9837cca66fb5abef12f31be",
+        "numeric_hard_pass": 0
+      },
+      "after": {
+        "name": "PAST_ONLY_Q90_CAPACITY_AT_EVENT_SLOT2",
+        "public_input_sha": "3d524c67f96b34211b6cc25526c49740bb122e6fab6967ffe27ecfd55dee19a7",
+        "ordered_actions": 10,
+        "numeric_candidates": 10,
+        "source_policy_sha": "47e8dd331fd8b2778e53ee706c21bbdc49f6d1281dde3decf85335d2b04ed314",
+        "numeric_hard_pass": 10
+      }
+    },
+    {
+      "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_2",
+      "exact_same_public_input_sha": "2a54ff1ad5abbd40c6bddcee222f75d3c8f5b2b4b34f9e511f5c85af025cb73c",
+      "before": {
+        "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_2",
+        "public_input_sha": "2a54ff1ad5abbd40c6bddcee222f75d3c8f5b2b4b34f9e511f5c85af025cb73c",
+        "ordered_actions": 0,
+        "numeric_candidates": 10,
+        "source_policy_sha": "86eaac02755eb8d090856ecdbe0774a798b28ea656fba4f25d9f2475ad5169c7",
+        "numeric_hard_pass": 0
+      },
+      "after": {
+        "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_2",
+        "public_input_sha": "2a54ff1ad5abbd40c6bddcee222f75d3c8f5b2b4b34f9e511f5c85af025cb73c",
+        "ordered_actions": 0,
+        "numeric_candidates": 10,
+        "source_policy_sha": "48ecb57d8ffe9782afa1926ff01bf2ee399c58a625d60027ff40226bfd63728d",
+        "numeric_hard_pass": 0
+      }
+    },
+    {
+      "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_3",
+      "exact_same_public_input_sha": "696dfd8b10394f5162e2a41fab697ea3bc0bf794448da22ea6e4a40b42f3c833",
+      "before": {
+        "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_3",
+        "public_input_sha": "696dfd8b10394f5162e2a41fab697ea3bc0bf794448da22ea6e4a40b42f3c833",
+        "ordered_actions": 0,
+        "numeric_candidates": 10,
+        "source_policy_sha": "72a50cd53354c70515c37863cdd8c6413731c0567ca27b4af579eae17e91c0ea",
+        "numeric_hard_pass": 0
+      },
+      "after": {
+        "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_3",
+        "public_input_sha": "696dfd8b10394f5162e2a41fab697ea3bc0bf794448da22ea6e4a40b42f3c833",
+        "ordered_actions": 0,
+        "numeric_candidates": 10,
+        "source_policy_sha": "3b077df05fc3ad7128a9a8e439ee986474cc54ba2fa1379f898348db516d3f13",
+        "numeric_hard_pass": 0
+      }
+    },
+    {
+      "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_95",
+      "exact_same_public_input_sha": "eac9fc16ab98b4f4366130f5157004ef120f2b2dffaaf7c5166785a3c2b69e01",
+      "before": {
+        "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_95",
+        "public_input_sha": "eac9fc16ab98b4f4366130f5157004ef120f2b2dffaaf7c5166785a3c2b69e01",
+        "ordered_actions": 0,
+        "numeric_candidates": 10,
+        "source_policy_sha": "409a26102dfe8a55476af36a2d59e70aa5125e14a388c848abdd65968698bf40",
+        "numeric_hard_pass": 0
+      },
+      "after": {
+        "name": "CURRENT_FUTURE_Q90_CAPACITY_SLOT_95",
+        "public_input_sha": "eac9fc16ab98b4f4366130f5157004ef120f2b2dffaaf7c5166785a3c2b69e01",
+        "ordered_actions": 0,
+        "numeric_candidates": 10,
+        "source_policy_sha": "c9f2fec5601506b974268fd1bcde724d3df2918c5d7bb51b7b7c4521e098789a",
+        "numeric_hard_pass": 0
+      }
+    }
+  ],
+  "input_receipts": [
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\fixtures\\BEFORE_REPLAY.json",
+      "bytes": 6793,
+      "sha256": "f92b7e5542e6d7788771d4201cfc5a90f057239aab77a3f39695870b9a48a27e"
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\fixtures\\AFTER_REPLAY.json",
+      "bytes": 7925,
+      "sha256": "4d88eb909a5a56e565367ccd8e48ac5080a716181543da6d87755677dd5aafd0"
+    }
+  ],
+  "before_after_runner": {
+    "path": "D:\\v42_policy_root_cause_20261013\\audit\\scripts\\replay_patch_conditions.py",
+    "bytes": 4717,
+    "sha256": "fbaf0c7dcf6f629b20b3fb8dbb6fd64707f67ef1858ded03e218d9c17fa5c6d4"
+  }
+}

@@ -425,7 +425,9 @@ def compile_sensitivity_policy(packet,envelope,cc4_q50,cc4_q90,kernel,prototypes
                                     after+=profile
                         delta=after-reference_profile
                         score=packet.evaluate(delta,remaining_slot=slot,scenario_gpu=stress)
-                        total=packet.known_gpu+anonymous+stress+delta
+                        # A decision at this event cannot alter expired slots.
+                        # Match the remaining horizon used by the grid evaluator.
+                        total=(packet.known_gpu+anonymous+stress+delta)[slot:]
                         if np.any(total>np.asarray([packet.capacities[s] for s in packet.sites])+1e-8) or np.any(total<-1e-8):
                             score=dict(score,hard_feasible=False,violations=score['violations']+
                                 [dict(reason='WHOLE_GANG_SITE_GPU_CAPACITY')])
@@ -635,7 +637,8 @@ class FrozenSensitivityPolicy(FrozenControlPolicy):
             return None,'NOT_YET_SUBMITTED'
         if now%DT:return None,'CONTROL_GRID_EVENT_NOT_DUE'
         state=metadata.get('state','PENDING')
-        if metadata.get('protected') is not False or metadata.get('batch_eligible') is not True:
+        if metadata.get('protected') is not False or (
+                state=='RUNNING' and metadata.get('batch_eligible') is not True):
             return None,'ACTION_QOS_AUTHORITY_UNCONFIRMED'
         service=(float(metadata['t50_seconds'])-float(metadata.get('accumulated_compute_seconds',0))
             if state=='RUNNING' else float(metadata.get('nominal_service_seconds',metadata['t50_seconds'])))
@@ -662,7 +665,9 @@ class FrozenSensitivityPolicy(FrozenControlPolicy):
             delay=max(0.,start-receipt['reference_start_seconds'])
             consumed=delay+float(metadata.get('cumulative_migration_interruption_seconds',0))
             if (start not in receipt['allowed_starts_seconds'] or consumed>receipt['budget_seconds']+1e-9
+                    or (delay>1e-9 and metadata.get('batch_eligible') is not True)
                     or site not in metadata.get('compatible_sites',())
+                    or (row['action']=='PREPLACE' and metadata.get('can_prestart_place') is not True)
                     or (metadata.get('source_site') is not None and site!=metadata['source_site']
                         and metadata.get('can_prestart_place') is not True)):
                 continue

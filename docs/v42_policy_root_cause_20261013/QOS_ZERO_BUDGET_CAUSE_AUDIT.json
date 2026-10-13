@@ -1,0 +1,111 @@
+{
+  "schema": "QOS_ZERO_BUDGET_CAUSE_AUDIT_V1",
+  "PASS": true,
+  "strict_TRAIN_loaded_and_SHA_verified": {
+    "path": "D:\\v42_common_am_qos_integration_20261013\\docs\\v42_common_am_qos_integration\\QOS_EMPIRICAL_STATS_STRICT.json",
+    "sha256": "2a9bb692b0e538f38e8d0fab8cba9398bef2de91b568efb8311063204a8c067b",
+    "bytes": 906
+  },
+  "strict_TRAIN": {
+    "policy_id": "EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1",
+    "cutoff_seconds": 1735689600.0,
+    "source_sha": "0783273c06d8a5e7ecf804b18221d7ac66c0c8ab432162490c0afef282bd343e",
+    "bucket_definition": {
+      "GPU": [
+        "1",
+        "2-4",
+        "5-16",
+        "17-64",
+        "65+"
+      ],
+      "requested_walltime": [
+        "<=1h",
+        "1-4h",
+        "4-24h",
+        ">24h"
+      ]
+    },
+    "quantile": 0.9,
+    "quantile_method": "higher",
+    "normalization": "W/max(T,900)",
+    "minimum_cohort_unique_uids": 100,
+    "input_rows": 439534,
+    "accepted_unique_uids": 0,
+    "accepted_uid_sha": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "exclusions": {
+      "UNSUPPORTED_REQUEST_PROVENANCE": 439534,
+      "CONFLICTING_UID_EXCLUDED": 0
+    },
+    "descriptive_only": false,
+    "provenance_note": "VERIFIED_REQUEST_AND_OBSERVATION_ONLY",
+    "cohorts": [],
+    "uids": []
+  },
+  "minimum100_or_backoff_failure_primary": false,
+  "backoff_L0_L3_available": true,
+  "TRAIN_first_failure": {
+    "function": "TrainingStatistics.from_records",
+    "condition": "provenance not in supported_request_provenances",
+    "first_reason": "UNSUPPORTED_REQUEST_PROVENANCE",
+    "rows": 439534,
+    "accepted_UIDs": 0,
+    "cohorts": 0
+  },
+  "May_independent_metadata_failures": {
+    "active_UIDs": 2320,
+    "protected_unconfirmed": 2320,
+    "batch_unconfirmed": 2320,
+    "observed_qos_UNCONFIRMED": 2320,
+    "confirmed_normal": 0,
+    "confirmed_standby": 0,
+    "minimum100_or_requested_walltime_not_first_select_failure": "select returnsNone on protectedNone before bucket matching"
+  },
+  "issuer_receipts": {
+    "total": 2423,
+    "Planning_known": 1649,
+    "active_known_reused": 1546,
+    "inactive_historical_known": 103,
+    "Actual_origin_unknown_issued": 774,
+    "Actual_prefix_unknown": 78,
+    "Actual_Dday_unknown": 696,
+    "active_UIDs": 2320,
+    "positive_budget_UIDs": 0,
+    "first_reason_counts": {
+      "PROTECTION_UNCONFIRMED": 2423
+    },
+    "all_recorded_reason_counts": {
+      "PROTECTION_UNCONFIRMED": 2423,
+      "BATCH_ELIGIBILITY_UNCONFIRMED": 2423,
+      "UNSUPPORTED_COHORT": 2423,
+      "EMPTY_AUTHORIZED_WINDOW": 277
+    },
+    "reference_wait_is_primary": false,
+    "baseline_QOS_excess_count": 0,
+    "empirical_wait_values_all_null": true
+  },
+  "issuer_expression": "B=0 if reasons else 900*floor(min(max(0,empirical_wait-reference_wait),3600)/900)",
+  "raw_known_population_qos_fields_present": 0,
+  "actual_preplace_independent": {
+    "source_flag_TRUE": 1245,
+    "active_known_initial_pending_TRUE": 1245,
+    "all_unknown_TRUE": 0,
+    "migration_packet_present": 0,
+    "positive_delay_budget": 0,
+    "can_prestart_place_not_derived_from_B": true,
+    "universal_lookup_mask": "protectedFalse AND batchTrue applied before action-specific filtering; latentpreplacemaskreviewownedlead",
+    "no_May_unknown_preplace_authority_demonstrated": true
+  },
+  "hard_contract_earliest_latest_deadline_confirmed": 0,
+  "representation_completion_promoted_to_deadline": false,
+  "no_budget_reissue_or_enlargement": true,
+  "Known_receipt_identity_preserved": true,
+  "quantities_seconds_and_900slots_checked": true,
+  "source_semantics": "StrictsourceaccountingproxyCannotAuthorizeRequestVersion; no60minRelaxationOrMayRefit",
+  "Source18r_original_known_job_qos_model_labels": {
+    "standby": 1488,
+    "normal": 11
+  },
+  "offline_template_qos": {
+    "normal": 144
+  }
+}

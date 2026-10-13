@@ -1,0 +1,815 @@
+{
+  "schema": "FROZEN_V5_PRODUCTION_SOURCE_RECEIPT_AUDIT_V1",
+  "written_utc": "2026-10-13T14:57:30.051544+00:00",
+  "workstream": "B_READ_ONLY_SOURCE_GRID",
+  "A_exact_pushed_commit": "8f0ea6e8f97147bb425530e8d787ca89f4a05053",
+  "source_sha": "f488f3a99555eb2354ef52d0835078be816d2d988a2bf37010b9b09ff36568d8",
+  "source_snapshot": {
+    "path": "D:\\v42_policy_root_cause_20261013\\audit\\SOURCE_SNAPSHOT.json",
+    "sha256": "3c8320fa796113a08ccb2d245f1ac28f15e7eaf9c4583f7e7c9f1291d65faee6",
+    "bytes": 471483
+  },
+  "evidence_kind": "REAL_MAY01_V5_RECEIPTS_WITH_SEPARATELY_LABELLED_CONTROLLED_FIXTURES",
+  "Native_Optimize_calls": 0,
+  "Actual_replays": 0,
+  "Fresh_AC_calls": 0,
+  "source_edits": 0,
+  "result_tree_read_only": true,
+  "current_bindings": {
+    "aidc_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+    "case_sha": "623efbcbd6344b9c18540ff2a496a112b43c93b1d277c50d9c9b682fc11bcce0",
+    "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+    "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+    "mess_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+    "qos_sha": "6e5c70e2a1fc6af46480c549d6d2bdc6ca0290c24b3cad44ff749c339e2969ca",
+    "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+    "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+    "science_sha": "f488f3a99555eb2354ef52d0835078be816d2d988a2bf37010b9b09ff36568d8"
+  },
+  "status": "PRODUCTION_CONNECTION_CONFIRMED_WITH_TWO_SEPARATE_FIRST_FAILURES",
+  "contribution_scope": "MERGED_PRODUCTION_CALLGRAPH_SOURCE_GRID_CC4_QOS_UID_EPISODE_ACTUAL",
+  "nodes": [
+    {
+      "stage": "A1_A2_OPTIMIZE",
+      "source": {
+        "module": "v42_integration/a_engine.py",
+        "function": "optimize_aidc",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\a_engine.py",
+        "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+        "bytes": 14521,
+        "lines": [
+          138
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 2,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\A1\\A_RESULT.json",
+          "sha256": "daff086793561b81501f867ef212552cb68639512b424e9caa83d5b6442a1c49",
+          "bytes": 1089283
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\A2\\A_RESULT.json",
+          "sha256": "5fdef059bd52cbc1cd4cdca537e24473e0efd96001c012e7ac8303bb45f44b73",
+          "bytes": 1096718
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "final_output_consumed": "A2",
+      "M_full_joint_optimality_claimed": false
+    },
+    {
+      "stage": "A2_RESOURCE_ENVELOPE",
+      "source": {
+        "module": "v42_integration/production_case.py",
+        "function": "compile_production_control_policy",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\production_case.py",
+        "sha256": "6f9839ad739c3c42eff31302821c263f3b0abd0f10a013057b029e5fd78fe3e8",
+        "bytes": 44889,
+        "lines": [
+          225
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 1152,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\A_STAGE_RESOURCE_ENVELOPE.json",
+          "sha256": "4571b98a2baa8953a9d4d5dfa5fa364fc30c2708572118c251504f2b1280e966",
+          "bytes": 336077
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "array_shape": [
+        96,
+        12
+      ],
+      "known_immutable": true
+    },
+    {
+      "stage": "KNOWN_UNKNOWN_QOS_AUTHORITY",
+      "source": {
+        "module": "v42_integration/qos.py",
+        "function": "TrainingStatistics.from_records;QoSWindowProvider.issue",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\qos.py",
+        "bytes": 27259,
+        "sha256": "4de5204e1f941179e48204e6d5f82f9b8faefac9246bed7aef0e074b702478f4"
+      },
+      "production_executed": true,
+      "real_May01": true,
+      "fixture": false,
+      "counts": {
+        "strict_TRAIN_input_rows": 439534,
+        "strict_TRAIN_accepted_UIDs": 0,
+        "original_Known_receipts": 1649,
+        "active_Known_reused": 1546,
+        "Actual_origin_unknown_issued": 774,
+        "total_immutable_receipts": 2423,
+        "active_positive_budget": 0,
+        "source_preplace_flag_Known": 1245,
+        "source_preplace_flag_Unknown": 0
+      },
+      "first_TRAIN_reject": "UNSUPPORTED_REQUEST_PROVENANCE",
+      "first_May_issuer_reason": "PROTECTION_UNCONFIRMED",
+      "source_authority_missing_is_separate_from_minimum100_backoff": true,
+      "artifacts": [
+        {
+          "path": "D:\\v42_policy_root_cause_20261013\\audit\\QOS_ZERO_BUDGET_CAUSE_AUDIT.json",
+          "bytes": 3939,
+          "sha256": "564b544ff02f78896f3048f2d991394174ec2956a27d3af0479699e376580f3b"
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\QOS_BUDGET_LEDGER.json",
+          "bytes": 12809171,
+          "sha256": "0cf26efc81acb530c86dd7a57cbf4417182c6a8e2ac83899497e43e72ae7ab71"
+        }
+      ]
+    },
+    {
+      "stage": "ORIGINAL_GRID_RESPONSE_BINDING",
+      "source": {
+        "module": "v42_integration/sensitivity_policy.py",
+        "function": "build_grid_packet",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\sensitivity_policy.py",
+        "sha256": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428",
+        "bytes": 50524,
+        "lines": [
+          219
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 96,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+          "sha256": "4de8a542a15c8b2f023675c30df45ba6ddc42e854180ee274bf121e51635c05d",
+          "bytes": 1362546
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "coefficient_SHA": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8"
+    },
+    {
+      "stage": "CC4_RUNTIME_QOS_BINDING",
+      "source": {
+        "module": "v42_integration/production_case.py",
+        "function": "compile_production_control_policy",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\production_case.py",
+        "sha256": "6f9839ad739c3c42eff31302821c263f3b0abd0f10a013057b029e5fd78fe3e8",
+        "bytes": 44889,
+        "lines": [
+          225
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 1,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\CC4_V21_SOURCE_BINDING_AUDIT.json",
+          "sha256": "95ffdc70e97ec26ba10ddb54b019f2f05d1fe2800b6c6fde3f462dcec8601cb2",
+          "bytes": 31167
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "new_training_calls": 0
+    },
+    {
+      "stage": "BOUNDED_ANONYMOUS_CONDITIONS",
+      "source": {
+        "module": "v42_integration/sensitivity_policy.py",
+        "function": "bounded_prototypes",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\sensitivity_policy.py",
+        "sha256": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428",
+        "bytes": 50524,
+        "lines": [
+          506
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 144,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+          "sha256": "4de8a542a15c8b2f023675c30df45ba6ddc42e854180ee274bf121e51635c05d",
+          "bytes": 1362546
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "future_individual_UIDs": 0
+    },
+    {
+      "stage": "CANDIDATE_GENERATION",
+      "source": {
+        "module": "v42_integration/sensitivity_policy.py",
+        "function": "compile_sensitivity_policy",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\sensitivity_policy.py",
+        "sha256": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428",
+        "bytes": 50524,
+        "lines": [
+          303
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 4392,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+          "sha256": "4de8a542a15c8b2f023675c30df45ba6ddc42e854180ee274bf121e51635c05d",
+          "bytes": 1362546
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false
+    },
+    {
+      "stage": "REFERENCE_SUPPORT_GATE",
+      "source": {
+        "module": "v42_integration/sensitivity_policy.py",
+        "function": "compile_sensitivity_policy",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\sensitivity_policy.py",
+        "sha256": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428",
+        "bytes": 50524,
+        "lines": [
+          303
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 102,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+          "sha256": "4de8a542a15c8b2f023675c30df45ba6ddc42e854180ee274bf121e51635c05d",
+          "bytes": 1362546
+        }
+      ],
+      "skip_or_reject_reason": "PROTOTYPE_REFERENCE_NOT_IN_ANONYMOUS_ENVELOPE",
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "count_unit": "first-rejected templates;3111 associated generated variants skipped"
+    },
+    {
+      "stage": "RESOURCE_GUARD",
+      "source": {
+        "module": "v42_integration/policy.py",
+        "function": "ReservationLedger.feasible",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\policy.py",
+        "sha256": "2182c740a84bc3c9de6a601c748b1c768639becd04a3cdd4fd8fb3a87c8cf6c2",
+        "bytes": 25523,
+        "lines": [
+          109
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 972,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+          "sha256": "4de8a542a15c8b2f023675c30df45ba6ddc42e854180ee274bf121e51635c05d",
+          "bytes": 1362546
+        }
+      ],
+      "skip_or_reject_reason": "NO_ENVELOPE_CAPACITY",
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "count_unit": "rejected generated variants"
+    },
+    {
+      "stage": "GRID_SCORE",
+      "source": {
+        "module": "v42_integration/sensitivity_policy.py",
+        "function": "OriginalGridPacket.evaluate",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\sensitivity_policy.py",
+        "sha256": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428",
+        "bytes": 50524,
+        "lines": [
+          192
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 1083,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+          "sha256": "4de8a542a15c8b2f023675c30df45ba6ddc42e854180ee274bf121e51635c05d",
+          "bytes": 1362546
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\Q50_Q90_BURST_POLICY_COMPARISON.json",
+          "sha256": "ef8d041b470cece52c0469724fe0e24e55a37358cb7bd4192d65ff12952248a9",
+          "bytes": 121592
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "serialized_variants": 309,
+      "Q50_hard_feasible": 112,
+      "Q90_hard_feasible": 0,
+      "count_unit": "cache miss evaluator calls"
+    },
+    {
+      "stage": "OFFLINE_APPROVAL",
+      "source": {
+        "module": "v42_integration/sensitivity_policy.py",
+        "function": "compile_sensitivity_policy",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\sensitivity_policy.py",
+        "sha256": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428",
+        "bytes": 50524,
+        "lines": [
+          303
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 0,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\OPTIMIZED_CONDITIONAL_CONTROL_POLICY.json",
+          "sha256": "4de8a542a15c8b2f023675c30df45ba6ddc42e854180ee274bf121e51635c05d",
+          "bytes": 1362546
+        }
+      ],
+      "skip_or_reject_reason": "ALL_REMAINING_SCORED_Q90_VARIANTS_HARD_INFEASIBLE",
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false
+    },
+    {
+      "stage": "POLICY_FREEZE_RELOAD",
+      "source": {
+        "module": "v42_integration/coordinator.py",
+        "function": "run_arm",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\coordinator.py",
+        "sha256": "ee8572414da16935b08f8b7f81d0dbb9be1bb68437b96f76f375590fb6f82177",
+        "bytes": 16940,
+        "lines": [
+          81
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 1,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\PLANNING_FREEZE.json",
+          "sha256": "098565139dbac38a11add42a6a3cfcd7c1ebafbd4a8e2461a58f6b9f39691ca3",
+          "bytes": 15374913
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\CONTROL_POLICY_RELOAD_TEST.json",
+          "sha256": "6d282dc5cd2c2dd10ca04cbe02bd5c596e0b6aca06844d9d5f7645d6261d2697",
+          "bytes": 1063
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\CONTROL_POLICY_SHA_MANIFEST.json",
+          "sha256": "f5fd8ad21004cf05788f41733596fb7e396a9ebc3499e130be5a8e7b930785d6",
+          "bytes": 17481
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "semantic_equal": true,
+      "expanded_bindings": 9
+    },
+    {
+      "stage": "OBSERVED_JOB_EVENTS",
+      "source": {
+        "module": "v42_integration/actual.py",
+        "function": "run_actual",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\actual.py",
+        "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+        "bytes": 45124,
+        "lines": [
+          535
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 79997,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\JOB_EVENT_LEDGER.json",
+          "sha256": "be8617c843239b0d777511cf4dad1266f09f6c055198ba3d43088285e6bb2924",
+          "bytes": 11618150
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "active_job_UIDs": 2320,
+      "Dday_depleted_unknown_UIDs": 696
+    },
+    {
+      "stage": "ACTUAL_RESOURCE_SUPPORT_GUARD",
+      "source": {
+        "module": "v42_integration/actual.py",
+        "function": "JobEventController._policy_resource_guard",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\actual.py",
+        "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+        "bytes": 45124,
+        "lines": [
+          226
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 5816,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\RULE_CONSUMPTION_RECEIPT.json",
+          "sha256": "7a14d6fc6a9d5caad008181206f25b0cac2a2cc2ad6ee35855c7bafa91812363",
+          "bytes": 9018462
+        }
+      ],
+      "skip_or_reject_reason": {
+        "OBSERVED_RESOURCE_OUTSIDE_FROZEN_TEMPLATE_SUPPORT": 5763,
+        "NO_FROZEN_RESOURCE_SUPPORT_AUTHORITY": 53
+      },
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false
+    },
+    {
+      "stage": "LITERAL_FROZEN_POLICY_SELECT_LOOKUP",
+      "source": {
+        "module": "v42_integration/sensitivity_policy.py",
+        "function": "FrozenSensitivityPolicy.lookup",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\sensitivity_policy.py",
+        "sha256": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428",
+        "bytes": 50524,
+        "lines": [
+          628
+        ]
+      },
+      "production_executed": false,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 0,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\CONTROL_POLICY_RUNTIME_MEMORY.json",
+          "sha256": "0844ad616e288d773c7998b721ff999beb1219cbb883f674dc735ecdc74076aa",
+          "bytes": 632
+        }
+      ],
+      "skip_or_reject_reason": "PRECEDING_ACTUAL_RESOURCE_GUARD_REJECTED_ALL5816_EVENTS",
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false
+    },
+    {
+      "stage": "BASELINE_FALLBACK_ACTION",
+      "source": {
+        "module": "v42_integration/actual.py",
+        "function": "JobEventController._reference_decision",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\actual.py",
+        "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+        "bytes": 45124,
+        "lines": [
+          188
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 5816,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\RULE_CONSUMPTION_RECEIPT.json",
+          "sha256": "7a14d6fc6a9d5caad008181206f25b0cac2a2cc2ad6ee35855c7bafa91812363",
+          "bytes": 9018462
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\ACTUAL_QUEUE_LEDGER.json",
+          "sha256": "2b3f7cc8c6c8a86d77dd3631872f24596a1fd2a35255ae4ab92440a7bde4e3fa",
+          "bytes": 2108877
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "count_unit": "fallback/reject controller records,not unique starts",
+      "action_counts": {
+        "QUEUE": 748,
+        "STAY": 5068
+      },
+      "optimized_actions": 0
+    },
+    {
+      "stage": "GPU_WAN_RESERVATION",
+      "source": {
+        "module": "v42_integration/actual.py",
+        "function": "JobEventController.admit",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\actual.py",
+        "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+        "bytes": 45124,
+        "lines": [
+          260
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 2103,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\RESERVATION_LEDGER.json",
+          "sha256": "5cdd5dcbd91b5e97f8b9fb44e6523c339f10d62eea5dae6ff002f212af1beb03",
+          "bytes": 1353662
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "count_unit": "reservation UID entries",
+      "checkpoint_migrations": 0,
+      "policy_optimized_reservations": 0
+    },
+    {
+      "stage": "ACTUAL_OCCUPANCY_PCC_POWER",
+      "source": {
+        "module": "v42_integration/actual.py",
+        "function": "run_actual",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\actual.py",
+        "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+        "bytes": 45124,
+        "lines": [
+          535
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 96,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\ACTUAL_OCCUPANCY_POWER_TRACE.npz",
+          "sha256": "42ee4994ecf778981e72895238674de7076def05458a633daf1638a88a989208",
+          "bytes": 14635
+        },
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\ACTUAL_RESULT.json",
+          "sha256": "aa8b0f904d84b45fcf7ac54dab353440e16bff492af2f7afa01b8464b73b7fd7",
+          "bytes": 132578894
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "planning_power_copied": false,
+      "forecast_added_as_Actual": false,
+      "actual_power_recomputed": true
+    },
+    {
+      "stage": "FROZEN_M2_PHYSICAL_CONSUMER",
+      "source": {
+        "module": "v42_integration/mess_actual.py",
+        "function": "consume_frozen_mess",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\mess_actual.py",
+        "sha256": "22910c80ef951d5c908bbcfa24d33ea31a89fb12552c5862fa4cc9e6d50caebd",
+        "bytes": 2681,
+        "lines": [
+          6
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 96,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\MESS_ACTUAL_EXECUTION_RECEIPT.json",
+          "sha256": "d7a3dc4c12b942ba374576ff65a716b1d2d719391ab3950787edea5051243301",
+          "bytes": 180137
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "frozen_execution_validated": true
+    },
+    {
+      "stage": "FRESH_AC",
+      "source": {
+        "module": "v42_integration/actual_validation.py",
+        "function": "fresh_ac_minimum",
+        "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\actual_validation.py",
+        "sha256": "3834469372344d1d84b8dd05df43e1ff8719a10c11e983c039eafcc3f4e2025c",
+        "bytes": 63957,
+        "lines": [
+          783
+        ]
+      },
+      "production_executed": true,
+      "evidence": "CURRENT_REAL_RECEIPT_AND_FROZEN_SOURCE_BRANCH",
+      "count": 96,
+      "outputs": [
+        {
+          "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\FRESH_PHYSICAL\\FRESH_PHYSICAL_RESULT.json",
+          "sha256": "28d4014cb127a58fdf27a60e426973953a14b1e2a09166fec756c743a251de91",
+          "bytes": 3937998
+        }
+      ],
+      "skip_or_reject_reason": null,
+      "AIDC_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+      "MESS_anchor": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+      "fixture": false,
+      "PASS": true,
+      "actual_power_trace_SHA_verified": true,
+      "original_Fresh96_body_executed": false,
+      "Original_full_source18r_case_certified": false,
+      "current_model_11SVR_153transformer_phase_scope": true,
+      "policy_benefit_certified": false
+    }
+  ],
+  "source_receipts": [
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\a_engine.py",
+      "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+      "bytes": 14521
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\production_case.py",
+      "sha256": "6f9839ad739c3c42eff31302821c263f3b0abd0f10a013057b029e5fd78fe3e8",
+      "bytes": 44889
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\cc4_policy_inputs.py",
+      "sha256": "9037525dcc4f943c9ed51fda986fb3897b1689b3572dab44a828b475f26a734f",
+      "bytes": 18807
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\coordinator.py",
+      "sha256": "ee8572414da16935b08f8b7f81d0dbb9be1bb68437b96f76f375590fb6f82177",
+      "bytes": 16940
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\sensitivity_policy.py",
+      "sha256": "7e378d6efa980a667cb1578540383e4de1f2ce17dc0223a1214776478428d428",
+      "bytes": 50524
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\actual.py",
+      "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+      "bytes": 45124
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\actual_validation.py",
+      "sha256": "3834469372344d1d84b8dd05df43e1ff8719a10c11e983c039eafcc3f4e2025c",
+      "bytes": 63957
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\v42_integration\\policy.py",
+      "sha256": "2182c740a84bc3c9de6a601c748b1c768639becd04a3cdd4fd8fb3a87c8cf6c2",
+      "bytes": 25523
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\v42_job_capability.py",
+      "sha256": "33a2e0a5a17ee28c3632aead1a3723b5bac97e1f8d88f25714830799737172ce",
+      "bytes": 22761
+    }
+  ],
+  "first_failure_compiler": "102templates fail anonymous-reference support; remaining42templates score309variants, allQ90hard-infeasible",
+  "first_failure_actual": "5763observed-resource mismatch+53controlqueries at horizon end reject before literal policy lookup",
+  "actual_global_optimizer_calls": 0,
+  "actual_online_grid_evaluations": 0,
+  "no_V39_fixed_PCC_replay": true,
+  "May_policy_effect": "NOT_ESTABLISHED",
+  "full_joint_global_gap": "NOT_CERTIFIED",
+  "confirmed_masked_fixture_bugs": 3,
+  "implementation_bug_proof_files": [
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\source_grid\\PREPLACE_ZERO_BUDGET_UNIVERSAL_MASK_REPRODUCTION.json",
+      "sha256": "44d7f9e71017e1cdda4f713c0a313e08d13fe0b48500b05d004a8099c4871dd9",
+      "bytes": 4856
+    },
+    {
+      "path": "D:\\v42_policy_root_cause_20261013\\audit\\source_grid\\PAST_SLOT_CAPACITY_VETO_REPRODUCTION.json",
+      "sha256": "b8473b6e804b9d213ac0c3b27ed4a0b3cd72554f742ee205bfc15a35dd465abc",
+      "bytes": 14075
+    }
+  ],
+  "population_and_candidate_facts": {
+    "raw_UIDs": 2498,
+    "original_known_UIDs": 1649,
+    "active_known_UIDs": 1546,
+    "historical_known_UIDs": 103,
+    "post_issue_unknown_UIDs": 849,
+    "historical_unknown_UIDs": 75,
+    "historical_total_UIDs": 178,
+    "initial_running_UIDs": 324,
+    "initial_pending_UIDs": 1300,
+    "pre_Dday_observed_origin_unknown_UIDs": 78,
+    "Dday_unknown_UIDs": 696,
+    "active_origin_unknown_UIDs": 774,
+    "active_UIDs": 2320,
+    "policy_controller_dispatch_unique_UIDs": 814,
+    "unknown_dispatch_UIDs": 766,
+    "known_dispatch_UIDs": 48,
+    "unknown_no_due_policy_event_UIDs": 8,
+    "known_no_unknown_dispatch_UIDs": 1498,
+    "Dday_pending_dispatch_UIDs": 693,
+    "late_Dday_no_admit_boundary_UIDs": 3,
+    "valid_observed_QoS_cohort_UIDs": 0,
+    "extra_delay_budget_UIDs": 0,
+    "explicit_preplacement_flag_active_UIDs": 1245,
+    "explicit_preplacement_flag_unknown_UIDs": 0,
+    "migration_capability_packet_UIDs": 0,
+    "offline_templates": 144,
+    "offline_materialized_variants": 4392,
+    "offline_reference_skipped_variants": 3111,
+    "offline_envelope_rejected_variants": 972,
+    "offline_resource_guard_passed_and_scored_variants": 309,
+    "offline_Q50_hard_passed_variants": 112,
+    "offline_Q90_hard_passed_variants": 0,
+    "offline_both_scenarios_hard_passed_variants": 0,
+    "grid_evaluation_calls_including_bucket_endpoints": 1083,
+    "missing_capability_migration_destination_attempts_before_materialization": 792,
+    "offline_approved_actions": 0,
+    "actual_dispatch_events": 5816,
+    "actual_resource_outside_support_events": 5763,
+    "actual_no_horizon_support_events": 53,
+    "actual_pending_policy_attempts": 748,
+    "actual_running_policy_attempts": 5068,
+    "actual_policy_select_or_lookup_invocations_reconstructed": 0,
+    "actual_generated_individual_candidates": 0,
+    "actual_online_grid_score_calls": 0,
+    "actual_selected_optimized_control_actions": 0,
+    "actual_completed_UIDs": 1690,
+    "actual_carryout_UIDs": 630
+  },
+  "job_actual_partition_receipt": {
+    "path": "D:\\v42_policy_root_cause_20261013\\audit\\job_actual\\POLICY_FREEZE_RELOAD_RUNTIME_AUDIT.json",
+    "bytes": 27962,
+    "sha256": "1e3c3a4d0c6dcf05763e9ae3aa58937a687f8f427911b452d57a696cfdc5579c"
+  },
+  "QOS_partition_receipt": {
+    "path": "D:\\v42_policy_root_cause_20261013\\audit\\QOS_ZERO_BUDGET_CAUSE_AUDIT.json",
+    "bytes": 3939,
+    "sha256": "564b544ff02f78896f3048f2d991394174ec2956a27d3af0479699e376580f3b"
+  },
+  "whole_A_M_stage_handoffs": [
+    {
+      "stage": "A1",
+      "arm": "B3",
+      "engine": "v42_integration.a_engine.optimize_aidc",
+      "case_sha": "3df8856647274066035c4e81e5073eea2c3d3eec8043494ed5868fa4a1197efb"
+    },
+    {
+      "stage": "M1",
+      "arm": "B3",
+      "engine": "PR222_CASE_EXPLICIT_EXACT_DIRECT_JOINT_V1",
+      "case_sha": "97c0be9aeea343a72d422c415039db00ca05291d97458ac6665e3a45eb158812"
+    },
+    {
+      "stage": "A2",
+      "arm": "B3",
+      "engine": "v42_integration.a_engine.optimize_aidc",
+      "case_sha": "ba1fadf8cb44b2b4dec50c2460cfc492cfd7fd16e5c4c7e06f2fc26385a1d753"
+    },
+    {
+      "stage": "M2",
+      "arm": "B3",
+      "engine": "PR222_CASE_EXPLICIT_EXACT_DIRECT_JOINT_V1",
+      "case_sha": "4479ae9f9cdd4442948c66b2272e494ee663b43b092eb895c00fcb0de97b12f8"
+    }
+  ],
+  "node_evidence_scope": "Recorded current execution receipts plus immutable call-site branch reconstruction; no claim of a complete Python stack profiler.",
+  "additional_source_none_permission_proof": {
+    "path": "D:\\v42_policy_root_cause_20261013\\audit\\CONTROL_POLICY_BEFORE_AFTER_REPLAY.json",
+    "bytes": 17817,
+    "sha256": "05ab57bf4b55d66840a1d7062f251e41c5868dd659fc04a7493621da87fdcf13"
+  }
+}
