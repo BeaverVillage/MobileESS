@@ -1,0 +1,149 @@
+"""Reuse PR219 Label/Minimax and PR220 exact route closures with verified feedback."""
+from dataclasses import dataclass
+from collections import defaultdict,Counter
+from tools.adaptive_compact_joint.adapter import *
+from tools.minimax_beam1800.routes import Label as PriorLabel
+from tools.minimax_beam1800.grid import Minimax
+from tools.global_local_multistart1800.dag import Graph
+from tools.global_local_multistart1800.joint import path_signature,pool_signature
+from tools.global_local_multistart1800.routes import distance
+
+@dataclass(frozen=True)
+class Label(PriorLabel):
+    soc_lower:float
+    terminal_upper:float
+    recovery_need:float
+
+def feedback(case,point,context,full_receipt,epoch=0):
+    receipt=read(full_receipt);assert receipt['PASS'] and receipt['point_vector_sha256']==v.vector_sha(point)
+    assert context['center_vector_sha']==v.vector_sha(point) and context['all_thermal_rows_scanned']==403968
+    original=case.lift(point);lookup=dict(zip(map(str,case.original_d['names']),map(float,original)))
+    rows=[]
+    for row in context['rows']:
+        coeff={name:float(F(co)) for name,co in row['coeff'].items()};scale=-coeff['rho_max'];contrib={}
+        for u in case.graph[1]:
+            contrib[u]={f:sum(co*lookup.get(name,0.)/scale for name,co in coeff.items() if name.startswith(f+'['+u+',')) for f in ('Pch','Pdis','Q')}
+        rows.append(dict(original_row=row['original_row'],metadata=row['metadata'],slot=row['slot'],loading=row['current_loading'],signed_PQ_contributions=contrib,
+            rebound_risk=sum(max(0.,c['Pch']) for c in contrib.values())))
+    paths=paths_of(case,point);scorer=Minimax(case,point,context);predicted,_,_=scorer.peak(paths)
+    result=dict(PASS=True,Optimize_calls=0,verified_incumbent=record(full_receipt),raw_vector_SHA=v.vector_sha(point),
+        original_grid_context=context,selected_paths=paths,actual_moves=Graph(case).metadata(paths),rows=rows,
+        predicted_incumbent_loading=predicted,actual_incumbent_UB=receipt['Global_UB'],
+        predicted_minus_actual=predicted-receipt['Global_UB'],
+        exact_LP_dual_prices_used=False,reduced_cost_pricing=False,column_generation=False,
+        feed_forward='Rank near-binding rows and positive signed charging rebound; include actual selected paths/SOC/PQ. Expected-versus-actual error is a calibration diagnostic, not a bound.')
+    write(DOCS/f'OPTIMIZATION_FEEDBACK_{epoch:02d}.json',result);return result
+
+def generate(case,point,context,full_receipt,size=8,epoch=0):
+    graph=Graph(case);battery=case.graph[3];base=paths_of(case,point);authority=paths_of(case,v.load_point(ROOT/RAW_REL))
+    fb=feedback(case,point,context,full_receipt,epoch);scoring=Minimax(case,point,context)
+    counters=Counter();all_candidates={u:{} for u in graph.origins};pool={};stats={}
+    loading=scoring.loading;weights=1+np.maximum(0.,loading-(fb['actual_incumbent_UB']-.025))*20
+    # Real positive charging contributions increase attention to rebound windows.
+    weights+=np.asarray([min(.5,max(0.,row['rebound_risk'])) for row in fb['rows']])
+    def register(u,path,origin):
+        graph.validate(u,path);sig=path_signature(path)
+        if sig in all_candidates[u]:return
+        paths={w:list(p) for w,p in base.items()};paths[u]=list(path)
+        peak,vec,rebound=scoring.peak(paths)
+        actual=scoring.path_vector(u,path);cached=scoring.path_cache[u,tuple(path)]
+        # Preserve max loading as primary ranking; weighted deficits guide ties.
+        secondary=float(np.sum(weights*np.maximum(0.,np.asarray(vec)+np.asarray(rebound)-(fb['actual_incumbent_UB']-.025))))
+        all_candidates[u][sig]=dict(path=list(path),path_signature=sig,origin=origin,moves=len(graph.move_indices(path)),
+            predicted_peak=peak,weighted_near_critical_risk=secondary,relief_vector=(scoring.loading-np.asarray(vec)).tolist(),
+            heuristic_rebound=rebound,unresolved_terminal_heuristic=cached[2],travel_and_service_spent_heuristic=cached[3],
+            expected_full_feasibility=False,heuristic_score_not_bound=True)
+    legacy=read(OLD_DOCS/'GLOBAL_CANDIDATE_POOL.json')['candidates']
+    for u in graph.origins:
+        register(u,graph.complete(u,[]),'MANDATORY_STAY_OPTION');register(u,authority[u],'PR220_AUTHORITY');register(u,base[u],'VERIFIED_FEEDBACK_PATH')
+        # Existing static generator is a comparison and diversity reservoir.
+        for c in legacy:
+            if c['units']==[u]:register(u,c['paths'][u],'REUSED_STATIC_DAG_CANDIDATE')
+        # PR220 local branching closure adds real retiming alternatives, no fixed M3 rule.
+        used_sites=list(dict.fromkeys([graph.origins[u]]+[graph.arcs[k][2] for k in base[u]]))
+        if len(used_sites)>=2:
+            try:
+                closure=graph.closure(u,base[u],0,96,used_sites,terminal_any=True)
+                register(u,closure['witness'],'REUSED_PR220_LOCAL_CLOSURE_WITNESS')
+            except AssertionError:counters['no_local_closure_witness']+=1
+        original_moves=graph.move_indices(base[u])
+        for ii,k in enumerate(original_moves):
+            a=graph.arcs[k]
+            for shift in (-2,-1,1,2):
+                alternative=graph.moves.get((a[0],a[2],a[1]+shift))
+                if alternative is None:continue
+                trial=original_moves.copy();trial[ii]=alternative
+                try:register(u,graph.complete(u,trial),'PR220_MOVE_RETIMING')
+                except AssertionError:counters['exact_retiming_DAG_rejections']+=1
+        initial=np.zeros(scoring.m);ui=scoring.units.index(u)
+        frontier=defaultdict(list);frontier[0]=[Label(graph.origins[u],0,0.,battery.initial,96,0,-1,0,tuple(initial),(),0.,(),battery.initial,battery.maximum,0.)]
+        for t in range(96):
+            labels=frontier.pop(t,[]);unique={z.path:z for z in labels};groups=defaultdict(list)
+            for z in unique.values():groups[z.site,min(z.moves,3),z.first_depart//12].append(z)
+            # Width adapts to current time's verified grid/rebound risk, not pool size.
+            active=scoring.times==t;width=16 if np.any(loading[active]>=fb['actual_incumbent_UB']-.025) else 12
+            selected=[]
+            while groups and len(selected)<width:
+                for key in sorted(list(groups)):
+                    group=groups[key];group.sort(key=lambda z:(z.peak,z.recovery_need,z.energy,z.path));selected.append(group.pop(0))
+                    if not group:del groups[key]
+                    if len(selected)>=width:break
+            counters['heuristic_beam_labels_discarded']+=len(unique)-len(selected)
+            for label in selected:
+                for k in graph.outgoing[label.site,t]:
+                    if k not in graph.available[u]:counters['exact_original_arc_domain_rejections']+=1;continue
+                    a=graph.arcs[k];moving=a[-1] is not None
+                    if moving and label.moves>=4:counters['heuristic_MOVE_depth4_discarded']+=1;continue
+                    energy=float(a[-1].energy_kwh) if moving else 0.
+                    upper=label.soc_upper-energy if moving else min(battery.maximum,label.soc_upper+battery.dt_hours*battery.eta_charge*battery.p_limit)
+                    lower=max(battery.minimum,label.soc_lower-energy if moving else label.soc_lower-battery.dt_hours*battery.p_limit/battery.eta_discharge)
+                    if upper<battery.minimum-1e-8:counters['safe_SOC_upper_exclusions']+=1;continue
+                    terminal=min(battery.maximum,upper+(96-a[3])*battery.dt_hours*battery.eta_charge*battery.p_limit)
+                    if terminal<battery.terminal-1e-8:counters['safe_terminal_upper_exclusions']+=1;continue
+                    vec=np.asarray(label.relief_vector).copy()
+                    if not moving:vec[scoring.times==t]=scoring.support[ui,scoring.site_id[a[0]],scoring.times==t]
+                    score=scoring.partial_peak(u,a[2],a[3],vec,upper,96-a[3])
+                    # Rebound lookahead: recovery service at incumbent busy slots is penalized heuristically.
+                    recovery=max(0.,battery.terminal-upper);score+=1e-5*recovery*float(weights[scoring.times>=a[3]].mean() if np.any(scoring.times>=a[3]) else 1.)
+                    path=label.path+(k,)
+                    nxt=Label(a[2],a[3],label.energy+energy,upper,96-a[3],label.moves+int(moving),
+                        t if moving and label.first_depart<0 else label.first_depart,a[3] if moving else label.reconnect,tuple(vec),
+                        label.active_service_windows+((t,t+1,a[0]),) if not moving else label.active_service_windows,score,path,lower,terminal,recovery)
+                    counters['expanded_original_arcs']+=1
+                    if a[3]==96:register(u,path,'ADAPTIVE_MINIMAX_BEAM_LABEL')
+                    else:frontier[a[3]].append(nxt)
+    # Fixed small pool: pin feasibility witnesses, retain both MOVE classes, then
+    # choose complementary relief under other vehicles' provisional selections.
+    joint={u:list(p) for u,p in base.items()};chosen=[]
+    for u in sorted(graph.origins):
+        paths=[];seen=set()
+        def add(path):
+            sig=path_signature(path)
+            if sig not in seen:paths.append(path);seen.add(sig)
+        add(authority[u]);add(graph.complete(u,[]));add(base[u])
+        candidates=list(all_candidates[u].values())
+        for predicate in (lambda c:c['moves']==1,lambda c:c['moves']>=2):
+            options=[c for c in candidates if predicate(c)]
+            assert options,'MOVE_CLASS_COVERAGE_REQUIRED'
+            add(min(options,key=lambda c:(c['predicted_peak'],c['weighted_near_critical_risk'],c['path_signature']))['path'])
+        while len(paths)<size:
+            options=[c for c in candidates if c['path_signature'] not in seen]
+            if not options:break
+            scored=[]
+            for c in options:
+                test=dict(joint);test[u]=c['path'];peak,vec,rebound=scoring.peak(test)
+                novelty=min(distance(graph,{u:c['path']},{u:p}) for p in paths)
+                scored.append((peak-1e-5*min(novelty,24),c['weighted_near_critical_risk'],c['path_signature'],c))
+            pick=min(scored,key=lambda a:a[:3])[-1];add(pick['path']);joint[u]=pick['path'];chosen.append(dict(unit=u,path_signature=pick['path_signature'],selection='joint minimax complement plus novelty; no MOVE forcing'))
+        pool[u]=paths
+        stats[u]=dict(generated=len(candidates),MOVE_distribution=dict(Counter(c['moves'] for c in candidates)),
+            selected_MOVE_distribution=dict(Counter(len(graph.move_indices(p)) for p in paths)),
+            native_pool_size=len(paths),Beam_width_min=12,Beam_width_max=16,heuristic_MOVE_depth=4,
+            theoretical_physical_MOVE_cap_not_assumed=True)
+    packet=dict(PASS=True,Optimize_calls=0,epoch=epoch,pools=pool,pool_signature=pool_signature(pool),units=stats,counters=dict(counters),
+        all_generated_candidates=all_candidates,complement_selection=chosen,feedback=record(DOCS/f'OPTIMIZATION_FEEDBACK_{epoch:02d}.json'),
+        safe_exclusions='Original arc bounds; optimistic SOC upper envelope and optimistic terminal recovery only',
+        heuristic_exclusions='Beam width12/16, depth4, weighted/rebound score, fixed8 path admission; no global infeasibility claim',
+        preserved_all_STAY_single_multiple_MOVE=True,no_MOVE_forcing=True,all_four_independent_decision=True,
+        PR219_Label_and_Minimax_reused=True,PR220_exact_closure_reused=True)
+    write(DOCS/f'ADAPTIVE_BEAM_EPOCH_{epoch:02d}.json',packet);return pool,packet

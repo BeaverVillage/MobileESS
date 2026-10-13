@@ -1,0 +1,62 @@
+{
+  "PASS": true,
+  "Native_limit": 1800,
+  "Threads": 1,
+  "heavy_workers": 1,
+  "RAM_reserve_GiB": 4,
+  "Commit_reserve_GiB": 6,
+  "main_algorithm": "FOUR_MESS_JOINT_ROUTE_POOL_MILP",
+  "all_four_MESS_routes_selected_in_one_MILP": true,
+  "solo_pairs_triples_only_ablation": true,
+  "ablation_families": [
+    "PAIR_MESS01_MESS02",
+    "PAIR_MESS01_MESS04",
+    "PAIR_MESS02_MESS04"
+  ],
+  "initial_allocations": {
+    "JOINT": 1300,
+    "ABLATION": 250,
+    "DUAL": 180,
+    "RETURN": 8,
+    "adaptive": 62
+  },
+  "initial_pool_size": 8,
+  "initial_Joint_cap": 120,
+  "joint_cap": 150,
+  "max_Joint_cap": 175,
+  "max_pool_size": 24,
+  "expand_each_vehicle_by": 2,
+  "ablation_call_cap": 30,
+  "ablation_stage_cap": 250,
+  "dual_requested_seconds": 175,
+  "dual_maximum180": true,
+  "dual_calls": 1,
+  "dual_reserved_until_executed": 180,
+  "return_reserve": 8,
+  "switching": "Joint then one ablation then expanded Joint, until seven comparison families considered; one Dual after Joint integrity gate; then all-four expanded pools until budget.",
+  "adaptive_generation": "Expand all four units by2 after no strict gain, include current winning paths, preserve old paths, prefer unseen location/time diversity. On strict gain continue global pool expansion rather than stop. If reservoir cannot add paths generate new minimax epoch at current center, at most3 epochs. Never separately enumerate Cartesian path combinations.",
+  "adaptive_allocation": "Small initial6/unit; if root incomplete use new diversified pool at same size before increasing, longer cap at most175 only after completed root; no identical pool/bounds/link matrix signatures.",
+  "pool_lambda": "One binary lambda per original complete vehicle DAG path; sum lambda per unit =1; exact original Native Route Flow/Node links, affine original Arc/Alias proof; all9322 source binary types retained.",
+  "source_Start": "Original FULL center and literal one-hot lambda readback; all384 Modes/P/Q/SOC free; no added MOVE forcing or Global objective cutoff.",
+  "strict_delta": 1e-05,
+  "UB_tolerance": 1e-08,
+  "Global_LB_never_restricted": true,
+  "conditional_LP_screen_calls": 0,
+  "Actual": "ACTUAL_NOT_RUN",
+  "old_Native_times_separate": true,
+  "source_policy_frozen_before_Native": true,
+  "version": "V2_POINT_ONLY_TRANSPORT",
+  "budget_offset": 270.6589996814728,
+  "total_budget_still1800": true,
+  "root_incomplete_definition": "Only TIME_LIMIT with no completed root: change small corridor. Presolve OPTIMAL is completed solve and permits expansion.",
+  "stagnation_expansion": "Add2 original routes to all four vehicle pools after completed solves, retaining STAY/PR220/current center; no separate Cartesian combination MILPs.",
+  "Raw_transport": "point-only NPZ compatible with unchanged original validator; lambda raw floats separately preserved in Native capture JSON.",
+  "V1_ledger": {
+    "path": "D:\\v42_b2_global_local_multistart_dual1800_20261013\\docs\\v42_b2_global_local_multistart_dual1800\\NATIVE_RUNTIME_LEDGER.json",
+    "sha256": "7e80de9de1e0c68e16aa68057c15ffa9cb04eb2aafedea2d34a596ff78f567e9"
+  },
+  "V1_all_receipts": {
+    "path": "D:\\v42_b2_global_local_multistart_dual1800_20261013\\docs\\v42_b2_global_local_multistart_dual1800\\v2\\INHERITED_V1_NATIVE_CALLS.json",
+    "sha256": "cfd748e76d890ef5a7d6bec4546fd9f24214bf7416b5565fa1abc946e1d14625"
+  }
+}

@@ -1,0 +1,91 @@
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+Set parameter Threads to value 1
+Set parameter FeasibilityTol to value 1e-09
+Set parameter OptimalityTol to value 1e-09
+Set parameter IntFeasTol to value 1e-08
+Set parameter MIPGap to value 0.005
+Set parameter Method to value 1
+Set parameter MIPFocus to value 3
+Set parameter NumericFocus to value 3
+Set parameter ScaleFlag to value 2
+Set parameter Seed to value 0
+Set parameter MIPGapAbs to value 1e-10
+Set parameter TimeLimit to value 175
+Set parameter LogFile to value "D:\v42_b2_global_local_multistart_dual1800_20261013\docs\v42_b2_global_local_multistart_dual1800\v2\dual\NATIVE_GUROBI.log"
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  175
+FeasibilityTol  1e-09
+IntFeasTol  1e-08
+MIPGap  0.005
+OptimalityTol  1e-09
+Method  1
+ScaleFlag  2
+MIPFocus  3
+NumericFocus  3
+Threads  1
+
+Optimize a model with 143292 rows, 244265 columns and 1252450 nonzeros (Min)
+Model fingerprint: 0x8133519e
+Model has 1 linear objective coefficients
+Variable types: 244021 continuous, 244 integer (244 binary)
+Coefficient statistics:
+  Matrix range     [2e-12, 4e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+03]
+  RHS range        [9e-02, 8e+02]
+Warning: Model contains large matrix coefficient range
+
+Presolve removed 107 rows and 8577 columns
+Presolve time: 0.98s
+Presolved: 143185 rows, 235688 columns, 1237498 nonzeros
+Variable types: 235444 continuous, 244 integer (244 binary)
+Root relaxation presolved: 143185 rows, 235688 columns, 1237498 nonzeros
+
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   16358    1.7019068e-03   4.486894e+04   0.000000e+00      5s
+   39083    1.8550685e-03   1.058281e+05   0.000000e+00     10s
+   52112    1.8836576e-03   1.275027e+05   0.000000e+00     15s
+   67565    6.0636042e-03   4.701946e+05   0.000000e+00     20s
+   76655    9.2186272e-03   2.677544e+06   0.000000e+00     25s
+   86553    1.1933999e-02   3.486823e+06   0.000000e+00     30s
+   94835    1.4188633e-02   2.091207e+06   0.000000e+00     35s
+  107056    2.1141653e-02   4.290527e+06   0.000000e+00     40s
+  118267    2.4543545e-02   4.209163e+06   0.000000e+00     45s
+  125337    4.8332341e-01   1.101726e+06   0.000000e+00     50s
+  132306    4.8401788e-01   8.590691e+04   0.000000e+00     55s
+  137356    4.8404731e-01   3.411984e+04   0.000000e+00     60s
+  140083    4.8407120e-01   2.179613e+04   0.000000e+00     65s
+  143315    4.8407793e-01   5.748202e+03   0.000000e+00     70s
+  145234    4.8407843e-01   1.755745e+03   0.000000e+00     75s
+  148814    4.6499031e-01   0.000000e+00   1.817318e+02     80s
+  150483    4.6497618e-01   0.000000e+00   0.000000e+00     82s
+  150483    4.6497618e-01   0.000000e+00   0.000000e+00     84s
+
+Root relaxation: objective 4.649762e-01, 150483 iterations, 82.49 seconds (131.83 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.46498    0   32          -    0.46498      -     -   84s
+*    0     0               0       0.4649762    0.46498  0.00%     -   87s
+
+Explored 1 nodes (154835 simplex iterations) in 87.04 seconds (141.50 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 1: 0.464976 
+
+Optimal solution found (tolerance 5.00e-03)
+Best objective 4.649761763976e-01, best bound 4.649761763976e-01, gap 0.0000%
+
+User-callback calls 2036, time in user-callback 11.40 sec
+{"Native": 87.04200005531311, "certificate": {"PASS": true, "Global_LB": 0.4649761763975841, "native_source_attribute": "ObjBound", "source_sha": "497609b46faa14ea7e32a9483a333ab32fd264ef", "case_sha": "34c0efffa9c05397552fb167667c0bbfe2f35cec89801a3169c00c64fe77f292", "inclusion": {"path": "D:\\v42_b2_global_local_multistart_dual1800_20261013\\docs\\v42_b2_global_local_multistart_dual1800\\v2\\dual\\INDEPENDENT_NATIVE0.json", "sha256": "c6c7338b343e667d1437c61108752e5dcc99d4af5b47cc732ca9781765b5e9ee"}, "readback": {"path": "D:\\v42_b2_global_local_multistart_dual1800_20261013\\docs\\v42_b2_global_local_multistart_dual1800\\v2\\dual\\NATIVE_READBACK.json", "sha256": "0a7c81f9f6c837078ac227605f92f3bd511f67c3e161a44315a5c7bcb5e05efc"}, "Global_LB_gain": 0.0, "Reduced_ObjVal_is_FULL_UB": false, "numerical_Gurobi_BB_contract": true, "exact_rational_optimality_claim": false}}

@@ -1,0 +1,69 @@
+"""Native0 source, exact integrality replacement, regression and model gates."""
+import subprocess,sys,gc,time
+from tools.adaptive_compact_joint.adapter import *
+from tools.adaptive_compact_joint.compact import integer_proof
+from tools.adaptive_compact_joint.beam import generate
+from tools.global_local_multistart1800.joint import build_spec
+from tools.minimax_beam1800 import grid
+
+def invoke(args,log):
+    with log.open('w',encoding='utf-8') as stream:
+        rc=subprocess.run([sys.executable,'-X','utf8','-m','tools.adaptive_compact_joint.worker',*map(str,args)],cwd=ROOT,stdout=stream,stderr=subprocess.STDOUT).returncode
+    assert rc==0,log
+
+def main():
+    guard();began=time.perf_counter();assert read(DOCS/'PHASE0_SAFE_STOP.json')['PASS']
+    grid.DOCS=DOCS
+    for name in ('SIGNED_SELECTION_CONTEXT.json',):
+        src=OLD_DOCS/name;assert src.exists();(DOCS/name).write_bytes(src.read_bytes())
+    warm=read(DOCS/'PR220_FRESH_ORIGINAL_FULL_REPLAY.json') if (DOCS/'PR220_FRESH_ORIGINAL_FULL_REPLAY.json').exists() else replay(ROOT/RAW_REL,DOCS/'PR220_FRESH_ORIGINAL_FULL_REPLAY.json',INITIAL_UB)
+    assert warm['PASS'] and warm['point_file_sha256']==v.file_sha(ROOT/RAW_REL)==RAW_SHA
+    stop=read(DOCS/'PHASE0_SAFE_STOP.json');feedback_raw=Path(stop['final_raw']['path']);feedback_receipt=Path(stop['last_original_FULL_replay']['path'])
+    case=v.load_native_case();point=v.load_point(ROOT/RAW_REL);latest=v.load_point(feedback_raw)
+    context=read(DOCS/'grid/epoch00/CRITICAL_MINIMAX_CONTEXT.json') if (DOCS/'grid/epoch00/CRITICAL_MINIMAX_CONTEXT.json').exists() else grid.refresh(case,latest,0)[0]
+    assert context['center_vector_sha']==v.vector_sha(latest)
+    pools,beam=generate(case,latest,context,feedback_receipt,size=8)
+    oldspec=read(OLD_DOCS/'v2/calls/001_JOINT_POOL_101/SPEC.json')
+    proof_refs={};spec_refs={}
+    for label,paths in (('SAME_POOL',oldspec['pools']),('ADAPTIVE',pools)):
+        spec,lo,hi,A,rhs=build_spec(case,point,DOCS/'PR220_FRESH_ORIGINAL_FULL_REPLAY.json',paths,label,30 if label=='SAME_POOL' else 50)
+        proof=integer_proof(case,point,spec,lo,hi,A,rhs)
+        write(DOCS/f'{label}_SPEC.json',spec);write(DOCS/f'{label}_INTEGER_EQUIVALENCE.json',proof)
+        proof_refs[label]=record(DOCS/f'{label}_INTEGER_EQUIVALENCE.json');spec_refs[label]=record(DOCS/f'{label}_SPEC.json')
+    # Negative regression: omitted route link must fail the independent proof.
+    altered=A.copy().tolil();altered[4,altered.rows[4][0]]=2.;altered=altered.tocsr();rejected=False
+    try:integer_proof(case,point,spec,lo,hi,altered,rhs)
+    except AssertionError:rejected=True
+    assert rejected
+    write(DOCS/'NATIVE0_NEGATIVE_REGRESSION.json',dict(PASS=True,Optimize_calls=0,corrupted_route_link_rejected=rejected))
+    del case,point,latest,A,altered;gc.collect()
+    outputs={}
+    for label,old in (('SAME_POOL',True),('SAME_POOL',False),('ADAPTIVE',False)):
+        target=DOCS/'native0'/f'{label}_{"OLD" if old else "COMPACT"}'
+        args=['--mode','native0','--spec',spec_refs[label]['path'],'--proof',proof_refs[label]['path'],'--output',target,'--seconds',30 if label=='SAME_POOL' else 50]
+        if old:args.append('--old')
+        if target.exists():
+            assert read(target/'NATIVE_CALL.json')['status']=='NATIVE0_PASS' and read(target/'NATIVE_CALL.json')['Optimize_calls']==0
+            assert read(target/'NATIVE_CALL.json')['source_spec']['sha256']==v.file_sha(spec_refs[label]['path'])
+        else:invoke(args,DOCS/f'NATIVE0_{target.name}.log')
+        outputs[target.name]=dict(readback=record(target/'COMPACT_NATIVE_READBACK.json'),presolve=record(target/'PRESOLVE_NATIVE0_TRANSFORMATION.json'),admission=record(target/'POST_BUILD_ADMISSION.json'))
+    policy=dict(algorithm='Adaptive Minimax-Aware Beam + Compact 4-MESS Joint MILP + Optimization Feedback',
+        inherited_actual_Native=stop['Native_used'],total_approved_limit=1800,first_pilot_new_Native_limit=min(240.,stop['remaining_approved_seconds']-10),
+        maximum_single_call_seconds=50,calls=[dict(label='SAME_POOL',seconds=30),dict(label='ADAPTIVE',seconds=50)],
+        stop_after_initial_pilot=True,allow_full_budget_consumption_without_measured_gain=False,
+        additional_LB_Optimize=False,conditional_LP_screening=False,Heavy_Worker=1,Threads=1,
+        same_K32_244_repeated=False,Original_FULL_only_UB=True,default_MOVE_forcing=False,ACTUAL='ACTUAL_NOT_RUN')
+    write(DOCS/'PILOT_POLICY.json',policy)
+    write(DOCS/'NATIVE0_GATE.json',dict(PASS=True,Optimize_calls=0,source_case_authority=record(DOCS/'PR220_FRESH_ORIGINAL_FULL_REPLAY.json'),
+        inherited_stop=record(DOCS/'PHASE0_SAFE_STOP.json'),proofs=proof_refs,specifications=spec_refs,native_readbacks=outputs,
+        STAY_single_multiple_all_four=True,original_all_rows_kept=True,PCS16_Mode_P_Q_SOC_Grid_unmodified=True,
+        warm_bit_exact=True,dual_LP_prices_not_invented=True,integer_reduction=8938,
+        model_presolve_transform_calls=3,CSR_fill_in_relative_to_existing_joint=0,
+        computational_speedup_not_assumed_before_pilot=True,wall_seconds=time.perf_counter()-began))
+    # Core and immutable configuration seal created only after all Native0 gates.
+    paths=list((ROOT/'tools/adaptive_compact_joint').glob('*.py'))+list((ROOT/'tools/global_local_multistart1800').glob('*.py'))
+    paths+=[DOCS/name for name in ('PILOT_POLICY.json','NATIVE0_GATE.json','SAME_POOL_SPEC.json','ADAPTIVE_SPEC.json','SAME_POOL_INTEGER_EQUIVALENCE.json','ADAPTIVE_INTEGER_EQUIVALENCE.json','PRESERVED_JOINT_FILES.json','PHASE0_SAFE_STOP.json')]
+    write(DOCS/'EXECUTED_SOURCE_HASHES.json',{p.relative_to(ROOT).as_posix():v.file_sha(p) for p in paths})
+    print(json.dumps(dict(PASS=True,Native0_Optimize_calls=0,model_transforms=3,remaining=stop['remaining_approved_seconds'])))
+
+if __name__=='__main__':main()

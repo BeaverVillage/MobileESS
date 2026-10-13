@@ -1,0 +1,59 @@
+"""Heuristic signed minimax service with backward terminal-SOC lookahead."""
+from tools.adaptive_perf_v3.bootstrap import *
+from tools.adaptive_compact_joint.scoring import AdaptiveMinimax
+
+class LookaheadMinimax(AdaptiveMinimax):
+    def path_vector(self,u,path):
+        key=(u,tuple(path))
+        if key in self.path_cache:return self.path_cache[key][0]
+        ui=self.units.index(u);battery=self.case.graph[3];dt=battery.dt_hours
+        connected=np.full(96,-1,dtype=int);travel=np.zeros(96)
+        for k in path:
+            arc=self.case.graph[2][k]
+            if arc[-1] is None:connected[arc[1]]=self.site_id[arc[0]]
+            else:travel[arc[1]]=float(arc[-1].energy_kwh)
+        required=np.full(97,battery.minimum);required[-1]=battery.terminal
+        for t in range(95,-1,-1):
+            capacity=battery.p_limit*dt*battery.eta_charge if connected[t]>=0 else 0.
+            required[t]=max(battery.minimum,required[t+1]+travel[t]-capacity)
+        out=np.zeros(self.m);rebound=np.zeros(self.m);soc=battery.initial;unresolved=0.;spent=0.
+        for t in range(96):
+            soc-=travel[t];spent+=travel[t];unresolved+=max(0.,battery.minimum-soc)
+            site=connected[t]
+            if site<0:continue
+            active=np.flatnonzero(self.times==t)
+            if not len(active):continue
+            charge_cap=min(battery.p_limit,max(0.,battery.maximum-soc)/(dt*battery.eta_charge))
+            discharge_cap=min(battery.p_limit,max(0.,soc-max(battery.minimum,required[t+1]))*battery.eta_discharge/dt)
+            minimum_charge=max(0.,required[t+1]-soc)/(dt*battery.eta_charge)
+            future=np.flatnonzero(self.times>t)
+            marginal=max([0.]+[-float(self.coeff[ui,site,i,1])*battery.eta_discharge/dt for i in future])
+            energy_price=.30*marginal
+            support=getattr(self,'base_support',np.zeros((4,self.m)))
+            reference=self.base[active]+support[:,active].sum(axis=0)-support[ui,active]
+            options=[]
+            for vertex_p,vertex_q in self.vertices:
+                if minimum_charge>0:
+                    if vertex_p>=0:continue
+                    if min(-vertex_p,charge_cap)+1e-9<minimum_charge:continue
+                    p=-min(-vertex_p,charge_cap)
+                elif vertex_p>=0:p=min(float(vertex_p),discharge_cap)
+                else:p=-min(-float(vertex_p),charge_cap)
+                q=float(vertex_q);field=1 if p>=0 else 0
+                service=self.coeff[ui,site,active,field]*abs(p)+self.coeff[ui,site,active,2]*q
+                energy=p*dt/battery.eta_discharge if p>=0 else p*dt*battery.eta_charge
+                score=float(np.max(reference+service)+energy_price*energy)
+                options.append((score,p,q,service,energy))
+            if not options:unresolved+=minimum_charge*dt*battery.eta_charge;continue
+            _,p,q,service,energy=min(options,key=lambda a:a[0]);soc-=energy;out[active]=service
+            if p>=0:spent+=energy
+            else:rebound[active]=np.maximum(0.,self.coeff[ui,site,active,0]*(-p))
+        unresolved+=max(0.,battery.terminal-soc)
+        # Charging is already in the signed service vector. Record its risk
+        # separately without adding it twice to the minimax prediction.
+        self.path_cache[key]=(out,np.zeros(self.m),unresolved,spent)
+        if not hasattr(self,'lookahead_diagnostics'):self.lookahead_diagnostics={}
+        self.lookahead_diagnostics[key]=dict(terminal_SOC=soc,terminal_recovery_shortfall=max(0.,battery.terminal-soc),
+            conservative_required_SOC=required.tolist(),remaining_connected_slots=int(np.count_nonzero(connected>=0)),
+            travel_energy=float(travel.sum()),charge_rebound=rebound.tolist(),heuristic_only=True,no_physical_feasibility_pruning=True)
+        return out
