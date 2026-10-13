@@ -1,0 +1,119 @@
+{
+  "schema": "D_INDEPENDENT_CDF_RECOURSE_REVIEW_V1",
+  "status": "PASS_WITH_EXPLICIT_AGGREGATE_SCOPE",
+  "code_review": "COMPLETE_CURRENT_SOURCE_READ_NO_SOURCE_EDITS",
+  "Native_Optimize_calls": 0,
+  "models_created": 0,
+  "Actual_runs": 0,
+  "Fresh_AC_calls": 0,
+  "test_reruns": 0,
+  "shared_solver_budget_debit": 0,
+  "review_sources": [
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\v42_integration\\q90_recourse.py",
+      "sha256": "bc7425ecda1b0915c4836ae18cade29b79db332c4a1616f95e34de91fe138ec5",
+      "bytes": 25060
+    },
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\v42_integration\\q90_policy.py",
+      "sha256": "9691785b21c94a92f6841afd7fdc98287c0e6a465d9fce05392691b41ec1b592",
+      "bytes": 11413
+    },
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\tests\\test_v42_q90_recourse.py",
+      "sha256": "a3fff2ecf7c4ad3dec4594d78164ba28b7e7362e985af11c4af9d6915ff2e383",
+      "bytes": 10276
+    },
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\tests\\test_v42_q90_policy.py",
+      "sha256": "fcd2b595b46e89746484d598efe4c82dd7a29ddd039d42fc91269c2b331a5197",
+      "bytes": 3360
+    },
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\audit\\recourse\\A2_REFERENCE_Q90_EXTRA_RECOURSE.json",
+      "sha256": "abe250db2d9ba4f3ab3ee4c9ab971516f38f041b6a3d5cdf006d59a4b0cf71bd",
+      "bytes": 365232
+    },
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\audit\\recourse\\FROZEN_A2_NOMINAL_SERVICE.json",
+      "sha256": "fe998c891e373aa9d218ba369ff43127f0b7130e8fbef2c5c3b3078f74d3c2c0",
+      "bytes": 76195
+    },
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\audit\\recourse\\SOURCE_RECOURSE_NATIVE0_AUDIT.json",
+      "sha256": "fb38f4d25b1cc125822cd28cece8b2e047bad568ac8f2810ec58e006cea4667d",
+      "bytes": 2668
+    },
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\audit\\recourse\\A2_SERVICE_TIMING_SOURCE_PACKET.json",
+      "sha256": "bbf58cd213c789f79e924b3dda1a4a55eb9dde27e411cf7d3fdf335232bd7827",
+      "bytes": 475396
+    }
+  ],
+  "independent_saved_result_replay": {
+    "per_hour_extra_mass_max_error_GPUh": 1.1368683772161603e-12,
+    "site_GPUh_projection_max_error_GPUh": 1.4210854715202004e-14,
+    "full_Q90_mass_error_GPUh": 3.637978807091713e-12,
+    "CDF_upper_max_violation_GPUh": 0.0,
+    "CDF_lower_max_deficit_GPUh": 791.6994510967967,
+    "CDF_lower_violation_count": 1057,
+    "physical_capacity_max_violation_GPU": 0.0,
+    "extra_demand_GPUh": 18904.62175513747,
+    "extra_served_GPUh": 3848.0764028961726,
+    "extra_carryout_GPUh": 15056.5453522413,
+    "nominal_served_GPUh": 3225.157483116983,
+    "nominal_carryout_GPUh": 2278.28398903905,
+    "nominal_plus_extra_terminal_carry_GPUh": 17334.82934128035,
+    "PASS": true
+  },
+  "checked_semantics": {
+    "Q90_minus_Q50_only": "PASS_LITERAL_HOURLY_DIFFERENCE_NO_FULL_Q50_RESCHEDULING",
+    "hourly_to_slot_to_site_units": "PASS_24_HOURLY_GPUh_TO_96_QUARTER_SERVICES_TO_12_SITE_GPU",
+    "original_nominal_x_carry_reuse": "PASS_SEALED_RECEIPT_KNOWN_SITE_AND_AIDC_ANCHOR_MATCH",
+    "source_CDF_upper": "PASS_CUMULATIVE_ADMISSION_QUOTAS_HI_TIMES_REMAINING_PLUS_PRIOR",
+    "source_CDF_lower": "REQUIRED_FIRST_AND_UNMET_RECORDED_AS_TIMING_INFEASIBLE_NOT_NORMAL_COMPLETED",
+    "midcohort_history": "EXPLICIT_PRIOR_AND_REMAINING_PER_HOUR_MUST_SUM_TO_UNCHANGED_SOURCE_EXTRA",
+    "future_prior": "POSITIVE_SERVICE_BEFORE_4H_COHORT_ARRIVAL_REJECTED",
+    "terminal_carry": "ONE_TERMINAL_RESIDUAL_RECLASSIFICATION_PENDING0_NO_DOUBLE_COUNT",
+    "full_Q90_mass": "Q90=FROZEN_NOMINAL_SERVE_PLUS_CARRY_PLUS_EXTRA_PRIOR_SERVE_CARRY",
+    "signed_physics": "ORIGINAL_SIGNED_VOLTAGE_LINE_CURRENT_ALL_TRANSFORMER_CURRENT_KVA_ADMISSION_AND_SCALAR_BOUNDARY_CHECK",
+    "Q50_evidence_reuse": "EXACT_REJECT_ORDINAL_COUNT_ACTION_SITE_ALL_SCENARIO_PEAK_ASSERTIONS_PLUS_ALL_OLD_NONSCIENCE_BINDINGS_UNCHANGED"
+  },
+  "compiler_findings_reported_and_resolved": [
+    {
+      "issue": "ACTION_SITE_KEY_LOST_DISTINCT_DELAY_Q50_EVIDENCE",
+      "resolution": "EXACT_ORDERED_REJECTION_CONSUMPTION_AND_SOURCE_SCORE_ASSERTIONS",
+      "status": "RESOLVED_SOURCE_REVIEW"
+    },
+    {
+      "issue": "MET_TREATED_AS_TIMING_RISK_BY_PASS_ONLY_COMPARISON",
+      "resolution": "MET_IS_ACCEPTED",
+      "status": "RESOLVED_SOURCE_REVIEW"
+    },
+    {
+      "issue": "GRID_ONLY_RECOURSE_APPROVAL_OMITTED_EXPLICIT_CAPACITY_STATUS",
+      "resolution": "PHYSICAL_HARD_FEASIBLE_GRID_AND_CAPACITY_REQUIRED",
+      "status": "RESOLVED_SOURCE_REVIEW"
+    }
+  ],
+  "causal_scope": {
+    "begin0": "SAME_FULL_DAY_SOURCE_COUNTERFACTUAL_FOR_EVERY_ACTION_NOT_LIVE_ACTUAL_BACKLOG",
+    "remaining_slot": "CANDIDATE_DELTA_ZERO_IN_PAST_REMAINING_HORIZON_SCORE",
+    "actual_forecastbook_depletion": "SEPARATE_CAUSAL_ONCE_ONLY_PATH_NOT_INFERRED_FROM_RECOURSE",
+    "existing_pending_mass_added_to_past_begin0": false,
+    "future_UID_or_private_Actual_completion_used": false
+  },
+  "scientific_limits": {
+    "CDF_lower_unmet_is_real_risk": true,
+    "anonymous_job_QoS_guarantee": false,
+    "whole_gang_exact_scheduling_guarantee": false,
+    "global_recourse_optimum": false,
+    "new_A_M_FULL_or_gap": false,
+    "new_Full96_Actual_Fresh_AC": "NOT_RUN",
+    "old_PR223_Actual_Fresh_results_transferred": false,
+    "PR224_fixes_reimplemented": false,
+    "B2_B3_campaign_HOLD": true,
+    "May31_campaign_started": false
+  },
+  "unresolved_material_correctness_findings": 0
+}

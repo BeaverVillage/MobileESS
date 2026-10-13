@@ -1,0 +1,92 @@
+{
+  "source_records": [
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\v42_integration\\q90_recourse.py",
+      "sha256": "bc7425ecda1b0915c4836ae18cade29b79db332c4a1616f95e34de91fe138ec5",
+      "bytes": 25060
+    },
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\tests\\test_v42_q90_recourse.py",
+      "sha256": "a3fff2ecf7c4ad3dec4594d78164ba28b7e7362e985af11c4af9d6915ff2e383",
+      "bytes": 10276
+    },
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\audit\\recourse\\source_replay.py",
+      "sha256": "68d88c144921bed4bc2dacea0117bb8a66b1db3365b71edbee12ee851341bd2b",
+      "bytes": 4281
+    },
+    {
+      "path": "D:\\v42_q90_service_recourse_20261014\\audit\\recourse\\A2_SERVICE_TIMING_SOURCE_PACKET.json",
+      "sha256": "bbf58cd213c789f79e924b3dda1a4a55eb9dde27e411cf7d3fdf335232bd7827",
+      "bytes": 475396
+    }
+  ],
+  "tests": 21,
+  "focused_tests_status": "PASS",
+  "source_native0_audit": {
+    "schema": "D_SOURCE_ONLY_NOMINAL_AND_RECOURSE_REPLAY_V1",
+    "status": "PASS",
+    "source_packet": {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\audit\\cc4_service\\A2_SERVICE_TIMING_SOURCE_PACKET.json",
+      "sha256": "b76271ffbb35506ff1d33553bef46ebf70a2ef0f9517354037d45548a62f5357",
+      "bytes": 475394
+    },
+    "source_module": {
+      "path": "D:\\v42_q90_service_recourse_20261014\\v42_integration\\q90_recourse.py",
+      "sha256": "bc7425ecda1b0915c4836ae18cade29b79db332c4a1616f95e34de91fe138ec5",
+      "bytes": 25060
+    },
+    "frozen_A2_aidc_anchor": "6693158b53d01fc0f318cc81a72426dcdae2cc45428b204e27ba06f89006b464",
+    "nominal_replay": {
+      "per_cohort_mass_max_error_GPUh": 2.2737367544323206e-13,
+      "site_projection_max_error_GPU": 3.410605131648481e-13,
+      "CDF_max_violation_GPUh": 1.7053025658242404e-13,
+      "audit_numerical_tolerance": 1e-07,
+      "original_model_hard_constraint_tolerance_changed": false
+    },
+    "original_A2_nominal_served_GPUh": 3225.157483116982,
+    "original_A2_nominal_carryout_GPUh": 2278.28398903905,
+    "old_A2_reserve_target_served_GPUh": 18904.35883350153,
+    "old_A2_achieved_CC4_reserve_GPUh": 0.0,
+    "original_A2_reserve_target_is_executable_capacity_certificate": false,
+    "recourse_mass": {
+      "extra_arrived_GPUh": 18904.62175513747,
+      "extra_served_GPUh": 3848.0764028961726,
+      "extra_terminal_backlog_GPUh": 15056.5453522413,
+      "conservation_PASS": true
+    },
+    "risk_total_unfinished_GPUh": 17334.82934128035,
+    "physical_hard_feasible": true,
+    "CDF_timing_status": "LOWER_BOUND_UNMET",
+    "CDF_lower_max_deficit_GPUh": 791.6994510967967,
+    "CDF_timing_violation_count": 1057,
+    "peak_line_loading": 0.7058031341938754,
+    "grid_admission": {
+      "method": "ALL_ORIGINAL_SIGNED_AFFINE_ROWS_WITH_ORIGINAL_SCALAR_BOUNDARY_GUARD",
+      "scalar_guard_calls": 92,
+      "scalar_boundary_backoffs": 3,
+      "conservative_roundoff_repairs": 2,
+      "vectorized_original_guard_calls": 421,
+      "original_grid_hard_tolerance": 1e-09
+    },
+    "recourse_seconds": 0.6829958000016632,
+    "total_loader_audit_seconds": 5.843551899997692,
+    "Native_Optimize_calls": 0,
+    "Actual_runs": 0,
+    "Fresh_AC_calls": 0,
+    "models_created": 0,
+    "shared_solver_budget_debit": 0,
+    "job_QoS_certified": false,
+    "whole_gang_schedulability_certified": false,
+    "physical_scope": "ORIGINAL_SIGNED_AFFINE_PLANNING_ROWS;NO_NEW_AC_EXECUTION",
+    "future_UID_or_actual_completion_inputs_used": false,
+    "nominal_schedule_changed": false,
+    "forecast_scaled_or_clipped": false,
+    "kernel_reference_not_fixed_service": true,
+    "B2_B3_campaign_HOLD": true,
+    "May31_started": false
+  },
+  "Original_Actual_Full96_reexecuted": false,
+  "Original_Fresh_AC_reexecuted": false,
+  "shared_solver_budget_debit": 0
+}
