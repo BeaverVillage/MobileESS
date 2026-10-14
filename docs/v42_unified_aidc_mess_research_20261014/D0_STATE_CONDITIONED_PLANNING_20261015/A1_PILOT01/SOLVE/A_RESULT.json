@@ -1,0 +1,210 @@
+{
+  "engine": "v42_integration.d0_a_planning.solve_d0_native_model",
+  "stage": "A1",
+  "arm": "B3",
+  "case_sha": "8e0737b9b425c4aa3e88f0cf01908c18de1fb5b899815200a29ef2220f07acb1",
+  "source_identity": {
+    "science_sha": "a95f71d0bf08d3982d892cd83b38c8544d45379339f784291ba014fcf5f82425",
+    "case_sha": "cf9731c8b63d06f50ff595c1288ee4dc1aafb42aa1f36a6091349993f1be3568",
+    "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+    "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+    "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b"
+  },
+  "D0_input_sha": "446afc16c51ce0ce8163a95c33f4ec8145437bbfd7c496ad295759703f7c6279",
+  "input_MESS_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+  "FULL_feasible": false,
+  "global_gap_certified": false,
+  "old_LB_reused": false,
+  "old_point_reused": false,
+  "domain_scope": "COMPLETE_D0_SOURCE_AUTHORIZED_BASIC_DOMAIN",
+  "unrestricted_original_migration_equivalence": false,
+  "lazy_pricing_calls": 0,
+  "pricing_status": "COMPLETE_BASIC_DOMAIN_MATERIALIZED_NO_OTHER_DOMAIN_PRICING_CERTIFICATE",
+  "Phase_I": "UNRESOLVED_NO_FULL_PRIMAL",
+  "P1_status": "NOT_CERTIFIED",
+  "P2_status": "NOT_CERTIFIED",
+  "P2_calls": 0,
+  "lexicographic_trace": [
+    {
+      "group": "MAX_LINE_LOADING",
+      "component": "rho",
+      "status": 9,
+      "Native_call": {
+        "label": "D0_A1_ORIGINAL_P1",
+        "solver": "GUROBI",
+        "Native_Runtime": 26.23799991607666,
+        "wall_seconds": 26.268492200004403,
+        "charged_seconds": 26.23799991607666,
+        "cap_seconds": 25.0,
+        "overshoot_seconds": 1.2379999160766602,
+        "error": null,
+        "status": 9
+      },
+      "incumbent": null,
+      "valid_current_matrix_bound": 0.08280107490283846,
+      "original_FULL_point_replay": null,
+      "component_optimality_certified": false,
+      "closure_scope": "CURRENT_COMPLETE_D0_FIXED_MESS_A_MATRIX_ONLY"
+    },
+    {
+      "group": "MIN_INTERVENTION",
+      "component": "migration_count",
+      "status": "NOT_RUN",
+      "reason": "PREVIOUS_LEX_COMPONENT_NOT_CERTIFIED"
+    },
+    {
+      "group": "MIN_INTERVENTION",
+      "component": "shift_magnitude",
+      "status": "NOT_RUN",
+      "reason": "PREVIOUS_LEX_COMPONENT_NOT_CERTIFIED"
+    },
+    {
+      "group": "MIN_INTERVENTION",
+      "component": "prestart_relocation",
+      "status": "NOT_RUN",
+      "reason": "PREVIOUS_LEX_COMPONENT_NOT_CERTIFIED"
+    }
+  ],
+  "numerical_policy": {
+    "version": "B3_MAY_PRECISION_ORIGINAL_ROWS_V1",
+    "policy_sha": "19ac34fccdcbe6f53bce1ad193aa769523912aa2167438717ec36932b8916934",
+    "day": "2025-05-01",
+    "stage": "A1",
+    "component": "ORIGINAL_P1",
+    "overrides": {
+      "FeasibilityTol": 1e-09,
+      "OptimalityTol": 1e-09,
+      "NumericFocus": 3,
+      "ScaleFlag": 2
+    },
+    "effective_parameters": {
+      "Threads": 1,
+      "Method": 2,
+      "NodeMethod": 1,
+      "MIPGap": 0.005,
+      "IntFeasTol": 1e-05,
+      "Heuristics": 0.05,
+      "Cuts": -1,
+      "Seed": 20260929,
+      "Presolve": -1,
+      "Crossover": -1,
+      "MIPFocus": 3,
+      "FeasibilityTol": 1e-09,
+      "OptimalityTol": 1e-09,
+      "NumericFocus": 3,
+      "ScaleFlag": 2
+    },
+    "numerical_precision_override": true,
+    "phase_I_original_rows": false,
+    "original_method_unchanged": true,
+    "solver_policy_unchanged": false,
+    "scientific_acceptance_tolerance_unchanged": true,
+    "heuristics_parameter": 0.05,
+    "built_in_heuristics_active": true,
+    "heuristics_changed": false,
+    "scientific_certified": false,
+    "protected_parameters": {
+      "Threads": 1,
+      "Method": 2,
+      "NodeMethod": 1,
+      "MIPGap": 0.005,
+      "IntFeasTol": 1e-05,
+      "Heuristics": 0.05,
+      "Cuts": -1,
+      "Seed": 20260929,
+      "Presolve": -1,
+      "Crossover": -1,
+      "MIPFocus": 3
+    },
+    "content_sha": "4b6412c0526618e92f9a34e960fed86fa67aee8d22481c47fb31b52d2b3fe25b"
+  },
+  "solver_policy": {
+    "schema": "A_STAGE_SOLVER_POLICY_V2",
+    "PASS": true,
+    "frozen_gurobi_version": [
+      13,
+      0,
+      2
+    ],
+    "original_authority_parameters": {
+      "Threads": 1,
+      "Method": 1,
+      "Seed": 20260929,
+      "MIPGap": 0.005,
+      "Presolve": -1,
+      "Cuts": -1,
+      "Heuristics": 0.05,
+      "NumericFocus": 0,
+      "FeasibilityTol": 1e-06,
+      "OptimalityTol": 1e-06,
+      "IntFeasTol": 1e-05
+    },
+    "parameters": {
+      "Threads": 1,
+      "Method": 2,
+      "Seed": 20260929,
+      "MIPGap": 0.005,
+      "Presolve": -1,
+      "Cuts": -1,
+      "Heuristics": 0.05,
+      "NumericFocus": 0,
+      "FeasibilityTol": 1e-06,
+      "OptimalityTol": 1e-06,
+      "IntFeasTol": 1e-05,
+      "NodeMethod": 1,
+      "MIPFocus": 3,
+      "Crossover": -1
+    },
+    "preserved_scientific_settings": {
+      "MIPGap": 0.005,
+      "Seed": 20260929,
+      "FeasibilityTol": 1e-06,
+      "OptimalityTol": 1e-06,
+      "IntFeasTol": 1e-05
+    },
+    "parameter_support": {
+      "NodeMethod": {
+        "current": -1,
+        "minimum": -1,
+        "maximum": 5,
+        "default": -1
+      },
+      "MIPFocus": {
+        "current": 0,
+        "minimum": 0,
+        "maximum": 3,
+        "default": 0
+      },
+      "Crossover": {
+        "current": -1,
+        "minimum": -1,
+        "maximum": 5,
+        "default": -1
+      }
+    },
+    "algorithmic_changes": [
+      "Threads=1",
+      "Method=2",
+      "NodeMethod=1",
+      "MIPFocus=3"
+    ],
+    "scientific_model_change": false,
+    "parameter_sweep": false,
+    "cumulative_native_seconds_per_date": 3600,
+    "build_and_static_verification_outside_native_budget": true,
+    "crossover_rule": "Preserve frozen authority setting or frozen native default; diagnostic LP Crossover=0 is rejected"
+  },
+  "Native_used_seconds": 26.23799991607666,
+  "requested_total_cap_seconds": 25.0,
+  "matrix": {
+    "rows": 844129,
+    "columns": 36931,
+    "nonzeros": 10920902
+  },
+  "original_model_not_replaced": true,
+  "FCFS_final_schedule_used": false,
+  "historical_prefix_gate_used": false,
+  "KnownOptimization_status": "NOT_DEMONSTRATED",
+  "local_bound": 0.08280107490283846,
+  "global_gap_scope": "D0_FIXED_MESS_A_ONLY_NOT_AIDC_MESS_JOINT"
+}
