@@ -1,0 +1,409 @@
+{
+  "schema": "ORIGINAL_ISSUE_TO_DDAY_PREFIX_RECONCILIATION_V1",
+  "status": "NOT_CERTIFIED",
+  "evidence_scope": "ORIGINAL_PR223_SOURCE_AND_RETROSPECTIVE_SAVED_LEDGER",
+  "issue_seconds": 1746000000.0,
+  "begin_seconds": 1746021600.0,
+  "gap_seconds": 21600.0,
+  "prefix_execution": "NOT_RUN",
+  "original_native_time_axis_receipt": {
+    "status": "PASS",
+    "native_input_issue_time": "2025-04-30T08:00:00+00:00",
+    "issue_epoch_seconds": 1746000000.0,
+    "Dday_begin_epoch_seconds": 1746021600.0,
+    "native_slot_zero_is_issue": true,
+    "native_slot24_is_Dday": true,
+    "original_preparation_time_axis": {
+      "issue_epoch_seconds": 1746000000.0,
+      "planning_native_slots": [
+        24,
+        120
+      ],
+      "M_slots": [
+        0,
+        96
+      ],
+      "dt_seconds": 900
+    },
+    "original_model_grid_known_access": "known[site,t+24]",
+    "original_model_CC4_access": "anonymous/reserve[site,t+24]",
+    "original_model_capacity_native_slots": [
+      24,
+      120
+    ],
+    "original_QoS_native_conversion": "(allowed_seconds-issue)/900",
+    "original_Actual_command_conversion": "planning_slot_zero_seconds+native_start_slot*900",
+    "A1_selected_Pending_UIDs": 1395,
+    "A1_selected_Pending_original_QoS_epoch_matches": 1395,
+    "independent_of_current_known_command_compiler": true,
+    "verified_original_source_file_records": [
+      {
+        "path": "D:\\v42_common_am_qos_integration_20261013\\v42_capacity\\reference.py",
+        "sha256": "2baf1e03c9328676d94a1dc83bc6b75143e385efa988cc24c333eab1bf73df04",
+        "bytes": 7524
+      },
+      {
+        "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\a_engine.py",
+        "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+        "bytes": 14521
+      },
+      {
+        "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\production_case.py",
+        "sha256": "6f9839ad739c3c42eff31302821c263f3b0abd0f10a013057b029e5fd78fe3e8",
+        "bytes": 44889
+      },
+      {
+        "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\planning_inputs.py",
+        "sha256": "6fc08628e4ddc9964e9ed2fae493a560d6d06aeec4f59ad5a755601ffd74bb21",
+        "bytes": 8280
+      },
+      {
+        "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\qos.py",
+        "sha256": "4de5204e1f941179e48204e6d5f82f9b8faefac9246bed7aef0e074b702478f4",
+        "bytes": 27259
+      },
+      {
+        "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\coordinator.py",
+        "sha256": "ee8572414da16935b08f8b7f81d0dbb9be1bb68437b96f76f375590fb6f82177",
+        "bytes": 16940
+      },
+      {
+        "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual.py",
+        "sha256": "e27b6ad697006d33c67c9ddc612bf9508006f38af3052c36ba986f71361dcc38",
+        "bytes": 45124
+      }
+    ],
+    "changing_native0_to_Dday_authorized": false
+  },
+  "original_prefix_receipt_found": false,
+  "original_prefix_assertion_flags": {
+    "Apr30_queue_replay": false,
+    "saved_actual_gate_preday_queue_replay": false,
+    "saved_initial_binding_Apr30_queue_replay": false
+  },
+  "public_elapsed_continuation_scope": "103_ALREADY_RUNNING_UIDS_ONLY_NOT_PENDING_PREFIX_REPLAY",
+  "partial_continuation_certificates": {
+    "A1": {
+      "certificate_sha": "0e3b0cabcbc28e6b8f865e3952d5ebb07594ea7bc0e53980c2efd705f73db381",
+      "UIDs": 103,
+      "GPU": 133,
+      "observed_prefix_compute_GPUh": 798.0
+    },
+    "A2": {
+      "certificate_sha": "394c1018f41cf952464c5dc8a624c4da10bdfa1bbd05029810b201824fa7f0e4",
+      "UIDs": 103,
+      "GPU": 133,
+      "observed_prefix_compute_GPUh": 798.0
+    }
+  },
+  "stages": {
+    "A1": {
+      "status": "PASS",
+      "scope": "UID_ROOT_CAUSE_CLASSIFICATION_ONLY_NOT_FULL_BOUNDARY_CERTIFICATION",
+      "native_Known_UIDs": 1649,
+      "optimized_commands": 1499,
+      "issue_seconds": 1746000000.0,
+      "begin_seconds": 1746021600.0,
+      "stage": "A1",
+      "stage_case_sha": "3df8856647274066035c4e81e5073eea2c3d3eec8043494ed5868fa4a1197efb",
+      "primary_groups": {
+        "FUTURE_PENDING_COMMAND": {
+          "UIDs": 359,
+          "GPU": 359,
+          "issue_remaining_nominal_GPUh": 2871.292046553671,
+          "planned_prefix_nominal_compute_GPUh": 0.0,
+          "planned_prefix_reserved_GPUh": 0.0,
+          "observed_past_prefix_compute_GPUh": 0.0,
+          "first_possible_divergence_seconds": null,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "ISSUE_PENDING_SOURCE_STARTED_AFTER_OPTIMIZED": {
+          "UIDs": 42,
+          "GPU": 42,
+          "issue_remaining_nominal_GPUh": 614.7201085123979,
+          "planned_prefix_nominal_compute_GPUh": 178.00544974580782,
+          "planned_prefix_reserved_GPUh": 178.5,
+          "observed_past_prefix_compute_GPUh": 98.90944444444446,
+          "first_possible_divergence_seconds": 1746000000.0,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "ISSUE_PENDING_SOURCE_STARTED_BEFORE_OPTIMIZED": {
+          "UIDs": 108,
+          "GPU": 108,
+          "issue_remaining_nominal_GPUh": 1696.3021735153334,
+          "planned_prefix_nominal_compute_GPUh": 141.0,
+          "planned_prefix_reserved_GPUh": 141.0,
+          "observed_past_prefix_compute_GPUh": 475.71277777777755,
+          "first_possible_divergence_seconds": 1746000331.0,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "ISSUE_RUNNING_OBSERVED_PRIOR_COMPLETION": {
+          "UIDs": 1,
+          "GPU": 1,
+          "issue_remaining_nominal_GPUh": 0.22202851839920515,
+          "planned_prefix_nominal_compute_GPUh": 0.22202851839920515,
+          "planned_prefix_reserved_GPUh": 0.25,
+          "observed_past_prefix_compute_GPUh": 4.204722222222222,
+          "first_possible_divergence_seconds": 1746000000.0,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "PENDING_PRE_DDAY_COMMAND_NOMINAL_ACTIVE": {
+          "UIDs": 172,
+          "GPU": 172,
+          "issue_remaining_nominal_GPUh": 2635.0261160573405,
+          "planned_prefix_nominal_compute_GPUh": 608.0,
+          "planned_prefix_reserved_GPUh": 608.0,
+          "observed_past_prefix_compute_GPUh": 0.0,
+          "first_possible_divergence_seconds": 1746000900.0,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "PENDING_PRE_DDAY_COMMAND_NOMINAL_FINISHED": {
+          "UIDs": 714,
+          "GPU": 714,
+          "issue_remaining_nominal_GPUh": 417.79703950225775,
+          "planned_prefix_nominal_compute_GPUh": 417.79703950225775,
+          "planned_prefix_reserved_GPUh": 535.5,
+          "observed_past_prefix_compute_GPUh": 0.0,
+          "first_possible_divergence_seconds": 1746000000.0,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "VERIFIED_ISSUE_RUNNING_CONTINUATION": {
+          "UIDs": 103,
+          "GPU": 133,
+          "issue_remaining_nominal_GPUh": 2153.015805757383,
+          "planned_prefix_nominal_compute_GPUh": 765.5932211512993,
+          "planned_prefix_reserved_GPUh": 766.5,
+          "observed_past_prefix_compute_GPUh": 798.0,
+          "first_possible_divergence_seconds": null,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "ZERO_NOMINAL_PRIOR_COMPLETED": {
+          "UIDs": 102,
+          "GPU": 171,
+          "issue_remaining_nominal_GPUh": 0.0,
+          "planned_prefix_nominal_compute_GPUh": 0.0,
+          "planned_prefix_reserved_GPUh": 0.0,
+          "observed_past_prefix_compute_GPUh": 466.8847222222224,
+          "first_possible_divergence_seconds": null,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "ZERO_NOMINAL_RUNNING_PHYSICAL_HOLD": {
+          "UIDs": 48,
+          "GPU": 163,
+          "issue_remaining_nominal_GPUh": 0.0,
+          "planned_prefix_nominal_compute_GPUh": 0.0,
+          "planned_prefix_reserved_GPUh": 0.0,
+          "observed_past_prefix_compute_GPUh": 978.0,
+          "first_possible_divergence_seconds": null,
+          "first_observed_comparison_seconds": 1746021600.0
+        }
+      },
+      "overlapping_type_counts": {
+        "ZERO_NOMINAL_RUNNING_PHYSICAL_HOLD": 48,
+        "Q50_EXPIRED_RUNNING_PHYSICAL_HOLD": 56,
+        "ZERO_NOMINAL_PRIOR_COMPLETED": 102,
+        "ISSUE_PENDING_SOURCE_STARTED_AFTER_OPTIMIZED": 42,
+        "PENDING_PRE_DDAY_COMMAND_NOMINAL_FINISHED": 714,
+        "VERIFIED_ISSUE_RUNNING_CONTINUATION": 103,
+        "FUTURE_PENDING_COMMAND": 359,
+        "ISSUE_PENDING_SOURCE_STARTED_BEFORE_OPTIMIZED": 108,
+        "DISTINCT_APPROVED_DDAY_SITE_MODEL": 110,
+        "PENDING_PRE_DDAY_COMMAND_NOMINAL_ACTIVE": 172,
+        "ISSUE_RUNNING_OBSERVED_PRIOR_COMPLETION": 1
+      },
+      "Running_with_native_commands": 253,
+      "Pending_with_pre_Dday_native_commands": 886,
+      "all_UIDs_explained": true,
+      "optimized_schedule_full_prefix_replayed": false,
+      "initialization_redesigned": false,
+      "Native_calls": 0,
+      "past_pending_QoS": {
+        "UIDs": 886,
+        "original_receipt_status_counts": {
+          "PROTECTION_UNCONFIRMED": 886
+        },
+        "original_receipt_reason_counts": {
+          "PROTECTION_UNCONFIRMED": 886,
+          "BATCH_ELIGIBILITY_UNCONFIRMED": 886,
+          "UNSUPPORTED_COHORT": 886
+        },
+        "allowed_start_at_or_after_Dday_UIDs": 518,
+        "no_original_allowed_start_at_or_after_Dday_UIDs": 368,
+        "original_budget_seconds_counts": {
+          "0": 886
+        },
+        "automatic_Dday_retime_authorized": false
+      },
+      "Running_with_commands_site_match_UIDs": 143,
+      "Running_with_commands_site_mismatch_UIDs": 110
+    },
+    "A2": {
+      "status": "PASS",
+      "scope": "UID_ROOT_CAUSE_CLASSIFICATION_ONLY_NOT_FULL_BOUNDARY_CERTIFICATION",
+      "native_Known_UIDs": 1649,
+      "optimized_commands": 1499,
+      "issue_seconds": 1746000000.0,
+      "begin_seconds": 1746021600.0,
+      "stage": "A2",
+      "stage_case_sha": "ba1fadf8cb44b2b4dec50c2460cfc492cfd7fd16e5c4c7e06f2fc26385a1d753",
+      "primary_groups": {
+        "FUTURE_PENDING_COMMAND": {
+          "UIDs": 357,
+          "GPU": 357,
+          "issue_remaining_nominal_GPUh": 2811.301806242519,
+          "planned_prefix_nominal_compute_GPUh": 0.0,
+          "planned_prefix_reserved_GPUh": 0.0,
+          "observed_past_prefix_compute_GPUh": 0.0,
+          "first_possible_divergence_seconds": null,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "ISSUE_PENDING_SOURCE_STARTED_AFTER_OPTIMIZED": {
+          "UIDs": 82,
+          "GPU": 82,
+          "issue_remaining_nominal_GPUh": 1243.401809811463,
+          "planned_prefix_nominal_compute_GPUh": 342.2554497458078,
+          "planned_prefix_reserved_GPUh": 342.75,
+          "observed_past_prefix_compute_GPUh": 294.7952777777776,
+          "first_possible_divergence_seconds": 1746000000.0,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "ISSUE_PENDING_SOURCE_STARTED_BEFORE_OPTIMIZED": {
+          "UIDs": 68,
+          "GPU": 68,
+          "issue_remaining_nominal_GPUh": 1067.6204722162684,
+          "planned_prefix_nominal_compute_GPUh": 92.5,
+          "planned_prefix_reserved_GPUh": 92.5,
+          "observed_past_prefix_compute_GPUh": 279.8269444444444,
+          "first_possible_divergence_seconds": 1746000331.0,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "ISSUE_RUNNING_OBSERVED_PRIOR_COMPLETION": {
+          "UIDs": 1,
+          "GPU": 1,
+          "issue_remaining_nominal_GPUh": 0.22202851839920515,
+          "planned_prefix_nominal_compute_GPUh": 0.22202851839920515,
+          "planned_prefix_reserved_GPUh": 0.25,
+          "observed_past_prefix_compute_GPUh": 4.204722222222222,
+          "first_possible_divergence_seconds": 1746000000.0,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "PENDING_PRE_DDAY_COMMAND_NOMINAL_ACTIVE": {
+          "UIDs": 176,
+          "GPU": 176,
+          "issue_remaining_nominal_GPUh": 2696.186656199031,
+          "planned_prefix_nominal_compute_GPUh": 690.75,
+          "planned_prefix_reserved_GPUh": 690.75,
+          "observed_past_prefix_compute_GPUh": 0.0,
+          "first_possible_divergence_seconds": 1746000900.0,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "PENDING_PRE_DDAY_COMMAND_NOMINAL_FINISHED": {
+          "UIDs": 712,
+          "GPU": 712,
+          "issue_remaining_nominal_GPUh": 416.62673967171924,
+          "planned_prefix_nominal_compute_GPUh": 416.62673967171924,
+          "planned_prefix_reserved_GPUh": 534.0,
+          "observed_past_prefix_compute_GPUh": 0.0,
+          "first_possible_divergence_seconds": 1746000000.0,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "VERIFIED_ISSUE_RUNNING_CONTINUATION": {
+          "UIDs": 103,
+          "GPU": 133,
+          "issue_remaining_nominal_GPUh": 2153.015805757383,
+          "planned_prefix_nominal_compute_GPUh": 765.5932211512993,
+          "planned_prefix_reserved_GPUh": 766.5,
+          "observed_past_prefix_compute_GPUh": 798.0,
+          "first_possible_divergence_seconds": null,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "ZERO_NOMINAL_PRIOR_COMPLETED": {
+          "UIDs": 102,
+          "GPU": 171,
+          "issue_remaining_nominal_GPUh": 0.0,
+          "planned_prefix_nominal_compute_GPUh": 0.0,
+          "planned_prefix_reserved_GPUh": 0.0,
+          "observed_past_prefix_compute_GPUh": 466.8847222222224,
+          "first_possible_divergence_seconds": null,
+          "first_observed_comparison_seconds": 1746021600.0
+        },
+        "ZERO_NOMINAL_RUNNING_PHYSICAL_HOLD": {
+          "UIDs": 48,
+          "GPU": 163,
+          "issue_remaining_nominal_GPUh": 0.0,
+          "planned_prefix_nominal_compute_GPUh": 0.0,
+          "planned_prefix_reserved_GPUh": 0.0,
+          "observed_past_prefix_compute_GPUh": 978.0,
+          "first_possible_divergence_seconds": null,
+          "first_observed_comparison_seconds": 1746021600.0
+        }
+      },
+      "overlapping_type_counts": {
+        "ZERO_NOMINAL_RUNNING_PHYSICAL_HOLD": 48,
+        "Q50_EXPIRED_RUNNING_PHYSICAL_HOLD": 56,
+        "ZERO_NOMINAL_PRIOR_COMPLETED": 102,
+        "ISSUE_PENDING_SOURCE_STARTED_AFTER_OPTIMIZED": 82,
+        "PENDING_PRE_DDAY_COMMAND_NOMINAL_FINISHED": 712,
+        "VERIFIED_ISSUE_RUNNING_CONTINUATION": 103,
+        "FUTURE_PENDING_COMMAND": 357,
+        "ISSUE_PENDING_SOURCE_STARTED_BEFORE_OPTIMIZED": 68,
+        "DISTINCT_APPROVED_DDAY_SITE_MODEL": 112,
+        "PENDING_PRE_DDAY_COMMAND_NOMINAL_ACTIVE": 176,
+        "ISSUE_RUNNING_OBSERVED_PRIOR_COMPLETION": 1
+      },
+      "Running_with_native_commands": 253,
+      "Pending_with_pre_Dday_native_commands": 888,
+      "all_UIDs_explained": true,
+      "optimized_schedule_full_prefix_replayed": false,
+      "initialization_redesigned": false,
+      "Native_calls": 0,
+      "past_pending_QoS": {
+        "UIDs": 888,
+        "original_receipt_status_counts": {
+          "PROTECTION_UNCONFIRMED": 888
+        },
+        "original_receipt_reason_counts": {
+          "PROTECTION_UNCONFIRMED": 888,
+          "BATCH_ELIGIBILITY_UNCONFIRMED": 888,
+          "UNSUPPORTED_COHORT": 888
+        },
+        "allowed_start_at_or_after_Dday_UIDs": 520,
+        "no_original_allowed_start_at_or_after_Dday_UIDs": 368,
+        "original_budget_seconds_counts": {
+          "0": 888
+        },
+        "automatic_Dday_retime_authorized": false
+      },
+      "Running_with_commands_site_match_UIDs": 141,
+      "Running_with_commands_site_mismatch_UIDs": 112
+    }
+  },
+  "saved_actual_decision_status_counts": {
+    "PRE_DDAY_START_COMMAND_NOT_REPLAYED": 888,
+    "KNOWN_EXECUTION_COMMAND": 357,
+    "CAUSAL_REFERENCE_START": 748
+  },
+  "saved_actual_event_times_first": 1746021600.0,
+  "original_driver_preday_behavior": "PRE_DDAY_START_COMMAND_NOT_REPLAYED_REFERENCE_FALLBACK",
+  "original_driver_behavior_is_optimized_prefix_execution": false,
+  "legal_path": "B_OBSERVED_BOUNDARY_ADAPTER_WITH_TYPED_CONTINUATIONS_AND_EXPLICIT_UNRESOLVED_COMMANDS",
+  "legal_adapter": {
+    "reuse_approved_initial_state": true,
+    "initial_state_semantic_and_file_validation_separate": true,
+    "Running103": "Source-verified pinned continuation; native start=0 retains remaining-service meaning; no new START or command mutation.",
+    "Running150": "Keep approved observed physical episode. Audit optimized allocation/time divergence; do not move or restart already-running jobs.",
+    "Known_Running48_without_native_domain": "Hold observed 163GPU until observed completion, irrespective of expired nominal Q50.",
+    "historical_completed178": "Preserve observed completed history; no active GPU or CC4 demand reinsertion.",
+    "Pending886": "Keep original optimized command immutable and original QoS receipt. A past command does not become a new Dday START.",
+    "Pending_expired_authority": "Record unresolved expired command with original allowed window and hard contract. Starting at Dday needs an independently valid original window or an explicit new research corrective policy/receipt; no blanket Known consent.",
+    "future_pending": "Only future original commands with exact source/Case/SHA, preparation and physical guard may proceed after all gate requirements.",
+    "unresolved_conflict_outcome": "HOLD before real Actual replay. Preserve queue and capacity metrics as NOT_RUN."
+  },
+  "no_planning_command_retime": true,
+  "no_FCFS_replacement": true,
+  "no_initial_state_redefinition": true,
+  "no_apparent_schedule_execution_from_nominal_prefix": true,
+  "Native_calls": 0,
+  "Actual_calls": 0,
+  "Fresh_AC_calls": 0
+}

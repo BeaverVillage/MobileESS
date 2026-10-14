@@ -36,6 +36,46 @@ def require_sha(value, field):
     return value
 
 
+def build_approved_dday_observed_state(record, *, initial_state_sha, begin_seconds, arm='B1'):
+    """Normalize the approved PR223 snapshot without changing its authority.
+
+    The byte receipt seals the file, while the original loader independently
+    checks its semantic payload, provenance, physical capacity and arm binding.
+    No private future runtime or new initial placement enters this projection.
+    """
+    from .dday_initialization import load_dday_state
+    path = Path(record['path'])
+    if file_sha(path) != record.get('sha256') or path.stat().st_size != record.get('bytes'):
+        raise ValueError('FOLLOWUP_BOUNDARY_SOURCE_BYTE_SHA_DRIFT')
+    source = load_dday_state(path, arm=arm)
+    if (source['common_initial_state_sha'] != initial_state_sha or
+            source['begin_epoch_seconds'] != begin_seconds or
+            source['day_begin_epoch_seconds'] != begin_seconds):
+        raise ValueError('FOLLOWUP_BOUNDARY_SOURCE_SEMANTIC_OR_CLOCK_DRIFT')
+    running = [dict(uid=row['uid'], episode_id=row['episode_id'], site=row['site'],
+        start_seconds=row['observed_start_seconds'], gpu=row['gpu'],
+        submit_seconds=row['submit_seconds'],q50_total_seconds=row['q50'],
+        compatible_sites=deepcopy(row['compatible_sites']),
+        elapsed_compute_seconds=row['elapsed_compute_seconds'], observed_at_seconds=begin_seconds,
+        source_row_sha=digest(row)) for row in source['running']]
+    pending = [dict(uid=row['uid'], episode_id=row['episode_id'], site=row['site'], gpu=row['gpu'],
+        q50_total_seconds=row['q50'],compatible_sites=deepcopy(row['compatible_sites']),
+        submit_seconds=row['submit_seconds'], observed_at_seconds=begin_seconds,
+        source_row_sha=digest(row)) for row in source['pending']]
+    completed = [dict(uid=row['job_uid'], site=row['original_native_site'],
+        start_seconds=row['observed_start_seconds'], gpu=row['GPU_gang'],
+        observed_completion_seconds=row['observed_completion_seconds'],
+        observed_control_release_seconds=row['observed_control_release_seconds'],
+        observed_at_seconds=begin_seconds, source_row_sha=digest(row))
+        for row in source['historical_completed']]
+    return dict(running=running, pending=pending, historical_completed=completed,
+        source_record=deepcopy(record), source_schema=source['schema'],
+        source_semantic_sha=source['common_initial_state_sha'], source_arm=arm,
+        MODEL_ASSUMPTION=source['MODEL_ASSUMPTION'],
+        KESTREL_OBSERVED_SITE=source['KESTREL_OBSERVED_SITE'],
+        KESTREL_OBSERVED_QUEUE=source['KESTREL_OBSERVED_QUEUE'])
+
+
 def same_case(planning, actual):
     for key in IDENTITY_FIELDS:
         require_sha(planning.get(key), key)
@@ -45,10 +85,23 @@ def same_case(planning, actual):
     return {key: planning[key] for key in IDENTITY_FIELDS}
 
 
-def validate_known_boundary(commands, observed_state, *, begin_seconds):
-    """A past command requires observed execution/completion, never retiming."""
+def validate_known_boundary(commands, observed_state, *, begin_seconds, continuation_identity=None):
+    """Separate verified running continuation from literal new-start commands."""
     if not math.isfinite(begin_seconds) or begin_seconds % 900:
         raise ValueError('FOLLOWUP_ORIGINAL_CONTROL_TIME_AXIS_REQUIRED')
+    continuations={}
+    proof=observed_state.get('running_continuation_certificate')
+    if proof is not None:
+        if continuation_identity is None:
+            raise ValueError('FOLLOWUP_CONTINUATION_EXPLICIT_STAGE_INITIAL_BINDING_REQUIRED')
+        from .may01_boundary_reconciliation import validate_running_continuation_certificate
+        continuations=validate_running_continuation_certificate(proof,commands=commands,
+            stage_case_sha=continuation_identity['stage_case_sha'],
+            initial_semantic_sha=continuation_identity['initial_state_sha'],begin_seconds=begin_seconds)
+        source=observed_state.get('source_record',{})
+        if (source.get('sha256')!=proof['initial_record']['sha256'] or
+                source.get('bytes')!=proof['initial_record']['bytes']):
+            raise ValueError('FOLLOWUP_CONTINUATION_INITIAL_SOURCE_RECEIPT_DRIFT')
     running, completed = {}, {}
     for field, target in (('running', running), ('historical_completed', completed)):
         for row in observed_state.get(field, []):
@@ -68,7 +121,15 @@ def validate_known_boundary(commands, observed_state, *, begin_seconds):
             raise ValueError('FOLLOWUP_DIAGNOSTIC_FCFS_IS_NOT_PLANNING_AUTHORITY')
         row = running.get(uid)
         if row is not None:
-            if (start >= begin_seconds or row.get('site') != command['site'] or
+            continuation=continuations.get(uid)
+            if continuation is not None:
+                if (row.get('site')!=continuation['current_site'] or
+                        row.get('start_seconds')!=continuation['historical_episode_start_seconds'] or
+                        row.get('gpu')!=continuation['gpu'] or
+                        row.get('elapsed_compute_seconds')!=continuation['Dday_elapsed_seconds'] or
+                        row.get('episode_id')!=continuation['episode_id']):
+                    mismatched.append(uid)
+            elif (start >= begin_seconds or row.get('site') != command['site'] or
                     row.get('start_seconds') != start):
                 mismatched.append(uid)
             continue
@@ -86,6 +147,8 @@ def validate_known_boundary(commands, observed_state, *, begin_seconds):
     return dict(status='PASS' if not missing and not mismatched else 'NOT_CERTIFIED',
                 past_commands_without_observed_execution_UIDs=missing,
                 observed_execution_command_mismatch_UIDs=mismatched,
+                verified_issue_running_continuation_UIDs=sorted(continuations),
+                continuation_is_not_new_start=True,
                 planning_commands_sha=digest(commands), commands_retimed=False,
                 begin_seconds=begin_seconds)
 
@@ -116,7 +179,8 @@ def require_planning_actual_handoff(a_result, planning_identity, actual_identity
     for uid, original in expected.items():
         if any(digest(commands[uid].get(key)) != digest(value) for key, value in original.items()):
             raise ValueError('FOLLOWUP_PLANNING_COMMAND_DERIVATION_DRIFT:' + uid)
-    boundary = validate_known_boundary(commands, observed_state, begin_seconds=begin_seconds)
+    boundary = validate_known_boundary(commands, observed_state, begin_seconds=begin_seconds,
+        continuation_identity=identity)
     if boundary['status'] != 'PASS':
         raise ValueError('FOLLOWUP_DDAY_PLANNING_BOUNDARY_NOT_CERTIFIED')
     return dict(status='PASS', identity=identity, boundary=boundary,
@@ -144,6 +208,10 @@ def comparison_inputs(rows):
 def require_initial_state_alignment(observed_state, arguments, actual_identity, *, evidence_scope):
     """Join the validated boundary to what the private simulator will execute."""
     begin=arguments['begin']
+    observed_uids=[r['uid'] for field in ('running','pending','historical_completed')
+                   for r in observed_state.get(field,[])]
+    if len(set(observed_uids))!=len(observed_uids):
+        raise ValueError('FOLLOWUP_DUPLICATE_BOUNDARY_UID')
     expected_running={r['uid']:(r.get('site'),r.get('start_seconds'))
                       for r in observed_state.get('running',[])}
     running=arguments.get('running',())
@@ -154,16 +222,45 @@ def require_initial_state_alignment(observed_state, arguments, actual_identity, 
         row=next(r for r in observed_state['running'] if r['uid']==request.uid)
         if row.get('gpu',request.gpu)!=request.gpu:
             raise ValueError('FOLLOWUP_ACTUAL_DRIVER_INITIAL_GPU_DRIFT')
+        if ('submit_seconds' in row and row['submit_seconds']!=request.submit):
+            raise ValueError('FOLLOWUP_ACTUAL_DRIVER_INITIAL_SUBMIT_DRIFT')
+        if ('q50_total_seconds' in row and row['q50_total_seconds']!=request.q50):
+            raise ValueError('FOLLOWUP_ACTUAL_DRIVER_INITIAL_Q50_DRIFT')
+        if ('compatible_sites' in row and
+                tuple(row['compatible_sites'])!=tuple(request.compatible)):
+            raise ValueError('FOLLOWUP_ACTUAL_DRIVER_INITIAL_COMPATIBILITY_DRIFT')
         elapsed=getattr(request,'metadata',{}).get('elapsed_compute_seconds',begin-start)
         if row.get('elapsed_compute_seconds',elapsed)!=elapsed:
             raise ValueError('FOLLOWUP_ACTUAL_DRIVER_INITIAL_ELAPSED_DRIFT')
+        if ('episode_id' in row and
+                row['episode_id'] != getattr(request,'metadata',{}).get('episode_id')):
+            raise ValueError('FOLLOWUP_ACTUAL_DRIVER_INITIAL_EPISODE_DRIFT')
     expected_pending={r['uid'] for r in observed_state.get('pending',[])}
     requests=arguments.get('requests',())
+    request_uids=[r.uid for r in requests]
+    if len(set(request_uids))!=len(request_uids) or set(request_uids)&set(actual_running):
+        raise ValueError('FOLLOWUP_ACTUAL_DRIVER_DUPLICATE_OR_RESUBMITTED_UID')
     actual_pending={r.uid for r in requests if r.uid not in actual_running and
         (r.submit<begin or r.uid in expected_pending or
          getattr(r,'metadata',{}).get('dday_initialization_seconds')==begin)}
     if actual_pending!=expected_pending:
         raise ValueError('FOLLOWUP_ACTUAL_DRIVER_INITIAL_PENDING_DRIFT')
+    pending_rows={r['uid']:r for r in observed_state.get('pending',[])}
+    for request in requests:
+        row=pending_rows.get(request.uid)
+        if row is None:
+            continue
+        if (('gpu' in row and row['gpu']!=request.gpu) or
+                ('submit_seconds' in row and row['submit_seconds']!=request.submit)):
+            raise ValueError('FOLLOWUP_ACTUAL_DRIVER_INITIAL_PENDING_CONTRACT_DRIFT')
+        if ('q50_total_seconds' in row and row['q50_total_seconds']!=request.q50):
+            raise ValueError('FOLLOWUP_ACTUAL_DRIVER_INITIAL_Q50_DRIFT')
+        if ('compatible_sites' in row and
+                tuple(row['compatible_sites'])!=tuple(request.compatible)):
+            raise ValueError('FOLLOWUP_ACTUAL_DRIVER_INITIAL_COMPATIBILITY_DRIFT')
+        if ('episode_id' in row and
+                row['episode_id']!=getattr(request,'metadata',{}).get('episode_id')):
+            raise ValueError('FOLLOWUP_ACTUAL_DRIVER_INITIAL_EPISODE_DRIFT')
     completed={r['uid'] for r in observed_state.get('historical_completed',[])}
     if completed & (set(actual_running)|{r.uid for r in requests}):
         raise ValueError('FOLLOWUP_COMPLETED_BOUNDARY_UID_RESUBMITTED')
@@ -172,12 +269,21 @@ def require_initial_state_alignment(observed_state, arguments, actual_identity, 
         raise ValueError('FOLLOWUP_REAL_BOUNDARY_SOURCE_RECEIPT_REQUIRED')
     if record is not None:
         path=Path(record['path'])
-        if (file_sha(path)!=record.get('sha256') or path.stat().st_size!=record.get('bytes') or
-                record['sha256']!=actual_identity['initial_state_sha']):
+        if file_sha(path)!=record.get('sha256') or path.stat().st_size!=record.get('bytes'):
             raise ValueError('FOLLOWUP_BOUNDARY_SOURCE_BYTE_SHA_DRIFT')
         source=json.loads(path.read_text(encoding='utf8'))
-        # A normalized observed-state receipt has a literal frozen row roster.
-        # Source-specific normalization must be certified before this gate.
+        if source.get('schema')=='V42_MAY01_DDAY_INITIAL_STATE_FREEZE_V1':
+            source=build_approved_dday_observed_state(record,
+                initial_state_sha=actual_identity['initial_state_sha'],begin_seconds=begin,
+                arm=observed_state.get('source_arm','B1'))
+            for field in ('source_schema','source_semantic_sha','source_arm','MODEL_ASSUMPTION',
+                          'KESTREL_OBSERVED_SITE','KESTREL_OBSERVED_QUEUE'):
+                if observed_state.get(field)!=source[field]:
+                    raise ValueError('FOLLOWUP_BOUNDARY_SOURCE_AUTHORITY_DRIFT:'+field)
+        elif record['sha256']!=actual_identity['initial_state_sha']:
+            # Legacy literal normalized receipts use a file-content identity.
+            # Only the approved source-specific transform has semantic authority.
+            raise ValueError('FOLLOWUP_BOUNDARY_SOURCE_SEMANTIC_OR_CLOCK_DRIFT')
         for field in ('running','pending','historical_completed'):
             if digest(source.get(field,[]))!=digest(observed_state.get(field,[])):
                 raise ValueError('FOLLOWUP_BOUNDARY_SOURCE_ROW_DRIFT:'+field)
