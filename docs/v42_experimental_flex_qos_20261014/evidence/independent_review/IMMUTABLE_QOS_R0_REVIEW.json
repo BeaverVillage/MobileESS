@@ -1,0 +1,132 @@
+{
+  "schema": "V42_EXPERIMENTAL_IMMUTABLE_QOS_R0_INDEPENDENT_REVIEW_V1",
+  "status": "PASS_FINAL_CONTROL_BARRIER_READ_ONLY",
+  "scope": "READ_ONLY_CURRENT_SOURCE;NO_PRODUCTION_EDITS",
+  "source_files": [
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\v42_integration\\experimental_qos.py",
+      "sha256": "0b121f2a5db43ba8fda1ed671bef0e3f0769672180248d4781fb5112997f2815"
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\v42_integration\\experimental_policy.py",
+      "sha256": "1f6a033a27c9da76b280bc4000f9b66bdf301a4748e495a44265d3212996fafb"
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\v42_integration\\experimental_actual.py",
+      "sha256": "0d1ca4ac8a24df210b29c50b7e6cee19dd0908468ac6f7682ab2e6d4121086f2"
+    }
+  ],
+  "verified_issuer_properties": [
+    "Original issue receipt, original reference and B sealed immutable",
+    "E0 strict delegate unchanged",
+    "Known issue and observed Unknown use same preregistered participation formula",
+    "Source protection/high/urgent/explicit nonbatch preserve zero additional budget",
+    "Raw QoS remains distinct from ASSUMED_NORMAL_BATCH model metadata",
+    "E2 new contract permits explicit7200s without modifying strict issuer"
+  ],
+  "findings": [
+    {
+      "required": "A later block must not retroactively excuse unsupported future-Q50/policy waiting. Preserve original deadline unless timely recorded physical block proof applies, with no expired-window renewal.",
+      "function": "ExperimentalControlPolicy._execution_reference",
+      "id": "R0_LATE_OBSERVATION_RETROACTIVE_REBASE",
+      "condition": "now>=R0 accepts a newly observed current block, followed by now>R0 reference advancement",
+      "state": "RESOLVED_CURRENT_SOURCE"
+    },
+    {
+      "required": "Preserve and validate runtime references and block proofs across policy reload/controller restore, or fail closed unsupported continuation.",
+      "function": "ExperimentalJobEventController snapshot/restore inherited from common Actual",
+      "id": "R0_CONTROLLER_SNAPSHOT_PERSISTENCE",
+      "condition": "Common snapshot restores metadata/decisions/budget but not policy.references/observed_blocks/reference_audit",
+      "state": "RESOLVED_CURRENT_SOURCE"
+    },
+    {
+      "required": "Label assumed action authority only when participant and eligible_for_contract; preserve independent original source placement authority.",
+      "function": "ExperimentalJobEventController._overlay",
+      "id": "ASSUMED_CAPABILITY_AUTHORITY_LABEL",
+      "condition": "Assumed Pre-placement label keyed only by hash participant even if contract eligibility false",
+      "state": "RESOLVED_CURRENT_SOURCE"
+    }
+  ],
+  "required_regressions": [
+    "Unsupported future Q50 veto at R0, then deadline expiry, then later current capacity block cannot renew R0/window",
+    "Timely observed physical block may advance reference, preserves already consumed burden and immutable B",
+    "Selected delay charged once, canceled command does not refund budget; retry uses same deadline",
+    "Expired QUEUE has no base-controller late START fallback",
+    "Policy reload + controller restore preserves original R0/proof/deadline; expired continuation cannot refreeze reference",
+    "Original protected/high/urgent/nonbatch never acquire assumed TimeShift/Migration capability",
+    "Missing raw QoS remains explicitly assumed, Source pre-placement authority tracked independently"
+  ],
+  "production_source_edits": 0,
+  "Native_Optimize_calls": 0,
+  "Actual_runs": 0,
+  "Fresh_AC_calls": 0,
+  "test_runs_by_reviewer": 0,
+  "report_draft": "audit/CONTROL_POLICY_FLEXIBILITY_FINAL_KO_DRAFT.md",
+  "final_boundary_findings": [
+    {
+      "before": "Proof at0 advances reference900 then drops timely900 proof, incorrectly expires after continuous current hard blockage",
+      "state": "RESOLVED_SAME_INPUT_BEFORE_AFTER",
+      "scope": "Named synthetic signed current grid fixture, not productionActual",
+      "id": "CONTINUOUS_OBSERVED_CURRENT_GRID_BLOCK_CHAIN",
+      "after": "Timely due proofs retained0/900/1800/2700/3600; release4500 START, immutableB1800 and intentionaldelay0"
+    }
+  ],
+  "resolved_behavior": [
+    "New block proof is limited to frozen R0 due or selected contractual due while unexpired; later unsupported policy wait cannot retroactively create proof",
+    "Current due proof chain survives a reference advance at base==now through bounded one-time re-entry",
+    "Same-reference delay is an absolute cumulative obligation, not summed again at each retry",
+    "Expired window creates terminalQUEUE and blocks common reference START fallback",
+    "Experimental snapshot exports runtime references/proofs/hash; experimental continuation fails before state mutation instead of reopening window",
+    "E0 inherited snapshot/restore delegation remains unchanged",
+    "Assumed action-authority label requires participant and contract eligibility, independent original sourcePre authority remains explicit",
+    "Instantaneous whole-gang current occupancy is checked before slot-average forecasts",
+    "Migration original guard uses cumulative additional start delay plus migration interruption and preserves Q50overrun STAY"
+  ],
+  "evidence": [
+    {
+      "role": "Pre-fix controlled proof",
+      "path": "audit/independent_review/CHAINED_CURRENT_GRID_REFERENCE_REPRO.json"
+    },
+    {
+      "role": "Same-input post-fix current-grid proof",
+      "corrected_chain_PASS": true,
+      "path": "audit/independent_review/CHAINED_CURRENT_GRID_REFERENCE_REPRO_AFTER.json"
+    },
+    {
+      "role": "Writer28 focused test cases reviewed, not rerun by reviewer",
+      "path": "tests/test_v42_experimental_control.py"
+    },
+    {
+      "role": "Parent reported integrated151 testsPASS4.12s, not rerun by reviewer"
+    }
+  ],
+  "unsupported_scope": [
+    "E1/E2 controller continuation is deliberately NOT_SUPPORTED_FAIL_CLOSED_FIXED_ONE_DAY_ANCHOR",
+    "C final18-case outcomes pending complete aggregate at latest review update,first3 Full96 independently validated by source agent",
+    "New A/M optimization and Fresh AC NOT_RUN",
+    "Source observed whole SLA is not certified by experimental additional-delay contract"
+  ],
+  "controlled_reproduction_runs": 2,
+  "unresolved_material_issues": [],
+  "final_C_source_sha": "c4b59fb3898da7f3bed6b3b6818890165c74f7f1f90e4cd2470fa3abd5c56c0a",
+  "exact_cache_engineering_review": {
+    "late_no_renewal": "New late blockage still cannot create proof or refresh expired reference",
+    "continuous_block_chain": "Existing applicable due proof still enters evaluation/advance and bounded re-entry at newly due reference",
+    "current_policy_comment_only_change": "AST_EQUAL_provenance_audit_read;current package authority fallback preserves exact current source path",
+    "reviewer_test_reruns": 0,
+    "reservation_cache": "Full resource-name view caches existing peer segments; all successful reserve/activate/release/retain_running mutations invalidate; delegates original ReservationLedger._fits on identical query segments and capacities",
+    "two_slot_same_input_prefix": {
+      "old_source": "4a13796f69a39dc8b7e5c6159747a402561ec5661f0edda9cbfadef35d7a6bff",
+      "new_source": "aac397455fc3344efb61016ef4fcede668437fa490852c46fab74d4df9d04c0a",
+      "case_sha": "869390b1d402ded346034a4363627d5e5ff2a4f06df8f7414a1b310c38413825",
+      "old_wall_seconds": 57.5023604,
+      "scope": "PARTIAL_TWO_SLOT_ENGINEERING_EQUIVALENCE_NOT_FULL96_OR_AC",
+      "all5_occupancy_compute_IT_PCC_arrays_SHA_equal": true,
+      "new_wall_seconds": 29.0213831,
+      "canonical_behavior_sha": "27aa83c35bccf3edb88d977df6d3c808d2ffbf934304f9dfeedf9a503f8e5fad"
+    },
+    "parent_focused_test_evidence": "161PASS4.45s incl35control+5grid;not rerun by reviewer",
+    "R0_early_return": "Only when neither timely frozen/selected due proof nor previously recorded applicable proof can cause a write/advance; returns original reference/site before expensive geometry. No eligibility/budget/deadline mutation.",
+    "status": "PASS_READ_ONLY_R0_DEAD_BRANCH_AND_LITERAL_BASE_FIT_REUSE"
+  }
+}

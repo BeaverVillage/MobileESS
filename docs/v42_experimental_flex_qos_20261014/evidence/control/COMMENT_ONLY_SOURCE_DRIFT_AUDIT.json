@@ -1,0 +1,42 @@
+{
+  "status": "IDENTIFIED_EXACT_COMMENT_ONLY_NO_LINE_ENDING_CHANGE",
+  "intentional_comment_change": {
+    "before": "        # One immutable serial selection snapshot; no cache crosses reservation\n        # mutation or observed events. Candidate-specific phases are still exact.",
+    "after": "        # One immutable serial selection snapshot. Reuse requires the complete\n        # ordered reservation frame; candidate-specific phases remain exact."
+  },
+  "executable_code_changed": false,
+  "policy_doc_numeric_semantics_changed": false,
+  "production_file_written_during_audit": false,
+  "variants": [
+    {
+      "label": "CURRENT",
+      "sha256": "4d1d36bc728a966b0b857af67a9b4b786f9e76f4f4b6e1ffd49c4f0e9000ed91",
+      "bytes": 40896
+    },
+    {
+      "label": "CURRENT_LF",
+      "sha256": "dae9812bdb8c8f481b9be92e377e11c8b654eb6019bb6133333954daf5851546",
+      "bytes": 40348
+    },
+    {
+      "label": "CURRENT_CRLF",
+      "sha256": "4d1d36bc728a966b0b857af67a9b4b786f9e76f4f4b6e1ffd49c4f0e9000ed91",
+      "bytes": 40896
+    },
+    {
+      "label": "PRE_COMMENT_LF",
+      "sha256": "08e15e578bbc742da915c6559aa94caca45d08b2ff6f28726d183215b9966143",
+      "bytes": 40354
+    },
+    {
+      "label": "PRE_COMMENT_CRLF",
+      "sha256": "5ef205a57c5970761bd385d0c84eeedb74f763e65acf142460739d67b5d94d49",
+      "bytes": 40902
+    }
+  ],
+  "expected_frozen_policy_sha": "5ef205a57c5970761bd385d0c84eeedb74f763e65acf142460739d67b5d94d49",
+  "reconstructed_pre_comment_exact_SHA_MATCH": true,
+  "executable_AST_bitwise_equal": true,
+  "changed_lines_count": 2,
+  "byte_size_change": -6
+}

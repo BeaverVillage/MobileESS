@@ -535,7 +535,7 @@ class JobEventController(Controller):
 def run_actual(capacities, requests, environment, *, arm, qos_window_provider,
                frozen_policy=None, known_schedule=None, running=(), begin=0., end=86400.,
                reference=None, forecast=None, wan_capacities=None, power_model=None,
-               weather=None, carryout=None, expected_bindings=None):
+               weather=None, carryout=None, expected_bindings=None, controller_class=None):
     """One independent daily Case or an explicit small carryout continuation."""
     if end <= begin or begin % 900 or end % 900:
         raise ValueError("ACTUAL_CONTROL_GRID_HORIZON")
@@ -544,7 +544,8 @@ def run_actual(capacities, requests, environment, *, arm, qos_window_provider,
             frozen_policy.require_bindings(expected_bindings)
         if frozen_policy.bindings["case_sha"] != qos_window_provider.case_sha:
             raise ValueError("ACTUAL_QOS_POLICY_CASE_MISMATCH")
-    controller = JobEventController(capacities, arm=arm, qos_window_provider=qos_window_provider,
+    controller_type = JobEventController if controller_class is None else controller_class
+    controller = controller_type(capacities, arm=arm, qos_window_provider=qos_window_provider,
         frozen_policy=frozen_policy, known_schedule=known_schedule, reference=reference,
         forecast=forecast, wan_capacities=wan_capacities)
     if carryout is not None:

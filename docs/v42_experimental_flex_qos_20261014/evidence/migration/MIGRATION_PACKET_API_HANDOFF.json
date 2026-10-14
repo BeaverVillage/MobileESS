@@ -1,0 +1,536 @@
+{
+  "schema": "EXPERIMENTAL_MIGRATION_SOURCE_NUMERIC_AUTHORITY_V1",
+  "policy_id": "V42_EXPERIMENTAL_FLEXIBLE_QOS_CONTROL_V1",
+  "written_utc": "2026-10-13T16:04:34.193486+00:00",
+  "mode": "SOURCE_NUMERIC_AUDIT_AND_NAMED_GUARD_FIXTURE_ONLY",
+  "source_receipts": [
+    {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-01\\output\\STATIC\\DATA\\DATA.pkl",
+      "bytes": 34419875,
+      "sha256": "adf6666d455620c5d28ea5a4723078eed38eb577e7297327878f9c8e020adfa4"
+    },
+    {
+      "path": "D:\\v42_may_joint_repair_campaign_20261013\\raw\\2025-05-01\\NATIVE_INPUT_TEMPLATE_B1.json",
+      "bytes": 4000652,
+      "sha256": "365824518d8b3d380b6e2cc72a78d19d27ce8d39d304acdc8ffc5b5806b342fc"
+    },
+    {
+      "path": "D:\\MobileESS_V42\\docs\\v42_may01_native_canary\\MAY01_NATIVE_INPUT_MANIFEST.json",
+      "bytes": 33310,
+      "sha256": "beddaf427d31f23de300ddc4ecde6188259f712fd65ecda1ce8f0f477c57571a"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\pfr\\contracts\\IDC_MIGRATION_AUTHORITY_V1.json",
+      "bytes": 4272,
+      "sha256": "6a5729090a28a94c6952fb9986fd8da85e530c8a9bc29cbd368e6dbd5c9ea843"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v38\\authority.py",
+      "bytes": 27719,
+      "sha256": "43c18de41730df48694f4d1c0682e47ae7b7cd7deb4b3277230f091308f4e35b"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\pfr\\migration.py",
+      "bytes": 8911,
+      "sha256": "4eccbe7236e308ec285ba6d51365c8eb35a91cad1f4f73e80b8f26b8baef66dd"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\v38\\contracts.py",
+      "bytes": 4253,
+      "sha256": "0a72070019668f90927fe9b01f5fa64717d5c30654c0da1493b9858b0d87a23d"
+    },
+    {
+      "path": "D:\\v42_may_joint_repair_campaign_20261013\\raw\\2025-05-01\\POWER_AUTHORITY.json",
+      "bytes": 1792,
+      "sha256": "e88c5cb63757a6afc601bdbdb221f9808e3ea39643a149fe17c46ac30803c8a0"
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\v42_temporal\\native.py",
+      "bytes": 12785,
+      "sha256": "e3325724a2de55f81d97a5d6b19633f6b673bc7821eb31ad6f904695370d4b54"
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\v42_job_capability.py",
+      "bytes": 22761,
+      "sha256": "33a2e0a5a17ee28c3632aead1a3723b5bac97e1f8d88f25714830799737172ce"
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\v42_integration\\policy.py",
+      "bytes": 25523,
+      "sha256": "2182c740a84bc3c9de6a601c748b1c768639becd04a3cdd4fd8fb3a87c8cf6c2"
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\v42_integration\\actual.py",
+      "bytes": 45235,
+      "sha256": "bb93bf3ce1e9357a42e102879da3b054075ce0e935ac5fa675e7113e3f11252d"
+    },
+    {
+      "path": "D:\\v42_experimental_flex_qos_20261014\\tests\\test_v42_integration_actual.py",
+      "bytes": 15460,
+      "sha256": "084433e8fe8ce7745c48b5c052b73e423f709f859421447466d4fb5acd8298f6"
+    }
+  ],
+  "Native_Optimize_calls": 0,
+  "Actual_runs": 0,
+  "AC_calls": 0,
+  "code_edits": 0,
+  "future_Actual_runtime_or_UID_inputs_used": false,
+  "Raw_modified": false,
+  "old_PR222_PR223_and_budget_ledgers_unchanged": true,
+  "packet_source_sha": "56ffee08c30000b4c5e1da316b6b1db67df15b15aef6f91e624d5256d8c8fb1e",
+  "common_guard": "v42_integration.policy.migration_guard",
+  "common_Actual_recorder": "JobEventController._record_migration",
+  "packet_required_fields": [
+    "source_sha",
+    "checkpoint_authorized",
+    "allowed_destinations",
+    "gpu_type_confirmed",
+    "rack_gang_confirmed",
+    "data_residency_confirmed",
+    "wan_path",
+    "bandwidth_bytes_per_second",
+    "payload_bytes",
+    "restart_seconds",
+    "source_wait_seconds",
+    "source_hold_until",
+    "destination_hold_from",
+    "assumption",
+    "assumption_class",
+    "route_links",
+    "measured_Kestrel_capability",
+    "capability_confirmation_basis"
+  ],
+  "example_packets_and_guard_results": [
+    {
+      "evidence_kind": "NAMED_GUARD_FIXTURE_NOT_REAL_JOB",
+      "gpu": 1,
+      "route": "OD01_02_FIXED",
+      "budget": 1800,
+      "packet": {
+        "source_sha": "56ffee08c30000b4c5e1da316b6b1db67df15b15aef6f91e624d5256d8c8fb1e",
+        "checkpoint_authorized": true,
+        "allowed_destinations": [
+          "AIDC02"
+        ],
+        "gpu_type_confirmed": true,
+        "rack_gang_confirmed": true,
+        "data_residency_confirmed": true,
+        "wan_path": "OD01_02_FIXED",
+        "bandwidth_bytes_per_second": 1240000000.0,
+        "payload_bytes": 80000000000,
+        "restart_seconds": 900,
+        "source_wait_seconds": 0,
+        "source_hold_until": "transfer_start",
+        "destination_hold_from": "transfer_end",
+        "assumption": true,
+        "assumption_class": "ASSUMED_CHECKPOINTABLE_FOR_EXPERIMENT",
+        "route_links": [
+          "ATLAM5--ATLAng"
+        ],
+        "measured_Kestrel_capability": false,
+        "capability_confirmation_basis": "FROZEN_MODEL_COMPATIBILITY_AND_EXPLICIT_EXPERIMENTAL_RIGHTS"
+      },
+      "reason": "AUTHORIZED",
+      "receipt": {
+        "id": "CHECKPOINT:NAMED_MIGRATION_NUMERIC_FIXTURE",
+        "job_id": "NAMED_MIGRATION_NUMERIC_FIXTURE",
+        "source": "AIDC01",
+        "destination": "AIDC02",
+        "physical_checkpoint_seconds": 1800.0,
+        "control_checkpoint_seconds": 1800.0,
+        "times": {
+          "checkpoint": 1800.0,
+          "transfer_start": 1800.0,
+          "transfer_end": 2700.0,
+          "restart_start": 2700.0,
+          "restart_end": 3600.0
+        },
+        "interruption_seconds": 1800.0,
+        "accumulated_compute_seconds": 1800,
+        "capability_source_sha": "56ffee08c30000b4c5e1da316b6b1db67df15b15aef6f91e624d5256d8c8fb1e",
+        "capability_assumption": true,
+        "hold_contract": {
+          "source_hold_until": "transfer_start",
+          "destination_hold_from": "transfer_end"
+        },
+        "segments": [
+          {
+            "resource": "wan:OD01_02_FIXED",
+            "begin": 1800.0,
+            "end": 2700.0,
+            "quantity": 1240000000.0
+          },
+          {
+            "resource": "active:WAN",
+            "begin": 1800.0,
+            "end": 2700.0,
+            "quantity": 1
+          },
+          {
+            "resource": "gpu:AIDC02",
+            "begin": 2700.0,
+            "end": 7200.0,
+            "quantity": 1
+          }
+        ],
+        "completed_at": 3600.0
+      },
+      "Native_Optimize_calls": 0,
+      "Actual_runs": 0,
+      "AC_calls": 0
+    },
+    {
+      "evidence_kind": "NAMED_GUARD_FIXTURE_NOT_REAL_JOB",
+      "gpu": 4,
+      "route": "OD01_06_FIXED",
+      "budget": 1800,
+      "packet": {
+        "source_sha": "56ffee08c30000b4c5e1da316b6b1db67df15b15aef6f91e624d5256d8c8fb1e",
+        "checkpoint_authorized": true,
+        "allowed_destinations": [
+          "AIDC06"
+        ],
+        "gpu_type_confirmed": true,
+        "rack_gang_confirmed": true,
+        "data_residency_confirmed": true,
+        "wan_path": "OD01_06_FIXED",
+        "bandwidth_bytes_per_second": 310000000.0,
+        "payload_bytes": 320000000000,
+        "restart_seconds": 900,
+        "source_wait_seconds": 0,
+        "source_hold_until": "transfer_start",
+        "destination_hold_from": "transfer_end",
+        "assumption": true,
+        "assumption_class": "ASSUMED_CHECKPOINTABLE_FOR_EXPERIMENT",
+        "route_links": [
+          "ATLAM5--ATLAng",
+          "ATLAng--IPLSng"
+        ],
+        "measured_Kestrel_capability": false,
+        "capability_confirmation_basis": "FROZEN_MODEL_COMPATIBILITY_AND_EXPLICIT_EXPERIMENTAL_RIGHTS"
+      },
+      "reason": "SHARED_DELAY_INTERRUPTION_BUDGET_EXCEEDED",
+      "receipt": null,
+      "Native_Optimize_calls": 0,
+      "Actual_runs": 0,
+      "AC_calls": 0
+    },
+    {
+      "evidence_kind": "NAMED_GUARD_FIXTURE_NOT_REAL_JOB",
+      "gpu": 4,
+      "route": "OD01_06_FIXED",
+      "budget": 3600,
+      "packet": {
+        "source_sha": "56ffee08c30000b4c5e1da316b6b1db67df15b15aef6f91e624d5256d8c8fb1e",
+        "checkpoint_authorized": true,
+        "allowed_destinations": [
+          "AIDC06"
+        ],
+        "gpu_type_confirmed": true,
+        "rack_gang_confirmed": true,
+        "data_residency_confirmed": true,
+        "wan_path": "OD01_06_FIXED",
+        "bandwidth_bytes_per_second": 310000000.0,
+        "payload_bytes": 320000000000,
+        "restart_seconds": 900,
+        "source_wait_seconds": 0,
+        "source_hold_until": "transfer_start",
+        "destination_hold_from": "transfer_end",
+        "assumption": true,
+        "assumption_class": "ASSUMED_CHECKPOINTABLE_FOR_EXPERIMENT",
+        "route_links": [
+          "ATLAM5--ATLAng",
+          "ATLAng--IPLSng"
+        ],
+        "measured_Kestrel_capability": false,
+        "capability_confirmation_basis": "FROZEN_MODEL_COMPATIBILITY_AND_EXPLICIT_EXPERIMENTAL_RIGHTS"
+      },
+      "reason": "AUTHORIZED",
+      "receipt": {
+        "id": "CHECKPOINT:NAMED_MIGRATION_NUMERIC_FIXTURE",
+        "job_id": "NAMED_MIGRATION_NUMERIC_FIXTURE",
+        "source": "AIDC01",
+        "destination": "AIDC06",
+        "physical_checkpoint_seconds": 1800.0,
+        "control_checkpoint_seconds": 1800.0,
+        "times": {
+          "checkpoint": 1800.0,
+          "transfer_start": 1800.0,
+          "transfer_end": 3600.0,
+          "restart_start": 3600.0,
+          "restart_end": 4500.0
+        },
+        "interruption_seconds": 2700.0,
+        "accumulated_compute_seconds": 1800,
+        "capability_source_sha": "56ffee08c30000b4c5e1da316b6b1db67df15b15aef6f91e624d5256d8c8fb1e",
+        "capability_assumption": true,
+        "hold_contract": {
+          "source_hold_until": "transfer_start",
+          "destination_hold_from": "transfer_end"
+        },
+        "segments": [
+          {
+            "resource": "wan:OD01_06_FIXED",
+            "begin": 1800.0,
+            "end": 3600.0,
+            "quantity": 310000000.0
+          },
+          {
+            "resource": "active:WAN",
+            "begin": 1800.0,
+            "end": 3600.0,
+            "quantity": 1
+          },
+          {
+            "resource": "gpu:AIDC06",
+            "begin": 3600.0,
+            "end": 8100.0,
+            "quantity": 4
+          }
+        ],
+        "completed_at": 4500.0
+      },
+      "Native_Optimize_calls": 0,
+      "Actual_runs": 0,
+      "AC_calls": 0
+    },
+    {
+      "evidence_kind": "NAMED_GUARD_FIXTURE_NOT_REAL_JOB",
+      "gpu": 16,
+      "route": "OD01_06_FIXED",
+      "budget": 7200,
+      "packet": {
+        "source_sha": "56ffee08c30000b4c5e1da316b6b1db67df15b15aef6f91e624d5256d8c8fb1e",
+        "checkpoint_authorized": true,
+        "allowed_destinations": [
+          "AIDC06"
+        ],
+        "gpu_type_confirmed": true,
+        "rack_gang_confirmed": true,
+        "data_residency_confirmed": true,
+        "wan_path": "OD01_06_FIXED",
+        "bandwidth_bytes_per_second": 310000000.0,
+        "payload_bytes": 1280000000000,
+        "restart_seconds": 900,
+        "source_wait_seconds": 0,
+        "source_hold_until": "transfer_start",
+        "destination_hold_from": "transfer_end",
+        "assumption": true,
+        "assumption_class": "ASSUMED_CHECKPOINTABLE_FOR_EXPERIMENT",
+        "route_links": [
+          "ATLAM5--ATLAng",
+          "ATLAng--IPLSng"
+        ],
+        "measured_Kestrel_capability": false,
+        "capability_confirmation_basis": "FROZEN_MODEL_COMPATIBILITY_AND_EXPLICIT_EXPERIMENTAL_RIGHTS"
+      },
+      "reason": "AUTHORIZED",
+      "receipt": {
+        "id": "CHECKPOINT:NAMED_MIGRATION_NUMERIC_FIXTURE",
+        "job_id": "NAMED_MIGRATION_NUMERIC_FIXTURE",
+        "source": "AIDC01",
+        "destination": "AIDC06",
+        "physical_checkpoint_seconds": 1800.0,
+        "control_checkpoint_seconds": 1800.0,
+        "times": {
+          "checkpoint": 1800.0,
+          "transfer_start": 1800.0,
+          "transfer_end": 6300.0,
+          "restart_start": 6300.0,
+          "restart_end": 7200.0
+        },
+        "interruption_seconds": 5400.0,
+        "accumulated_compute_seconds": 1800,
+        "capability_source_sha": "56ffee08c30000b4c5e1da316b6b1db67df15b15aef6f91e624d5256d8c8fb1e",
+        "capability_assumption": true,
+        "hold_contract": {
+          "source_hold_until": "transfer_start",
+          "destination_hold_from": "transfer_end"
+        },
+        "segments": [
+          {
+            "resource": "wan:OD01_06_FIXED",
+            "begin": 1800.0,
+            "end": 6300.0,
+            "quantity": 310000000.0
+          },
+          {
+            "resource": "active:WAN",
+            "begin": 1800.0,
+            "end": 6300.0,
+            "quantity": 1
+          },
+          {
+            "resource": "gpu:AIDC06",
+            "begin": 6300.0,
+            "end": 10800.0,
+            "quantity": 16
+          }
+        ],
+        "completed_at": 7200.0
+      },
+      "Native_Optimize_calls": 0,
+      "Actual_runs": 0,
+      "AC_calls": 0
+    }
+  ],
+  "construction_recipe": "Build per observedGPU/currentSource/destination,bindoriginal132ODroute+80GBperGPU+900restart+explicitE1/E2assumptionreceipt;never inspect futureactualruntime/UID.",
+  "per_destination_packet_required": true,
+  "one_generic_wan_path_for_multiple_destinations_forbidden": true,
+  "ledger_WAN_capacities": {
+    "OD01_02_FIXED": 1240000000.0,
+    "OD01_03_FIXED": 310000000.0,
+    "OD01_04_FIXED": 1240000000.0,
+    "OD01_05_FIXED": 1240000000.0,
+    "OD01_06_FIXED": 310000000.0,
+    "OD01_07_FIXED": 1240000000.0,
+    "OD01_08_FIXED": 1240000000.0,
+    "OD01_09_FIXED": 1240000000.0,
+    "OD01_10_FIXED": 1240000000.0,
+    "OD01_11_FIXED": 1240000000.0,
+    "OD01_12_FIXED": 1240000000.0,
+    "OD02_01_FIXED": 1240000000.0,
+    "OD02_03_FIXED": 310000000.0,
+    "OD02_04_FIXED": 1240000000.0,
+    "OD02_05_FIXED": 1240000000.0,
+    "OD02_06_FIXED": 310000000.0,
+    "OD02_07_FIXED": 1240000000.0,
+    "OD02_08_FIXED": 1240000000.0,
+    "OD02_09_FIXED": 1240000000.0,
+    "OD02_10_FIXED": 1240000000.0,
+    "OD02_11_FIXED": 1240000000.0,
+    "OD02_12_FIXED": 1240000000.0,
+    "OD03_01_FIXED": 310000000.0,
+    "OD03_02_FIXED": 310000000.0,
+    "OD03_04_FIXED": 1240000000.0,
+    "OD03_05_FIXED": 310000000.0,
+    "OD03_06_FIXED": 1240000000.0,
+    "OD03_07_FIXED": 1240000000.0,
+    "OD03_08_FIXED": 310000000.0,
+    "OD03_09_FIXED": 1240000000.0,
+    "OD03_10_FIXED": 1240000000.0,
+    "OD03_11_FIXED": 1240000000.0,
+    "OD03_12_FIXED": 1240000000.0,
+    "OD04_01_FIXED": 1240000000.0,
+    "OD04_02_FIXED": 1240000000.0,
+    "OD04_03_FIXED": 1240000000.0,
+    "OD04_05_FIXED": 1240000000.0,
+    "OD04_06_FIXED": 1240000000.0,
+    "OD04_07_FIXED": 1240000000.0,
+    "OD04_08_FIXED": 1240000000.0,
+    "OD04_09_FIXED": 1240000000.0,
+    "OD04_10_FIXED": 1240000000.0,
+    "OD04_11_FIXED": 1240000000.0,
+    "OD04_12_FIXED": 1240000000.0,
+    "OD05_01_FIXED": 1240000000.0,
+    "OD05_02_FIXED": 1240000000.0,
+    "OD05_03_FIXED": 310000000.0,
+    "OD05_04_FIXED": 1240000000.0,
+    "OD05_06_FIXED": 310000000.0,
+    "OD05_07_FIXED": 1240000000.0,
+    "OD05_08_FIXED": 1240000000.0,
+    "OD05_09_FIXED": 1240000000.0,
+    "OD05_10_FIXED": 1240000000.0,
+    "OD05_11_FIXED": 1240000000.0,
+    "OD05_12_FIXED": 1240000000.0,
+    "OD06_01_FIXED": 310000000.0,
+    "OD06_02_FIXED": 310000000.0,
+    "OD06_03_FIXED": 1240000000.0,
+    "OD06_04_FIXED": 1240000000.0,
+    "OD06_05_FIXED": 310000000.0,
+    "OD06_07_FIXED": 1240000000.0,
+    "OD06_08_FIXED": 310000000.0,
+    "OD06_09_FIXED": 1240000000.0,
+    "OD06_10_FIXED": 1240000000.0,
+    "OD06_11_FIXED": 1240000000.0,
+    "OD06_12_FIXED": 310000000.0,
+    "OD07_01_FIXED": 1240000000.0,
+    "OD07_02_FIXED": 1240000000.0,
+    "OD07_03_FIXED": 1240000000.0,
+    "OD07_04_FIXED": 1240000000.0,
+    "OD07_05_FIXED": 1240000000.0,
+    "OD07_06_FIXED": 1240000000.0,
+    "OD07_08_FIXED": 1240000000.0,
+    "OD07_09_FIXED": 1240000000.0,
+    "OD07_10_FIXED": 1240000000.0,
+    "OD07_11_FIXED": 1240000000.0,
+    "OD07_12_FIXED": 1240000000.0,
+    "OD08_01_FIXED": 1240000000.0,
+    "OD08_02_FIXED": 1240000000.0,
+    "OD08_03_FIXED": 310000000.0,
+    "OD08_04_FIXED": 1240000000.0,
+    "OD08_05_FIXED": 1240000000.0,
+    "OD08_06_FIXED": 310000000.0,
+    "OD08_07_FIXED": 1240000000.0,
+    "OD08_09_FIXED": 1240000000.0,
+    "OD08_10_FIXED": 1240000000.0,
+    "OD08_11_FIXED": 1240000000.0,
+    "OD08_12_FIXED": 1240000000.0,
+    "OD09_01_FIXED": 1240000000.0,
+    "OD09_02_FIXED": 1240000000.0,
+    "OD09_03_FIXED": 1240000000.0,
+    "OD09_04_FIXED": 1240000000.0,
+    "OD09_05_FIXED": 1240000000.0,
+    "OD09_06_FIXED": 1240000000.0,
+    "OD09_07_FIXED": 1240000000.0,
+    "OD09_08_FIXED": 1240000000.0,
+    "OD09_10_FIXED": 1240000000.0,
+    "OD09_11_FIXED": 1240000000.0,
+    "OD09_12_FIXED": 1240000000.0,
+    "OD10_01_FIXED": 1240000000.0,
+    "OD10_02_FIXED": 1240000000.0,
+    "OD10_03_FIXED": 1240000000.0,
+    "OD10_04_FIXED": 1240000000.0,
+    "OD10_05_FIXED": 1240000000.0,
+    "OD10_06_FIXED": 1240000000.0,
+    "OD10_07_FIXED": 1240000000.0,
+    "OD10_08_FIXED": 1240000000.0,
+    "OD10_09_FIXED": 1240000000.0,
+    "OD10_11_FIXED": 1240000000.0,
+    "OD10_12_FIXED": 1240000000.0,
+    "OD11_01_FIXED": 1240000000.0,
+    "OD11_02_FIXED": 1240000000.0,
+    "OD11_03_FIXED": 1240000000.0,
+    "OD11_04_FIXED": 1240000000.0,
+    "OD11_05_FIXED": 1240000000.0,
+    "OD11_06_FIXED": 1240000000.0,
+    "OD11_07_FIXED": 1240000000.0,
+    "OD11_08_FIXED": 1240000000.0,
+    "OD11_09_FIXED": 1240000000.0,
+    "OD11_10_FIXED": 1240000000.0,
+    "OD11_12_FIXED": 1240000000.0,
+    "OD12_01_FIXED": 1240000000.0,
+    "OD12_02_FIXED": 1240000000.0,
+    "OD12_03_FIXED": 1240000000.0,
+    "OD12_04_FIXED": 1240000000.0,
+    "OD12_05_FIXED": 1240000000.0,
+    "OD12_06_FIXED": 310000000.0,
+    "OD12_07_FIXED": 1240000000.0,
+    "OD12_08_FIXED": 1240000000.0,
+    "OD12_09_FIXED": 1240000000.0,
+    "OD12_10_FIXED": 1240000000.0,
+    "OD12_11_FIXED": 1240000000.0
+  },
+  "route_bottleneck_proxy_equivalence": {
+    "conditions": [
+      "all15linkcapacitiesconstant96",
+      "globaloneactiveWANtransfer",
+      "fullpayloadcarriedoneachrouteLink",
+      "sameconservative15mintransferquantization"
+    ],
+    "capacity_and_transfer_duration_equivalent": true,
+    "full_per_link_ledger_identity": false,
+    "last_slot_bandwidth_reservation_can_exceed_payload": true,
+    "transmitted_bytes_proof": "EmitactualpayloadonEACHorderedlink;bandwidth*roundedtransfer is reservation upper bound,not transmittedbytes"
+  },
+  "source_wait_zero_is_not_zero_transfer_or_restart": true,
+  "shared_30min_Normal_budget_minimum": "transfer900+restart900 leaveszero roomforroundup/sourcewait/priorStartDelay;unalignedcheckpoint maylegallyfail",
+  "policy_no_forced_migration": true,
+  "protocol": {
+    "source_hold_until": "transfer_start",
+    "destination_hold_from": "transfer_end",
+    "label": "EXPLICIT_EXPERIMENTAL_HOLD_PROTOCOL_REUSING_VALIDATED_COMMON_FIXTURE"
+  },
+  "precise_energy_scope": "GPUholdoccupation flows through existingFrozenPowerModel/C1;separateWAN/saveIOenergyNULLunmodeled,not zero",
+  "request_level_authority": "EXPERIMENTAL_ASSUMPTION_NOT_SOURCE_VERIFIED_Kestrel_capability"
+}
