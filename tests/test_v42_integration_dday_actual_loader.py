@@ -155,7 +155,8 @@ def test_pre_midnight_known_start_is_not_replayed(boundary_fixture):
     controller.submit(request,begin)
     decision=controller._known_decision(request.uid,begin)
     assert decision['status']=='PRE_DDAY_START_COMMAND_NOT_REPLAYED'
-    assert decision['start_seconds']>=begin and decision['plan_start_seconds']==begin-900
+    assert decision['action']=='QUEUE' and 'start_seconds' not in decision
+    assert decision['plan_start_seconds']==begin-900
 
 
 def test_public_loader_requires_intact_freeze_before_private_join(boundary_fixture,tmp_path):

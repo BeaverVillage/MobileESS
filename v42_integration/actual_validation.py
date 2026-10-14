@@ -836,11 +836,17 @@ def fresh_ac_minimum(folder, actual_output, output, *, source_freeze, campaign_m
         if tuple(map(str,packet['sites']))!=tuple(f'AIDC{j:02d}' for j in range(1,13)):
             raise ValueError('FRESH_AC_ACTUAL_SITE_AXIS_DRIFT')
         p, q = packet["PCC_P_kw"].copy(), packet["PCC_Q_kvar"].copy()
+        partial_trace = (case_scope or {}).get('partial_actual_trace_authorized') is True
+        trace_slots = slots if partial_trace else 96
+        if partial_trace and slots == 96:
+            raise ValueError('PARTIAL_FRESH_AC_SCOPE_REQUIRES_STRICT_PREFIX')
         if "timestamps_start_epoch_seconds" not in packet or not np.array_equal(
-                packet["timestamps_start_epoch_seconds"], np.arange(begin.timestamp(), end.timestamp(), 900)):
+                packet["timestamps_start_epoch_seconds"], begin.timestamp()+np.arange(trace_slots)*900):
             raise ValueError("FRESH_AC_ACTUAL_EXPLICIT_TIME_AXIS_REQUIRED")
-    if p.shape != (96, 12) or q.shape != (96, 12):
+    if p.shape != (trace_slots, 12) or q.shape != (trace_slots, 12):
         raise ValueError("FRESH_AC_ACTUAL_FULL96_PQ_AXIS")
+    if not np.isfinite(p).all() or not np.isfinite(q).all():
+        raise ValueError('FRESH_AC_FINITE_ACTUAL_PQ_REQUIRED')
     if arm in {"B0", "B1"} and mess_plan is not None:
         if (mess_plan.get('MESS_control')!='OFF' or any(abs(float(v))>0
                 for field in ('P_by_site','Q_by_site') for row in mess_plan[field].values() for v in row)):
@@ -932,6 +938,8 @@ def fresh_ac_minimum(folder, actual_output, output, *, source_freeze, campaign_m
                        else "MINIMUM_REPRESENTATIVE_REAL_ACTUAL" if slots < 96 else "FULL96_REAL_ACTUAL"),
         evidence_kind=result.get("evidence_kind", "REAL_DATA"),
         original_full_case_certified=False,
+        partial_actual_trace_authorized=partial_trace,
+        supplied_actual_trace_slots=trace_slots,
         case_scope=case_scope,science_version=source_freeze['science_version'],
         SOURCE18R_NUMERICALLY_IDENTICAL=False,
         common_initial_state_sha=(case_scope or {}).get('common_initial_state_sha'),

@@ -30,6 +30,9 @@ class IntegrationCase:
     fresh_evaluator: object = None
     actual_gate: dict | None = None
     control_policy_factory: object = None
+    unified_bindings: dict | None = None
+    unified_actual_runner: object = None
+    unified_m_optimizer: object = None
     _consumed: bool = field(default=False,init=False,repr=False)
 
 
@@ -84,6 +87,15 @@ def run_arm(arm, case, budget, output, *, planning_only=False):
         raise ValueError('COMPARISON_ARM_REQUIRED')
     if case._consumed:
         raise ValueError('INTEGRATION_CASE_ALREADY_CONSUMED_BUILD_FRESH_CASE_PER_ARM')
+    if case.unified_bindings is not None:
+        from .unified_contract import load_contracts, require_bindings
+        common=load_contracts()['bindings']
+        expected=dict(common,aidc_anchor=case.reference_aidc['aidc_anchor'],
+                      mess_anchor=case.initial_mess['plan_sha'])
+        require_bindings(case.unified_bindings,expected)
+        if (case.science_sha!=common['science_sha'] or case.case_sha!=common['case_sha']
+                or case.qos_provider.stats.sha!=common['qos_sha']):
+            raise ValueError('UNIFIED_CASE_SCIENCE_QOS_DRIFT')
     midnight=case.planning_slot_zero_seconds+24*900
     if not planning_only:_require_actual_gate(case,midnight)
     verify_sources(case.source_freeze,case.input_receipts)
@@ -98,27 +110,39 @@ def run_arm(arm, case, budget, output, *, planning_only=False):
     for stage in stages:
         verify_sources(case.source_freeze,case.input_receipts)
         before=dict(AIDC_anchor=aidc['aidc_anchor'],MESS_anchor=mess['plan_sha'])
+        stage_bindings=None if case.unified_bindings is None else dict(case.unified_bindings,
+            aidc_anchor=aidc['aidc_anchor'],mess_anchor=mess['plan_sha'])
         if stage.startswith('A'):
             a_case=case.make_a_case(arm,stage,mess,output/stage)
+            if stage_bindings is not None:a_case.unified_bindings=dict(stage_bindings)
             result=optimize_aidc(a_case,mess,case.qos_provider,budget)
             aidc=_full_a(result)
             consumed=dict(fixed_mess_plan_sha=mess['plan_sha'],QoS_SHA=case.qos_provider.stats.sha)
         else:
             m_case=case.make_m_case(arm,stage,aidc,output/stage)
+            if stage_bindings is not None:m_case.unified_bindings=dict(stage_bindings)
             if m_case.identity.get('aidc_anchor')!=aidc['aidc_anchor']:
                 raise ValueError('M_STAGE_AIDC_ANCHOR_MISMATCH')
             # A new anchor receives the old vector only as a FULL-replayed warm
             # candidate; registry bindings/LB do not transfer to this new case.
-            result,initial=optimize_mess(m_case,initial,registry,budget)
+            m_optimizer=case.unified_m_optimizer or optimize_mess
+            result,initial=m_optimizer(m_case,initial,registry,budget)
             mess=_full_m(result);registry=result['incumbent_registry']
             consumed=dict(fixed_aidc_anchor=aidc['aidc_anchor'],full_PQ_and_anonymous_frozen=True)
         results[stage]=result
         calls.append(dict(stage=stage,arm=arm,engine=result.get('engine',result.get('engine_version')),case_sha=result['case_sha']))
         handoffs.append(dict(stage=stage,producer_anchor_before=before,consumed=consumed,
-            result_AIDC_anchor=aidc['aidc_anchor'],result_MESS_anchor=mess['plan_sha']))
+            result_AIDC_anchor=aidc['aidc_anchor'],result_MESS_anchor=mess['plan_sha'],
+            unified_input_bindings=stage_bindings))
         _write(output/'A_M_CALLGRAPH.json',calls);_write(output/'STAGE_HANDOFF_AUDIT.json',handoffs)
+    if case.unified_bindings is not None and arm=='B3':
+        from .unified_contract import validate_handoffs
+        _write(output/'UNIFIED_HANDOFF_VALIDATION.json',validate_handoffs(handoffs,
+            case.unified_bindings,case.reference_aidc['aidc_anchor'],case.initial_mess['plan_sha']))
     bindings=dict(science_sha=case.science_sha,qos_sha=case.qos_provider.stats.sha,
         case_sha=case.case_sha,aidc_anchor=aidc['aidc_anchor'],mess_anchor=mess['plan_sha'])
+    if case.unified_bindings is not None:
+        bindings=dict(case.unified_bindings,**bindings)
     # Native slot 24 is planning-day midnight; Actual has its own explicit
     # seconds origin. This is a conversion, never an inferred array offset.
     envelope=[dict(r,slot_start=r['slot_start']+midnight,slot_end=r['slot_end']+midnight,
@@ -201,7 +225,11 @@ def run_arm(arm, case, budget, output, *, planning_only=False):
             projected_after_policy_freeze=True,frozen_policy_sha=reload.sha))
     arguments=dict(actual_arguments,frozen_policy=reload,qos_window_provider=case.qos_provider,
         arm=arm,known_schedule=commands,expected_bindings=bindings)
-    if getattr(case.qos_provider,'scenario','E0')!='E0':
+    if case.unified_actual_runner is not None:
+        if case.unified_bindings is None:
+            raise ValueError('UNIFIED_ACTUAL_REQUIRES_SHARED_BINDINGS')
+        actual=case.unified_actual_runner(**arguments)
+    elif getattr(case.qos_provider,'scenario','E0')!='E0':
         from .experimental_actual import run_experimental_actual
         if not getattr(reload,'lookup_only',False):raise ValueError('UNKNOWN_ACTUAL_FROZEN_LOOKUP_ONLY_REQUIRED')
         actual=run_experimental_actual(**arguments)

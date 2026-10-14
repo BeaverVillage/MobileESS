@@ -1,0 +1,1437 @@
+{
+  "schema": "V42_INTEGRATION_SOLVE_BUDGET_V1",
+  "limit_seconds": 360,
+  "calls": [
+    {
+      "label": "PR230_HISTORICAL_FRESH16",
+      "solver": "AC",
+      "status": "COMPLETED",
+      "measured_seconds": 15.816260300009162
+    },
+    {
+      "label": "MESS:S1:EXACT_REDUCED",
+      "solver": "GUROBI",
+      "Native_Runtime": 30.241000175476074,
+      "wall_seconds": 30.477526400005445,
+      "charged_seconds": 30.241000175476074,
+      "cap_seconds": 30.0,
+      "overshoot_seconds": 0.24100017547607422,
+      "error": null,
+      "status": 9,
+      "stage_context": {
+        "unified_bindings": {
+          "qos_sha": "a1d86a638afb2ef888a7194ebcdbc9d51dd45e0c31353b12129cc2eabff4cb2b",
+          "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+          "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+          "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+          "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+          "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+          "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+          "science_sha": "56810c3fdd3b094af6f7e8d51e7d650e4108090fe974bc4ff05873315b968403",
+          "case_sha": "bb1afbdf5bfc24d3793e3fe9eb8f593fcde5017df54499016bbf22e5c23d93a3",
+          "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+          "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+          "interface_sha": "5bc256a8ef08919d048eaee14d0046d4f2ee12409bc851417d575d9a627ff8b8"
+        },
+        "reduced_case_sha": "b3ad893b79e95a86e74241322314a527d231cf63793ce7b5c333f28e770d2339",
+        "numeric_scope": "HISTORICAL_DIAGNOSTIC_AIDC_ANCHOR",
+        "lineage_restored_from_existing_result": {
+          "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\MESS_2X5_FIRST_FULL_RESULT.json",
+          "sha256": "362e35d3573788774f3baee30211a5df03becb557f29ef91156b9dcd8b4f65a2",
+          "bytes": 6674
+        },
+        "cost_unchanged": true
+      },
+      "session_identity": {
+        "science_sha": "56810c3fdd3b094af6f7e8d51e7d650e4108090fe974bc4ff05873315b968403",
+        "case_sha": "bb1afbdf5bfc24d3793e3fe9eb8f593fcde5017df54499016bbf22e5c23d93a3",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      }
+    },
+    {
+      "label": "A1_REFERENCE_FEASIBILITY_SEED",
+      "solver": "GUROBI",
+      "Native_Runtime": 1.2089998722076416,
+      "wall_seconds": 1.2412801000027684,
+      "charged_seconds": 1.2089998722076416,
+      "cap_seconds": 11.25,
+      "overshoot_seconds": 0.0,
+      "error": null,
+      "status": 3,
+      "session_identity": {
+        "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+        "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "stage_context": {
+        "bindings": {
+          "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+          "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+          "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+          "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+          "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+          "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+          "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+          "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+          "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+          "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+          "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+          "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+        },
+        "stage": "A1",
+        "arm": "B1",
+        "day": "2025-05-01",
+        "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+        "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+        "executed_source_sha": "910e40857b6a2b04a9ba933038cc15a84a421a2154bea9620e3382a7d530896e",
+        "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+      }
+    },
+    {
+      "label": "A1_ORIGINAL_P1",
+      "solver": "GUROBI",
+      "Native_Runtime": 75.5149998664856,
+      "wall_seconds": 75.51670459999877,
+      "charged_seconds": 75.5149998664856,
+      "cap_seconds": 73.79100012779236,
+      "overshoot_seconds": 1.7239997386932373,
+      "error": null,
+      "status": 9,
+      "session_identity": {
+        "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+        "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "stage_context": {
+        "bindings": {
+          "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+          "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+          "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+          "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+          "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+          "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+          "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+          "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+          "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+          "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+          "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+          "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+        },
+        "stage": "A1",
+        "arm": "B1",
+        "day": "2025-05-01",
+        "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+        "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+        "executed_source_sha": "910e40857b6a2b04a9ba933038cc15a84a421a2154bea9620e3382a7d530896e",
+        "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+      }
+    },
+    {
+      "label": "A1_AUTHORIZED_CHOICES_FEASIBILITY_SEED",
+      "solver": "GUROBI",
+      "Native_Runtime": 1.9490001201629639,
+      "wall_seconds": 1.9808916999900248,
+      "charged_seconds": 1.9490001201629639,
+      "cap_seconds": 6.0,
+      "overshoot_seconds": 0.0,
+      "error": null,
+      "status": 3,
+      "session_identity": {
+        "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+        "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "stage_context": {
+        "bindings": {
+          "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+          "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+          "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+          "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+          "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+          "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+          "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+          "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+          "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+          "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+          "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+          "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+        },
+        "stage": "A1",
+        "arm": "B1",
+        "day": "2025-05-01",
+        "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+        "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+        "executed_source_sha": "e8f2674af18d039e6b914a6fdd6ae7782bfd38827187ff4ccd3fac735172b223",
+        "bound_scope": "FIXED_KNOWN_FEASIBILITY_SEED_NOT_GLOBAL",
+        "seed_choice_sha": "e5102ee80051b08fe1edd8fd3b435b97da44dd57188aaf83ff397cf52ab8a566",
+        "reference_or_receipts_reissued": false
+      }
+    },
+    {
+      "label": "A1_ORIGINAL_P1",
+      "solver": "GUROBI",
+      "Native_Runtime": 38.21499991416931,
+      "wall_seconds": 38.2203290000034,
+      "charged_seconds": 38.21499991416931,
+      "cap_seconds": 38.050999879837036,
+      "overshoot_seconds": 0.1640000343322754,
+      "error": null,
+      "status": 9,
+      "session_identity": {
+        "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+        "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "stage_context": {
+        "bindings": {
+          "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+          "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+          "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+          "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+          "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+          "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+          "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+          "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+          "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+          "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+          "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+          "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+        },
+        "stage": "A1",
+        "arm": "B1",
+        "day": "2025-05-01",
+        "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+        "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+        "executed_source_sha": "e8f2674af18d039e6b914a6fdd6ae7782bfd38827187ff4ccd3fac735172b223",
+        "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+      }
+    },
+    {
+      "label": "MESS:S1:COMPRESSION_BENCH:ORIGINAL",
+      "solver": "GUROBI",
+      "Native_Runtime": 20.1489999294281,
+      "wall_seconds": 20.19801870000083,
+      "charged_seconds": 20.1489999294281,
+      "cap_seconds": 20.0,
+      "overshoot_seconds": 0.14899992942810059,
+      "error": null,
+      "status": 9,
+      "session_identity": {
+        "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+        "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "stage_context": {
+        "unified_bindings": {
+          "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+          "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+          "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+          "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+          "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+          "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+          "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+          "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+          "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+          "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+          "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+          "interface_sha": "a900a6075d6160b13abb0366afaec8936739389c913ec5f3d7f54f8548d53678"
+        },
+        "reduced_case_sha": "20ec897ade7bcab866110158afbf23ed26e13c6c711671058055954a5e230a01",
+        "scale_stage": "S1",
+        "planning_stage": "M1",
+        "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+        "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+        "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+        "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+        "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+        "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+        "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+        "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+        "coefficient_source": {
+          "path": "D:\\v42_may_final_campaign_20261013\\models\\2025-05-01\\COEFFICIENTS.npz",
+          "sha256": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+          "bytes": 62211025
+        },
+        "numeric_scope": "HISTORICAL_DIAGNOSTIC_AIDC_ANCHOR",
+        "grid_compression_mode": "NONE",
+        "prior_UB_LB_transferred": false,
+        "comparison_id": "0dc20beefeb068139b9b3faad09c56df8d905f51671479ec3bb3567966269a4b",
+        "comparison_variant": "ORIGINAL",
+        "original_matrix_sha": "d022d8358d265d0426e8d94b8419f29cb070c27df63b5e9cfddf2ca72d6a9071",
+        "original_domain_sha": "f26944b4f0290e42bc0b13310928d015ea55b03cefb2e13007c74f32bd9ed52f",
+        "selected_matrix_sha": "d022d8358d265d0426e8d94b8419f29cb070c27df63b5e9cfddf2ca72d6a9071",
+        "selected_domain_sha": "f26944b4f0290e42bc0b13310928d015ea55b03cefb2e13007c74f32bd9ed52f",
+        "declared_equivalence_certificate": null,
+        "identical_start_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+        "actual_Start_readback": {
+          "PASS": true,
+          "expected_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+          "actual_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+          "NumStart": 1,
+          "policy": "CURRENT_SOURCE_STAY"
+        },
+        "prior_variant_LB_or_incumbent_given_to_solver": false
+      }
+    },
+    {
+      "label": "MESS:S1:COMPRESSION_BENCH:COMPRESSED",
+      "solver": "GUROBI",
+      "Native_Runtime": 20.109999895095825,
+      "wall_seconds": 20.112211200001184,
+      "charged_seconds": 20.109999895095825,
+      "cap_seconds": 20.0,
+      "overshoot_seconds": 0.1099998950958252,
+      "error": null,
+      "status": 9,
+      "session_identity": {
+        "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+        "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "stage_context": {
+        "unified_bindings": {
+          "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+          "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+          "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+          "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+          "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+          "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+          "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+          "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+          "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+          "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+          "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+          "interface_sha": "a900a6075d6160b13abb0366afaec8936739389c913ec5f3d7f54f8548d53678"
+        },
+        "reduced_case_sha": "20ec897ade7bcab866110158afbf23ed26e13c6c711671058055954a5e230a01",
+        "scale_stage": "S1",
+        "planning_stage": "M1",
+        "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+        "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+        "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+        "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+        "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+        "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+        "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+        "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+        "coefficient_source": {
+          "path": "D:\\v42_may_final_campaign_20261013\\models\\2025-05-01\\COEFFICIENTS.npz",
+          "sha256": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+          "bytes": 62211025
+        },
+        "numeric_scope": "HISTORICAL_DIAGNOSTIC_AIDC_ANCHOR",
+        "grid_compression_mode": "NONE",
+        "prior_UB_LB_transferred": false,
+        "comparison_id": "0dc20beefeb068139b9b3faad09c56df8d905f51671479ec3bb3567966269a4b",
+        "comparison_variant": "COMPRESSED",
+        "original_matrix_sha": "d022d8358d265d0426e8d94b8419f29cb070c27df63b5e9cfddf2ca72d6a9071",
+        "original_domain_sha": "f26944b4f0290e42bc0b13310928d015ea55b03cefb2e13007c74f32bd9ed52f",
+        "selected_matrix_sha": "ed964bfafcfbdad700ac800ac96f17391a95a89a6c564c56c411a8a50a254b18",
+        "selected_domain_sha": "62dd85f514a0a980a9ac5c581476fdce4c5631b741393159e37da3d1fa065aef",
+        "declared_equivalence_certificate": {
+          "path": "D:\\v42_trajectory_tracking_may01_20261014\\runtime\\v42_unified\\MESS_EXACT_COMPRESSION_COMPARE01\\SOLVE\\COMPRESSION_BENCHMARK\\EXACT_PROOF\\FULL96_COMPRESSION_CERTIFICATE.json",
+          "sha256": "4c2d20c60cbfc7b4cba829b0b5ff7a31e348dbf80b613d73e53fe95a226de611",
+          "bytes": 262515
+        },
+        "identical_start_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+        "actual_Start_readback": {
+          "PASS": true,
+          "expected_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+          "actual_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+          "NumStart": 1,
+          "policy": "CURRENT_SOURCE_STAY"
+        },
+        "prior_variant_LB_or_incumbent_given_to_solver": false
+      }
+    }
+  ],
+  "inflight": null,
+  "Gurobi_Native_seconds": 187.3879997730255,
+  "other_solver_wall_seconds": 0.0,
+  "conservative_solve_seconds": 187.3879997730255,
+  "AC_wall_seconds": 15.816260300009162,
+  "historical_ledgers_merged": false,
+  "identity": {
+    "science_sha": "25b9651048504a07a45aca9490ce644312ad7f11c6598a5123c4d05ea52bc96a",
+    "case_sha": "742604c596cc8ca6ded35e12fe17b16a9108bda92831675b21f02245fb15c29a",
+    "session": "UNIFIED_20261014_ONE_ATTEMPT"
+  },
+  "historical_ledgers": [
+    {
+      "path": "D:\\v42_b2_global_lb_alternative_20261014\\docs\\v42_b2_global_lb_alternative_research_20261014\\NATIVE_RUNTIME_BUDGET_LEDGER.json",
+      "sha256": "40e712c7ee1a47196dc54f3932eafc2d060f16166a17e981ece41df3ccc6bb2e",
+      "used_seconds": 1257.5220000743866,
+      "limit_seconds": 1800.0,
+      "binding": {
+        "stage": "B2",
+        "source_sha": "e0e1f615d5773bbbe86720fff69811b40a9f65de82cde215106086c1f8ad2375",
+        "case_sha": "b6577cefde6d51eb0e0c9d274a6ad8df2dd1e461dfbf934a0696341e87bc9cad",
+        "matrix_sha": "0eca025d99a24d2ae91117cdfe3ae48dade189336ada61b3f8234d9bf99f3cec",
+        "domain_sha": "9247e42b8119f60ef149d0963e31dd8a697af5426a5aaeec9450b2a2f246481e",
+        "objective_sha": "d8cc60859a138f737c329743dd9919fb7577941a611ea5a3bd42bfdafcd2a1e3",
+        "anchor_sha": "7668e00504bfb6c5b0958f06ea6d02159eda19a020b94b76b909e246eef7af65",
+        "source_input_packet_sha": "91c93d2d622abff2bed52587852c8d312589bcda304b5a73cc63b5d8534afdf9",
+        "physical_source_git": "497609b46faa14ea7e32a9483a333ab32fd264ef"
+      },
+      "inherited": true,
+      "original_ledger_mutated": false
+    },
+    {
+      "path": "D:\\v42_integration_validation_20261013\\INTEGRATION_BUDGET_LEDGER.json",
+      "sha256": "986d97aab8ae6df204b1be01d04ff926bbdecc480461c0aa89ad9bb5a347c5c6",
+      "used_seconds": 621.2855198158068,
+      "limit_seconds": 3600.0,
+      "binding": null,
+      "inherited": true,
+      "original_ledger_mutated": false
+    }
+  ],
+  "Threads": 1,
+  "Heavy_workers": 1,
+  "auto_restart_authorized": false,
+  "parent_usage_reset": false,
+  "PR230_historical_native_seconds": 0,
+  "campaign_HOLD": true,
+  "IEEE8500_started": false,
+  "contract_revisions": [
+    {
+      "reason": "CORRECT_EMPIRICAL_TRAIN_STATS_SHA_PRE_NATIVE;HISTORICAL_E1_POLICY_SHA_WAS_NOT_TRAIN",
+      "previous_identity": {
+        "science_sha": "96c83b163bf905bd3ce5e9baee56e6b7bb2d572f77fdfba6c11593dd19a08a2a",
+        "case_sha": "780b3f14243c14825c4e9678bb0f0538940dd0b722e51440ec99839912e457b9",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "current_identity": {
+        "science_sha": "56810c3fdd3b094af6f7e8d51e7d650e4108090fe974bc4ff05873315b968403",
+        "case_sha": "bb1afbdf5bfc24d3793e3fe9eb8f593fcde5017df54499016bbf22e5c23d93a3",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "Native_usage_reset": false,
+      "all_existing_calls_preserved": true,
+      "existing_AC_scope": "HISTORICAL_PR230_PREFIX_DIAGNOSTIC"
+    },
+    {
+      "reason": "USER_PRIORITY_KNOWN_BOUNDARY_MODEL_REPAIR_NEW_ISSUE_ONLY_DDAY_REFERENCE",
+      "previous_identity": {
+        "science_sha": "56810c3fdd3b094af6f7e8d51e7d650e4108090fe974bc4ff05873315b968403",
+        "case_sha": "bb1afbdf5bfc24d3793e3fe9eb8f593fcde5017df54499016bbf22e5c23d93a3",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "current_identity": {
+        "science_sha": "13c98ab7d6e1a248804a87868d71d95af259df28ac9bd014986b45437fa86db3",
+        "case_sha": "def3ab1ca9951333a21792232177197ccb5a52112fabe382acc94cad2fa05cde",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "Native_usage_reset": false,
+      "all_existing_calls_preserved": true,
+      "previous_limit": 120.0,
+      "new_limit": 360,
+      "used_conservative_seconds": 30.241000175476074,
+      "historical_case_results_transferred": false
+    },
+    {
+      "reason": "USER_PRIORITY_B1_ONLY_S1_EXACT_COMPRESSION_AND_PREFROZEN_KNOWN_RESOURCE_WAIT",
+      "previous_identity": {
+        "science_sha": "13c98ab7d6e1a248804a87868d71d95af259df28ac9bd014986b45437fa86db3",
+        "case_sha": "def3ab1ca9951333a21792232177197ccb5a52112fabe382acc94cad2fa05cde",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "current_identity": {
+        "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+        "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "old_contract_archive": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\CONTRACT_HISTORY\\REVISION_03_BEFORE",
+      "Native_usage_reset": false,
+      "all_existing_calls_preserved": true,
+      "used_conservative_seconds": 30.241000175476074,
+      "historical_case_results_transferred": false,
+      "prior_calls_before_lineage_annotation": [
+        {
+          "label": "PR230_HISTORICAL_FRESH16",
+          "solver": "AC",
+          "status": "COMPLETED",
+          "measured_seconds": 15.816260300009162
+        },
+        {
+          "label": "MESS:S1:EXACT_REDUCED",
+          "solver": "GUROBI",
+          "Native_Runtime": 30.241000175476074,
+          "wall_seconds": 30.477526400005445,
+          "charged_seconds": 30.241000175476074,
+          "cap_seconds": 30.0,
+          "overshoot_seconds": 0.24100017547607422,
+          "error": null,
+          "status": 9
+        }
+      ]
+    },
+    {
+      "reason": "USER_PRIORITY_FROZEN_KNOWN_UNKNOWN_SITE_ONLY;NEW_KNOWN_NATIVE_TIME_SHIFT_RUNTIME_REPAIR_MIGRATION_HOLD;MESS_S1_EXACT_COMPRESSION_CONTINUES",
+      "previous_identity": {
+        "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+        "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "current_identity": {
+        "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+        "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "old_contract_archive": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\CONTRACT_HISTORY\\REVISION_04_BEFORE",
+      "Native_usage_reset": false,
+      "all_existing_calls_preserved": true,
+      "used_conservative_seconds": 147.1289999485016,
+      "historical_case_results_transferred": false,
+      "prior_calls_before_lineage_annotation": [
+        {
+          "label": "PR230_HISTORICAL_FRESH16",
+          "solver": "AC",
+          "status": "COMPLETED",
+          "measured_seconds": 15.816260300009162
+        },
+        {
+          "label": "MESS:S1:EXACT_REDUCED",
+          "solver": "GUROBI",
+          "Native_Runtime": 30.241000175476074,
+          "wall_seconds": 30.477526400005445,
+          "charged_seconds": 30.241000175476074,
+          "cap_seconds": 30.0,
+          "overshoot_seconds": 0.24100017547607422,
+          "error": null,
+          "status": 9,
+          "stage_context": {
+            "unified_bindings": {
+              "qos_sha": "a1d86a638afb2ef888a7194ebcdbc9d51dd45e0c31353b12129cc2eabff4cb2b",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "56810c3fdd3b094af6f7e8d51e7d650e4108090fe974bc4ff05873315b968403",
+              "case_sha": "bb1afbdf5bfc24d3793e3fe9eb8f593fcde5017df54499016bbf22e5c23d93a3",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "5bc256a8ef08919d048eaee14d0046d4f2ee12409bc851417d575d9a627ff8b8"
+            },
+            "reduced_case_sha": "b3ad893b79e95a86e74241322314a527d231cf63793ce7b5c333f28e770d2339",
+            "numeric_scope": "HISTORICAL_DIAGNOSTIC_AIDC_ANCHOR",
+            "lineage_restored_from_existing_result": {
+              "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\MESS_2X5_FIRST_FULL_RESULT.json",
+              "sha256": "362e35d3573788774f3baee30211a5df03becb557f29ef91156b9dcd8b4f65a2",
+              "bytes": 6674
+            },
+            "cost_unchanged": true
+          },
+          "session_identity": {
+            "science_sha": "56810c3fdd3b094af6f7e8d51e7d650e4108090fe974bc4ff05873315b968403",
+            "case_sha": "bb1afbdf5bfc24d3793e3fe9eb8f593fcde5017df54499016bbf22e5c23d93a3",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          }
+        },
+        {
+          "label": "A1_REFERENCE_FEASIBILITY_SEED",
+          "solver": "GUROBI",
+          "Native_Runtime": 1.2089998722076416,
+          "wall_seconds": 1.2412801000027684,
+          "charged_seconds": 1.2089998722076416,
+          "cap_seconds": 11.25,
+          "overshoot_seconds": 0.0,
+          "error": null,
+          "status": 3,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "910e40857b6a2b04a9ba933038cc15a84a421a2154bea9620e3382a7d530896e",
+            "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+          }
+        },
+        {
+          "label": "A1_ORIGINAL_P1",
+          "solver": "GUROBI",
+          "Native_Runtime": 75.5149998664856,
+          "wall_seconds": 75.51670459999877,
+          "charged_seconds": 75.5149998664856,
+          "cap_seconds": 73.79100012779236,
+          "overshoot_seconds": 1.7239997386932373,
+          "error": null,
+          "status": 9,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "910e40857b6a2b04a9ba933038cc15a84a421a2154bea9620e3382a7d530896e",
+            "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+          }
+        },
+        {
+          "label": "A1_AUTHORIZED_CHOICES_FEASIBILITY_SEED",
+          "solver": "GUROBI",
+          "Native_Runtime": 1.9490001201629639,
+          "wall_seconds": 1.9808916999900248,
+          "charged_seconds": 1.9490001201629639,
+          "cap_seconds": 6.0,
+          "overshoot_seconds": 0.0,
+          "error": null,
+          "status": 3,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "e8f2674af18d039e6b914a6fdd6ae7782bfd38827187ff4ccd3fac735172b223",
+            "bound_scope": "FIXED_KNOWN_FEASIBILITY_SEED_NOT_GLOBAL",
+            "seed_choice_sha": "e5102ee80051b08fe1edd8fd3b435b97da44dd57188aaf83ff397cf52ab8a566",
+            "reference_or_receipts_reissued": false
+          }
+        },
+        {
+          "label": "A1_ORIGINAL_P1",
+          "solver": "GUROBI",
+          "Native_Runtime": 38.21499991416931,
+          "wall_seconds": 38.2203290000034,
+          "charged_seconds": 38.21499991416931,
+          "cap_seconds": 38.050999879837036,
+          "overshoot_seconds": 0.1640000343322754,
+          "error": null,
+          "status": 9,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "e8f2674af18d039e6b914a6fdd6ae7782bfd38827187ff4ccd3fac735172b223",
+            "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+          }
+        }
+      ]
+    },
+    {
+      "reason": "USER_EMERGENCY_CORRECTION_CURRENT_DDAY_DETERMINISTIC_KNOWN_BASELINE;HISTORICAL_A1_NO_EXECUTION_AUTHORITY;SITE_ONLY_C0_C1;NO_NEW_BRANCH_OR_PR",
+      "previous_identity": {
+        "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+        "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "current_identity": {
+        "science_sha": "25b9651048504a07a45aca9490ce644312ad7f11c6598a5123c4d05ea52bc96a",
+        "case_sha": "742604c596cc8ca6ded35e12fe17b16a9108bda92831675b21f02245fb15c29a",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "old_contract_archive": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\CONTRACT_HISTORY\\REVISION_05_BEFORE",
+      "Native_usage_reset": false,
+      "all_existing_calls_preserved": true,
+      "used_conservative_seconds": 187.3879997730255,
+      "historical_case_results_transferred": false,
+      "prior_calls_before_lineage_annotation": [
+        {
+          "label": "PR230_HISTORICAL_FRESH16",
+          "solver": "AC",
+          "status": "COMPLETED",
+          "measured_seconds": 15.816260300009162
+        },
+        {
+          "label": "MESS:S1:EXACT_REDUCED",
+          "solver": "GUROBI",
+          "Native_Runtime": 30.241000175476074,
+          "wall_seconds": 30.477526400005445,
+          "charged_seconds": 30.241000175476074,
+          "cap_seconds": 30.0,
+          "overshoot_seconds": 0.24100017547607422,
+          "error": null,
+          "status": 9,
+          "stage_context": {
+            "unified_bindings": {
+              "qos_sha": "a1d86a638afb2ef888a7194ebcdbc9d51dd45e0c31353b12129cc2eabff4cb2b",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "56810c3fdd3b094af6f7e8d51e7d650e4108090fe974bc4ff05873315b968403",
+              "case_sha": "bb1afbdf5bfc24d3793e3fe9eb8f593fcde5017df54499016bbf22e5c23d93a3",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "5bc256a8ef08919d048eaee14d0046d4f2ee12409bc851417d575d9a627ff8b8"
+            },
+            "reduced_case_sha": "b3ad893b79e95a86e74241322314a527d231cf63793ce7b5c333f28e770d2339",
+            "numeric_scope": "HISTORICAL_DIAGNOSTIC_AIDC_ANCHOR",
+            "lineage_restored_from_existing_result": {
+              "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\MESS_2X5_FIRST_FULL_RESULT.json",
+              "sha256": "362e35d3573788774f3baee30211a5df03becb557f29ef91156b9dcd8b4f65a2",
+              "bytes": 6674
+            },
+            "cost_unchanged": true
+          },
+          "session_identity": {
+            "science_sha": "56810c3fdd3b094af6f7e8d51e7d650e4108090fe974bc4ff05873315b968403",
+            "case_sha": "bb1afbdf5bfc24d3793e3fe9eb8f593fcde5017df54499016bbf22e5c23d93a3",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          }
+        },
+        {
+          "label": "A1_REFERENCE_FEASIBILITY_SEED",
+          "solver": "GUROBI",
+          "Native_Runtime": 1.2089998722076416,
+          "wall_seconds": 1.2412801000027684,
+          "charged_seconds": 1.2089998722076416,
+          "cap_seconds": 11.25,
+          "overshoot_seconds": 0.0,
+          "error": null,
+          "status": 3,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "910e40857b6a2b04a9ba933038cc15a84a421a2154bea9620e3382a7d530896e",
+            "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+          }
+        },
+        {
+          "label": "A1_ORIGINAL_P1",
+          "solver": "GUROBI",
+          "Native_Runtime": 75.5149998664856,
+          "wall_seconds": 75.51670459999877,
+          "charged_seconds": 75.5149998664856,
+          "cap_seconds": 73.79100012779236,
+          "overshoot_seconds": 1.7239997386932373,
+          "error": null,
+          "status": 9,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "910e40857b6a2b04a9ba933038cc15a84a421a2154bea9620e3382a7d530896e",
+            "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+          }
+        },
+        {
+          "label": "A1_AUTHORIZED_CHOICES_FEASIBILITY_SEED",
+          "solver": "GUROBI",
+          "Native_Runtime": 1.9490001201629639,
+          "wall_seconds": 1.9808916999900248,
+          "charged_seconds": 1.9490001201629639,
+          "cap_seconds": 6.0,
+          "overshoot_seconds": 0.0,
+          "error": null,
+          "status": 3,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "e8f2674af18d039e6b914a6fdd6ae7782bfd38827187ff4ccd3fac735172b223",
+            "bound_scope": "FIXED_KNOWN_FEASIBILITY_SEED_NOT_GLOBAL",
+            "seed_choice_sha": "e5102ee80051b08fe1edd8fd3b435b97da44dd57188aaf83ff397cf52ab8a566",
+            "reference_or_receipts_reissued": false
+          }
+        },
+        {
+          "label": "A1_ORIGINAL_P1",
+          "solver": "GUROBI",
+          "Native_Runtime": 38.21499991416931,
+          "wall_seconds": 38.2203290000034,
+          "charged_seconds": 38.21499991416931,
+          "cap_seconds": 38.050999879837036,
+          "overshoot_seconds": 0.1640000343322754,
+          "error": null,
+          "status": 9,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "e8f2674af18d039e6b914a6fdd6ae7782bfd38827187ff4ccd3fac735172b223",
+            "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+          }
+        },
+        {
+          "label": "MESS:S1:COMPRESSION_BENCH:ORIGINAL",
+          "solver": "GUROBI",
+          "Native_Runtime": 20.1489999294281,
+          "wall_seconds": 20.19801870000083,
+          "charged_seconds": 20.1489999294281,
+          "cap_seconds": 20.0,
+          "overshoot_seconds": 0.14899992942810059,
+          "error": null,
+          "status": 9,
+          "session_identity": {
+            "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+            "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "unified_bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+              "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "a900a6075d6160b13abb0366afaec8936739389c913ec5f3d7f54f8548d53678"
+            },
+            "reduced_case_sha": "20ec897ade7bcab866110158afbf23ed26e13c6c711671058055954a5e230a01",
+            "scale_stage": "S1",
+            "planning_stage": "M1",
+            "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+            "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+            "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+            "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+            "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+            "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+            "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+            "coefficient_source": {
+              "path": "D:\\v42_may_final_campaign_20261013\\models\\2025-05-01\\COEFFICIENTS.npz",
+              "sha256": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "bytes": 62211025
+            },
+            "numeric_scope": "HISTORICAL_DIAGNOSTIC_AIDC_ANCHOR",
+            "grid_compression_mode": "NONE",
+            "prior_UB_LB_transferred": false,
+            "comparison_id": "0dc20beefeb068139b9b3faad09c56df8d905f51671479ec3bb3567966269a4b",
+            "comparison_variant": "ORIGINAL",
+            "original_matrix_sha": "d022d8358d265d0426e8d94b8419f29cb070c27df63b5e9cfddf2ca72d6a9071",
+            "original_domain_sha": "f26944b4f0290e42bc0b13310928d015ea55b03cefb2e13007c74f32bd9ed52f",
+            "selected_matrix_sha": "d022d8358d265d0426e8d94b8419f29cb070c27df63b5e9cfddf2ca72d6a9071",
+            "selected_domain_sha": "f26944b4f0290e42bc0b13310928d015ea55b03cefb2e13007c74f32bd9ed52f",
+            "declared_equivalence_certificate": null,
+            "identical_start_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+            "actual_Start_readback": {
+              "PASS": true,
+              "expected_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+              "actual_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+              "NumStart": 1,
+              "policy": "CURRENT_SOURCE_STAY"
+            },
+            "prior_variant_LB_or_incumbent_given_to_solver": false
+          }
+        },
+        {
+          "label": "MESS:S1:COMPRESSION_BENCH:COMPRESSED",
+          "solver": "GUROBI",
+          "Native_Runtime": 20.109999895095825,
+          "wall_seconds": 20.112211200001184,
+          "charged_seconds": 20.109999895095825,
+          "cap_seconds": 20.0,
+          "overshoot_seconds": 0.1099998950958252,
+          "error": null,
+          "status": 9,
+          "session_identity": {
+            "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+            "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "unified_bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+              "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "a900a6075d6160b13abb0366afaec8936739389c913ec5f3d7f54f8548d53678"
+            },
+            "reduced_case_sha": "20ec897ade7bcab866110158afbf23ed26e13c6c711671058055954a5e230a01",
+            "scale_stage": "S1",
+            "planning_stage": "M1",
+            "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+            "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+            "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+            "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+            "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+            "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+            "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+            "coefficient_source": {
+              "path": "D:\\v42_may_final_campaign_20261013\\models\\2025-05-01\\COEFFICIENTS.npz",
+              "sha256": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "bytes": 62211025
+            },
+            "numeric_scope": "HISTORICAL_DIAGNOSTIC_AIDC_ANCHOR",
+            "grid_compression_mode": "NONE",
+            "prior_UB_LB_transferred": false,
+            "comparison_id": "0dc20beefeb068139b9b3faad09c56df8d905f51671479ec3bb3567966269a4b",
+            "comparison_variant": "COMPRESSED",
+            "original_matrix_sha": "d022d8358d265d0426e8d94b8419f29cb070c27df63b5e9cfddf2ca72d6a9071",
+            "original_domain_sha": "f26944b4f0290e42bc0b13310928d015ea55b03cefb2e13007c74f32bd9ed52f",
+            "selected_matrix_sha": "ed964bfafcfbdad700ac800ac96f17391a95a89a6c564c56c411a8a50a254b18",
+            "selected_domain_sha": "62dd85f514a0a980a9ac5c581476fdce4c5631b741393159e37da3d1fa065aef",
+            "declared_equivalence_certificate": {
+              "path": "D:\\v42_trajectory_tracking_may01_20261014\\runtime\\v42_unified\\MESS_EXACT_COMPRESSION_COMPARE01\\SOLVE\\COMPRESSION_BENCHMARK\\EXACT_PROOF\\FULL96_COMPRESSION_CERTIFICATE.json",
+              "sha256": "4c2d20c60cbfc7b4cba829b0b5ff7a31e348dbf80b613d73e53fe95a226de611",
+              "bytes": 262515
+            },
+            "identical_start_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+            "actual_Start_readback": {
+              "PASS": true,
+              "expected_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+              "actual_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+              "NumStart": 1,
+              "policy": "CURRENT_SOURCE_STAY"
+            },
+            "prior_variant_LB_or_incumbent_given_to_solver": false
+          }
+        }
+      ]
+    },
+    {
+      "reason": "USER_STOP_FOR_PR_SNAPSHOT;REGISTER_REVIEWED_SOURCE_OWNERSHIP;PRESERVE_ALL_NATIVE_COSTS_AND_CASE_LINEAGE",
+      "previous_identity": {
+        "science_sha": "25b9651048504a07a45aca9490ce644312ad7f11c6598a5123c4d05ea52bc96a",
+        "case_sha": "742604c596cc8ca6ded35e12fe17b16a9108bda92831675b21f02245fb15c29a",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "current_identity": {
+        "science_sha": "25b9651048504a07a45aca9490ce644312ad7f11c6598a5123c4d05ea52bc96a",
+        "case_sha": "742604c596cc8ca6ded35e12fe17b16a9108bda92831675b21f02245fb15c29a",
+        "session": "UNIFIED_20261014_ONE_ATTEMPT"
+      },
+      "old_contract_archive": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\CONTRACT_HISTORY\\REVISION_06_BEFORE",
+      "Native_usage_reset": false,
+      "all_existing_calls_preserved": true,
+      "used_conservative_seconds": 187.3879997730255,
+      "historical_case_results_transferred": false,
+      "prior_calls_before_lineage_annotation": [
+        {
+          "label": "PR230_HISTORICAL_FRESH16",
+          "solver": "AC",
+          "status": "COMPLETED",
+          "measured_seconds": 15.816260300009162
+        },
+        {
+          "label": "MESS:S1:EXACT_REDUCED",
+          "solver": "GUROBI",
+          "Native_Runtime": 30.241000175476074,
+          "wall_seconds": 30.477526400005445,
+          "charged_seconds": 30.241000175476074,
+          "cap_seconds": 30.0,
+          "overshoot_seconds": 0.24100017547607422,
+          "error": null,
+          "status": 9,
+          "stage_context": {
+            "unified_bindings": {
+              "qos_sha": "a1d86a638afb2ef888a7194ebcdbc9d51dd45e0c31353b12129cc2eabff4cb2b",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "56810c3fdd3b094af6f7e8d51e7d650e4108090fe974bc4ff05873315b968403",
+              "case_sha": "bb1afbdf5bfc24d3793e3fe9eb8f593fcde5017df54499016bbf22e5c23d93a3",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "5bc256a8ef08919d048eaee14d0046d4f2ee12409bc851417d575d9a627ff8b8"
+            },
+            "reduced_case_sha": "b3ad893b79e95a86e74241322314a527d231cf63793ce7b5c333f28e770d2339",
+            "numeric_scope": "HISTORICAL_DIAGNOSTIC_AIDC_ANCHOR",
+            "lineage_restored_from_existing_result": {
+              "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\MESS_2X5_FIRST_FULL_RESULT.json",
+              "sha256": "362e35d3573788774f3baee30211a5df03becb557f29ef91156b9dcd8b4f65a2",
+              "bytes": 6674
+            },
+            "cost_unchanged": true
+          },
+          "session_identity": {
+            "science_sha": "56810c3fdd3b094af6f7e8d51e7d650e4108090fe974bc4ff05873315b968403",
+            "case_sha": "bb1afbdf5bfc24d3793e3fe9eb8f593fcde5017df54499016bbf22e5c23d93a3",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          }
+        },
+        {
+          "label": "A1_REFERENCE_FEASIBILITY_SEED",
+          "solver": "GUROBI",
+          "Native_Runtime": 1.2089998722076416,
+          "wall_seconds": 1.2412801000027684,
+          "charged_seconds": 1.2089998722076416,
+          "cap_seconds": 11.25,
+          "overshoot_seconds": 0.0,
+          "error": null,
+          "status": 3,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "910e40857b6a2b04a9ba933038cc15a84a421a2154bea9620e3382a7d530896e",
+            "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+          }
+        },
+        {
+          "label": "A1_ORIGINAL_P1",
+          "solver": "GUROBI",
+          "Native_Runtime": 75.5149998664856,
+          "wall_seconds": 75.51670459999877,
+          "charged_seconds": 75.5149998664856,
+          "cap_seconds": 73.79100012779236,
+          "overshoot_seconds": 1.7239997386932373,
+          "error": null,
+          "status": 9,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "910e40857b6a2b04a9ba933038cc15a84a421a2154bea9620e3382a7d530896e",
+            "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+          }
+        },
+        {
+          "label": "A1_AUTHORIZED_CHOICES_FEASIBILITY_SEED",
+          "solver": "GUROBI",
+          "Native_Runtime": 1.9490001201629639,
+          "wall_seconds": 1.9808916999900248,
+          "charged_seconds": 1.9490001201629639,
+          "cap_seconds": 6.0,
+          "overshoot_seconds": 0.0,
+          "error": null,
+          "status": 3,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "e8f2674af18d039e6b914a6fdd6ae7782bfd38827187ff4ccd3fac735172b223",
+            "bound_scope": "FIXED_KNOWN_FEASIBILITY_SEED_NOT_GLOBAL",
+            "seed_choice_sha": "e5102ee80051b08fe1edd8fd3b435b97da44dd57188aaf83ff397cf52ab8a566",
+            "reference_or_receipts_reissued": false
+          }
+        },
+        {
+          "label": "A1_ORIGINAL_P1",
+          "solver": "GUROBI",
+          "Native_Runtime": 38.21499991416931,
+          "wall_seconds": 38.2203290000034,
+          "charged_seconds": 38.21499991416931,
+          "cap_seconds": 38.050999879837036,
+          "overshoot_seconds": 0.1640000343322754,
+          "error": null,
+          "status": 9,
+          "session_identity": {
+            "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+            "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "c38bbffa8cda45b35507cc1cfb95f4821a43586189f0ee7924ccd95033a93e4b",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "de43b37cf820dd291d7e5d4d71822b50e507de32977c58217ff9a0800a5b3e20",
+              "case_sha": "1ea2b1caf7f75c496b78e1b087913d2742da21c45537ccfeaa667eccfc0671e1",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "58856ef4fd25253ffe9ea3201c8a3a604c6a192a549eb0bc2ba5af844aa452d6"
+            },
+            "stage": "A1",
+            "arm": "B1",
+            "day": "2025-05-01",
+            "native_case_sha": "af258b092f5de66e8a6b716f189dc463e449bbb5babfbe5826c6266f61aa55a8",
+            "input_mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "executed_source_sha": "e8f2674af18d039e6b914a6fdd6ae7782bfd38827187ff4ccd3fac735172b223",
+            "bound_scope": "FIXED_ZERO_MESS_CURRENT_A_ONLY"
+          }
+        },
+        {
+          "label": "MESS:S1:COMPRESSION_BENCH:ORIGINAL",
+          "solver": "GUROBI",
+          "Native_Runtime": 20.1489999294281,
+          "wall_seconds": 20.19801870000083,
+          "charged_seconds": 20.1489999294281,
+          "cap_seconds": 20.0,
+          "overshoot_seconds": 0.14899992942810059,
+          "error": null,
+          "status": 9,
+          "session_identity": {
+            "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+            "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "unified_bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+              "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "a900a6075d6160b13abb0366afaec8936739389c913ec5f3d7f54f8548d53678"
+            },
+            "reduced_case_sha": "20ec897ade7bcab866110158afbf23ed26e13c6c711671058055954a5e230a01",
+            "scale_stage": "S1",
+            "planning_stage": "M1",
+            "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+            "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+            "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+            "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+            "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+            "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+            "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+            "coefficient_source": {
+              "path": "D:\\v42_may_final_campaign_20261013\\models\\2025-05-01\\COEFFICIENTS.npz",
+              "sha256": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "bytes": 62211025
+            },
+            "numeric_scope": "HISTORICAL_DIAGNOSTIC_AIDC_ANCHOR",
+            "grid_compression_mode": "NONE",
+            "prior_UB_LB_transferred": false,
+            "comparison_id": "0dc20beefeb068139b9b3faad09c56df8d905f51671479ec3bb3567966269a4b",
+            "comparison_variant": "ORIGINAL",
+            "original_matrix_sha": "d022d8358d265d0426e8d94b8419f29cb070c27df63b5e9cfddf2ca72d6a9071",
+            "original_domain_sha": "f26944b4f0290e42bc0b13310928d015ea55b03cefb2e13007c74f32bd9ed52f",
+            "selected_matrix_sha": "d022d8358d265d0426e8d94b8419f29cb070c27df63b5e9cfddf2ca72d6a9071",
+            "selected_domain_sha": "f26944b4f0290e42bc0b13310928d015ea55b03cefb2e13007c74f32bd9ed52f",
+            "declared_equivalence_certificate": null,
+            "identical_start_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+            "actual_Start_readback": {
+              "PASS": true,
+              "expected_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+              "actual_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+              "NumStart": 1,
+              "policy": "CURRENT_SOURCE_STAY"
+            },
+            "prior_variant_LB_or_incumbent_given_to_solver": false
+          }
+        },
+        {
+          "label": "MESS:S1:COMPRESSION_BENCH:COMPRESSED",
+          "solver": "GUROBI",
+          "Native_Runtime": 20.109999895095825,
+          "wall_seconds": 20.112211200001184,
+          "charged_seconds": 20.109999895095825,
+          "cap_seconds": 20.0,
+          "overshoot_seconds": 0.1099998950958252,
+          "error": null,
+          "status": 9,
+          "session_identity": {
+            "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+            "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+            "session": "UNIFIED_20261014_ONE_ATTEMPT"
+          },
+          "stage_context": {
+            "unified_bindings": {
+              "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+              "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+              "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b",
+              "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+              "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+              "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+              "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+              "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+              "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+              "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+              "interface_sha": "a900a6075d6160b13abb0366afaec8936739389c913ec5f3d7f54f8548d53678"
+            },
+            "reduced_case_sha": "20ec897ade7bcab866110158afbf23ed26e13c6c711671058055954a5e230a01",
+            "scale_stage": "S1",
+            "planning_stage": "M1",
+            "science_sha": "1dd7d30cf256ab922786426e82302965ff798bfa5547e2069ac1c12eb6d81ddf",
+            "case_sha": "fb32249a0858e317c8c0ac18d3c91d85c8b97e26653b34d0c2cc5e4c8973ac6f",
+            "physical_sha": "bac78ade2615ef4e79a7360ef7123f48088f511786fb703564ba76dadf4990e6",
+            "time_axis_sha": "31d71f5df920b3f32042b368eb89f70c3303b8a8af021853ccdd80c3032102fa",
+            "qos_sha": "c76bc1959e26b0c10ec89de625b2252a6925cf1486e814e9412dc7a9b283e7be",
+            "aidc_anchor": "83f506e6ba63933bb5f43ed8083b8c230dc28865efa76953e2925b80ace564cb",
+            "mess_anchor": "dfb90934dcb05d151d9974a48885b39de6803413837d28d08c4b6ecc1589eaf7",
+            "response_sha": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+            "coefficient_source": {
+              "path": "D:\\v42_may_final_campaign_20261013\\models\\2025-05-01\\COEFFICIENTS.npz",
+              "sha256": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+              "bytes": 62211025
+            },
+            "numeric_scope": "HISTORICAL_DIAGNOSTIC_AIDC_ANCHOR",
+            "grid_compression_mode": "NONE",
+            "prior_UB_LB_transferred": false,
+            "comparison_id": "0dc20beefeb068139b9b3faad09c56df8d905f51671479ec3bb3567966269a4b",
+            "comparison_variant": "COMPRESSED",
+            "original_matrix_sha": "d022d8358d265d0426e8d94b8419f29cb070c27df63b5e9cfddf2ca72d6a9071",
+            "original_domain_sha": "f26944b4f0290e42bc0b13310928d015ea55b03cefb2e13007c74f32bd9ed52f",
+            "selected_matrix_sha": "ed964bfafcfbdad700ac800ac96f17391a95a89a6c564c56c411a8a50a254b18",
+            "selected_domain_sha": "62dd85f514a0a980a9ac5c581476fdce4c5631b741393159e37da3d1fa065aef",
+            "declared_equivalence_certificate": {
+              "path": "D:\\v42_trajectory_tracking_may01_20261014\\runtime\\v42_unified\\MESS_EXACT_COMPRESSION_COMPARE01\\SOLVE\\COMPRESSION_BENCHMARK\\EXACT_PROOF\\FULL96_COMPRESSION_CERTIFICATE.json",
+              "sha256": "4c2d20c60cbfc7b4cba829b0b5ff7a31e348dbf80b613d73e53fe95a226de611",
+              "bytes": 262515
+            },
+            "identical_start_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+            "actual_Start_readback": {
+              "PASS": true,
+              "expected_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+              "actual_vector_sha": "ff46bb67f415db6d1760a8ca5ac037962b9f6e1877fe2efbad78b63d75233c62",
+              "NumStart": 1,
+              "policy": "CURRENT_SOURCE_STAY"
+            },
+            "prior_variant_LB_or_incumbent_given_to_solver": false
+          }
+        }
+      ]
+    }
+  ],
+  "active_stage_context": null,
+  "linked_cumulative_projections": [
+    {
+      "path": "D:\\v42_b2_global_lb_alternative_20261014\\docs\\v42_b2_global_lb_alternative_research_20261014\\NATIVE_RUNTIME_BUDGET_LEDGER.json",
+      "historical_seconds": 1257.5220000743866,
+      "new_conservative_seconds": 187.3879997730255,
+      "cumulative_seconds": 1444.909999847412,
+      "limit_seconds": 1800.0
+    },
+    {
+      "path": "D:\\v42_integration_validation_20261013\\INTEGRATION_BUDGET_LEDGER.json",
+      "historical_seconds": 621.2855198158068,
+      "new_conservative_seconds": 187.3879997730255,
+      "cumulative_seconds": 808.6735195888323,
+      "limit_seconds": 3600.0
+    }
+  ],
+  "research_execution": "USER_STOPPED_FOR_PR",
+  "usage_reset": false
+}

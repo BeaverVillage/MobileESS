@@ -8,6 +8,7 @@ from collections import defaultdict
 from dataclasses import asdict, replace
 import hashlib
 import json
+import math
 import numpy as np
 from v42_job_capability import Option, validate, checkpoint_records
 from v42_boundary.generator import Generator, Domain
@@ -99,6 +100,18 @@ def physical_domain(job, bound, resources, gen=None, hard_release=None):
                 stays.append((start, site))
             if not job.checkpoint_authorized or (job.unknown_arrival and not job.qos_policy_id) or not job.is_observed or job.migrations_used:
                 continue
+            qos_transfer_slots=None
+            if job.qos_policy_id:
+                burden=job.qos_start_delay_seconds+max(0,start-job.reference_start)*900
+                # A positive payload needs at least one transfer slot and the
+                # original restart duration. Widen the rounded arithmetic;
+                # keep the original exact restart/QoS mask below.
+                upper_budget=np.nextafter(float(job.qos_budget_seconds),math.inf)
+                upper_remaining=np.nextafter(upper_budget-burden,math.inf)
+                upper_slots=np.nextafter(upper_remaining/900.,math.inf)
+                if math.isfinite(upper_slots):
+                    qos_transfer_slots=math.floor(upper_slots)
+                    if qos_transfer_slots<1+resources.restart_slots:continue
             if (job.qos_policy_id and job.qos_start_delay_seconds + max(0,start-job.reference_start)*900
                     + resources.restart_slots*900 > job.qos_budget_seconds):
                 # Positive inherited restart is an exact lower bound on every
@@ -114,6 +127,8 @@ def physical_domain(job, bound, resources, gen=None, hard_release=None):
                         continue
                     latest = min(resources.control_end - resources.restart_slots - 2,
                                  bound.latest_completion - remaining - resources.restart_slots - 1)
+                    if qos_transfer_slots is not None:
+                        latest=min(latest,cp+qos_transfer_slots-1-resources.restart_slots)
                     if cp > latest:
                         continue
                     ids = np.arange(cp, latest + 1, dtype=int)
