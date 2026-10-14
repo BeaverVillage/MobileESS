@@ -1,0 +1,598 @@
+{
+  "PASS": true,
+  "evidence_kind": "NAMED_SYNTHETIC_TWO_SLOT_SAVED_PROGRAM_REPLAY_NOT_MAY01",
+  "before_source_commit": "1100995086a8d202cb6b8a7308ccc6d60799bbc5",
+  "before_actual_sha": "bb93bf3ce1e9357a42e102879da3b054075ce0e935ac5fa675e7113e3f11252d",
+  "before_adapter_sha": "0d1ca4ac8a24df210b29c50b7e6cee19dd0908468ac6f7682ab2e6d4121086f2",
+  "before_receipt": {
+    "capacity_violations": 0,
+    "dropped_jobs": 0,
+    "submitted_jobs": 3,
+    "completed_jobs": 2,
+    "carryout_jobs": 1,
+    "max_per_site_GPU": {
+      "A": 1.0,
+      "B": 2.0
+    },
+    "actual_compute_GPUh": 1.0,
+    "actual_occupation_GPUh": 1.0,
+    "anonymous_physical_GPU": 0,
+    "runtime_reserve_physical_GPU": 0,
+    "optimizer_calls": 0,
+    "actual_global_reoptimization": 0,
+    "future_duration_controller_reads": 0,
+    "future_completion_controller_reads": 0,
+    "actual_power_recomputed": true,
+    "planning_power_copied": false,
+    "physical_ac_status": "NOT_EXECUTED"
+  },
+  "after_receipt": {
+    "capacity_violations": 0,
+    "dropped_jobs": 0,
+    "submitted_jobs": 3,
+    "completed_jobs": 2,
+    "carryout_jobs": 1,
+    "max_per_site_GPU": {
+      "A": 1.0,
+      "B": 2.0
+    },
+    "actual_compute_GPUh": 1.0,
+    "actual_occupation_GPUh": 1.0,
+    "anonymous_physical_GPU": 0,
+    "runtime_reserve_physical_GPU": 0,
+    "optimizer_calls": 0,
+    "actual_global_reoptimization": 0,
+    "future_duration_controller_reads": 0,
+    "future_completion_controller_reads": 0,
+    "actual_power_recomputed": true,
+    "planning_power_copied": false,
+    "physical_ac_status": "NOT_EXECUTED"
+  },
+  "before_Known": {
+    "job_uid": "SYNTHETIC_UID_2",
+    "submit_time": 0,
+    "initial_admission_attempt": 0.0,
+    "admitted_time": 0.0,
+    "capacity_wait_seconds": 0.0,
+    "capacity_wait_slots": 0,
+    "site": "B",
+    "GPU_gang": 1,
+    "queue_position": 1,
+    "completion_observed_time": 900.0,
+    "release_control_time": 900,
+    "grid_reads": 0,
+    "future_end_reads": 0,
+    "future_duration_reads": 0,
+    "optimizer_calls": 0,
+    "timeshift_optimization": false,
+    "migration_optimization": false,
+    "plan_start_seconds": 0,
+    "plan_actual_start_deviation_seconds": 0.0,
+    "intentional_delay_seconds": 0.0,
+    "unavoidable_queue_seconds": 0.0,
+    "policy_action": "PREPLACE",
+    "rule_id": "cf783bb26d5a:1",
+    "carryout": false,
+    "latest_state": "COMPLETED",
+    "origin_unknown": false,
+    "migration_count": 0,
+    "accumulated_compute_seconds": 900.0
+  },
+  "after_Known": {
+    "job_uid": "SYNTHETIC_UID_2",
+    "submit_time": 0,
+    "initial_admission_attempt": 0.0,
+    "admitted_time": 0.0,
+    "capacity_wait_seconds": 0.0,
+    "capacity_wait_slots": 0,
+    "site": "A",
+    "GPU_gang": 1,
+    "queue_position": 1,
+    "completion_observed_time": 900.0,
+    "release_control_time": 900,
+    "grid_reads": 0,
+    "future_end_reads": 0,
+    "future_duration_reads": 0,
+    "optimizer_calls": 0,
+    "timeshift_optimization": false,
+    "migration_optimization": false,
+    "plan_start_seconds": 0.0,
+    "plan_actual_start_deviation_seconds": 0.0,
+    "intentional_delay_seconds": 0.0,
+    "unavoidable_queue_seconds": 0.0,
+    "policy_action": "START",
+    "rule_id": null,
+    "carryout": false,
+    "latest_state": "COMPLETED",
+    "origin_unknown": false,
+    "migration_count": 0,
+    "accumulated_compute_seconds": 900.0
+  },
+  "before_QoS": [
+    {
+      "uid": "BG",
+      "budget_seconds": 0,
+      "intentional_start_delay_seconds": 0.0,
+      "migration_interruption_seconds": 0.0,
+      "total_intentional_burden_seconds": 0.0,
+      "actual_wait_seconds": 0,
+      "latest_start_excess_seconds": 0.0,
+      "unfinished": true,
+      "actual_completion_deadline_excess_seconds": null,
+      "window_status": "SOURCE_PROTECTED_OR_EXPLICIT_NONBATCH"
+    },
+    {
+      "uid": "SYNTHETIC_UID_2",
+      "budget_seconds": 1800,
+      "intentional_start_delay_seconds": 0.0,
+      "migration_interruption_seconds": 0.0,
+      "total_intentional_burden_seconds": 0.0,
+      "actual_wait_seconds": 0.0,
+      "latest_start_excess_seconds": 0.0,
+      "unfinished": false,
+      "actual_completion_deadline_excess_seconds": null,
+      "window_status": "EXPERIMENTAL_CONTRACT_AUTHORIZED"
+    },
+    {
+      "uid": "SYNTHETIC_UNKNOWN_0",
+      "budget_seconds": 1800,
+      "intentional_start_delay_seconds": 0.0,
+      "migration_interruption_seconds": 0.0,
+      "total_intentional_burden_seconds": 0.0,
+      "actual_wait_seconds": 0.0,
+      "latest_start_excess_seconds": 0.0,
+      "unfinished": false,
+      "actual_completion_deadline_excess_seconds": null,
+      "window_status": "EXPERIMENTAL_CONTRACT_AUTHORIZED"
+    }
+  ],
+  "after_QoS": [
+    {
+      "uid": "BG",
+      "budget_seconds": 0,
+      "intentional_start_delay_seconds": 0.0,
+      "migration_interruption_seconds": 0.0,
+      "total_intentional_burden_seconds": 0.0,
+      "actual_wait_seconds": 0,
+      "latest_start_excess_seconds": 0.0,
+      "unfinished": true,
+      "actual_completion_deadline_excess_seconds": null,
+      "window_status": "SOURCE_PROTECTED_OR_EXPLICIT_NONBATCH"
+    },
+    {
+      "uid": "SYNTHETIC_UID_2",
+      "budget_seconds": 1800,
+      "intentional_start_delay_seconds": 0.0,
+      "migration_interruption_seconds": 0.0,
+      "total_intentional_burden_seconds": 0.0,
+      "actual_wait_seconds": 0.0,
+      "latest_start_excess_seconds": 0.0,
+      "unfinished": false,
+      "actual_completion_deadline_excess_seconds": null,
+      "window_status": "EXPERIMENTAL_CONTRACT_AUTHORIZED"
+    },
+    {
+      "uid": "SYNTHETIC_UNKNOWN_0",
+      "budget_seconds": 1800,
+      "intentional_start_delay_seconds": 0.0,
+      "migration_interruption_seconds": 0.0,
+      "total_intentional_burden_seconds": 0.0,
+      "actual_wait_seconds": 0.0,
+      "latest_start_excess_seconds": 0.0,
+      "unfinished": false,
+      "actual_completion_deadline_excess_seconds": null,
+      "window_status": "EXPERIMENTAL_CONTRACT_AUTHORIZED"
+    }
+  ],
+  "before_Known_in_Unknown_policy_UIDs": 1,
+  "after_Known_in_Unknown_policy_UIDs": 0,
+  "Unknown_Actual": {
+    "Unknown_Observed_UID": 1,
+    "Unknown_Observed_Eligible_UID": 1,
+    "Unknown_Participant_UID": 1,
+    "Unknown_Lookup_Success_UID": 1,
+    "Unknown_Feasible_Frozen_Alternative_UID": 1,
+    "Unknown_Flexible_Reserved_UID": 1,
+    "Unknown_First_Alternative_Executed_UID": 1,
+    "Unknown_Later_Alternative_Executed_UID": 0,
+    "Unknown_Same_Row_Revalidation_Fallback_Executed_UID": 0,
+    "Frozen_rank_scope": "OBSERVED_PENDING_START_COMMANDS_ONLY;LEGACY_SELECTOR_UNRANKED",
+    "Unknown_Reserved_Command_Revalidation_Failed_UID": 0,
+    "Unknown_Flexible_Reserved_Not_Executed_UID": 0,
+    "Unknown_Actual_TimeShift_UID": 0,
+    "Unknown_Actual_Preplace_UID": 1,
+    "Unknown_Actual_Migration_UID": 0,
+    "Unknown_Actual_Changed_UID": 1,
+    "Changed_Nominal_GPUh": 0.25,
+    "Eligible_Nominal_GPUh": 0.25,
+    "Unknown_committed_delay_obligation_UID": 0,
+    "Unknown_Actual_Changed_UID_rate": 1.0,
+    "Changed_Nominal_GPUh_rate": 1.0,
+    "Unknown_Queue_UID": 0,
+    "Unknown_Carryover_UID": 0,
+    "QoS_intentional_budget_excess_UID": 0,
+    "Contract_pending_overdue_UID": 0,
+    "Contract_latest_start_excess_UID": 0,
+    "Contract_observed_completion_deadline_excess_UID": 0,
+    "Actual_AIDC_IT_PCC_PQ": {
+      "IT_kw": [
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          2.0
+        ]
+      ],
+      "PCC_P_kw": [
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          2.0
+        ]
+      ],
+      "PCC_Q_kvar": [
+        [
+          0.3286841051788632,
+          0.3286841051788632
+        ],
+        [
+          0.0,
+          0.6573682103577264
+        ]
+      ]
+    },
+    "Actual_power_scope": "TOTAL_OBSERVED_AIDC_OCCUPANCY_INCLUDES_KNOWN;MESS_ACCOUNTED_SEPARATELY",
+    "rejection_candidate_event_counts": {},
+    "rejection_unique_UID_counts": {},
+    "rejection_unique_UID_sets_overlap": true,
+    "Actual_PCC_PQ_delta_from_Unknown_alone": null,
+    "PCC_delta_status": "REQUIRES_SAME_CASE_FIXED_KNOWN_MESS_COUNTERFACTUAL_REPLAY",
+    "Known_Unknown_action_ledger_disjoint": true,
+    "scope": "UNKNOWN_ACTUAL_ONLY"
+  },
+  "actual_PCC_delta_scope": "TOTAL_TOY_REPLAY_ONLY_NOT_ISOLATED_UNKNOWN_EFFECT",
+  "actual_PCC_P_delta_kw": [
+    [
+      1.0,
+      -1.0
+    ],
+    [
+      -1.0,
+      1.0
+    ]
+  ],
+  "actual_PCC_Q_delta_kvar": [
+    [
+      0.3286841051788632,
+      -0.3286841051788632
+    ],
+    [
+      -0.3286841051788632,
+      0.3286841051788632
+    ]
+  ],
+  "Native_Optimize_calls": 0,
+  "Fresh_AC_calls": 0,
+  "new_May01_B1_Canary": false,
+  "new_B1_B3_Full96": false,
+  "integrated_science_performance_PASS": false,
+  "C0_C1_C2_C3": {
+    "C0": {
+      "completed": 2,
+      "carryover": 1,
+      "Known_entered_Unknown_UIDs": 1,
+      "Unknown": {
+        "Unknown_Observed_UID": 1,
+        "Unknown_Observed_Eligible_UID": 1,
+        "Unknown_Participant_UID": 1,
+        "Unknown_Lookup_Success_UID": 1,
+        "Unknown_Feasible_Frozen_Alternative_UID": 1,
+        "Unknown_Flexible_Reserved_UID": 0,
+        "Unknown_First_Alternative_Executed_UID": 0,
+        "Unknown_Later_Alternative_Executed_UID": 0,
+        "Unknown_Same_Row_Revalidation_Fallback_Executed_UID": 0,
+        "Frozen_rank_scope": "OBSERVED_PENDING_START_COMMANDS_ONLY;LEGACY_SELECTOR_UNRANKED",
+        "Unknown_Reserved_Command_Revalidation_Failed_UID": 0,
+        "Unknown_Flexible_Reserved_Not_Executed_UID": 0,
+        "Unknown_Actual_TimeShift_UID": 0,
+        "Unknown_Actual_Preplace_UID": 0,
+        "Unknown_Actual_Migration_UID": 0,
+        "Unknown_Actual_Changed_UID": 0,
+        "Changed_Nominal_GPUh": 0,
+        "Eligible_Nominal_GPUh": 0.25,
+        "Unknown_committed_delay_obligation_UID": 0,
+        "Unknown_Actual_Changed_UID_rate": 0.0,
+        "Changed_Nominal_GPUh_rate": 0.0,
+        "Unknown_Queue_UID": 0,
+        "Unknown_Carryover_UID": 0,
+        "QoS_intentional_budget_excess_UID": 0,
+        "Contract_pending_overdue_UID": 0,
+        "Contract_latest_start_excess_UID": 0,
+        "Contract_observed_completion_deadline_excess_UID": 0,
+        "Actual_AIDC_IT_PCC_PQ": {
+          "IT_kw": [
+            [
+              0.0,
+              2.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "PCC_P_kw": [
+            [
+              0.0,
+              2.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "PCC_Q_kvar": [
+            [
+              0.0,
+              0.6573682103577264
+            ],
+            [
+              0.3286841051788632,
+              0.3286841051788632
+            ]
+          ]
+        },
+        "Actual_power_scope": "TOTAL_OBSERVED_AIDC_OCCUPANCY_INCLUDES_KNOWN;MESS_ACCOUNTED_SEPARATELY",
+        "rejection_candidate_event_counts": {},
+        "rejection_unique_UID_counts": {},
+        "rejection_unique_UID_sets_overlap": true,
+        "Actual_PCC_PQ_delta_from_Unknown_alone": null,
+        "PCC_delta_status": "REQUIRES_SAME_CASE_FIXED_KNOWN_MESS_COUNTERFACTUAL_REPLAY",
+        "Known_Unknown_action_ledger_disjoint": false,
+        "scope": "UNKNOWN_ACTUAL_ONLY"
+      },
+      "QoS_budget_excess_UIDs": 0,
+      "physical_capacity_violations": 0,
+      "policy_sha": "cf783bb26d5a4d8ef726c066b7836fd175e7372c595c73669623ce970d078b24",
+      "role": "NAMED_SYNTHETIC_TWO_SLOT_DIAGNOSTIC_NOT_MAY01"
+    },
+    "C1": {
+      "completed": 2,
+      "carryover": 1,
+      "Known_entered_Unknown_UIDs": 0,
+      "Unknown": {
+        "Unknown_Observed_UID": 1,
+        "Unknown_Observed_Eligible_UID": 1,
+        "Unknown_Participant_UID": 1,
+        "Unknown_Lookup_Success_UID": 1,
+        "Unknown_Feasible_Frozen_Alternative_UID": 1,
+        "Unknown_Flexible_Reserved_UID": 0,
+        "Unknown_First_Alternative_Executed_UID": 0,
+        "Unknown_Later_Alternative_Executed_UID": 0,
+        "Unknown_Same_Row_Revalidation_Fallback_Executed_UID": 0,
+        "Frozen_rank_scope": "OBSERVED_PENDING_START_COMMANDS_ONLY;LEGACY_SELECTOR_UNRANKED",
+        "Unknown_Reserved_Command_Revalidation_Failed_UID": 0,
+        "Unknown_Flexible_Reserved_Not_Executed_UID": 0,
+        "Unknown_Actual_TimeShift_UID": 0,
+        "Unknown_Actual_Preplace_UID": 0,
+        "Unknown_Actual_Migration_UID": 0,
+        "Unknown_Actual_Changed_UID": 0,
+        "Changed_Nominal_GPUh": 0,
+        "Eligible_Nominal_GPUh": 0.25,
+        "Unknown_committed_delay_obligation_UID": 0,
+        "Unknown_Actual_Changed_UID_rate": 0.0,
+        "Changed_Nominal_GPUh_rate": 0.0,
+        "Unknown_Queue_UID": 0,
+        "Unknown_Carryover_UID": 0,
+        "QoS_intentional_budget_excess_UID": 0,
+        "Contract_pending_overdue_UID": 0,
+        "Contract_latest_start_excess_UID": 0,
+        "Contract_observed_completion_deadline_excess_UID": 0,
+        "Actual_AIDC_IT_PCC_PQ": {
+          "IT_kw": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "PCC_P_kw": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ],
+          "PCC_Q_kvar": [
+            [
+              0.3286841051788632,
+              0.3286841051788632
+            ],
+            [
+              0.3286841051788632,
+              0.3286841051788632
+            ]
+          ]
+        },
+        "Actual_power_scope": "TOTAL_OBSERVED_AIDC_OCCUPANCY_INCLUDES_KNOWN;MESS_ACCOUNTED_SEPARATELY",
+        "rejection_candidate_event_counts": {},
+        "rejection_unique_UID_counts": {},
+        "rejection_unique_UID_sets_overlap": true,
+        "Actual_PCC_PQ_delta_from_Unknown_alone": null,
+        "PCC_delta_status": "REQUIRES_SAME_CASE_FIXED_KNOWN_MESS_COUNTERFACTUAL_REPLAY",
+        "Known_Unknown_action_ledger_disjoint": true,
+        "scope": "UNKNOWN_ACTUAL_ONLY"
+      },
+      "QoS_budget_excess_UIDs": 0,
+      "physical_capacity_violations": 0,
+      "policy_sha": "cf783bb26d5a4d8ef726c066b7836fd175e7372c595c73669623ce970d078b24",
+      "role": "NAMED_SYNTHETIC_TWO_SLOT_DIAGNOSTIC_NOT_MAY01"
+    },
+    "C2": {
+      "completed": 2,
+      "carryover": 1,
+      "Known_entered_Unknown_UIDs": 0,
+      "Unknown": {
+        "Unknown_Observed_UID": 1,
+        "Unknown_Observed_Eligible_UID": 1,
+        "Unknown_Participant_UID": 1,
+        "Unknown_Lookup_Success_UID": 1,
+        "Unknown_Feasible_Frozen_Alternative_UID": 1,
+        "Unknown_Flexible_Reserved_UID": 1,
+        "Unknown_First_Alternative_Executed_UID": 1,
+        "Unknown_Later_Alternative_Executed_UID": 0,
+        "Unknown_Same_Row_Revalidation_Fallback_Executed_UID": 0,
+        "Frozen_rank_scope": "OBSERVED_PENDING_START_COMMANDS_ONLY;LEGACY_SELECTOR_UNRANKED",
+        "Unknown_Reserved_Command_Revalidation_Failed_UID": 0,
+        "Unknown_Flexible_Reserved_Not_Executed_UID": 0,
+        "Unknown_Actual_TimeShift_UID": 0,
+        "Unknown_Actual_Preplace_UID": 1,
+        "Unknown_Actual_Migration_UID": 0,
+        "Unknown_Actual_Changed_UID": 1,
+        "Changed_Nominal_GPUh": 0.25,
+        "Eligible_Nominal_GPUh": 0.25,
+        "Unknown_committed_delay_obligation_UID": 0,
+        "Unknown_Actual_Changed_UID_rate": 1.0,
+        "Changed_Nominal_GPUh_rate": 1.0,
+        "Unknown_Queue_UID": 0,
+        "Unknown_Carryover_UID": 0,
+        "QoS_intentional_budget_excess_UID": 0,
+        "Contract_pending_overdue_UID": 0,
+        "Contract_latest_start_excess_UID": 0,
+        "Contract_observed_completion_deadline_excess_UID": 0,
+        "Actual_AIDC_IT_PCC_PQ": {
+          "IT_kw": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              0.0,
+              2.0
+            ]
+          ],
+          "PCC_P_kw": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              0.0,
+              2.0
+            ]
+          ],
+          "PCC_Q_kvar": [
+            [
+              0.3286841051788632,
+              0.3286841051788632
+            ],
+            [
+              0.0,
+              0.6573682103577264
+            ]
+          ]
+        },
+        "Actual_power_scope": "TOTAL_OBSERVED_AIDC_OCCUPANCY_INCLUDES_KNOWN;MESS_ACCOUNTED_SEPARATELY",
+        "rejection_candidate_event_counts": {},
+        "rejection_unique_UID_counts": {},
+        "rejection_unique_UID_sets_overlap": true,
+        "Actual_PCC_PQ_delta_from_Unknown_alone": null,
+        "PCC_delta_status": "REQUIRES_SAME_CASE_FIXED_KNOWN_MESS_COUNTERFACTUAL_REPLAY",
+        "Known_Unknown_action_ledger_disjoint": true,
+        "scope": "UNKNOWN_ACTUAL_ONLY"
+      },
+      "QoS_budget_excess_UIDs": 0,
+      "physical_capacity_violations": 0,
+      "policy_sha": "3ddcafd79758f8a1402d91578004f091198ea0020c191564f8eb4fff7374453b",
+      "role": "NAMED_SYNTHETIC_TWO_SLOT_DIAGNOSTIC_NOT_MAY01"
+    },
+    "C3": {
+      "completed": 2,
+      "carryover": 1,
+      "Known_entered_Unknown_UIDs": 0,
+      "Unknown": {
+        "Unknown_Observed_UID": 1,
+        "Unknown_Observed_Eligible_UID": 1,
+        "Unknown_Participant_UID": 1,
+        "Unknown_Lookup_Success_UID": 1,
+        "Unknown_Feasible_Frozen_Alternative_UID": 1,
+        "Unknown_Flexible_Reserved_UID": 1,
+        "Unknown_First_Alternative_Executed_UID": 1,
+        "Unknown_Later_Alternative_Executed_UID": 0,
+        "Unknown_Same_Row_Revalidation_Fallback_Executed_UID": 0,
+        "Frozen_rank_scope": "OBSERVED_PENDING_START_COMMANDS_ONLY;LEGACY_SELECTOR_UNRANKED",
+        "Unknown_Reserved_Command_Revalidation_Failed_UID": 0,
+        "Unknown_Flexible_Reserved_Not_Executed_UID": 0,
+        "Unknown_Actual_TimeShift_UID": 0,
+        "Unknown_Actual_Preplace_UID": 1,
+        "Unknown_Actual_Migration_UID": 0,
+        "Unknown_Actual_Changed_UID": 1,
+        "Changed_Nominal_GPUh": 0.25,
+        "Eligible_Nominal_GPUh": 0.25,
+        "Unknown_committed_delay_obligation_UID": 0,
+        "Unknown_Actual_Changed_UID_rate": 1.0,
+        "Changed_Nominal_GPUh_rate": 1.0,
+        "Unknown_Queue_UID": 0,
+        "Unknown_Carryover_UID": 0,
+        "QoS_intentional_budget_excess_UID": 0,
+        "Contract_pending_overdue_UID": 0,
+        "Contract_latest_start_excess_UID": 0,
+        "Contract_observed_completion_deadline_excess_UID": 0,
+        "Actual_AIDC_IT_PCC_PQ": {
+          "IT_kw": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              0.0,
+              2.0
+            ]
+          ],
+          "PCC_P_kw": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              0.0,
+              2.0
+            ]
+          ],
+          "PCC_Q_kvar": [
+            [
+              0.3286841051788632,
+              0.3286841051788632
+            ],
+            [
+              0.0,
+              0.6573682103577264
+            ]
+          ]
+        },
+        "Actual_power_scope": "TOTAL_OBSERVED_AIDC_OCCUPANCY_INCLUDES_KNOWN;MESS_ACCOUNTED_SEPARATELY",
+        "rejection_candidate_event_counts": {},
+        "rejection_unique_UID_counts": {},
+        "rejection_unique_UID_sets_overlap": true,
+        "Actual_PCC_PQ_delta_from_Unknown_alone": null,
+        "PCC_delta_status": "REQUIRES_SAME_CASE_FIXED_KNOWN_MESS_COUNTERFACTUAL_REPLAY",
+        "Known_Unknown_action_ledger_disjoint": true,
+        "scope": "UNKNOWN_ACTUAL_ONLY"
+      },
+      "QoS_budget_excess_UIDs": 0,
+      "physical_capacity_violations": 0,
+      "policy_sha": "ae0112b01a2e8837b93c15c0354b6d3986b9edce5c6e5ddd7470200083283c88",
+      "role": "NAMED_SYNTHETIC_TWO_SLOT_DIAGNOSTIC_NOT_MAY01"
+    }
+  }
+}

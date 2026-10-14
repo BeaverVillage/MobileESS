@@ -224,7 +224,8 @@ def initial_mess(bundle):
 
 def compile_production_control_policy(*, arm, aidc, mess, bindings, envelope, output,
         mess_validation, coefficients, power, idle_kw, swing_kw, capacities,
-        grid_authority, cc4_inputs, initial_state_sha, rack_limits=None):
+        grid_authority, cc4_inputs, initial_state_sha, rack_limits=None, qos_provider=None,
+        unknown_conditions=None, migration_authority=None,service_reallocation=False):
     """Compile the conditional table from the final, source-validated A/M pair."""
     from .cc4_policy_inputs import validate_optimized_reserve
     from .sensitivity_policy import (build_grid_packet, compile_sensitivity_policy,
@@ -292,6 +293,20 @@ def compile_production_control_policy(*, arm, aidc, mess, bindings, envelope, ou
     packet=build_grid_packet(coefficients,power,swing_kw,capacities,aidc,mess,grid_authority,
         expanded,begin_seconds=midnight,known_gpu=known,power_factor=.95,mess_validation=mess_validation,
         rack_compatibility=rack_limits)
+    if getattr(qos_provider,'scenario','E0')!='E0':
+        from .frozen_unknown import compile_unknown_policy,coverage_grammar
+        from .q90_recourse import load_nominal_service
+        import pandas as pd
+        timing_rows=pd.read_csv(TIMING)
+        lower,upper=np.asarray(timing_rows.Q10),np.asarray(timing_rows.Q90)
+        recourse_authority=dict(authority,timing_envelope_sha=file_record(TIMING)['sha256'])
+        nominal=load_nominal_service(aidc,cc4_inputs['q50_hourly_GPUh'],lower,upper,source_authority=recourse_authority)
+        policy=compile_unknown_policy(packet,expanded,qos_provider=qos_provider,nominal_service=nominal,
+            q90_hourly=cc4_inputs['q90_hourly_GPUh'],timing_lower=lower,timing_upper=upper,
+            source_authority=recourse_authority,conditions=coverage_grammar(packet) if unknown_conditions is None else unknown_conditions,
+            envelope=envelope,migration_authority=migration_authority,service_reallocation=service_reallocation)
+        export_policy_evidence(policy,output)
+        return policy
     prototypes=bounded_prototypes(packet,envelope)
     if rack_limits is not None:
         for prototype in prototypes:
@@ -644,7 +659,10 @@ def build_integration_case(*, source_freeze, strict_stats, output,
             capacities=bundle['capacities'],grid_authority=authority,cc4_inputs=cc4_inputs,
             initial_state_sha=(result.actual_gate or {}).get('common_initial_state_sha'),
             rack_limits={site:tuple(r['compatibility_GPU_limit'] for r in bundle['racks'] if r['aidc_id']==site)
-                for site in bundle['capacities']})
+                for site in bundle['capacities']},qos_provider=result.qos_provider,
+            unknown_conditions=getattr(result,'unknown_conditions',None),
+            migration_authority=getattr(result,'experimental_migration_authority',None),
+            service_reallocation=getattr(result,'service_reallocation',False))
     result.control_policy_factory=control_policy_factory
     def fresh_evaluator(trace,mess,folder,budget,*,arm):
         from .actual_validation import fresh_ac_minimum

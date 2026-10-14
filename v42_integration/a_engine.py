@@ -112,9 +112,24 @@ def authorized_data(case):
         starts=(job.reference_start,) if job.state=='RUNNING' else tuple(case.window_slots[uid])
         policy=doc.get('policy_id',doc.get('policy_version','EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1'))
         budget=float(doc.get('budget_seconds',doc.get('B_seconds',0.)))
+        model=doc.get('model_metadata',{})
+        research=bool(model)
+        if research and doc.get('origin_unknown') is not False:
+            raise ValueError('UNKNOWN_NOT_PRESENT_AT_PLANNING')
+        participant=research and doc.get('participant') is True and doc.get('eligible_for_contract') is True
+        sites=job.initial_sites
+        checkpoint=job.checkpoint_authorized
+        if participant:
+            # Source site/GPU-type/residency compatibility remains the upper
+            # domain. Research membership grants no incompatible destination.
+            source_row=next((r for r in bundle.get('known_population',()) if r['job_uid']==uid),{})
+            sites=tuple(source_row.get('compatible_sites',job.initial_sites))
+            checkpoint=True
         changed[uid]=replace(job,qos_policy_id=policy,qos_receipt_sha=digest(doc),
             qos_allowed_starts=starts,qos_budget_seconds=budget,
-            is_observed=True,batch_eligible=doc.get('batch_eligible',False))
+            is_observed=True,batch_eligible=model.get('batch_eligible',doc.get('batch_eligible',False)),
+            qos=model.get('qos',job.qos),protected=model.get('protected',job.protected),
+            initial_sites=sites,checkpoint_authorized=checkpoint)
         if not starts:
             raise ValueError('EMPTY_AUTHORIZED_WINDOW:'+uid)
         newbound=replace(bounds[uid],allowed_starts=starts)
@@ -227,6 +242,9 @@ def optimize_aidc(case, fixed_mess, qos_policy, budget):
                 incumbent_source=origin,FULL_point_replay=replay)
             result['aidc_anchor']=digest({k:result[k] for k in ('selected_jobs','AIDC_P_by_site','AIDC_Q_by_site','CC4_service','CC4_carryout','anonymous_resource_envelope')})
             result['resource_distribution_sha']=digest({k:result[k] for k in ('nominal_site_GPU','reserve_site_GPU','known_site_GPU','resource_sites','CC4_reserve_service','CC4_reserve_carryout')})
+            from .action_metrics import known_planning_metrics
+            result['Known_planning_metrics']=known_planning_metrics(data[1],selected,rho=result['rho'],site_gpu=result['known_site_GPU'],
+                site_power_slopes={s:[case.grid.power[s,t].slope*case.grid.swing_kw for t in range(96)] for s in data[3].capacities})
             np.savez_compressed(case.output/'POINT.npz',point=x)
         (case.output/'A_RESULT.json').write_text(json.dumps(result,indent=2,default=str,allow_nan=False),encoding='utf8')
         return result

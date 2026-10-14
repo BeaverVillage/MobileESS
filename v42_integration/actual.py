@@ -165,6 +165,8 @@ class JobEventController(Controller):
         if "representation_starts_seconds" not in args:
             raise ValueError("SOURCE_REPRESENTATION_STARTS_REQUIRED")
         observed = ObservedJob(**args)
+        if observed.origin_unknown and request.uid in self.known_schedule:
+            raise ValueError("KNOWN_UNKNOWN_COMMAND_ROSTER_OVERLAP")
         budget = self.qos.issue(observed)
         self.observed[request.uid] = observed
         self.budgets[request.uid] = budget
@@ -209,8 +211,9 @@ class JobEventController(Controller):
         r = self.requests[uid]
         boundary = self.metadata[uid].get("dday_initialization_seconds")
         if boundary is not None and start < boundary:
-            return dict(self._reference_decision(uid, now),
-                status="PRE_DDAY_START_COMMAND_NOT_REPLAYED", plan_start_seconds=start)
+            self._event(uid,now,'KNOWN_COMMAND_EXECUTION_FAILED',reason='PRE_DDAY_START_NOT_OBSERVED_EXECUTED',
+                plan_start_seconds=start,planned_site=site,unknown_selector_used=False)
+            return dict(uid=uid,action='QUEUE',status='PRE_DDAY_START_COMMAND_NOT_REPLAYED',plan_start_seconds=start)
         if start not in receipt.allowed_starts_seconds:
             return dict(uid=uid, action="QUEUE", status="PLAN_OUTSIDE_AUTHORIZED_WINDOW")
         if site not in r.compatible or (r.source_site is not None and site != r.source_site
@@ -218,7 +221,9 @@ class JobEventController(Controller):
             return dict(uid=uid, action="QUEUE", status="PLAN_SITE_NO_AUTHORITY")
         if start < now:
             start = now
-        return dict(uid=uid, action="START", site=site, start_seconds=start,
+        action = ("PREPLACE" if site != r.source_site and r.source_site is not None
+                  else "DELAY" if schedule["start_seconds"] > receipt.reference_start_seconds else "START")
+        return dict(uid=uid, action=action, site=site, start_seconds=start,
                     nominal_end_seconds=start + max(r.q50, 1e-9), status="KNOWN_EXECUTION_COMMAND",
                     plan_start_seconds=float(schedule["start_seconds"]),
                     additional_start_delay_seconds=max(0., schedule["start_seconds"] - receipt.reference_start_seconds))
@@ -276,6 +281,10 @@ class JobEventController(Controller):
                     decision = self._reference_decision(uid, now)
                 elif uid in self.known_schedule:
                     decision = self._known_decision(uid, now)
+                elif not self.metadata[uid]["origin_unknown"]:
+                    decision = dict(self._reference_decision(uid, now),
+                        status="SOURCE_AUTHORIZED_KNOWN_REFERENCE_FALLBACK",
+                        known_not_individually_optimized=True)
                 elif self.policy is not None:
                     reason, observation = self._policy_resource_guard(now, observed_use=use)
                     if reason:
@@ -318,6 +327,12 @@ class JobEventController(Controller):
                 continue
             segment = dict(resource="gpu:" + site, begin=now,
                            end=now + max(request.q50, 1e-9), quantity=request.gpu)
+            if self.policy is not None and hasattr(self.policy, "current_guard"):
+                reason = self.policy.current_guard(meta, [segment], now, use)
+                if reason:
+                    self._event(uid, now, "QUEUED", reason=reason,
+                        frozen_known_command=uid in self.known_schedule)
+                    continue
             if uid not in self.reservations.reservations or self.reservations.reservations[uid]["status"] == "RELEASED":
                 ok, reason = self.reservations.reserve(uid, [segment])
                 if not ok:
@@ -365,21 +380,52 @@ class JobEventController(Controller):
             return None
         command = self.known_schedule.get(uid, {})
         requested_destination = command.get("migration_destination")
+        if not metadata["origin_unknown"] and requested_destination is None:
+            self._event(uid, now, "RUNNING_STAY", reason=("KNOWN_FROZEN_STAY_COMMAND"
+                if command else "SOURCE_AUTHORIZED_KNOWN_REFERENCE_STAY"))
+            return None
         boundary = metadata.get("dday_initialization_seconds")
         if (requested_destination is not None and boundary is not None
                 and command.get("checkpoint_control_seconds", now) < boundary):
             self._event(uid, now, "RUNNING_STAY", reason="PRE_DDAY_COMMAND_NOT_REPLAYED")
             return None
-        if requested_destination is not None and now < command.get("checkpoint_control_seconds", now):
+        if requested_destination is not None and (math.ceil(physical_checkpoint/900.)*900 != command.get("checkpoint_control_seconds", math.ceil(physical_checkpoint/900.)*900)
+                or physical_checkpoint != command.get("physical_checkpoint_seconds", physical_checkpoint)
+                or metadata.get("migration_count", 0)):
             self._event(uid, now, "RUNNING_STAY", reason="KNOWN_CHECKPOINT_COMMAND_NOT_DUE")
             return None
         if requested_destination is not None:
+            if command.get('site')!=metadata['current_site']:
+                self._event(uid,now,'RUNNING_STAY',reason='KNOWN_PLANNED_MIGRATION_SOURCE_MISMATCH')
+                return None
+            if command.get('migration_capability'):
+                metadata['migration_capability']=deepcopy(command['migration_capability'])
             remaining = max(0., self.requests[uid].q50 - metadata["accumulated_compute_seconds"])
             receipt, reason = migration_guard(metadata, self.budgets[uid], now=now,
                 accumulated_compute_seconds=metadata["accumulated_compute_seconds"],
                 destination=requested_destination, remaining_nominal_seconds=remaining,
                 reservations=self.reservations, checkpoint_at=physical_checkpoint)
             if receipt is not None:
+                if any(receipt['times'].get(k)!=v for k,v in command.get('planned_migration_times',{}).items()):
+                    self._event(uid,now,'RUNNING_STAY',reason='KNOWN_PLANNED_MIGRATION_PROFILE_MISMATCH')
+                    return None
+                links=metadata.get('migration_capability',{}).get('route_links',[])
+                if links:
+                    cap=metadata['migration_capability'];a=receipt['times']['transfer_start'];b=receipt['times']['transfer_end']
+                    if command.get('planned_wan') and set(r[0] for r in command['planned_wan'])!=set(links):
+                        self._event(uid,now,'RUNNING_STAY',reason='KNOWN_PLANNED_WAN_PATH_MISMATCH')
+                        return None
+                    if command.get('planned_wan') and any(abs(sum(float(r[2]) for r in command['planned_wan'] if r[0]==link)
+                            -float(cap['payload_bytes']))>1e-6 for link in links):
+                        self._event(uid,now,'RUNNING_STAY',reason='KNOWN_PLANNED_WAN_PAYLOAD_MISMATCH')
+                        return None
+                    receipt['segments'].extend(dict(resource='wan:LINK::'+link,begin=a,end=b,
+                        quantity=cap['bandwidth_bytes_per_second']) for link in links)
+                if hasattr(self.policy, "current_guard"):
+                    reason = self.policy.current_guard(metadata, receipt["segments"], now, self.ledger.physical(now))
+                    if reason:
+                        self._event(uid, now, "RUNNING_STAY", reason=reason)
+                        return None
                 ok, reason = self.reservations.reserve(uid, receipt["segments"], replace=True)
                 if ok:
                     return self._record_migration(uid, receipt, now, physical_checkpoint,
@@ -658,6 +704,21 @@ def run_actual(capacities, requests, environment, *, arm, qos_window_provider,
                     event(now + 1800., 3, (uid, epoch))
             elif kind == 4:
                 uid, phase = payload
+                migration=controller.ledger.in_flight[uid]
+                active=[s for s in migration['segments'] if s['resource'].startswith('gpu:')
+                    and s['begin']<=now<s['end']]
+                if any(s['begin']==now for s in active) and hasattr(controller.policy,'current_guard'):
+                    # A future nominal booking cannot predict release of an
+                    # observed overrun. Recheck when the physical gang hold
+                    # begins, before advancing execution through that phase.
+                    others=controller.ledger.physical(now)
+                    for segment in active:others[segment['resource'][4:]]-=segment['quantity']
+                    reason=controller.policy.current_guard(dict(controller.metadata[uid],state='PENDING'),
+                        active,now,others)
+                    if reason:
+                        controller._event(uid,now,'MIGRATION_EXECUTION_FAILED',phase=phase,reason=reason,
+                            running_jobs_evicted=False,QoS_budget_refunded=False)
+                        raise ValueError('MIGRATION_PHASE_CURRENT_GUARD_FAILED:'+uid+':'+phase+':'+reason)
                 if phase == "restart_end":
                     controller.migration_finished(uid, now)
                     schedule_compute(uid, now)
