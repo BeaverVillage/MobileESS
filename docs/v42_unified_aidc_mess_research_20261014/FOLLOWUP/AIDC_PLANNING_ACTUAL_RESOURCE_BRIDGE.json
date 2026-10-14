@@ -1,0 +1,1385 @@
+{
+  "status": "PASS",
+  "scope": "NAMED_NATIVE0_FIXTURE_ACCOUNTING_AND_HISTORICAL_PLANNING_REPLAY",
+  "fixture": {
+    "schema": "AIDC_PLANNING_ACTUAL_RESOURCE_BRIDGE_V1",
+    "status": "PASS",
+    "scope": "SAME_CASE_SAVED_PLANNING_AND_CAUSAL_ACCOUNTING_ONLY",
+    "identity": {
+      "source_sha": "8eea2a36f77291047a394cfcfbde5a00ff1786617f263eafa482051dce4b699d",
+      "stage_case_sha": "a8132c7eeed82f80933123c35cd260891d5571882d358e6e629ba12143cd0d50",
+      "science_sha": "f3047e94e195ad63bf5bffe843d8f92a8da04963700276adbf6631ba7601a596",
+      "initial_state_sha": "2a052a3b045807334df81efe0c56eedc6936cf097b118ff9cba3eb53cf0038d6",
+      "time_axis_sha": "cb16524bbff1559a8da94b8fa6bb6d3c6dd760d8c818b83498e0d8748b5cdc74",
+      "cc4_sha": "b9f6d8dade11a931388e98cef064a9eb51f54a691491d102eacbcf515c6366e2",
+      "runtime_sha": "fcb878f49196bdc3efee65a8be2e38d524c07bb975fd6ca7c9eb22a3aa3b023e"
+    },
+    "planning_result_sha": "aff490fad37639cdf72c74c7820579be83258492791775ff9827512c4b527dd3",
+    "capacity_audit": {
+      "status": "PASS",
+      "scope": "SAVED_PLANNING_RESOURCE_CAPACITY_ONLY",
+      "slots": 96,
+      "sites": [
+        "A",
+        "B"
+      ],
+      "relation": "Known + Unknown_Q50_Nominal + Achieved_CC4_Reserve + Achieved_Runtime_Reserve <= Site_Capacity",
+      "capacity_max_violation_GPU": 0.0,
+      "minimum_unused_capacity_GPU": 4.0,
+      "target_CC4_reserve_GPU_slots": 1.0,
+      "achieved_CC4_reserve_GPU_slots": 1.0,
+      "achieved_runtime_reserve_GPU_slots": 0.0,
+      "CC4_reserve_shortfall_GPU_slots": 9.0,
+      "runtime_reserve_shortfall_GPU_slots": 2.0,
+      "nominal_forecast_is_job_reservation": false,
+      "reserve_target_is_achieved_capacity": false,
+      "Actual_certified": false,
+      "Fresh_AC_certified": false
+    },
+    "nominal_service_replay": {
+      "per_cohort_mass_max_error_GPUh": 0.0,
+      "site_projection_max_error_GPU": 0.0,
+      "CDF_max_violation_GPUh": 0.0,
+      "audit_numerical_tolerance": 1e-07,
+      "original_model_hard_constraint_tolerance_changed": false
+    },
+    "transitions": [
+      {
+        "uid": "OBSERVED_U",
+        "event_seconds": 0.0,
+        "state": "OBSERVED",
+        "origin_unknown": true,
+        "physical_GPU_added": 0,
+        "forecast_GPU_added_to_physical": 0,
+        "forecast_debit_count": 1,
+        "observed_nominal_GPUh": 0.5,
+        "CC4_hour": 0,
+        "remaining_CC4_Q50_GPUh": 0.5
+      }
+    ],
+    "snapshots": [
+      {
+        "event_seconds": 0.0,
+        "status": "PASS",
+        "scope": "CAUSAL_RESOURCE_ACCOUNTING_ONLY",
+        "planning": {
+          "known_site_GPU": {
+            "A": 0.0,
+            "B": 0.0
+          },
+          "nominal_site_GPU": {
+            "A": 4.0,
+            "B": 0.0
+          },
+          "reserve_site_GPU": {
+            "A": 0.0,
+            "B": 1.0
+          },
+          "achieved_CC4_reserve_site_GPU": {
+            "A": 0.0,
+            "B": 1.0
+          },
+          "achieved_runtime_reserve_site_GPU": {
+            "A": 0.0,
+            "B": 0.0
+          }
+        },
+        "actual_Running_GPU": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "actual_Committed_GPU": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "not_yet_arrived_forecast_GPU_96": [
+          [
+            2.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "remaining_CC4_Q50_GPUh": 0.5,
+        "remaining_CC4_in_day_GPUh": 0.5,
+        "remaining_CC4_carryout_GPUh": 0.0,
+        "expired_unsubmitted_Q50_GPUh": 0.0,
+        "observed_Unknown_nominal_GPUh": 0.5,
+        "observed_Unknown_completed_actual_GPUh": 0.0,
+        "observed_Unknown_carry_computed_actual_GPUh": 0.0,
+        "carry_remaining_actual_GPUh": null,
+        "carry_remaining_status": "PRIVATE_FUTURE_RUNTIME_NOT_READ",
+        "physical_GPU_includes_forecast": false,
+        "planning_power_target_enforced": false,
+        "Original_C1_actual_PQ_recompute_required": true,
+        "source_service_preserved": true,
+        "mathematical_cohort_site_coupling": "CANONICAL_TRANSPORT_PRESERVES_BOTH_SAVED_NATIVE_MARGINALS"
+      },
+      {
+        "event_seconds": 300.0,
+        "status": "PASS",
+        "scope": "CAUSAL_RESOURCE_ACCOUNTING_ONLY",
+        "planning": {
+          "known_site_GPU": {
+            "A": 0.0,
+            "B": 0.0
+          },
+          "nominal_site_GPU": {
+            "A": 4.0,
+            "B": 0.0
+          },
+          "reserve_site_GPU": {
+            "A": 0.0,
+            "B": 1.0
+          },
+          "achieved_CC4_reserve_site_GPU": {
+            "A": 0.0,
+            "B": 1.0
+          },
+          "achieved_runtime_reserve_site_GPU": {
+            "A": 0.0,
+            "B": 0.0
+          }
+        },
+        "actual_Running_GPU": {
+          "A": 0.0,
+          "B": 2.0
+        },
+        "actual_Committed_GPU": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "not_yet_arrived_forecast_GPU_96": [
+          [
+            2.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "remaining_CC4_Q50_GPUh": 0.5,
+        "remaining_CC4_in_day_GPUh": 0.5,
+        "remaining_CC4_carryout_GPUh": 0.0,
+        "expired_unsubmitted_Q50_GPUh": 0.0,
+        "observed_Unknown_nominal_GPUh": 0.5,
+        "observed_Unknown_completed_actual_GPUh": 0.0,
+        "observed_Unknown_carry_computed_actual_GPUh": 0.16666666666666666,
+        "carry_remaining_actual_GPUh": null,
+        "carry_remaining_status": "PRIVATE_FUTURE_RUNTIME_NOT_READ",
+        "physical_GPU_includes_forecast": false,
+        "planning_power_target_enforced": false,
+        "Original_C1_actual_PQ_recompute_required": true,
+        "source_service_preserved": true,
+        "mathematical_cohort_site_coupling": "CANONICAL_TRANSPORT_PRESERVES_BOTH_SAVED_NATIVE_MARGINALS"
+      },
+      {
+        "event_seconds": 600.0,
+        "status": "PASS",
+        "scope": "CAUSAL_RESOURCE_ACCOUNTING_ONLY",
+        "planning": {
+          "known_site_GPU": {
+            "A": 0.0,
+            "B": 0.0
+          },
+          "nominal_site_GPU": {
+            "A": 4.0,
+            "B": 0.0
+          },
+          "reserve_site_GPU": {
+            "A": 0.0,
+            "B": 1.0
+          },
+          "achieved_CC4_reserve_site_GPU": {
+            "A": 0.0,
+            "B": 1.0
+          },
+          "achieved_runtime_reserve_site_GPU": {
+            "A": 0.0,
+            "B": 0.0
+          }
+        },
+        "actual_Running_GPU": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "actual_Committed_GPU": {
+          "A": 0.0,
+          "B": 0.0
+        },
+        "not_yet_arrived_forecast_GPU_96": [
+          [
+            2.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "remaining_CC4_Q50_GPUh": 0.5,
+        "remaining_CC4_in_day_GPUh": 0.5,
+        "remaining_CC4_carryout_GPUh": 0.0,
+        "expired_unsubmitted_Q50_GPUh": 0.0,
+        "observed_Unknown_nominal_GPUh": 0.5,
+        "observed_Unknown_completed_actual_GPUh": 0.3333333333333333,
+        "observed_Unknown_carry_computed_actual_GPUh": 0.0,
+        "carry_remaining_actual_GPUh": null,
+        "carry_remaining_status": "PRIVATE_FUTURE_RUNTIME_NOT_READ",
+        "physical_GPU_includes_forecast": false,
+        "planning_power_target_enforced": false,
+        "Original_C1_actual_PQ_recompute_required": true,
+        "source_service_preserved": true,
+        "mathematical_cohort_site_coupling": "CANONICAL_TRANSPORT_PRESERVES_BOTH_SAVED_NATIVE_MARGINALS"
+      }
+    ],
+    "Native_calls": 0,
+    "Actual_global_MILP_calls": 0,
+    "Actual_performance_status": "NOT_CERTIFIED",
+    "Fresh_AC_status": "NOT_RUN"
+  },
+  "historical_Planning_capacity_status": "PASS",
+  "current_E60_A1_status": "SAME_CASE_A1_NOT_CERTIFIED",
+  "historical_Actual_handoff_status": "NOT_CERTIFIED",
+  "historical_Dday_blocker_counts": {
+    "RUNNING_COMMAND_MISMATCH": 253,
+    "PAST_PENDING_COMMAND_NOT_EXECUTED": 886,
+    "FUTURE_PENDING_COMMAND": 359,
+    "COMPLETED_COMMAND_EXECUTION_NOT_ESTABLISHED": 1
+  },
+  "actual_May_status": "NOT_RUN",
+  "Full96_status": "NOT_RUN",
+  "Fresh_AC_status": "NOT_RUN",
+  "Native_calls": 0
+}

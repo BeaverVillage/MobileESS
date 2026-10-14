@@ -1,0 +1,64 @@
+{
+  "status": "DIAGNOSTIC_ONLY",
+  "selected_candidate": "AGGREGATE_SITE_POWER_ROUTE_BINARY_MODE_INTEGER_HULL",
+  "symbolic_integer_validity": "PASS",
+  "integer_validity_theorem": "For an original integer vehicle route, at most one STAY site is connected at a slot (a vehicle in transit has none). The original connection rows force all other nonnegative Pch/Pdis to zero. If binary charge_mode=0, every Pch is zero; if charge_mode=1, the sole connected Pch is at most Pmax. Thus sum_site Pch <= Pmax*charge_mode. Interchanging charge and discharge proves sum_site Pdis <= Pmax*(1-charge_mode). All Original integer routes, travel/SOC states and P/Q operations are preserved.",
+  "independent_original_source_row_validity": "PASS",
+  "source_validity_scope": "S1_ONLY",
+  "Original_4x24_independent_source_row_validity": "NOT_CERTIFIED",
+  "cuts_adopted": 0,
+  "historical_PR227_4X24_root_robust_violations": 109,
+  "historical_PR227_root_diagnostic": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\FOLLOWUP\\GLOBAL_LB_AGGREGATE_MODE_HULL_DIAGNOSTIC.json",
+    "sha256": "c89a507ba995265e063e2efbffcdd1f735a9abcd02e992ae2d6df6e8b7c29849",
+    "bytes": 694498
+  },
+  "S1_root_diagnostic": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\FOLLOWUP\\S1_ROOT_FRACTIONALITY.json",
+    "sha256": "e866d775de233e9bad23e30beac4031800cbf1ea1098da9079f3a3ded666f788",
+    "bytes": 11108
+  },
+  "S1_source_integer_validity": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\FOLLOWUP\\S1_MODE_HULL_VALIDITY_GATE.json",
+    "sha256": "07fe410d336c5920adadeb0a2769cf89ca8b2732c9103eacdc8eaa530768c1a1",
+    "bytes": 2004
+  },
+  "source_power_limit_kW": 300.0,
+  "S1_root_robustly_violated": 35,
+  "S1_diagnostic_LP_valid_cuts_applied": 384,
+  "S1_baseline_LP_objective": 0.6090630116056528,
+  "S1_strengthened_LP_objective": 0.6090630116727263,
+  "S1_LP_increase": 6.707345789891406e-11,
+  "S1_material_LB_improvement": false,
+  "S1_LP_comparison": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\FOLLOWUP\\S1_MODE_HULL_LP_COMPARISON.json",
+    "sha256": "18361bb62c8fc508ef5b4ecb3a64d3c2ed86c23f2c648d580e87fc18de3b2dfe",
+    "bytes": 17904
+  },
+  "S1_unchanged_objective_continuous_mode_reselection_witness": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\FOLLOWUP\\S1_MODE_RESELECTION_LP_WITNESS.json",
+    "sha256": "0b35bf5f9eca1b8eec830b8023cb02a97dd9f2d81196a0c2b2d205ca3004a228",
+    "bytes": 2141
+  },
+  "weaker_600kW_history": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\FOLLOWUP\\GLOBAL_LB_WEAKER_600KW_DIAGNOSTIC_HISTORY.json",
+    "sha256": "2ad7ba153f9a497d0858ace992e1071434d07abd0dbabf145e2f06d2297b08a3",
+    "bytes": 693363
+  },
+  "strengthened_original_global_LB": null,
+  "K48_improvement": "NOT_RUN",
+  "requires_before_adoption": [
+    "Actual same-case root LP row separation",
+    "Original unrestricted integer route/connection/mode row audit",
+    "Exact outward row transport",
+    "Certified complete global LP dual bound",
+    "Same-source K48 numerical increase",
+    "Resource cost audit"
+  ],
+  "PR227_failure_not_repeated": true,
+  "PR227_failure": "Stabilized Lagrangian no material LB gain; multi-period integer support0 violated cuts",
+  "restricted_master_or_Beam_ObjBound_is_Global_LB": false,
+  "S1_bound_transferred_to_original4x24": false,
+  "method_activated": false,
+  "Native_optimize_calls": 0
+}

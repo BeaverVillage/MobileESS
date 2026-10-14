@@ -1,0 +1,36 @@
+{
+  "schema": "V42_WORKSTREAM_DAG_V1",
+  "parallel": [
+    "Agent_A_NATIVE0",
+    "Agent_B_NATIVE0",
+    "Supervisor_AUDIT"
+  ],
+  "edges": [
+    [
+      "COMMON_CONTRACT_FREEZE",
+      "Agent_A_NATIVE0"
+    ],
+    [
+      "COMMON_CONTRACT_FREEZE",
+      "Agent_B_NATIVE0"
+    ],
+    [
+      "A1",
+      "M1"
+    ],
+    [
+      "M1",
+      "A2"
+    ],
+    [
+      "A2",
+      "M2"
+    ],
+    [
+      "M2",
+      "Actual"
+    ]
+  ],
+  "resource_serialization": "ONE_SUPERVISOR_HEAVY_CALL_AT_A_TIME",
+  "integration_refuses": "SCIENCE_CASE_ELECTRICAL_FORECAST_QOS_OR_ANCHOR_DRIFT"
+}

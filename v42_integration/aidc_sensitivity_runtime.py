@@ -12,13 +12,13 @@ from pathlib import Path
 import hashlib
 import numpy as np
 
-from .actual import JobEventController, _require_public_metadata, run_actual
+from .actual import JobEventController, ExecutionLedger, _require_public_metadata, run_actual
 from .experimental_actual import ExperimentalJobEventController
 from .experimental_qos import (ExperimentalQoSProvider, ExperimentalBudgetReceipt,
     ExperimentalStatistics, participation_for, FROZEN_SEED)
 from .qos import QoSWindowProvider, ObservedJob, receipt_slot_domain, CausalReferenceScheduler
 from v42_capacity.actual import Request
-from .policy import digest, _receipt, migration_guard
+from .policy import digest, _receipt, migration_guard, ReservationLedger
 from .reservation_state import ContractReservationLedger, union_job_segments
 from .trajectory_tracking import TrackingReference, service_integral, require_tracking_public
 from .frozen_unknown import _migration_capability
@@ -29,6 +29,7 @@ CONTRACT = 'V42_SIGNED_SENSITIVITY_RUNTIME60_V1'
 MODE = 'CAUSAL_SIGNED_GRID_ALLOCATION'
 DELAY_SECONDS = (0, 900, 1800, 2700, 3600)
 SITE_ONLY_CONTRACT = 'V42_FROZEN_KNOWN_UNKNOWN_SITE_ONLY_V1'
+CURRENT_EVENT_CONTRACT = 'V42_CURRENT_EVENT_SIGNED_ALLOCATION_CORRECTIVE_V1'
 
 
 def grid_numeric_fingerprint(packet):
@@ -225,6 +226,9 @@ def conditional_remaining_runtime(metadata):
     return dict(total_Q50_seconds=q50, total_Q90_seconds=q90, elapsed_seconds=elapsed,
         conditional_remaining_Q90_seconds=None, conditional_provider_status='NOT_CERTIFIED',
         public_remaining_Q50_seconds=max(0., q50-elapsed),
+        physical_remaining_runtime_seconds=None,
+        physical_remaining_runtime_status='UNOBSERVED_RUNNING_RIGHT_CENSORED' if metadata.get('state')=='RUNNING' else 'NOT_A_COMPLETION_FORECAST',
+        zero_Q50_remaining_is_physical_completion=False,
         running_hold_required=metadata.get('state') == 'RUNNING',
         quantile_is_completion_guarantee=False)
 
@@ -810,7 +814,7 @@ class SignedSensitivityPolicy:
 
 
 class SiteOnlySensitivityPolicy(SignedSensitivityPolicy):
-    """Choose an Unknown site at its current executable event, with no delay.
+    """Historical diagnostic selector retained for exact evidence replay.
 
     The immutable historical Known plan is an input, never a new optimizer
     result. CC4 forecasts and future electrical rows do not enter this choice.
@@ -876,6 +880,19 @@ class SiteOnlySensitivityPolicy(SignedSensitivityPolicy):
     def _public_future(self,*args,**kwargs):
         raise ValueError('SITE_ONLY_FUTURE_FORECAST_OR_ELECTRICAL_LOOKAHEAD_FORBIDDEN')
 
+    def _admission_hold(self, site, now, end, gpu):
+        horizon=float(self.spec['source_identity'].get('Known_booking_horizon_seconds',self.reference.begin+86400))
+        return [dict(resource='gpu:'+site,begin=now,end=max(end,horizon),quantity=gpu)], horizon
+
+    def _admission_conflict(self, reservations, held, uid):
+        conflict=reservations.feasible(held,exclude=uid)
+        return ('UNKNOWN_UNBOUNDED_RUNTIME_KNOWN_FIRM_BOOKING'
+            if conflict and getattr(reservations,'known_plans',{}) else conflict)
+
+    def _earliest_event(self,metadata,receipt):
+        return max(receipt['reference_start_seconds'],metadata['submit_seconds'],
+            metadata.get('release_seconds') or -math.inf,metadata.get('hard_earliest_start_seconds') or -math.inf)
+
     def current_guard(self,metadata,segments,now,observed):
         reason=super().current_guard(metadata,segments,now,observed)
         if metadata.get('origin_unknown') is False:
@@ -903,8 +920,7 @@ class SiteOnlySensitivityPolicy(SignedSensitivityPolicy):
         if metadata['gpu']<=0 or int(metadata['gpu'])!=metadata['gpu']:
             raise ValueError('WHOLE_GPU_GANG_REQUIRED')
         r=_receipt(receipt)
-        earliest=max(r['reference_start_seconds'],metadata['submit_seconds'],
-            metadata.get('release_seconds') or -math.inf,metadata.get('hard_earliest_start_seconds') or -math.inf)
+        earliest=self._earliest_event(metadata,r)
         if now<earliest:
             return self._record(metadata,now,dict(action='QUEUE',status='SOURCE_EVENT_NOT_EXECUTABLE_YET',
                 reason='SOURCE_EVENT_NOT_EXECUTABLE_YET',earliest_executable_seconds=math.ceil(earliest/900)*900),began,0,[])
@@ -943,12 +959,9 @@ class SiteOnlySensitivityPolicy(SignedSensitivityPolicy):
             # No certified total-runtime upper bound is available. Keep the
             # offered gang through the entire declared study horizon when
             # testing firm bookings; Q50 only describes its nominal service.
-            hold_end=float(self.spec['source_identity'].get('Known_booking_horizon_seconds',self.reference.begin+86400))
-            held=[dict(resource='gpu:'+site,begin=now,end=max(end,hold_end),quantity=metadata['gpu'])]
+            held,hold_end=self._admission_hold(site,now,end,metadata['gpu'])
             if reason is None:
-                conflict=reservations.feasible(held,exclude=metadata['uid'])
-                if conflict:
-                    reason='UNKNOWN_UNBOUNDED_RUNTIME_KNOWN_FIRM_BOOKING' if getattr(reservations,'known_plans',{}) else conflict
+                reason=self._admission_conflict(reservations,held,metadata['uid'])
             peak,bad=None,[];booking_conflict=None
             if reason=='UNKNOWN_UNBOUNDED_RUNTIME_KNOWN_FIRM_BOOKING' or reason=='NO_CAPACITY':
                 booking_conflict=deepcopy(getattr(reservations,'last_conflict',None))
@@ -1012,7 +1025,8 @@ class SiteOnlyJobEventController(JobEventController):
     def __init__(self,*args,**kwargs):
         proof=kwargs.pop('boundary_completion_proof',None)
         policy=kwargs.get('frozen_policy')
-        if not isinstance(policy,SiteOnlySensitivityPolicy) or kwargs.get('arm')!='B1':
+        accepted_arms={'B1','B3'} if isinstance(policy,CurrentEventSensitivityPolicy) else {'B1'}
+        if not isinstance(policy,SiteOnlySensitivityPolicy) or kwargs.get('arm') not in accepted_arms:
             raise ValueError('EXPLICIT_B1_SITE_ONLY_CONTROLLER_REQUIRED')
         super().__init__(*args,**kwargs)
         if digest(self.known_schedule)!=digest(policy.reference.commands):
@@ -1129,6 +1143,459 @@ class SiteOnlyJobEventController(JobEventController):
             boundary_completion_proof_sha=self.boundary_completion_proof_sha,
             boundary_cancellations=self.boundary_cancellations)
         return snapshot
+
+
+class CurrentEventExecutionLedger(ExecutionLedger):
+    """Release physical GPU on observed completion; dispatch remains on-grid."""
+    def complete(self,uid,end,event_time):
+        super().complete(uid,end,event_time)
+        self.jobs[uid]['release_control_time']=float(event_time)
+
+
+class CurrentEventReservationLedger(ContractReservationLedger):
+    """Current GPU commitments, with original temporal WAN constraints.
+
+    A future Known planning command is recorded separately and is never an
+    admission veto. Physical RUNNING holds are refreshed by the original
+    event driver; a public quantile does not release them.
+    """
+    def current_gpu_use(self,now,*,exclude=None):
+        use=self.owner.ledger.physical(now)
+        if exclude in self.owner.ledger.jobs:
+            job=self.owner.ledger.jobs[exclude]
+            if job['latest_observed_state']=='RUNNING':
+                use[job['current_site']]-=job['gpu']
+        # Unstarted commitments at this instant occupy GPU independently of
+        # Running. UID union prevents counting a started reservation twice.
+        for uid,row in self.reservations.items():
+            if uid==exclude or row.get('status')=='RELEASED':continue
+            state=self.owner.metadata.get(uid,{}).get('state')
+            if state in {'RUNNING','COMPLETED'}:continue
+            for s in union_job_segments(row.get('segments',[])):
+                if s['resource'].startswith('gpu:') and s['begin']<=now<s['end']:
+                    use[s['resource'][4:]]+=s['quantity']
+        return use
+
+    def _fits(self,segments,*,exclude=None,envelope=None,scope='physical'):
+        now=self.owner.policy.current[0] if self.owner.policy.current is not None else self.owner.policy.reference.begin
+        use=self.current_gpu_use(now,exclude=exclude)
+        offered={s:0. for s in use}
+        for s in union_job_segments(segments):
+            if s['resource'].startswith('gpu:') and s['begin']<=now<s['end']:
+                offered[s['resource'][4:]]+=s['quantity']
+        for site,quantity in offered.items():
+            if use[site]+quantity>self.capacities['gpu:'+site]+1e-9:return 'NO_CAPACITY'
+        non_gpu=[s for s in segments if not s['resource'].startswith('gpu:')]
+        return ReservationLedger._fits(self,non_gpu,exclude=exclude,envelope=None,scope=scope)
+
+    def snapshot(self):
+        result=super().snapshot()
+        result.update(future_Known_GPU_admission_veto=False,
+            Known_plan_role='IMMUTABLE_PLANNING_COMMAND_NOT_CURRENT_PHYSICAL_OCCUPANCY',
+            current_committed_GPU_separate_from_Running=True)
+        return result
+
+
+class CurrentEventSensitivityPolicy(SiteOnlySensitivityPolicy):
+    """Active current-only Unknown selection and actual Known conflict repair."""
+    frozen_schema=CURRENT_EVENT_CONTRACT
+    controller_contract=CURRENT_EVENT_CONTRACT
+    execution_mode='CURRENT_UNKNOWN_SIGNED_ALLOCATION_PENDING_KNOWN_CORRECTIVE'
+
+    def __init__(self,*args,corrective_authority=None,runtime_repair=False,runtime_fixture_gate=None,**kwargs):
+        super().__init__(*args,**kwargs)
+        gate=deepcopy(runtime_fixture_gate)
+        if runtime_repair and (not gate or gate.get('status')!='PASS'
+                or gate.get('controller_contract')!=CURRENT_EVENT_CONTRACT
+                or gate.get('basic_allocation_and_corrective_fixture_PASS') is not True):
+            raise ValueError('RUNTIME_CONTROL_REQUIRES_VALIDATED_BASIC_FIXTURE')
+        self.runtime_repair=bool(runtime_repair)
+        self.spec.update(contract=CURRENT_EVENT_CONTRACT,active_scope='CURRENT_UNKNOWN_PENDING_KNOWN_CORRECTIVE',
+            future_Known_speculative_GPU_veto=False,Unknown_runtime_upper_bound_required=False,
+            earliest_start_authority='SOURCE_RELEASE_HARD_EARLIEST_REPRESENTATION_CURRENT_PHYSICAL',
+            QoS_FCFS_reference_is_hard_earliest=False,
+            corrective_authority=deepcopy(corrective_authority),corrective_authority_sha=digest(corrective_authority),
+            runtime_repair=self.runtime_repair,runtime_fixture_gate=gate,runtime_fixture_gate_sha=digest(gate),
+            absolute_SLA_guarantee=False,checkpoint_migration='HOLD',intentional_time_shift='HOLD')
+        self.sha=digest(self.spec)
+
+    @classmethod
+    def load(cls,path,*,bindings):
+        self=SignedSensitivityPolicy.load.__func__(cls,path,bindings=bindings)
+        if (self.spec.get('active_scope')!='CURRENT_UNKNOWN_PENDING_KNOWN_CORRECTIVE'
+                or self.spec.get('future_Known_speculative_GPU_veto') is not False
+                or digest(self.spec.get('corrective_authority'))!=self.spec['corrective_authority_sha']
+                or digest(self.spec.get('runtime_fixture_gate'))!=self.spec['runtime_fixture_gate_sha']):
+            raise ValueError('CURRENT_EVENT_POLICY_AUTHORITY_DRIFT')
+        self.current_candidates=[];self.known_current_guards=[]
+        return self
+
+    def _record(self,m,now,decision,began,count,rejected):
+        result=SignedSensitivityPolicy._record(self,m,now,decision,began,count,rejected)
+        result.update(execution_mode=self.execution_mode,controller_contract=CURRENT_EVENT_CONTRACT,
+            intentional_delay_seconds=0,additional_start_delay_seconds=0,time_shift=False,
+            runtime_repair=self.runtime_repair,migration=False,future_Known_speculative_GPU_veto=False,
+            absolute_SLA_guarantee=False)
+        bridge=getattr(self,'_resource_bridge',None)
+        if bridge is not None:
+            slot=int((now-bridge.begin)//900)
+            if 0<=slot<96:
+                result['planning_resource_advisory']=dict(
+                    saved_Known_GPU_by_site=dict(zip(bridge.sites,bridge.matrices['known_site_GPU'][slot].tolist())),
+                    saved_Unknown_Q50_GPU_by_site=dict(zip(bridge.sites,bridge.matrices['nominal_site_GPU'][slot].tolist())),
+                    saved_achieved_CC4_reserve_by_site=dict(zip(bridge.sites,bridge.matrices['achieved_CC4_reserve_site_GPU'][slot].tolist())),
+                    saved_achieved_runtime_reserve_by_site=dict(zip(bridge.sites,bridge.matrices['achieved_runtime_reserve_site_GPU'][slot].tolist())),
+                    remaining_CC4_Q50_GPUh=sum(bridge.book.row(h,now)['remaining_CC4_Q50_GPUh'] for h in range(24)),
+                    role='SOFT_PLANNING_CONTEXT_NOT_PHYSICAL_OCCUPANCY_OR_TARGET_POWER',
+                    all_line_phase_current_max_loading_remains_primary_objective=True)
+        self.last_selection[m['uid']]=deepcopy(result);self.audit[-1]['decision']=deepcopy(result)
+        return result
+
+    def _admission_hold(self,site,now,end,gpu):
+        return [dict(resource='gpu:'+site,begin=now,end=math.floor(now/900)*900+900,quantity=gpu)],None
+
+    def _earliest_event(self,metadata,receipt):
+        # A FCFS/QoS comparison reference is not a source release authority.
+        # Current feasible admission may precede it, on a legal source tick.
+        return max([metadata['submit_seconds']]+[float(metadata[k]) for k in
+            ('release_seconds','hard_earliest_start_seconds') if metadata.get(k) is not None])
+
+    def _admission_conflict(self,reservations,held,uid):
+        if not isinstance(reservations,CurrentEventReservationLedger):
+            raise ValueError('CURRENT_EVENT_RESOURCE_LEDGER_REQUIRED')
+        reason=reservations.feasible(held,exclude=uid)
+        if reason is None and getattr(self,'_backfill_active',False):
+            site=held[0]['resource'][4:]
+            ok,reason=safe_backfill(self.metadata[uid],now=self.current[0],site=site,
+                reservations=reservations,uid=uid,evidence_scope=self.evidence_scope)
+            reservations.owner.backfill_audit.append(dict(uid=uid,time_seconds=self.current[0],site=site,
+                feasible=ok,reason=reason,guaranteed_completion_claim=False,source_executable_event_required=True))
+            return None if ok else reason
+        return reason
+
+    def current_guard(self,metadata,segments,now,observed):
+        if hasattr(self,'_current_resource_ledger'):
+            observed=self._current_resource_ledger.current_gpu_use(now,exclude=metadata['uid'])
+        return super().current_guard(metadata,segments,now,observed)
+
+    def corrective_allowed(self,metadata):
+        if metadata.get('state')!='PENDING' or metadata.get('origin_unknown') is not False:return False
+        if metadata.get('can_prestart_place') is True:return True
+        authority=self.spec.get('corrective_authority')
+        if authority is None:return False
+        if (digest(authority)!=self.spec['corrective_authority_sha']
+                or authority.get('schema')!='RESEARCH_PENDING_KNOWN_CORRECTIVE_AUTHORITY_V1'
+                or authority.get('case_sha')!=self.bindings['case_sha']
+                or authority.get('science_sha')!=self.bindings['science_sha']
+                or authority.get('source_customer_permission_claim') is not False):
+            raise ValueError('CURRENT_KNOWN_CORRECTIVE_RESEARCH_AUTHORITY_DRIFT')
+        return metadata['uid'] in authority.get('authorized_UIDs',[])
+
+
+class CurrentEventJobEventController(SiteOnlyJobEventController):
+    """Preserve Planning commands; repair only observed PENDING GPU conflict."""
+    def __init__(self,*args,resource_bridge=None,actual_identity=None,**kwargs):
+        if not isinstance(kwargs.get('frozen_policy'),CurrentEventSensitivityPolicy):
+            raise ValueError('EXPLICIT_CURRENT_EVENT_CONTROLLER_REQUIRED')
+        super().__init__(*args,**kwargs)
+        self.ledger=CurrentEventExecutionLedger(self.ledger.capacities)
+        self.reservations=CurrentEventReservationLedger(self,capacities=self.ledger.capacities,
+            wan_capacities=kwargs.get('wan_capacities'))
+        for uid in self.boundary_completed_UIDs:self.reservations.known_plans.pop(uid,None)
+        self.policy._current_resource_ledger=self.reservations
+        if self.policy.evidence_scope.startswith('REAL') and resource_bridge is None:
+            raise ValueError('REAL_CURRENT_EVENT_SAME_CASE_RESOURCE_BRIDGE_REQUIRED')
+        if resource_bridge is not None:
+            planned_identity=self.policy.spec['source_identity'].get('planning_identity')
+            if self.policy.evidence_scope.startswith('REAL') and (planned_identity is None or any(
+                    resource_bridge.identity[k]!=planned_identity.get(k) for k in resource_bridge.identity)):
+                raise ValueError('RESOURCE_BRIDGE_FROZEN_PLANNING_STAGE_IDENTITY_REQUIRED')
+            if actual_identity is None or any(resource_bridge.identity[k]!=actual_identity.get(k)
+                    for k in resource_bridge.identity):
+                raise ValueError('RESOURCE_BRIDGE_ACTUAL_STAGE_IDENTITY_REQUIRED')
+            for key in ('science_sha','initial_state_sha','time_axis_sha','cc4_sha','runtime_sha'):
+                if resource_bridge.identity[key]!=self.policy.bindings[key]:
+                    raise ValueError('RESOURCE_BRIDGE_CURRENT_POLICY_IDENTITY_DRIFT:'+key)
+            if (resource_bridge.source['aidc_anchor']!=self.policy.bindings['aidc_anchor']
+                    or resource_bridge.begin!=self.policy.reference.begin
+                    or set(resource_bridge.sites)!=set(self.ledger.capacities)):
+                raise ValueError('RESOURCE_BRIDGE_CURRENT_CLOCK_SITE_ANCHOR_DRIFT')
+            if any(self.ledger.capacities[s]!=resource_bridge.capacities[s] for s in resource_bridge.sites):
+                raise ValueError('RESOURCE_BRIDGE_CURRENT_PHYSICAL_CAPACITY_DRIFT')
+        self.resource_bridge=resource_bridge
+        self.policy._resource_bridge=resource_bridge
+        self.planning_commands=deepcopy(self.known_schedule)
+        self.corrective_commands={};self.corrective_audit=[];self.known_actual_audit=[]
+        self.conflict_attempts={};self.runtime_audit=[];self.backfill_audit=[]
+        self._overrun_seen=set();self.released_since_control=[]
+        if any(str(c.get('execution_rule','')).startswith('DETERMINISTIC_KNOWN')
+                for c in self.known_schedule.values()):
+            raise ValueError('DIAGNOSTIC_FCFS_MUST_NOT_BECOME_ACTIVE_KNOWN_PLAN')
+
+    def submit(self,request,now):
+        super().submit(request,now)
+        # Unknown arrives once. The bridge owns its independent depletion
+        # book, while the driver's ForecastBook remains an audit of the same
+        # observation; neither book is a physical reservation.
+        if self.resource_bridge is not None:
+            self.resource_bridge.observe(self.metadata[request.uid],now)
+
+    def _policy_resource_guard(self,now,*,lookup_at=None,observed_use=None):
+        self.policy.observe(now,self.reservations.current_gpu_use(now),self.metadata)
+        return None,dict(observed_at_seconds=now,controller_contract=CURRENT_EVENT_CONTRACT,
+            grid_safety_guaranteed=False,current_committed_GPU_checked=True)
+
+    def _preparation(self,uid,site,now):
+        data=self.metadata[uid].get('preplacement_data') or {}
+        sha=data.get('source_sha');observed=data.get('observed_at_seconds',math.inf)
+        if (not isinstance(sha,str) or len(sha)!=64 or any(c not in '0123456789abcdef' for c in sha)
+                or not math.isfinite(float(observed)) or observed>now):
+            return None,'SOURCE_DATA_PREPARATION_AUTHORITY_MISSING'
+        if site not in data.get('authorized_destinations',[]):return None,'DATA_RESIDENCY_DESTINATION_NOT_AUTHORIZED'
+        ready=data.get('ready_at_seconds',{}).get(site)
+        if ready is not None and math.isfinite(float(ready)) and ready<=now:
+            return dict(ready_at_seconds=now,transfer_seconds=0.,preparation_seconds=0.,wan_segments=[],
+                source_sha=data['source_sha'],data_already_ready=True),None
+        path=data.get('wan_path_by_destination',{}).get(site)
+        # Original WAN capacity and migration authority are bytes/second.
+        # Units are explicit; a GB/s quantity must never be charged as bytes/s.
+        bandwidth=data.get('bandwidth_bytes_per_second');payload=data.get('payload_bytes');prepare=data.get('preparation_seconds')
+        if (not path or any(v is None or not math.isfinite(float(v)) or v<0 for v in (payload,prepare))
+                or bandwidth is None or not math.isfinite(float(bandwidth)) or bandwidth<=0):
+            return None,'SOURCE_TRANSFER_TIME_WAN_AUTHORITY_MISSING'
+        if payload<=0:return None,'SOURCE_TRANSFER_POSITIVE_DURATION_REQUIRED'
+        duration=max(900.,math.ceil(float(payload)/float(bandwidth)/900)*900.)
+        if 'wan:'+path not in self.reservations.capacities:return None,'NO_RESOURCE_AUTHORITY'
+        segments=[dict(resource='wan:'+path,begin=now,end=now+duration,quantity=bandwidth),
+            dict(resource='active:WAN',begin=now,end=now+duration,quantity=1)]
+        reason=self.reservations.feasible(segments,exclude=uid)
+        if reason:return None,reason
+        return dict(ready_at_seconds=math.ceil((now+duration+float(prepare))/900)*900,
+            transfer_seconds=duration,preparation_seconds=float(prepare),wan_segments=segments,
+            source_sha=data['source_sha'],data_already_ready=False,wan_quantity_units='bytes_per_second'),None
+
+    def _hard_window(self,uid,now):
+        m=self.metadata[uid]
+        if now not in set(m.get('representation_starts_seconds') or []):return 'SOURCE_REPRESENTATION_WINDOW'
+        if now<max(m['submit_seconds'],m.get('release_seconds') or -math.inf,
+                m.get('hard_earliest_start_seconds') or -math.inf):return 'SOURCE_RELEASE_WINDOW'
+        if m.get('hard_latest_start_seconds') is not None and now>m['hard_latest_start_seconds']:return 'SOURCE_LATEST_START_WINDOW'
+        if m.get('completion_deadline_seconds') is not None and now+self.requests[uid].q50>m['completion_deadline_seconds']:return 'SOURCE_COMPLETION_DEADLINE_RISK'
+        return None
+
+    def _known_decision(self,uid,now):
+        m=self.metadata[uid];command=self.planning_commands[uid];planned=float(command['start_seconds'])
+        if planned<self.policy.reference.begin:
+            return dict(uid=uid,action='QUEUE',status='PAST_PLANNING_START_REQUIRES_SAME_CASE_BOUNDARY_REPLAY')
+        if m['state']!='PENDING':return dict(uid=uid,action='QUEUE',status='PENDING_KNOWN_REQUIRED')
+        receipt=self.budgets[uid]
+        if planned not in receipt.allowed_starts_seconds:
+            return dict(uid=uid,action='QUEUE',status='PLAN_OUTSIDE_AUTHORIZED_WINDOW')
+        if now<planned:
+            return dict(uid=uid,action='START',site=command['site'],start_seconds=planned,
+                nominal_end_seconds=planned+max(self.requests[uid].q50,1e-9),additional_start_delay_seconds=0)
+        reason=self._hard_window(uid,now)
+        if reason:
+            self._event(uid,now,'KNOWN_CORRECTIVE_QOS_RISK',reason=reason,Planning_command_changed=False)
+            return dict(uid=uid,action='QUEUE',status=reason)
+        use=self.reservations.current_gpu_use(now,exclude=uid);site=command['site'];gpu=m['gpu']
+        if site not in self.requests[uid].compatible:return dict(uid=uid,action='QUEUE',status='PLAN_SITE_INCOMPATIBLE')
+        correction=self.corrective_commands.get(uid)
+        if correction is not None:
+            if now<correction['ready_at_seconds']:
+                return dict(uid=uid,action='QUEUE',status='KNOWN_DATA_TRANSFER_PREPARATION_IN_PROGRESS')
+            site=correction['actual_site']
+            # Recheck actual capacity and all current electrical rows after
+            # real preparation. No GPU was created at transfer initiation.
+            if use[site]+gpu>self.ledger.capacities[site]:
+                return dict(uid=uid,action='QUEUE',status='CORRECTED_SITE_ACTUAL_GPU_CONFLICT')
+        elif use[site]+gpu>self.ledger.capacities[site]:
+            self.conflict_attempts.setdefault(uid,dict(first_conflict_seconds=now,planned_site=site))
+            return self._corrective_decision(uid,now,use)
+        elif now>planned and uid not in self.conflict_attempts:
+            return dict(uid=uid,action='QUEUE',status='KNOWN_MISSED_UNOBSERVED_PLANNING_START')
+        if site!=self.requests[uid].source_site and not self.policy.corrective_allowed(m):
+            return dict(uid=uid,action='QUEUE',status='PLAN_SITE_NO_SOURCE_AUTHORITY')
+        return dict(uid=uid,action='PREPLACE' if correction else 'START',site=site,start_seconds=now,
+            nominal_end_seconds=now+max(self.requests[uid].q50,1e-9),plan_start_seconds=planned,
+            additional_start_delay_seconds=max(0.,planned-receipt.reference_start_seconds)+(
+                0 if correction is None else correction['qos_preparation_budget_used_seconds']),
+            unavoidable_resource_wait_seconds=max(0.,now-planned-(0 if correction is None else
+                correction['qos_preparation_budget_used_seconds'])),
+            status='ACTUAL_CORRECTIVE_COMMAND' if correction else 'PLANNING_COMMAND')
+
+    def _corrective_decision(self,uid,now,use):
+        m=self.metadata[uid];command=self.planning_commands[uid];site=command['site']
+        original=np.asarray([use[s] for s in self.policy.packet.sites],float)
+        original[self.policy.packet.sites.index(site)]+=m['gpu']
+        slot=int((now-self.policy.reference.begin)//900)
+        original_peak,_=self.policy.packet._at_slot(slot,self.policy._grid_delta(slot,original,now))
+        rows=[];rejected=[]
+        if self.policy.corrective_allowed(m):
+            for target in sorted(set(self.requests[uid].compatible)-{site}):
+                reason=None
+                if m['gpu']>max(self.policy.packet.rack_compatibility[target]):reason='RACK_GANG_INCOMPATIBLE'
+                if use[target]+m['gpu']>self.ledger.capacities[target]:reason='CURRENT_GPU_CAPACITY'
+                prep=None
+                if reason is None:prep,reason=self._preparation(uid,target,now)
+                used=0. if prep is None else prep['ready_at_seconds']-now
+                qos_total=max(0.,command['start_seconds']-self.budgets[uid].reference_start_seconds)+used+m.get('cumulative_migration_interruption_seconds',0.)
+                if reason is None and qos_total>self.budgets[uid].budget_seconds+1e-9:reason='SHARED_QOS_PREPARATION_BUDGET_EXCEEDED'
+                if reason is None:reason=self._hard_window(uid,prep['ready_at_seconds'])
+                candidate=np.asarray([use[s] for s in self.policy.packet.sites],float)
+                candidate[self.policy.packet.sites.index(target)]+=m['gpu']
+                peak,bad=self.policy.packet._at_slot(slot,self.policy._grid_delta(slot,candidate,now))
+                if reason is None and bad:reason='CURRENT_OBSERVED_'+bad[0]['reason']
+                if reason:rejected.append(dict(site=target,reason=reason));continue
+                rows.append((peak,target,prep,used))
+        else:rejected.append(dict(site=None,reason='PENDING_KNOWN_PREPLACEMENT_AUTHORITY_MISSING'))
+        for peak,target,prep,used in sorted(rows,key=lambda r:(r[0],r[1])):
+            if prep['wan_segments']:
+                ok,reason=self.reservations.reserve(uid,prep['wan_segments'],replace=True)
+                if not ok:rejected.append(dict(site=target,reason=reason));continue
+            correction=dict(uid=uid,command_type='ACTUAL_CORRECTIVE_COMMAND',original_planned_site=site,
+                original_planned_start_seconds=command['start_seconds'],actual_site=target,actual_start_seconds=None,
+                trigger_seconds=now,reason='ACTUAL_RUNNING_GPU_CAPACITY_CONFLICT',GPU_capacity_conflict=True,
+                original_grid_loading=original_peak,corrected_grid_loading=peak,all_line_phase_rows=True,
+                qos_preparation_budget_used_seconds=used,shared_qos_budget_seconds=self.budgets[uid].budget_seconds,
+                planning_command_sha=digest(command),planning_command_modified=False,
+                source_customer_permission_claim=m.get('can_prestart_place') is True,**prep)
+            self.corrective_commands[uid]=correction;self.corrective_audit.append(deepcopy(correction))
+            self._event(uid,now,'KNOWN_CORRECTIVE_PREPLACEMENT',actual_site=target,
+                ready_at_seconds=prep['ready_at_seconds'],Planning_command_changed=False)
+            if prep['ready_at_seconds']>now:
+                return dict(uid=uid,action='QUEUE',status='KNOWN_DATA_TRANSFER_PREPARATION_IN_PROGRESS')
+            return self._known_decision(uid,now)
+        self.corrective_audit.append(dict(uid=uid,trigger_seconds=now,original_planned_site=site,
+            original_planned_start_seconds=command['start_seconds'],status='QUEUE',reason='NO_SAFE_CORRECTIVE_SITE',
+            rejected_candidates=rejected,GPU_capacity_conflict=True,Running_jobs_preserved=True,
+            planning_command_modified=False,QoS_risk_seconds=max(0.,now-command['start_seconds'])))
+        return dict(uid=uid,action='QUEUE',status='NO_SAFE_CORRECTIVE_SITE',rejected_candidates=rejected)
+
+    def admit(self,now):
+        if now%900:return []
+        if digest(self.known_schedule)!=self.frozen_known_sha:raise ValueError('CURRENT_EVENT_PLANNING_COMMAND_DRIFT')
+        self.policy.require_bindings(self.policy.bindings)
+        for uid,m in self.metadata.items():
+            if (self.policy.runtime_repair and m['state']=='RUNNING' and m.get('accumulated_compute_seconds',0)>m['t50_seconds']
+                    and uid not in self._overrun_seen):
+                self._overrun_seen.add(uid);self.runtime_audit.append(dict(uid=uid,time_seconds=now,
+                    event='OVERRUN_RUNNING_HOLD',elapsed_seconds=m['accumulated_compute_seconds'],
+                    Q50_seconds=m['t50_seconds'],Running_gpu_preserved=True,actual_completion_read=False))
+        original=list(self.pending);remaining=[];starts=[]
+        order=sorted(original,key=lambda row:(self.metadata[row[1]]['origin_unknown'],row[0],row[1]))
+        for row in order:
+            uid=row[1];self.pending=[row];self.decisions.pop(uid,None)
+            self.policy.observe(now,self.reservations.current_gpu_use(now,exclude=uid),self.metadata)
+            if not self.metadata[uid]['origin_unknown'] and uid not in self.planning_commands:
+                self.decisions[uid]=dict(uid=uid,action='QUEUE',status='SAME_CASE_KNOWN_PLANNING_COMMAND_MISSING')
+            # Check each actual candidate destination, after current capacity
+            # and source release, rather than assuming the source is selected.
+            self.policy._backfill_active=bool(self.policy.runtime_repair and self.released_since_control
+                and self.metadata[uid]['origin_unknown'])
+            one=JobEventController.admit(self,now);starts.extend(one);remaining.extend(self.pending)
+            if one:
+                if uid in self.corrective_commands:
+                    correction=self.corrective_commands[uid]
+                    slot=int((now-self.policy.reference.begin)//900)
+                    physical=np.asarray([self.ledger.physical(now)[s] for s in self.policy.packet.sites],float)
+                    peak,_=self.policy.packet._at_slot(slot,self.policy._grid_delta(slot,physical,now))
+                    correction.update(actual_start_seconds=now,grid_loading_after_actual_start=peak)
+                    for entry in self.corrective_audit:
+                        if entry.get('uid')==uid and entry.get('command_type')=='ACTUAL_CORRECTIVE_COMMAND':
+                            entry.update(actual_start_seconds=now,grid_loading_after_actual_start=peak)
+                if uid in self.planning_commands:
+                    self.known_actual_audit.append(dict(uid=uid,original_command=deepcopy(self.planning_commands[uid]),
+                        actual_site=self.audit[uid]['site'],actual_start_seconds=now,
+                        actual_start_delay_seconds=now-self.planning_commands[uid]['start_seconds'],
+                        start_delay_QoS_risk_seconds=max(0.,now-self.budgets[uid].latest_start_seconds),
+                        corrective_command=deepcopy(self.corrective_commands.get(uid)),planning_command_modified=False))
+        self.pending=remaining
+        self.policy._backfill_active=False
+        import heapq
+        heapq.heapify(self.pending)
+        self.released_since_control=[]
+        if self.resource_bridge is not None:self.resource_bridge.snapshot(now,self.metadata,self.reservations)
+        return starts
+
+    def completion(self,uid,now):
+        release=super().completion(uid,now);m=self.metadata[uid]
+        self.reservations.release(uid,now)
+        if uid in self.corrective_commands:
+            self.corrective_commands[uid].update(completion_result='COMPLETED',observed_completion_seconds=now)
+            for entry in self.corrective_audit:
+                if entry.get('uid')==uid and entry.get('command_type')=='ACTUAL_CORRECTIVE_COMMAND':
+                    entry.update(completion_result='COMPLETED',observed_completion_seconds=now)
+        if self.policy.runtime_repair:
+            elapsed=m['accumulated_compute_seconds'];self.runtime_audit.append(dict(uid=uid,time_seconds=now,
+                event='RUNTIME_SHORT_COMPLETION' if elapsed<m['t50_seconds'] else 'OBSERVED_COMPLETION',
+                elapsed_seconds=elapsed,Q50_seconds=m['t50_seconds'],release_control_seconds=release,
+                physical_GPU_released_at_observed_completion=True,dispatch_legal_source_grid_preserved=True))
+            self.released_since_control.append(uid)
+        return release
+
+    def snapshot(self,now):
+        result=super().snapshot(now)
+        for uid,correction in self.corrective_commands.items():
+            correction['completion_result']='COMPLETED' if self.metadata[uid]['state']=='COMPLETED' else 'CARRY_'+self.metadata[uid]['state']
+            for entry in self.corrective_audit:
+                if entry.get('uid')==uid and entry.get('command_type')=='ACTUAL_CORRECTIVE_COMMAND':
+                    entry['completion_result']=correction['completion_result']
+        result['current_event_state']=dict(contract=CURRENT_EVENT_CONTRACT,status='FIXTURE_VALIDATED_ACTUAL_NOT_CERTIFIED',
+            planning_commands=deepcopy(self.planning_commands),planning_commands_sha=self.frozen_known_sha,
+            actual_corrective_commands=deepcopy(self.corrective_commands),corrective_audit=deepcopy(self.corrective_audit),
+            Known_actual_audit=deepcopy(self.known_actual_audit),conflict_attempts=deepcopy(self.conflict_attempts),
+            runtime_events=deepcopy(self.runtime_audit),backfill_results=deepcopy(self.backfill_audit),
+            future_Known_speculative_GPU_veto=False,actual_global_MILP_calls=0,absolute_SLA_guarantee=False,
+            checkpoint_migration_status='NOT_RUN',intentional_time_shift_status='NOT_RUN',
+            resource_bridge=None if self.resource_bridge is None else self.resource_bridge.export())
+        return result
+
+    def restore(self,snapshot):
+        raise ValueError('CURRENT_EVENT_CARRYOUT_RESTORE_NOT_CERTIFIED')
+
+
+def run_current_event_actual(arguments,*,frozen_policy,resource_bridge,expected_bindings,handoff_gate):
+    """Execute only after the supervisor certifies the same-case handoff.
+
+    C0/C1 may produce different Actual Known corrective commands. Their
+    immutable Planning commands and exogenous inputs must be identical.
+    """
+    if not isinstance(frozen_policy,CurrentEventSensitivityPolicy):
+        raise ValueError('CURRENT_EVENT_FROZEN_POLICY_REQUIRED')
+    if not handoff_gate or handoff_gate.get('status')!='PASS':
+        raise ValueError('SAME_CASE_PLANNING_ACTUAL_HANDOFF_NOT_CERTIFIED')
+    frozen_policy.require_bindings(expected_bindings)
+    if resource_bridge is None:
+        raise ValueError('SAVED_PLANNING_KNOWN_CC4_RESOURCE_BRIDGE_REQUIRED')
+    if (handoff_gate.get('planning_commands_sha')!=digest(frozen_policy.reference.commands)
+            or any(handoff_gate.get('identity',{}).get(k)!=resource_bridge.identity[k]
+                for k in resource_bridge.identity)):
+        raise ValueError('CURRENT_EVENT_HANDOFF_COMMAND_OR_IDENTITY_DRIFT')
+    for key in ('science_sha','initial_state_sha','time_axis_sha','cc4_sha','runtime_sha'):
+        if resource_bridge.identity[key]!=expected_bindings[key]:
+            raise ValueError('RESOURCE_BRIDGE_ACTIVE_POLICY_IDENTITY_DRIFT:'+key)
+    if resource_bridge.source['aidc_anchor']!=expected_bindings['aidc_anchor']:
+        raise ValueError('RESOURCE_BRIDGE_ACTIVE_AIDC_ANCHOR_DRIFT')
+    if arguments.get('carryout') is not None:
+        raise ValueError('CURRENT_EVENT_CARRYOUT_RESTORE_NOT_CERTIFIED')
+    if digest(arguments.get('known_schedule',frozen_policy.reference.commands))!=digest(frozen_policy.reference.commands):
+        raise ValueError('CURRENT_EVENT_ORIGINAL_PLANNING_COMMAND_SHA_DRIFT')
+    args=deepcopy(arguments)
+    arm=args.get('arm','B1')
+    if arm not in {'B1','B3'}:raise ValueError('CURRENT_EVENT_B1_OR_B3_EXPLICIT_ARM_REQUIRED')
+    args.update(arm=arm,frozen_policy=frozen_policy,known_schedule=frozen_policy.reference.commands,
+        expected_bindings=expected_bindings)
+    _bind_driver_current_c1(frozen_policy,args)
+    def controller(*a,**kw):
+        return CurrentEventJobEventController(*a,resource_bridge=resource_bridge,
+            actual_identity=handoff_gate['identity'],**kw)
+    result=run_actual(**args,controller_class=controller)
+    result['planning_actual_resource_bridge']=resource_bridge.export()
+    result['receipt'].update(controller_contract=CURRENT_EVENT_CONTRACT,
+        same_case_handoff_status=handoff_gate['status'],future_Known_speculative_GPU_veto=False,
+        immutable_Known_planning_commands=True,Fresh_AC_status='NOT_RUN',May_performance_status='NOT_CERTIFIED')
+    return result
 
 
 def safe_backfill(metadata, *, now, site, reservations, uid, evidence_scope='REAL_DIAGNOSTIC'):
@@ -2275,6 +2742,112 @@ def build_new_unified_case(output, *, shared_manifest=None, a_call_cap=10., m_st
     (output/'ISSUE_ONLY_DDAY_KNOWN_REFERENCE.json').write_text(json.dumps(audit,
         sort_keys=True, allow_nan=False), encoding='utf-8')
     return case
+
+
+def bind_current_event_planning(case,issue_records,shared_manifest,*,handoff_factory=None,
+        basic=False,corrective_authority=None,runtime_repair=False,runtime_fixture_gate=None):
+    """Active original A1/M1/A2/M2 binding with a current-event Actual hook.
+
+    The legacy research binder supplies original Planning domains only. Its
+    SignedSensitivityPolicy and Actual runner are replaced. A supervisor must
+    provide independent source/initial-state handoff data; missing evidence
+    fails before the deferred Actual request bank is projected.
+    """
+    from .followup_contract import require_planning_actual_handoff
+    from .aidc_resource_bridge import PlanningActualResourceBridge
+    bind_unified_planning(case,issue_records,shared_manifest)
+    legacy_factory=case.control_policy_factory
+    legacy_prepare=case.prepare_research_actual_arguments
+    frozen={}
+
+    def factory(**kwargs):
+        aidc=kwargs['aidc']
+        if aidc.get('FULL_feasible') is not True:raise ValueError('SAME_CASE_A1_NOT_CERTIFIED')
+        template=legacy_factory(**kwargs)
+        b=template.bindings
+        source_sha=getattr(case,'source_freeze',{}).get('source_sha')
+        if source_sha is None and case.evidence_kind!='REAL_DATA':source_sha=digest('NAMED_CURRENT_PLANNING_SOURCE')
+        identity=dict(source_sha=source_sha,stage_case_sha=aidc['case_sha'],science_sha=b['science_sha'],
+            initial_state_sha=b['initial_state_sha'],time_axis_sha=b['time_axis_sha'],cc4_sha=b['cc4_sha'],runtime_sha=b['runtime_sha'])
+        authority=template.reference.identity['CC4_source_authority']
+        bridge=PlanningActualResourceBridge(aidc,identity=identity,expected_identity=identity,
+            capacities=template.packet.capacities,q50=template.reference.identity['CC4_Q50'],
+            q90=template.reference.identity['CC4_Q90'],timing_lower=template.reference.identity['Timing_CDF_Q10'],
+            timing_upper=template.reference.identity['Timing_CDF_Q90'],cc4_source_authority=authority,
+            begin_seconds=template.reference.begin,required_site_count=12 if case.evidence_kind=='REAL_DATA' else len(template.packet.sites))
+        unknown_authority=dict(schema='PUBLIC_UNKNOWN_PRESTART_COMPATIBLE_SITE_STUDY_V1',
+            interface_sha=b['interface_sha'],study_case_sha=b['case_sha'],candidate_axis='SOURCE_COMPATIBLE_SITES_ONLY',
+            intentional_delay_seconds=0,max_sites=12,Known_commands_modified=False,
+            source_customer_SLA_claim=False,source_customer_permission_claim=False,
+            authority_scope='USER_AUTHORIZED_UNKNOWN_ALLOCATION_RESEARCH_CASE',Strict_Source_certificate=False,
+            Known_corrective_permission_granted=False,Source_release_GPU_rack_grid_compatibility_preserved=True)
+        policy=CurrentEventSensitivityPolicy(template.reference,template.packet,bindings=b,expected_bindings=b,
+            basic=basic,evidence_scope='REAL_CURRENT_EVENT_NEW_U60' if case.evidence_kind=='REAL_DATA' else 'NAMED_CURRENT_PLANNING',
+            source_identity=dict(planning_identity=identity,study_case_sha=b['case_sha']),
+            site_authority=unknown_authority,corrective_authority=corrective_authority,
+            runtime_repair=runtime_repair,runtime_fixture_gate=runtime_fixture_gate)
+        case.research_contract_binding['Unknown_site_authority']=deepcopy(unknown_authority)
+        case.research_contract_binding['Unknown_site_authority_sha']=digest(unknown_authority)
+        frozen.update(a_result=deepcopy(aidc),planning_identity=identity,policy=policy,resource_bridge=bridge)
+        return policy
+
+    def certify_handoff():
+        if not frozen:raise ValueError('FINAL_CURRENT_EVENT_A_STAGE_POLICY_NOT_FROZEN')
+        if handoff_factory is None:raise ValueError('CURRENT_EVENT_SUPERVISOR_HANDOFF_FACTORY_REQUIRED')
+        policy=frozen['policy']
+        supplied=handoff_factory(aidc=frozen['a_result'],planning_identity=frozen['planning_identity'],
+            frozen_policy=policy,resource_bridge=frozen['resource_bridge'])
+        handoff=require_planning_actual_handoff(frozen['a_result'],frozen['planning_identity'],
+            supplied['actual_identity'],policy.reference.commands,supplied['observed_state'],
+            begin_seconds=policy.reference.begin,planning_slot_zero_seconds=case.planning_slot_zero_seconds)
+        frozen['handoff']=handoff
+        frozen['supplied']=dict(supplied,planning_identity=frozen['planning_identity'],
+            planning_slot_zero_seconds=case.planning_slot_zero_seconds,resource_bridge=frozen['resource_bridge'])
+        return frozen['supplied']
+
+    def prepare_actual():
+        certify_handoff()
+        args,receipt=legacy_prepare()
+        receipt.update(controller_contract=CURRENT_EVENT_CONTRACT,current_event_handoff_before_Actual_projection=True,
+            diagnostic_FCFS_used=False,future_Known_speculative_GPU_veto=False)
+        return args,receipt
+
+    def coordinator_handoff(**kwargs):
+        supplied=certify_handoff()
+        if (digest(kwargs['aidc'])!=digest(frozen['a_result'])
+                or digest(kwargs['commands'])!=digest(frozen['policy'].reference.commands)):
+            raise ValueError('CURRENT_EVENT_FINAL_FROZEN_PLANNING_HANDOFF_DRIFT')
+        return supplied
+
+    def no_legacy_fallback(**kwargs):
+        raise ValueError('CURRENT_EVENT_SUPERVISOR_SAVED_PLANNING_RUNNER_REQUIRED')
+
+    case.control_policy_factory=factory
+    case.prepare_research_actual_arguments=prepare_actual
+    case.current_event_handoff_factory=coordinator_handoff
+    case.unified_actual_runner=no_legacy_fallback
+    case.research_contract_binding['active_Actual_controller']=CURRENT_EVENT_CONTRACT
+    case.research_contract_binding['legacy_Actual_runner_active']=False
+    case.research_contract_binding['independent_handoff_factory_configured']=handoff_factory is not None
+    case.research_contract_binding['Current_Actual_global_MILP_calls']=0
+    return case
+
+
+def build_current_event_case(output,*,shared_manifest=None,a_call_cap=10.,m_stage_cap=30.,
+        handoff_factory=None,basic=False,corrective_authority=None,runtime_repair=False,runtime_fixture_gate=None):
+    """Explicit current research entry; historical factories remain reproducible."""
+    from .followup_contract import load_followup_contracts
+    from .production_case import build_integration_case,read,ARCHIVE
+    from .partial_canary import SOURCE_DIR,source_known_records
+    output=Path(output);output.mkdir(parents=True,exist_ok=True)
+    shared=load_followup_contracts() if shared_manifest is None else shared_manifest
+    case=build_integration_case(source_freeze=read(SOURCE_DIR/'SOURCE_FREEZE_DDAY_GRID_V5.json'),
+        strict_stats=SOURCE_DIR/'QOS_EMPIRICAL_STATS_STRICT.json',output=output/'CASE',
+        initial_state_freeze=SOURCE_DIR/'V42_MAY01_DDAY_INITIAL_STATE_FREEZE.json',
+        a_call_cap=float(a_call_cap),m_stage_cap=float(m_stage_cap))
+    records=source_known_records(case.qos_provider,read(ARCHIVE/'raw/2025-05-01/NATIVE_INPUT_TEMPLATE_B1.json'))
+    return bind_current_event_planning(case,records,shared,handoff_factory=handoff_factory,basic=basic,
+        corrective_authority=corrective_authority,runtime_repair=runtime_repair,runtime_fixture_gate=runtime_fixture_gate)
 
 
 def run_b1_prefix_canary(case, final_aidc, *, slots=16, output=None, variants=('C0', 'C2', 'C3'), profile=False):

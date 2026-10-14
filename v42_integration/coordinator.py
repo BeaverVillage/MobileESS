@@ -33,6 +33,7 @@ class IntegrationCase:
     unified_bindings: dict | None = None
     unified_actual_runner: object = None
     unified_m_optimizer: object = None
+    current_event_handoff_factory: object = None
     _consumed: bool = field(default=False,init=False,repr=False)
 
 
@@ -225,7 +226,16 @@ def run_arm(arm, case, budget, output, *, planning_only=False):
             projected_after_policy_freeze=True,frozen_policy_sha=reload.sha))
     arguments=dict(actual_arguments,frozen_policy=reload,qos_window_provider=case.qos_provider,
         arm=arm,known_schedule=commands,expected_bindings=bindings)
-    if case.unified_actual_runner is not None:
+    if case.current_event_handoff_factory is not None:
+        from .followup_execution import run_saved_planning_current_actual
+        # The final A result and ORIGINAL commands are supplied after A2/M2
+        # have frozen. A saved mismatched boundary fails before Actual starts.
+        handoff = case.current_event_handoff_factory(aidc=aidc, mess=mess,
+            commands=commands, bindings=bindings, arguments=actual_arguments)
+        actual = run_saved_planning_current_actual(arguments,
+            a_result=aidc, frozen_policy=reload, expected_bindings=bindings,
+            output=output, **handoff)
+    elif case.unified_actual_runner is not None:
         if case.unified_bindings is None:
             raise ValueError('UNIFIED_ACTUAL_REQUIRES_SHARED_BINDINGS')
         actual=case.unified_actual_runner(**arguments)

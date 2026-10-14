@@ -1,0 +1,95 @@
+{
+  "schema": "V42_FOLLOWUP_CURRENT_EVENT_INTERFACE_V1",
+  "base_commit": "22c644b10a1bfae344cfb86274262719bbe5f412",
+  "branch": "codex/v42-trajectory-tracking-may01-20261014",
+  "slots": 96,
+  "slot_seconds": 900,
+  "aidc_gpu_gang": "WHOLE_INTEGER",
+  "aidc_P_Q": "ORIGINAL_C1_CONSUMPTION_KW_KVAR",
+  "mess_P_Q": "SIGNED_INJECTION_POSITIVE_DISCHARGE",
+  "net_load": "AIDC_CONSUMPTION_MINUS_MESS_INJECTION_EACH_ONCE",
+  "stages": [
+    "A1",
+    "M1",
+    "A2",
+    "M2"
+  ],
+  "Actual_global_optimize_calls": 0,
+  "max_start_delay_seconds": 3600,
+  "start_delay_candidates_seconds": [
+    0,
+    900,
+    1800,
+    2700,
+    3600
+  ],
+  "policy": "CURRENT_EVENT_UNKNOWN_PENDING_KNOWN_CORRECTIVE",
+  "binding_fields": [
+    "science_sha",
+    "case_sha",
+    "physical_sha",
+    "time_axis_sha",
+    "qos_sha",
+    "cc4_sha",
+    "runtime_sha",
+    "response_sha",
+    "initial_state_sha",
+    "aidc_anchor",
+    "mess_anchor",
+    "interface_sha"
+  ],
+  "reservations": {
+    "Observed_RUNNING": "HARD_UNTIL_OBSERVED_COMPLETION",
+    "Known_frozen": "IMMUTABLE_PLANNING_COMMAND_NOT_SPECULATIVE_UNKNOWN_VETO",
+    "Unknown_committed": "HARD",
+    "CC4_Q50_Q90": "SOFT_FORECAST"
+  },
+  "unknown_primary_score": "MIN_PREDICTED_MAX_LOADING_CURRENT_ALL_LINE_PHASE_ROWS",
+  "hard_grid": "ORIGINAL_VOLTAGE_CURRENT_TRANSFORMER;NONWORSENING_IS_NOT_SAFE_PASS",
+  "known": "ORIGINAL_SAME_CASE_FULL_A1_OR_A2_COMMANDS",
+  "running_runtime": "Q50_Q90_NOT_COMPLETION_GUARANTEE;CONDITIONAL_PROVIDER_NOT_CERTIFIED",
+  "native": {
+    "Threads": 1,
+    "Heavy_workers": 1,
+    "owner": "Supervisor",
+    "ledger": "UNIFIED_NATIVE_RUNTIME_LEDGER.json"
+  },
+  "modules": {
+    "AIDC": "v42_integration.aidc_sensitivity_runtime",
+    "MESS": "v42_integration.mess_scaling",
+    "Supervisor": "v42_integration.unified_contract"
+  },
+  "certification": "FIXTURE_AND_REAL_DIAGNOSTIC_SCOPE_EXPLICIT;NO_HISTORICAL_CERTIFICATE_TRANSFER",
+  "validation_priority": "MAY01_B1_AIDC_AND_EXACT_S1_MESS_STANDALONE_FIRST",
+  "allowed_AIDC_Heavy_arms": [],
+  "allowed_AIDC_Heavy_days": [
+    "2025-05-01"
+  ],
+  "new_Known_A_Heavy_authorized": false,
+  "AIDC_active_comparison": [
+    "C0_BASIC",
+    "C1_SIGNED",
+    "C2_SIGNED_RUNTIME"
+  ],
+  "AIDC_active_day": "2025-05-01",
+  "AIDC_active_arm": "B1",
+  "AIDC_TimeShifting_authorized": false,
+  "AIDC_RuntimeRepair_authorized": "ONLY_AFTER_BASIC_FIXTURE_AND_SOURCE_QOS_GATE",
+  "AIDC_CheckpointMigration_authorized": false,
+  "AIDC_candidate_start": "ACTUAL_EXECUTABLE_EVENT_TIME_ONLY",
+  "AIDC_candidate_sites": "SOURCE_COMPATIBLE_AT_MOST_12;GPU_RACK_AND_ORIGINAL_GRID_GUARDS",
+  "Known_initial_state": "SAME_CASE_OBSERVED_BOUNDARY_AND_DRIVER_JOIN_REQUIRED",
+  "Known_priority": "DUE_KNOWN_COMMANDS_THEN_CURRENT_UNKNOWN",
+  "Known_execution_fairness": "SAME_INITIAL_PLAN_INPUTS_AND_RIGHTS_OUTCOMES_MAY_DIFFER",
+  "historical_Known_anchor": "PLANNING_REPRODUCTION_ONLY_ACTUAL_BOUNDARY_NOT_CERTIFIED",
+  "Unknown_runtime_reservation": "CURRENT_PHYSICAL_RUNNING_COMMITTED_UNTIL_OBSERVED_COMPLETION",
+  "inactive_extension_contract": "TIME_SHIFT_60MIN_QOS_CONTRACT.json;NOT_ACTIVE_SITE_ONLY_AUTHORITY",
+  "four_stage_Heavy_authorized": false,
+  "S2_to_S7_Heavy_authorized": false,
+  "combined_Heavy_prerequisite": "USER_RESUMES_AFTER_STANDALONE_VALIDATION",
+  "Unknown_future_Known_speculative_veto": false,
+  "unknown_site_authority": "EXPLICIT_RESEARCH_SOURCE_COMPATIBLE_MAX12_NO_CUSTOMER_PERMISSION_CLAIM",
+  "current_MESS_algorithm": "ADAPTIVE_BEAM_JOINT_FULL_REGISTRY_UNCHANGED",
+  "MESS_compression_default": false,
+  "MESS_diversity_default": false
+}
