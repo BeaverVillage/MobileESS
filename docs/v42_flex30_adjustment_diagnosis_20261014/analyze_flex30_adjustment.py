@@ -334,6 +334,10 @@ def main():
         all_executed_changed_UIDs=62,participating_changed_UIDs=39,nonparticipating_changed_UIDs=23,
         participating_change_rate=39/674,all_actions=dict(collections.Counter(starts[u]['action'] for u in adjusted)),
         participating_actions=dict(collections.Counter(starts[u]['action'] for u in adjusted&participants)),
+        participating_PREPLACE_with_original_model_rights=sum(r['FLEX30_positive_budget'] and r['action']=='PREPLACE'
+            and r['source_model_zero_delay_preplace'] for r in adjusted_details),
+        participating_PREPLACE_only_experimental_rights=sum(r['FLEX30_positive_budget'] and r['action']=='PREPLACE'
+            and not r['source_model_zero_delay_preplace'] for r in adjusted_details),
         participating_spatial_change_UIDs=sum(r['FLEX30_positive_budget'] and r['reference_site']!=r['actual_site'] for r in adjusted_details),
         participating_temporal_change_UIDs=sum(r['FLEX30_positive_budget'] and r['start_minus_reference_seconds']>0 for r in adjusted_details),
         participating_temporal_start_delta_seconds=sum(r['start_minus_reference_seconds'] for r in adjusted_details if r['FLEX30_positive_budget']),
@@ -382,7 +386,7 @@ def main():
             'Nonselected candidates Q90 risk tie-break components'],
         parameter_or_production_edits=0,new_replays=0,Native_Optimize_calls=0,Fresh_AC='NOT_RUN',
         frozen_input_binding_PASS=True,all_674_exclusive_category_reconciliation_PASS=True)
-    (OUT/'FLEX30_ADJUSTMENT_DIAGNOSIS.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
+    (OUT/'FLEX30_ADJUSTMENT_DIAGNOSIS.json').write_text(json.dumps(report,ensure_ascii=False,indent=2,sort_keys=True)+'\n',encoding='utf8')
     print(json.dumps({k:report[k] for k in ('participating_actions','unique_UID_stage_funnel',
         'disjoint_674_UID_categories','participant_initial_running','participant_day_started','participant_never_started',
         'participant_revalidation_failures','feasible_flex_Q50_tie_baseline_events','feasible_flex_worse_Q50_baseline_events')}))
