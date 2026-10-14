@@ -69,6 +69,7 @@ def main(out):
             'SAME_ROW_PRERANKED_FALLBACK','ATOMIC_OWN_RESERVATION_REPLACE','ACTUAL_C1_PQ_RECOMPUTATION'],
         Actual_forbidden=['NEW_RANKING','96_SLOT_CANDIDATE_OBJECTIVE_EVALUATION','GLOBAL_MILP','KNOWN_REOPT','UNOBSERVED_UID_OR_COMPLETION'],
         Running_overrun_without_causal_remaining_authority='STAY_WITH_PHYSICAL_HOLD_NOT_FALSE_COMPLETION',
+        Migration_future_destination_acquisition='RECHECK_CURRENT_GPU_RACK_SIGNED_AFFINE_BEFORE_PHASE;FAIL_REPLAY_ON_PHYSICAL_DRIFT',
         evidence='NATIVE0_AND_NAMED_FIXTURE;REAL_MAY01_C1_C2_C3_FULL96_NOT_RUN')
     write(out/'UNKNOWN_POLICY_COMPILER_SPEC.json',spec)
     write(out/'UNKNOWN_POLICY_COVERAGE_AUDIT.json',dict(PASS=True,Source_retrospective_inventory=inventory,
@@ -154,7 +155,7 @@ Known은 A1/A2의 최종 UID 계획을 유지하고, Unknown만 Planning에서 �
 
 6. Q50 rho가 1순위이며 동등성 허용오차는 기존 1e-9다. 동점에는 Q90 CDF 위반/결손, Carry, Queue, Q50 최대 선로 노출량(loading-hours), Q90 peak, QoS 부담, 개입 최소화와 고정 Site/Frame 순서를 사용한다. 원래 A-stage P2를 변경한 것으로 표현하지 않는다. 동일 숫자를 SHA로 공유하며 후보·순위·정밀도를 삭제하지 않는다. 작은 Fixture의 모든 사이트×시간 점수를 원래 scalar 식과 독립 비교했다. Actual은 목적함수를 계산하거나 순위를 바꾸지 않는다.
 
-7. Running 현재 점유, Known 확정 미래 예약, Unknown 확정 명령, 익명·미확정 예측을 구분했다. 관측 Running은 다음 제어 시점마다 먼저 보호한다. Known/다른 확정 Unknown 예약은 밀어내지 않는다. 실행 명령 실패 시 동일 Frozen 행의 다음 합법 대안을 원자적으로 교체하고, 모두 실패하면 Queue/STAY다. R0/B를 재발급하거나 지연 의무를 환불하지 않는다. 충돌 Resource·구간·상대 UID·역할을 기록한다.
+7. Running 현재 점유, Known 확정 미래 예약, Unknown 확정 명령, 익명·미확정 예측을 구분했다. 관측 Running은 다음 제어 시점마다 먼저 보호한다. Known/다른 확정 Unknown 예약은 밀어내지 않는다. 실행 명령 실패 시 동일 Frozen 행의 다음 합법 대안을 원자적으로 교체하고, 모두 실패하면 Queue/STAY다. Migration의 미래 목적지 GPU Hold 시작 시에도 현재 GPU/Rack/affine 검사를 반복한다. 이미 전송을 시작한 후 목적지 Overrun 때문에 불가능하면 명시적 실행 실패로 Replay를 중단하며, 기존 Job을 밀어내거나 완료를 조작하지 않는다. R0/B를 재발급하거나 지연 의무를 환불하지 않는다. 충돌 Resource·구간·상대 UID·역할을 기록한다.
 
 8. 기존 참여자 244개 선택 중 205개 미실행은 Known 103·Unknown 102개다. 현재 GPU·affine 검사가 가능했던 174 UID/592 사건은 미래 안전의 증명이 아니다. 동일 행 차순위 실행과 예약 보호를 Fixture에서 개선·검증했으며, 이 실제 205개 집단의 구제 수는 NOT_RUN이다. 후보 상한 잘림은 0, 승인 대안 미선택은 17개였으므로 상한 부족을 핵심 원인으로 주장하지 않는다.
 

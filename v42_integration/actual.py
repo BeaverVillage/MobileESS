@@ -704,6 +704,21 @@ def run_actual(capacities, requests, environment, *, arm, qos_window_provider,
                     event(now + 1800., 3, (uid, epoch))
             elif kind == 4:
                 uid, phase = payload
+                migration=controller.ledger.in_flight[uid]
+                active=[s for s in migration['segments'] if s['resource'].startswith('gpu:')
+                    and s['begin']<=now<s['end']]
+                if any(s['begin']==now for s in active) and hasattr(controller.policy,'current_guard'):
+                    # A future nominal booking cannot predict release of an
+                    # observed overrun. Recheck when the physical gang hold
+                    # begins, before advancing execution through that phase.
+                    others=controller.ledger.physical(now)
+                    for segment in active:others[segment['resource'][4:]]-=segment['quantity']
+                    reason=controller.policy.current_guard(dict(controller.metadata[uid],state='PENDING'),
+                        active,now,others)
+                    if reason:
+                        controller._event(uid,now,'MIGRATION_EXECUTION_FAILED',phase=phase,reason=reason,
+                            running_jobs_evicted=False,QoS_budget_refunded=False)
+                        raise ValueError('MIGRATION_PHASE_CURRENT_GUARD_FAILED:'+uid+':'+phase+':'+reason)
                 if phase == "restart_end":
                     controller.migration_finished(uid, now)
                     schedule_compute(uid, now)

@@ -29,11 +29,15 @@ def test_required_contract(contract,tmp_path,monkeypatch):
     from test_v42_frozen_alternatives import (
         test_FIRST_FEASIBLE_FROZEN_FALLBACK_SELECTED,test_KNOWN_HARD_RESERVATION_PROTECTED,
         test_RUNNING_OVERRUN_CAPACITY_PROTECTED,test_NO_FUTURE_HARD_CAPACITY_VIOLATION)
+    if contract=='NO_FUTURE_HARD_CAPACITY_VIOLATION':
+        from test_v42_known_unknown_contract import test_migration_destination_acquisition_rechecks_observed_overrun_before_execution
+        test_NO_FUTURE_HARD_CAPACITY_VIOLATION()
+        test_migration_destination_acquisition_rechecks_observed_overrun_before_execution()
+        return
     special={'FIRST_FEASIBLE_FROZEN_FALLBACK_SELECTED':lambda:test_FIRST_FEASIBLE_FROZEN_FALLBACK_SELECTED(monkeypatch),
         'UNKNOWN_TENTATIVE_BOOKING_CAUSAL_REBIND':lambda:test_FIRST_FEASIBLE_FROZEN_FALLBACK_SELECTED(monkeypatch),
         'KNOWN_HARD_RESERVATION_PROTECTED':test_KNOWN_HARD_RESERVATION_PROTECTED,
-        'RUNNING_OVERRUN_CAPACITY_PROTECTED':test_RUNNING_OVERRUN_CAPACITY_PROTECTED,
-        'NO_FUTURE_HARD_CAPACITY_VIOLATION':test_NO_FUTURE_HARD_CAPACITY_VIOLATION}
+        'RUNNING_OVERRUN_CAPACITY_PROTECTED':test_RUNNING_OVERRUN_CAPACITY_PROTECTED}
     if contract in special:special[contract]();return
     if contract in ('B1_MESS_OFF','B3_FINAL_A2_M2_POLICY_BINDING'):
         from test_v42_known_unknown_contract import test_final_A_stage_known_handoff_transport_only

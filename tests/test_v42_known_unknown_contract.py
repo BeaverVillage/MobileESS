@@ -325,3 +325,26 @@ def test_unknown_invalid_or_future_checkpoint_does_not_consume_first_valid_attem
     m['is_observed']=True
     p.select_migration(m,receipt,1800,ledger,checkpoint_at=1800)
     assert m['frozen_first_checkpoint_attempt_seconds']==1800
+
+
+def test_migration_destination_acquisition_rechecks_observed_overrun_before_execution():
+    authority=dict(packet_source_sha='NAMED_TOY_PHYSICAL_MIGRATION',
+        scalar=dict(bytes_per_GPU=90000,current_conservative_restart_seconds=900),
+        protocol=dict(source_hold_until='transfer_start',destination_hold_from='transfer_end'),
+        routes={'AB':dict(source='A',destination='B',bandwidth_bytes_per_second=100,links=['L'])},
+        wan_capacities={'AB':100,'LINK::L':100})
+    condition=dict(state='RUNNING',qos='normal',gpu=1,reference_site='A',compatible_sites=['A','B'],
+        runtime_lower_seconds=900.,runtime_upper_seconds=3600.,time_slots=[2])
+    provider,p=frozen(profile='migration_witness',migration_authority=authority,conditions=[condition])
+    mover=request('SYNTHETIC_UID_2',submit=0,q50=5400,origin_unknown=True,
+        qos='UNCONFIRMED',protected=None,batch_eligible=None,partition='',requested_walltime_seconds=None,
+        elapsed_compute_seconds=0,representation_starts_seconds=tuple(range(0,86400,900)))
+    background=request('BG',submit=-1000,gpu=8,q50=900,origin_unknown=False,
+        source_site='B',compatible=('B',),qos='high',protected=True,batch_eligible=False,
+        elapsed_compute_seconds=1000,representation_starts_seconds=tuple(range(0,86400,900)))
+    before=p.packet.evaluation_calls
+    with pytest.raises(ValueError,match='MIGRATION_PHASE_CURRENT_GUARD_FAILED:.*:transfer_end:GPU_CAPACITY'):
+        run_experimental_actual({'A':8,'B':8},[],Environment({mover.uid:9000,'BG':9000},{mover.uid:9000,'BG':9000}),
+            arm='B3',qos_window_provider=provider,frozen_policy=p,
+            running=[(mover,'A',0),(background,'B',-1000)],begin=0,end=3600)
+    assert p.packet.evaluation_calls==before
