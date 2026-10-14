@@ -14,7 +14,7 @@ from .experimental_qos import ExperimentalQoSProvider,FROZEN_SEED
 
 
 def prepare_conditional_arguments(strict_arguments,known_observed_records,*,scenario,
-                                  participation,case_sha,seed=FROZEN_SEED):
+                                  participation,case_sha,seed=FROZEN_SEED,existing_provider=None):
     """Project public issue records into a separately identified research case.
 
     Environment and all physical quantities are passed through unchanged. The
@@ -23,8 +23,11 @@ def prepare_conditional_arguments(strict_arguments,known_observed_records,*,scen
     using UID identity when no issue-time public episode was frozen.
     """
     strict=strict_arguments['qos_window_provider']
-    provider=ExperimentalQoSProvider(strict,scenario=scenario,participation=participation,
+    provider=existing_provider or ExperimentalQoSProvider(strict,scenario=scenario,participation=participation,
         case_sha=case_sha,provider_sha=strict.provider_sha,seed=seed)
+    if (provider.case_sha!=case_sha or provider.scenario!=scenario or provider.participation!=participation
+            or provider.provider_sha!=strict.provider_sha):
+        raise ValueError('EXPERIMENTAL_ISSUE_PROVIDER_BINDING_DRIFT')
     arguments=dict(strict_arguments)
     arguments['qos_window_provider']=provider
     if scenario=='E0':
@@ -162,6 +165,7 @@ class ExperimentalReservationLedger(ReservationLedger):
 
 class ExperimentalJobEventController(JobEventController):
     def __init__(self,*args,**kwargs):
+        legacy_diagnostic=kwargs.pop('legacy_diagnostic',False)
         provider=kwargs['qos_window_provider'];policy=kwargs.get('frozen_policy')
         authority=getattr(policy,'migration_authority',None)
         if provider.scenario!='E0' and authority:
@@ -178,12 +182,18 @@ class ExperimentalJobEventController(JobEventController):
         self.observed_context_cache_hits=0
         if self.experimental:
             if self.policy is None:raise ValueError('EXPERIMENTAL_SIGNED_GRID_SELECTOR_REQUIRED')
-            self.reservations=ExperimentalReservationLedger(self,capacities=self.ledger.capacities,
-                wan_capacities=kwargs.get('wan_capacities'))
+            if not getattr(self.policy,'lookup_only',False) and not legacy_diagnostic:
+                raise ValueError('UNKNOWN_ACTUAL_FROZEN_LOOKUP_ONLY_REQUIRED')
+            if getattr(self.policy,'lookup_only',False):
+                from .reservation_state import ContractReservationLedger
+                self.reservations=ContractReservationLedger(self,capacities=self.ledger.capacities,
+                    wan_capacities=kwargs.get('wan_capacities'))
+            else:
+                self.reservations=ExperimentalReservationLedger(self,capacities=self.ledger.capacities,
+                    wan_capacities=kwargs.get('wan_capacities'))
             self.frozen_known_schedule=deepcopy(self.known_schedule)
-            # Both Known and observed Unknown use the same research selector.
-            # Old A2/M2 remain coefficient/anchor context, not new-optimum proof.
-            self.known_schedule={}
+            # Issue-time Known commands remain immutable, including unmodeled
+            # Known reference fallbacks. Only Unknown enters conditional lookup.
 
     def submit(self,request,now):
         if self.experimental:
@@ -198,6 +208,13 @@ class ExperimentalJobEventController(JobEventController):
             self._overlay(request.uid,self.observed[request.uid].state)
             self.metadata[request.uid]['original_raw_request_metadata']=deepcopy(request.metadata)
             self.metadata[request.uid]['experimental_prediction_Q50_seconds']=float(request.q50)
+            if (getattr(self.policy,'lookup_only',False) and request.uid in self.known_schedule
+                    and request.uid not in self.reservations.known_plans):
+                command=self.known_schedule[request.uid]
+                boundary=self.metadata[request.uid].get('dday_initialization_seconds',self.policy.packet.begin_seconds)
+                if command['start_seconds']>=boundary:
+                    self.reservations.install_known(request.uid,[dict(resource='gpu:'+command['site'],
+                        begin=command['start_seconds'],end=command['start_seconds']+max(request.q50,1e-9),quantity=request.gpu)])
 
     def _overlay(self,uid,state):
         overlay=self.qos.metadata_overlay(self.observed[uid],self.budgets[uid],state=state)
@@ -214,6 +231,9 @@ class ExperimentalJobEventController(JobEventController):
 
     def _observed_context(self,now,observed_use=None):
         use=self.ledger.physical(now) if observed_use is None else dict(observed_use)
+        if getattr(self.policy, 'lookup_only', False):
+            self.policy.set_current_resources(now, use)
+            return use
         # Within a serial pass, submission/start are the only pending mutations.
         # A start changes both pending count and physical use. No cache survives
         # a changed public clock, forecast depletion, or submission generation.
@@ -250,6 +270,8 @@ class ExperimentalJobEventController(JobEventController):
         context=dict(observed_at_seconds=now,observed_GPU_by_site=use,
             observed_resource_sha=digest(use),forecast_deviation_is_not_blanket_veto=True,
             grid_safety_guaranteed=False,source='CURRENT_EPISODE_LEDGER_NOT_FUTURE_ACTUAL')
+        if getattr(self.policy,'lookup_only',False):
+            return None,context
         slot=int((now-self.policy.packet.begin_seconds)//900)
         if 0<=slot<96:
             baseline=self.policy.packet.known_gpu[slot]+self.policy.frozen_anonymous[slot]
@@ -273,12 +295,24 @@ class ExperimentalJobEventController(JobEventController):
             # recheck its actual nominal profile against newly observed holds;
             # an overrun cannot silently change the scored start interval.
             for _,uid in sorted(self.pending):
+                if not self.metadata[uid]['origin_unknown']:continue
                 decision=self.decisions.get(uid)
                 if decision is None or decision['action']=='QUEUE' or decision['start_seconds']>now:continue
                 self._observed_context(now)
                 metadata=self.metadata[uid]
                 segment=[dict(resource='gpu:'+decision['site'],begin=now,
                     end=now+max(self.requests[uid].q50,1e-9),quantity=self.requests[uid].gpu)]
+                if getattr(self.policy, 'lookup_only', False):
+                    reason=self.policy.current_guard(metadata,segment,now,self.ledger.physical(now))
+                    if reason is None:reason=self.reservations.feasible(segment,exclude=uid)
+                    self._event(uid,now,'FROZEN_COMMAND_CURRENT_GUARD_REVALIDATED',passed=reason is None,
+                        reason=reason,online_grid_horizon_evaluations=0)
+                    if reason:
+                        metadata['additional_start_delay_seconds']=max(metadata.get('additional_start_delay_seconds',0),
+                            decision.get('additional_start_delay_seconds',0))
+                        self.decisions[uid]=self.policy.revalidate_command(metadata,self.budgets[uid],now,
+                            self.reservations,decision,self.ledger.physical(now),failure_reason=reason)
+                    continue
                 reason=self.policy._rack_reason(metadata,decision['site'])
                 window=decision.get('execution_window_receipt')
                 if window is not None and (now>window['latest_start_seconds'] or now not in window['allowed_starts_seconds']):
@@ -300,7 +334,13 @@ class ExperimentalJobEventController(JobEventController):
                     self.reservations.release(uid,now)
                     self.decisions[uid]=self.policy._terminal(metadata,now,'QUEUE',
                         'CACHED_COMMAND_CURRENT_HARD_GUARD_REJECTED',reason)
-        return super().admit(now)
+        blocked=[entry for entry in self.pending if self.decisions.get(entry[1],{}).get('revalidated_at_seconds')==now
+            and self.decisions[entry[1]].get('status')=='ALL_SAME_ROW_FROZEN_ALTERNATIVES_INFEASIBLE']
+        if blocked:
+            self.pending=[entry for entry in self.pending if entry not in blocked];heapq.heapify(self.pending)
+        try:return super().admit(now)
+        finally:
+            for entry in blocked:heapq.heappush(self.pending,entry)
 
     def snapshot(self,now):
         result=super().snapshot(now)
@@ -309,6 +349,7 @@ class ExperimentalJobEventController(JobEventController):
                 references=deepcopy(self.policy.references),observed_blocks=deepcopy(self.policy.observed_blocks),
                 reference_audit=deepcopy(self.policy.reference_audit),
                 continuation_status='NOT_SUPPORTED_FAIL_CLOSED_FIXED_ONE_DAY_ANCHOR')
+            if getattr(self.policy,'lookup_only',False):state['active_service_frame_id']=self.policy.active_service_frame_id
             state['runtime_state_sha']=digest(state)
             result['experimental_runtime_state']=state
         return result
@@ -325,20 +366,29 @@ class ExperimentalJobEventController(JobEventController):
 
 
 def run_experimental_actual(capacities,requests,environment,*,qos_window_provider,frozen_policy,
-                            arm='B3',**kwargs):
+                            arm='B3',legacy_diagnostic=False,**kwargs):
     """Causal counterfactual Actual; all private service stays in Environment."""
     if qos_window_provider.scenario=='E0':
         result=run_actual(capacities,requests,environment,arm=arm,qos_window_provider=qos_window_provider,
             frozen_policy=frozen_policy,**kwargs)
     else:
+        if not getattr(frozen_policy,'lookup_only',False) and not legacy_diagnostic:
+            raise ValueError('UNKNOWN_ACTUAL_FROZEN_LOOKUP_ONLY_REQUIRED')
+        if legacy_diagnostic:
+            from functools import partial
+            controller_class=partial(ExperimentalJobEventController,legacy_diagnostic=True)
+        else:controller_class=ExperimentalJobEventController
         result=run_actual(capacities,requests,environment,arm=arm,qos_window_provider=qos_window_provider,
-            frozen_policy=frozen_policy,controller_class=ExperimentalJobEventController,**kwargs)
+            frozen_policy=frozen_policy,controller_class=controller_class,**kwargs)
     result['experimental_scope']=dict(policy_id='V42_EXPERIMENTAL_FLEXIBLE_QOS_CONTROL_V1',
         scenario=qos_window_provider.scenario,participation=qos_window_provider.participation,
         fixed_A2_M2_conditional_replay=True,new_A_M_optimality=False,
         Actual_Maximum_Line_Loading=None,Fresh_AC='NOT_RUN',Native_Optimize_calls=0,
         observed_source_or_raw_contract_fields_modified=False,
         new_Known_contract_domain_optimized=False)
+    result['experimental_scope'].update(legacy_online_selector_diagnostic=legacy_diagnostic,
+        integrated_contract_performance_eligible=False,
+        Unknown_lookup_only=getattr(frozen_policy,'lookup_only',False))
     if qos_window_provider.scenario!='E0':
         result['experimental_candidate_audit']=deepcopy(frozen_policy.audit)
         result['experimental_reference_audit']=deepcopy(frozen_policy.reference_audit)
@@ -374,7 +424,7 @@ def run_experimental_actual(capacities,requests,environment,*,qos_window_provide
 
 
 def run_conditional_case(source,*,scenario,participation,algorithm,case_sha,
-                         source_freeze_sha,output=None,end_slots=96):
+                         source_freeze_sha,output=None,end_slots=96,unknown_conditions=None,service_reallocation=False):
     """Execute one independently initialized causal fixed-anchor experiment.
 
     The loader supplies future service solely through its private Environment.
@@ -397,16 +447,19 @@ def run_conditional_case(source,*,scenario,participation,algorithm,case_sha,
     if scenario=='E0':
         selector=source['original_policy']
     else:
-        from .experimental_policy import ExperimentalControlPolicy,load_experimental_migration_authority
+        from .experimental_policy import load_experimental_migration_authority
+        from .frozen_unknown import compile_unknown_policy,coverage_grammar
         bindings=dict(source['bindings'],case_sha=case_sha,qos_sha=provider.stats.sha,
             science_sha=source_freeze_sha)
-        selector=ExperimentalControlPolicy(source['packet'],bindings,qos_provider=provider,
-            q50_hourly=source['q50_hourly'],q90_hourly=source['q90_hourly'],kernel=source['kernel'],
-            queue_authority=source['queue_authority'],frozen_anonymous_gpu=source['frozen_anonymous_gpu'],
-            algorithm=algorithm,nominal_service=source['nominal_service'],
-            train_cdf_lower=source['train_cdf_lower'],train_cdf_upper=source['train_cdf_upper'],
-            recourse_source_authority=source['recourse_source_authority'],
-            migration_authority=load_experimental_migration_authority())
+        if algorithm!='GRID_SENSITIVITY_AWARE':raise ValueError('LEGACY_ABLATIONS_DIAGNOSTIC_ONLY')
+        packet=deepcopy(source['packet']);packet.bindings=bindings
+        selector=compile_unknown_policy(packet,bindings,qos_provider=provider,
+            nominal_service=source['nominal_service'],q90_hourly=source['q90_hourly'],
+            timing_lower=source['train_cdf_lower'],timing_upper=source['train_cdf_upper'],
+            source_authority=source['recourse_source_authority'],
+            conditions=coverage_grammar(packet) if unknown_conditions is None else unknown_conditions,
+            envelope=source['original_policy'].document['envelope'],
+            migration_authority=load_experimental_migration_authority(),service_reallocation=service_reallocation)
     arguments['frozen_policy']=selector
     arguments['expected_bindings']=selector.bindings
     started=time.perf_counter()

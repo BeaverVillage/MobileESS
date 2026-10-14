@@ -91,6 +91,8 @@ def run_arm(arm, case, budget, output, *, planning_only=False):
     case._consumed=True
     calls=[];handoffs=[];aidc=case.reference_aidc;mess=case.initial_mess
     initial=None;registry=[]
+    if arm=='B1' and any(float(v)!=0. for field in ('P_by_site','Q_by_site') for row in mess[field].values() for v in row):
+        raise ValueError('B1_MESS_PQ_MUST_BE_ZERO')
     stages={'B0':(),'B2':('M1',),'B1':('A1',),'B3':('A1','M1','A2','M2')}[arm]
     results={}
     for stage in stages:
@@ -148,6 +150,8 @@ def run_arm(arm, case, budget, output, *, planning_only=False):
         path=output/'UNKNOWN_CONTROL_POLICY.json'
     policy.save(path)
     reload=type(policy).load(path,bindings=bindings)
+    if hasattr(reload,'bind_runtime_packet'):
+        reload.bind_runtime_packet(policy.packet)
     if sensitivity:
         # Retain the established consumer filename with identical content.
         reload.save(output/'UNKNOWN_CONTROL_POLICY.json')
@@ -163,6 +167,8 @@ def run_arm(arm, case, budget, output, *, planning_only=False):
         source_freeze=case.source_freeze,inputs=case.input_receipts,policy_file=file_record(path),
         control_policy_algorithm=policy.document.get('policy_version'),
         sensitivity_policy_enabled=sensitivity,
+        Known_planning_metrics=aidc.get('Known_planning_metrics'),
+        research_contract_binding=getattr(case,'research_contract_binding',None),
         stages=results,campaign_HOLD=True,campaign_started=False,
         global_AIDC_MESS_gap='NOT_CERTIFIED',evidence_kind=case.evidence_kind,
         actual_gate=case.actual_gate,Actual_execution_authorized=not planning_only)
@@ -175,17 +181,10 @@ def run_arm(arm, case, budget, output, *, planning_only=False):
             stale_A1_policy_reused=False,source_input_receipts=case.input_receipts,
             compiler_source_sha=policy.document.get('compiler_source_sha')))
     _write(output/'PLANNING_FREEZE.json',freeze)
-    commands={}
-    for uid,option in aidc['selected_jobs'].items():
-        if 'start_seconds' in option:commands[uid]=option
-        else:
-            command=dict(start_seconds=case.planning_slot_zero_seconds+option['start']*900,
-                site=option['initial_site'],original_option=option)
-            if option.get('checkpoint',-1)>=0:
-                command.update(migration_destination=option['destination'],
-                    checkpoint_control_seconds=case.planning_slot_zero_seconds+option['checkpoint']*900,
-                    physical_checkpoint_seconds=case.planning_slot_zero_seconds+option['physical_checkpoint_seconds'])
-            commands[uid]=command
+    from .known_commands import compile_known_commands
+    gpu_by_uid={u:r.hard_contract['gpu'] for u,r in case.qos_provider.receipts.items() if not r.origin_unknown}
+    commands=compile_known_commands(aidc['selected_jobs'],slot_zero_seconds=case.planning_slot_zero_seconds,
+        migration_authority=getattr(case,'experimental_migration_authority',None),gpu_by_uid=gpu_by_uid)
     if planning_only:
         _write(output/'RELOAD_CONSUMPTION_RECEIPT.json',dict(policy_sha=reload.sha,anchors=bindings,
             reloaded_before_actual=True,status='RELOADED_PLANNING_ONLY_ACTUAL_NOT_RUN',
@@ -195,11 +194,30 @@ def run_arm(arm, case, budget, output, *, planning_only=False):
             status='PLANNING_ONLY_ACTUAL_NOT_AUTHORIZED',campaign_HOLD=True,actual_gate=case.actual_gate)
         _write(output/'PLANNING_ONLY_RESULT.json',result)
         return result
-    arguments=dict(case.actual_arguments,frozen_policy=reload,qos_window_provider=case.qos_provider,
+    actual_arguments=case.actual_arguments
+    if hasattr(case,'prepare_research_actual_arguments'):
+        actual_arguments,projection=case.prepare_research_actual_arguments()
+        _write(output/'ACTUAL_RESEARCH_MODEL_PROJECTION.json',dict(projection,
+            projected_after_policy_freeze=True,frozen_policy_sha=reload.sha))
+    arguments=dict(actual_arguments,frozen_policy=reload,qos_window_provider=case.qos_provider,
         arm=arm,known_schedule=commands,expected_bindings=bindings)
-    actual=run_actual(**arguments)
+    if getattr(case.qos_provider,'scenario','E0')!='E0':
+        from .experimental_actual import run_experimental_actual
+        if not getattr(reload,'lookup_only',False):raise ValueError('UNKNOWN_ACTUAL_FROZEN_LOOKUP_ONLY_REQUIRED')
+        actual=run_experimental_actual(**arguments)
+        actual['experimental_scope'].update(fixed_A2_M2_conditional_replay=False,
+            Known_domain_handoff_verified=True,final_Known_stage='A2' if arm=='B3' else 'A1',
+            new_Known_contract_domain_optimized=all(results[s].get('engine')=='v42_integration.a_engine.optimize_aidc'
+                for s in stages if s.startswith('A')))
+    else:
+        actual=run_actual(**arguments)
     actual['receipt'].update(common_initial_state_sha=(case.actual_gate or {}).get('common_initial_state_sha'),
         evaluation_case_sha=getattr(case,'evaluation_case_sha',None))
+    from .action_metrics import unknown_actual_metrics
+    if isinstance(actual.get('carryout'),dict) and 'controller' in actual['carryout']:
+        actual['Unknown_actual_metrics']=unknown_actual_metrics(actual,begin=midnight)
+        _write(output/'KNOWN_UNKNOWN_ACTION_METRICS.json',dict(
+            Known_Planning=aidc.get('Known_planning_metrics'),Unknown_Actual=actual['Unknown_actual_metrics']))
     from .mess_actual import consume_frozen_mess
     if mess_actual is None:
         mess_actual=consume_frozen_mess(mess,day_begin_seconds=midnight,evidence_kind=case.evidence_kind,

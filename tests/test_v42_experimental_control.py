@@ -143,7 +143,7 @@ def test_common_actual_adapter_executes_new_policy_with_power_compute_and_cc4_ca
     power=FrozenPowerModel(0.,1.,{'A':8,'B':8},.95,lambda it,w:np.asarray(it),'SYNTHETIC_LINEAR_C1_ONLY')
     from v42_final.workload import ForecastBook
     result=run_experimental_actual({'A':8,'B':8},[pending],Environment({job.uid:900,'BG':10000},{'BG':9000}),
-        arm='B3',qos_window_provider=provider,frozen_policy=p,running=[(bg,'B',-1000)],
+        arm='B3',qos_window_provider=provider,frozen_policy=p,legacy_diagnostic=True,running=[(bg,'B',-1000)],
         begin=0,end=4500,power_model=power,weather=[{}]*5,
         forecast=ForecastBook(tuple([0.]*24),tuple([0.]*24),0))
     row=next(r for r in result['queue_ledger'] if r['job_uid']==job.uid)
@@ -211,7 +211,7 @@ def test_public_known_issue_projection_reuses_new_receipt_preserves_old_proof_an
     assert clone.metadata['nominal_service_seconds']==1800
     assert clone.metadata['experimental_prediction_Q50_seconds']==900
     new=projected['new_qos_provider'];p=policy(new)
-    result=run_experimental_actual(**projected['arguments'],arm='B3',frozen_policy=p)
+    result=run_experimental_actual(**projected['arguments'],arm='B3',frozen_policy=p,legacy_diagnostic=True)
     assert result['receipt']['future_duration_controller_reads']==0
     assert new.receipts['KNOWN'].issued_at_seconds==original.event_seconds
     assert new.receipts['KNOWN'].authority_sha==old_receipt.authority_sha
@@ -247,7 +247,7 @@ def test_initial_running_migration_uses_same_physical_service_budget_and_no_doub
     r=JobRequest(job.uid,0,1,('A','B'),5400,'A',raw);p=policy(provider,profile='migration_witness')
     power=FrozenPowerModel(0.,1.,{'A':8,'B':8},.95,lambda it,w:np.asarray(it),'SYNTHETIC_LINEAR_C1_ONLY')
     result=run_experimental_actual({'A':8,'B':8},[],Environment({job.uid:5400},{job.uid:5400}),
-        qos_window_provider=provider,frozen_policy=p,arm='B3',running=[(r,'A',0)],
+        qos_window_provider=provider,frozen_policy=p,legacy_diagnostic=True,arm='B3',running=[(r,'A',0)],
         begin=0,end=8100,wan_capacities={'AB':100},power_model=power,weather=[{}]*9,
         forecast=ForecastBook(tuple([0.]*24),tuple([0.]*24),0))
     assert len(result['migration_receipts'])==1
@@ -279,7 +279,7 @@ def test_due_delayed_command_rechecks_new_observed_hard_rows_and_keeps_spent_bud
     provider=research_provider();job=replace(job,origin_unknown=True)
     values=fixture(profile='placement',voltage_slope=.3)
     p=policy(provider,packet_values=values)
-    controller=ExperimentalJobEventController({'A':8,'B':8},arm='B3',qos_window_provider=provider,frozen_policy=p)
+    controller=ExperimentalJobEventController({'A':8,'B':8},arm='B3',qos_window_provider=provider,frozen_policy=p,legacy_diagnostic=True)
     initial_bg=JobRequest('INITIAL_BACKGROUND',0,1,('B',),86400,'B',dict(
         origin_unknown=True,representation_starts_seconds=tuple(range(0,86400,900)),
         qos='high',protected=True,batch_eligible=False))
@@ -312,7 +312,7 @@ def test_due_delayed_command_rechecks_new_observed_hard_rows_and_keeps_spent_bud
 def test_nominal_initial_booking_overrun_retains_running_and_cancels_conflicting_future_start():
     from v42_integration.actual import JobEventController
     provider=research_provider();p=policy(provider)
-    controller=ExperimentalJobEventController({'A':8,'B':8},arm='B3',qos_window_provider=provider,frozen_policy=p)
+    controller=ExperimentalJobEventController({'A':8,'B':8},arm='B3',qos_window_provider=provider,frozen_policy=p,legacy_diagnostic=True)
     running=JobRequest('INITIAL_RUNNING',-1800,8,('A',),900,'A',dict(origin_unknown=False,
         representation_starts_seconds=tuple(range(0,86400,900)),elapsed_compute_seconds=1800,
         qos='high',protected=True,batch_eligible=False))
@@ -347,7 +347,7 @@ def test_original_source_zero_delay_preplace_is_independent_of_research_nonparti
         job=observed('SOURCE_RIGHT_NONPARTICIPANT_'+str(i))
         if not provider.issue(job).participant:break
     provider=research_provider();p=policy(provider)
-    controller=ExperimentalJobEventController({'A':8,'B':8},arm='B3',qos_window_provider=provider,frozen_policy=p)
+    controller=ExperimentalJobEventController({'A':8,'B':8},arm='B3',qos_window_provider=provider,frozen_policy=p,legacy_diagnostic=True)
     r=JobRequest(job.uid,0,1,('A','B'),900,'A',dict(asdict(job),can_prestart_place=True))
     controller.submit(r,0)
     metadata=controller.metadata[job.uid]
@@ -411,7 +411,7 @@ def test_research_route_packet_reserves_each_link_and_keeps_payload_separate_fro
     p=policy(provider,migration_authority=authority,profile='migration_witness')
     r=JobRequest(job.uid,0,1,('A','B'),5400,'A',dict(asdict(job),elapsed_compute_seconds=0))
     result=run_experimental_actual({'A':8,'B':8},[],Environment({job.uid:5400},{job.uid:5400}),
-        arm='B3',qos_window_provider=provider,frozen_policy=p,running=[(r,'A',0)],
+        arm='B3',qos_window_provider=provider,frozen_policy=p,legacy_diagnostic=True,running=[(r,'A',0)],
         end=8100,wan_capacities=authority['wan_capacities'])
     assert len(result['migration_receipts'])==1
     migration=result['migration_receipts'][0]
@@ -486,7 +486,7 @@ def test_committed_selected_delay_spends_once_retry_without_renewal():
 
 def test_experimental_resume_fails_closed_instead_of_reopening_frozen_reference():
     provider=research_provider();p=policy(provider)
-    controller=ExperimentalJobEventController({'A':8,'B':8},arm='B3',qos_window_provider=provider,frozen_policy=p)
+    controller=ExperimentalJobEventController({'A':8,'B':8},arm='B3',qos_window_provider=provider,frozen_policy=p,legacy_diagnostic=True)
     job,_=participant(provider)
     from dataclasses import asdict
     controller.submit(JobRequest(job.uid,0,1,('A',),900,'A',asdict(job)),0)
@@ -661,8 +661,12 @@ def test_conditional_partial_horizon_slices_weather_and_recomputes_PCC(monkeypat
         nominal_service=seed_policy.nominal,train_cdf_lower=seed_policy.cdf_lower,
         train_cdf_upper=seed_policy.cdf_upper,recourse_source_authority=seed_policy.recourse_authority)
     monkeypatch.setattr(module,'load_experimental_migration_authority',lambda:None)
+    from v42_integration.frozen_unknown import coverage_grammar
+    from types import SimpleNamespace
+    source['original_policy']=SimpleNamespace(document={'envelope':[]})
     result=run_conditional_case(source,scenario='E1',participation='FLEX40',algorithm='GRID_SENSITIVITY_AWARE',
-        case_sha='FIXTURE_CASE',source_freeze_sha='NAMED_SYNTHETIC_SOURCE',end_slots=2)
+        case_sha='FIXTURE_CASE',source_freeze_sha='NAMED_SYNTHETIC_SOURCE',end_slots=2,
+        unknown_conditions=coverage_grammar(seed_policy.packet,gpu_gangs=(1,),runtime_bounds=(900.,),time_slots=(0,1)))
     assert result['physical']['PCC_P_kw'].shape==(2,2)
     np.testing.assert_array_equal(result['physical']['PCC_P_kw'],result['occupancy_GPU'])
     assert not result['conditional_case']['Full96'] and len(args['weather'])==96

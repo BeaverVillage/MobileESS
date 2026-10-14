@@ -39,19 +39,10 @@ def load_conditional_source():
     template=read(ARCHIVE/'raw/2025-05-01/NATIVE_INPUT_TEMPLATE_B1.json')
     bundle,merge=assemble_native_bundle(data[0],projection,template)
     issue=datetime.fromisoformat(template['issue_time'].replace('Z','+00:00')).timestamp()
-    known_commands={}
+    from .known_commands import compile_known_commands
     # Reuse the coordinator's native-option -> absolute execution convention.
     # Saved PLANNING_FREEZE.Known_schedule is a Native option, not a command.
-    for uid,option in planned['Known_schedule'].items():
-        if 'start_seconds' in option:known_commands[uid]=option
-        else:
-            command=dict(start_seconds=issue+option['start']*900,
-                site=option['initial_site'],original_option=option)
-            if option.get('checkpoint',-1)>=0:
-                command.update(migration_destination=option['destination'],
-                    checkpoint_control_seconds=issue+option['checkpoint']*900,
-                    physical_checkpoint_seconds=issue+option['physical_checkpoint_seconds'])
-            known_commands[uid]=command
+    known_commands=compile_known_commands(planned['Known_schedule'],slot_zero_seconds=issue)
     data=(bundle,)+tuple(data[1:])
     manifest=read(ARCHIVE/'CAMPAIGN_MANIFEST.json')
     physical=ProductionPhysicalContext(freeze,manifest,bundle)
