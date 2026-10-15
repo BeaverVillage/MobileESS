@@ -473,11 +473,16 @@ def run_current_k48(case, selected_full_point, budget, output):
     output = Path(output); output.mkdir(parents=True, exist_ok=False)
     packet, certificate = prepare_k16(case, selected_full_point, output / 'K16')
     history = []
+    control=getattr(case,'global_gap_control',None)
     for iteration in range(3):
         if budget.remaining() <= 0:
             break
         result, point = solve_packet(packet, certificate, budget, output / ('K'+str(packet['K'])) / 'SOLVE')
         history.append(result)
+        if control is not None:
+            from .table_v_global_control import mess_lower
+            mess_lower(control,case,result,Native_Runtime=result['Native_Runtime'],Native_remaining=budget.remaining())
+            if control.target_met():break
         if packet['K'] == 48:
             break
         if point is None or iteration == 2 or budget.remaining() <= 0:

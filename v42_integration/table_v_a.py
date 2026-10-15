@@ -159,6 +159,10 @@ def execute_current_a(context,budget,*,arm,stage,output,parent_result=None,paren
                         if abs(objective-old['objective'])>1e-7:
                             raise ValueError('TABLE_V_REUSED_A1_CURRENT_OBJECTIVE_DRIFT')
                         result=deepcopy(old)
+                        # A different Arm does not inherit a Native-bound
+                        # certificate. DW/full pricing is independently replayed.
+                        result.pop('Original_Integer_Bound_Certificate',None)
+                        result.pop('Global_Gap_Control',None)
                         result.update(arm=arm,Native_call=None,reused_native_call=old.get('Native_call'),
                             Native_optimize_calls_this_stage=0,reused_A1_result=file_record(old_folder/'P1_ONLY_RESULT.json'),
                             model_build_seconds=build_seconds,stage_wall_seconds=perf_counter()-started,
@@ -182,14 +186,16 @@ def execute_current_a(context,budget,*,arm,stage,output,parent_result=None,paren
                         return result,receipt
                     _write(output/'A1_REUSE_MATH_MATRIX_DOMAIN_OBJECTIVE_AUDIT.json',dict(candidates=reuse_audits,reused=False))
                 dw=execute_current_dw(context,case,built,budget,output/'DW')
-                call=(budget.solve(model,label='RELEASE_P1:'+stage+':ORIGINAL_P1',cap=5400.)
-                    if not dw.get('structural_adapter_failure') and budget.remaining()>0 else None)
+                from .table_v_a_control import solve_original
+                call,integer_certificate,gap_control=(solve_original(model,budget,case,context,binding,objective_sha,dw,output)
+                    if not dw.get('structural_adapter_failure') else (None,None,None))
                 result=dict(stage=stage,arm=arm,case_sha=case.case_sha,source_identity=deepcopy(context['manifest']['identity']),
-                    D0_input_sha=context['input_audit']['a_input_sha'],input_MESS_anchor=case.grid.fixed_mess['plan_sha'],
+                    D0_input_sha=context['input_audit']['a_input_sha'],D0_source_sha=context['manifest']['source_sha'],input_MESS_anchor=case.grid.fixed_mess['plan_sha'],
                     D0_issue_seconds=context['input_audit']['issue_seconds'],P2_calls=0,P2='NOT_RUN',
                     objective=float(model.ObjVal) if call and model.SolCount else None,
                     bound=float(model.ObjBound) if call and math.isfinite(float(model.ObjBound)) and abs(float(model.ObjBound))<gp.GRB.INFINITY else None,
                     gap=float(model.MIPGap) if call and model.SolCount else None,Native_call=call,FULL_feasible=False,
+                    Original_Integer_Bound_Certificate=integer_certificate,Global_Gap_Control=gap_control,
                     Gurobi_Status=int(model.Status) if call else None,SolCount=int(model.SolCount) if call else 0,
                     Native_Runtime=float(model.Runtime) if call else 0.,objective_sha=objective_sha,
                     native_binding=binding,solver_policy=policy,numerical_policy=numeric,

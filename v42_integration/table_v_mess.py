@@ -205,6 +205,8 @@ class TableVMessStages:
 
     def prepare(self, arm, stage, aidc, parent_acceptance, output, *, build_admission, progress=None):
         self._context()
+        from .m_source_revision import require_preparation_sources
+        require_preparation_sources()
         require_build_admission(build_admission, arm=arm, stage=stage)
         payload = payload_for_m(self.context, arm, stage, aidc, parent_acceptance)
         from v42_may_campaign_native90.m_model import build_case
@@ -301,9 +303,83 @@ class TableVMessStages:
             evidence_scope='REAL_PRODUCTION', fixture=False)
         receipt['acceptance_sha'] = digest(receipt)
         require_m_acceptance(receipt, result=result, identity=self.manifest['identity'], arm=arm, stage=stage)
-        _write(case.output / 'TABLE_V_M_RESULT.json', result)
-        _write(case.output / 'TABLE_V_M_ACCEPTANCE.json', receipt)
+        result_output=Path(getattr(case,'mess_result_output',case.output))
+        _write(result_output / 'TABLE_V_M_RESULT.json', result)
+        _write(result_output / 'TABLE_V_M_ACCEPTANCE.json', receipt)
         return result, receipt, point
+
+    def execute_cooperative(self,arm,stage,case,aidc,parent_acceptance,*,k48_budget,k48_admission,initial_point=None):
+        """FULL seed -> separate certified K bounds -> nonduplicate UB search.
+
+        Native guard contexts never overlap. Seed/search Raw live in distinct
+        children and remain immutable; the final result gets its own seal.
+        """
+        from copy import copy
+        from .table_v_global_control import GlobalGapControl,mess_scope
+        root=Path(case.output);control=GlobalGapControl(mess_scope(case),MESS_GLOBAL_GAP_TARGET,root/'GLOBAL_CONTROL')
+        case.global_gap_control=control
+        result=acceptance=point=kval=None
+        try:
+            seed=copy(case);seed.mess_execution_subdir='COOPERATIVE_SEED/COMMON_M_PR222'
+            seed.mess_result_output=root/'COOPERATIVE_SEED';seed.global_gap_seed_checkpoint=True
+            result,acceptance,point=self.execute(arm,stage,seed,aidc,parent_acceptance,initial_point=initial_point)
+            if acceptance is not None:
+                try:
+                    kval=self.execute_k48(arm,stage,case,result,acceptance,point,k48_budget=k48_budget,
+                        output=root/'COOPERATIVE_K48',build_admission=k48_admission())
+                except Exception as exc:
+                    control.failure=repr(exc)
+                    _write(root/'COOPERATIVE_K48_FAILURE.json',dict(error=repr(exc),certified_LB_admitted=False))
+                # The same stage allowance includes initialization and all UB calls.
+                # Retain only the verified seed as a new search warm start.
+                if not control.target_met() and control.failure is None:
+                    search=copy(case);search.mess_execution_subdir='COOPERATIVE_SEARCH/COMMON_M_PR222'
+                    search.mess_result_output=root/'COOPERATIVE_SEARCH';search.global_gap_seed_checkpoint=False
+                    result,acceptance,point=self.execute(arm,stage,search,aidc,parent_acceptance,initial_point=point,
+                        incumbent_registry=result['incumbent_registry'])
+            reason=('IMPLEMENTATION_OR_NUMERICAL_FAILURE' if control.failure else
+                'NO_FULL_FEASIBLE_SOLUTION' if acceptance is None else
+                result.get('adaptive_search',{}).get('termination_reason','NO_FURTHER_CERTIFIED_IMPROVEMENT'))
+            summary=control.finish(reason)
+            if result is not None:
+                result=deepcopy(result);bounds=control.bounds()
+                result.update(Global_Gap_Control=summary,certified_Global_LB=bounds['Global_LB'],
+                    Global_LB_valid=bounds['Global_LB'] is not None,relative_global_gap=bounds['Global_Gap'],
+                    global_gap_certified=bounds['global_gap_certified'],termination_reason=summary['termination_reason'],
+                    certified_LB_by_origin=bounds['certified_LB_by_origin'],
+                    K48_Global_LB=bounds['certified_LB_by_origin'].get('K48'),
+                    K48_Global_LB_valid='K48' in bounds['certified_LB_by_origin'])
+                if acceptance is not None:
+                    acceptance=deepcopy(acceptance);acceptance.update(result_sha=digest(result),
+                        Global_LB=bounds['Global_LB'],Global_LB_valid=bounds['Global_LB'] is not None,
+                        relative_global_gap=bounds['Global_Gap'],global_optimality_status=summary['termination_reason'])
+                    acceptance['acceptance_sha']=digest({k:v for k,v in acceptance.items() if k!='acceptance_sha'})
+                    require_m_acceptance(acceptance,result=result,identity=self.manifest['identity'],arm=arm,stage=stage)
+                if kval is not None:
+                    # Reassess the final UB without editing the checkpoint Raw
+                    # or relabelling an early K16 bound as a solved K48 bound.
+                    kval=deepcopy(kval)
+                    kval.update(relative_global_gap=bounds['Global_Gap'],global_gap_certified=bounds['global_gap_certified'],
+                        current_FULL_UB=bounds['Global_UB'],final_M_result_sha=digest(result),
+                        final_M_acceptance_sha=None if acceptance is None else acceptance['acceptance_sha'],
+                        optimality_status='TARGET_MET' if bounds['global_gap_certified'] else 'OPTIMALITY_TARGET_UNMET')
+                    checkpoint_assessment=kval.get('M_stage_assessment')
+                    if checkpoint_assessment is not None and acceptance is not None:
+                        assessment=deepcopy(checkpoint_assessment)
+                        assessment.update(parent_M_result_sha=digest(result),parent_M_acceptance_sha=acceptance['acceptance_sha'],
+                            MESS_anchor=acceptance['MESS_anchor'],relative_global_gap=bounds['Global_Gap'],
+                            global_gap_certified=bounds['global_gap_certified'],global_optimality_status=summary['termination_reason'])
+                        assessment['assessment_sha']=digest({k:v for k,v in assessment.items() if k!='assessment_sha'})
+                        kval['M_stage_assessment']=assessment
+                    _write(root/'COOPERATIVE_GLOBAL_ASSESSMENT.json',kval)
+                _write(root/'TABLE_V_M_RESULT.json',result)
+                if acceptance is not None:_write(root/'TABLE_V_M_ACCEPTANCE.json',acceptance)
+            return result,acceptance,point,kval
+        except BaseException as error:
+            control.finish('IMPLEMENTATION_OR_NUMERICAL_FAILURE',error=repr(error))
+            raise
+        finally:
+            control.close();case.__dict__.pop('global_gap_control',None)
 
     def execute_k48(self, arm, stage, case, m_result, m_acceptance, point, *,
                     k48_budget, output, build_admission):

@@ -696,7 +696,11 @@ def build_case(payload, request, progress=None, *, integration_context=None):
     presolve.current_security=pre
     presolve.bound.extend(pre['bounds'])
     presolve.row_delete({int(p['row']) for p in pre['certificates']},pre['certificates'])
+    if progress: progress(dict(phase='M_EXACT_STATIC_PRESOLVE',day=day,arm=request.get('arm','B2')))
+    presolve_started=time.perf_counter()
     B,e=presolve.run()
+    atomic(out/'CURRENT_STATIC_PRESOLVE_PROFILE.json',dict(rounds=presolve.rounds,
+        wall_seconds=time.perf_counter()-presolve_started,Native_calls=0))
     atomic(out/'CURRENT_SECURITY_PRE_C2_SUMMARY.json',pre['summary'])
     atomic(out/'CURRENT_SECURITY_PRE_C2_ROW_CERTIFICATES.json',pre['certificates'])
     atomic(out/'CURRENT_SECURITY_PRE_C2_BOUND_CERTIFICATES.json',pre['bounds'])

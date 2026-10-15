@@ -134,6 +134,10 @@ def certified_bounds(folder, stage, context):
     lower = dw.get('Global_LB') if (dw.get('case_sha')==case and dw.get('LB_certified') is True
                     and dw.get('full_domain_pricing_complete') is True) else None
     upper = result.get('objective') if result.get('case_sha')==case and result.get('FULL_feasible') is True else None
+    if result.get('case_sha')==case and result.get('Original_Integer_Bound_Certificate'):
+        from v42_integration.table_v_a_control import verified_integer_lower
+        integer=verified_integer_lower(result)
+        if integer is not None:lower=max(v for v in (lower,integer) if v is not None)
     gap = (upper-lower)/upper*100 if (core.finite(lower) and core.finite(upper) and upper>0 and lower<=upper) else None
     return dict(LB=lower, UB=upper, gap_percent=gap)
 
@@ -153,6 +157,8 @@ def state(source=SOURCE):
         complete=bool(core.read_small(audit/'COMPLETE.json')),
         results=core.read_small(audit/'MONTH_RESULTS.json'))
     value['historical_B0'] = preserved_b0(source)
+    recovery=core.read_small(REPO/'docs/v42_phase_gap_recovery_20261015/RESULTS.json')
+    value['phase_policy_recovery']=recovery if source.name=='EXECUTION07' else {}
     value['system'] = memory_sample()
     value['archived_native_seconds'] = planning.get('archived_native_seconds_excluded_from_current_cycle')
     for row in value['arms']:
@@ -171,6 +177,10 @@ def state(source=SOURCE):
                  and r.get('stage_context', {}).get('source_sha')==value.get('source_sha')]
         builds = [r for r in calls if r.get('solver')=='BUILD']
         row['phase_display'] = phase_for(folder, row, flight, bool(builds))
+        if stage in ('A1','A2'):
+            candidates=list((folder/stage/'DW').glob('PHASE_I/S*/*/SOLVER_PROGRESS.json'))
+            row['solver_progress']=core.read_small(max(candidates,key=lambda p:p.stat().st_mtime)) if candidates else {}
+            row['phase_I_trace']=core.read_small(folder/stage/'DW/PHASE_I_TRACE.json')
         row['phase_display']['age_seconds'] = max(0, now-row['phase_display']['record_epoch']) if row['phase_display'].get('record_epoch') else None
         pid = active.get('active_stage_owner_pid') or (flight or {}).get('pid')
         if not pid and not row.get('raw_arm_status') and stage:
@@ -184,10 +194,12 @@ def state(source=SOURCE):
             completed_calls=len(natives), inflight=bool(flight),
             call_wall=max(0,now-flight['started_epoch_seconds']) if flight and core.finite(flight.get('started_epoch_seconds')) else None)
         row['bounds'] = certified_bounds(folder, stage, context)
-        row['mess_search']=core.read_small(folder/stage/'COMMON_M_PR222/ADAPTIVE_PROGRESS.json') if stage.startswith('M') else None
+        row['mess_search']=(core.read_small(folder/stage/'COOPERATIVE_SEARCH/COMMON_M_PR222/ADAPTIVE_PROGRESS.json') or
+            core.read_small(folder/stage/'COMMON_M_PR222/ADAPTIVE_PROGRESS.json')) if stage.startswith('M') else None
         if stage.startswith('M'):
             mr=core.read_small(folder/stage/'TABLE_V_M_RESULT.json')
-            assessment=core.read_small(folder/(stage+'_K48')/'TABLE_V_M_K48_ASSESSMENT.json')
+            combined=core.read_small(folder/stage/'COOPERATIVE_GLOBAL_ASSESSMENT.json')
+            assessment=combined.get('M_stage_assessment') or core.read_small(folder/(stage+'_K48')/'TABLE_V_M_K48_ASSESSMENT.json')
             if mr.get('case_sha')==context.get('stage_case_sha') and mr.get('FULL_validated'):
                 row['bounds']['UB']=mr.get('BEST_GLOBAL_UB')
                 if assessment.get('stage_case_sha')==mr['case_sha'] and assessment.get('Global_LB_valid'):

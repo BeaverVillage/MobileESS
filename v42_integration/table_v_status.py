@@ -12,10 +12,14 @@ def classify_a_result(result):
     lb = result.get('AIDC_Global_LB')
     ub = result.get('AIDC_Global_UB')
     certified = dw.get('LB_certified') is True and dw.get('full_domain_pricing_complete') is True
+    if result.get('Original_Integer_Bound_Certificate') is not None:
+        from .table_v_a_control import verified_integer_lower
+        certified=certified or verified_integer_lower(result) is not None
     finite = lambda v: type(v) in (int, float) and math.isfinite(v)
+    bound_status='AIDC_GLOBAL_BOUND_CERTIFIED' if result.get('Original_Integer_Bound_Certificate') else 'DW_GLOBAL_LB_CERTIFIED'
     if feasible and certified and finite(lb) and finite(ub) and ub > 0 and lb <= ub:
         gap = max(0., (ub-lb)/ub)
-        return 'P1_GLOBAL_GAP_TARGET_MET' if gap <= .005 else 'DW_GLOBAL_LB_CERTIFIED'
+        return 'P1_GLOBAL_GAP_TARGET_MET' if gap <= .005 else bound_status
     if feasible:
         return 'FULL_FEASIBLE_OPTIMALITY_UNPROVEN'
     if status == 3:
@@ -29,7 +33,7 @@ def classify_a_result(result):
     if dw and not certified:
         return 'DW_PRICING_INCOMPLETE'
     if certified and finite(lb):
-        return 'DW_GLOBAL_LB_CERTIFIED'
+        return bound_status
     return result.get('status') or 'NOT_CERTIFIED'
 
 

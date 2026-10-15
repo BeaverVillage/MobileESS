@@ -18,7 +18,7 @@ class Element{
  assert.equal(ids.get('arms').children.length,4);
  assert.equal(ids.get('results').children.length,4);
  assert.equal(ids.get('lb').textContent,'미확정');
- assert(ids.get('detail').textContent.includes('1965.3929998874664'));
+ assert.equal(JSON.parse(ids.get('detail').textContent).archived_native_seconds_excluded,state.archived_native_seconds);
  assert(ids.get('detail').textContent.includes('current_release_recertified'));
  console.log('Render integration PASS: live phase, 4 arms, 4 result rows, pending certified bounds, historical B0, archived Native separation');
 })().catch(e=>{console.error(e);process.exitCode=1});

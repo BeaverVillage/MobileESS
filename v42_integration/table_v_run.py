@@ -31,7 +31,8 @@ def adapters():
            'table_v_dw.py','table_v_dw_reuse.py','table_v_gap_contract.py','table_v_dates.py','table_v_campaign.py','table_v_memory.py',
            'table_v_resources.py','table_v_launch.py','table_v_launch_evidence.py',
            'table_v_geometry_cache.py','table_v_compression.py','table_v_compression_verify.py',
-           'table_v_compression_adapter.py','m_adaptive.py','m_warm.py','table_v_evaluation.py','m_source_revision.py']
+           'table_v_compression_adapter.py','m_adaptive.py','m_warm.py','table_v_evaluation.py','m_source_revision.py',
+           'table_v_global_control.py','table_v_a_control.py','table_v_phase_policy.py']
     return [file_record(Path(__file__).with_name(n)) for n in names]+[
         file_record(ROOT/'v42_may_campaign_native90/m_model.py'),
         file_record(Path(__file__).with_name('release_production_budget.py'))]
@@ -228,18 +229,14 @@ def run_arm(arm,output=DEFAULT,*,attempt=None,actual_slots=96,launch_authority=N
                 if arm=='B3' and current=='M2' and m1_handoff is not None:
                     from .m_warm import admit_m1
                     warm_point,warm_receipt=admit_m1(case,m1_handoff)
-                mr,ma,point=factory.execute(arm,current,case,aidc,aa,stage_total_cap=1800.,initial_point=warm_point)
+                mr,ma,point,kval=factory.execute_cooperative(arm,current,case,aidc,aa,k48_budget=k48,
+                    k48_admission=lambda:current_build_admission(k48,arm=arm,stage=current,operation='CURRENT_K48_NATIVE_BUILD'),
+                    initial_point=warm_point)
                 warm_point=None
 
                 stages[current]=dict(result=mr,acceptance=ma,warm_admission=warm_receipt)
                 if ma is None:raise RuntimeError('M_STAGE_HAS_NO_ORIGINAL_FULL_FEASIBLE_POINT')
-                try:
-                    kval=factory.execute_k48(arm,current,case,mr,ma,point,k48_budget=k48,output=folder/(current+'_K48'),
-                        build_admission=current_build_admission(k48,arm=arm,stage=current,operation='CURRENT_K48_NATIVE_BUILD'))
-                    stages[current]['K48']=kval
-                except Exception as exc:
-                    stages[current]['K48']=dict(status='NOT_CERTIFIED',error=repr(exc),
-                        traceback=traceback.format_exc(),physical_FULL_handoff_still_allowed=True)
+                stages[current]['K48']=kval
                 if arm=='B3' and current=='M1':
                     from .m_warm import save_m1
                     m1_handoff=save_m1(case,point,mr,ma)

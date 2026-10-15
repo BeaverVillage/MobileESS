@@ -39,7 +39,8 @@ def _freeze_sources(output):
         'v42_may_build_v6/construction.py','v42_may_build_v6/compact_build.py',
         'v42_root/native.py','v42_root/factor.py','v42_a_stage_domain_v2/runtime_projection.py',
         'v42_integration/table_v_geometry_cache.py','v42_integration/table_v_compression.py',
-        'v42_integration/table_v_compression_verify.py','v42_integration/table_v_compression_adapter.py')
+        'v42_integration/table_v_compression_verify.py','v42_integration/table_v_compression_adapter.py',
+        'v42_integration/table_v_phase_policy.py','v42_integration/table_v_global_control.py')
     records=[file_record(root/path) for path in paths]
     _write(Path(output)/'DW_SOURCE_FREEZE.json',dict(PASS=True,sources=records,Native_calls=0))
     return records
@@ -507,7 +508,7 @@ class CurrentNative:
     def __init__(self,budget,case,output):
         self.budget=budget; self.case=case; self.output=Path(output); self.calls=[]
         self.day=getattr(case,'table_v_day',case.data[0].get('day'))
-        self.native_seconds=0.; self.resources=[]
+        self.native_seconds=0.; self.resources=[];self.seen_operations=set()
         freeze=self.output/'DW_SOURCE_FREEZE.json'
         self.frozen_sources=json.loads(freeze.read_text(encoding='utf8'))['sources'] if freeze.is_file() else []
 
@@ -521,38 +522,73 @@ class CurrentNative:
         from v42_a_stage_domain_v2.stress_backend import materialize
         from v42_a_stage_domain_v2.solver_policy import solver_policy,apply_policy
         from v42_b3_joint.numerical_policy import apply_native_precision
+        from .table_v_phase_policy import POLICIES,allowance,validate_raw,progress_callback,INTEGER_RETURN_RESERVE
         import gurobipy as gp
         if component not in ('PHASE_I','ORIGINAL_P1','LOCAL_PRICING'):
             raise PermissionError('TABLE_V_DW_P1_ONLY_NATIVE_COMPONENT_REQUIRED')
         if not self.frozen_sources or any(file_record(row['path'])!=row for row in self.frozen_sources):
             raise PermissionError('TABLE_V_DW_FROZEN_SOURCE_BYTES_DRIFT')
-        self.remaining(); folder=Path(folder); folder.mkdir(parents=True,exist_ok=True)
+        self.remaining();folder=Path(folder);folder.mkdir(parents=True,exist_ok=True)
         from .table_v_resources import admit_resources
         admit_resources(self.budget,phase='PRE_DW_MODEL_BUILD:'+component)
         model,objectives=materialize(snapshot,self.day)
+        attempts=[];accepted=None;raw={}
         try:
-            if any(snapshot.vtypes!='C'): raise ValueError('TABLE_V_DW_LP_ONLY')
+            if any(snapshot.vtypes!='C'):raise ValueError('TABLE_V_DW_LP_ONLY')
             model.setObjective(objectives[0][1],gp.GRB.MINIMIZE)
             policy=solver_policy(gp);apply_policy(model,policy,gp)
-            numerical=apply_native_precision(model,day=self.day,stage=self.case.stage,component=component)
-            model.Params.Threads=1;model.Params.LogFile=str(folder/'NATIVE_GUROBI.log')
-            _write(folder/'MODEL_IDENTITY.json',dict(original_snapshot_sha256=snapshot.fingerprint(),
-                component=component,case_sha=self.case.case_sha,objective_name=snapshot.objectives[0].name,
-                solver_policy=policy,numerical_policy=numerical,Threads=1,P2_calls=0))
-            call=self.budget.solve(model,label='RELEASE_P1:'+self.case.stage+':DW:'+component,cap=self.remaining())
-            record=dict(status=int(model.Status),SolCount=int(model.SolCount),native_seconds=float(model.Runtime),
-                Work=float(model.Work),objective=float(model.ObjVal) if model.SolCount else None,
-                snapshot_sha=snapshot.fingerprint(),ledger_call=call,component=component)
-            raw={}
-            if model.SolCount: raw['X']=np.asarray(model.getAttr('X'),float)
-            if model.Status==gp.GRB.OPTIMAL:
-                raw.update(Pi=np.asarray(model.getAttr('Pi'),float),RC=np.asarray(model.getAttr('RC'),float))
+            numerical=None
+            profiles=POLICIES if component=='PHASE_I' else (None,)
+            seen=self.seen_operations
+            for profile in profiles:
+                if component=='PHASE_I':
+                    phase_used=sum(r['native_seconds'] for r in self.calls if r['component']=='PHASE_I')
+                    seconds=min(profile.seconds,allowance(self.remaining(),phase_used))
+                    parameters=profile.parameters();name=profile.name
+                else:
+                    seconds=min(120. if component=='LOCAL_PRICING' else 300.,self.remaining()-INTEGER_RETURN_RESERVE)
+                    parameters=dict(OutputFlag=1,LogToConsole=0);name='ORIGINAL_PRECISE'
+                    numerical=apply_native_precision(model,day=self.day,stage=self.case.stage,component=component)
+                if seconds<=0:raise RuntimeError('DW_RESERVED_ORIGINAL_INTEGER_NATIVE_ALLOWANCE')
+                key=(snapshot.fingerprint(),component,name)
+                if key in seen:raise RuntimeError('DUPLICATE_UNCHANGED_DW_POLICY_OPERATION')
+                seen.add(key);attempt=folder/name;attempt.mkdir(exist_ok=False)
+                if attempts:model.reset()
+                for k,v in parameters.items():model.setParam(k,v)
+                model.Params.Threads=1;model.Params.LogFile=str(attempt/'NATIVE_GUROBI.log')
+                _write(attempt/'MODEL_IDENTITY.json',dict(original_snapshot_sha256=snapshot.fingerprint(),
+                    component=component,case_sha=self.case.case_sha,objective_name=snapshot.objectives[0].name,
+                    solver_policy=policy,numerical_policy=numerical,adaptive_policy=name,parameters=parameters,Threads=1,P2_calls=0))
+                call=self.budget.solve(model,label='RELEASE_P1:'+self.case.stage+':DW:'+component+':'+name,
+                    cap=seconds,callback=progress_callback(attempt,component))
+                record=dict(status=int(model.Status),SolCount=int(model.SolCount),native_seconds=float(model.Runtime),
+                    Work=float(model.Work),objective=float(model.ObjVal) if model.SolCount else None,
+                    snapshot_sha=snapshot.fingerprint(),ledger_call=call,component=component,adaptive_policy=name,
+                    source_sha=(getattr(self.budget,'context',None) or {}).get('source_sha'),case_sha=self.case.case_sha,
+                    Stage_Native_cumulative=5400.-self.budget.remaining(),certified_Global_LB=None,FULL_verified_UB=None,
+                    Global_Gap=None,diagnostic_objective_is_global_certificate=False)
+                from .table_v_memory import memory_sample
+                import psutil
+                memory=psutil.Process().memory_info()
+                record.update(memory=memory_sample(),process_peak_RSS_bytes=getattr(memory,'peak_wset',memory.rss),
+                    process_peak_private_bytes=getattr(memory,'peak_pagefile',getattr(memory,'private',None)))
+                candidate={}
+                if model.SolCount:candidate['X']=np.asarray(model.getAttr('X'),float)
+                if model.Status==gp.GRB.OPTIMAL:
+                    candidate.update(Pi=np.asarray(model.getAttr('Pi'),float),RC=np.asarray(model.getAttr('RC'),float))
+                validation=validate_raw(snapshot,candidate) if component=='PHASE_I' else dict(PASS=model.Status==gp.GRB.OPTIMAL)
+                record['independent_numerical_validation']=validation
+                np.savez_compressed(attempt/'RAW_ATTRIBUTES.npz',**candidate);_write(attempt/'NATIVE_RESULT.json',record)
+                self.calls.append(record);self.native_seconds+=record['native_seconds'];attempts.append(record)
+                _write(self.output/'DW_NATIVE_CALLS.json',dict(calls=self.calls,Native_Runtime=self.native_seconds,P2_calls=0))
+                if record['status']==2 and validation['PASS']:
+                    accepted=record;raw=candidate;break
+            record=accepted or attempts[-1]
+            # Compatibility outputs are new files; attempt Raw is never edited.
             np.savez_compressed(folder/'RAW_ATTRIBUTES.npz',**raw)
-            _write(folder/'NATIVE_RESULT.json',record)
-            self.calls.append(record);self.native_seconds+=record['native_seconds']
-            _write(self.output/'DW_NATIVE_CALLS.json',dict(calls=self.calls,Native_Runtime=self.native_seconds,P2_calls=0))
+            _write(folder/'NATIVE_RESULT.json',dict(record,numerical_attempts=len(attempts),validation_accepted=accepted is not None))
             return record,raw
-        finally: model.dispose()
+        finally:model.dispose()
 
 
 def execute_current_dw(context,case,built,budget,output):
@@ -579,7 +615,8 @@ def execute_current_dw(context,case,built,budget,output):
             target=rebound(targeted.targeted,dict(targeted.targeted.__globals__,HISTORY=output,worker=worker))
             # Source run writes to OUT/day. All other algorithm code and
             # stopping/pricing/row-promotion criteria remain source-owned.
-            namespace=dict(phase.run.__globals__,OUT=output.parent,
+            from .table_v_phase_policy import require_exact_zero
+            namespace=dict(phase.run.__globals__,OUT=output.parent,verify_zero=require_exact_zero(phase.verify_zero),
                 full_pricing=full_pricing,targeted=target)
             if '_class_sum' in state:
                 from .table_v_compression_adapter import complete_kernel_rebuilder
@@ -615,7 +652,7 @@ def execute_current_dw(context,case,built,budget,output):
         if result['phase_I_status']=='NOT_RUN': result['phase_I_status']='NOT_CERTIFIED'
         result.update(error=type(error).__name__+': '+str(error),status='DW_PHASE_I_NOT_CERTIFIED'
             if result['phase_I_status']!='PHI_ZERO_CERTIFIED' else 'DW_PRICING_INCOMPLETE')
-        result['structural_adapter_failure']=not (output/'ORIGINAL_FULL_DW_MATH_EQUIVALENCE.json').is_file() or not native.calls
+        result['structural_adapter_failure']=not (output/'ORIGINAL_FULL_DW_MATH_EQUIVALENCE.json').is_file()
     result.update(Native_Runtime=native.native_seconds,native_calls=len(native.calls),wall_seconds=perf_counter()-started,
         Native_calls_receipt=file_record(output/'DW_NATIVE_CALLS.json') if (output/'DW_NATIVE_CALLS.json').exists() else None)
     if result['LB_certified']: result['status']='DW_GLOBAL_LB_CERTIFIED'
@@ -625,12 +662,17 @@ def execute_current_dw(context,case,built,budget,output):
 
 
 def attach_global_bounds(result,dw):
-    """Only verified same-matrix full pricing can meet an AIDC global target."""
+    """Keep certified DW and original integer bounds under separate authority."""
     result['DW']=deepcopy(dw)
     upper=result.get('objective') if result.get('FULL_feasible') is True else None
     valid=(dw.get('LB_certified') is True and dw.get('full_domain_pricing_complete') is True
         and dw.get('case_sha')==result.get('case_sha') and dw.get('native_binding')==result.get('native_binding'))
-    lower=dw.get('Global_LB') if valid else None
+    dw_lower=dw.get('Global_LB') if valid else None
+    from .table_v_a_control import verified_integer_lower
+    integer_lower=verified_integer_lower(result)
+    lower=max((v for v in (dw_lower,integer_lower) if v is not None),default=None)
+    result.update(AIDC_DW_Global_LB=dw_lower,AIDC_Integer_Global_Bound=integer_lower,
+        AIDC_Global_LB_origins={k:v for k,v in (('DW_FULL_PRICING',dw_lower),('ORIGINAL_INTEGER_MILP',integer_lower)) if v is not None})
     finite=lambda v:type(v) in (int,float) and math.isfinite(v)
     gap=None
     if finite(upper) and finite(lower) and upper>0 and lower<=upper:

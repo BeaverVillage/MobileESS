@@ -320,6 +320,17 @@ class ReleaseProductionBudget(IntegrationBudget):
                         stage_context=context, native_binding=actual, resource_before_solve=snapshot,
                         P2_call=False, objective_scope='ORIGINAL_P1_CURRENT_MATRIX_NOT_UNPRICED_GLOBAL_CERTIFICATE')
                     row['native_execution_entered']=entered
+                    # Preserve numerical bound provenance under the same owned
+                    # transaction as Native Runtime; consumers must still prove
+                    # that this is their original unrestricted integer model.
+                    attributes={}
+                    if entered:
+                        for name in ('ObjBound','ObjVal','SolCount','IsMIP'):
+                            try:
+                                value=float(getattr(model,name))
+                                if math.isfinite(value):attributes[name]=value
+                            except Exception:pass  # Unavailable LP/failed-solve attributes carry no certificate.
+                    row['native_numeric_attributes']=attributes
                     if not entered:row['pre_native_model_status']=prior_status
                     with self._transaction():
                         self.document['calls'].append(row)

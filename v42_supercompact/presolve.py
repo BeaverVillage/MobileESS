@@ -90,7 +90,7 @@ class Presolve:
             plans.setdefault(int(j),({},float(d['lower'][j]),None,'FIXED_ZERO' if d['lower'][j]==0 else 'FIXED_CONSTANT'))
         return self.substitute(plans)
     def row_scan(self):
-        A,d=self.A,self.d;groups={};gone=set();proofs=[];unknown=0;categories=Counter()
+        A,d=self.A,self.d;groups={};gone=set();proofs=[];unknown=0;categories=Counter();normalizations={}
         # Exact primitive dyadic vectors identify proportional equality/inequality rows.
         for i in range(A.shape[0]):
             a,b=A.indptr[i:i+2];js=A.indices[a:b];ws=A.data[a:b];sg=-1 if d['sense'][i]=='>' else 1;s='=' if d['sense'][i]=='=' else '<';rhs=F(sg*float(d['rhs'][i]))
@@ -101,9 +101,14 @@ class Presolve:
             if s=='=' and all(d['lower'][j]==d['upper'][j] for j in js):
                 assert sum(F(sg*float(w))*F(float(d['lower'][j])) for j,w in zip(js,ws))==rhs
                 gone.add(i);proofs.append(dict(row=int(self.row_ids[i]),kind='FIXED_BOUND_EQUALITY',round=len(self.rounds)));categories['FIXED_BOUND_EQUALITY']+=1;continue
-            rat=[(sg*float(w)).as_integer_ratio() for w in ws];den=max(q for p,q in rat);ints=[p*(den//q) for p,q in rat];g=math.gcd(*ints);ints=[p//g for p in ints]
-            if s=='=' and ints[0]<0:ints=[-v for v in ints]
-            scale=F(sg*float(ws[0]))/ints[0];rr=rhs/scale
+            signature=(s,sg,ws.dtype.str,ws.tobytes())
+            normalized=normalizations.get(signature)
+            if normalized is None:
+                rat=[(sg*float(w)).as_integer_ratio() for w in ws];den=max(q for p,q in rat);ints=[p*(den//q) for p,q in rat];g=math.gcd(*ints);ints=[p//g for p in ints]
+                if s=='=' and ints[0]<0:ints=[-v for v in ints]
+                normalized=(tuple(ints),F(sg*float(ws[0]))/ints[0])
+                if len(normalizations)<32768:normalizations[signature]=normalized
+            ints,scale=normalized;rr=rhs/scale
             key=(s,js.tobytes(),tuple(ints))
             if key in groups:
                 rep,old=groups[key]
@@ -140,7 +145,7 @@ class Presolve:
             consumers=C.indices[C.indptr[j]:C.indptr[j+1]];down=[int(q) for q in consumers if q!=i];before=int(sum(A.indptr[q+1]-A.indptr[q] for q in down)+length)
             after=0;afterfill=0;exprset=set(expr)
             for q in down:
-                size=len(rowset(q)|exprset)-1;after+=size;afterfill+=size**2
+                support=rowset(q);size=len(support)+len(exprset)-len(support&exprset)-1;after+=size;afterfill+=size**2
             delta=after-before;positive=sum(abs(w) for w in expr.values());cfmin=min(map(abs,expr.values()));cfmax=max(map(abs,expr.values()))
             record=dict(column=int(self.col_ids[j]),name=str(d['names'][j]),definition=int(self.row_ids[i]),definition_nnz=length,consumers=len(down),rows_saved=1,columns_saved=1,
                 nnz_before=before,nnz_after_union_upper=after,nnz_delta_upper=delta,fill_proxy_before=sum((A.indptr[q+1]-A.indptr[q])**2 for q in down)+length**2,

@@ -620,7 +620,7 @@ def export_plan(case, point):
     plan["sha256"] = sha256(payload.encode()).hexdigest()
     from .a_engine import digest
     plan["plan_sha"] = digest(plan)
-    _write(case.output / "COMMON_M_PR222/FULL_MESS_PHYSICAL_ANCHOR.json", plan)
+    _write(Path(getattr(case,'mess_execution_folder',case.output/'COMMON_M_PR222')) / 'FULL_MESS_PHYSICAL_ANCHOR.json', plan)
     return plan
 
 
@@ -637,8 +637,12 @@ def optimize_mess(case, initial_point, incumbent_registry, budget):
     case = copy(case)
     case.output = Path(case.output).resolve()
     case.output.mkdir(parents=True, exist_ok=True)
-    folder = case.output / "COMMON_M_PR222"
-    folder.mkdir(exist_ok=False)
+    subdir=getattr(case,'mess_execution_subdir','COMMON_M_PR222')
+    if subdir not in ('COMMON_M_PR222','COOPERATIVE_SEED/COMMON_M_PR222','COOPERATIVE_SEARCH/COMMON_M_PR222'):
+        raise ValueError('OFFICIAL_MESS_EXECUTION_CHILD_REQUIRED')
+    folder = case.output / subdir
+    folder.mkdir(parents=True,exist_ok=False)
+    case.mess_execution_folder=folder
     validator = getattr(case, "strict_validator", strict_full)
     key = binding(case)
     bank = IncumbentBank(case)

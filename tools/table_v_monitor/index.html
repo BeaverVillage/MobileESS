@@ -40,7 +40,14 @@ function render(s){
  text('elapsed',duration(proc.elapsed_seconds??active.elapsed_wall_seconds));text('build',finite(active.model_build_seconds)?duration(active.model_build_seconds)+' ✓':'진행 전');text('rss',gb(proc.RSS_bytes));
  const compline=$('compression-size');
  const comp=active.compression;compline.textContent=comp?'Job '+fmt(comp.Job_count)+' → Class '+fmt(comp.classes)+' · DW LP '+fmt(comp.compressed_size.rows)+'행 / '+fmt(comp.compressed_size.columns)+'변수 · 원본 정수 모델 유지':'';
- const b=active.stage_budget; text('budget-title',(active.current_stage||'Stage')+' · '+b.kind+' 확정 Native 사용량');
+ const solver=active.solver_progress||{};
+ if(finite(solver.diagnostic_Phi))compline.textContent+=' · Phi(진단) '+solver.diagnostic_Phi.toExponential(2)+' · Primal '+Number(solver.primal_residual).toExponential(2)+' · Dual '+Number(solver.dual_residual).toExponential(2);
+ const b={...active.stage_budget};const recovery=s.phase_policy_recovery||{};
+ if(active.arm==='B1'&&active.current_stage==='A1'&&active.raw_arm_status==='INTERRUPTED_BY_USER'&&finite(recovery.current_cycle_Native_seconds)){
+  b.used=recovery.current_cycle_Native_seconds;b.kind+=' · 기존 실행+수치 진단';
+  compline.textContent+=' · 첫 LP '+fmt(recovery.previous_same_matrix_Native_seconds,1)+' → '+fmt(recovery.FAST_B_Native_seconds,1)+'초';
+ }
+ text('budget-title',(active.current_stage||'Stage')+' · '+b.kind+' 확정 Native 사용량');
  $('native').replaceChildren(node('span',null));$('native').textContent=fmt(b.used,1);$('native').append(node('span',' / '+fmt(b.cap)+'초'));
  $('nativebar').style.width=(finite(b.used)&&finite(b.cap)&&b.cap>0?Math.min(100,b.used/b.cap*100):0)+'%';
  text('remaining',finite(b.cap)&&finite(b.used)?'잔여 '+fmt(Math.max(0,b.cap-b.used),1)+'초':'예산 대기');text('calls','완료 '+b.completed_calls+'회'+(b.inflight?' · 호출 중':''));

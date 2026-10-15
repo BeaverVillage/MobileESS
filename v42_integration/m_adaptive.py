@@ -32,10 +32,20 @@ def run(case, bank, budget, folder, validator):
         case.candidate_generator = generator
     calls, seen_models, history = [], set(), []
     last, reason = None, 'NATIVE_BUDGET_RETURN_RESERVE'
+    control=getattr(case,'global_gap_control',None)
+    if control is not None:
+        from .table_v_global_control import mess_upper
+        mess_upper(control,case,bank,Native_remaining=budget.remaining())
+        if getattr(case,'global_gap_seed_checkpoint',False):
+            return None,dict(history=[],joint_calls=0,unique_pools=0,stop_reason='CERTIFIED_LOWER_BOUND_CHECKPOINT',
+                stage_native_seconds=budget.used(),stage_budget_seconds=budget.limit)
     solver = getattr(case,'joint_solver',_native_joint)
     reserve = RETURN_RESERVE_SECONDS if solver is _native_joint or budget.remaining()>RETURN_RESERVE_SECONDS else 0.
     # Finite exhaustion guard; absence of improvement is never a stop rule.
     for epoch in range(1, 1101):
+        if control is not None and control.target_met():
+            reason='GLOBAL_GAP_TARGET_MET'
+            break
         if bank.best is None or budget.remaining() <= reserve:
             break
         state['epoch'] = epoch
@@ -93,6 +103,8 @@ def run(case, bank, budget, folder, validator):
                     bank.offer(point, cert)
                     case.mess_feedback_point=point.copy()
             after = bank.fields()['BEST_GLOBAL_UB']
+            if control is not None:
+                mess_upper(control,case,bank,Native_Runtime=native.get('Native_Runtime'),Native_remaining=budget.remaining(),pool_sha=signature)
             row = dict(epoch=epoch,pool_sha=signature,pool_counts={u:len(p) for u,p in pools.items()},
                 status='REPLAYED',FULL_verified_UB_before=before,FULL_verified_UB_after=after,
                 improvement=before-after,Native_Runtime=native.get('Native_Runtime'),
@@ -130,6 +142,14 @@ def run(case, bank, budget, folder, validator):
         stage_budget_seconds=budget.limit,stage_native_seconds=budget.used(),
         restricted_ObjBound_is_Global_LB=False,backend='EXACT_DIRECT_ONLY',
         PR219_PR221_repeat_and_feedback=True)
+    if control is not None:
+        canonical=('GLOBAL_GAP_TARGET_MET' if control.target_met() else
+            'IMPLEMENTATION_OR_NUMERICAL_FAILURE' if 'FAILED' in reason or 'ERROR' in reason else
+            'NO_FULL_FEASIBLE_SOLUTION' if bank.best is None else
+            'NATIVE_BUDGET_EXHAUSTED' if budget.remaining()<=reserve else
+            'NO_FURTHER_CERTIFIED_IMPROVEMENT')
+        report.update(global_gap_control=control.bounds(),termination_reason=canonical,
+            exhausted_scope='CURRENT_APPROVED_CANDIDATE_GENERATOR_NOT_ENTIRE_GLOBAL_ROUTE_DOMAIN')
     _write(folder/'ADAPTIVE_SEARCH.json',report)
     # Static products, path reservoirs and full model references die with stage.
     case.__dict__.pop('_direct_static_cache',None)
