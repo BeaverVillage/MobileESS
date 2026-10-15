@@ -162,48 +162,59 @@ class SignedMinimax:
                 if arc[-1] is not None:
                     self.moves_by_origin[unit, arc[0]].append((arc[1], arc[3], self.site_id[arc[2]]))
 
-    def path_vector(self, unit, path):
-        key = unit, tuple(path)
-        if key in self.path_cache:
-            return self.path_cache[key][0]
-        index, battery = self.units.index(unit), self.case.graph[3]
-        out, rebound, soc, spent = np.zeros(self.m), np.zeros(self.m), battery.initial, 0.
-        critical = set(map(int, self.times))
-        stays = [self.graph.arcs[k] for k in path if self.graph.arcs[k][-1] is None]
-        trough = {a[1] for a in sorted(stays, key=lambda a: (
-            max([0.] + [self.loading[i] for i in range(self.m) if self.times[i] == a[1]]), a[1]))[:16]}
+    def path_vector(self,u,path):
+        key=(u,tuple(path))
+        if key in self.path_cache:return self.path_cache[key][0]
+        ui=self.units.index(u);battery=self.case.graph[3];dt=battery.dt_hours
+        connected=np.full(self.H,-1,dtype=int);travel=np.zeros(self.H)
         for k in path:
-            arc = self.graph.arcs[k]
-            if arc[-1] is not None:
-                soc -= float(arc[-1].energy_kwh)
-                spent += float(arc[-1].energy_kwh)
-                continue
-            t, site = arc[1], self.site_id[arc[0]]
-            mask = self.times == t
-            if t in critical:
-                active = np.flatnonzero(mask)
-                i = active[np.argmax(self.base[active])]
-                p, q = self.vertices[self.best_vertex[index, site, i]].copy()
-                if p >= 0:
-                    p = min(p, max(0., soc-battery.minimum)*battery.eta_discharge/battery.dt_hours)
-                    soc -= p*battery.dt_hours/battery.eta_discharge
-                    spent += p*battery.dt_hours/battery.eta_discharge
-                    out[mask] = self.coeff[index, site, mask, 1]*p + self.coeff[index, site, mask, 2]*q
-                else:
-                    charge = min(-p, max(0., battery.maximum-soc)/battery.dt_hours/battery.eta_charge)
-                    soc += charge*battery.dt_hours*battery.eta_charge
-                    out[mask] = self.coeff[index, site, mask, 0]*charge + self.coeff[index, site, mask, 2]*q
-            elif t in trough:
-                soc += min(battery.p_limit, max(0., battery.maximum-soc)/battery.dt_hours/battery.eta_charge)*battery.dt_hours*battery.eta_charge
-            soc = min(battery.maximum, max(battery.minimum, soc))  # Score only; no Raw vector altered.
-        need = max(0., battery.terminal-soc)
-        recovery = [a for a in stays if a[1] in trough]
-        power = min(battery.p_limit, need/(battery.eta_charge*battery.dt_hours*max(1, len(recovery))))
-        for arc in recovery:
-            mask = self.times == arc[1]
-            rebound[mask] += self.coeff[index, self.site_id[arc[0]], mask, 0]*power
-        unresolved = max(0., need-len(recovery)*battery.dt_hours*battery.eta_charge*power)
-        self.path_cache[key] = out, rebound, unresolved, spent
+            arc=self.case.graph[2][k]
+            if arc[-1] is None:connected[arc[1]]=self.site_id[arc[0]]
+            else:travel[arc[1]]=float(arc[-1].energy_kwh)
+        required=np.full(self.H+1,battery.minimum);required[-1]=battery.terminal
+        for t in range(self.H-1,-1,-1):
+            capacity=battery.p_limit*dt*battery.eta_charge if connected[t]>=0 else 0.
+            required[t]=max(battery.minimum,required[t+1]+travel[t]-capacity)
+        out=np.zeros(self.m);rebound=np.zeros(self.m);soc=battery.initial;unresolved=0.;spent=0.
+        if not hasattr(self,'slot_indices'):
+            self.slot_indices=[np.flatnonzero(self.times==t) for t in range(self.H)]
+            rewards=np.zeros((len(self.units),len(self.sites),self.H))
+            for t,indices in enumerate(self.slot_indices):
+                if len(indices):rewards[:,:,t]=np.maximum(0.,(-self.coeff[:,:,indices,1]*battery.eta_discharge/dt).max(axis=-1))
+            maxima=np.maximum.accumulate(rewards[:,:,::-1],axis=-1)[:,:,::-1]
+            self.future_energy_price=np.zeros((len(self.units),len(self.sites),self.H));self.future_energy_price[:,:,:-1]=.30*maxima[:,:,1:]
+        support=getattr(self,'base_support',np.zeros((len(self.units),self.m)))
+        reference_all=self.base+support.sum(axis=0)-support[ui]
+        for t in range(self.H):
+            soc-=travel[t];spent+=travel[t];unresolved+=max(0.,battery.minimum-soc)
+            site=connected[t]
+            if site<0:continue
+            active=self.slot_indices[t]
+            if not len(active):continue
+            charge_cap=min(battery.p_limit,max(0.,battery.maximum-soc)/(dt*battery.eta_charge))
+            discharge_cap=min(battery.p_limit,max(0.,soc-max(battery.minimum,required[t+1]))*battery.eta_discharge/dt)
+            minimum_charge=max(0.,required[t+1]-soc)/(dt*battery.eta_charge)
+            energy_price=self.future_energy_price[ui,site,t];reference=reference_all[active]
+            vertex_p=self.vertices[:,0];qv=self.vertices[:,1]
+            pv=np.where(vertex_p>=0,np.minimum(vertex_p,discharge_cap),-np.minimum(-vertex_p,charge_cap))
+            valid=np.ones(len(pv),dtype=bool)
+            if minimum_charge>0:valid=(vertex_p<0)&(np.minimum(-vertex_p,charge_cap)+1e-9>=minimum_charge)
+            if not valid.any():unresolved+=minimum_charge*dt*battery.eta_charge;continue
+            service_matrix=(np.maximum(0.,-pv)[:,None]*self.coeff[ui,site,active,0]+np.maximum(0.,pv)[:,None]*self.coeff[ui,site,active,1]+qv[:,None]*self.coeff[ui,site,active,2])
+            energies=np.where(pv>=0,pv*dt/battery.eta_discharge,pv*dt*battery.eta_charge)
+            scores=(reference[None,:]+service_matrix).max(axis=1)+energy_price*energies;scores[~valid]=np.inf
+            index=int(np.argmin(scores));p=float(pv[index]);q=float(qv[index]);service=service_matrix[index];energy=float(energies[index])
+            soc-=energy;out[active]=service
+            if p>=0:spent+=energy
+            else:rebound[active]=np.maximum(0.,self.coeff[ui,site,active,0]*(-p))
+        unresolved+=max(0.,battery.terminal-soc)
+        # Charging is already in the signed service vector. Record its risk
+        # separately without adding it twice to the minimax prediction.
+        self.path_cache[key]=(out,np.zeros(self.m),unresolved,spent)
+        if not hasattr(self,'lookahead_diagnostics'):self.lookahead_diagnostics={}
+        self.lookahead_diagnostics[key]=dict(terminal_SOC=soc,terminal_recovery_shortfall=max(0.,battery.terminal-soc),
+            conservative_required_SOC=required.tolist(),remaining_connected_slots=int(np.count_nonzero(connected>=0)),
+            travel_energy=float(travel.sum()),charge_rebound=rebound.tolist(),heuristic_only=True,no_physical_feasibility_pruning=True)
         return out
 
     def peak(self, paths):
@@ -328,8 +339,11 @@ class JointDispatchScore:
 def generate(case, point, bank, budget):
     """Fresh exact-day Beam followed by bounded joint LP admission shortlist."""
     graph, battery = bank.graph, case.graph[3]
-    context = grid_context(case, point)
-    scoring = SignedMinimax(case, point, context, pcs_vertices(case))
+    state = getattr(case,'mess_search_state',{})
+    epoch = int(state.get('epoch',1))
+    feedback_point=getattr(case,'mess_feedback_point',point)
+    context = grid_context(case, feedback_point)
+    scoring = SignedMinimax(case, feedback_point, context, pcs_vertices(case))
     base = graph.paths(point)
     candidates = {u: {} for u in graph.origins}
     counters = Counter()
@@ -348,6 +362,8 @@ def generate(case, point, bank, budget):
     for unit in sorted(graph.origins):
         register(unit, graph.complete(unit), 'STAY')
         register(unit, base[unit], 'CURRENT_FULL')
+        if unit in getattr(case,'warm_route_seed',{}):
+            register(unit,case.warm_route_seed[unit],'M1_ROUTE_ONLY_M2_REDISPATCH')
         if bank.best_moving is not None:
             register(unit, graph.paths(bank.best_moving[0])[unit], 'VERIFIED_MOVING_FULL')
         frontier = defaultdict(list)
@@ -405,6 +421,14 @@ def generate(case, point, bank, budget):
                         register(unit, path, 'FRESH_PR222_BEAM_LABEL')
                     else:
                         frontier[arc[3]].append(nxt)
+    reservoir = state.setdefault('reservoir',{})
+    for unit, records in candidates.items():
+        saved = reservoir.setdefault(unit,{})
+        saved.update(records)
+        # Scores are refreshed against the latest FULL-verified P/Q/SOC point.
+        for key, row in saved.items():
+            if key not in records:
+                register(unit,row['path'],'STAGE_LOCAL_DIVERSE_RESERVOIR')
     pools, lp = {}, JointDispatchScore(scoring, budget)
     diagnostics = []
     for unit in sorted(candidates):
@@ -415,13 +439,16 @@ def generate(case, point, bank, budget):
             if key not in seen:
                 seen.add(key); shortlist.append(list(path))
         add(base[unit]); add(graph.complete(unit))
+        if unit in getattr(case,'warm_route_seed',{}):add(case.warm_route_seed[unit])
         if bank.best_moving is not None:
             add(graph.paths(bank.best_moving[0])[unit])
         for predicate in (lambda c: c['moves'] == 1, lambda c: c['moves'] >= 2, lambda c: c['moves'] >= 3):
             options = [c for c in ranked if predicate(c)]
             if options:
                 add(options[0]['path'])
-        for candidate in ranked:
+        rotation=(epoch-1)*(1+sorted(candidates).index(unit))
+        ranked_diverse=ranked[rotation % max(1,len(ranked)):] + ranked[:rotation % max(1,len(ranked))]
+        for candidate in ranked_diverse:
             if len(shortlist) >= 12:
                 break
             add(candidate['path'])
@@ -438,6 +465,7 @@ def generate(case, point, bank, budget):
             if key not in chosen_seen:
                 chosen_seen.add(key); chosen.append(list(path))
         pin(base[unit]); pin(graph.complete(unit))
+        if unit in getattr(case,'warm_route_seed',{}):pin(case.warm_route_seed[unit])
         if bank.best_moving is not None:
             pin(graph.paths(bank.best_moving[0])[unit])
         for predicate in (lambda path: sum(graph.arcs[k][-1] is not None for k in path) == 1,
@@ -445,12 +473,72 @@ def generate(case, point, bank, budget):
             options = [p for _, _, p in sorted(rescored) if predicate(p)]
             if options:
                 pin(options[0])
-        for _, _, path in sorted(rescored):
+        ordered=sorted(rescored)
+        offset=rotation % max(1,len(ordered))
+        for _, _, path in ordered[offset:]+ordered[:offset]:
             if len(chosen) >= 8:
                 break
             pin(path)
         pools[unit] = chosen
-    _write(case.output / 'COMMON_M_PR222/FRESH_BEAM_AND_REDISPATCH_ADMISSION.json', dict(
+    # PR221 resume_feedback admission variants: move depth and time/site
+    # diversity with all four route choices remaining jointly optimized.
+    from .m_adaptive import pool_identity
+    seen_pools=state.get('seen_pools',set())
+    if pool_identity(pools) in seen_pools:
+        selected=None
+        for variant in range(12):
+            trial={}
+            for ui,unit in enumerate(sorted(candidates)):
+                ranked=sorted(candidates[unit].values(),key=lambda c:(c['predicted_peak'],c['risk'],c['path']))
+                chosen=[];sigs=set()
+                def add(path):
+                    key=tuple(path)
+                    if key not in sigs:chosen.append(list(path));sigs.add(key)
+                add(base[unit]);add(graph.complete(unit))
+                if bank.best_moving is not None:add(graph.paths(bank.best_moving[0])[unit])
+                for depth in (1,2,3):
+                    options=[c for c in ranked if (c['moves']==1 if depth==1 else c['moves']>=depth)
+                             and tuple(c['path']) not in sigs]
+                    if options:add(options[(epoch*3+ui+variant*7)%min(len(options),48)]['path'])
+                groups=defaultdict(list)
+                for c in ranked:
+                    moves=[graph.arcs[k] for k in c['path'] if graph.arcs[k][-1] is not None]
+                    key=(moves[0][1]//12 if moves else -1,tuple(sorted({a[2] for a in moves})),
+                         len(moves),moves[-1][3]//12 if moves else -1)
+                    groups[key].append(c)
+                representatives=sorted((v[0] for v in groups.values()),key=lambda c:(c['predicted_peak'],c['path']))
+                shift=(epoch*11+ui*7+variant*13)%max(1,len(representatives))
+                for c in representatives[shift:]+representatives[:shift]+ranked:
+                    if len(chosen)>=8:break
+                    add(c['path'])
+                trial[unit]=chosen
+            if pool_identity(trial) not in seen_pools:selected=trial;break
+        if selected is None:return None
+        pools=selected
+    # Every final pool, including PR221 diversity variants, passes PR222's
+    # coupled four-unit continuous P/Q/SOC redispatch admission score.
+    for unit,paths in pools.items():
+        for path in paths:
+            test=dict(base);test[unit]=path
+            packet=lp.score(test)
+            diagnostics.append(dict(unit=unit,path=path,final_pool_admission=True,**packet))
+    coverage={}
+    for unit,paths in pools.items():
+        depths=[sum(graph.arcs[k][-1] is not None for k in path) for path in paths]
+        available=[c['moves'] for c in candidates[unit].values()]
+        coverage[unit]=dict(STAY=0 in depths,single_MOVE=1 in depths,multiple_MOVE=any(d>=2 for d in depths),
+            single_available=1 in available,multiple_available=any(d>=2 for d in available))
+        if not coverage[unit]['STAY'] or (1 in available and 1 not in depths) or (
+                any(d>=2 for d in available) and not any(d>=2 for d in depths)):
+            raise ValueError('PR222_DIVERSE_MOVE_ADMISSION_LOST')
+        if bank.best_moving is not None and graph.paths(bank.best_moving[0])[unit] not in paths:
+            raise ValueError('PR222_BEST_MOVING_PATH_NOT_PINNED')
+    target=getattr(case,'mess_iteration_output',case.output / 'COMMON_M_PR222')
+    _write(target / 'FRESH_BEAM_AND_REDISPATCH_ADMISSION.json', dict(
+        coverage=coverage,PR222_joint_redispatch_admission=True,
+        epoch=epoch,feedback=state.get('feedback',[])[-1:],current_dispatch_vector_sha=vector_sha(feedback_point),
+        grid_feedback_rows=len(context['rows']),
+        backward_terminal_SOC_lookahead=True,charge_rebound_counted_once=True,
         PASS=True, counters=dict(counters), generated={u: len(c) for u, c in candidates.items()},
         generated_MOVE_distribution={u: dict(Counter(c['moves'] for c in rows.values())) for u, rows in candidates.items()},
         pool_counts={u: len(p) for u, p in pools.items()}, pools=pools, LP_calls=len(lp.cache), scores=diagnostics,

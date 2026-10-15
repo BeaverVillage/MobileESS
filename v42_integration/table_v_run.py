@@ -28,7 +28,9 @@ def adapters():
            'table_v_flex_planning.py','table_v_reference.py','tablev_actual.py',
            'tablev_fullflex_actual.py','table_v_status.py','table_v_control.py','table_v_reuse.py',
            'table_v_dw.py','table_v_dw_reuse.py','table_v_gap_contract.py','table_v_dates.py','table_v_campaign.py','table_v_memory.py',
-           'table_v_resources.py','table_v_launch.py','table_v_launch_evidence.py']
+           'table_v_resources.py','table_v_launch.py','table_v_launch_evidence.py',
+           'table_v_geometry_cache.py','table_v_compression.py','table_v_compression_verify.py',
+           'table_v_compression_adapter.py','m_adaptive.py','m_warm.py','table_v_evaluation.py','m_source_revision.py']
     return [file_record(Path(__file__).with_name(n)) for n in names]+[
         file_record(ROOT/'v42_may_campaign_native90/m_model.py'),
         file_record(Path(__file__).with_name('release_production_budget.py'))]
@@ -204,7 +206,7 @@ def run_arm(arm,output=DEFAULT,*,attempt=None,actual_slots=96,launch_authority=N
         ref=json.loads((output/'REFERENCE_RESULT.json').read_text(encoding='utf8'))
         ref_accept=json.loads((output/'REFERENCE_ACCEPTANCE.json').read_text(encoding='utf8'))
         main=budget(output,'PLANNING');k48=budget(output,'K48');factory=TableVMessStages(context,main)
-        aidc,aa=ref,ref_accept;mr=ma=None
+        aidc,aa=ref,ref_accept;mr=ma=None;m1_handoff=None
         for current in ARM_STAGES[arm]:
             require_running(output);verify_adapters(output);progress('STARTED')
             if current.startswith('A'):
@@ -221,8 +223,14 @@ def run_arm(arm,output=DEFAULT,*,attempt=None,actual_slots=96,launch_authority=N
                 main.bind_table_v_case(arm=arm,stage=current,stage_case_sha=case.case_sha,
                     source_sha=context['manifest']['source_sha'],parent_result=aidc,
                     source_identity=context['manifest']['identity'],parent_acceptance=aa)
-                mr,ma,point=factory.execute(arm,current,case,aidc,aa,stage_total_cap=1800.)
-                stages[current]=dict(result=mr,acceptance=ma)
+                warm_point=None;warm_receipt=None
+                if arm=='B3' and current=='M2' and m1_handoff is not None:
+                    from .m_warm import admit_m1
+                    warm_point,warm_receipt=admit_m1(case,m1_handoff)
+                mr,ma,point=factory.execute(arm,current,case,aidc,aa,stage_total_cap=1800.,initial_point=warm_point)
+                warm_point=None
+
+                stages[current]=dict(result=mr,acceptance=ma,warm_admission=warm_receipt)
                 if ma is None:raise RuntimeError('M_STAGE_HAS_NO_ORIGINAL_FULL_FEASIBLE_POINT')
                 try:
                     kval=factory.execute_k48(arm,current,case,mr,ma,point,k48_budget=k48,output=folder/(current+'_K48'),
@@ -231,6 +239,9 @@ def run_arm(arm,output=DEFAULT,*,attempt=None,actual_slots=96,launch_authority=N
                 except Exception as exc:
                     stages[current]['K48']=dict(status='NOT_CERTIFIED',error=repr(exc),
                         traceback=traceback.format_exc(),physical_FULL_handoff_still_allowed=True)
+                if arm=='B3' and current=='M1':
+                    from .m_warm import save_m1
+                    m1_handoff=save_m1(case,point,mr,ma)
                 del case,point;gc.collect()
             _write(folder/'PLANNING_STAGE_RESULTS.json',stages)
         require_running(output);current='ACTUAL'+str(actual_slots);progress('STARTED')

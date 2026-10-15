@@ -44,9 +44,24 @@ def require_day(day):
 def original_source_freeze():
     saved = initial.read(SAVED / "D0_CASE_MANIFEST.json")["source_freeze"]
     current = [initial.record(ROOT / path) for path in SOURCE13]
-    if current != saved["files"] or digest(current) != saved["source_sha"]:
-        raise ValueError("DATE_CASE_ORIGINAL_SOURCE13_DRIFT")
-    return deepcopy(saved)
+    if current == saved['files'] and digest(current) == saved['source_sha']:
+        return deepcopy(saved)
+    # Explicit reviewed M implementation revision. The eleven AIDC/physical
+    # source files remain pinned to the historical authority; no old result
+    # acquires the new Source/Science/Case identity.
+    from .m_source_revision import EXPECTED_SOURCES
+    revised={'v42_integration/m_engine.py','v42_integration/m_candidates.py'}
+    for name,now,prior in zip(SOURCE13,current,saved['files']):
+        if name in revised:
+            if EXPECTED_SOURCES.get(name)!={'sha256':now['sha256'],'bytes':now['bytes']}:
+                raise ValueError('DATE_CASE_UNAPPROVED_MESS_SOURCE_REVISION')
+        elif now!=prior:
+            raise ValueError('DATE_CASE_ORIGINAL_SOURCE13_DRIFT')
+    freeze=deepcopy(saved)
+    freeze.update(files=current,source_sha=digest(current),predecessor_source_sha=saved['source_sha'],
+        MESS_implementation_revision='PR230_RESTORED_PR219_221_ADAPTIVE_FULL_REPLAY',
+        historical_result_promoted=False,AIDC_eleven_source_files_unchanged=True)
+    return freeze
 
 
 def verify_sources(records):
@@ -388,9 +403,19 @@ def compile_date_case(day, *, output, initial_receipt=None, call_cap=120.):
         context = original.build_planning_inputs(output=output, call_cap=call_cap)
         saved = initial.read(SAVED / "D0_CASE_MANIFEST.json")
         saved_audit = initial.read(SAVED / "D0_PLANNING_INPUT_AUDIT.json")
-        if context["manifest"] != saved or context["input_audit"]["a_input_sha"] != saved_audit["a_input_sha"]:
-            raise ValueError("MAY01_SAVED_P1_SOURCE_CASE_INPUT_EXACT_COMPATIBILITY_FAILED")
-        context["date_case_compile_acceptance"] = dict(PASS=True, day=day, saved_P1_case_exact_preserved=True,
+        unchanged=original_source_freeze()==saved['source_freeze']
+        if unchanged and (context['manifest']!=saved or context['input_audit']['a_input_sha']!=saved_audit['a_input_sha']):
+            raise ValueError('MAY01_SAVED_P1_SOURCE_CASE_INPUT_EXACT_COMPATIBILITY_FAILED')
+        if not unchanged:
+            original.require_case(context['manifest'])
+            if (context['manifest']['source_freeze']['files']!=original_source_freeze()['files']
+                    or context['manifest']['identity']['initial_state_sha']!=saved['identity']['initial_state_sha']
+                    or context['manifest']['forecast_receipt']!=saved['forecast_receipt']
+                    or context['manifest']['physical']!=saved['physical']
+                    or context['manifest']['time_axis']!=saved['time_axis']):
+                raise ValueError('MAY01_MESS_REVISION_PUBLIC_PHYSICS_FORECAST_OR_INITIAL_DRIFT')
+        context["date_case_compile_acceptance"] = dict(PASS=True, day=day, saved_P1_case_exact_preserved=unchanged,
+            new_MESS_source_requires_new_release=not unchanged,historical_LB_UB_Gap_transferred=False,
             identity=context["manifest"]["identity"], input_sha=context["input_audit"]["a_input_sha"],
             Native_calls=0, AC_solves=0, native_model_builds=0)
         initial.write_json(output / "DATE_CASE_COMPILE_ACCEPTANCE.json", context["date_case_compile_acceptance"])

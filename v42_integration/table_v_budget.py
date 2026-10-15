@@ -58,6 +58,11 @@ def require_authorization(a):
             or not a.get('human_approval_reference') or not a.get('source_cases')):
         raise PermissionError('EXPLICIT_TABLE_V_STAGE_ONLY_AUTHORIZATION_REQUIRED')
     fresh=a.get('fresh_native_cycle')
+    restricted=a.get('authorized_arm_stages')
+    if restricted is not None and (not isinstance(restricted,list)
+            or any(not isinstance(stage,str) or stage not in expected for stage in restricted)
+            or len(restricted)!=len(set(restricted))):
+        raise PermissionError('EXACT_AUTHORIZED_ARM_STAGE_SUBSET_REQUIRED')
     if fresh is not None and (not isinstance(fresh,dict)
             or fresh.get('schema')!='TABLE_V_EXPLICIT_FRESH_NATIVE_CYCLE_V1'
             or fresh.get('approved') is not True or fresh.get('start_native_seconds')!=0
@@ -186,7 +191,8 @@ class TableVStageBudget(ReleaseProductionBudget):
     def bind_table_v_case(self, *, arm, stage, stage_case_sha, source_sha,
                           parent_result, source_identity, parent_acceptance=None,
                           case_certificate=None):
-        if f'{arm}:{stage}' not in self.authorization['stage_caps_seconds']:
+        if (f'{arm}:{stage}' not in self.authorization['stage_caps_seconds']
+                or f'{arm}:{stage}' not in self.authorization.get('authorized_arm_stages',self.authorization['stage_caps_seconds'])):
             raise PermissionError('ARM_STAGE_NOT_AUTHORIZED')
         authorities=[a for a in self.authorization['source_cases'] if a.get('source_sha')==source_sha
                      and a.get('source_identity')==source_identity]
@@ -242,6 +248,9 @@ class TableVStageBudget(ReleaseProductionBudget):
         if context not in self.derived_bindings:
             raise PermissionError('EXACT_APPROVED_SOURCE_CASE_STAGE_PARENT_REQUIRED')
         self.check_historical()
+        if context['arm']+':'+context['stage'] not in self.authorization.get(
+                'authorized_arm_stages',self.authorization['stage_caps_seconds']):
+            raise PermissionError('ARM_STAGE_NOT_AUTHORIZED')
         with self._transaction():
             if self.document.get('active_stage_context') or self.document.get('inflight'):
                 raise RuntimeError('UNRECONCILED_STAGE_CONTEXT')
@@ -280,6 +289,9 @@ class TableVStageBudget(ReleaseProductionBudget):
                 or not label.startswith('RELEASE_P1:'+self.context['stage']+':')):
             raise ValueError('P1_ONLY_EXACT_ARM_STAGE_LABEL_REQUIRED')
         self.check_historical()
+        if self.context['arm']+':'+self.context['stage'] not in self.authorization.get(
+                'authorized_arm_stages',self.authorization['stage_caps_seconds']):
+            raise PermissionError('ARM_STAGE_NOT_AUTHORIZED')
         if require_remaining and self.remaining() <= 0:
             raise RuntimeError('ARM_STAGE_NATIVE_TIMEOUT_EXHAUSTED')
 

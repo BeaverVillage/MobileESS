@@ -61,6 +61,9 @@ def replay_same_problem_dw(context,case,built,previous,output):
         zero=verify_zero(elastic,point)
         if not all(proof.get('PASS') is True for proof in (sign,compact,expanded,point_proof,zero)):
             raise ValueError('TABLE_V_DW_REPLAY_CURRENT_PHASE_I_PRIMAL_DUAL_FAILED')
+        if '_class_sum' in state:
+            from .table_v_compression_adapter import source_lp_replay
+            source_lp_replay(state,raw['X'],output)
 
         class RecordedNative:
             def remaining(self): return 1.

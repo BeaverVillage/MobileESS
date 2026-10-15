@@ -37,7 +37,9 @@ def _freeze_sources(output):
         'v42_a_stage_phase1/core.py','v42_a_stage_phase1/oracle.py',
         'v42_a_stage_compact_rowgen/assembly.py','v42_a_stage_compact_rowgen/equivalence.py',
         'v42_may_build_v6/construction.py','v42_may_build_v6/compact_build.py',
-        'v42_root/native.py','v42_root/factor.py','v42_a_stage_domain_v2/runtime_projection.py')
+        'v42_root/native.py','v42_root/factor.py','v42_a_stage_domain_v2/runtime_projection.py',
+        'v42_integration/table_v_geometry_cache.py','v42_integration/table_v_compression.py',
+        'v42_integration/table_v_compression_verify.py','v42_integration/table_v_compression_adapter.py')
     records=[file_record(root/path) for path in paths]
     _write(Path(output)/'DW_SOURCE_FREEZE.json',dict(PASS=True,sources=records,Native_calls=0))
     return records
@@ -333,6 +335,10 @@ def project_runtime_auxiliaries(model, base, bindings, descriptor, data):
 
 def prepare_current_dw(context, case, built, output, *, captured=None,independent_domain_receipt=None,reference_receipt=None):
     """The PR191 source prepare sequence, using this already built FULL model."""
+    if context.get('manifest',{}).get('Table_V_full_flex') is True:
+        from .table_v_compression_adapter import prepare_exact_dw
+        return prepare_exact_dw(context,case,built,output,captured=captured,
+            independent_domain_receipt=independent_domain_receipt,reference_receipt=reference_receipt)
     from v42_pr134_sc.snapshot import capture
     from v42_a_stage_domain_v2.stress_backend import snapshot_of
     from v42_a_stage_domain_v2.fast_backend import Backend
@@ -485,6 +491,9 @@ def capture_current_full(context,case,built,output):
         objective_sha=objective_identity(model),
         native_binding=deepcopy(metadata['native_binding']),source_identity=deepcopy(context['manifest']['identity']),
         input_sha=context['input_audit']['a_input_sha'])
+    if getattr(case,'table_v_full_flex',False):
+        from .table_v_compression_adapter import stage_binding
+        packet['stage_binding']=stage_binding(context,case,packet)
     path=output/'FULL_DW_CAPTURE.pkl.gz'
     with gzip.open(path,'xb',compresslevel=1) as stream:pickle.dump(packet,stream,protocol=5)
     _write(output/'FULL_DW_CAPTURE_RECEIPT.json',dict(PASS=True,capture=file_record(path),
@@ -518,6 +527,8 @@ class CurrentNative:
         if not self.frozen_sources or any(file_record(row['path'])!=row for row in self.frozen_sources):
             raise PermissionError('TABLE_V_DW_FROZEN_SOURCE_BYTES_DRIFT')
         self.remaining(); folder=Path(folder); folder.mkdir(parents=True,exist_ok=True)
+        from .table_v_resources import admit_resources
+        admit_resources(self.budget,phase='PRE_DW_MODEL_BUILD:'+component)
         model,objectives=materialize(snapshot,self.day)
         try:
             if any(snapshot.vtypes!='C'): raise ValueError('TABLE_V_DW_LP_ONLY')
@@ -568,9 +579,17 @@ def execute_current_dw(context,case,built,budget,output):
             target=rebound(targeted.targeted,dict(targeted.targeted.__globals__,HISTORY=output,worker=worker))
             # Source run writes to OUT/day. All other algorithm code and
             # stopping/pricing/row-promotion criteria remain source-owned.
-            routed=rebound(phase.run,dict(phase.run.__globals__,OUT=output.parent,
-                full_pricing=full_pricing,targeted=target))
-            state,_,_,priced=routed(native,state,output.name)
+            namespace=dict(phase.run.__globals__,OUT=output.parent,
+                full_pricing=full_pricing,targeted=target)
+            if '_class_sum' in state:
+                from .table_v_compression_adapter import complete_kernel_rebuilder
+                namespace['build']=complete_kernel_rebuilder(state)
+                namespace['activate']=rebound(phase.activate,namespace)
+            routed=rebound(phase.run,namespace)
+            state,p1_point,_,priced=routed(native,state,output.name)
+            if '_class_sum' in state:
+                from .table_v_compression_adapter import source_lp_replay
+                source_lp_replay(state,p1_point,output)
         if any(file_record(row['path'])!=row for row in sources):
             raise PermissionError('TABLE_V_DW_SOURCE_BYTES_CHANGED_DURING_SOLVE')
         phi=json.loads((output/'PHASE_I_ZERO_CERTIFICATE.json').read_text(encoding='utf8'))

@@ -243,6 +243,10 @@ def run_tablev_actual(*,context,arm,reference_result,reference_acceptance,output
         _write(output/(name+'.json'),value)
     bad=[k for k in ('capacity_violations','dropped_jobs','future_duration_controller_reads',
         'future_completion_controller_reads','optimizer_calls','actual_global_reoptimization') if result['receipt'][k]!=0]
+    from .table_v_evaluation import evaluate
+    common,common_failures=evaluate(result,arm=arm,begin=args['begin'],end=args['end'])
+    bad.extend(common_failures)
+    _write(output/'COMMON_QOS_THROUGHPUT_METRICS.json',common)
     verify_sources(freeze,[])
     receipt=dict(schema=SCHEMA,fixture=False,arm=arm,day=day,status='FULL_PASS' if not bad else 'NOT_CERTIFIED',
         Actual_stage_PASS=not bad,Actual_stage_failures=bad,source_identity=context['manifest']['identity'],
@@ -255,6 +259,7 @@ def run_tablev_actual(*,context,arm,reference_result,reference_acceptance,output
         blocked_native_attempts=attempts,actual_wall_seconds=perf_counter()-began,receipt=result['receipt'],
         raw_folder=str(private['raw_folder']),Gate_contract=CONTRACT,
         control_tick_timings=result['carryout']['controller']['tablev_state']['control_tick_timings'],
+        common_metrics=common,common_metrics_record=file_record(output/'COMMON_QOS_THROUGHPUT_METRICS.json'),
         added_TimeShift_PreSite_Migration=False,Fresh_status='NOT_RUN')
     _write(output/'TABLE_V_ACTUAL_EXECUTION.json',receipt)
     return dict(status=receipt['status'],result=receipt,raw_records=[file_record(output/'TABLE_V_ACTUAL_EXECUTION.json'),file_record(trace)])

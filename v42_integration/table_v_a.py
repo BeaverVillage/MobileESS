@@ -100,6 +100,8 @@ def execute_current_a(context,budget,*,arm,stage,output,parent_result=None,paren
                 from v42_a_stage_domain_v2.solver_policy import solver_policy,apply_policy
                 from v42_b3_joint.numerical_policy import apply_native_precision
                 from .partial_canary import resource_snapshot
+                from .table_v_resources import admit_resources
+                admit_resources(budget,phase='PRE_ORIGINAL_AIDC_INTEGER_MODEL_BUILD:'+stage)
                 resources=resource_snapshot()
                 if (resources['memory']['AvailableMBytes']<8192
                         or resources['memory']['PercentCommittedBytesInUse']>=75

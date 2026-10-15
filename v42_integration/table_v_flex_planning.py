@@ -32,7 +32,9 @@ def _seal(value,key):
 
 def _records():
     names=('table_v_flex_planning.py','experimental_qos.py','experimental_planning.py',
-        'experimental_policy.py','qos.py','d0_actual_inputs.py')
+        'experimental_policy.py','qos.py','d0_actual_inputs.py','table_v_geometry_cache.py',
+        'table_v_compression.py','table_v_compression_verify.py','table_v_compression_adapter.py',
+        'm_adaptive.py','m_warm.py','table_v_evaluation.py','m_source_revision.py')
     paths=[Path(__file__).with_name(n) for n in names]
     paths += [ROOT/p for p in ('v42_native/service.py','v42_job_capability.py',
         'v42_a_stage_domain_v2/domain.py','v42_a_stage_phase1/producer.py','v42_boundary/generator.py')]
@@ -345,7 +347,7 @@ def build_flex_native_model(case,*,build_admission):
     if (build_admission.get('status')!='PASS' or build_admission.get('operation')!='TABLE_V_FULL_FLEX_A_NATIVE0_BUILD'
             or build_admission.get('case_sha')!=case.case_sha or build_admission.get('concurrent_heavy_solver') is not False):
         raise ValueError('TABLE_V_SUPERVISOR_FULL_FLEX_BUILD_ADMISSION_REQUIRED')
-    from .a_engine import authorized_data
+    from .table_v_geometry_cache import authorized_data
     from v42_root.native import build
     from v42_native.voltage import Stage
     data,domains=authorized_data(case)
@@ -359,6 +361,7 @@ def build_flex_native_model(case,*,build_admission):
     model,units,levels,controls,bindings=build(Context(),data,'F2-CRA',grid_context=case.grid,
         stage=Stage.A2 if case.stage=='A2' else Stage.A1)
     try:
+        model._table_v_authorized_domains=domains
         if [n for n,_ in levels]!=['rho','reserve_shortfall','CC4_reference_deviation','migration_count','shift_slots','prestart_changes']:
             raise ValueError('TABLE_V_ORIGINAL_OBJECTIVE_LAYER_DRIFT')
         receipt=dict(status='PASS',scope='TABLE_V_ORIGINAL_FULL_FLEX_MATRIX_NATIVE0_NOT_FULL_FEASIBLE',

@@ -704,6 +704,10 @@ def run_fullflex_actual(*,context,arm,a_result,a_acceptance,reference_result,ref
     for row in result['qos_ledger']:
         if row['total_intentional_burden_seconds']>row['budget_seconds']+1e-7:failures.append('SHARED_E1_QOS_BUDGET:'+row['uid'])
         if (row.get('actual_completion_deadline_excess_seconds') or 0)>0:failures.append('ACTUAL_SOURCE_HARD_DEADLINE:'+row['uid'])
+    from .table_v_evaluation import evaluate
+    common,common_failures=evaluate(result,arm=arm,begin=args['begin'],end=args['end'])
+    failures=list(dict.fromkeys(failures+common_failures))
+    _write(output/'COMMON_QOS_THROUGHPUT_METRICS.json',common)
     tick_max=max((r['wall_seconds'] for r in state['control_tick_timings']),default=math.inf)
     if tick_max>=900:failures.append('CONTROLLER_900_SECOND_LIMIT')
     verify_sources(freeze,[])
@@ -744,7 +748,8 @@ def run_fullflex_actual(*,context,arm,a_result,a_acceptance,reference_result,ref
         Original_reference_latest_start_excess_UIDs=sum(r['latest_start_excess_seconds']>0 for r in result['qos_ledger']),
         Original_reference_lateness_is_not_additional_intentional_burden=True,
         full_TimeShift_R1_Runtime_Backfill_Checkpoint_domain_connected=True,PreSite_only_case=False,R2='HOLD')
-    receipt=dict(schema=SCHEMA,fixture=False,arm=arm,day=day,status='FULL_PASS' if not failures else 'NOT_CERTIFIED',
+    receipt=dict(common_metrics=common,common_metrics_record=file_record(output/'COMMON_QOS_THROUGHPUT_METRICS.json'),
+        schema=SCHEMA,fixture=False,arm=arm,day=day,status='FULL_PASS' if not failures else 'NOT_CERTIFIED',
         Actual_stage_PASS=not failures,Actual_stage_failures=failures,source_identity=identity,source_sha=context['manifest']['source_sha'],
         evaluation_case_payload=payload,evaluation_case_sha=digest(payload),initial_state_sha=identity['initial_state_sha'],
         AIDC_anchor=a_result['aidc_anchor'],policy_sha=payload['policy_sha'],
