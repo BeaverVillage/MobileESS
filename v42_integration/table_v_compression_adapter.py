@@ -87,6 +87,22 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
     if built[6]['native_binding']!=captured['native_binding']:
         raise ValueError('COMPRESSION_CURRENT_ORIGINAL_FULL_BINDING_DRIFT')
     data=captured['data'];base=captured['projected'];descriptor=captured['descriptor']
+    # P2 deviation epigraphs have no P1 cost and can be existentially lifted.
+    # Remove only independently proved neutral tails before building Phi, so
+    # their unbounded null directions cannot contaminate the elastic LP.
+    from .table_v_p1_tails import project as project_p1_tails
+    projection=deepcopy(captured['runtime_projection'])
+    runtime_rows=projection['retained_original_rows'];runtime_columns=projection['retained_original_columns']
+    runtime_rowmap={int(row):i for i,row in enumerate(runtime_rows)}
+    protected={runtime_rowmap[int(i)] for i in captured['coupling_rows'].values()}
+    before_tails=base
+    base,descriptor,tail_proof,tail_rows,tail_columns=project_p1_tails(base,descriptor,protected_rows=protected)
+    _write(output/'P1_NEUTRAL_TAIL_PROJECTION.json',tail_proof)
+    projection.update(runtime_only_projected_FULL_sha=projection['projected_FULL_sha'],
+        projected_FULL_sha=base.fingerprint(),
+        retained_original_rows=[runtime_rows[int(i)] for i in tail_rows],
+        retained_original_columns=[runtime_columns[int(j)] for j in tail_columns],
+        P1_neutral_tail_projection=file_record(output/'P1_NEUTRAL_TAIL_PROJECTION.json'))
     if 'preserve_singleton_mixed_flow' not in data[7]:
         data=(*data[:7],dict(data[7],preserve_singleton_mixed_flow=[]))
     model=built[0]
@@ -102,7 +118,7 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
     semantic=semantic_classes(data,domains,context['tablev_flex']['known_issued_receipts'])
     _write(output/'UID_AUTHORITY_TO_MATHEMATICAL_CLASS.json',dict(UIDs=semantic['uid_ledger'],
         original_receipts_preserved=True,source_identity=context['manifest']['identity'],case_sha=case.case_sha))
-    projection=captured['runtime_projection'];_write(output/'ORIGINAL_RUNTIME_AUXILIARY_PROJECTION.json',projection)
+    _write(output/'ORIGINAL_RUNTIME_AUXILIARY_PROJECTION.json',projection)
     old_to_projected={int(row):i for i,row in enumerate(projection['retained_original_rows'])}
     axes={(family.upper(),*key) if isinstance(key,tuple) else (family.upper(),'',key):old_to_projected[row]
           for (family,key),row in captured['coupling_rows'].items()}
@@ -186,6 +202,7 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
         original_integer_size=size(captured['original']),objective_unchanged=True,
         all_rows_boxes_coefficients_exact=True,only_continuous_LP_compressed=True,integer_compression_applied=False,
         exact_class_projection=exact,redundancy=independent,Runtime_auxiliaries_removed=projection['eliminated_auxiliaries'],
+        P1_neutral_auxiliary_projection=file_record(output/'P1_NEUTRAL_TAIL_PROJECTION.json'),
         UID_authority_ledger=file_record(output/'UID_AUTHORITY_TO_MATHEMATICAL_CLASS.json'))
     _write(output/'ORIGINAL_FULL_DW_MATH_EQUIVALENCE.json',proof)
     _write(output/'AIDC_SEMANTIC_CLASS_EQUIVALENCE.json',dict(PASS=True,classes=len(groups),UIDs=len(data[1]),
@@ -203,7 +220,7 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
         atlas=dict(rf=np.zeros(len(G),dtype=int),rf_names=np.asarray(['ORIGINAL_FULL_ROW']),node_names=np.asarray([]),
             voltage_lower_rows=np.asarray([],dtype=int),voltage_upper_rows=np.asarray([],dtype=int),
             resource_variables=np.asarray(resource_variables),domains=domains),
-        _class_sum=dict(result=result,original_LP=base),
+        _class_sum=dict(result=result,original_LP=base,p1_tail_source=before_tails,p1_tail_proof=tail_proof),
         _table_v=dict(case_sha=case.case_sha,native_binding=deepcopy(built[6]['native_binding']),stage_binding=binding,
             source_domain_audit_sha=digest(audit),equivalent=proof,full_physical_domain_sha=data[7]['physical_domain_hash'],classes=len(groups)))
     from .table_v_memory import memory_sample
@@ -228,6 +245,13 @@ def source_lp_replay(state,point,output):
     result=info['result'];lift=np.asarray(point)[result['fold']]/result['scale']
     replay=primal_replay(info['original_LP'],lift)
     if not replay['PASS']:raise ValueError('COMPRESSED_P1_ORIGINAL_UID_LP_REPLAY_FAILED')
+    if info.get('p1_tail_proof',{}).get('entries'):
+        from .table_v_p1_tails import lift as lift_p1_tails
+        lift=lift_p1_tails(info['p1_tail_source'],lift,info['p1_tail_proof'])
+        replay=primal_replay(info['p1_tail_source'],lift)
+        if not replay['PASS']:raise ValueError('P1_TAIL_CANONICAL_ORIGINAL_UID_REPLAY_FAILED')
+        replay.update(P1_only_auxiliary_lift=True,native_compressed_point_unchanged=True,
+            all_pre_tail_original_UID_rows_replayed=True)
     np.savez_compressed(Path(output)/'ORIGINAL_UID_LP_POINT.npz',point=lift)
     _write(Path(output)/'ORIGINAL_UID_LP_REPLAY.json',dict(replay,scope='ORIGINAL_UID_LP_NOT_INTEGER_POINT',
         point=file_record(Path(output)/'ORIGINAL_UID_LP_POINT.npz'),integer_feasibility_claimed=False))

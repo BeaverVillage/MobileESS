@@ -27,6 +27,14 @@ OLD=ROOT/'docs/v42_b1_structure_b2_solo_20261015/TRACK_B/MAY01_RUN01/EXECUTIONS/
 def read(path):return json.loads(Path(path).read_text(encoding='utf8'))
 
 
+def require_validation_source(output,gate):
+    """A new attempt must use the exact scientific Source actually audited."""
+    manifest=read(Path(output)/'INPUTS/FULL_FLEX/TABLE_V_FLEX_CASE_MANIFEST.json')
+    source=gate.get('scientific_source_sha')
+    if not isinstance(source,str) or not source or manifest.get('source_sha')!=source:
+        raise PermissionError('FRESH_ATTEMPT_MUST_MATCH_AUDITED_SCIENTIFIC_SOURCE')
+
+
 def new_json(path,value):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
     with path.open('x',encoding='utf8') as stream:json.dump(value,stream,indent=2,ensure_ascii=False,allow_nan=False)
@@ -128,6 +136,7 @@ def run(arm,number,*,reason,corrective_commit,prepare_only=False,validation_gate
         output=prepare_attempt(arm,number,reason=reason,corrective_commit=corrective_commit)
         if prepare_only:return dict(status='PREPARED_NO_SOLVE',output=str(output),
             total_preparation_wall_seconds=time()-attempt_started)
+        require_validation_source(output,gate)
         if arm=='B2':
             manifests=[r for r in gate['evidence'] if read(r['path']).get('verified_static_case_cache')]
             if len(manifests)!=1:raise ValueError('ONE_ACTUAL_NATIVE0_STATIC_M_CACHE_REQUIRED')

@@ -41,7 +41,8 @@ def _freeze_sources(output):
         'v42_integration/table_v_geometry_cache.py','v42_integration/table_v_compression.py',
         'v42_integration/table_v_compression_verify.py','v42_integration/table_v_compression_adapter.py',
         'v42_integration/table_v_phase_policy.py','v42_integration/table_v_phase_diagnostics.py',
-        'v42_integration/table_v_global_control.py','v42_integration/pcc_definitions.py')
+        'v42_integration/table_v_global_control.py','v42_integration/pcc_definitions.py',
+        'v42_integration/table_v_p1_tails.py')
     records=[file_record(root/path) for path in paths]
     _write(Path(output)/'DW_SOURCE_FREEZE.json',dict(PASS=True,sources=records,Native_calls=0))
     return records

@@ -20,6 +20,9 @@ def seal(b1,m,regression,output):
         and rows[0]['mathematical_matrix_equivalence']=='PASS_INDEPENDENT_ALL_UID_ACTUAL_A_B_RHS_BOUNDS_OBJECTIVE'
         and rows[0]['FULL_integer_compression_rows_removed']==0
         and rows[0]['FULL_integer_compression_columns_removed']==0,'B1_ORIGINAL_INTEGER_AND_LP_EQUIVALENCE_REQUIRED')
+    require(isinstance(rows[0].get('source_sha'),str) and bool(rows[0]['source_sha'])
+        and rows[0]['source_sha']==mproof.get('source_sha'),
+        'A_AND_M_NATIVE0_MUST_SHARE_EXACT_CURRENT_SCIENTIFIC_SOURCE')
     definitions=read(b1/'B1/A1/DW/PCC_HARD_DEFINITIONS.json')
     require(definitions.get('PASS') is True and definitions.get('original_identity_rows_preserved') is True
         and len(definitions.get('definitions',[]))==1152,'ALL_12_BY_96_PCC_DEFINITIONS_REQUIRED')
@@ -42,9 +45,15 @@ def seal(b1,m,regression,output):
         and tests.get('tests',0)>=1247 and not tests.get('failures') and not tests.get('skipped')
         and not tests.get('blocked_real_native_attempts') and tests.get('historical_ledgers_byte_preserved') is True,
         'FULL_CURRENT_REGRESSION_AND_HISTORICAL_LEDGER_INTEGRITY_REQUIRED')
-    records=read(b1/'B1/A1/DW/DW_SOURCE_FREEZE.json')['sources']+mproof['current_source_records']
+    scientific_manifest=read(b1/'INPUTS/FULL_FLEX/TABLE_V_FLEX_CASE_MANIFEST.json')
+    require(scientific_manifest.get('source_sha')==rows[0]['source_sha'],
+        'AUDIT_RESULT_AND_SCIENTIFIC_MANIFEST_SOURCE_MUST_MATCH')
+    science_records=scientific_manifest.get('science_derivation',{}).get('source_records')
+    require(isinstance(science_records,list) and bool(science_records),'ACTUAL_SCIENTIFIC_SOURCE_RECORDS_REQUIRED')
+    records=read(b1/'B1/A1/DW/DW_SOURCE_FREEZE.json')['sources']+mproof['current_source_records']+science_records
     require(all(file_record(r['path'])==r for r in records),'NATIVE0_CURRENT_SOURCE_BYTES_REQUIRED')
     proof=dict(schema='V42_2_CURRENT_RELEASE_NATIVE0_REGRESSION_GATE_V1',PASS=True,release=release_identity(),
+        scientific_source_sha=rows[0]['source_sha'],
         evidence=[file_record(p) for p in (b1/'RESULT.json',m/'RESULT.json',regression/'RESULTS.json',
             b1/'B1/A1/DW/PCC_HARD_DEFINITIONS.json',b1/'B1/A1/DW/PCC_FORMULATION_NATIVE0_COMPARISON.json')],
         verified_source_records=records,Native_calls=0,FULL_UB_claimed=False,Actual_Fresh_PASS_claimed=False,

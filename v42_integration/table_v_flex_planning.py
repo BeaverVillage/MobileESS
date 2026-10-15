@@ -33,7 +33,7 @@ def _seal(value,key):
 def _records():
     names=('table_v_flex_planning.py','experimental_qos.py','experimental_planning.py',
         'experimental_policy.py','qos.py','d0_actual_inputs.py','table_v_geometry_cache.py',
-        'table_v_compression.py','table_v_compression_verify.py','table_v_compression_adapter.py',
+        'table_v_compression.py','table_v_compression_verify.py','table_v_compression_adapter.py','table_v_p1_tails.py',
         'm_adaptive.py','m_warm.py','table_v_evaluation.py','m_source_revision.py')
     paths=[Path(__file__).with_name(n) for n in names]
     paths += [ROOT/p for p in ('v42_native/service.py','v42_job_capability.py',
