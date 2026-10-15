@@ -13,7 +13,7 @@ import numpy as np
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 
 
-def audit(execution,output):
+def audit(execution,output,*,reuse_static=None):
     import gurobipy as gp
     from v42_integration.table_v_run import load_context,budget,current_build_admission
     from v42_integration.table_v_mess import TableVMessStages
@@ -31,9 +31,13 @@ def audit(execution,output):
     factory=TableVMessStages(context,main)
     ref=json.loads((Path(execution)/'REFERENCE_RESULT.json').read_text(encoding='utf8'))
     accepted=json.loads((Path(execution)/'REFERENCE_ACCEPTANCE.json').read_text(encoding='utf8'))
-    case=factory.prepare('B2','M1',ref,accepted,output/'CURRENT_M',
-        build_admission=current_build_admission(main,arm='B2',stage='M1',operation='CURRENT_M_NATIVE0_BUILD'),
-        progress=lambda row:print('M_NATIVE0',row,flush=True))
+    if reuse_static is None:
+        case=factory.prepare('B2','M1',ref,accepted,output/'CURRENT_M',
+            build_admission=current_build_admission(main,arm='B2',stage='M1',operation='CURRENT_M_NATIVE0_BUILD'),
+            progress=lambda row:print('M_NATIVE0',row,flush=True))
+    else:
+        from v42_integration.m_static_reuse import restore_proved_artifacts
+        case=restore_proved_artifacts(reuse_static,context,ref,accepted,output/'CURRENT_M')
     packet,certificate=prepare_k16(case,None,output/'K16')
     K,e=packet['A'],packet['d']
     model=gp.Model('SEEDLESS_K16_NATIVE0')
@@ -45,8 +49,8 @@ def audit(execution,output):
             lower=np.array_equal(x.LB,e['lower']),upper=np.array_equal(x.UB,e['upper']),types=np.array_equal(x.VType,e['types']),
             objective=np.array_equal(x.Obj,e['objective']),rhs=np.array_equal(rows.RHS,e['rhs']),
             sense=np.array_equal(rows.Sense,e['sense']),no_Start=np.all(np.asarray(x.Start)==gp.GRB.UNDEFINED))
+        _write(output/'K16_NATIVE_READBACK.json',dict(PASS=all(checks.values()),checks=checks,Native_calls=0,FULL_UB=None))
         if not all(checks.values()):raise ValueError('SEEDLESS_K_NATIVE_READBACK_FAILED')
-        _write(output/'K16_NATIVE_READBACK.json',dict(PASS=True,checks=checks,Native_calls=0,FULL_UB=None))
     finally:model.dispose()
     del packet;gc.collect()
     class NoNative:
@@ -95,12 +99,16 @@ def audit(execution,output):
         measurements.append(dict(repeat=repeat,baseline_wall_seconds=old_wall,current_wall_seconds=new_wall,
             exact_same_matrix_domain_lift_start=True,scope='DIRECT_CONSTRUCTION_ONLY_NOT_FULL_ARM_SPEEDUP'))
         del left,right;gc.collect()
+    from v42_integration.m_static_reuse import save_verified_case
+    static_cache=save_verified_case(case,output/'VERIFIED_STATIC_CASE.pkl.gz')
     result=dict(status='PASS',Native_calls=0,blocked_Native_attempts=calls,K16=certificate,
+        verified_static_case_cache=static_cache,
         seedless_iterations=iterations,Direct_same_pool_AB=measurements,source_case=case.identity,
         case_sha=case.case_sha,source_sha=context['manifest']['source_sha'],before_memory=before,
         after_memory=memory_sample(),wall_seconds=perf_counter()-began,FULL_UB_certified=False,
         current_source_records=[file_record(ROOT/p) for p in ('v42_integration/m_engine.py','v42_integration/m_candidates.py',
-            'v42_integration/table_v_k48.py','v42_integration/m_adaptive.py','v42_integration/table_v_mess.py')])
+            'v42_integration/table_v_k48.py','v42_integration/m_adaptive.py','v42_integration/table_v_mess.py',
+            'v42_integration/m_static_reuse.py')])
     if calls:raise ValueError('NATIVE0_NATIVE_CALL_ATTEMPTED')
     _write(output/'RESULT.json',result);print(json.dumps(dict(status='PASS',wall_seconds=result['wall_seconds'])),flush=True)
 
@@ -108,4 +116,5 @@ def audit(execution,output):
 if __name__=='__main__':
     import argparse
     p=argparse.ArgumentParser();p.add_argument('--execution',type=Path,required=True);p.add_argument('--output',type=Path,required=True)
-    args=p.parse_args();audit(args.execution,args.output)
+    p.add_argument('--reuse-static',type=Path)
+    args=p.parse_args();audit(args.execution,args.output,reuse_static=args.reuse_static)

@@ -79,3 +79,25 @@ def test_PCC_identity_stays_hard_while_grid_rows_remain_elastic():
     hard=hard_rows(state);master=elastic_master(s,tuple(i for i in state['grows'] if i not in hard))
     assert 0 not in master.artificial_rows and 1 in master.artificial_rows
     assert (master.snapshot.matrix.getrow(0).toarray()[0,:2]==[1.,-2.]).all()
+
+
+def test_tiny_projected_K_coefficient_is_preserved_by_exact_row_scaling(tmp_path,monkeypatch):
+    import gurobipy as gp
+    from v42_integration.a_engine import digest
+    from v42_m1_hybrid.blocks import matrix_sha
+    case,_=source_fixture()
+    case.original_A[4,6]=-2.**-42
+    case.identity['original_matrix_sha']=matrix_sha(case.original_A);case.case_sha=digest(case.identity)
+    packet,proof=prepare_k16(case,None,tmp_path/'K16_SCALED')
+    assert proof['positive_dyadic_native_row_scaling_exact']
+    assert all(cut['native_row_scale']>1 for cut in packet['cuts'])
+    def forbidden(*args,**kwargs):raise AssertionError('NATIVE0_OPTIMIZE_FORBIDDEN')
+    monkeypatch.setattr(gp.Model,'optimize',forbidden)
+    model=gp.Model();model.Params.OutputFlag=0
+    try:
+        d=packet['d'];x=model.addMVar(packet['A'].shape[1],lb=d['lower'],ub=d['upper'],vtype=d['types'])
+        model.addMConstr(packet['A'],x,d['sense'],d['rhs']);model.update()
+        assert matrix_sha(model.getA().tocsr())==matrix_sha(packet['A'])
+    finally:model.dispose()
+    packet['cuts'][0]['native_row_scale']*=2
+    with pytest.raises(ValueError,match='ROW_SCALE_DRIFT'):verify_packet(case,packet)

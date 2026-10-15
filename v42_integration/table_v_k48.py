@@ -32,6 +32,7 @@ QUOTAS = dict(original_oracle.QUOTAS)
 ORIGINAL_NATIVE_PARAMETERS = dict(Threads=1, MIPGap=.03, MIPFocus=3,
     FeasibilityTol=1e-8, IntFeasTol=1e-8, OptimalityTol=1e-8, Seed=42)
 ORIGINAL_CALL_CAP = {16: 90., 32: 180., 48: 180.}
+NATIVE_COEFFICIENT_FLOOR = 2.**-39
 
 
 def require(value, reason):
@@ -113,13 +114,23 @@ def exact_cut(A, d, row, columns, geometry=None):
                      delta * F(float(d['upper'][original_j])))
         values[j] = native
     native_rhs = original_oracle.upward(rhs + error)
+    # Helper elimination can create tiny nonzero coefficients that Gurobi
+    # silently omits. Exact powers of two retain every coefficient and the
+    # same inequality; neither physical rows nor bounds are relaxed.
+    exponent=max(0,-39-(math.frexp(min(abs(v) for v in values.values()))[1]-1))
+    scale=math.ldexp(1.,exponent)
+    scaled={j:v*scale for j,v in values.items()}
+    require(all(math.isfinite(v) and F(v)==F(values[j])*F(scale) for j,v in scaled.items())
+        and math.isfinite(native_rhs*scale) and F(native_rhs*scale)==F(native_rhs)*F(scale),
+        'K48_EXACT_NATIVE_ROW_SCALING_NOT_REPRESENTABLE')
     return dict(original_row=int(row), name=str(d['row_names'][row]),
         source_row_sha=original_oracle.row_sha(A, d, int(row)),
         original_terms={str(j): str(c) for j, c in sorted(terms.items())},
         terms={str(j): str(c) for j, c in sorted(local.items())},
-        native_terms={str(j): c for j, c in sorted(values.items())},
+        native_terms={str(j): c for j, c in sorted(scaled.items())},
         exact_rhs=str(rhs), helper_constant=str(constant), coefficient_box_error=str(error),
-        native_rhs=native_rhs, helper_rows=[dict(row=int(i), source_row_sha=original_oracle.row_sha(A, d, i))
+        native_rhs=native_rhs*scale, native_row_scale=scale,
+        helper_rows=[dict(row=int(i), source_row_sha=original_oracle.row_sha(A, d, i))
                                           for i in sorted(dependencies)])
 
 
@@ -219,8 +230,15 @@ def verify_packet(case, packet):
             native = float(value); expected_terms[j] = native
             delta = F(native) - value
             error += max(delta * F(float(e['lower'][j])), delta * F(float(e['upper'][j])))
+        # Independent exact-rational derivation of the positive row scale.
+        scale=F(1)
+        while min(abs(F(v)) for v in expected_terms.values())*scale < F(1,2**39):
+            scale*=2
+        require(F(cut.get('native_row_scale',1.))==scale,'K48_EXACT_NATIVE_ROW_SCALE_DRIFT')
+        expected_terms={j:float(F(v)*scale) for j,v in expected_terms.items()}
+        expected_rhs=float(F(independent.upward(rhs+error))*scale)
         require(cut['coefficient_box_error'] == str(error)
-                and cut['native_rhs'] == independent.upward(rhs + error), 'K48_OUTWARD_ROUNDING_FAILED')
+                and F(cut['native_rhs']) == F(expected_rhs), 'K48_OUTWARD_ROUNDING_FAILED')
         begin, end = B.indptr[len(rows) + k:len(rows) + k + 2]
         observed = {int(j): float(v) for j, v in zip(B.indices[begin:end], B.data[begin:end])}
         require(observed == expected_terms and e['rhs'][len(rows)+k] == cut['native_rhs'],
@@ -245,6 +263,7 @@ def verify_packet(case, packet):
         proof='Literal original physical rows/bounds/types + exact original grid inequalities; outward rounding only relaxes rows',
         coordinate_representation='IDENTITY_ON_ORIGINAL_FULL_PHYSICAL_COLUMNS_AND_RHO',
         independent_original_geometry_replayed=True, historical_LB_or_UB_transferred=False,
+        positive_dyadic_native_row_scaling_exact=True, source_coefficients_not_deleted=True,
         original_FULL_start_replay=original, projected_start_replay=projected,
         K=len(cuts), physical_rows=len(rows), columns=len(columns), nnz=B.nnz,
         current_FULL_UB=None if original is None else original['objective'], Native_optimize_calls=0,

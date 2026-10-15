@@ -108,6 +108,7 @@ def owned_campaign_lock():
 
 
 def run(arm,number,*,reason,corrective_commit,prepare_only=False,validation_gate=None):
+    attempt_started=time()
     from v42_integration.table_v_run import run_arm
     from v42_integration.table_v_memory import memory_sample
     from v42_integration.table_v_control import require_running,stop_request
@@ -125,9 +126,11 @@ def run(arm,number,*,reason,corrective_commit,prepare_only=False,validation_gate
     with owned_campaign_lock():
         require_running(CAMPAIGN)
         output=prepare_attempt(arm,number,reason=reason,corrective_commit=corrective_commit)
-        if prepare_only:return dict(status='PREPARED_NO_SOLVE',output=str(output))
+        if prepare_only:return dict(status='PREPARED_NO_SOLVE',output=str(output),
+            total_preparation_wall_seconds=time()-attempt_started)
         authority=launch_authority(output,arm)
-        state=dict(arm=arm,attempt=number,output=str(output),pid=os.getpid(),started_epoch_seconds=time(),
+        state=dict(arm=arm,attempt=number,output=str(output),pid=os.getpid(),started_epoch_seconds=attempt_started,
+            preparation_wall_seconds=time()-attempt_started,
             status='RUNNING',validation_gate=file_record(validation_gate),Worker=1,Threads=1)
         stop=threading.Event()
         def observer():
@@ -142,13 +145,13 @@ def run(arm,number,*,reason,corrective_commit,prepare_only=False,validation_gate
         try:
             outcome=run_arm(arm,output,actual_slots=96,launch_authority=authority)
             state.update(status=outcome['status'],outcome=file_record(output/arm/'ARM_OUTCOME.json'),
-                finished_epoch_seconds=time(),automatic_identical_retry=False,
+                finished_epoch_seconds=time(),total_attempt_wall_seconds=time()-attempt_started,automatic_identical_retry=False,
                 next_action='PRESERVE_PASS_AND_PROCEED_NEXT_ARM' if outcome['status']=='FULL_PASS' else 'ROOT_CAUSE_REPAIR_NATIVE0_THEN_NEW_ATTEMPT')
             _write(CAMPAIGN/'STATE.json',state)
             return state
         except BaseException as error:
             state.update(status='SUPERVISOR_ERROR_REQUIRES_RECONCILIATION',error=repr(error),
-                finished_epoch_seconds=time(),automatic_identical_retry=False)
+                finished_epoch_seconds=time(),total_attempt_wall_seconds=time()-attempt_started,automatic_identical_retry=False)
             _write(CAMPAIGN/'STATE.json',state)
             raise
         finally:
