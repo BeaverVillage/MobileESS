@@ -1,0 +1,286 @@
+{
+  "status": "CAUSE_REPRODUCED",
+  "scope": "FROZEN_LOCAL_PLANNING_SECANTS_NOT_CURRENT_NONLINEAR_VOLTAGE_AUTHORITY",
+  "input_authority": {
+    "coefficients": {
+      "path": "D:\\v42_may_final_campaign_20261013\\models\\2025-05-01\\COEFFICIENTS.npz",
+      "sha256": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+      "bytes": 62211025
+    },
+    "certificate": {
+      "path": "D:\\v42_may_joint_repair_campaign_20261013\\models\\2025-05-01\\ELECTRICAL_CERTIFICATE.json",
+      "sha256": "51367e284c316308a89c28bb5b56928d1f024359754f0d5caf9ec2403dcb4796",
+      "bytes": 228676
+    },
+    "original_validity_scope": "Settled unsaturated original LDC deadband endpoints; local relative-voltage and delivered-power approximation; independent AC remains decisive",
+    "background": "FROZEN_FORECAST_PV_DEMAND_WEATHER_SVR_LINEARIZATION",
+    "AIDC_controls": "OBSERVED_GPU_RECOMPUTED_EXACT_ORIGINAL_C1_WITH_CURRENT_ACTUAL_WEATHER",
+    "MESS_controls": "EXACT_FROZEN_PR223_M2_ALL24_SERVICE_SITES",
+    "actual_exogenous_background_relinearized": false,
+    "Fresh_AC_required_for_realized_nonlinear_voltage": true,
+    "original_voltage_bounds_changed": false,
+    "Source_voltage_violations_are_not_Fresh_AC_results": true
+  },
+  "coefficient_source": {
+    "path": "D:\\v42_may_final_campaign_20261013\\models\\2025-05-01\\COEFFICIENTS.npz",
+    "sha256": "b3370e37a375d6b358ba0695feeb5bad26da4d043447669f5d2d3024ad20eba8",
+    "bytes": 62211025
+  },
+  "voltage_rows": 838,
+  "unique_node_axes": 419,
+  "node_axis_duplicated_for_lower_upper_LDC_faces": true,
+  "endpoint_rows": [
+    {
+      "face": "LOWER_LDC_ENDPOINT",
+      "node": "idc_idc11_pcc.1",
+      "slot": 12,
+      "constant": 0.08120561101891188,
+      "anchor_endpoint_voltage_squared": 1.0026612235993855,
+      "current_endpoint_voltage_squared": 0.41711076914344963,
+      "current_endpoint_sqrt_pu": 0.6458411330532066,
+      "delta_voltage_squared_by_family": {
+        "AIDC_PQ_PF95": -0.5100246081043298,
+        "MESS_P": 0.0,
+        "MESS_Q": -0.07552584635160609
+      },
+      "terms": [
+        {
+          "control": "aidc_load_kw[AIDC02]",
+          "signed_coefficient": -1.8172480590772366e-05,
+          "anchor": 31.057673949978476,
+          "current": 26.675882678695153,
+          "contribution_voltage_squared": 7.962801683021195e-05
+        },
+        {
+          "control": "aidc_load_kw[AIDC03]",
+          "signed_coefficient": -1.8039446576745277e-05,
+          "anchor": 57.13305857010904,
+          "current": 46.17858008563574,
+          "contribution_voltage_squared": 0.00019761272939676177
+        },
+        {
+          "control": "aidc_load_kw[AIDC05]",
+          "signed_coefficient": -4.2582294894844e-05,
+          "anchor": 70.17075607241303,
+          "current": 60.29650666411781,
+          "contribution_voltage_squared": 0.00042046820016926594
+        },
+        {
+          "control": "aidc_load_kw[AIDC06]",
+          "signed_coefficient": -1.8183490796075397e-05,
+          "anchor": 57.13305857010904,
+          "current": 40.701340932779985,
+          "contribution_voltage_squared": 0.00029878598642208267
+        },
+        {
+          "control": "aidc_load_kw[AIDC07]",
+          "signed_coefficient": -1.7983954277989156e-05,
+          "anchor": 31.057673949978476,
+          "current": 22.294091404983508,
+          "contribution_voltage_squared": 0.00015760386780057335
+        },
+        {
+          "control": "aidc_load_kw[AIDC08]",
+          "signed_coefficient": -1.797760149502281e-05,
+          "anchor": 57.13305857010904,
+          "current": 41.7967887588956,
+          "contribution_voltage_squared": 0.00027570934708614396
+        },
+        {
+          "control": "aidc_load_kw[AIDC09]",
+          "signed_coefficient": -1.7688826374984146e-05,
+          "anchor": 31.057673949978476,
+          "current": 9.148717587358892,
+          "contribution_voltage_squared": 0.000387543725155482
+        },
+        {
+          "control": "aidc_load_kw[AIDC10]",
+          "signed_coefficient": 0.006404054943599524,
+          "anchor": 57.13305857010904,
+          "current": 33.03320617901066,
+          "contribution_voltage_squared": -0.1543367788452324
+        },
+        {
+          "control": "aidc_load_kw[AIDC11]",
+          "signed_coefficient": 0.006358868575621512,
+          "anchor": 31.057673949978476,
+          "current": 16.81685231398516,
+          "contribution_voltage_squared": -0.09055551319214884
+        },
+        {
+          "control": "aidc_load_kw[AIDC12]",
+          "signed_coefficient": 0.006413133321065301,
+          "anchor": 57.13305857010904,
+          "current": 15.50604108174128,
+          "contribution_voltage_squared": -0.2669596129112193
+        },
+        {
+          "control": "mess_q_kvar[STA01]",
+          "signed_coefficient": -0.0012743683314313525,
+          "anchor": 0.0,
+          "current": -392.3141121612922,
+          "contribution_voltage_squared": 0.4999526805119584
+        },
+        {
+          "control": "mess_q_kvar[STA06]",
+          "signed_coefficient": -0.0012418089236342134,
+          "anchor": 0.0,
+          "current": 93.90326457722648,
+          "contribution_voltage_squared": -0.11660991191038438
+        },
+        {
+          "control": "mess_q_kvar[STA08]",
+          "signed_coefficient": -0.001241930806297975,
+          "anchor": 0.0,
+          "current": 8.474390933657162,
+          "contribution_voltage_squared": -0.010524607165121089
+        },
+        {
+          "control": "mess_q_kvar[STA12]",
+          "signed_coefficient": -0.0012291155594490234,
+          "anchor": 0.0,
+          "current": 364.76961367980607,
+          "contribution_voltage_squared": -0.448344007788059
+        }
+      ]
+    },
+    {
+      "face": "UPPER_LDC_ENDPOINT",
+      "node": "idc_idc11_pcc.1",
+      "slot": 12,
+      "constant": 0.08120561101891188,
+      "anchor_endpoint_voltage_squared": 1.0026612235993855,
+      "current_endpoint_voltage_squared": 0.41711076914344963,
+      "current_endpoint_sqrt_pu": 0.6458411330532066,
+      "delta_voltage_squared_by_family": {
+        "AIDC_PQ_PF95": -0.5100246081043298,
+        "MESS_P": 0.0,
+        "MESS_Q": -0.07552584635160609
+      },
+      "terms": [
+        {
+          "control": "aidc_load_kw[AIDC02]",
+          "signed_coefficient": -1.8172480590772366e-05,
+          "anchor": 31.057673949978476,
+          "current": 26.675882678695153,
+          "contribution_voltage_squared": 7.962801683021195e-05
+        },
+        {
+          "control": "aidc_load_kw[AIDC03]",
+          "signed_coefficient": -1.8039446576745277e-05,
+          "anchor": 57.13305857010904,
+          "current": 46.17858008563574,
+          "contribution_voltage_squared": 0.00019761272939676177
+        },
+        {
+          "control": "aidc_load_kw[AIDC05]",
+          "signed_coefficient": -4.2582294894844e-05,
+          "anchor": 70.17075607241303,
+          "current": 60.29650666411781,
+          "contribution_voltage_squared": 0.00042046820016926594
+        },
+        {
+          "control": "aidc_load_kw[AIDC06]",
+          "signed_coefficient": -1.8183490796075397e-05,
+          "anchor": 57.13305857010904,
+          "current": 40.701340932779985,
+          "contribution_voltage_squared": 0.00029878598642208267
+        },
+        {
+          "control": "aidc_load_kw[AIDC07]",
+          "signed_coefficient": -1.7983954277989156e-05,
+          "anchor": 31.057673949978476,
+          "current": 22.294091404983508,
+          "contribution_voltage_squared": 0.00015760386780057335
+        },
+        {
+          "control": "aidc_load_kw[AIDC08]",
+          "signed_coefficient": -1.797760149502281e-05,
+          "anchor": 57.13305857010904,
+          "current": 41.7967887588956,
+          "contribution_voltage_squared": 0.00027570934708614396
+        },
+        {
+          "control": "aidc_load_kw[AIDC09]",
+          "signed_coefficient": -1.7688826374984146e-05,
+          "anchor": 31.057673949978476,
+          "current": 9.148717587358892,
+          "contribution_voltage_squared": 0.000387543725155482
+        },
+        {
+          "control": "aidc_load_kw[AIDC10]",
+          "signed_coefficient": 0.006404054943599524,
+          "anchor": 57.13305857010904,
+          "current": 33.03320617901066,
+          "contribution_voltage_squared": -0.1543367788452324
+        },
+        {
+          "control": "aidc_load_kw[AIDC11]",
+          "signed_coefficient": 0.006358868575621512,
+          "anchor": 31.057673949978476,
+          "current": 16.81685231398516,
+          "contribution_voltage_squared": -0.09055551319214884
+        },
+        {
+          "control": "aidc_load_kw[AIDC12]",
+          "signed_coefficient": 0.006413133321065301,
+          "anchor": 57.13305857010904,
+          "current": 15.50604108174128,
+          "contribution_voltage_squared": -0.2669596129112193
+        },
+        {
+          "control": "mess_q_kvar[STA01]",
+          "signed_coefficient": -0.0012743683314313525,
+          "anchor": 0.0,
+          "current": -392.3141121612922,
+          "contribution_voltage_squared": 0.4999526805119584
+        },
+        {
+          "control": "mess_q_kvar[STA06]",
+          "signed_coefficient": -0.0012418089236342134,
+          "anchor": 0.0,
+          "current": 93.90326457722648,
+          "contribution_voltage_squared": -0.11660991191038438
+        },
+        {
+          "control": "mess_q_kvar[STA08]",
+          "signed_coefficient": -0.001241930806297975,
+          "anchor": 0.0,
+          "current": 8.474390933657162,
+          "contribution_voltage_squared": -0.010524607165121089
+        },
+        {
+          "control": "mess_q_kvar[STA12]",
+          "signed_coefficient": -0.0012291155594490234,
+          "anchor": 0.0,
+          "current": 364.76961367980607,
+          "contribution_voltage_squared": -0.448344007788059
+        }
+      ]
+    }
+  ],
+  "critical_node_in_LDC_projected_affected_nodes": false,
+  "critical_node_face_rows_identical": true,
+  "critical_node_semantics": "UNMODIFIED_LOCAL_CENTRAL_AUTO_SECANT_DUPLICATED_IN_BOTH_FACES",
+  "certificate_validity_scope": "Settled unsaturated original LDC deadband endpoints; local relative-voltage and delivered-power approximation; independent AC remains decisive",
+  "global_nonlinear_envelope_certified": false,
+  "independent_native_prefix_central_secants_include_discrete_AUTO_response": true,
+  "frozen_background": "FORECAST_DEMAND_PV_WEATHER_AND_FORECAST_ANCHOR",
+  "previous_Fresh_same_slot_same_node_pu": 1.0007719049522799,
+  "API_semantic_issue": "Off-anchor local central AUTO secants were treated as global current admission authority. Some other nodes have LDC endpoint faces, but the critical node is unprojected and its two rows are identical.",
+  "supersedes_preliminary_interpretation": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC01\\FROZEN_AFFINE_ROOT_CAUSE.json",
+  "preliminary_claim_critical_node_is_only_a_LDC_lower_bound": false,
+  "correction": "Use same-current-state original IEEE123/11SVR candidate AC for present safety; keep invalid old faces diagnostic only, require explicit valid prediction scope before Pre-site ranking.",
+  "original_planning_formulation_or_voltage_limits_changed": false,
+  "AC_or_Native_calls": 0,
+  "generation_source": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_svr11\\model.py",
+    "sha256": "a69c4627c2cfda9abf2ec5ec56c92b866fb9fc142a9cfead3f15fa48e303c373",
+    "bytes": 16084
+  },
+  "LDC_projection_source": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_svr11\\ldc_interval.py",
+    "sha256": "0cf2b4a089989ffd73e8536afdb37f75b4ffd335cbb5268e15ddb2f897a46b0c",
+    "bytes": 6962
+  }
+}
