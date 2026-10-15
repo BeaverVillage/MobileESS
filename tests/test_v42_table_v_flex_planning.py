@@ -191,6 +191,28 @@ def test_new_reference_keeps_original_runtime_completion_offset_exact():
             before[uid]['risk_nominal_completion_issue_slot']-before[uid]['reference_end'])
 
 
+@pytest.mark.parametrize('kind', ['pending', 'nonmember'])
+def test_delayed_reference_does_not_remove_original_E1_earlier_legal_starts(kind):
+    """The Source receipt, rather than the objective reference, owns timing."""
+    from v42_integration.a_engine import authorized_data
+    from v42_integration.qos import receipt_slot_domain
+    base,stats,u=fixture();uid=u[kind];begin=base['state']['begin_epoch_seconds']
+    base['state']['capacities'].update(A=1,B=1)
+    base['data'][3].capacities.update(A=1,B=1)
+    next(row for row in base['state']['pending'] if row['uid']==uid)['submit_seconds']=begin-3600
+    c=api.compile_flex_descriptors(base,strict_stats=stats,source_records=[])
+    receipt=c['provider'].receipts[uid]
+    expected=receipt_slot_domain(receipt,axis_origin_seconds=begin,axis_start_slot=24)
+    assert c['data'][1][uid].reference_start>24
+    assert min(expected)==24 and min(expected)<c['data'][1][uid].reference_start
+    assert c['windows'][uid]==expected
+    assert receipt.budget_seconds==(1800 if kind=='pending' else 0)
+    case=SimpleNamespace(data=c['data'],qos_receipts=c['receipts'],window_slots=c['windows'],progress=None)
+    data,domains=authorized_data(case)
+    assert set(start for start,site in domains[uid].stays)==set(expected)
+    assert data[1][uid].service_slots==base['data'][1][uid].service_slots
+
+
 def test_fullflex_builder_rejects_unadmitted_request_before_model_construction():
     c,b,u=compiled()
     with pytest.raises(ValueError,match='FULL_FLEX_A_CASE'):

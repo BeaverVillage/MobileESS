@@ -78,8 +78,18 @@ def state(source):
                        if (d.get('active_stage_context') or {}).get('arm') == arm), None)
         native = [r for r in calls if r.get('stage_context', {}).get('arm') == arm
                   and r.get('solver','').startswith('GUROBI')]
+        current_source = contract.get('source_sha')
+        current_native = [r for r in native if current_source
+                          and r.get('stage_context', {}).get('source_sha') == current_source]
+        prior_native = [r for r in native if not current_source
+                        or r.get('stage_context', {}).get('source_sha') != current_source]
+        last_current_native = current_native[-1] if current_native else {}
         runtime_known = all(finite(r.get('Native_Runtime')) for r in native)
         native_seconds = sum(r['Native_Runtime'] for r in native) if runtime_known else None
+        current_native_seconds = sum(r['Native_Runtime'] for r in current_native) if current_source and all(
+            finite(r.get('Native_Runtime')) for r in current_native) else None
+        prior_native_seconds = sum(r['Native_Runtime'] for r in prior_native) if current_source and all(
+            finite(r.get('Native_Runtime')) for r in prior_native) else None
         current_case = (bool(contract) and actual.get('source_identity') == contract.get('source_identity')
             and actual.get('source_sha') == contract.get('source_sha')
             and actual.get('evaluation_case_sha') == digest(actual.get('evaluation_case_payload'))
@@ -115,6 +125,7 @@ def state(source):
         build_rows = [r for r in calls if r.get('solver') == 'BUILD'
             and r.get('stage_context', {}).get('arm') == arm
             and r.get('stage_context', {}).get('stage') == build_stage
+            and current_source and r.get('stage_context', {}).get('source_sha') == current_source
             and finite(r.get('measured_seconds'))]
         build_wall = sum(r['measured_seconds'] for r in build_rows) if build_rows else None
         native_inflight_wall = max(0.,now-inflight['started_epoch_seconds']) if inflight and finite(inflight.get('started_epoch_seconds')) else None
@@ -131,11 +142,16 @@ def state(source):
             Native_seconds=native_seconds if planning else None, Native_calls=len(native) if planning else None,
             completed_Native_Runtime_seconds=native_seconds if planning else None,
             Native_calls_completed=len(native) if planning else None,
+            current_case_completed_Native_Runtime_seconds=current_native_seconds if planning else None,
+            prior_case_completed_Native_Runtime_seconds=prior_native_seconds if planning else None,
+            current_case_Native_calls_completed=len(current_native) if planning and current_source else None,
+            prior_case_Native_calls_completed=len(prior_native) if planning and current_source else None,
             Native_calls_inflight=1 if inflight else 0,
             Native_calls_started=len(native)+(1 if inflight else 0) if planning else None,
-            last_completed_Native_status=native[-1].get('status') if native else None,
+            last_completed_Native_status=last_current_native.get('status'),
             last_completed_Native_status_name={2:'OPTIMAL',3:'INFEASIBLE',4:'INF_OR_UNBD',
-                5:'UNBOUNDED',9:'TIME_LIMIT',11:'INTERRUPTED'}.get(native[-1].get('status')) if native else None,
+                5:'UNBOUNDED',9:'TIME_LIMIT',11:'INTERRUPTED'}.get(last_current_native.get('status')),
+            last_completed_Native_status_source_sha=current_source if last_current_native else None,
             active_Native_elapsed_seconds=native_inflight_wall,
             current_Native_call_wall_seconds=native_inflight_wall,
             current_Native_Runtime_pending=bool(inflight),
@@ -193,17 +209,17 @@ body{font:15px system-ui,sans-serif;background:#111820;color:#e6edf3;margin:28px
 Timeout: A1/A2 각 Arm·Stage Native 5,400초 / M1/M2 1,800초. <b>합산 총량 제한 없음</b>; K48 별도 원장. Build·HiGHS·Actual·AC는 Native timeout에서 제외.</p>
 <h2>Actual 최대 선로·상 부하율</h2><p>현재 Case의 Actual trace를 원래 15분×96 clock으로 settle 후 측정한 Full-network Fresh AC 값입니다. Planning ρ와 구분합니다. Fresh 완료 전 값은 대기 상태입니다. % = 100 × pu.</p>
 <table><thead><tr><th>Arm</th><th>Computing / MESS</th><th>Actual / Fresh</th><th>Actual 최대 선로·상 (%)</th><th>Vmin / Vmax (pu)</th><th>공식 물리 판정</th></tr></thead><tbody id="physical"></tbody></table>
-<h2>실행 진행</h2><table><thead><tr><th>Arm</th><th>결과</th><th>현재 Stage / Phase</th><th>전체 경과</th><th>완료 전처리 wall</th><th>완료 Native Runtime</th><th>Gurobi 호출</th><th>현재 호출 wall<br>(Runtime 확정 전)</th><th>Actual Compute GPUh</th><th>Peak RSS</th></tr></thead><tbody id="progress"></tbody></table>
-<p>최적화가 진행 중이면 현재 Phase는 NATIVE_OPTIMIZE_RUNNING입니다. 전처리 완료 후 마지막 콜백 이름이 남아 있어도 전처리가 계속 진행되는 뜻은 아닙니다. 완료 Native Runtime 0초·완료 0회와 현재 진행 1회는 구분합니다. 진행 호출의 wall은 반환 후 확정되는 Native Runtime과 다릅니다.<br>전체 wall은 Native·Build·Actual·AC를 포함합니다. 하위 시간을 다시 더하지 않습니다. Substep은 별도 진단이며 공식 PASS/FAIL을 대신하지 않습니다. 이 화면은 새로운 물리 인증서를 발급하지 않습니다.</p>
+<h2>실행 진행</h2><table><thead><tr><th>Arm</th><th>결과</th><th>현재 Stage / Phase</th><th>전체 경과</th><th>이번Case 완료 전처리 wall</th><th>완료 Native Runtime<br>전체 / 이전Case / 이번Case</th><th>Gurobi 호출</th><th>현재 호출 wall<br>(Runtime 확정 전)</th><th>Actual Compute GPUh</th><th>Peak RSS</th></tr></thead><tbody id="progress"></tbody></table>
+<p>최적화가 진행 중이면 현재 Phase는 NATIVE_OPTIMIZE_RUNNING입니다. 전처리 완료 후 마지막 콜백 이름이 남아 있어도 전처리가 계속 진행되는 뜻은 아닙니다. 완료 Native Runtime 0초·완료 0회와 현재 진행 1회는 구분합니다. 진행 호출의 wall은 반환 후 확정되는 Native Runtime과 다릅니다. 이전Case에서 이월한 Native 비용·호출수는 총 누적에 포함하지만, 최종 Gurobi 상태는 현재 Source의 완료 호출만 표시합니다.<br>전체 wall은 Native·Build·Actual·AC를 포함합니다. 하위 시간을 다시 더하지 않습니다. Substep은 별도 진단이며 공식 PASS/FAIL을 대신하지 않습니다. 이 화면은 새로운 물리 인증서를 발급하지 않습니다.</p>
 <div id="failure"></div><details><summary>Report / evidence</summary><ul id="links"></ul></details><details><summary>Source / Case</summary><pre id="identity"></pre></details>
 <script>
 const el=id=>document.getElementById(id); const fmt=(x,d=2)=>typeof x==='number'&&Number.isFinite(x)?x.toFixed(d):'대기';
 const seconds=x=>typeof x==='number'?Math.floor(x/3600)+'h '+Math.floor(x%3600/60)+'m '+Math.floor(x%60)+'s':'—';
 function row(body,values,metricIndex=-1){let tr=document.createElement('tr');values.forEach((v,i)=>{let td=document.createElement('td');td.textContent=v==null?'—':String(v);if(i===metricIndex)td.className='metric';tr.appendChild(td)});body.appendChild(tr)}
 async function refresh(){try{let response=await fetch('/api/state',{cache:'no-store'});if(!response.ok)throw Error(response.status);let s=await response.json();el('physical').replaceChildren();el('progress').replaceChildren();el('links').replaceChildren();let failures=[];
-s.arms.forEach(a=>{row(el('physical'),[a.arm,a.computing+' / '+a.MESS,(a.executed_actual_slots??0)+'/96 · '+(a.executed_fresh_slots??0)+'/96',fmt(a.maximum_actual_phase_line_loading_percent)+' %',fmt(a.voltage_min_pu,4)+' / '+fmt(a.voltage_max_pu,4),a.physical_status],3);row(el('progress'),[a.arm+' '+a.current_attempt,a.statuses.arm,(a.current_stage??'대기')+' / '+(a.current_phase??''),seconds(a.elapsed_wall_seconds),typeof a.completed_model_preprocessing_wall_seconds==='number'?fmt(a.completed_model_preprocessing_wall_seconds,3)+' s (완료)':'—',seconds(a.completed_Native_Runtime_seconds),'완료 '+(a.Native_calls_completed??'—')+'회 / 진행 '+a.Native_calls_inflight+'회'+(a.last_completed_Native_status!=null?' · '+a.last_completed_Native_status+' '+(a.last_completed_Native_status_name??''):''),seconds(a.current_Native_call_wall_seconds)+(a.current_Native_Runtime_pending?' (Runtime 미확정)':''),fmt(a.actual_compute_GPUh),typeof a.peak_RSS_bytes==='number'?(a.peak_RSS_bytes/1073741824).toFixed(2)+' GiB':'—']);if(a.failure_reason)failures.push(a.arm+' '+a.failure_stage+': '+a.failure_reason)});
+s.arms.forEach(a=>{row(el('physical'),[a.arm,a.computing+' / '+a.MESS,(a.executed_actual_slots??0)+'/96 · '+(a.executed_fresh_slots??0)+'/96',fmt(a.maximum_actual_phase_line_loading_percent)+' %',fmt(a.voltage_min_pu,4)+' / '+fmt(a.voltage_max_pu,4),a.physical_status],3);row(el('progress'),[a.arm+' '+a.current_attempt,a.statuses.arm,(a.current_stage??'대기')+' / '+(a.current_phase??''),seconds(a.elapsed_wall_seconds),typeof a.completed_model_preprocessing_wall_seconds==='number'?fmt(a.completed_model_preprocessing_wall_seconds,3)+' s (완료)':'—',seconds(a.completed_Native_Runtime_seconds)+' / '+seconds(a.prior_case_completed_Native_Runtime_seconds)+' / '+seconds(a.current_case_completed_Native_Runtime_seconds),'완료 '+(a.Native_calls_completed??'—')+'회 (이전 '+(a.prior_case_Native_calls_completed??'—')+' / 이번 '+(a.current_case_Native_calls_completed??'—')+') / 진행 '+a.Native_calls_inflight+'회'+(a.last_completed_Native_status!=null?' · 이번Case '+a.last_completed_Native_status+' '+(a.last_completed_Native_status_name??''):''),seconds(a.current_Native_call_wall_seconds)+(a.current_Native_Runtime_pending?' (Runtime 미확정)':''),fmt(a.actual_compute_GPUh),typeof a.peak_RSS_bytes==='number'?(a.peak_RSS_bytes/1073741824).toFixed(2)+' GiB':'—']);if(a.failure_reason)failures.push(a.arm+' '+a.failure_stage+': '+a.failure_reason)});
 for(let group of [['evidence',s.evidence],['report',s.reports]])for(let item of group[1]){let li=document.createElement('li'),a=document.createElement('a');a.textContent=item.label;a.href='/'+group[0]+'/'+encodeURIComponent(item.relative_path);a.target='_blank';a.rel='noopener';li.appendChild(a);el('links').appendChild(li)}
-el('failure').textContent=failures.join('\n');el('identity').textContent=JSON.stringify({Source:s.source,SourceSHA:s.source_sha,Case:s.source_case},null,2);el('updated').textContent='5초 갱신 · '+s.observed_UTC+' · 현재 EXECUTION01만 표시';
+el('failure').textContent=failures.join('\n');el('identity').textContent=JSON.stringify({Source:s.source,SourceSHA:s.source_sha,Case:s.source_case},null,2);el('updated').textContent='5초 갱신 · '+s.observed_UTC+' · 현재 선택된 실행 폴더만 표시';
 }catch(error){el('updated').textContent='현재 자료 읽기 오류: '+error.message}}refresh();setInterval(refresh,5000);
 </script></html>'''
 

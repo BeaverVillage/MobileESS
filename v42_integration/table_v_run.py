@@ -35,7 +35,7 @@ def verify_adapters(output):
     return freeze
 
 
-def prepare(output=DEFAULT):
+def prepare(output=DEFAULT,*,carry_forward_native_ledgers=()):
     from .release_date_case import compile_date_case
     from .table_v_flex_planning import compile_table_v_flex_context
     from .table_v_reference import make_reference
@@ -77,6 +77,8 @@ def prepare(output=DEFAULT):
         input_preparation_wall_seconds=perf_counter()-began)
     _write(output/'MAY01_TABLE_V_FOUR_ARM_CONTRACT.json',contract)
     for kind,caps,name in [('PLANNING_NATIVE',MAIN_CAPS,'PLANNING'),('K48_SEPARATE',K48_CAPS,'K48')]:
+        predecessors=[file_record(p) for p in carry_forward_native_ledgers
+            if json.loads(Path(p).read_text(encoding='utf8'))['authorization_document']['budget_kind']==kind]
         auth=dict(schema=SCHEMA,approved=True,budget_kind=kind,stage_caps_seconds=caps,
             total_limit_seconds=None,total_limit_enabled=False,
             timeout_basis='CUMULATIVE_GUROBI_NATIVE_OPTIMIZE_PER_ARM_STAGE',P2_calls=0,Worker=1,Threads=1,
@@ -85,7 +87,8 @@ def prepare(output=DEFAULT):
             human_approval_reference=dict(latest_user_reply='총량 제한 폐지, Stage Timeout만 적용',
                 stage_limits='B1 A1/B3 A1/A2 5400 sec each; B2 M1/B3 M1/M2 1800 sec each',
                 K48='Table V attachment prior explicit K48 300 sec per M stage; separate ledger; no extra grant'),
-            source_cases=[dict(day='2025-05-01',source_sha=manifest['source_sha'],source_identity=manifest['identity'])])
+            source_cases=[dict(day='2025-05-01',source_sha=manifest['source_sha'],source_identity=manifest['identity'])],
+            carry_forward_ledgers=predecessors,prior_arm_stage_costs_reset=False)
         _write(output/(name+'_AUTHORIZATION.json'),auth)
         TableVStageBudget(auth['authorized_ledger_path'],authorization=auth,historical_ledgers=HISTORY)
     files=adapters()+[file_record(ROOT/'tools/run_v42_table_v.py')]

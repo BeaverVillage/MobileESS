@@ -11,6 +11,7 @@ if __name__=='__main__':
     p.add_argument('operation',choices=['prepare','B0','B1','B2','B3'])
     p.add_argument('--output',type=Path,default=DEFAULT)
     p.add_argument('--attempt',default=None)
+    p.add_argument('--carry-forward-native-ledger',type=Path,action='append',default=[])
     a=p.parse_args()
-    result=prepare(a.output) if a.operation=='prepare' else run_arm(a.operation,a.output,attempt=a.attempt)
+    result=prepare(a.output,carry_forward_native_ledgers=a.carry_forward_native_ledger) if a.operation=='prepare' else run_arm(a.operation,a.output,attempt=a.attempt)
     print('PREPARED' if a.operation=='prepare' else {k:result.get(k) for k in ('arm','status','failed_stage','error','wall_seconds')},flush=True)

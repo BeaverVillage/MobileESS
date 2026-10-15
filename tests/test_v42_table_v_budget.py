@@ -123,3 +123,32 @@ def test_owned_worker_lock_and_no_reset(tmp_path,monkeypatch):
     b.path.unlink()
     with pytest.raises(RuntimeError,match='RESET_FORBIDDEN'):
         mod.TableVStageBudget(b.path,authorization=auth,historical_ledgers=hist,worker_lock=b.worker_lock)
+
+
+def test_case_repair_carries_prior_native_stage_cost_without_reset(tmp_path,monkeypatch):
+    b,auth,hist,Model=setup(tmp_path,monkeypatch)
+    with b.arm_context('B1'),context(b,'B1','A1'),b.capture_native_methods():
+        m=Model();m.seconds=776.269
+        b.solve(m,label='RELEASE_P1:A1:FIXTURE',cap=5400.)
+    prior=b.path.read_bytes()
+    new=dict(auth,authorization_id='NAMED_REPAIRED_CASE',authorized_ledger_path=str(tmp_path/'REPAIRED.json'),
+             carry_forward_ledgers=[mod.file_record(b.path)])
+    repaired=mod.TableVStageBudget(tmp_path/'REPAIRED.json',authorization=new,historical_ledgers=hist,worker_lock=b.worker_lock)
+    assert repaired.used()==pytest.approx(776.269)
+    with repaired.arm_context('B1'),context(repaired,'B1','A1'):
+        assert repaired.remaining()==pytest.approx(4623.731)
+    with repaired.arm_context('B3'),context(repaired,'B3','A1'):
+        assert repaired.remaining()==5400.
+    assert b.path.read_bytes()==prior and repaired.document['prior_arm_stage_costs_reset'] is False
+    reopened=mod.TableVStageBudget(repaired.path,authorization=new,historical_ledgers=hist,worker_lock=b.worker_lock)
+    assert reopened.used()==pytest.approx(776.269)
+
+
+def test_case_repair_refuses_inflight_or_unknown_native_parent(tmp_path,monkeypatch):
+    b,auth,hist,_=setup(tmp_path,monkeypatch)
+    document=deepcopy(b.document);document['inflight']={'pid':123}
+    b.path.write_text(__import__('json').dumps(document),encoding='utf8')
+    new=dict(auth,authorization_id='BAD_PARENT',authorized_ledger_path=str(tmp_path/'BAD.json'),
+             carry_forward_ledgers=[mod.file_record(b.path)])
+    with pytest.raises(ValueError,match='COMPLETED_SAME'):
+        mod.TableVStageBudget(tmp_path/'BAD.json',authorization=new,historical_ledgers=hist,worker_lock=b.worker_lock)

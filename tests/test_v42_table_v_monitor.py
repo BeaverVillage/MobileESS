@@ -62,7 +62,8 @@ def test_latest_append_attempt_selected_without_resetting_shared_native(tmp_path
 
 def test_inflight_native_overrides_stale_bindings_phase_and_separates_wall(tmp_path, monkeypatch):
     monkeypatch.setattr('tools.serve_v42_table_v_monitor.time.time', lambda: 1000.)
-    context = dict(arm='B1',stage='A1')
+    context = dict(arm='B1',stage='A1',source_sha='current')
+    write(tmp_path/'MAY01_TABLE_V_FOUR_ARM_CONTRACT.json',dict(source_sha='current'))
     write(tmp_path/'B1/LIVE_PROGRESS.json',dict(stage='A1',elapsed_wall_seconds=100.,
         progress=dict(phase='NATIVE_BINDINGS')))
     write(tmp_path/'PLANNING_NATIVE_LEDGER.json',dict(calls=[
@@ -79,7 +80,8 @@ def test_inflight_native_overrides_stale_bindings_phase_and_separates_wall(tmp_p
 
 
 def test_ended_infeasible_arm_does_not_remain_in_bindings_or_running_phase(tmp_path):
-    context = dict(arm='B1',stage='A1')
+    context = dict(arm='B1',stage='A1',source_sha='current')
+    write(tmp_path/'MAY01_TABLE_V_FOUR_ARM_CONTRACT.json',dict(source_sha='current'))
     write(tmp_path/'B1/LIVE_PROGRESS.json',dict(stage='A1',progress=dict(phase='NATIVE_BINDINGS')))
     write(tmp_path/'B1/ARM_OUTCOME.json',dict(status='NOT_CERTIFIED',failed_stage='A1',wall_seconds=888.227))
     write(tmp_path/'PLANNING_NATIVE_LEDGER.json',dict(calls=[
@@ -101,3 +103,27 @@ def test_completed_arm_shows_terminal_phase(tmp_path):
     row = state(tmp_path)['arms'][0]
     assert row['current_stage'] == 'COMPLETED' and row['current_phase'] == 'ARM_COMPLETED'
     assert row['completed_phase'] == 'FRESH_AC96' and row['failed_phase'] is None
+
+
+def test_carried_native_cost_preserved_without_transferring_old_case_status(tmp_path):
+    write(tmp_path/'MAY01_TABLE_V_FOUR_ARM_CONTRACT.json',dict(source_sha='new-source'))
+    previous = dict(arm='B1',stage='A1',source_sha='old-source')
+    current = dict(arm='B1',stage='A1',source_sha='new-source')
+    calls = [dict(solver='GUROBI',Native_Runtime=776.269,status=3,stage_context=previous,
+                  carry_forward_from='EXECUTION01')]
+    path = tmp_path/'PLANNING_NATIVE_LEDGER.json'
+    write(path,dict(calls=calls,active_stage_context=current,
+                    inflight=dict(stage_context=current,started_epoch_seconds=1.)))
+    row = state(tmp_path)['arms'][1]
+    assert row['current_phase'] == 'NATIVE_OPTIMIZE_RUNNING'
+    assert row['Native_calls_completed'] == 1 and row['completed_Native_Runtime_seconds'] == 776.269
+    assert row['prior_case_Native_calls_completed'] == 1 and row['prior_case_completed_Native_Runtime_seconds'] == 776.269
+    assert row['current_case_Native_calls_completed'] == 0 and row['current_case_completed_Native_Runtime_seconds'] == 0.
+    assert row['last_completed_Native_status'] is None and row['last_completed_Native_status_name'] is None
+    calls.append(dict(solver='GUROBI',Native_Runtime=20.,status=2,stage_context=current))
+    write(path,dict(calls=calls,inflight=None))
+    row = state(tmp_path)['arms'][1]
+    assert row['completed_Native_Runtime_seconds'] == 796.269 and row['Native_calls_completed'] == 2
+    assert row['current_case_completed_Native_Runtime_seconds'] == 20. and row['current_case_Native_calls_completed'] == 1
+    assert row['last_completed_Native_status'] == 2 and row['last_completed_Native_status_name'] == 'OPTIMAL'
+    assert row['last_completed_Native_status_source_sha'] == 'new-source'

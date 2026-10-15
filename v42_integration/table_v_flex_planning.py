@@ -146,7 +146,7 @@ def compile_flex_descriptors(base,*,strict_stats,source_records):
         running=original.state=='RUNNING'
         reference=OFFSET if running else OFFSET+int((observed[uid].reference_start_seconds-begin)/SLOT)
         allowed=(OFFSET,) if running else tuple(OFFSET+int((t-begin)/SLOT) for t in receipt.allowed_starts_seconds
-            if begin<=t<begin+86400 and t>=observed[uid].reference_start_seconds)
+            if begin<=t<begin+86400)
         if not allowed or reference not in allowed:
             issues.append(dict(uid=uid,reason='CAUSAL_REFERENCE_OR_E1_WINDOW_OUTSIDE_ORIGINAL_D0_CONTROL_REPRESENTATION',
                 reference_native_slot=reference,receipt_status=receipt.status,allowed_native_slots=list(allowed)))

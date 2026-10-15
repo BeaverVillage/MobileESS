@@ -45,9 +45,31 @@ class TableVStageBudget(ReleaseProductionBudget):
         self.authorization = deepcopy(authorization)
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        carried=[];carry_parents=[]
+        for record in authorization.get('carry_forward_ledgers',[]):
+            if file_record(record['path'])!=record or any(r['path']==record['path'] for r in carry_parents):
+                raise ValueError('EXACT_DISTINCT_PREDECESSOR_NATIVE_LEDGER_REQUIRED')
+            prior=json.loads(Path(record['path']).read_text(encoding='utf8'))
+            if (prior.get('schema')!='TABLE_V_NATIVE_STAGE_LEDGER_V1'
+                    or prior.get('inflight') or prior.get('active_stage_context')
+                    or prior['authorization_document'].get('budget_kind')!=authorization['budget_kind']
+                    or prior['authorization_document'].get('stage_caps_seconds')!=authorization['stage_caps_seconds']):
+                raise ValueError('COMPLETED_SAME_ARM_STAGE_AUTHORITY_PREDECESSOR_REQUIRED')
+            for index,row in enumerate(prior['calls']):
+                if not row.get('solver','').startswith('GUROBI'):continue
+                runtime=row.get('Native_Runtime');c=row.get('stage_context',{})
+                if (type(runtime) not in (int,float) or not math.isfinite(runtime) or runtime<0
+                        or c.get('day')!='2025-05-01'
+                        or c.get('arm','')+':'+c.get('stage','') not in authorization['stage_caps_seconds']):
+                    raise ValueError('KNOWN_NATIVE_RUNTIME_AND_ORIGINAL_ARM_STAGE_REQUIRED')
+                copied=deepcopy(row)
+                copied['carried_forward_from']=dict(ledger=record,row_index=index,row_sha=digest(row))
+                carried.append(copied)
+            carry_parents.append(record)
         if self.path.resolve() != Path(authorization['authorized_ledger_path']).resolve():
             raise PermissionError('APPROVAL_BOUND_TO_ONE_CANONICAL_LEDGER_PATH')
         self.historical = [file_record(p) for p in historical_ledgers]
+        self.historical += [r for r in carry_parents if r not in self.historical]
         if len(self.historical) < 2 or any(Path(r['path']).resolve() == self.path.resolve() for r in self.historical):
             raise ValueError('OLD_CANONICAL_AND_CONSUMED_RC01_LEDGERS_READ_ONLY_REQUIRED')
         self.worker_lock = Path(worker_lock)
@@ -85,9 +107,10 @@ class TableVStageBudget(ReleaseProductionBudget):
                 raise RuntimeError('UNRECONCILED_NATIVE_OR_STAGE_CONTEXT')
         else:
             self.document = dict(schema='TABLE_V_NATIVE_STAGE_LEDGER_V1', limit_seconds=None,
-                total_limit_enabled=False, calls=[], inflight=None, active_stage_context=None,
-                Gurobi_Native_seconds=0., other_solver_wall_seconds=0.,
-                conservative_solve_seconds=0., AC_wall_seconds=0.,
+                total_limit_enabled=False, calls=carried, inflight=None, active_stage_context=None,
+                Gurobi_Native_seconds=sum(r['Native_Runtime'] for r in carried), other_solver_wall_seconds=0.,
+                conservative_solve_seconds=sum(r['Native_Runtime'] for r in carried), AC_wall_seconds=0.,
+                carried_forward_predecessors=carry_parents, prior_arm_stage_costs_reset=False,
                 historical_ledgers_merged=False, release_identity=identity,
                 authorization_document=deepcopy(authorization),
                 worker_lock_path=str(self.worker_lock.resolve()), P2_calls=0, Worker=1, Threads=1)
