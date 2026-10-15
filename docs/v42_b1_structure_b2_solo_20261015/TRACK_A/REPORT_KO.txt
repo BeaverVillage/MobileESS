@@ -1,0 +1,209 @@
+PR230 Track A — B1 Phase I 구조 진단 / 2026-10-15
+상태: Native0 진단 완료, Production 정식화 미변경, 추가 Optimize·presolve·IIS 0회
+
+1. 가장 구체적으로 확인한 원인
+
+저장된 FAST_B S0 Raw의 최대 절댓값 원본 변수는 column 20436이다.
+실제 descriptor의 controls[73][0]이며 이름은 PCC_affine_alias[AIDC01,73]이다.
+값은 -1.0368985084808021e17, 원본 하한 -inf / 상한 +inf, Phi 목적 계수는 0이다.
+이는 GPU 수요가 1e17이라는 뜻이 아니라 전력망의 PCC affine 보조변수가 수치적으로 멀리 이동한 것이다.
+
+원본 생성 위치는 v42_integration/a_engine.py:68~69이다.
+PCC_affine_alias를 자유변수로 만든 다음 PCC_affine_identity로 실제 AIDC 부하 식과 연결한다.
+1152개 PCC 변수는 column 19560~20711, 12개 AIDC × 96 slot이다.
+이 축은 원본 descriptor와 저장 S0 원본 열 축이 공유하는 global prefix이다.
+
+S0 column 20436의 포함 incident row는 14개이며 모두 <=, 계수는 약 8.63e-12~2.38e-11이다.
+restricted row 13110: coefficient=8.626411393243067e-12, RHS=6.847556066577913e-7, NNZ=13.
+restricted row 13120: coefficient=9.111854579641918e-12, RHS=6.201584204155704e-7, NNZ=13.
+두 행 모두 elastic global row다. 전체 14개 행과 다른 상위 20개 열 정보는 S0_STRUCTURE.json에 있다.
+이 열에 걸리는 equality 행이 S0에 하나도 없다. 따라서 원본 PCC_affine_identity equality는 S0에서 생략됐다.
+상위 20개 큰 열 모두 PCC alias이고 해당 equality가 포함돼 있지 않음을 독립 확인했다.
+
+따라서 확인된 구조적 문제는 '원본의 자유 보조변수 정의식을 생략한 restricted LP'다.
+작은 grid 계수만 남고 실제 부하를 결정하는 identity가 빠진 상태에서 Phi가 원본 변수 크기를 벌점화하지 않는다.
+큰 음수 PCC로 일부 포함 grid inequality를 만족하는 방향이 열려 있다. Phi=0이어도 물리 계획을 뜻하지 않는다.
+이는 현재 snapshot/Raw에 대한 직접 증거이며, 새로운 Solver 속도 개선 실측이나 full LP infeasibility 증명은 아니다.
+PCC identity의 원본 FULL 행 번호와 모든 grid 행의 원본 이름은 경량 descriptor에 저장되어 있지 않아 복구하지 않았다.
+restricted row 번호와 원본 FULL row 번호를 혼동하지 않는다.
+
+2. 111.218666의 의미와 실제 Phi
+
+NATIVE03 SOURCE18R_FAST의 Barrier 마지막 Primal Objective 약 111.218665587은 최적화 중 내부 진단값이다.
+현재 종료는 TIME_LIMIT(9), SolCount=0, 유효 X/Pi/RC가 없다. 실제 artificial vector와 원본 Phi는 복원할 수 없다.
+111개 인공변수나 인증 Phi=111.218666으로 해석하지 않는다. Global LB도 없다.
+
+실제 목적은 v42_a_stage_phase1/core.py:61~85에서 구성한다.
+Phi = sum(w_j * a_j), 모든 a_j는 연속형, lower=0, upper=+inf이다.
+원본 <= 행에는 -a, >= 행에는 +a, equality에는 +a_plus-a_minus를 추가한다.
+가중치는 w=1/2^ceil(log2(max(1,abs(rhs),max(abs(Aij)))))인 양의 정확 dyadic 수다.
+이것은 목적의 행별 벌점 정규화이며 원본 A/RHS를 실제로 나누는 행 scaling이 아니다.
+local row 및 원본 variable bounds는 hard로 보존하고 명시 global row에만 artificial을 붙인다.
+elastic한 전력망 행도 a=0으로 되돌린 원본 물리 한계를 최종 검증해야 한다.
+
+현재 S0에는 14,555 elastic row: equality 5,592 / <= 6,574 / >= 2,389가 있다.
+artificial은 20,147개: +1 계수 7,981개 / -1 계수 12,166개이다.
+hard local row는 261,414개다.
+weight별 artificial 개수: 1:10467, 1/2:1334, 1/4:5832, 1/8:340,
+1/16:284, 1/32:254, 1/64:196, 1/524288:96, 1/2097152:1344.
+S0_ARTIFICIAL_MAPPING.csv에 artificial column, restricted row, 부호, 정확 weight, 저장 Raw X를 전부 기록했다.
+
+과거 FAST_B_EXTENDED 111.157초 OPTIMAL Raw에서는 20,147개 artificial 값이 모두 정확히 0이다.
+Phi도 정확 Fraction 합으로 0이며 S0 원본 포함 행 replay 최대 잔차는 1.1482370609883219e-11이다.
+하지만 full compact의 나머지 행은 별도다. 유효한 restricted Phi=0을 전체 feasibility나 DW LB로 승격하지 않는다.
+
+3. Source18r와 현재의 정식화 차이
+
+Source18r S0: 19,450행 / 원본 68,026열 + artificial 19,541열 = 총 87,567열 / NNZ 2,237,275.
+현재 S0: 275,969행 / 원본 195,578열 + artificial 20,147열 = 총 215,725열 / NNZ 1,799,788.
+Source18r elastic row 14,861 / hard local row 4,589.
+현재 elastic row 14,555 / hard local row 261,414.
+즉 행 증가 256,519개는 hard local 증가 256,825개와 elastic global 감소 306개의 합이다.
+artificial 증가는 606개뿐이다. 현재 S0가 느린 이유를 'artificial 개수 폭증'으로 설명하는 것은 맞지 않는다.
+원본 변수는 127,552개 늘었다. 전체 NNZ가 작아도 국소 블록·coupling 축·소거 그래프가 달라졌다.
+
+현재 원본 FULL은 2,108,858행 / 946,756열 / NNZ 21,126,591이다.
+global 원본 20,713열 + UID-local primitive 856,321열 + Runtime_finish_count 69,722열 = 946,756열이다.
+Runtime_auxiliary exact substitution으로 69,542개를 제거하고 상수 Runtime 180개는 global prefix에 보존한다.
+그 뒤 1,555 UID의 동일 연속 local polytope를 229 semantic class로 정확히 합쳐 원본 LP 195,578열이 된다.
+20,713 + 180 + class-local 174,685 = 195,578이다.
+따라서 229 class라고 local 변수 229개만 남는 구조가 아니다. 각 class가 시간·상태·이동·WAN flow 변수를 가진다.
+
+ORIGINAL_LOCAL_VARIABLE_FAMILIES.csv에 실제 descriptor 기준 원본 UID별/229 class 대표별 변수 수를 기록했다.
+대표별 주요 family: r1 36,926 / link_bytes 28,082 / arrive 24,712 / r0 20,039 /
+q 14,852 / depart 14,852 / pair 7,199 / y 6,693 등이다.
+정확 합은 174,685이다. 원본 FULL의 integer/binary는 이 LP class 합으로 치환하지 않는다.
+원본 binary 272,044와 1,555 UID 권한은 별도로 그대로 유지된다.
+CLASS_UID_ROSTER.csv는 class SHA, cardinality, 대표 UID, 전체 UID를 기록한다.
+class 합은 Y=sum(X_uid), 유리수 역상 X_uid=Y/N이라는 연속 convexity 증명이다. 정수 분해 증명이 아니다.
+
+Source18r 준비 파일은 physical class 117개와 과거 active/compact 경로를 기록한다.
+현재 229개와 같은 class의 재실행으로 취급하지 않는다.
+Source18r snapshot은 열 이름/단위 정보가 없어 68,026열의 정확 family별 분해를 이번 경량 감사에서 복구하지 않았다.
+과거와 현재의 개별 family 증감에 추정 수치를 채우지 않는다.
+
+4. Phi=0 이후 S1이 필요한 이유
+
+v42_a_stage_canary/phase.py:43~50은 hard local 행, coupling axes,
+초기 constructed point에서 이미 만족한 nonempty global 행과 상위 50개 벌점 행을 S0에 넣는다.
+초기 point에서 위반한 definition equality가 상위 50에 들지 않으면 생략될 수 있다.
+
+완전 compact는 1,030,845행이다. S0 275,969행을 제외한 754,876행을 별도로 검사한다.
+E07의 저장 ROW_SEPARATION.json에서 실제 위반 omitted row가 280,182개였다.
+v42_a_stage_canary/phase.py:66~71은 이를 포함집합에 전부 추가하므로 S1은 556,151행이 된다.
+S1도 모든 행을 한꺼번에 넣은 상태가 아니다. 그 뒤에도 빠진 행의 독립 separation이 필요하다.
+S1은 원본 열 195,578개가 같고 artificial 301,709개, 총 열 497,287개, NNZ 5,652,483이다.
+
+280,182개 위반은 E07의 원래 OPTIMAL Raw로 기록한 결과다.
+111.157초 FAST_B는 동일 S0의 별도 Raw이며 이번에 full omitted separation을 새로 실행하지 않았다.
+두 Raw의 동일성을 가정하지 않는다. FAST_B의 큰 PCC 값과 기존 WARM_MAPPING02의 S1 잔차 실패는 별도 증거다.
+S0 Phi=0이 full Phase I 종료가 되지 못하는 구조는 두 경우에 공통이다.
+
+S0→S1 warm-start audit의 최대 original X≈1.037e17,
+새 artificial도≈1.037e17이고 단순 elastic PStart의 binary64 replay는 최대 2.68485455로 실패했다.
+저장 Raw에는 VBasis/CBasis가 없다. 유효 Basis를 발명하거나 Raw를 반올림해 설치할 수 없다.
+현재 공통 basis 확장 코드는 유효 Native basis가 있을 때만 exact 포함을 검사한다. 실제 속도 이득은 미검증이다.
+
+5. Scaling, factor fill 및 남아 있는 중복
+
+현재 S0 원본 계수 최소 비영값 1.0450071318960668e-13, 최대 305175.78125로 약 2.9e18 범위다.
+Source18r 저장 S0 원본 최소 3.717757149856028e-13, 최대 5.77444934649158이다.
+이를 coefficient의 단위가 같은 크기 비교로 해석하지 않는다. count, WAN 및 grid 좌표가 혼재한다.
+현재 큰 PCC와 1e-11 계수의 곱은 1e6 수준이다. 빠진 identity를 S1에서 복원하면
+1e17 규모 original/artificial 상쇄가 필요해져 작은 절대 잔차를 얻기 어려워진다.
+목적 weight 정규화만으로 원본 자유 변수의 이런 상쇄 문제는 없앨 수 없다.
+
+새 Source18r 설정의 presolved 행렬은 163,507행 / 112,997열 / NNZ 1,025,048이다.
+저장 로그 Factor NZ≈81,780,000, Factor Ops≈1.052e11이다. presolved NNZ 대비 약 79.8배 factor fill이다.
+Source18r 과거 presolved는 3,018행 / 51,957열 / NNZ 736,646이었다.
+class-local 상태/시간/flow 블록과 global GPU/Runtime/WAN/grid coupling이 소거 시 연결되는 구조가 있다.
+하지만 실제 ordering/elimination tree와 family별 factor 기여를 얻지 않았으므로 특정 family가 fill의 몇 %라는 인과 수치는 없다.
+새 presolve/factor, 수치 rank/SVD, symbolic factor 실행은 하지 않았다. 선형종속 일반론을 입증으로 쓰지 않는다.
+
+기존 독립 영수증은 exact duplicate 69,028행과 constant tautology 5,194행 제거를 이미 증명한다.
+현재 저장 S0에서 coefficient/RHS/sense 완전 동일 signature를 검사하니 81 duplicate가 남아 있다.
+coupling 이름 보존 때문에 protected row가 중복 제거에서 제외되는 코드 경로가 있다.
+잔여 81개의 중복 제거는 정확한 alias/dual lift를 추가로 검증해야 한다. 이것만으로 수백 초 문제 해결을 주장하지 않는다.
+
+6. LP 재구성과 활성화 비용
+
+매 반복에서 restricted CSR slicing, elastic hstack, require/verify, solver materialize를 새로 수행한다.
+280,182개 행 활성화는 281,562개 artificial 열 증가를 동반한다. equality는 열 2개가 필요하기 때문이다.
+이전 basis가 없으므로 S1은 사실상 새로운 큰 LP다. 기존 row-promotion policy는 최악 19회 후 모든 행으로 승격한다.
+행별 한 번씩 add/update하거나 수십 개 행만 너무 짧게 solve하는 전략은 동일한 위험이 있다.
+권장 후보는 먼저 definition equality를 항상 보존하고 위반 규모/구조별 묶음을 한 번에 활성화하는 방식이다.
+이번 감사는 반복별 assembly/materialize wall을 새로 재측정하지 않았다.
+기존 CLASS_COMPRESSION_BUILD_PROFILE은 complete compression/preparation 223.926초와 pricing cache 15.334초를 기록한다.
+이 시간을 순수 S0→S1 재구성 비용으로 오기하지 않는다.
+
+7. Native0 우선 개선 후보 및 동치성 검증 계획
+
+후보 A — PCC identity를 모든 restricted LP에서 hard definition으로 보존.
+영향: 임의의 free PCC 이동을 막는다. 원본 FULL feasible set는 그대로다.
+주의: 중간 restricted elastic Phi 목적/feasible set는 달라지며 과거 Phi trajectory와 동일하다고 하지 않는다.
+검증: 원본 identity row의 정확 계수/RHS/열 bounds를 provenance로 등록하고 모든 S에서 포함/hard 여부 검사.
+원본 feasible point의 forward inclusion과 Phi=0에서 원본 identity 회복을 정확 유리수로 증명.
+예상 비용: 최대 1152개 정의행 보호와 관련 artificial 제외, 수초 수준 감사 가능성. 실측되지 않았다.
+Global LB: 이 변경만으로 발급 불가. 전체 omitted row closure와 full-domain pricing/dual correction은 계속 필요하다.
+
+후보 B — PCC affine alias를 exact substitution으로 제거.
+영향: 원본 identity p=f(x)를 모든 grid 행/목적/경계에 대입하고 원본 p를 복구하면 원본 feasible set 투영이 같다.
+검증: Fraction binary64 계수로 대입 결과를 계산; exact representability 불가능하면 원래 표현 유지.
+모든 원본 voltage/line/transformer row를 독립 역상 replay하고 물리 단위를 유지한다.
+고정 alias bound를 임의로 추가해 원본 feasible set를 좁히는 방법은 채택하지 않는다.
+비용: 1152열+정의행 제거 가능하나 grid 행의 density가 늘 수 있어 fill/메모리 이득은 미확정이다.
+현재 수학적 역상·dual certificate 변환 계획이며 Production 구현하지 않았다.
+
+후보 C — 단위/행·열의 정확한 2^k scaling.
+Ax<=b에 양의 행 scale, x=D z에 양의 열 scale을 적용하고 bounds/objective/dual를 전부 역변환한다.
+정확 power-of-two 표현, overflow/underflow와 계수 소실 검사를 필수로 한다.
+원본 absolute tolerance와 engineering unit 기준으로 역상 replay하고 scaled tolerance를 물리 완화로 쓰지 않는다.
+LB는 원본 dual/box residual을 원래 단위로 가격화한 별도 정확 또는 outward error correction이 있어야 한다.
+weight만 바꾼다고 solver matrix scaling이 된다고 주장하지 않는다.
+
+후보 D — exact duplicate/proportional row, 정의식 및 class 불변 구조 공유.
+현재 229 class 검증은 유지하고 UID 권한·QoS receipt를 합치지 않는다.
+완전 동일 중복은 row alias와 dual aggregate/split 증명 후 삭제 가능.
+비례행/일반 선형종속은 Fraction 관계, RHS/sense 및 bounds까지 증명해야 하며 수치 rank만으로 삭제하지 않는다.
+동일 열은 bounds의 Minkowski sum과 objective/모든 row 기여의 정확 일치가 필요하다. 이름만 같은 열을 합치지 않는다.
+기존 69,028개 제거를 신규 개선으로 재계상하지 않는다.
+
+후보 E — S0→S1 exact inclusion, 유효 basis 또는 persistent model.
+행·열 signature와 artificial mapping을 유지하고 기존 basis가 있으면 새 slack basis의 block-triangular 확장 검사.
+현재 1e17 Raw의 단순 PStart는 사용하지 않는다. Basis가 없으면 gain을 미리 주장하지 않는다.
+persistent solver 모델은 immutable source/case/row axis와 증분 Native accounting 보장이 선행돼야 한다.
+이번 Track A에서는 새 Solver를 실행하지 않아 성능 채택 기준을 충족하지 않는다.
+
+8. Original FULL feasible UB와 DW LB 분리
+
+원본 Integer FULL의 feasible incumbent는 DW Phase I 완료와 독립적으로 얻을 수 있다.
+현재 table_v_a.py:186~188도 DW 결과 뒤 solve_original을 호출하고 structural_adapter_failure만 별도 중단한다.
+향후 이미 생성된 동일 original model을 사용해 UB 탐색을 먼저 하거나 DW timeout 뒤 남은 Integer 예산으로 진행할 수 있다.
+원본 전압/선로/변압기/GPU/QoS/Deadline/SOC/정수 제약을 모두 유지하고 Original FULL replay를 통과해야 한다.
+raw incumbent, bounds, objective, source/case SHA를 보존한다. relaxed elastic point를 UB로 만들지 않는다.
+DW Global LB는 full row closure + 전체 원본 local domain pricing + dual residual 보정으로 독립 인증한다.
+유효 UB만 있고 LB가 없으면 feasible planning과 gap 미인증을 분리해 보고한다.
+이번 진단은 이 경로를 새로 실행하거나 B1 예산을 연장하지 않았다.
+
+9. 검증·자원·보존 및 한계
+
+신규 Native0 검사는 11 PASS이다. dimension identity, artifact sign/weights,
+restricted Phi=0과 full identity 위반을 재현하는 작은 반례, 실제 PCC source mapping과 Raw artificial zero를 확인했다.
+전체 회귀 suite 결과나 Production 수학적 동치성 검증을 이 11개 검사로 대체하지 않는다.
+NATIVE0_REGRESSION.json에 상세 항목과 입력 SHA를 기록했다.
+
+현재 S0 한 번 load/분석: Wall 1.766초 / CPU 1.469초 / peak RSS 298,672,128 bytes.
+Source18r 소형 CSR 한 번 load/분석: Wall 0.143초 / CPU 0.141초 / peak RSS 132,841,472 bytes.
+descriptor/semantic JSON 경량 분석의 기록 최대 peak RSS 925,097,984 bytes, 각 프로세스 종료로 객체 해제.
+S1 CSR 또는 FULL capture를 load/재생성하지 않았다. B2 Heavy와 동시 Solver/대형 분석을 하지 않았다.
+Python 소스·테스트·Git index·commit·branch·worktree·Native ledger·기존 Raw를 수정하지 않았다.
+Track A 산출물은 이 디렉터리의 TXT/CSV/JSON뿐이다.
+
+B1 최신 NATIVE03 PLANNING ledger SHA 651b5914dbbc624f18d224d556a06e4fb1aa9e56145b0c40376003e9b78c9550를 확인했다.
+Phase I 누적 900.069000006초는 그대로이며 신규 Native 예산을 발급하지 않았다.
+모든 개선안은 진단/검증 계획이다. 수초~수십 초 Solver 회복, 새로운 FULL feasible UB 또는 Global LB를 달성했다고 보고하지 않는다.
+
+미완료 범위는 Source18r의 정확한 named variable family 전체 분해, 모든 FULL row family별 이름/개수,
+PCC identity의 원본 FULL row 번호, numeric rank 및 family별 factor fill 기여다.
+다음 독립 audit window에서 원본 capture를 한 번 열어 descriptor+row provenance를 작은 sidecar로 추출해야 한다.
+실행 중 B2 모델을 중복 생성하거나 메모리에 함께 올려 이 정보를 얻지 않는다.

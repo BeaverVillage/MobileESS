@@ -22,6 +22,7 @@ def _snapshot():
                 Path(x).name=='run_v42_table_v.py' for x in args) and any(x in ('B1','B2','B3') for x in args)
             heavy=heavy or any(Path(x).name=='run_v42_production_campaign.py' for x in args) and '--execute' in args
             heavy=heavy or any(Path(x).name=='run_v42_table_v_serial_arms.py' for x in args)
+            heavy=heavy or any(Path(x).name=='run_v42_table_v_b2_solo.py' for x in args) and '--execute' in args
             if heavy:workers.append(dict(pid=process.pid,name=process.info['name'],heavy_worker=True))
         except (psutil.NoSuchProcess,psutil.AccessDenied):continue
     return dict(memory=dict(AvailableMBytes=memory['system_available_bytes']/2**20,

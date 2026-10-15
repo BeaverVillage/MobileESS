@@ -104,10 +104,20 @@ def preflight_table_v_plan(plan,gate=None):
     if not plan.get('release_sha') or not (gate or {}).get('launch_authorization'):
         launch.append('CURRENT_RELEASE_SHA_AND_EXPLICIT_LAUNCH_APPROVAL_MISSING')
     if not plan.get('budget_authorizations'):launch.append('CURRENT_DATE_APPROVED_NATIVE_BUDGET_BINDINGS_MISSING')
-    if any(day!='2025-05-01' for day in dates):
+    from .table_v_b2_gate import B2_SCOPES,validate_b2_scope
+    b2_scope=plan.get('execution_scope') in B2_SCOPES
+    if b2_scope:
+        try:validate_b2_scope(plan)
+        except PermissionError as error:blockers.append(str(error))
+        if plan['execution_scope']!='B2_MAY01_FULL96':
+            launch.append('CURRENT_B2_MAY01_FULL96_RELEASE_EVIDENCE_REQUIRED')
+        if plan['execution_scope']=='B2_MAY31_APPROVED':
+            launch.append('CURRENT_B2_THREE_REPRESENTATIVE_CANARY16_APPROVALS_REQUIRED')
+    elif any(day!='2025-05-01' for day in dates):
         launch.append('MAY01_FOUR_ARM_FULL96_AND_REPRESENTATIVE_CANARY_APPROVAL_REQUIRED')
     return dict(status='PASS_NATIVE0_WIRING' if not blockers else 'NOT_CERTIFIED',
-        blockers=blockers,launch_blockers=launch,dates=bindings,case_count=4*len(bindings),
+        blockers=blockers,launch_blockers=launch,dates=bindings,
+        case_count=(1 if b2_scope else 4)*len(bindings),
         Native_calls=0,model_builds=0,Actual_runs=0,P2_calls=0,R2='HOLD',
         production_executor='v42_integration.table_v_campaign.RealTableVExecutor',
         stage_checkpoint_engine='v42_integration.release_production_campaign._date_loop',
@@ -128,6 +138,9 @@ def validate_arm_full96(record,expected,arm,*,expected_policy_sha):
 def _launch_gate(plan,gate):
     from .table_v_launch import validate_launch_identity
     validate_launch_identity(plan,gate)
+    from .table_v_b2_gate import B2_SCOPES,validate_b2_launch_evidence
+    if plan['execution_scope'] in B2_SCOPES:
+        return validate_b2_launch_evidence(plan,gate)
     if plan['execution_scope']=='MAY01_VALIDATION':return
     for arm in ARMS:
         expected=plan['case_bindings']['2025-05-01']

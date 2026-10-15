@@ -47,3 +47,15 @@ def profile_joint(function):
         with measure(case.output,'M_DIRECT_JOINT_CONSTRUCTION'):
             return function(case,*args,**kwargs)
     return wrapped
+
+
+def profile_component(stage):
+    """Measure the original callable without changing its result or policy."""
+    def decorate(function):
+        @wraps(function)
+        def wrapped(case,*args,**kwargs):
+            folder=getattr(case,'output',None)
+            if folder is None:return function(case,*args,**kwargs)
+            with measure(folder,stage):return function(case,*args,**kwargs)
+        return wrapped
+    return decorate

@@ -48,7 +48,10 @@ def validate_launch_identity(plan,gate):
     if len(roots)!=len(set(roots)):
         raise PermissionError('INDEPENDENT_DATE_EXECUTION_ROOTS_REQUIRED')
     scope=plan.get('execution_scope')
-    if scope not in ('MAY01_VALIDATION','REPRESENTATIVE_CANARY16_APPROVED','MAY31_APPROVED'):
+    from .table_v_b2_gate import B2_SCOPES,validate_b2_scope,validate_b2_reference
+    b2_scope=scope in B2_SCOPES
+    if b2_scope:validate_b2_scope(plan)
+    if scope not in ('MAY01_VALIDATION','REPRESENTATIVE_CANARY16_APPROVED','MAY31_APPROVED')+B2_SCOPES:
         raise PermissionError('EXPLICIT_TABLE_V_EXECUTION_SCOPE_REQUIRED')
     if scope=='REPRESENTATIVE_CANARY16_APPROVED' and (
             plan.get('actual_slots')!=16 or any(day not in ('2025-05-02','2025-05-10','2025-05-12') for day in dates)):
@@ -78,11 +81,17 @@ def validate_launch_identity(plan,gate):
                 or policy!=manifest['science_derivation']['policy']
                 or plan['policy_bindings'].get(day)!=digest(policy)):
             raise PermissionError('CURRENT_DATE_SCIENCE_CASE_SOURCE_POLICY_SHA_REQUIRED')
+        if b2_scope:
+            validate_b2_reference(root,expected,manifest,
+                actual_policy_sha=plan.get('actual_policy_bindings',{}).get(day,{}).get('B2'))
         for kind in ('PLANNING','K48'):
             record=plan['budget_authorizations'][day][kind]
             if Path(record['path']).resolve()!=root/(kind+'_AUTHORIZATION.json'):
                 raise PermissionError('ONE_EXACT_DATE_BUDGET_AUTHORIZATION_DOCUMENT_REQUIRED')
             authority=require_authorization(checked_json(record))
+            if b2_scope and authority.get('authorized_arm_stages')!=[
+                    'B2:M1' if kind=='PLANNING' else 'B2:K48_M1']:
+                raise PermissionError('B2_SCOPE_EXACT_AUTHORIZED_ARM_STAGE_REQUIRED')
             ledger_path=root/(kind+'_NATIVE_LEDGER.json')
             if (Path(authority['authorized_ledger_path']).resolve()!=ledger_path
                     or authority['source_cases']!=[expected]):

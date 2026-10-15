@@ -1,5 +1,5 @@
 """Reviewed PR230 M revision; predecessor eleven physical/AIDC pins remain exact."""
-EXPECTED_SOURCES = {'v42_integration/m_engine.py': {'sha256': '9272043b4cc922e46c0f11b29c2829ad40fb24e5290796052593af8d25ea7047', 'bytes': 38144}, 'v42_integration/m_candidates.py': {'sha256': '9f6d01542c2910b744f46cf1f067d6e7394ecddb26b11cc3623512484466d6d8', 'bytes': 31823}}
+EXPECTED_SOURCES = {'v42_integration/m_engine.py': {'sha256': 'aec0efcc092a5f6d40f4855b5ee0b432f2d1185064c1c176d205e9230ce7fc85', 'bytes': 38209}, 'v42_integration/m_candidates.py': {'sha256': '3cb706e44071d150c3ec14b455d957943789cd27dd242dae18903ead086a2acc', 'bytes': 31913}}
 
 
 EXPECTED_PREPARATION_SOURCES = {'v42_supercompact/presolve.py': {'sha256': 'a0cd3c2006da1ea51d8e394c461bb4e06594e30c047e93acd92ddc4286271527', 'bytes': 16071}, 'v42_may_campaign_native90/m_model.py': {'sha256': '8ea4aaeab59506e59953e8f79b56f913c50a42d07c766fef4ece7dc507ec5554', 'bytes': 54073}}

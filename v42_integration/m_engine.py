@@ -20,7 +20,7 @@ from time import perf_counter
 
 import numpy as np
 from scipy import sparse
-from .preparation_profile import measure, profile_joint
+from .preparation_profile import measure, profile_joint, profile_component
 
 ENGINE_VERSION = "PR222_CASE_EXPLICIT_EXACT_DIRECT_JOINT_V1"
 PR222_SHA = "12594e281bb89611331950f11f775a2612d3cb48"
@@ -152,6 +152,7 @@ def _exact_objective(domain, point):
          for j in np.flatnonzero(domain["objective"])), Fraction(0))
 
 
+@profile_component('M_ORIGINAL_FULL_REPLAY')
 def strict_full(case, path, evidence=None):
     """Unmodified check_ub FULL/physical validator, without historical ROOT IO.
 

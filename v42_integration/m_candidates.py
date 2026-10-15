@@ -16,6 +16,7 @@ from scipy.optimize import linprog, OptimizeWarning
 from scipy.spatial import ConvexHull
 
 from .m_engine import PathGraph, _write, vector_sha
+from .preparation_profile import profile_component
 
 
 def grid_context(case, point):
@@ -336,6 +337,7 @@ class JointDispatchScore:
         return packet
 
 
+@profile_component('M_BEAM_SCORING')
 def generate(case, point, bank, budget):
     """Fresh exact-day Beam followed by bounded joint LP admission shortlist."""
     graph, battery = bank.graph, case.graph[3]
