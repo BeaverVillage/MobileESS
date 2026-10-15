@@ -1,0 +1,154 @@
+PR230 B1/B2 병목 개선 및 EXECUTION08 실패 감사
+2026-10-15 / 상태: 캠페인 중단, Native0 검증 완료, 추가 Native 실험 미승인
+
+1. 현재 상태와 실행 보존
+
+사용자의 마지막 지시에 따라 EXECUTION08을 공식 stop_request로 중단했다.
+PID 11064는 정상 종료했고, PLANNING/K48 원장의 inflight 및 active_stage_context는 비었다.
+계획 Native 누적 1,106.595000505초, K48 0초를 보존했다. 새 예산이나 fresh-zero 주기는 발급하지 않았다.
+중단 후에만 기존 PR230 체크아웃의 Source를 전환했다. 기존 Raw/원장/Source Freeze 210개 파일과
+기존 Source Archive 2,252개 파일의 바이트 보존을 SUMMARY.json 생성 때 다시 확인했다.
+첨부 요청 이전에 만든 임시 분리 디렉터리는 기존 PR 브랜치로 복사했으며, 이후 새 Branch/PR/Worktree는 만들지 않았다.
+
+2. B1 Phase I과 Integer 종료를 구분한 감사
+
+Phase I은 S0에서 끝났다. S1은 시작하지 않았으며 P1 full-domain pricing에도 진입하지 않았다.
+FAST_A 30.098초, FAST_B 180.075초, ACCURATE_C 300.075초, CURRENT 305.868초가 모두 Status=9였다.
+합계 Native 816.116초, DW 준비를 포함한 Wall 약 978.575초이다. 유효한 X/Pi/RC/Basis는 얻지 못했다.
+각 시도의 Raw는 그대로 보존했다. 상세 행렬 및 Source/Case SHA는 EXECUTION08_FAILURE_AUDIT.json에 있다.
+
+그 뒤 원본 Integer MILP Optimize에는 실제로 진입했다.
+원본은 2,108,858행 / 946,756열 / 21,126,591 NNZ이다.
+266.269초 후 최종 Status=11(INTERRUPTED), SolCount=0으로 돌아왔다. Native NUMERIC=12 종료가 아니다.
+Archive의 v42_integration/table_v_a_control.py, solve_original.callback, 36행이
+MESSAGE의 'Numerical trouble encountered'를 읽으면 errors에 넣고 terminate()를 호출했다.
+Native 로그의 'Crossover changed status from Numeric to Interrupted'와 이 경로가 일치한다.
+별도의 Callback Python 예외나 FULL Replay 실패가 최초 종료 원인이 아니다. 해가 없어 FULL Replay에 진입하지 못했다.
+B1 A1 누적 Native는 1,082.385000229초이고 5,400초 중 4,317.614999771초가 남아 있다.
+
+3. B1 수정
+
+경고 메시지는 별도로 기록하고 경고만으로 terminate하지 않는다.
+실제 NUMERIC=12, 검증된 Gap 종료, 불명확한 INTERRUPTED, Callback 예외를 구분한다.
+수치 실패/임의 중단의 Bound는 인증하지 않는다. 같은 원본 Matrix/Domain/Objective 및 Native 원장 대조는 유지한다.
+Solver가 받아들였고 원본 행·경계·정수 잔차를 검사한 개선 incumbent는 원시 float 값 그대로 NPZ에 보존한다.
+나중에 NUMERIC이 발생해도 보존된 incumbent를 지우거나 Global LB로 바꾸지 않는다.
+
+Phase I은 FAST_B를 우선 사용하고, S0/S1 등이 공유하는 잔여 900초와 Integer Reserve 1,800초로 cap을 정한다.
+짧은 FAST_A warmup을 제거했다. 단순 TimeLimit 뒤 다른 수치 정책을 cold start하지 않는다.
+고정밀 fallback은 실제 NUMERIC 또는 최적해의 독립 수치 검증 실패에 한정한다.
+이미 원장에 기록된 같은 날짜/Arm/Stage Phase I 사용 시간도 차감하므로 새 어댑터가 900초를 다시 열지 못한다.
+E08 B1에는 이미 816.116초가 사용되어 생산 Phase I 잔여 allowance는 83.884초이다.
+향후 유효한 최적 LP가 반환하면 VBasis/CBasis도 보존한다. Integer MILP 수치 정책은 Phase I 정책과 별도로 유지한다.
+
+4. '반복당 2초'와 CPU 실행속도
+
+과거 약 2초는 내부 barrier iteration 예상 시간이다. 과거 FAST_B S0 전체 Native는 111.157초였다.
+과거 24회차 80초와 E08 FAST_B 24회차 180초는 같은 수치 진행을 보여, 동일 형태의 계산이 약 2.25배 느려졌다.
+두 로그의 fingerprint/Source ID까지 동일하다고 주장하지 않는다. Native Work/Iteration/Wall을 분리해 해석했다.
+조사 당시 AC 전원과 고성능 전원 구성이었고, 주 실행 프로세스는 한 코어에 해당하는 약 98% CPU를 사용했다.
+클럭·발열·P/E 코어 배치 중 어느 것이 속도 변화의 직접 원인인지는 확정하지 못했다. 시스템 우선순위나 affinity는 변경하지 않았다.
+S0 60초 목표, 새 정책의 전체 Phase I→P1→Integer 완주 시간은 추가 Native 승인 전에는 검증할 수 없다.
+
+5. Barrier vs Dual Simplex 및 S0→S1
+
+이번 개선 작업이 추가한 Native Optimize는 0회다. Method=2 vs Method=1 동일 S0 비교는 미실행이다.
+최대 시간/목적/기존 Stage 잔액을 포함한 제안은 NATIVE_EXPERIMENT_PROPOSAL.json에 있다.
+
+저장된 S0/S1 행렬의 기본 열·경계·타입이 같고, 기존 행 275,969개가 S1에 정확히 포함됨을 Native0로 확인했다.
+S1은 556,151행 / 497,287열이고 새 행은 280,182개이다.
+그러나 저장된 S0 X에는 절댓값 약 1.037e17의 변수가 있다. 새 elastic 행을 채우는 단순 primal 이동은
+binary64 상쇄오차로 원본 1e-6 허용오차를 넘었다. 최대 행 잔차는 약 2.68485였다.
+저장 Raw는 X/Pi/RC만 있고 Basis는 없다. 따라서 해당 PStart/DStart/Basis를 생산에 적용하지 않았다.
+WARM_MAPPING02는 이 부적합을 제대로 거부한 감사 결과다. 허용오차를 완화하거나 원시 점을 고쳐서 PASS로 만들지 않았다.
+LPWarmStart=2의 실제 성능도 미검증이다. 생략 원본 행의 최종 검사는 계속 유지한다.
+
+6. B2 실패 원인과 RAM 게이트 제거
+
+C3A 증명 자체는 통과했다. 제한된 F1 시도들의 infeasible은 전체 MESS 도메인의 불가능성 증명이 아니다.
+F2는 Optimize 이전 RELEASE_RAM_COMMIT_GATE, F3는 TABLE_V_RESOURCE_ADMISSION_DENIED로 막혔다.
+F2/F3 Native Runtime은 0이다. B2가 사용한 누적 Native는 앞선 F1 시도들의 9.980000257초이다.
+이 보호 코드는 가용 RAM 8GiB 또는 시스템 Commit 75%라는 휴리스틱 기준을 사용했다. 실제 OOM 판정은 아니다.
+에이전트가 병행한 Native0 감사도 약 6GB를 점유해 메모리 여유를 줄였다. 해당 실험은 중단했다.
+대형 Native0 감사가 실행 중인 production worker와 겹치지 못하도록 검사한다.
+
+사용자의 후속 명시 지시에 따라 캠페인 build/native 및 관련 공통 실행 경로의 RAM/Commit 수치 차단을 제거했다.
+메모리 수치는 telemetry로만 남는다. Worker Lock, 동시 Heavy Worker 거부, Native 총량·Source/Case/Raw 검사는 유지한다.
+이번 수정으로 RAM 거부 경로는 제거했지만, 승인 없는 F2/F3 재실행으로 실제 feasible 해를 얻었다고 주장하지 않는다.
+
+7. C3A 실제 Hotspot 및 개선
+
+py-spy는 이전 검증기의 interval→enclosure→Fraction 생성과 새 경계 식 전개를 확인했다.
+이전 코드는 없는 좌표도 변수×MESS×Site의 삼중 루프로 방문하고 같은 유리수 변환을 반복했다.
+수정은 sparse한 실제 계수만 interval 배열에 넣고, 순수 scalar 반올림 결과를 정수 numerator/denominator 키로 재사용한다.
+Fraction 자체를 cache key로 쓸 때의 비싼 hash 비용을 피한다. 대형 벡터 결과나 PASS를 신뢰하는 cache가 아니다.
+원본 행렬·도메인·RHS·경계·타입·목적 및 각 증명은 매번 다시 검사한다.
+생산자와 독립 검증기의 proof 경로도 분리되어 있다.
+
+같은 PCS 평면의 vertices/Farkas 계산은 정확한 평면 서명 안에서 한 번만 수행한다.
+실제 각 블록의 원본 행 좌표와 증명 support는 새로 구성하고 독립 검증한다.
+C3A/Dense retained CSR 검사는 행별 길이와 연속된 CSR 구간을 직접 비교해 대형 복사 및 수십만 번의 작은 비교를 줄였다.
+기존 442→460초로 느려진 전체 IntervalMemo cache는 채택하지 않았다.
+
+8. 실제 측정과 목표
+
+저장된 동일 C2/FULL 행렬 기반 C3A 생성·독립 검증: 744.643 → 320.718초, 약 56.93% 감소.
+독립 verifier: 441.990 → 184.420초, 약 58.28% 감소.
+동일 프로세스의 층화된 2,048개 실제 경계 sample은 기존 4.358초 / 수정 1.405초로 약 3.10배였다.
+모든 190,248개 구간 끝값과 모든 95,124개 경계 인증서, 71,540개 삭제 행 인증서가 같았다.
+
+전체 M1 Native0를 새로 생성하고 Direct Joint readback까지 한 번만 실행했다.
+M1 준비 808.382초, Joint 및 readback을 포함한 총 824.358초이다.
+과거 약 1,268초와 비교하면 약 35.0% 작지만, 같은 순간/CPU 조건의 A/B 측정은 아니다.
+전체 준비 경로 안의 C3A는 376.072초, 독립 검증 236.596초로 단독 측정보다 느렸다.
+Static Presolve는 71.672초였다. 이번 패치는 Presolve 수학 알고리즘 자체를 바꾸지 않았으므로
+과거 112.279초 대비 차이를 모두 이번 코드 변경의 효과로 귀속하지 않는다.
+
+C3A 400초 및 Presolve 90초 목표는 측정에서 충족했다. 전체 M1 700초 목표는 미달이다.
+실제 full-run Hotspot은 C3A 376.1초, Grid 원본 행 검증 116.6초, Original→C2 검증 113.6초다.
+정확한 Stage별 Wall/CPU/샘플 Peak RSS/Private/System Commit은 B2_STAGE_WALL_CPU_RAM.csv에 있다.
+원본 생성 34.5초, Physical 5.6초, Compact 0.9초, Security 36.5초,
+Dense 3.8초, Direct Joint 6.9초, Native readback 4.7초였다.
+메모리는 0.2초 sampling과 Windows process lifetime peak를 구분했다. 전체 Peak RSS는 약 9.52GiB였다.
+이전과 동일 조건의 Peak 비교가 없으므로 Peak RSS 감소를 성공으로 주장하지 않는다.
+Dense 검증의 추가 CSR 사본 제거량은 최대 약 101MiB 규모이다.
+
+9. 수학적 동일성과 Production 연결
+
+한 번의 전체 build에서 Original FULL 1,130,336×344,967, Dense 715,142×354,332를 얻었다.
+Full/C3A/Dense의 CSR, 모든 변수명·행명·RHS·Sense·하한·상한·Types·Objective·Constant를 바이트로 비교했다.
+모든 C2 Alias/Row Proof, C3A Row/Bound Proof, Dense Plan도 기준 산출물과 동일했다.
+ALL_ARTIFACTS_EQUIVALENCE.json이 비교 결과다.
+Direct readback은 검증용 STAY 1개/Unit의 작은 pool을 사용하여 715,146×137,662이다.
+이 pool 크기는 이전 137,690열 벤치마크와 다르므로 Joint solver 성능을 직접 비교하지 않는다.
+384 charge mode와 모든 source 행을 보존했다. 이 구조적 start는 FULL-feasible incumbent나 UB가 아니다.
+
+수정은 공통 current C3A/security/Dense 검증기, 원본 A 제어기, 공통 M 준비/Direct readback 경로에 연결되어 있다.
+229 Class/전체 UID 권한, DW projection, full pricing, 원본 Integer, MESS 이동·P/Q/SOC/PCS·Grid·Rebound,
+PR221/222 후보·incumbent·Warm 재검증, A 0.5%/M 3% 목표는 완화하지 않았다.
+Source byte pin은 실제 수정본으로 갱신하고 m_model의 강제 개행 변환을 해제해 체크아웃 후 checksum 변화를 방지했다.
+
+10. 회귀와 보존
+
+1,185 PASS / skip 0 / 실제 Native 0. 직전 1,172개의 testcase ID도 모두 보존했다.
+새 검증은 sparse/dense interval의 bit 동일성, 증명 재사용, 경고와 최종 상태 구분,
+유효 incumbent 보존, 불명확한 INTERRUPTED bound 거부, TimeLimit 재시작 방지,
+S0/S1·재개 누적 allowance, 낮은 RAM 허용 및 Worker 충돌 거부를 포함한다.
+기존 682 ID와 historical Native 원장 바이트 보존도 공통 regression runner가 검사했다.
+RAM 관련 기존 테스트의 기대값은 사용자의 명시적 제거 요청에 맞게 변경했으며 Native/Worker 검사 범위는 유지했다.
+
+11. 남은 검증과 실행 승인
+
+실제 Dual Simplex 비교, 수정된 Integer MILP의 수치 복구, B2 F2/F3 해 탐색은 미실행이다.
+최적성이나 May01 Planning/Actual/Fresh96의 전체 성공을 주장하지 않는다.
+추가 제안은 Native 5회, 최대 1,020초이다: B1 S0 Barrier 120초 + Dual Simplex 120초 +
+원본 Integer 360초, B2 F2 180초 + F3 240초. 각 기존 Stage 누적 한도에서 차감한다.
+이는 실행 승인이 아니며, 신규 Source/Case binding과 원장 carry-forward의 명시적 승인이 필요하다.
+첨부 실행 정책의 '승인되지 않은 추가 Native Optimize 금지'와 최신 캠페인 중단 지시에 따라 실행하지 않았다.
+
+12. 재개 여부
+
+캠페인은 HOLD다. 자동 재개·May01 처음부터 재시작·새 0초 예산·B2/B3/May02~31 Heavy는 실행하지 않았다.
+P2=0, R2 HOLD, IEEE8500 미실행이다. 재개하려면 현재 소스에 맞는 명시적 승인과 제한된 Native 재검증이 필요하다.
+코드/작은 JSON·CSV·회귀 XML·보고서는 기존 Draft PR230에 반영한다.
+대형 행렬·Raw는 로컬에 두고 LOCAL_LARGE_ARTIFACTS_SHA256_MANIFEST.json으로 위치와 해시를 기록한다.

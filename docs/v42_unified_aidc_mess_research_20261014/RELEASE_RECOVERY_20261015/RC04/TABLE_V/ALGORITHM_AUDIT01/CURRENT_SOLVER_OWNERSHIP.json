@@ -1,0 +1,44 @@
+{
+  "observed_epoch_seconds": 1792043957.3215795,
+  "ledger_sha256": "2bda092b0abfe7e9df5b8438c376ad373fbb40248a89c632b62ccf2f9c111d72",
+  "inflight": {
+    "label": "RELEASE_P1:A1:ORIGINAL_P1",
+    "cap": 4623.731000185013,
+    "pid": 49056,
+    "stage_context": {
+      "day": "2025-05-01",
+      "arm": "B1",
+      "stage": "A1",
+      "stage_case_sha": "d630a27040f841dc9359e2fe88a579716958f6cf1980dec4e77af8737a8d3d53",
+      "source_sha": "394c4ab5a8293eee10328e6976976f71eb4bf2d0ebb061702bcaf75a40f6b4b6",
+      "parent_result_sha": "3ab4b4315761cb61d2b4d247ff5a7d84ded6a8952ffe3749976e72c9c5114795"
+    },
+    "native_binding": {
+      "matrix_sha": "e51e4dd56aad9106d27c57aa76caf8877dd701b668a0d722c53ba7e1efb87b0b",
+      "domain_sha": "c22a508780311a1ad74b1617e302014c5562dfaa3a87a201f7b39c7a4f78e384",
+      "objective_sense": 1,
+      "rows": 2108858,
+      "columns": 946756,
+      "nonzeros": 21126591,
+      "Threads": 1
+    },
+    "started_epoch_seconds": 1792043295.4011269,
+    "worker_lock_owner": {
+      "schema": "V42_RELEASE_OWNED_LOCK_V1",
+      "kind": "HEAVY_WORKER",
+      "pid": 49056,
+      "nonce": "4cb1e77dc8294d208b585cd0ffb2f013",
+      "ledger_path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION02\\PLANNING_NATIVE_LEDGER.json",
+      "authorization_sha": "208180185328788ea5211942e5497c061196cab5965d3791df674f8a9b53802c",
+      "created_epoch_seconds": 1792043295.3990993
+    },
+    "worker_lock_record": {
+      "path": "D:\\V42_UNIFIED_HEAVY_WORKER.lock",
+      "sha256": "7121da06d476559602d25b7d22bd5a827be43b8d7e8725ba049a8b57b8efa7b1",
+      "bytes": 448
+    }
+  },
+  "current_case_result_exists": false,
+  "action": "NO_FORCE_TERMINATION_NO_LEDGER_RESET_NO_NEW_HEAVY_CALL",
+  "reason": "Existing bounded UB call owns the worker lock; its budget finally records Native Runtime on return. Current invocation has no cancellation callback or exported safe-stop control. Native Runtime must not be inferred from external wall."
+}

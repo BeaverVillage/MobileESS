@@ -1,6 +1,7 @@
 """Exact stored rational H-polytopes and positive two-plane Farkas proofs."""
 from fractions import Fraction as F
 from itertools import combinations
+from functools import lru_cache
 def vertices(planes):
     out=set()
     for i,j in combinations(range(len(planes)),2):
@@ -29,9 +30,15 @@ def minimal(planes):
     for i in removed:
         bound,a,b,l,m=farkas(planes[i],[planes[j] for j in keep]);removed[i]=dict(support=[keep[a],keep[b]],multipliers=[str(l),str(m)],slack=str(planes[i][2]-bound))
     return keep,removed
+@lru_cache(maxsize=16384)
+def _bounds(numerator,denominator):
+    import numpy as np
+    x=F(numerator,denominator);v=float(x);stored=F(v)
+    return (v if stored<=x else float(np.nextafter(v,-np.inf)),
+            v if stored>=x else float(np.nextafter(v,np.inf)))
+
 def down(x):
-    import numpy as np
-    v=float(x);return v if F(v)<=x else float(np.nextafter(v,-np.inf))
+    return _bounds(x.numerator,x.denominator)[0]
+
 def up(x):
-    import numpy as np
-    v=float(x);return v if F(v)>=x else float(np.nextafter(v,np.inf))
+    return _bounds(x.numerator,x.denominator)[1]

@@ -17,6 +17,7 @@ from v42_m1_hybrid.blocks import matrix_sha
 
 POLICY='SELECTED_EXACT_CURRENT_MATRIX_PROOFS'
 SOURCES=('v42_ultracompact/current.py','v42_ultracompact/current_verify.py',
+         'v42_ultracompact/independent_interval.py',
          'v42_ultracompact/polytope.py','v42_ultracompact/support.py',
          'v42_ultracompact/security.py','v42_ultracompact/security_verify.py')
 
@@ -56,7 +57,7 @@ def reduce_current_c3a(A,d,graph,progress=None,physical_original=None):
         key=axes.pop()
         if fam=='PCS16':pcs[key].append(i)
         else:links[key][fam]=i
-    certs=[];local_cache={};polygons={};p_limit=F(float(graph[3].p_limit))
+    certs=[];local_cache={};link_cache={};polygons={};p_limit=F(float(graph[3].p_limit))
     for key,ids in pcs.items():
         # C2 fixed-source singleton removals can leave a partial block. Such
         # blocks are kept; they are still safely enclosed by the common PCS.
@@ -90,8 +91,10 @@ def reduce_current_c3a(A,d,graph,progress=None,physical_original=None):
             planes.append((F(sign),F(0),p_limit));sources.append(support)
         if len(planes)!=18:continue
         signature=tuple(planes)
-        if signature not in local_cache:local_cache[signature]=minimal(planes)
-        keep,removed=local_cache[signature];polygons[signature]=vertices(planes)
+        if signature not in local_cache:
+            local_cache[signature]=minimal(planes)
+            polygons[signature]=vertices(planes)
+        keep,removed=local_cache[signature]
         for face,certificate in removed.items():
             if face>=16:continue
             certs.append(_certificate(ids[face],'PCS_FARKAS',certificate,sources,stay))
@@ -102,7 +105,9 @@ def reduce_current_c3a(A,d,graph,progress=None,physical_original=None):
             if stay is not None:expected[stay]=-target[2]
             if v!=expected or r!=(0 if stay is not None else target[2]):
                 raise ValueError('CURRENT_C3A_CONNECTED_Q_STRUCTURE_DRIFT')
-            proof=farkas(target,[planes[j] for j in keep])
+            link_key=(signature,target)
+            if link_key not in link_cache:link_cache[link_key]=farkas(target,[planes[j] for j in keep])
+            proof=link_cache[link_key]
             if proof:
                 bound,a,b,l,m=proof
                 c=dict(support=[keep[a],keep[b]],multipliers=[str(l),str(m)],slack=str(target[2]-bound))
@@ -126,13 +131,17 @@ def reduce_current_c3a(A,d,graph,progress=None,physical_original=None):
         if {k:w for k,w in total.items() if w}==target and rhs==r:
             certs.append(dict(row=i,kind='FLOW_EQUALITY_SUM',support=ids));gone.add(i)
     if progress:progress(dict(phase='M_CURRENT_EXACT_C3A_AFFINE_BOUNDS',rows_removed=len(gone)))
-    dom=domains(A,d,graph);src=exact_sources(A,d,dom);keys,vectors,constants,times,defs,_=src
+    dom=domains(A,d,graph)
+    if progress:progress(dict(phase='M_CURRENT_EXACT_C3A_AFFINE_SOURCES',rows_removed=len(gone)))
+    src=exact_sources(A,d,dom);keys,vectors,constants,times,defs,_=src
     # Reuse a conservative enclosing PCS polygon. Reject unequal local PCS
     # authorities instead of transporting one state proof to another domain.
     if len(polygons)!=1:raise ValueError('CURRENT_C3A_PCS_BOUND_AUTHORITY_UNAVAILABLE_OR_UNEQUAL')
     verts=next(iter(polygons.values()));width=3*len(dom['units'])*len(dom['sites'])
     eligible=[j for j in sorted(keys) if vf[j].startswith(('injection_','response_')) and d['lower'][j]!=d['upper'][j]]
     pairs=list(dict.fromkeys((keys[j],times[j]) for j in eligible));cache={}
+    last_progress=0.
+    if progress:progress(dict(phase='M_CURRENT_EXACT_C3A_AFFINE_INTERVALS',completed=0,total=len(pairs)))
     for start in range(0,len(pairs),256):
         chunk=pairs[start:start+256];mid=np.zeros((len(chunk),width));err=mid.copy();tt=[]
         for k,(h,t) in enumerate(chunk):
@@ -143,6 +152,10 @@ def reduce_current_c3a(A,d,graph,progress=None,physical_original=None):
         uu=union_upper(mid,err,np.asarray(tt),dom,verts)
         ll=union_upper(-mid,err,np.asarray(tt),dom,verts)
         for pair,l,u in zip(chunk,ll,uu):cache[pair]=(-float(l),float(u))
+        now=perf_counter()
+        if progress and (now-last_progress>=2. or start+len(chunk)==len(pairs)):
+            progress(dict(phase='M_CURRENT_EXACT_C3A_AFFINE_INTERVALS',completed=start+len(chunk),total=len(pairs)))
+            last_progress=now
     bounds=[];e=dict(d,lower=d['lower'].copy(),upper=d['upper'].copy())
     for j in eligible:
         lo,hi=cache[keys[j],times[j]]
@@ -163,7 +176,7 @@ def reduce_current_c3a(A,d,graph,progress=None,physical_original=None):
     authority=permit()
     if authority is None:
         from .current_verify import verify_current_c3a
-        proof=verify_current_c3a(ultra,graph)
+        proof=verify_current_c3a(ultra,graph,progress=progress)
         proof['independent_model_proof_replayed']=True
     else:
         proof=receipt(authority,removed_rows=len(certs),
@@ -174,6 +187,7 @@ def reduce_current_c3a(A,d,graph,progress=None,physical_original=None):
         removed_families=dict(Counter(rf[p['row']] for p in certs)),bound_families=dict(Counter(vf[p['column']] for p in bounds)),
         fresh_current_matrix_certificates=True,historical_row_indices_read=0,Native_optimize_calls=0,
         selected_PR162_techniques_reused=True,security_rows_kept='RETAINED_AFTER_FRESH_PRE_C2_SECURITY_PROOF',wall_seconds=perf_counter()-began)
+    if progress:progress(dict(phase='M_CURRENT_EXACT_C3A_COMPLETE',completed=len(bounds),total=len(bounds),wall_seconds=perf_counter()-began))
     ultra.proof=proof
     return ultra
 

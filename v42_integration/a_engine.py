@@ -95,15 +95,43 @@ class ACase:
     progress: object = None
 
 
+def authorized_geometry(job,bound,resources,generator,retained_flow,cache):
+    """Share identical geometry, retaining each UID's original authority hash."""
+    from v42_a_stage_domain_v2.domain import physical_domain,digest as domain_digest,AUTHORITY
+    from v42_a_stage_phase1.producer import complete_graph
+    from v42_boundary.generator import Domain
+    bound.require()
+    if generator.r!=resources:raise ValueError('PHYSICAL_RESOURCE_IDENTITY')
+    key=digest(dict(job={k:v for k,v in asdict(job).items() if k not in ('uid','qos_receipt_sha')},
+        bound=asdict(bound),resources=generator.identity,retained_flow=retained_flow))
+    if key not in cache:
+        domain=physical_domain(job,bound,resources,gen=generator)
+        graph=complete_graph(job,domain,retained_flow)
+        cache[key]=(domain,graph)
+        return domain,graph,False
+    source,graph=cache[key]
+    domain=Domain(source.stays,source.blocks,generator,job.service_slots)
+    # Exactly the original physical_domain authority formula; the excluded
+    # receipt affects lineage, although neither it nor UID affects geometry.
+    from v42_a_stage_domain_v2.domain import physical_starts
+    if physical_starts(job,bound,resources.control_end):
+        domain.sha=domain_digest(dict(authority=AUTHORITY,resources=generator.identity,
+            job={k:v for k,v in asdict(job).items() if k!='uid'},
+            completion=bound.latest_completion,stays=domain.stays,blocks=domain.blocks))
+    return domain,graph,True
+
+
 def authorized_data(case):
     """Rebuild exact classes/graphs with policy, service and contract identity."""
     from v42_a_stage_domain_v2.domain import physical_domain
     from v42_a_stage_phase1.producer import complete_graph
     from v42_boundary.generator import Generator
     bundle,jobs,bounds,resources,raw,_,_,prep=case.data
+    from time import perf_counter
+    began=perf_counter();geometry_cache={};hits=0
     changed={}; domains={}; graphs={}; classes=defaultdict(list)
     shared_generator=Generator(resources,max((b.latest_completion for b in bounds.values()),default=resources.control_end))
-    for uid,job in jobs.items():
+    for number,(uid,job) in enumerate(jobs.items()):
         receipt=case.qos_receipts[uid]
         doc=receipt.to_dict() if hasattr(receipt,'to_dict') else dict(receipt)
         # RUNNING's native start is the current remaining-service boundary,
@@ -133,20 +161,29 @@ def authorized_data(case):
         if not starts:
             raise ValueError('EMPTY_AUTHORIZED_WINDOW:'+uid)
         newbound=replace(bounds[uid],allowed_starts=starts)
-        domain=physical_domain(changed[uid],newbound,resources,gen=shared_generator)
+        domain,graph,hit=authorized_geometry(changed[uid],newbound,resources,shared_generator,
+            uid in prep.get('preserve_singleton_mixed_flow',()),geometry_cache)
+        hits+=hit
         if not domain.stays and not domain.blocks:
             raise ValueError('NO_PHYSICAL_AUTHORIZED_OPTION:'+uid)
         domains[uid]=domain
-        graphs[uid]=complete_graph(changed[uid],domain,uid in prep.get('preserve_singleton_mixed_flow',()))
+        graphs[uid]=graph
         signature=dict(job={k:v for k,v in asdict(changed[uid]).items() if k not in ('uid','qos_receipt_sha')},
             boundary=asdict(newbound),hard_contract=doc.get('hard_contract',{}),
             resources=domain.cache.identity,runtime={k:raw[uid].get(k) for k in
                 ('duration_authority','risk_nominal_completion_issue_slot','reference_end')})
         classes[digest(signature)].append(uid)
+        if case.progress and (number%20==0 or number+1==len(jobs)):
+            case.progress(dict(phase='AUTHORIZED_DOMAIN_GEOMETRY',jobs_complete=number+1,
+                jobs_required=len(jobs),exact_geometry_cache_hits=hits,
+                exact_geometry_cache_misses=len(geometry_cache),seconds=perf_counter()-began))
     newbounds={uid:replace(bounds[uid],allowed_starts=changed[uid].qos_allowed_starts) for uid in jobs}
     metadata=dict(prep,classes=dict(classes),domain_authority='EMPIRICAL_QOS_Q90_REFERENCE_SLACK_V1',
         full_migration_domain_active=True,old_domain_certificate_reused=False,
-        physical_domain_hash=digest({u:d.sha for u,d in sorted(domains.items())}))
+        physical_domain_hash=digest({u:d.sha for u,d in sorted(domains.items())}),
+        authorized_domain_generation=dict(wall_seconds=perf_counter()-began,
+            exact_geometry_cache_hits=hits,exact_geometry_cache_misses=len(geometry_cache),
+            removed_physical_options=0,per_UID_authority_SHA_preserved=True))
     return (bundle,changed,newbounds,resources,raw,graphs,graphs,metadata),domains
 
 
@@ -188,7 +225,16 @@ def optimize_aidc(case, fixed_mess, qos_policy, budget):
         model.Params.LogFile=str(case.output/'NATIVE_SOLVER.log');model.Params.OutputFlag=1
         before=budget.remaining()
         seed,seed_plans,seed_receipt=project_reference_seed(model,units,data,budget,case.output/'REFERENCE_SEED',
-            stage=case.stage,seconds=min(30.,max(.001,case.call_cap*.15)))
+            stage=case.stage,seconds=min(30.,max(.001,case.call_cap*.15)),
+            choices=getattr(case,'known_seed_choices',None),iis_cap=getattr(case,'seed_iis_cap',None))
+        if getattr(case,'seed_diagnostic_only',False):
+            result=dict(stage=case.stage,arm=case.arm,case_sha=case.case_sha,
+                engine='v42_integration.a_engine.optimize_aidc',FULL_feasible=False,
+                diagnostic_only=True,main_Optimize_calls=0,current_case_seed=seed_receipt,
+                build_wall_seconds=build_wall_seconds,matrix=dict(rows=model.NumConstrs,
+                    columns=model.NumVars,nonzeros=model.NumNZs),global_infeasibility_claimed=False)
+            (case.output/'A_RESULT.json').write_text(json.dumps(result,indent=2,allow_nan=False),encoding='utf8')
+            return result
         charged=before-budget.remaining()
         remaining_cap=max(.001,case.call_cap-charged)
         call=budget.solve(model,label=case.stage+'_ORIGINAL_P1',cap=remaining_cap)
@@ -215,6 +261,16 @@ def optimize_aidc(case, fixed_mess, qos_policy, budget):
                 record=dict(record);record['segments']=tuple(tuple(r) for r in record['segments']);record['wan']=tuple(tuple(r) for r in record.get('wan',()))
                 validate(data[1][uid],Option(**record),data[2][uid],data[3])
             arrays=case.grid.planning_arrays
+            selected_gpu={key:float(value) for key,value in data[3].fixed_gpu.items()}
+            for uid,record in selected.items():
+                for site,start,end in record['segments']:
+                    for tick in range(start,end):
+                        selected_gpu[site,tick]=selected_gpu.get((site,tick),0.)+data[1][uid].gpu
+            coupling_residual=max((abs(value_at(variable,x)-selected_gpu.get(key,0.))
+                for key,variable in arrays['known'].items()),default=0.)
+            if coupling_residual>1e-5:raise ValueError('SELECTED_KNOWN_NATIVE_GPU_COUPLING_DRIFT')
+            result['selected_Known_GPU_coupling_replay']=dict(PASS=True,
+                maximum_residual=coupling_residual,includes_original_fixed_GPU=True)
             envelope=[dict(slot_start=t*900.,slot_end=(t+1)*900.,site=s,
                 gpu_capacity=max(0.,value_at(arrays['anonymous'][s,t+24],x)),
                 source_variable=f'anonymous_GPU[{s},{t}]',carryout_end=86400.) for t in range(96) for s in data[3].capacities]

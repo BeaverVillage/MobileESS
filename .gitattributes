@@ -1,4 +1,10 @@
 .gitattributes -text
+docs/v42_b1_structure_b2_solo_20261015/** -text whitespace=cr-at-eol
+tools/benchmark_v42_source18r_phase.py -text whitespace=cr-at-eol
+tools/audit_v42_source18r_results.py -text whitespace=cr-at-eol
+tests/test_v42_source18r_phase.py -text whitespace=cr-at-eol
+docs/v42_source18r_phase_20261015/** -text whitespace=cr-at-eol
+docs/v42_source18r_phase_20261015/**/*.log -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 v42_job_capability.py -text
 tests/test_v42_job_capability.py -text
 docs/v42_job_capability_joint_flexibility/** -text whitespace=cr-at-eol
@@ -122,7 +128,17 @@ docs/v42_common_am_qos_integration/**/*.log whitespace=-blank-at-eol,-blank-at-e
 docs/v42_common_am_qos_integration/**/*.txt whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 v42_svr11/authority.py -text whitespace=cr-at-eol
 v42_svr11/monitor.py -text whitespace=cr-at-eol
-v42_may_campaign_native90/m_model.py text eol=crlf whitespace=cr-at-eol
+v42_may_campaign_native90/m_model.py -text whitespace=cr-at-eol
+
+# Preserve measured PR230 preparation code and receipt bytes across checkouts.
+tools/benchmark_v42_*preparation.py -text whitespace=cr-at-eol
+tools/audit_v42_execution08_bottlenecks.py -text whitespace=cr-at-eol
+tools/audit_v42_phase_warm_mapping.py -text whitespace=cr-at-eol
+tools/verify_v42_preparation_artifacts.py -text whitespace=cr-at-eol
+tools/write_v42_bottleneck_report.py -text whitespace=cr-at-eol
+tests/test_v42_preparation_performance.py -text whitespace=cr-at-eol
+tests/test_v42_a_control_numeric_messages.py -text whitespace=cr-at-eol
+docs/v42_pr230_bottleneck_20261015/** -text whitespace=cr-at-eol
 validation/fixture_native0/** -text whitespace=cr-at-eol
 validation/fixture_native0/**/*.log whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 validation/initialization_native0_no_prior_pins/** -text whitespace=cr-at-eol
@@ -148,3 +164,124 @@ tools/*known_unknown*.py -text whitespace=cr-at-eol
 tests/test_v42_known_unknown_contract.py -text whitespace=cr-at-eol
 tests/test_v42_frozen_alternatives.py -text whitespace=cr-at-eol
 tests/test_v42_required_contracts.py -text whitespace=cr-at-eol
+docs/v42_may01_b1_partial_canary_20261014/** -text whitespace=cr-at-eol
+tools/*may01_b1_canary*.py -text whitespace=cr-at-eol
+tests/test_v42_partial_canary.py -text whitespace=cr-at-eol
+docs/v42_may01_b1_partial_canary_20261014/PRE_REPAIR_TEST_FAILURES.xml -text whitespace=-blank-at-eol,cr-at-eol
+
+# Preserve tracking source and measurement byte seals.
+docs/v42_trajectory_tracking_may01_canary_20261014/** -text whitespace=cr-at-eol
+v42_integration/trajectory_tracking.py -text
+v42_integration/tracking_canary.py -text
+v42_integration/tracking_metrics.py -text
+tools/*trajectory_tracking*.py -text
+tests/test_v42_trajectory_tracking.py -text
+docs/v42_trajectory_tracking_may01_canary_20261014/PRE_FIX_MIGRATION_VOLUME_TESTS.xml -text whitespace=-blank-at-eol,cr-at-eol
+
+# Preserve V42 unified snapshot byte seals and collapse generated review evidence.
+docs/v42_unified_aidc_mess_research_20261014/** -text whitespace=cr-at-eol
+docs/v42_unified_aidc_mess_research_20261014/*.json linguist-generated=true
+docs/v42_unified_aidc_mess_research_20261014/**/*.json linguist-generated=true
+docs/v42_unified_aidc_mess_research_20261014/*.csv linguist-generated=true
+docs/v42_unified_aidc_mess_research_20261014/*.xml linguist-generated=true
+tests/test_v42_aidc_sensitivity_runtime.py -text whitespace=cr-at-eol
+tests/test_v42_authorized_geometry.py -text whitespace=cr-at-eol
+tests/test_v42_integration_dday_actual_loader.py -text whitespace=cr-at-eol
+tests/test_v42_mess_scaling.py -text whitespace=cr-at-eol
+tests/test_v42_seed_member_choices.py -text whitespace=cr-at-eol
+tests/test_v42_unified_integration.py -text whitespace=cr-at-eol
+tools/audit_v42_known_cc4_headroom.py -text whitespace=cr-at-eol
+tools/audit_v42_known_native_interval.py -text whitespace=cr-at-eol
+tools/audit_v42_known_seed_box.py -text whitespace=cr-at-eol
+tools/audit_v42_known_service_authority.py -text whitespace=cr-at-eol
+tools/freeze_v42_unified_contracts.py -text whitespace=cr-at-eol
+tools/revise_v42_unified_contracts.py -text whitespace=cr-at-eol
+tools/run_v42_aidc_sensitivity_canary.py -text whitespace=cr-at-eol
+tools/run_v42_b1_actual_only.py -text whitespace=cr-at-eol
+tools/run_v42_frozen_known_site_only.py -text whitespace=cr-at-eol
+tools/run_v42_mess_scaling_pilot.py -text whitespace=cr-at-eol
+tools/run_v42_unified_b1_pilot.py -text whitespace=cr-at-eol
+tools/run_v42_unified_handoff_pilot.py -text whitespace=cr-at-eol
+tools/run_v42_unified_research.py -text whitespace=cr-at-eol
+tools/run_v42_unknown_current_ac_probe.py -text whitespace=cr-at-eol
+v42_a_stage_domain_v2/domain.py -text whitespace=cr-at-eol
+v42_integration/a_engine.py -text whitespace=cr-at-eol
+v42_integration/a_seed.py -text whitespace=cr-at-eol
+v42_integration/actual_validation.py -text whitespace=cr-at-eol
+v42_integration/aidc_sensitivity_runtime.py -text whitespace=cr-at-eol
+v42_integration/coordinator.py -text whitespace=cr-at-eol
+v42_integration/mess_scaling.py -text whitespace=cr-at-eol
+v42_integration/unified_contract.py -text whitespace=cr-at-eol
+v42_integration/unified_native0.py -text whitespace=cr-at-eol
+v42_integration/unified_research.py -text whitespace=cr-at-eol
+v42_integration/unified_resource.py -text whitespace=cr-at-eol
+v42_integration/aidc_resource_bridge.py -text whitespace=cr-at-eol
+v42_integration/followup_*.py -text whitespace=cr-at-eol
+v42_integration/mess_joint_compression.py -text whitespace=cr-at-eol
+v42_integration/mess_beam_diversity.py -text whitespace=cr-at-eol
+v42_integration/mess_mode_hull.py -text whitespace=cr-at-eol
+tests/test_v42_aidc_followup.py -text whitespace=cr-at-eol
+tests/test_v42_followup_contract.py -text whitespace=cr-at-eol
+tests/test_v42_mess_joint_compression.py -text whitespace=cr-at-eol
+tests/test_v42_mess_beam_diversity.py -text whitespace=cr-at-eol
+tests/test_v42_mess_mode_hull.py -text whitespace=cr-at-eol
+tools/audit_v42_original_beam_joint.py -text whitespace=cr-at-eol
+tools/audit_v42_s1_fractionality.py -text whitespace=cr-at-eol
+tools/run_v42_aidc_followup_native0.py -text whitespace=cr-at-eol
+tools/run_v42_aidc_original_coefficient_fixture.py -text whitespace=cr-at-eol
+tools/run_v42_followup_*.py -text whitespace=cr-at-eol
+tools/write_v42_mess_followup_reports.py -text whitespace=cr-at-eol
+tools/write_v42_unified_followup_reports.py -text whitespace=cr-at-eol
+v42_integration/may01_boundary_reconciliation.py -text whitespace=cr-at-eol
+v42_integration/mess_verified_packet_cache.py -text whitespace=cr-at-eol
+v42_integration/mess_s1_research.py -text whitespace=cr-at-eol
+tests/test_v42_recovery_*.py -text whitespace=cr-at-eol
+tests/test_v42_may01_boundary_reconciliation.py -text whitespace=cr-at-eol
+tests/test_v42_mess_verified_packet_cache.py -text whitespace=cr-at-eol
+tests/test_v42_mess_s1_research.py -text whitespace=cr-at-eol
+tools/run_v42_recovery_regression.py -text whitespace=cr-at-eol
+tools/run_v42_may01_boundary_reconciliation.py -text whitespace=cr-at-eol
+tools/run_v42_mess_continuation_*.py -text whitespace=cr-at-eol
+tools/write_v42_boundary_recovery_reports.py -text whitespace=cr-at-eol
+tools/run_v42_s1_integer_oracle.py -text whitespace=cr-at-eol
+docs/v42_unified_aidc_mess_research_20261014/FOLLOWUP/MESS_CONTINUATION_20324_ATTEMPT01/INTEGER_ORACLE_NATIVE_GUROBI.log -text whitespace=-blank-at-eol,cr-at-eol
+v42_integration/d0_*.py -text whitespace=cr-at-eol
+v42_integration/mess_root_diagnosis.py -text whitespace=cr-at-eol
+v42_integration/mess_minimax_lookahead.py -text whitespace=cr-at-eol
+tests/test_v42_d0_*.py -text whitespace=cr-at-eol
+tests/test_v42_mess_root_diagnosis.py -text whitespace=cr-at-eol
+tests/test_v42_mess_minimax_lookahead.py -text whitespace=cr-at-eol
+tools/run_v42_d0_*.py -text whitespace=cr-at-eol
+tools/run_v42_mess_root_diagnosis.py -text whitespace=cr-at-eol
+tools/run_v42_mess_lookahead_offline.py -text whitespace=cr-at-eol
+tools/write_v42_d0_*.py -text whitespace=cr-at-eol
+docs/v42_unified_aidc_mess_research_20261014/D0_STATE_CONDITIONED_PLANNING_20261015/** -text whitespace=cr-at-eol
+docs/v42_unified_aidc_mess_research_20261014/D0_STATE_CONDITIONED_PLANNING_20261015/**/*.log -text whitespace=-blank-at-eol,cr-at-eol
+
+# Preserve isolated PR223 diagnostic Source and measured receipt byte seals.
+tools/*v42_isolated*.py -text whitespace=cr-at-eol
+tests/test_v42_isolated*.py -text whitespace=cr-at-eol
+
+# Preserve release recovery Source and bounded execution evidence bytes.
+tools/*v42_release*.py -text whitespace=cr-at-eol
+tests/test_v42_release*.py -text whitespace=cr-at-eol
+docs/v42_unified_aidc_mess_research_20261014/RELEASE_RECOVERY_20261015/**/*.log -text whitespace=-blank-at-eol,cr-at-eol
+
+# Preserve additive research-contract, diagnostic and production byte seals.
+tools/*v42_research_presite*.py -text whitespace=cr-at-eol
+tools/*v42_research*.py -text whitespace=cr-at-eol
+tools/*v42_literature*.py -text whitespace=cr-at-eol
+tests/test_v42_research_presite*.py -text whitespace=cr-at-eol
+tools/*v42_production_campaign.py -text whitespace=cr-at-eol
+tools/*v42_rc02*.py -text whitespace=cr-at-eol
+tests/test_v42_rc02*.py -text whitespace=cr-at-eol
+tools/*v42_rc03*.py -text whitespace=cr-at-eol
+tools/*v42_research_transfer*.py -text whitespace=cr-at-eol
+tools/*v42_campaign_presite*.py -text whitespace=cr-at-eol
+tools/*v42_table_v*.py -text whitespace=cr-at-eol
+tools/*v42_tablev*.py -text whitespace=cr-at-eol
+tests/test_v42_table_v*.py -text whitespace=cr-at-eol
+tests/test_v42_tablev*.py -text whitespace=cr-at-eol
+# Keep the exact executed/fixture source and native log bytes, including EOF blanks.
+v42_integration/tablev_fullflex_actual.py -text whitespace=-blank-at-eof,cr-at-eol
+docs/v42_unified_aidc_mess_research_20261014/RELEASE_RECOVERY_20261015/**/*.log -text whitespace=-blank-at-eof,-blank-at-eol,cr-at-eol

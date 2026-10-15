@@ -1,0 +1,12 @@
+Historical two-candidate profiling invocation. This command ran before the
+run-wide physical-scope reuse change. The executed adapter bytes are preserved
+in RC01/AIDC/SOURCE; this invocation is performance evidence, not a controller
+algorithm or a real pre-site result. Native optimization was not invoked.
+
+python -c "from v42_integration.release_actual import *; import cProfile,pstats,numpy as np; s=prepare_packet(prepare_source()); a=s['arguments']; o=CausalObservations.load(RAW,begin=a['begin'],end=a['begin']+14400); from v42_integration.production_case import ARCHIVE; x=CurrentACAdmission(begin=a['begin'],sites=tuple(sorted(a['capacities'])),power_model=a['power_model'],observations=o,source_freeze=s['freeze']['source_freeze'],manifest=read(ARCHIVE/'CAMPAIGN_MANIFEST.json'),mess=s['mess']); x.observe(a['begin'],[]); g=np.zeros(12); sites=tuple(sorted(a['capacities'])); [(g.__setitem__(sites.index(site),g[sites.index(site)]+r.gpu)) for r,site,start in a['running']]; print('PROFILE_READY',flush=True); prof=cProfile.Profile(); prof.enable(); p=x.evaluate(a['begin'],g); g[0]+=1; q=x.evaluate(a['begin'],g); prof.disable(); prof.dump_stats('runtime/RC01_AC_PROFILE.pstats'); pstats.Stats(prof).sort_stats('cumulative').print_stats(28); print('AC_TIMES',p['AC_wall_seconds'],q['AC_wall_seconds'],flush=True)"
+
+Observed: 2 candidate calls, 11.071s profiled wall; verify_sources 10.290s;
+AC call walls 5.723904399987077s and 5.346534300013445s. The optimized replay
+keeps independent candidate compile/solve/current guards and validates the
+entire Source graph at outer run entry/exit, with physical authority bytes
+checked again at each candidate.

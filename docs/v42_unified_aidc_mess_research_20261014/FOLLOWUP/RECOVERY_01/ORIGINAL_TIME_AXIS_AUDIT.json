@@ -1,0 +1,115 @@
+{
+  "schema": "ORIGINAL_PR223_ISSUE_NATIVE_TIME_AXIS_INDEPENDENT_AUDIT_V1",
+  "status": "PASS",
+  "native_slot_zero_seconds": 1746000000.0,
+  "native_slot_zero_local": "2025-04-30T18:00:00+10:00",
+  "Dday_slot_seconds": 1746021600.0,
+  "Dday_native_slot": 24,
+  "planning_native_slots": [
+    24,
+    120
+  ],
+  "M_slots": [
+    0,
+    96
+  ],
+  "dt_seconds": 900,
+  "grid_interval_epoch_seconds": [
+    1746021600.0,
+    1746108000.0
+  ],
+  "native_job_eligibility": "Known at Issue; original reference_start_if_authorized kept on issue slot axis.",
+  "RUNNING_start_zero_semantics": "Already RUNNING remaining nominal service at issue; not historical episode admission.",
+  "PENDING_start_semantics": "New start at issue + 900 * option.start.",
+  "source_semantic_chain": [
+    "v42_capacity.reference.build_reference starts issue RUNNING at0 and queued PENDING at nominal-release issue slots.",
+    "v42_final.native.canonical_jobs uses reference_start_if_authorized and frozen service_slots without a midnight shift.",
+    "v42_temporal.native.native_jobs passes reference_start to the original Job; resource control horizon is120.",
+    "production_case converts public QoS allowed seconds with axis_origin_seconds=issue.",
+    "PlanningGridContext.bind projects physical slot t to Known native t+24 and CC4 t+24.",
+    "coordinator compiles Known start at planning_slot_zero_seconds + option.start*900.",
+    "coordinator maps the M time axis0..95 to midnight = issue+24*900."
+  ],
+  "selected_A1_commands": 1499,
+  "selected_pending_commands": 1395,
+  "selected_running_continuations": 104,
+  "all_selected_Pending_commands_match_saved_issued_QoS_epoch_axis": true,
+  "failures": [],
+  "source_records": [
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\production_case.py",
+      "bytes": 44889,
+      "sha256": "6f9839ad739c3c42eff31302821c263f3b0abd0f10a013057b029e5fd78fe3e8",
+      "matches_executed_frozen_source_receipt": true
+    },
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\a_engine.py",
+      "bytes": 14521,
+      "sha256": "64c1b055c2d20fd9ce02b6cfc5107550f8163757593bc3b3f0bd11c0c479a6f8",
+      "matches_executed_frozen_source_receipt": true
+    },
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\coordinator.py",
+      "bytes": 16940,
+      "sha256": "ee8572414da16935b08f8b7f81d0dbb9be1bb68437b96f76f375590fb6f82177",
+      "matches_executed_frozen_source_receipt": true
+    },
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\actual_validation.py",
+      "bytes": 63957,
+      "sha256": "3834469372344d1d84b8dd05df43e1ff8719a10c11e983c039eafcc3f4e2025c",
+      "matches_executed_frozen_source_receipt": true
+    },
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_integration\\qos.py",
+      "bytes": 27259,
+      "sha256": "4de5204e1f941179e48204e6d5f82f9b8faefac9246bed7aef0e074b702478f4",
+      "matches_executed_frozen_source_receipt": true
+    },
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_temporal\\native.py",
+      "bytes": 12785,
+      "sha256": "e3325724a2de55f81d97a5d6b19633f6b673bc7821eb31ad6f904695370d4b54",
+      "matches_executed_frozen_source_receipt": true
+    },
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_final\\native.py",
+      "bytes": 2257,
+      "sha256": "6fddb5938544aef952f86cc72e836a46c657ed66a6a594f5d842346900beebba",
+      "matches_executed_frozen_source_receipt": true
+    },
+    {
+      "path": "D:\\v42_common_am_qos_integration_20261013\\v42_capacity\\reference.py",
+      "bytes": 7524,
+      "sha256": "2baf1e03c9328676d94a1dc83bc6b75143e385efa988cc24c333eab1bf73df04",
+      "matches_executed_frozen_source_receipt": true
+    }
+  ],
+  "preparation_receipt": {
+    "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\CASE\\PRODUCTION_CASE_PREPARATION.json",
+    "bytes": 11747927,
+    "sha256": "fdb859b13763a3c3e7c84c802d56dad43a8ed121ef8fe766fee37048ae6fe4e2"
+  },
+  "public_QoS_domain_receipt": {
+    "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\CASE\\AUTHORIZED_START_DOMAIN_DIFF.json",
+    "bytes": 16046474,
+    "sha256": "fb0e2a4ec0fb976e813c89caecc8f3515738ece47db1c9b0cd114a5f76aaabdb"
+  },
+  "original_A1_receipt": {
+    "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\A1\\A_RESULT.json",
+    "bytes": 1089283,
+    "sha256": "daff086793561b81501f867ef212552cb68639512b424e9caa83d5b6442a1c49"
+  },
+  "Dday_state_receipt": {
+    "path": "D:\\v42_common_am_qos_integration_20261013\\docs\\v42_common_am_qos_integration\\V42_MAY01_DDAY_INITIAL_STATE_FREEZE.json",
+    "bytes": 6973987,
+    "sha256": "d8aae451858d7ab8579f087ac9811d04f83a8c10bd7e6fc1b2156e35b2db7003"
+  },
+  "issue_origin_was_not_inferred_from_current_compiler_only": true,
+  "native_zero_reinterpreted_as_midnight": false,
+  "commands_retimed": false,
+  "full_schedule_issue_to_Dday_prefix_certified": false,
+  "Native_calls": 0,
+  "Actual_replays": 0,
+  "Fresh_replays": 0
+}

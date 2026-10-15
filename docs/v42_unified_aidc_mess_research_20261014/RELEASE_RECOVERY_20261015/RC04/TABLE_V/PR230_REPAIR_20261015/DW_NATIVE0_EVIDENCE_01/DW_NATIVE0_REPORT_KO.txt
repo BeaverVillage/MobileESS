@@ -1,0 +1,19 @@
+AIDC DW 복구 및 실제 Native0 검증 결과
+
+최종 결과: PASS. DW_NATIVE0_04에서 optimize/presolve/computeIIS를 모두 차단한 상태로 실제 May01 E1/FLEX30/D0 FULL 모델과 원본 DW 입력의 정확한 동등성을 확인했다. Native 호출과 Runtime은 0이며, 이번 검증은 기존 sparse 입력만 재사용하여 원본 FULL 모델 재빌드도 0이다. source local block 모델 생성은 수행했다. 총 준비 시간은 1018.783초다.
+
+원본 FULL은 2,108,858행, 946,756열, 21,126,591 nonzeros다. 실제 Runtime equality와 box를 검증한 후 69,542개 보조변수/equality만 exact 제거했다. 상수 전용 보조변수 180개는 원래 equality, RHS, 계수를 그대로 유지하여 global prefix로 옮겼다. 반올림은 허용하지 않았다. 이후 2,039,316행, 877,214열의 원본 source reference와 모든 행/box/계수 및 rho 목적이 정확히 일치했다. integrality만 LP 목적에 맞게 완화했으며 원본 integer FULL 모델이 UB의 기준이다.
+
+PR191의 기존 Phase I/P1/full-pricing 알고리즘을 연결했다. 실제 실행 함수는 table_v_dw.execute_current_dw이며 ASourceBridge는 참고한 원본 경계다. typed bridge.execute를 호출한 것으로 표시하지 않는다. 기존 V6 ReferenceReuse/routed_compact_build의 동일 fresh reference hit 1회로 두 번째 원본 reference 구축 약 258.53초를 제거했다. 이전 solution, bound, DW certificate는 이 검증에 사용하지 않았다.
+
+독립 원본 E1 재발급과 physical domain/complete graph SHA 검증을 통과했다. 전체 현재 population은 PENDING 1,300개, 합법 시작 슬롯 5,721개, 초기 RUNNING 324개(서비스 대상 255개와 만료 후 물리 hold 69개)다. 1,555개 전체 클래스의 원본 complete local-pricing block과 각각의 byte SHA를 검증했다. 첨부의 992/3,667 수치는 전체 population과 동일한 정의라는 증거가 없어 강제하지 않았다.
+
+현재 Global LB, integer UB, global gap은 모두 null이다. 이 검증에서 실제 Phase I/P1 최적화나 integer FULL solve를 실행하지 않았으므로 최적성/feasibility 달성을 주장하지 않는다. Source 전역 pricing 인증이 없으면 LB/gap을 null로 유지하고, 구조적 adapter 실패 때 대형 MILP 자동 재시도를 차단한다.
+
+DW_NATIVE0_03의 과거 중단은 Windows event 59413/59414에서 python311.dll, 예외 코드 0xc0000005로 확인된다. Python finally 보고서가 남지 않은 프로세스 access violation이다. OOM이나 비동기 faulthandler가 원인이라고 확정하지 않는다. 이후 비동기 stack walker를 제거하고 동기 telemetry와 기존 V6 cache wrapper를 사용한 DW_NATIVE0_04에서는 끝까지 PASS했다.
+
+최종 scoped regression은 41 passed in 1.73s, Native 호출 0이다. 최종 freeze 시각은 2026-10-15 15:59:10 KST이며 16개 source 파일의 bytes/SHA가 검증 후에도 그대로다. 별도 root 통합 회귀 965 PASS는 root의 Regression06 증거를 참조한다.
+
+대형 FULL capture, reference, 1,555개 block pickle은 로컬에 보존하고 이 묶음에는 SHA256 manifest만 넣었다. 원본 raw와 과거 ledger는 수정하지 않았다. JSON gzip 사본은 압축 해제 bytes가 원본과 정확히 같은지 검증했다.
+
+남은 작업: 구조적 Native0 blocker는 해소됐다. 사용자의 최신 지시에 따라 root가 새 EXECUTION05 B1을 Native=0, cap=5400으로 시작하고 B2/B3를 순서대로 실행한다. B1은 이전 point/bound/DW certificate를 사용하지 않고 fresh FULL/DW build/solve를 수행해야 한다. 이전 1965.393초 기록은 보존하되 새 cycle에 합산하지 않는다. 실제 pricing 인증과 FULL integer UB의 존재/품질은 새 실행 결과로 판단한다.

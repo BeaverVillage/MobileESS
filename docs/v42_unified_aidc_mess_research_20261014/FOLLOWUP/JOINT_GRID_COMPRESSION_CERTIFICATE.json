@@ -1,0 +1,113 @@
+{
+  "schema": "SAME_POOL_JOINT_GRID_EXACT_V2_EQUALITY_SUPPORT",
+  "status": "PASS",
+  "PASS": true,
+  "identity": {
+    "version": "SAME_POOL_JOINT_GRID_EXACT_V2_EQUALITY_SUPPORT",
+    "source_sha": "c7031020e0f98b1471a2fe2562ce1a8eb51958d09e01e986793e32d5a41e2cc3",
+    "case_sha": "34c0efffa9c05397552fb167667c0bbfe2f35cec89801a3169c00c64fe77f292",
+    "physical_sha": "df7826eaabfd96ea163bc1a8bd37cca844faaf06d5a19fd88ad4f550451073ed",
+    "pool_sha": "820c01bac969b64fb661031df2e6ef554c40b417e24cfaf5f34f34ca9d260c97",
+    "matrix_sha": "9bfc7d56a86ae0ac4149bc7ee4fffe1fc0d841ff23cedcb082ca5f4686332410",
+    "domain_sha": "bb25c19d21f231d52be7311d59537edeb360f4264c3fd3b8b8848f9a89aeaf2c",
+    "lift_sha": "747f10c363b815a8772c22849890d8f3eb6bac199fd90fab44122fc6a28d9cf8",
+    "proof_kernel_source_sha": "30ea04a117aa77e30878b330139ccf772f05a8d9feb631d6607df57b4a7a8a1b",
+    "box_support_kernel_source_sha": "b72fb62d337023fb4721990c95c93808a0c964ee6dc9d9780b7484dd5c621444",
+    "start_sha": "5c2a522c664578cde43a27447a6e8db41818331c72d5b086a1ec2e156b176e3c",
+    "route_proof_sha": "2f7324e5311521e3b14d7a5390200a1f6c6a0c86757e7b865c1cf2bb6e99d816"
+  },
+  "cache_key": "8ed6ec03749310927bba6aad4a1280638266c21a407fab601856e2717e041424",
+  "cache_hit": false,
+  "row_certificate": {
+    "schema": "MESS_EXACT_NATIVE_CSR_GRID_COMPRESSION_V1",
+    "PASS": true,
+    "original_matrix_sha": "ccb5b59875a542432ef3cc9f81af405998b550988db06d18a96e4bd6663838ed",
+    "original_rhs_sense_sha": "9a511b4999ec38da32db6be377b361d1b55affa8eb36c6a0a4be276909cc8f6c",
+    "original_bounds_sha": "f6e686659c9d582eff97dd3df11a78b7e9007c554ca11eb379ccf1203fb93cf1",
+    "original_rows": 462324,
+    "retained_rows": 432543,
+    "original_nonzeros": 1838549,
+    "retained_nonzeros": 1792220,
+    "coefficient_epsilon_deletions": 0,
+    "equality_rows_removed": 0,
+    "variables_or_bounds_changed": false,
+    "proof_counts": {
+      "RETAINED": 432543,
+      "EXACT_DUPLICATE": 0,
+      "SAME_LHS_WEAKER_RHS": 0,
+      "OUTWARD_BOX": 29781,
+      "CONSTANT_BOX": 0
+    },
+    "inclusion": "original_subset_compressed_by_row_subset;compressed_subset_original_by_each_removal_witness",
+    "native_matrix_scope": "SUPPLIED_STORED_CSR;REAL_NATIVE_LINEAGE_REQUIRES_CAPTURE_RECEIPT"
+  },
+  "independently_verified": {
+    "PASS": true,
+    "all_removed_rows_proven": true,
+    "coefficient_epsilon_deletions": 0,
+    "original_integer_feasible_region_preserved": true,
+    "original_LP_feasible_region_preserved": true,
+    "original_objective_and_domains_preserved": true,
+    "Native_optimize_calls": 0
+  },
+  "retained_helper_equality_support_proof": {
+    "PASS": true,
+    "helper_equalities": 110012,
+    "rounds": [
+      {
+        "round": 0,
+        "changed_endpoints": 9000,
+        "implied_box_sha": "97785dda8a01dbacddef56df3a0685145edffbc103f5c208ef811d756263150b"
+      },
+      {
+        "round": 1,
+        "changed_endpoints": 44840,
+        "implied_box_sha": "f6e686659c9d582eff97dd3df11a78b7e9007c554ca11eb379ccf1203fb93cf1"
+      },
+      {
+        "round": 2,
+        "changed_endpoints": 0,
+        "implied_box_sha": "f6e686659c9d582eff97dd3df11a78b7e9007c554ca11eb379ccf1203fb93cf1"
+      }
+    ],
+    "retained_connection_inequalities": 17884,
+    "physical_power_upper_endpoints_tightened": 14592,
+    "retained_helper_row_ids_sha": "a324a8c1b15594d527c2f0f045ea1029b2828fabcc043c1236a7d63e3c415b09",
+    "retained_helper_pivot_ids_sha": "e1a931093eb4b27076a09f1cd308693aa194edd6aa2305eb39c0284e0745e2dc",
+    "original_bounds_sha": "2f51ce60d7ee41490fdb35c1f375885420a9208296e8215ff74f9f96b6c952f9",
+    "implied_bounds_sha": "f6e686659c9d582eff97dd3df11a78b7e9007c554ca11eb379ccf1203fb93cf1",
+    "bounds_are_installed_in_model": false,
+    "original_LP_domain_enclosed": true,
+    "proof": "Retained +1 power connection rows first imply outward upper bounds. Induction over synchronous helper rounds then uses each retained +1 equality and the previous enclosing box. Intersecting valid bounds remains valid for every Original integer and LP point. No grid row is used for bound inference and no source constraint or model variable bound is changed."
+  },
+  "helper_bound_proof_seconds": 3.1388408000057098,
+  "original_joint_rows": 715600,
+  "compressed_joint_rows": 685819,
+  "original_joint_nonzeros": 7008176,
+  "compressed_joint_nonzeros": 6961847,
+  "original_matrix_sha": "9bfc7d56a86ae0ac4149bc7ee4fffe1fc0d841ff23cedcb082ca5f4686332410",
+  "original_domain_sha": "bb25c19d21f231d52be7311d59537edeb360f4264c3fd3b8b8848f9a89aeaf2c",
+  "compressed_matrix_sha": "478bc1b6625788b44bbecb376435591c3f457ef2484b53d9aebac5230bb540a1",
+  "compressed_domain_sha": "e6356f494f3cff1244b27255ffa4263a0bbf058f17cf180ea93934b289a6ee2b",
+  "unchanged_columns": 137635,
+  "unchanged_binary": 416,
+  "removed_grid_rows": 29781,
+  "non_grid_rows_removed": 0,
+  "raw_lift_bit_identical": true,
+  "MIP_Start_bit_identical": true,
+  "objective_types_bounds_bit_identical": true,
+  "same_pool_integer_domain_equivalent": true,
+  "same_pool_LP_domain_equivalent": true,
+  "original_FULL_inclusion_inherited_from_source_packet": true,
+  "original_FULL_equals_restricted_joint_claimed": false,
+  "restricted_ObjBound_is_Global_LB": false,
+  "proof_seconds": 2.4112141999939922,
+  "verification_seconds": 2.3767654999974184,
+  "cache_creation_seconds": 0.44376439999905415,
+  "cache_reuse_seconds": 0.0,
+  "compression_total_wall_seconds": 9.24321110000892,
+  "Native_optimize_calls": 0,
+  "solver_speedup": "NOT_RUN",
+  "total_beam_iteration_speedup": "NOT_CERTIFIED",
+  "experimental_default_disabled": true
+}

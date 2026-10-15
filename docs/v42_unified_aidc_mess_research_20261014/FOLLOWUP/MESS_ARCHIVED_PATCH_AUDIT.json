@@ -1,0 +1,136 @@
+{
+  "status": "PASS",
+  "patches": [
+    {
+      "file": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\PR_PAUSED_RESEARCH\\FULL_B_SOURCE_BEFORE_PR_CLEANUP.patch.gz",
+        "sha256": "cd65d62ae697e572ad62aabb9c8bab648ee241ca372bb7e61ad6493b8f7e9950",
+        "bytes": 51819
+      },
+      "status": "DIAGNOSTIC_ONLY",
+      "touched_files": [
+        "v42_integration/mess_scaling.py",
+        "tools/run_v42_mess_scaling_pilot.py",
+        "tests/test_v42_mess_scaling.py"
+      ],
+      "added_functions": [
+        "checked",
+        "load_routes",
+        "audit_original_sites",
+        "validate_stay_physics",
+        "require_stage_bindings",
+        "build_scale_case",
+        "fixed_injections",
+        "validate_scale_identity",
+        "validate_response_coefficients",
+        "validate_pilot_inputs",
+        "validate_grid_authority",
+        "full_vehicle_replay",
+        "prescreen",
+        "beam_paths",
+        "source_grid_controls",
+        "model_build_estimate",
+        "_attr",
+        "constructor_summary",
+        "affine_support_upper",
+        "_sparse_box_support",
+        "_csr_box_support_vectorized_exact",
+        "compress_native_grid_rows",
+        "verify_native_grid_compression",
+        "offline_vectorized_proof_benchmark",
+        "_save_cached_objective_authority",
+        "build_cached_sparse_native0",
+        "add_grid_exact_compressed",
+        "compress_existing_native_grid_model",
+        "projected_grid_rows",
+        "audit_grid_bottleneck",
+        "_same_model_compression_benchmark",
+        "run_original_pilot",
+        "validate_captured_a_input_mess",
+        "make_stage_pilot_bundle",
+        "full_stay_handoff",
+        "install_scaled_m_adapter",
+        "prepare_production_pilot",
+        "write_csv",
+        "materialize_reports",
+        "recover_measured_reports",
+        "summarize_compression_benchmark",
+        "main",
+        "source",
+        "build",
+        "test_source_only_full96_and_four_physical_vehicles",
+        "test_inactive_nonzero_q_outside_optimized_sites_is_retained_once",
+        "test_deterministic_nested_stages_and_reduced_sha_not_original",
+        "test_route_and_stay_corruption_are_rejected",
+        "test_shared_physical_and_forecast_contract_drift_rejected",
+        "test_beam_stay_move_corridors_original_path_grammar",
+        "test_restricted_bound_cannot_be_original_or_reduced_global",
+        "test_original24_audit_source_mapping_and_signed_vector",
+        "test_mutated_aidc_power_cannot_retain_old_anchor_string",
+        "test_manifest_and_fixed_schedule_mutations_rejected",
+        "test_response_descriptors_arrays_and_bytes_revalidated",
+        "test_transformer_current_disable_rejected_before_source_or_native_read",
+        "test_constructor_receipt_whitelist_serializes_without_self_reference",
+        "test_stage_anchor_changes_require_supervisor_and_new_case_sha",
+        "test_outward_support_encloses_exact_fraction_box_vertices",
+        "test_full_stay_handoff_complete_grid_alias_and_content_sha",
+        "test_captured_a_cannot_pair_with_another_valid_input_mess_anchor",
+        "test_exact_native_compression_senses_constants_and_no_epsilon_deletion",
+        "test_compression_keeps_unbounded_max_endpoint_and_uses_finite_min_for_negative_rho",
+        "test_compression_same_integer_and_continuous_box_feasible_region_exact_fraction",
+        "test_compression_certificate_rejects_original_rhs_bounds_or_proof_mutation",
+        "test_compression_rejects_noncanonical_duplicate_column_dyadic_terms",
+        "test_vectorized_support_is_bit_identical_to_scalar_tiny_ulp_inf_zero_and_overflow",
+        "test_vectorized_scalar_proof_identity_random_sparse_native_row_order_and_guards",
+        "test_cached_csr_refuses_missing_objective_authority_and_new_case_without_build",
+        "test_original_constructor_objective_probe_requires_recorded_arrays_and_min_sense",
+        "test_compression_benchmark_requires_original_s1_two_equal_budgeted_native_caps",
+        "test_benchmark_mock_only_identical_starts_fresh_bounds_and_original_best_preserved"
+      ],
+      "hunk_review": "Mixed before-cleanup source snapshot. Contains unmeasured cached CSR experiment plus already tracked proof/stage work. Individual hunks require current-code tests; no blanket restore.",
+      "patch_applied": false,
+      "unmeasured_cached_native_reproduction_promoted": false
+    },
+    {
+      "file": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\PR_PAUSED_RESEARCH\\REMOVE_UNMEASURED_CACHED_CSR_ONLY.patch.gz",
+        "sha256": "43a8388804a2ce40a785ed51654d4cf4e1023c1c51176fe14e67443ffd5a9a26",
+        "bytes": 5534
+      },
+      "status": "DIAGNOSTIC_ONLY",
+      "touched_files": [
+        "v42_integration/mess_scaling.py",
+        "tools/run_v42_mess_scaling_pilot.py",
+        "tests/test_v42_mess_scaling.py"
+      ],
+      "added_functions": [],
+      "hunk_review": "Removal side of the cached CSR experiment. Current PR230 preserves the measured Native0/grid proof and omits unmeasured bulk cached native construction. No new application.",
+      "patch_applied": false,
+      "unmeasured_cached_native_reproduction_promoted": false
+    },
+    {
+      "file": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\PR_PAUSED_RESEARCH\\RESTORE_UNMEASURED_CACHED_CSR_ONLY.patch.gz",
+        "sha256": "a7e0cf2985efb201810e67e09f5d1f017044ce4b8c752415a648e934f7281541",
+        "bytes": 5537
+      },
+      "status": "DIAGNOSTIC_ONLY",
+      "touched_files": [
+        "v42_integration/mess_scaling.py",
+        "tools/run_v42_mess_scaling_pilot.py",
+        "tests/test_v42_mess_scaling.py"
+      ],
+      "added_functions": [
+        "_save_cached_objective_authority",
+        "build_cached_sparse_native0",
+        "test_cached_csr_refuses_missing_objective_authority_and_new_case_without_build",
+        "test_original_constructor_objective_probe_requires_recorded_arrays_and_min_sense"
+      ],
+      "hunk_review": "Reintroduces objective-only constructor probe and bulk cached CSR Native0 build. Source/Case/objective authority probes were not measured before cleanup. Not restored or used for performance/physical claims.",
+      "patch_applied": false,
+      "unmeasured_cached_native_reproduction_promoted": false
+    }
+  ],
+  "blanket_restore": false,
+  "Native_optimize_calls": 0
+}

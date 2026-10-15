@@ -20,6 +20,7 @@ from time import perf_counter
 
 import numpy as np
 from scipy import sparse
+from .preparation_profile import measure, profile_joint, profile_component
 
 ENGINE_VERSION = "PR222_CASE_EXPLICIT_EXACT_DIRECT_JOINT_V1"
 PR222_SHA = "12594e281bb89611331950f11f775a2612d3cb48"
@@ -131,7 +132,10 @@ def binding(case):
                               separators=(",", ":"), allow_nan=False).encode()).hexdigest()
     identity = getattr(case, "identity", {})
     bundle = getattr(case, "bundle", {})
-    return dict(day=bundle.get("day", identity.get("day")),
+    return dict(case_sha=case.case_sha,stage=identity.get('stage'),
+                source_sha=identity.get('D0_source_sha',identity.get('source_sha')),
+                science_sha=identity.get('science_sha'),
+                day=bundle.get("day", identity.get("day")),
                 arm=identity.get("arm", bundle.get("arm")),
                 original_matrix_sha=matrix_sha(case.original_A),
                 original_domain_sha=domain_sha(case.original_d),
@@ -148,6 +152,7 @@ def _exact_objective(domain, point):
          for j in np.flatnonzero(domain["objective"])), Fraction(0))
 
 
+@profile_component('M_ORIGINAL_FULL_REPLAY')
 def strict_full(case, path, evidence=None):
     """Unmodified check_ub FULL/physical validator, without historical ROOT IO.
 
@@ -275,6 +280,7 @@ class IncumbentBank:
                     BEST_MOVING_FEASIBLE_UB=None if self.best_moving is None else self.best_moving[1]["Global_UB"])
 
     def save(self, folder, case_binding):
+        Path(folder).mkdir(parents=True,exist_ok=True)
         records = []
         for label, item in (("GLOBAL", self.best), ("MOVING", self.best_moving)):
             if item is None:
@@ -360,6 +366,7 @@ def pin_pools(case, point, bank, candidate_pools=None):
     return pool
 
 
+@profile_joint
 def direct_joint(case, point, pools):
     """PR221 Exact Direct substitution with current axes and no global context."""
     graph = PathGraph(case)
@@ -367,15 +374,24 @@ def direct_joint(case, point, pools):
     if set(pools) != set(units):
         raise ValueError("ALL_MESS_POOL_REQUIRED")
     center = graph.paths(point)
-    route = np.asarray([j for j, name in enumerate(map(str, case.d["names"]))
-                        if name.startswith(("route_flow[", "arc[", "node_activity["))], dtype=int)
-    keep = np.setdiff1d(np.arange(case.A.shape[1]), route, assume_unique=True)
-    if not len(route) or np.any(case.d["objective"][route] != 0):
-        raise ValueError("ORIGINAL_ROUTE_COORDINATE_OR_OBJECTIVE_DRIFT")
-    grouped = {u: [int(j) for j in route if str(case.d["names"][j]).split("[", 1)[1].split(",")[0] == u]
-               for u in units}
-    if sum(map(len, grouped.values())) != len(route):
-        raise ValueError("ORIGINAL_ROUTE_UNIT_AXIS_DRIFT")
+    cache_key = (matrix_sha(case.A), domain_sha(case.d),
+                 matrix_sha(case.original_A), domain_sha(case.original_d),
+                 file_record(__file__)['sha256'], binding(case)['route_contract_sha'])
+    cache = getattr(case, '_direct_static_cache', None)
+    cache_hit = cache is not None and cache['key'] == cache_key
+    if not cache_hit:
+        route = np.asarray([j for j, name in enumerate(map(str, case.d["names"]))
+                            if name.startswith(("route_flow[", "arc[", "node_activity["))], dtype=int)
+        keep = np.setdiff1d(np.arange(case.A.shape[1]), route, assume_unique=True)
+        if not len(route) or np.any(case.d["objective"][route] != 0):
+            raise ValueError("ORIGINAL_ROUTE_COORDINATE_OR_OBJECTIVE_DRIFT")
+        grouped = {u: [int(j) for j in route if str(case.d["names"][j]).split("[", 1)[1].split(",")[0] == u]
+                   for u in units}
+        if sum(map(len, grouped.values())) != len(route):
+            raise ValueError("ORIGINAL_ROUTE_UNIT_AXIS_DRIFT")
+        cache = dict(key=cache_key, route=route, keep=keep, grouped=grouped, path_products={})
+        case._direct_static_cache = cache
+    route, keep, grouped = cache['route'], cache['keep'], cache['grouped']
     rows, columns, coefficients, axis, selections = list(map(int, keep)), list(range(len(keep))), [1.] * len(keep), [], []
     for unit in units:
         if center[unit] not in pools[unit] or graph.complete(unit) not in pools[unit]:
@@ -409,14 +425,18 @@ def direct_joint(case, point, pools):
     checked = 0
     for ordinal in range(len(axis)):
         path_columns = lift[:, len(keep) + ordinal].tocoo().row
-        source = case.A[:, path_columns].tocoo()
-        exact = defaultdict(Fraction)
-        for row, value in zip(source.row, source.data):
-            exact[int(row)] += Fraction(float(value))
+        path_key = (axis[ordinal]['unit'], tuple(axis[ordinal]['path']))
+        exact = cache['path_products'].get(path_key)
+        if exact is None:
+            source = case.A[:, path_columns].tocoo()
+            exact = defaultdict(Fraction)
+            for row, value in zip(source.row, source.data):
+                exact[int(row)] += Fraction(float(value))
+            exact = {r:v for r,v in exact.items() if v}
+            cache['path_products'][path_key] = exact
         observed = product[:, len(keep) + ordinal].tocoo()
-        if {r: v for r, v in exact.items() if v} != {
-                int(r): Fraction(float(v)) for r, v in zip(observed.row, observed.data)}:
-            raise ValueError("SPARSE_PRODUCT_NOT_EXACT_DYADIC")
+        if exact != {int(r): Fraction(float(v)) for r,v in zip(observed.row,observed.data)}:
+            raise ValueError('SPARSE_PRODUCT_NOT_EXACT_DYADIC')
         checked += len(exact)
     one = sparse.csr_matrix(([1.] * len(axis), ([units.index(a["unit"]) for a in axis],
                              [len(keep) + i for i in range(len(axis))])), shape=(len(units), lift.shape[1]))
@@ -439,7 +459,8 @@ def direct_joint(case, point, pools):
         raise ValueError("JOINT_ORIGINAL_CHARGE_MODE_AUTHORITY_DRIFT")
     proof = dict(PASS=True, restricted_to_FULL_inclusion=True, restricted_equals_FULL_not_claimed=True,
                  original_source_rows_semantically_preserved=case.A.shape[0],
-                 original_source_RHS_Sense_objective_unmodified=True,
+                 original_source_RHS_Sense_objective_unmodified=True, static_cache_hit=cache_hit,
+                 static_cache_key=list(cache_key), dynamic_links_and_start_reverified=True,
                  exact_dyadic_lambda_row_coefficients_checked=checked,
                  no_physical_nonroute_columns_removed=True, original_charge_modes_retained=retained_modes,
                  lambda_axis=axis, keep_columns=keep.tolist(), removed_route_columns=route.tolist(),
@@ -456,6 +477,11 @@ def _native_joint(case, budget, packet, folder, seconds, native0=False):
     A, d, lift, start, proof = packet
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
+    parent=budget
+    while hasattr(parent,'parent'):parent=parent.parent
+    if hasattr(parent,'worker_lock'):
+        from .table_v_resources import admit_resources
+        admit_resources(parent,phase='M_JOINT_PREBUILD')
     model = gp.Model(ENGINE_VERSION)
     captures, messages, errors = [], [], []
     result = dict(executed=False, Native_optimize_calls=0, Native_Runtime=0., native0=native0,
@@ -465,24 +491,25 @@ def _native_joint(case, budget, packet, folder, seconds, native0=False):
         params = dict(APPROVED_JOINT_PARAMETERS, LogFile=str(folder / "NATIVE_GUROBI.log"))
         for key, value in params.items():
             setattr(model.Params, key, value)
-        x = model.addMVar(A.shape[1], lb=d["lower"], ub=d["upper"], vtype=d["types"], obj=d["objective"])
-        x.VarName = d["names"].tolist()
-        x.Start = start
-        model.ObjCon = float(d["constant"])
-        rows = model.addMConstr(A, x, d["sense"], d["rhs"])
-        rows.ConstrName = d["row_names"].tolist()
-        model.update()
-        checks = dict(CSR_exact=matrix_sha(model.getA().tocsr()) == matrix_sha(A),
-                      RHS_exact=np.array_equal(model.getAttr("RHS"), d["rhs"]),
-                      Sense_exact=np.array_equal(model.getAttr("Sense"), d["sense"]),
-                      bounds_exact=np.array_equal(x.LB, d["lower"]) and np.array_equal(x.UB, d["upper"]),
-                      types_exact=np.array_equal(x.VType, d["types"]),
-                      objective_exact=np.array_equal(x.Obj, d["objective"]) and model.ObjCon == float(d["constant"]),
-                      Start_exact=np.array_equal(x.Start, start),
-                      literal_inverse_Start_exact=np.array_equal(lift @ x.Start, lift @ start))
-        if not all(checks.values()):
-            raise ValueError("COMMON_M_NATIVE_READBACK_DRIFT")
-        _write(folder / "NATIVE_READBACK.json", dict(PASS=True, checks=checks, Optimize_calls=0))
+        with measure(folder,'M_NATIVE_MODEL_READBACK'):
+            x = model.addMVar(A.shape[1], lb=d["lower"], ub=d["upper"], vtype=d["types"], obj=d["objective"])
+            x.VarName = d["names"].tolist()
+            x.Start = start
+            model.ObjCon = float(d["constant"])
+            rows = model.addMConstr(A, x, d["sense"], d["rhs"])
+            rows.ConstrName = d["row_names"].tolist()
+            model.update()
+            checks = dict(CSR_exact=matrix_sha(model.getA().tocsr()) == matrix_sha(A),
+                          RHS_exact=np.array_equal(model.getAttr("RHS"), d["rhs"]),
+                          Sense_exact=np.array_equal(model.getAttr("Sense"), d["sense"]),
+                          bounds_exact=np.array_equal(x.LB, d["lower"]) and np.array_equal(x.UB, d["upper"]),
+                          types_exact=np.array_equal(x.VType, d["types"]),
+                          objective_exact=np.array_equal(x.Obj, d["objective"]) and model.ObjCon == float(d["constant"]),
+                          Start_exact=np.array_equal(x.Start, start),
+                          literal_inverse_Start_exact=np.array_equal(lift @ x.Start, lift @ start))
+            if not all(checks.values()):
+                raise ValueError("COMMON_M_NATIVE_READBACK_DRIFT")
+            _write(folder / "NATIVE_READBACK.json", dict(PASS=True, checks=checks, Optimize_calls=0))
         def capture(values, objective, discovery):
             values = np.asarray(values, dtype=np.float64)
             K = len(proof["keep_columns"])
@@ -530,6 +557,9 @@ def _native_joint(case, budget, packet, folder, seconds, native0=False):
                 result["Native_Runtime"] = float(model.Runtime)
             except Exception:
                 result["Native_Runtime"] = None
+        for i,candidate in enumerate(captures):
+            np.savez_compressed(folder/f'RECOVERABLE_CAPTURE_{i:03d}.npz',point=candidate['point'])
+        result['recoverable_captures']=[file_record(folder/f'RECOVERABLE_CAPTURE_{i:03d}.npz') for i in range(len(captures))]
         _write(folder / "NATIVE_CALL.json", result)
         raise
     finally:
@@ -594,7 +624,7 @@ def export_plan(case, point):
     plan["sha256"] = sha256(payload.encode()).hexdigest()
     from .a_engine import digest
     plan["plan_sha"] = digest(plan)
-    _write(case.output / "COMMON_M_PR222/FULL_MESS_PHYSICAL_ANCHOR.json", plan)
+    _write(Path(getattr(case,'mess_execution_folder',case.output/'COMMON_M_PR222')) / 'FULL_MESS_PHYSICAL_ANCHOR.json', plan)
     return plan
 
 
@@ -611,8 +641,12 @@ def optimize_mess(case, initial_point, incumbent_registry, budget):
     case = copy(case)
     case.output = Path(case.output).resolve()
     case.output.mkdir(parents=True, exist_ok=True)
-    folder = case.output / "COMMON_M_PR222"
-    folder.mkdir(exist_ok=False)
+    subdir=getattr(case,'mess_execution_subdir','COMMON_M_PR222')
+    if subdir not in ('COMMON_M_PR222','COOPERATIVE_SEED/COMMON_M_PR222','COOPERATIVE_SEARCH/COMMON_M_PR222'):
+        raise ValueError('OFFICIAL_MESS_EXECUTION_CHILD_REQUIRED')
+    folder = case.output / subdir
+    folder.mkdir(parents=True,exist_ok=False)
+    case.mess_execution_folder=folder
     validator = getattr(case, "strict_validator", strict_full)
     key = binding(case)
     bank = IncumbentBank(case)
@@ -647,47 +681,10 @@ def optimize_mess(case, initial_point, incumbent_registry, budget):
                                 admitted=cold_used and bank.best is not None))
     native, captures, pools, proof = None, [], None, None
     initial_ub = bank.fields()["BEST_GLOBAL_UB"]
+    adaptive = dict(history=[],joint_calls=0,unique_pools=0,stop_reason='NO_FULL_SEED_OR_NATIVE_BUDGET')
     if bank.best is not None:
-        point, certificate = bank.best
-        candidates = getattr(case, "candidate_pools", None)
-        generator = getattr(case, "candidate_generator", None)
-        if generator is None and candidates is None and budget.remaining() > 0:
-            from .m_candidates import generate
-            generator = generate
-            case.candidate_generator = generator
-        if generator is not None:
-            candidates = generator(case, point, bank, budget)
-        pools = pin_pools(case, point, bank, candidates)
-        _write(folder / "POOL.json", dict(pools=pools, complete_incumbent_paths_pinned=True,
-                    STAY_preserved=True, no_MOVE_forcing=True,
-                    candidate_generation="EXPLICIT_CASE_GENERATOR" if generator else "CALLER_POOL" if candidates else "PINNED_OPTIONS_ONLY",
-                    full_cold_search_performance_established=False))
-        packet = direct_joint(case, point, pools)
-        proof = packet[-1]
-        _write(folder / "EXACT_INTEGER_AND_ROW_EQUIVALENCE.json", proof)
-        if budget.remaining() > 0:
-            solver = getattr(case, "joint_solver", _native_joint)
-            try:
-                native, captures = solver(case, budget, packet, folder / "JOINT", min(140., budget.remaining()))
-            except Exception as exc:
-                receipt_path = folder / "JOINT/NATIVE_CALL.json"
-                native = (json.loads(receipt_path.read_text(encoding="utf-8")) if receipt_path.exists()
-                          else dict(executed=False, current_pool_ObjVal=None))
-                native["error"] = repr(exc)
-                captures = []
-            if solver is not _native_joint:
-                native = dict(native, fixture_backend=True, production_execution=False)
-            seen = set()
-            for ordinal, capture in enumerate(captures):
-                point = capture["point"]
-                signature = vector_sha(point)
-                if signature in seen:
-                    continue
-                seen.add(signature)
-                certificate = _validate(case, point, folder / f"CAPTURE_{ordinal:03d}.npz", validator)
-                _write(folder / f"CAPTURE_{ordinal:03d}_ROUTE_SELECTION.json", capture.get("route_selection"))
-                if certificate is not None:
-                    bank.offer(point, certificate)
+        from .m_adaptive import run
+        native, adaptive = run(case, bank, budget, folder, validator)
     registry = bank.save(folder, key)
     feasible = bank.best is not None
     plan = None
@@ -703,7 +700,7 @@ def optimize_mess(case, initial_point, incumbent_registry, budget):
                   cold_initializer_used=cold_invoked, cold_history=cold_history,
                   historical_witness_supplied=bool(records), initial_verified_UB=initial_ub,
                   current_pool_ObjVal=None if native is None else native.get("current_pool_ObjVal"),
-                  **bank.fields(), native_call=native, incumbent_registry=registry,
+                  **bank.fields(), native_call=native, adaptive_search=adaptive, incumbent_registry=registry,
                   admission_order=admission_order, mess=plan,
                   P2_calls=0, AIDC_optimization_calls=0, LB_optimizer_calls=0,
                   solver_threads=1, wall_seconds=perf_counter() - began,

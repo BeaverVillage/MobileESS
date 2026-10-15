@@ -1,0 +1,410 @@
+{
+  "schema": "AIDC_DW_RESTORATION_SOURCE_AUDIT_V1",
+  "status": "SOURCE_REUSE_AVAILABLE_D0_E1_ADAPTER_NOT_CONNECTED",
+  "evidence_scope": "READ_ONLY_SOURCE_GIT_AND_PR_AUDIT_NOT_MODEL_BUILD_OR_EXECUTION",
+  "created_UTC": "2026-10-15T06:01:12.1026604+00:00",
+  "repository": "D:\\v42_trajectory_tracking_may01_20261014",
+  "observed_HEAD": "0e5aa80107dcae5f7b18438c5ff8cf92695ff44a",
+  "verdict_KO": "기존PR191 V6 및 ASourceBridge의 Phase I/P1 full pricing/integer recovery 경로는 존재한다. 현재TableV는이를호출하지않고단일monolithic UB P1만연결했다. D0 E1 입출력/ownership/current-grid/Source·Case·예산adapter 검증후복원가능하나현재D0 DW LB는미실행이다.",
+  "current_TableV": {
+    "file": "v42_integration/table_v_a.py",
+    "entry": "execute_current_a",
+    "full_native_build_line": 103,
+    "single_UB_MILP_call_line": 153,
+    "bound_origin": "model.ObjBound from this monolithic MILP",
+    "DW_phase_I_calls": 0,
+    "DW_complete_pricing_calls": 0,
+    "DW_LB": "NOT_RUN",
+    "active_EXECUTION02_B1_UB": "LEFT_UNTOUCHED",
+    "P2_calls": 0
+  },
+  "existing_reusable_adapter": {
+    "file": "v42_may_build_v6/a_stage.py",
+    "functions": [
+      "_prepare:111",
+      "verify_case:324",
+      "_NativeBudget:388",
+      "_native:425",
+      "_physical:535",
+      "_planning:555",
+      "run:584"
+    ],
+    "sequence": [
+      "current-date DATA and current full oracle roster",
+      "routed Phase I with frozen original weights",
+      "original P1 complete full-native pricing",
+      "exact full-domain LP LB",
+      "restore_types original N integer lanes",
+      "INTEGER_CONTROL UB and original physical replay",
+      "P1-only acceptance P2=0"
+    ],
+    "B3_file": "v42_b3_joint/a_source.py",
+    "B3_functions": [
+      "ASourceBridge._binding:236",
+      "_physical:321",
+      "_configure:406",
+      "execute:523",
+      "_recorded_pricing:594"
+    ],
+    "date_budget_P2_routing": "ALREADY_IMPLEMENTED_BY_V6_AND_PR191_NOT_A_RESTORATION_BLOCKER",
+    "no_new_decomposition_algorithm_required": true
+  },
+  "PR_sources": [
+    {
+      "number": 180,
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/180",
+      "head_commit": "8b90bdda26de480715e243249f62d46ff9bf1a54",
+      "head_ref": "codex/v42-a-stage-compact-rowgen",
+      "functionality": "Original elastic Phase I, SUM/perspective hybrid/full-native class pricing, original integer lanes and physical UB recovery",
+      "historical_result_scope": "May19 only; never current D0 numeric authority",
+      "key_files": [
+        "v42_a_stage_canary/phase.py",
+        "v42_a_stage_phase1/producer.py",
+        "v42_a_stage_compact_rowgen/assembly.py",
+        "v42_a_stage_compact_rowgen/kernel.py"
+      ],
+      "Git_blob_receipts": [
+        {
+          "relative_path": "v42_a_stage_canary/phase.py",
+          "commit": "8b90bdda26de480715e243249f62d46ff9bf1a54",
+          "Git_blob_sha1": "2644ceb40b618ebb5ad546d512d74e82906ab1f3"
+        },
+        {
+          "relative_path": "v42_a_stage_phase1/producer.py",
+          "commit": "8b90bdda26de480715e243249f62d46ff9bf1a54",
+          "Git_blob_sha1": "abc752772f58bf1aef37fbb86fbb77654c847d7d"
+        },
+        {
+          "relative_path": "v42_a_stage_compact_rowgen/assembly.py",
+          "commit": "8b90bdda26de480715e243249f62d46ff9bf1a54",
+          "Git_blob_sha1": "08016f3a170a17d4442bf5579bdc13e3d6ed29b3"
+        },
+        {
+          "relative_path": "v42_a_stage_compact_rowgen/kernel.py",
+          "commit": "8b90bdda26de480715e243249f62d46ff9bf1a54",
+          "Git_blob_sha1": "401f301da889cd6b86d7b1bace1a889105236315"
+        }
+      ]
+    },
+    {
+      "number": 186,
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/186",
+      "head_commit": "9a1b41260aff3bc70d2e36d7e1c293c03ea114de",
+      "head_ref": "codex/v42-may12-phase1-p1-exact-rescue",
+      "key_fix_commit": "8806e48d1072e3ad7c11a7fb1d280ac5bfb84929",
+      "functionality": "Artificial-free P1 inclusion repair; preserved positive-Phi weight guards; exact activation and separate P1-only acceptance",
+      "historical_result_scope": "May12 only; no point/bound/130-class transfer",
+      "key_files": [
+        "v42_a_stage_canary/phase.py",
+        "v42_may12_rescue/activation.py",
+        "v42_may12_rescue/contract.py"
+      ],
+      "Git_blob_receipts": [
+        {
+          "relative_path": "v42_a_stage_canary/phase.py",
+          "commit": "9a1b41260aff3bc70d2e36d7e1c293c03ea114de",
+          "Git_blob_sha1": "265ade292cce339b92e20ec33b6c5fff18ddd8be"
+        },
+        {
+          "relative_path": "v42_may12_rescue/activation.py",
+          "commit": "9a1b41260aff3bc70d2e36d7e1c293c03ea114de",
+          "Git_blob_sha1": "a572ef53608203f30eb8c64d769622d918513111"
+        },
+        {
+          "relative_path": "v42_may12_rescue/contract.py",
+          "commit": "9a1b41260aff3bc70d2e36d7e1c293c03ea114de",
+          "Git_blob_sha1": "bed68e0bc97ed122709202f46d8c5ec336e6f1d3"
+        }
+      ]
+    },
+    {
+      "number": 191,
+      "url": "https://github.com/BeaverVillage/MobileESS/pull/191",
+      "head_commit": "40b6f94dcd80e470f93c73b7479fdd2d9d91c3f2",
+      "head_ref": "codex/v42-b3-preparation",
+      "V6_introduction_commit": "0f3da66e6edadc45f75d55011affcd3d2ec6954d",
+      "B3_connection_commit": "66f15fcb8c2ac3b1714fb5920af4aa4b7024ed77",
+      "functionality": "Fresh-date V6 Phase I/P1/full pricing/integer recovery with P2=0; B3 current-M1 fixed P/Q A2, SourceRegistry, stage-native ledger and independent saved-bound replay",
+      "PR191_real_execution_status": "NOT_RUN_IN_PR191_SOURCE_IMPLEMENTATION_IS_NOT_CURRENT_EXECUTION_CERTIFICATE",
+      "key_files": [
+        "v42_may_build_v6/a_stage.py",
+        "v42_b3_joint/a_source.py",
+        "v42_b3_joint/numerical_policy.py",
+        "v42_may_phase_v4/phase.py"
+      ],
+      "Git_blob_receipts": [
+        {
+          "relative_path": "v42_may_build_v6/a_stage.py",
+          "commit": "40b6f94dcd80e470f93c73b7479fdd2d9d91c3f2",
+          "Git_blob_sha1": "1133dc844b3d01fc418143235c3aef3415875f99"
+        },
+        {
+          "relative_path": "v42_b3_joint/a_source.py",
+          "commit": "40b6f94dcd80e470f93c73b7479fdd2d9d91c3f2",
+          "Git_blob_sha1": "3e53620b60546f1397562d6c765659a008e3db08"
+        },
+        {
+          "relative_path": "v42_b3_joint/numerical_policy.py",
+          "commit": "40b6f94dcd80e470f93c73b7479fdd2d9d91c3f2",
+          "Git_blob_sha1": "9806bdf73566c910beb586205ae116a12c2304c0"
+        },
+        {
+          "relative_path": "v42_may_phase_v4/phase.py",
+          "commit": "40b6f94dcd80e470f93c73b7479fdd2d9d91c3f2",
+          "Git_blob_sha1": "1c7236c26bda17ef6b05212697d667647c688352"
+        }
+      ]
+    }
+  ],
+  "D0_E1_adapter_gaps": [
+    {
+      "id": "CURRENT_DATA_PASSTHROUGH",
+      "status": "NOT_CONNECTED",
+      "source": "V6._prepare calls original data_module.prepare/load_native",
+      "required": "Inject exact approved TableV E1 data/receipts/classes/resources/fixed holds and verify current Source/input/UID/remaining-service identities; do not regenerate D-1 state"
+    },
+    {
+      "id": "CURRENT_GRID_CONTEXT",
+      "status": "NOT_CONNECTED",
+      "source": "ASourceBridge._binding original compact grid versus current D0PlanningGridContext",
+      "required": "Preserve current D0 issue/native24 offset, original C1/all-phase/thermal/transformer, CC4 Q50/CDF and current-hard Runtime overlap adjustment, MESS OFF or accepted-current-M1"
+    },
+    {
+      "id": "RUNTIME_FINISH_AUXILIARY_OWNERSHIP",
+      "status": "CONCRETE_SOURCE_INTERFACE_GAP_NOT_MODEL_REPRODUCED",
+      "source": "root.native:116-122; snapshot.capture; phase1.producer.row_partition:114-117",
+      "required": "Assign class ownership/equations for finish_count variables or independently verify existing exact runtime_projection substitution; never forge old V2 domain_authority"
+    },
+    {
+      "id": "RECEIPT_CLASS_AND_SEED",
+      "status": "SOURCE_CONDITIONAL_GAP_NOT_CURRENT_BUILD_TESTED",
+      "source": "a_engine grouping excludes receipt SHA; active.prepare_fast_active literal compares it and treats old graph all STAY as mandatory",
+      "required": "Preserve per-UID authority while verify exact geometry classes; separate complete scientific domain and small engineering seed/inactive pool; preserve singleton-not-full-fixed guard"
+    },
+    {
+      "id": "D0_REPLAY_AND_EXPORT",
+      "status": "NOT_CONNECTED",
+      "source": "V6._planning selected-only known GPU and old validation Runtime target meaning",
+      "required": "Preserve fixed69UID187GPU plus1555selected/all1624, current D0 adjusted reserve semantics and original FULL/Option/WAN/grid checks; use current D0 export contract"
+    },
+    {
+      "id": "CURRENT_STAGE_LEDGER_AND_SOURCE_RECEIPT",
+      "status": "FACADE_REQUIRED",
+      "source": "V6 native_used/native_optimize/check/wall/cost protocol versus TableV current arm/stage budget",
+      "required": "Route master/local pricing/UB to same cumulative5400 A-stage account, no duplicate charge or resets, P2=0; current Source/Case/Stage/MESS/full-domain/dual/cache identities exact"
+    }
+  ],
+  "certification_limits": [
+    "Restricted master objective is not a full-domain LB",
+    "All current native local class blocks, exact global box and matching pricing dual coverage required",
+    "Native fractional WAN/finish directions must survive; finite integer path scan alone is insufficient",
+    "LP pricing closure is not integer-domain closure",
+    "Existing saved May19/May12 values, points, classes or clock do not certify current D0",
+    "Algorithm restoration does not imply feasibility or a speed PASS"
+  ],
+  "preliminary_audit_correction": "Bare-canary date/expired wall budget/P2 auto-run findings are preserved as preliminary only; existing V6/PR191 already routes these engineering concerns. Reuse V6/ASourceBridge rather than rewrite bare driver.",
+  "current_vs_PR191": {
+    "unchanged_Git_content_files": [
+      "v42_may_build_v6/a_stage.py",
+      "v42_a_stage_canary/phase.py",
+      "v42_a_stage_phase1/producer.py",
+      "v42_may_campaign_native90/a_routing.py"
+    ],
+    "a_source_later_diff": "32added/15removed relative PR191 HEAD: state IO and independent-replay routing plus anytime FULL/gap distinction; do not label current file exact PR191 bytes"
+  },
+  "operation_counts": {
+    "new_Native_calls": 0,
+    "new_full_model_builds": 0,
+    "presolve": 0,
+    "IIS": 0,
+    "tests_run": 0,
+    "AC": 0,
+    "Actual": 0,
+    "private_future_reads": 0,
+    "existing_Source_files_modified": 0,
+    "active_worker_interrupted": 0
+  },
+  "source_records": [
+    {
+      "relative_path": "v42_integration/table_v_a.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_a.py",
+      "sha256": "1e983fdbb85943ea7d7addc146b51327b081e7e273ee312f9ba8ecc87c5e47c7",
+      "bytes": 12677
+    },
+    {
+      "relative_path": "v42_integration/table_v_flex_planning.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_flex_planning.py",
+      "sha256": "e5ae3eb1184efb64188c553c630746dc5dd11d0299800057e5f53b2a0f9373a5",
+      "bytes": 32830
+    },
+    {
+      "relative_path": "v42_integration/a_engine.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\a_engine.py",
+      "sha256": "0d24f9d67cd9533bbaf6548e32bfbaa50f2680e1a310ed1f016ca673b46386eb",
+      "bytes": 19513
+    },
+    {
+      "relative_path": "v42_integration/d0_a_planning.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\d0_a_planning.py",
+      "sha256": "b3246d963a95467830b655670ac980374356c02720551c7dccdc2a8cb00aec04",
+      "bytes": 42784
+    },
+    {
+      "relative_path": "v42_integration/table_v_budget.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_budget.py",
+      "sha256": "00e94fb33f87d249518bfe37c614e1f25572d878633fcec4a65c34f8f393c2a0",
+      "bytes": 13283
+    },
+    {
+      "relative_path": "v42_integration/release_p1_production.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\release_p1_production.py",
+      "sha256": "02d48ebea223869f8f875e80712d4ea1eb35889960e32e17d48af28c1bae2417",
+      "bytes": 21629
+    },
+    {
+      "relative_path": "v42_may_build_v6/a_stage.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_may_build_v6\\a_stage.py",
+      "sha256": "0ec63df35f2580ef2c0b5e3649750cb9442bbe73ad0ca9ec3cc8e0cb964c6dff",
+      "bytes": 41057
+    },
+    {
+      "relative_path": "v42_may_build_v6/construction.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_may_build_v6\\construction.py",
+      "sha256": "212420038b6a14a57b96dd2ace8cf713b20afa5dbe893fe24e0310a7938c9198",
+      "bytes": 1373
+    },
+    {
+      "relative_path": "v42_may_build_v6/compact_build.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_may_build_v6\\compact_build.py",
+      "sha256": "0aed62c67b59712fd69c7dba6ab3d5e840999f77dfd2ed9ee21a4884f79f4460",
+      "bytes": 6556
+    },
+    {
+      "relative_path": "v42_may_phase_v4/phase.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_may_phase_v4\\phase.py",
+      "sha256": "45a501212be4104e16101afda4adfb85a0120ee11191347fd5aceff4f9c36137",
+      "bytes": 2275
+    },
+    {
+      "relative_path": "v42_may_campaign_native90/a_routing.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_may_campaign_native90\\a_routing.py",
+      "sha256": "1d51ea7120174eab373ded3a05133ef4c401c6999131758b6b85633734b33d44",
+      "bytes": 8152
+    },
+    {
+      "relative_path": "v42_b3_joint/a_source.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_b3_joint\\a_source.py",
+      "sha256": "48e30e3be9dac6c630e97dde04d756ec517d579a074968977815c104ecdad877",
+      "bytes": 52055
+    },
+    {
+      "relative_path": "v42_b3_joint/numerical_policy.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_b3_joint\\numerical_policy.py",
+      "sha256": "64173e0ce288283b3938d0ebf3df17665ab277b416d20c1ea0a11b02fdd3543a",
+      "bytes": 6943
+    },
+    {
+      "relative_path": "v42_b3_joint/native_ledger.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_b3_joint\\native_ledger.py",
+      "sha256": "f21550ca63cf7124902bc2c582a235f16493134f0b077a6c8c72bedb632384ac",
+      "bytes": 11931
+    },
+    {
+      "relative_path": "v42_a_stage_canary/phase.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_canary\\phase.py",
+      "sha256": "e679dca0d050211cba2a43db9ce6a3d36de2b42c1743a7b6786b706cb30f0ac7",
+      "bytes": 11288
+    },
+    {
+      "relative_path": "v42_a_stage_canary/prepare.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_canary\\prepare.py",
+      "sha256": "a23c4ce4d3b0e249f2ee6d9769cc29c4b29486f39e946756cbc7768fdb7f83b0",
+      "bytes": 8617
+    },
+    {
+      "relative_path": "v42_a_stage_canary/pricing.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_canary\\pricing.py",
+      "sha256": "25f6e12b921927e7085bbca134dad09b97ea3ca1507367a8d412cf001588467f",
+      "bytes": 9776
+    },
+    {
+      "relative_path": "v42_a_stage_phase1/producer.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_phase1\\producer.py",
+      "sha256": "bda2a9e1771ed05574fa1decb40028287d33a1983c10149d0a17c11bf82eb65f",
+      "bytes": 16372
+    },
+    {
+      "relative_path": "v42_a_stage_phase1/backend.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_phase1\\backend.py",
+      "sha256": "7824149bfb90e685d5528d491807831ca50565c0af605c99bd57ba25e5cbc752",
+      "bytes": 7399
+    },
+    {
+      "relative_path": "v42_a_stage_phase1/core.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_phase1\\core.py",
+      "sha256": "dd0574401d3a7631a404fd2af4f0f80e3ad05b0962c075b03d78b50b916d49b0",
+      "bytes": 10594
+    },
+    {
+      "relative_path": "v42_a_stage_phase1/oracle.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_phase1\\oracle.py",
+      "sha256": "afdb88872c51845b171a8b76f79e041048b9943a3c372e803e46fc3fa6e95c1a",
+      "bytes": 3575
+    },
+    {
+      "relative_path": "v42_a_stage_domain_v2/active.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_domain_v2\\active.py",
+      "sha256": "cb888a627a9a955cd5065cf439132604b137c024d2bf30ed6aa2d7eae1dc18ef",
+      "bytes": 23955
+    },
+    {
+      "relative_path": "v42_a_stage_domain_v2/runtime_projection.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_domain_v2\\runtime_projection.py",
+      "sha256": "b3fce70b96bcd315e499830fec77f82c52656831a2fa0b3323722ab882523818",
+      "bytes": 704
+    },
+    {
+      "relative_path": "v42_a_stage_practical/integer_model.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_practical\\integer_model.py",
+      "sha256": "44e31914aadc70fca841564daeaf1a8470a3f729d8077cda826da252ad4e8aaf",
+      "bytes": 2116
+    },
+    {
+      "relative_path": "v42_a_stage_compact_rowgen/assembly.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_compact_rowgen\\assembly.py",
+      "sha256": "b4b7acca34d85db5cbcc3cb9c80a9ed3e34f3bb672abb1ace3e210f5a10620a0",
+      "bytes": 6384
+    },
+    {
+      "relative_path": "v42_a_stage_compact_rowgen/kernel.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_compact_rowgen\\kernel.py",
+      "sha256": "d4f12aa99949460337e89b39587f6d0ab5730d8dc4bd9085a8f54c81c4cc2c7d",
+      "bytes": 3950
+    },
+    {
+      "relative_path": "v42_may12_rescue/contract.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_may12_rescue\\contract.py",
+      "sha256": "e46544781a679082b4ce334b03359ef61b5bc072ba49a3a039544f20c33ce553",
+      "bytes": 1516
+    },
+    {
+      "relative_path": "v42_root/native.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_root\\native.py",
+      "sha256": "9f09b7aa1857762dd0284076ca35438d97e4ba9eb6cd4c01f6302f970453d8dc",
+      "bytes": 12829
+    },
+    {
+      "relative_path": "v42_pr134_sc/snapshot.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_pr134_sc\\snapshot.py",
+      "sha256": "fb0eaa65db86f13fa2bcdad0424ffe5126b1510f1084470c41e9f50b0cb3f921",
+      "bytes": 6152
+    },
+    {
+      "relative_path": "v42_exact/validation.py",
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_exact\\validation.py",
+      "sha256": "374751be21b39e10bdce3918e3ca49b2d3c96fa7e072bb58dfe38f010148f966",
+      "bytes": 6219
+    }
+  ],
+  "detailed_report": "KO_DW_RESTORATION.md"
+}

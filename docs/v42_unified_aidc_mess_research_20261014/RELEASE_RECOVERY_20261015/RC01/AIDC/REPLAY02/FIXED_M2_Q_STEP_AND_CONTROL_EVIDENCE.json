@@ -1,0 +1,372 @@
+{
+  "schema": "RC01_FIXED_M2_Q_STEP_AND_NATIVE_CONTROL_EVIDENCE_V1",
+  "status": "EVIDENCE_SAVED_SINGLE_CAUSE_NOT_PROVEN",
+  "evidence_scope": "READ_ONLY_PRESERVED_FIXED_M2_AND_ASOF_ALL_NATIVE_SUBSTEP_DIAGNOSIS",
+  "source_receipts": [
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC01\\AIDC\\REPLAY02\\ASOF_SUBSTEP_PHYSICAL_DIAGNOSIS.json",
+      "sha256": "7e8985886e07cb184f4cf9095823805a0f2838fdcb3eb195b4fd8960847a18a1",
+      "bytes": 176315
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC01\\AIDC\\REPLAY02\\C0\\PUBLIC_PREFIX_ORIGINAL_C1.json",
+      "sha256": "eaceeeef3e39fec3095695ac7fb518f6dd60264ecbc0c1364533ecc5b6bc4e38",
+      "bytes": 151140
+    },
+    {
+      "path": "D:\\v42_integration_validation_20261013\\DDAY_V5_B3_FINAL_ATTEMPT01\\B3\\M2\\COMMON_M_PR222\\FULL_MESS_PHYSICAL_ANCHOR.json",
+      "sha256": "72be8ee7c73024643bcce927eb2373c40872bc06fb9e9c9da98b6b6b84cb8656",
+      "bytes": 173842
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC01\\AIDC\\RUNTIME_SOURCE\\RC01_FIXED_M2_Q_STEP_EVIDENCE.py",
+      "sha256": "f8bc3b7cac6a5643062ae329b4152dcde11e3e794aa27e31dd61b13e942de76a",
+      "bytes": 4698
+    }
+  ],
+  "MESS_plan_sha": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e",
+  "public_Q_step_rows": [
+    {
+      "slot": 11,
+      "interval_start_seconds": 1746031500.0,
+      "average_observed_GPU": 722.0255555555556,
+      "AIDC_PCC_P_kw": 536.5034873297857,
+      "AIDC_PCC_Q_kvar": 176.34016865833019,
+      "demand_mw": 4222.77,
+      "pv_mw": 0.0,
+      "fixed_STA01_P_kw": 0.0,
+      "fixed_STA01_Q_kvar": 392.3141121612922
+    },
+    {
+      "slot": 12,
+      "interval_start_seconds": 1746032400.0,
+      "average_observed_GPU": 708.1311111111111,
+      "AIDC_PCC_P_kw": 528.893167879488,
+      "AIDC_PCC_Q_kvar": 173.83877761968378,
+      "demand_mw": 4208.45,
+      "pv_mw": 0.0,
+      "fixed_STA01_P_kw": 0.0,
+      "fixed_STA01_Q_kvar": -392.3141121612922
+    },
+    {
+      "slot": 13,
+      "interval_start_seconds": 1746033300.0,
+      "average_observed_GPU": 693.1233333333334,
+      "AIDC_PCC_P_kw": 520.6730480283086,
+      "AIDC_PCC_Q_kvar": 171.1369548819359,
+      "demand_mw": 4197.26,
+      "pv_mw": 0.0,
+      "fixed_STA01_P_kw": 0.0,
+      "fixed_STA01_Q_kvar": 392.3141121612922
+    }
+  ],
+  "adjacent_changes": [
+    {
+      "from_slot": 11,
+      "to_slot": 12,
+      "delta_STA01_Q_kvar": -784.6282243225844,
+      "delta_AIDC_PCC_P_kw": -7.610319450297652,
+      "delta_observed_average_GPU": -13.894444444444503
+    },
+    {
+      "from_slot": 12,
+      "to_slot": 13,
+      "delta_STA01_Q_kvar": 784.6282243225844,
+      "delta_AIDC_PCC_P_kw": -8.220119851179447,
+      "delta_observed_average_GPU": -15.00777777777762
+    }
+  ],
+  "first_violation": {
+    "step": {
+      "slot": 0,
+      "native_seconds": 23.0,
+      "lowest_node": {
+        "node_phase": "idc_idc06_pcc.1",
+        "voltage_pu": 0.982679847978879,
+        "original": true
+      },
+      "highest_node": {
+        "node_phase": "mess_sta08_pcc.1",
+        "voltage_pu": 1.0514925156881074,
+        "original": true
+      },
+      "physical_sha": "5fda56808a8f10ebd33650e46426763e3241ac7176d0de1f1aa1fe5e908b3c65",
+      "SVR_sha": "60c41e815ab79f53034e767623d47aff2b42fc5d5b42753c5995adce7c789200",
+      "PASS": false,
+      "kind": "NATIVE_QUEUED_EVENT",
+      "voltage_min_pu": 0.982679847978879,
+      "voltage_max_pu": 1.0514925156881074,
+      "voltage_violation_cells": 3,
+      "violations": {
+        "voltage_violation_cells": 3,
+        "line_current_violation_cells": 0,
+        "transformer_current_violation_cells": 0,
+        "transformer_nameplate_current_violation_cells": 0,
+        "original_transformer_nameplate_current_violation_cells": 0,
+        "added_transformer_nameplate_current_violation_cells": 0,
+        "transformer_kva_violation_cells": 0
+      }
+    },
+    "event_kind": "NATIVE_QUEUED_EVENT",
+    "absolute_seconds": 23.0,
+    "previous_native_step": {
+      "slot": 0,
+      "native_seconds": 21.0,
+      "lowest_node": {
+        "node_phase": "idc_idc06_pcc.1",
+        "voltage_pu": 0.9825795502521973,
+        "original": true
+      },
+      "highest_node": {
+        "node_phase": "mess_sta08_pcc.3",
+        "voltage_pu": 1.0472865974224506,
+        "original": true
+      },
+      "physical_sha": "6b04f0b8777b4c46e1f00e48ffe44e774ac0dcf6c16989980770221283fdc492",
+      "SVR_sha": "74969c7d3700005a1343178eb2d97301b569240f50bd41c99521b49f9725f343",
+      "PASS": true,
+      "kind": "NATIVE_QUEUED_EVENT",
+      "voltage_min_pu": 0.9825795502521973,
+      "voltage_max_pu": 1.0472865974224506,
+      "voltage_violation_cells": 0,
+      "violations": {
+        "voltage_violation_cells": 0,
+        "line_current_violation_cells": 0,
+        "transformer_current_violation_cells": 0,
+        "transformer_nameplate_current_violation_cells": 0,
+        "original_transformer_nameplate_current_violation_cells": 0,
+        "added_transformer_nameplate_current_violation_cells": 0,
+        "transformer_kva_violation_cells": 0
+      }
+    },
+    "STA08_current_taps_and_original_control_parameters": [
+      {
+        "phase": 1,
+        "tap": 1.0,
+        "tap_number": 0.0,
+        "parameters": {
+          "Delay": "30",
+          "TapDelay": "2",
+          "VReg": "120",
+          "Band": "2",
+          "R": "0",
+          "X": "0",
+          "PTPhase": "1"
+        }
+      },
+      {
+        "phase": 2,
+        "tap": 1.0,
+        "tap_number": 0.0,
+        "parameters": {
+          "Delay": "30",
+          "TapDelay": "2",
+          "VReg": "120",
+          "Band": "2",
+          "R": "0",
+          "X": "0",
+          "PTPhase": "1"
+        }
+      },
+      {
+        "phase": 3,
+        "tap": 1.0,
+        "tap_number": 0.0,
+        "parameters": {
+          "Delay": "30",
+          "TapDelay": "2",
+          "VReg": "120",
+          "Band": "2",
+          "R": "0",
+          "X": "0",
+          "PTPhase": "1"
+        }
+      }
+    ],
+    "pending_STA08_actions": [
+      {
+        "handle": 13,
+        "hour": 0,
+        "seconds": 30.0,
+        "action_code": 0,
+        "proxy_device_ref": 0,
+        "device": "svr_sta08_p1",
+        "absolute_seconds": 30.0
+      },
+      {
+        "handle": 14,
+        "hour": 0,
+        "seconds": 30.0,
+        "action_code": 0,
+        "proxy_device_ref": 0,
+        "device": "svr_sta08_p2",
+        "absolute_seconds": 30.0
+      },
+      {
+        "handle": 15,
+        "hour": 0,
+        "seconds": 30.0,
+        "action_code": 0,
+        "proxy_device_ref": 0,
+        "device": "svr_sta08_p3",
+        "absolute_seconds": 30.0
+      }
+    ],
+    "pending_original_creg4a": [
+      {
+        "handle": 51,
+        "hour": 0,
+        "seconds": 25.0,
+        "action_code": 0,
+        "proxy_device_ref": 0,
+        "device": "creg4a",
+        "absolute_seconds": 25.0
+      }
+    ],
+    "native_event_log": [],
+    "executed_regulator_identity_not_inferred_from_future_queue": true
+  },
+  "global_substep_diagnosis": {
+    "total": 145,
+    "FAIL": 32,
+    "minimum_voltage_pu": 0.9203485319228436,
+    "maximum_voltage_pu": 1.083657371551732,
+    "violation_slots": [
+      0,
+      3,
+      10,
+      11,
+      12,
+      13
+    ],
+    "all_slot_last_solve_PASS": true,
+    "last_solve_per_slot": [
+      {
+        "slot": 0,
+        "native_seconds": 85.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9835919335812838,
+        "voltage_max_pu": 1.0330011693698393
+      },
+      {
+        "slot": 1,
+        "native_seconds": 936.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9801628481844711,
+        "voltage_max_pu": 1.0344775576539942
+      },
+      {
+        "slot": 2,
+        "native_seconds": 1849.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9856559694827116,
+        "voltage_max_pu": 1.0335423341419718
+      },
+      {
+        "slot": 3,
+        "native_seconds": 2742.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9732447041348757,
+        "voltage_max_pu": 1.0434716115959546
+      },
+      {
+        "slot": 4,
+        "native_seconds": 3636.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9728573084633264,
+        "voltage_max_pu": 1.0422168676470456
+      },
+      {
+        "slot": 5,
+        "native_seconds": 4530.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9722222908488574,
+        "voltage_max_pu": 1.04325324776633
+      },
+      {
+        "slot": 6,
+        "native_seconds": 5438.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9689393406481109,
+        "voltage_max_pu": 1.0355226486230251
+      },
+      {
+        "slot": 7,
+        "native_seconds": 6332.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9691845818678898,
+        "voltage_max_pu": 1.0344455040541618
+      },
+      {
+        "slot": 8,
+        "native_seconds": 7234.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9715033055898976,
+        "voltage_max_pu": 1.0424364301054856
+      },
+      {
+        "slot": 9,
+        "native_seconds": 8160.0,
+        "PASS": true,
+        "voltage_min_pu": 0.972814424769177,
+        "voltage_max_pu": 1.0434048411196084
+      },
+      {
+        "slot": 10,
+        "native_seconds": 9046.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9678991386481264,
+        "voltage_max_pu": 1.0297669846258544
+      },
+      {
+        "slot": 11,
+        "native_seconds": 9944.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9715720033823242,
+        "voltage_max_pu": 1.0348961791343827
+      },
+      {
+        "slot": 12,
+        "native_seconds": 10854.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9838790316634279,
+        "voltage_max_pu": 1.0428664472919729
+      },
+      {
+        "slot": 13,
+        "native_seconds": 11756.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9735382307083836,
+        "voltage_max_pu": 1.0444585454823354
+      },
+      {
+        "slot": 14,
+        "native_seconds": 12600.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9731977507717328,
+        "voltage_max_pu": 1.043929115692999
+      },
+      {
+        "slot": 15,
+        "native_seconds": 13532.0,
+        "PASS": true,
+        "voltage_min_pu": 0.9730079224758481,
+        "voltage_max_pu": 1.0434960984577728
+      }
+    ]
+  },
+  "interpretation": {
+    "fixed_public_reactive_command_reverses_by_784_628_kvar": true,
+    "worst_undervoltage_and_overvoltage_nodes_correspond_to_STA01_Q_step_slots": true,
+    "existing_AUTO_delay_interaction_is_supported_evidence": true,
+    "sole_cause_proven": false,
+    "counterfactual_control_intervention_performed": false,
+    "Source_core_or_MESS_algorithm_changed": false,
+    "limits_or_control_parameters_changed": false,
+    "cannot_replace_all_native_substep_FAIL_with_last_solve_or_offline_Fresh_PASS": true,
+    "Gate2": "PHYSICAL_FAIL",
+    "new_D0_full_chain_or_Full96_claim": false
+  },
+  "Native_calls": 0,
+  "receipt_sha": "6fde7de38894b626a73fd68d06f0dcaba857e24c0dd9a3d66defffcb897a7594"
+}

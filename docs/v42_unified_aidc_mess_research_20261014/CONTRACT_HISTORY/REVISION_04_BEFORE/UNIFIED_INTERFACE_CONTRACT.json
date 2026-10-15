@@ -1,0 +1,73 @@
+{
+  "schema": "V42_UNIFIED_INTERFACE_V1",
+  "base_commit": "f32b22adf8e3e53ab68256458cb991f9d30d2ecb",
+  "branch": "codex/v42-unified-aidc-mess-sensitivity-runtime-scale",
+  "slots": 96,
+  "slot_seconds": 900,
+  "aidc_gpu_gang": "WHOLE_INTEGER",
+  "aidc_P_Q": "ORIGINAL_C1_CONSUMPTION_KW_KVAR",
+  "mess_P_Q": "SIGNED_INJECTION_POSITIVE_DISCHARGE",
+  "net_load": "AIDC_CONSUMPTION_MINUS_MESS_INJECTION_EACH_ONCE",
+  "stages": [
+    "A1",
+    "M1",
+    "A2",
+    "M2"
+  ],
+  "Actual_global_optimize_calls": 0,
+  "max_start_delay_seconds": 3600,
+  "start_delay_candidates_seconds": [
+    0,
+    900,
+    1800,
+    2700,
+    3600
+  ],
+  "policy": "RESEARCH_BATCH_FLEX_PARTICIPATION_60MIN_NOT_CUSTOMER_SLA",
+  "binding_fields": [
+    "science_sha",
+    "case_sha",
+    "physical_sha",
+    "time_axis_sha",
+    "qos_sha",
+    "cc4_sha",
+    "runtime_sha",
+    "response_sha",
+    "initial_state_sha",
+    "aidc_anchor",
+    "mess_anchor",
+    "interface_sha"
+  ],
+  "reservations": {
+    "Observed_RUNNING": "HARD_UNTIL_OBSERVED_COMPLETION",
+    "Known_frozen": "HARD",
+    "Unknown_committed": "HARD",
+    "CC4_Q50_Q90": "SOFT_FORECAST"
+  },
+  "unknown_primary_score": "MIN_PREDICTED_MAX_LOADING_ALL_LINE_PHASE_TIME_ROWS",
+  "hard_grid": "ORIGINAL_VOLTAGE_CURRENT_TRANSFORMER;NONWORSENING_IS_NOT_SAFE_PASS",
+  "known": "OBSERVED_AT_ISSUE_FROZEN_A1_A2_COMMANDS;NO_ACTUAL_UNKNOWN_REOPTIMIZATION",
+  "running_runtime": "Q50_Q90_NOT_COMPLETION_GUARANTEE;CONDITIONAL_PROVIDER_NOT_CERTIFIED",
+  "native": {
+    "Threads": 1,
+    "Heavy_workers": 1,
+    "owner": "Supervisor",
+    "ledger": "UNIFIED_NATIVE_RUNTIME_LEDGER.json"
+  },
+  "modules": {
+    "AIDC": "v42_integration.aidc_sensitivity_runtime",
+    "MESS": "v42_integration.mess_scaling",
+    "Supervisor": "v42_integration.unified_contract"
+  },
+  "certification": "FIXTURE_AND_REAL_DIAGNOSTIC_SCOPE_EXPLICIT;NO_HISTORICAL_CERTIFICATE_TRANSFER",
+  "validation_priority": "MAY01_B1_AIDC_AND_EXACT_S1_MESS_STANDALONE_FIRST",
+  "allowed_AIDC_Heavy_arms": [
+    "B1"
+  ],
+  "allowed_AIDC_Heavy_days": [
+    "2025-05-01"
+  ],
+  "four_stage_Heavy_authorized": false,
+  "S2_to_S7_Heavy_authorized": false,
+  "combined_Heavy_prerequisite": "USER_RESUMES_AFTER_STANDALONE_VALIDATION"
+}

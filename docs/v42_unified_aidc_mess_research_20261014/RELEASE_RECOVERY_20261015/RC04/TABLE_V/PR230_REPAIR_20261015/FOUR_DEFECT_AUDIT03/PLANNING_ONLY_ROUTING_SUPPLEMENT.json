@@ -1,0 +1,60 @@
+{
+  "schema": "PR230_TABLE_V_PLANNING_ONLY_ROUTING_AUDIT_V1",
+  "status": "PASS_NATIVE0_REVIEW",
+  "completed_utc": "2026-10-15T06:56:57.637942+00:00",
+  "git_head_at_review": "a23ccf80bb82e2a59f38fc58923dbcc707cf3a9a",
+  "prior_audits": [
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\PR230_REPAIR_20261015\\FOUR_DEFECT_AUDIT01\\INDEPENDENT_AUDIT_RESULT.json",
+      "sha256": "321ec5da239e5b59d34ffcf049b445429a402cfbe826aea838f0abcf2b554311",
+      "bytes": 5994
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\PR230_REPAIR_20261015\\FOUR_DEFECT_AUDIT02\\INDEPENDENT_AUDIT_SUPPLEMENT.json",
+      "sha256": "0be4dcad00c830271d433f650dbebad4a601f6eac5095a899d941283dfdda986",
+      "bytes": 3469
+    }
+  ],
+  "review_scope": "Only explicit Table V schema rejection at run_planning_p1 entry; prior complete audits retained.",
+  "findings": [
+    {
+      "status": "PASS",
+      "check": "TABLE_V_SCHEMA_DENIED_BEFORE_LEGACY_BACKEND_PREFLIGHT_BUDGET_OR_RUN_REAL",
+      "source": "v42_integration/release_production_campaign.py:591"
+    },
+    {
+      "status": "PASS",
+      "check": "DIRECT_API_AND_REAL_EXECUTE_PLANNING_ONLY_CLI_DENIED_WITHOUT_OUTPUT",
+      "test": "tests/test_v42_table_v_launch_resources.py::test_planning_only_option_cannot_route_table_v_through_legacy_gate"
+    }
+  ],
+  "source_bytes_unchanged_during_review": true,
+  "historical_raw_and_native_ledgers_unchanged": true,
+  "previous_audits_unchanged": true,
+  "regression": {
+    "command": [
+      "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_v42_table_v_launch_resources.py::test_planning_only_option_cannot_route_table_v_through_legacy_gate",
+      "--junitxml=D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\PR230_REPAIR_20261015\\FOUR_DEFECT_AUDIT03\\NATIVE0_SINGLE_REGRESSION.xml"
+    ],
+    "returncode": 0,
+    "wall_seconds": 2.241966200002935,
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "real_Native_optimize_calls": 0,
+  "real_native_model_builds": 0,
+  "real_Actual_or_OpenDSS_runs": 0,
+  "May01_real_solver_completion_claimed": false,
+  "May01_old_B0_preserved_not_recertified": true,
+  "May02_to_31_heavy_execution_performed": false,
+  "limitations": [
+    "A narrow routing regression, not a new complete four-defect audit or physical completion certificate.",
+    "Final launch authority must bind final committed release/source SHA."
+  ]
+}

@@ -1,0 +1,309 @@
+{
+  "status": "NATIVE0_VERIFIED_CAMPAIGN_STOPPED_NATIVE_TESTS_PENDING",
+  "generated_KST": "2026-10-15T22:35:25.888690+09:00",
+  "Native_optimize_calls_for_improvement": 0,
+  "regression_tests": 1185,
+  "all_1172_predecessor_IDs_preserved": true,
+  "new_IDs": 13,
+  "regression_PASS": true,
+  "matrix_domain_proof_equivalence": true,
+  "all_190248_interval_endpoints_bit_exact": true,
+  "EXECUTION08_Raw_ledgers_freeze_preserved": true,
+  "source_archive_preserved": true,
+  "RAM_Commit_thresholds_removed_from_campaign_paths": true,
+  "Worker1_Threads1_preserved": true,
+  "B1_Phase_I_status": "NATIVE_REVALIDATION_PENDING",
+  "B1_Integer_status": "CALLBACK_FATAL_WARNING_FIXED_NATIVE_PENDING",
+  "warm_mapping": {
+    "PASS": true,
+    "row_mapping_PASS": true,
+    "warm_start_admissible": false,
+    "status": "REJECTED_PRIMAL_START_NOT_REPLAYABLE",
+    "rejection_reason": "NEW_ELASTIC_EQUALITY_BINARY64_CANCELLATION_EXCEEDS_ORIGINAL_TOLERANCE",
+    "max_abs_base_primal": 1.0368985084808021e+17,
+    "max_abs_artificial_primal": 1.0368985084808022e+17,
+    "Native_optimize_calls": 0,
+    "old_rows": 275969,
+    "new_rows": 556151,
+    "base_columns": 195578,
+    "original_rows_mapped_exactly": 275969,
+    "new_rows_added": 280182,
+    "original_bounds_and_types_identical": true,
+    "old_native_raw_fields": [
+      "X",
+      "Pi",
+      "RC"
+    ],
+    "old_native_basis_available": false,
+    "VBasis_CBasis_start_installed": false,
+    "S1_elastic_primal_replay": {
+      "PASS": false,
+      "max_row_violation": 2.684854554673258,
+      "max_bound_violation": 1.6024733623387633e-12,
+      "tolerance": 1e-06,
+      "rows": 556151,
+      "columns": 497287,
+      "raw_point_rounded_or_clipped": false
+    },
+    "S1_exact_Phi": "20670120695737914437687163353530515985/2361183241434822606848",
+    "exact_Phi_zero_or_global_LB_claimed": false,
+    "DStart_old_rows_mapped": true,
+    "DStart_new_rows_zero": true,
+    "DStart_dual_feasibility_claimed": false,
+    "LPWarmStart_2_preserved_presolve_experiment": "NOT_RUN_REQUIRES_NATIVE_APPROVAL",
+    "production_point_or_bound_reuse": false
+  },
+  "comparisons": [
+    {
+      "metric": "C3A_saved_matrix",
+      "before": 744.6433830999886,
+      "after": 320.71810539998114,
+      "scope": "Same saved matrices; different runs",
+      "reduction_percent": 56.929973101377044
+    },
+    {
+      "metric": "C3A_independent_verifier",
+      "before": 441.98971129997517,
+      "after": 184.41950799999177,
+      "scope": "Same saved matrices; different runs",
+      "reduction_percent": 58.27515815751023
+    },
+    {
+      "metric": "M1_Native0_total",
+      "before": 1268.0,
+      "after": 824.3576312000223,
+      "scope": "Historical approximate baseline vs one complete current build/readback",
+      "reduction_percent": 34.9875685173484
+    },
+    {
+      "metric": "Static_presolve",
+      "before": 112.279,
+      "after": 71.6715639999893,
+      "scope": "Historical run; presolve algorithm unchanged by this patch",
+      "reduction_percent": 36.16654583671986
+    }
+  ],
+  "full_Native0": {
+    "PASS": true,
+    "checks": {
+      "original_matrix": true,
+      "C3A_matrix": true,
+      "Dense_matrix": true,
+      "all_original_384_charge_modes": true,
+      "Native_readback": true
+    },
+    "Native_optimize_calls": 0,
+    "M1_preparation_wall_seconds": 808.3817474000098,
+    "total_with_Joint_readback_wall_seconds": 824.3576312000223,
+    "original_FULL_shape": [
+      1130336,
+      344967
+    ],
+    "Dense_shape": [
+      715142,
+      354332
+    ],
+    "Joint_shape": [
+      715146,
+      137662
+    ],
+    "C3A": {
+      "PASS": true,
+      "removed_rows": 71540,
+      "removed_row_methods": {
+        "PCS_FARKAS": 53652,
+        "Q_LINK_FARKAS": 17884,
+        "FLOW_EQUALITY_SUM": 4
+      },
+      "bounds_tightened": 95124,
+      "affine_definitions_reconstructed": 95124,
+      "independent_bound_exact_fallbacks": 0,
+      "columns_eliminated": 0,
+      "objective_and_integer_and_full_LP_domains_preserved": true,
+      "original_P1_bit_exact": true,
+      "integer_and_full_LP_domains_identical": true,
+      "Native_optimize_calls": 0,
+      "production_deletion_decisions_called": false,
+      "independent_verifier_wall_seconds": 236.59555880000698,
+      "independent_model_proof_replayed": true,
+      "schema": "V42_CURRENT_EXACT_C3A_PROOF_V1",
+      "C3A_policy": "SELECTED_EXACT_CURRENT_MATRIX_PROOFS",
+      "baseline": {
+        "rows": 801625,
+        "columns": 339389,
+        "binaries": 9322,
+        "nnz": 8837257
+      },
+      "selected": {
+        "rows": 730085,
+        "columns": 339389,
+        "binaries": 9322,
+        "nnz": 8604669
+      },
+      "baseline_matrix_SHA256": "d20a25dba6cc5e357b73c0b3d56b520170f65ebd8c2d45934635d19ac8724b97",
+      "selected_matrix_SHA256": "e91bf1d997cfe4541b71ad0f9b8e723161264784b2f6c77ef8568dc44642efbb",
+      "removed_families": {
+        "PCS16": 53652,
+        "connected_Qmax": 8942,
+        "connected_Qmin": 8942,
+        "terminal_location": 4
+      },
+      "bound_families": {
+        "injection_P": 2263,
+        "injection_Q": 2237,
+        "response_line_P": 25152,
+        "response_line_Q": 25152,
+        "response_line_correction": 25152,
+        "response_transformer_P": 7584,
+        "response_transformer_Q": 7584
+      },
+      "fresh_current_matrix_certificates": true,
+      "historical_row_indices_read": 0,
+      "selected_PR162_techniques_reused": true,
+      "security_rows_kept": "RETAINED_AFTER_FRESH_PRE_C2_SECURITY_PROOF",
+      "wall_seconds": 376.0479932000162,
+      "scientific_source_SHAs": {
+        "v42_ultracompact/current.py": "a1ddc6056de905117b84b731eefb78e7f2ed33b9b48238eb4faa0e50de0d5b5a",
+        "v42_ultracompact/current_verify.py": "8a0d96e150eb17e434016a5e93964e53c0d7602730d89123c51d3ffb622fe681",
+        "v42_ultracompact/independent_interval.py": "c58db723601ab612316e838c327227b49aab7714e207518b0073ca3c7e9c222b",
+        "v42_ultracompact/polytope.py": "7536a676eb6afd03a08c38af39fb6caaf0218a20af44444f1bc652f6c228e71f",
+        "v42_ultracompact/support.py": "83b4759a1d4f7fdc36edcb34342b9f5fbbdb6645d00a6559ac4388508563ea3f",
+        "v42_ultracompact/security.py": "f6ee9502ea662257d2b98b5553d081b126a7449537e9e793176be9d39520d107",
+        "v42_ultracompact/security_verify.py": "ef39ef48be8f3adad273cb19cff88827b94f54846c280c8607b92a7a07d56977"
+      }
+    },
+    "static_presolve": {
+      "rounds": [
+        {
+          "round": 1,
+          "rows_before": 851816,
+          "columns_before": 354005,
+          "nnz_before": 11216492,
+          "fixed": 94,
+          "rows_deleted": 35579,
+          "substitutions": 14214,
+          "rows_after": 801933,
+          "columns_after": 339697,
+          "nnz_after": 8841906,
+          "wall": 28.93199260000256,
+          "categories": "{'CONSTANT_SAFE': 274, 'PROPORTIONAL': 34370, 'SINGLETON_BOUND_IMPLIED': 1, 'DOMINATED': 934}"
+        },
+        {
+          "round": 2,
+          "rows_before": 801933,
+          "columns_before": 339697,
+          "nnz_before": 8841906,
+          "fixed": 98,
+          "rows_deleted": 0,
+          "substitutions": 210,
+          "rows_after": 801625,
+          "columns_after": 339389,
+          "nnz_after": 8837257,
+          "wall": 21.993305400013924,
+          "categories": "{}"
+        },
+        {
+          "round": 3,
+          "rows_before": 801625,
+          "columns_before": 339389,
+          "nnz_before": 8837257,
+          "fixed": 0,
+          "rows_deleted": 0,
+          "substitutions": 0,
+          "rows_after": 801625,
+          "columns_after": 339389,
+          "nnz_after": 8837257,
+          "wall": 20.740337800001726,
+          "categories": "{}"
+        }
+      ],
+      "wall_seconds": 71.6715639999893,
+      "Native_calls": 0
+    },
+    "all_original_matrix_bounds_and_proofs_replayed": true,
+    "structural_Joint_start_is_not_FULL_feasible_or_UB": true,
+    "stage_profiles": [
+      "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_pr230_bottleneck_20261015\\FULL_NATIVE0_01\\CURRENT_M\\PREPARATION_PROFILE.jsonl",
+      "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_pr230_bottleneck_20261015\\FULL_NATIVE0_01\\JOINT\\PREPARATION_PROFILE.jsonl"
+    ],
+    "source_case_identity": {
+      "PASS": true,
+      "day": "2025-05-01",
+      "arm": "B2",
+      "stage": "M1",
+      "AIDC_anchor": "00ec70b64764c4e6ddce756cf6937c8cb1d1cf934d7685f9a2670440ab4cedb4",
+      "QoS_SHA": "47ebb3841c439a3b98734ce6af87d66e54398b8a89b166d76b46c9b03f7776e6",
+      "parent_case_sha": "f7ec689cb2c1675c610fe24ce3fc9ad158b86328115f8009f849577a004cd8c7",
+      "source_sha": "9fece7b5032d7bca15680b43ae974b038dadb788a524266d043c9aeaa7861881",
+      "parent_acceptance_sha": "6d7b06a67b4ff431a3f6d7aac3871ce1bb48456f0d344bdd55dfb58904e23ccb",
+      "parent_result_sha": "1d73da9789c23c3d6284d05d745dbd8a1a75a28df68b014494f7f7a3bf57b68d",
+      "reference_schedule_only": true,
+      "scope": "NATIVE0_FROZEN_CASE_PREPARATION_AUDIT",
+      "production_result_promoted": false
+    },
+    "source_bundle": {
+      "path": "D:\\v42_may_joint_repair_campaign_20261013\\raw\\2025-05-01\\NATIVE_INPUT_TEMPLATE_B1.json",
+      "sha256": "365824518d8b3d380b6e2cc72a78d19d27ce8d39d304acdc8ffc5b5806b342fc",
+      "bytes": 4000652
+    }
+  },
+  "targets": {
+    "C3A_saved_matrix_400_seconds": true,
+    "static_presolve_90_seconds": true,
+    "total_M1_Native0_700_seconds": false,
+    "S0_60_seconds": "NOT_TESTED"
+  },
+  "Native_experiment_proposal": {
+    "status": "NOT_AUTHORIZED_NOT_EXECUTED",
+    "campaign_resume": false,
+    "total_max_Native_seconds": 1020,
+    "same_A1_5400_second_stage_cap": true,
+    "Native_reset": false,
+    "new_5400_or_1800_budget": false,
+    "B1_A1_already_used": 1082.3850002288818,
+    "B1_A1_remaining": 4317.614999771118,
+    "B2_M1_already_used": 9.980000257492065,
+    "B2_M1_remaining": 1790.019999742508,
+    "calls": [
+      {
+        "model": "Saved May01 S0",
+        "Method": 2,
+        "parameters": "FAST_B",
+        "Threads": 1,
+        "max_seconds": 120,
+        "purpose": "Barrier comparison; raw Phi/primal/dual/KKT/Work/RSS"
+      },
+      {
+        "model": "Same saved May01 S0",
+        "Method": 1,
+        "parameters": "FAST_B",
+        "Threads": 1,
+        "max_seconds": 120,
+        "purpose": "Dual Simplex comparison on identical rows/RHS/bounds/objective"
+      },
+      {
+        "model": "Current original FULL Integer MILP",
+        "Threads": 1,
+        "max_seconds": 360,
+        "purpose": "Validate warning recovery and incumbent preservation beyond the old 266s abort"
+      },
+      {
+        "model": "B2 M1 F2 stationary free modes",
+        "Threads": 1,
+        "max_seconds": 180,
+        "purpose": "Check the first seed trial previously blocked before Optimize by the RAM gate"
+      },
+      {
+        "model": "B2 M1 F3 current-day route seed",
+        "Threads": 1,
+        "max_seconds": 240,
+        "purpose": "Check the second previously blocked seed trial; same M-stage 1800s cumulative cap"
+      }
+    ],
+    "prerequisite": "Explicit user approval, current source/case binding and cumulative ledger carry-forward; no production auto launch"
+  },
+  "May01_resume": "HOLD_NEW_EXACT_SOURCE_APPROVAL_AND_NATIVE_VALIDATION_REQUIRED",
+  "P2_calls": 0,
+  "R2": "HOLD",
+  "IEEE8500_executed": false
+}

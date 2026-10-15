@@ -1,0 +1,146 @@
+{
+  "schema": "TABLE_V_NATIVE_STAGE_LEDGER_V1",
+  "limit_seconds": null,
+  "total_limit_enabled": false,
+  "calls": [
+    {
+      "label": "RELEASE_P1:A1:MODEL_BUILD",
+      "solver": "BUILD",
+      "status": "COMPLETED",
+      "measured_seconds": 93.91443410000647,
+      "stage_context": {
+        "day": "2025-05-01",
+        "arm": "B1",
+        "stage": "A1",
+        "stage_case_sha": "6a5f4ee46f02d014b2475ea99cd07261da8732721c6b85e803e2785e93cabd57",
+        "source_sha": "87e36a4a20ca8c4ce7e4deeb4d81c4992335e707de8867aa6d4498bbedff3584",
+        "parent_result_sha": "a14aeea55d93e3824b5e94128ae563971ac519a3a580e074961b7e8ce78cad66"
+      },
+      "P2_call": false,
+      "consumes_native_timeout": false
+    },
+    {
+      "label": "RELEASE_P1:A1:ORIGINAL_P1",
+      "solver": "GUROBI",
+      "Native_Runtime": 776.2689998149872,
+      "wall_seconds": 776.3088372000202,
+      "charged_seconds": 776.2689998149872,
+      "cap_seconds": 5400.0,
+      "overshoot_seconds": 0.0,
+      "error": null,
+      "status": 3,
+      "stage_context": {
+        "day": "2025-05-01",
+        "arm": "B1",
+        "stage": "A1",
+        "stage_case_sha": "6a5f4ee46f02d014b2475ea99cd07261da8732721c6b85e803e2785e93cabd57",
+        "source_sha": "87e36a4a20ca8c4ce7e4deeb4d81c4992335e707de8867aa6d4498bbedff3584",
+        "parent_result_sha": "a14aeea55d93e3824b5e94128ae563971ac519a3a580e074961b7e8ce78cad66"
+      },
+      "native_binding": {
+        "matrix_sha": "a3d85bf6ff39dc3c8ec8bfb668f2e99ca6e2fa5d8088f982d3400184408cb603",
+        "domain_sha": "c9a8c347a098d2e93ce98cdafb9550a731e110166619b409406ff7f4aec02c1a",
+        "objective_sense": 1,
+        "rows": 1699066,
+        "columns": 600284,
+        "nonzeros": 15446607,
+        "Threads": 1
+      },
+      "resource_before_solve": {
+        "memory": {
+          "AvailableMBytes": 14555,
+          "CommittedBytes": 28240211968,
+          "CommitLimit": 68408958976,
+          "PercentCommittedBytesInUse": 41
+        },
+        "workers": [
+          {
+            "ProcessId": 67000,
+            "Name": "python.exe",
+            "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -u tools/run_v42_table_v.py B1"
+          },
+          {
+            "ProcessId": 6948,
+            "Name": "python.exe",
+            "CommandLine": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -u D:\\v42_trajectory_tracking_may01_20261014\\tools\\serve_v42_table_v_monitor.py --port 8793 --source D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION01"
+          }
+        ],
+        "psutil_available_RAM_bytes": 15310270464,
+        "CPU_percent": 11.2
+      },
+      "P2_call": false,
+      "objective_scope": "ORIGINAL_P1_CURRENT_MATRIX_NOT_UNPRICED_GLOBAL_CERTIFICATE"
+    }
+  ],
+  "inflight": null,
+  "active_stage_context": null,
+  "Gurobi_Native_seconds": 776.2689998149872,
+  "other_solver_wall_seconds": 93.91443410000647,
+  "conservative_solve_seconds": 776.2689998149872,
+  "AC_wall_seconds": 0.0,
+  "historical_ledgers_merged": false,
+  "release_identity": {
+    "authorization_sha": "c6b596eb532d945f390e939ade299838dde820c06b333519ccd623b993854fb3",
+    "historical_read_only": [
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\UNIFIED_NATIVE_RUNTIME_LEDGER.json",
+        "sha256": "96dafdd5a0f261e2446d66de8070d604c588a8cbf8bfd9e4960f5c20730deadc",
+        "bytes": 105988
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC01\\A1_P1_120\\SEPARATE_NATIVE_LEDGER_180.json",
+        "sha256": "1f26c7f0a0f5e20f93b758cc94d319bb5eb749ad6c55a6ffdf224e3368a555f7",
+        "bytes": 3687
+      }
+    ],
+    "authorization_claim": {
+      "path": "D:\\.V42_TABLE_V_AUTHORIZATION_CLAIMS\\5eeb3e22289bdc1bb0478a9ca46a03d374280156ee5f2e9c48071fabecc74ec4.json",
+      "sha256": "3ead9f48780b5d36554b0239055ca34b538bb0ef785979b6f2da6ef479721884",
+      "bytes": 292
+    }
+  },
+  "authorization_document": {
+    "schema": "TABLE_V_ARM_STAGE_NATIVE_ONLY_AUTHORIZATION_V1",
+    "approved": true,
+    "budget_kind": "PLANNING_NATIVE",
+    "stage_caps_seconds": {
+      "B1:A1": 5400.0,
+      "B2:M1": 1800.0,
+      "B3:A1": 5400.0,
+      "B3:M1": 1800.0,
+      "B3:A2": 5400.0,
+      "B3:M2": 1800.0
+    },
+    "total_limit_seconds": null,
+    "total_limit_enabled": false,
+    "timeout_basis": "CUMULATIVE_GUROBI_NATIVE_OPTIMIZE_PER_ARM_STAGE",
+    "P2_calls": 0,
+    "Worker": 1,
+    "Threads": 1,
+    "authorization_id": "USER_TABLE_V_MAY01_STAGE_ONLY_PLANNING_EXECUTION01",
+    "authorized_ledger_path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION01\\PLANNING_NATIVE_LEDGER.json",
+    "human_approval_reference": {
+      "latest_user_reply": "\ucd1d\ub7c9 \uc81c\ud55c \ud3d0\uc9c0, Stage Timeout\ub9cc \uc801\uc6a9",
+      "stage_limits": "B1 A1/B3 A1/A2 5400 sec each; B2 M1/B3 M1/M2 1800 sec each",
+      "K48": "Table V attachment prior explicit K48 300 sec per M stage; separate ledger; no extra grant"
+    },
+    "source_cases": [
+      {
+        "day": "2025-05-01",
+        "source_sha": "87e36a4a20ca8c4ce7e4deeb4d81c4992335e707de8867aa6d4498bbedff3584",
+        "source_identity": {
+          "science_sha": "b9f07fa6d5264eb68cf228b35442629a9436a48b34eac48dbb53578047d78af6",
+          "case_sha": "64ec5f9abbdd8dbd166c7140e603540a4ad09d7ee17aca61ef9027885fc308cf",
+          "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+          "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+          "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b"
+        }
+      }
+    ]
+  },
+  "worker_lock_path": "D:\\V42_UNIFIED_HEAVY_WORKER.lock",
+  "P2_calls": 0,
+  "Worker": 1,
+  "Threads": 1,
+  "active_stage_owner_pid": null
+}

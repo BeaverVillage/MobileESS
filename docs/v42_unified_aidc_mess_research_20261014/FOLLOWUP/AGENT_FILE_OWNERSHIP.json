@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "single_branch": "codex/v42-trajectory-tracking-may01-20261014",
+  "worktree_creation": false,
+  "new_PR_creation": false,
+  "Agent_A": [
+    "v42_integration/aidc_sensitivity_runtime.py",
+    "v42_integration/aidc_resource_bridge.py",
+    "tests/test_v42_aidc_followup.py",
+    "tools/run_v42_aidc_followup_native0.py",
+    "tools/run_v42_aidc_original_coefficient_fixture.py",
+    "FOLLOWUP/AIDC*",
+    "FOLLOWUP/KNOWN_CC4*",
+    "FOLLOWUP/AIDC_related_CSV"
+  ],
+  "Agent_B": [
+    "v42_integration/mess_joint_compression.py",
+    "v42_integration/mess_beam_diversity.py",
+    "v42_integration/mess_mode_hull.py",
+    "tests/test_v42_mess_joint_compression.py",
+    "tests/test_v42_mess_beam_diversity.py",
+    "tests/test_v42_mess_mode_hull.py",
+    "tools/audit_v42_original_beam_joint.py",
+    "tools/audit_v42_s1_fractionality.py",
+    "tools/write_v42_mess_followup_reports.py",
+    "FOLLOWUP/MESS*",
+    "FOLLOWUP/S1*",
+    "FOLLOWUP/GLOBAL_LB*",
+    "FOLLOWUP/BEAM*"
+  ],
+  "Supervisor": [
+    "v42_integration/coordinator.py",
+    "v42_integration/followup_contract.py",
+    "v42_integration/followup_execution.py",
+    "v42_integration/followup_resource.py",
+    "tests/test_v42_followup_contract.py",
+    "tools/run_v42_followup_joint_benchmark.py",
+    "tools/run_v42_followup_s1_lp.py",
+    "tools/run_v42_followup_regression.py",
+    "FOLLOWUP/common_reports"
+  ],
+  "independent_review": "read-only source and native budget audits",
+  "Heavy_workers": 1,
+  "Threads": 1
+}

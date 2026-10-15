@@ -1,0 +1,96 @@
+
+Gurobi 13.0.2 (win64) logging started Thu Oct 15 00:47:47 2026
+
+Set parameter LogFile to value "D:\v42_trajectory_tracking_may01_20261014\docs\v42_unified_aidc_mess_research_20261014\D0_STATE_CONDITIONED_PLANNING_20261015\A1_PILOT01\SOLVE\NATIVE_SOLVER.log"
+Set parameter Threads to value 1
+Set parameter TimeLimit to value 25
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  25
+FeasibilityTol  1e-09
+MIPGap  0.005
+OptimalityTol  1e-09
+Method  2
+ScaleFlag  2
+MIPFocus  3
+NodeMethod  1
+NumericFocus  3
+Seed  20260929
+Threads  1
+
+Optimize a model with 844129 rows, 36931 columns and 10920902 nonzeros (Min)
+Model fingerprint: 0xe66c6ad9
+Model has 1 linear objective coefficients
+Variable types: 28867 continuous, 8064 integer (3456 binary)
+Coefficient statistics:
+  Matrix range     [1e-13, 1e+01]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 9e+02]
+  RHS range        [2e-09, 1e+06]
+
+Presolve removed 462755 rows and 24280 columns (presolve time = 5s)...
+Presolve removed 462755 rows and 24280 columns (presolve time = 10s)...
+Presolve removed 462746 rows and 24264 columns
+Presolve time: 12.97s
+Presolved: 381383 rows, 12667 columns, 5776978 nonzeros
+Variable types: 3517 continuous, 9150 integer (3404 binary)
+Root relaxation presolve removed 309374 rows and 1133 columns
+Root relaxation presolved: 12667 rows, 98144 columns, 2134268 nonzeros
+
+Root barrier log...
+
+Ordering time: 0.14s
+
+Barrier statistics:
+ Dense cols : 494
+ Free vars  : 2412
+ AA' NZ     : 6.949e+05
+ Factor NZ  : 2.742e+06 (roughly 70 MB of memory)
+ Factor Ops : 1.860e+09 (less than 1 second per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0  -9.34719997e+08  2.16655351e+00  2.02e+07 1.98e+03  1.00e+06    20s
+   1  -4.75392805e+08 -1.96828478e+02  5.57e+06 1.31e+03  3.85e+05    20s
+   2  -3.31907638e+08 -1.42794643e+02  1.96e+06 1.00e+03  2.02e+05    20s
+   3  -2.41572326e+08 -2.15833667e+02  7.22e+05 8.78e+02  1.25e+05    21s
+   4  -2.10436801e+08 -2.14686742e+02  7.15e+04 5.42e+02  8.08e+04    21s
+   5  -1.67162034e+08 -4.02687757e+01  1.11e+04 1.04e+02  1.63e+04    21s
+   6  -1.06521514e+08 -5.12946651e+00  2.20e+03 1.78e+01  3.29e+03    21s
+   7  -4.58266775e+07  1.70437889e-01  3.66e+02 3.79e+00  8.00e+02    21s
+   8  -1.89894470e+07  7.90938730e-01  9.02e+01 1.73e+00  2.96e+02    22s
+   9  -1.07073795e+07  1.03282217e+00  4.24e+01 8.46e-01  1.46e+02    22s
+  10  -4.54128380e+06  1.02003180e+00  1.58e+01 4.19e-01  5.93e+01    22s
+  11  -1.34006961e+06  9.90914004e-01  3.82e+00 1.51e-01  1.72e+01    23s
+  12  -3.18078567e+05  9.77369680e-01  6.52e-01 4.93e-02  4.15e+00    23s
+  13  -1.21418818e+05  9.73466453e-01  1.98e-01 9.13e-03  1.29e+00    23s
+  14  -2.24180548e+04  9.73082127e-01  3.01e-02 9.05e-04  2.14e-01    24s
+  15  -2.65742414e+03  9.73470309e-01  3.43e-03 8.97e-05  2.49e-02    24s
+  16  -2.67312761e+02  9.73426460e-01  3.43e-04 8.89e-06  2.50e-03    24s
+  17  -2.83057594e+01  9.72588588e-01  3.71e-05 8.81e-07  2.73e-04    24s
+  18  -4.28245740e+00  9.63766662e-01  6.56e-06 8.73e-08  4.89e-05    25s
+  19  -7.55674187e-01  6.99590967e-01  1.55e-06 3.33e-08  1.36e-05    26s
+
+Barrier performed 19 iterations in 26.22 seconds (62.75 work units)
+Time limit reached
+
+
+Root relaxation: time limit, 0 iterations, 9.83 seconds (26.06 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0          -    0               -    0.08280      -     -   26s
+
+Explored 1 nodes (0 simplex iterations) in 26.24 seconds (62.87 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 0
+
+Time limit reached
+Best objective -, best bound 8.280107490284e-02, gap -

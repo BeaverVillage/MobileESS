@@ -1,0 +1,49 @@
+{
+  "status": "NOT_AUTHORIZED_NOT_EXECUTED",
+  "campaign_resume": false,
+  "total_max_Native_seconds": 1020,
+  "same_A1_5400_second_stage_cap": true,
+  "Native_reset": false,
+  "new_5400_or_1800_budget": false,
+  "B1_A1_already_used": 1082.3850002288818,
+  "B1_A1_remaining": 4317.614999771118,
+  "B2_M1_already_used": 9.980000257492065,
+  "B2_M1_remaining": 1790.019999742508,
+  "calls": [
+    {
+      "model": "Saved May01 S0",
+      "Method": 2,
+      "parameters": "FAST_B",
+      "Threads": 1,
+      "max_seconds": 120,
+      "purpose": "Barrier comparison; raw Phi/primal/dual/KKT/Work/RSS"
+    },
+    {
+      "model": "Same saved May01 S0",
+      "Method": 1,
+      "parameters": "FAST_B",
+      "Threads": 1,
+      "max_seconds": 120,
+      "purpose": "Dual Simplex comparison on identical rows/RHS/bounds/objective"
+    },
+    {
+      "model": "Current original FULL Integer MILP",
+      "Threads": 1,
+      "max_seconds": 360,
+      "purpose": "Validate warning recovery and incumbent preservation beyond the old 266s abort"
+    },
+    {
+      "model": "B2 M1 F2 stationary free modes",
+      "Threads": 1,
+      "max_seconds": 180,
+      "purpose": "Check the first seed trial previously blocked before Optimize by the RAM gate"
+    },
+    {
+      "model": "B2 M1 F3 current-day route seed",
+      "Threads": 1,
+      "max_seconds": 240,
+      "purpose": "Check the second previously blocked seed trial; same M-stage 1800s cumulative cap"
+    }
+  ],
+  "prerequisite": "Explicit user approval, current source/case binding and cumulative ledger carry-forward; no production auto launch"
+}

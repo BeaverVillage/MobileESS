@@ -8,13 +8,18 @@ from collections import Counter, defaultdict
 from fractions import Fraction as Q
 from itertools import combinations
 from time import perf_counter
+from functools import lru_cache
 import numpy as np
+
+@lru_cache(maxsize=16384)
+def _rational(value):
+    return Q(value)
 
 def family(n):return str(n).split('[',1)[0]
 
 def vec(A,d,i):
     a,b=A.indptr[i:i+2];sg=-1 if d['sense'][i]=='>' else 1
-    return {int(j):Q(sg*float(w)) for j,w in zip(A.indices[a:b],A.data[a:b])},Q(sg*float(d['rhs'][i]))
+    return {int(j):_rational(sg*float(w)) for j,w in zip(A.indices[a:b],A.data[a:b])},_rational(sg*float(d['rhs'][i]))
 
 def affine(A,d,sites,units):
     N=len(sites);directions={};constants={};timeid={};bindings={};vf=[family(v) for v in d['names']];cache={};active=set()
@@ -94,7 +99,7 @@ def physical_pcs_authority(A,d,graph):
     if authority is None:raise ValueError('CURRENT_C3A_CURRENT_PCS_AUTHORITY_MISSING')
     return authority
 
-def verify_current_c3a(ultra,graph):
+def verify_current_c3a(ultra,graph,progress=None):
     began=perf_counter();A,d=ultra.original,ultra.original_data;B,e=ultra.A,ultra.d;rows=np.asarray(ultra.row_ids)
     retained=set(map(int,rows));removed=set(range(A.shape[0]))-retained
     if (len(rows)!=len(retained) or B.shape!=(len(rows),A.shape[1])
@@ -102,14 +107,20 @@ def verify_current_c3a(ultra,graph):
         raise ValueError('CURRENT_C3A_ROW_CERTIFICATE_COVER_DRIFT')
     # Stream CSR comparison instead of creating another full subset/difference.
     if not np.array_equal(np.diff(A.indptr)[rows],np.diff(B.indptr)):raise ValueError('CURRENT_C3A_RETAINED_SPARSITY_DRIFT')
-    for k,i in enumerate(rows):
-        a,b=A.indptr[i:i+2];c,f=B.indptr[k:k+2]
+    # Equal row lengths above make every contiguous retained run one exact
+    # comparison, including the segmentation of the CSR rows within that run.
+    breaks=np.r_[0,np.flatnonzero(np.diff(rows)!=1)+1,len(rows)]
+    for first,last in zip(breaks[:-1],breaks[1:]):
+        if first==last:continue
+        a=A.indptr[rows[first]];b=A.indptr[rows[last-1]+1]
+        c=B.indptr[first];f=B.indptr[last]
         if not np.array_equal(A.indices[a:b],B.indices[c:f]) or not np.array_equal(A.data[a:b],B.data[c:f]):
             raise ValueError('CURRENT_C3A_RETAINED_COEFFICIENT_DRIFT')
     for k in ('rhs','sense','row_names'):
         if not np.array_equal(d[k][rows],e[k]):raise ValueError('CURRENT_C3A_RETAINED_ROW_METADATA_DRIFT')
     for k in ('names','types','objective','constant'):
         if not np.array_equal(d[k],e[k]):raise ValueError('CURRENT_C3A_OBJECTIVE_INTEGER_AXIS_DRIFT')
+    if progress:progress(dict(phase='M_CURRENT_EXACT_C3A_VERIFY_ROWS',completed=0,total=len(ultra.certificates)))
     methods=Counter()
     for certificate in ultra.certificates:
         i=int(certificate['row']);kind=certificate['kind'];target,rhs=vec(A,d,i);total=defaultdict(Q);bound=Q(0)
@@ -145,10 +156,12 @@ def verify_current_c3a(ultra,graph):
     for n in d['names']:
         if str(n).startswith('Pch['):
             u,s,t=str(n)[4:-1].split(',');reach[units.index(u),int(t),sites.index(s)]=True
+    if progress:progress(dict(phase='M_CURRENT_EXACT_C3A_VERIFY_AFFINE_SOURCES'))
     dirs,const,times,defs=affine(A,d,sites,units)
     if any(i not in retained for i in defs.values()):raise ValueError('CURRENT_C3A_AFFINE_SUPPORT_DEFINITION_REMOVED')
     # Independent rational pair intersections from every freshly constructed
     # original PCS block. The C2 transport proof is required by the caller.
+    if progress:progress(dict(phase='M_CURRENT_EXACT_C3A_VERIFY_PHYSICAL_PCS'))
     full,fd=ultra.physical_original,ultra.physical_original_data
     if full is not None:
         planes=physical_pcs_authority(full,fd,graph)
@@ -173,23 +186,9 @@ def verify_current_c3a(ultra,graph):
         x=(c*q-b*r)/den;y=(a*r-c*p)/den
         if all(s*x+t*y<=u for s,t,u in planes):points.add((x,y))
     if not points:raise ValueError('CURRENT_C3A_CURRENT_PCS_DOMAIN_EMPTY')
-    def enclosure(x):
-        y=float(x);return (y if Q(y)<=x else np.nextafter(y,-np.inf),y if Q(y)>=x else np.nextafter(y,np.inf))
+    from .independent_interval import interval as sparse_interval
     def interval(vectors,ts):
-        K=len(vectors);pl=np.zeros((K,len(units),N));ph=pl.copy();ql=pl.copy();qh=pl.copy();common=pl.copy()
-        for k,v in enumerate(vectors):
-            for u in range(len(units)):
-                for s in range(N):
-                    pd=v.get((3*u+1)*N+s,Q(0));qq=v.get((3*u+2)*N+s,Q(0));ch=v.get(3*u*N+s,Q(0))
-                    pl[k,u,s],ph[k,u,s]=enclosure(pd);ql[k,u,s],qh[k,u,s]=enclosure(qq);common[k,u,s]=enclosure(max(Q(0),ch+pd)*limit)[1]
-        value=np.zeros_like(pl)
-        for x,y in points:
-            xl,xh=enclosure(x);yl,yh=enclosure(y)
-            p=np.nextafter(np.maximum.reduce([pl*xl,pl*xh,ph*xl,ph*xh]),np.inf);q=np.nextafter(np.maximum.reduce([ql*yl,ql*yh,qh*yl,qh*yh]),np.inf)
-            value=np.maximum(value,np.nextafter(p+q,np.inf))
-        value=np.nextafter(value+common,np.inf);upper=np.zeros(K)
-        for u in range(len(units)):upper=np.nextafter(upper+np.max(np.where(reach[u,np.asarray(ts)],value[:,u,:],0),axis=1),np.inf)
-        return upper
+        return sparse_interval(vectors,ts,reach,points,limit)
     exact_cache={}
     def exact(v,t):
         key=(tuple(sorted(v.items())),t)
@@ -203,7 +202,8 @@ def verify_current_c3a(ultra,graph):
                 total+=best
             exact_cache[key]=total
         return exact_cache[key]
-    boundids=set();fallbacks=0
+    boundids=set();fallbacks=0;last_progress=0.
+    if progress:progress(dict(phase='M_CURRENT_EXACT_C3A_VERIFY_BOUNDS',completed=0,total=len(ultra.bounds)))
     for start in range(0,len(ultra.bounds),256):
         chunk=ultra.bounds[start:start+256];js=[int(p['column']) for p in chunk];vs=[dirs[j] for j in js];ts=[times[j] for j in js]
         ups=interval(vs,ts);downs=interval([{q:-w for q,w in v.items()} for v in vs],ts)
@@ -217,6 +217,10 @@ def verify_current_c3a(ultra,graph):
                     or e['lower'][j]!=p['new_lower'] or e['upper'][j]!=p['new_upper']
                     or e['lower'][j]<d['lower'][j] or e['upper'][j]>d['upper'][j]):
                 raise ValueError('CURRENT_C3A_AFFINE_BOUND_NOT_IMPLIED')
+        now=perf_counter()
+        if progress and (now-last_progress>=2. or start+len(chunk)==len(ultra.bounds)):
+            progress(dict(phase='M_CURRENT_EXACT_C3A_VERIFY_BOUNDS',completed=start+len(chunk),total=len(ultra.bounds)))
+            last_progress=now
     changed=set(map(int,np.flatnonzero((e['lower']!=d['lower'])|(e['upper']!=d['upper']))))
     if changed!=boundids:raise ValueError('CURRENT_C3A_BOUND_CERTIFICATE_COVER_DRIFT')
     return dict(PASS=True,removed_rows=len(removed),removed_row_methods=dict(methods),bounds_tightened=len(boundids),

@@ -16,6 +16,7 @@ from scipy import sparse
 SECURITY_FAMILIES = frozenset(('voltage_upper', 'voltage_lower',
     'line_thermal_face', 'transformer_kVA', 'NormalAmps'))
 SOURCES = ('v42_ultracompact/security.py', 'v42_ultracompact/security_verify.py',
+    'v42_ultracompact/independent_interval.py',
     'v42_ultracompact/current_verify.py', 'v42_ultracompact/support.py',
     'v42_ultracompact/polytope.py')
 

@@ -1,0 +1,190 @@
+{
+  "execution": "docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION08",
+  "Native_optimize_calls_by_audit": 0,
+  "B1": {
+    "phase_I_status": "DW_PHASE_I_NOT_CERTIFIED",
+    "completed_outer_Phase_I_iterations": 0,
+    "last_Phase_I_iteration": "S0",
+    "S1_started": false,
+    "P1_full_pricing_started": false,
+    "Phase_I_policies": [
+      {
+        "profile": "ACCURATE_C",
+        "status": 9,
+        "Native_seconds": 300.0750000476837,
+        "Work": 246.55617149411077,
+        "SolCount": 0,
+        "snapshot_sha": "871160b29f7d777f0e8f7d760870643213e28619e9114d6f092f21a8e7f938e0",
+        "raw_attributes": "docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION08\\B1\\A1\\DW\\PHASE_I\\S0\\ACCURATE_C\\RAW_ATTRIBUTES.npz"
+      },
+      {
+        "profile": "CURRENT",
+        "status": 9,
+        "Native_seconds": 305.8680000305176,
+        "Work": 295.86981603659984,
+        "SolCount": 0,
+        "snapshot_sha": "871160b29f7d777f0e8f7d760870643213e28619e9114d6f092f21a8e7f938e0",
+        "raw_attributes": "docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION08\\B1\\A1\\DW\\PHASE_I\\S0\\CURRENT\\RAW_ATTRIBUTES.npz"
+      },
+      {
+        "profile": "FAST_A",
+        "status": 9,
+        "Native_seconds": 30.098000049591064,
+        "Work": 37.52836208774199,
+        "SolCount": 0,
+        "snapshot_sha": "871160b29f7d777f0e8f7d760870643213e28619e9114d6f092f21a8e7f938e0",
+        "raw_attributes": "docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION08\\B1\\A1\\DW\\PHASE_I\\S0\\FAST_A\\RAW_ATTRIBUTES.npz"
+      },
+      {
+        "profile": "FAST_B",
+        "status": 9,
+        "Native_seconds": 180.07500004768372,
+        "Work": 118.16459953121453,
+        "SolCount": 0,
+        "snapshot_sha": "871160b29f7d777f0e8f7d760870643213e28619e9114d6f092f21a8e7f938e0",
+        "raw_attributes": "docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION08\\B1\\A1\\DW\\PHASE_I\\S0\\FAST_B\\RAW_ATTRIBUTES.npz"
+      }
+    ],
+    "Phase_I_Native_seconds": 816.1160001754761,
+    "Phase_I_wall_seconds": 978.5748255999933,
+    "Integer_MILP_Optimize_entered": true,
+    "Integer_Native_status": 11,
+    "Integer_Native_seconds": 266.26900005340576,
+    "Integer_SolCount": 0.0,
+    "callback_exception": false,
+    "callback_message_forced_terminate": true,
+    "callback_source": "D:\\v42_e08_source_677dc0e29_20261015\\v42_integration\\table_v_a_control.py",
+    "callback_source_function": "solve_original.callback",
+    "callback_source_line": 36,
+    "native_terminal_NUMERIC": false,
+    "native_terminal_INTERRUPTED": true,
+    "root_barrier_numerical_warning": true,
+    "warning_recovery_success_unestablished": true,
+    "FULL_replay_failure": false,
+    "FULL_replay_status": "NOT_ENTERED_NO_INCUMBENT",
+    "last_valid_E08_X_Pi_RC_Basis": null,
+    "cumulative_stage_Native_seconds": 1082.3850002288818,
+    "Native_remaining_seconds": 4317.614999771118,
+    "original_binding": {
+      "matrix_sha": "44751de1b16d5dc47652de8c531c40f38a4e17adfaae8633db446ab110d0f425",
+      "domain_sha": "e9ef9358c85afd0674de34c73ca3c3793db3aff8cddb88343cda2692533fd8e4",
+      "objective_sense": 1,
+      "rows": 2108858,
+      "columns": 946756,
+      "nonzeros": 21126591,
+      "Threads": 1
+    },
+    "source_case_binding": {
+      "source_sha": "6892657176da539e7eb58366db11b63a01812e32ad6da9ce3149ba4620a5d0d5",
+      "case_sha": "1e0c6567d4cdb56f5f1a3dc3da41865fcaa6ff46aaa9080261e9f6a07c51e911",
+      "day": "2025-05-01",
+      "arm": "B1",
+      "stage": "A1",
+      "matrix_sha": "44751de1b16d5dc47652de8c531c40f38a4e17adfaae8633db446ab110d0f425",
+      "domain_sha": "e9ef9358c85afd0674de34c73ca3c3793db3aff8cddb88343cda2692533fd8e4",
+      "objective_sha": "2cf02b1316d14ac725b86b2062d1e6b53b1f1ca25878ed70f9f4a7a3fc1772af"
+    }
+  },
+  "B2": {
+    "outcome": {
+      "status": "NOT_CERTIFIED",
+      "failed_stage": "M1",
+      "error": "RuntimeError('RuntimeError: TABLE_V_RESOURCE_ADMISSION_DENIED:RAM_AVAILABLE_OR_SYSTEM_COMMIT_LIMIT')",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_run.py\", line 232, in run_arm\n    mr,ma,point,kval=factory.execute_cooperative(arm,current,case,aidc,aa,k48_budget=k48,\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_mess.py\", line 325, in execute_cooperative\n    result,acceptance,point=self.execute(arm,stage,seed,aidc,parent_acceptance,initial_point=initial_point)\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_mess.py\", line 267, in execute\n    result, point = optimize_mess(case, initial_point, incumbent_registry, bridge)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\m_engine.py\", line 667, in optimize_mess\n    point, certificate, cold_history = _initialize(case, StageBudget(budget), validator, None,\n                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_common_mess\\engine.py\", line 420, in _initialize\n    point, strict, row = _trial(case, budget, case.output / 'INITIALIZATION' / label,\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_common_mess\\engine.py\", line 254, in _trial\n    raise RuntimeError(error)\nRuntimeError: RuntimeError: TABLE_V_RESOURCE_ADMISSION_DENIED:RAM_AVAILABLE_OR_SYSTEM_COMMIT_LIMIT\n",
+      "completed_planning_stages": [],
+      "attempted_planning_stages": [],
+      "physical_PASS_claimed": false,
+      "day": "2025-05-01",
+      "arm": "B2",
+      "wall_seconds": 1452.9320392000081,
+      "P2_calls": 0,
+      "R2": "HOLD"
+    },
+    "first_gate_error": "RuntimeError: RELEASE_RAM_COMMIT_GATE",
+    "last_gate_error": "RuntimeError: TABLE_V_RESOURCE_ADMISSION_DENIED:RAM_AVAILABLE_OR_SYSTEM_COMMIT_LIMIT",
+    "F2_Optimize_entered": false,
+    "F3_Optimize_entered": false,
+    "F2_available_RAM_bytes": 8381091840,
+    "threshold_removed_bytes": 8589934592,
+    "C3A_independent_proof": {
+      "PASS": true,
+      "removed_rows": 71540,
+      "removed_row_methods": {
+        "PCS_FARKAS": 53652,
+        "Q_LINK_FARKAS": 17884,
+        "FLOW_EQUALITY_SUM": 4
+      },
+      "bounds_tightened": 95124,
+      "affine_definitions_reconstructed": 95124,
+      "independent_bound_exact_fallbacks": 0,
+      "columns_eliminated": 0,
+      "objective_and_integer_and_full_LP_domains_preserved": true,
+      "original_P1_bit_exact": true,
+      "integer_and_full_LP_domains_identical": true,
+      "Native_optimize_calls": 0,
+      "production_deletion_decisions_called": false,
+      "independent_verifier_wall_seconds": 463.1519643999927,
+      "independent_model_proof_replayed": true,
+      "schema": "V42_CURRENT_EXACT_C3A_PROOF_V1",
+      "C3A_policy": "SELECTED_EXACT_CURRENT_MATRIX_PROOFS",
+      "baseline": {
+        "rows": 801625,
+        "columns": 339389,
+        "binaries": 9322,
+        "nnz": 8837257
+      },
+      "selected": {
+        "rows": 730085,
+        "columns": 339389,
+        "binaries": 9322,
+        "nnz": 8604669
+      },
+      "baseline_matrix_SHA256": "d20a25dba6cc5e357b73c0b3d56b520170f65ebd8c2d45934635d19ac8724b97",
+      "selected_matrix_SHA256": "e91bf1d997cfe4541b71ad0f9b8e723161264784b2f6c77ef8568dc44642efbb",
+      "removed_families": {
+        "PCS16": 53652,
+        "connected_Qmax": 8942,
+        "connected_Qmin": 8942,
+        "terminal_location": 4
+      },
+      "bound_families": {
+        "injection_P": 2263,
+        "injection_Q": 2237,
+        "response_line_P": 25152,
+        "response_line_Q": 25152,
+        "response_line_correction": 25152,
+        "response_transformer_P": 7584,
+        "response_transformer_Q": 7584
+      },
+      "fresh_current_matrix_certificates": true,
+      "historical_row_indices_read": 0,
+      "selected_PR162_techniques_reused": true,
+      "security_rows_kept": "RETAINED_AFTER_FRESH_PRE_C2_SECURITY_PROOF",
+      "wall_seconds": 821.7643173999968,
+      "scientific_source_SHAs": {
+        "v42_ultracompact/current.py": "c5594d5ee80ea41ade2342d562c1dd99fc4c34f3da35178f9588493bb64d1757",
+        "v42_ultracompact/current_verify.py": "9cda0bd34452e8fb17e137c67fe939f7238219c4d07d99bf0b4d63d158be2807",
+        "v42_ultracompact/polytope.py": "76f3a588d614d25a924d404d6059fb32959d32e9fc02695c27b0e83f5a298036",
+        "v42_ultracompact/support.py": "83b4759a1d4f7fdc36edcb34342b9f5fbbdb6645d00a6559ac4388508563ea3f",
+        "v42_ultracompact/security.py": "db4e78961c71b898f0ce5f68e9e47a4c775ee12d5aab50851dad9f118c67736f",
+        "v42_ultracompact/security_verify.py": "dcf2e5b8d819992dc466b5fe1153ba76cc14d3ed4e0d0c4caf95d4a330d9e9a6"
+      }
+    },
+    "cumulative_stage_Native_seconds": 9.980000257492065,
+    "full_domain_infeasibility_certified": false,
+    "concurrent_agent_audit_RSS_observed_bytes": 6261542912,
+    "agent_audit_contributed_memory_pressure": true,
+    "agent_audit_stopped": true
+  },
+  "Native_ledger_total_seconds": 1106.5950005054474,
+  "ledger_reset": false,
+  "stopped": true,
+  "automatic_resume": false,
+  "P2_calls": 0,
+  "R2": "HOLD",
+  "IEEE8500_executed": false,
+  "limitations": [
+    "No additional Native Optimize authorized or executed by this audit",
+    "Dual-simplex comparison, S1 warm-start performance and repaired MILP success need bounded Native approval"
+  ]
+}

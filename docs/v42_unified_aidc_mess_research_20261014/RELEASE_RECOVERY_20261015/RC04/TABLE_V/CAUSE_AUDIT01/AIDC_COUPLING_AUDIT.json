@@ -1,0 +1,172 @@
+{
+  "schema": "TABLE_V_AIDC_PUBLIC_COUPLING_NATIVE0_AUDIT_V1",
+  "scope": "FAILED_B1_ATTEMPT_ONLY_READONLY_ARITHMETIC_RELAXATION",
+  "failed_stage_case_sha": "6a5f4ee46f02d014b2475ea99cd07261da8732721c6b85e803e2785e93cabd57",
+  "failed_source_identity": {
+    "science_sha": "b9f07fa6d5264eb68cf228b35442629a9436a48b34eac48dbb53578047d78af6",
+    "case_sha": "64ec5f9abbdd8dbd166c7140e603540a4ad09d7ee17aca61ef9027885fc308cf",
+    "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+    "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+    "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b"
+  },
+  "failed_solver_status": 3,
+  "failed_Native_Runtime": 776.2689998149872,
+  "public_counts": {
+    "positive_remaining_UIDs": 1555,
+    "source_window_UIDs": 992,
+    "removed_start_count": 3667,
+    "E1_participant_UIDs": 454,
+    "checkpoint_UIDs": 454
+  },
+  "Q50_expired_current_slot_hold_UIDs": 69,
+  "Q50_expired_current_slot_hold_GPU": 187.0,
+  "intervals_examined": 4656,
+  "necessary_window_capacity": {
+    "failed_compiler": {
+      "necessary_capacity_excess_windows": 0,
+      "maximum_lower_bound_minus_capacity_GPU_slots": -182.0,
+      "tightest_window_D0_slots": [
+        0,
+        1
+      ],
+      "tightest_window_known_min_GPU_slots": 598.0,
+      "tightest_window_CC4_min_GPU_slots": 0.0,
+      "tightest_window_capacity_GPU_slots": 780.0,
+      "interpretation": "EXCESS_IS_STRUCTURAL_INFEASIBILITY_PROOF; NO_EXCESS_IS_INCONCLUSIVE"
+    },
+    "original_receipt": {
+      "necessary_capacity_excess_windows": 0,
+      "maximum_lower_bound_minus_capacity_GPU_slots": -182.0,
+      "tightest_window_D0_slots": [
+        0,
+        1
+      ],
+      "tightest_window_known_min_GPU_slots": 598.0,
+      "tightest_window_CC4_min_GPU_slots": 0.0,
+      "tightest_window_capacity_GPU_slots": 780.0,
+      "interpretation": "EXCESS_IS_STRUCTURAL_INFEASIBILITY_PROOF; NO_EXCESS_IS_INCONCLUSIVE"
+    }
+  },
+  "findings": [
+    {
+      "status": "CONFIRMED_DOMAIN_SHRINK",
+      "claim": "Pending compiler deleted receipt-authorized starts earlier than causal reference; authorized_data adds no independent reference hard-earliest.",
+      "does_not_prove": "This finding alone does not prove the solver infeasibility cause."
+    },
+    {
+      "status": "NO_ADDITIONAL_ACTUAL_WINDOW_FILTER_FOUND",
+      "claim": "Known immutable commands are checked against receipt.allowed_starts_seconds; Can_TimeShift=False does not remove a receipt-authorized earlier command. Additional delay is max(0, planned-reference)."
+    },
+    {
+      "status": "RUNTIME_ANCHOR_ALREADY_CORRECTED",
+      "claim": "Original risk_nominal_completion_issue_slot is shifted by new_reference-original_reference for Pending, preserving risk anchor minus reference_end."
+    },
+    {
+      "status": "SOFT_RESERVE_TARGETS",
+      "claim": "bind_headroom permits achieved CC4/runtime reserves zero with nonnegative unbounded shortfall. Only Known+nominal CC4+achieved reserve occupancy is hard; targets themselves do not force occupancy."
+    },
+    {
+      "status": "ORIGINAL_HARD_COUPLING_RETAINED",
+      "claim": "Known nominal and CC4 nominal allocations drive Original C1/PCC and signed full network F2CRA; all physical bounds remain hard and cannot be relaxed from this audit."
+    }
+  ],
+  "limitations": [
+    "No LP/MILP, presolve, IIS, point replay or full feasibility certificate.",
+    "Necessary aggregate capacity bounds relax per-site GPU/rack, timing correlations, checkpoint/WAN geometry, and all electrical inequalities.",
+    "No-excess intervals cannot establish feasibility or identify the remaining cause of INFEASIBLE.",
+    "Original/frozen source files and failed result are unchanged. No private future observations read."
+  ],
+  "counts_operation": {
+    "Gurobi_imported": false,
+    "model_builds": 0,
+    "optimize": 0,
+    "presolve": 0,
+    "IIS": 0,
+    "private_future_reads": 0
+  },
+  "public_input_records": [
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION01\\INPUTS\\FULL_FLEX\\TABLE_V_FLEXIBILITY_POLICY_FREEZE.json",
+      "sha256": "fb9eb2a62e71e3abf41e53e4b0b18fc6bb5625677a6c64dcdde0927a99dc8f30",
+      "bytes": 27258197
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION01\\INPUTS\\BASIC\\D0_CC4_FORECAST_RECEIPT.json",
+      "sha256": "7a5b7c4e64e665bc4e1bfcc99c32e166f65044207701dc7b5da58d105aa48910",
+      "bytes": 5841
+    },
+    {
+      "path": "D:\\MobileESS_V42\\docs\\v42_ts_cc4_temporal_refinement\\CC4_SERVICE_TIMING_ENVELOPE.csv",
+      "sha256": "d3feac2094d7a15406fc28fbde1663ffa6d41fd7254c1cbd26d46436204830e8",
+      "bytes": 329528
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION01\\B1\\A1\\P1_ONLY_RESULT.json",
+      "sha256": "b9b6da089c7d475facbc339f82b915b4894ad11294499d124bbe8193d391eda9",
+      "bytes": 7054
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION01\\REFERENCE_RESULT.json",
+      "sha256": "adaede743895ea0e32b7a7dcd5b420771bc6177092c417dd07e137009db98246",
+      "bytes": 2806341
+    }
+  ],
+  "source_records": [
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\a_engine.py",
+      "sha256": "0d24f9d67cd9533bbaf6548e32bfbaa50f2680e1a310ed1f016ca673b46386eb",
+      "bytes": 19513
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\tablev_fullflex_actual.py",
+      "sha256": "ab30632e8b64260c468e3902976089fec8dcc9b0dfafdb06188e2cd7ec454d82",
+      "bytes": 55033
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\release_production_actual.py",
+      "sha256": "e23edeec4b4f91fbf4aa1b7141004e5651a82fb913adee0e342c0a33c203aa29",
+      "bytes": 33205
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\aidc_sensitivity_runtime.py",
+      "sha256": "703759813dca250209286fa8f6cb7931943aa8a0e8df274f4d8047485051f13f",
+      "bytes": 205796
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_final\\reserve.py",
+      "sha256": "44ad22dc6071cd0523e29711e255dc1bbeb46245269aa2b918b310787980668b",
+      "bytes": 3350
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_temporal\\service.py",
+      "sha256": "f17bea519bd340a03dda22dc4508352b145a6c09b87b227702d1b09be1390909",
+      "bytes": 3885
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_root\\native.py",
+      "sha256": "9f09b7aa1857762dd0284076ca35438d97e4ba9eb6cd4c01f6302f970453d8dc",
+      "bytes": 12829
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_a_stage_domain_v2\\domain.py",
+      "sha256": "51749b95ae55ba16fdb2151554fd307b654fb2bbf9fd82b97cc4e63e858812fe",
+      "bytes": 20078
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_native\\service.py",
+      "sha256": "588145b6e307dbec9fcf187bf91eeab15817f57c05a3743c5cdf21e684ae5cd1",
+      "bytes": 4258
+    }
+  ],
+  "arithmetic_source": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\CAUSE_AUDIT01\\audit_aidc_coupling_native0.py",
+    "sha256": "f501a890a26b7f177fe437b61a23e55d6f3a8cdeb4a6233c083b370be0a67632",
+    "bytes": 10183
+  },
+  "window_csv": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\CAUSE_AUDIT01\\AIDC_CC4_WINDOW_CAPACITY_NECESSARY_BOUNDS.csv",
+    "sha256": "1a568fb30482c450867667a5e194ede13b98543e519d46d358476c6e03f10362",
+    "bytes": 389995
+  },
+  "wall_seconds": 0.4066803000168875
+}

@@ -1,0 +1,60 @@
+{
+  "schema": "TABLE_V_ARM_STAGE_NATIVE_ONLY_AUTHORIZATION_V1",
+  "approved": true,
+  "budget_kind": "K48_SEPARATE",
+  "stage_caps_seconds": {
+    "B2:K48_M1": 300.0,
+    "B3:K48_M1": 300.0,
+    "B3:K48_M2": 300.0
+  },
+  "total_limit_seconds": null,
+  "total_limit_enabled": false,
+  "timeout_basis": "CUMULATIVE_GUROBI_NATIVE_OPTIMIZE_PER_ARM_STAGE",
+  "P2_calls": 0,
+  "Worker": 1,
+  "Threads": 1,
+  "authorization_id": "USER_EXPLICIT_FRESH_TABLE_V_MAY01_EXECUTION05_K48",
+  "authorized_ledger_path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION05\\K48_NATIVE_LEDGER.json",
+  "human_approval_reference": {
+    "previous_stage_caps": {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION02\\K48_AUTHORIZATION.json",
+      "sha256": "2a6902ba245cc01cce662ba4a36caf1ea7fc7d3307dbbd212dcecae915323fdc",
+      "bytes": 2029
+    },
+    "latest_direct_user_instruction": "아니야. Native도 0초로 해야지. 모든 걸 처음부터 B1 돌려야돼.",
+    "preceding_direct_user_execution_order": "응 작업 끝났으면 5월1일 B1 B2 B3 돌려. B0은 pass되었으니 B1부터 시작해. B1 처음부터 실행해."
+  },
+  "source_cases": [
+    {
+      "day": "2025-05-01",
+      "source_sha": "f44ea21b4c1191765e128e8effe6681bdbee5f661922edd2b335d33684fd2139",
+      "source_identity": {
+        "science_sha": "00b37335ce8ae666e763037cda7cd9e8ee8dd38a72420e7c8049a26cd0d60399",
+        "case_sha": "1dfff6d4cdf3ea9956b8e9bf46c827ba8360066a76c0eecdc85b299b26fe53bc",
+        "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+        "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+        "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b"
+      }
+    }
+  ],
+  "carry_forward_ledgers": [],
+  "prior_arm_stage_costs_reset": true,
+  "fresh_native_cycle": {
+    "schema": "TABLE_V_EXPLICIT_FRESH_NATIVE_CYCLE_V1",
+    "approved": true,
+    "cycle_id": "USER_FRESH_MAY01_EXECUTION05_K48",
+    "start_native_seconds": 0.0,
+    "human_approval_reference": {
+      "latest_direct_user_instruction": "아니야. Native도 0초로 해야지. 모든 걸 처음부터 B1 돌려야돼.",
+      "execution_order": "응 작업 끝났으면 5월1일 B1 B2 B3 돌려. B0은 pass되었으니 B1부터 시작해. B1 처음부터 실행해."
+    },
+    "archived_native_ledgers": [
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION02\\K48_NATIVE_LEDGER.json",
+        "sha256": "9791a1c12d00882b6e05468595a29c4fa54a483690d0ebb7937e331d12f56914",
+        "bytes": 4365
+      }
+    ],
+    "reuse_previous_solution_or_bound": false
+  }
+}
