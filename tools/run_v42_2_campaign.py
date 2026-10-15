@@ -115,7 +115,10 @@ def run(arm,number,*,reason,corrective_commit,prepare_only=False,validation_gate
     if not prepare_only:
         if validation_gate is None:raise PermissionError('CURRENT_SOURCE_NATIVE0_AND_REGRESSION_GATE_REQUIRED')
         gate=read(validation_gate)
-        if gate.get('PASS') is not True or gate.get('release')!=release_identity():
+        if (gate.get('schema')!='V42_2_CURRENT_RELEASE_NATIVE0_REGRESSION_GATE_V1'
+                or gate.get('PASS') is not True or gate.get('release')!=release_identity()
+                or not gate.get('verified_source_records')
+                or any(file_record(r['path'])!=r for r in gate['verified_source_records'])):
             raise PermissionError('CURRENT_V42_2_VALIDATION_RELEASE_REQUIRED')
         if any(file_record(r['path'])!=r for r in gate.get('evidence',[])) or len(gate.get('evidence',[]))<3:
             raise PermissionError('EXACT_B1_M_NATIVE0_AND_REGRESSION_EVIDENCE_REQUIRED')
@@ -143,6 +146,11 @@ def run(arm,number,*,reason,corrective_commit,prepare_only=False,validation_gate
                 next_action='PRESERVE_PASS_AND_PROCEED_NEXT_ARM' if outcome['status']=='FULL_PASS' else 'ROOT_CAUSE_REPAIR_NATIVE0_THEN_NEW_ATTEMPT')
             _write(CAMPAIGN/'STATE.json',state)
             return state
+        except BaseException as error:
+            state.update(status='SUPERVISOR_ERROR_REQUIRES_RECONCILIATION',error=repr(error),
+                finished_epoch_seconds=time(),automatic_identical_retry=False)
+            _write(CAMPAIGN/'STATE.json',state)
+            raise
         finally:
             stop.set();thread.join(timeout=2.)
 
