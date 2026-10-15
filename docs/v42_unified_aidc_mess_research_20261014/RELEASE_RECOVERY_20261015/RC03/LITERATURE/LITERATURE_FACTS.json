@@ -1,0 +1,70 @@
+{
+  "schema": "V42_PRESITE_PRIMARY_LITERATURE_FACTS_V1",
+  "verified_on_UTC": "2026-10-15",
+  "primary_sources_only": true,
+  "full_papers_redistributed_in_repository": false,
+  "anchors": [
+    {
+      "key": "Wang2016",
+      "doi": "10.1109/TSG.2015.2501808",
+      "journal_year": 2016,
+      "journal": "IEEE Transactions on Smart Grid",
+      "volume_issue_pages": "7(3), 1584-1596",
+      "publisher": "https://ieeexplore.ieee.org/document/7346506/",
+      "author_manuscript": "https://staff.ie.cuhk.edu.hk/~xjlin/paper/tsg16-win-win.pdf",
+      "locator": "Section III, workload conservation (2), transmission-plus-queue delay (3)",
+      "supported_model": "Geographic distribution of incoming workload subject to service and capacity constraints",
+      "not_an_evidence_of": ["Kestrel customer consent", "Kestrel replicated input", "GPU gang or V42 electrical safety"]
+    },
+    {
+      "key": "Hogade2022",
+      "doi": "10.1109/TSUSC.2021.3086087",
+      "journal_year": 2022,
+      "online_year": 2021,
+      "journal": "IEEE Transactions on Sustainable Computing",
+      "volume_issue_pages": "7(2), 400-413",
+      "publisher": "https://ieeexplore.ieee.org/document/9445675/",
+      "author_manuscript": "https://arxiv.org/pdf/2106.00066",
+      "locator": "Section 3.3.6 equation (6); Section 6.2 Table 2, author PDF page 8; Section 7.4.1",
+      "supported_model": "Workload distribution with network data volume and queueing costs; input-size sensitivity",
+      "benchmark_input_sizes_MB": [100, 233, 500, 600, 650],
+      "benchmark_rows": [
+        {"task": "Image-to-Image", "dataset_MB": 100},
+        {"task": "LDA", "dataset_MB": 233},
+        {"task": "Naive Bayes", "dataset_MB": 500},
+        {"task": "Image-to-Text", "dataset_MB": 600},
+        {"task": "K-means", "dataset_MB": 650}
+      ],
+      "V42_MB_interpretation_bytes": 1000000,
+      "V42_Kestrel_task_type_mapping": null,
+      "V42_scenario_payload_provenance": "ASSUMED_PER_JOB_INPUT_SIZE_USING_PUBLISHED_EXAMPLES; NOT_A_KESTREL_MEASUREMENT",
+      "not_an_evidence_of": ["Universal pre-staging", "Kestrel WAN measurements", "Unrestricted RUNNING migration"]
+    },
+    {
+      "key": "Basmadjian2018",
+      "doi": "10.1109/TSG.2016.2632526",
+      "journal_year": 2018,
+      "online_year": 2016,
+      "journal": "IEEE Transactions on Smart Grid",
+      "volume_issue_pages": "9(4), 3453-3464",
+      "publisher": "https://ieeexplore.ieee.org/document/7755751/",
+      "author_manuscript": "https://www.fim.uni-passau.de/fileadmin/dokumente/fakultaeten/fim/lehrstuhl/meer/publications/pdf/Basmadjian2016b.pdf",
+      "locator": "Section II.B; Sections IV GreenSDA and V GreenSLA",
+      "supported_model": "Explicit energy-supply and customer-service flexibility contracts retaining QoS scope",
+      "not_an_evidence_of": ["A signed agreement for any Kestrel UID", "An arbitrary QoS extension", "Automatic checkpoint permission"]
+    }
+  ],
+  "V42_inference_and_assumptions": {
+    "R1_primary": "Pre-staged/shared input for observed FLEX30 eligible PENDING requests at compatible research sites",
+    "R1_is_direct_measurement_or_literal_requirement_of_these_papers": false,
+    "R1_zero_runtime_WAN_transfer_is_explicit_scenario_assumption": true,
+    "R2_separate": "Transfer-aware case with payload, path, capacity, preparation, unchanged QoS and ceil-to-900 ready time",
+    "FLEX30_fraction_comes_from": "Existing V42 preregistered research contract, not a numerical claim from these papers",
+    "bandwidth_path_and_prepare_parameters_come_from": "Existing approved V42 WAN model and explicit V42 sensitivity assumptions",
+    "all_scenario_parameters_are_Kestrel_measured": false,
+    "Source_explicit_prohibitions_overridden": false,
+    "Unknown_UID_day_ahead_optimization_authorized": false,
+    "additional_QoS_delay_seconds_granted": 0,
+    "RUNNING_migration_authorized": false
+  }
+}

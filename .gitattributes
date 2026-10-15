@@ -250,3 +250,22 @@ tests/test_v42_isolated*.py -text whitespace=cr-at-eol
 tools/*v42_release*.py -text whitespace=cr-at-eol
 tests/test_v42_release*.py -text whitespace=cr-at-eol
 docs/v42_unified_aidc_mess_research_20261014/RELEASE_RECOVERY_20261015/**/*.log -text whitespace=-blank-at-eol,cr-at-eol
+
+# Preserve additive research-contract, diagnostic and production byte seals.
+tools/*v42_research_presite*.py -text whitespace=cr-at-eol
+tools/*v42_research*.py -text whitespace=cr-at-eol
+tools/*v42_literature*.py -text whitespace=cr-at-eol
+tests/test_v42_research_presite*.py -text whitespace=cr-at-eol
+tools/*v42_production_campaign.py -text whitespace=cr-at-eol
+tools/*v42_rc02*.py -text whitespace=cr-at-eol
+tests/test_v42_rc02*.py -text whitespace=cr-at-eol
+tools/*v42_rc03*.py -text whitespace=cr-at-eol
+tools/*v42_research_transfer*.py -text whitespace=cr-at-eol
+tools/*v42_campaign_presite*.py -text whitespace=cr-at-eol
+tools/*v42_table_v*.py -text whitespace=cr-at-eol
+tools/*v42_tablev*.py -text whitespace=cr-at-eol
+tests/test_v42_table_v*.py -text whitespace=cr-at-eol
+tests/test_v42_tablev*.py -text whitespace=cr-at-eol
+# Keep the exact executed/fixture source and native log bytes, including EOF blanks.
+v42_integration/tablev_fullflex_actual.py -text whitespace=-blank-at-eof,cr-at-eol
+docs/v42_unified_aidc_mess_research_20261014/RELEASE_RECOVERY_20261015/**/*.log -text whitespace=-blank-at-eof,-blank-at-eol,cr-at-eol

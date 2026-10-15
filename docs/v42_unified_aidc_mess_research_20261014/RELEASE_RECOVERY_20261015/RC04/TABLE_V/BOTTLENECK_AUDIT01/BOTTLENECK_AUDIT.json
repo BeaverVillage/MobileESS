@@ -1,0 +1,322 @@
+{
+  "schema": "TABLE_V_READ_ONLY_BOTTLENECK_AUDIT_V1",
+  "created_utc": "2026-10-15T05:27:40.044249+00:00",
+  "resource_samples": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\BOTTLENECK_AUDIT01\\RESOURCE_SAMPLES.json",
+    "bytes": 13377,
+    "sha256": "0aef132b6a03778d00b5e2c2bb121b6c39a6d51627fcc73bc0486676789506f5"
+  },
+  "target_pid": 67000,
+  "stage": "B1:A1",
+  "status": "RUNNING_CPU_ACTIVE_NO_RESOURCE_SATURATION_OBSERVED",
+  "measurements": {
+    "interval_seconds": 8.014413299999433,
+    "cpu_seconds": 7.78125,
+    "cpu_percent_one_core": 97.09070032613056,
+    "logical_cpus": 16,
+    "process_threads": 50,
+    "native_binding_threads": 1,
+    "working_set_GiB": 4.0603790283203125,
+    "private_GiB": 5.387184143066406,
+    "system_available_GiB": 12.474933624267578,
+    "commit_percent": 45.31720263551463,
+    "page_faults_delta": 57884,
+    "page_faults_include_soft_and_hard": true,
+    "hard_fault_rate_measured": false,
+    "target_io_delta": {
+      "read_count": 0,
+      "write_count": 0,
+      "read_bytes": 0,
+      "write_bytes": 0,
+      "other_count": 0,
+      "other_bytes": 0
+    },
+    "native_inflight_wall_elapsed_seconds": 547.316513299942,
+    "native_cap_seconds": 5400.0,
+    "final_Gurobi_Runtime_not_available_until_return": true,
+    "completed_native_ledger_seconds": 0.0,
+    "model_build_seconds": 93.91443410000647,
+    "common_prepare_seconds": 13.350226100010332,
+    "post_model_certificate_to_inflight_seconds": 2.763474941253662
+  },
+  "source_final_bytes_unchanged": true,
+  "source_trace": {
+    "table_v_a": {
+      "source": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_a.py",
+        "bytes": 12677,
+        "sha256": "1e983fdbb85943ea7d7addc146b51327b081e7e273ee312f9ba8ecc87c5e47c7"
+      },
+      "lines": {
+        "binding=native_binding(model)": [
+          110
+        ],
+        "call=budget.solve(": [
+          153
+        ],
+        "build_seconds=": [
+          111,
+          113,
+          143,
+          161
+        ],
+        "_export_d0_point(case,built,point": [
+          148,
+          171
+        ],
+        "full=full_replay(": [
+          134,
+          169
+        ]
+      }
+    },
+    "native_gate": {
+      "source": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\release_production_budget.py",
+        "bytes": 23596,
+        "sha256": "757d24e339458f9a5852e3aa1ad0c50e1bcff5afe1611df0f5fe5774c9617958"
+      },
+      "lines": {
+        "actual = native_binding(model)": [
+          259
+        ],
+        "snapshot = resource_snapshot()": [
+          264
+        ],
+        "started_epoch_seconds=time()": [
+          286
+        ],
+        "runtime = float(model.Runtime)": [
+          301
+        ]
+      }
+    },
+    "binding": {
+      "source": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\d0_resource.py",
+        "bytes": 4014,
+        "sha256": "8626f290d98e1da4baebcc973e98c44168a5d6ccbead55e5ece1aaf0585f6552"
+      },
+      "lines": {
+        "def native_binding": [
+          13
+        ],
+        "model.getAttr(attr)": [
+          15
+        ],
+        "matrix_sha(model.getA().tocsr())": [
+          19
+        ]
+      }
+    },
+    "load_context": {
+      "source": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_run.py",
+        "bytes": 13748,
+        "sha256": "84298516ebb0251df5ef8e9e39285d9cf6b712dd98b0ebd0539a01d2e0f0e779"
+      },
+      "lines": {
+        "def load_context": [
+          96
+        ],
+        "basic=load_date_case(": [
+          100
+        ],
+        "context=compile_table_v_flex_context(": [
+          47,
+          103
+        ],
+        "context=load_context(output)": [
+          150
+        ],
+        "def progress(": [
+          147
+        ]
+      }
+    },
+    "load_date": {
+      "source": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\release_date_case.py",
+        "bytes": 31067,
+        "sha256": "05dd9685263f111387de75ba46be30a895f94524c39e4b791185bc6993df0cd9"
+      },
+      "lines": {
+        "_VERIFIED_IMMUTABLE_FILES =": [
+          30
+        ],
+        "def load_date_case": [
+          447
+        ],
+        "context = compile_date_case(day, output=scratch": [
+          459
+        ],
+        "def materialize_physical": [
+          276
+        ]
+      }
+    },
+    "flex_context": {
+      "source": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_flex_planning.py",
+        "bytes": 32875,
+        "sha256": "75ba307e4a77c4e9e8ea45245754851ceb7ec120a9eb890a9c23784f3d1bb2f0"
+      },
+      "lines": {
+        "physical_cache={}": [
+          295
+        ],
+        "if not physical_cache:": [
+          297
+        ],
+        "template=base[": [
+          298
+        ],
+        "context.update(make_a_case": [
+          331
+        ],
+        "def require_flex_context": [
+          221
+        ],
+        "full_physical_domains=len(domains)": [
+          361
+        ]
+      }
+    },
+    "original_physical": {
+      "source": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\production_case.py",
+        "bytes": 46327,
+        "sha256": "b23700d34249cf665b44cd0945de0bf2b071d8eea9fbca5924637802dd14005c"
+      },
+      "lines": {
+        "class ProductionPhysicalContext": [
+          135
+        ],
+        "with np.load(path": [
+          151
+        ],
+        "self.coefficients =": [
+          162
+        ],
+        "def planning_power": [
+          178
+        ]
+      }
+    },
+    "original_silent_logging": {
+      "source": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_root\\native.py",
+        "bytes": 12829,
+        "sha256": "9f09b7aa1857762dd0284076ca35438d97e4ba9eb6cd4c01f6302f970453d8dc"
+      },
+      "lines": {
+        "OutputFlag=0": [
+          68
+        ]
+      }
+    }
+  },
+  "structure": {
+    "rows": 1699066,
+    "columns": 600284,
+    "nonzeros": 15446607,
+    "full_physical_domains": 1555,
+    "migration_blocks": 452367,
+    "checkpoint_UIDs": 454
+  },
+  "findings": [
+    {
+      "id": "CPU",
+      "kind": "MEASURED",
+      "conclusion": "97.09 percent of one core used; compute is active within Threads=1; no hang inference from silent log"
+    },
+    {
+      "id": "MEMORY_IO",
+      "kind": "MEASURED_LIMITED_WINDOW",
+      "conclusion": "Commit45.32 percent and12.48GiB available; no target read/write during8.014sec. Total pagefault count alone cannot establish paging pressure."
+    },
+    {
+      "id": "LOG_MONITOR",
+      "kind": "SOURCE_PROVEN",
+      "conclusion": "Original native build sets OutputFlag0. Coordinator progress is updated only on callbacks. No optimizer callback is passed; last NATIVE_BINDINGS progress can remain during normal solve."
+    },
+    {
+      "id": "DUPLICATE_BINDING",
+      "kind": "SOURCE_PROVEN_COST_NOT_ISOLATED",
+      "conclusion": "A wrapper computes current matrix/domain hash, then inherited budget.solve recomputes it. Gate interval2.763sec includes second binding/resource snapshot/lock and is not a pure binding benchmark."
+    },
+    {
+      "id": "CONTEXT_RELOAD",
+      "kind": "SOURCE_PROVEN_COST_PARTLY_REPORTED",
+      "conclusion": "Every arm load_context reconstructs Basic and FullFlex descriptors in temporary folders and byte-compares them. Root reported inputcheck11.78sec; not rebenchmarked during active Native."
+    },
+    {
+      "id": "FULL_MATRIX",
+      "kind": "STRUCTURE_OBSERVED_RUNTIME_ATTRIBUTION_INFERRED",
+      "conclusion": "1.699M rows/600284vars/15.446Mnnz and452367 migrationblocks are the complete authorized model. Current dominant ongoing phase is optimizer CPU; exact internal presolve/barrier/branch subphase unobserved."
+    }
+  ],
+  "cache_scope": {
+    "CC4": "Same frozen May01 public Q50/Q90/kernel; no fit, refit, scaling, clipping, forecast modification or futureUID use.",
+    "forecast_receipt_checks": {
+      "fit_calls": 0,
+      "scaling_calls": 0,
+      "clipping_calls": 0,
+      "forecast_modifications": 0,
+      "actual_future_UIDs_used": false
+    },
+    "physical": "Original ProductionPhysicalContext loads existing day-bound coefficient npz and validates Source/11SVR/thermal; no AC regeneration. Public compiler reconstruction reloads arrays per arm/process.",
+    "within_B3": "FullFlex materialize_physical closure caches physical, template grid and initial MESS for that context. New stage grids receive parent MESS separately. A1/M1/A2/M2 can use same immutable physical coefficients in one arm context.",
+    "across_arms": "run_arm calls load_context anew; no persisted decoded-context or coefficient-object cache across arms/processes.",
+    "source_verification": "release_date_case has process-local verified-file cache keyed by path/SHA/size plus stat size/mtime; FullFlex verifier still verifies own source records and input fingerprint each call."
+  },
+  "future_options_only": [
+    {
+      "priority": 1,
+      "change": "Monitor may derive stage/native elapsed from inflight ledger and label finalized Runtime pending; does not need solver callbacks or Source changes.",
+      "condition": "Read-only observer; existing Source/model/params/Native untouched."
+    },
+    {
+      "priority": 2,
+      "change": "Future immutable descriptor/coefficient cache can avoid repeated public context reconstruction.",
+      "condition": "Exact Source/initial/science/case/CC4/power/thermal/coefficient byte SHA; no mutable grid or issued-parent registry sharing; current matrix/domain/objective binding still required."
+    },
+    {
+      "priority": 3,
+      "change": "Future single hash per immutable same-model admission could remove duplicate binding traversal.",
+      "condition": "Explicit proof model cannot change between hash and native entry; exact SourceCaseMatrixDomainObjectiveSHA; retain independent guard. Savings unmeasured and likely secondary to Native; no current-run change."
+    },
+    {
+      "priority": 4,
+      "change": "Existing B1 to B3 A1 exact reuse can avoid second Native optimization when literal math/matrix/domain/objective match.",
+      "condition": "New B3 matrix recomputed, original FULL point replay and arm-specific acceptance; no Basic A1 optimum transfer; no claim before successful B1 completion."
+    }
+  ],
+  "prohibited_changes": [
+    "No timeout increase",
+    "No Threads increase",
+    "No domain pruning",
+    "No algorithm or objective change",
+    "No Source final edits",
+    "No target process interruption",
+    "No R2 work"
+  ],
+  "observer": {
+    "pid": 1896,
+    "wall_seconds": 8.02870460000122,
+    "cpu_seconds": 0.03125,
+    "io_delta": {
+      "read_count": 32,
+      "write_count": 0,
+      "read_bytes": 166567,
+      "write_bytes": 0,
+      "other_count": 200,
+      "other_bytes": 7696
+    }
+  },
+  "Native_calls": 0,
+  "Actual_calls": 0,
+  "new_model_builds": 0,
+  "target_process_mutations": 0,
+  "source_modifications": 0
+}

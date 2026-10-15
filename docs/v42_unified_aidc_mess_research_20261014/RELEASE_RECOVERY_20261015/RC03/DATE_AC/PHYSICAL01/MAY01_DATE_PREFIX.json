@@ -1,0 +1,156 @@
+{
+  "raw_probe_result": {
+    "PASS": true,
+    "status": "PASS",
+    "physical_steps": [
+      {
+        "native_seconds": 900.0,
+        "kind": "CURRENT_CANDIDATE_ONLY_NO_FUTURE_TAP_EXECUTION",
+        "PASS": true,
+        "voltage_min_pu": 0.9758716563979387,
+        "voltage_max_pu": 1.034311731923931,
+        "maximum_phase_line_loading": 0.6008057161257361,
+        "physical_sha": "ec7503c2d55e8ee660984e26384a55ebb8356c9ae03dd25621a5a438cfdc74e8",
+        "SVR_sha": "65526456af1586c033c89f07cc313a294172f2bf0f4d347251c1ef52d1ff35a8",
+        "SVR_hardware_PASS": true,
+        "SVR_voltage_PASS": true,
+        "checked_nodes": 419,
+        "checked_current_rows": 832,
+        "violations": {
+          "voltage_violation_cells": 0,
+          "line_current_violation_cells": 0,
+          "transformer_current_violation_cells": 0,
+          "transformer_nameplate_current_violation_cells": 0,
+          "original_transformer_nameplate_current_violation_cells": 0,
+          "added_transformer_nameplate_current_violation_cells": 0,
+          "transformer_kva_violation_cells": 0
+        },
+        "worst_line": {
+          "element": "line.sw2",
+          "terminal": 1,
+          "phase": 1,
+          "current_A": 251.13678934055767,
+          "NormalAmps": 418.0,
+          "loading_pu": 0.6008057161257361,
+          "nameplate_current_A": null,
+          "nameplate_current_loading_pu": null,
+          "original": true
+        }
+      }
+    ],
+    "current_native_seconds": 900,
+    "future_queue_not_executed": [
+      {
+        "handle": 160,
+        "hour": 0,
+        "seconds": 930.0,
+        "action_code": 0,
+        "proxy_device_ref": 0,
+        "device": "svr_sta06_p1",
+        "absolute_seconds": 930.0
+      },
+      {
+        "handle": 161,
+        "hour": 0,
+        "seconds": 930.0,
+        "action_code": 0,
+        "proxy_device_ref": 0,
+        "device": "svr_sta06_p2",
+        "absolute_seconds": 930.0
+      },
+      {
+        "handle": 162,
+        "hour": 0,
+        "seconds": 930.0,
+        "action_code": 0,
+        "proxy_device_ref": 0,
+        "device": "svr_sta06_p3",
+        "absolute_seconds": 930.0
+      },
+      {
+        "handle": 163,
+        "hour": 0,
+        "seconds": 930.0,
+        "action_code": 0,
+        "proxy_device_ref": 0,
+        "device": "svr_sta08_p2",
+        "absolute_seconds": 930.0
+      },
+      {
+        "handle": 164,
+        "hour": 0,
+        "seconds": 930.0,
+        "action_code": 0,
+        "proxy_device_ref": 0,
+        "device": "svr_sta08_p3",
+        "absolute_seconds": 930.0
+      },
+      {
+        "handle": 165,
+        "hour": 0,
+        "seconds": 930.0,
+        "action_code": 0,
+        "proxy_device_ref": 0,
+        "device": "svr_bus82_p2",
+        "absolute_seconds": 930.0
+      }
+    ],
+    "original_RegControl": 7,
+    "SVR_count": 11,
+    "future_native_Tap_actions_executed": 0,
+    "conditional_predicted_AUTO_substeps": 0,
+    "prediction_is_not_Actual_Tap_observation": false,
+    "executed_prefix_physical_solves": 29
+  },
+  "observed_original_clock_returns": [
+    {
+      "function": "bind",
+      "namespace": "ACTUAL",
+      "day": "2025-05-01",
+      "receipt": {
+        "namespace": "ACTUAL",
+        "day": "2025-05-01",
+        "control_mode": "TIME",
+        "start_seconds": 0,
+        "CAPI_version": "DSS C-API Library version 0.14.5 revision 87d85c2622c8281b92255335bc7c09b11191b21d based on OpenDSS SVN 3723 [FPC 3.2.2] (64-bit build) MVMULT INCREMENTAL_Y CONTEXT_API PM 20240329033747; License Status: Open \nDSS-Python version: 0.15.7\nOpenDSSDirect.py version: 0.9.4",
+        "source_initial_queue": []
+      }
+    },
+    {
+      "function": "settle_slot",
+      "namespace": "ACTUAL",
+      "day": "2025-05-01",
+      "receipt": {
+        "schema": "V42_NATIVE_TIME_SLOT_V1",
+        "namespace": "ACTUAL",
+        "day": "2025-05-01",
+        "slot": 0,
+        "start_seconds": 0,
+        "end_seconds": 900,
+        "last_solve_seconds": 85.0,
+        "physical_solve_count": 29,
+        "extra_SolveSnap_count": 28,
+        "total_physical_solve_count": 29,
+        "events": [],
+        "queue_carried_to_next_slot": [],
+        "control_actions_done_as_of_current_time": true,
+        "converged": true,
+        "PASS": true,
+        "boundary_semantics": "[start,end); next inputs sampled before end-boundary actions",
+        "unsolved_hold_seconds": 815.0,
+        "hold_assumption": "piecewise-constant slot injections; no native queued events before end",
+        "physical_elapsed_seconds": 900,
+        "iteration_to_seconds_conversion": false,
+        "manual_tap_or_cap_actions": 0
+      }
+    }
+  ],
+  "wall_seconds": 0.6293822999869008,
+  "performance_comparison_claim": false,
+  "passive_return_observation_only": true,
+  "clock_or_engine_or_class_patched": false,
+  "runtime_source_execution": false,
+  "input_scope": "SAVED_MAY01_PUBLIC_PREFIX_SLOT1_FIXED_MESS_ONLY",
+  "input_sha": "156ad06be346a5931fe877cc53227f2d70288d90cba718ed5f06ec05bc45d5d2",
+  "MESS_plan_sha": "49d136655fa762d45925ed8132aeb2b86b453d1495b15f0ff8f9e6dbe3075b3e"
+}
