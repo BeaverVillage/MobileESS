@@ -6,9 +6,11 @@ The caller first checks the actual original flow equations and Compact links.
 from collections import Counter, defaultdict, OrderedDict
 from fractions import Fraction as Q
 from itertools import combinations
+from functools import lru_cache
 import numpy as np
 from .current_verify import affine, physical_pcs_authority, vec, family
 
+@lru_cache(maxsize=16384)
 def _enclose(x):
     y=float(x)
     return (y if Q(y)<=x else np.nextafter(y,-np.inf),y if Q(y)>=x else np.nextafter(y,np.inf))
@@ -87,23 +89,8 @@ def verify_current_security(compact,presolve):
             result=np.zeros(len(vs))
             for u in range(len(units)):result=np.nextafter(result+np.max(np.where(reach[u,np.asarray(ts)],values,0),axis=1),np.inf)
             return result
-        K=len(vs);pl=np.zeros((K,len(units),N));ph=pl.copy();ql=pl.copy();qh=pl.copy();extra=pl.copy()
-        for k,v in enumerate(vs):
-            for u in range(len(units)):
-                for site in range(N):
-                    pd=v.get((3*u+1)*N+site,Q(0));qq=v.get((3*u+2)*N+site,Q(0));ch=v.get(3*u*N+site,Q(0))
-                    pl[k,u,site],ph[k,u,site]=_enclose(pd);ql[k,u,site],qh[k,u,site]=_enclose(qq)
-                    extra[k,u,site]=_enclose(max(Q(0),ch+pd)*limit)[1]
-        values=np.zeros_like(pl)
-        for x,y in points:
-            xl,xh=_enclose(x);yl,yh=_enclose(y)
-            pp=np.nextafter(np.maximum.reduce([pl*xl,pl*xh,ph*xl,ph*xh]),np.inf)
-            qq=np.nextafter(np.maximum.reduce([ql*yl,ql*yh,qh*yl,qh*yh]),np.inf)
-            values=np.maximum(values,np.nextafter(pp+qq,np.inf))
-        values=np.nextafter(values+extra,np.inf);result=np.zeros(K)
-        for u in range(len(units)):
-            result=np.nextafter(result+np.max(np.where(reach[u,np.asarray(ts)],values[:,u,:],0),axis=1),np.inf)
-        return result
+        from .independent_interval import interval as sparse_interval
+        return sparse_interval(vs,ts,reach,points,limit)
     exact_fallbacks=0;expression_cache=OrderedDict();support_cache=OrderedDict();evaluations=0
     for start in range(0,len(certificates),256):
         chunk=certificates[start:start+256];vectors=[];basevalues=[];ts=[];right=[];pairs=[]

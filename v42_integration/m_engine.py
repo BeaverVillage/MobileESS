@@ -20,6 +20,7 @@ from time import perf_counter
 
 import numpy as np
 from scipy import sparse
+from .preparation_profile import measure, profile_joint
 
 ENGINE_VERSION = "PR222_CASE_EXPLICIT_EXACT_DIRECT_JOINT_V1"
 PR222_SHA = "12594e281bb89611331950f11f775a2612d3cb48"
@@ -364,6 +365,7 @@ def pin_pools(case, point, bank, candidate_pools=None):
     return pool
 
 
+@profile_joint
 def direct_joint(case, point, pools):
     """PR221 Exact Direct substitution with current axes and no global context."""
     graph = PathGraph(case)
@@ -488,24 +490,25 @@ def _native_joint(case, budget, packet, folder, seconds, native0=False):
         params = dict(APPROVED_JOINT_PARAMETERS, LogFile=str(folder / "NATIVE_GUROBI.log"))
         for key, value in params.items():
             setattr(model.Params, key, value)
-        x = model.addMVar(A.shape[1], lb=d["lower"], ub=d["upper"], vtype=d["types"], obj=d["objective"])
-        x.VarName = d["names"].tolist()
-        x.Start = start
-        model.ObjCon = float(d["constant"])
-        rows = model.addMConstr(A, x, d["sense"], d["rhs"])
-        rows.ConstrName = d["row_names"].tolist()
-        model.update()
-        checks = dict(CSR_exact=matrix_sha(model.getA().tocsr()) == matrix_sha(A),
-                      RHS_exact=np.array_equal(model.getAttr("RHS"), d["rhs"]),
-                      Sense_exact=np.array_equal(model.getAttr("Sense"), d["sense"]),
-                      bounds_exact=np.array_equal(x.LB, d["lower"]) and np.array_equal(x.UB, d["upper"]),
-                      types_exact=np.array_equal(x.VType, d["types"]),
-                      objective_exact=np.array_equal(x.Obj, d["objective"]) and model.ObjCon == float(d["constant"]),
-                      Start_exact=np.array_equal(x.Start, start),
-                      literal_inverse_Start_exact=np.array_equal(lift @ x.Start, lift @ start))
-        if not all(checks.values()):
-            raise ValueError("COMMON_M_NATIVE_READBACK_DRIFT")
-        _write(folder / "NATIVE_READBACK.json", dict(PASS=True, checks=checks, Optimize_calls=0))
+        with measure(folder,'M_NATIVE_MODEL_READBACK'):
+            x = model.addMVar(A.shape[1], lb=d["lower"], ub=d["upper"], vtype=d["types"], obj=d["objective"])
+            x.VarName = d["names"].tolist()
+            x.Start = start
+            model.ObjCon = float(d["constant"])
+            rows = model.addMConstr(A, x, d["sense"], d["rhs"])
+            rows.ConstrName = d["row_names"].tolist()
+            model.update()
+            checks = dict(CSR_exact=matrix_sha(model.getA().tocsr()) == matrix_sha(A),
+                          RHS_exact=np.array_equal(model.getAttr("RHS"), d["rhs"]),
+                          Sense_exact=np.array_equal(model.getAttr("Sense"), d["sense"]),
+                          bounds_exact=np.array_equal(x.LB, d["lower"]) and np.array_equal(x.UB, d["upper"]),
+                          types_exact=np.array_equal(x.VType, d["types"]),
+                          objective_exact=np.array_equal(x.Obj, d["objective"]) and model.ObjCon == float(d["constant"]),
+                          Start_exact=np.array_equal(x.Start, start),
+                          literal_inverse_Start_exact=np.array_equal(lift @ x.Start, lift @ start))
+            if not all(checks.values()):
+                raise ValueError("COMMON_M_NATIVE_READBACK_DRIFT")
+            _write(folder / "NATIVE_READBACK.json", dict(PASS=True, checks=checks, Optimize_calls=0))
         def capture(values, objective, discovery):
             values = np.asarray(values, dtype=np.float64)
             K = len(proof["keep_columns"])

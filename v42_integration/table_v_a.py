@@ -103,10 +103,8 @@ def execute_current_a(context,budget,*,arm,stage,output,parent_result=None,paren
                 from .table_v_resources import admit_resources
                 admit_resources(budget,phase='PRE_ORIGINAL_AIDC_INTEGER_MODEL_BUILD:'+stage)
                 resources=resource_snapshot()
-                if (resources['memory']['AvailableMBytes']<8192
-                        or resources['memory']['PercentCommittedBytesInUse']>=75
-                        or budget.worker_lock.exists()):
-                    raise RuntimeError('TABLE_V_FULL_FLEX_BUILD_RAM_OR_CONCURRENT_HEAVY_GATE')
+                if budget.worker_lock.exists():
+                    raise RuntimeError('TABLE_V_FULL_FLEX_BUILD_CONCURRENT_HEAVY_GATE')
                 admission=dict(status='PASS',operation='TABLE_V_FULL_FLEX_A_NATIVE0_BUILD',
                     case_sha=case.case_sha,concurrent_heavy_solver=False,resource_snapshot=resources)
                 _write(output/'MODEL_BUILD_ADMISSION.json',admission)

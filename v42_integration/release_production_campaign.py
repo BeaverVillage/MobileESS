@@ -425,8 +425,7 @@ def _execute_date(*,day,root,identity,dispatch,restore,evidence_scope,stages):
 def _build_admission(budget,*,stage,case_sha=None):
     from .partial_canary import resource_snapshot
     state=resource_snapshot();memory=state['memory']
-    if (memory['AvailableMBytes']<8192 or memory['PercentCommittedBytesInUse']>=75
-            or budget.worker_lock.exists()):raise RuntimeError('PRODUCTION_PREBUILD_RAM_OR_WORKER_GATE')
+    if budget.worker_lock.exists():raise RuntimeError('PRODUCTION_PREBUILD_WORKER_GATE')
     return dict(status='PASS',operation='D0_A_NATIVE0_BUILD' if stage.startswith('A') else 'CURRENT_M_NATIVE0_BUILD',
         stage=stage,case_sha=case_sha,concurrent_heavy_solver=False,resource=state)
 

@@ -47,7 +47,9 @@ def test_missing_native_duals_cannot_certify_phase_I():
     assert not policy.validate_raw(snapshot(),dict(X=np.array([0.])))['PASS']
 
 def test_policy_profiles_change_arithmetic_but_preserve_barrier_and_threads():
-    assert len({tuple(sorted(p.parameters().items())) for p in policy.POLICIES})==4
+    assert len({tuple(sorted(p.parameters().items())) for p in policy.POLICIES})==3
+    assert policy.POLICIES[0].name=='FAST_B'
+    assert policy.POLICIES[0].seconds==policy.PHASE_I_STAGE_ALLOWANCE
     for p in policy.POLICIES:
         assert p.parameters()['Method']==2 and p.parameters()['Threads']==1
-        assert p.seconds<=300
+        assert p.seconds<=policy.PHASE_I_STAGE_ALLOWANCE

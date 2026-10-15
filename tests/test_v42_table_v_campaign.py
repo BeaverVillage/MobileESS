@@ -86,8 +86,8 @@ def test_m_and_k48_builds_require_live_memory_and_worker_gate(tmp_path,monkeypat
     import v42_integration.table_v_resources as resources
     budget=SimpleNamespace(worker_lock=tmp_path/'HEAVY.lock')
     monkeypatch.setattr(resources,'_snapshot',lambda:dict(memory=dict(AvailableMBytes=8000,PercentCommittedBytesInUse=20)))
-    with pytest.raises(RuntimeError,match='RESOURCE_ADMISSION_DENIED'):
-        current_build_admission(budget,arm='B2',stage='M1',operation='CURRENT_M_NATIVE0_BUILD')
+    accepted=current_build_admission(budget,arm='B2',stage='M1',operation='CURRENT_M_NATIVE0_BUILD')
+    assert accepted['status']=='PASS'  # RAM is telemetry after the user's removal request.
     monkeypatch.setattr(resources,'_snapshot',lambda:dict(memory=dict(AvailableMBytes=16000,PercentCommittedBytesInUse=20)))
     budget.worker_lock.write_text('owned-another-worker')
     with pytest.raises(RuntimeError,match='RESOURCE_ADMISSION_DENIED'):

@@ -133,7 +133,6 @@ def run(output,*,a1_wall=600,prior_a1=None,prior_wall=0):
     output.mkdir(parents=True,exist_ok=True);began=perf_counter()
     if (output/'SOLVER_AND_CONTROLLER_RUNTIME_LEDGER.json').exists():raise RuntimeError('NO_AUTOMATIC_ATTEMPT_REUSE')
     pre=resource_snapshot();memory=pre['memory']
-    if memory['AvailableMBytes']<8192 or memory['PercentCommittedBytesInUse']>=75:raise RuntimeError('RAM_COMMIT_START_GATE')
     permitted={os.getpid(),int(os.environ.get('V42_TRACKING_WATCH_PID','0'))}
     others=[p for p in pre['workers'] if p['ProcessId'] not in permitted
         and not str(p.get('CommandLine','')).endswith('MONITOR_ADAPTER.py serve')]

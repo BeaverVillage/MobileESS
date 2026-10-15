@@ -36,14 +36,8 @@ def admit_resources(budget,*,phase,owned_lock=False,snapshot=None):
     process=sample.get('process') or memory_sample();memory=sample.get('memory') or {}
     errors=[];lock=Path(budget.worker_lock);owner=None;lock_record=None
     finite=lambda v:type(v) in (int,float) and math.isfinite(v)
-    if (not finite(memory.get('AvailableMBytes')) or memory['AvailableMBytes']<8192
-            or not finite(memory.get('PercentCommittedBytesInUse')) or memory['PercentCommittedBytesInUse']>=75):
-        errors.append('RAM_AVAILABLE_OR_SYSTEM_COMMIT_LIMIT')
-    if not finite(process.get('RSS_bytes')) or process['RSS_bytes']<0:
-        errors.append('PROCESS_RSS_MEASUREMENT_REQUIRED')
-    limit=memory.get('CommitLimit');committed=memory.get('CommittedBytes')
-    if limit is not None and (not finite(limit) or limit<=0 or not finite(committed) or committed<0 or committed>=.75*limit):
-        errors.append('LIVE_COMMITTED_BYTES_LIMIT')
+    # RAM and Commit are telemetry only. The user removed numeric admission
+    # thresholds; ownership and concurrent-worker checks remain authoritative.
     owner_alive=None;owner_matches=False
     if lock.exists():
         lock_record=file_record(lock)
@@ -62,7 +56,7 @@ def admit_resources(budget,*,phase,owned_lock=False,snapshot=None):
     receipt=dict(schema='TABLE_V_LIVE_RESOURCE_ADMISSION_V1',phase=phase,status='PASS' if not errors else 'DENIED',
         epoch_seconds=time(),pid=os.getpid(),snapshot=sample,process=process,errors=errors,
         lock_record=lock_record,lock_owner=owner,lock_owner_PID_alive=owner_alive,
-        lock_owner_matches_current_budget=owner_matches,Worker=1,Threads=1,Native_calls=0)
+        lock_owner_matches_current_budget=owner_matches,Worker=1,Threads=1,Native_calls=0,RAM_Commit_policy='TELEMETRY_ONLY_USER_REQUEST')
     if hasattr(budget,'path'):
         folder=Path(budget.path).parent/'RESOURCE_ADMISSIONS';folder.mkdir(parents=True,exist_ok=True)
         with (folder/(uuid.uuid4().hex+'.json')).open('x',encoding='utf8') as stream:

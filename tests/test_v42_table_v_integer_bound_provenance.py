@@ -40,3 +40,12 @@ def test_rewritten_bound_header_cannot_override_owned_native_attributes(tmp_path
         Path(packet['ledger']).write_text(json.dumps(dict(calls=[])))
     raw.write_text(json.dumps(packet));result['Original_Integer_Bound_Certificate']=dict(packet,attributes=file_record(raw))
     with pytest.raises(ValueError,match='SAME_ORIGINAL'):verified_integer_lower(result)
+
+
+def test_interrupted_native_without_verified_gap_stop_is_not_a_bound_certificate(tmp_path):
+    from pathlib import Path
+    result,raw,packet=evidence(tmp_path)
+    packet['native_call']['status']=11
+    Path(packet['ledger']).write_text(json.dumps(dict(calls=[packet['native_call']])))
+    raw.write_text(json.dumps(packet));result['Original_Integer_Bound_Certificate']=dict(packet,attributes=file_record(raw))
+    with pytest.raises(ValueError,match='SAME_ORIGINAL'):verified_integer_lower(result)

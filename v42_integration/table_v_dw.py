@@ -509,6 +509,15 @@ class CurrentNative:
         self.budget=budget; self.case=case; self.output=Path(output); self.calls=[]
         self.day=getattr(case,'table_v_day',case.data[0].get('day'))
         self.native_seconds=0.; self.resources=[];self.seen_operations=set()
+        # The 900s Phase-I allowance also survives a source revision/resume;
+        # a new adapter object must not silently reopen the same stage clock.
+        refresh=getattr(budget,'_refresh',None)
+        if refresh is not None:refresh()
+        prior=getattr(budget,'document',{}).get('calls',[])
+        self.prior_phase_seconds=sum(float(row.get('Native_Runtime') or 0.) for row in prior
+            if row.get('solver')=='GUROBI' and row.get('label','').startswith('RELEASE_P1:'+case.stage+':DW:PHASE_I:')
+            and all(row.get('stage_context',{}).get(key)==value for key,value in
+                dict(day=self.day,arm=getattr(case,'arm',None),stage=case.stage).items()))
         freeze=self.output/'DW_SOURCE_FREEZE.json'
         self.frozen_sources=json.loads(freeze.read_text(encoding='utf8'))['sources'] if freeze.is_file() else []
 
@@ -542,7 +551,7 @@ class CurrentNative:
             seen=self.seen_operations
             for profile in profiles:
                 if component=='PHASE_I':
-                    phase_used=sum(r['native_seconds'] for r in self.calls if r['component']=='PHASE_I')
+                    phase_used=self.prior_phase_seconds+sum(r['native_seconds'] for r in self.calls if r['component']=='PHASE_I')
                     seconds=min(profile.seconds,allowance(self.remaining(),phase_used))
                     parameters=profile.parameters();name=profile.name
                 else:
@@ -576,6 +585,15 @@ class CurrentNative:
                 if model.SolCount:candidate['X']=np.asarray(model.getAttr('X'),float)
                 if model.Status==gp.GRB.OPTIMAL:
                     candidate.update(Pi=np.asarray(model.getAttr('Pi'),float),RC=np.asarray(model.getAttr('RC'),float))
+                    try:
+                        vb=np.asarray(model.getAttr('VBasis'),dtype=np.int32)
+                        cb=np.asarray(model.getAttr('CBasis'),dtype=np.int32)
+                        if vb.shape!=(snapshot.matrix.shape[1],) or cb.shape!=(snapshot.matrix.shape[0],):
+                            raise ValueError('LP_BASIS_NATIVE_AXIS_DRIFT')
+                        candidate.update(VBasis=vb,CBasis=cb)
+                        record['LP_basis']=dict(available=True,native_raw=True,reused_as_start=False)
+                    except Exception as basis_error:
+                        record['LP_basis']=dict(available=False,reason=type(basis_error).__name__,reused_as_start=False)
                 validation=validate_raw(snapshot,candidate) if component=='PHASE_I' else dict(PASS=model.Status==gp.GRB.OPTIMAL)
                 record['independent_numerical_validation']=validation
                 np.savez_compressed(attempt/'RAW_ATTRIBUTES.npz',**candidate);_write(attempt/'NATIVE_RESULT.json',record)
@@ -583,6 +601,11 @@ class CurrentNative:
                 _write(self.output/'DW_NATIVE_CALLS.json',dict(calls=self.calls,Native_Runtime=self.native_seconds,P2_calls=0))
                 if record['status']==2 and validation['PASS']:
                     accepted=record;raw=candidate;break
+                # TimeLimit is not a numerical failure. Barrier has no valid
+                # partial basis to resume here; cold-starting another policy
+                # would discard convergence and consume the integer reserve.
+                if component=='PHASE_I' and record['status']!=gp.GRB.OPTIMAL and record['status']!=gp.GRB.NUMERIC:
+                    break
             record=accepted or attempts[-1]
             # Compatibility outputs are new files; attempt Raw is never edited.
             np.savez_compressed(folder/'RAW_ATTRIBUTES.npz',**raw)
@@ -702,8 +725,6 @@ def native0_preflight(context,output,*,arm='B1',stage='A1',capture_receipt=None,
     output=Path(output)
     if output.exists(): raise FileExistsError('TABLE_V_DW_NATIVE0_PREFLIGHT_FRESH_OUTPUT_REQUIRED')
     resources=resource_snapshot();memory=resources['memory']
-    if memory['AvailableMBytes']<8192 or memory['PercentCommittedBytesInUse']>=75:
-        raise RuntimeError('TABLE_V_DW_NATIVE0_PREFLIGHT_RAM_GATE')
     output.mkdir(parents=True);built=None;started=perf_counter()
     original={name:getattr(gp.Model,name) for name in ('optimize','presolve','computeIIS')}
     def forbidden(*args,**kwargs): raise PermissionError('TABLE_V_DW_PREFLIGHT_NATIVE0_ONLY')

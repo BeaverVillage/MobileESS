@@ -264,8 +264,6 @@ class ReleaseProductionBudget(IntegrationBudget):
         if actual['Threads'] != 1 or actual['objective_sense'] != 1 or int(model.NumObj) != 1:
             raise ValueError('SINGLE_ORIGINAL_P1_MINIMIZATION_REQUIRED')
         snapshot = resource_snapshot()
-        if snapshot['memory']['AvailableMBytes'] < 8192 or snapshot['memory']['PercentCommittedBytesInUse'] >= 75:
-            raise RuntimeError('RELEASE_RAM_COMMIT_GATE')
         fd = os.open(self.worker_lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
         owner=self._lock_owner('HEAVY_WORKER'); lock_bytes=json.dumps(owner,sort_keys=True).encode('utf8')
         try:

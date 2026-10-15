@@ -41,8 +41,6 @@ class ReleaseP1Budget(IntegrationBudget):
         binding=native_binding(model)
         self.validate_call(label=label,cap=cap,binding=binding)
         snapshot=resource_snapshot();memory=snapshot['memory']
-        if memory['AvailableMBytes']<8192 or memory['PercentCommittedBytesInUse']>=75:
-            raise RuntimeError('RELEASE_RAM_COMMIT_GATE')
         # The original shared cross-directory lock protects every V42 ledger.
         lock=Path('D:/V42_UNIFIED_HEAVY_WORKER.lock')
         fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_WRONLY);os.write(fd,str(os.getpid()).encode());os.close(fd)

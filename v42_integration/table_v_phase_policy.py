@@ -9,7 +9,7 @@ import math
 import time
 import numpy as np
 
-VERSION='TABLE_V_VERIFIED_ADAPTIVE_PHASE_I_V1'
+VERSION='TABLE_V_VERIFIED_ADAPTIVE_PHASE_I_V2'
 REPLAY_TOLERANCE=1e-6
 INTEGER_RETURN_RESERVE=1800.
 PHASE_I_STAGE_ALLOWANCE=900.
@@ -28,8 +28,13 @@ class Policy:
             OptimalityTol=self.tolerance,NumericFocus=self.focus,ScaleFlag=self.scale,
             Method=2,Threads=1,OutputFlag=1,LogToConsole=0)
 
-POLICIES=(Policy('FAST_A',-1,1e-6,0,30.),Policy('FAST_B',-1,1e-8,1,180.),
-          Policy('ACCURATE_C',-1,1e-9,3,300.),Policy('CURRENT',0,1e-9,3,300.))
+# The validated FAST_B trajectory was still converging at the old 180s cap
+# on the production machine. Give it the remaining part of the unchanged 900s
+# allowance instead of discarding that progress after a failed 30s warmup.
+# Each later S iteration receives only the actual remaining shared allowance;
+# unused time from S0 is therefore available to the larger S1 master.
+POLICIES=(Policy('FAST_B',-1,1e-8,1,PHASE_I_STAGE_ALLOWANCE),
+          Policy('ACCURATE_C',-1,1e-9,3,300.),Policy('CURRENT',0,1e-9,3,150.))
 
 def allowance(remaining,phase_used):
     """Reserve the original integer search and bound all Phase-I diagnostics."""

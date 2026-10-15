@@ -122,7 +122,17 @@ docs/v42_common_am_qos_integration/**/*.log whitespace=-blank-at-eol,-blank-at-e
 docs/v42_common_am_qos_integration/**/*.txt whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 v42_svr11/authority.py -text whitespace=cr-at-eol
 v42_svr11/monitor.py -text whitespace=cr-at-eol
-v42_may_campaign_native90/m_model.py text eol=crlf whitespace=cr-at-eol
+v42_may_campaign_native90/m_model.py -text whitespace=cr-at-eol
+
+# Preserve measured PR230 preparation code and receipt bytes across checkouts.
+tools/benchmark_v42_*preparation.py -text whitespace=cr-at-eol
+tools/audit_v42_execution08_bottlenecks.py -text whitespace=cr-at-eol
+tools/audit_v42_phase_warm_mapping.py -text whitespace=cr-at-eol
+tools/verify_v42_preparation_artifacts.py -text whitespace=cr-at-eol
+tools/write_v42_bottleneck_report.py -text whitespace=cr-at-eol
+tests/test_v42_preparation_performance.py -text whitespace=cr-at-eol
+tests/test_v42_a_control_numeric_messages.py -text whitespace=cr-at-eol
+docs/v42_pr230_bottleneck_20261015/** -text whitespace=cr-at-eol
 validation/fixture_native0/** -text whitespace=cr-at-eol
 validation/fixture_native0/**/*.log whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 validation/initialization_native0_no_prior_pins/** -text whitespace=cr-at-eol

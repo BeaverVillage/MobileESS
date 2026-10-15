@@ -82,8 +82,6 @@ class UnifiedResearchBudget(IntegrationBudget):
         from .partial_canary import resource_snapshot
         snap = resource_snapshot()
         m = snap['memory']
-        if m['AvailableMBytes'] < 8192 or m['PercentCommittedBytesInUse'] >= 75:
-            raise RuntimeError('UNIFIED_RAM_COMMIT_GATE')
         workers = [p for p in snap['workers'] if p['ProcessId'] != os.getpid()
                    and not str(p.get('CommandLine', '')).endswith('MONITOR_ADAPTER.py serve')]
         if workers:

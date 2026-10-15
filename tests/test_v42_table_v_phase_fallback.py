@@ -35,11 +35,11 @@ def setup(tmp_path,monkeypatch):
 def test_real_production_native_adapter_falls_back_without_changing_raw(tmp_path,monkeypatch):
     native,model,budget,source=setup(tmp_path,monkeypatch)
     rec,raw=native.solve(snapshot(),tmp_path/'S0','PHASE_I')
-    assert rec['adaptive_policy']=='FAST_B' and len(budget.calls)==2 and native.native_seconds==2.
-    with np.load(tmp_path/'S0/FAST_A/RAW_ATTRIBUTES.npz') as a:assert a['X'][0]==-7.63e-6
-    with np.load(tmp_path/'S0/FAST_B/RAW_ATTRIBUTES.npz') as a:assert a['X'][0]==0.
+    assert rec['adaptive_policy']=='ACCURATE_C' and len(budget.calls)==2 and native.native_seconds==2.
+    with np.load(tmp_path/'S0/FAST_B/RAW_ATTRIBUTES.npz') as a:assert a['X'][0]==-7.63e-6
+    with np.load(tmp_path/'S0/ACCURATE_C/RAW_ATTRIBUTES.npz') as a:assert a['X'][0]==0.
     assert raw['X'][0]==0. and model.disposed
-    assert [c['cap'] for c in budget.calls]==[30.,180.]
+    assert [c['cap'] for c in budget.calls]==[900.,300.]
 
 def test_source_drift_blocks_before_model_and_native(tmp_path,monkeypatch):
     native,model,budget,source=setup(tmp_path,monkeypatch);source.write_text('changed')
@@ -50,3 +50,43 @@ def test_reserved_integer_allowance_blocks_phase_only(tmp_path,monkeypatch):
     native,model,budget,source=setup(tmp_path,monkeypatch);budget.native=2400.
     with pytest.raises(RuntimeError,match='RESERVED_ORIGINAL_INTEGER'):native.solve(snapshot(),tmp_path/'S0','PHASE_I')
     assert not budget.calls and model.disposed
+
+
+def test_time_limit_does_not_cold_restart_other_numeric_policy(tmp_path,monkeypatch):
+    native,model,budget,source=setup(tmp_path,monkeypatch)
+    def timeout(current,**kwargs):
+        budget.calls.append(kwargs);budget.native+=900.
+        current.Status=9;current.SolCount=0;current.Runtime=900.;current.Work=125.
+        return dict(Native_Runtime=900.,status=9)
+    budget.solve=timeout
+    rec,raw=native.solve(snapshot(),tmp_path/'S0','PHASE_I')
+    assert len(budget.calls)==1 and rec['status']==9 and raw=={}
+    assert native.native_seconds==900. and model.disposed
+
+
+def test_s1_receives_only_unused_s0_phase_allowance(tmp_path,monkeypatch):
+    native,model,budget,source=setup(tmp_path,monkeypatch)
+    native.calls=[dict(component='PHASE_I',native_seconds=111.)]
+    native.native_seconds=111.;budget.native=111.
+    def timeout(current,**kwargs):
+        budget.calls.append(kwargs);current.Status=9;current.SolCount=0
+        current.Runtime=kwargs['cap'];current.Work=1.
+        return dict(Native_Runtime=current.Runtime,status=9)
+    budget.solve=timeout
+    native.solve(snapshot(),tmp_path/'S1','PHASE_I')
+    assert len(budget.calls)==1 and budget.calls[0]['cap']==789.
+    assert native.native_seconds==900.
+
+
+def test_resumed_adapter_cannot_reopen_existing_stage_phase_clock(tmp_path,monkeypatch):
+    native,model,budget,source=setup(tmp_path,monkeypatch);native.case.arm='B1'
+    budget.document=dict(calls=[dict(solver='GUROBI',label='RELEASE_P1:A1:DW:PHASE_I:FAST_B',
+        Native_Runtime=816.,stage_context=dict(day='2025-05-01',arm='B1',stage='A1'))])
+    resumed=dw.CurrentNative(budget,native.case,tmp_path)
+    def timeout(current,**kwargs):
+        budget.calls.append(kwargs);current.Status=9;current.SolCount=0
+        current.Runtime=kwargs['cap'];current.Work=1.
+        return dict(Native_Runtime=current.Runtime,status=9)
+    budget.solve=timeout
+    resumed.solve(snapshot(),tmp_path/'RESUMED','PHASE_I')
+    assert resumed.prior_phase_seconds==816. and budget.calls[0]['cap']==84.

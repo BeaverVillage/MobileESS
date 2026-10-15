@@ -236,10 +236,14 @@ def test_m_k48_live_prebuild_resource_denials_recorded(tmp_path,monkeypatch,faul
     else:sample['memory']['PercentCommittedBytesInUse']=None
     monkeypatch.setattr(resources,'_snapshot',lambda:sample)
     for operation in ('CURRENT_M_NATIVE0_BUILD','CURRENT_K48_NATIVE_BUILD'):
-        with pytest.raises(RuntimeError,match='RESOURCE_ADMISSION_DENIED'):
-            current_build_admission(budget,arm='B2',stage='M1',operation=operation)
+        if fault in ('foreign_pid','lock'):
+            with pytest.raises(RuntimeError,match='RESOURCE_ADMISSION_DENIED'):
+                current_build_admission(budget,arm='B2',stage='M1',operation=operation)
+        else:
+            assert current_build_admission(budget,arm='B2',stage='M1',operation=operation)['status']=='PASS'
     receipts=list((tmp_path/'RESOURCE_ADMISSIONS').glob('*.json'))
-    assert len(receipts)==2 and all(json.loads(p.read_text())['status']=='DENIED' for p in receipts)
+    expected='DENIED' if fault in ('foreign_pid','lock') else 'PASS'
+    assert len(receipts)==2 and all(json.loads(p.read_text())['status']==expected for p in receipts)
     assert not budget.path.exists()
 
 
@@ -249,7 +253,7 @@ def test_pre_native_race_rechecked_without_native_or_double_charge(tmp_path,monk
     def snapshot():
         value=next(samples)
         # The second check happens after the durable owned lock is acquired.
-        if b.worker_lock.exists():value['memory']['AvailableMBytes']=100
+        if b.worker_lock.exists():value['workers']=[dict(pid=os.getpid()+100,heavy_worker=True)]
         return value
     monkeypatch.setattr(resources,'_snapshot',snapshot)
     model=Model();model.Runtime=1234.;model.Status=2

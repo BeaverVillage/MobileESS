@@ -84,11 +84,18 @@ def verify_response_reformulation(result):
     _require(_same_values(result.row_ids,np.concatenate((kept,np.full(count,-1,dtype=np.int64))))
         and _same_values(result.col_ids,np.concatenate((np.arange(n),np.full(count,-1,dtype=np.int64)))),
         'RESPONSE_PROOF_TRANSPORT_AXIS_DRIFT')
-    original_kept=A[kept];used=original_kept.nnz
-    _require(_same_values(B.indptr[:len(kept)+1],original_kept.indptr)
-        and _same_values(B.indices[:used],original_kept.indices)
-        and _same_values(B.data[:used],original_kept.data),'RESPONSE_PROOF_RETAINED_ROW_COEFFICIENT_DRIFT')
-    del original_kept
+    # Check retained CSR spans directly, without allocating another matrix
+    # containing nearly every original nonzero. Row lengths preserve the
+    # segmentation within every consecutive run.
+    _require(_same_values(np.diff(B.indptr[:len(kept)+1]),np.diff(A.indptr)[kept]),
+        'RESPONSE_PROOF_RETAINED_ROW_COEFFICIENT_DRIFT')
+    breaks=np.r_[0,np.flatnonzero(np.diff(kept)!=1)+1,len(kept)]
+    for first,last in zip(breaks[:-1],breaks[1:]):
+        if first==last:continue
+        a=A.indptr[kept[first]];b=A.indptr[kept[last-1]+1]
+        c=B.indptr[first];f=B.indptr[last]
+        _require(_same_values(B.indices[c:f],A.indices[a:b])
+            and _same_values(B.data[c:f],A.data[a:b]),'RESPONSE_PROOF_RETAINED_ROW_COEFFICIENT_DRIFT')
     for key in ('rhs','sense','row_names'):
         _require(len(e[key])==B.shape[0] and _same_values(e[key][:len(kept)],d[key][kept]),
             'RESPONSE_PROOF_RETAINED_ROW_METADATA_DRIFT:'+key)
