@@ -110,7 +110,7 @@ class TableVStageBudget(ReleaseProductionBudget):
         self.historical = [file_record(p) for p in historical_ledgers]
         self.historical += [r for r in carry_parents if r not in self.historical]
         fresh=authorization.get('fresh_native_cycle')
-        archived_seconds=0.
+        archived_seconds=0.;archived_lower=0.;archived_upper=0.;archived_uncertainty=[]
         archived_paths=set()
         for record in (fresh or {}).get('archived_native_ledgers',[]):
             absolute=str(Path(record['path']).resolve())
@@ -126,6 +126,10 @@ class TableVStageBudget(ReleaseProductionBudget):
             if type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<0:
                 raise ValueError('FRESH_CYCLE_ARCHIVED_NATIVE_USAGE_MUST_REMAIN_KNOWN')
             archived_seconds+=seconds
+            from .table_v_interruption import archived_runtime_summary
+            summary=archived_runtime_summary(prior)
+            archived_lower+=summary['native_lower_bound_seconds'];archived_upper+=summary['native_upper_bound_seconds']
+            archived_uncertainty+=summary['uncertainty_receipts']
             if record not in self.historical:self.historical.append(record)
         if len(self.historical) < 2 or any(Path(r['path']).resolve() == self.path.resolve() for r in self.historical):
             raise ValueError('OLD_CANONICAL_AND_CONSUMED_RC01_LEDGERS_READ_ONLY_REQUIRED')
@@ -158,6 +162,8 @@ class TableVStageBudget(ReleaseProductionBudget):
                         authorization_claim=file_record(claim_path))
         if self.path.exists():
             self._refresh()
+            if self.document.get('sealed_interrupted_attempt'):
+                raise RuntimeError('SEALED_INTERRUPTED_ATTEMPT_REQUIRES_NEW_INDEPENDENT_ATTEMPT')
             if self.document.get('release_identity') != identity:
                 raise ValueError('TABLE_V_AUTHORIZATION_OR_HISTORY_DRIFT')
             if self.document.get('inflight') or self.document.get('active_stage_context'):
@@ -174,6 +180,10 @@ class TableVStageBudget(ReleaseProductionBudget):
             if fresh is not None:
                 self.document.update(fresh_native_cycle=deepcopy(fresh),fresh_cycle_native_start_seconds=0.,
                     archived_native_seconds_excluded_from_current_cycle=archived_seconds,
+                    archived_native_lower_bound_seconds=archived_lower,
+                    archived_native_upper_bound_seconds=archived_upper,
+                    archived_native_runtime_fully_known=not archived_uncertainty,
+                    archived_native_uncertainty_receipts=archived_uncertainty,
                     archived_ledgers_overwritten=False,prior_arm_stage_costs_reset=True)
             self._save()
         self.check_historical()
@@ -356,14 +366,22 @@ class TableVStageBudget(ReleaseProductionBudget):
                 and all(r.get('stage_context',{}).get(k)==diagnostic['context'][k] for k in ('day','arm','stage')))
             cap=min(cap,allowance(self.remaining(),used))
         admit_resources(self,phase='PRE_NATIVE_CALL')
+        from .table_v_native_journal import NativeJournal
+        journal=NativeJournal(self,label);before=len(self.document.get('calls',[]))
         stop_file=self.path.parent/STOP_FILE
         def cooperative_stop(current, where):
+            journal.callback(current,where)
             if stop_file.exists():
                 current.terminate()
                 return
             if callback is not None:
                 callback(current,where)
-        return super().solve(model,label=label,cap=cap,callback=cooperative_stop,binding=binding)
+        try:
+            return super().solve(model,label=label,cap=cap,callback=cooperative_stop,binding=binding)
+        finally:
+            self._refresh()
+            if len(self.document.get('calls',[]))>before:
+                journal.finish(model,self.document['calls'][-1])
 
     def _before_native_optimize(self,model):
         from .table_v_resources import admit_resources

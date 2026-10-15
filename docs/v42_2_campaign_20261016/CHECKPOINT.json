@@ -4,12 +4,12 @@
   "freeze_tag": "v42.1-freeze-20261016",
   "branch": "codex/v42.2-may01-b1b2b3-20261016",
   "PR": "https://github.com/BeaverVillage/MobileESS/pull/231",
-  "current_commit": "1b749c436df467b64b6c3f27e96add1f22566376",
-  "active_stage": "B1_CROSSOVER_POLICY_NATIVE0_AND_REGRESSION_PASS_PENDING_FRESH_ATTEMPT",
+  "current_commit": "9ceee6fb0ba1c06a1c250c4b95481839c0e756a1",
+  "active_stage": "HOST_RESTART_RECOVERED_REGRESSION08_RUNNING",
   "Native_optimize_calls": 2,
   "active_PID": null,
-  "active_log": "D:/v42_2_b1_native0_04.log",
-  "active_output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_04",
+  "active_log": "D:/v42_2_regression08.log",
+  "active_output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT003",
   "regression01": {
     "status": "PASS",
     "tests": 1246,
@@ -28,10 +28,9 @@
   "B2_ACTUAL_FRESH_PASS": false,
   "B3_ACTUAL_FRESH_PASS": false,
   "next_steps": [
-    "Finish B1_NATIVE0_04 actual exact S1 matrix/basis and selected Method2 LPWarmStart0 readback; full regression07",
-    "Commit/push source correction and finalized Attempt002 evidence; seal new current release gate",
-    "Fresh B1 ATTEMPT003 A1 from zero under same caps; inspect actual cold S1 Barrier before any success claim",
-    "Only after B1 FULL+Actual96+Fresh96 PASS proceed B2 ATTEMPT004 then B3 ATTEMPT001"
+    "Finish REGRESSION08 and source/evidence commit; current release gate with unchanged actual matrix Native0 proofs",
+    "Run fresh B1 ATTEMPT004 and supervise full Source18r PhaseI; terminal journal retains BarX/duals to diagnose any remaining numerical failure",
+    "Only after full B1 planning and Actual/Fresh PASS proceed B2 then B3; preserve all prior Native uncertainty in research totals"
   ],
   "constraints": {
     "Worker": 1,
@@ -74,22 +73,22 @@
     "output": "docs/v42_2_campaign_20261016/REGRESSION03"
   },
   "B2_ATTEMPT001": "PREPARED_FOR_NATIVE0_ONLY_NO_SOLVE_NO_NATIVE_USAGE",
-  "supplemental_external_hash_PID": 71500,
-  "supplemental_external_hash_session": 61426,
-  "active_exec_session": 12101,
+  "supplemental_external_hash_PID": null,
+  "supplemental_external_hash_session": null,
+  "active_exec_session": 99677,
   "latest_observation": {
-    "epoch_seconds": 1792089246.4007034,
-    "Native_solver_running": false,
-    "B1_NATIVE0_04": "RUNNING",
-    "REGRESSION07": "RUNNING",
-    "research_native_preserved": 4210.561000585556
+    "epoch_seconds": 1792105747.9383411,
+    "all_old_native_workers_absent": true,
+    "Native_runtime_interruption_not_fabricated": true,
+    "new_runtime_journal_and_partial_BarX_diagnostics": "IMPLEMENTED_NATIVE0_TESTED",
+    "root_host_restart": "WINDOWS_UPDATE_RESTART_SYSTEM_EVENT1074_6006_6005"
   },
   "mandatory_resume_rules": [
-    "B1 actual worker65264 exited, Native712.152 and all locks reconciled; NEVER reuse or alter its directory/ledger",
-    "Native0_04 and Regression07 are running; do not edit their frozen source files",
-    "New dynamic policy defers positive elastic extension basis to retain Barrier; Source13/scientific Case and M Native0_03 sources remain unchanged",
-    "After PASS commit/push then seal new gate; actual order B1 then B2 then B3 with all full/actual/fresh checks",
-    "Goal remains ACTIVE; no main merge or scientific relaxation"
+    "No heavy worker live now; Attempt003 was killed by Windows Update reboot and is sealed after official orphan reconciliation",
+    "Native Runtime exact lost for Attempt003 S1: NULL. Preserve exact subtotal143.757 and bound265..396.420 S1. Never report bound or downtime as actual Native",
+    "Current source edits are recovery/accounting/journaling only; B1_NATIVE0_04/M_NATIVE0_03 mathematical producer bytes still match, HOST_RECOVERY_NATIVE0_01 PASS",
+    "Require REGRESSION08 PASS and commit/push, seal new gate before new B1 ATTEMPT004 from A1; no existing directory reuse",
+    "B1 then B2 ATTEMPT004 then B3 ATTEMPT001; all original physical/integer/P1/Actual96/Fresh96. Goal stays ACTIVE; no main merge"
   ],
   "M_NATIVE0_02": {
     "status": "PASS",
@@ -115,7 +114,7 @@
     "tests": 1259,
     "Native_calls": 0
   },
-  "validation_gate": "docs/v42_2_campaign_20261016/VALIDATION_GATE_02.json",
+  "validation_gate": "docs/v42_2_campaign_20261016/VALIDATION_GATE_03.json",
   "M_NATIVE0_03": {
     "status": "PASS",
     "Native_calls": 0,
@@ -135,10 +134,9 @@
     "raw_preserved": true
   },
   "active_regression": {
-    "output": "REGRESSION07",
-    "exec_session": 23570,
-    "status": "PASS",
-    "PID": 55004
+    "output": "REGRESSION08",
+    "exec_session": 99677,
+    "status": "RUNNING"
   },
   "regression06": {
     "status": "PASS",
@@ -180,5 +178,25 @@
       "Method": 2,
       "LPWarmStart": 0
     }
-  }
+  },
+  "current_attempt": 3,
+  "B1_ATTEMPT003": {
+    "status": "HOST_RESTART_INTERRUPTED_NOT_CERTIFIED",
+    "known_Native_seconds": 143.757000207901,
+    "Native_lower_bound_seconds": 408.757000207901,
+    "Native_upper_bound_seconds": 540.1774392127991,
+    "Native_runtime_fully_known": false,
+    "inflight": null,
+    "original_raw_preserved": true,
+    "locks_released": true,
+    "FULL_PASS": false,
+    "Actual_Fresh_PASS": false
+  },
+  "HOST_RECOVERY_NATIVE0_01": {
+    "status": "PASS",
+    "Native_calls": 0,
+    "actual_static_matrix_sources_byte_preserved": true,
+    "static_original_matrix_proof_reused": "B1_NATIVE0_04/M_NATIVE0_03"
+  },
+  "supplemental_external_hash_status": "OS_RESTART_TERMINATED_WITHOUT_FINAL_SUPPLEMENT_PRIMARY_FREEZE_MANIFESTS_UNCHANGED"
 }
