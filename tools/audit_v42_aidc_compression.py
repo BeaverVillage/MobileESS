@@ -73,7 +73,7 @@ def capture_release_native0(context,case,built,folder):
     return memo,domains,axes,metadata,objective
 
 
-def audit(day,output,*,matrix=False,reuse_capture=None):
+def audit(day,output,*,matrix=False,reuse_capture=None,phase_basis_predecessor=None):
     from v42_integration.release_date_case import compile_date_case
     from v42_integration.table_v_flex_planning import compile_table_v_flex_context,build_flex_native_model
     from v42_integration.table_v_geometry_cache import authorized_data
@@ -156,6 +156,7 @@ def audit(day,output,*,matrix=False,reuse_capture=None):
                 metadata=json.loads((prior/'ORIGINAL_FULL_INTEGER_NATIVE0.json').read_text(encoding='utf8'))
                 if metadata['native_binding']!=raw['native_binding']:raise ValueError('NATIVE0_REUSE_NATIVE_MATRIX_BINDING_DRIFT')
                 memo=dict(original=raw['original'],descriptor=raw['original_descriptor'],data=raw['data'],
+                    pcc_definitions=raw.get('pcc_definitions',[]),
                     runtime=raw['original_runtime_bindings'],equalities=raw['runtime_equality_rows'],original_sha=raw['original'].fingerprint())
                 verified_domains=domains;axes=raw['coupling_rows'];objective=raw['objective_sha']
                 model_seconds=metadata['model_build_seconds']
@@ -203,6 +204,9 @@ def audit(day,output,*,matrix=False,reuse_capture=None):
             memo=None;projected=None;descriptor=None;verified_domains=None;gc.collect()
             state=prepare_current_dw(context,case,built,dw,captured=captured,
                 independent_domain_receipt=file_record(domain_path))
+            if phase_basis_predecessor is not None:
+                from tools.audit_v42_2_phase_basis import audit as audit_phase_basis
+                audit_phase_basis(state,phase_basis_predecessor,output/'ACTUAL_S1_BASIS_NATIVE0')
             captured=None
             local,owned=partition(state['compact'],state['metas'],state['grows'])
             _,witness=artificial_point(elastic_master(state['compact'],state['grows']),state['prior_compact'])
@@ -271,5 +275,7 @@ def audit(day,output,*,matrix=False,reuse_capture=None):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--day',required=True);parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--matrix',action='store_true');parser.add_argument('--reuse-capture',type=Path);args=parser.parse_args()
-    audit(args.day,args.output,matrix=args.matrix,reuse_capture=args.reuse_capture)
+    parser.add_argument('--matrix',action='store_true');parser.add_argument('--reuse-capture',type=Path)
+    parser.add_argument('--phase-basis-predecessor',type=Path);args=parser.parse_args()
+    audit(args.day,args.output,matrix=args.matrix,reuse_capture=args.reuse_capture,
+        phase_basis_predecessor=args.phase_basis_predecessor)

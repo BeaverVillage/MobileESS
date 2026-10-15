@@ -1,0 +1,153 @@
+{
+  "goal_status": "ACTIVE_NOT_COMPLETE",
+  "freeze_source_SHA": "6473cb6dc7360358ff014b3d4bd92586b304383e",
+  "freeze_tag": "v42.1-freeze-20261016",
+  "branch": "codex/v42.2-may01-b1b2b3-20261016",
+  "PR": "https://github.com/BeaverVillage/MobileESS/pull/231",
+  "current_commit": "f50c414d3",
+  "active_stage": "B1_BASIS_REPAIR_NATIVE0_AND_REGRESSION_PASS_PENDING_NEW_ATTEMPT",
+  "Native_optimize_calls": 2,
+  "active_PID": null,
+  "active_log": "D:/v42_2_b1_native0_03.log",
+  "active_output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT001",
+  "regression01": {
+    "status": "PASS",
+    "tests": 1246,
+    "Native_calls": 0,
+    "baseline_IDs": 682
+  },
+  "regression02": {
+    "status": "PASS",
+    "tests": 1247,
+    "Native_calls": 0
+  },
+  "B1_FULL_PASS": false,
+  "B2_FULL_PASS": false,
+  "B3_FULL_PASS": false,
+  "B1_ACTUAL_FRESH_PASS": false,
+  "B2_ACTUAL_FRESH_PASS": false,
+  "B3_ACTUAL_FRESH_PASS": false,
+  "next_steps": [
+    "Require exact actual S0/S1 snapshots and repaired local-pivot basis Native0 PASS",
+    "Require full REGRESSION06 PASS, commit/push correction and finalized Attempt001 evidence",
+    "Seal new current release gate using B1_NATIVE0_03, unchanged M_NATIVE0_03, REGRESSION06",
+    "Run new B1 ATTEMPT002 from zero while retaining prior517.768Native research usage; only then B2 ATTEMPT004 and B3"
+  ],
+  "constraints": {
+    "Worker": 1,
+    "Threads": 1,
+    "A_stage": 5400,
+    "Phase_I": 900,
+    "M_stage": 1800,
+    "K48_separate": 300,
+    "Joint_call_cap": 140,
+    "P2_calls": 0,
+    "R2": "HOLD",
+    "physics_relaxation": false,
+    "merge_main": false
+  },
+  "prior_failure": {
+    "output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_01",
+    "reason": "Exact M source revision pin not updated before native0 preparation",
+    "Native_calls": 0,
+    "fix": "m_source_revision expected hashes explicitly updated to actual user-authorized V42.2 code"
+  },
+  "B1_NATIVE0": {
+    "status": "PASS_NATIVE0_MATRIX",
+    "PCC_hard_definitions": 1152,
+    "integer_FULL_rows": 2108858,
+    "integer_FULL_columns": 946756,
+    "LP_rows": 1030845,
+    "LP_columns": 195578,
+    "LP_NNZ": 11165284,
+    "classes": 229,
+    "UIDs": 1555,
+    "PCC_symbolic_candidate": "REJECTED_NONEXACT_BINARY64_COEFFICIENT",
+    "Native_calls": 0,
+    "output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_02"
+  },
+  "regression03": {
+    "status": "PASS",
+    "tests": 1254,
+    "baseline_IDs": 682,
+    "Native_calls": 0,
+    "output": "docs/v42_2_campaign_20261016/REGRESSION03"
+  },
+  "B2_ATTEMPT001": "PREPARED_FOR_NATIVE0_ONLY_NO_SOLVE_NO_NATIVE_USAGE",
+  "supplemental_external_hash_PID": 71500,
+  "supplemental_external_hash_session": 61426,
+  "active_exec_session": null,
+  "latest_observation": {
+    "epoch_seconds": 1792087220.8683689,
+    "Native_calls_now_running": 0,
+    "repair_unit_tests": 14,
+    "actual_B1_NATIVE0_03": "RUNNING",
+    "REGRESSION06": "RUNNING"
+  },
+  "mandatory_resume_rules": [
+    "Native0 audit PID24972 still active; do not edit its frozen .py files",
+    "Never erase or reset existing Attempt001 ledger or failure evidence",
+    "M Native0 source records unchanged; B1 repaired Source records require fresh Native0 gate",
+    "Before actual worker run seal release gate after final correction commit",
+    "B1 then B2 then B3, each with required original FULL and Actual96/Fresh96; no main merge"
+  ],
+  "M_NATIVE0_02": {
+    "status": "PASS",
+    "Native_calls": 0,
+    "source_commit": "d55271bb0",
+    "wall_seconds": 522.5869387999992,
+    "cache": "docs/v42_2_campaign_20261016/M_NATIVE0_02/VERIFIED_STATIC_CASE.pkl.gz"
+  },
+  "root_cause_fix": {
+    "failed_output": "M_NATIVE0_01",
+    "cause": "Gurobi omitted eight ~8.86e-15 coefficients in exact K16 helper projection",
+    "fix_commit": "d55271bb0",
+    "repair": "Exact positive dyadic row scaling; no coefficients or physical constraints removed",
+    "repair_actual_matrix_native0": "PASS",
+    "Native_usage": 0
+  },
+  "regression04": {
+    "status": "PASS",
+    "tests": 1255
+  },
+  "regression05": {
+    "status": "PASS",
+    "tests": 1259,
+    "Native_calls": 0
+  },
+  "validation_gate": "docs/v42_2_campaign_20261016/VALIDATION_GATE_01.json",
+  "M_NATIVE0_03": {
+    "status": "PASS",
+    "Native_calls": 0,
+    "wall_seconds": 372.7489573000057
+  },
+  "source_editing_locked_until_worker_stop_or_exit": false,
+  "B1_ATTEMPT001": {
+    "status": "OFFICIAL_STOP_FOR_ROOT_CAUSE_REPAIR",
+    "Native_seconds": 517.7680003643036,
+    "inflight": null,
+    "heavy_worker_lock_released": true,
+    "campaign_lock_released": true,
+    "FULL_PASS": false,
+    "Actual_Fresh_PASS": false,
+    "S1_native_seconds": 372.8270001411438,
+    "cause_under_repair": "New rows received basic equality/slack columns with an infeasible extended primal; warm presolve/crossover lost feasibility and residual exceeded1e10",
+    "raw_preserved": true
+  },
+  "active_regression": {
+    "output": "REGRESSION06",
+    "PID": 67892,
+    "exec_session": 72071
+  },
+  "regression06": {
+    "status": "PASS",
+    "tests": 1264,
+    "Native_calls": 0
+  },
+  "B1_NATIVE0_03": {
+    "status": "PASS_NATIVE0_MATRIX",
+    "Native_calls": 0,
+    "wall_seconds": 477.41205159999663,
+    "actual_S1_extended_basis": "PASS_NATIVE0_EXACT_MATRIX_AND_PRIMAL_FEASIBLE_EXTENSION"
+  }
+}
