@@ -1,0 +1,87 @@
+
+Gurobi 13.0.2 (win64) logging started Thu Oct 15 22:53:17 2026
+
+Set parameter LogFile to value "D:\v42_trajectory_tracking_may01_20261014\docs\v42_source18r_phase_20261015\NATIVE03\SOURCE18R_FAST\NATIVE_GUROBI.log"
+Set parameter Threads to value 1
+Set parameter TimeLimit to value 8.3883999824523926e+01
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  8.3883999824523926e+01
+MIPGap  0.005
+Method  2
+MIPFocus  3
+NodeMethod  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 275969 rows, 215725 columns and 1799788 nonzeros (Min)
+Model fingerprint: 0x73ada4a4
+Model has 20147 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 3e+05]
+  Objective range  [5e-07, 1e+00]
+  Bounds range     [1e+00, 2e+06]
+  RHS range        [2e-09, 2e+06]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Presolve removed 112462 rows and 102728 columns
+Presolve time: 0.48s
+Presolved: 163507 rows, 112997 columns, 1025048 nonzeros
+
+Ordering time: 4.46s
+
+Barrier statistics:
+ Dense cols : 1
+ Free vars  : 1053
+ AA' NZ     : 6.897e+06
+ Factor NZ  : 8.178e+07 (roughly 800 MB of memory)
+ Factor Ops : 1.052e+11 (roughly 2 seconds per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.95993313e+09 -5.12222701e+08  1.58e+08 0.00e+00  4.48e+05     6s
+   1   1.21270373e+09 -4.18546241e+08  9.74e+07 6.38e-01  2.59e+05     6s
+   2   8.84777494e+08 -3.59493294e+08  6.94e+07 5.77e-01  1.91e+05     6s
+   3   3.17765633e+08 -2.67539574e+08  2.21e+07 2.39e-01  7.25e+04     7s
+   4   6.87852673e+07 -1.31988719e+08  4.69e+06 6.47e-02  1.66e+04    11s
+   5   2.57223507e+07 -4.15816987e+07  1.70e+06 9.35e-03  5.73e+03    14s
+   6   6.72928849e+06 -1.43744898e+07  4.26e+05 1.24e-03  1.49e+03    17s
+   7   1.94173954e+06 -3.39668010e+06  1.20e+05 6.59e-05  3.85e+02    20s
+   8   1.20779441e+06 -1.26032135e+06  8.27e+04 6.13e-05  2.27e+02    23s
+   9   4.42080569e+05 -4.87555620e+05  2.99e+04 6.50e-05  8.06e+01    26s
+  10   7.03433174e+04 -2.03186521e+05  4.62e+03 6.79e-05  1.50e+01    29s
+  11   3.23720255e+04 -7.68076819e+04  2.07e+03 3.45e-05  5.88e+00    32s
+  12   7.91135043e+03 -2.81640850e+04  4.74e+02 9.82e-06  1.49e+00    35s
+  13   3.60560412e+03 -1.14821310e+04  2.07e+02 5.52e-06  5.99e-01    38s
+  14   1.23884251e+03 -5.37402716e+03  6.39e+01 5.39e-06  2.18e-01    41s
+  15   8.05995608e+02 -2.29862337e+03  2.03e+01 4.09e-06  8.30e-02    44s
+  16   4.13419361e+02 -4.20794411e+02  7.37e-01 5.38e-06  1.27e-02    48s
+  17   3.30408199e+02 -2.54116796e+02  2.96e-01 5.46e-06  7.10e-03    51s
+  18   2.82135674e+02 -1.24928840e+02  1.50e-01 5.54e-06  3.24e-03    54s
+  19   2.67470211e+02 -6.76026091e+01  1.05e-01 5.56e-06  1.76e-03    57s
+  20   2.54253886e+02 -4.80332446e+01  6.98e-02 5.57e-06  1.21e-03    60s
+  21   2.52973942e+02 -3.59932155e+01  6.73e-02 5.57e-06  9.25e-04    62s
+  22   2.42638371e+02 -1.55724238e+01  4.67e-02 5.58e-06  4.07e-04    65s
+  23   2.39767039e+02 -1.38565671e+01  4.24e-02 5.58e-06  3.58e-04    68s
+  24   2.19134620e+02 -7.00668376e+00  1.28e-02 5.58e-06  1.57e-04    72s
+  25   1.91647489e+02 -1.30935472e+00  8.96e-05 5.58e-06  7.42e-06    75s
+  26   1.64832544e+02 -1.00036412e+00  3.62e-08 5.58e-06  1.04e-08    78s
+  27   1.38025591e+02 -9.99979089e-01  4.04e-08 5.58e-06  2.45e-11    81s
+  28   1.11218666e+02 -9.99978705e-01  3.85e-08 5.58e-06  2.65e-13    84s
+
+Barrier performed 28 iterations in 83.92 seconds (125.64 work units)
+Time limit reached
+
+
+Stopped in 0 iterations and 83.95 seconds (125.77 work units)
+Time limit reached
+
+User-callback calls 2976, time in user-callback 0.15 sec

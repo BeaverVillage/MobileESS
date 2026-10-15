@@ -19,7 +19,7 @@ class Budget:
     def remaining(self):return 4100.-self.native
     def solve(self,model,**kw):
         self.native+=1.;model.Status=2;model.SolCount=1;model.Runtime=1.;model.Work=1.;model.ObjVal=0.
-        model.raw=dict(X=np.array([-7.63e-6 if not self.calls else 0.]),Pi=np.array([1.]),RC=np.array([0.]))
+        model.raw=dict(X=np.array([-2e-5 if not self.calls else 0.]),Pi=np.array([1.]),RC=np.array([0.]))
         self.calls.append(kw);return dict(Native_Runtime=1.,label=kw['label'])
 
 def setup(tmp_path,monkeypatch):
@@ -35,11 +35,11 @@ def setup(tmp_path,monkeypatch):
 def test_real_production_native_adapter_falls_back_without_changing_raw(tmp_path,monkeypatch):
     native,model,budget,source=setup(tmp_path,monkeypatch)
     rec,raw=native.solve(snapshot(),tmp_path/'S0','PHASE_I')
-    assert rec['adaptive_policy']=='ACCURATE_C' and len(budget.calls)==2 and native.native_seconds==2.
-    with np.load(tmp_path/'S0/FAST_B/RAW_ATTRIBUTES.npz') as a:assert a['X'][0]==-7.63e-6
-    with np.load(tmp_path/'S0/ACCURATE_C/RAW_ATTRIBUTES.npz') as a:assert a['X'][0]==0.
+    assert rec['adaptive_policy']=='FAST_B' and len(budget.calls)==2 and native.native_seconds==2.
+    with np.load(tmp_path/'S0/SOURCE18R_FAST/RAW_ATTRIBUTES.npz') as a:assert a['X'][0]==-2e-5
+    with np.load(tmp_path/'S0/FAST_B/RAW_ATTRIBUTES.npz') as a:assert a['X'][0]==0.
     assert raw['X'][0]==0. and model.disposed
-    assert [c['cap'] for c in budget.calls]==[900.,300.]
+    assert [c['cap'] for c in budget.calls]==[900.,899.]
 
 def test_source_drift_blocks_before_model_and_native(tmp_path,monkeypatch):
     native,model,budget,source=setup(tmp_path,monkeypatch);source.write_text('changed')

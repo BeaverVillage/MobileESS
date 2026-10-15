@@ -40,7 +40,8 @@ def _freeze_sources(output):
         'v42_root/native.py','v42_root/factor.py','v42_a_stage_domain_v2/runtime_projection.py',
         'v42_integration/table_v_geometry_cache.py','v42_integration/table_v_compression.py',
         'v42_integration/table_v_compression_verify.py','v42_integration/table_v_compression_adapter.py',
-        'v42_integration/table_v_phase_policy.py','v42_integration/table_v_global_control.py')
+        'v42_integration/table_v_phase_policy.py','v42_integration/table_v_phase_diagnostics.py',
+        'v42_integration/table_v_global_control.py')
     records=[file_record(root/path) for path in paths]
     _write(Path(output)/'DW_SOURCE_FREEZE.json',dict(PASS=True,sources=records,Native_calls=0))
     return records
@@ -509,6 +510,7 @@ class CurrentNative:
         self.budget=budget; self.case=case; self.output=Path(output); self.calls=[]
         self.day=getattr(case,'table_v_day',case.data[0].get('day'))
         self.native_seconds=0.; self.resources=[];self.seen_operations=set()
+        self.phase_basis=None
         # The 900s Phase-I allowance also survives a source revision/resume;
         # a new adapter object must not silently reopen the same stage clock.
         refresh=getattr(budget,'_refresh',None)
@@ -531,7 +533,7 @@ class CurrentNative:
         from v42_a_stage_domain_v2.stress_backend import materialize
         from v42_a_stage_domain_v2.solver_policy import solver_policy,apply_policy
         from v42_b3_joint.numerical_policy import apply_native_precision
-        from .table_v_phase_policy import POLICIES,allowance,validate_raw,progress_callback,INTEGER_RETURN_RESERVE
+        from .table_v_phase_policy import POLICIES,allowance,progress_callback,INTEGER_RETURN_RESERVE
         import gurobipy as gp
         if component not in ('PHASE_I','ORIGINAL_P1','LOCAL_PRICING'):
             raise PermissionError('TABLE_V_DW_P1_ONLY_NATIVE_COMPONENT_REQUIRED')
@@ -564,10 +566,21 @@ class CurrentNative:
                 seen.add(key);attempt=folder/name;attempt.mkdir(exist_ok=False)
                 if attempts:model.reset()
                 for k,v in parameters.items():model.setParam(k,v)
+                basis_start=dict(installed=False,reason='NO_PRIOR_ACCEPTED_PHASE_BASIS')
+                if component=='PHASE_I' and self.phase_basis is not None and not attempts:
+                    from .table_v_phase_diagnostics import extend_basis
+                    try:
+                        vb,cb,proof=extend_basis(self.phase_basis[0],snapshot,self.phase_basis[1])
+                        model.setAttr('VBasis',vb.tolist());model.setAttr('CBasis',cb.tolist())
+                        model.setParam('LPWarmStart',2)
+                        basis_start=dict(installed=True,proof=proof)
+                    except (ValueError,AttributeError,gp.GurobiError) as error:
+                        model.reset();basis_start=dict(installed=False,reason=str(error))
                 model.Params.Threads=1;model.Params.LogFile=str(attempt/'NATIVE_GUROBI.log')
                 _write(attempt/'MODEL_IDENTITY.json',dict(original_snapshot_sha256=snapshot.fingerprint(),
                     component=component,case_sha=self.case.case_sha,objective_name=snapshot.objectives[0].name,
-                    solver_policy=policy,numerical_policy=numerical,adaptive_policy=name,parameters=parameters,Threads=1,P2_calls=0))
+                    solver_policy=policy,numerical_policy=numerical,adaptive_policy=name,parameters=parameters,
+                    basis_start=basis_start,Threads=1,P2_calls=0))
                 call=self.budget.solve(model,label='RELEASE_P1:'+self.case.stage+':DW:'+component+':'+name,
                     cap=seconds,callback=progress_callback(attempt,component))
                 record=dict(status=int(model.Status),SolCount=int(model.SolCount),native_seconds=float(model.Runtime),
@@ -594,12 +607,19 @@ class CurrentNative:
                         record['LP_basis']=dict(available=True,native_raw=True,reused_as_start=False)
                     except Exception as basis_error:
                         record['LP_basis']=dict(available=False,reason=type(basis_error).__name__,reused_as_start=False)
-                validation=validate_raw(snapshot,candidate) if component=='PHASE_I' else dict(PASS=model.Status==gp.GRB.OPTIMAL)
+                if component=='PHASE_I':
+                    from .table_v_phase_diagnostics import residual_report
+                    diagnostics=residual_report(snapshot,candidate,attempt)
+                    validation=diagnostics['numerical_1e5']
+                    record['residual_comparison']=diagnostics
+                else:validation=dict(PASS=model.Status==gp.GRB.OPTIMAL)
                 record['independent_numerical_validation']=validation
                 np.savez_compressed(attempt/'RAW_ATTRIBUTES.npz',**candidate);_write(attempt/'NATIVE_RESULT.json',record)
                 self.calls.append(record);self.native_seconds+=record['native_seconds'];attempts.append(record)
                 _write(self.output/'DW_NATIVE_CALLS.json',dict(calls=self.calls,Native_Runtime=self.native_seconds,P2_calls=0))
                 if record['status']==2 and validation['PASS']:
+                    if component=='PHASE_I' and all(k in candidate for k in ('VBasis','CBasis')):
+                        self.phase_basis=(snapshot,candidate)
                     accepted=record;raw=candidate;break
                 # TimeLimit is not a numerical failure. Barrier has no valid
                 # partial basis to resume here; cold-starting another policy
@@ -638,8 +658,15 @@ def execute_current_dw(context,case,built,budget,output):
             target=rebound(targeted.targeted,dict(targeted.targeted.__globals__,HISTORY=output,worker=worker))
             # Source run writes to OUT/day. All other algorithm code and
             # stopping/pricing/row-promotion criteria remain source-owned.
-            from .table_v_phase_policy import require_exact_zero
+            from .table_v_phase_policy import require_exact_zero,phase_primal_replay,phase_dual_replay
+            elastic_backend=rebound(phase.point_with_replay,dict(phase.point_with_replay.__globals__,
+                primal_replay=phase_primal_replay(phase.primal_replay)))
+            elastic_point=rebound(phase.artificial_point,dict(phase.artificial_point.__globals__,
+                point_with_replay=elastic_backend))
             namespace=dict(phase.run.__globals__,OUT=output.parent,verify_zero=require_exact_zero(phase.verify_zero),
+                primal_replay=phase_primal_replay(phase.primal_replay),
+                verify_sign_convention=phase_dual_replay(phase.verify_sign_convention),
+                artificial_point=elastic_point,
                 full_pricing=full_pricing,targeted=target)
             if '_class_sum' in state:
                 from .table_v_compression_adapter import complete_kernel_rebuilder

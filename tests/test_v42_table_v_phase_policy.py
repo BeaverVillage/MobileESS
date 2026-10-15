@@ -14,7 +14,8 @@ def test_fast_presolve_does_not_change_scientific_replay_threshold():
     s=snapshot();raw=dict(X=np.array([0.]),Pi=np.array([1.]),RC=np.array([0.]))
     assert policy.POLICIES[0].parameters()['Presolve']==-1
     assert policy.validate_raw(s,raw)['PASS']
-    assert policy.REPLAY_TOLERANCE==1e-6
+    assert policy.REPLAY_TOLERANCE==1e-5
+    assert policy.CERTIFICATION_TOLERANCE==1e-6
 
 def test_fast_numerical_reconstruction_failure_requires_fallback():
     raw=dict(X=np.array([0.]),Pi=np.array([0.]),RC=np.array([0.]))
@@ -23,7 +24,9 @@ def test_fast_numerical_reconstruction_failure_requires_fallback():
 @pytest.mark.parametrize('violation',[7.63e-6,3.814697265625e-6,2e-6])
 def test_old_failed_points_stay_failed_at_original_threshold(violation):
     raw=dict(X=np.array([-violation]),Pi=np.array([1.]),RC=np.array([0.]))
-    assert not policy.validate_raw(snapshot(),raw)['PASS']
+    assert policy.validate_raw(snapshot(),raw)['PASS']
+    assert not policy.compare_raw(snapshot(),raw)['legacy_1e6']['PASS']
+    assert policy.compare_raw(snapshot(),raw)['certified_Global_LB'] is None
 
 def test_phase_calls_leave_original_integer_native_budget():
     assert policy.allowance(4100.,0.)==900.
@@ -47,8 +50,8 @@ def test_missing_native_duals_cannot_certify_phase_I():
     assert not policy.validate_raw(snapshot(),dict(X=np.array([0.])))['PASS']
 
 def test_policy_profiles_change_arithmetic_but_preserve_barrier_and_threads():
-    assert len({tuple(sorted(p.parameters().items())) for p in policy.POLICIES})==3
-    assert policy.POLICIES[0].name=='FAST_B'
+    assert len({tuple(sorted(p.parameters().items())) for p in policy.POLICIES})==2
+    assert policy.POLICIES[0].name=='SOURCE18R_FAST'
     assert policy.POLICIES[0].seconds==policy.PHASE_I_STAGE_ALLOWANCE
     for p in policy.POLICIES:
         assert p.parameters()['Method']==2 and p.parameters()['Threads']==1

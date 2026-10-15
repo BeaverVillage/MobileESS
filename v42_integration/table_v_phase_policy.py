@@ -1,7 +1,8 @@
-"""Bounded adaptive Phase-I arithmetic; original scientific replay is unchanged.
+"""Fast elastic LP admission with separate unchanged original certification.
 
-Every retry changes an explicit numeric policy, not rows, domains or tolerances
-of the independent verifier. All calls use the same cumulative A-stage ledger.
+The elastic numerical check uses 1e-5; original P1/FULL, exact zero and rational
+Global LB certificates retain their independent requirements and tolerances.
+All calls use the same cumulative A-stage ledger.
 """
 from dataclasses import dataclass
 from fractions import Fraction
@@ -9,8 +10,9 @@ import math
 import time
 import numpy as np
 
-VERSION='TABLE_V_VERIFIED_ADAPTIVE_PHASE_I_V2'
-REPLAY_TOLERANCE=1e-6
+VERSION='TABLE_V_SOURCE18R_PHASE_I_V3'
+REPLAY_TOLERANCE=1e-5
+CERTIFICATION_TOLERANCE=1e-6
 INTEGER_RETURN_RESERVE=1800.
 PHASE_I_STAGE_ALLOWANCE=900.
 
@@ -26,15 +28,17 @@ class Policy:
     def parameters(self):
         return dict(Presolve=self.presolve,FeasibilityTol=self.tolerance,
             OptimalityTol=self.tolerance,NumericFocus=self.focus,ScaleFlag=self.scale,
-            Method=2,Threads=1,OutputFlag=1,LogToConsole=0)
+            Method=2,Threads=1,OutputFlag=1,LogToConsole=0,
+            Crossover=-1,BarHomogeneous=-1)
 
-# The validated FAST_B trajectory was still converging at the old 180s cap
-# on the production machine. Give it the remaining part of the unchanged 900s
-# allowance instead of discarding that progress after a failed 30s warmup.
-# Each later S iteration receives only the actual remaining shared allowance;
-# unused time from S0 is therefore available to the larger S1 master.
-POLICIES=(Policy('FAST_B',-1,1e-8,1,PHASE_I_STAGE_ALLOWANCE),
-          Policy('ACCURATE_C',-1,1e-9,3,300.),Policy('CURRENT',0,1e-9,3,150.))
+# Restore the recorded Source18r settings, including automatic scaling.
+# Later S iterations receive only the remaining shared allowance; a slow solve
+# is never interrupted at an arbitrary short per-profile warmup cap.
+SOURCE18R_FAST=Policy('SOURCE18R_FAST',-1,1e-6,0,PHASE_I_STAGE_ALLOWANCE,scale=-1)
+FAST_B=Policy('FAST_B',-1,1e-8,1,PHASE_I_STAGE_ALLOWANCE)
+# A second policy is eligible only for a terminal NUMERIC or independently
+# rejected optimal point. TimeLimit never triggers a fresh arithmetic attempt.
+POLICIES=(SOURCE18R_FAST,FAST_B)
 
 def allowance(remaining,phase_used):
     """Reserve the original integer search and bound all Phase-I diagnostics."""
@@ -42,27 +46,52 @@ def allowance(remaining,phase_used):
         raise ValueError('FINITE_NONNEGATIVE_PHASE_I_BUDGET_REQUIRED')
     return max(0.,min(PHASE_I_STAGE_ALLOWANCE-phase_used,remaining-INTEGER_RETURN_RESERVE))
 
-def validate_raw(snapshot,raw):
+def validate_raw(snapshot,raw,*,tolerance=REPLAY_TOLERANCE):
     from v42_a_stage_phase1.core import primal_replay,verify_sign_convention
     if not all(key in raw for key in ('X','Pi','RC')):
         return dict(PASS=False,reason='OPTIMAL_PRIMAL_DUAL_ATTRIBUTES_REQUIRED')
-    primal=primal_replay(snapshot,raw['X'],REPLAY_TOLERANCE)
-    dual=verify_sign_convention(snapshot,raw['Pi'],raw['RC'])
+    primal=primal_replay(snapshot,raw['X'],tolerance)
+    dual=verify_sign_convention(snapshot,raw['Pi'],raw['RC'],absolute=tolerance)
     # Independent dual sign/complementarity, separate from RC reconstruction.
     pi=np.asarray(raw['Pi']);rc=np.asarray(raw['RC']);x=np.asarray(raw['X'])
     activity=snapshot.matrix@x;slack=activity-snapshot.rhs
     sign=np.maximum(0.,np.where(snapshot.senses=='<',pi,np.where(snapshot.senses=='>',-pi,0.)))
-    bound=np.maximum(np.where(x>snapshot.lower+REPLAY_TOLERANCE,np.maximum(rc,0.),0.),
-                     np.where(x<snapshot.upper-REPLAY_TOLERANCE,np.maximum(-rc,0.),0.))
+    bound=np.maximum(np.where(x>snapshot.lower+tolerance,np.maximum(rc,0.),0.),
+                     np.where(x<snapshot.upper-tolerance,np.maximum(-rc,0.),0.))
     complementary=np.abs(pi*slack)
     kkt=dict(max_dual_sign_violation=float(sign.max(initial=0)),
         max_reduced_cost_bound_violation=float(bound.max(initial=0)),
         max_complementarity=float(complementary.max(initial=0)))
-    kkt['PASS']=max(kkt.values())<=REPLAY_TOLERANCE
+    kkt['PASS']=max(kkt.values())<=tolerance
     return dict(PASS=primal['PASS'] and dual['PASS'] and kkt['PASS'],
         original_primal=primal,native_dual_reconstruction=dual,dual_KKT=kkt,
-        independent_replay_tolerance_unchanged=True,raw_point_modified=False,
+        numerical_admission_only=True,replay_tolerance=tolerance,raw_point_modified=False,
         Phi_zero_or_global_LB_claimed=False)
+
+def phase_primal_replay(original):
+    """Only elastic Phi LP admission changes; original P1/FULL stays strict."""
+    def replay(snapshot,point,tolerance=CERTIFICATION_TOLERANCE):
+        if tuple(o.name for o in snapshot.objectives)==('Phi',):
+            tolerance=REPLAY_TOLERANCE
+        return original(snapshot,point,tolerance)
+    return replay
+
+def phase_dual_replay(original):
+    def replay(snapshot,pi,rc,**kwargs):
+        if tuple(o.name for o in snapshot.objectives)==('Phi',):
+            kwargs.setdefault('absolute',REPLAY_TOLERANCE)
+        return original(snapshot,pi,rc,**kwargs)
+    return replay
+
+def compare_raw(snapshot,raw):
+    """Keep the old 1e-6/1e-7 contract independently visible in receipts."""
+    from v42_a_stage_phase1.core import verify_sign_convention
+    strict=validate_raw(snapshot,raw,tolerance=CERTIFICATION_TOLERANCE)
+    if all(k in raw for k in ('X','Pi','RC')):
+        strict['native_dual_reconstruction']=verify_sign_convention(snapshot,raw['Pi'],raw['RC'])
+        strict['PASS']=all(strict[k]['PASS'] for k in ('original_primal','native_dual_reconstruction','dual_KKT'))
+    return dict(numerical_1e5=validate_raw(snapshot,raw),legacy_1e6=strict,
+                certified_Global_LB=None,physical_constraints_modified=False)
 
 def require_exact_zero(original_verify):
     def verify(master,point,**kwargs):

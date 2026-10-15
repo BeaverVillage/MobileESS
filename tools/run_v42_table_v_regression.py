@@ -20,7 +20,7 @@ def main(output):
     if len(nodes)!=len(set(nodes)) or len(nodes)!=682:raise ValueError('682_BASELINE_IDS_REQUIRED')
     old_files={n.split('::')[0] for n in nodes}
     new=sorted(set(p.relative_to(ROOT).as_posix() for pattern in ('test_v42_table_v*.py','test_v42_tablev*.py',
-        'test_v42_preparation_performance.py','test_v42_a_control_numeric_messages.py')
+        'test_v42_preparation_performance.py','test_v42_a_control_numeric_messages.py','test_v42_source18r_phase.py')
         for p in (ROOT/'tests').glob(pattern) if p.relative_to(ROOT).as_posix() not in old_files))
     import pytest
     import gurobipy as gp

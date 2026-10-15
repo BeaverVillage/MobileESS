@@ -1,0 +1,155 @@
+PR230 Source18r Phase I 설정 복원 / 수치 검사 분리 / 실제 속도 검증
+2026-10-15 / 캠페인 HOLD 유지 / 현재 S0 속도 목표 미입증
+
+1. 결론
+
+Source18r의 정확한 고속 설정을 복원하고 공통 A-stage Phase I에 우선 연결했다.
+Phase I elastic LP의 독립 수치 허용오차는 1e-5로 변경했으며, 기존 1e-6 결과도 함께 기록한다.
+원본 P1/FULL 검증, 정확 Phi=0, 모든 생략 행과 full-domain pricing/rational LB 인증은 유지했다.
+그러나 새 실제 동일 S0에서는 83.953초에 TIME_LIMIT, SolCount=0이었다. 수초~수십 초 목표는 충족하지 못했다.
+Source18r를 새 성능 검증의 승자로 확정하지 않는다. 요청대로 우선 정책으로 복원하되 상태는 잠정적이다.
+동일 S0에서 완료와 원본 검증까지 확인된 기준은 이전 FAST_B 111.157초 결과다.
+새로운 동시 조건의 FAST_B/Dual Simplex 비교는 Phase I 잔여 예산 소진으로 미실행이다.
+
+2. 정확한 과거 실행 근거
+
+D:/v42_b1_only_may_20261012_03/dates/B1/2025-05-01/attempts/attempt_01/
+output/PHASE_I/S0의 SOLVER_PARAMETERS.json과 NATIVE_TELEMETRY.json을 대조했다.
+Native 2.037000179초, OPTIMAL, Phi=0, Barrier 22회, Simplex 34,130회였다.
+과거 Source SHA는 146bf39f5e4f9d720ef7118051edbcdc58b96ca3d83af31c3e7bd5349f1fecd8이다.
+
+Presolve=-1 / Method=2 / NumericFocus=0 / FeasibilityTol=1e-6 / OptimalityTol=1e-6 / Threads=1
+ScaleFlag=-1 / Crossover=-1 / BarHomogeneous=-1
+Seed=20260929 / IntFeasTol=1e-5 / MIPGap=.005 / Cuts=-1 / Heuristics=.05 / NodeMethod=1 / MIPFocus=3
+마지막 그룹은 원래 공통 solver_policy에서 계속 유지한다. LP에 영향 없는 MIP 항목도 원래대로 보존했다.
+ScaleFlag는 당시 파라미터 파일에서 생략되어 있었지만 실제 telemetry가 -1임을 기록하고 있다.
+이는 이전 비교의 ScaleFlag=2와 다르다. Solver 자체 tolerance 1e-5는 적용하거나 실행하지 않았다.
+
+과거 원본 행렬은 19,450행 / 87,567열 / 2,237,275 NNZ였다.
+Presolved 3,018행 / 51,957열 / 736,646 NNZ였다.
+이것을 현재의 275,969행 / 215,725열 제한 LP와 동일 행렬로 취급하지 않는다.
+
+3. 과거 Raw의 독립 재검사: 기존 FAIL은 그대로 보존
+
+저장 CSR/Attributes/Raw의 원래 SHA를 검증하고 LinearSnapshot fingerprint까지 재구성했다.
+snapshot=55b262e6de09e889ec4e74565cab387f486343db1d1f41c05ab2608648b2a5ce
+행 6526 equality의 정확 잔차는 1/131072 = 7.62939453125e-6이다.
+최대 항은 약 4.774e10이다. 큰 항 사이 상쇄오차를 보여 주지만 정확 잔차를 0으로 바꾸지 않는다.
+
+독립 수치 결과:
+기존 1e-6: Primal FAIL, Dual 재구성 PASS, KKT PASS
+시험 1e-5: Primal PASS, Dual 재구성 PASS, KKT PASS
+최대 Primal 행 잔차 7.62939453125e-6 / Bound 잔차 1.4210854715202004e-14
+최대 Dual 재구성 오차 0 / sign 위반 0 / Bound RC 위반 0 / complementarity 0
+정확 Phi=0 / 인공변수 최대 절댓값 0 / 인공변수 음수 위반 0
+
+원본 FAIL 영수증·Raw·거부 감사는 수정하지 않았다. 새 수치 PASS도 Global LB, 원본 계획 Freeze,
+Original FULL feasible incumbent 또는 Actual 완료로 승격하지 않는다.
+
+4. 절대·상대 잔차와 단위
+
+Primal/Bound/Dual/KKT의 절대값은 1e-6/1e-5로 각각 검사한다.
+Dual RC 재구성은 기존 상대 allowance 1e-10을 그대로 기록한다.
+상대 행 잔차의 분모는 max(1,abs(rhs),sum(abs(A_ij*x_j)))이다. 통과 판정에는 이 상대값을 쓰지 않는다.
+각 행의 signed residual, 방향별 violation, 절대·상대 violation, term magnitude, 계산 scale,
+1e-6/1e-5 판정을 ROW_RESIDUALS.csv로 남겼다. 최악 20개 행은 정확 Fraction 잔차도 기록했다.
+원본 행을 실제로 나누거나 RHS/경계를 바꾸지 않았다.
+
+LinearSnapshot에는 공학 단위 annotation이 없다. 행 단위는 UNANNOTATED_SOURCE_COORDINATE로 명시했다.
+해당 행을 임의로 pu/MW/GPU/초로 분류하지 않았다. 계산 scale은 물리 단위나 전압 허용 범위가 아니다.
+따라서 공학 단위별 요약은 이 저장 스냅샷만으로 제공할 수 없다는 한계가 있다.
+
+5. 새 동일 S0 실제 실험
+
+E07에서 저장된 May01 S0와 이전 FAST_B 완료 실험의 정확히 같은 snapshot을 사용했다.
+snapshot=8c857d23a3c371432db5d0c5518c66798d8591cb793ab19374b276a238633c35
+E08의 S0 fingerprint는 별도이므로 이번 결과를 E08 행렬의 실측으로 표시하지 않는다.
+229 Class/모든 원본 행렬·열·도메인·목적은 바꾸지 않았다.
+
+Source18r 복원 설정:
+요청 cap 83.883999825초 / 실제 Native 83.952999830초 / TIME_LIMIT(9) / SolCount=0
+Barrier 28회 / Work 125.769949 / 최종 Barrier 진단 primal objective 약 111.218666
+최종 Barrier 진단 primal residual 약 3.85e-8 / dual residual 약 5.58e-6
+최종 Barrier complementarity 약 2.65e-13
+위 값은 내부 scaled 진단값이며 원본 X/Pi/RC replay나 엄밀한 Phi/하한 인증이 아니다.
+원본 Primal/Dual/KKT는 유효 Raw가 없어 NOT_AVAILABLE이다. 1e-5 검사 PASS를 만들지 않았다.
+
+Presolve 0.48초 / 163,507행 / 112,997열 / 1,025,048 NNZ
+Factor NZ 약 8.178e7 / Factor Ops 약 1.052e11
+0.2초 sampling Peak RSS 1,196,589,056 bytes, 별도 프로세스 lifetime peak도 같았다.
+과거 9.43GB lifetime peak는 선행 원본 build를 포함하므로 직접적인 Peak 감소 비교를 하지 않는다.
+
+이전 동일 S0 FAST_B는 111.157초 OPTIMAL / Barrier 27회 / 정확 Phi=0 / 원본 Primal/Dual/KKT PASS였다.
+별도 시점 측정이다. 새 Source18r가 83.953초에 중단됐다는 사실만으로 111.157초보다 빠르다고 하지 않는다.
+COMPARISON.csv가 과거 다른 행렬/과거 같은 행렬/새 같은 행렬을 구분한다.
+
+6. 속도 원인에 대한 현재 판단
+
+독립 Replay 1e-5는 Optimize가 반환한 다음 적용된다. 반환 전 Solver 시간 자체를 줄이지는 않는다.
+이번 Source18r 설정에서도 마지막 Dual residual이 약 5.58e-6에 머물렀고 유효 해를 반환하지 못했다.
+따라서 Replay 완화만으로 현재 S0의 수백 초 문제를 해결했다고 볼 수 없다.
+과거보다 큰 Presolve 잔존 행렬과 Barrier factor fill/연산량도 주요 병목이다.
+Solver OptimalityTol=1e-5 또는 Dual Simplex는 다음 비교 후보지만 실제 성능·원본 검증을 확인하지 못했다.
+신규 Solver 1e-5 설정을 생산 fallback으로 자동 채택하지 않았다.
+
+7. 공통 경로와 반복 낭비
+
+CurrentNative와 execute_current_dw가 B1 A1, B3 A1/A2 및 5월 공통 A-stage 경로다.
+SOURCE18R_FAST 우선, 검증된 FAST_B fallback만 남겼다. CURRENT의 고정 고정밀 정책은 기본 강제하지 않는다.
+실제 NUMERIC 또는 OPTIMAL Raw의 독립 검사 실패 때만 fallback한다. TIME_LIMIT 뒤 cold restart하지 않는다.
+각 호출은 공유 Phase I 잔여 allowance를 받으며 임의의 30초/180초 제한으로 진행을 끊지 않는다.
+P1-only 및 원본 Integer 정책을 Phase I 설정으로 바꾸지 않았다.
+
+S0의 Native VBasis/CBasis가 있고 수치 검사를 통과하면 다음 S에서 재사용을 시도한다.
+기본 열의 경계/타입, 모든 기존 행의 계수/RHS/sense, 인공변수 행·부호·가중치를 정확히 매핑한다.
+추가 행의 slack을 basic으로 두어 기존 Native basis의 block triangular 확장을 유지한다.
+LPWarmStart=2로 presolve를 유지한다. Gurobi가 거부하거나 정확 포함이 없으면 start를 설치하지 않는다.
+X/Pi를 새 feasible point나 DStart로 만들어 넣지 않는다. 실제 새 run에는 유효 Basis가 없어 전송 성능은 미검증이다.
+
+8. 인증 경계와 원본 제약 보존
+
+1e-5는 elastic Phi LP의 수치 admission 및 내부 elastic point replay에만 적용된다.
+Phase I 종료/P1의 원본 행렬 replay는 기존 1e-6, omitted-row 검사는 기존 exact/outward 기준을 유지한다.
+원본 Integer FULL 및 MESS의 별도 기존 허용오차는 변경하지 않았다.
+최종 Phase I의 정확 Phi=0, artificial-free 원본 검증 및 full pricing/rational LB 인증은 그대로다.
+1e-5 admission만으로 DW Certified Global LB를 발급하는 경로는 없다.
+별도 오차 보정을 통해 느슨한 수치 해를 엄밀한 하한으로 올리는 신규 증명은 만들지 않았다.
+
+전압 0.95~1.05 pu, 선로·변압기 정격, GPU/QoS/Deadline/SOC/원본 도메인을 변경하지 않았다.
+MESS Beam–Joint/K48, R1 Actual, P1-only 및 원본 전력망 source byte pin 검사를 유지했다.
+
+9. 예산과 HOLD
+
+첫 두 준비 시도는 Source 바인딩 및 Threads 포함 Native identity 검사에서 Optimize 전에 거부됐다.
+각 시도의 추가 Native는 0이다. 별도의 저장 LP 진단 authority를 만들어 생산 재개 권한과 분리했다.
+과거 Case가 현재 Source와 일치하는 것처럼 기존 Freeze를 수정하지 않았다.
+진단 권한은 정확한 저장 LP fingerprint/Native binding/현재 코드/허용 label/기존 Stage 비용에 묶었다.
+
+실제 새 Optimize는 1회, 83.952999830초다. overshoot 0.069000006초까지 모두 차감했다.
+Phase I 누적 900.069000006초, 잔여 0초.
+B1 A1 누적 1,166.338000059초, 5,400초 중 잔여 4,233.661999941초.
+원래 E08 계획 원장 1,106.595000505초는 바이트 그대로 보존했다.
+이를 포함한 진단 descendant의 PLANNING 누적은 1,190.548000336초이다. K48은 0초 그대로다.
+
+새 canonical predecessor는 NATIVE03/PLANNING_NATIVE_LEDGER.json이다.
+DIAGNOSTIC_HEAD.json과 CARRY_FORWARD_REQUIRED.json에 경로/SHA를 기록했다.
+향후 E08만 다시 carry-forward하여 이번 사용량을 누락하면 안 된다.
+CLI도 최신 descendant를 읽고 Phase I 잔여 0을 확인해 모델 생성/Optimize 전에 중단한다.
+그 경로를 실제 Native0로 확인했으며 새 0초 주기나 새 5,400초 예산을 만들지 않았다.
+현재 Phase I cap 내에서는 추가 FAST_B/Dual Simplex/Solver tolerance 1e-5 실험 예산이 없다.
+
+E08 Raw/Freeze/원장 210개 파일을 재검사했다. 실제 Native 실행 당시 Python 소스 2,265개를 별도 보존했다.
+이번 Native 실행본과 이후 추가한 재사용 방지/회귀 코드의 차이를 숨기지 않고 실행 소스 archive로 구분했다.
+캠페인은 HOLD다. 생산/May01/May02~31/Actual을 재개하지 않았다. P2=0, R2 HOLD, IEEE8500 미실행이다.
+
+10. 회귀 및 남은 작업
+
+전체 1,194 PASS / skip 0 / 회귀 자체 실제 Native 0. 직전 1,185 및 기존 682 ID를 보존했다.
+새 테스트는 복원 설정, 1e-5 vs 1e-6 분리, 정확 zero 불인증, 원본 P1 tolerance 유지,
+Basis의 정확 포함/새 slack 확장, 변형 Source/Matrix 거부, 생산 label 거부,
+누적 allowance/최신 descendant 강제 및 원장 drift 거부를 검증한다.
+변경된 기존 잔차 테스트의 기대값은 사용자의 1e-5 시험 요청에 맞춘 것이며 과거 FAIL 증거는 그대로다.
+
+현재 S0의 수초~수십 초 완주, 새 Source18r 설정의 가장 빠른 유효 정책 선정,
+동일 조건 FAST_B/Dual Simplex 비교, 실제 Basis 전송 속도 및 5월 날짜별 Native 성능은 미완료다.
+현재 수정은 설정 복원·검사 분리·반복 낭비 방지이며, Solver 속도 회복을 성공으로 보고하지 않는다.

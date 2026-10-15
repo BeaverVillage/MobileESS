@@ -233,6 +233,34 @@ class TableVStageBudget(ReleaseProductionBudget):
             self.derived_bindings.append(context)
         return context
 
+    def bind_saved_phase_diagnostic(self,snapshot):
+        """Authorize only a frozen LP parameter comparison, never production.
+
+        Historical case source files can have been revised since the matrix
+        was saved. Bind the literal saved matrix and current diagnostic source
+        independently instead of pretending the old case is current production.
+        """
+        from .table_v_launch import release_identity
+        d=self.authorization.get('saved_phase_i_diagnostic',{})
+        if (d.get('schema')!='TABLE_V_SAVED_PHASE_DIAGNOSTIC_V1'
+                or d.get('approved') is not True or d.get('production_result_promoted') is not False
+                or d.get('current_release')!=release_identity()
+                or not self.authorization.get('human_approval_reference')
+                or not self.authorization.get('carry_forward_ledgers')
+                or snapshot.fingerprint()!=d.get('snapshot_sha')
+                or any(snapshot.vtypes!='C') or tuple(o.name for o in snapshot.objectives)!=('Phi',)
+                or self.authorization.get('authorized_arm_stages')!=['B1:A1']
+                or not d.get('allowed_labels') or not all(x.startswith('RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_AUDIT:') for x in d['allowed_labels'])
+                or any(file_record(r['path'])!=r for r in d.get('frozen_records',[]))
+                or len(d.get('frozen_records',[]))<3):
+            raise PermissionError('EXACT_FROZEN_SAVED_PHASE_DIAGNOSTIC_AUTHORITY_REQUIRED')
+        context=d['context']
+        if (context.get('day')!='2025-05-01' or context.get('arm')!='B1' or context.get('stage')!='A1'
+                or not all(context.get(k) for k in ('stage_case_sha','source_sha','parent_result_sha'))):
+            raise PermissionError('SAVED_PHASE_DIAGNOSTIC_CONTEXT_REQUIRED')
+        self.derived_bindings.append(deepcopy(context))
+        return context
+
     @contextmanager
     def phase(self, stage, stage_case_sha, source_sha, parent_result_sha, *, day=None):
         if day is None:
@@ -294,10 +322,31 @@ class TableVStageBudget(ReleaseProductionBudget):
             raise PermissionError('ARM_STAGE_NOT_AUTHORIZED')
         if require_remaining and self.remaining() <= 0:
             raise RuntimeError('ARM_STAGE_NATIVE_TIMEOUT_EXHAUSTED')
+        diagnostic=self.authorization.get('saved_phase_i_diagnostic')
+        if diagnostic is not None:
+            if (label not in diagnostic['allowed_labels'] or self.context!=diagnostic['context']
+                    or any(file_record(r['path'])!=r for r in diagnostic['frozen_records'])):
+                raise PermissionError('SAVED_DIAGNOSTIC_ONLY_NO_PRODUCTION_NATIVE')
+            from .table_v_phase_policy import allowance
+            used=sum(r['Native_Runtime'] for r in self.document['calls'] if r.get('solver')=='GUROBI'
+                and r.get('label','').startswith('RELEASE_P1:A1:DW:PHASE_I:')
+                and all(r.get('stage_context',{}).get(k)==self.context[k] for k in ('day','arm','stage')))
+            if allowance(self.remaining(),used)<=0:raise PermissionError('SAVED_DIAGNOSTIC_PHASE_ALLOWANCE_EXHAUSTED')
 
     def solve(self, model, *, label, cap, callback=None, binding=None):
         from .table_v_control import STOP_FILE
         from .table_v_resources import admit_resources
+        diagnostic=self.authorization.get('saved_phase_i_diagnostic')
+        if diagnostic is not None:
+            from .d0_resource import native_binding
+            if native_binding(model)!=diagnostic['native_binding']:
+                raise PermissionError('SAVED_DIAGNOSTIC_MATRIX_DOMAIN_OBJECTIVE_DRIFT')
+            self._refresh()
+            from .table_v_phase_policy import allowance
+            used=sum(r['Native_Runtime'] for r in self.document['calls'] if r.get('solver')=='GUROBI'
+                and r.get('label','').startswith('RELEASE_P1:A1:DW:PHASE_I:')
+                and all(r.get('stage_context',{}).get(k)==diagnostic['context'][k] for k in ('day','arm','stage')))
+            cap=min(cap,allowance(self.remaining(),used))
         admit_resources(self,phase='PRE_NATIVE_CALL')
         stop_file=self.path.parent/STOP_FILE
         def cooperative_stop(current, where):
