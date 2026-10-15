@@ -17,7 +17,7 @@ from v42_integration.table_v_launch import release_identity
 from v42_integration.table_v_run import budget,verify_adapters
 
 
-def read(path):return json.loads(Path(path).read_text(encoding='utf8-sig'))
+def read(path):return json.loads(Path(path).read_text(encoding='utf-8-sig'))
 
 
 def write(path,value):
