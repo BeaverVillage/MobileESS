@@ -41,7 +41,7 @@ def _freeze_sources(output):
         'v42_integration/table_v_geometry_cache.py','v42_integration/table_v_compression.py',
         'v42_integration/table_v_compression_verify.py','v42_integration/table_v_compression_adapter.py',
         'v42_integration/table_v_phase_policy.py','v42_integration/table_v_phase_diagnostics.py',
-        'v42_integration/table_v_global_control.py')
+        'v42_integration/table_v_global_control.py','v42_integration/pcc_definitions.py')
     records=[file_record(root/path) for path in paths]
     _write(Path(output)/'DW_SOURCE_FREEZE.json',dict(PASS=True,sources=records,Native_calls=0))
     return records
@@ -475,10 +475,12 @@ def capture_current_full(context,case,built,output):
     descriptor=capture(model,units,levels,controls,bindings,output/'SCIENTIFIC_INTERFACES.pkl.gz')
     backend=Backend();backend.data=data
     rawaxes=backend._coupling_rows(model,bindings)
+    from .pcc_definitions import definitions_from_native
+    pcc_definitions=definitions_from_native(model,context['state']['capacities'])
     # Save the original sparse snapshot even if the equality projection fails.
     original_path=output/'ORIGINAL_FULL_SNAPSHOT.pkl.gz'
     with gzip.open(original_path,'xb',compresslevel=1) as stream:pickle.dump(original,stream,protocol=5)
-    raw_packet=dict(data=data,original=original,original_descriptor=descriptor,coupling_rows=rawaxes,
+    raw_packet=dict(data=data,original=original,original_descriptor=descriptor,coupling_rows=rawaxes,pcc_definitions=pcc_definitions,
         original_runtime_bindings={key:int(value.index) for key,value in bindings.get('Runtime_finish_counts',{}).items()
             if hasattr(value,'index') and isinstance(value.index,int)},
         runtime_equality_rows=[i for i,name in enumerate(model.getAttr('ConstrName')) if name=='exact_Runtime_finish_count'],
@@ -488,7 +490,7 @@ def capture_current_full(context,case,built,output):
     with gzip.open(raw_path,'xb',compresslevel=1) as stream:pickle.dump(raw_packet,stream,protocol=5)
     _write(output/'ORIGINAL_FULL_CAPTURE_RECEIPT.json',dict(PASS=True,capture=file_record(raw_path),Native_calls=0))
     projected,translated,projection=project_runtime_auxiliaries(model,original,bindings,descriptor,data)
-    packet=dict(data=data,original=original,projected=projected,descriptor=translated,
+    packet=dict(data=data,original=original,projected=projected,descriptor=translated,pcc_definitions=pcc_definitions,
         runtime_projection=projection,coupling_rows=rawaxes,case_sha=case.case_sha,
         objective_sha=objective_identity(model),
         native_binding=deepcopy(metadata['native_binding']),source_identity=deepcopy(context['manifest']['identity']),

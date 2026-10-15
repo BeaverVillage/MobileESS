@@ -211,7 +211,15 @@ class TableVStageBudget(ReleaseProductionBudget):
             if (manifest['identity'] != source_identity or manifest['source_sha'] != source_sha
                     or parent_result != manifest):
                 raise ValueError('FULL_FLEX_A1_MANIFEST_PARENT_REQUIRED')
-        elif stage in ('M1', 'M2'):
+        elif stage in ('M1', 'M2') or (stage in ('K48_M1', 'K48_M2')
+                and (case_certificate or {}).get('schema') == 'TABLE_V_SEEDLESS_K48_PARENT_V1'):
+            if stage.startswith('K48_'):
+                current = case_certificate['identity']
+                if (digest(current) != stage_case_sha or current.get('arm') != arm
+                        or current.get('stage') != stage[4:] or current.get('day') != authority['day']
+                        or current.get('D0_source_sha') != source_sha
+                        or current.get('aidc_anchor') != parent_result.get('aidc_anchor')):
+                    raise ValueError('SEEDLESS_K48_CURRENT_FIXED_AIDC_PARENT_REQUIRED')
             from .table_v_mess import require_aidc_anchor
             require_aidc_anchor(parent_result, sorted(parent_result['AIDC_P_by_site']))
             if arm == 'B2':
@@ -219,7 +227,7 @@ class TableVStageBudget(ReleaseProductionBudget):
                 require_reference_acceptance(parent_acceptance, identity=source_identity, result=parent_result)
             else:
                 from .release_p1_acceptance import require_acceptance
-                require_acceptance(parent_acceptance, stage='A1' if stage == 'M1' else 'A2',
+                require_acceptance(parent_acceptance, stage='A1' if stage in ('M1', 'K48_M1') else 'A2',
                                    source_identity=source_identity, result=parent_result)
                 if parent_acceptance.get('evidence_scope') != 'REAL_PRODUCTION':
                     raise ValueError('REAL_CURRENT_A_PARENT_REQUIRED')

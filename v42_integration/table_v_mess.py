@@ -309,7 +309,7 @@ class TableVMessStages:
         return result, receipt, point
 
     def execute_cooperative(self,arm,stage,case,aidc,parent_acceptance,*,k48_budget,k48_admission,initial_point=None):
-        """FULL seed -> separate certified K bounds -> nonduplicate UB search.
+        """Seedless K bounds -> seedless Beam--Joint -> verified UB feedback.
 
         Native guard contexts never overlap. Seed/search Raw live in distinct
         children and remain immutable; the final result gets its own seal.
@@ -320,23 +320,17 @@ class TableVMessStages:
         case.global_gap_control=control
         result=acceptance=point=kval=None
         try:
-            seed=copy(case);seed.mess_execution_subdir='COOPERATIVE_SEED/COMMON_M_PR222'
-            seed.mess_result_output=root/'COOPERATIVE_SEED';seed.global_gap_seed_checkpoint=True
-            result,acceptance,point=self.execute(arm,stage,seed,aidc,parent_acceptance,initial_point=initial_point)
-            if acceptance is not None:
-                try:
-                    kval=self.execute_k48(arm,stage,case,result,acceptance,point,k48_budget=k48_budget,
-                        output=root/'COOPERATIVE_K48',build_admission=k48_admission())
-                except Exception as exc:
-                    control.failure=repr(exc)
-                    _write(root/'COOPERATIVE_K48_FAILURE.json',dict(error=repr(exc),certified_LB_admitted=False))
-                # The same stage allowance includes initialization and all UB calls.
-                # Retain only the verified seed as a new search warm start.
-                if not control.target_met() and control.failure is None:
-                    search=copy(case);search.mess_execution_subdir='COOPERATIVE_SEARCH/COMMON_M_PR222'
-                    search.mess_result_output=root/'COOPERATIVE_SEARCH';search.global_gap_seed_checkpoint=False
-                    result,acceptance,point=self.execute(arm,stage,search,aidc,parent_acceptance,initial_point=point,
-                        incumbent_registry=result['incumbent_registry'])
+            try:
+                kval=self.execute_k48(arm,stage,case,aidc,parent_acceptance,None,k48_budget=k48_budget,
+                    output=root/'COOPERATIVE_K48',build_admission=k48_admission())
+            except Exception as exc:
+                # A missing/numerical lower bound cannot permanently block UB
+                # discovery. Integrity is independently checked by execute().
+                _write(root/'COOPERATIVE_K48_FAILURE.json',dict(error=repr(exc),certified_LB_admitted=False,
+                    UB_search_continues=True))
+            search=copy(case);search.mess_execution_subdir='COOPERATIVE_SEARCH/COMMON_M_PR222'
+            search.mess_result_output=root/'COOPERATIVE_SEARCH';search.global_gap_seed_checkpoint=False
+            result,acceptance,point=self.execute(arm,stage,search,aidc,parent_acceptance,initial_point=initial_point)
             reason=('IMPLEMENTATION_OR_NUMERICAL_FAILURE' if control.failure else
                 'NO_FULL_FEASIBLE_SOLUTION' if acceptance is None else
                 result.get('adaptive_search',{}).get('termination_reason','NO_FURTHER_CERTIFIED_IMPROVEMENT'))
@@ -395,20 +389,27 @@ class TableVMessStages:
                 or build_admission.get('supervisor_serial_window') is not True
                 or build_admission.get('concurrent_heavy_solver') is not False):
             raise ValueError('TABLE_V_SEPARATE_K48_APPROVAL_AND_SERIAL_RAM_ADMISSION_REQUIRED')
-        require_m_acceptance(m_acceptance, result=m_result, identity=self.manifest['identity'], arm=arm, stage=stage)
-        if (m_acceptance['stage_case_sha'] != case.case_sha
+        seedless = point is None
+        if seedless:
+            require_parent(self.context, arm, stage, m_result, m_acceptance)
+            anchor = m_result['aidc_anchor']
+        else:
+            require_m_acceptance(m_acceptance, result=m_result, identity=self.manifest['identity'], arm=arm, stage=stage)
+            anchor = m_acceptance['AIDC_anchor']
+        if ((not seedless and m_acceptance['stage_case_sha'] != case.case_sha)
                 or case.identity['arm'] != arm or case.identity['stage'] != stage
                 or case.identity.get('day') != context_day(self.context)
-                or case.identity['aidc_anchor'] != m_acceptance['AIDC_anchor']):
+                or case.identity['aidc_anchor'] != anchor):
             raise ValueError('TABLE_V_K48_SAME_CURRENT_FULL_M_CASE_REQUIRED')
-        selected = np.asarray(point)
-        if (selected.dtype != np.dtype('float64') or selected.ndim != 1 or not np.isfinite(selected).all()
+        selected = None if seedless else np.asarray(point)
+        if not seedless and (selected.dtype != np.dtype('float64') or selected.ndim != 1 or not np.isfinite(selected).all()
                 or vector_sha(selected) != m_acceptance['Original_FULL'].get('point_vector_sha256')):
             raise ValueError('TABLE_V_K48_SAME_ACCEPTED_FULL_INCUMBENT_REQUIRED')
         k_stage = 'K48_'+stage
         k48_budget.bind_table_v_case(arm=arm, stage=k_stage, stage_case_sha=case.case_sha,
             source_sha=self.manifest['source_sha'], parent_result=m_result,
-            source_identity=self.manifest['identity'], parent_acceptance=m_acceptance)
+            source_identity=self.manifest['identity'], parent_acceptance=m_acceptance,
+            case_certificate=dict(schema='TABLE_V_SEEDLESS_K48_PARENT_V1',identity=case.identity) if seedless else None)
         with k48_budget.arm_context(arm):
             with k48_budget.phase(k_stage, case.case_sha, self.manifest['source_sha'], digest(m_result), day=context_day(self.context)):
                 with k48_budget.capture_native_methods():
@@ -417,7 +418,8 @@ class TableVMessStages:
         # Append the later LB assessment without rewriting that immutable raw.
         assessment = dict(schema='TABLE_V_M_K48_ASSESSMENT_V1', day=context_day(self.context), arm=arm, stage=stage,
             stage_case_sha=case.case_sha, source_identity=deepcopy(self.manifest['identity']),
-            AIDC_anchor=m_acceptance['AIDC_anchor'], MESS_anchor=m_acceptance['MESS_anchor'],
+            AIDC_anchor=anchor, MESS_anchor=None if seedless else m_acceptance['MESS_anchor'],
+            seedless=seedless, FULL_feasible_UB_available=not seedless,
             parent_M_result_sha=digest(m_result), parent_M_acceptance_sha=m_acceptance['acceptance_sha'],
             K48_result=file_record(Path(output) / 'CURRENT_K48_RESULT.json'),
             global_gap_target=MESS_GLOBAL_GAP_TARGET, relative_global_gap=summary['relative_global_gap'],

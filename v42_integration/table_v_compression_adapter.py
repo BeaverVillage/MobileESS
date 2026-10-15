@@ -106,17 +106,24 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
     old_to_projected={int(row):i for i,row in enumerate(projection['retained_original_rows'])}
     axes={(family.upper(),*key) if isinstance(key,tuple) else (family.upper(),'',key):old_to_projected[row]
           for (family,key),row in captured['coupling_rows'].items()}
-    result=compress_lp(base,descriptor,data,semantic,forced_global=axes.values(),
+    old_columns={int(j):i for i,j in enumerate(projection['retained_original_columns'])}
+    pcc=[dict(entry,row=old_to_projected[entry['row']],pivot=old_columns[entry['pivot']])
+         for entry in captured.get('pcc_definitions',[])]
+    if not pcc and getattr(case.grid,'alias_controls',False):
+        raise ValueError('PCC_DEFINITION_PROVENANCE_REQUIRED_REBUILD_CAPTURE')
+    result=compress_lp(base,descriptor,data,semantic,forced_global=list(axes.values())+[e['row'] for e in pcc],
         progress=lambda value:_prepare_progress(output,**value))
     exact=verify_sum(base,result)
     old_global_position={int(row):i for i,row in enumerate(result['global_rows'])}
     coupling={key:old_global_position[row] for key,row in axes.items()}
     _prepare_progress(output,'EXACT_REDUNDANT_ROW_PROOF',classes=len(result['records']))
-    compact,redundancy=redundant_rows(result['snapshot'],protected_rows=coupling.values())
+    protected_pcc=[old_global_position[e['row']] for e in pcc]
+    compact,redundancy=redundant_rows(result['snapshot'],protected_rows=list(coupling.values())+protected_pcc)
     independent=verify_redundancy(result['snapshot'],compact,redundancy)
     rowmap={int(row):i for i,row in enumerate(redundancy['retained_rows'])}
     ng=sum(int(row)<len(result['global_rows']) for row in redundancy['retained_rows'])
     newaxes={key:rowmap[row] for key,row in coupling.items()}
+    hard_pcc=[dict(e,row=rowmap[old_global_position[e['row']]],pivot=int(result['fold'][e['pivot']])) for e in pcc]
     G=tuple(range(ng));n=result['prefix']
     translated=compressed_descriptor(descriptor,result['records'],result['fold'])
     groups={r['class_id']:r['members'] for r in result['records']}
@@ -128,6 +135,11 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
     prior,_=constructed_point(base,descriptor,data,n,local_original)
     initial=np.zeros(compact.matrix.shape[1]);initial[:n]=prior[:n]
     np.add.at(initial,result['fold'][n:],prior[n:])
+    from .pcc_definitions import satisfy_definitions,compare_forms
+    initial=satisfy_definitions(compact,initial,hard_pcc)
+    _write(output/'PCC_FORMULATION_NATIVE0_COMPARISON.json',compare_forms(compact,hard_pcc))
+    _write(output/'PCC_HARD_DEFINITIONS.json',dict(PASS=True,definitions=hard_pcc,
+        original_identity_rows_preserved=True,Native_calls=0,reference_is_FULL_feasible=False))
     local_new=replace(compact,matrix=compact.matrix[ng:].tocsr(),senses=compact.senses[ng:],rhs=compact.rhs[ng:])
     witness=primal_replay(local_new,initial)
     if not witness['PASS']:raise ValueError('COMPRESSED_ORIGINAL_LOCAL_WITNESS_REPLAY_FAILED')
@@ -186,7 +198,8 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
         resource_variables.append(int(e[1]) if e is not None and e[0]=='v' else -1)
     state=dict(compact=compact,reference=compact,reference_descriptor=translated,scientific_descriptor=translated,
         data=newdata,domains=domains,ledger=_ledger(newdata,domains,{}),metas=metas,n=n,grows=G,axes=newaxes,
-        prior_original=initial,prior_compact=initial,global_types=base.vtypes[:n].copy(),projection_proofs=[exact],
+        prior_original=initial,prior_compact=initial,hard_pcc_definitions=hard_pcc,
+        global_types=base.vtypes[:n].copy(),projection_proofs=[exact],
         atlas=dict(rf=np.zeros(len(G),dtype=int),rf_names=np.asarray(['ORIGINAL_FULL_ROW']),node_names=np.asarray([]),
             voltage_lower_rows=np.asarray([],dtype=int),voltage_upper_rows=np.asarray([],dtype=int),
             resource_variables=np.asarray(resource_variables),domains=domains),

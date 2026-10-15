@@ -50,7 +50,9 @@ def capture_release_native0(context,case,built,folder):
     objective=objective_identity(model);memo={};folder=Path(folder)
     class CaptureBoundary(Exception):pass
     def save_boundary(current,original,bindings,descriptor,data):
+        from v42_integration.pcc_definitions import definitions_from_native
         memo.update(original=original,descriptor=descriptor,data=data,
+            pcc_definitions=definitions_from_native(current,context['state']['capacities']),
             runtime={k:int(v.index) for k,v in bindings.get('Runtime_finish_counts',{}).items()
                      if hasattr(v,'index') and isinstance(v.index,int)},
             equalities=[i for i,name in enumerate(current.getAttr('ConstrName')) if name=='exact_Runtime_finish_count'],
@@ -181,6 +183,7 @@ def audit(day,output,*,matrix=False,reuse_capture=None):
                 dict(Runtime_finish_counts=memo['runtime'],_runtime_equality_rows=memo['equalities']),
                 memo['descriptor'],memo['data'])
             captured=dict(data=memo['data'],original=memo['original'],projected=projected,descriptor=descriptor,
+                pcc_definitions=memo.get('pcc_definitions',[]),
                 runtime_projection=projection,coupling_rows=axes,case_sha=case.case_sha,objective_sha=objective,
                 native_binding=metadata['native_binding'],source_identity=context['manifest']['identity'],
                 input_sha=context['input_audit']['a_input_sha'])
