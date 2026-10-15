@@ -13,7 +13,7 @@ import numpy as np
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 
 
-def audit(execution,output,*,reuse_static=None):
+def audit(execution,output,*,reuse_static=None,reuse_cache=None):
     import gurobipy as gp
     from v42_integration.table_v_run import load_context,budget,current_build_admission
     from v42_integration.table_v_mess import TableVMessStages
@@ -31,7 +31,10 @@ def audit(execution,output,*,reuse_static=None):
     factory=TableVMessStages(context,main)
     ref=json.loads((Path(execution)/'REFERENCE_RESULT.json').read_text(encoding='utf8'))
     accepted=json.loads((Path(execution)/'REFERENCE_ACCEPTANCE.json').read_text(encoding='utf8'))
-    if reuse_static is None:
+    if reuse_cache is not None:
+        from v42_integration.m_static_reuse import load_verified_case
+        case=load_verified_case(file_record(reuse_cache),context,ref,accepted,output/'CURRENT_M',dynamic_recheck=True)
+    elif reuse_static is None:
         case=factory.prepare('B2','M1',ref,accepted,output/'CURRENT_M',
             build_admission=current_build_admission(main,arm='B2',stage='M1',operation='CURRENT_M_NATIVE0_BUILD'),
             progress=lambda row:print('M_NATIVE0',row,flush=True))
@@ -117,4 +120,5 @@ if __name__=='__main__':
     import argparse
     p=argparse.ArgumentParser();p.add_argument('--execution',type=Path,required=True);p.add_argument('--output',type=Path,required=True)
     p.add_argument('--reuse-static',type=Path)
-    args=p.parse_args();audit(args.execution,args.output,reuse_static=args.reuse_static)
+    p.add_argument('--reuse-cache',type=Path)
+    args=p.parse_args();audit(args.execution,args.output,reuse_static=args.reuse_static,reuse_cache=args.reuse_cache)

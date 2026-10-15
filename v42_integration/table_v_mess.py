@@ -216,8 +216,13 @@ class TableVMessStages:
         if (Path(output) / 'SCIENTIFIC_CASE_IDENTITY.json').exists():
             raise ValueError('TABLE_V_M_PREPARATION_EXISTS_DO_NOT_REBUILD_OR_OVERWRITE')
         with self.budget.capture_native_methods():
-            case = build_case(payload, dict(day=context_day(self.context), arm=arm, stage=stage, output=str(output)),
-                              progress=progress, integration_context=physical)
+            cache_pointer=self.budget.path.parent/'STATIC_M_CASE_CACHE.json'
+            if arm=='B2' and stage=='M1' and cache_pointer.exists():
+                from .m_static_reuse import load_verified_case,read
+                case=load_verified_case(read(cache_pointer)['manifest'],self.context,aidc,parent_acceptance,output)
+            else:
+                case = build_case(payload, dict(day=context_day(self.context), arm=arm, stage=stage, output=str(output)),
+                                  progress=progress, integration_context=physical)
         identity = self.manifest['identity']
         case.identity.update(day=context_day(self.context), arm=arm, stage=stage, aidc_anchor=aidc['aidc_anchor'],
             qos_sha=self.context['backlog']['contract_sha'],

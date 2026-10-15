@@ -128,6 +128,11 @@ def run(arm,number,*,reason,corrective_commit,prepare_only=False,validation_gate
         output=prepare_attempt(arm,number,reason=reason,corrective_commit=corrective_commit)
         if prepare_only:return dict(status='PREPARED_NO_SOLVE',output=str(output),
             total_preparation_wall_seconds=time()-attempt_started)
+        if arm=='B2':
+            manifests=[r for r in gate['evidence'] if read(r['path']).get('verified_static_case_cache')]
+            if len(manifests)!=1:raise ValueError('ONE_ACTUAL_NATIVE0_STATIC_M_CACHE_REQUIRED')
+            new_json(output/'STATIC_M_CASE_CACHE.json',dict(manifest=manifests[0],
+                authority=file_record(validation_gate),prior_solution_or_bound_reused=False))
         authority=launch_authority(output,arm)
         state=dict(arm=arm,attempt=number,output=str(output),pid=os.getpid(),started_epoch_seconds=attempt_started,
             preparation_wall_seconds=time()-attempt_started,

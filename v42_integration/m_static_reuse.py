@@ -145,3 +145,71 @@ def save_verified_case(case,path):
             vars(static).pop(key,None)
     with gzip.open(path,'xb',compresslevel=1) as stream:pickle.dump(static,stream,protocol=5)
     return file_record(path)
+
+
+def load_verified_case(manifest_record,context,aidc,acceptance,output,*,dynamic_recheck=False):
+    """Load a real Native0 cache; changed dynamic code requires fresh Native0.
+
+    Production requires the entire current dynamic source receipt. A Native0
+    recheck may reuse static models when their actual scientific producers,
+    complete transport states, physical source/case and fixed plan still match.
+    """
+    from .table_v_mess import payload_for_m
+    from v42_may_campaign_native90.m_model import (CampaignMCase,_domain_sha,_transport_state_sha,_c3_state_sha)
+    from v42_ultracompact.response import state_sha
+    from v42_m1_hybrid.blocks import matrix_sha
+    began=perf_counter()
+    require(file_record(manifest_record['path'])==manifest_record,'STATIC_M_NATIVE0_MANIFEST_BYTES_DRIFT')
+    manifest=read(manifest_record['path'])
+    require(manifest.get('status')=='PASS' and manifest.get('Native_calls')==0
+        and manifest.get('FULL_UB_certified') is False and not manifest.get('blocked_Native_attempts'),
+        'STATIC_M_ACTUAL_COMPLETED_NATIVE0_REQUIRED')
+    iterations=manifest.get('seedless_iterations',[])
+    require(len(iterations)==2 and len({r['pool_sha'] for r in iterations})==2
+        and all(r['charge_modes']==384 and r['MIP_Start_present'] is False for r in iterations)
+        and manifest.get('K16',{}).get('PASS') is True,'STATIC_M_COMPLETE_DYNAMIC_NATIVE0_REQUIRED')
+    if not dynamic_recheck:
+        require(manifest.get('current_source_records') and all(file_record(r['path'])==r for r in manifest['current_source_records']),
+            'STATIC_M_CURRENT_DYNAMIC_NATIVE0_SOURCE_REQUIRED')
+    cache=manifest['verified_static_case_cache']
+    require(file_record(cache['path'])==cache,'STATIC_M_CACHE_BYTES_DRIFT')
+    with gzip.open(cache['path'],'rb') as stream:case=pickle.load(stream)
+    require(type(case) is CampaignMCase and case.point is None,'STATIC_M_LITERAL_UNSOLVED_CASE_REQUIRED')
+    require(not any(k in vars(case) for k in ('mess_search_state','candidate_pools','warm_route_seed',
+        '_direct_static_cache','mess_feedback_point')),'STATIC_M_NO_HEURISTIC_POOL_OR_INCUMBENT_TRANSFER')
+    require(case.case_sha==manifest['case_sha'] and case.identity==manifest['source_case'],
+        'STATIC_M_NATIVE0_CACHE_IDENTITY_MISMATCH')
+    payload=payload_for_m(context,'B2','M1',aidc,acceptance);identity=case.identity
+    require(identity['arm']=='B2' and identity['stage']=='M1'
+        and identity['D0_source_sha']==context['manifest']['source_sha']
+        and identity['D0_parent_case_sha']==context['manifest']['identity']['case_sha']
+        and identity['input_identity']==payload['identity']
+        and identity['aidc_anchor']==aidc['aidc_anchor']
+        and identity['bundle_sha']==digest(payload['bundle'])==digest(case.bundle)
+        and digest(case.planning)==digest(payload['planning'])
+        and digest(identity)==case.case_sha,'STATIC_M_EXACT_CURRENT_SOURCE_CASE_POLICY_AND_PLAN_REQUIRED')
+    _proofs_current(identity,case.output)
+    require(matrix_sha(case.original_A)==identity['original_matrix_sha']
+        and _domain_sha(case.original_d)==identity['original_domain_sha']
+        and matrix_sha(case.A)==identity['selected_matrix_sha']
+        and _domain_sha(case.d)==identity['selected_domain_sha']
+        and digest(case.anchor)==identity['anchor_sha'],'STATIC_M_ACTUAL_MODEL_ARRAYS_DRIFT')
+    require(_transport_state_sha(case.compact,case.presolve,case.graph)==identity['transport_authority']['state_sha']
+        and _c3_state_sha(case.ultra)==identity['c3_authority']['state_sha']
+        and state_sha(case.response)==identity['response_authority']['state_sha'],
+        'STATIC_M_COMPLETE_PROVED_TRANSFORM_STATE_DRIFT')
+    physical=context['materialize_physical']()['physical'];physical.verify()
+    require(identity['physical_sha']==context['manifest']['physical_sha'],
+        'STATIC_M_CURRENT_PHYSICAL_INPUT_REQUIRED')
+    prior=case.case_sha;_retarget(case,output)
+    from .m_candidates import generate
+    from .m_engine import export_plan
+    case.candidate_generator=generate;case.plan_exporter=export_plan
+    _write(case.output/'STATIC_PROOF_REUSE.json',dict(PASS=True,prior_static_case_sha=prior,
+        current_case_sha=case.case_sha,scientific_case_sha=identity['D0_parent_case_sha'],
+        source_sha=identity['D0_source_sha'],AIDC_anchor=identity['aidc_anchor'],
+        original_matrix_domain_and_objective_unchanged=True,complete_transport_C3A_Dense_states_reconstructed=True,
+        real_prior_independent_proofs_reused=True,provenance_paths_rebound_only=True,
+        cached_native0_manifest=manifest_record,cache=cache,dynamic_recheck=dynamic_recheck,
+        prior_solution_or_bound_reused=False,Native_calls=0,wall_seconds=perf_counter()-began))
+    return case
