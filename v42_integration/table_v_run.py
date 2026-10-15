@@ -13,6 +13,7 @@ from .a_engine import digest
 from .m_engine import _write,file_record
 from .table_v_budget import TableVStageBudget,MAIN_CAPS,K48_CAPS,SCHEMA
 from .table_v_control import require_running, CampaignStopped
+from .table_v_progress import write_progress
 from .table_v_status import failed_stage_status
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -25,7 +26,7 @@ ARM_STAGES={'B0':[],'B1':['A1'],'B2':['M1'],'B3':['A1','M1','A2','M2']}
 
 def adapters():
     names=['table_v_run.py','table_v_a.py','table_v_budget.py','table_v_mess.py','table_v_k48.py',
-           'table_v_flex_planning.py','table_v_reference.py','tablev_actual.py',
+           'table_v_flex_planning.py','table_v_reference.py','tablev_actual.py','table_v_progress.py',
            'tablev_fullflex_actual.py','table_v_status.py','table_v_control.py','table_v_reuse.py',
            'table_v_dw.py','table_v_dw_reuse.py','table_v_gap_contract.py','table_v_dates.py','table_v_campaign.py','table_v_memory.py',
            'table_v_resources.py','table_v_launch.py','table_v_launch_evidence.py',
@@ -199,7 +200,7 @@ def run_arm(arm,output=DEFAULT,*,attempt=None,actual_slots=96,launch_authority=N
             stop.wait(1.)
     observer=threading.Thread(target=monitor,daemon=True);observer.start()
     def progress(value):
-        _write(folder/'LIVE_PROGRESS.json',dict(arm=arm,stage=current,elapsed_wall_seconds=perf_counter()-began,progress=value))
+        write_progress(folder/'LIVE_PROGRESS.json',dict(arm=arm,stage=current,elapsed_wall_seconds=perf_counter()-began,progress=value))
     try:
         context=load_context(output)
         day=context['manifest']['day']
