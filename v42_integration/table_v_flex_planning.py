@@ -189,9 +189,12 @@ def compile_flex_descriptors(base,*,strict_stats,source_records):
 
 
 def require_flex_case(manifest,*,stage=None):
-    from .release_date_case import require_date_case
+    from .release_date_case import require_date_case,require_day
+    require_day(manifest.get('day'))
     if (manifest.get('schema')!=SCHEMA or manifest.get('manifest_sha')!=digest({k:v for k,v in manifest.items() if k!='manifest_sha'})
-            or manifest.get('day')!='2025-05-01' or manifest.get('Table_V_full_flex') is not True):
+            or manifest.get('Table_V_full_flex') is not True
+            or manifest.get('day')!=manifest.get('parent_basic_manifest',{}).get('day',manifest.get('day'))
+            or manifest.get('time_axis')!=manifest.get('parent_basic_manifest',{}).get('time_axis')):
         raise ValueError('EXACT_TABLE_V_FULL_FLEX_MANIFEST_REQUIRED')
     require_date_case(manifest['parent_basic_manifest'])
     if (manifest['identity']['initial_state_sha']!=manifest['parent_basic_manifest']['identity']['initial_state_sha']
@@ -231,7 +234,10 @@ def require_flex_context(context):
 def compile_table_v_flex_context(base_context,*,output,call_cap=600.):
     require_basic_context(base_context)
     state=base_context['state']
-    if state['day']!='2025-05-01':raise ValueError('TABLE_V_MAY01_ONLY_AUTHORIZATION')
+    from .release_date_case import require_day
+    require_day(state['day'])
+    if state['day']!=base_context['manifest'].get('day',base_context.get('day')):
+        raise ValueError('TABLE_V_SAME_DAY_INITIAL_AND_MANIFEST_REQUIRED')
     output=Path(output)
     if output.exists():raise FileExistsError('TABLE_V_FULL_FLEX_PREPARATION_MUST_NOT_OVERWRITE')
     stats_record=file_record(STRICT_STATS)
@@ -466,7 +472,7 @@ def load_table_v_context(path,*,call_cap=5400.):
     require_flex_case(read(path/names[0]))
     with tempfile.TemporaryDirectory(prefix='v42_table_v_public_context_') as scratch:
         scratch=Path(scratch)
-        basic=compile_date_case('2025-05-01',output=scratch/'BASIC',call_cap=call_cap)
+        basic=compile_date_case(read(path/names[0])['day'],output=scratch/'BASIC',call_cap=call_cap)
         context=compile_table_v_flex_context(basic,output=scratch/'FULL_FLEX',call_cap=call_cap)
         for name,record in saved.items():
             if (scratch/'FULL_FLEX'/name).read_bytes()!=(path/name).read_bytes() or file_record(record['path'])!=record:

@@ -16,6 +16,10 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from v42_integration.table_v_gap_contract import (
+    AIDC_GLOBAL_GAP_TARGET, MESS_GLOBAL_GAP_TARGET, restricted_joint_diagnostic)
+from v42_integration.table_v_status import classify_a_result
+from v42_integration.table_v_dates import require_day
 ARMS = ('B0', 'B1', 'B2', 'B3')
 STAGES = {'B0': (), 'B1': ('A1',), 'B2': ('M1',), 'B3': ('A1', 'M1', 'A2', 'M2')}
 DEFAULT = ROOT/'docs/v42_unified_aidc_mess_research_20261014/RELEASE_RECOVERY_20261015/RC04/TABLE_V/EXECUTION01'
@@ -129,6 +133,51 @@ def mess_operation(plan):
         netP_diagnostic_does_not_replace_original_FULL_SOC_and_Mode_validation=True)
 
 
+def mess_gap_fields(k):
+    """Apply the MESS reporting contract without editing historical K raw."""
+    history = k.get('history') or []
+    valid = [r for r in history if k.get('source') and r.get('numerical_global_bound_contract') is True
+             and finite(r.get('Global_LB')) and r.get('source') == k.get('source')]
+    lb = k.get('Global_LB')
+    valid_lb = finite(lb) and any(r['Global_LB'] == lb for r in valid)
+    ub = k.get('current_FULL_UB')
+    gap = (max(0., (ub-lb)/max(abs(ub), 1e-10))
+           if valid_lb and finite(ub) and lb <= ub+1e-6 else None)
+    target_met = gap is not None and gap <= MESS_GLOBAL_GAP_TARGET
+    valid_k48 = [r for r in valid if r.get('K') == 48]
+    return dict(K48_status=k.get('status', 'NOT_RUN'), K_reached=k.get('K_reached'),
+        K_solved=max((r['K'] for r in history), default=None),
+        K48_completed=any(r.get('K') == 48 for r in history),
+        K48_cuts_reached=k.get('K_reached') == 48, K48_current_FULL_UB=ub,
+        current_case_Global_LB=lb if valid_lb else None, Global_LB_valid=valid_lb,
+        Global_LB_valid_K=sorted({r['K'] for r in valid}),
+        Global_LB_best_K=sorted({r['K'] for r in valid if r['Global_LB'] == lb}),
+        Global_LB_scope='CURRENT_ORIGINAL_FULL_WITH_FIXED_AIDC_ANCHOR' if valid_lb else 'NOT_CERTIFIED',
+        K48_Global_LB=max((r['Global_LB'] for r in valid_k48), default=None),
+        K48_Global_LB_valid=bool(valid_k48), global_gap=gap,
+        global_gap_target=MESS_GLOBAL_GAP_TARGET, global_gap_target_percent=100*MESS_GLOBAL_GAP_TARGET,
+        global_gap_certified=target_met,
+        global_optimality_status=('TARGET_MET' if target_met else 'OPTIMALITY_TARGET_UNMET' if valid_lb
+                                  else 'NOT_CERTIFIED' if k else 'K48_NOT_RUN'),
+        raw_global_gap_target=k.get('global_gap_target'),
+        raw_global_gap_certified=k.get('global_gap_certified'), raw_relative_global_gap=k.get('relative_global_gap'))
+
+
+def aidc_gap_fields(result):
+    """A MILP internal gap cannot fill an uncertified DW global gap."""
+    dw = result.get('DW') or {}
+    lb, ub = result.get('AIDC_Global_LB'), result.get('AIDC_Global_UB')
+    lb_valid = (dw.get('LB_certified') is True and dw.get('full_domain_pricing_complete') is True
+                and finite(lb))
+    ub_valid = (result.get('FULL_feasible') is True and result.get('FULL_point_replay', {}).get('PASS') is True
+                and finite(ub))
+    gap = (max(0., (ub-lb)/ub) if lb_valid and ub_valid and ub > 0 and 0 <= lb <= ub+1e-8 else None)
+    return dict(AIDC_Global_LB=lb if lb_valid else None, AIDC_Global_UB=ub if ub_valid else None,
+        AIDC_global_gap_target=AIDC_GLOBAL_GAP_TARGET, AIDC_global_gap=gap,
+        AIDC_global_gap_certified=gap is not None and gap <= AIDC_GLOBAL_GAP_TARGET,
+        DW=dw or None)
+
+
 def fresh_metrics(wrapped):
     """Re-read recorded source rows and rerun the original settled validator."""
     fresh = unwrap(wrapped)
@@ -164,9 +213,17 @@ def report(source=DEFAULT, *, output):
     if source == output or output.exists():
         raise FileExistsError('NEW_REPORT_DIRECTORY_REQUIRED_RAW_OUTPUTS_MUST_NOT_BE_OVERWRITTEN')
     output.mkdir(parents=True)
-    contract = read(source/'MAY01_TABLE_V_FOUR_ARM_CONTRACT.json')
-    common = read(source/'MAY01_COMMON_INITIAL_STATE_CERTIFICATE.json')
-    policy = read(source/'MAY01_FLEXIBILITY_POLICY_FREEZE.json')
+    def current_or_legacy(current,legacy):
+        return source/current if (source/current).is_file() else source/legacy
+    contract_path=current_or_legacy('TABLE_V_FOUR_ARM_CONTRACT.json','MAY01_TABLE_V_FOUR_ARM_CONTRACT.json')
+    common_path=current_or_legacy('TABLE_V_COMMON_INITIAL_STATE_CERTIFICATE.json','MAY01_COMMON_INITIAL_STATE_CERTIFICATE.json')
+    policy_path=current_or_legacy('TABLE_V_FLEXIBILITY_POLICY_FREEZE.json','MAY01_FLEXIBILITY_POLICY_FREEZE.json')
+    contract,common,policy=read(contract_path),read(common_path),read(policy_path)
+    day=first(contract.get('day'),common.get('day'))
+    if day is not None:
+        require_day(day)
+        if common.get('day',day)!=day:raise ValueError('REPORT_CURRENT_DATE_INITIAL_CONTRACT_DRIFT')
+    label=day or '일자 미기록'
     reference = read(source/'REFERENCE_RESULT.json')
     calls = read(source/'PLANNING_NATIVE_LEDGER.json').get('calls', []) + read(source/'K48_NATIVE_LEDGER.json').get('calls', [])
     main_present = (source/'PLANNING_NATIVE_LEDGER.json').is_file()
@@ -180,11 +237,18 @@ def report(source=DEFAULT, *, output):
             if (source/arm/'ARM_OUTCOME.json').is_file():raw_inputs.append(record(source/arm/'ARM_OUTCOME.json'))
         outcome = read(folder/'ARM_OUTCOME.json')
         stage_results = read(folder/'PLANNING_STAGE_RESULTS.json')
+        arm_status = outcome.get('status', 'NOT_RUN')
+        failed_stage = outcome.get('failed_stage', '')
+        if failed_stage.startswith('A') and arm_status == 'NOT_CERTIFIED':
+            classified = classify_a_result(stage_results.get(failed_stage, {}).get('result') or {})
+            if classified != 'NOT_RUN':
+                arm_status = classified
         actual_wrapped = read(folder/'ACTUAL_RESULT.json')
         fresh_wrapped = read(folder/'FRESH_AC_RESULT.json')
         actual, actual_receipt = unwrap(actual_wrapped), unwrap(actual_wrapped).get('receipt', {})
         fresh = fresh_metrics(fresh_wrapped)
         arm_data[arm] = dict(outcome=outcome, actual=actual, fresh=fresh,
+                            status=arm_status,
                             attempt=pointer['name'] if pointer else 'ORIGINAL')
         for name in ('ARM_OUTCOME.json','PLANNING_STAGE_RESULTS.json','ACTUAL_RESULT.json','FRESH_AC_RESULT.json','WALL_RAM_RESOURCE_REPORT.json'):
             if (folder/name).is_file(): raw_inputs.append(record(folder/name))
@@ -193,12 +257,13 @@ def report(source=DEFAULT, *, output):
             result, accepted = entry.get('result', {}), entry.get('acceptance', {}) or {}
             if stage == 'ACTUAL96': status = actual_wrapped.get('status', 'NOT_RUN')
             elif stage == 'FRESH_AC96': status = fresh['status']
+            elif stage.startswith('A'): status = classify_a_result(result)
             else: status = accepted.get('status', result.get('status', 'NOT_RUN'))
             if status == 'NOT_RUN' and outcome.get('failed_stage') == stage:
                 status = 'EXECUTION_FAILED'
             execution.append(dict(arm=arm, stage=stage, status=status,
                 attempt=pointer['name'] if pointer else 'ORIGINAL',
-                arm_outcome=outcome.get('status', 'NOT_RUN'),
+                arm_outcome=arm_status, raw_arm_outcome=outcome.get('status', 'NOT_RUN'),
                 failure_reason=outcome.get('error') if outcome.get('failed_stage') == stage else None,
                 source_sha=contract.get('source_sha'), case_sha=contract.get('source_identity', {}).get('case_sha'),
                 P2_calls=outcome.get('P2_calls') if outcome else None, **stage_native(calls, arm, stage, ledger_present=main_present)))
@@ -209,17 +274,21 @@ def report(source=DEFAULT, *, output):
                     AIDC_anchor=accepted.get('AIDC_anchor'), MESS_anchor=accepted.get('MESS_anchor'),
                     objective=first(result.get('objective'), result.get('BEST_GLOBAL_UB')),
                     bound=result.get('bound'), numeric_A_gap=result.get('gap'),
+                    Gurobi_Status=first(result.get('Gurobi_Status'), result.get('solver_status')),
+                    SolCount=result.get('SolCount'), MILP_internal_relative_gap=result.get('gap'),
                     optimality_status=accepted.get('optimality_status', accepted.get('global_optimality_status')),
                     P2_calls=result.get('P2_calls'), **stage_native(calls, arm, stage, ledger_present=main_present)))
                 if stage.startswith('A'):
+                    planning[-1].update(aidc_gap_fields(result))
                     funnel.append(dict(arm=arm, stage=stage, scope='PLANNING', **planning_actions(result, reference, policy)))
                 else:
                     k = entry.get('K48', {}) or {}
                     plan = result.get('mess', {}) or {}
+                    gap_fields = mess_gap_fields(k)
+                    planning[-1]['optimality_status'] = gap_fields['global_optimality_status']
                     mess_rows.append(dict(arm=arm, stage=stage, status=status,
-                        FULL_UB=result.get('BEST_GLOBAL_UB'), K48_status=k.get('status', 'NOT_RUN'),
-                        K_reached=k.get('K_reached'), current_case_Global_LB=k.get('Global_LB'),
-                        global_gap=k.get('relative_global_gap'), global_gap_certified=k.get('global_gap_certified'),
+                        FULL_UB=result.get('BEST_GLOBAL_UB'), **gap_fields,
+                        **restricted_joint_diagnostic(result),
                         restricted_joint_pool_bound_is_global=False,
                         missed_K48_gap_blocks_FULL_feasible_Actual=False,
                         STAY_MOVE_complete_routes=plan.get('route_paths'), MOVE_count=len(plan['moves']) if 'moves' in plan else None,
@@ -245,22 +314,23 @@ def report(source=DEFAULT, *, output):
             inclusive_wall_contains_build_solve_Actual_AC=True, nested_times_must_not_be_added=True,
             **stage_native(calls, arm, ledger_present=both_present)))
     tables = {
-        'MAY01_FOUR_ARM_EXECUTION_LEDGER.csv': execution,
-        'MAY01_FOUR_ARM_PLANNING_RESULTS.csv': planning,
-        'MAY01_FOUR_ARM_ACTUAL_RESULTS.csv': actual_rows,
-        'MAY01_FOUR_ARM_FRESH_AC_RESULTS.csv': fresh_rows,
-        'MAY01_AIDC_FLEXIBILITY_ACTION_FUNNEL.csv': funnel,
-        'MAY01_MESS_UB_K48_GAP.csv': mess_rows,
-        'MAY01_NATIVE_WALL_RAM_REPORT.csv': resources}
+        'TABLE_V_FOUR_ARM_EXECUTION_LEDGER.csv': execution,
+        'TABLE_V_FOUR_ARM_PLANNING_RESULTS.csv': planning,
+        'TABLE_V_FOUR_ARM_ACTUAL_RESULTS.csv': actual_rows,
+        'TABLE_V_FOUR_ARM_FRESH_AC_RESULTS.csv': fresh_rows,
+        'TABLE_V_AIDC_FLEXIBILITY_ACTION_FUNNEL.csv': funnel,
+        'TABLE_V_MESS_UB_K48_GAP.csv': mess_rows,
+        'TABLE_V_NATIVE_WALL_RAM_REPORT.csv': resources}
     for name, rows in tables.items(): csv_write(output/name, rows)
-    statuses = {a: arm_data[a]['outcome'].get('status', 'NOT_RUN') for a in ARMS}
+    statuses = {a: arm_data[a]['status'] for a in ARMS}
     pass_count = sum(statuses[a] == 'FULL_PASS' and arm_data[a]['fresh'].get('verified_official_Full96')
                      and arm_data[a]['fresh'].get('settled_raw_replay_status') == 'PASS' for a in ARMS)
-    lines = ['# May01 Table V 비교', '', '| Arm | Computing | MESS | 실행 결과 | Raw Fresh96 재검산 |', '|---|---|---|---|---|']
+    lines = [f'# {label} Table V 비교', '', '| Arm | Computing | MESS | 실행 결과 | Raw Fresh96 재검산 |', '|---|---|---|---|---|']
     for a in ARMS:
         lines.append(f"| {a} | {'Reference' if a in ('B0','B2') else 'Full E1/FLEX30/R1'} | {'OFF' if a in ('B0','B1') else 'ON'} | {statuses[a]} | {arm_data[a]['fresh'].get('settled_raw_replay_status','NOT_RUN')} |")
     lines += ['', f'실제 Arm 결과와 raw settled Fresh96가 모두 PASS인 비교군은 {pass_count}/4개입니다.',
         '미실행·미기록 수치는 0으로 대체하지 않았습니다. Planning action은 Actual 실행 횟수로 전이하지 않았습니다.',
+        'Global Gap 목표는 AIDC 0.5%, MESS 3%입니다. Restricted Joint Gap은 진단값이며 Global LB나 K48 하한 인증을 대신하지 않습니다.',
         '', 'A1/A2는 Arm·Stage마다 누적 Gurobi Native 5400초, M1/M2는 1800초이며 합산 총량 제한은 없습니다. K48은 별도 단계 원장입니다. Build·HiGHS·Actual·AC wall은 Native timeout에서 제외됩니다.',
         '표의 Arm wall은 중첩 시간을 포함한 실제 전체 wall입니다. Native/Presolve/Root/Build와 다시 더하지 않습니다.',
         '공식 물리 판정은 15분×96의 원래 settle_slot→measure_full_network입니다. Substep 진단은 별도로 보존하며 공식 판정을 대신하지 않습니다. 연속시간 안전 인증은 주장하지 않습니다.',
@@ -274,24 +344,28 @@ def report(source=DEFAULT, *, output):
         delta_l = l1-l0 if valid and finite(l0) and finite(l1) else 'NOT_CERTIFIED'
         delta_g = g1-g0 if finite(g0) and finite(g1) else 'NOT_RECORDED'
         lines.append(f'- {baseline}→{treatment} ({label}): 최대 선로부하율 차이 {delta_l}, 실제 Compute GPUh 차이 {delta_g}.')
-    (output/'MAY01_TABLE_V_COMPARISON_KO.md').write_text('\n'.join(lines)+'\n', encoding='utf8')
-    review = ['# May01 Release 후보 검토', '', f'현재 raw 검산 기준 FULL_PASS: {pass_count}/4.',
-        '네 Arm 전체 PASS 전에는 May01 통합 ReleaseFreeze나 다른 날짜의 실행 성공을 선언하지 않습니다.',
+    (output/'TABLE_V_COMPARISON_KO.md').write_text('\n'.join(lines)+'\n', encoding='utf8')
+    review = [f'# {label} Release 후보 검토', '', f'현재 raw 검산 기준 FULL_PASS: {pass_count}/4.',
+        f'네 Arm 전체 PASS 전에는 {label} 통합 ReleaseFreeze나 다른 날짜의 실행 성공을 선언하지 않습니다.',
         '원본 Adaptive Beam→4-MESS Joint→Original FULL→Incumbent registry와 K48만 실행 대상입니다. Joint 제한 후보풀의 ObjBound는 Global LB로 사용하지 않습니다.',
         '현재 단계의 FULL-feasible 해는 K48 목표 Gap 미달과 별도로 Actual 물리 평가에 전달할 수 있습니다.', '']
     for a in ARMS:
         outcome = arm_data[a]['outcome']
         review.append(f"- {a}: {statuses[a]}; 실패 단계={outcome.get('failed_stage','해당 없음/미기록')}; 사유={outcome.get('error','미기록')}.")
-    review += ['', '다른 5월 날짜: 이번 실행 권한과 결과는 May01 전용입니다. 날짜별 현재 Case/초기 상태/정책/단계 FULL 부모 및 실제 Actual96·Fresh96 검증이 추가로 필요합니다.',
+    review += ['', '다른 날짜의 성공으로 전이하지 않습니다. 날짜별 현재 Case/초기 상태/정책/단계 FULL 부모 및 실제 Actual96·Fresh96 검증이 필요합니다.',
         'CSV는 raw에 실제 존재하는 항목만 기록합니다. 미기록 행동 수·QoS 세부값은 별도 raw funnel/queue/QoS 원장을 연결하기 전까지 미인증입니다.', '']
-    (output/'MAY01_RELEASE_CANDIDATE_REVIEW_KO.md').write_text('\n'.join(review),encoding='utf8')
-    for name in ('MAY01_TABLE_V_FOUR_ARM_CONTRACT.json','MAY01_COMMON_INITIAL_STATE_CERTIFICATE.json','MAY01_FLEXIBILITY_POLICY_FREEZE.json'):
-        path = source/name
+    (output/'TABLE_V_RELEASE_CANDIDATE_REVIEW_KO.md').write_text('\n'.join(review),encoding='utf8')
+    for path in (contract_path,common_path,policy_path):
         if path.is_file():
-            (output/name).write_bytes(path.read_bytes()); raw_inputs.append(record(path))
+            (output/path.name).write_bytes(path.read_bytes()); raw_inputs.append(record(path))
+    if day=='2025-05-01':
+        aliases={name:'MAY01_'+name.removeprefix('TABLE_V_') for name in tables}
+        aliases.update({'TABLE_V_COMPARISON_KO.md':'MAY01_TABLE_V_COMPARISON_KO.md',
+                        'TABLE_V_RELEASE_CANDIDATE_REVIEW_KO.md':'MAY01_RELEASE_CANDIDATE_REVIEW_KO.md'})
+        for current,legacy in aliases.items():(output/legacy).write_bytes((output/current).read_bytes())
     for name in ('PLANNING_NATIVE_LEDGER.json','K48_NATIVE_LEDGER.json','REFERENCE_RESULT.json','REFERENCE_ACCEPTANCE.json','EXECUTION_SOURCE_FREEZE.json'):
         if (source/name).is_file():raw_inputs.append(record(source/name))
-    manifest = dict(schema='MAY01_TABLE_V_REPORT_READ_ONLY_MANIFEST_V1', source=str(source),
+    manifest = dict(schema='TABLE_V_REPORT_READ_ONLY_MANIFEST_V1', day=day, source=str(source),
         report_source=record(__file__), raw_inputs=raw_inputs, arm_statuses=statuses,
         independently_replayed_Full96_PASS_arms=pass_count, Native_optimize_calls=0, model_builds=0,
         unknowns_not_imputed_as_zero=True, total_native_cap=None, total_native_cap_enabled=False,

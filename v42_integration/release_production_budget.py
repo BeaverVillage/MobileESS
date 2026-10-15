@@ -238,6 +238,8 @@ class ReleaseProductionBudget(IntegrationBudget):
         def admitted(model, *args, **kwargs):
             if model is not self._admitted_model or self._admitted_count != 0:
                 return blocked()
+            gate=getattr(self,'_before_native_optimize',None)
+            if gate is not None:gate(model)
             self._admitted_count += 1
             return original['optimize'](model, *args, **kwargs)
         gp.Model.optimize = admitted
@@ -307,12 +309,18 @@ class ReleaseProductionBudget(IntegrationBudget):
                         status = int(model.Status)
                     except Exception:
                         status = None
+                    entered=self._admitted_count>0
+                    prior_status=status
+                    if not entered:
+                        runtime=0.;status=None
                     charge = runtime if runtime is not None else wall
                     row = dict(label=label, solver='GUROBI', Native_Runtime=runtime,
                         wall_seconds=wall, charged_seconds=charge, cap_seconds=seconds,
                         overshoot_seconds=max(0.,charge-seconds), error=error, status=status,
                         stage_context=context, native_binding=actual, resource_before_solve=snapshot,
                         P2_call=False, objective_scope='ORIGINAL_P1_CURRENT_MATRIX_NOT_UNPRICED_GLOBAL_CERTIFICATE')
+                    row['native_execution_entered']=entered
+                    if not entered:row['pre_native_model_status']=prior_status
                     with self._transaction():
                         self.document['calls'].append(row)
                         self.document['Gurobi_Native_seconds'] += runtime or 0.

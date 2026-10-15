@@ -127,3 +127,16 @@ def test_carried_native_cost_preserved_without_transferring_old_case_status(tmp_
     assert row['current_case_completed_Native_Runtime_seconds'] == 20. and row['current_case_Native_calls_completed'] == 1
     assert row['last_completed_Native_status'] == 2 and row['last_completed_Native_status_name'] == 'OPTIMAL'
     assert row['last_completed_Native_status_source_sha'] == 'new-source'
+
+
+def test_stopped_old_raw_keeps_original_header_and_reports_exact_native_status(tmp_path):
+    write(tmp_path/'CAMPAIGN_STOP_REQUEST.json',dict(reason='USER_STOP'))
+    write(tmp_path/'B1/ARM_OUTCOME.json',dict(status='NOT_CERTIFIED',failed_stage='A1'))
+    write(tmp_path/'B1/PLANNING_STAGE_RESULTS.json',dict(A1=dict(result=dict(
+        FULL_feasible=False,Native_call=dict(status=11),bound=.613,gap=None))))
+    result=state(tmp_path)
+    assert result['campaign_status']=='STOPPED_BY_USER'
+    b1=result['arms'][1]
+    assert b1['raw_arm_status']=='NOT_CERTIFIED'
+    assert b1['statuses']['arm']=='INTERRUPTED_NO_FEASIBLE'
+    assert result['arms'][2]['statuses']['arm']=='NOT_RUN'

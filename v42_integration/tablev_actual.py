@@ -24,6 +24,7 @@ from .release_ac_contract import CONTRACT, validate_settled_fresh
 from .release_private_actual_inputs import (ARCHIVE, STRICT_STATS, STRICT_STATS_SHA,
     _public_source_join, _load_private_truth, _driver_bank, _decoded_initial_copy)
 from .table_v_flex_planning import compile_public_reference
+from .table_v_dates import context_day
 
 ROOT=Path(__file__).resolve().parents[1]
 SCHEMA='TABLE_V_ACTUAL_EXECUTION_V1'
@@ -122,8 +123,7 @@ def prepare_reference_inputs(context,*,reference_result,reference_acceptance,out
         _require_context(context)
     if type(slots) is not int or slots not in (16,96):raise ValueError('TABLE_V_EXPLICIT_16_OR_96_SCOPE_REQUIRED')
     reference=_require_reference(context,reference_result,reference_acceptance)
-    state=context['state'];day=state['day'];begin=state['begin_epoch_seconds']
-    if day!='2025-05-01':raise ValueError('TABLE_V_MAY01_ONLY')
+    state=context['state'];day=context_day(context);begin=state['begin_epoch_seconds']
     output=Path(output)
     if output.exists():raise FileExistsError('TABLE_V_PRIVATE_PREPARATION_MUST_NOT_OVERWRITE')
     raw=ARCHIVE/'raw'/day
@@ -147,19 +147,22 @@ def prepare_reference_inputs(context,*,reference_result,reference_acceptance,out
             tuple(context['forecast']['Q90_GPUh']),begin),power_model=model,
         weather=[observations.at(begin+t*900,observed_now=begin+t*900)['weather']['values'] for t in range(slots)])
     arguments=project_public_initial(arguments,state,reference=reference,provider=provider)
-    if len(arguments['running'])!=324 or sum(r.gpu for r,_,_ in arguments['running'])!=472:
-        raise ValueError('TABLE_V_APPROVED_324_RUNNING_472_GPU_REQUIRED')
-    if sum(r.metadata.get('origin_unknown') is False for r in arguments['requests'])!=1300:
-        raise ValueError('TABLE_V_APPROVED_1300_PENDING_KNOWN_REQUIRED')
+    running_gpu=sum(r['gpu'] for r in state['running'])
+    if (len(arguments['running'])!=len(state['running'])
+            or sum(r.gpu for r,_,_ in arguments['running'])!=running_gpu):
+        raise ValueError('TABLE_V_CURRENT_DATE_APPROVED_RUNNING_ROSTER_REQUIRED')
+    if sum(r.metadata.get('origin_unknown') is False for r in arguments['requests'])!=len(state['pending']):
+        raise ValueError('TABLE_V_CURRENT_DATE_APPROVED_PENDING_KNOWN_REQUIRED')
     sources += [stats_record,archive_receipt,*power_receipts,*observations.sources]
     sources += [file_record(ROOT/p) for p in ('v42_integration/tablev_actual.py','v42_integration/actual.py',
         'v42_integration/release_private_actual_inputs.py','v42_integration/table_v_reference.py',
-        'v42_integration/table_v_flex_planning.py','v42_integration/qos.py','v42_capacity/actual.py')]
+        'v42_integration/table_v_flex_planning.py','v42_integration/table_v_dates.py',
+        'v42_integration/qos.py','v42_capacity/actual.py')]
     sources=list({r['path']:r for r in sources}.values());verify_sources(context['manifest']['source_freeze'],sources)
     output.mkdir(parents=True);decoded=_decoded_initial_copy(context,output)
-    receipt=dict(status='PASS_PRIVATE_INPUT_PREPARATION_ONLY',reference_acceptance=reference_acceptance,
+    receipt=dict(status='PASS_PRIVATE_INPUT_PREPARATION_ONLY',day=day,reference_acceptance=reference_acceptance,
         initial_source=context['manifest']['initial_record'],private_bank=bank_receipt,
-        approved_initial_Known=1624,initial_GPU=472,initial_CC4_depletion=0,
+        approved_initial_Known=len(state['running'])+len(state['pending']),initial_GPU=running_gpu,initial_CC4_depletion=0,
         strict_original_QoS=True,Basic_85500_research_window_used=False,
         original_truth_extractor_and_Environment_reused=True,private_Controller_fields_read=0,
         source_records=sources,decoded_initial=decoded,Native_calls=0)
@@ -191,6 +194,8 @@ def _require_mess(context,arm,m_result,m_acceptance):
         if m_result is not None or m_acceptance is not None:raise ValueError('TABLE_V_MESS_OFF_REJECTS_ON_PLAN')
         return initial_mess(context['data'][0])
     from .table_v_mess import require_m_acceptance
+    if m_result.get('day')!=context_day(context):
+        raise ValueError('TABLE_V_CURRENT_DATE_MESS_PARENT_REQUIRED')
     require_m_acceptance(m_acceptance,arm=arm,stage='M1' if arm=='B2' else 'M2',
         identity=context['manifest']['identity'],result=m_result)
     return m_result['mess']
@@ -207,6 +212,7 @@ def run_tablev_actual(*,context,arm,reference_result,reference_acceptance,output
     if arm not in ('B0','B2'):raise ValueError('TABLE_V_FULL_FLEX_FACTORY_NOT_YET_ADMITTED')
     if gate.get('Gate_contract')!=CONTRACT or gate.get('official_contract_authorized') is not True:
         raise ValueError('TABLE_V_ORIGINAL_SETTLED_AC_CONTRACT_REQUIRED')
+    day=context_day(context)
     mess=_require_mess(context,arm,m_result,m_acceptance)
     output=Path(output)
     if output.exists():raise FileExistsError('TABLE_V_ACTUAL_MUST_NOT_OVERWRITE')
@@ -214,11 +220,17 @@ def run_tablev_actual(*,context,arm,reference_result,reference_acceptance,output
     private=prepare_reference_inputs(context,reference_result=reference_result,
         reference_acceptance=reference_acceptance,output=output/'PRIVATE_INPUTS',slots=slots)
     freeze=_source_freeze(context,private,output);args=dict(private['arguments']);args.update(arm=arm)
-    payload=dict(schema='TABLE_V_ACTUAL_EVALUATION_CASE_V1',arm=arm,
+    payload=dict(schema='TABLE_V_ACTUAL_EVALUATION_CASE_V1',day=day,arm=arm,
         source_identity=context['manifest']['identity'],source_sha=context['manifest']['source_sha'],
         initial_state_sha=context['state']['common_initial_state_sha'],reference_result_sha=digest(reference_result),
         reference_acceptance_sha=digest(reference_acceptance),MESS_plan_sha=mess['plan_sha'],slots=slots,
-        policy='ORIGINAL_REFERENCE_FIFO_GRID_BLIND_NO_ADDED_FLEX',clock_contract=CONTRACT)
+        AIDC_anchor=reference_result['aidc_anchor'],A_result_sha=digest(reference_result),
+        A_acceptance_sha=reference_acceptance['acceptance_sha'],
+        M_result_sha=None if m_result is None else digest(m_result),
+        M_acceptance_sha=None if m_acceptance is None else m_acceptance['acceptance_sha'],
+        final_AIDC_stage='REFERENCE',final_MESS_stage='OFF' if arm=='B0' else 'M1',
+        policy='ORIGINAL_REFERENCE_FIFO_GRID_BLIND_NO_ADDED_FLEX',
+        policy_sha=digest('ORIGINAL_REFERENCE_FIFO_GRID_BLIND_NO_ADDED_FLEX'),clock_contract=CONTRACT)
     from .isolated_unknown import no_native
     from .rc02_prefix_cache import memory_gate
     memory_gate();began=perf_counter()
@@ -232,10 +244,12 @@ def run_tablev_actual(*,context,arm,reference_result,reference_acceptance,output
     bad=[k for k in ('capacity_violations','dropped_jobs','future_duration_controller_reads',
         'future_completion_controller_reads','optimizer_calls','actual_global_reoptimization') if result['receipt'][k]!=0]
     verify_sources(freeze,[])
-    receipt=dict(schema=SCHEMA,fixture=False,arm=arm,day='2025-05-01',status='FULL_PASS' if not bad else 'NOT_CERTIFIED',
+    receipt=dict(schema=SCHEMA,fixture=False,arm=arm,day=day,status='FULL_PASS' if not bad else 'NOT_CERTIFIED',
         Actual_stage_PASS=not bad,Actual_stage_failures=bad,source_identity=context['manifest']['identity'],
         source_sha=context['manifest']['source_sha'],evaluation_case_payload=payload,evaluation_case_sha=digest(payload),
         initial_state_sha=context['state']['common_initial_state_sha'],MESS_plan_sha=mess['plan_sha'],
+        AIDC_anchor=reference_result['aidc_anchor'],policy_sha=payload['policy_sha'],
+        final_AIDC_stage=payload['final_AIDC_stage'],final_MESS_stage=payload['final_MESS_stage'],
         executed_actual_slots=slots,actual_trace=file_record(trace),actual_source_freeze=file_record(output/'TABLE_V_ACTUAL_SOURCE_FREEZE.json'),
         Original_event_driver_reused=True,private_Environment_identity_preserved=True,Actual_global_MILP_calls=0,
         blocked_native_attempts=attempts,actual_wall_seconds=perf_counter()-began,receipt=result['receipt'],
@@ -251,6 +265,7 @@ def run_tablev_fresh(*,context,actual_result,output,m_result=None,m_acceptance=N
     from .mess_actual import consume_frozen_mess
     actual=actual_result.get('result',actual_result)
     if (actual.get('schema')!=SCHEMA or actual.get('fixture') is not False or actual.get('Actual_stage_PASS') is not True
+            or actual.get('day')!=context_day(context)
             or actual.get('source_identity')!=context['manifest']['identity'] or actual.get('executed_actual_slots')!=slots
             or actual.get('evaluation_case_sha')!=digest(actual['evaluation_case_payload'])):
         raise ValueError('TABLE_V_FRESH_EXACT_CURRENT_ACTUAL_REQUIRED')

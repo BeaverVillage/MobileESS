@@ -23,6 +23,28 @@ MAIN_CAPS = {'B1:A1': 5400., 'B2:M1': 1800., 'B3:A1': 5400.,
 K48_CAPS = {'B2:K48_M1': 300., 'B3:K48_M1': 300., 'B3:K48_M2': 300.}
 
 
+def _native_origin(record, index, row):
+    """Resolve immutable predecessor provenance before deduplicating a charge."""
+    visited = set()
+    while True:
+        key = (str(Path(record['path']).resolve()), record['sha256'], index, digest(row))
+        if key in visited:
+            raise ValueError('CYCLIC_NATIVE_CARRY_FORWARD_PROVENANCE')
+        visited.add(key)
+        parent = row.get('carried_forward_from')
+        if parent is None:
+            return key
+        record, index = parent['ledger'], parent['row_index']
+        if file_record(record['path']) != record:
+            raise ValueError('CARRIED_NATIVE_ORIGIN_LEDGER_DRIFT')
+        original = json.loads(Path(record['path']).read_text(encoding='utf8'))['calls'][index]
+        if (digest(original) != parent['row_sha']
+                or {k:v for k,v in original.items() if k != 'carried_forward_from'}
+                != {k:v for k,v in row.items() if k != 'carried_forward_from'}):
+            raise ValueError('CARRIED_NATIVE_ORIGIN_ROW_DRIFT')
+        row = original
+
+
 def require_authorization(a):
     expected = K48_CAPS if a.get('budget_kind') == 'K48_SEPARATE' else MAIN_CAPS
     if (a.get('schema') != SCHEMA or a.get('approved') is not True
@@ -35,6 +57,14 @@ def require_authorization(a):
             or not a.get('authorization_id') or not a.get('authorized_ledger_path')
             or not a.get('human_approval_reference') or not a.get('source_cases')):
         raise PermissionError('EXPLICIT_TABLE_V_STAGE_ONLY_AUTHORIZATION_REQUIRED')
+    fresh=a.get('fresh_native_cycle')
+    if fresh is not None and (not isinstance(fresh,dict)
+            or fresh.get('schema')!='TABLE_V_EXPLICIT_FRESH_NATIVE_CYCLE_V1'
+            or fresh.get('approved') is not True or fresh.get('start_native_seconds')!=0
+            or not fresh.get('human_approval_reference') or not fresh.get('cycle_id')
+            or not fresh.get('archived_native_ledgers') or a.get('carry_forward_ledgers')
+            or fresh.get('reuse_previous_solution_or_bound') is not False):
+        raise PermissionError('EXPLICIT_HUMAN_FRESH_NATIVE_CYCLE_WITH_IMMUTABLE_ARCHIVES_REQUIRED')
     return a
 
 
@@ -45,7 +75,7 @@ class TableVStageBudget(ReleaseProductionBudget):
         self.authorization = deepcopy(authorization)
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        carried=[];carry_parents=[]
+        carried=[];carry_parents=[];charged_origins=set()
         for record in authorization.get('carry_forward_ledgers',[]):
             if file_record(record['path'])!=record or any(r['path']==record['path'] for r in carry_parents):
                 raise ValueError('EXACT_DISTINCT_PREDECESSOR_NATIVE_LEDGER_REQUIRED')
@@ -59,9 +89,13 @@ class TableVStageBudget(ReleaseProductionBudget):
                 if not row.get('solver','').startswith('GUROBI'):continue
                 runtime=row.get('Native_Runtime');c=row.get('stage_context',{})
                 if (type(runtime) not in (int,float) or not math.isfinite(runtime) or runtime<0
-                        or c.get('day')!='2025-05-01'
+                        or c.get('day') not in {a.get('day') for a in authorization['source_cases']}
                         or c.get('arm','')+':'+c.get('stage','') not in authorization['stage_caps_seconds']):
                     raise ValueError('KNOWN_NATIVE_RUNTIME_AND_ORIGINAL_ARM_STAGE_REQUIRED')
+                origin=_native_origin(record,index,row)
+                if origin in charged_origins:
+                    continue
+                charged_origins.add(origin)
                 copied=deepcopy(row)
                 copied['carried_forward_from']=dict(ledger=record,row_index=index,row_sha=digest(row))
                 carried.append(copied)
@@ -70,6 +104,24 @@ class TableVStageBudget(ReleaseProductionBudget):
             raise PermissionError('APPROVAL_BOUND_TO_ONE_CANONICAL_LEDGER_PATH')
         self.historical = [file_record(p) for p in historical_ledgers]
         self.historical += [r for r in carry_parents if r not in self.historical]
+        fresh=authorization.get('fresh_native_cycle')
+        archived_seconds=0.
+        archived_paths=set()
+        for record in (fresh or {}).get('archived_native_ledgers',[]):
+            absolute=str(Path(record['path']).resolve())
+            if file_record(record['path'])!=record or absolute in archived_paths:
+                raise ValueError('FRESH_CYCLE_ARCHIVED_NATIVE_LEDGER_BYTES_DRIFT')
+            archived_paths.add(absolute)
+            prior=json.loads(Path(record['path']).read_text(encoding='utf8'))
+            if (prior.get('schema')!='TABLE_V_NATIVE_STAGE_LEDGER_V1' or prior.get('inflight')
+                    or prior.get('active_stage_context')
+                    or prior['authorization_document']['budget_kind']!=authorization['budget_kind']):
+                raise ValueError('FRESH_CYCLE_REQUIRES_COMPLETED_SAME_KIND_ARCHIVED_LEDGER')
+            seconds=prior.get('Gurobi_Native_seconds')
+            if type(seconds) not in (int,float) or not math.isfinite(seconds) or seconds<0:
+                raise ValueError('FRESH_CYCLE_ARCHIVED_NATIVE_USAGE_MUST_REMAIN_KNOWN')
+            archived_seconds+=seconds
+            if record not in self.historical:self.historical.append(record)
         if len(self.historical) < 2 or any(Path(r['path']).resolve() == self.path.resolve() for r in self.historical):
             raise ValueError('OLD_CANONICAL_AND_CONSUMED_RC01_LEDGERS_READ_ONLY_REQUIRED')
         self.worker_lock = Path(worker_lock)
@@ -114,6 +166,10 @@ class TableVStageBudget(ReleaseProductionBudget):
                 historical_ledgers_merged=False, release_identity=identity,
                 authorization_document=deepcopy(authorization),
                 worker_lock_path=str(self.worker_lock.resolve()), P2_calls=0, Worker=1, Threads=1)
+            if fresh is not None:
+                self.document.update(fresh_native_cycle=deepcopy(fresh),fresh_cycle_native_start_seconds=0.,
+                    archived_native_seconds_excluded_from_current_cycle=archived_seconds,
+                    archived_ledgers_overwritten=False,prior_arm_stage_costs_reset=True)
             self._save()
         self.check_historical()
 
@@ -132,7 +188,13 @@ class TableVStageBudget(ReleaseProductionBudget):
                           case_certificate=None):
         if f'{arm}:{stage}' not in self.authorization['stage_caps_seconds']:
             raise PermissionError('ARM_STAGE_NOT_AUTHORIZED')
-        authority = dict(day='2025-05-01', source_sha=source_sha, source_identity=source_identity)
+        authorities=[a for a in self.authorization['source_cases'] if a.get('source_sha')==source_sha
+                     and a.get('source_identity')==source_identity]
+        if len(authorities)!=1:
+            raise PermissionError('ONE_EXACT_TABLE_V_DATE_SOURCE_CASE_REQUIRED')
+        authority=authorities[0]
+        from .release_date_case import require_day
+        require_day(authority['day'])
         if authority not in self.authorization['source_cases']:
             raise PermissionError('EXACT_TABLE_V_SOURCE_CASE_AUTHORITY_REQUIRED')
         if not stage_case_sha:
@@ -159,14 +221,20 @@ class TableVStageBudget(ReleaseProductionBudget):
             from .table_v_mess import require_m_acceptance
             require_m_acceptance(parent_acceptance, result=parent_result, identity=source_identity,
                                  arm=arm, stage='M1' if stage in ('A2', 'K48_M1') else 'M2')
-        context = dict(day='2025-05-01', arm=arm, stage=stage, stage_case_sha=stage_case_sha,
+        context = dict(day=authority['day'], arm=arm, stage=stage, stage_case_sha=stage_case_sha,
                        source_sha=source_sha, parent_result_sha=digest(parent_result))
         if context not in self.derived_bindings:
             self.derived_bindings.append(context)
         return context
 
     @contextmanager
-    def phase(self, stage, stage_case_sha, source_sha, parent_result_sha, *, day='2025-05-01'):
+    def phase(self, stage, stage_case_sha, source_sha, parent_result_sha, *, day=None):
+        if day is None:
+            matches=[c['day'] for c in self.derived_bindings if c['arm']==self.arm and c['stage']==stage
+                     and c['stage_case_sha']==stage_case_sha and c['source_sha']==source_sha
+                     and c['parent_result_sha']==parent_result_sha]
+            if len(set(matches))!=1:raise PermissionError('ONE_EXACT_APPROVED_DATE_STAGE_REQUIRED')
+            day=matches[0]
         context = dict(day=day, arm=self.arm, stage=stage, stage_case_sha=stage_case_sha,
                        source_sha=source_sha, parent_result_sha=parent_result_sha)
         if self.context is not None or self.arm is None:
@@ -206,12 +274,36 @@ class TableVStageBudget(ReleaseProductionBudget):
         return max(0., cap-sum(r['Native_Runtime'] for r in rows))
 
     def _call_gate(self, label, *, require_remaining=True):
+        from .table_v_control import require_running
+        require_running(self.path.parent)
         if (self.context is None or 'P2' in label.upper()
                 or not label.startswith('RELEASE_P1:'+self.context['stage']+':')):
             raise ValueError('P1_ONLY_EXACT_ARM_STAGE_LABEL_REQUIRED')
         self.check_historical()
         if require_remaining and self.remaining() <= 0:
             raise RuntimeError('ARM_STAGE_NATIVE_TIMEOUT_EXHAUSTED')
+
+    def solve(self, model, *, label, cap, callback=None, binding=None):
+        from .table_v_control import STOP_FILE
+        from .table_v_resources import admit_resources
+        admit_resources(self,phase='PRE_NATIVE_CALL')
+        stop_file=self.path.parent/STOP_FILE
+        def cooperative_stop(current, where):
+            if stop_file.exists():
+                current.terminate()
+                return
+            if callback is not None:
+                callback(current,where)
+        return super().solve(model,label=label,cap=cap,callback=cooperative_stop,binding=binding)
+
+    def _before_native_optimize(self,model):
+        from .table_v_resources import admit_resources
+        receipt=admit_resources(self,phase='IMMEDIATELY_BEFORE_NATIVE_OPTIMIZE',owned_lock=True)
+        self._refresh()
+        call=self.document.get('inflight') or {}
+        if (call.get('pid')!=os.getpid() or call.get('worker_lock_owner')!=receipt['lock_owner']
+                or call.get('worker_lock_record')!=receipt['lock_record']):
+            raise RuntimeError('NATIVE_INFLIGHT_LOCK_OWNER_BINDING_DRIFT')
 
     def record_external(self, label, seconds, *, solver='OTHER', status='COMPLETED'):
         self._call_gate(label, require_remaining=False)

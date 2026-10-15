@@ -33,8 +33,9 @@ def main():
         print(json.dumps(run_planning_p1(plan,authorization=approval,folder=a.output,budget_ledger=a.budget_ledger),indent=2));return
     if not a.physical_gate:
         raise PermissionError('EXPLICIT_PLAN_NEW_APPROVAL_PHYSICAL_GATE_OUTPUT_AND_LEDGER_REQUIRED_NO_AUTOLAUNCH')
+    ledger=read(a.budget_ledger) if plan.get('schema')=='TABLE_V_FOUR_ARM_PRODUCTION_PLAN_V1' else a.budget_ledger
     print(json.dumps(run_production(plan,authorization=approval,gate=gate,folder=a.output,
-        budget_ledger=a.budget_ledger),indent=2))
+        budget_ledger=ledger),indent=2))
 
 
 if __name__=='__main__':main()

@@ -18,6 +18,8 @@ from scipy import sparse
 
 from .a_engine import digest
 from .m_engine import _write, file_record, vector_sha
+from .table_v_gap_contract import MESS_GLOBAL_GAP_TARGET
+from .table_v_dates import require_day
 from v42_m1_hybrid.blocks import matrix_sha
 from v42_may_campaign_native90.m_model import _domain_sha
 from tools.critical_grid_cg import oracle as original_oracle
@@ -44,11 +46,13 @@ def family(name):
 def identity(case):
     """Bind actual numeric source bytes, not manually supplied SHA strings."""
     require(digest(case.identity) == case.case_sha, 'K48_CURRENT_STAGE_CASE_IDENTITY_DRIFT')
+    day = require_day(case.identity['day'])
+    require(case.bundle['day'] == day, 'K48_CURRENT_DATE_NATIVE_SOURCE_DRIFT')
     A, d = case.original_A, case.original_d
     actual = dict(matrix_sha=matrix_sha(A), domain_sha=_domain_sha(d))
     require(actual['matrix_sha'] == case.identity['original_matrix_sha'], 'K48_CURRENT_FULL_MATRIX_DRIFT')
     require(actual['domain_sha'] == case.identity['original_domain_sha'], 'K48_CURRENT_FULL_DOMAIN_DRIFT')
-    return dict(stage_case_sha=case.case_sha, source_sha=case.identity['D0_source_sha'],
+    return dict(day=day, stage_case_sha=case.case_sha, source_sha=case.identity['D0_source_sha'],
         parent_case_sha=case.identity['D0_parent_case_sha'], arm=case.identity['arm'],
         stage=case.identity['stage'], aidc_anchor=case.identity['aidc_anchor'], **actual)
 
@@ -422,6 +426,43 @@ def solve_packet(packet, certificate, budget, output):
         model.dispose()
 
 
+def summarize_current_k48(packet, certificate, history):
+    """Report each bound at its solved K; packet construction is not a solve.
+
+    Any certified member of the nested relaxation sequence bounds the same
+    current original FULL problem. A valid K16/K32 bound is never relabelled as
+    a solved or certified K48 bound.
+    """
+    ub = certificate['current_FULL_UB']
+    valid = [r for r in history if r.get('numerical_global_bound_contract') is True
+             and type(r.get('Global_LB')) in (int, float) and math.isfinite(r['Global_LB'])]
+    for result in history:
+        require(result.get('source') == packet['source'], 'K48_HISTORY_CURRENT_CASE_DRIFT')
+    best = max((r['Global_LB'] for r in valid), default=None)
+    if best is not None:
+        require(best <= ub + 1e-6, 'K48_BOUND_EXCEEDS_CURRENT_ORIGINAL_FULL_UB')
+    gap = None if best is None else max(0., (ub-best) / max(abs(ub), 1e-10))
+    completed = any(r['K'] == 48 for r in history)
+    valid_k48 = [r for r in valid if r['K'] == 48]
+    target_met = gap is not None and gap <= MESS_GLOBAL_GAP_TARGET
+    return dict(schema='TABLE_V_CURRENT_K48_RESULT_V1', source=packet['source'],
+        status='K48_EXECUTED' if completed else 'PARTIAL_ORIGINAL_K_SEQUENCE',
+        K_reached=packet['K'], K_solved=max((r['K'] for r in history), default=None),
+        K48_completed=completed, K48_cuts_reached=packet['K'] == 48, history=history,
+        current_FULL_UB=ub, Global_LB=best, Global_LB_valid=best is not None,
+        Global_LB_valid_K=sorted({r['K'] for r in valid}),
+        Global_LB_best_K=sorted({r['K'] for r in valid if r['Global_LB'] == best}),
+        Global_LB_scope='CURRENT_ORIGINAL_FULL_WITH_FIXED_AIDC_ANCHOR' if valid else 'NOT_CERTIFIED',
+        K48_Global_LB=max((r['Global_LB'] for r in valid_k48), default=None),
+        K48_Global_LB_valid=bool(valid_k48), relative_global_gap=gap,
+        global_gap_target=MESS_GLOBAL_GAP_TARGET, global_gap_target_percent=100*MESS_GLOBAL_GAP_TARGET,
+        global_gap_certified=target_met,
+        optimality_status='TARGET_MET' if target_met else 'OPTIMALITY_TARGET_UNMET' if valid else 'NOT_CERTIFIED',
+        physical_evaluation_allowed=True, missed_gap_blocks_FULL_feasible_Actual=False,
+        historical_bounds_transferred=False, restricted_pool_bound_used=False,
+        solver_algorithm='ORIGINAL_K16_THEN_K32_THEN_K48', coordinate_representation='ORIGINAL_FULL_PHYSICAL_IDENTITY')
+
+
 def run_current_k48(case, selected_full_point, budget, output):
     """Original iterative order, with one separately authorized cumulative cap.
 
@@ -431,16 +472,14 @@ def run_current_k48(case, selected_full_point, budget, output):
     """
     output = Path(output); output.mkdir(parents=True, exist_ok=False)
     packet, certificate = prepare_k16(case, selected_full_point, output / 'K16')
-    history, best, completed = [], None, False
+    history = []
     for iteration in range(3):
         if budget.remaining() <= 0:
             break
         result, point = solve_packet(packet, certificate, budget, output / ('K'+str(packet['K'])) / 'SOLVE')
         history.append(result)
-        if result['Global_LB'] is not None:
-            best = result['Global_LB'] if best is None else max(best, result['Global_LB'])
         if packet['K'] == 48:
-            completed = True; break
+            break
         if point is None or iteration == 2 or budget.remaining() <= 0:
             break
         cuts, separation = separate(case, packet, point)
@@ -449,18 +488,6 @@ def run_current_k48(case, selected_full_point, budget, output):
             break
         packet, certificate = append_cuts(case, packet, cuts, output / ('K'+str(packet['K']+16)))
         gc.collect()
-    ub = certificate['current_FULL_UB']
-    if best is not None:
-        require(best <= ub + 1e-6, 'K48_BOUND_EXCEEDS_CURRENT_ORIGINAL_FULL_UB')
-    gap = None if best is None else max(0., (ub-best) / max(abs(ub), 1e-10))
-    summary = dict(schema='TABLE_V_CURRENT_K48_RESULT_V1', source=packet['source'],
-        status='K48_EXECUTED' if completed else 'PARTIAL_ORIGINAL_K_SEQUENCE',
-        K_reached=packet['K'], K48_completed=completed, history=history, current_FULL_UB=ub,
-        Global_LB=best, relative_global_gap=gap, global_gap_target=.005,
-        global_gap_certified=gap is not None and gap <= .005,
-        optimality_status='TARGET_MET' if gap is not None and gap <= .005 else 'OPTIMALITY_TARGET_UNMET',
-        physical_evaluation_allowed=True, missed_gap_blocks_FULL_feasible_Actual=False,
-        historical_bounds_transferred=False, restricted_pool_bound_used=False,
-        solver_algorithm='ORIGINAL_K16_THEN_K32_THEN_K48', coordinate_representation='ORIGINAL_FULL_PHYSICAL_IDENTITY')
+    summary = summarize_current_k48(packet, certificate, history)
     _write(output / 'CURRENT_K48_RESULT.json', summary)
     return summary

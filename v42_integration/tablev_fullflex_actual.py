@@ -30,6 +30,7 @@ from .policy import ReservationLedger
 from .reservation_state import union_job_segments
 from .qos import ObservedJob
 from .m_engine import _write,file_record
+from .table_v_dates import context_day
 
 
 class StreamingAudit:
@@ -588,6 +589,7 @@ def run_fullflex_actual(*,context,arm,a_result,a_acceptance,reference_result,ref
             or a_acceptance.get('source_sha')!=context['manifest']['source_sha'] or a_result.get('arm')!=arm):
         raise ValueError('TABLE_V_CURRENT_ARM_ORIGINAL_FULL_A_P1_REQUIRED')
     require_full_a_parent(context,arm,a_result,a_acceptance)
+    day=context_day(context)
     _full_a(a_result);commands=compile_flex_commands(a_result,context)
     mess=_require_mess(context,arm,m_result,m_acceptance)
     if arm=='B3':
@@ -640,7 +642,8 @@ def run_fullflex_actual(*,context,arm,a_result,a_acceptance,reference_result,ref
     private['sources']+=extra
     freeze=_source_freeze(context,private,output)
     from .actual_validation import read,_validated_hardware_context
-    campaign=read(Path('D:/v42_may_joint_repair_campaign_20261013/CAMPAIGN_MANIFEST.json'))
+    from .tablev_actual import ARCHIVE
+    campaign=read(ARCHIVE/'CAMPAIGN_MANIFEST.json')
     oracle=TableVCurrentAC(begin=args['begin'],sites=packet.sites,power_model=args['power_model'],
         observations=private['observations'],source_freeze=freeze,manifest=campaign,mess=mess,proof_records=extra)
     oracle.audit=StreamingAudit(output/'CURRENT_CANDIDATE_AC_LEDGER.jsonl')
@@ -686,11 +689,15 @@ def run_fullflex_actual(*,context,arm,a_result,a_acceptance,reference_result,ref
             E1_CAUSAL_REFERENCE_LEDGER=policy.reference_audit,MIGRATION_FUNNEL=policy.migration_funnel,
             MIGRATION_RECEIPTS=result['migration_receipts'],RESEARCH_R1_LEDGER=research.export(),
             RESOURCE_BRIDGE=bridge.export()).items():_write(output/(name+'.json'),value)
-    payload=dict(schema='TABLE_V_FULL_FLEX_ACTUAL_EVALUATION_CASE_V1',arm=arm,source_identity=identity,
+    payload=dict(schema='TABLE_V_FULL_FLEX_ACTUAL_EVALUATION_CASE_V1',day=day,arm=arm,source_identity=identity,
         source_sha=context['manifest']['source_sha'],initial_state_sha=context['state']['common_initial_state_sha'],
         A_result_sha=digest(a_result),A_acceptance_sha=a_acceptance['acceptance_sha'],
+        reference_result_sha=digest(reference_result),reference_acceptance_sha=digest(reference_acceptance),
         M_result_sha=None if m_result is None else digest(m_result),
         M_acceptance_sha=None if m_acceptance is None else m_acceptance['acceptance_sha'],
+        AIDC_anchor=a_result['aidc_anchor'],MESS_plan_sha=mess['plan_sha'],
+        final_AIDC_stage=stage,final_MESS_stage='OFF' if arm=='B1' else 'M2',
+        policy=actual_policy,policy_sha=digest(actual_policy),
         actual_policy=actual_policy,actual_policy_sha=digest(actual_policy),slots=slots,clock_contract=CONTRACT)
     failures=[k for k in ('capacity_violations','dropped_jobs','future_duration_controller_reads',
         'future_completion_controller_reads','optimizer_calls','actual_global_reoptimization') if result['receipt'][k]!=0]
@@ -737,9 +744,11 @@ def run_fullflex_actual(*,context,arm,a_result,a_acceptance,reference_result,ref
         Original_reference_latest_start_excess_UIDs=sum(r['latest_start_excess_seconds']>0 for r in result['qos_ledger']),
         Original_reference_lateness_is_not_additional_intentional_burden=True,
         full_TimeShift_R1_Runtime_Backfill_Checkpoint_domain_connected=True,PreSite_only_case=False,R2='HOLD')
-    receipt=dict(schema=SCHEMA,fixture=False,arm=arm,day='2025-05-01',status='FULL_PASS' if not failures else 'NOT_CERTIFIED',
+    receipt=dict(schema=SCHEMA,fixture=False,arm=arm,day=day,status='FULL_PASS' if not failures else 'NOT_CERTIFIED',
         Actual_stage_PASS=not failures,Actual_stage_failures=failures,source_identity=identity,source_sha=context['manifest']['source_sha'],
         evaluation_case_payload=payload,evaluation_case_sha=digest(payload),initial_state_sha=identity['initial_state_sha'],
+        AIDC_anchor=a_result['aidc_anchor'],policy_sha=payload['policy_sha'],
+        final_AIDC_stage=payload['final_AIDC_stage'],final_MESS_stage=payload['final_MESS_stage'],
         MESS_plan_sha=mess['plan_sha'],executed_actual_slots=slots,actual_trace=file_record(trace),
         actual_source_freeze=file_record(output/'TABLE_V_ACTUAL_SOURCE_FREEZE.json'),Original_event_driver_reused=True,
         private_Environment_identity_preserved=True,Actual_global_MILP_calls=0,blocked_native_attempts=attempts,

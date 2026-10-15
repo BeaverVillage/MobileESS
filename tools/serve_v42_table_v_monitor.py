@@ -10,10 +10,13 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import math
 from pathlib import Path
+import sys
 import time
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
+from v42_integration.table_v_status import classify_a_result
 DEFAULT = ROOT/'docs/v42_unified_aidc_mess_research_20261014/RELEASE_RECOVERY_20261015/RC04/TABLE_V/EXECUTION01'
 ARMS = ('B0','B1','B2','B3')
 
@@ -57,9 +60,10 @@ def attempt_folder(source, arm):
 
 def state(source):
     source = Path(source).resolve()
-    contract = read_small(source/'MAY01_TABLE_V_FOUR_ARM_CONTRACT.json')
+    contract = read_small(source/'TABLE_V_FOUR_ARM_CONTRACT.json') or read_small(source/'MAY01_TABLE_V_FOUR_ARM_CONTRACT.json')
     planning = read_small(source/'PLANNING_NATIVE_LEDGER.json')
     k48 = read_small(source/'K48_NATIVE_LEDGER.json')
+    campaign_stop = read_small(source/'CAMPAIGN_STOP_REQUEST.json')
     now = time.time()
     calls = planning.get('calls', []) + k48.get('calls', [])
     rows = []
@@ -72,6 +76,12 @@ def state(source):
         fresh = unwrap(read_small(folder/'FRESH_AC_RESULT.json'))
         cert = fresh.get('official_certificate', {})
         resource = read_small(folder/'WALL_RAM_RESOURCE_REPORT.json')
+        stages = read_small(folder/'PLANNING_STAGE_RESULTS.json')
+        a_statuses = {name:classify_a_result(row.get('result')) for name,row in stages.items()
+                      if name in ('A1','A2')}
+        reported_status = outcome.get('status')
+        if reported_status == 'NOT_CERTIFIED' and outcome.get('failed_stage') in a_statuses:
+            reported_status = a_statuses[outcome['failed_stage']]
         inflight = next((d.get('inflight') for d in (planning,k48)
                          if (d.get('inflight') or {}).get('stage_context', {}).get('arm') == arm), None)
         active = next((d.get('active_stage_context') for d in (planning,k48)
@@ -130,10 +140,11 @@ def state(source):
         build_wall = sum(r['measured_seconds'] for r in build_rows) if build_rows else None
         native_inflight_wall = max(0.,now-inflight['started_epoch_seconds']) if inflight and finite(inflight.get('started_epoch_seconds')) else None
         metrics = actual.get('receipt', {})
-        statuses = dict(arm=outcome.get('status', 'RUNNING' if progress or active else 'WAITING'),
+        statuses = dict(arm=reported_status or ('RUNNING' if progress or active else 'NOT_RUN' if campaign_stop else 'WAITING'),
             Actual96=actual.get('status', 'NOT_RUN'), Fresh96=fresh.get('status', 'NOT_RUN'))
         rows.append(dict(arm=arm, computing='Reference' if arm in ('B0','B2') else 'Full E1/FLEX30/R1',
             MESS='OFF' if arm in ('B0','B1') else 'ON', statuses=statuses,
+            A_stage_statuses=a_statuses,raw_arm_status=outcome.get('status'),
             current_stage=current, current_phase=phase, last_progress_phase=last_progress_phase,
             completed_phase=completed_phase, failed_phase=failed_phase,
             elapsed_wall_seconds=elapsed,
@@ -189,6 +200,8 @@ def state(source):
                     reports.append(dict(label=directory.name+'/'+p.name,relative_path=directory.name+'/'+p.name))
     return dict(schema='TABLE_V_LOCAL_READ_ONLY_MONITOR_V1',source=str(source),
         observed_UTC=datetime.now(timezone.utc).isoformat(), arms=rows, order=list(ARMS),
+        campaign_status='STOPPED_BY_USER' if campaign_stop else 'ACTIVE_OR_READY',
+        campaign_stop_request=campaign_stop or None,
         source_case=contract.get('source_identity'), source_sha=contract.get('source_sha'),
         official_clock='900s ×96 original settle_slot → measure_full_network',
         P2_calls=0,R2='HOLD',Worker=1,Threads=1,total_native_limit_enabled=False,total_native_limit_seconds=None,
@@ -205,6 +218,7 @@ HTML = r'''<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="view
 <title>May01 Table V · Actual96 / Fresh96</title><style>
 body{font:15px system-ui,sans-serif;background:#111820;color:#e6edf3;margin:28px}h1{font-size:25px}p{line-height:1.65;color:#b8c7d5}table{border-collapse:collapse;width:100%;margin:18px 0;background:#19242f}th,td{padding:12px;border-bottom:1px solid #324354;text-align:left}th{color:#aaccdd;font-size:13px}td{font-variant-numeric:tabular-nums}.metric{font-size:20px;font-weight:650}a{color:#8dccff}details{margin:16px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere}.muted{color:#8ea2b5}.bad{color:#ffb5a9}.good{color:#90e0bb}#updated{font-size:13px}#failure{white-space:pre-wrap;color:#ffb5a9}</style>
 <h1>May01 Table V — 네 Arm 실제 실행</h1><p id="updated">현재 실행 자료를 읽는 중…</p>
+<p id="campaign-state"></p>
 <p>Reference / Full E1·FLEX30·R1 × MESS OFF / ON. P2 0 · R2 HOLD · Worker 1 · Threads 1.<br>
 Timeout: A1/A2 각 Arm·Stage Native 5,400초 / M1/M2 1,800초. <b>합산 총량 제한 없음</b>; K48 별도 원장. Build·HiGHS·Actual·AC는 Native timeout에서 제외.</p>
 <h2>Actual 최대 선로·상 부하율</h2><p>현재 Case의 Actual trace를 원래 15분×96 clock으로 settle 후 측정한 Full-network Fresh AC 값입니다. Planning ρ와 구분합니다. Fresh 완료 전 값은 대기 상태입니다. % = 100 × pu.</p>
@@ -219,7 +233,7 @@ function row(body,values,metricIndex=-1){let tr=document.createElement('tr');val
 async function refresh(){try{let response=await fetch('/api/state',{cache:'no-store'});if(!response.ok)throw Error(response.status);let s=await response.json();el('physical').replaceChildren();el('progress').replaceChildren();el('links').replaceChildren();let failures=[];
 s.arms.forEach(a=>{row(el('physical'),[a.arm,a.computing+' / '+a.MESS,(a.executed_actual_slots??0)+'/96 · '+(a.executed_fresh_slots??0)+'/96',fmt(a.maximum_actual_phase_line_loading_percent)+' %',fmt(a.voltage_min_pu,4)+' / '+fmt(a.voltage_max_pu,4),a.physical_status],3);row(el('progress'),[a.arm+' '+a.current_attempt,a.statuses.arm,(a.current_stage??'대기')+' / '+(a.current_phase??''),seconds(a.elapsed_wall_seconds),typeof a.completed_model_preprocessing_wall_seconds==='number'?fmt(a.completed_model_preprocessing_wall_seconds,3)+' s (완료)':'—',seconds(a.completed_Native_Runtime_seconds)+' / '+seconds(a.prior_case_completed_Native_Runtime_seconds)+' / '+seconds(a.current_case_completed_Native_Runtime_seconds),'완료 '+(a.Native_calls_completed??'—')+'회 (이전 '+(a.prior_case_Native_calls_completed??'—')+' / 이번 '+(a.current_case_Native_calls_completed??'—')+') / 진행 '+a.Native_calls_inflight+'회'+(a.last_completed_Native_status!=null?' · 이번Case '+a.last_completed_Native_status+' '+(a.last_completed_Native_status_name??''):''),seconds(a.current_Native_call_wall_seconds)+(a.current_Native_Runtime_pending?' (Runtime 미확정)':''),fmt(a.actual_compute_GPUh),typeof a.peak_RSS_bytes==='number'?(a.peak_RSS_bytes/1073741824).toFixed(2)+' GiB':'—']);if(a.failure_reason)failures.push(a.arm+' '+a.failure_stage+': '+a.failure_reason)});
 for(let group of [['evidence',s.evidence],['report',s.reports]])for(let item of group[1]){let li=document.createElement('li'),a=document.createElement('a');a.textContent=item.label;a.href='/'+group[0]+'/'+encodeURIComponent(item.relative_path);a.target='_blank';a.rel='noopener';li.appendChild(a);el('links').appendChild(li)}
-el('failure').textContent=failures.join('\n');el('identity').textContent=JSON.stringify({Source:s.source,SourceSHA:s.source_sha,Case:s.source_case},null,2);el('updated').textContent='5초 갱신 · '+s.observed_UTC+' · 현재 선택된 실행 폴더만 표시';
+el('failure').textContent=failures.join('\n');el('campaign-state').textContent=s.campaign_status==='STOPPED_BY_USER'?'사용자 요청으로 캠페인 중단 · 기존 Native·Raw 보존':'';el('identity').textContent=JSON.stringify({Source:s.source,SourceSHA:s.source_sha,Case:s.source_case},null,2);el('updated').textContent='5초 갱신 · '+s.observed_UTC+' · 현재 선택된 실행 폴더만 표시';
 }catch(error){el('updated').textContent='현재 자료 읽기 오류: '+error.message}}refresh();setInterval(refresh,5000);
 </script></html>'''
 

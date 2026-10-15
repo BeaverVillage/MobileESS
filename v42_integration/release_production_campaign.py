@@ -221,6 +221,10 @@ def _resolved_actual_gate(plan,gate,blockers):
 
 def preflight(plan,authorization,gate,*,planning_only=False):
     """Report every blocker; an input inventory is not execution certification."""
+    if plan.get('schema')=='TABLE_V_FOUR_ARM_PRODUCTION_PLAN_V1':
+        if planning_only:raise ValueError('TABLE_V_FOUR_ARM_SCOPE_REQUIRED')
+        from .table_v_campaign import preflight_table_v_plan
+        return preflight_table_v_plan(plan,gate)
     from .release_production_budget import require_authorization
     blockers=[]
     try:require_authorization(authorization)
@@ -568,6 +572,9 @@ def run_production(plan,*,authorization,gate,folder,budget_ledger,backend='ORIGI
     began=perf_counter()
     production_backend(backend)
     if injected:raise ValueError('PRODUCTION_INJECTED_OR_DUMMY_EXECUTORS_FORBIDDEN')
+    if plan.get('schema')=='TABLE_V_FOUR_ARM_PRODUCTION_PLAN_V1':
+        from .table_v_campaign import run_table_v_production
+        return run_table_v_production(plan,authorization=authorization,gate=gate,folder=folder,budget_ledger=budget_ledger)
     readiness=preflight(plan,authorization,gate)
     if readiness['blockers']:raise PermissionError(';'.join(readiness['blockers']))
     result=_run_real(plan,authorization=authorization,gate=gate,folder=folder,budget_ledger=budget_ledger,stages=STAGES)
@@ -581,6 +588,8 @@ def run_planning_p1(plan,*,authorization,folder,budget_ledger,backend='ORIGINAL'
     The settled canary needs the resulting M2 plan. It cannot be a prerequisite
     for generating that plan. This path never calls Actual, Fresh, or K48.
     """
+    if plan.get('schema')=='TABLE_V_FOUR_ARM_PRODUCTION_PLAN_V1':
+        raise PermissionError('TABLE_V_REQUIRES_FULL_ARM_PRODUCTION_LAUNCH_GATE')
     began=perf_counter();production_backend(backend)
     if injected:raise ValueError('PRODUCTION_INJECTED_OR_DUMMY_EXECUTORS_FORBIDDEN')
     readiness=preflight(plan,authorization,{},planning_only=True)

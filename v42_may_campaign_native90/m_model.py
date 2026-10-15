@@ -5,6 +5,7 @@ The selected Exact C3A proofs are regenerated on the current C2 matrix; no
 historical point, deletion index or proof packet participates in a new case.
 """
 from collections import defaultdict
+from contextlib import contextmanager
 from dataclasses import dataclass
 from fractions import Fraction as F
 from pathlib import Path
@@ -57,6 +58,16 @@ class CampaignMCase:
             raise ValueError('CURRENT_M_POINT_AXIS_DRIFT')
         selected = self.response.inverse(point) if self.response is not None else point
         return self.compact.inverse(self.presolve.inverse(selected))
+
+
+@contextmanager
+def _captured_model_scope(captured):
+    """Dispose construction copies even if the producer/scope exits early."""
+    try:
+        yield
+    finally:
+        for model in captured:
+            model.dispose()
 
 
 def _domain_sha(d):
@@ -658,16 +669,15 @@ def build_case(payload, request, progress=None, *, integration_context=None):
         captured.append(model.copy())
         return None,dict(Native_optimize_calls=0,P1_only=True,P2_calls=0)
     scope=physical_authority() if integration_context is None else integration_context.physical_scope()
-    with scope:
-        anchor['voltage_authority_sha256']=authority_sha(Stage.A1)
-        if integration_context is None:
-            with patch.object(native,'optimize',capture):
-                native.solve('M1',ConstructionDeadline(),sites,initial,routes,battery,96,grid)
-        else:
-            native.solve(request.get('stage','M1'),ConstructionDeadline(),sites,initial,routes,battery,96,grid,optimizer=capture)
-    model=captured[0]
-    try: A,d=arrays(model)
-    finally: model.dispose()
+    with _captured_model_scope(captured):
+        with scope:
+            anchor['voltage_authority_sha256']=authority_sha(Stage.A1)
+            if integration_context is None:
+                with patch.object(native,'optimize',capture):
+                    native.solve('M1',ConstructionDeadline(),sites,initial,routes,battery,96,grid)
+            else:
+                native.solve(request.get('stage','M1'),ConstructionDeadline(),sites,initial,routes,battery,96,grid,optimizer=capture)
+        A,d=arrays(captured[0])
     physical_authority_receipt=_freeze_physical(physical,out,A,d)
     grid_prescreen_authority=_freeze_grid_prescreen(grid_prescreen,out,A,d,progress)
     families={str(n).split('[',1)[0] for n in d['names']}

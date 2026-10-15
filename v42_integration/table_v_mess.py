@@ -15,6 +15,8 @@ from .coordinator import _full_m
 from .m_engine import file_record, vector_sha, _write
 from .release_p1_acceptance import prohibit_p2, require_acceptance
 from .release_p1_production import StageSolveBridge
+from .table_v_gap_contract import MESS_GLOBAL_GAP_TARGET, restricted_joint_diagnostic
+from .table_v_dates import context_day
 
 
 AIDC_KEYS = ('selected_jobs', 'AIDC_P_by_site', 'AIDC_Q_by_site',
@@ -90,7 +92,7 @@ def payload_for_m(context, arm, stage, aidc, acceptance):
         complete_AIDC_anchor=aidc['aidc_anchor'], CC4_service=aidc['CC4_service'],
         CC4_carryout=aidc['CC4_carryout'], anonymous_resource_envelope=aidc['anonymous_resource_envelope'])
     return dict(bundle=context['data'][0], planning=planning,
-        identity=dict(PASS=True, day='2025-05-01', arm=arm, stage=stage,
+        identity=dict(PASS=True, day=context_day(context), arm=arm, stage=stage,
             AIDC_anchor=aidc['aidc_anchor'], QoS_SHA=context['backlog']['contract_sha'],
             parent_case_sha=manifest['identity']['case_sha'], source_sha=manifest['source_sha'],
             parent_acceptance_sha=acceptance['acceptance_sha'], parent_result_sha=digest(aidc),
@@ -143,6 +145,7 @@ def require_m_acceptance(receipt, *, result=None, identity=None, arm=None, stage
         plan = _full_m(result)
         if (result.get('case_sha') != receipt['stage_case_sha'] or result.get('arm') != receipt['arm']
                 or result.get('stage') != receipt['stage']
+                or receipt.get('day') is not None and result.get('day') != receipt['day']
                 or result.get('D0_source_identity') != receipt['source_identity']
                 or result.get('D0_fixed_AIDC_anchor') != receipt['AIDC_anchor']
                 or result.get('binding', {}).get('aidc_anchor') != receipt['AIDC_anchor']
@@ -211,10 +214,10 @@ class TableVMessStages:
         if (Path(output) / 'SCIENTIFIC_CASE_IDENTITY.json').exists():
             raise ValueError('TABLE_V_M_PREPARATION_EXISTS_DO_NOT_REBUILD_OR_OVERWRITE')
         with self.budget.capture_native_methods():
-            case = build_case(payload, dict(day='2025-05-01', arm=arm, stage=stage, output=str(output)),
+            case = build_case(payload, dict(day=context_day(self.context), arm=arm, stage=stage, output=str(output)),
                               progress=progress, integration_context=physical)
         identity = self.manifest['identity']
-        case.identity.update(arm=arm, stage=stage, aidc_anchor=aidc['aidc_anchor'],
+        case.identity.update(day=context_day(self.context), arm=arm, stage=stage, aidc_anchor=aidc['aidc_anchor'],
             qos_sha=self.context['backlog']['contract_sha'],
             science_sha=identity.get('science_sha'), D0_parent_case_sha=identity['case_sha'],
             D0_source_sha=self.manifest['source_sha'],
@@ -243,6 +246,7 @@ class TableVMessStages:
         if (self.issued.get(case.case_sha) != expected
                 or digest(case.identity) != case.case_sha
                 or case.identity.get('arm') != arm or case.identity.get('stage') != stage
+                or case.identity.get('day') != context_day(self.context)
                 or case.identity.get('aidc_anchor') != aidc['aidc_anchor']
                 or case.identity.get('D0_source_sha') != self.manifest['source_sha']
                 or case.candidate_generator is not generate or case.plan_exporter is not export_plan
@@ -256,11 +260,13 @@ class TableVMessStages:
         case.mess_stage_budget_seconds = float(stage_total_cap)
         bridge = StageSolveBridge(self.budget, stage)
         with self.budget.arm_context(arm):
-            with self.budget.phase(stage, case.case_sha, self.manifest['source_sha'], digest(aidc), day='2025-05-01'):
+            with self.budget.phase(stage, case.case_sha, self.manifest['source_sha'], digest(aidc), day=context_day(self.context)):
                 with self.budget.capture_native_methods():
                     result, point = optimize_mess(case, initial_point, incumbent_registry, bridge)
         prohibit_p2(result)
         result['release_build_costs'] = bridge.build_costs
+        result.update(restricted_joint_diagnostic(result), global_gap_target=MESS_GLOBAL_GAP_TARGET,
+            relative_global_gap=None, Global_LB_valid=False, K48_Global_LB_valid=False)
         if result.get('FULL_validated') is not True:
             return result, None, point
         result = deepcopy(result)
@@ -280,7 +286,7 @@ class TableVMessStages:
                 or certificate.get('original_matrix_and_96_slot_physical_replay', {}).get('case_sha') != case.case_sha
                 or certificate.get('original_matrix_and_96_slot_physical_replay', {}).get('PASS') is not True):
             raise ValueError('TABLE_V_ORIGINAL_FULL_PHYSICAL_REPLAY_REQUIRED')
-        receipt = dict(schema=M_ACCEPTANCE_SCHEMA, status='FULL_PASS', arm=arm, stage=stage,
+        receipt = dict(schema=M_ACCEPTANCE_SCHEMA, status='FULL_PASS', day=context_day(self.context), arm=arm, stage=stage,
             stage_case_sha=case.case_sha, source_identity=deepcopy(self.manifest['identity']),
             source_sha=self.manifest['source_sha'], AIDC_anchor=aidc['aidc_anchor'], MESS_anchor=plan['plan_sha'],
             result_sha=digest(result), parent_acceptance_sha=parent_acceptance['acceptance_sha'],
@@ -288,6 +294,9 @@ class TableVMessStages:
             raw_point=bank[0]['raw'], raw_replay=file_record(Path(bank[0]['raw']['path']).with_suffix('.REPLAY.json')),
             UB_algorithm='ADAPTIVE_BEAM_4_JOINT_ORIGINAL_FULL_INCUMBENT_REGISTRY',
             restricted_pool_ObjBound_is_Global_LB=False, K48_Global_LB=None,
+            Global_LB_valid=False, K48_Global_LB_valid=False,
+            relative_global_gap=None, global_gap_target=MESS_GLOBAL_GAP_TARGET,
+            restricted_joint_diagnostic=restricted_joint_diagnostic(result),
             physical_evaluation_allowed=True, global_optimality_status='K48_NOT_RUN',
             evidence_scope='REAL_PRODUCTION', fixture=False)
         receipt['acceptance_sha'] = digest(receipt)
@@ -313,13 +322,36 @@ class TableVMessStages:
         require_m_acceptance(m_acceptance, result=m_result, identity=self.manifest['identity'], arm=arm, stage=stage)
         if (m_acceptance['stage_case_sha'] != case.case_sha
                 or case.identity['arm'] != arm or case.identity['stage'] != stage
+                or case.identity.get('day') != context_day(self.context)
                 or case.identity['aidc_anchor'] != m_acceptance['AIDC_anchor']):
             raise ValueError('TABLE_V_K48_SAME_CURRENT_FULL_M_CASE_REQUIRED')
+        selected = np.asarray(point)
+        if (selected.dtype != np.dtype('float64') or selected.ndim != 1 or not np.isfinite(selected).all()
+                or vector_sha(selected) != m_acceptance['Original_FULL'].get('point_vector_sha256')):
+            raise ValueError('TABLE_V_K48_SAME_ACCEPTED_FULL_INCUMBENT_REQUIRED')
         k_stage = 'K48_'+stage
         k48_budget.bind_table_v_case(arm=arm, stage=k_stage, stage_case_sha=case.case_sha,
             source_sha=self.manifest['source_sha'], parent_result=m_result,
             source_identity=self.manifest['identity'], parent_acceptance=m_acceptance)
         with k48_budget.arm_context(arm):
-            with k48_budget.phase(k_stage, case.case_sha, self.manifest['source_sha'], digest(m_result), day='2025-05-01'):
+            with k48_budget.phase(k_stage, case.case_sha, self.manifest['source_sha'], digest(m_result), day=context_day(self.context)):
                 with k48_budget.capture_native_methods():
-                    return run_current_k48(case, point, k48_budget, output)
+                    summary = run_current_k48(case, point, k48_budget, output)
+        # The original FULL receipt remains the physical handoff authority.
+        # Append the later LB assessment without rewriting that immutable raw.
+        assessment = dict(schema='TABLE_V_M_K48_ASSESSMENT_V1', day=context_day(self.context), arm=arm, stage=stage,
+            stage_case_sha=case.case_sha, source_identity=deepcopy(self.manifest['identity']),
+            AIDC_anchor=m_acceptance['AIDC_anchor'], MESS_anchor=m_acceptance['MESS_anchor'],
+            parent_M_result_sha=digest(m_result), parent_M_acceptance_sha=m_acceptance['acceptance_sha'],
+            K48_result=file_record(Path(output) / 'CURRENT_K48_RESULT.json'),
+            global_gap_target=MESS_GLOBAL_GAP_TARGET, relative_global_gap=summary['relative_global_gap'],
+            Global_LB=summary['Global_LB'], Global_LB_valid=summary['Global_LB_valid'],
+            Global_LB_valid_K=summary['Global_LB_valid_K'], K_reached=summary['K_reached'],
+            K_solved=summary['K_solved'], K48_completed=summary['K48_completed'],
+            K48_Global_LB=summary['K48_Global_LB'], K48_Global_LB_valid=summary['K48_Global_LB_valid'],
+            global_gap_certified=summary['global_gap_certified'], global_optimality_status=summary['optimality_status'],
+            physical_evaluation_allowed=True, missed_gap_blocks_FULL_feasible_Actual=False,
+            restricted_joint_diagnostic=restricted_joint_diagnostic(m_result), P2_calls=0)
+        assessment['assessment_sha'] = digest(assessment)
+        _write(Path(output) / 'TABLE_V_M_K48_ASSESSMENT.json', assessment)
+        return dict(summary, M_stage_assessment=assessment)

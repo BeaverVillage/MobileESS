@@ -1,0 +1,10 @@
+{
+  "schema": "PR230_PLANNING_ONLY_DEFENSE_BOUNDARY_CLARIFICATION_V1",
+  "recorded_utc": "2026-10-15T06:57:07.174953+00:00",
+  "existing_preflight_rejection": "Table V schema with planning_only=True already raises ValueError(TABLE_V_FOUR_ARM_SCOPE_REQUIRED).",
+  "current_change": "run_planning_p1 now explicitly raises PermissionError(TABLE_V_REQUIRES_FULL_ARM_PRODUCTION_LAUNCH_GATE) at the public API entry before backend and preflight.",
+  "classification": "DEFENSE_BOUNDARY_HARDENING_EXISTING_REJECTION_PRESERVED",
+  "new_reproduced_authorization_bypass_claimed": false,
+  "single_native0_test": "PASS: direct API plus real --execute --planning-only CLI denial; no output folder.",
+  "source_or_existing_audit_changes": false
+}
