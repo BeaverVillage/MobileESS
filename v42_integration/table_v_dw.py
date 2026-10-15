@@ -570,12 +570,17 @@ class CurrentNative:
                 for k,v in parameters.items():model.setParam(k,v)
                 basis_start=dict(installed=False,reason='NO_PRIOR_ACCEPTED_PHASE_BASIS')
                 if component=='PHASE_I' and self.phase_basis is not None and not attempts:
-                    from .table_v_phase_diagnostics import extend_basis
+                    from .table_v_phase_diagnostics import extend_basis,basis_admission
                     try:
                         vb,cb,proof=extend_basis(self.phase_basis[0],snapshot,self.phase_basis[1])
-                        model.setAttr('VBasis',vb.tolist());model.setAttr('CBasis',cb.tolist())
-                        model.setParam('LPWarmStart',2)
-                        basis_start=dict(installed=True,proof=proof)
+                        admission=basis_admission(proof)
+                        path=attempt/'VERIFIED_CANDIDATE_NATIVE_BASIS.npz'
+                        np.savez_compressed(path,VBasis=vb,CBasis=cb)
+                        for k,v in admission['parameters'].items():model.setParam(k,v)
+                        if admission['reuse']:
+                            model.setAttr('VBasis',vb.tolist());model.setAttr('CBasis',cb.tolist())
+                        basis_start=dict(installed=admission['reuse'],proof=proof,admission=admission,
+                            retained_native_basis=file_record(path))
                     except (ValueError,AttributeError,gp.GurobiError) as error:
                         model.reset();basis_start=dict(installed=False,reason=str(error))
                 model.Params.Threads=1;model.Params.LogFile=str(attempt/'NATIVE_GUROBI.log')

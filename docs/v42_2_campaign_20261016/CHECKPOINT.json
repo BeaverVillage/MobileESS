@@ -4,12 +4,12 @@
   "freeze_tag": "v42.1-freeze-20261016",
   "branch": "codex/v42.2-may01-b1b2b3-20261016",
   "PR": "https://github.com/BeaverVillage/MobileESS/pull/231",
-  "current_commit": "f50c414d3",
-  "active_stage": "B1_BASIS_REPAIR_NATIVE0_AND_REGRESSION_PASS_PENDING_NEW_ATTEMPT",
+  "current_commit": "1b749c436df467b64b6c3f27e96add1f22566376",
+  "active_stage": "B1_CROSSOVER_POLICY_NATIVE0_AND_REGRESSION_PASS_PENDING_FRESH_ATTEMPT",
   "Native_optimize_calls": 2,
   "active_PID": null,
-  "active_log": "D:/v42_2_b1_native0_03.log",
-  "active_output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT001",
+  "active_log": "D:/v42_2_b1_native0_04.log",
+  "active_output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_04",
   "regression01": {
     "status": "PASS",
     "tests": 1246,
@@ -28,10 +28,10 @@
   "B2_ACTUAL_FRESH_PASS": false,
   "B3_ACTUAL_FRESH_PASS": false,
   "next_steps": [
-    "Require exact actual S0/S1 snapshots and repaired local-pivot basis Native0 PASS",
-    "Require full REGRESSION06 PASS, commit/push correction and finalized Attempt001 evidence",
-    "Seal new current release gate using B1_NATIVE0_03, unchanged M_NATIVE0_03, REGRESSION06",
-    "Run new B1 ATTEMPT002 from zero while retaining prior517.768Native research usage; only then B2 ATTEMPT004 and B3"
+    "Finish B1_NATIVE0_04 actual exact S1 matrix/basis and selected Method2 LPWarmStart0 readback; full regression07",
+    "Commit/push source correction and finalized Attempt002 evidence; seal new current release gate",
+    "Fresh B1 ATTEMPT003 A1 from zero under same caps; inspect actual cold S1 Barrier before any success claim",
+    "Only after B1 FULL+Actual96+Fresh96 PASS proceed B2 ATTEMPT004 then B3 ATTEMPT001"
   ],
   "constraints": {
     "Worker": 1,
@@ -76,20 +76,20 @@
   "B2_ATTEMPT001": "PREPARED_FOR_NATIVE0_ONLY_NO_SOLVE_NO_NATIVE_USAGE",
   "supplemental_external_hash_PID": 71500,
   "supplemental_external_hash_session": 61426,
-  "active_exec_session": null,
+  "active_exec_session": 12101,
   "latest_observation": {
-    "epoch_seconds": 1792087220.8683689,
-    "Native_calls_now_running": 0,
-    "repair_unit_tests": 14,
-    "actual_B1_NATIVE0_03": "RUNNING",
-    "REGRESSION06": "RUNNING"
+    "epoch_seconds": 1792089246.4007034,
+    "Native_solver_running": false,
+    "B1_NATIVE0_04": "RUNNING",
+    "REGRESSION07": "RUNNING",
+    "research_native_preserved": 4210.561000585556
   },
   "mandatory_resume_rules": [
-    "Native0 audit PID24972 still active; do not edit its frozen .py files",
-    "Never erase or reset existing Attempt001 ledger or failure evidence",
-    "M Native0 source records unchanged; B1 repaired Source records require fresh Native0 gate",
-    "Before actual worker run seal release gate after final correction commit",
-    "B1 then B2 then B3, each with required original FULL and Actual96/Fresh96; no main merge"
+    "B1 actual worker65264 exited, Native712.152 and all locks reconciled; NEVER reuse or alter its directory/ledger",
+    "Native0_04 and Regression07 are running; do not edit their frozen source files",
+    "New dynamic policy defers positive elastic extension basis to retain Barrier; Source13/scientific Case and M Native0_03 sources remain unchanged",
+    "After PASS commit/push then seal new gate; actual order B1 then B2 then B3 with all full/actual/fresh checks",
+    "Goal remains ACTIVE; no main merge or scientific relaxation"
   ],
   "M_NATIVE0_02": {
     "status": "PASS",
@@ -115,7 +115,7 @@
     "tests": 1259,
     "Native_calls": 0
   },
-  "validation_gate": "docs/v42_2_campaign_20261016/VALIDATION_GATE_01.json",
+  "validation_gate": "docs/v42_2_campaign_20261016/VALIDATION_GATE_02.json",
   "M_NATIVE0_03": {
     "status": "PASS",
     "Native_calls": 0,
@@ -135,9 +135,10 @@
     "raw_preserved": true
   },
   "active_regression": {
-    "output": "REGRESSION06",
-    "PID": 67892,
-    "exec_session": 72071
+    "output": "REGRESSION07",
+    "exec_session": 23570,
+    "status": "PASS",
+    "PID": 55004
   },
   "regression06": {
     "status": "PASS",
@@ -148,6 +149,36 @@
     "status": "PASS_NATIVE0_MATRIX",
     "Native_calls": 0,
     "wall_seconds": 477.41205159999663,
-    "actual_S1_extended_basis": "PASS_NATIVE0_EXACT_MATRIX_AND_PRIMAL_FEASIBLE_EXTENSION"
+    "actual_S1_extended_basis": "PASS_NATIVE0_EXACT_MATRIX_AND_PRIMAL_FEASIBLE_EXTENSION",
+    "actual_S1_basis_detail": {
+      "same_original_snapshot_and_native_matrix": true,
+      "old_uncompensated_max_row_violation": 1784.027025724307,
+      "repaired_elastic_witness_max_row_violation": 8.01492205937393e-12,
+      "new_local_artificials_basic": 5933,
+      "Native_calls": 0,
+      "FULL_UB_claimed": false
+    }
+  },
+  "B1_ATTEMPT002": {
+    "status": "OFFICIAL_STOP_FOR_CROSSOVER_POLICY_REPAIR",
+    "Native_seconds": 712.1519999504089,
+    "inflight": null,
+    "FULL_PASS": false,
+    "Actual_Fresh_PASS": false,
+    "raw_preserved": true
+  },
+  "regression07": {
+    "status": "PASS",
+    "tests": 1267,
+    "Native_calls": 0
+  },
+  "B1_NATIVE0_04": {
+    "status": "PASS_NATIVE0_MATRIX",
+    "Native_calls": 0,
+    "wall_seconds": 456.5873606999812,
+    "actual_S1_same_matrix_policy_readback": {
+      "Method": 2,
+      "LPWarmStart": 0
+    }
   }
 }

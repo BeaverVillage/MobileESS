@@ -10,7 +10,7 @@ def audit(state,predecessor,output):
     from v42_a_stage_compact_rowgen.rowgen import restricted
     from v42_a_stage_domain_v2.stress_backend import materialize
     from v42_integration.pcc_definitions import hard_rows
-    from v42_integration.table_v_phase_diagnostics import extend_basis
+    from v42_integration.table_v_phase_diagnostics import extend_basis,basis_admission
     from v42_integration.d0_resource import native_binding
     from v42_integration.m_engine import _write,file_record
     prior=Path(predecessor).resolve();output=Path(output);output.mkdir(parents=True,exist_ok=False)
@@ -43,6 +43,7 @@ def audit(state,predecessor,output):
     raw_path=root/'PHASE_I/S0/SOURCE18R_FAST/RAW_ATTRIBUTES.npz'
     with np.load(raw_path) as data:raw={k:data[k] for k in data.files}
     vb,cb,proof=extend_basis(masters[0].snapshot,masters[1].snapshot,raw)
+    admission=basis_admission(proof)
     import gurobipy as gp
     model,objectives=materialize(masters[1].snapshot,'2025-05-01')
     try:
@@ -53,11 +54,21 @@ def audit(state,predecessor,output):
         binding=native_binding(model)
         previous=json.loads((root/'PHASE_I/S1/SOURCE18R_FAST/NATIVE_RESULT.json').read_text())['ledger_call']['native_binding']
         if binding!=previous or not exact:raise ValueError('BASIS_NATIVE0_NATIVE_MATRIX_OR_BASIS_READBACK_DRIFT')
+        # Read back the selected production parameters on the same exact model.
+        # LPWarmStart=0 ignores even a supplied basis, so Method=2 really runs
+        # barrier. No Optimize/presolve call is made in this audit.
+        model.Params.Method=2
+        for k,v in admission['parameters'].items():model.setParam(k,v)
+        selected=dict(Method=int(model.Params.Method),LPWarmStart=int(model.Params.LPWarmStart))
+        if admission['barrier_required'] and selected!={'Method':2,'LPWarmStart':0}:
+            raise ValueError('BASIS_NATIVE0_SOURCE18R_BARRIER_POLICY_READBACK_DRIFT')
+        if native_binding(model)!=previous:raise ValueError('BASIS_POLICY_CHANGED_NATIVE_MATRIX_DOMAIN_OBJECTIVE')
     finally:model.dispose()
     result=dict(PASS=True,Native_calls=0,proof=proof,actual_S0_S1_exact_snapshots=True,
         native_matrix_domain_objective_unchanged=True,native_basis_exact_readback=exact,
         prior_finalized_ledger=file_record(ledger_path),actual_native_basis=file_record(raw_path),
         actual_model_identities=records,native_binding=binding,
+        selected_basis_admission=admission,selected_native_parameters=selected,
         original_FULL_UB_claimed=False,PStart_DStart_installed=False,
         solver_performance_improvement_claimed=False)
     _write(output/'RESULT.json',result)

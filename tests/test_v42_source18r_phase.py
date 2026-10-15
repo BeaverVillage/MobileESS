@@ -4,7 +4,7 @@ import scipy.sparse as sp
 import pytest
 from v42_a_stage_phase1.core import elastic_master,primal_replay,verify_zero
 from v42_integration import table_v_phase_policy as policy
-from v42_integration.table_v_phase_diagnostics import extend_basis,residual_report
+from v42_integration.table_v_phase_diagnostics import extend_basis,residual_report,basis_admission
 from tests.test_v42_table_v_phase_policy import snapshot
 
 
@@ -68,6 +68,22 @@ def test_basis_extension_cannot_invent_old_point_or_elasticize_new_hard_row():
     with pytest.raises(ValueError,match='NEW_HARD_ROW'):extend_basis(old.snapshot,new.snapshot,raw)
     raw['X']=np.array([-1.,0.])
     with pytest.raises(ValueError,match='OLD_NATIVE_BASIS_POINT_NOT_PRIMAL_FEASIBLE'):extend_basis(old.snapshot,new.snapshot,raw)
+
+
+@pytest.mark.parametrize('rhs,sense,cold',[(1.,'=',True),(-1.,'>',False)])
+def test_positive_elastic_extension_really_selects_barrier_and_safe_extension_can_reuse(rhs,sense,cold):
+    original=snapshot();old=elastic_master(original,[0])
+    bigger=replace(original,matrix=sp.csr_matrix([[1.],[2.]]),rhs=np.array([0.,rhs]),senses=np.array(['>',sense]))
+    new=elastic_master(bigger,[0,1]);raw=dict(VBasis=np.array([-1,0]),CBasis=np.array([-1]),X=np.array([0.,0.]))
+    _,_,proof=extend_basis(old.snapshot,new.snapshot,raw);decision=basis_admission(proof)
+    params=dict(policy.SOURCE18R_FAST.parameters(),**decision['parameters'])
+    assert decision['barrier_required']==cold and decision['reuse'] is (not cold)
+    assert params['Method']==2 and params['LPWarmStart']==(0 if cold else 2)
+    assert decision['native_basis_preserved_as_evidence'] and not decision['original_FULL_UB_claimed']
+
+
+def test_basis_admission_does_not_promote_unverified_rank_or_primal_proof():
+    with pytest.raises(ValueError,match='VERIFIED_NATIVE_BASIS_EXTENSION'):basis_admission(dict(PASS=True,new_local_artificials_basic=0))
 
 
 def test_basis_rejects_changed_row_and_incomplete_native_basis():

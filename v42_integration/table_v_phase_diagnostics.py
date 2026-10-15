@@ -146,3 +146,27 @@ def extend_basis(old,new,raw):
         old_primal_coordinates_unchanged=True,old_native_basis_unchanged=True,
         original_FULL_feasible_claimed=False,elastic_witness_installed_as_start=False,
         PStart_DStart_installed=False,LPWarmStart=2)
+
+
+def basis_admission(proof):
+    """A feasible extension need not make crossover a safe numerical method.
+
+    Actual May01 attempts show that newly positive elastic pivots can give a
+    feasible basis yet spend the shared allowance in crossover. With Method=2,
+    LPWarmStart=2 skips barrier entirely. Retain that native basis as evidence,
+    but require cold Source18r barrier for this structural change. Extensions
+    needing no new artificial pivot remain eligible for native basis reuse.
+    """
+    if not (proof.get('PASS') is True and proof.get('exact_inclusion') is True
+            and proof.get('block_triangular_nonzero_local_pivots') is True
+            and proof.get('extended_elastic_witness_replay',{}).get('PASS') is True
+            and proof.get('old_native_basis_unchanged') is True):
+        raise ValueError('VERIFIED_NATIVE_BASIS_EXTENSION_REQUIRED_FOR_ADMISSION')
+    count=proof.get('new_local_artificials_basic')
+    if type(count) is not int or count<0:raise ValueError('EXACT_NEW_ARTIFICIAL_PIVOT_COUNT_REQUIRED')
+    cold=count>0
+    return dict(reuse=not cold,barrier_required=cold,
+        reason='POSITIVE_NEW_ELASTIC_PIVOTS_REQUIRE_SOURCE18R_BARRIER' if cold else 'FEASIBLE_NATIVE_BASIS_REUSE_ADMITTED',
+        parameters=dict(LPWarmStart=0 if cold else 2),
+        native_basis_preserved_as_evidence=True,original_FULL_UB_claimed=False,
+        policy='ACTUAL_MAY01_CROSSOVER_STAGNATION_GUARD_V1')
