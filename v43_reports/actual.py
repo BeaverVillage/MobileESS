@@ -36,6 +36,11 @@ def report(attempt):
     golden=read(case['Golden003']['path'])
     if not set(golden['selected_jobs']) <= known:
         raise ValueError('FUTURE_UNKNOWN_UID_IN_GOLDEN_PLANNING')
+    import json
+    with np.load(attempt/'GOLDEN_REFERENCE/REFERENCE.npz',allow_pickle=False) as archive:
+        commands=json.loads(str(archive['Known_UID_Schedule_JSON']))
+    if set(commands)!=set(golden['selected_jobs']) or digest(commands)!=case['Known_commands_sha']:
+        raise ValueError('GOLDEN_SELECTED_COMMAND_CONTENT_CHANGED')
     summaries=[];uid_rows=[];physical={}
     for variant in ('C0','C1'):
         folder=attempt/variant
@@ -51,10 +56,13 @@ def report(attempt):
         actual_by={r['job_uid']:r for r in event['queue_ledger']}
         if set(actual_by) != known|unknown or set(metadata) != known|unknown:
             raise ValueError('ACTUAL_COMPLETE_SUBMITTED_UID_ROSTER_REQUIRED')
-        if set(public['known_schedule']) != set(golden['selected_jobs']):
-            raise ValueError('GOLDEN_SELECTED_COMMAND_ROSTER_CHANGED')
-        if digest(public['known_schedule']) != case['Known_commands_sha']:
-            raise ValueError('GOLDEN_SELECTED_COMMAND_CONTENT_CHANGED')
+        original_by={r['job_uid']:r for r in source_plan['known_population']}
+        for uid,command in commands.items():
+            row=actual_by[uid]
+            if original_by[uid]['state']=='RUNNING' or row['admitted_time'] is None:
+                continue
+            if row['site']!=command['site'] or row.get('plan_start_seconds')!=command['start_seconds']:
+                raise ValueError('KNOWN_ACTUAL_ADMISSION_DEVIATES_FROM_FROZEN_COMMAND')
         for r in event['job_event_ledger']:
             uid=r['uid']
             if r['event']=='SUBMISSION_OBSERVED' and r['time_seconds'] < actual_by[uid]['submit_time']:
