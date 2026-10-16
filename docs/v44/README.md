@@ -1,6 +1,6 @@
 # V44 May01~07 실행 직전 준비
 
-현재 상태는 **V44_PRESTART_BLOCKED**다. 초기 상태 문제는 해결했으며, 남은 새 계통 FULL 모델·물리 Driver·Case별 C1 보정 인증을 구분한다. V44 Gurobi 최적화 및 Actual96/Fresh96 본 실행은 0회다. Known 연구 정책은 **IMPLEMENTED_NOT_EXECUTED**이며 414개 START 또는 Service Equivalence PASS를 주장하지 않는다.
+현재 상태는 **V44_PRESTART_BLOCKED**다. 초기 상태 문제는 해결했으며, 남은 새 계통 FULL 모델·물리 Driver·Case별 C1 보정 인증을 구분한다. 아래 준비 영수증은 Pilot 실행 전 기준이다. 최신 May01 B2 실행 결과는 문서 끝과 별도 결과 영수증을 따른다. Known 연구 정책은 **IMPLEMENTED_NOT_EXECUTED**이며 414개 START 또는 Service Equivalence PASS를 주장하지 않는다.
 
 1. **브랜치·기준:** `codex/v44-may01-07-prestart`, Worktree `D:/v44_may01_07_prepare_20261016`. V43 기준 Commit은 `5fed802db447a1f4b4e7fd556e4f5009b6bcee0d`다. 기준의 B2 복구·캐시·시간 종료 후 FULL 해 인계 수정까지 포함한다. V44 Commit과 Draft PR은 Git 기록 및 이 작업의 최종 보고를 따른다.
 2. **변경 범위:** `v44/`, `docs/v44/`, `tests/test_v44*.py`, 해당 파일의 SHA 보존을 위한 `.gitattributes` 규칙이다. 원본 V43/V42 파일·Raw는 보존하고 사용자 승인에 따른 Epoch12 SVR11 계통·전압 모델을 V44 전용 경로에 이식했다. 날짜별 IO, Stage/Arm 연결, 900+300초 예산, Scheduler, 같은 모니터의 부분 수정 및 증거를 추가했다.
@@ -45,3 +45,5 @@ python -m v44.campaign --execute --permit D:/MobileESS_V44/APPROVED_EXECUTION_PE
 검증 단계는 캠페인 내부에 추가하지 않았다. Stage별 기존 FULL/Source/정산 검사는 유지한다. 기존 결과 덮어쓰기, 다른 날짜 결과 혼용, Native 원장 초기화, May08~31 실행 및 Main Merge는 수행하지 않았다.
 
 최신 사용자 지시로 May01 B2 한 건의 실행을 승인받았다. 별도 v44.pilot 경로가 날짜/Arm/Stage/Source/예산을 한정한다. K48 300초와 Joint 900초, Threads=1이며 기존 Native0/FULL 검사를 통과한 정상 가능해는 Gap 미달이어도 Actual/Fresh로 인계한다. 다른 날짜, A1, B1/B3 또는 전체 캠페인을 자동 실행하지 않는다. 이 문서의 미실행 수치는 Pilot 시작 전 준비 기준이다. 실제 실행 상태는 D:/MobileESS_V44/runtime/ACTIVE_MAY01_B2_PILOT.json 및 그 RESULT 원장에서 확인한다.
+
+May01 B2 SVR11 Pilot 결과(2026-10-16 KST 20:55): M1 구현 실행 PASS, K48 300.074초 / Joint 890.503초, Joint 7회 모두 SolCount=0, FULL 가능해 미확보로 Actual96/Fresh96 0회. K48 각 단계에는 후보 3개씩 있으나 인증 Global LB는 0이다. INFEASIBLE 판정이나 구현 오류는 없었다. 기존 10초 반환 여유 정책에 따라 Joint 약 9.497초를 남겼으며 원장/예산을 초기화하거나 다른 날짜를 실행하지 않았다. 행렬 계열별 진단에서 변압기 kVA·P/Q 응답 제약 확대와 새 전압 계수에 따른 축약률 저하를 확인했다. 기존 140초 호출 내 Root LP 미완료가 직접 병목이다. SVR11 장비 자체의 물리적 불가능이나 제어 결함으로 판정하지 않는다. 경량화 정책 변경은 적용하지 않았다. 상세 수치·Source/Commit·Raw 링크는 svr11_revision01/MAY01_B2_PILOT_RESULT.json 및 MODEL_FAMILY_DIAGNOSIS.json에 기록했다.
