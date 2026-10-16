@@ -1,5 +1,5 @@
 {
-  "state": "BASELINE_FCFS_RESTORED_READY",
+  "state": "READY_EXACT_ORIGINAL_FCFS_B0_THEN_B1",
   "pid": 39084,
   "process_created": 1792120643.9523497,
   "started_UTC": "2026-10-16T03:17:24.701728+00:00",
@@ -31,7 +31,7 @@
     "bytes": 3552,
     "sha256": "298251269b7227d49e8c445af58206fb2a3800f48995fc65526661a5fc596bc5"
   },
-  "next_stage": "RUN_B0_EVENT_FCFS_FRESH96_THEN_B2_M1",
+  "next_stage": "B0_EXACT_FCFS_THEN_COMPLETE_B1_AND_RUN_C0",
   "Golden004_required": false,
   "numerical_certificate": {
     "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GOLDEN003_CERTIFIED_NUMERICAL_CASE.json",
@@ -47,7 +47,7 @@
     "sha256": "2c060ffcb70280899934c4c35d41a79dc109ba6ababe7e216509ca840d718334"
   },
   "Gate_B_started_UTC": "2026-10-16T04:11:08.245762+00:00",
-  "updated_UTC": "2026-10-16T06:11:00.791307+00:00",
+  "updated_UTC": "2026-10-16T06:18:55.806062+00:00",
   "allowed_execution_dates": [
     "2025-05-01"
   ],
@@ -58,7 +58,7 @@
     "bytes": 15576,
     "sha256": "616cdf65b1df0179b2c9b5890a1c9c01465e0abd02fa98516ddafb34a5d27231"
   },
-  "current_stage": "B0_GRID_BLIND_BASELINE",
+  "current_stage": "B0_GRID_BLIND_EVENT_FCFS",
   "May01_resume_manifest": {
     "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_MAY01_RESUME_MANIFEST.json",
     "bytes": 6516,
@@ -66,7 +66,7 @@
   },
   "automation_id": "v43-may01",
   "active_process_created": null,
-  "active_attempt": null,
+  "active_attempt": "D:\\MobileESS_V43\\runtime\\may01_B0_FCFS_actual96_attempt004",
   "M1_status": "NOT_STARTED_B0_ALREADY_RECONCILED",
   "M1_requests_source_commit": "5ca34a8ae",
   "B2_M1_request_pointer": {
@@ -127,11 +127,11 @@
     "bytes": 2038,
     "sha256": "b7c67ac05ce03bd26d832600b64e97b4050c73b853cdfe7dfee4b855a8533730"
   },
-  "active_source_commit": "c1de631e606bc4a35ebac939d822afbc9358422d",
+  "active_source_commit": "beceaa25170313158a637db577235ae68ef7eb94",
   "active_source_freeze": {
-    "path": "D:\\MobileESS_V43\\runtime\\may01_B0_C0_fast_actual96_attempt003.CORRECTIVE_SOURCE_FREEZE.json",
-    "bytes": 10783,
-    "sha256": "16fe2ab3c76ddbe070d58b61e3aaa1ea3985194464af2783a801a8d72f11a426"
+    "path": "D:\\MobileESS_V43\\runtime\\may01_B0_FCFS_actual96_attempt004.BASELINE_SOURCE_FREEZE.json",
+    "bytes": 9676,
+    "sha256": "d5fd4f131e43988106c7220e9189ae945f1b9744219ca014371185145a100970"
   },
   "real_prefix_AC_equivalence": {
     "path": "D:\\MobileESS_V43\\runtime\\current_ac_prefix_equivalence_attempt001\\RESULT.json",
@@ -148,12 +148,12 @@
     "sha256": "b08303a14d11d7f0228ac37a63af88510025267fcb9f54ef4ccee2e279904844"
   },
   "latest_user_scope": {
-    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\USER_STEERING_B0_BASELINE_SEMANTICS.txt",
-    "bytes": 645,
-    "sha256": "5dc2e9cd3f503d2e2951810143aad84a886015e4ff74e22abf0ae738e76c7bc6"
+    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\USER_STEERING_B1_PRIORITY_40MIN.txt",
+    "bytes": 667,
+    "sha256": "90c4c03e7023b5c091c89d802b9e9efc64fa231075facaf9c3a64c440fb04e1e"
   },
   "B0_affine_hard_gate": "UNCHANGED_NO_CASE_SPECIFIC_MISMATCH_IN_SAMPLED_INPUTS",
-  "active_started_UTC": "2026-10-16T06:03:23.248684+00:00",
+  "active_started_UTC": "2026-10-16T06:11:14.283205+00:00",
   "B0_improved_full_Actual_wall_seconds": null,
   "C0_applicable_arms": [
     "B1",
@@ -165,5 +165,9 @@
     "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_BASELINE_FCFS_NATIVE0.xml",
     "bytes": 1198,
     "sha256": "745eb0f9321af5d1195ccefe4e17e2506554fdc15053789c65137186d091ccc0"
-  }
+  },
+  "B2_dispatch_authorized": false,
+  "B2_status": "NOT_STARTED_USER_HOLD",
+  "B1_wall_ceiling_seconds": 2400,
+  "official_B0_result": "ATTEMPT005_PENDING"
 }

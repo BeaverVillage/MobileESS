@@ -4,10 +4,7 @@ from copy import deepcopy
 from pathlib import Path
 from time import perf_counter
 import os
-import inspect
-import math
 import threading
-import textwrap
 import traceback
 
 import numpy as np
@@ -25,21 +22,8 @@ from v43_mess.budget import heavy_peers
 from v42_capacity.actual import Controller as OriginalFCFS
 
 
-def original_fcfs_core():
-    body=textwrap.dedent(inspect.getsource(OriginalFCFS.admit))
-    original='eligible=sorted(s for s in r.compatible if s in use and (r.source_site is None or s==r.source_site))'
-    if body.count(original)!=1:raise ValueError('ORIGINAL_FCFS_SOURCE_BOUNDARY_DRIFT')
-    # The existing R0 Reference fixes each basic site; this is not an
-    # alternative-site selector. All heap/head-of-line/capacity/start logic
-    # remains the original PR189 code-base FCFS implementation.
-    body=body.replace(original,'eligible=self._baseline_sites(uid,now,use)')
-    namespace=dict(OriginalFCFS.admit.__globals__)
-    exec(compile(body,inspect.getfile(OriginalFCFS),'exec'),namespace)
-    return namespace['admit']
-
-
 class BaselineController(JobEventController):
-    _fcfs_admit=original_fcfs_core()
+    _fcfs_admit=OriginalFCFS.admit
     def __init__(self,*args,rack_limits,on_tick=None,**kwargs):
         if kwargs.get('arm') not in ('B0','B2') or kwargs.get('frozen_policy') is not None:
             raise ValueError('GRID_BLIND_BASELINE_NO_CONTROL_POLICY_REQUIRED')
@@ -47,14 +31,13 @@ class BaselineController(JobEventController):
         if self.flexible:raise ValueError('BASELINE_MUST_USE_ORIGINAL_NONFLEXIBLE_FCFS')
         self.rack_limits=rack_limits;self.on_tick=on_tick
 
-    def _baseline_sites(self,uid,when,use):
-        r=self.requests[uid];m=self.metadata[uid];site=m['reference_site']
-        if site not in r.compatible or site not in use or r.gpu>max(self.rack_limits[site]):return []
-        if r.source_site is not None and site!=r.source_site:return []
-        if when<max(r.submit,m.get('release_seconds') or -math.inf,m.get('hard_earliest_start_seconds') or -math.inf):return []
-        if any(m.get(k) is not None and value>m[k] for k,value in (
-                ('hard_latest_start_seconds',when),('completion_deadline_seconds',when+r.q50))):return []
-        return [site]
+    def submit(self,request,when):
+        if any(request.gpu>max(self.rack_limits[s]) for s in request.compatible):
+            raise ValueError('SOURCE_COMPATIBILITY_MUST_ENFORCE_RACK_GANG')
+        if any(request.metadata.get(k) is not None for k in ('release_seconds','hard_earliest_start_seconds',
+                'hard_latest_start_seconds','completion_deadline_seconds')):
+            raise ValueError('BASELINE_CASE_HAS_EXPLICIT_HARD_WINDOW_REQUIRING_SOURCE_SUPPORT')
+        return super().submit(request,when)
 
     def admit(self,when):
         if when%900:return []
@@ -148,8 +131,9 @@ def run(arm,output,*,reference_folder=None,mess_result=None):
             if actual['migration_receipts'] or any(r.get('policy_action') not in (None,'START') or
                     r.get('intentional_delay_seconds',0)!=0 or r['migration_count'] for r in actual['queue_ledger']):
                 raise ValueError('BASELINE_CONTAINS_CONTROLLED_FLEXIBILITY')
-            if any(r['admitted_time'] is not None and r['site']!=args['reference'].assigned[r['job_uid']]['reference_site']
-                    for r in actual['queue_ledger']):raise ValueError('BASELINE_REFERENCE_SITE_CHANGED')
+            requests_by={j.uid:j for j in [*args['requests'],*(x[0] for x in args['running'])]}
+            if any(r['admitted_time'] is not None and r['site'] not in requests_by[r['job_uid']].compatible
+                    for r in actual['queue_ledger']):raise ValueError('BASELINE_SOURCE_COMPATIBILITY_CHANGED')
             progress(phase='ONE_INDEPENDENT_SEQUENTIAL_FRESH120_WITH_ACTUAL96')
             oracle=FullPrefixReferenceAC(issue_seconds=args['begin'],sites=actual['sites'],power_model=args['power_model'],
                 observations=observations,mess_plan=mess,day_start_seconds=args['begin']+21600)
@@ -162,6 +146,9 @@ def run(arm,output,*,reference_folder=None,mess_result=None):
             result.update(PASS=execution_pass and fresh_pass,Actual96_execution_PASS=execution_pass,Fresh96_physical_PASS=fresh_pass,
                 preparation_wall_seconds=preparation_wall,Actual_wall_seconds=actual_wall,Fresh_wall_seconds=fresh_wall,
                 Known_R0_unchanged=True,Pre_site_actions=0,Time_shift_actions=0,Migration_actions=0,
+                Known_R0_scope='PLANNING_REFERENCE_UNCHANGED_NOT_COPIED_ACTUAL_COMMANDS',
+                exact_original_FCFS_admission_function=True,
+                basic_initial_placement='FIRST_AVAILABLE_SOURCE_COMPATIBLE_SITE_NOT_PRESITE',
                 candidate_Current_AC_calls=0,candidate_past_slot_replays=0,
                 sequential_Fresh_counts=oracle.performance,Fresh_actual_slots=len(evaluated),
                 Fresh_violations={k:sum(r['violations'][k] for r in evaluated) for k in evaluated[0]['violations']},

@@ -46,3 +46,18 @@ def test_observed_shorter_service_changes_actual_occupancy_not_planning_copy():
 def test_baseline_rejects_any_attached_control_policy():
     with pytest.raises(ValueError,match='GRID_BLIND_BASELINE_NO_CONTROL_POLICY_REQUIRED'):
         BaselineController({'A':1},arm='B0',qos_window_provider=None,frozen_policy=object(),rack_limits={'A':[1]})
+
+
+def test_unassigned_initial_placement_uses_first_currently_available_site_without_presite():
+    caps={'A':1,'B':1};q=QoSWindowProvider(stats(),case_sha=digest('CASE'),provider_sha=digest('PROVIDER'))
+    ref=CorrectedReferenceScheduler(caps,reference_sha='NAMED_BASELINE')
+    out=run_actual(caps,[request('FIRST',0.,site='A'),request('SECOND',900.,site=None)],
+        Environment({'FIRST':2700.,'SECOND':300.}),arm='B0',qos_window_provider=q,reference=ref,
+        begin=0.,end=4500.,frozen_policy=None,
+        controller_class=partial(BaselineController,rack_limits={'A':[1],'B':[1]}))
+    row=next(r for r in out['queue_ledger'] if r['job_uid']=='SECOND')
+    assert row['admitted_time']==900. and row['site']=='B'
+    assert row['policy_action']=='START' and row['intentional_delay_seconds']==0
+    assert not out['rule_consumption_receipt'] and not out['migration_receipts']
+    from v42_capacity.actual import Controller
+    assert BaselineController._fcfs_admit is Controller.admit

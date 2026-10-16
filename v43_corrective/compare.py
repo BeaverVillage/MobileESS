@@ -5,6 +5,7 @@ from types import FunctionType
 import argparse
 import inspect
 import textwrap
+from time import perf_counter
 
 from v43.common import ROOT,atomic,read,record,verify_records,git,now
 from v43_actual import compare as original
@@ -16,12 +17,19 @@ from .current_ac import FullPrefixReferenceAC,CertifiedPrefixAC,ShadowCertifiedP
 
 
 def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,correction_proof=None,
-        ac_mode='SHADOW',ac_certification=None,variants=('C0',)):
+        ac_mode='SHADOW',ac_certification=None,variants=('C0',),wall_limit_seconds=2400.):
     if arm not in ('B1','B3'):raise ValueError('C0_CONTROL_ONLY_B1_B3_BASELINES_USE_EVENT_FCFS')
     output=Path(output);freeze=output.with_name(output.name+'.CORRECTIVE_SOURCE_FREEZE.json')
     if output.exists() or freeze.exists():raise ValueError('NEW_CORRECTIVE_ACTUAL_ATTEMPT_REQUIRED')
     variants=tuple(variants)
     if variants not in (('C0',),('C0','C1')):raise ValueError('EXPLICIT_SUPPORTED_CONTROL_VARIANTS_REQUIRED')
+    if not 0<float(wall_limit_seconds)<=2400:raise ValueError('USER_40_MINUTE_WALL_CEILING_REQUIRED')
+    began=perf_counter()
+    def check_deadline():
+        if perf_counter()-began>=wall_limit_seconds:
+            atomic(output/'STOP_REQUESTED.json',dict(UTC=now(),authority='USER_40_MINUTE_B1_LIMIT',
+                reason='WALL_LIMIT_REACHED_STOP_RECONCILE_PROFILE_AND_REPAIR',wall_limit_seconds=wall_limit_seconds))
+            raise RuntimeError('V43_ACTUAL_USER_40_MINUTE_WALL_LIMIT_REACHED')
     if control_slots not in (1,25,120):raise ValueError('SUPPORTED_CORRECTIVE_HORIZON_REQUIRED')
     if ac_mode not in ('FULL_REFERENCE','SHADOW','FAST'):raise ValueError('EXPLICIT_CURRENT_AC_MODE_REQUIRED')
     if control_slots==120 and ac_mode!='FAST':raise ValueError('NO_NEW_FULL_ACTUAL_WITH_UNCERTIFIED_FULL_PREFIX_PATH')
@@ -46,26 +54,49 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
     if ac_certification:sources.append(record(ac_certification))
     atomic(freeze,dict(UTC=now(),arm=arm,policy_version=POLICY_ID,source_commit=git('rev-parse','HEAD').decode().strip(),
         sources=sources,control_slots=control_slots,physical_bands_changed=False,
-        parent_Golden003_reoptimized=False,Strict_outputs_overwritten=False,ac_mode=ac_mode,variants=variants))
+        parent_Golden003_reoptimized=False,Strict_outputs_overwritten=False,ac_mode=ac_mode,variants=variants,
+        wall_limit_seconds=wall_limit_seconds))
     policies=[];controllers=[];oracles=[]
     def policy(*args,**kwargs):
+        check_deadline()
         kwargs['evidence_scope']='REAL_V43_R1_FLEX30_CORRECTIVE'
-        p=CorrectivePolicy(*args,correction_proof=proof,**kwargs);policies.append(p);return p
+        p=CorrectivePolicy(*args,correction_proof=proof,**kwargs)
+        for name in ('select','current_guard'):
+            method=getattr(p,name)
+            def checked(*a,_method=method,**kw):
+                check_deadline();return _method(*a,**kw)
+            setattr(p,name,checked)
+        policies.append(p);return p
     def controller(*args,**kwargs):
         p=CorrectiveController(*args,**kwargs);controllers.append(p);return p
     def oracle(*args,**kwargs):
+        check_deadline()
         cls={'FULL_REFERENCE':FullPrefixReferenceAC,'SHADOW':ShadowCertifiedPrefixAC,'FAST':CertifiedPrefixAC}[ac_mode]
-        p=cls(*args,mess_plan=mess,day_start_seconds=1746021600.,**kwargs);oracles.append(p);return p
+        p=cls(*args,mess_plan=mess,day_start_seconds=1746021600.,**kwargs)
+        method=p._probe
+        def checked_probe(rows):check_deadline();return method(rows)
+        p._probe=checked_probe
+        oracles.append(p);return p
     namespace=dict(original.__dict__,prepare=binding.prepare,build=binding.build,
         IssueContinuityPolicy=policy,V43EventController=controller,
-        OriginalCurrentAC=oracle,__selected_variants=variants)
+        OriginalCurrentAC=oracle,__selected_variants=variants,__check_deadline=check_deadline)
     # Fresh always takes the independent original sequential all-measurement
     # path, even when admission uses certified historical proof reuse.
     body=textwrap.dedent(inspect.getsource(original.run))
     if body.count('fresh=oracle._probe(rows)')!=1:raise ValueError('INDEPENDENT_FRESH_REUSE_BOUNDARY_DRIFT')
-    body=body.replace('fresh=oracle._probe(rows)','fresh=oracle.full_fresh_probe(rows)')
+    body=body.replace('fresh=oracle._probe(rows)','__check_deadline();fresh=oracle.full_fresh_probe(rows)')
     if body.count("for variant in ('C0','C1'):")!=1:raise ValueError('EXPLICIT_VARIANT_REUSE_BOUNDARY_DRIFT')
     body=body.replace("for variant in ('C0','C1'):",'for variant in __selected_variants:')
+    actual_line='actual=run_actual(**current,frozen_policy=policy,controller_class=V43EventController,expected_bindings=bindings)'
+    if body.count(actual_line)!=1:raise ValueError('ACTUAL_TIMING_SOURCE_BOUNDARY_DRIFT')
+    body=body.replace(actual_line,actual_line+'\n                event_wall_seconds=time.perf_counter()-started')
+    body=body.replace('variants={}','preparation_wall=time.perf_counter()-began\n            variants={}')
+    body=body.replace('__check_deadline();fresh=oracle.full_fresh_probe(rows)',
+        '__check_deadline();fresh_started=time.perf_counter();fresh=oracle.full_fresh_probe(rows);fresh_wall_seconds=time.perf_counter()-fresh_started')
+    body=body.replace('elapsed_wall_seconds=time.perf_counter()-started,Native_calls=0,',
+        'elapsed_wall_seconds=time.perf_counter()-started,actual_event_wall_seconds=event_wall_seconds,Fresh_wall_seconds=fresh_wall_seconds,Native_calls=0,')
+    body=body.replace('result=dict(PASS=gate if control_slots==120 else not attempts,',
+        'result=dict(preparation_wall_seconds=preparation_wall,PASS=gate if control_slots==120 else not attempts,')
     exec(compile(body,__file__,'exec'),namespace);function=namespace['run']
     verify_records(sources);result=function(output,control_slots=control_slots);verify_records(sources)
     atomic(output/'CORRECTIVE_POLICY_RECEIPTS.json',dict(arm=arm,policy_version=POLICY_ID,

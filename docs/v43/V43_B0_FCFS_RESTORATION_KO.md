@@ -4,8 +4,10 @@ B0 비교군 실행 복원
 
 Attempt003은 잘못된 공통 C0 경로로 실행됐으므로 공식 중단했다. Wall121.0618816초, PID종료, Native0/0초/inflight없음, Source/Raw/STOP/원장을 보존했다. 이를 정상 B0 또는 성능 결과로 사용하지 않는다.
 
-새 v43_baseline은 v42_capacity.actual.Controller.admit 원본 FCFS의 큐·선두 대기·GPU 입장 알고리즘을 재사용한다. 후보 사이트만 기존 grid-blind R0 기본 사이트로 고정하고 Source GPU/Rack/호환성/하드 시간 조건을 유지한다. Signed score, UniformArmController, C0/C1, 후보 Current AC를 호출하지 않는다. 실제 서비스는 private 환경이 제출/완료 관측 이벤트로만 알리며, RUNNING/Overrun GPU는 실제 관측 해제까지 유지한다. 실제 GPU 점유에서 기존 C1로 IT/PCC P/Q를 새로 계산한다. Planning 전력·GPU 궤적을 Actual에 복사하지 않는다.
+새 v43_baseline은 v42_capacity.actual.Controller.admit 원본 FCFS의 큐·선두 대기·GPU 입장 알고리즘을 재사용한다. Source 사이트가 있으면 유지하고, Source 사이트가 없으면 원본대로 현재 용량에 맞는 첫 호환 사이트에 기본 배치한다. 기본 최초 배치는 Pre-site 제어가 아니다. 기존 R0 Planning Reference는 M-stage 입력으로 그대로 유지한다. Signed score, UniformArmController, C0/C1, 후보 Current AC를 호출하지 않는다. 실제 서비스는 private 환경이 제출/완료 관측 이벤트로만 알리며, RUNNING/Overrun GPU는 실제 관측 해제까지 유지한다. 실제 GPU 점유에서 기존 C1로 IT/PCC P/Q를 새로 계산한다. Planning 전력·GPU 궤적을 Actual에 복사하지 않는다.
 
 입력·Known R0·Q50 Reference는 기존 V43_MAY01_B0_REFERENCE_003을 재사용하고 Planning/전기계수/Domain을 다시 생성하지 않는다. 민감도 packet도 B0 실행에 만들지 않는다. 실제 이벤트 실행 뒤 원본7Reg Snapshot/Static 순차120슬롯을 한 번만 독립 Fresh로 실행하고 Actual96을 평가한다. 후보 AC 호출/과거 슬롯 재생은0회여야 한다. 물리 위반은 그대로 실패로 보고하며 비교군을 AC 조건에 맞게 재배치하거나 지연시키지 않는다.
 
 8개 집중 Native0 회귀 PASS: B0/B2의 C0 진입 차단, 정책 없는 B0 dispatch, Overrun 관측 해제, 실제 서비스에 따른 Actual GPU 변화, Pre-site/Time-shift/Migration 부재. 실제 B0 전체 실행 및 Fresh96은 새 독립 attempt에서 측정한다. May01만 허용한다.
+
+Attempt004는 추가 R0 사이트 고정 변형으로 별도 보존하고 공식 정확 FCFS 비교군으로 사용하지 않는다. 최종 경로는 v42_capacity.actual.Controller.admit 함수 자체를 수정 없이 호출한다. 별도 반례에서 Source미지정 작업이 첫 현재 가용 사이트에서 START하는지 확인했다. 기본 배치와 최적화 Pre-site를 혼동하지 않는다. 새 B0 후 B2를 시작하지 말고 B1 요청 작업을 마친 뒤 C0 실행/40분 Wall 상한을 우선한다.
