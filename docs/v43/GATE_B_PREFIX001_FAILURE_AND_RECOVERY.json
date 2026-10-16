@@ -1,0 +1,25 @@
+{
+  "UTC": "2026-10-16T04:02:53.630166+00:00",
+  "result": {
+    "path": "D:\\MobileESS_V43\\runtime\\gate_b_prefix_native0_001\\RESULT.json",
+    "bytes": 860,
+    "sha256": "18145901ff1a6a748dff751f0524ceba01ba7ca93718e09748fca14f02291583"
+  },
+  "reconciliation": {
+    "path": "D:\\MobileESS_V43\\runtime\\gate_b_prefix_native0_001\\RECONCILIATION.json",
+    "bytes": 120,
+    "sha256": "6cba7d2ea6c94ab6bfaa70b684c96d7998cd6d8602e24dbca82ba9240d8afcc9"
+  },
+  "natural_failure": true,
+  "Native_calls": 0,
+  "Native_seconds": 0,
+  "inflight": null,
+  "cause": "PR189 daily NOAA derivative uses ts_fixed_aest_start rather than raw ts and contains no 18:00 prefix. Online observer must bind preserved raw hourly NOAA, not rename/interpolate retrospective daily rows.",
+  "repair": "V43 observations adapter reads the existing raw_realized_sources weather receipt, keeps raw rows and original as-of observer unchanged. No download or C1 regeneration.",
+  "source_preserved": {
+    "path": "D:\\MobileESS_V43\\runtime\\gate_b_prefix_native0_001\\START.json",
+    "bytes": 6097,
+    "sha256": "d79c268d39e83f1937e9f81d0702e128e2d1c94444d158c4f55464495854dbe7"
+  },
+  "Golden003_unchanged": true
+}

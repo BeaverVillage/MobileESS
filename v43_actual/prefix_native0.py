@@ -21,7 +21,7 @@ def run(output):
     from v42_may_campaign_native90.preflight import native_zero
     from v43.golden import no_heavy_peer
     from .vendor.actual import run_actual
-    from .vendor.current_ac_admission import CausalObservations
+    from .observations import load_observations
     output=Path(output)
     if output.exists():
         raise FileExistsError('NEW_INDEPENDENT_PREFIX_ATTEMPT_REQUIRED')
@@ -61,7 +61,7 @@ def run(output):
             verify_records(sources)
             args,identity=prepare(output/'CASE',private_service=True)
             midnight=args['begin']+21600
-            observations=CausalObservations.load(BUNDLE,begin=args['begin'],end=midnight)
+            observations=load_observations(begin=args['begin'],end=midnight)
             # Every physical interval uses a causal as-of observation. No
             # interpolated future observation is exposed to a controller.
             weather=[observations.at(t,observed_now=t)['weather']['values']
