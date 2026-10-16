@@ -11,3 +11,7 @@ V42.2 PR231과 기존 미커밋 수정은 `D:/v42_trajectory_tracking_may01_2026
 호스트 중단 중 inflight Native가 있었다면 Runtime을 0으로 추정하지 않는다. 원본 로그·원장을 보존하고 불명확 구간을 표시한 별도 정산을 만든다. 실패 attempt를 덮어쓰지 말고 새 번호·새 Native=0 원장으로 비교군 처음부터 재시작한다. 지원 파일 누락은 Git 원본 blob에서 동일 바이트로 복원하고 새 freeze/회귀/commit을 만든다.
 
 Gate 순서: A(PR189 재현) → B(Unknown C0/C1) → C(MESS) → D(May01 네 비교군) → May31. 실행되지 않은 결과는 NOT_RUN, 미인증은 NOT_CERTIFIED다. 모든 후속 Gate가 확인되기 전 월간 캠페인을 자동 시작하지 않는다.
+
+현재 재개 지점: Golden001은 cutoff 이후 GFS06Z 공개 증거로 중지했고 Native=0으로 정산했다. 원본 입력을 그대로 재시도하지 않는다. `v43.weather_repair`는 `D:/MobileESS_V43/inputs/weather/2025-05-01_GFS00Z`에 새 source를 복구한다. PROGRESS/REPAIR_SOURCE_MANIFEST와 실제 PID를 확인한다. 이 작업은 MILP가 아니며 과거 certificate·결과를 고치지 않는다. 필요한 decoder 패키지는 독립 `D:/MobileESS_V43/dependencies`에 설치했고 기존 Python·NumPy 환경은 바꾸지 않았다.
+
+자동 감독 `v43-pr189`는 이 채팅에서 10분마다 상태와 재개 작업을 확인한다. 상태 변화가 없으면 알림을 생략한다. 세션 재개 시 해당 감독과 살아 있는 source 복구/solver Worker가 중복 실행되지 않도록 확인한다. Source 복구 후 새 전기 Case, Native0/회귀/commit/freeze를 완성한 뒤 다음 독립 Golden attempt를 만든다.

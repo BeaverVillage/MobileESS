@@ -39,6 +39,20 @@ def check(request,output):
     assert sha(path)==weather['sha256']
     frame=pd.read_parquet(path)
     meta=dict(columns=list(frame.columns),attrs=frame.attrs,source=record(path))
+    availability=DOC/'GFS_HISTORICAL_AVAILABILITY_HEAD_AUDIT.json'
+    if availability.exists():
+        from email.utils import parsedate_to_datetime
+        evidence=read(availability)
+        original_manifest=read(path.parent/'gfs_source_manifest.json')
+        source_etags={r['etag'] for r in original_manifest['records']}
+        for row in evidence['rows']:
+            headers=row.get('headers',{})
+            if headers.get('ETag') in source_etags and row.get('recorded_ETag')==headers['ETag']:
+                if parsedate_to_datetime(headers['Last-Modified'])>issue:
+                    atomic(output/'CAUSAL_INPUT_REJECTED.json',dict(PASS=False,Native_calls=0,
+                        reason='GFS_OBJECT_AVAILABLE_AFTER_PLANNING_CUTOFF',evidence=record(availability),
+                        original_weather=record(path),cutoff_UTC=issue.isoformat(),offending_row=row))
+                    raise ValueError('GFS_OBJECT_AVAILABLE_AFTER_PLANNING_CUTOFF')
     # Forecast arrays and byte identity are proven here. Their original GFS
     # publication evidence is recorded separately; absence never becomes PASS.
     result=dict(PASS=True,Native_calls=0,known=cells,electrical=electrical,forecast=forecast,

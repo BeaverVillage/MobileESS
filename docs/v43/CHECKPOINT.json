@@ -1,19 +1,34 @@
 {
-  "state": "BASELINE_SEALED_GATE_A_NOT_RUN",
+  "state": "GATE_A_HOLD_GFS06Z_AFTER_CUTOFF_CAUSAL_SOURCE_REPAIR_RUNNING",
   "Gate_A_PASS": false,
   "Gate_B_PASS": false,
   "Gate_C_PASS": false,
   "Gate_D_PASS": false,
   "May31_PASS": false,
-  "next_command": "python -X utf8 -u -m v43.golden",
-  "request": {
-    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GOLDEN_REQUEST.json",
-    "bytes": 1855,
-    "sha256": "6572f571f8535c6b8bd5ea137620887ff3931937512b2fbb2bc744c521afaa43"
+  "Golden_attempt001": "OFFICIALLY_STOPPED_CAUSAL_INPUT_REJECTED",
+  "Native_calls": 0,
+  "Native_seconds": 0,
+  "inflight": null,
+  "heavy_solver_PID": null,
+  "source_recovery_PID": 31160,
+  "source_recovery_output": "D:/MobileESS_V43/inputs/weather/2025-05-01_GFS00Z",
+  "source_recovery_command": "python -B -X utf8 -u -m v43.weather_repair",
+  "automation_id": "v43-pr189",
+  "automation_interval_minutes": 10,
+  "GFS06Z_evidence": {
+    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GFS_HISTORICAL_AVAILABILITY_HEAD_AUDIT.json",
+    "bytes": 1477,
+    "sha256": "cbd5fb6f491f3e2960c3063248369e5fc209c6e3cf6c7579e9ab54a08b40b2ac"
   },
-  "Source": {
-    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_BASELINE_AND_SOURCE_FREEZE.json",
-    "bytes": 274222,
-    "sha256": "4c8ca663f52248c1c9883ed666942f04c9c121b6e5fd1d851f20138651d27b7e"
-  }
+  "GFS00Z_preflight": {
+    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GFS00Z_CAUSAL_REPAIR_PREFLIGHT.json",
+    "bytes": 844,
+    "sha256": "9f65625548ae2d248cfd06e6fb7b61db60c87407b09252ce28e5a5d6099e8a01"
+  },
+  "next_steps": [
+    "Verify all recovered GFS00Z raw message bytes, availability and original decode/interpolation.",
+    "Preserve original PR189 AIDC formulation; regenerate C1/B0 anchor and electrical sensitivities in an independent V43 case.",
+    "Fresh Native0, regression, commit and source/case/policy freeze before new Golden attempt.",
+    "Do not call original invalid-input Golden again; do not advance Gates B/C/D or May31 until Gate A certified."
+  ]
 }
