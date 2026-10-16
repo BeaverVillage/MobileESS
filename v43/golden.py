@@ -20,7 +20,7 @@ def no_heavy_peer():
         try:
             if p.pid == os.getpid() or (p.info['name'] or '').lower() not in ('python.exe','pythonw.exe','python'): continue
             cmd = ' '.join(p.info['cmdline'] or []).lower()
-            if any(x in cmd for x in ('v43.golden', 'v43.weather_repair', 'v43.electrical_repair', 'audit_v42', 'native0', '.worker', 'm_stage', 'solve_v42')):
+            if any(x in cmd for x in ('v43.golden', 'v43_followup', 'v43.weather_repair', 'v43.electrical_repair', 'audit_v42', 'native0', '.worker', 'm_stage', 'solve_v42')):
                 conflicts.append(p.info)
         except psutil.Error: pass
     if conflicts: raise PermissionError('HEAVY_WORKER_CONFLICT:' + repr(conflicts))
@@ -111,7 +111,9 @@ def run():
         with permit(req):
             from .causal import check as causal_check
             causal=causal_check(req,attempt/'CAUSAL_NATIVE0',numerical_reproduction=True)
-            result=original_run(req,budget,progress)
+            from v43_followup.physical_cache import cache_scope
+            with cache_scope(req):
+                result=original_run(req,budget,progress)
             atomic(attempt/'PLANNING_RESULT.json',result)
             if result.get('PASS'):
                 progress(dict(phase='GOLDEN_ORIGINAL_FIXED_REPLAY_FRESH_AC96'))

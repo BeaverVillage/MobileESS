@@ -110,3 +110,28 @@ def test_terminated_native0_failure_can_only_prove_local_domains(monkeypatch):
     cache._terminated(dict(pid=77, process_created=123.), result, reconciliation)
     with pytest.raises(ValueError, match='NUMERICAL_PASS_REQUIRED'):
         cache._completed(dict(pid=77, process_created=123.), result, reconciliation)
+
+
+def test_required_cache_failure_is_not_an_optional_regeneration_fallback(tmp_path, monkeypatch):
+    from v42_may_campaign_native90 import a_cache
+    path = tmp_path / 'proof.json'
+    path.write_text('{}')
+    original = a_cache.load_current_date_physical_cache
+    def fail(*args, **kwargs):
+        assert kwargs['original_loader'] is original
+        raise ValueError('scientific mismatch')
+    monkeypatch.setattr(cache, 'load_current_date_physical_cache', fail)
+    with pytest.raises(RuntimeError, match='REQUIRED_VERIFIED_PHYSICAL_CACHE_REUSE_FAILED'):
+        with cache.cache_scope(dict(physical_cache_case_proof=record(path))):
+            a_cache.load_current_date_physical_cache({}, object())
+    assert a_cache.load_current_date_physical_cache is original
+
+
+def test_case_proof_byte_drift_denies_routing_before_original_loader(tmp_path):
+    path = tmp_path / 'proof.json'
+    path.write_text('{}')
+    proof = record(path)
+    path.write_text('{"changed": true}')
+    with pytest.raises(ValueError, match='FROZEN_BYTES_DRIFT'):
+        with cache.cache_scope(dict(physical_cache_case_proof=proof)):
+            pytest.fail('A changed proof must not enter the original build')

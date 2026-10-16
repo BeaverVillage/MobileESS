@@ -5,6 +5,7 @@ scientific input checks, complete-domain hashing and verifier code stay intact.
 This adapter cannot run against a live Golden source attempt.
 """
 from copy import deepcopy
+from contextlib import contextmanager
 from pathlib import Path
 from threading import RLock
 from types import FunctionType
@@ -205,6 +206,10 @@ def load_current_date_physical_cache(request, fresh_data, *, case_proof,
         return original_read(path)
 
     original = original_loader or a_cache.load_current_date_physical_cache
+    if (original.__module__ != a_cache.__name__
+            or original.__name__ != 'load_current_date_physical_cache'
+            or Path(original.__code__.co_filename).resolve() != ROOT / 'v42_may_campaign_native90/a_cache.py'):
+        raise ValueError('EXACT_ORIGINAL_CACHE_VERIFIER_FUNCTION_REQUIRED')
     namespace = dict(original.__globals__, read=routed_read)
     loader = FunctionType(original.__code__, namespace, original.__name__, original.__defaults__, original.__closure__)
     with _mutex, patch.object(fast_census, 'read', routed_read):
@@ -237,3 +242,27 @@ def load_current_date_physical_cache(request, fresh_data, *, case_proof,
         original_input_and_cache_files_modified=False, Native_calls=0,
         prior_solution_used=False, prior_UB_LB_used=False, prior_Native_runtime_used=False))
     return domains
+
+
+@contextmanager
+def cache_scope(request):
+    """V43-only binding; invalid required reuse cannot silently regenerate."""
+    proof = request.get('physical_cache_case_proof')
+    if proof is None:
+        yield
+        return
+    verify_records([proof])
+    from v42_may_campaign_native90 import a_cache
+    original = a_cache.load_current_date_physical_cache
+    def routed(current_request, fresh_data, check=lambda: None, progress=None):
+        try:
+            return load_current_date_physical_cache(current_request, fresh_data,
+                case_proof=proof['path'], check=check, progress=progress,
+                original_loader=original)
+        except Exception as error:
+            # Original optional cache routing catches ValueError/IOError and
+            # recomputes domains. Required, independently verified reuse must
+            # fail visibly instead of spending another full build on a bug.
+            raise RuntimeError('REQUIRED_VERIFIED_PHYSICAL_CACHE_REUSE_FAILED') from error
+    with patch.object(a_cache, 'load_current_date_physical_cache', routed):
+        yield
