@@ -1,0 +1,17 @@
+2026-10-16 사용자 추가 지시 — PR189 빠른 B0 실행 알고리즘 재사용
+
+과거 결과를 복사하지 않고 v42_capacity/actual.py Event/FCFS와 원본 순차 OpenDSS96 실행 방식을 V43에 재사용한다. B0는 R0/Q50 Reference 그대로, B2는 같은 B0 AIDC 계획 고정 후 MESS만 최적화한다. 완료 Planning 재생성 금지.
+
+후보마다 새 엔진에서 0~t 전체 슬롯의 분기 측정·Inventory 검증을 반복하는 병목을 최우선 해결한다. 안전한 완전 상태 복제·복원이 인증되면 증분 후보 검사를 사용한다. 그렇지 않으면 동일 과거 슬롯의 중복 분기 측정·Inventory 제거부터 보수적으로 적용한다. Full Prefix Replay와 탭·전압·상별 전류·PASS/FAIL을 독립 대조한다. 증명 없이 AC PASS나 물리 제약 완화 금지.
+
+Known 동결 명령, Unknown 실제 이벤트, Overrun, R1-FLEX30, GPU/Rack/WAN/QoS, 미래 정보 차단을 유지한다. 고정 Planning 전력을 실제 GPU 점유 대신 복사하지 않는다. C0/C1에 동일하게 인증된 하드 물리 검사를 사용한다.
+
+동일 May01 관측 Prefix/후보 집합에서 Current AC 호출 수, 과거 슬롯 재생 수, 분기 측정·Inventory 호출, Actual Wall, 최대 제어 지연, 모든 후보 PASS/FAIL, 실행 UID/사이트/시각/GPU, 최종 Fresh96을 비교한다. 부분 표본을 전체 Actual 등가 인증으로 확대하지 않는다.
+
+B0 Attempt002 Source/Raw/원장을 보존하며 현재 Worker는 공식 종료 경계까지 유지한다. 개선본은 짧은 Canary와 실제 Prefix 동등성부터 검증한다. 기존 B0 전체 Actual을 불필요하게 재실행하지 않는다.
+
+병목 개선 인증 뒤 B2 Seedless K48 + Adaptive Beam–4-MESS Direct Joint, B3 A1→M1→A2→M2를 진행한다. B2 수학 입력은 B0 Reference이며 B0 Actual 결과가 아니다. Heavy1/Threads1 및 공통 lock을 유지한다.
+
+Golden003/PR189/기존 B0·Strict Raw/Native 원장 불변. V43만 Commit/Push/PR232 갱신. May01만 실행하고 May02~31 및 Main merge 금지.
+
+이 문서는 최신 채팅 지시의 실행 정책 요약이다. 원문은 해당 사용자 메시지이며 이전 R1 최종 지시는 USER_STEERING_R1_FLEX30_CORRECTIVE_ACTUAL.txt에 그대로 보존한다.

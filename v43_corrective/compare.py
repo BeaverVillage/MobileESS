@@ -1,0 +1,151 @@
+"""Separate attempt/source freeze over the unchanged sequential Actual driver."""
+from functools import partial
+from pathlib import Path
+from types import FunctionType
+import argparse
+import inspect
+import textwrap
+import traceback
+from time import perf_counter
+
+from v43.common import ROOT,atomic,read,record,verify_records,git,now
+from v43_actual import compare as original
+from . import POLICY_ID
+from .binding import CorrectiveBinding
+from .controller import CorrectiveController
+from .policy import CorrectivePolicy
+from .current_ac import FullPrefixReferenceAC,CertifiedPrefixAC,ShadowCertifiedPrefixAC
+
+
+def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,correction_proof=None,
+        ac_mode='SHADOW',ac_certification=None,variants=('C0',),wall_limit_seconds=2400.,known_window_policy=None):
+    if arm not in ('B1','B3'):raise ValueError('C0_CONTROL_ONLY_B1_B3_BASELINES_USE_EVENT_FCFS')
+    output=Path(output);freeze=output.with_name(output.name+'.CORRECTIVE_SOURCE_FREEZE.json')
+    if output.exists() or freeze.exists():raise ValueError('NEW_CORRECTIVE_ACTUAL_ATTEMPT_REQUIRED')
+    variants=tuple(variants)
+    if variants not in (('C0',),('C1',),('C0','C1')):raise ValueError('EXPLICIT_SUPPORTED_CONTROL_VARIANTS_REQUIRED')
+    if not 0<float(wall_limit_seconds)<=2400:raise ValueError('USER_40_MINUTE_WALL_CEILING_REQUIRED')
+    began=perf_counter()
+    def check_deadline():
+        if perf_counter()-began>=wall_limit_seconds:
+            atomic(output/'STOP_REQUESTED.json',dict(UTC=now(),authority='USER_40_MINUTE_B1_LIMIT',
+                reason='WALL_LIMIT_REACHED_STOP_RECONCILE_PROFILE_AND_REPAIR',wall_limit_seconds=wall_limit_seconds,
+                active_stack=traceback.format_stack()))
+            raise RuntimeError('V43_ACTUAL_USER_40_MINUTE_WALL_LIMIT_REACHED')
+    if control_slots not in (1,25,120):raise ValueError('SUPPORTED_CORRECTIVE_HORIZON_REQUIRED')
+    if ac_mode not in ('FULL_REFERENCE','SHADOW','FAST'):raise ValueError('EXPLICIT_CURRENT_AC_MODE_REQUIRED')
+    if control_slots==120 and ac_mode!='FAST':raise ValueError('NO_NEW_FULL_ACTUAL_WITH_UNCERTIFIED_FULL_PREFIX_PATH')
+    if ac_mode=='FAST':
+        if ac_certification is None:raise ValueError('REAL_PREFIX_AND_PAIRED_EVENT_CANARY_CERTIFICATION_REQUIRED')
+        cert=read(ac_certification);verify_records([cert['optimized_source']])
+        if (cert.get('production_fast_path_authorized') is not True or
+                cert.get('paired_actual_UID_site_time_GPU_exact') is not True or
+                cert['optimized_source']['sha256']!=record(ROOT/'v43_corrective/current_ac.py')['sha256']):
+            raise ValueError('CURRENT_AC_CERTIFICATION_NOT_FOR_THIS_SOURCE')
+    mess=None
+    if mess_result:
+        result=read(mess_result)
+        if result.get('FULL_feasible') is not True or result['arm']!=arm:raise ValueError('FROZEN_ARM_FULL_MESS_REQUIRED')
+        mess=result['MESS_plan']
+    binding=CorrectiveBinding(arm,reference_folder,mess,known_window_policy=known_window_policy)
+    sources=[record(p) for folder in ('v43_corrective','v43_actual','v43_arms')
+        for p in sorted((ROOT/folder).rglob('*.py'))]+[record(ROOT/'v43/common.py')]
+    if mess_result:sources.append(record(mess_result))
+    proof=None if correction_proof is None else read(correction_proof)
+    if correction_proof:sources.append(record(correction_proof))
+    if ac_certification:sources.append(record(ac_certification))
+    atomic(freeze,dict(UTC=now(),arm=arm,policy_version=POLICY_ID,source_commit=git('rev-parse','HEAD').decode().strip(),
+        sources=sources,control_slots=control_slots,physical_bands_changed=False,
+        parent_Golden003_reoptimized=False,Strict_outputs_overwritten=False,ac_mode=ac_mode,variants=variants,
+        wall_limit_seconds=wall_limit_seconds,Known_window_research_policy=known_window_policy))
+    policies=[];controllers=[];oracles=[]
+    def policy(*args,**kwargs):
+        check_deadline()
+        kwargs['evidence_scope']='REAL_V43_R1_FLEX30_CORRECTIVE'
+        p=CorrectivePolicy(*args,correction_proof=proof,**kwargs)
+        for name in ('select','current_guard'):
+            method=getattr(p,name)
+            def checked(*a,_method=method,**kw):
+                check_deadline();return _method(*a,**kw)
+            setattr(p,name,checked)
+        policies.append(p);return p
+    def controller(*args,**kwargs):
+        p=binding.controller_class(*args,**kwargs);controllers.append(p);return p
+    def oracle(*args,**kwargs):
+        check_deadline()
+        cls={'FULL_REFERENCE':FullPrefixReferenceAC,'SHADOW':ShadowCertifiedPrefixAC,'FAST':CertifiedPrefixAC}[ac_mode]
+        p=cls(*args,mess_plan=mess,day_start_seconds=1746021600.,**kwargs)
+        method=p._probe
+        def checked_probe(rows):check_deadline();return method(rows)
+        p._probe=checked_probe
+        oracles.append(p);return p
+    namespace=dict(original.__dict__,prepare=binding.prepare,build=binding.build,
+        IssueContinuityPolicy=policy,V43EventController=controller,
+        OriginalCurrentAC=oracle,__selected_variants=variants,__check_deadline=check_deadline)
+    # Fresh always takes the independent original sequential all-measurement
+    # path, even when admission uses certified historical proof reuse.
+    body=textwrap.dedent(inspect.getsource(original.run))
+    body=body.replace('from v43.golden import no_heavy_peer','from v43_corrective.safety import no_heavy_peer')
+    if body.count('fresh=oracle._probe(rows)')!=1:raise ValueError('INDEPENDENT_FRESH_REUSE_BOUNDARY_DRIFT')
+    body=body.replace('fresh=oracle._probe(rows)','__check_deadline();fresh=oracle.full_fresh_probe(rows)')
+    if body.count("for variant in ('C0','C1'):")!=1:raise ValueError('EXPLICIT_VARIANT_REUSE_BOUNDARY_DRIFT')
+    body=body.replace("for variant in ('C0','C1'):",'for variant in __selected_variants:')
+    actual_line='actual=run_actual(**current,frozen_policy=policy,controller_class=V43EventController,expected_bindings=bindings)'
+    if body.count(actual_line)!=1:raise ValueError('ACTUAL_TIMING_SOURCE_BOUNDARY_DRIFT')
+    body=body.replace(actual_line,actual_line+'\n                event_wall_seconds=time.perf_counter()-started')
+    body=body.replace('variants={}','preparation_wall=time.perf_counter()-began\n            variants={}')
+    body=body.replace('__check_deadline();fresh=oracle.full_fresh_probe(rows)',
+        '__check_deadline();fresh_started=time.perf_counter();fresh=oracle.full_fresh_probe(rows);fresh_wall_seconds=time.perf_counter()-fresh_started')
+    body=body.replace('elapsed_wall_seconds=time.perf_counter()-started,Native_calls=0,',
+        'elapsed_wall_seconds=time.perf_counter()-started,actual_event_wall_seconds=event_wall_seconds,Fresh_wall_seconds=fresh_wall_seconds,Native_calls=0,')
+    body=body.replace('result=dict(PASS=gate if control_slots==120 else not attempts,',
+        'result=dict(preparation_wall_seconds=preparation_wall,PASS=gate if control_slots==120 else not attempts,')
+    driver=output.with_name(output.name+'.ACTUAL_DRIVER.py')
+    driver.write_text(body,encoding='utf-8')
+    sources.append(record(driver));frozen=read(freeze);frozen['sources']=sources
+    frozen['transformed_driver']=record(driver);atomic(freeze,frozen)
+    exec(compile(body,str(driver),'exec'),namespace);function=namespace['run']
+    verify_records(sources);result=function(output,control_slots=control_slots);verify_records(sources)
+    for p in policies:p.require_bindings(p.bindings)
+    if not result['PASS']:
+        for c in controllers:
+            try:
+                when=c.policy.oracle.now
+                atomic(output/f'PARTIAL_PUBLIC_CONTROLLER_{c.policy.variant}.json',c.snapshot(when))
+                atomic(output/f'PARTIAL_CURRENT_AC_{c.policy.variant}.json',c.policy.oracle.audit)
+            except Exception as error:
+                atomic(output/f'PARTIAL_CAPTURE_ERROR_{c.policy.variant}.json',dict(error=repr(error)))
+    atomic(output/'CORRECTIVE_POLICY_RECEIPTS.json',dict(arm=arm,policy_version=POLICY_ID,
+        source_freeze=record(freeze),policies=[dict(variant=p.variant,spec=p.spec,sha=p.sha,timings=p.timings,
+            current_diagnostics=p.current_diagnostics,candidate_funnel=p.funnel) for p in policies],
+        controllers=[dict(variant=c.policy.variant,participation=list(c.participation.receipts.values()),
+            overruns=c.overrun_observations,Known_commands_unchanged=c.known_schedule==c._frozen_known_commands,
+            Known_window_research_policy=known_window_policy,
+            Known_research_measurements=[e for e in c.events if e['event'].startswith('KNOWN_RESEARCH_')])
+            for c in controllers],independent_Actual_and_Fresh=record(output/'RESULT.json')))
+    for index,o in enumerate(oracles):
+        folder=output/variants[index]
+        if not folder.exists():folder.mkdir()
+        if isinstance(o,CertifiedPrefixAC):atomic(folder/'PREFIX_CERTIFICATES.json',o.certificates())
+        atomic(folder/'AC_ALGORITHM_METRICS.json',dict(mode=ac_mode,Current_AC_calls=o.calls,
+            counters=o.performance,equivalence=getattr(o,'equivalence',[]),
+            independent_fresh_used=True,state_clone_claimed=False))
+    atomic(output/'CORRECTIVE_CERTIFICATION_STATUS.json',dict(policy_version=POLICY_ID,
+        PLANNING_FULL_PASS='PRESERVED_PARENT_CERTIFICATE_ONLY',PLANNING_GLOBAL_GAP_PASS='PRESERVED_PARENT_STAGE_ONLY',
+        KNOWN_FROZEN_COMMAND_PASS=all(c.known_schedule==c._frozen_known_commands for c in controllers),
+        UNKNOWN_REFERENCE_CORRECTION_PASS='NATIVE0_COUNTEREXAMPLES_PASS_EVENT_UID_AUDIT_REQUIRED',
+        R1_FLEX30_ASSUMED=True,OVERRUN_CORRECTIVE_CONTROL_PASS='PENDING_INDEPENDENT_EVENT_AUDIT',
+        ACTUAL_SERVICE_PASS='NOT_CERTIFIED_PENDING_UID_AND_GPUH_AUDIT',FRESH_AC96_PASS=result['Fresh96_PASS'],
+        QOS_PASS='PENDING_INDEPENDENT_DEADLINE_AUDIT',legacy_driver_PASS_scope='EXECUTION_AND_PHYSICAL_ONLY'))
+    return result
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('arm');p.add_argument('output');p.add_argument('--reference-folder')
+    p.add_argument('--mess-result');p.add_argument('--control-slots',type=int,default=120);p.add_argument('--correction-proof')
+    p.add_argument('--ac-mode',choices=['FULL_REFERENCE','SHADOW','FAST'],default='SHADOW');p.add_argument('--ac-certification')
+    from .known_window import POLICY_ID as KNOWN_POLICY
+    p.add_argument('--known-window-policy',choices=[KNOWN_POLICY])
+    a=p.parse_args();run(a.arm,a.output,reference_folder=a.reference_folder,mess_result=a.mess_result,
+        control_slots=a.control_slots,correction_proof=a.correction_proof,ac_mode=a.ac_mode,ac_certification=a.ac_certification,
+        known_window_policy=a.known_window_policy)

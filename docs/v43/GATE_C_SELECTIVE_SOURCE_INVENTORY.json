@@ -1,0 +1,75 @@
+{
+  "UTC": "2026-10-16T04:19:36.283530+00:00",
+  "status": "READ_ONLY_PREPARATION_NOT_ACTIVATED_GATE_B_RUNNING",
+  "sources": [
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\m_engine.py",
+      "bytes": 38860,
+      "sha256": "92c74ca95c9907c9ad2ac25b2836956bdbed1c3a9459a12055aaa436e61ee8d6"
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\m_adaptive.py",
+      "bytes": 8665,
+      "sha256": "2deffad2dcd682e3e0176a7352cb8d611e127b8d01e463e7eb01a980910445a9"
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\m_candidates.py",
+      "bytes": 33065,
+      "sha256": "b22dea1711f15ae4018c905d7d192374ee64bb6b16c0ad6c6bafa3ee78e900d4"
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\preparation_profile.py",
+      "bytes": 2568,
+      "sha256": "5c0c2c0b33a88a5ad7c4bb3e75a501bda636fd6190b3a1858b44721d7e727f75"
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_k48.py",
+      "bytes": 30322,
+      "sha256": "20d574abb43e1458cf50230159e8bd3d3cc7dea3dfaf9e96e1faee489f379212"
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\mess_joint_compression.py",
+      "bytes": 15060,
+      "sha256": "30ea04a117aa77e30878b330139ccf772f05a8d9feb631d6607df57b4a7a8a1b"
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\mess_scaling.py",
+      "bytes": 126458,
+      "sha256": "b72fb62d337023fb4721990c95c93808a0c964ee6dc9d9780b7484dd5c621444"
+    },
+    {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\v42_may_campaign_native90\\m_model.py",
+      "bytes": 33640,
+      "sha256": "758fbb11c07c52ac10895da63bf3bd6049dd5d94cb19e6b606589f25b5889dde"
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\tools\\critical_grid_cg\\oracle.py",
+      "bytes": 23345,
+      "sha256": "3a4fcfd507a13c9f2b77c5220b388c358aa3da652e4bd8cbdf250d2d30a4a782"
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\tools\\critical_grid_cg\\verify.py",
+      "bytes": 41723,
+      "sha256": "cd492fc0d73c6f5657934777e5a02a163e5f1d7114c035ddc5969edd632a2438"
+    }
+  ],
+  "existing_algorithms": [
+    "Seedless K16->K32->K48 original row selector and independent symbolic inclusion verifier",
+    "PR219/220/221/222 adaptive independent four-vehicle Beam route pools and exact Direct Joint",
+    "Original FULL physical/integer incumbent replay and registry retention"
+  ],
+  "planned_case_builder": "Original PR189 v42_may_campaign_native90.m_model.build_case with newly supplied current V43 fixed AIDC injections; no historical M point/bound",
+  "required_binding_adaptations": [
+    "PR231 table_v_k48.identity requires D0_source_sha/D0_parent_case_sha: route honest PR189/V43 Source fields only in a separate namespace; never fabricate D0 authority.",
+    "Route m_engine .a_engine.digest to canonical digest only, without importing a DayAhead engine.",
+    "Do not call old M-stage initial FULL MILP seed. optimize_mess(None,emptyRegistry) defaults to seedless Beam when no cold_initializer is installed.",
+    "Preserve separate K48 budget/1800-second M stage Native and 140-second Joint cap. Restricted pool ObjBound remains diagnostic.",
+    "Preserve original graph/battery/traffic/PQ/SOC/all rows. Recompute UB/LB for each exact new Case.",
+    "Static caches require complete Source/Case/numeric equality.",
+    "critical_grid_cg oracle and verifier are absent from PR189: selectively reuse pinned PR231 tool source and its dependencies; do not silently import the PR231 historical CASE globals."
+  ],
+  "Gate_C_PASS": false,
+  "Native_calls": 0,
+  "build_executed": false,
+  "case_bounds_transferred": false
+}

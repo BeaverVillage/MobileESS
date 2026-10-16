@@ -1,0 +1,714 @@
+# Codex Ultra — V43: PR189 Fast Planning + Unknown Sensitivity Pre-site + 4-MESS Joint Optimization
+
+## 0. 작업 목적 및 실행 승인
+
+이번 연구 버전을 **V43**으로 명명한다.
+
+V43는 기존 V42.2를 계속 확장하는 버전이 아니다. **실제 2025년 5월 B1 31/31 PASS를 달성한 PR #189의 빠른 AIDC Day-Ahead 알고리즘을 기준으로 다시 통합하는 새로운 연구 버전**이다.
+
+다음 요소를 결합한다.
+
+1. PR189의 D-1 18:00 Day-Ahead AIDC 최적화
+2. 실제 Unknown Job 도착 후 전기적 민감도 기반 PENDING Pre-site
+3. 최신 Seedless K48 + Adaptive Beam–4-MESS Direct Joint MILP
+4. Known Job 계획 동결 및 Unknown Job 이벤트 기반 제어
+5. Planning/Actual 분리 및 Fresh OpenDSS AC 검증
+6. 2025-05-01 B0/B1/B2/B3 Canary 후 5월 전체 캠페인
+
+목적함수는 최대 선로·상 부하율 최소화다.
+
+**핵심 원칙: 빠른 Day-Ahead 최적화는 PR189에서 복원하고, 신규 Unknown Job 대응은 Actual의 경량 제어로 수행한다.**
+
+V42.2의 D0/E1/FLEX30 대형 AIDC MILP를 V43 Day-Ahead 경로에 통째로 이식하지 마라.
+
+이번 지시는 V43 브랜치 생성, 선택적 알고리즘 통합, 필수 테스트, May01 실험 및 통과 후 5월 캠페인 실행을 승인한다.
+
+---
+
+## 1. 기존 버전 보존 및 V43 생성
+
+### 1.1 기준 커밋
+
+PR189:
+
+`625bbcb8b9a54a00c1660c26d96f7737c2f75457`
+
+V42.1 Freeze:
+
+`v42.1-freeze-20261016`
+
+V42.2:
+
+PR #231, 실제 작업 시 최신 HEAD 확인
+
+### 1.2 작업 시작 전 확인
+
+- 현재 V42.2 Native Solver 실행 여부
+- M_NATIVE0 및 B1 Worker 상태
+- Source/Case/Policy SHA
+- 현재 Git Worktree 및 미커밋 수정
+- 실행 중 Native 원장과 진행 중 호출
+- V42.1 Rollback Manifest의 유효성
+
+기존 실행이 남아 있으면 실행 도중 Source를 수정하지 않는다.
+
+기존 실행을 종료해야 한다면 공식 Stop/Checkpoint/원장 정산 후 진행한다.
+
+모든 V42.1·V42.2 Raw, 결과, 실패 증거 및 Git Commit을 유지한다.
+
+### 1.3 V43 브랜치 생성
+
+PR189 exact HEAD에서 새 Worktree와 브랜치를 생성한다.
+
+권장 브랜치:
+
+`codex/v43-pr189-fast-planning-unknown-presite`
+
+새 Draft PR을 생성한다.
+
+V42.2의 대형 결과 디렉터리를 복제하지 마라. 기존 Git Source와 검증된 외부 파일을 SHA 기반으로 참조한다.
+
+V43의 Source/Policy/Case/Raw/Native 원장을 독립 관리한다.
+
+기존 Main, PR189, V42.1, V42.2는 변경하지 않는다.
+
+---
+
+## 2. PR189 Day-Ahead 모델 정확히 복원
+
+### 2.1 시간 구조
+
+멜버른 현지시각 AEST 기준:
+
+- D-1 18:00: Planning 정보 기준시점
+- D-1 18:00~D 00:00: 내부 Prefix 24슬롯
+- D 00:00~D+1 00:00: 평가 96슬롯
+- Slot duration: 900초
+
+기존 PR189의 내부 시간축 0~120과 평가 슬롯 24~119의 의미를 유지한다.
+
+**전날 18:00부터 자정까지 6시간 내내 재최적화하는 알고리즘으로 변경하지 않는다.**
+
+Planning은 18:00 이전에 관측된 정보와 해당 시점까지 발행된 유효 예측만 사용한다.
+
+18:00 이후 제출된 Job이나 자정 Actual 상태를 Planning 입력에 소급 반영하지 않는다.
+
+18:00~00:00 사이의 실제 사건이 있다면 Actual 이벤트 처리와 물리 상태 연속성에서만 시간순으로 반영하되, 당시 Planning을 미래 정보로 수정하지 않는다.
+
+D0 자정 스냅샷은 Actual 상태 재구성 검증에는 사용할 수 있어도 PR189의 Planning 정보권한으로 승격해서는 안 된다.
+
+### 2.2 PR189 원본 최적화 유지
+
+다음 경로를 우선 기준으로 사용한다.
+
+- `v42_may_campaign_native90/`
+- `v42_may31_recovery_v10/`
+- `v42_a_stage_canary/`
+- `v42_a_stage_phase1/`
+- `v42_a_stage_compact_rowgen/`
+
+실제 PR189 실행에 사용된 날짜별 Adapter, Native Policy, Input Freeze 및 Pricing Source를 먼저 복원한다.
+
+원본 모델·수치 정책을 변경하지 않은 상태로 May01 재현 검증을 실시한다.
+
+PR189 May01 참고값:
+
+- B1 전체 Native: 약 97.472초
+- Phase I Native: 약 63.820초
+- B1 P1 UB: 0.6718471055537026
+- 독립 LB: 0.6715871456570585
+- B1 0.5% Gap 기준 충족
+
+이 수치는 동일 입력·정식화·환경 재현의 비교 기준이다.
+
+원본 PR189 Result를 V43 신규 실행 결과로 복사해 PASS시키지 않는다.
+
+### 2.3 원본 빠른 Phase I 보존
+
+PR189의 Fast Active Domain, 압축 Class, Hybrid LP, Row Generation, Complete Pricing, P1 및 Integer Restoration을 재사용한다.
+
+기존 PR189의 Phase I 시간을 확인하기 전에 V42.2의 다음 설정을 적용하지 마라.
+
+- D0/E1/FLEX30 전체 수학적 도메인
+- 229 Class Complete-kernel 강제
+- 약 20만 개 Local Hard 행
+- V42.2 전용 Phase I 900초 제한
+- V42.2 전용 PCC/CC4 LP 재정식화
+
+PR189에서는 A-stage 전체 Native 5,400초의 공유 예산을 사용했다.
+
+V43도 이 공식 실행 기준과 원본 최적화·인증 규칙을 우선 복원한다.
+
+새로운 Stage 제한은 별도 승인 없이 임의로 도입하지 않는다.
+
+### 2.4 V43 초기 Golden Gate
+
+아무런 후속 알고리즘을 이식하지 않은 V43 초기 버전에서 다음을 검증한다.
+
+- May01 원본 입력과 Source SHA
+- D-1 18:00 Issue Cutoff
+- Original FULL 수학적 모델
+- Phase I Exact Phi=0
+- 모든 생략 행 검사
+- Full-domain Pricing
+- Certified Global LB
+- Original Integer FULL Replay
+- B1 P1 Gap
+- Fresh AC96
+- Native Runtime 및 전체 Wall Time
+
+이 Gate가 PASS하기 전까지 PR189 기반의 AIDC 수학적 모델을 변경하지 않는다.
+
+---
+
+## 3. Known Job과 Unknown Job을 명확히 분리
+
+V43의 핵심 구조는 다음과 같다.
+
+### Known Job
+
+D-1 18:00에 이미 알려진 작업을 Planning에서 최적화한다.
+
+- 승인된 Start/Finish Domain
+- 데이터센터 위치
+- Timeshift/Migration 권한
+- GPU/Rack 및 WAN
+- 기존 QoS/Deadline
+- AIDC P/Q와 전력망 제약
+
+Planning 종료 후 Known Job 실행 명령은 동결한다.
+
+Actual에서는 계획된 작업을 시간순으로 수행하고 현재 물리 자원과 안전 조건을 재검증한다.
+
+불법적인 명령은 실행하지 않고 명시적인 Queue 또는 기존 허용된 Corrective 경로로 처리한다.
+
+### Unknown Job
+
+D-1 18:00 이후 개별 UID가 아직 알려지지 않은 작업이다.
+
+Day-Ahead에서는 CC4 예측과 기존 익명 Workload Envelope만 사용한다.
+
+미래 Unknown UID, 실제 Submit Time, 실제 Runtime, 미래 데이터센터 선택 및 Actual 종료정보를 Planning에서 읽지 않는다.
+
+Unknown Job이 실제 도착하면:
+
+1. Submit 관측
+2. 공개 메타데이터 및 Runtime Q50 확인
+3. 기존 Reference 규칙으로 기본 사이트 배정
+4. 아직 PENDING이고 실행 전이라면 Pre-site 후보 평가
+5. 실행 가능한 더 좋은 사이트가 있으면 선택
+6. 없으면 원래 사이트 또는 Queue
+7. 실행 후 실제 Runtime·완료·Carryout을 기록
+
+**Unknown Pre-site는 이미 RUNNING 중인 작업의 Migration이 아니다.**
+
+Running Migration은 별도 기존 정책으로 유지하고 이번 첫 통합에서는 새로운 권한을 부여하지 않는다.
+
+---
+
+## 4. 기존 Unknown Sensitivity Pre-site 알고리즘 이식
+
+새로운 Pre-site 알고리즘을 처음부터 만들지 마라.
+
+기존 구현을 확인한 뒤 필요한 모듈을 선택적으로 가져온다.
+
+우선 참조할 파일:
+
+- `v42_integration/aidc_sensitivity_runtime.py`
+- `v42_integration/sensitivity_policy.py`
+- `v42_integration/release_actual.py`
+- `v42_integration/research_presite_actual.py`
+- `v42_integration/research_presite_contract.py`
+- `v42_integration/current_ac_admission.py`
+- `v42_integration/frozen_unknown.py`
+
+관련 기존 연구:
+
+- PR223: Actual 및 A/M 결합
+- PR224: Conditional Action Gate 수정
+- PR225: Queue-aware Q90
+- PR226: E1/FLEX30 Preplacement 연구
+- PR228: Known 동결·Unknown 후보 Fallback
+
+### 4.1 초기 사이트와 Pre-site 분리
+
+Unknown Job 최초 배치는 기존의 Causal Reference/Compatible Site 규칙을 사용한다.
+
+최초 배치 단계에서는 전력망 민감도로 기본 사이트를 변경하지 않는다.
+
+그 후 Pre-site 단계에서만 다음 대체 후보를 평가한다.
+
+- 다른 Source-compatible AIDC
+- GPU 및 Rack 수용 가능
+- 요청된 Gang 전체 수용
+- 데이터 접근 또는 전송 준비 가능
+- Source QoS/Deadline 만족
+- 기존 확정 예약과 충돌하지 않음
+- 실제 전력망 제약 충족
+
+기본 배치 권한과 Pre-site 변경 권한은 동일하다고 가정하지 않는다.
+
+### 4.2 최대 선로 부하율 기반 의사결정
+
+Unknown Job \(j\)의 배치 후보 \(s\)에 대해 다음 목적을 사용한다.
+
+\[
+s_j^* =
+\underset{s\in\mathcal S_j^{feasible}}{\arg\min}
+\max_{\tau,\ell,\phi}
+\widehat{\rho}_{\ell,\phi,\tau}(s)
+\]
+
+여기서 평가 대상은 다음과 같다.
+
+- IEEE123 원본 모든 선로
+- 각 선로의 모든 상
+- 현재 시각부터 남은 평가 구간
+- 해당 Job의 Q50 예상 서비스 구간
+- 기존 Known Job 동결 명령
+- 이전에 확정한 Unknown 예약
+- 기존 MESS P/Q 및 위치
+- 현재 시각까지 관측된 실제 GPU/전력망 상태
+
+한 선로나 한 슬롯의 감도만 이용하지 않는다.
+
+민감도는 Signed Electrical Sensitivity와 원본 C1 Affine P/Q 관계를 사용한다.
+
+후보 계산에서 발생하는 전압·전류·변압기 및 GPU/Rack 위반은 목적함수의 가중 페널티가 아니라 Hard Reject로 처리한다.
+
+### 4.3 후보 순위
+
+후보 선택 우선순위:
+
+1. 실제 실행 권한과 물리적 실행가능성
+2. 예상 최대 선로·상 부하율 최소
+3. Critical Loading Hours 감소
+4. Q90 Runtime/Rebound 위험 감소
+5. 추가 Delay/Transfer/Interruption 최소
+6. 결정적 Site/Start Tie-break
+
+동일한 실행 조건에서 기존 기본 사이트보다 유의미하게 개선되는 경우에만 Pre-site를 선택한다.
+
+실행 가능한 대체 사이트가 없는 경우 기본 사이트를 유지한다.
+
+기본 사이트도 불가능하면 Queue로 남긴다.
+
+### 4.4 Actual의 계산 제한
+
+Actual에서 원본 AIDC 또는 MESS의 Global MILP를 다시 풀지 않는다.
+
+후보 생성·민감도 점수 계산·Current Hard Guard 및 필요한 AC 확인만 수행한다.
+
+15분 제어 슬롯보다 계산시간이 길어지지 않도록 캐시와 후보 재사용을 도입한다.
+
+실제 P50/P95/Max Controller Wall Time을 계측한다.
+
+미래 AC Tap 동작, 실제 미래 Weather, 실제 미래 Runtime/Completion을 미리 알고 있다고 가정하지 않는다.
+
+Current AC Hard Admission과 미래 Q50 기반 예측 점수를 명확히 구분한다.
+
+---
+
+## 5. Pre-site 실행 권한 및 WAN 계약
+
+이 부분은 반드시 실제 연구 결과의 해석까지 고려하라.
+
+기존 PR224/226/228에서는 Source 권한이 없거나 GPU/Q90 제약에서 거부되어 Pre-site가 실행되지 않는 경우가 있었다.
+
+따라서 다음 계약을 분리한다.
+
+### Strict Source Mode
+
+- 실제 Source에서 확인된 Pre-site 권한만 사용
+- 금지된 목적지 제외
+- 데이터 접근 가능성이 확인된 후보만 선택
+- WAN 준비시간과 완료시각 적용
+- QoS/Deadline 유지
+- 권한이 없으면 Pre-site 실행하지 않음
+
+### Research R1 Mode
+
+공유 데이터 또는 사전 Stage된 입력을 가정하는 별도 연구용 시나리오다.
+
+- Source의 명시적 금지사항은 그대로 유지
+- 기존 E1/FLEX30 참여 규칙은 별도 연구 계약으로 표시
+- 연구에서 추가한 데이터 접근 가정은 `ASSUMED`로 표시
+- 고객의 실제 배치 허가 또는 측정 WAN 실적으로 주장하지 않음
+- 원본 GPU/Rack/전력망 Hard 제약 유지
+- 서비스량, Carryout, QoS 위험을 전부 기록
+
+Research R2의 실제 데이터 전송 기반 Pre-site는 별도의 사용 승인과 Source/Timing 검증이 없다면 HOLD를 유지한다.
+
+R1 연구 가정을 Strict Production PASS로 승격하지 않는다.
+
+**민감도 점수가 좋다는 이유로 허가받지 않은 Job 이동을 실행하지 마라.**
+
+---
+
+## 6. Pre-site 효과를 독립적으로 검증
+
+동일한 Day-Ahead 계획과 동일한 Actual 입력에 대해 다음을 비교한다.
+
+### C0 — Basic Unknown Placement
+
+- 원래 Reference Site 사용
+- 민감도 기반 대체 사이트 탐색 없음
+- 기존 물리적 Queue/Fallback 유지
+
+### C1 — Sensitivity Pre-site
+
+- 초기 Reference Site 동일
+- 동일 실제 Job 도착
+- 동일 Known Schedule
+- 동일 MESS 계획
+- 동일 GPU·QoS·WAN Hard Constraints
+- PENDING 상태에서만 대체 사이트 평가
+- 민감도 기반 최적 후보 선택
+
+Strict C1과 연구 가정 R1을 섞지 말고 별도 Policy ID로 구분하라.
+
+### 검증 지표
+
+반드시 다음 수치를 보고한다.
+
+- Unknown Submitted UID
+- Unknown Basic Site Assigned
+- Pre-site Eligible UID
+- Pre-site Candidate Evaluated
+- Pre-site Hard Feasible
+- Pre-site Selected
+- Pre-site Actually Started
+- Pre-site Changed GPUh
+- Unknown Queue
+- Completion 및 Terminal Carryout
+- 지연/서비스 위험
+- GPU/Rack/WAN 위반 수
+- Actual 최대 선로·상 부하율
+- Actual 일평균/일최대 Loading
+- Fresh AC 전압·열적 위반
+- Controller P50/P95/Max Wall Time
+
+`Selected`와 `Executed`를 반드시 구분한다.
+
+Pre-site 후보가 있었으나 실제 실행되지 않은 원인도 UID 단위로 추적한다.
+
+Strict Source Mode에서 변경 0건이 나오면 해당 결과를 그대로 보존하고 원인을 보고한다.
+
+전력망 개선을 만들기 위해 Source 권한을 조작하지 않는다.
+
+---
+
+## 7. 최신 MESS 최적화 알고리즘 통합
+
+다음 작업은 PR189 B1 복원과 Unknown Pre-site 독립 검증 이후 수행한다.
+
+기존 구현을 우선 재사용한다.
+
+- PR219: Cold-start Beam 후보
+- PR220: Verified Moving Incumbent
+- PR221: Cached Adaptive Beam–4-MESS Direct Joint
+- PR222: Incumbent 보존 및 Pool 누락 수정
+- V42.2 PR231: Seedless K48와 Joint MILP 연결
+
+### 7.1 MESS 물리 계약
+
+- IEEE123
+- 4대 MESS
+- 원본 24개 연결 후보 노드
+- 원본 교통 DAG 및 이동시간
+- 실제 이동에너지
+- Pch/Pdis/Q
+- SOC 및 종단 SOC
+- 384 Charge Mode
+- PCS P/Q 제약
+- 모든 원본 전압·선로·변압기 제한
+
+4대 각각 STAY와 다양한 MOVE 경로를 자유롭게 선택하게 한다.
+
+STAY/MOVE를 강제하지 않는다.
+
+네 대가 동시에 서로 다른 경로로 이동할 수 있어야 한다.
+
+### 7.2 MESS 단계
+
+먼저 PR189 AIDC/Reference로부터 V43 전용 MESS Case를 생성한다.
+
+그다음 다음 과정을 수행한다.
+
+1. Seedless K48 또는 검증된 유효 Global LB 계산
+2. Beam Search로 다양한 경로 후보 생성
+3. 4대 공동 Direct Joint MILP
+4. P/Q/SOC/Charge Mode 최적화
+5. Original FULL Replay
+6. FULL-feasible UB 저장
+7. Adaptive Beam 반복 및 Global Gap 평가
+
+K48에서 계산한 LB와 Joint MILP의 UB는 정확한 동일 Case에 한해 결합한다.
+
+PR220의 기존 UB `0.539831...`이나 기존 K48 LB를 새 V43 Case의 인증으로 이전하지 않는다.
+
+제한된 Beam Pool의 `ObjBound`를 전체 원본 문제의 Global LB로 사용하지 않는다.
+
+### 7.3 예산 및 성능
+
+M-stage Native 예산은 기존 1,800초/Stage를 유지한다.
+
+기존 K48 별도 한도 및 Joint 단일 호출 한도를 유지한다.
+
+- Worker=1
+- Threads=1
+- Heavy Solve 동시 실행 금지
+- Native/Build/Validation/Wall 분리 계측
+- 불변 Static Cache는 정확한 Source/Case 일치 시만 재사용
+
+M Stage의 FULL-feasible 결과와 Global Gap 인증을 별도로 기록한다.
+
+3% Gap을 달성하지 못했다고 수치 조작이나 잘못된 LB 승격을 하지 않는다.
+
+---
+
+## 8. B0/B1/B2/B3의 정의 보존
+
+V43는 기존 비교군의 의미를 보존해야 한다.
+
+| 비교군 | AIDC Day-Ahead | MESS Day-Ahead |
+|---|---|---|
+| B0 | 공통 Reference | 미최적화 |
+| B1 | PR189 기반 AIDC 최적화 | 미사용 |
+| B2 | 공통 Reference 고정 | 4-MESS 최적화 |
+| B3 | AIDC–MESS 공동 조정 | A1–M1–A2–M2 |
+
+B3의 단계는 다음과 같다.
+
+`A1 → M1 → A2 → M2`
+
+A2에서는 M1 MESS 결정 고정, M2에서는 A2 AIDC 결정 고정이라는 기존 교대 최적화 계약을 유지한다.
+
+각 단계의 Original FULL 검증을 보존한다.
+
+모든 B0/B1/B2/B3의 Actual에서 Unknown C0/C1 또는 해당 연구용 R1을 일관된 실험 정책으로 비교한다.
+
+동일한 Day-Ahead 계획을 C0/C1 양쪽에서 사용하므로 **두 정책의 실제 전력망 차이는 Unknown Pre-site 제어 효과로 식별 가능하게** 구성하라.
+
+단, Unknown 제어가 후속 작업 큐 및 Rebound에 미치는 영향은 각 Actual의 상태전이에 자연스럽게 반영한다.
+
+---
+
+## 9. 실제 May01 실행 순서
+
+새 V43에서 단계별 Gate를 통과한 후 실험을 실행한다.
+
+### Gate A — PR189 B1 복원
+
+- May01 B1 Day-Ahead 재현
+- Original FULL/P1 인증
+- Phase I 및 Native 시간 비교
+- 기존 PR189 수치와 비교
+- 동일한 과학적 기준의 차이 여부 확인
+
+이 Gate가 미달이면 원인부터 해결하고 다음 단계로 진행하지 않는다.
+
+### Gate B — Actual Unknown Pre-site
+
+같은 B1 계획을 기준으로:
+
+- C0 Full96
+- C1 Full96
+- 해당 권한이 별도로 봉인된 경우 Research R1 Full96
+- Actual GPU/IT/PCC 검증
+- Fresh AC96
+- UID Pre-site/Queue/Completion Audit
+- Controller Runtime 확인
+
+C0와 C1의 전력망 개선 및 작업 서비스 품질을 동시에 비교한다.
+
+### Gate C — MESS
+
+- B2 M-stage
+- B3 A1/M1/A2/M2
+- K48 LB
+- Beam–Direct Joint UB
+- Original FULL Replay
+- 실제 이동경로와 SOC 확인
+
+### Gate D — 전체 비교
+
+2025-05-01:
+
+- B0 C0/C1
+- B1 C0/C1
+- B2 C0/C1
+- B3 C0/C1
+
+필요한 연구용 R1 비교는 별도 표로 분리한다.
+
+모든 비교에서 Source/Case/Policy와 실제 입력의 동일성 및 차이를 명시한다.
+
+실험에서 비교한 물리적 전력망 하드웨어 구성이 다르면 공통 기준으로 독립 재검증하기 전까지 개선률을 직접 비교하지 않는다.
+
+---
+
+## 10. 2025년 5월 전체 캠페인
+
+May01 Canary가 필수 Gate를 통과하면 2025년 5월 1~31일 캠페인으로 확장한다.
+
+단, May01의 Source/Model 정합성, Causal Cutoff, Pre-site 실행 권한, Original FULL/Actual/Fresh AC 및 Worker 안정성이 인증되어야 한다.
+
+날짜별로 고정된 순서와 독립 원장을 사용한다.
+
+- D-1 18:00 Planning
+- B0/B1/B2/B3
+- Actual Unknown C0/C1
+- Fresh OpenDSS AC96
+- 최종 결과 및 실패 분류
+
+앞선 날짜 결과를 뒤 날짜 최적화의 미래 정보로 사용하지 않는다.
+
+각 날짜의 D-1 Issue Cutoff를 정확히 적용한다.
+
+실패 날짜는 원인을 분석하고 필요한 변경 후 새 독립 Attempt에서 시작한다.
+
+과거 Native 소비시간과 실패 증거는 삭제하지 않는다.
+
+기존 결과가 물리 PASS라고 해서 Global Gap까지 인증된 것으로 표시하지 않는다.
+
+전체 31일 결과를 사용해 평균·최대 부하율, 개선률, QoS, 서비스 이월량, Pre-site 실행량을 집계한다.
+
+---
+
+## 11. 자동 모니터링 및 오류 복구
+
+V43 실행 중에는 다음 상태를 지속 관찰한다.
+
+- 현재 날짜, 비교군, Stage
+- Solver Runtime/Wall Time
+- Phase I, P1, K48 및 Joint 상태
+- UB/LB/Global Gap
+- Native 누적 소비
+- Worker/Lock 및 메모리
+- Actual 이벤트 진행 슬롯
+- Unknown Pre-site 실행 횟수
+- Current AC/Fresh AC 실패
+- Source SHA 및 변경 이력
+
+문제가 발생하면:
+
+1. 원본 증거와 실제 오류 확인
+2. 근본 원인 분류
+3. 실행 중 Worker 안전 종료 및 원장 정산
+4. Source 수정
+5. Native0 및 회귀 테스트
+6. 새 Commit/Source Freeze
+7. 실패 비교군의 새 Attempt 생성
+8. 해당 비교군의 처음부터 재실행
+
+새 Attempt는 Native=0에서 시작하지만 이전 Attempt 원장은 보존한다.
+
+실행 환경이나 Codex 세션이 중단되면 정확한 Resume Manifest와 상태를 남겨라.
+
+대화가 무기한 유지된다고 가정하지 말고 감독 가능한 Worker와 재개 절차를 사용한다.
+
+사용자가 명시적으로 중지하지 않는 한, 승인된 캠페인 범위에서 자동 복구를 계속한다.
+
+---
+
+## 12. V43 검증 및 논문 결과
+
+최종 보고서는 세 부분을 명확히 구분한다.
+
+### A. Planning 알고리즘
+
+- PR189 대비 모델의 동일성
+- V43 Day-Ahead Phase I Runtime
+- A1/A2 Native Runtime
+- M1/M2 Native Runtime
+- A1/M1/A2/M2 계획 결과
+- Original FULL Gap 및 인증
+- MESS 이동경로
+- MESS P/Q/SOC
+
+### B. Actual Unknown 제어
+
+- 도착 Job 수
+- 기본 사이트 배정
+- Pre-site 후보 수
+- Pre-site 실제 실행 수
+- 변경 GPUh
+- QoS Delay/Deadline Risk
+- 완료 및 Carryout
+- Unknown 제어 P50/P95/Max 계산시간
+- Source Authority와 연구 가정 분리
+- 미래 정보 유출 0
+
+### C. 전력망 영향
+
+- B0/B1/B2/B3 Planning 최대 선로 부하율
+- B0/B1/B2/B3 Actual 최대 선로 부하율
+- C0 대비 C1의 부하율 변화(%p)
+- 월간 일별 최대 선로·상 부하율 평균
+- 월간 실제 최대 부하율 및 날짜
+- Vmin/Vmax
+- 선로·변압기 위반 횟수
+- Fresh AC96 수렴
+- Q-only 보정 여부 및 원본 계획 동결 여부
+
+과거 PR189의 B1 평균 68.7% 및 기존 결과는 Historical Baseline으로만 보고한다.
+
+V43의 Pre-site와 MESS 이식 이후 결과는 반드시 새로 계산한다.
+
+---
+
+## 13. 필수 산출물
+
+V43 Draft PR에 다음 파일을 제출한다.
+
+1. `V43_BASELINE_AND_SOURCE_FREEZE.json`
+2. `V43_PR189_REPRODUCTION_KO.md`
+3. `V43_MIGRATION_PORT_MATRIX.md`
+4. `V43_TIME_AND_CAUSAL_CONTRACT.json`
+5. `V43_UNKNOWN_PRESITE_SOURCE_AUTHORITY.json`
+6. `V43_UNKNOWN_C0_C1_COMPARISON.csv`
+7. `V43_PRESITE_ACTUAL_EXECUTION_AUDIT.json`
+8. `V43_MESS_K48_BEAM_JOINT_CERTIFICATION.json`
+9. `V43_MAY01_FOUR_ARM_RESULTS.csv`
+10. `V43_MAY2025_31DAY_RESULTS.csv`
+11. `V43_NATIVE_AND_WALL_RUNTIME_BREAKDOWN.csv`
+12. `V43_FINAL_INDEPENDENT_REVIEW_KO.md`
+13. `V43_ROLLBACK_AND_RESUME_KO.md`
+
+완료되지 않은 결과는 NULL/NOT_RUN/NOT_CERTIFIED로 정확히 표시한다.
+
+---
+
+## 14. 절대 금지 사항
+
+- V42.1·V42.2 원본 삭제 또는 덮어쓰기
+- PR189 기존 원본 결과 수정
+- V42.2 D0 Full-Flex 대형 LP의 무검증 전체 이식
+- 전날 18:00 이후 미래 Unknown 정보의 Day-Ahead 사용
+- Source 근거 없는 Customer QoS·WAN·데이터 접근 권한 주장
+- Unknown Pre-site를 Running Migration으로 바꿔 실행
+- 사전 승인 없는 Actual Global MILP 재최적화
+- MESS STAY/MOVE 강제
+- 제한된 MILP Bound를 Global LB로 승격
+- 원본 전압·정격·SOC·GPU·WAN 제약 완화
+- 서로 다른 Case의 UB/LB 혼합
+- Native/Wall Time 조작
+- 검증되지 않은 기존 결과의 V43 PASS 승격
+- 사용자 승인 없는 Main 병합
+
+## 15. 최종 지시
+
+**V43는 PR189의 빠른 Day-Ahead AIDC 알고리즘을 기반으로 하되, Unknown Job에 대한 민감도 기반 Pre-site와 최신 MESS 알고리즘을 통합하는 연구 버전이다.**
+
+진행 순서는 다음과 같다.
+
+**PR189 복원 → V43 Golden B1 PASS → Unknown C0/C1 Pre-site Actual 검증 → 4-MESS K48/Beam–Joint 연결 → B0/B1/B2/B3 May01 PASS → 5월 전체 캠페인**
+
+현재 V42.2를 계속 최적화하려고 V43에도 그 대형 LP를 이식하지 마라.
+
+기존 알고리즘과 검증된 소스들을 가능한 한 재사용하고, 새 기능이 PR189의 빠른 AIDC 최적화 성능을 훼손하지 않도록 분리하라.
+
+모든 비교군에서 알고리즘의 실행가능성, 전역 최적성 인증, Actual 물리 안전성 및 연구용 권한 가정을 구분하라.
+
+먼저 V43 브랜치와 Rollback 기반을 봉인하고, PR189 May01 Golden Baseline 재현을 시작하라. 이후 승인된 순서대로 실험과 통합을 계속한다.

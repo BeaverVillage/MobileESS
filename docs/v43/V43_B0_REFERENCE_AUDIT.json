@@ -1,0 +1,99 @@
+{
+  "status": "REFERENCE_FROZEN_PLANNING_AC_NOT_YET_CERTIFIED",
+  "frozen_reference": {
+    "path": "D:\\MobileESS_V43\\inputs\\V43_MAY01_B0_REFERENCE_003\\AIDC_REFERENCE.json",
+    "bytes": 669438,
+    "sha256": "f382ef85fe3b071a8af693d22d89cdda34e9bc1c0d57b7dc092920d84bc6c2e7"
+  },
+  "schema": "V43_PR189_R0_Q50_REFERENCE_V1",
+  "day": "2025-05-01",
+  "arm": "B0",
+  "stage": "REFERENCE",
+  "parent_case_sha": "365824518d8b3d380b6e2cc72a78d19d27ce8d39d304acdc8ffc5b5806b342fc",
+  "reference": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\frozen_artifacts\\v41r3_may\\inputs\\2025-05-01\\common_q90_v3\\COMMON_B0_REFERENCE_JOBS.json",
+    "sha256": "60a75be104f8df41a93ac14f50a9ddd8ce330e3bd0c12cce2aa4e23e4b202ddb",
+    "bytes": 1632416,
+    "period": "2025-05-01",
+    "units": "GPU,seconds,issue-origin 900s slots",
+    "role": "Authoritative known-job independent-day reference and exact service",
+    "authority_status": "FROZEN_SOURCE_REUSED"
+  },
+  "input": {
+    "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\inputs\\B1\\2025-05-01\\NATIVE_INPUT.json",
+    "sha256": "365824518d8b3d380b6e2cc72a78d19d27ce8d39d304acdc8ffc5b5806b342fc",
+    "bytes": 4000652
+  },
+  "windows": {
+    "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\inputs\\B1\\2025-05-01\\WINDOWS.json",
+    "sha256": "5aec44479490ea00c0532f87229850507623b3d365fcdfbd6b105208dc8317a8",
+    "bytes": 1035812
+  },
+  "source": [
+    {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\v43_arms\\reference.py",
+      "bytes": 6517,
+      "sha256": "9b87d2d7c41ab2f66b8ee6ffcb8adb8ecbc191f91668364ad50f36ef684142ca"
+    },
+    {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\v42_final\\native.py",
+      "bytes": 2257,
+      "sha256": "6fddb5938544aef952f86cc72e836a46c657ed66a6a594f5d842346900beebba"
+    },
+    {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\v42_capacity\\queue.py",
+      "bytes": 1839,
+      "sha256": "b5b8780ca9399bb1506920574bf025c9d5cfe1955d81814664a4a99ceeb8d381"
+    },
+    {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\v42_final\\workload.py",
+      "bytes": 4374,
+      "sha256": "10320df9beaa0df89fd0d80b763595ee95fb57eb82f5a3d53ed9373d4517daed"
+    },
+    {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\v42_temporal\\native.py",
+      "bytes": 12785,
+      "sha256": "e3325724a2de55f81d97a5d6b19633f6b673bc7821eb31ad6f904695370d4b54"
+    }
+  ],
+  "Known_UID": 1649,
+  "selected_nominal_UID": 1499,
+  "external_initial_RUNNING": 44,
+  "rule": "EXACT_PR189_R0_SITE_START_WITH_CANONICAL_CURRENT_Q50_SERVICE",
+  "CC4_rule": "ORIGINAL_FIXED_EXECUTION_KERNEL_GRID_BLIND_CAPACITY_ALLOCATION",
+  "physical": {
+    "path": "D:\\MobileESS_V43\\inputs\\V43_MAY01_B0_REFERENCE_003\\PLANNING_PHYSICAL.npz",
+    "bytes": 14661,
+    "sha256": "0b358137bfd998e0480fb6cdeacbfb0fcd5c9bda500ea9156a9ee6a44c9b799b"
+  },
+  "conservation": {
+    "forecast_Q50_GPUh": 5503.441472156033,
+    "served_DDAY_GPUh": 3697.092935783121,
+    "original_post96_tail_GPUh": 1806.3485363729126,
+    "capacity_backlog_carryout_GPUh": 0.0,
+    "conservation_error": 0.0,
+    "PASS": true,
+    "kernel_roundtrip_replay_max_abs_GPU": 2.842170943040401e-14,
+    "physical_forecast_profile": "LITERAL_FROZEN_NATIVE_INPUT_NO_REPLACEMENT",
+    "replay_tolerance_only_not_model_feasibility_tolerance": 1e-09,
+    "maximum_capacity_backlog_GPU": 117.2690275946556,
+    "terminal_capacity_backlog_GPU": 0.0
+  },
+  "AIDC_optimization_calls": 0,
+  "MESS_optimization_calls": 0,
+  "old_requested_service_imported": false,
+  "B1_optimized_commands_read": false,
+  "Source_initial44": "MODEL_ASSUMED_IN_ACTUAL_ONLY",
+  "FULL_optimization_certificate": "NOT_APPLICABLE_REFERENCE",
+  "FORECAST_CAUSAL_AVAILABILITY": "NOT_CERTIFIED",
+  "aidc_anchor": "c25ec4c552b0107280cd8d32c22500fe7c9d7cea8d36319639a7c29efe138784",
+  "alternate_FCFS_cache_rejected": "Different R0 sites/start authority; not the original PR189 common reference",
+  "source_read_claim_correction": {
+    "Golden_certificate_and_freeze_JSON_read_for_input_authority": true,
+    "B1_selected_commands_parsed_by_common_case_factory_then_discarded": true,
+    "B1_optimized_schedule_used_for_B0": false,
+    "B0_decision_inputs": "Original NATIVE R0 site/start and canonical Q50 plus original CC4 only",
+    "frozen_identity_B1_optimized_commands_read_marker": "Legacy producer marker is too broad; it certifies absence of decision use, not absence of JSON IO. Raw frozen input is preserved.",
+    "no_prior_UB_LB_used_for_B0": true
+  }
+}
