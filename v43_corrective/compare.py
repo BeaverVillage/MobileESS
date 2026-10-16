@@ -5,6 +5,7 @@ from types import FunctionType
 import argparse
 import inspect
 import textwrap
+import traceback
 from time import perf_counter
 
 from v43.common import ROOT,atomic,read,record,verify_records,git,now
@@ -28,7 +29,8 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
     def check_deadline():
         if perf_counter()-began>=wall_limit_seconds:
             atomic(output/'STOP_REQUESTED.json',dict(UTC=now(),authority='USER_40_MINUTE_B1_LIMIT',
-                reason='WALL_LIMIT_REACHED_STOP_RECONCILE_PROFILE_AND_REPAIR',wall_limit_seconds=wall_limit_seconds))
+                reason='WALL_LIMIT_REACHED_STOP_RECONCILE_PROFILE_AND_REPAIR',wall_limit_seconds=wall_limit_seconds,
+                active_stack=traceback.format_stack()))
             raise RuntimeError('V43_ACTUAL_USER_40_MINUTE_WALL_LIMIT_REACHED')
     if control_slots not in (1,25,120):raise ValueError('SUPPORTED_CORRECTIVE_HORIZON_REQUIRED')
     if ac_mode not in ('FULL_REFERENCE','SHADOW','FAST'):raise ValueError('EXPLICIT_CURRENT_AC_MODE_REQUIRED')
@@ -97,8 +99,20 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
         'elapsed_wall_seconds=time.perf_counter()-started,actual_event_wall_seconds=event_wall_seconds,Fresh_wall_seconds=fresh_wall_seconds,Native_calls=0,')
     body=body.replace('result=dict(PASS=gate if control_slots==120 else not attempts,',
         'result=dict(preparation_wall_seconds=preparation_wall,PASS=gate if control_slots==120 else not attempts,')
-    exec(compile(body,__file__,'exec'),namespace);function=namespace['run']
+    driver=output.with_name(output.name+'.ACTUAL_DRIVER.py')
+    driver.write_text(body,encoding='utf-8')
+    sources.append(record(driver));frozen=read(freeze);frozen['sources']=sources
+    frozen['transformed_driver']=record(driver);atomic(freeze,frozen)
+    exec(compile(body,str(driver),'exec'),namespace);function=namespace['run']
     verify_records(sources);result=function(output,control_slots=control_slots);verify_records(sources)
+    if not result['PASS']:
+        for c in controllers:
+            try:
+                when=c.policy.oracle.now
+                atomic(output/f'PARTIAL_PUBLIC_CONTROLLER_{c.policy.variant}.json',c.snapshot(when))
+                atomic(output/f'PARTIAL_CURRENT_AC_{c.policy.variant}.json',c.policy.oracle.audit)
+            except Exception as error:
+                atomic(output/f'PARTIAL_CAPTURE_ERROR_{c.policy.variant}.json',dict(error=repr(error)))
     atomic(output/'CORRECTIVE_POLICY_RECEIPTS.json',dict(arm=arm,policy_version=POLICY_ID,
         source_freeze=record(freeze),policies=[dict(variant=p.variant,spec=p.spec,sha=p.sha,
             current_diagnostics=p.current_diagnostics,candidate_funnel=p.funnel) for p in policies],

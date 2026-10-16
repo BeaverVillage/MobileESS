@@ -43,3 +43,11 @@ def test_official_b0_uses_baseline_without_c0_or_ac_certificate(monkeypatch):
     monkeypatch.setattr(may01,'read',lambda *args:pytest.fail('B0 must not load C0 policy/certification'))
     may01.actual('B0','baseline-output',reference_folder='original-R0')
     assert calls==[(('B0','baseline-output'),{'reference_folder':'original-R0','mess_result':None})]
+
+
+@pytest.mark.parametrize('limit',[0.,2401.])
+def test_b1_wall_ceiling_cannot_be_disabled_or_extended(tmp_path,limit):
+    from v43_corrective.compare import run
+    with pytest.raises(ValueError,match='USER_40_MINUTE_WALL_CEILING_REQUIRED'):
+        run('B1',tmp_path/'not-started',wall_limit_seconds=limit)
+    assert not (tmp_path/'not-started').exists()

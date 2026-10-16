@@ -36,43 +36,24 @@
     "Source_presite": 0
   },
   "Phase_B_B0": {
-    "state": "RUNNING_ATTEMPT002",
-    "reference": "D:/MobileESS_V43/inputs/V43_MAY01_B0_REFERENCE_003/AIDC_REFERENCE.json",
-    "audit": {
-      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_REFERENCE_AUDIT.json",
-      "bytes": 4128,
-      "sha256": "47316032b72d1959565f85404c900787331cdb50dc0d66dfe79f3dc68285c7ac"
+    "state": "EXACT_ORIGINAL_FCFS_ACTUAL_FRESH96_PASS",
+    "attempt": "D:/MobileESS_V43/runtime/may01_B0_exact_FCFS_actual96_attempt005",
+    "result": {
+      "path": "D:\\MobileESS_V43\\runtime\\may01_B0_exact_FCFS_actual96_attempt005\\RESULT.json",
+      "bytes": 2520,
+      "sha256": "c195c6e9feae5d55d895a79fb52bcc65c059014609f239b72de973d65aa2c826"
     },
-    "Native0": {
-      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_REFERENCE_NATIVE0_CERTIFICATION.json",
-      "bytes": 11778,
-      "sha256": "67bea8ac58913b72b66bd5ff943895635dfaf319124be6807f3516029f2da5ff"
+    "independent_report": {
+      "path": "D:\\MobileESS_V43\\runtime\\may01_B0_exact_FCFS_actual96_attempt005\\INDEPENDENT_BASELINE_REPORT.json",
+      "bytes": 1928,
+      "sha256": "b312ce824f29b9c8948ace37db83fe2289a1fbd005c65a04b16db761ab7104db"
     },
-    "failure": {
-      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_ACTUAL001_STOP_RECONCILED.json",
-      "bytes": 930,
-      "sha256": "7fd2c43cf2165654f49fe475d58debe6e4d6a80e5457d2998549b407ca8e44bd"
-    },
-    "fix": "UniformArmController forces shared Known-command/Unknown policy dispatch; no new Source rights",
-    "tests": {
-      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_UNIFORM_FOUR_ARM_ACTUAL_NATIVE0_GUARDS.xml",
-      "bytes": 3523,
-      "sha256": "f28b5742d4481bb722ac6e6b723be972a387f3e7f7382d29e593bb5aac2ea9de"
-    },
-    "attempt": "D:/MobileESS_V43/runtime/may01_B0_C0_C1_actual96_attempt002",
-    "pid": 31144,
-    "creation": 1792126209.8237405,
-    "source_commit": "506821c09c7deaf5b666ee41c82dbeca9ffad1cf",
-    "source_freeze": {
-      "path": "D:\\MobileESS_V43\\runtime\\may01_B0_C0_C1_actual96_attempt002.ARM_SOURCE_FREEZE.json",
-      "bytes": 8592,
-      "sha256": "e9ab24314fe5de28874a38b7e350d8c9a8272e8a02cd5af41d3d928f94156518"
-    },
-    "Planning_AC96": "PASS",
-    "uniform_policy_dispatch": true
+    "control_variant": null,
+    "candidate_Current_AC_calls": 0,
+    "candidate_past_replays": 0
   },
   "Phase_C_B2": {
-    "state": "SOURCE_ADAPTER_READY_REAL_FULL_NATIVE0_NOT_RUN",
+    "state": "NOT_STARTED_USER_HOLD",
     "command": "python -m v43_mess.worker <explicit request>",
     "AIDC": "B0_REFERENCE_003_ONLY",
     "old_FULL_MILP_seed": false,
@@ -94,7 +75,8 @@
       "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_MAY01_B2_M1_REQUEST_POINTER.json",
       "bytes": 419,
       "sha256": "8a6468108f311d0ad42893ce84ccdba59cf1ff75082ed7c09d45bff522496c43"
-    }
+    },
+    "dispatch_authorized": false
   },
   "Phase_D_B3": {
     "A1": "GOLDEN003_EXACT_FREEZE_REUSE_CANDIDATE",
@@ -113,13 +95,9 @@
     }
   },
   "next_tasks": [
-    "Finish B0 attempt002, independently verify shared C0/C1/Full physical receipts and reconcile",
-    "Run real B2 M FULL Native0 then seedless K48 + Beam/Joint with B0_REFERENCE_003; source-freeze first",
-    "Native0 M full/compact/K48/Joint with exact B0-fixed B2 Case",
-    "Execute B2 independently; B3 A1/M1/A2/M2 remains independent if B2-specific failure",
-    "Freeze final per-arm P/Q/AIDC and run shared C0/C1 plus Fresh96",
-    "Update required four-arm tables/graph, source/Native ledgers, commit/push and PR232",
-    "B3 M1 exact Golden003 handoff; A2 uses v43_a2.worker with mandatory physical-domain proof reuse; M2 fixes accepted A2"
+    "Run prepared B1 C0 Actual/Fresh with original Golden003 Planning reuse and 2400s wall limit",
+    "Record real stage timing/CPU/CurrentAC and investigate any sustained stall; official stop/reconcile/profile/fix at ceiling",
+    "Report B1 measured results; do not start B2 or C1"
   ],
   "Worker": 1,
   "Threads": 1,
@@ -143,7 +121,7 @@
     "bytes": 17606,
     "sha256": "1e937adf3c18d11c9d397c3c25fb1c627ed360ba896b12e64968b777fa31d3f3"
   },
-  "updated_UTC": "2026-10-16T05:44:56.368773+00:00",
+  "updated_UTC": "2026-10-16T06:25:15.233916+00:00",
   "new_actual_policy": "R1_FLEX30_CORRECTIVE_ACTUAL_V1",
   "Strict_results_immutable": true,
   "next_after_B0_reconciliation": "INDEPENDENT_AC_PREFIX_EQUIVALENCE_AND_PAIRED_SHORT_CANARY_THEN_B2_B3_M",
@@ -174,5 +152,15 @@
   "official_corrective_canary_entrypoint": "python -m v43.may01 canary B1 <new-attempt> --ac-mode SHADOW",
   "legacy_strict_actual_entrypoints": "HISTORICAL_ONLY_NO_NEW_OFFICIAL_CAMPAIGN_EXECUTION",
   "official_corrective_route_status": "APPLIED_REAL_PREFIX_AND_SHORT_EVENT_VALIDATION_REQUIRED_BEFORE_FULL_ACTUAL",
-  "B1_corrective_real_event_canary": "NOT_STARTED_WAIT_B0_OFFICIAL_EXIT"
+  "B1_corrective_real_event_canary": "NOT_STARTED_WAIT_B0_OFFICIAL_EXIT",
+  "latest_user_scope": {
+    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\USER_STEERING_B1_PRIORITY_40MIN.txt",
+    "bytes": 667,
+    "sha256": "90c4c03e7023b5c091c89d802b9e9efc64fa231075facaf9c3a64c440fb04e1e"
+  },
+  "C0_applicable_arms": [
+    "B1",
+    "B3"
+  ],
+  "C1_enabled": false
 }
