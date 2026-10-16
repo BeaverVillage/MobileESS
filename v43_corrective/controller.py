@@ -12,7 +12,7 @@ from .participation import ArrivalParticipation
 from .performance import single_resource_fit
 
 
-def admission_core():
+def admission_core(*,relaxed_known=False):
     source=textwrap.dedent(inspect.getsource(JobEventController.admit))
     old='if uid not in self.decisions or self.decisions[uid]["action"] == "QUEUE":'
     if source.count(old)!=1:raise ValueError('UNKNOWN_RETRY_REUSE_BOUNDARY_DRIFT')
@@ -24,6 +24,16 @@ def admission_core():
         'self.budgets[uid].budget_seconds == 0' in ast.unparse(n.test)]
     if len(nodes)!=1:raise ValueError('UNKNOWN_FALLBACK_REUSE_BOUNDARY_DRIFT')
     nodes[0].test=ast.Constant(False);ast.fix_missing_locations(tree)
+    if relaxed_known:
+        gates=[n for n in ast.walk(tree) if isinstance(n,ast.If)
+            and 'hard_latest is not None' in ast.unparse(n.test)
+            and 'deadline is not None' in ast.unparse(n.test)]
+        if len(gates)!=1:raise ValueError('KNOWN_DEADLINE_REUSE_BOUNDARY_DRIFT')
+        gates[0].test=ast.BoolOp(op=ast.And(),values=[
+            ast.UnaryOp(op=ast.Not(),operand=ast.Call(func=ast.Attribute(
+                value=ast.Name(id='self',ctx=ast.Load()),attr='_relaxed_known',ctx=ast.Load()),
+                args=[ast.Name(id='uid',ctx=ast.Load())],keywords=[])),gates[0].test])
+        ast.fix_missing_locations(tree)
     ns=dict(JobEventController.admit.__globals__)
     exec(compile(tree,inspect.getfile(JobEventController.admit),'exec'),ns)
     return ns['admit']

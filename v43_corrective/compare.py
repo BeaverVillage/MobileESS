@@ -18,7 +18,7 @@ from .current_ac import FullPrefixReferenceAC,CertifiedPrefixAC,ShadowCertifiedP
 
 
 def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,correction_proof=None,
-        ac_mode='SHADOW',ac_certification=None,variants=('C0',),wall_limit_seconds=2400.):
+        ac_mode='SHADOW',ac_certification=None,variants=('C0',),wall_limit_seconds=2400.,known_window_policy=None):
     if arm not in ('B1','B3'):raise ValueError('C0_CONTROL_ONLY_B1_B3_BASELINES_USE_EVENT_FCFS')
     output=Path(output);freeze=output.with_name(output.name+'.CORRECTIVE_SOURCE_FREEZE.json')
     if output.exists() or freeze.exists():raise ValueError('NEW_CORRECTIVE_ACTUAL_ATTEMPT_REQUIRED')
@@ -47,7 +47,7 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
         result=read(mess_result)
         if result.get('FULL_feasible') is not True or result['arm']!=arm:raise ValueError('FROZEN_ARM_FULL_MESS_REQUIRED')
         mess=result['MESS_plan']
-    binding=CorrectiveBinding(arm,reference_folder,mess)
+    binding=CorrectiveBinding(arm,reference_folder,mess,known_window_policy=known_window_policy)
     sources=[record(p) for folder in ('v43_corrective','v43_actual','v43_arms')
         for p in sorted((ROOT/folder).rglob('*.py'))]+[record(ROOT/'v43/common.py')]
     if mess_result:sources.append(record(mess_result))
@@ -57,7 +57,7 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
     atomic(freeze,dict(UTC=now(),arm=arm,policy_version=POLICY_ID,source_commit=git('rev-parse','HEAD').decode().strip(),
         sources=sources,control_slots=control_slots,physical_bands_changed=False,
         parent_Golden003_reoptimized=False,Strict_outputs_overwritten=False,ac_mode=ac_mode,variants=variants,
-        wall_limit_seconds=wall_limit_seconds))
+        wall_limit_seconds=wall_limit_seconds,Known_window_research_policy=known_window_policy))
     policies=[];controllers=[];oracles=[]
     def policy(*args,**kwargs):
         check_deadline()
@@ -70,7 +70,7 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
             setattr(p,name,checked)
         policies.append(p);return p
     def controller(*args,**kwargs):
-        p=CorrectiveController(*args,**kwargs);controllers.append(p);return p
+        p=binding.controller_class(*args,**kwargs);controllers.append(p);return p
     def oracle(*args,**kwargs):
         check_deadline()
         cls={'FULL_REFERENCE':FullPrefixReferenceAC,'SHADOW':ShadowCertifiedPrefixAC,'FAST':CertifiedPrefixAC}[ac_mode]
@@ -119,7 +119,9 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
         source_freeze=record(freeze),policies=[dict(variant=p.variant,spec=p.spec,sha=p.sha,timings=p.timings,
             current_diagnostics=p.current_diagnostics,candidate_funnel=p.funnel) for p in policies],
         controllers=[dict(variant=c.policy.variant,participation=list(c.participation.receipts.values()),
-            overruns=c.overrun_observations,Known_commands_unchanged=c.known_schedule==c._frozen_known_commands)
+            overruns=c.overrun_observations,Known_commands_unchanged=c.known_schedule==c._frozen_known_commands,
+            Known_window_research_policy=known_window_policy,
+            Known_research_measurements=[e for e in c.events if e['event'].startswith('KNOWN_RESEARCH_')])
             for c in controllers],independent_Actual_and_Fresh=record(output/'RESULT.json')))
     for index,o in enumerate(oracles):
         folder=output/variants[index]
@@ -142,5 +144,8 @@ if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('arm');p.add_argument('output');p.add_argument('--reference-folder')
     p.add_argument('--mess-result');p.add_argument('--control-slots',type=int,default=120);p.add_argument('--correction-proof')
     p.add_argument('--ac-mode',choices=['FULL_REFERENCE','SHADOW','FAST'],default='SHADOW');p.add_argument('--ac-certification')
+    from .known_window import POLICY_ID as KNOWN_POLICY
+    p.add_argument('--known-window-policy',choices=[KNOWN_POLICY])
     a=p.parse_args();run(a.arm,a.output,reference_folder=a.reference_folder,mess_result=a.mess_result,
-        control_slots=a.control_slots,correction_proof=a.correction_proof,ac_mode=a.ac_mode,ac_certification=a.ac_certification)
+        control_slots=a.control_slots,correction_proof=a.correction_proof,ac_mode=a.ac_mode,ac_certification=a.ac_certification,
+        known_window_policy=a.known_window_policy)

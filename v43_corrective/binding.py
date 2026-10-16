@@ -13,7 +13,10 @@ from .reference import CorrectedReferenceScheduler
 
 
 class CorrectiveBinding:
-    def __init__(self,arm,reference_folder=None,mess_plan=None):
+    def __init__(self,arm,reference_folder=None,mess_plan=None,*,known_window_policy=None):
+        from .known_window import select_controller
+        self.controller_class=select_controller(arm,known_window_policy)
+        self.known_window_policy=known_window_policy
         if arm not in ('B0','B1','B2','B3'):raise ValueError('MAY01_FINAL_ARM_REQUIRED')
         self.arm=arm;self.mess=mess_plan
         self.base=None if arm=='B1' else ArmBinding(arm,reference_folder,mess_plan)
@@ -58,6 +61,13 @@ class CorrectiveBinding:
             reference_sha=reference.reference_sha,Known_commands_sha=digest(args['known_schedule']),
             future_Known_global_Unknown_start_barrier=False,Strict_parent_raw_modified=False,
             R1='ASSUMED_ARRIVAL_HASH30',R2='HOLD',Actual96_PASS=False,Fresh96_PASS=False)
+        if self.known_window_policy is not None:
+            from .known_window import policy_assumption
+            assumption=policy_assumption()
+            source=record(ROOT/'v43_corrective/known_window.py')
+            case.update(Known_window_research_assumption=assumption,
+                Known_window_policy_source=source,
+                case_sha=digest(dict(parent=case['case_sha'],assumption=assumption,source=source)))
         args['qos_window_provider'].case_sha=case['case_sha']
         atomic(output/'CASE_BINDINGS.json',case)
         return args,case
