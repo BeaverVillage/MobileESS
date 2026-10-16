@@ -175,6 +175,9 @@ def prepare(output, *, private_service=True):
     result = dict(capacities=plan['capacities'],requests=requests,running=running,reference=reference,
         qos_window_provider=qos,known_schedule=commands,begin=issue,end=end,arm='B1',
         power_model=model)
+    from v42_final.workload import ForecastBook
+    cc4=plan['forecast_inputs']['current_CC4']
+    result['forecast']=ForecastBook(tuple(cc4['Q50_GPUh']),tuple(cc4['Q90_GPUh']),midnight)
     identity = dict(schema='V43_PR189_POSTFREEZE_EVENT_CASE_V1',case_sha=case_sha,
         provider_sha=provider_sha,reference_sha=reference_sha,initialization=record(initial_path),
         Known=len(raw),Unknown=len(population)-len(raw),initial_Running=len(running),

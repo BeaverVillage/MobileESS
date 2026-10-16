@@ -15,6 +15,7 @@ from v43_actual.vendor.trajectory_tracking import TrackingReference
 from v43_actual.vendor.unified_contract import BINDING_FIELDS
 from v43_actual.presite import PendingPresitePolicy, change_authority
 from v43_actual.windows import OriginalKnownWindows
+from v43_actual.controller import V43EventController
 from v42_capacity.actual import Environment
 
 
@@ -162,3 +163,29 @@ def test_observed_overrun_retains_whole_gang_until_private_completion():
     row=next(x for x in out['queue_ledger'] if x['job_uid']=='U')
     assert row['admitted_time']==2700. and out['receipt']['capacity_violations']==0
     assert out['receipt']['future_duration_controller_reads']==0
+
+
+def test_serial_whole_gang_start_refreshes_next_policy_observation():
+    observations=[]
+    class Oracle:
+        issue=0.
+        now=None
+        def observe(self,now,history):self.now=now
+    class Policy:
+        oracle=Oracle()
+        sha=digest('NAMED_SERIAL_POLICY')
+        metadata={}
+        def observe(self,now,use,metadata):self.current=(now,dict(use));self.metadata=metadata
+        def current_guard(self,m,segments,now,use):return None
+        def select(self,m,receipt,now,reservations):
+            observations.append((m['uid'],self.current[1]['A']))
+            return dict(uid=m['uid'],action='START',site='A',start_seconds=now,
+                nominal_end_seconds=now+900.,additional_start_delay_seconds=0.)
+    p=Policy()
+    q=QoSWindowProvider(stats(),case_sha=digest('CASE'),provider_sha=digest('PROVIDER'))
+    controller=V43EventController({'A':2},arm='B1',qos_window_provider=q,frozen_policy=p)
+    for uid in ('U1','U2'):
+        controller.submit(JobRequest(uid,0.,1,('A',),900.,None,
+            dict(origin_unknown=True,representation_starts_seconds=(0.,900.))),0.)
+    assert controller.admit(0.)==['U1','U2']
+    assert observations==[('U1',0),('U2',1)]
