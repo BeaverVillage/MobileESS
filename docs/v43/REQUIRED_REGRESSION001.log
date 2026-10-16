@@ -1,0 +1,843 @@
+...............FF............F.......................................... [  9%]
+......................................................FF................ [ 19%]
+.........................................F.............................. [ 29%]
+..............................EEEEEFEEEEFFFFFFFFFFFF.................... [ 39%]
+...................................EEEEEE............................... [ 48%]
+........................F...F....................................FFFFFFF [ 58%]
+FFFFFFFFFFFFF..................................EEEE..................... [ 68%]
+........................................................................ [ 78%]
+....................................................................EEEE [ 88%]
+EEEEEEEEEEEE...........FF............................................... [ 97%]
+...............                                                          [100%]
+=================================== ERRORS ====================================
+_ ERROR at setup of test_callback_discovery_is_never_backdated_as_first_certificate _
+tests\test_v42_m1_anytime.py:63: in frontier
+    write(lb,dict(PASS=True,case_sha=CASE,exact_Global_LB='9/10'))
+v42_m1_anytime\core.py:25: in write
+    if path.drive.upper()!='D:' or not path.is_relative_to(ROOT.resolve()):raise ValueError('D_ONLY')
+E   ValueError: D_ONLY
+_ ERROR at setup of test_invalid_bracket_cannot_corrupt_live_certified_state __
+tests\test_v42_m1_anytime.py:63: in frontier
+    write(lb,dict(PASS=True,case_sha=CASE,exact_Global_LB='9/10'))
+v42_m1_anytime\core.py:25: in write
+    if path.drive.upper()!='D:' or not path.is_relative_to(ROOT.resolve()):raise ValueError('D_ONLY')
+E   ValueError: D_ONLY
+___ ERROR at setup of test_packet_hash_cannot_be_replaced_by_metadata_pass ____
+tests\test_v42_m1_anytime.py:63: in frontier
+    write(lb,dict(PASS=True,case_sha=CASE,exact_Global_LB='9/10'))
+v42_m1_anytime\core.py:25: in write
+    if path.drive.upper()!='D:' or not path.is_relative_to(ROOT.resolve()):raise ValueError('D_ONLY')
+E   ValueError: D_ONLY
+______ ERROR at setup of test_checkpoint_uses_only_then_certified_state _______
+tests\test_v42_m1_anytime.py:63: in frontier
+    write(lb,dict(PASS=True,case_sha=CASE,exact_Global_LB='9/10'))
+v42_m1_anytime\core.py:25: in write
+    if path.drive.upper()!='D:' or not path.is_relative_to(ROOT.resolve()):raise ValueError('D_ONLY')
+E   ValueError: D_ONLY
+______ ERROR at setup of test_weaker_same_case_bound_never_replaces_best ______
+tests\test_v42_m1_anytime.py:63: in frontier
+    write(lb,dict(PASS=True,case_sha=CASE,exact_Global_LB='9/10'))
+v42_m1_anytime\core.py:25: in write
+    if path.drive.upper()!='D:' or not path.is_relative_to(ROOT.resolve()):raise ValueError('D_ONLY')
+E   ValueError: D_ONLY
+_ ERROR at setup of test_offline_timeline_binds_exact_packets_and_checks_first_passage _
+tests\test_v42_m1_anytime.py:123: in published_timeline
+    core.write(tmp_path/'lb0.json',dict(PASS=True,case_sha=CASE,exact_bound='9/10'))
+v42_m1_anytime\core.py:25: in write
+    if path.drive.upper()!='D:' or not path.is_relative_to(ROOT.resolve()):raise ValueError('D_ONLY')
+E   ValueError: D_ONLY
+_ ERROR at setup of test_offline_checker_rejects_checkpoint_filled_from_future _
+tests\test_v42_m1_anytime.py:123: in published_timeline
+    core.write(tmp_path/'lb0.json',dict(PASS=True,case_sha=CASE,exact_bound='9/10'))
+v42_m1_anytime\core.py:25: in write
+    if path.drive.upper()!='D:' or not path.is_relative_to(ROOT.resolve()):raise ValueError('D_ONLY')
+E   ValueError: D_ONLY
+_ ERROR at setup of test_offline_checker_rejects_discovery_time_as_first_passage _
+tests\test_v42_m1_anytime.py:123: in published_timeline
+    core.write(tmp_path/'lb0.json',dict(PASS=True,case_sha=CASE,exact_bound='9/10'))
+v42_m1_anytime\core.py:25: in write
+    if path.drive.upper()!='D:' or not path.is_relative_to(ROOT.resolve()):raise ValueError('D_ONLY')
+E   ValueError: D_ONLY
+_ ERROR at setup of test_offline_checker_rejects_forged_mathematical_bound_in_event _
+tests\test_v42_m1_anytime.py:123: in published_timeline
+    core.write(tmp_path/'lb0.json',dict(PASS=True,case_sha=CASE,exact_bound='9/10'))
+v42_m1_anytime\core.py:25: in write
+    if path.drive.upper()!='D:' or not path.is_relative_to(ROOT.resolve()):raise ValueError('D_ONLY')
+E   ValueError: D_ONLY
+_ ERROR at setup of test_real_signed_targets_are_verified_original_row_site_time_projection _
+tests\test_v42_m1_hybrid_ub.py:23: in case
+    return load_case(ROOT/'tmp/hybrid_ub_pytest_case')
+v42_m1_hybrid\case.py:67: in load_case
+    case=legacy.load_case()
+v42_m1_research\case.py:72: in load_case
+    if sha(ROOT/path)!=hashlib.sha256(git('show',f'{M_HEAD}:{path}')).hexdigest():
+v42_unified\audit.py:16: in git
+    return subprocess.check_output(['git', '-C', str(ROOT), *args])
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:466: in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:571: in run
+    raise CalledProcessError(retcode, process.args,
+E   subprocess.CalledProcessError: Command '['git', '-C', 'D:\\v43_pr189_fast_planning_20261016', 'show', '4b19e85089171729a3225529a40cb00bf31f43d5:v42_native/mess.py']' returned non-zero exit status 128.
+---------------------------- Captured stderr setup ----------------------------
+fatal: path 'v42_native/mess.py' exists on disk, but not in '4b19e85089171729a3225529a40cb00bf31f43d5'
+________ ERROR at setup of test_A_reuses_current_U2_selection_exactly _________
+tests\test_v42_m1_hybrid_ub.py:23: in case
+    return load_case(ROOT/'tmp/hybrid_ub_pytest_case')
+v42_m1_hybrid\case.py:67: in load_case
+    case=legacy.load_case()
+v42_m1_research\case.py:72: in load_case
+    if sha(ROOT/path)!=hashlib.sha256(git('show',f'{M_HEAD}:{path}')).hexdigest():
+v42_unified\audit.py:16: in git
+    return subprocess.check_output(['git', '-C', str(ROOT), *args])
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:466: in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:571: in run
+    raise CalledProcessError(retcode, process.args,
+E   subprocess.CalledProcessError: Command '['git', '-C', 'D:\\v43_pr189_fast_planning_20261016', 'show', '4b19e85089171729a3225529a40cb00bf31f43d5:v42_native/mess.py']' returned non-zero exit status 128.
+_ ERROR at setup of test_every_original_binary_accounted_and_seed_feasible_without_forced_routes[A] _
+tests\test_v42_m1_hybrid_ub.py:23: in case
+    return load_case(ROOT/'tmp/hybrid_ub_pytest_case')
+v42_m1_hybrid\case.py:67: in load_case
+    case=legacy.load_case()
+v42_m1_research\case.py:72: in load_case
+    if sha(ROOT/path)!=hashlib.sha256(git('show',f'{M_HEAD}:{path}')).hexdigest():
+v42_unified\audit.py:16: in git
+    return subprocess.check_output(['git', '-C', str(ROOT), *args])
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:466: in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:571: in run
+    raise CalledProcessError(retcode, process.args,
+E   subprocess.CalledProcessError: Command '['git', '-C', 'D:\\v43_pr189_fast_planning_20261016', 'show', '4b19e85089171729a3225529a40cb00bf31f43d5:v42_native/mess.py']' returned non-zero exit status 128.
+_ ERROR at setup of test_every_original_binary_accounted_and_seed_feasible_without_forced_routes[B] _
+tests\test_v42_m1_hybrid_ub.py:23: in case
+    return load_case(ROOT/'tmp/hybrid_ub_pytest_case')
+v42_m1_hybrid\case.py:67: in load_case
+    case=legacy.load_case()
+v42_m1_research\case.py:72: in load_case
+    if sha(ROOT/path)!=hashlib.sha256(git('show',f'{M_HEAD}:{path}')).hexdigest():
+v42_unified\audit.py:16: in git
+    return subprocess.check_output(['git', '-C', str(ROOT), *args])
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:466: in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:571: in run
+    raise CalledProcessError(retcode, process.args,
+E   subprocess.CalledProcessError: Command '['git', '-C', 'D:\\v43_pr189_fast_planning_20261016', 'show', '4b19e85089171729a3225529a40cb00bf31f43d5:v42_native/mess.py']' returned non-zero exit status 128.
+_ ERROR at setup of test_every_original_binary_accounted_and_seed_feasible_without_forced_routes[C] _
+tests\test_v42_m1_hybrid_ub.py:23: in case
+    return load_case(ROOT/'tmp/hybrid_ub_pytest_case')
+v42_m1_hybrid\case.py:67: in load_case
+    case=legacy.load_case()
+v42_m1_research\case.py:72: in load_case
+    if sha(ROOT/path)!=hashlib.sha256(git('show',f'{M_HEAD}:{path}')).hexdigest():
+v42_unified\audit.py:16: in git
+    return subprocess.check_output(['git', '-C', str(ROOT), *args])
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:466: in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:571: in run
+    raise CalledProcessError(retcode, process.args,
+E   subprocess.CalledProcessError: Command '['git', '-C', 'D:\\v43_pr189_fast_planning_20261016', 'show', '4b19e85089171729a3225529a40cb00bf31f43d5:v42_native/mess.py']' returned non-zero exit status 128.
+_ ERROR at setup of test_real_model_keeps_full_original_source_and_continuous_domains_without_optimize _
+tests\test_v42_m1_hybrid_ub.py:23: in case
+    return load_case(ROOT/'tmp/hybrid_ub_pytest_case')
+v42_m1_hybrid\case.py:67: in load_case
+    case=legacy.load_case()
+v42_m1_research\case.py:72: in load_case
+    if sha(ROOT/path)!=hashlib.sha256(git('show',f'{M_HEAD}:{path}')).hexdigest():
+v42_unified\audit.py:16: in git
+    return subprocess.check_output(['git', '-C', str(ROOT), *args])
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:466: in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\subprocess.py:571: in run
+    raise CalledProcessError(retcode, process.args,
+E   subprocess.CalledProcessError: Command '['git', '-C', 'D:\\v43_pr189_fast_planning_20261016', 'show', '4b19e85089171729a3225529a40cb00bf31f43d5:v42_native/mess.py']' returned non-zero exit status 128.
+___ ERROR at setup of test_every_frozen_c3a_binary_is_mapped_and_classified ___
+tests\test_v42_m1_research_ub.py:68: in frozen_case
+    with np.load(out/'C3A_DATA.npz') as z:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\site-packages\numpy\lib\npyio.py:427: in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_m1_ultracompact_exact_20261006\\C3A_DATA.npz'
+_ ERROR at setup of test_neighborhood_preserves_outside_window_and_all_binary_decisions[U1-2] _
+tests\test_v42_m1_research_ub.py:68: in frozen_case
+    with np.load(out/'C3A_DATA.npz') as z:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\site-packages\numpy\lib\npyio.py:427: in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_m1_ultracompact_exact_20261006\\C3A_DATA.npz'
+_ ERROR at setup of test_neighborhood_preserves_outside_window_and_all_binary_decisions[U2-4] _
+tests\test_v42_m1_research_ub.py:68: in frozen_case
+    with np.load(out/'C3A_DATA.npz') as z:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\site-packages\numpy\lib\npyio.py:427: in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_m1_ultracompact_exact_20261006\\C3A_DATA.npz'
+_ ERROR at setup of test_unknown_neighborhood_does_not_create_parameter_sweep _
+tests\test_v42_m1_research_ub.py:68: in frozen_case
+    with np.load(out/'C3A_DATA.npz') as z:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\site-packages\numpy\lib\npyio.py:427: in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_m1_ultracompact_exact_20261006\\C3A_DATA.npz'
+_____ ERROR at setup of test_real_original_p1_edge_independently_verified _____
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[P2] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[A1] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[job] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[control] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[input] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[grid] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[axis] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[source] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[bound] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[decision] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[scope] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_rehashed_scientific_interface_mutations_are_rejected[day] _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+_ ERROR at setup of test_old_p2_required_interface_does_not_accept_new_contract _
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+______ ERROR at setup of test_frozen_input_mismatch_cannot_reuse_old_m1 _______
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+____________ ERROR at setup of test_pq_soc_route_contract_retained ____________
+tests\test_v42_unified.py:24: in original_edge
+    h = read(REPORTS/'A1_P1_ONLY_TO_M1_HANDOFF.json')
+tests\test_v42_unified.py:18: in read
+    return json.loads(path.read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_integration_20261008\\A1_P1_ONLY_TO_M1_HANDOFF.json'
+================================== FAILURES ===================================
+_______ test_future_m2_and_m1_grid_require_correct_fixed_anchor[M1-A1] ________
+contract_tests\test_bootstrap_robust.py:71: in test_future_m2_and_m1_grid_require_correct_fixed_anchor
+    levels,ctrl=grid.frozen_grid(model,dict(capacities={'S':80},battery={}),anchor,p,q,stage=stage)
+v42_bootstrap\grid.py:36: in frozen_grid
+    digest(bundle['capacities']),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),
+v42_root\common.py:8: in sha
+    def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1050: in read_bytes
+    with self.open(mode='rb') as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_final_integration\\MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'
+---------------------------- Captured stdout call -----------------------------
+Set parameter Username
+Set parameter LicenseID to value 2845475
+Academic license - for non-commercial use only - expires 2027-07-18
+_______ test_future_m2_and_m1_grid_require_correct_fixed_anchor[M2-A2] ________
+contract_tests\test_bootstrap_robust.py:71: in test_future_m2_and_m1_grid_require_correct_fixed_anchor
+    levels,ctrl=grid.frozen_grid(model,dict(capacities={'S':80},battery={}),anchor,p,q,stage=stage)
+v42_bootstrap\grid.py:36: in frozen_grid
+    digest(bundle['capacities']),sha(OLD/'MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'),
+v42_root\common.py:8: in sha
+    def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1050: in read_bytes
+    with self.open(mode='rb') as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_final_integration\\MAY01_FINAL_NATIVE_INPUT_BUNDLE.json'
+________ test_saved_interval_certificate_proves_full_box_contradiction ________
+contract_tests\test_voltage_margin.py:119: in test_saved_interval_certificate_proves_full_box_contradiction
+    proof=json.loads((root/'docs/v42_voltage_margin_a1_m1/A1_INFEASIBILITY_DIAGNOSIS.json').read_text())
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_voltage_margin_a1_m1\\A1_INFEASIBILITY_DIAGNOSIS.json'
+____________________ test_schema_and_runtime_freeze_agree _____________________
+tests\test_v42_dayahead_actual.py:130: in test_schema_and_runtime_freeze_agree
+    schema=json.loads((EVIDENCE/'DAYAHEAD_FREEZE_SCHEMA.json').read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_day_ahead_planning_direct_dday_actual\\DAYAHEAD_FREEZE_SCHEMA.json'
+__________ test_source_supersession_allowlist_cannot_authorize_drift __________
+tests\test_v42_dayahead_actual.py:144: in test_source_supersession_allowlist_cannot_authorize_drift
+    assert_authorized('v42_native/coordinator.py','0'*64)
+v42_voltage\preservation.py:43: in assert_authorized
+    audit=read(ROOT/'docs/v42_a1_bootstrap_m1_robust/LEGACY_PRESERVATION_AUDIT.json')
+v42_root\common.py:9: in read
+    def read(p):return json.loads(Path(p).read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_a1_bootstrap_m1_robust\\LEGACY_PRESERVATION_AUDIT.json'
+______ test_v41_historical_preservation_evidence_and_no_production_claim ______
+tests\test_v42_dayahead_actual.py:303: in test_v41_historical_preservation_evidence_and_no_production_claim
+    audit=json.loads((EVIDENCE/'V41_PRESERVATION_AUDIT.json').read_text(encoding='utf8'))
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+C:\Users\kjw39\AppData\Local\Programs\Python\Python311\Lib\pathlib.py:1044: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+E   FileNotFoundError: [Errno 2] No such file or directory: 'D:\\v43_pr189_fast_planning_20261016\\docs\\v42_day_ahead_planning_direct_dday_actual\\V41_PRESERVATION_AUDIT.json'
+_____ test_ledger_cost_accepts_original_rmp_track_keyword_without_solver ______
+tests\test_v42_m1_anytime.py:108: in test_ledger_cost_accepts_original_rmp_track_keyword_without_solver
+    ledger=Ledger(tmp_path/'NATIVE_RUNTIME_LEDGER.json',0.,clock=lambda:now[0])
+v42_m1_anytime\core.py:39: in __init__
+    self.persist()
+v42_m1_anytime\core.py:104: in persist
+    write(self.path,data)
+v42_m1_anytime\core.py:25: in write
+    if path.drive.upper()!='D:' or not path.is_relative_to(ROOT.resolve()):raise ValueError('D_ONLY')
+E   ValueError: D_ONLY
+_ test_empty_external_catalog_always_includes_all_four_verified_seed_columns __
+tests\test_v42_m1_hybrid_dw.py:85: in test_empty_external_catalog_always_includes_all_four_verified_seed_columns
+    model,variables,rows,receipt,source=dw.build_master(case,decomp,{},tmp_path/'rmp')
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+_______ test_seed_duplicates_are_deduplicated_without_losing_unit_seed ________
+tests\test_v42_m1_hybrid_dw.py:103: in test_seed_duplicates_are_deduplicated_without_losing_unit_seed
+    model,variables,rows,receipt,source=dw.build_master(case,decomp,{'M1':[duplicate]},tmp_path/'rmp')
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+______ test_valid_additional_integer_column_changes_only_derived_catalog ______
+tests\test_v42_m1_hybrid_dw.py:111: in test_valid_additional_integer_column_changes_only_derived_catalog
+    model,variables,rows,receipt,source=dw.build_master(case,decomp,{'M1':[extra]},tmp_path/'rmp')
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+_____ test_changed_candidate_file_sha_rejected_before_model_construction ______
+tests\test_v42_m1_hybrid_dw.py:123: in test_changed_candidate_file_sha_rejected_before_model_construction
+    dw.build_master(case,build_blocks(case),{'M1':[item]},tmp_path/'rmp')
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+
+During handling of the above exception, another exception occurred:
+tests\test_v42_m1_hybrid_dw.py:122: in test_changed_candidate_file_sha_rejected_before_model_construction
+    with pytest.raises(ValueError,match='DW_COLUMN_BYTE_DRIFT'):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'DW_COLUMN_BYTE_DRIFT'
+E    Input: 'HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42'
+_ test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected[point0-axis0-ORIGINAL_AXIS_DRIFT] _
+tests\test_v42_m1_hybrid_dw.py:136: in test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected
+    dw.build_master(case,build_blocks(case),{'M1':[item]},tmp_path/'rmp')
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+
+During handling of the above exception, another exception occurred:
+tests\test_v42_m1_hybrid_dw.py:135: in test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected
+    with pytest.raises(ValueError,match=error):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'ORIGINAL_AXIS_DRIFT'
+E    Input: 'HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42'
+_ test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected[point1-axis1-POINT_DRIFT] _
+tests\test_v42_m1_hybrid_dw.py:136: in test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected
+    dw.build_master(case,build_blocks(case),{'M1':[item]},tmp_path/'rmp')
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+
+During handling of the above exception, another exception occurred:
+tests\test_v42_m1_hybrid_dw.py:135: in test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected
+    with pytest.raises(ValueError,match=error):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'POINT_DRIFT'
+E    Input: 'HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42'
+_ test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected[point2-axis2-POINT_DRIFT] _
+tests\test_v42_m1_hybrid_dw.py:136: in test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected
+    dw.build_master(case,build_blocks(case),{'M1':[item]},tmp_path/'rmp')
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+
+During handling of the above exception, another exception occurred:
+tests\test_v42_m1_hybrid_dw.py:135: in test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected
+    with pytest.raises(ValueError,match=error):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'POINT_DRIFT'
+E    Input: 'HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42'
+_ test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected[point3-axis3-DOMAIN_REPLAY_FAILED] _
+tests\test_v42_m1_hybrid_dw.py:136: in test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected
+    dw.build_master(case,build_blocks(case),{'M1':[item]},tmp_path/'rmp')
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+
+During handling of the above exception, another exception occurred:
+tests\test_v42_m1_hybrid_dw.py:135: in test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected
+    with pytest.raises(ValueError,match=error):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'DOMAIN_REPLAY_FAILED'
+E    Input: 'HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42'
+_ test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected[point4-axis4-DOMAIN_REPLAY_FAILED] _
+tests\test_v42_m1_hybrid_dw.py:136: in test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected
+    dw.build_master(case,build_blocks(case),{'M1':[item]},tmp_path/'rmp')
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+
+During handling of the above exception, another exception occurred:
+tests\test_v42_m1_hybrid_dw.py:135: in test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected
+    with pytest.raises(ValueError,match=error):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'DOMAIN_REPLAY_FAILED'
+E    Input: 'HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42'
+______________ test_invalid_seed_is_not_admitted_by_source_label ______________
+tests\test_v42_m1_hybrid_dw.py:143: in test_invalid_seed_is_not_admitted_by_source_label
+    dw.build_master(case,build_blocks(case),{},tmp_path/'rmp')
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+
+During handling of the above exception, another exception occurred:
+tests\test_v42_m1_hybrid_dw.py:142: in test_invalid_seed_is_not_admitted_by_source_label
+    with pytest.raises(ValueError,match='DOMAIN_REPLAY_FAILED'):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'DOMAIN_REPLAY_FAILED'
+E    Input: 'HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42'
+___ test_external_rejected_column_does_not_displace_verified_original_seed ____
+tests\test_v42_m1_hybrid_dw.py:149: in test_external_rejected_column_does_not_displace_verified_original_seed
+    _,_,_,receipt,_=dw.build_master(case,build_blocks(case),{'M1':[item]},tmp_path/'rmp')
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+_ test_actual_original_rows_and_eta_mapping_has_no_native_objective_authority _
+tests\test_v42_m1_hybrid_dw.py:154: in test_actual_original_rows_and_eta_mapping_has_no_native_objective_authority
+    result=dw.run(case,build_blocks(case),{},MockLedger(),tmp_path/'rmp')
+v42_m1_hybrid\dw.py:88: in run
+    model,variables,rows,identity,source_rows=build_master(case,decomp,columns,output)
+v42_m1_hybrid\dw.py:16: in build_master
+    start=perf_counter();output=output_directory(output)
+v42_m1_hybrid\blocks.py:165: in output_directory
+    raise ValueError('HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42')
+E   ValueError: HYBRID_OUTPUT_MUST_BE_INSIDE_D_V42
+_______ test_strong_one_leaf_bound_cannot_replace_minimum_of_ALL_leaves _______
+tests\test_v42_m1_research_joint.py:132: in test_strong_one_leaf_bound_cannot_replace_minimum_of_ALL_leaves
+    bound,checked=evaluate_complete_count_bound(case,joint,run_path=tmp_path)
+v42_m1_research\check_joint.py:342: in evaluate_complete_count_bound
+    r = evaluate_evidence(leaf.A, leaf.d, entry['dual_evidence'], case.case_sha,
+v42_m1_research\check_joint.py:306: in evaluate_evidence
+    path = _path(evidence['path'], within=run_path)
+v42_m1_research\check_joint.py:280: in _path
+    raise ValueError('D_V42_CHECKER_EVIDENCE_REQUIRED')
+E   ValueError: D_V42_CHECKER_EVIDENCE_REQUIRED
+_ test_independent_multiplier_recompute_rejects_hash_mutation_and_no_native_objective _
+tests\test_v42_m1_research_joint.py:190: in test_independent_multiplier_recompute_rejects_hash_mutation_and_no_native_objective
+    r=evaluate_evidence(case.A,case.d,evidence,case.case_sha,run_path=tmp_path)
+v42_m1_research\check_joint.py:306: in evaluate_evidence
+    path = _path(evidence['path'], within=run_path)
+v42_m1_research\check_joint.py:280: in _path
+    raise ValueError('D_V42_CHECKER_EVIDENCE_REQUIRED')
+E   ValueError: D_V42_CHECKER_EVIDENCE_REQUIRED
+_____ test_latest_ub_forwarding_revalidates_and_preserves_scientific_case _____
+tests\test_v42_m1_research_lb.py:257: in test_latest_ub_forwarding_revalidates_and_preserves_scientific_case
+    local,receipt=latest_validated_ub(case,path)
+v42_m1_research\lb.py:126: in latest_validated_ub
+    if not path.is_relative_to(ROOT.resolve()):raise ValueError('LATEST_UB_MUST_BE_D_V42_RESEARCH_OUTPUT')
+E   ValueError: LATEST_UB_MUST_BE_D_V42_RESEARCH_OUTPUT
+____________ test_latest_ub_forwarding_rejects_failed_full_replay _____________
+tests\test_v42_m1_research_lb.py:270: in test_latest_ub_forwarding_rejects_failed_full_replay
+    latest_validated_ub(case,path)
+v42_m1_research\lb.py:126: in latest_validated_ub
+    if not path.is_relative_to(ROOT.resolve()):raise ValueError('LATEST_UB_MUST_BE_D_V42_RESEARCH_OUTPUT')
+E   ValueError: LATEST_UB_MUST_BE_D_V42_RESEARCH_OUTPUT
+
+During handling of the above exception, another exception occurred:
+tests\test_v42_m1_research_lb.py:269: in test_latest_ub_forwarding_rejects_failed_full_replay
+    with pytest.raises(ValueError,match='ORIGINAL_REPLAY_FAILED'):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'ORIGINAL_REPLAY_FAILED'
+E    Input: 'LATEST_UB_MUST_BE_D_V42_RESEARCH_OUTPUT'
+__________ test_default_allocation_and_two_track_cumulative_runtime ___________
+tests\test_v42_m1_research_ledger.py:59: in test_default_allocation_and_two_track_cumulative_runtime
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+________ test_requested_time_is_clipped_to_actual_remaining_allocation ________
+tests\test_v42_m1_research_ledger.py:83: in test_requested_time_is_clipped_to_actual_remaining_allocation
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+_____ test_combined_5400_cap_remains_after_all_unused_budget_transferred ______
+tests\test_v42_m1_research_ledger.py:98: in test_combined_5400_cap_remains_after_all_unused_budget_transferred
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+______ test_unused_transfer_moves_future_budget_only_and_preserves_total ______
+tests\test_v42_m1_research_ledger.py:115: in test_unused_transfer_moves_future_budget_only_and_preserves_total
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+__________ test_transfer_cannot_retroactively_erase_track_overshoot ___________
+tests\test_v42_m1_research_ledger.py:130: in test_transfer_cannot_retroactively_erase_track_overshoot
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+____________ test_invalid_transfer_never_changes_accounting[-1.0] _____________
+tests\test_v42_m1_research_ledger.py:143: in test_invalid_transfer_never_changes_accounting
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+_____________ test_invalid_transfer_never_changes_accounting[0.0] _____________
+tests\test_v42_m1_research_ledger.py:143: in test_invalid_transfer_never_changes_accounting
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+_____________ test_invalid_transfer_never_changes_accounting[nan] _____________
+tests\test_v42_m1_research_ledger.py:143: in test_invalid_transfer_never_changes_accounting
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+_____________ test_invalid_transfer_never_changes_accounting[inf] _____________
+tests\test_v42_m1_research_ledger.py:143: in test_invalid_transfer_never_changes_accounting
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+_______ test_failed_native_call_is_charged_and_original_error_preserved _______
+tests\test_v42_m1_research_ledger.py:151: in test_failed_native_call_is_charged_and_original_error_preserved
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+__ test_missing_optional_diagnostic_cannot_lose_finished_runtime[MaxMemUsed] __
+tests\test_v42_m1_research_ledger.py:166: in test_missing_optional_diagnostic_cannot_lose_finished_runtime
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+___ test_missing_optional_diagnostic_cannot_lose_finished_runtime[ObjBound] ___
+tests\test_v42_m1_research_ledger.py:166: in test_missing_optional_diagnostic_cannot_lose_finished_runtime
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+_______ test_failed_call_with_missing_optional_attributes_still_charged _______
+tests\test_v42_m1_research_ledger.py:177: in test_failed_call_with_missing_optional_attributes_still_charged
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+___ test_preexisting_finite_memory_limit_rejected_before_optimize[MemLimit] ___
+tests\test_v42_m1_research_ledger.py:190: in test_preexisting_finite_memory_limit_rejected_before_optimize
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+_ test_preexisting_finite_memory_limit_rejected_before_optimize[SoftMemLimit] _
+tests\test_v42_m1_research_ledger.py:190: in test_preexisting_finite_memory_limit_rejected_before_optimize
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+______ test_build_and_validation_wall_costs_do_not_consume_native_budget ______
+tests\test_v42_m1_research_ledger.py:202: in test_build_and_validation_wall_costs_do_not_consume_native_budget
+    account = ledger(tmp_path, clock=clock)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+________ test_wall_practicality_failure_does_not_rewrite_native_budget ________
+tests\test_v42_m1_research_ledger.py:222: in test_wall_practicality_failure_does_not_rewrite_native_budget
+    account = ledger(tmp_path, clock=clock)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+_____________ test_existing_ledger_cannot_be_reset_or_overwritten _____________
+tests\test_v42_m1_research_ledger.py:233: in test_existing_ledger_cannot_be_reset_or_overwritten
+    account = ledger(tmp_path)
+tests\test_v42_m1_research_ledger.py:50: in ledger
+    return ResearchLedger(tmp_path / 'runtime_ledger.json', 'same_scientific_case',
+v42_m1_research\ledger.py:16: in __init__
+    if not self.path.is_relative_to(ROOT.resolve()):raise ValueError('D_V42_LEDGER_REQUIRED')
+E   ValueError: D_V42_LEDGER_REQUIRED
+_______________ test_default_config_is_d_only_and_no_new_native _______________
+tests\test_v42_unified.py:120: in test_default_config_is_d_only_and_no_new_native
+    c=configuration();assert c['workspace'].lower()=='d:\\mobileess_v42' and not c['integration_native_optimize_allowed']
+v42_unified\pipeline.py:22: in configuration
+    require(Path(c['workspace']).resolve() == ROOT.resolve() and ROOT.drive.upper() == 'D:', 'V42_D_WORKSPACE')
+v42_native\contracts.py:14: in require
+    raise ContractError(message)
+E   v42_native.contracts.ContractError: V42_D_WORKSPACE
+_ test_single_pipeline_stage_order_warm_start_and_no_false_pending_completion _
+tests\test_v42_unified.py:156: in test_single_pipeline_stage_order_warm_start_and_no_false_pending_completion
+    b=ContractBackend();r=run_pipeline(b,authority,tmp_path/'all')
+v42_unified\pipeline.py:71: in run_pipeline
+    c = config or configuration()
+v42_unified\pipeline.py:22: in configuration
+    require(Path(c['workspace']).resolve() == ROOT.resolve() and ROOT.drive.upper() == 'D:', 'V42_D_WORKSPACE')
+v42_native\contracts.py:14: in require
+    raise ContractError(message)
+E   v42_native.contracts.ContractError: V42_D_WORKSPACE
+============================== warnings summary ===============================
+tests/test_v42_dayahead_actual.py::test_repository_v42_ac_call_only_in_actual_and_no_global_optimizer
+  <unknown>:113: DeprecationWarning: invalid escape sequence '\M'
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: D:\v43_pr189_fast_planning_20261016\docs\v43\REQUIRED_REGRESSION001.xml -
+=========================== short test summary info ===========================
+FAILED contract_tests/test_bootstrap_robust.py::test_future_m2_and_m1_grid_require_correct_fixed_anchor[M1-A1]
+FAILED contract_tests/test_bootstrap_robust.py::test_future_m2_and_m1_grid_require_correct_fixed_anchor[M2-A2]
+FAILED contract_tests/test_voltage_margin.py::test_saved_interval_certificate_proves_full_box_contradiction
+FAILED tests/test_v42_dayahead_actual.py::test_schema_and_runtime_freeze_agree
+FAILED tests/test_v42_dayahead_actual.py::test_source_supersession_allowlist_cannot_authorize_drift
+FAILED tests/test_v42_dayahead_actual.py::test_v41_historical_preservation_evidence_and_no_production_claim
+FAILED tests/test_v42_m1_anytime.py::test_ledger_cost_accepts_original_rmp_track_keyword_without_solver
+FAILED tests/test_v42_m1_hybrid_dw.py::test_empty_external_catalog_always_includes_all_four_verified_seed_columns
+FAILED tests/test_v42_m1_hybrid_dw.py::test_seed_duplicates_are_deduplicated_without_losing_unit_seed
+FAILED tests/test_v42_m1_hybrid_dw.py::test_valid_additional_integer_column_changes_only_derived_catalog
+FAILED tests/test_v42_m1_hybrid_dw.py::test_changed_candidate_file_sha_rejected_before_model_construction
+FAILED tests/test_v42_m1_hybrid_dw.py::test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected[point0-axis0-ORIGINAL_AXIS_DRIFT]
+FAILED tests/test_v42_m1_hybrid_dw.py::test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected[point1-axis1-POINT_DRIFT]
+FAILED tests/test_v42_m1_hybrid_dw.py::test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected[point2-axis2-POINT_DRIFT]
+FAILED tests/test_v42_m1_hybrid_dw.py::test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected[point3-axis3-DOMAIN_REPLAY_FAILED]
+FAILED tests/test_v42_m1_hybrid_dw.py::test_mapped_column_axis_shape_finite_and_exact_integer_domain_rejected[point4-axis4-DOMAIN_REPLAY_FAILED]
+FAILED tests/test_v42_m1_hybrid_dw.py::test_invalid_seed_is_not_admitted_by_source_label
+FAILED tests/test_v42_m1_hybrid_dw.py::test_external_rejected_column_does_not_displace_verified_original_seed
+FAILED tests/test_v42_m1_hybrid_dw.py::test_actual_original_rows_and_eta_mapping_has_no_native_objective_authority
+FAILED tests/test_v42_m1_research_joint.py::test_strong_one_leaf_bound_cannot_replace_minimum_of_ALL_leaves
+FAILED tests/test_v42_m1_research_joint.py::test_independent_multiplier_recompute_rejects_hash_mutation_and_no_native_objective
+FAILED tests/test_v42_m1_research_lb.py::test_latest_ub_forwarding_revalidates_and_preserves_scientific_case
+FAILED tests/test_v42_m1_research_lb.py::test_latest_ub_forwarding_rejects_failed_full_replay
+FAILED tests/test_v42_m1_research_ledger.py::test_default_allocation_and_two_track_cumulative_runtime
+FAILED tests/test_v42_m1_research_ledger.py::test_requested_time_is_clipped_to_actual_remaining_allocation
+FAILED tests/test_v42_m1_research_ledger.py::test_combined_5400_cap_remains_after_all_unused_budget_transferred
+FAILED tests/test_v42_m1_research_ledger.py::test_unused_transfer_moves_future_budget_only_and_preserves_total
+FAILED tests/test_v42_m1_research_ledger.py::test_transfer_cannot_retroactively_erase_track_overshoot
+FAILED tests/test_v42_m1_research_ledger.py::test_invalid_transfer_never_changes_accounting[-1.0]
+FAILED tests/test_v42_m1_research_ledger.py::test_invalid_transfer_never_changes_accounting[0.0]
+FAILED tests/test_v42_m1_research_ledger.py::test_invalid_transfer_never_changes_accounting[nan]
+FAILED tests/test_v42_m1_research_ledger.py::test_invalid_transfer_never_changes_accounting[inf]
+FAILED tests/test_v42_m1_research_ledger.py::test_failed_native_call_is_charged_and_original_error_preserved
+FAILED tests/test_v42_m1_research_ledger.py::test_missing_optional_diagnostic_cannot_lose_finished_runtime[MaxMemUsed]
+FAILED tests/test_v42_m1_research_ledger.py::test_missing_optional_diagnostic_cannot_lose_finished_runtime[ObjBound]
+FAILED tests/test_v42_m1_research_ledger.py::test_failed_call_with_missing_optional_attributes_still_charged
+FAILED tests/test_v42_m1_research_ledger.py::test_preexisting_finite_memory_limit_rejected_before_optimize[MemLimit]
+FAILED tests/test_v42_m1_research_ledger.py::test_preexisting_finite_memory_limit_rejected_before_optimize[SoftMemLimit]
+FAILED tests/test_v42_m1_research_ledger.py::test_build_and_validation_wall_costs_do_not_consume_native_budget
+FAILED tests/test_v42_m1_research_ledger.py::test_wall_practicality_failure_does_not_rewrite_native_budget
+FAILED tests/test_v42_m1_research_ledger.py::test_existing_ledger_cannot_be_reset_or_overwritten
+FAILED tests/test_v42_unified.py::test_default_config_is_d_only_and_no_new_native
+FAILED tests/test_v42_unified.py::test_single_pipeline_stage_order_warm_start_and_no_false_pending_completion
+ERROR tests/test_v42_m1_anytime.py::test_callback_discovery_is_never_backdated_as_first_certificate
+ERROR tests/test_v42_m1_anytime.py::test_invalid_bracket_cannot_corrupt_live_certified_state
+ERROR tests/test_v42_m1_anytime.py::test_packet_hash_cannot_be_replaced_by_metadata_pass
+ERROR tests/test_v42_m1_anytime.py::test_checkpoint_uses_only_then_certified_state
+ERROR tests/test_v42_m1_anytime.py::test_weaker_same_case_bound_never_replaces_best
+ERROR tests/test_v42_m1_anytime.py::test_offline_timeline_binds_exact_packets_and_checks_first_passage
+ERROR tests/test_v42_m1_anytime.py::test_offline_checker_rejects_checkpoint_filled_from_future
+ERROR tests/test_v42_m1_anytime.py::test_offline_checker_rejects_discovery_time_as_first_passage
+ERROR tests/test_v42_m1_anytime.py::test_offline_checker_rejects_forged_mathematical_bound_in_event
+ERROR tests/test_v42_m1_hybrid_ub.py::test_real_signed_targets_are_verified_original_row_site_time_projection
+ERROR tests/test_v42_m1_hybrid_ub.py::test_A_reuses_current_U2_selection_exactly
+ERROR tests/test_v42_m1_hybrid_ub.py::test_every_original_binary_accounted_and_seed_feasible_without_forced_routes[A]
+ERROR tests/test_v42_m1_hybrid_ub.py::test_every_original_binary_accounted_and_seed_feasible_without_forced_routes[B]
+ERROR tests/test_v42_m1_hybrid_ub.py::test_every_original_binary_accounted_and_seed_feasible_without_forced_routes[C]
+ERROR tests/test_v42_m1_hybrid_ub.py::test_real_model_keeps_full_original_source_and_continuous_domains_without_optimize
+ERROR tests/test_v42_m1_research_ub.py::test_every_frozen_c3a_binary_is_mapped_and_classified
+ERROR tests/test_v42_m1_research_ub.py::test_neighborhood_preserves_outside_window_and_all_binary_decisions[U1-2]
+ERROR tests/test_v42_m1_research_ub.py::test_neighborhood_preserves_outside_window_and_all_binary_decisions[U2-4]
+ERROR tests/test_v42_m1_research_ub.py::test_unknown_neighborhood_does_not_create_parameter_sweep
+ERROR tests/test_v42_unified.py::test_real_original_p1_edge_independently_verified
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[P2]
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[A1]
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[job]
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[control]
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[input]
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[grid]
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[axis]
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[source]
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[bound]
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[decision]
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[scope]
+ERROR tests/test_v42_unified.py::test_rehashed_scientific_interface_mutations_are_rejected[day]
+ERROR tests/test_v42_unified.py::test_old_p2_required_interface_does_not_accept_new_contract
+ERROR tests/test_v42_unified.py::test_frozen_input_mismatch_cannot_reuse_old_m1
+ERROR tests/test_v42_unified.py::test_pq_soc_route_contract_retained - FileNo...
+43 failed, 657 passed, 1 warning, 35 errors in 59.08s
