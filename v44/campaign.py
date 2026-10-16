@@ -21,8 +21,6 @@ def stage_request(case,stage):
     request=dict(case,stage=stage,root=str(root),output=str(root/'OUTPUT') if stage in ('A1','A2') else str(root),
         input_folder=row['native_folder'],Threads=1,Worker=1,P2_calls=0,native_budget_seconds=5400,
         wall_budget_seconds=None,target_gap=.005 if stage in ('A1','A2') else .03)
-    if stage=='ACTUAL' and case['arm'] in ('B1','B3'):
-        request['correction_proof']=row['files'].get('C1_correction_proof_'+case['arm'])
     return request
 
 
@@ -55,6 +53,9 @@ def stage_result(case,stage,function):
                 atomic(pointer,saved);return result
             if stage in ('M1','M2') and not (parent/'BINARY_STAGE_CHECKPOINT.json').exists():
                 raise NotReady('RESUME_BINARY_CHECKPOINT_NOT_SUPPORTED:'+stage)
+            if stage=='ACTUAL':
+                request['actual_restart_from_independent_source']=True
+                return function(request)
             admission=crash_admission(parent,request)
             if admission['status']!='RESTORABLE_M_BINARY':raise NotReady('RESUME_STAGE_NOT_SUPPORTED:'+stage+':'+admission['reason'])
             request['resume_parent']=str(parent)
@@ -96,7 +97,7 @@ def run_case(request):
                     a1_request=stage_request(request,'A1')
                     restored=read(root/'RESTORED_COMPLETED_STAGES.json') if (root/'RESTORED_COMPLETED_STAGES.json').exists() else {}
                     a1_root=Path(restored['A1']['root']) if 'A1' in restored else Path(a1_request['root'])
-                    a1_output=a1_root/'OUTPUT'
+                    a1_output=Path(r.get('accepted_cache_output',str(a1_root/'OUTPUT')))
                     cache=a1_output/'STATIC/DOMAIN'/day/'PHYSICAL_DOMAIN_CACHE.json'
                     domain=read(cache);prepared=read(a1_output/'A_PREPARE_RECEIPT.json')
                     proof=Path(a1_request['root'])/'ACCEPTED_A1_CACHE_PROOF.json'
@@ -135,7 +136,7 @@ def run_case(request):
 def run(root,permit,*,resume=False):
     certification=read(DOC/'PREEXECUTION_CERTIFICATION.json');require_execution_permit(permit,certification)
     freeze=read(DOC/'SCIENTIFIC_FREEZE_MANIFEST.json')
-    sources=[r['V44'] for r in freeze['unchanged_source_rows']+freeze['unchanged_support_inputs']]+[r['source'] for r in freeze['inherited_external_M_algorithms']]+freeze['adapters']
+    sources=[r['V44'] for r in freeze['unchanged_source_rows']+freeze['unchanged_support_inputs']]+[r['source'] for r in freeze['inherited_external_M_algorithms']]+freeze['adapters']+freeze.get('physics_receipts',[])
     verify(sources);root=Path(root)
     if root.exists() and not resume:raise ValueError('NEW_CAMPAIGN_ROOT_OR_EXPLICIT_RESUME_REQUIRED')
     states={};running={};resume_sources={};attempt_numbers={}

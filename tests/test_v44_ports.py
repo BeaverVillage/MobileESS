@@ -139,21 +139,22 @@ def test_actual_wrapper_uses_dated_midnight_and_c1_without_running_driver(day,tm
     monkeypatch.setattr(worker,'day_inputs',lambda d:dict(actual_bundle='D:/fixture/'+d))
     monkeypatch.setattr(worker,'corrective_binding',lambda *a:object())
     monkeypatch.setattr(worker,'driver',lambda function,path:function)
-    import v44.svr11_actual as svr11
+    import v44.svr12_policy as svr12
     def routed(original,proxy,binding,midnight):
         return lambda arm,output,**kw:dict(PASS=True,arm=arm,day_start_seconds=midnight,options=kw)
-    monkeypatch.setattr(svr11,'corrective_driver',routed)
+    monkeypatch.setattr(svr12,'corrective_driver',routed)
     proof=tmp_path/'MOCK_PROOF.json';atomic(proof,dict(mock=True))
     request=dict(output=str(tmp_path/'ACTUAL'),day=day,arm='B3',stage='ACTUAL',
-        correction_proof=record(proof),case_root=str(tmp_path),sources=[],source_sha=digest([]))
-    result=worker.actual.__wrapped__(request,'D:/fixture_A2',{'frozen':True})
+        correction_proof=None,case_root=str(tmp_path),sources=[],source_sha=digest([]))
+    result=worker.actual(request,'D:/fixture_A2',{'frozen':True})
     assert result['day_start_seconds']==axis(day)['day_start_seconds']
     assert result['options']['variants']==('C1',)
     assert result['options']['known_window_policy']==KNOWN_POLICY
     assert result['options']['control_slots']==120 and result['options']['ac_mode']=='FAST'
-    assert result['options']['correction_proof']==str(proof)
-    with pytest.raises(worker.NotReady,match='CORRECTION_PROOF_REQUIRED'):
-        worker.actual.__wrapped__(dict(request,correction_proof=None),'D:/fixture_A2',{'frozen':True})
+    assert result['options']['correction_proof'] is None
+    assert result['SVR_banks']==12 and result['RegControl_count']==43
+    with pytest.raises(PermissionError,match='OLD_GRID_CORRECTION_PROOF_FORBIDDEN'):
+        worker.actual(dict(request,correction_proof=record(proof)),'D:/fixture_A2',{'frozen':True})
 
 
 def test_monitor_reads_dispatcher_layout_and_distinguishes_physical_fail(tmp_path):

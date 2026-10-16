@@ -13,7 +13,7 @@ from .common import ROOT,DOC,read,record,atomic,verify,digest,now,NotReady
 from .daily import day_inputs,load_aidc,export_a,ActualBinding,corrective_binding,clone
 from .execution import assert_current,native_stage
 from .config import axis
-from .svr11_grid import stage_scope
+from .planning import stage_scope
 
 
 @stage_scope
@@ -69,13 +69,16 @@ def a_stage(request,*,m1=None):
     atomic(root/'request.json',request)
     budget=None
     try:
-        budget=DateBudget(root/'NATIVE_RUNTIME_LEDGER.json',native_limit=5400.)
-        with native_stage(request):
-            if m1 is None:
-                with cache_scope(request):result=run(request,budget)
-            else:
-                from .a2 import scope
-                with scope(request,m1) as original:result=original(request,budget)
+        from .planning import golden
+        result=golden(request) if m1 is None else None
+        if result is None:
+            budget=DateBudget(root/'NATIVE_RUNTIME_LEDGER.json',native_limit=5400.)
+            with native_stage(request):
+                if m1 is None:
+                    with cache_scope(request):result=run(request,budget)
+                else:
+                    from .a2 import scope
+                    with scope(request,m1) as original:result=original(request,budget)
         result.update(day=request['day'],arm=request['arm'],stage=request['stage'],finished_UTC=now(),P2_calls=0,
             source_sha=request['source_sha'],Native_seconds=budget.used() if budget else 0.,
             independent_Global_LB_validated=bool(result.get('PASS')),FULL_feasible=bool(result.get('PASS')))
@@ -193,14 +196,13 @@ def driver(function,output):
     if text.count(old)!=1:raise ValueError('ORIGINAL_SHARED_LOCK_BOUNDARY_DRIFT')
     text=text.replace(old,'from v44.execution import shared_lease_scope as exclusive_lock')
     text=text.replace('from v43.golden import no_heavy_peer','from v44.execution import assert_current as no_heavy_peer')
-    text=text.replace('FRESH_ORIGINAL7_AC.json','FRESH_SVR11_TIME_AC.json')
-    text=text.replace('PR189_SNAPSHOT_STATIC_7REG_NO_ADDED_SVR','V44_EPOCH12_SVR11_AUTO_NATIVE_TIME')
+    text=text.replace('FRESH_ORIGINAL7_AC.json','FRESH_SVR12_TIME_AC.json')
+    text=text.replace('PR189_SNAPSHOT_STATIC_7REG_NO_ADDED_SVR','V44_SVR12_AUTO_NATIVE_TIME')
     path=Path(output);path.write_text(text,encoding='utf8')
     ns=dict(function.__globals__,heavy_peers=lambda:[]);exec(compile(text,str(path),'exec'),ns)
     return ns[function.__name__]
 
 
-@stage_scope
 def actual(request,aidc_folder,mess):
     """Actual and independent Fresh remain in the existing sequential driver."""
     assert_current()
@@ -213,17 +215,16 @@ def actual(request,aidc_folder,mess):
         function=driver(original.run,out.with_name(out.name+'.DRIVER.py'))
         function=clone(function,ArmBinding=lambda *a,**kw:binding,
             load_observations=lambda **kw:observations(bundle=bundle,**kw),
-            FullPrefixReferenceAC=lambda **kw:__import__('v44.svr11_ac',fromlist=['SVR11CurrentAC']).SVR11CurrentAC(arm=arm,**kw))
+            FullPrefixReferenceAC=lambda **kw:__import__('v44.svr12',fromlist=['SVR12CurrentAC']).SVR12CurrentAC(arm=arm,**kw))
         result=function(arm,out,reference_folder=aidc_folder,mess_result=request.get('MESS_result'))
     else:
         import v43_corrective.compare as original
         import v43_actual.compare as shared
         from .config import KNOWN_POLICY
-        # The verified C1 uses the existing case-specific affine/AC correction.
-        # Missing evidence must not silently reactivate its older affine gate.
-        proof=request.get('correction_proof')
-        if not proof:raise NotReady('EXACT_CASE_C1_AFFINE_AC_CORRECTION_PROOF_REQUIRED')
-        verify([proof]);proof_path=proof['path']
+        if request.get('correction_proof') is not None:
+            raise PermissionError('OLD_GRID_CORRECTION_PROOF_FORBIDDEN_FOR_SVR12')
+        # The V43 signed model remains a ranking proxy. The new grid has its
+        # own certified Current AC; old-grid affine evidence is not promoted.
         binding=corrective_binding(arm,aidc_folder,mess,day)
         shared_run=driver(shared.run,out.with_name(out.name+'.SHARED_DRIVER.py'))
         namespace=dict(shared.__dict__);namespace.update(run=shared_run,
@@ -231,14 +232,15 @@ def actual(request,aidc_folder,mess):
         # The existing corrective worker builds its private function namespace
         # from this module-like object and retains its independent Fresh path.
         proxy=SimpleNamespace(**namespace)
-        from .svr11_actual import corrective_driver
+        from .svr12_policy import corrective_driver
         function=corrective_driver(original.run,proxy,binding,axis(day)['day_start_seconds'])
-        cert=DOC/'svr11_revision01/CURRENT_AC_CERTIFICATION.json'
+        cert=DOC/'v43_planning_svr12_actual_v1/CURRENT_AC_CERTIFICATION.json'
+        from .execution import actual_slots
         result=function(arm,out,reference_folder=aidc_folder,mess_result=request.get('MESS_result'),
-            control_slots=120,ac_mode='FAST',ac_certification=str(cert),variants=('C1',),
-            correction_proof=proof_path,known_window_policy=KNOWN_POLICY)
+            control_slots=actual_slots(request),ac_mode='FAST',ac_certification=str(cert),variants=('C1',),
+            correction_proof=None,known_window_policy=KNOWN_POLICY)
     result.update(day=day,arm=arm,stage='ACTUAL_FRESH',Known_policy_status='EXECUTED_RESEARCH_ASSUMPTION' if arm in ('B1','B3') else 'NOT_APPLICABLE')
-    result.update(hardware_revision='V44_SVR11_REVISION01',SVR_banks=11,RegControl_count=40,
+    result.update(hardware_revision='V44_V43_PLANNING_SVR12_ACTUAL_V1',SVR_banks=12,RegControl_count=43,
         Planning_tap_queue_transfer=0,Native_TIME_controls=True)
     atomic(out/'RESULT.json',result)
     from .checkpoints import seal_stage

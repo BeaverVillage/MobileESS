@@ -28,6 +28,12 @@ def tree_sha(path):return digest(ast.dump(ast.parse(Path(path).read_text(encodin
 
 
 def manifest():
+    from .svr12 import REVISION,DIRECTORY,HARDWARE,certificate
+    h=read(HARDWARE/'HARDWARE.json');verify(list(h['sources'].values()))
+    certificate(DIRECTORY/'CURRENT_AC_CERTIFICATION.json')
+    physics=[record(HARDWARE/name) for name in ('HARDWARE.json','SCENARIO.json','THERMAL.json')]
+    physics += [record(DIRECTORY/name) for name in ('PLANNING_MATRIX_EQUIVALENCE.json',
+        'REFERENCE_C_RAW_REPLAY.json','CURRENT_AC_CERTIFICATION.json','ACTUAL_ENTRYPOINT_CERTIFICATION.json')]
     support_rows=support()
     rows=[];different=[];byte_drift=[]
     candidates={p for package in PACKAGES for p in (ROOT/package).rglob('*.py')}
@@ -57,14 +63,22 @@ def manifest():
             if old.exists():overlays.append(dict(V43=record(old),V44=record(p),
                 byte_identical=record(old)['sha256']==record(p)['sha256'],
                 scope='V43_RUNTIME_PERFORMANCE_PLUS_CHECKED_B3_STAGE_AND_DATED_NAMESPACE_ADAPTER'))
-    return dict(schema='V44_SCIENTIFIC_FREEZE_V1',V43_base_commit=V43_COMMIT,
+    return dict(schema='V44_SCIENTIFIC_FREEZE_V1',revision=REVISION,V43_base_commit=V43_COMMIT,
+        Planning_Physics=dict(grid='V43_ORIGINAL_IEEE123',RegControl=7,added_SVR=0,
+            coefficients='ORIGINAL_DATED_7REG_ONLY',taps_or_queue_transferred_to_Actual=False),
+        Actual_Physics=dict(grid='IEEE123_SVR12',RegControl=43,added_SVR=12,
+            source_SHA=h['source_SHA'],equipment_SHA=h['equipment_SHA'],hardware=physics[0],
+            Native_AUTO_TIME=True,all_28_cases_same_hardware=True,Planning_commands_frozen=True),
+        intentional_Planning_Actual_physical_grid_difference=True,physics_receipts=physics,
+        inactive_evidence=['SVR11_PLANNING_FORECAST_COEFFICIENTS','SVR11_PLANNING_PILOT_NO_FULL'],
         V43_runtime_overlay='B2_PERFORMANCE_AND_RESUME_REPAIRS_COMMITTED_IN_BASE;RUNTIME_BYTES_SEPARATELY_SHA_PINNED',
         unchanged_source_rows=rows,AST_drift=different,byte_drift=byte_drift,source_PASS=not different and not byte_drift,
         inherited_external_M_algorithms=external,adapters=adapters,
         runtime_overlay_sources=overlays,
         unchanged_support_inputs=support_rows,
         source_sha=digest(dict(unchanged=[(r['relative'],r['V44']['sha256']) for r in rows],
-            support=[r['V44'] for r in support_rows],external=[r['source'] for r in external],adapters=[(r['relative'],r['sha256']) for r in adapters])),
+            support=[r['V44'] for r in support_rows],external=[r['source'] for r in external],
+            adapters=[(r['relative'],r['sha256']) for r in adapters],physics=physics)),
         frozen_algorithms=['PR189_FAST_A1_PHASE_I_FULL_PRICING_INTEGER_RESTORATION_P1_ONLY',
             'ORIGINAL_FULL_DOMAIN_OBJECTIVE_AND_PHYSICAL_VALIDATORS','SEEDLESS_K16_K32_K48_INDEPENDENT_GLOBAL_LB',
             'ADAPTIVE_BEAM_FOUR_MESS_DIRECT_COMPACT_JOINT_MILP',
@@ -72,11 +86,13 @@ def manifest():
             'CERTIFIED_CURRENT_AC_AND_INDEPENDENT_FRESH96','IEEE123_12AIDC_4MESS_0.95_1.05'],
         allowed_changes=['dated_input_and_stage_arm_IO_metadata','M_joint_1800_to_900_K48_separate_300',
             'Main1_B2two_scheduler','same_V43_performance_reuse',
-            'USER_AUTHORIZED_EPOCH12_SVR11_11BANKS_40REGCONTROL_NATIVE_TIME_PHYSICS_REVISION',
+            'USER_AUTHORIZED_ORIGINAL_V43_PLANNING_AND_EXACT_REFERENCE_C_SVR12_ACTUAL',
             'EXPLICIT_INDEPENDENT_DAILY_INITIAL_STATE_MODEL_ASSUMPTIONS',
             'COMPLETED_STAGE_AND_RECONCILED_BINARY_M_CHECKPOINT_RESUME_NO_NATIVE_CLOCK_RESET',
             'USER_AUTHORIZED_MAY02_07_SIX_PARALLEL_FORECAST_WORKERS_MAY01_PRESERVED'],
-        new_model_matrix_validation='NOT_RUN_NO_MODEL_BUILT',new_Actual_or_Fresh='NOT_EXECUTED',
+        new_model_matrix_validation='MAY01_FULL_C3A_EXACT_V43_NATIVE0_PASS',
+        new_Actual_or_Fresh='REAL_SHORT_PREFIX_ENTRY_CHECK_ONLY_FULL_CAMPAIGN_NOT_CERTIFIED',
+        signed_sensitivity='UNCHANGED_7REG_RANKING_PROXY_WITH_LIVE_SVR12_CURRENT_AC_FINAL_GATE',
         Runtime_ML='V10::T3_ISOTONIC_ROLLING14_calibrated',CC4='Q50_Q90_UNCHANGED',
         Known_policy='B1_RESEARCH_RELAXED_KNOWN_WINDOW_V1',Unknown_policy='R1_FLEX30_C1_R1_ASSUMED',
         Source_authority_promoted=False,FORECAST_CAUSAL_AVAILABILITY='NOT_CERTIFIED',

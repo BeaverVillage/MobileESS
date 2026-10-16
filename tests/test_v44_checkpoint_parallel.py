@@ -11,7 +11,7 @@ from v44.config import DAYS
 
 @pytest.fixture
 def stage_request(tmp_path,monkeypatch):
-    import v44.svr11_hardware as hardware
+    import v44.svr12 as hardware
     h=tmp_path/'hardware';atomic(h/'HARDWARE.json',dict(fixture=True))
     monkeypatch.setattr(hardware,'HARDWARE',h)
     source=tmp_path/'source.py';source.write_text('immutable_fixture=True\n')
@@ -44,7 +44,7 @@ def test_duplicate_worker_creation_identity_and_hardware_drift(tmp_path,stage_re
     monkeypatch.setattr(cp,'alive',lambda who:True)
     with pytest.raises(cp.NotReady,match='STILL_LIVE'):cp.load_completed(root,stage_request)
     monkeypatch.setattr(cp,'alive',lambda who:False)
-    import v44.svr11_hardware as hardware
+    import v44.svr12 as hardware
     atomic(hardware.HARDWARE/'HARDWARE.json',dict(changed=True))
     with pytest.raises(ValueError,match='HARDWARE_DRIFT'):cp.load_completed(root,stage_request)
 

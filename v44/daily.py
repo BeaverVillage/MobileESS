@@ -22,12 +22,9 @@ def day_inputs(day):
     from .initial_states import READY_INPUT_STATES
     if row['status'] not in READY_INPUT_STATES:raise NotReady('INPUT_NOT_READY:'+day+':'+','.join(row['blockers']))
     verify(list(row['files'].values()))
-    if (DOC/'svr11_revision01/EPOCH12_SOURCE_PIN.json').exists():
-        from .svr11_grid import ready
-        from .svr11_forecast import INPUTS
-        proof=ready(day);row=deepcopy(row);row['native_folder']=str(INPUTS/day)
-        row['files'].update(native=proof['input'],windows=proof['windows'],electrical=proof['model'],SVR11_hardware=proof['hardware'])
-        row['hardware_revision']='V44_SVR11_REVISION01'
+    from .planning import check_native,REVISION
+    check_native(read(row['files']['native']['path']))
+    row=deepcopy(row);row['hardware_revision']=REVISION
     return row
 
 

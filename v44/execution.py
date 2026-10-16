@@ -7,6 +7,7 @@ from .common import verify,read,NotReady
 from .locks import alive,EXTERNAL_LOCKS
 
 _active=ContextVar('V44_CASE_LEASE',default=None)
+_validation=ContextVar('V44_NATIVE0_SHORT_VALIDATION',default=False)
 
 
 @contextmanager
@@ -20,6 +21,13 @@ def case_scope(request,lease,worker):
 def assert_current():
     c=_active.get()
     if c is None or c['worker']['pid']!=os.getpid() or not alive(c['lease']):raise NotReady('V44_LIVE_CASE_LEASE_REQUIRED')
+    if _validation.get():
+        import gurobipy as gp
+        r=c['request']
+        if (r.get('validation_control_slots')!=1 or r.get('arm')!='B1'
+                or gp.Model.optimize.__name__!='denied' or gp.Model.presolve.__name__!='denied'):
+            raise PermissionError('ONLY_NATIVE0_SHORT_B1_VALIDATION_ALLOWED')
+        verify(r['sources']);return c
     from .prepare import require_execution_permit
     from .common import DOC
     permit=c['request'].get('execution_permit')
@@ -30,6 +38,22 @@ def assert_current():
         validate_permit(permit['path'],c['request'])
     else:require_execution_permit(permit['path'],read(DOC/'PREEXECUTION_CERTIFICATION.json'))
     verify(c['request']['sources']);return c
+
+
+@contextmanager
+def short_validation(request,lease,worker):
+    """Explicit prestart check; optimizer methods must be Native0-denied."""
+    with case_scope(request,lease,worker):
+        token=_validation.set(True)
+        try:assert_current();yield
+        finally:_validation.reset(token)
+
+
+def actual_slots(request):
+    value=request.get('validation_control_slots')
+    if value is None:return 120
+    if not _validation.get() or value!=1:raise PermissionError('PRODUCTION_ACTUAL120_REQUIRED')
+    return value
 
 
 @contextmanager

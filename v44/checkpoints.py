@@ -27,7 +27,7 @@ def receipts(value):
 
 
 def envelope(request,kind,files,**data):
-    from .svr11_hardware import HARDWARE
+    from .svr12 import HARDWARE
     sources=request['sources'];verify(sources);verify(files)
     value=dict(schema='V44_RECONCILED_STAGE_CHECKPOINT_V1',kind=kind,UTC=now(),
         key=key(request),hardware=record(HARDWARE/'HARDWARE.json'),sources=sources,files=files,**data)
@@ -35,7 +35,7 @@ def envelope(request,kind,files,**data):
 
 
 def checked(path,request,kind):
-    from .svr11_hardware import HARDWARE
+    from .svr12 import HARDWARE
     value=read(path)
     if value.get('checkpoint_sha')!=digest({k:v for k,v in value.items() if k!='checkpoint_sha'}):
         raise ValueError('STAGE_CHECKPOINT_SHA_CORRUPT')

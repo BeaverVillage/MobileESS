@@ -16,6 +16,31 @@ def require_execution_permit(path,certification):
     return permit
 
 
+def prestart_evidence():
+    """Check required evidence once before dispatch, outside the campaign."""
+    from .svr12 import DIRECTORY,HARDWARE,certificate
+    receipts=[]
+    for name in ('PLANNING_MATRIX_EQUIVALENCE.json','REFERENCE_C_RAW_REPLAY.json',
+            'ACTUAL_ENTRYPOINT_CERTIFICATION.json'):
+        row=record(DIRECTORY/name);value=read(row['path'])
+        if value.get('PASS') is not True:raise NotReady('PRESTART_EVIDENCE_FAILED:'+name)
+        verify(value.get('sources',[]));receipts.append(row)
+    matrix=read(receipts[0]['path']);canary=read(receipts[2]['path'])
+    if (matrix['Native_calls']!=0 or matrix['RegControl_count']!=7 or matrix['added_SVR']!=0
+            or len(matrix['comparisons'])!=2 or not all(r['PASS'] for r in matrix['comparisons'])
+            or canary['Native_calls']!=0 or canary['control_slots']!=1
+            or canary['independent_Current_Fresh_prefix_slots']!=25):
+        raise NotReady('PRESTART_PLANNING_OR_SHORT_CANARY_SCOPE_DRIFT')
+    certificate(DIRECTORY/'CURRENT_AC_CERTIFICATION.json')
+    h=read(HARDWARE/'HARDWARE.json');verify([h['scenario'],h['thermal']]+list(h['sources'].values()))
+    if (h['SVR_count'],h['RegControl_count'])!=(12,43):raise NotReady('PRESTART_SVR12_INVENTORY_DRIFT')
+    verify([canary['pair'],canary['B1_canary']])
+    pair=read(canary['pair']['path'])
+    if not pair['PASS'] or not pair['midnight_continuity']['PASS'] or pair['Fresh_native_state_reused']:
+        raise NotReady('PRESTART_CURRENT_FRESH_STATE_ISOLATION_FAILED')
+    return receipts
+
+
 def run(*,tests=None):
     from .inputs import manifest as inputs
     from .scheduler import manifest as scheduler
@@ -27,11 +52,7 @@ def run(*,tests=None):
     atomic(DOC/'CAMPAIGN_SCHEDULER_MANIFEST.json',schedule)
     from .initial_states import READY_INPUT_STATES
     blockers=[dict(day=r['day'],reasons=r['blockers']) for r in data['days'] if r['status'] not in READY_INPUT_STATES]
-    # Static/mock tests are evidence for adapters; they are not a current-source
-    # real matrix/Actual/Fresh certification or a 7-day worker integration run.
-    runtime=read(DOC/'RUNTIME_ADAPTER_COVERAGE.json') if (DOC/'RUNTIME_ADAPTER_COVERAGE.json').exists() else {}
-    if runtime.get('all_stage_entrypoints_certified') is not True:
-        blockers.append(dict(scope='RUNTIME',reasons=['DATED_A1_ACTUAL_DRIVER_AND_RESUME_INTEGRATION_NOT_CERTIFIED']))
+    evidence=prestart_evidence()
     testdoc=read(tests) if tests else None
     if not testdoc or testdoc.get('failed')!=0 or testdoc.get('passed',0)==0:
         blockers.append(dict(scope='TESTS',reasons=['LIGHTWEIGHT_TEST_RECEIPT_MISSING_OR_FAILED']))
@@ -41,12 +62,16 @@ def run(*,tests=None):
         source_sha=source['source_sha'],source='PASS' if source['source_PASS'] else 'FAIL',
         inputs='PASS' if not any(r['status'] not in READY_INPUT_STATES for r in data['days']) else 'FAIL',
         date_axis='PASS',algorithm_source_identity='PASS' if source['source_PASS'] else 'FAIL',
-        new_model_matrix_validation='NOT_RUN',new_physical_case_contract='NOT_CERTIFIED',
+        revision=source['revision'],prestart_evidence=evidence,
+        new_model_matrix_validation='MAY01_V43_FULL_C3A_EXACT_PASS',
+        new_physical_case_contract='SVR12_EXACT_EQUIPMENT_AND_SHORT_CURRENT_FRESH_ENTRY_PASS',
         Native_budgets='PASS_FIXTURES' if testdoc and testdoc.get('failed')==0 else 'NOT_CERTIFIED',
         Worker2_concurrency='PASS_OS_LOCK_FIXTURES' if testdoc and testdoc.get('failed')==0 else 'NOT_CERTIFIED',
-        tests=testdoc,blockers=blockers,Native_optimize_calls=0,Actual_runs=0,Fresh_runs=0,
-        model_builds=0,Golden003_reoptimization_calls=0,existing_results_modified=False,
-        Known_policy_status='IMPLEMENTED_NOT_EXECUTED',Known_service_equivalence='NOT_CERTIFIED',
+        tests=testdoc,blockers=blockers,Native_optimize_calls=0,Actual96_runs=0,Fresh96_runs=0,
+        real_B1_entry_canary_slots=1,independent_Current_Fresh_prefix_slots=25,
+        model_builds=1,Golden003_reoptimization_calls=0,existing_results_modified=False,
+        Known_policy_status='SHORT_PREFIX_ONLY_FULL_ACTUAL_NOT_CERTIFIED',Known_service_equivalence='NOT_CERTIFIED',
+        full_28_case_runtime_PASS_claimed=False,
         FORECAST_CAUSAL_AVAILABILITY='NOT_CERTIFIED',execution_permit_created=False)
     atomic(DOC/'PREEXECUTION_CERTIFICATION.json',certification)
     (DOC/'MONITOR.html').write_text(render(data),encoding='utf8')

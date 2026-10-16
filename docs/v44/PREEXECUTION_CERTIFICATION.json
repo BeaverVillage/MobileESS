@@ -1,48 +1,82 @@
 {
   "schema": "V44_PREEXECUTION_CERTIFICATION_V1",
-  "UTC": "2026-10-16T11:17:36.879680+00:00",
-  "status": "V44_PRESTART_BLOCKED",
+  "UTC": "2026-10-16T12:49:09.843929+00:00",
+  "status": "V44_PRESTART_READY",
   "mode": "PREPARE_ONLY",
-  "source_sha": "db3def2c578a0f7cd29f8623fa7bfefee0e93892df621f9f818b70132cfd65b2",
+  "source_sha": "f0c56b0ec67f58c213025c6528c5006b2ad20d8bcca2045cf92994835a673f72",
   "source": "PASS",
   "inputs": "PASS",
   "date_axis": "PASS",
   "algorithm_source_identity": "PASS",
-  "new_model_matrix_validation": "NOT_RUN",
-  "new_physical_case_contract": "NOT_CERTIFIED",
+  "revision": "V44_V43_PLANNING_SVR12_ACTUAL_V1",
+  "prestart_evidence": [
+    {
+      "path": "D:\\v44_may01_07_prepare_20261016\\docs\\v44\\v43_planning_svr12_actual_v1\\PLANNING_MATRIX_EQUIVALENCE.json",
+      "bytes": 3331,
+      "sha256": "60782c6d25a4c624effb87c981417f845b089df7efd74a9889f27acc94c55c81"
+    },
+    {
+      "path": "D:\\v44_may01_07_prepare_20261016\\docs\\v44\\v43_planning_svr12_actual_v1\\REFERENCE_C_RAW_REPLAY.json",
+      "bytes": 669,
+      "sha256": "0340d54dbaa0659c6b08f3f4de15025166d99176913d6c4ac67fe7c50d623417"
+    },
+    {
+      "path": "D:\\v44_may01_07_prepare_20261016\\docs\\v44\\v43_planning_svr12_actual_v1\\ACTUAL_ENTRYPOINT_CERTIFICATION.json",
+      "bytes": 8494,
+      "sha256": "6ef3115bb3e41a8cb393112c8e5bfc305d02af64206e88c50f03b159b4d6e37b"
+    }
+  ],
+  "new_model_matrix_validation": "MAY01_V43_FULL_C3A_EXACT_PASS",
+  "new_physical_case_contract": "SVR12_EXACT_EQUIPMENT_AND_SHORT_CURRENT_FRESH_ENTRY_PASS",
   "Native_budgets": "PASS_FIXTURES",
   "Worker2_concurrency": "PASS_OS_LOCK_FIXTURES",
   "tests": {
-    "UTC": "2026-10-16T11:17:26.194279+00:00",
-    "passed": 175,
+    "UTC": "2026-10-16T12:47:54.496569+00:00",
+    "passed": 184,
     "failed": 0,
-    "receipt": {
-      "path": "D:\\v44_may01_07_prepare_20261016\\docs\\v44\\svr11_revision01\\FINAL_LIGHTWEIGHT_REGRESSION.xml",
-      "bytes": 24490,
-      "sha256": "2e1436ad392ce67ceeee28e8855ec83f042017526ba5560fbd5f1d5136065f01"
+    "xml": {
+      "path": "D:\\v44_may01_07_prepare_20261016\\docs\\v44\\v43_planning_svr12_actual_v1\\REGRESSION.xml",
+      "bytes": 25669,
+      "sha256": "b6b61aafefc0a708ca570b2580a120784fe57fb037e2ae6e2deb4a488ad8f651"
     },
-    "scope": "LIGHTWEIGHT_SOURCE_BINARY_MATRIX_INVERSE_K48_PACKET_OS_LOCK_PILOT_SCOPE_AND_LEGACY_REGRESSION",
-    "real_Gurobi_optimize_calls": 0,
-    "real_Actual96_runs": 0,
-    "real_Fresh96_runs": 0,
-    "real_full_optimization_model_builds": 0
+    "Native_optimize_calls": 0,
+    "tests": [
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\tests\\test_v44_checkpoint_parallel.py",
+        "bytes": 16539,
+        "sha256": "8b8409ddff6a3977857639d27d75eceb921f952ce4e0b4a1e4eac08a70b35b06"
+      },
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\tests\\test_v44_final_revision.py",
+        "bytes": 5571,
+        "sha256": "2e58a15f8ed20ba47aca6cebd71c86363be76f6b50671414cf78415b6895150a"
+      },
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\tests\\test_v44_ports.py",
+        "bytes": 11165,
+        "sha256": "57a08ced609f016f2e56163965f4cc768822812210f64c9d10dfebdcc79362d3"
+      },
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\tests\\test_v44_preparation.py",
+        "bytes": 12771,
+        "sha256": "d8718966db6b5acf32a53ea9f4cd5a6d654e583289c2d7e2810d2f47c7eda0f5"
+      }
+    ],
+    "scope": "LIGHTWEIGHT_28_ROUTE_B3_NATIVE_BUDGET_BINARY_OS_LOCK_POLICY_AND_COMPACT_CACHE_REGRESSION",
+    "full_28_case_runtime_integration": false
   },
-  "blockers": [
-    {
-      "scope": "RUNTIME",
-      "reasons": [
-        "DATED_A1_ACTUAL_DRIVER_AND_RESUME_INTEGRATION_NOT_CERTIFIED"
-      ]
-    }
-  ],
+  "blockers": [],
   "Native_optimize_calls": 0,
-  "Actual_runs": 0,
-  "Fresh_runs": 0,
-  "model_builds": 0,
+  "Actual96_runs": 0,
+  "Fresh96_runs": 0,
+  "real_B1_entry_canary_slots": 1,
+  "independent_Current_Fresh_prefix_slots": 25,
+  "model_builds": 1,
   "Golden003_reoptimization_calls": 0,
   "existing_results_modified": false,
-  "Known_policy_status": "IMPLEMENTED_NOT_EXECUTED",
+  "Known_policy_status": "SHORT_PREFIX_ONLY_FULL_ACTUAL_NOT_CERTIFIED",
   "Known_service_equivalence": "NOT_CERTIFIED",
+  "full_28_case_runtime_PASS_claimed": false,
   "FORECAST_CAUSAL_AVAILABILITY": "NOT_CERTIFIED",
   "execution_permit_created": false
 }
