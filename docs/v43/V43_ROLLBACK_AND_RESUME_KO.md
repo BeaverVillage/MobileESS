@@ -9,3 +9,5 @@ Golden001 중지/Native0 원장은 보존했다. Golden002가 현재 공식 실�
 GFS00Z 복구와 C1/B0/전기계수 재생성은 사용자 지시로 공식 중단됐다. 해당 파일·코드·오류·원장은 역사적 자료다. NEXT_ELECTRICAL_REPAIR_RECIPE.md는 폐기된 작업 방향의 기록이며 실행 지시가 아니다. 새 GFS 다운로드나 전기계수 재생성을 하지 않는다.
 
 기존 자동 감독 v43-pr189는 10분마다 Golden과 실제 오류 복구를 확인한다. 상태 변화가 없으면 알림을 생략한다. 수치 재현 성공 후 Unknown C0/C1, 최신 K48/Beam/4-MESS Joint, May01 네 비교군 및 전체 5월 캠페인을 계속한다. 검증된 동일 Source/Case 증거는 SHA로 재사용하고 중복 빌드·테스트를 최소화한다. Main merge는 금지한다.
+
+최신 USER_STEERING_GOLDEN002_CONTINUE_AND_CACHE.txt에 따라 현재 Golden002는 정상 완료까지 중단·재시작하거나 실행 소스를 변경하지 않는다. CPU/Heartbeat/Build 단계 진전을 확인하고 Native0만으로 정체라고 판단하지 않는다. Golden002 PASS이면 Golden003을 실행하지 않는다. 검증된 신규 Source/Case 결과를 봉인해 즉시 Unknown Actual 통합으로 진행한다. FOLLOWUP_CACHE_REUSE_CONTRACT.json의 경로 독립 캐시 개선은 Golden002 종료 후 후속 경로에만 적용한다.
