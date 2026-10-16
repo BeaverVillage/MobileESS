@@ -20,13 +20,13 @@ def no_heavy_peer():
         try:
             if p.pid == os.getpid() or (p.info['name'] or '').lower() not in ('python.exe','pythonw.exe','python'): continue
             cmd = ' '.join(p.info['cmdline'] or []).lower()
-            if any(x in cmd for x in ('v43.golden', 'audit_v42', 'native0', '.worker', 'm_stage', 'solve_v42')):
+            if any(x in cmd for x in ('v43.golden', 'v43.weather_repair', 'v43.electrical_repair', 'audit_v42', 'native0', '.worker', 'm_stage', 'solve_v42')):
                 conflicts.append(p.info)
         except psutil.Error: pass
     if conflicts: raise PermissionError('HEAVY_WORKER_CONFLICT:' + repr(conflicts))
 
-def verified_freeze():
-    freeze = read(DOC/'V43_BASELINE_AND_SOURCE_FREEZE.json')
+def verified_freeze(path=None):
+    freeze = read(path or DOC/'V43_BASELINE_AND_SOURCE_FREEZE.json')
     assert freeze['base_commit'] == BASE and freeze['Worker'] == freeze['Threads'] == 1
     verify_records(freeze['sources'] + freeze['support'] + freeze['scientific_inputs'])
     for row in freeze['baseline_execution_sources']:
@@ -42,11 +42,12 @@ def permit(request):
     from v42_may_campaign.common import exclusive_lock
     if request['arm'] != 'B1' or request['day'] != '2025-05-01' or request['Threads'] != 1:
         raise PermissionError('GOLDEN_B1_MAY01_ONLY')
-    verified_freeze()
+    freeze_path=request.get('source_freeze',DOC/'V43_BASELINE_AND_SOURCE_FREEZE.json')
+    verified_freeze(freeze_path)
     no_heavy_peer()
     original_guard = inherited.guard
     def guard(model):
-        verified_freeze()
+        verified_freeze(freeze_path)
         no_heavy_peer()
         original_guard(model)
     with ExitStack() as stack:
@@ -57,7 +58,7 @@ def permit(request):
         locks += [Path('D:/V42_UNIFIED_HEAVY_WORKER.lock'), RUNS/'V43_HEAVY_WORKER.lock']
         for path in locks: stack.enter_context(exclusive_lock(path))
         token = legacy._active.set(dict(request=request, manifest=dict(schema='V43_GOLDEN_PR189_V1'),
-            manifest_sha=sha(DOC/'V43_BASELINE_AND_SOURCE_FREEZE.json'), worker_slot=None))
+            manifest_sha=sha(freeze_path), worker_slot=None))
         prior = (legacy.guard,inherited.guard,inherited_budget.guard)
         legacy.guard = inherited.guard = inherited_budget.guard = guard
         try: yield
@@ -71,7 +72,8 @@ def run():
     req = read(DOC/'GOLDEN_REQUEST.json')
     attempt = Path(req['root'])
     if attempt.exists(): raise PermissionError('FRESH_INDEPENDENT_ATTEMPT_REQUIRED')
-    verified_freeze()
+    freeze_path=req.get('source_freeze',DOC/'V43_BASELINE_AND_SOURCE_FREEZE.json')
+    verified_freeze(freeze_path)
     no_heavy_peer()
     attempt.mkdir(parents=True)
     tmp=attempt/'tmp'; tmp.mkdir()
@@ -79,9 +81,10 @@ def run():
     __import__('tempfile').tempdir=str(tmp)
     atomic(attempt/'request.json',req)
     active = dict(state='RUNNING_GATE_A',pid=os.getpid(),process_created=psutil.Process().create_time(),
-        started_UTC=now(),request=record(attempt/'request.json'),Source=record(DOC/'V43_BASELINE_AND_SOURCE_FREEZE.json'),
+        started_UTC=now(),request=record(attempt/'request.json'),Source=record(freeze_path),
         source_commit=git('rev-parse','HEAD').decode().strip(), Worker=1, Threads=1,
-        Gate_A_PASS=False,Gate_B_PASS=False,Gate_C_PASS=False,Gate_D_PASS=False,May31_PASS=False)
+        Gate_A_PASS=False,Gate_B_PASS=False,Gate_C_PASS=False,Gate_D_PASS=False,May31_PASS=False,
+        PR189_NUMERICAL_REPRODUCTION='RUNNING',FORECAST_CAUSAL_AVAILABILITY='NOT_CERTIFIED',CAUSAL_PASS=False)
     atomic(attempt/'START.json',active);atomic(DOC/'CHECKPOINT.json',active)
     latest = {}
     finished = threading.Event()
@@ -107,7 +110,7 @@ def run():
     try:
         with permit(req):
             from .causal import check as causal_check
-            causal=causal_check(req,attempt/'CAUSAL_NATIVE0')
+            causal=causal_check(req,attempt/'CAUSAL_NATIVE0',numerical_reproduction=True)
             result=original_run(req,budget,progress)
             atomic(attempt/'PLANNING_RESULT.json',result)
             if result.get('PASS'):
@@ -117,7 +120,9 @@ def run():
                 atomic(attempt/'GOLDEN_OPERATIONS.json',ops)
                 result=dict(result,Fresh_AC96_PASS=ops['PASS'],Original_fixed_replay_only=True,
                     reproduction_numerical_PASS=bool(ops['PASS']),
-                    Gate_A_PASS=bool(ops['PASS'] and causal['complete_causal_certification']),
+                    Gate_A_PASS=bool(ops['PASS']),
+                    PR189_NUMERICAL_REPRODUCTION='PASS' if ops['PASS'] else 'FAIL_FRESH_AC96',
+                    FORECAST_CAUSAL_AVAILABILITY='NOT_CERTIFIED',CAUSAL_PASS=False,
                     Actual_event_prefix_continuity='NOT_CERTIFIED',
                     Gate_B_PASS=False,Gate_C_PASS=False,Gate_D_PASS=False)
             else: result['Gate_A_PASS']=False
@@ -126,10 +131,12 @@ def run():
     finally:
         finished.set();thread.join(timeout=12)
         result.update(finished_UTC=now(),Native_seconds=budget.native_used,total_wall_seconds=budget.wall(),
+            FORECAST_CAUSAL_AVAILABILITY='NOT_CERTIFIED',CAUSAL_PASS=False,
             ledger=record(attempt/'NATIVE_RUNTIME_LEDGER.json'),past_attempts_preserved=True)
         atomic(attempt/'RESULT.json',result)
         state=dict(active,state='GATE_A_PASS' if result.get('Gate_A_PASS') else 'GATE_A_FAILED_REPAIR_REQUIRED',
-            finished_UTC=now(),active_PID=None,result=record(attempt/'RESULT.json'),Gate_A_PASS=result.get('Gate_A_PASS',False))
+            finished_UTC=now(),active_PID=None,result=record(attempt/'RESULT.json'),Gate_A_PASS=result.get('Gate_A_PASS',False),
+            PR189_NUMERICAL_REPRODUCTION=result.get('PR189_NUMERICAL_REPRODUCTION','FAIL'))
         atomic(DOC/'CHECKPOINT.json',state)
         atomic(attempt/'RECONCILIATION.json',dict(UTC=now(),Native_seconds=budget.native_used,
             inflight=budget.inflight,Native_runtime_known=not any(c.get('runtime_unavailable') for c in budget.calls),

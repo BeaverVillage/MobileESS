@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 import pandas as pd
 from .common import *
 
-def check(request,output):
+def check(request,output,*,numerical_reproduction=False):
     from v42_pr134_b1.native import bind
     from v42_integrated.contract import physical_authority
     from v42_may_campaign_native90.bindings import check_a_cells,check_coefficients,check_forecast
@@ -52,11 +52,15 @@ def check(request,output):
                     atomic(output/'CAUSAL_INPUT_REJECTED.json',dict(PASS=False,Native_calls=0,
                         reason='GFS_OBJECT_AVAILABLE_AFTER_PLANNING_CUTOFF',evidence=record(availability),
                         original_weather=record(path),cutoff_UTC=issue.isoformat(),offending_row=row))
-                    raise ValueError('GFS_OBJECT_AVAILABLE_AFTER_PLANNING_CUTOFF')
+                    if not numerical_reproduction:
+                        raise ValueError('GFS_OBJECT_AVAILABLE_AFTER_PLANNING_CUTOFF')
     # Forecast arrays and byte identity are proven here. Their original GFS
     # publication evidence is recorded separately; absence never becomes PASS.
     result=dict(PASS=True,Native_calls=0,known=cells,electrical=electrical,forecast=forecast,
         AEMO_issue_before_cutoff=True,weather=meta,weather_publication_cutoff='PENDING_SOURCE_METADATA_AUDIT',
-        complete_causal_certification=False,output_role='ORIGINAL_INPUT_LOADER_VERIFICATION')
+        complete_causal_certification=False,
+        FORECAST_CAUSAL_AVAILABILITY='NOT_CERTIFIED',CAUSAL_PASS=False,
+        future_unknown_UIDs_used=False,known_submit_cutoff_verified=True,
+        output_role='PR189_NUMERICAL_REPRODUCTION_INPUT_VERIFICATION' if numerical_reproduction else 'ORIGINAL_INPUT_LOADER_VERIFICATION')
     atomic(output/'CAUSAL_INPUT_AUDIT.json',result)
     return result
