@@ -28,3 +28,31 @@ def test_current_ac_rejects_changed_frozen_mess_before_mapping():
     oracle.mess_plan['P_kW']['MESS01'][0]=1.
     with pytest.raises(ValueError,match='FROZEN_MESS_PLAN_MUTATED'):
         oracle._apply_frozen_mess(None,dict(start_seconds=0))
+
+
+@pytest.mark.parametrize('arm',('B0','B1','B2','B3'))
+def test_every_arm_dispatches_unknown_through_same_policy_and_serial_guards(arm):
+    from v43_arms.controller import UniformArmController
+    from v43_actual.vendor.qos import TrainingStatistics,QoSWindowProvider
+    from v43_actual.vendor.policy import digest
+    from v43_actual.vendor.actual import JobRequest
+    calls=[]
+    class Oracle:
+        issue=0.;now=None
+        def observe(self,now,history):self.now=now
+    class Policy:
+        oracle=Oracle();sha=digest('NAMED_UNIFORM_ARM_POLICY');metadata={}
+        def observe(self,now,use,metadata):self.current=(now,dict(use));self.metadata=metadata
+        def current_guard(self,m,segments,now,use):return None
+        def select(self,m,receipt,now,reservations):
+            calls.append((m['uid'],self.current[1]['A']))
+            return dict(uid=m['uid'],action='START',site='A',start_seconds=now,
+                nominal_end_seconds=now+900.,additional_start_delay_seconds=0.)
+    stats=TrainingStatistics(0.,digest('NAMED_TRAIN_SOURCE'),(),(),0,{},False,'NAMED_FIXTURE_ONLY')
+    qos=QoSWindowProvider(stats,case_sha=digest('CASE'),provider_sha=digest('PROVIDER'))
+    c=UniformArmController({'A':2},arm=arm,qos_window_provider=qos,frozen_policy=Policy())
+    for uid in ('U1','U2'):
+        c.submit(JobRequest(uid,0.,1,('A',),900.,None,
+            dict(origin_unknown=True,representation_starts_seconds=(0.,900.))),0.)
+    assert c.arm==arm and c.admit(0.)==['U1','U2']
+    assert calls==[('U1',0),('U2',1)]

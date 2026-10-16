@@ -8,6 +8,7 @@ from v43.common import ROOT,read,record,verify_records,atomic,git,now
 from v43_actual import compare as original
 from .actual import ArmBinding
 from .current_ac import ArmCurrentAC
+from .controller import UniformArmController
 
 
 def run(arm,reference_folder,output,mess_result=None):
@@ -33,6 +34,7 @@ def run(arm,reference_folder,output,mess_result=None):
     # Reuse the exact comparison body and all event/controller/lock/Native0
     # algorithms. Only the explicit frozen-arm inputs and AC mapper differ.
     namespace=dict(original.__dict__,prepare=binding.prepare,build=binding.build,
+        V43EventController=UniformArmController,
         OriginalCurrentAC=partial(ArmCurrentAC,mess_plan=mess,
             day_start_seconds=__import__('datetime').datetime.fromisoformat('2025-05-01T00:00:00+10:00').timestamp()))
     function=FunctionType(original.run.__code__,namespace,original.run.__name__,original.run.__defaults__,original.run.__closure__)

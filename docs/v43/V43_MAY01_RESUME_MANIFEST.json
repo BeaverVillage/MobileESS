@@ -1,5 +1,5 @@
 {
-  "UTC": "2026-10-16T04:41:48.055437+00:00",
+  "UTC": "2026-10-16T04:49:52.968278+00:00",
   "scope_authority": {
     "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\USER_STEERING_MAY01_FOUR_ARM_ONLY.txt",
     "bytes": 15576,
@@ -19,21 +19,24 @@
   },
   "Golden003_reexecution_allowed": false,
   "Phase_A": {
-    "state": "RUNNING",
-    "attempt": "D:\\MobileESS_V43\\runtime\\gate_b_c0_c1_actual96_attempt001",
-    "source_freeze": {
-      "path": "D:\\MobileESS_V43\\runtime\\gate_b_c0_c1_actual96_attempt001\\START.json",
-      "bytes": 6977,
-      "sha256": "2c060ffcb70280899934c4c35d41a79dc109ba6ababe7e216509ca840d718334"
+    "state": "CONDITIONAL_EXECUTION_AND_FRESH_PASS_RECONCILED",
+    "attempt": "D:/MobileESS_V43/runtime/gate_b_c0_c1_actual96_attempt001",
+    "certificate": {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GATE_B_ACTUAL96_INDEPENDENT_CERTIFICATION.json",
+      "bytes": 494,
+      "sha256": "d8a7243ff284b5601c2344f5925826fa9501e65bf8b575575bb264fd5656d59f"
     },
-    "pid": 31260,
-    "creation": 1792123867.2474737,
-    "C0": "Actual96_Fresh96_PASS",
-    "C1": "RUNNING",
-    "last_observed_control_tick": 90
+    "reconciliation": {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GATE_B_FINAL_RECONCILED.json",
+      "bytes": 984,
+      "sha256": "789fa9b6dd0431942b7ff6fd0200c614e4bfd78a2859b17b66d8160cf1c2297e"
+    },
+    "Unknown_started": 0,
+    "Unknown_carryout": 849,
+    "Source_presite": 0
   },
   "Phase_B_B0": {
-    "state": "REFERENCE_AND_COHORT_NATIVE0_PASS_ACTUAL_NOT_RUN",
+    "state": "ATTEMPT001_OFFICIALLY_STOPPED_AFTER_REAL_ARM_DISPATCH_BUG; ATTEMPT002_READY",
     "reference": "D:/MobileESS_V43/inputs/V43_MAY01_B0_REFERENCE_003/AIDC_REFERENCE.json",
     "audit": {
       "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_REFERENCE_AUDIT.json",
@@ -44,6 +47,17 @@
       "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_REFERENCE_NATIVE0_CERTIFICATION.json",
       "bytes": 11778,
       "sha256": "67bea8ac58913b72b66bd5ff943895635dfaf319124be6807f3516029f2da5ff"
+    },
+    "failure": {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_ACTUAL001_STOP_RECONCILED.json",
+      "bytes": 930,
+      "sha256": "7fd2c43cf2165654f49fe475d58debe6e4d6a80e5457d2998549b407ca8e44bd"
+    },
+    "fix": "UniformArmController forces shared Known-command/Unknown policy dispatch; no new Source rights",
+    "tests": {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_UNIFORM_FOUR_ARM_ACTUAL_NATIVE0_GUARDS.xml",
+      "bytes": 3523,
+      "sha256": "f28b5742d4481bb722ac6e6b723be972a387f3e7f7382d29e593bb5aac2ea9de"
     }
   },
   "Phase_C_B2": {
