@@ -44,3 +44,36 @@ Attempt004의 cold Barrier는 S0 basis를 사용하지 않았고 S1에서 numeri
 - 기존 4,800 tail projection은 완료된 과거 개선으로 유지하며 새 개선으로 중복 계상하지 않음.
 
 근거: `PR189_B1_MAY01_COMPARISON.json`, PR189 runtime `STATIC/INITIAL_STATE.pkl.gz`, 현재 `B1_NATIVE0_07/B1/A1/DW/CLASS_COMPRESSION_BUILD_PROFILE.json`, `B1_NATIVE0_07/ACTUAL_S1_BASIS_NATIVE0/RESULT.json`, Attempt004 S1 Native 원본 로그.
+
+## 229 Class local support 전수 조사 추가 결과
+
+`B1_LOCAL_BLOCK_SUPPORT_CENSUS.json`은 A07의 SHA-bound 전체 229개 실제 local block을 읽어 총 261,414행과 174,685개 block-local 열을 전수 검사했다. Original descriptor의 변수 Family 식별자를 사용했으며, 아래 공학적 그룹명은 변수 support에 따른 분류다. 혼합 행은 WAN link → WAN dynamics → migration → local state → start/service 순서로 한 번만 분류했다. 원본 native 행 이름에 의한 유일한 의미 분류나 Presolve lineage를 주장하지 않는다.
+
+| Local support 그룹 | PR189 초기 Hybrid 행 | 현재 229 Class 행 | 현재 NNZ |
+|---|---:|---:|---:|
+| WAN link bytes/linking | 0 | 85,495 | 215,824 |
+| WAN transfer dynamics/linking | 0 | 116,533 | 348,154 |
+| Checkpoint/migration selection | 0 | 39,978 | 262,987 |
+| Local service state | 4,505 | 19,312 | 100,363 |
+| Job start/finish/service | 28 | 96 | 3,585 |
+| Empty/unannotated local | 56 | 0 | 0 |
+
+현재 local hard 행의 202,028개(약 77.3%)가 WAN 관련 변수 support를 포함하는 그룹에 속한다. PR189 초기 Hybrid의 local support에는 이 그룹이 없었다. 이것은 초기 Hybrid 표현의 차이를 보여주며, PR189가 전체 물리 migration domain을 삭제했다는 뜻은 아니다. 당시의 complete-domain pricing/activation과 현재의 complete-kernel 상시 포함을 구분해야 한다.
+
+현재 초기 229-Class 경로는 `table_v_compression_adapter.prepare`에서 block diagonal local 행렬을 직접 포함한다. `phase.run`은 local 행을 상시 포함한다. 기존 `assembly.build`는 같은 Hybrid 결합 방식을 제공하지만, 현재 full-class 경로는 `complete_kernel_rebuilder`로 rebuild를 대체하므로 두 경로를 혼동하면 안 된다. 이 경로가 실제 성능에 미치는 인과 효과는 동일 Case의 동치 축소 파일럿으로 검증해야 한다.
+
+ATTEMPT005와 생산 코드는 변경하지 않는다. 실행 정산 후 exact fixed-variable/affine elimination 및 exact redundancy부터 검증한다. Local polytope DW는 필요 시 별도 파일럿으로 검증하며, 유한 column pool을 full-domain pricing 또는 Global LB 증거로 승격하지 않는다.
+
+## Local Hard 1차 정확 축소 검증
+
+`LOCAL_REDUCTION_NATIVE0_01/RESULT.json`: 실제 229 Class, 1,555 UID를 대표하는 전체 continuous local polytope의 영 변수 함의·정확한 x=y 별칭·정확한 비례 중복 행을 독립 Fraction 검증기로 재검증했다. 모든 기존 local 행, bounds, P1 목적, global coupling 및 UID primitive expression을 검사했고 Gurobi에서 축소 행렬·변수형·목적을 다시 읽었다. Optimize와 Presolve는 차단했다.
+
+| 항목 | Before | After |
+|---|---:|---:|
+| Local Hard rows | 261,414 | 210,067 |
+| Local columns | 174,685 | 134,630 |
+| Local NNZ | 930,913 | 789,632 |
+
+Binary64에서 정확하게 표현할 수 없는 합은 반올림하지 않고 거부하도록 구현했다. 실제 229개 블록은 모두 정확한 readback을 통과했다. 회귀 1,305개 PASS이며 기존 682개 기준 및 과거 원장 byte가 보존됐다.
+
+**현재 범위는 완전한 local polytope들의 동치 축소다. 전체 Hybrid Master 연결, global row/column mapping, pricing 인증 경로, 실제 Native 성능은 아직 미검증이다. 생산 채택이나 B1 PASS를 뜻하지 않는다.**

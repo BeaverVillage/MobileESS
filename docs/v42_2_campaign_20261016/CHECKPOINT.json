@@ -4,12 +4,12 @@
   "freeze_tag": "v42.1-freeze-20261016",
   "branch": "codex/v42.2-may01-b1b2b3-20261016",
   "PR": "https://github.com/BeaverVillage/MobileESS/pull/231",
-  "current_commit": "20e8d59909f1fecbf8e122b748f4faa04b59bf90",
-  "active_stage": "NATIVE0_AND_REGRESSION_PASS_PREPARE_ORIGINAL_PRIMAL_B1_ATTEMPT005",
+  "current_commit": "6f8c851e83a7a9e5a7101c69cc434f2e65855b45",
+  "active_stage": "LOCAL_REDUCTION_NATIVE0_PASS_GLOBAL_MASTER_INTEGRATION_REQUIRED",
   "Native_optimize_calls": 3,
   "active_PID": null,
-  "active_log": "D:/v42_2_b1_native0_07.log",
-  "active_output": "docs/v42_2_campaign_20261016/B1_NATIVE0_07",
+  "active_log": "D:/v42_2_b1_attempt005.log",
+  "active_output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT005",
   "regression01": {
     "status": "PASS",
     "tests": 1246,
@@ -28,10 +28,9 @@
   "B2_ACTUAL_FRESH_PASS": false,
   "B3_ACTUAL_FRESH_PASS": false,
   "next_steps": [
-    "Commit/push the actually verified original-primal policy candidate and all failed Attempt004 evidence; seal GATE05 on the resulting release.",
-    "Run fresh whole B1 ATTEMPT005 under unchanged Stage and Phase I caps; do not reopen exhausted Attempt004. Measure actual basis acceptance, exact Phi, KKT and omitted-row checks.",
-    "Independently quantify row/column-family structure and presolve/factor evidence. If direct primal policy fails or remains slow, compare presolve warm start and exact reformulation with proof before further fresh attempts.",
-    "Complete all four required reports and real B1 FULL/Actual96/Fresh96, then B2 and B3. Tests and Native0 alone are not optimization success."
+    "Implement and independently verify local zero implications, exact variable aliases and proportional row redundancy; keep original integer FULL unchanged.",
+    "Run separate all-229-block Native0 with exact forward/inverse, coupling, objective and original-row verification. Integrate only after proof; actual performance pilot must use a new attempt.",
+    "Complete full engineering family/presolve investigation, all required reports, then original May01 B1 FULL/Actual96/Fresh96 and B2/B3."
   ],
   "constraints": {
     "Worker": 1,
@@ -117,7 +116,7 @@
     "tests": 1259,
     "Native_calls": 0
   },
-  "validation_gate": "docs\\v42_2_campaign_20261016\\VALIDATION_GATE_04.json",
+  "validation_gate": "docs/v42_2_campaign_20261016/VALIDATION_GATE_05.json",
   "M_NATIVE0_03": {
     "status": "PASS",
     "Native_calls": 0,
@@ -185,7 +184,7 @@
       "LPWarmStart": 0
     }
   },
-  "current_attempt": 4,
+  "current_attempt": 5,
   "B1_ATTEMPT003": {
     "status": "HOST_RESTART_INTERRUPTED_NOT_CERTIFIED",
     "known_Native_seconds": 143.757000207901,
@@ -352,5 +351,58 @@
     "B1_EXACT_LP_REFORMULATION_CERTIFICATE.json",
     "B1_MAY01_FINAL_PERFORMANCE_KO.md"
   ],
-  "latest_user_contract": "docs/v42_2_campaign_20261016/USER_REQUEST_PHASE_I_ROOT_CAUSE_20261016.txt"
+  "latest_user_contract": "docs/v42_2_campaign_20261016/USER_REQUEST_PHASE_I_ROOT_CAUSE_20261016.txt",
+  "B1_ATTEMPT005": {
+    "PID": 28596,
+    "release_commit": "6f8c851e83a7a9e5a7101c69cc434f2e65855b45",
+    "parameters": {
+      "Method": 0,
+      "LPWarmStart": 1,
+      "Presolve": 0
+    },
+    "phase_I_success": false,
+    "FULL_PASS": false,
+    "Actual_Fresh_PASS": false,
+    "Native0_and_regression": "A07_M04_REG12_GATE05",
+    "status": "USER_STOPPED_RECONCILED",
+    "Native_Runtime": 87.13599991798401,
+    "S0_Native": 76.53399991989136,
+    "S0_exact_Phi": 0,
+    "S1_Native": 10.601999998092651,
+    "S1_status": 11,
+    "actual_basis_accepted": true,
+    "actual_S1_initial_primal_infeasibility": 0,
+    "performance_improvement_proven": false
+  },
+  "additional_local_hard_instruction": "Preserve ATTEMPT005/source unchanged; after terminal reconcile, implement low-cost exact reductions under separate Native0, then same-case performance pilot. If needed exact local-polytope DW pilot; finite pool alone cannot certify full pricing or Global LB.",
+  "local_block_support_census": {
+    "path": "docs/v42_2_campaign_20261016/B1_LOCAL_BLOCK_SUPPORT_CENSUS.json",
+    "status": "PASS_EXACT_SUPPORT_CENSUS_NOT_FULL_ENGINEERING_FAMILY_CENSUS",
+    "classes": 229,
+    "rows": 261414,
+    "columns": 174685,
+    "WAN_related_rows": 202028,
+    "full_engineering_family_census": false,
+    "causal_fill_in_proof": false
+  },
+  "LOCAL_REDUCTION_NATIVE0_01": {
+    "status": "PASS_ALL_229_LOCAL_POLYTOPES_NOT_GLOBAL_INTEGRATION",
+    "totals": {
+      "before_rows": 261414,
+      "before_columns": 174685,
+      "before_NNZ": 930913,
+      "after_rows": 210067,
+      "after_columns": 134630,
+      "after_NNZ": 789632
+    },
+    "Native_calls": 0,
+    "global_integration": false,
+    "actual_performance": false
+  },
+  "regression13": {
+    "status": "PASS",
+    "tests": 1305,
+    "baseline_IDs": 682,
+    "Native_calls": 0
+  }
 }

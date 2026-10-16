@@ -1,0 +1,8 @@
+V42.2 추가 지시 — Local Hard 제약 폭증의 근본 해결
+새로 확인된 256,825개의 Local Hard 행 증가를 단순 통계로 보고하고 종료하지 마라.
+`v42_a_stage_compact_rowgen/assembly.py`에서 Local Block을 직접 결합하고, `v42_a_stage_canary/phase.py`에서 전체 Local 행을 상시 포함하는 구조가 실제 S1 병목에 기여하는지 조사하라.
+전체 229 Class의 변수·행 Family를 전수 분석하여 정확한 변수 소거, 중복 제약 제거 및 Dantzig–Wolfe Master/Pricing 분리 가능성을 검토하라.
+우선 원본 LP 투영이 정확하게 보존되는 저비용 축소부터 구현하고, 추가 개선이 필요하면 정확한 Local Polytope 기반 DW 재정식화를 별도 파일럿으로 검증하라. 유한한 Column Pool만으로 Full-domain Pricing이나 Global LB를 인증하지 마라.
+반드시 기존 D0/E1/FLEX30, 1,555 UID, 229 Class, QoS, GPU, Checkpoint/Migration, PCC, Original Integer FULL 및 물리 제약을 유지하라.
+현재 실행 중인 B1 ATTEMPT005와 Source는 변경하지 않는다. 해당 실험을 정산한 뒤 별도 Native0에서 구조 개선의 수학적 동치성을 증명하고, 동일 Case의 성능을 실측하여 유효한 개선만 새로운 Attempt에 적용하라.
+목표는 Solver 설정을 우회해 PASS시키는 것이 아니라, 261,414개 Local Hard 행을 포함하는 현재 Hybrid LP의 불필요한 수학적 복잡도를 정확하게 줄이는 것이다.

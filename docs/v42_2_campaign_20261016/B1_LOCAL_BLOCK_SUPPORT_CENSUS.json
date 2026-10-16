@@ -1,0 +1,1375 @@
+{
+  "schema": "V42_2_PR189_LOCAL_BLOCK_SUPPORT_CENSUS_V1",
+  "status": "PASS_EXACT_SUPPORT_CENSUS_NOT_FULL_ENGINEERING_FAMILY_CENSUS",
+  "Native_calls": 0,
+  "old": {
+    "hard_local_rows": 4589,
+    "classes": 117,
+    "families": [
+      {
+        "family": "JOB_START_FINISH_SERVICE",
+        "rows": 28,
+        "NNZ": 2476,
+        "equality_rows": 28,
+        "less_rows": 0,
+        "greater_rows": 0,
+        "min_abs_coefficient": 1.0,
+        "max_abs_coefficient": 1.0,
+        "signature_counts": {
+          "y": 14,
+          "f0": 14
+        },
+        "distinct_touched_columns": 2476,
+        "free_touched_columns": 0
+      },
+      {
+        "family": "LOCAL_SERVICE_STATE",
+        "rows": 4505,
+        "NNZ": 58049,
+        "equality_rows": 4505,
+        "less_rows": 0,
+        "greater_rows": 0,
+        "min_abs_coefficient": 1.0,
+        "max_abs_coefficient": 1.0,
+        "signature_counts": {
+          "f0+r0+y": 851,
+          "r0+y": 484,
+          "r0": 2686,
+          "f0+r0": 484
+        },
+        "distinct_touched_columns": 49377,
+        "free_touched_columns": 0
+      },
+      {
+        "family": "UNANNOTATED_LOCAL",
+        "rows": 56,
+        "NNZ": 0,
+        "equality_rows": 28,
+        "less_rows": 14,
+        "greater_rows": 14,
+        "min_abs_coefficient": null,
+        "max_abs_coefficient": 0.0,
+        "signature_counts": {
+          "EMPTY": 56
+        },
+        "distinct_touched_columns": 0,
+        "free_touched_columns": 0
+      }
+    ],
+    "column_support_family_counts": {
+      "UNANNOTATED_GLOBAL": 18649,
+      "f0+r0+y": 42565,
+      "y": 1238,
+      "f0": 1238,
+      "r0": 4336
+    }
+  },
+  "current": {
+    "hard_local_rows": 261414,
+    "classes": 229,
+    "local_columns": 174685,
+    "families": [
+      {
+        "family": "CHECKPOINT_MIGRATION_SELECTION",
+        "rows": 39978,
+        "NNZ": 262987,
+        "equality_rows": 16990,
+        "less_rows": 22848,
+        "greater_rows": 140,
+        "min_abs_coefficient": 1.0,
+        "max_abs_coefficient": 1.0,
+        "signature_counts": {
+          "q": 96,
+          "f0+q": 96,
+          "f1+q": 96,
+          "pair+q": 96,
+          "migration_selected+pair": 96,
+          "pair+source_selected": 657,
+          "destination_selected+pair": 1097,
+          "source_selected+y": 657,
+          "q+y": 14852,
+          "pair": 7199,
+          "migration_selected": 88,
+          "q+r0+y": 1657,
+          "q+r0": 11563,
+          "q+r1": 96,
+          "f0+q+r0+y": 684,
+          "f0+q+r0": 948
+        },
+        "distinct_touched_columns": 87241,
+        "free_touched_columns": 0
+      },
+      {
+        "family": "JOB_START_FINISH_SERVICE",
+        "rows": 96,
+        "NNZ": 3585,
+        "equality_rows": 96,
+        "less_rows": 0,
+        "greater_rows": 0,
+        "min_abs_coefficient": 1.0,
+        "max_abs_coefficient": 1.0,
+        "signature_counts": {
+          "y": 96
+        },
+        "distinct_touched_columns": 3585,
+        "free_touched_columns": 0
+      },
+      {
+        "family": "LOCAL_SERVICE_STATE",
+        "rows": 19312,
+        "NNZ": 100363,
+        "equality_rows": 19312,
+        "less_rows": 0,
+        "greater_rows": 0,
+        "min_abs_coefficient": 1.0,
+        "max_abs_coefficient": 1.0,
+        "signature_counts": {
+          "r0": 2647,
+          "f0+r0": 1953,
+          "r1": 12142,
+          "f1+r1": 1169,
+          "r0+r1": 96,
+          "r0+y": 1244,
+          "f0+r0+y": 61
+        },
+        "distinct_touched_columns": 64439,
+        "free_touched_columns": 0
+      },
+      {
+        "family": "WAN_LINK_BYTES_AND_LINKING",
+        "rows": 85495,
+        "NNZ": 215824,
+        "equality_rows": 1249,
+        "less_rows": 56164,
+        "greater_rows": 28082,
+        "min_abs_coefficient": 1.0,
+        "max_abs_coefficient": 305175.78125,
+        "signature_counts": {
+          "link_selected+pair": 1249,
+          "link_bytes+sent": 28082,
+          "link_bytes+link_selected": 28082,
+          "link_bytes+link_selected+sent": 28082
+        },
+        "distinct_touched_columns": 38688,
+        "free_touched_columns": 0
+      },
+      {
+        "family": "WAN_TRANSFER_DYNAMICS_AND_LINKING",
+        "rows": 116533,
+        "NNZ": 348154,
+        "equality_rows": 50594,
+        "less_rows": 55389,
+        "greater_rows": 10550,
+        "min_abs_coefficient": 1.0,
+        "max_abs_coefficient": 1.0,
+        "signature_counts": {
+          "q+wan_start": 96,
+          "q+wan_final": 96,
+          "remaining": 5946,
+          "wan_active+wan_start": 1055,
+          "wan_active+wan_final": 3213,
+          "remaining+wan_active+wan_start": 4316,
+          "remaining+sent+wan_start": 4316,
+          "migration_selected+sent": 2158,
+          "sent+wan_active": 2158,
+          "migration_selected+sent+wan_active+wan_final": 2158,
+          "remaining+sent+wan_final+wan_start": 2158,
+          "remaining+wan_active+wan_final": 4316,
+          "depart+wan_start": 2158,
+          "depart+source_selected": 14852,
+          "arrive+wan_final": 2158,
+          "arrive+destination_selected": 24712,
+          "depart+q": 14852,
+          "arrive+r1": 23080,
+          "wan_active+wan_final+wan_start": 1103,
+          "arrive+f1+r1": 1632
+        },
+        "distinct_touched_columns": 104834,
+        "free_touched_columns": 0
+      }
+    ],
+    "column_support_family_counts": {
+      "y": 3585,
+      "q": 14852,
+      "f0": 3585,
+      "f1": 2801,
+      "r0": 20039,
+      "r1": 36926,
+      "pair": 7199,
+      "wan_start": 2158,
+      "wan_active": 2158,
+      "wan_final": 2158,
+      "remaining": 3213,
+      "sent": 2158,
+      "migration_selected": 96,
+      "source_selected": 657,
+      "destination_selected": 1097,
+      "depart": 14852,
+      "arrive": 24712,
+      "link_selected": 1249,
+      "link_bytes": 28082,
+      "f0+r0+y": 3108
+    }
+  },
+  "old_state": {
+    "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\native90_build_reuse_20261009_01\\dates\\B1\\2025-05-01\\output\\STATIC\\INITIAL_STATE.pkl.gz",
+    "sha256": "c97c57db579fafbb813cce56f052f3f8b87ff3ccf3a739911177c7ea0c86ee5f",
+    "bytes": 120571980
+  },
+  "current_block_records": [
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\002545bee520.pkl.gz",
+      "sha256": "7741cf85c0fd81721ed3645033851ac4883b3f7d59766f86f51d851063ee01c1",
+      "bytes": 39181
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\004be76cf56e.pkl.gz",
+      "sha256": "e1c44479a00ea6cc72ccbb3f5dd297db0fa473d12b3a7e9b863385263cd4a5a6",
+      "bytes": 35888
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\0101745bb671.pkl.gz",
+      "sha256": "aa72080b74605a4d9d31e77eaf5b478cea4a48b4e039bcbfa8cc87ab1ef66aae",
+      "bytes": 1904
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\018d21133c22.pkl.gz",
+      "sha256": "93bdf82fbb1bab8eef7b57d8614ff125ea8a48ed6b5b167f825206105264da32",
+      "bytes": 26828
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\018e965f21b6.pkl.gz",
+      "sha256": "0e05a92b9da9504a5f4eb0ef28bd1705053fd2f3882be61654705ff159ef2dbf",
+      "bytes": 16616
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\060d82cfb430.pkl.gz",
+      "sha256": "bd52ca1ece9d93faeabd3cf915c263bebef3c1a60fdae220395660974682519b",
+      "bytes": 41824
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\069ec3b872f8.pkl.gz",
+      "sha256": "8e23368dadf6ea02757b4ed03f866d6a72cedd938ce87a3de634c404a7bb57ad",
+      "bytes": 1937
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\07a264a7f43b.pkl.gz",
+      "sha256": "06375e621010cdffd4f4f02356295e21ff2c7fb130c33cc8e60ff24483ae4bbd",
+      "bytes": 34024
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\0822d8d3688d.pkl.gz",
+      "sha256": "0accf9297f508b7489efc2e65ad81148951919cf47aaa42a592c03923d3d1781",
+      "bytes": 34110
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\08cbe3851f53.pkl.gz",
+      "sha256": "b1ea934560f63469b5b3eb3145969de7653b9b125b517bbeca0e2503054adb78",
+      "bytes": 28865
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\0e3a7472c144.pkl.gz",
+      "sha256": "72203660853f620c385d7446a6a64446470b7d2ea2dedeb6c55a1121fc4fdb78",
+      "bytes": 11317
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\0ebb6eaec049.pkl.gz",
+      "sha256": "a9ecb7b31970cf3c1285b837f2525eb9e11d1f5eaae5c01ce3bb8747e78ce0c2",
+      "bytes": 18400
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\0fb4eae42adb.pkl.gz",
+      "sha256": "7775c83106feea9ba9e200a579d127a541de31beeea659f58d6e27a1d4bcb979",
+      "bytes": 9216
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\0fe7489b3878.pkl.gz",
+      "sha256": "fef16a44ad70971bb5221b4b474aa779e972f18ff41d38a3f83cfb9621d6fd37",
+      "bytes": 1926
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\134cd7044a35.pkl.gz",
+      "sha256": "49aa2e7af16e91a863507ef8443a8a70e9c08261c012c3de9981a136162c4290",
+      "bytes": 37736
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\13967967184c.pkl.gz",
+      "sha256": "702443c8e16fe6b6bc815d15f1b5265af8420075908750afbe2d8febeeb72a73",
+      "bytes": 23121
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\1440a90b84b8.pkl.gz",
+      "sha256": "7387391619f922a690631d2ad55a41e87aaed14908c828331f48536086b5e28f",
+      "bytes": 1911
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\14cacf0abd9d.pkl.gz",
+      "sha256": "ac7a9fbb7c1832bccc7c78a20f9b6deb47b5be078109652ad4ba34038476dbcb",
+      "bytes": 12743
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\14fe19d9fa63.pkl.gz",
+      "sha256": "0d0fded08437c44165ab11b6ca6c74ee9be85a6c283a91c1982655b40f7e9b10",
+      "bytes": 383828
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\159a1e4ab2fc.pkl.gz",
+      "sha256": "afff3131ac27226823e697ccbfefb162c0b8979c4d2ba7f3ab5e9e5942f46cf1",
+      "bytes": 6348
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\17302260b778.pkl.gz",
+      "sha256": "aac320a3176151b643378d91fef0f4bcb98a924ee2500b2cf85380690cac79a2",
+      "bytes": 11278
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\17c6357ab7bc.pkl.gz",
+      "sha256": "3f8dcb290d1fd8f370595dac977d570b1e5e04fb348b97d12e5f4ffd682a48c8",
+      "bytes": 1932
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\191eb1cafb99.pkl.gz",
+      "sha256": "75d91707237c1ba84981b66a24ac428dd94e47def25c03cb4ad0c6b6a9590a8b",
+      "bytes": 39659
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\1a20458e295c.pkl.gz",
+      "sha256": "fd8fba2957de8c2c3e0adf7c12d18dcdc7ca51e1e44b0622a0b94c0fca540ac0",
+      "bytes": 35129
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\1b93616e4325.pkl.gz",
+      "sha256": "01b8505bbb54b427f2eafa5e08e540550b3cef2d297df9215fd344aeafb1166d",
+      "bytes": 2022
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\1e804669092b.pkl.gz",
+      "sha256": "379126070b01f67002487ea3065aaa1ef51eb8d1606dc0f941eb6f83e8a14261",
+      "bytes": 1899
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\1fdc2210f076.pkl.gz",
+      "sha256": "2aee95dba9e92857f35e08c1d5739a7ed450a51ab2731d28752f98a4bf559eea",
+      "bytes": 27693
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\2197f0564386.pkl.gz",
+      "sha256": "a9719b316e358344e4bd4c5f88697076650166af2d06dba3ddc65d8f7709c861",
+      "bytes": 18866
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\23ce6cb80803.pkl.gz",
+      "sha256": "37b751916867d957a4e2df62d5ea393251c0f40da4b74ea3a698097638e62633",
+      "bytes": 265108
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\24f9ca4bb760.pkl.gz",
+      "sha256": "b94cfb2d67575349e8a2a96952b7ba2728d735b1f4bc74d393a15cebb8858b15",
+      "bytes": 23120
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\252795b235aa.pkl.gz",
+      "sha256": "5c2304c8a725c9c115945bf974750c8636a1ffbccf684a3cacfe922d3ec272cf",
+      "bytes": 2011
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\271cc89aadcd.pkl.gz",
+      "sha256": "59dfecc0665e7659c93159a2440a3b8424e43ecebf02dd682b350e566a4a51b3",
+      "bytes": 1951
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\27864db2d2e0.pkl.gz",
+      "sha256": "3a91e6e628e666a88f29255a9e00fbbba46c29cbfd81df1229a0bee15208e76b",
+      "bytes": 11430
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\29046ab7fc81.pkl.gz",
+      "sha256": "dc955dc15972fa473adf711ddbcad4b941f4128743326b439a9204e59a78a3c8",
+      "bytes": 11375
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\2a0b3c84b6dc.pkl.gz",
+      "sha256": "4dc97f13230a26126f2f2d628c2114de8cae72d546e948f747e730ac51859bc5",
+      "bytes": 34150
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\2a0fd040554c.pkl.gz",
+      "sha256": "9f3dd7554ed4e445b384c638b1fc0de87e55d536e2f5093dbe908aee93b84668",
+      "bytes": 264935
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\2c163744f447.pkl.gz",
+      "sha256": "34f93428893bd24a6684680199c7dea6ed0894f028b46b1a6dccc39a36c6870a",
+      "bytes": 23109
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\2c675ea5badc.pkl.gz",
+      "sha256": "d1a12c30028cf19d5fae45c815e88e44b3864477b5cfec82f2e9329921e8b3d8",
+      "bytes": 18651
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\2e6946e4b2d7.pkl.gz",
+      "sha256": "e0443aa609f3f4ad67655f9a8455b9bf2770ac4a0df796bf90d0657d14e8a4e9",
+      "bytes": 9037
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\2f67087af7f4.pkl.gz",
+      "sha256": "0cbff729180a2f76fe42220956890b5c61589f21d99debc680b9c1998870ddec",
+      "bytes": 1881
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\32427081a1fa.pkl.gz",
+      "sha256": "1a6de9d3de243725c63f54111dc2cbf4b24a6cc93c2ae5f2fe093fe72cf4954c",
+      "bytes": 1904
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\33691e6e0e4e.pkl.gz",
+      "sha256": "30a076fa2dc4c233779d75abe3bb3127e50c86e6007d4e31dd9bafcec83307f6",
+      "bytes": 6344
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\34ebf8e31172.pkl.gz",
+      "sha256": "af5d6c2001067e1b1a78b94b87be3484615c9420d90e9ad464253d96e164f715",
+      "bytes": 265149
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\35f2dabf64d9.pkl.gz",
+      "sha256": "95ba5e57721d0f2b1baca1bb78a77f4e7516751dfed9db356148a35624b4b70c",
+      "bytes": 35880
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\360458b298a4.pkl.gz",
+      "sha256": "ee1b0d6508c02353af7b23da503647c1eb8992e0c5cb626dd6f01eb37be670f5",
+      "bytes": 2015
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\386392b700a4.pkl.gz",
+      "sha256": "4b5fd19f7b2bc55e2f04dbc910cf03077c3021ff82a17b32ae402e273232b1be",
+      "bytes": 23129
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\3a7a6c7bd2c8.pkl.gz",
+      "sha256": "298e33e8cb4b34ccdfbf2922ea7f22dc4d3dc9d330c8aa28a19b5062dc9960ea",
+      "bytes": 11521
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\3b4547bcfade.pkl.gz",
+      "sha256": "c8fc8aa28133ce55a873947012040c174b1fde60608eb44a3710ea427aa593ca",
+      "bytes": 14577
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\3bc941090f18.pkl.gz",
+      "sha256": "20fb58af829c5adcd198c7e9c7675f12ee855292d79df84cc85561447d2a743d",
+      "bytes": 42373
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\3cd22bee53ae.pkl.gz",
+      "sha256": "9e3300a9e0b9824f1795e52370faede47325791f1d0e1f201cfd4178d20d1b22",
+      "bytes": 6958
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\3e3d6be84587.pkl.gz",
+      "sha256": "a45bb490624b638ba992b13204ecb28b42dbfb8f7c70768785ad169143c25eb6",
+      "bytes": 1904
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\3e799348f497.pkl.gz",
+      "sha256": "6ccd21d9a5a68403c2893a9d5ae68df9b62c406c10a077d887f0507bb44696bc",
+      "bytes": 1920
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\4227204ca5bb.pkl.gz",
+      "sha256": "4e5d194fc754d04c30bbc3b46b02b2f73e851df75521ef80579cd70293d2b6d3",
+      "bytes": 34038
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\42f9f98401fc.pkl.gz",
+      "sha256": "e167f2c5d6d31f65537509bc2521d3dafd5a92ec31f7099ca23cadb831365a18",
+      "bytes": 18686
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\438df1a65d4a.pkl.gz",
+      "sha256": "ef0ac89cf8b5ac242d7087d140d3ba5032fc5750b838475fab71d47be2cf6c6c",
+      "bytes": 28864
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\453b4c894884.pkl.gz",
+      "sha256": "8c9375917907cb2ffbfd7a441325d65c1f45b52448ad2dcc5c34b7cc31c1f61f",
+      "bytes": 1626
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\456f24ba7323.pkl.gz",
+      "sha256": "baa69f82c158445f0d9f42385c592b89cf7275f64c4bc0664228447ae856b0bf",
+      "bytes": 1898
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\46fb8d34306b.pkl.gz",
+      "sha256": "6af701b1ddc9eb515aab52dcd669e3bfa8bef3f667b27d821852de52d40abdb1",
+      "bytes": 18685
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\4864b54c0dfe.pkl.gz",
+      "sha256": "00ac532a38bbd172e114d55f200981e9e64cd319fd797715e66cd0aac7c4a74a",
+      "bytes": 23127
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\488e9bdfd47e.pkl.gz",
+      "sha256": "5cd2ec045de52a6446d5036e45d3160ea8e2684a97c3e33932520669de5e9646",
+      "bytes": 1918
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\48c795b86086.pkl.gz",
+      "sha256": "24df0c4451a98f4eadd7d1cc138ca2946f79e7db7f74d2c182f8df38ec5d5e65",
+      "bytes": 18672
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\492da94843aa.pkl.gz",
+      "sha256": "0c1881d859a5a8aeddd29be299b7448a555133f5ba9de8db7363ac206b5b1b44",
+      "bytes": 1647
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\4affec3cf968.pkl.gz",
+      "sha256": "af54583546a027011d1f48c2669a5714807534b5fc42f10da864b450e5e8bbf6",
+      "bytes": 29727
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\4b22288fe24b.pkl.gz",
+      "sha256": "049b2bf1c657a86ec8382afcebae5d83b69c3ab6bcd85f572337cf9163292e11",
+      "bytes": 32250
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\4cb7fcac6e85.pkl.gz",
+      "sha256": "2b105e54ed870fc1946a84385d2aef35ca22d6295c739f76f6dddd32e5d9f66c",
+      "bytes": 5458
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\4d30ae6d8459.pkl.gz",
+      "sha256": "67fd1b9afb316f9e7a0cf5808f4f987f508c41292cb3a5c760ec981c90351a86",
+      "bytes": 14486
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\4d67a5c598ad.pkl.gz",
+      "sha256": "ab3bcd2f6337f51a016be7bff8ac5a9838864db2f2af9405af702919cf03458d",
+      "bytes": 23129
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\4d8a957a8849.pkl.gz",
+      "sha256": "69403e26af51f499270093206fcfe5f36cac24977c1b0a04136e1de945b9f786",
+      "bytes": 38899
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\4e1152af4fec.pkl.gz",
+      "sha256": "af08ffbf14b5b1b6c25cb0a031dddebf87f1cb160123726719a9cd1987570e75",
+      "bytes": 8952
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\4e88056c5b9f.pkl.gz",
+      "sha256": "ac8de54c661b8c06beb07b8a662468fffed21f649093ef8cb2c21792a8d98259",
+      "bytes": 2039
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\5050da3dc7b4.pkl.gz",
+      "sha256": "d21b8b03b7eda7b9e3657661b0aedeabd8679f4603159a0d3b5decd42a78235f",
+      "bytes": 1919
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\50da3f4d2bb2.pkl.gz",
+      "sha256": "e0e337db98c913b5db4743aa465b1db1a331d86b0de346ebe1d4b6ee4aaced40",
+      "bytes": 6377
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\520487cc0ca9.pkl.gz",
+      "sha256": "89e16a3ff9544169902c60e8a044bd55632bdcc0d77c46c88f13c9d78c200799",
+      "bytes": 1912
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\5678bdb460d8.pkl.gz",
+      "sha256": "9e33c11f4a98b311e4dd2193f91cce7acbf21204a0a52b320b1beb2a23b5c9b4",
+      "bytes": 39660
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\57a8598a30e2.pkl.gz",
+      "sha256": "9806dae9bd4be1844247915790c66d51af59d9c439db9abc7ab776df1d56d15f",
+      "bytes": 16474
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\57b1d93e41e3.pkl.gz",
+      "sha256": "3be67a0abc133ce37f7e134a0090e615af9f29abb56ffc9998b2cb0103841ed6",
+      "bytes": 257352
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\58d17c25cf43.pkl.gz",
+      "sha256": "8bfbac2b4de022e48d3bc0bcca4521d712596a625f1a713b8d853982a01824c8",
+      "bytes": 23110
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\59779d7bfc74.pkl.gz",
+      "sha256": "8e6c7d2b855ea7935339e02ec4624160f646343052a33928f2bef8326cb542e0",
+      "bytes": 1924
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\59d757205e99.pkl.gz",
+      "sha256": "b9008333290d7c7d4ff2b46511bb6c4b6a39a9b9c726dfd73c967ff9c1cb6962",
+      "bytes": 11458
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\5bab0584bbba.pkl.gz",
+      "sha256": "c11e034cabe1ce99b149489fe29abf17155d258915df1ece6260657b564ba142",
+      "bytes": 23162
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\5d541b0b4d6c.pkl.gz",
+      "sha256": "bb94cd9e16aff2f990eefc9c604469dff7a9ec231731fc2cdc1892f19f7c1208",
+      "bytes": 5339
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\5dec92d58936.pkl.gz",
+      "sha256": "32a116b8492efd1cf9eccef8fae1df79139189b9fe3178174c66ee6c7346d46c",
+      "bytes": 33344
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\601be4d4cc9d.pkl.gz",
+      "sha256": "07ad8aa2d838b703b4d7728ad2b34d3697b7250da1649925d46b421d0db16f2d",
+      "bytes": 29929
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\601f13babc1c.pkl.gz",
+      "sha256": "b91eb34277055f753485087f93b3e2fb9a1c3f680374d8a1c774a7c3b94b67f6",
+      "bytes": 267256
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\60822b12f65f.pkl.gz",
+      "sha256": "3e45c41ff2b52e9b19e1c721897ab7ac5bd49313d8fb5b06f47b94ec40b443ed",
+      "bytes": 1930
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\62f20f29f0fc.pkl.gz",
+      "sha256": "a0d612564c25860e3bc00ec82d2b4921c3de51be55ef793ec289ed5d4b2ccd0b",
+      "bytes": 16588
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\63026fc94cec.pkl.gz",
+      "sha256": "5843e23f683846bedf800a882428eae4f59cd2499bfd91712b6d9c3cf4744132",
+      "bytes": 1982
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\65b90031f765.pkl.gz",
+      "sha256": "d4cc1f9be50ab1ba83bd4b798234171e88a67598e68b02bfe558fff928325b92",
+      "bytes": 12830
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\665c7b7bf33e.pkl.gz",
+      "sha256": "2bd1371710649b028c8aa2c26d31703eaec879c1964df21b2b79e4615497a9a4",
+      "bytes": 9049
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\68e3be8b9c28.pkl.gz",
+      "sha256": "d1eff388eab1fb5e4f04594fe4ce7ac908e68d4694573cbf1c409dc5907d2d70",
+      "bytes": 1994
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\690ecc6c06d0.pkl.gz",
+      "sha256": "86f78b751d74c99a66f1ed6435f4c9985e222fe5d6cdc89af3128d05e85602c1",
+      "bytes": 6431
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\6a8bf2813ae4.pkl.gz",
+      "sha256": "d5d41b804a1004160564139a63dce781a3c6a7eb5237e221526bbc3df6df7f13",
+      "bytes": 8953
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\6b7e782f4580.pkl.gz",
+      "sha256": "1b095e6e02d93e446545b16a3dd702d59fabb57c0aa03ff7371bf175e42e533b",
+      "bytes": 34040
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\6cab4fdee272.pkl.gz",
+      "sha256": "d58f56869114b37eec8aa526efc18aa7a85610c27b5c049df7aa8111eabda15a",
+      "bytes": 2029
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\6d388abf7665.pkl.gz",
+      "sha256": "13230b1aac27085c1ed9c7b2d99caae2d615c02cc8f8507655b6167be9916cc6",
+      "bytes": 31968
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\6d77070168ad.pkl.gz",
+      "sha256": "c89cb024f58e9b762f4b2ca55ff9e0bf1ba41d176ecda6d704c48b0e0f558bda",
+      "bytes": 1913
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\6dbd15093956.pkl.gz",
+      "sha256": "a2d68722d36b14ebe15745543817dc9093b8c0f3dfaba4b3cd9a9bc54597ee0a",
+      "bytes": 1864
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\6df30a7f48bc.pkl.gz",
+      "sha256": "5fd1ee47519f3571edb78c30ba9c409b71ed7f04d159bd9a5c40ceddc392b062",
+      "bytes": 1603
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\6f310388afa4.pkl.gz",
+      "sha256": "cb63462e7451cf6022e9798f7db85199660627a6551d7505e7a50cea6fb3f679",
+      "bytes": 31929
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\72a1183478ac.pkl.gz",
+      "sha256": "eb6a1a2b518715aaebc715356d7e5329f471ed5f0af7e501ee7e8758378096b7",
+      "bytes": 31201
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\738a567c7c19.pkl.gz",
+      "sha256": "ebbf1f7905d5611f2f53181a7a80bfff4a560e3712358fc4f5872c8316ee0a24",
+      "bytes": 1603
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\75691fd3bd0e.pkl.gz",
+      "sha256": "1ed0884e1aa0a55610660a3f6db38b37e96a957f0c3b47a9c1687f2475748d45",
+      "bytes": 1969
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\76b88a7b7682.pkl.gz",
+      "sha256": "e5268f75cc8c3ee806c733fcd45c35cbc32b8da0d07bf608b29d284520147ae7",
+      "bytes": 1912
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\788525afc858.pkl.gz",
+      "sha256": "135ff050a11c63f51172757a6fa442f44d588b99e165a64edffdee2fe43e217c",
+      "bytes": 1919
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\7922a7455f14.pkl.gz",
+      "sha256": "c3cb2033e8bbdc8f3da56a846705ece21c4b991d6c4f375ddce3d09aa1c2fcb3",
+      "bytes": 11356
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\7933a4b6ef57.pkl.gz",
+      "sha256": "40748bb90f52e8da6281b1ff7ee95fb18722880d7a637abcc8303b9625f5a5c7",
+      "bytes": 1926
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\7a10ce463a51.pkl.gz",
+      "sha256": "610714bf0996012d1ce8959b9bcc707df7c83553aa3b6b2f719d22618a05dbc1",
+      "bytes": 1911
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\7a353a9ac2d4.pkl.gz",
+      "sha256": "ec138143e0a119c15f65fd8b4e81066da0cdb128b436172a94b874f414911c39",
+      "bytes": 30060
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\7b68278d89d6.pkl.gz",
+      "sha256": "2d5205f799b487da26dfec2dcce52999f4ea4a40e193e1a390ca69d07215b0ba",
+      "bytes": 267350
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\7d11705755c4.pkl.gz",
+      "sha256": "3eaa4d8fff94a7eaae1a85caf51a72171a86e4bf6dc529db7ceb2edc4d5d9c90",
+      "bytes": 16717
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\7d445c8846a8.pkl.gz",
+      "sha256": "09c29be7dbcf8c95d3fef3998eb6ff2b51400f2aa15916a10ad69b0f1891cd6e",
+      "bytes": 1924
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\7d99818c036b.pkl.gz",
+      "sha256": "540d07c17507af3d3fa284c0053b894a09cc577fcb8727c53db36bd3e16ac407",
+      "bytes": 267403
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\7de66067826a.pkl.gz",
+      "sha256": "5362a28585043bab916479fab1fc459561a7d44d0a44f7518ab4066cb6891fd3",
+      "bytes": 6357
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\7fbc69cf4620.pkl.gz",
+      "sha256": "75f9c80b9d31f98c746f720208183ed4d313ee973a74f75dca02c45a5011d719",
+      "bytes": 1920
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\8084ceb3d612.pkl.gz",
+      "sha256": "6ee8b33a8597986366af3469abba9bae79683abf97c7e8191a0bdc5c76441404",
+      "bytes": 5324
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\81fb1f1ba5f0.pkl.gz",
+      "sha256": "978d0efe324aca31fb77bdd8c997694225d70b207afd3e9d5f124dd7f949f330",
+      "bytes": 1922
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\82fb7b541877.pkl.gz",
+      "sha256": "445d7ca89da6f93df255513719944d231ccf3e2405477d9492489654a3d86e81",
+      "bytes": 2070
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\83553991f7d5.pkl.gz",
+      "sha256": "9f72d718bc53a17e9b0506f3902ba547a770f944956189817fff4c448079eafc",
+      "bytes": 1903
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\8437ffe99548.pkl.gz",
+      "sha256": "b499f065ecae1774409219ce5980b66341e61c19f2c3f26196279d526f90008f",
+      "bytes": 35878
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\857bd9a52aa9.pkl.gz",
+      "sha256": "0984ef88eb29fca22d6e6611e3317eaa43f4d260bb227ef816ad4e70d4950ed5",
+      "bytes": 1947
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\86215c25ee5a.pkl.gz",
+      "sha256": "c0db853960c589ef1097b4b9b9bccbd74b2e11c52a8cbc9a4bf424eea0379ca3",
+      "bytes": 1624
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\87639a45b3e0.pkl.gz",
+      "sha256": "a687c596edaa3bc9c28ad93f81913c935a978bb3df65f99a108afde321281463",
+      "bytes": 1759
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\881ec3c04739.pkl.gz",
+      "sha256": "e262545cff8bc23c8383ad4a7a9f453fb88fbec31f7397840b131e5f0003e0fc",
+      "bytes": 8986
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\8adaa8117210.pkl.gz",
+      "sha256": "f3508366d08d63e0452563c105aebd22baf8eec2ae81621cd2903cbcc701c131",
+      "bytes": 34120
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\8af97d5c0987.pkl.gz",
+      "sha256": "778df627d91b38ea86c798187dec2d50d1b6f2ceaebbcfd7dea9842c2a872029",
+      "bytes": 37401
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\8b5a60ab106f.pkl.gz",
+      "sha256": "e464ada1bd6cb62e62a1d938cfa57dd8549cf394f22807f055218d9b390e89ea",
+      "bytes": 16620
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\9013fd5ba575.pkl.gz",
+      "sha256": "0a9e1e9a1ff2bf0acdf0dc424b431766f5fc69ba3b689e9ca190869b955ce4c7",
+      "bytes": 16733
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\902bbf36dbaf.pkl.gz",
+      "sha256": "78b5abdf927f6fcd73f488e907bb1688b838ec599993f273c344360107a36fc2",
+      "bytes": 40518
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\946cb1898942.pkl.gz",
+      "sha256": "911b56ecc551b33e26882105d21376108ca11fd4dd377a005902d87d06599232",
+      "bytes": 1874
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\94a25087158c.pkl.gz",
+      "sha256": "123c886b9a373c74f0c732de419a80fe3c45515c794f1624a8d79dd3eb2bdac7",
+      "bytes": 2098
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\956a7c571565.pkl.gz",
+      "sha256": "d4b32954694894c89164e93e53cfabe616a32d697debb610356762fc2c92f983",
+      "bytes": 18657
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\965db1ff7d00.pkl.gz",
+      "sha256": "b2c34dd0addb00a8783965c840361eefa5655b6e49deb5554c9be717475566f4",
+      "bytes": 34026
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\97f3c97913c7.pkl.gz",
+      "sha256": "fa0f8de3421d354e0b82e68b081891c6c066f74897f666e1e344a055abb679c4",
+      "bytes": 9001
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\9882de79bd66.pkl.gz",
+      "sha256": "e4647ad34ff78710633c0791483cc4e660133ae61a0ce338e888a34ce53eaca3",
+      "bytes": 5311
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\995691d12bd2.pkl.gz",
+      "sha256": "f8360154dedfe3a7e95b67d74539f5b5ed0d8a40a6ca3f48f581e7dd3c2181e0",
+      "bytes": 33341
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\9b54d8c391c1.pkl.gz",
+      "sha256": "7b3021cd480813866644db4aa3e70e831881e139313d5990ff14325bb19db2d8",
+      "bytes": 33345
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\9be14fa402df.pkl.gz",
+      "sha256": "d29b8a788d3c2cc0d9428a37e5f4d3a768aaaf2378f3a617982df8efe1295b96",
+      "bytes": 267403
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\9cf0962fade1.pkl.gz",
+      "sha256": "9e2bc9b86344bd3cf03fca7df03fe3a56a501f05346ab85dc44971f1b51f3377",
+      "bytes": 267411
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\9d695ab1dcb4.pkl.gz",
+      "sha256": "6a9789395d8007d655ba5d70d8d422578dc1a77909e2420f532f73d620ef4987",
+      "bytes": 34542
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\9d92924f5f22.pkl.gz",
+      "sha256": "805b62d7fbd1b79ae5c997de2a533bde8a8df8a18c6b81619afe782f268018a4",
+      "bytes": 2020
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\9e18581202f6.pkl.gz",
+      "sha256": "1cb9c69ec0515dbeff6f711ae687e3703f61ac7daf0813e1c33d0b54fe59b6de",
+      "bytes": 2000
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\9e5b464e2297.pkl.gz",
+      "sha256": "97f0204c5583ba9d6218b4055e5a16ca0e3b8a243bfabc078c765ea550bef4d8",
+      "bytes": 267390
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\9fda278f6185.pkl.gz",
+      "sha256": "8e49e11e65ed2da2f0f964021a336d01ca5d23a250ae074c4c51cc7217be455d",
+      "bytes": 6352
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\a04dffd06a75.pkl.gz",
+      "sha256": "f87c265bf5a79e79581c400fbf9397c719d76c5a539bc56520cedb758d669011",
+      "bytes": 34125
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\a0d502bfc388.pkl.gz",
+      "sha256": "e725d4f9a9ae69102a6dbb531169ba2e5d5ddb15ff8a44b26bda090497ad1df4",
+      "bytes": 8948
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\a1aab997645c.pkl.gz",
+      "sha256": "f8fc344870ef27570c8a2177e89e8fa25c8719615cf22dd0d765d599ea722d9d",
+      "bytes": 14411
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\a1b4b28b8bca.pkl.gz",
+      "sha256": "ff7f308d314769e7ef00fa63166a9dd5d2c637471469ca3d7a780ca289035412",
+      "bytes": 6435
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\a27e07659579.pkl.gz",
+      "sha256": "2100533d5b79d60186a1748b5a15da5e00447f596460c41fd189ed78525b564a",
+      "bytes": 16772
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\a2b880671a05.pkl.gz",
+      "sha256": "baa70313e6035a3e65067bbdfe9e625e938b9e126e2b317421a3689cff1dc63d",
+      "bytes": 8972
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\a48a8351c6ce.pkl.gz",
+      "sha256": "f93bb33f0ed0d4e1d3e9e986ede543668a043453b72afc254b146e631b33be5b",
+      "bytes": 1919
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\a6a169fbd56e.pkl.gz",
+      "sha256": "a4b83342390d90dc07552dcae4539ebdfa67f4208328540eb5322572448a90bb",
+      "bytes": 43174
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\a7805ff8bc94.pkl.gz",
+      "sha256": "3e1b78b9590eafa4b6b31b83275a835535f9b44e82c427bfe48ab08b3a6e83ea",
+      "bytes": 18657
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\a7fa409b9850.pkl.gz",
+      "sha256": "114812ddd2821361a08ead65d0dcbc144e6c7945b37570f2e5bfd38ee6a39221",
+      "bytes": 6443
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\a905a377d3e4.pkl.gz",
+      "sha256": "d69e9eeab3459bc66daba1e6177a4e79ba7662a8aacf99e4c0e76039a24a7c18",
+      "bytes": 1891
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\ab484dc8c948.pkl.gz",
+      "sha256": "35da193c84a2644e8b29352c12ae07ee4119d8acf343befcee3a31b7f64807d1",
+      "bytes": 5362
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\ad8b878ca8b8.pkl.gz",
+      "sha256": "1f274760af91bc5acfc3b8320268d2003b5202758f4f6c7a9e15e259336f1f4e",
+      "bytes": 41820
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\ae25465619aa.pkl.gz",
+      "sha256": "8087ad77563a2d640d395812aa882cfbbd4c35f5b4119f0ebabd6a6d319a0a43",
+      "bytes": 1937
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\aeddfe6daea7.pkl.gz",
+      "sha256": "47200b35e2e4a9c2a21bbceb6f488d695e30a97310f62627453d90ad17042320",
+      "bytes": 23126
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\b2aaae19392d.pkl.gz",
+      "sha256": "1cd265b7b1749471997accba4004d07eb83a9528c2bd598ac97ea40382170a67",
+      "bytes": 5387
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\b46d3c39cb76.pkl.gz",
+      "sha256": "b03b014b07dae0ac081fb2b7e604730b98fd1706f6e7f98a12386e9e6c5121a3",
+      "bytes": 29726
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\b4cc2da513e3.pkl.gz",
+      "sha256": "016ac094d091fcd0f95ce331b93f6b66ad4497bef4f8f968f1f7296347d09b87",
+      "bytes": 33320
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\b52ddc6a6078.pkl.gz",
+      "sha256": "86a6e8b7682023d7d8e55f481113e3d49de87682c7daa75e889330583637622a",
+      "bytes": 2471
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\b58ffa979e86.pkl.gz",
+      "sha256": "5293fd99fece3be850c640477928af4b4afa81fb60fee89357fdd908a9be5b09",
+      "bytes": 31930
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\b811467f4898.pkl.gz",
+      "sha256": "e4202d26446b8ab4366fbc85146c2581b20fc4dd2344652cf36f7e81da390a6c",
+      "bytes": 1951
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\b96e6a26bbb3.pkl.gz",
+      "sha256": "28690a0a16f2e9203d11cac0b3159b4d3cacf25fab9ecfb1826864f209c5f5bb",
+      "bytes": 1887
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\b98743a7f88c.pkl.gz",
+      "sha256": "d58d98981a237e726485c4c4245e2b0100d30fec4df2ca63fc872efca1ad761d",
+      "bytes": 12715
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\bbd313e9e00a.pkl.gz",
+      "sha256": "112f665867fdcd1b47b77f714cc3b745a2b97e1bf93fcaca8e7bb9200b3400d6",
+      "bytes": 14771
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\bc6a69f359c9.pkl.gz",
+      "sha256": "704fb86a646cb6b58c342c743d51cd398e8df291001a2f245c3c606daa371c62",
+      "bytes": 33570
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\bca1e8a0493c.pkl.gz",
+      "sha256": "8ad472371eae2164ee563e8e2fbf309ffd74ec33b49305ca4fdf4ec516ed5fac",
+      "bytes": 18678
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\bd760a4283a5.pkl.gz",
+      "sha256": "474b3e0dc36dbe44f5f54c3520de0fe4cc4510cabca6471fe11196f9dc812f8b",
+      "bytes": 267389
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\be30d480ecb9.pkl.gz",
+      "sha256": "09b718000672a8ca303f2688817921c0a2e6b509ddadfb26bc26acd2df6a9c80",
+      "bytes": 5365
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\be7a530aaf88.pkl.gz",
+      "sha256": "a08ee82761d290efa97f6a373961a92123adea1b5b61c43e26e375b4e5710733",
+      "bytes": 23110
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\bedf37cc4fc3.pkl.gz",
+      "sha256": "2aa231fa5d6a9e6a08d1e188722e4494f53538f4a1eaf645d81c03ab591e9112",
+      "bytes": 1927
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\c000cfe745c7.pkl.gz",
+      "sha256": "b465d8bcf2fef7cfe539521550f37b077b22e4ed72d3d477a0b05237f3906ffa",
+      "bytes": 5376
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\c1026d5e8323.pkl.gz",
+      "sha256": "46960c0497d950522282564dbeac73a42a6d9f4d8fc266f727252a69176cc875",
+      "bytes": 26579
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\c258218e4f1c.pkl.gz",
+      "sha256": "9dfa35f96dcca5eeb0219ca2b5113d668b32f4bbe22b53c6b73717d44152e45e",
+      "bytes": 53196
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\c2b187e4f138.pkl.gz",
+      "sha256": "661b6adc4c8b79eb82b20a56f330ff4896df639e8594cdf30c718aa96a66f2d0",
+      "bytes": 1919
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\c35ab1881731.pkl.gz",
+      "sha256": "76d8bd1f697357042b017d1f867c9f05864b9eabc987f4ad9bac783ebd8d159e",
+      "bytes": 16769
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\c441b8adbe7a.pkl.gz",
+      "sha256": "71e1be652bdcbf682a36d094b87ee12ecf08df6308226edbf9b472bb280886f3",
+      "bytes": 15231
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\c47c329cdd4c.pkl.gz",
+      "sha256": "5ad8864577c0654e660bd224a571ebc935307f5b1003dfe03ecd7acbd86c9ee4",
+      "bytes": 1893
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\c54594a1abde.pkl.gz",
+      "sha256": "acafdd1095e0e4ee370bcb8d29d4a4df2a4b13bbcb16e630ac09436f05cf8322",
+      "bytes": 2026
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\c54e26dcd59c.pkl.gz",
+      "sha256": "7ae19baef68dec322bbcba14cc25472fe281a9f6e54cc592c4edfef6b5cbcbc8",
+      "bytes": 1874
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\c6a8c8eaf9de.pkl.gz",
+      "sha256": "2b97b6dfaff61c8af1342203860b23faf99c06b86c8f245f36c8a103b13c47be",
+      "bytes": 264230
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\c788567e2f34.pkl.gz",
+      "sha256": "ef1ee96f2d69c95fe0817a2c52506007cc6d76eacd08c3db23b48f368d891dc8",
+      "bytes": 31930
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\cb04077a34d2.pkl.gz",
+      "sha256": "7b650e3579db601ed09a4a60ae76c05eebe451cecb8db5f29e0150c737a8ee60",
+      "bytes": 1637
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\cb47283206b8.pkl.gz",
+      "sha256": "45fa8ab114e00cfbd02f43d1749969dca390c1c1bf15b82bf620237a9e2ca2b7",
+      "bytes": 6402
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\cd5f3bdbc961.pkl.gz",
+      "sha256": "ff8ffae971cbecb7ffdb5e2754ebda5e7f62bee40d8bdad01c789a1a99f8d61e",
+      "bytes": 34110
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\cebbc05448c4.pkl.gz",
+      "sha256": "4b550f94c48d81540754b60b11a09edcb78f5d995dd3081f6cda38b76f3ebfc8",
+      "bytes": 40288
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\cf3796d9c6b6.pkl.gz",
+      "sha256": "75337ecb42f25d0f82196844c58c6574286a3844131cc2650214660baeea9a02",
+      "bytes": 11281
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\d17142f29dbc.pkl.gz",
+      "sha256": "030eb4c06abac8398bd1658247534ffbc72d0c148257c9d40ab03e1310a63d8a",
+      "bytes": 1901
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\d1b62011ac49.pkl.gz",
+      "sha256": "13ea6e7e6e22e1924db3678de96453fc7f0c425289b0bc206b5d5c84c56b0eb7",
+      "bytes": 34125
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\d22f83b8774d.pkl.gz",
+      "sha256": "2b144822e14962334dc3da9e8cea996455ec6c2c526552db48c165a2c0d81435",
+      "bytes": 34557
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\d261a0509e7b.pkl.gz",
+      "sha256": "e0319381c9650ac398f605672f13f226339739db97b546c55c014da700c15de6",
+      "bytes": 40907
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\d262a376cc5d.pkl.gz",
+      "sha256": "94c92b00e4c32306a7db9ae655b6cdde42e1ceb0753f0ad602dd37e8a3c1e431",
+      "bytes": 257508
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\d4819fba0831.pkl.gz",
+      "sha256": "6bc74b59e1c43b764bebff6bade1bf5b3d08059332436f2d942fce04c45f87d8",
+      "bytes": 1879
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\d84ae9b70101.pkl.gz",
+      "sha256": "65f5113baf3a82a0bbbc40572c2c10aba6d47c332909e56b0ff4f4921ba31031",
+      "bytes": 29727
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\d91538a8c8ce.pkl.gz",
+      "sha256": "266500197149f8f87320287d5775233e5689c877722e0c5727d335ef4f7ea5ea",
+      "bytes": 1603
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\d9469e72a763.pkl.gz",
+      "sha256": "0a0fdfc8ea6cee28964914c44d7def7a2f13c5dd7d9177d5e00f631abe1cb8eb",
+      "bytes": 14380
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\d9fb6e9772b0.pkl.gz",
+      "sha256": "f06de426e423b8b3fe734f12c91f85692c6c2c61a35f9174db4744d1d7cafd29",
+      "bytes": 1912
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\da51c3756030.pkl.gz",
+      "sha256": "318641466131d49c99599ac64d9c54002ec1a2efd2c6b1ad09f563bbd4106d1a",
+      "bytes": 39747
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\da59dc9addb8.pkl.gz",
+      "sha256": "183c6d82c1b4cad47428520ad120e4aa7932b2f87d3cdb37582f4ba0c8f8dff8",
+      "bytes": 1982
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\de0c9ec7f39e.pkl.gz",
+      "sha256": "c1aa183d931c279f10ca3def1c92ea15ed2be6a7252083e3cca6410af3ee441e",
+      "bytes": 1606
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\de751ded484b.pkl.gz",
+      "sha256": "21960846e4456c3da8272dd3cf597e0b8a4328fcda3d6b85f6ccceb5cdc0425e",
+      "bytes": 2475
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\de7932c35d80.pkl.gz",
+      "sha256": "f130ffd711042e869caed102742eed500ed9d2ad17e10452e1d9f464ae172af0",
+      "bytes": 5317
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\e0727c94a4a3.pkl.gz",
+      "sha256": "c856e1cd5d1b1fd7564033e73de2564a9897c32fb097e6538f32ae8ad5cb403b",
+      "bytes": 14343
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\e0a695fd8713.pkl.gz",
+      "sha256": "80ed7d8efd2c634dcbada43da962afcc47306d634fda26a9ddabb0ec06dce36f",
+      "bytes": 6420
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\e12f473fbc46.pkl.gz",
+      "sha256": "f58568b0367d46adf9bbe1f2223c60a04fa54452093eab468a3c6806a556de8b",
+      "bytes": 14762
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\e21436687f62.pkl.gz",
+      "sha256": "43cc181d724fde259c8c11ca341b4c3d761010248d0038ef5c9b0147b52a7200",
+      "bytes": 18744
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\e388eca080af.pkl.gz",
+      "sha256": "372f39d20be30f328635ad359ccf6cf9eeead0aae6b8f31f5aaf635ad95ad619",
+      "bytes": 1912
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\e490cde92a07.pkl.gz",
+      "sha256": "17fc663a908de7a9ef017816853d24584820a31d8452b765c6ec7fe7c392e6dd",
+      "bytes": 6361
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\e53f947b91bd.pkl.gz",
+      "sha256": "c1c9c1250a9682c6bd4cb4a8c9ae9c776152381f90fa8797412393a042c44b2d",
+      "bytes": 18673
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\e6ddd916c314.pkl.gz",
+      "sha256": "4c0ca066343474b3ffe549332790d84a53f4212e843dce503e2d7be14ee6add8",
+      "bytes": 31965
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\e709daa16716.pkl.gz",
+      "sha256": "a5de7e9bf00a58fb34917ab4bc20d77cb692c8abb83e4136b7e1a8339ad61367",
+      "bytes": 267395
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\e93f30ee8f70.pkl.gz",
+      "sha256": "2ddcf2b44ca91499c7e37c0918eadc0c60113cbf90f9e5073ea3a3033b915ab7",
+      "bytes": 18646
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\eb547497cac3.pkl.gz",
+      "sha256": "5aee882287715c9d1932ba7b04b16c00700e29396093afe9924e31d92ac0353f",
+      "bytes": 23106
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\ece7fa53829b.pkl.gz",
+      "sha256": "fdccbdb9742f410dd61b1d4b147fe71315412ffd41d833e5d0b8b5839e20b436",
+      "bytes": 267402
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\f05152f521e6.pkl.gz",
+      "sha256": "324e9deef5a5baa5d651bb08b1769845f261282cac755c8ac7503296a55e90c5",
+      "bytes": 8978
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\f101c0db37be.pkl.gz",
+      "sha256": "e90b604dd849862bd14f1b5743734de758f36a6c0122c0e4c992b9af99350ed2",
+      "bytes": 1899
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\f401bf3eef51.pkl.gz",
+      "sha256": "5938cb98e74e7505e394198ef61acfed9471519838044661b855334b50a6ca20",
+      "bytes": 39737
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\f56ee26fa219.pkl.gz",
+      "sha256": "c8fc3f284235edad744283b99e866a1c987630321c3cd2fa201498f8a291591b",
+      "bytes": 1906
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\f61e1d4eed57.pkl.gz",
+      "sha256": "09042b19df91e6a8fe0f5239aefca35c3140135175d11ec978d7d0e16c4566c2",
+      "bytes": 16679
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\f78a357ff241.pkl.gz",
+      "sha256": "91a9af06e315ea621eb3c080a452340d5105dbb02ac0430ff1399434b9b026b4",
+      "bytes": 5396
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\f7f604b088ad.pkl.gz",
+      "sha256": "fdcc7f66fcac333d51d914e35a7cf96dc2de60d51be14ad3dab4abb210075975",
+      "bytes": 1904
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\f9bb66274b97.pkl.gz",
+      "sha256": "d3f778db91350908adff18d2bf3a3bcd4338fca277c7f91b7e142809acd79ea7",
+      "bytes": 16747
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\fa349f9f4509.pkl.gz",
+      "sha256": "74453b7d883b7c936b2887b17c428db3b0e1886bb34690ccf734130e1eeb27ef",
+      "bytes": 14680
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\fb47e14b9a3f.pkl.gz",
+      "sha256": "5373735bc7bd1124e575086bfc1b9a98ec77139b1c74471b7cb6df5d6e8107c4",
+      "bytes": 1911
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\fd3415c15580.pkl.gz",
+      "sha256": "338480d876b9adf231e486756d91b7a672df330ade95264af4887e66f8a5a8fb",
+      "bytes": 20141
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\fe0cc3efd90d.pkl.gz",
+      "sha256": "c6acb649790cc9c2b923c369f1c559b58052f8eb27530818182094ec9e52d324",
+      "bytes": 1903
+    },
+    {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_07\\B1\\A1\\DW\\FULL_BLOCKS\\fe0d087fd12f.pkl.gz",
+      "sha256": "87432f57103d53f3364cc24bf08ed1aea78be8cf3864bb03b5c3a4f0b97b1266",
+      "bytes": 30464
+    }
+  ],
+  "method": "Count exact sparse row/column support against original descriptor variable-family identifiers. Engineering group labels are a documented support-based classification; mixed rows use priority WAN link, WAN dynamics, migration, local state, start/service.",
+  "limitations": [
+    "No unique original semantic row-name provenance retained in these snapshots.",
+    "Global/network/artificial families and exact presolve lineage are outside this local census.",
+    "QoS and D0 restrictions encoded in allowed domains do not require distinct named row families.",
+    "This identifies support/row growth and does not prove causal Barrier fill-in contributions.",
+    "Columns touching multiple row families are counted separately in each family, not a partition of all variables."
+  ],
+  "wall_seconds": 32.16447949409485
+}
