@@ -8,7 +8,7 @@ PR189 exact base는 625bbcb8b9a54a00c1660c26d96f7737c2f75457이며 공식 AIDC p
 
 | 평가 | 상태 | 진행 조건 |
 |---|---|---|
-| PR189_NUMERICAL_REPRODUCTION | Golden002 IO_FAILURE / recovery pending | 새로운 FULL feasible UB, 독립 Global LB, Gap<=0.5%, 원본 행/정수/물리 및 Fresh AC96 |
+| PR189_NUMERICAL_REPRODUCTION | Golden002 IO_FAILURE / Golden003 RUNNING | 새로운 FULL feasible UB, 독립 Global LB, Gap<=0.5%, 원본 행/정수/물리 및 Fresh AC96 |
 | FORECAST_CAUSAL_AVAILABILITY | NOT_CERTIFIED | 보존된 GFS06Z 공개시각 증거에 따른 제한사항 |
 
 CAUSAL_PASS는 False다. GFS06Z 공개시각 증거는 보존하되 재조사하지 않으며, 이 제한만으로 수치 재현이나 후속 통합을 HOLD하지 않는다. 개별 미래 Unknown UID, 실제 도착, 실제 Runtime/Completion 정보는 계속 Planning에서 차단한다.
@@ -24,3 +24,5 @@ Historical 비교값은 Phase I Native 63.820초, 전체 B1 Native 97.472초, UB
 Golden002는 2026-10-16 03:06:58 UTC compact 행렬 구성 중 progress.json의 Windows sharing error32로 자연 종료됐다. Native 0회/0초, inflight 없음, 모델 준비 Wall 1698.715초, 전체 Wall 1711.479초다. 원본 Raw/Source/실패 원장은 보존됐다. V43 상태 writer에 원본 PR189의 unique temp/경로별 lock/sharing retry를 복원했다.
 
 Native0 독립 캐시 검증은 139.245초에 PASS했다. UID1499/Class117, STAY133609/Migration624473721 전체 내용과 Source/Input/Resource/Graph 의미 및 캐시 SHA를 원본 검증기로 대조했다. 이는 Local Domain 인증이며 새 FULL 모델, UB/LB 또는 Global Gap 인증이 아니다. Golden002 FAIL에 필요한 복구 Golden003만 별도 Source Freeze/새 원장으로 실행한다. 완료된 Domain을 재생성하거나 기존 최적화해·UB/LB·Native 소비를 재사용하지 않는다.
+
+복구 Golden003은 2026-10-16 03:17:24 UTC(12:17:24 KST), PID39084, source commit1d62fa7286db40697b88a0ea07f4f85aacab280c로 시작했다. GOLDEN_SOURCE_FREEZE_ATTEMPT003.json과 GOLDEN003_LAUNCH_GATE.json을 따른다. 반드시 인증된 경로 독립 Local Domain 캐시를 사용하며 재사용 오류를 Domain 재생성으로 숨기지 않는다. 새로운 FULL 모델·원본 행/정수 검사·UB/LB/Gap·FreshAC96은 아직 실행 중/미확정이다.
