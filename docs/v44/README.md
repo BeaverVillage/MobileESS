@@ -31,3 +31,5 @@ Current AC 후보별 전체 물리 Raw는 원래 경로에 보존하고, 감사 
 필수 준비 검증 최종 상태: **V44_PRESTART_READY**. Source SHA `f0c56b0ec67f58c213025c6528c5006b2ad20d8bcca2045cf92994835a673f72`, Actual Physics Source SHA `739598237b3b8b54e5fe9c7cb24f4b2b07c40ae40911d98614c70d2249e1bb01`. 이는 전체 28 Case PASS를 뜻하지 않는다. 상세 준비 보고는 `v43_planning_svr12_actual_v1/PRESTART_REPORT.json`을 따른다.
 
 최신 사용자 지시: 활성 실행은 `V44_JOINT_CALL300_COMPLETED_K48_RESUME_V1` 운영 정책으로 Joint 호출 cap300초를 적용한다. K48 총300 / Joint 총900과 기존 사용량 차감을 유지하며, 완료 K48 지점에서 새 Attempt로 재개한다. 기존 과학적 Source와 기본140초 경로는 보존하고 별도 실행 정책 SHA로 구분한다. 상세 내용은 `v43_planning_svr12_actual_v1/cap300/README.md`를 따른다.
+
+최신 사용자 정정: 완료 K48만 재사용하고 Joint는 새 독립900초를0초부터 시작한다. 이전 사용량은 차감하지 않는다. 활성 실행은 `v44.fresh900 --resume`이며, 이전 차감 정책 문서는 역사적 기록으로 보존한다. `v43_planning_svr12_actual_v1/fresh900/README.md`가 현재 정책이다.
