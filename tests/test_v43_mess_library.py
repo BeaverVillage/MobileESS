@@ -155,3 +155,12 @@ def test_measured_m_time_limit_overshoot_is_recorded_and_no_budget_reappears():
         assert budget.remaining()==0. and budget.used()==300.125
         receipt=read(path/'FIXTURE_LEDGER_MEASURED_CEILING_OVERRUN.json')
         assert receipt['overrun_seconds']==.125 and not receipt['next_native_call_permitted']
+
+
+def test_peer_guard_ignores_launcher_arguments_but_detects_actual_python_worker():
+    from v43_mess.budget import heavy_peers
+    def process(pid,name):return SimpleNamespace(pid=pid,info=dict(pid=pid,name=name,
+        cmdline=['-m','v43_mess.worker','EXPLICIT_REQUEST.json']))
+    launcher=process(1,'powershell.exe');own=process(2,'python.exe');peer=process(3,'python.exe')
+    assert not heavy_peers([launcher,own],own_pid=2)
+    assert heavy_peers([launcher,own,peer],own_pid=2)==[peer.info]

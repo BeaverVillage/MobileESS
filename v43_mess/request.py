@@ -45,7 +45,16 @@ def freeze(arm,stage,attempt_name,*,fixed_AIDC_reference=None,M1_result=None):
         from v43_a2.adapter import require_m1
         require_m1(read(M1_result))
     destination=RUNS/'requests'/(attempt_name+'.json')
-    if destination.exists():raise ValueError('STAGE_REQUEST_FREEZE_ALREADY_EXISTS')
+    if destination.exists():
+        prior=destination
+        # A request is not an executed attempt. Preserve an unused prior
+        # source freeze, and issue a new immutable revision before any worker.
+        if read(prior)['source_sha']==request['source_sha']:
+            raise ValueError('SAME_STAGE_SOURCE_ALREADY_FROZEN_USE_EXISTING_POINTER')
+        destination=destination.with_name(attempt_name+'.source_'+request['source_sha'][:12]+'.json')
+        if destination.exists():raise ValueError('STAGE_SOURCE_REVISION_ALREADY_FROZEN')
+        request['supersedes_unused_source_freeze']=record(prior)
+        request['superseded_request_worker_started']=False
     atomic(destination,request)
     atomic(DOC/f'V43_MAY01_{arm}_{stage}_REQUEST_POINTER.json',dict(request=record(destination),
         status='SOURCE_FROZEN_NOT_DISPATCHED',case_native0='NOT_RUN',Native_calls=0,

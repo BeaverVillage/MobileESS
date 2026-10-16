@@ -13,16 +13,13 @@ import psutil
 from v43.common import ROOT,DOC,read,record,verify_records,atomic,git,now
 from v42_native.contracts import digest
 from .library import load
-from .budget import worker_permit,StageBudget
+from .budget import worker_permit,StageBudget,heavy_peers
 
 
 def run(request_path):
     request=read(request_path);out=Path(request['output'])
     if out.exists():raise ValueError('NEW_INDEPENDENT_M_STAGE_ATTEMPT_REQUIRED')
-    for p in psutil.process_iter(['pid','cmdline']):
-        if p.pid!=os.getpid() and any(s in ' '.join(p.info['cmdline'] or []) for s in
-                ('-m v43_actual.compare','-m v43_arms.compare','-m v43_mess.worker','-m v43.golden')):
-            raise RuntimeError('OTHER_V43_HEAVY_WORKER_ALIVE')
+    if heavy_peers():raise RuntimeError('OTHER_V43_HEAVY_WORKER_ALIVE')
     sources=request['sources'];verify_records(sources)
     if 'fixed_AIDC_record' in request:verify_records([request['fixed_AIDC_record']])
     if digest(sources)!=request['source_sha']:raise ValueError('M_STAGE_SOURCE_FREEZE_SHA')

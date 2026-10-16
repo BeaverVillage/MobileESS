@@ -10,6 +10,21 @@ from v43.common import ROOT, RUNS, read, record, verify_records, atomic
 from v42_may_campaign_native90.budget import DateBudget
 
 
+def heavy_peers(processes=None,own_pid=None):
+    """Inspect actual workers; a PowerShell launcher containing args is not one."""
+    own_pid=os.getpid() if own_pid is None else own_pid
+    processes=psutil.process_iter(['pid','name','cmdline']) if processes is None else processes
+    peers=[]
+    for process in processes:
+        info=process.info;name=(info.get('name') or '').lower()
+        if process.pid==own_pid or name not in ('python.exe','pythonw.exe','python','gurobi_cl.exe'):continue
+        command=' '.join(info.get('cmdline') or []).lower()
+        if name=='gurobi_cl.exe' or any(x in command for x in ('-m v43_actual.compare','-m v43_arms.compare',
+                '-m v43_mess.worker','-m v43_a2.worker','-m v43.golden','.worker','solve_v42')):
+            peers.append(info)
+    return peers
+
+
 @contextmanager
 def worker_permit(request, sources):
     from v42_may_campaign.common import exclusive_lock
@@ -48,7 +63,17 @@ class StageBudget(DateBudget):
             stage_case_sha=case.case_sha,source_sha=case.identity['source_sha'])
         self.authorization=dict(schema='V43_MAY01_M_STAGE_NATIVE_AUTHORIZATION_V1',budget_kind=kind,
             context=self.context,old_native_clocks_reused=False)
-        super().__init__(path,native_limit=300. if kind=='K48_SEPARATE' else 1800.,progress=progress)
+        callback=progress or (lambda value:None)
+        super().__init__(path,native_limit=300. if kind=='K48_SEPARATE' else 1800.,
+            progress=lambda value:callback(dict(value,budget_kind=kind,stage_context=self.context)))
+
+    def persist(self):
+        from v43.common import now
+        atomic(self.path,dict(wall_ceiling_seconds=None,Native_ceiling_seconds=self.native_limit,
+            policy_version='V43_ORIGINAL_TABLEV_M_STAGE_CAPS',budget_basis='MEASURED_NATIVE_RUNTIME_ONLY',
+            inclusive_T0=self.started,UTC=now(),wall_seconds=self.wall(),measured_Native_Runtime=self.native_used,
+            calls=self.calls,costs=self.costs,admission_failures=self.admission_failures,inflight=self.inflight,
+            P2_calls=0,historical_costs_reused=False,authorization=self.authorization,stage_context=self.context))
 
     def remaining(self,reserve=None):
         left=super().remaining(reserve)

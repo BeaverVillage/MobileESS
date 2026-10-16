@@ -12,7 +12,7 @@ import psutil
 from v43.common import ROOT,DOC,read,record,verify_records,atomic,git,now
 from v42_native.contracts import digest
 from v42_may_campaign_native90.budget import DateBudget
-from v43_mess.budget import worker_permit
+from v43_mess.budget import worker_permit,heavy_peers
 from .adapter import scope,require_m1
 
 
@@ -53,10 +53,7 @@ def run(path):
     verify_records(request['sources']+[request['M1_result']])
     if digest(request['sources'])!=request['source_sha']:raise ValueError('A2_SOURCE_FREEZE_SHA')
     m1=read(request['M1_result']['path']);mess=require_m1(m1)
-    for p in psutil.process_iter(['pid','cmdline']):
-        if p.pid!=os.getpid() and any(x in ' '.join(p.info['cmdline'] or []) for x in
-                ('-m v43_actual.compare','-m v43_arms.compare','-m v43_mess.worker','-m v43_a2.worker','-m v43.golden')):
-            raise ValueError('A2_NO_COMPETING_HEAVY_WORKER')
+    if heavy_peers():raise ValueError('A2_NO_COMPETING_HEAVY_WORKER')
     attempt.mkdir(parents=True);atomic(attempt/'request.json',request)
     atomic(attempt/'START.json',dict(UTC=now(),pid=os.getpid(),process_created=psutil.Process().create_time(),
         source_commit=git('rev-parse','HEAD').decode().strip(),sources=request['sources'],M1_result=request['M1_result'],
