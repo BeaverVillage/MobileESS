@@ -12,7 +12,7 @@ def actual(arm,output,*,reference_folder=None,mess_result=None,correction_proof=
     bound=read(pointer)['certificate'];verify_records([bound])
     from v43_corrective.compare import run
     return run(arm,output,reference_folder=reference_folder,mess_result=mess_result,
-        correction_proof=correction_proof,control_slots=120,ac_mode='FAST',ac_certification=bound['path'])
+        correction_proof=correction_proof,control_slots=120,ac_mode='FAST',ac_certification=bound['path'],variants=('C0',))
 
 
 def main():

@@ -1,6 +1,6 @@
 V43 Corrective Actual 및 Current AC 개선 준비 — 실제 실행 인증 전
 
-기존 Golden003, Strict B1 C0/C1, 실행 중인 B0 Attempt002의 Source와 Raw는 변경하지 않았다. 별도 v43_corrective namespace만 추가했다. May01 네 Arm 및 두 R1 정책이 최종 범위이며 May02~31은 금지다.
+기존 Golden003, Strict B1 C0/C1, 공식 중단된 B0 Attempt002의 Source와 Raw는 변경하지 않았다. 별도 v43_corrective namespace만 추가했다. May01 네 Arm 및 두 R1 정책이 최종 범위이며 May02~31은 금지다.
 
 확인한 결함과 수정 범위:
 
@@ -19,4 +19,8 @@ PR189의 빠른 B0는 가벼운 사건 큐와 한 엔진에서의 순차 96슬�
 
 Native0 fixture 및 기존 경계 회귀 55개가 PASS했다. 이는 실제 DSS 동등성 또는 새 Actual96/Fresh96 인증이 아니다. 실제 관측 Prefix의 원본/개선본 shadow 대조, 짝지은 짧은 이벤트 Canary의 UID·사이트·시각·GPU 대조, 실제 시간·호출 수 비교를 통과해야 production FAST 경로를 허용한다. 전체 Actual을 기존 느린 FULL_PREFIX/SHADOW 모드로 새 실행하는 경로는 차단했다.
 
-현재 검증 상태: 실제 Prefix 동등성 NOT_RUN, 새 R1 실제 Canary NOT_RUN, 새 R1 Actual96/Fresh96 NOT_RUN, M1/A2/M2 NOT_RUN. B0 Attempt002는 자연 완료까지 유지하고 정산 후 실제 동등성 검증과 병목 개선, 이어 B2/B3 M-stage를 진행한다. 성능 개선이나 Unknown 서비스 회복을 아직 수치로 주장하지 않는다.
+현재 검증 상태(2026-10-16 05:54UTC): 사용자 지시로 B0 Attempt002를 공식 중단·정산했다. Wall3442.416s, Native0/0s/inflight없음, PID종료/6lockFREE/Source불변. C0만 독립 완료이고 C1 및 전체 attempt는 인증되지 않았다.
+
+실제 관측 Prefix 후보15개의 원본/개선 동등성 PASS: 탭/Cap,386노드 전압,383분기상 전류 및 물리 판정 일치. 후보 검사합계25.397→9.274초, 분기측정418236→51322, Inventory2184→268. 과거 SolveSnap재생1077→1077로 아직 유지한다. 해당 원본 궤적의 독립 Fresh96 PASS. 전체 Actual의 1분 완료나 모든 May01후보 동등성을 주장하지 않는다.
+
+수정 B1의 실제25슬롯 이벤트 Canary(FULL_REFERENCE)를 실행 중이다. 다음 SHADOW 쌍과 UID/사이트/시각/GPU/물리 동등성을 확인한 뒤 FAST 공식 실행을 허용한다. 새 전체 R1 Actual96/Fresh96 및 M1/A2/M2는 NOT_RUN이다. Signed전압거부3건이 원본 실제AC에서는 PASS이며 노드상축/계획-실제탭 차이를 확인했다. 원인 검토 전 affine hard gate는 유지한다.

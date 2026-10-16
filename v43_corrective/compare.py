@@ -16,9 +16,11 @@ from .current_ac import FullPrefixReferenceAC,CertifiedPrefixAC,ShadowCertifiedP
 
 
 def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,correction_proof=None,
-        ac_mode='SHADOW',ac_certification=None):
+        ac_mode='SHADOW',ac_certification=None,variants=('C0',)):
     output=Path(output);freeze=output.with_name(output.name+'.CORRECTIVE_SOURCE_FREEZE.json')
     if output.exists() or freeze.exists():raise ValueError('NEW_CORRECTIVE_ACTUAL_ATTEMPT_REQUIRED')
+    variants=tuple(variants)
+    if variants not in (('C0',),('C0','C1')):raise ValueError('EXPLICIT_SUPPORTED_CONTROL_VARIANTS_REQUIRED')
     if control_slots not in (1,25,120):raise ValueError('SUPPORTED_CORRECTIVE_HORIZON_REQUIRED')
     if ac_mode not in ('FULL_REFERENCE','SHADOW','FAST'):raise ValueError('EXPLICIT_CURRENT_AC_MODE_REQUIRED')
     if control_slots==120 and ac_mode!='FAST':raise ValueError('NO_NEW_FULL_ACTUAL_WITH_UNCERTIFIED_FULL_PREFIX_PATH')
@@ -43,7 +45,7 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
     if ac_certification:sources.append(record(ac_certification))
     atomic(freeze,dict(UTC=now(),arm=arm,policy_version=POLICY_ID,source_commit=git('rev-parse','HEAD').decode().strip(),
         sources=sources,control_slots=control_slots,physical_bands_changed=False,
-        parent_Golden003_reoptimized=False,Strict_outputs_overwritten=False,ac_mode=ac_mode))
+        parent_Golden003_reoptimized=False,Strict_outputs_overwritten=False,ac_mode=ac_mode,variants=variants))
     policies=[];controllers=[];oracles=[]
     def policy(*args,**kwargs):
         kwargs['evidence_scope']='REAL_V43_R1_FLEX30_CORRECTIVE'
@@ -55,12 +57,14 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
         p=cls(*args,mess_plan=mess,day_start_seconds=1746021600.,**kwargs);oracles.append(p);return p
     namespace=dict(original.__dict__,prepare=binding.prepare,build=binding.build,
         IssueContinuityPolicy=policy,V43EventController=controller,
-        OriginalCurrentAC=oracle)
+        OriginalCurrentAC=oracle,__selected_variants=variants)
     # Fresh always takes the independent original sequential all-measurement
     # path, even when admission uses certified historical proof reuse.
     body=textwrap.dedent(inspect.getsource(original.run))
     if body.count('fresh=oracle._probe(rows)')!=1:raise ValueError('INDEPENDENT_FRESH_REUSE_BOUNDARY_DRIFT')
     body=body.replace('fresh=oracle._probe(rows)','fresh=oracle.full_fresh_probe(rows)')
+    if body.count("for variant in ('C0','C1'):")!=1:raise ValueError('EXPLICIT_VARIANT_REUSE_BOUNDARY_DRIFT')
+    body=body.replace("for variant in ('C0','C1'):",'for variant in __selected_variants:')
     exec(compile(body,__file__,'exec'),namespace);function=namespace['run']
     verify_records(sources);result=function(output,control_slots=control_slots);verify_records(sources)
     atomic(output/'CORRECTIVE_POLICY_RECEIPTS.json',dict(arm=arm,policy_version=POLICY_ID,
@@ -70,7 +74,7 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
             overruns=c.overrun_observations,Known_commands_unchanged=c.known_schedule==c._frozen_known_commands)
             for c in controllers],independent_Actual_and_Fresh=record(output/'RESULT.json')))
     for index,o in enumerate(oracles):
-        folder=output/('C0' if index==0 else 'C1')
+        folder=output/variants[index]
         if not folder.exists():folder.mkdir()
         if isinstance(o,CertifiedPrefixAC):atomic(folder/'PREFIX_CERTIFICATES.json',o.certificates())
         atomic(folder/'AC_ALGORITHM_METRICS.json',dict(mode=ac_mode,Current_AC_calls=o.calls,
