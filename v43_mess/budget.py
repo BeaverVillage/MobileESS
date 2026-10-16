@@ -15,8 +15,9 @@ def worker_permit(request, sources):
     from v42_may_campaign import execution as legacy
     from v42_may_campaign_native90 import execution as inherited
     from v42_may_campaign_native90 import budget as inherited_budget
-    if request['day'] != '2025-05-01' or request['arm'] not in ('B2','B3') or request['stage'] not in ('M1','M2'):
-        raise PermissionError('V43_MAY01_MESS_STAGE_ONLY')
+    valid=(request['arm']=='B2' and request['stage']=='M1') or (request['arm']=='B3' and request['stage'] in ('M1','M2','A2'))
+    if request['day'] != '2025-05-01' or not valid:
+        raise PermissionError('V43_MAY01_EXPLICIT_ARM_STAGE_ONLY')
     with ExitStack() as stack:
         locks=[Path('D:/MobileESS_V42/runtime/v42_may_campaign/NATIVE_WORKER.lock')]
         locks += [Path(f'D:/MobileESS_V42/runtime/v42_may_campaign/native_slots/SLOT_{i}.lock') for i in (1,2,3)]
@@ -28,7 +29,7 @@ def worker_permit(request, sources):
         def guard(model):
             verify_records(sources)
             original(model)
-        token=legacy._active.set(dict(request=request,manifest=dict(schema='V43_MAY01_MESS_STAGE_PERMIT_V1'),
+        token=legacy._active.set(dict(request=request,manifest=dict(schema='V43_MAY01_STAGE_PERMIT_V1'),
             worker_slot=None,manifest_sha=request['source_sha']))
         legacy.guard=inherited.guard=inherited_budget.guard=guard
         try:yield

@@ -23,6 +23,9 @@ def report(attempt):
         raise ValueError('ACTUAL_NATIVE0_RECONCILIATION_REQUIRED')
     verify_records(start['sources'])
     case=read(attempt/'CASE/CASE_BINDINGS.json')
+    arm=case.get('arm','B1')
+    arm_freeze=attempt.with_name(attempt.name+'.ARM_SOURCE_FREEZE.json')
+    if arm_freeze.exists():verify_records(read(arm_freeze)['sources'])
     verify_records(case['source_receipts'])
     source_plan=read(case['source_receipts'][0]['path'])
     source_actual=read(case['source_receipts'][1]['path'])
@@ -33,13 +36,15 @@ def report(attempt):
     begin=issue+21600;end=begin+86400
     if known & unknown or len(known)!=case['Known'] or len(unknown)!=case['Unknown']:
         raise ValueError('FROZEN_KNOWN_UNKNOWN_ROSTER_DRIFT')
-    golden=read(case['Golden003']['path'])
-    if not set(golden['selected_jobs']) <= known:
+    parent=case.get('Final_AIDC_reference',case['Golden003'])
+    verify_records([parent])
+    selected=read(parent['path'])['selected_jobs']
+    if not set(selected) <= known:
         raise ValueError('FUTURE_UNKNOWN_UID_IN_GOLDEN_PLANNING')
     import json
     with np.load(attempt/'GOLDEN_REFERENCE/REFERENCE.npz',allow_pickle=False) as archive:
         commands=json.loads(str(archive['Known_UID_Schedule_JSON']))
-    if set(commands)!=set(golden['selected_jobs']) or digest(commands)!=case['Known_commands_sha']:
+    if set(commands)!=set(selected) or digest(commands)!=case['Known_commands_sha']:
         raise ValueError('GOLDEN_SELECTED_COMMAND_CONTENT_CHANGED')
     summaries=[];uid_rows=[];physical={}
     for variant in ('C0','C1'):
@@ -165,7 +170,7 @@ def report(attempt):
             GPU_runtime_violations=capacity_violations,Rack_runtime_violations=rack_violations,
             source_compatibility_violations=compatibility_violations,WAN_transfer_calls=0,
             controller_P50_seconds=stage['tick_P50_seconds'],controller_P95_seconds=stage['tick_P95_seconds'],
-            controller_Max_seconds=stage['tick_Max_seconds'],controller_timing_scope='WHOLE_ISSUE_TO_END_120_CONTROL_TICKS',
+            controller_Max_seconds=stage['tick_Max_seconds'],controller_timing_scope='WHOLE_ISSUE_TO_END_CONTROLLER_CALLBACKS_120_PHYSICAL_SLOTS',
             Note='Hard-feasible alternative count is zero if Source eligibility is zero; otherwise requires candidate-level score evidence.')
         if not eligible:summary['Pre_site_Hard_Feasible']=0
         summaries.append(summary)
@@ -173,7 +178,7 @@ def report(attempt):
     artifact=attempt/'INDEPENDENT_UNKNOWN_UID_AUDIT.csv'
     with artifact.open('x',encoding='utf-8-sig',newline='') as stream:
         writer=csv.DictWriter(stream,fieldnames=list(uid_rows[0]));writer.writeheader();writer.writerows(uid_rows)
-    report=dict(UTC=now(),schema='V43_INDEPENDENT_ACTUAL_UID_AND_PHYSICAL_REPORT_V1',
+    report=dict(UTC=now(),schema='V43_INDEPENDENT_ACTUAL_UID_AND_PHYSICAL_REPORT_V1',arm=arm,
         result=record(attempt/'RESULT.json'),summaries=summaries,UID_audit=record(artifact),
         C0_C1_physical_bit_exact=equal,Source_pre_site_production_claim=False,
         initial_source_sites='44_MODEL_ASSUMED_210_ORIGINAL_FIXED',R1='NOT_EXECUTED',R2='HOLD',
@@ -182,7 +187,8 @@ def report(attempt):
         conditional_Gate_B_execution_PASS=result.get('Gate_B_PASS',False),
         UID_OriginalRoster_and_KnownCommands_PASS=True,GPU_IT_PF_Q_replay_PASS=True)
     atomic(attempt/'INDEPENDENT_ACTUAL_REPORT.json',report)
-    atomic(DOC/'GATE_B_ACTUAL96_INDEPENDENT_CERTIFICATION.json',dict(report=record(attempt/'INDEPENDENT_ACTUAL_REPORT.json'),
+    destination='GATE_B_ACTUAL96_INDEPENDENT_CERTIFICATION.json' if arm=='B1' else f'V43_MAY01_{arm}_ACTUAL96_INDEPENDENT_CERTIFICATION.json'
+    atomic(DOC/destination,dict(report=record(attempt/'INDEPENDENT_ACTUAL_REPORT.json'),
         conditional_Gate_B_execution_PASS=report['conditional_Gate_B_execution_PASS'],
         UID_OriginalRoster_and_KnownCommands_PASS=True,GPU_IT_PF_Q_replay_PASS=True,
         Source_initial_sites_certified=False,FORECAST_CAUSAL_AVAILABILITY='NOT_CERTIFIED',CAUSAL_PASS=False))

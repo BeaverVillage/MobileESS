@@ -1,5 +1,5 @@
 {
-  "UTC": "2026-10-16T04:49:52.968278+00:00",
+  "UTC": "2026-10-16T04:54:07.813759+00:00",
   "scope_authority": {
     "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\USER_STEERING_MAY01_FOUR_ARM_ONLY.txt",
     "bytes": 15576,
@@ -36,7 +36,7 @@
     "Source_presite": 0
   },
   "Phase_B_B0": {
-    "state": "ATTEMPT001_OFFICIALLY_STOPPED_AFTER_REAL_ARM_DISPATCH_BUG; ATTEMPT002_READY",
+    "state": "RUNNING_ATTEMPT002",
     "reference": "D:/MobileESS_V43/inputs/V43_MAY01_B0_REFERENCE_003/AIDC_REFERENCE.json",
     "audit": {
       "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_REFERENCE_AUDIT.json",
@@ -58,7 +58,18 @@
       "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_UNIFORM_FOUR_ARM_ACTUAL_NATIVE0_GUARDS.xml",
       "bytes": 3523,
       "sha256": "f28b5742d4481bb722ac6e6b723be972a387f3e7f7382d29e593bb5aac2ea9de"
-    }
+    },
+    "attempt": "D:/MobileESS_V43/runtime/may01_B0_C0_C1_actual96_attempt002",
+    "pid": 31144,
+    "creation": 1792126209.8237405,
+    "source_commit": "506821c09c7deaf5b666ee41c82dbeca9ffad1cf",
+    "source_freeze": {
+      "path": "D:\\MobileESS_V43\\runtime\\may01_B0_C0_C1_actual96_attempt002.ARM_SOURCE_FREEZE.json",
+      "bytes": 8592,
+      "sha256": "e9ab24314fe5de28874a38b7e350d8c9a8272e8a02cd5af41d3d928f94156518"
+    },
+    "Planning_AC96": "PASS",
+    "uniform_policy_dispatch": true
   },
   "Phase_C_B2": {
     "state": "SOURCE_ADAPTER_READY_REAL_FULL_NATIVE0_NOT_RUN",
@@ -69,16 +80,22 @@
   "Phase_D_B3": {
     "A1": "GOLDEN003_EXACT_FREEZE_REUSE_CANDIDATE",
     "M1": "SOURCE_ADAPTER_READY_NOT_RUN",
-    "A2": "NOT_IMPLEMENTED_PR189_FIXED_M1_ADAPTER_REQUIRED",
-    "M2": "NOT_RUN"
+    "A2": "SELECTIVE_ADAPTER_AND_WORKER_IMPLEMENTED_REAL_CASE_NATIVE0_NOT_RUN",
+    "M2": "ACCEPTED_A2_HANDOFF_IMPLEMENTED_NOT_RUN",
+    "A2_guards": {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_A2_MESS_SELECTIVE_NATIVE0_GUARDS.xml",
+      "bytes": 2270,
+      "sha256": "6c05eb5334c10b14da46f5580b76ce376a59e6e5f64115b0e3ae3618d44907a9"
+    }
   },
   "next_tasks": [
-    "Reconcile current Gate B and run independent UID/physical report",
-    "Reuse original B0 Reference and verify independent B0 input/PCC identity",
+    "Finish B0 attempt002, independently verify shared C0/C1/Full physical receipts and reconcile",
+    "Run real B2 M FULL Native0 then seedless K48 + Beam/Joint with B0_REFERENCE_003; source-freeze first",
     "Native0 M full/compact/K48/Joint with exact B0-fixed B2 Case",
     "Execute B2 independently; B3 A1/M1/A2/M2 remains independent if B2-specific failure",
     "Freeze final per-arm P/Q/AIDC and run shared C0/C1 plus Fresh96",
-    "Update required four-arm tables/graph, source/Native ledgers, commit/push and PR232"
+    "Update required four-arm tables/graph, source/Native ledgers, commit/push and PR232",
+    "B3 M1 exact Golden003 handoff; A2 uses v43_a2.worker with mandatory physical-domain proof reuse; M2 fixes accepted A2"
   ],
   "Worker": 1,
   "Threads": 1,

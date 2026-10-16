@@ -49,7 +49,14 @@ def run(request_path):
                 from v43_arms.reference import load as baseline
                 payload=baseline(request['fixed_AIDC_reference'])
             elif request['stage']=='M1':payload=golden_a1()
-            else:raise ValueError('B3_M2_REQUIRES_EXPLICIT_ACCEPTED_A2_ADAPTER')
+            else:
+                from v43_arms.reference import load as fixed_aidc
+                payload=fixed_aidc(request['fixed_AIDC_reference'])
+                i=payload['identity']
+                if (i.get('stage')!='A2' or i.get('arm')!='B3' or i.get('FULL_feasible') is not True
+                        or not 0<=i.get('global_gap',1.)<=.005):
+                    raise ValueError('M2_REQUIRES_CURRENT_FULL_A2_WITH_INDEPENDENT_GAP')
+                verify_records([i['parent_acceptance']])
             with native_zero() as denied:
                 progress(dict(phase='ORIGINAL_FULL_M_BUILD_NATIVE0'))
                 case=build(payload,request,progress)

@@ -11,6 +11,14 @@ from v42_native.contracts import digest
 def golden_a1():
     from v43_actual.case import accepted
     certificate,freeze,native,windows,arrays=accepted()
+    verify_records([certificate['source_freeze']])
+    source=read(certificate['source_freeze']['path'])
+    verify_records(source['sources']+source['support']+source['scientific_inputs'])
+    atomic(DOC/'V43_B3_A1_GOLDEN003_REUSE_EQUIVALENCE.json',dict(PASS=True,
+        scope='B3_A1_EXACT_ACCEPTED_PR189_B1_A1_REUSE_ONLY_NOT_A2',
+        source=certificate['source_freeze'],case_input=freeze['scientific_input'],
+        planning=certificate['planning_freeze'],arrays=certificate['planning_arrays'],
+        new_optimization_run=False,Native_calls=0,A2_certified=False))
     return dict(bundle=native,planning=arrays,
         identity=dict(PASS=True,day=native['day'],parent_case_sha=certificate['planning_freeze']['sha256'],
             aidc_anchor=certificate['planning_freeze']['sha256'],stage='A1',arm='B1',
@@ -47,7 +55,6 @@ def build(payload,request,progress=None):
         if not np.array_equal(branches,np.asarray(case.coefficients[0].branch_names).astype(str)):
             raise ValueError('ORIGINAL_M_BRANCH_METADATA_DRIFT')
         nodes=z['node_names'].copy()
-    from types import SimpleNamespace
     # Expose names to K48's existing metadata-only interface, leaving the
     # original normalized coefficient records intact for physical validation.
     case._v43_coefficient_metadata=dict(node_names=nodes,branch_names=branches,
