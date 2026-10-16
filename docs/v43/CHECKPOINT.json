@@ -1,5 +1,5 @@
 {
-  "state": "RUNNING_B1_C0_CORRECTIVE_ACTUAL96",
+  "state": "PREPARING_B2_M1",
   "pid": 39084,
   "process_created": 1792120643.9523497,
   "started_UTC": "2026-10-16T03:17:24.701728+00:00",
@@ -25,13 +25,13 @@
   "FORECAST_CAUSAL_AVAILABILITY": "NOT_CERTIFIED",
   "CAUSAL_PASS": false,
   "finished_UTC": "2026-10-16T03:41:28.647150+00:00",
-  "active_PID": 47716,
+  "active_PID": null,
   "result": {
     "path": "D:\\MobileESS_V43\\runtime\\golden_B1_20250501_attempt003\\RESULT.json",
     "bytes": 3552,
     "sha256": "298251269b7227d49e8c445af58206fb2a3800f48995fc65526661a5fc596bc5"
   },
-  "next_stage": "MONITOR_PROFILE_REPORT_B1_NO_B2_DISPATCH",
+  "next_stage": "B2_M1",
   "Golden004_required": false,
   "numerical_certificate": {
     "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GOLDEN003_CERTIFIED_NUMERICAL_CASE.json",
@@ -47,7 +47,7 @@
     "sha256": "2c060ffcb70280899934c4c35d41a79dc109ba6ababe7e216509ca840d718334"
   },
   "Gate_B_started_UTC": "2026-10-16T04:11:08.245762+00:00",
-  "updated_UTC": "2026-10-16T06:27:22.849035+00:00",
+  "updated_UTC": "2026-10-16T06:51:28.508861+00:00",
   "allowed_execution_dates": [
     "2025-05-01"
   ],
@@ -58,15 +58,15 @@
     "bytes": 15576,
     "sha256": "616cdf65b1df0179b2c9b5890a1c9c01465e0abd02fa98516ddafb34a5d27231"
   },
-  "current_stage": "B1_C0_ACTUAL96_FRESH96",
+  "current_stage": "B2_M1",
   "May01_resume_manifest": {
     "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_MAY01_RESUME_MANIFEST.json",
     "bytes": 6516,
     "sha256": "e2611237892f67a48237bba88a8abd469a92fea6c940aaff7581577103d8f58c"
   },
   "automation_id": "v43-may01",
-  "active_process_created": 1792131950.6340928,
-  "active_attempt": "D:\\MobileESS_V43\\runtime\\may01_B1_C0_corrective_actual96_attempt001",
+  "active_process_created": null,
+  "active_attempt": null,
   "M1_status": "NOT_STARTED_B0_ALREADY_RECONCILED",
   "M1_requests_source_commit": "5ca34a8ae",
   "B2_M1_request_pointer": {
@@ -120,7 +120,7 @@
   "legacy_strict_actual_entrypoints": "HISTORICAL_ONLY_NO_NEW_OFFICIAL_CAMPAIGN_EXECUTION",
   "official_corrective_route_status": "APPLIED_REAL_PREFIX_AND_SHORT_EVENT_VALIDATION_REQUIRED_BEFORE_FULL_ACTUAL",
   "B1_corrective_real_event_canary": "PAIRED_25_SLOT_C0_C1_PASS_NOT_ACTUAL96",
-  "user_stop_current_attempt": true,
+  "user_stop_current_attempt": false,
   "restart_same_slow_actual_allowed": false,
   "B0_stop_reconciliation": {
     "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_ACTUAL002_USER_STOP_RECONCILED.json",
@@ -148,9 +148,9 @@
     "sha256": "b08303a14d11d7f0228ac37a63af88510025267fcb9f54ef4ccee2e279904844"
   },
   "latest_user_scope": {
-    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\USER_STEERING_B1_PRIORITY_40MIN.txt",
-    "bytes": 667,
-    "sha256": "90c4c03e7023b5c091c89d802b9e9efc64fa231075facaf9c3a64c440fb04e1e"
+    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\USER_STEERING_B2_EXECUTION_PRIORITY.txt",
+    "bytes": 807,
+    "sha256": "461189a1c251bf4b7309626e0143375e6e23fa29478d6df40c7562860aadfba0"
   },
   "B0_affine_hard_gate": "UNCHANGED_NO_CASE_SPECIFIC_MISMATCH_IN_SAMPLED_INPUTS",
   "active_started_UTC": "2026-10-16T06:25:51.766692+00:00",
@@ -166,8 +166,8 @@
     "bytes": 1198,
     "sha256": "745eb0f9321af5d1195ccefe4e17e2506554fdc15053789c65137186d091ccc0"
   },
-  "B2_dispatch_authorized": false,
-  "B2_status": "NOT_STARTED_USER_HOLD",
+  "B2_dispatch_authorized": true,
+  "B2_status": "AUTHORIZED_PREPARING_CURRENT_SOURCE_REQUEST",
   "B1_wall_ceiling_seconds": 2400,
   "official_B0_result": {
     "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_FINAL_EXACT_FCFS_RESULT.json",
@@ -179,5 +179,21 @@
     "path": "D:\\MobileESS_V43\\runtime\\B1_current_math_equivalence_attempt001\\RESULT.json",
     "bytes": 4576,
     "sha256": "10ee9d4990a25a1ccf1edb1aa488ec56e51d4f794194785fa0e540f52fa5f769"
-  }
+  },
+  "next_execution": "B2_M1_FIXED_B0_REFERENCE",
+  "B1_Actual96_Fresh96": "PHYSICAL_EXECUTION_PASS_SERVICE_NOT_CERTIFIED",
+  "B1_completed_result": {
+    "path": "D:\\MobileESS_V43\\runtime\\may01_B1_C0_corrective_actual96_attempt001\\RESULT.json",
+    "bytes": 3541,
+    "sha256": "1ee11c7e5282c5b4787c0ca9bb401de41901e62a9a653b30dcb43a82f427f0a8"
+  },
+  "B1_reconciliation": {
+    "path": "D:\\MobileESS_V43\\runtime\\may01_B1_C0_corrective_actual96_attempt001\\RECONCILIATION.json",
+    "bytes": 120,
+    "sha256": "d5e67ddf97128c2666dec7f2f033db94c90ae633408ca39293964022d8a274d2"
+  },
+  "B1_wall_seconds": 1054.2733345000015,
+  "B1_known_never_started": 579,
+  "B1_known_window_rejected": 414,
+  "B1_service_certification": "NOT_CERTIFIED_PENDING_WINDOW_ADAPTER_AUDIT"
 }

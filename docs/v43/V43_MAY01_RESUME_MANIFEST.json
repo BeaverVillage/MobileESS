@@ -53,7 +53,7 @@
     "candidate_past_replays": 0
   },
   "Phase_C_B2": {
-    "state": "NOT_STARTED_USER_HOLD",
+    "state": "AUTHORIZED_PREPARING_CURRENT_SOURCE_REQUEST",
     "command": "python -m v43_mess.worker <explicit request>",
     "AIDC": "B0_REFERENCE_003_ONLY",
     "old_FULL_MILP_seed": false,
@@ -76,7 +76,7 @@
       "bytes": 419,
       "sha256": "8a6468108f311d0ad42893ce84ccdba59cf1ff75082ed7c09d45bff522496c43"
     },
-    "dispatch_authorized": false
+    "dispatch_authorized": true
   },
   "Phase_D_B3": {
     "A1": "GOLDEN003_EXACT_FREEZE_REUSE_CANDIDATE",
@@ -95,9 +95,9 @@
     }
   },
   "next_tasks": [
-    "Run prepared B1 C0 Actual/Fresh with original Golden003 Planning reuse and 2400s wall limit",
-    "Record real stage timing/CPU/CurrentAC and investigate any sustained stall; official stop/reconcile/profile/fix at ceiling",
-    "Report B1 measured results; do not start B2 or C1"
+    "Execute B2 M1 with fixed existing B0 Planning Reference; do not rerun B0/B1",
+    "Native0 real FULL/relaxation checks then independent K48/Beam/Joint optimization and certification",
+    "Report MESS Native/build/wall, independent UB/LB/gap and final B2 FCFS/Fresh96"
   ],
   "Worker": 1,
   "Threads": 1,
@@ -121,7 +121,7 @@
     "bytes": 17606,
     "sha256": "1e937adf3c18d11c9d397c3c25fb1c627ed360ba896b12e64968b777fa31d3f3"
   },
-  "updated_UTC": "2026-10-16T06:25:15.233916+00:00",
+  "updated_UTC": "2026-10-16T06:51:28.510861+00:00",
   "new_actual_policy": "R1_FLEX30_CORRECTIVE_ACTUAL_V1",
   "Strict_results_immutable": true,
   "next_after_B0_reconciliation": "INDEPENDENT_AC_PREFIX_EQUIVALENCE_AND_PAIRED_SHORT_CANARY_THEN_B2_B3_M",
@@ -154,13 +154,17 @@
   "official_corrective_route_status": "APPLIED_REAL_PREFIX_AND_SHORT_EVENT_VALIDATION_REQUIRED_BEFORE_FULL_ACTUAL",
   "B1_corrective_real_event_canary": "NOT_STARTED_WAIT_B0_OFFICIAL_EXIT",
   "latest_user_scope": {
-    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\USER_STEERING_B1_PRIORITY_40MIN.txt",
-    "bytes": 667,
-    "sha256": "90c4c03e7023b5c091c89d802b9e9efc64fa231075facaf9c3a64c440fb04e1e"
+    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\USER_STEERING_B2_EXECUTION_PRIORITY.txt",
+    "bytes": 807,
+    "sha256": "461189a1c251bf4b7309626e0143375e6e23fa29478d6df40c7562860aadfba0"
   },
   "C0_applicable_arms": [
     "B1",
     "B3"
   ],
-  "C1_enabled": false
+  "C1_enabled": false,
+  "B2_dispatch_authorized": true,
+  "B2_status": "AUTHORIZED_PREPARING_CURRENT_SOURCE_REQUEST",
+  "next_execution": "B2_M1_FIXED_B0_REFERENCE",
+  "B1_Actual96_Fresh96": "PHYSICAL_EXECUTION_PASS_SERVICE_NOT_CERTIFIED"
 }
