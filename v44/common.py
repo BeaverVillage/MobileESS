@@ -4,6 +4,9 @@ import hashlib
 import json
 import os
 import uuid
+import time
+
+_original_replace=os.replace
 
 ROOT=Path(__file__).resolve().parents[1]
 DOC=ROOT/'docs/v44'
@@ -23,10 +26,19 @@ def verify(rows):
     for r in rows:
         actual=record(r['path'])
         if any(actual[k]!=r[k] for k in ('bytes','sha256')):raise ValueError('SOURCE_SHA_DRIFT:'+r['path'])
+
+
+def replace_atomic(source,destination):
+    """Keep atomic replacement across transient Windows reader/AV handles."""
+    for attempt in range(101):
+        try:return _original_replace(source,destination)
+        except PermissionError as error:
+            if getattr(error,'winerror',None) not in (None,5,32,33) or attempt==100:raise
+            time.sleep(min(.01*(attempt+1),.05))
 def atomic(path,value):
     p=Path(path);p.parent.mkdir(parents=True,exist_ok=True)
     tmp=p.with_name(p.name+f'.{os.getpid()}.{uuid.uuid4().hex}.tmp')
-    try:tmp.write_text(json.dumps(value,ensure_ascii=False,indent=2,allow_nan=False)+'\n',encoding='utf8');os.replace(tmp,p)
+    try:tmp.write_text(json.dumps(value,ensure_ascii=False,indent=2,allow_nan=False)+'\n',encoding='utf8');replace_atomic(tmp,p)
     finally:tmp.unlink(missing_ok=True)
 
 

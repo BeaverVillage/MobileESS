@@ -1,4 +1,4 @@
-"""Inspect existing dated sources. Never generate or copy another day's state."""
+"""Inspect dated sources and explicitly approved independent daily assumptions."""
 from datetime import datetime
 from pathlib import Path
 import gzip
@@ -95,8 +95,16 @@ def inspect_day(day,*,native_root=NATIVE_ROOT,bundle_root=BUNDLE_ROOT):
                 files['initial_running_authority']=resolve_receipt(initial);doc=read(files['initial_running_authority']['path'])
                 if doc['inputs']['issue_seconds']!=a['issue_seconds'] or set(doc['mapping'])!=set(running) or not doc.get('PASS'):
                     errors.append('INITIAL_RUNNING_DAY_ROSTER_OR_PHYSICAL_PASS_MISMATCH')
+                from v43_actual.vendor.initialization import load_initialization,replay_capacity,InitialRunningJob
+                policy=load_initialization(files['initial_running_authority']['path'])
+                jobs=[InitialRunningJob(**dict(r,compatible_sites=tuple(r['compatible_sites']))) for r in policy['inputs']['jobs']]
+                replay=replay_capacity(jobs,policy['mapping'],plan['capacities'],plan['rack_compatibility'],
+                    issue_seconds=a['issue_seconds'],site_gpu_types=policy['inputs']['site_gpu_types'])
+                if not replay['PASS']:errors.append('INITIAL_RUNNING_CAPACITY_OR_RACK_FAILURE')
+                if any(r.get('current_site_if_running') is not None and policy['mapping'][u]!=r['current_site_if_running'] for u,r in running.items()):
+                    errors.append('INITIAL_RUNNING_FROZEN_SOURCE_SITE_CHANGED')
                 warnings.append('INITIAL_RUNNING_MODEL_ASSUMPTION_NOT_OBSERVED_SITE_CERTIFICATION')
-            except (NotReady,KeyError) as e:errors.append(str(e))
+            except (NotReady,KeyError,ValueError) as e:errors.append(str(e))
         elif missing:errors.append(f'INITIAL_RUNNING_SOURCE_SITE_UNRESOLVED:{len(missing)}/{len(running)}')
         # The producer starts with deepcopy(MAY01_FINAL_NATIVE_INPUT_BUNDLE).
         # Equal numeric values do not constitute dated observations for later days.
@@ -106,7 +114,11 @@ def inspect_day(day,*,native_root=NATIVE_ROOT,bundle_root=BUNDLE_ROOT):
                 files['initial_MESS_authority']=resolve_receipt(mess);doc=read(files['initial_MESS_authority']['path'])
                 if doc.get('day')!=day or doc.get('issue_seconds')!=a['issue_seconds']:errors.append('INITIAL_MESS_DAY_ISSUE_MISMATCH')
                 if doc.get('initial_sites')!=native['initial_MESS_sites'] or doc.get('SOC')!=native['battery']['initial']:errors.append('INITIAL_MESS_VALUES_MISMATCH')
-            except NotReady as e:errors.append(str(e))
+                if doc.get('PASS') is not True or doc.get('policy')!='INDEPENDENT_DAILY_MESS_INITIAL_STATE_ASSUMPTION':
+                    errors.append('EXPLICIT_DAILY_MESS_ASSUMPTION_REQUIRED')
+                for source in doc.get('source',[]):resolve_receipt(source)
+                warnings.append('INDEPENDENT_DAILY_MESS_INITIAL_STATE_ASSUMPTION')
+            except (NotReady,KeyError,ValueError) as e:errors.append(str(e))
         elif day!='2025-05-01':errors.append('INITIAL_MESS_DATED_SOURCE_UNVERIFIED_TEMPLATE_MAY01_VALUES')
         else:warnings.append('MAY01_ORIGINAL_MESS_INITIAL_MODEL_ASSUMPTION_RETAINED_NOT_OBSERVED')
         descriptors=authority.get('request_descriptors')
@@ -133,7 +145,11 @@ def inspect_day(day,*,native_root=NATIVE_ROOT,bundle_root=BUNDLE_ROOT):
             try:files['D1_snapshot']=resolve_receipt(provenance['snapshot'])
             except NotReady as e:errors.append(str(e))
     return dict(day=day,axis=a,native_folder=str(folder),actual_bundle=str(bundle),files=files,
-        status='INPUT_READY' if not errors else 'INPUT_NOT_READY',blockers=sorted(set(errors)),warnings=warnings,
+        status='MODEL_ASSUMED_VERIFIED' if not errors else 'INPUT_NOT_READY',blockers=sorted(set(errors)),warnings=warnings,
+        source_observations_promoted=False,
+        initial_RUNNING_source_model_sites=len(running)-len(missing) if native and plan and actual else None,
+        initial_RUNNING_assumed_sites=len(missing) if native and plan and actual and initial else None,
+        initial_RUNNING_unresolved=len(missing) if native and plan and actual and not initial else 0,
         Known_count=len(native['known_population']) if native else None,
         Unknown_count=len(actual.get('post_issue_arrivals',[])) if actual else None,
         daily_MESS_values=None if not native else dict(initial_sites=native['initial_MESS_sites'],SOC=native['battery']['initial']),
@@ -152,4 +168,5 @@ def manifest():
             seen[key_sha]=row['day']
     return dict(schema='V44_SEVEN_DAY_INPUT_MANIFEST_V1',days=days,
         cases=[dict(day=r['day'],arm=arm,status=r['status'],blockers=r['blockers']) for r in days for arm in ARMS],
-        generated_or_imputed_sources=False,FORECAST_CAUSAL_AVAILABILITY='NOT_CERTIFIED')
+        generated_or_imputed_sources=False,explicit_independent_daily_model_assumptions=True,
+        source_verified_and_model_assumed_distinct=True,FORECAST_CAUSAL_AVAILABILITY='NOT_CERTIFIED')

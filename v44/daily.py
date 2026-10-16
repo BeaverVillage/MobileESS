@@ -19,8 +19,16 @@ def clone(function,**overrides):
 
 def day_inputs(day):
     require_day(day);row=next(r for r in read(DOC/'SEVEN_DAY_INPUT_MANIFEST.json')['days'] if r['day']==day)
-    if row['status']!='INPUT_READY':raise NotReady('INPUT_NOT_READY:'+day+':'+','.join(row['blockers']))
-    verify(list(row['files'].values()));return row
+    from .initial_states import READY_INPUT_STATES
+    if row['status'] not in READY_INPUT_STATES:raise NotReady('INPUT_NOT_READY:'+day+':'+','.join(row['blockers']))
+    verify(list(row['files'].values()))
+    if (DOC/'svr11_revision01/EPOCH12_SOURCE_PIN.json').exists():
+        from .svr11_grid import ready
+        from .svr11_forecast import INPUTS
+        proof=ready(day);row=deepcopy(row);row['native_folder']=str(INPUTS/day)
+        row['files'].update(native=proof['input'],windows=proof['windows'],electrical=proof['model'],SVR11_hardware=proof['hardware'])
+        row['hardware_revision']='V44_SVR11_REVISION01'
+    return row
 
 
 def load_aidc(folder,day):

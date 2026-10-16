@@ -24,7 +24,11 @@ def assert_current():
     from .common import DOC
     permit=c['request'].get('execution_permit')
     if not permit:raise PermissionError('V44_EXPLICIT_EXECUTION_PERMIT_REQUIRED')
-    verify([permit]);require_execution_permit(permit['path'],read(DOC/'PREEXECUTION_CERTIFICATION.json'))
+    verify([permit])
+    if read(permit['path']).get('mode')=='V44_MAY01_B2_SVR11_PILOT_V1':
+        from .pilot import validate_permit
+        validate_permit(permit['path'],c['request'])
+    else:require_execution_permit(permit['path'],read(DOC/'PREEXECUTION_CERTIFICATION.json'))
     verify(c['request']['sources']);return c
 
 

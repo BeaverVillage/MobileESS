@@ -40,7 +40,8 @@ def build(payload,request,progress=None):
     from .performance import profiled_build
     def report(value):
         if progress:progress(dict(value,arm=request['arm'],stage=request['stage']))
-    case=profiled_build(build_case,stage=request['stage'])(payload,request,report)
+    if not payload['bundle'].get('V44_SVR11'):raise PermissionError('ALL_V44_M_STAGES_REQUIRE_SVR11')
+    case=profiled_build(build_case,stage=request['stage'],transformer_phase_rows=153)(payload,request,report)
     verify_case(case)
     inherited=deepcopy(case.identity)
     case.identity=dict(inherited,schema='V44_DATED_FIXED_AIDC_MESS_CASE_V1',

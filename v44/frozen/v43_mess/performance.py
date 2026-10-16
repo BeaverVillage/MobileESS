@@ -26,10 +26,19 @@ def phase(case_or_folder,name):
                 CPU_seconds=process_time()-cpu,error=error,Native_optimize_included=False))+'\n')
 
 
-def profiled_build(original,*,stage='M1'):
+def profiled_build(original,*,stage='M1',transformer_phase_rows=120):
     source=textwrap.dedent(inspect.getsource(original));tree=ast.parse(source);changed=[]
     if stage not in ('M1','M2'):raise ValueError('EXPLICIT_M1_M2_MODEL_STAGE_REQUIRED')
     route_counts=dict(M_authority=0,A_parent=0,native_stage=0,deadline=0)
+    if transformer_phase_rows!=120:
+        count=[0]
+        class ThermalAxis(ast.NodeTransformer):
+            def visit_BinOp(self,node):
+                if ast.unparse(node)=='120 * 96':
+                    node.left=ast.Constant(transformer_phase_rows);count[0]+=1
+                return self.generic_visit(node)
+        tree=ThermalAxis().visit(tree)
+        if count!=[1] or transformer_phase_rows!=153:raise ValueError('SVR11_EXACT_153_PHASE_ROW_AXIS_REQUIRED')
     if stage=='M2':
         class StageRoute(ast.NodeTransformer):
             def visit_Attribute(self,node):

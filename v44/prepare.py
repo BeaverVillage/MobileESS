@@ -25,7 +25,8 @@ def run(*,tests=None):
     atomic(DOC/'SCIENTIFIC_FREEZE_MANIFEST.json',source)
     atomic(DOC/'SEVEN_DAY_INPUT_MANIFEST.json',data)
     atomic(DOC/'CAMPAIGN_SCHEDULER_MANIFEST.json',schedule)
-    blockers=[dict(day=r['day'],reasons=r['blockers']) for r in data['days'] if r['status']!='INPUT_READY']
+    from .initial_states import READY_INPUT_STATES
+    blockers=[dict(day=r['day'],reasons=r['blockers']) for r in data['days'] if r['status'] not in READY_INPUT_STATES]
     # Static/mock tests are evidence for adapters; they are not a current-source
     # real matrix/Actual/Fresh certification or a 7-day worker integration run.
     runtime=read(DOC/'RUNTIME_ADAPTER_COVERAGE.json') if (DOC/'RUNTIME_ADAPTER_COVERAGE.json').exists() else {}
@@ -38,7 +39,7 @@ def run(*,tests=None):
     certification=dict(schema='V44_PREEXECUTION_CERTIFICATION_V1',UTC=now(),
         status='V44_PRESTART_BLOCKED' if blockers else 'V44_PRESTART_READY',mode='PREPARE_ONLY',
         source_sha=source['source_sha'],source='PASS' if source['source_PASS'] else 'FAIL',
-        inputs='PASS' if not any(r['status']!='INPUT_READY' for r in data['days']) else 'FAIL',
+        inputs='PASS' if not any(r['status'] not in READY_INPUT_STATES for r in data['days']) else 'FAIL',
         date_axis='PASS',algorithm_source_identity='PASS' if source['source_PASS'] else 'FAIL',
         new_model_matrix_validation='NOT_RUN',new_physical_case_contract='NOT_CERTIFIED',
         Native_budgets='PASS_FIXTURES' if testdoc and testdoc.get('failed')==0 else 'NOT_CERTIFIED',

@@ -16,7 +16,8 @@ from .prepare import require_execution_permit
 
 def stage_request(case,stage):
     root=Path(case['case_root'])/stage
-    row=next(r for r in read(DOC/'SEVEN_DAY_INPUT_MANIFEST.json')['days'] if r['day']==case['day'])
+    from .daily import day_inputs
+    row=day_inputs(case['day'])
     request=dict(case,stage=stage,root=str(root),output=str(root/'OUTPUT') if stage in ('A1','A2') else str(root),
         input_folder=row['native_folder'],Threads=1,Worker=1,P2_calls=0,native_budget_seconds=5400,
         wall_budget_seconds=None,target_gap=.005 if stage in ('A1','A2') else .03)
@@ -28,6 +29,38 @@ def stage_request(case,stage):
 def _aidc(result):return str(Path(result['AIDC_reference']['path']).parent)
 
 
+def stage_file(case,stage,name='RESULT.json'):
+    pointer=Path(case['case_root'])/'RESTORED_COMPLETED_STAGES.json'
+    restored=read(pointer) if pointer.exists() else {}
+    return Path(restored[stage]['root'])/name if stage in restored else Path(case['case_root'])/stage/name
+
+
+def stage_result(case,stage,function):
+    """Re-use a sealed completed stage, or restore this M stage's binary case."""
+    request=stage_request(case,stage)
+    if case.get('resume_of'):
+        from .checkpoints import load_completed,crash_admission,assert_dead
+        parent=Path(case['resume_of'])/stage
+        # A previous continuation may itself have consumed earlier stages.
+        inherited=Path(case['resume_of'])/'RESTORED_COMPLETED_STAGES.json'
+        old=read(inherited) if inherited.exists() else {}
+        if stage in old:parent=Path(old[stage]['root'])
+        if parent.exists():
+            assert_dead(parent)
+            if (parent/'COMPLETED_STAGE_CHECKPOINT.json').exists():
+                result=load_completed(parent,request)
+                pointer=Path(case['case_root'])/'RESTORED_COMPLETED_STAGES.json'
+                saved=read(pointer) if pointer.exists() else {}
+                saved[stage]=dict(root=str(parent),checkpoint=record(parent/'COMPLETED_STAGE_CHECKPOINT.json'),new_Native_calls=0)
+                atomic(pointer,saved);return result
+            if stage in ('M1','M2') and not (parent/'BINARY_STAGE_CHECKPOINT.json').exists():
+                raise NotReady('RESUME_BINARY_CHECKPOINT_NOT_SUPPORTED:'+stage)
+            admission=crash_admission(parent,request)
+            if admission['status']!='RESTORABLE_M_BINARY':raise NotReady('RESUME_STAGE_NOT_SUPPORTED:'+stage+':'+admission['reason'])
+            request['resume_parent']=str(parent)
+    return function(request)
+
+
 def run_case(request):
     """One fresh attempt; every stage's files/clocks live below this case."""
     from .execution import case_scope
@@ -35,8 +68,12 @@ def run_case(request):
     from .daily import load_aidc,day_inputs
     from .stages import require_a2
     root=Path(request['case_root']);root.mkdir(parents=True,exist_ok=False)
+    if request.get('resume_of'):
+        from .checkpoints import assert_dead
+        assert_dead(request['resume_of'])
     who=dict(**process_identity(),day=request['day'],arm=request['arm'],worker_slot=request['worker_slot'])
-    atomic(root/'START.json',dict(who,UTC=now(),sources=request['sources'],source_sha=request['source_sha']))
+    atomic(root/'START.json',dict(who,UTC=now(),sources=request['sources'],source_sha=request['source_sha'],
+        scientific_case_root=request.get('scientific_case_root',str(root))))
     result=dict(day=request['day'],arm=request['arm'],status='FAILED',PASS=False)
     with worker_slot(request['day'],request['arm'],request['worker_slot'],root=request['campaign_root'],lease=request['lease']),case_scope(request,request['lease'],who):
         try:
@@ -47,7 +84,7 @@ def run_case(request):
                 aidc=worker.reference(day,folder)
             else:
                 if arm=='B1':
-                    progress('A1');r=worker.a_stage(stage_request(request,'A1'))
+                    progress('A1');r=stage_result(request,'A1',worker.a_stage)
                     if not r.get('PASS'):raise NotReady('A1_NOT_ACCEPTED')
                 else:
                     progress('A1_REUSE');r=read(campaign/'B1_A1'/f'{day}.json')
@@ -57,38 +94,36 @@ def run_case(request):
                 if arm=='B1':
                     atomic(campaign/'B1_A1'/f'{day}.json',r)
                     a1_request=stage_request(request,'A1')
-                    if day=='2025-05-01':
-                        historical=read(DOC/'../v43/GOLDEN_REQUEST_ATTEMPT003.json')
-                        for key in ('_current_date_physical_cache','_physical_cache_identity','physical_cache_case_proof',
-                            '_expected_model_verification','_expected_complete_domain_hashes'):
-                            a1_request[key]=historical[key]
-                    else:
-                        cache=Path(a1_request['output'])/'STATIC/DOMAIN'/day/'PHYSICAL_DOMAIN_CACHE.json'
-                        domain=read(cache);prepared=read(Path(a1_request['output'])/'A_PREPARE_RECEIPT.json')
-                        proof=Path(a1_request['root'])/'ACCEPTED_A1_CACHE_PROOF.json'
-                        atomic(proof,dict(schema='V44_ACCEPTED_A1_PHYSICAL_CACHE',day=day,result=record(Path(a1_request['root'])/'RESULT.json'),
-                            cache=record(cache),sources=request['sources'],inputs={n:record(Path(a1_request['input_folder'])/n)
-                                for n in ('NATIVE_INPUT.json','WINDOWS.json')}))
-                        a1_request.update(_current_date_physical_cache=a1_request['output'],_physical_cache_identity=record(cache),
-                            physical_cache_case_proof=record(proof),_expected_model_verification=prepared['verification'],
-                            _expected_complete_domain_hashes=domain['complete_domain_hashes'])
+                    restored=read(root/'RESTORED_COMPLETED_STAGES.json') if (root/'RESTORED_COMPLETED_STAGES.json').exists() else {}
+                    a1_root=Path(restored['A1']['root']) if 'A1' in restored else Path(a1_request['root'])
+                    a1_output=a1_root/'OUTPUT'
+                    cache=a1_output/'STATIC/DOMAIN'/day/'PHYSICAL_DOMAIN_CACHE.json'
+                    domain=read(cache);prepared=read(a1_output/'A_PREPARE_RECEIPT.json')
+                    proof=Path(a1_request['root'])/'ACCEPTED_A1_CACHE_PROOF.json'
+                    atomic(proof,dict(schema='V44_ACCEPTED_A1_PHYSICAL_CACHE',day=day,result=record(a1_root/'RESULT.json'),
+                        cache=record(cache),sources=request['sources'],inputs={n:record(Path(a1_request['input_folder'])/n)
+                            for n in ('NATIVE_INPUT.json','WINDOWS.json')}))
+                    a1_request.update(_current_date_physical_cache=str(a1_output),_physical_cache_identity=record(cache),
+                        physical_cache_case_proof=record(proof),_expected_model_verification=prepared['verification'],
+                        _expected_complete_domain_hashes=domain['complete_domain_hashes'])
                     atomic(campaign/'B1_A1'/f'{day}.request.json',a1_request)
             mess=None;mess_result=None
             if arm in ('B2','B3'):
-                progress('M1');m=worker.m_stage(stage_request(request,'M1'),aidc)
+                progress('M1');m=stage_result(request,'M1',lambda r:worker.m_stage(r,aidc))
                 if not m['allow_downstream']:raise NotReady(m['status'])
                 if arm=='B3':
                     progress('A2');a2=stage_request(request,'A2')
                     a1_request=read(campaign/'B1_A1'/f'{day}.request.json')
                     a2.update(physical_domain_request=a1_request,
-                        physical_cache_case_proof=a1_request['physical_cache_case_proof'],M1_result=record(root/'M1/RESULT.json'))
-                    r=worker.a_stage(a2,m1=m);require_a2(r,day)
+                        physical_cache_case_proof=a1_request['physical_cache_case_proof'],M1_result=record(stage_file(request,'M1')))
+                    r=stage_result(request,'A2',lambda r:worker.a_stage(dict(r,physical_domain_request=a2['physical_domain_request'],
+                        physical_cache_case_proof=a2['physical_cache_case_proof'],M1_result=a2['M1_result']),m1=m));require_a2(r,day)
                     folder=Path(_aidc(r));aidc,_=load_aidc(folder,day)
-                    progress('M2');m=worker.m_stage(stage_request(request,'M2'),aidc)
+                    progress('M2');m=stage_result(request,'M2',lambda r:worker.m_stage(r,aidc))
                     if not m['allow_downstream']:raise NotReady(m['status'])
-                mess=m['MESS_plan'];mess_result=str(root/('M2' if arm=='B3' else 'M1')/'RESULT.json')
+                mess=m['MESS_plan'];mess_result=str(stage_file(request,'M2' if arm=='B3' else 'M1'))
             progress('ACTUAL_FRESH');a=stage_request(request,'ACTUAL');a['MESS_result']=mess_result
-            result.update(worker.actual(a,folder,mess))
+            result.update(stage_result(request,'ACTUAL',lambda r:worker.actual(dict(r,MESS_result=a['MESS_result']),folder,mess)))
             result['status']='COMPLETE' if result.get('PASS') else 'FAILED'
         except BaseException as error:
             result.update(status='BLOCKED' if isinstance(error,NotReady) else 'FAILED',error=repr(error),traceback=traceback.format_exc())
@@ -103,21 +138,25 @@ def run(root,permit,*,resume=False):
     sources=[r['V44'] for r in freeze['unchanged_source_rows']+freeze['unchanged_support_inputs']]+[r['source'] for r in freeze['inherited_external_M_algorithms']]+freeze['adapters']
     verify(sources);root=Path(root)
     if root.exists() and not resume:raise ValueError('NEW_CAMPAIGN_ROOT_OR_EXPLICIT_RESUME_REQUIRED')
-    states={};running={}
+    states={};running={};resume_sources={};attempt_numbers={}
     with coordinator(root) as lease:
         data=read(DOC/'SEVEN_DAY_INPUT_MANIFEST.json')
         for case in data['cases']:
-            key=(case['day'],case['arm']);path=root/case['day']/case['arm']/'attempt001'
-            if (path/'RESULT.json').exists():states[key]=read(path/'RESULT.json')['status']
-            elif path.exists():
-                # Do not reset a crashed stage's clock. Unknown in-flight Native
-                # time needs a reconciled checkpoint before that case can resume.
-                start=read(path/'START.json')
-                if alive(start):raise NotReady('RESUME_OLD_WORKER_STILL_LIVE')
-                states[key]='BLOCKED'
-                atomic(path/'RESUME_BLOCKED.json',dict(UTC=now(),reason='RECONCILED_STAGE_CHECKPOINT_REQUIRED_NO_NATIVE_CLOCK_RESET',
-                    ledgers=[record(p) for p in path.rglob('*LEDGER.json')]))
-            else:states[key]='READY' if case['status']=='INPUT_READY' else 'INPUT_NOT_READY'
+            key=(case['day'],case['arm']);attempts=sorted((root/case['day']/case['arm']).glob('attempt[0-9][0-9][0-9]'))
+            path=attempts[-1] if attempts else root/case['day']/case['arm']/'attempt001'
+            attempt_numbers[key]=int(path.name[-3:])+1 if attempts else 1
+            complete=(path/'RESULT.json').exists() and read(path/'RESULT.json')['status']=='COMPLETE'
+            if complete:states[key]='COMPLETE'
+            elif path.exists() and resume:
+                from .checkpoints import assert_dead
+                assert_dead(path)
+                # Each stage performs its own completed/binary checkpoint and
+                # Native reconciliation checks before any solver admission.
+                states[key]='READY';resume_sources[key]=path
+            elif path.exists():states[key]='BLOCKED'
+            else:
+                from .initial_states import READY_INPUT_STATES
+                states[key]='READY' if case['status'] in READY_INPUT_STATES else 'INPUT_NOT_READY'
         while True:
             for pid,item in list(running.items()):
                 if item['process'].poll() is not None:
@@ -129,11 +168,20 @@ def run(root,permit,*,resume=False):
             tasks=assignments(states,active)
             for task in tasks:
                 atomic(root/'PHASE.json',dict(lane=task['lane'],UTC=now()))
-                case_root=root/task['day']/task['arm']/'attempt001'
+                task_key=(task['day'],task['arm'])
+                case_root=root/task['day']/task['arm']/f'attempt{attempt_numbers[task_key]:03d}'
                 dated=next(r for r in data['days'] if r['day']==task['day'])
                 dated_sources=sources+list(dated['files'].values())
                 case=dict(task,case_root=str(case_root),campaign_root=str(root),lease=lease,sources=dated_sources,source_sha=digest(dated_sources),
                     scientific_source_sha=freeze['source_sha'],axis=axis(task['day']),execution_permit=record(permit))
+                if task_key in resume_sources:
+                    parent=resume_sources[task_key];start=read(parent/'START.json')
+                    if start['source_sha']!=case['source_sha']:
+                        states[task_key]='BLOCKED'
+                        atomic(root/'resume_audit'/f'{task["day"]}_{task["arm"]}.json',dict(
+                            status='BLOCKED',reason='RESUME_SOURCE_OR_DATED_INPUT_SHA_DRIFT',parent=record(parent/'START.json'),UTC=now()))
+                        continue
+                    case.update(resume_of=str(parent),scientific_case_root=start.get('scientific_case_root',str(parent)))
                 pointer=root/'requests'/f"{task['day']}_{task['arm']}.json";atomic(pointer,case)
                 command=[sys.executable,'-u','-m','v44.campaign','--worker',str(pointer)]
                 env=dict(os.environ,OMP_NUM_THREADS='1',OPENBLAS_NUM_THREADS='1',MKL_NUM_THREADS='1',NUMEXPR_NUM_THREADS='1')
