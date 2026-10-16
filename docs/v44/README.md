@@ -29,3 +29,5 @@ Coordinator는 기존 공유 OS Lock 6개를 보유하며 Worker 슬롯·날짜/
 Current AC 후보별 전체 물리 Raw는 원래 경로에 보존하고, 감사 목록과 LRU 판정 캐시에 중복된 전체 Prefix 객체를 저장하지 않는다. 기존 V43의 감사 압축 방식을 사용해 Raw 참조·원래 판정·현재 요약·정확한 Source/부하 키를 유지한다. 메모리·JSON 직렬화 병목을 제거하는 저장 방식 수정이며 AC Solve/측정/정격 검사는 생략하지 않는다. 중단된 준비 검증 002의 부분 결과와 정산 기록도 별도 보존한다.
 
 필수 준비 검증 최종 상태: **V44_PRESTART_READY**. Source SHA `f0c56b0ec67f58c213025c6528c5006b2ad20d8bcca2045cf92994835a673f72`, Actual Physics Source SHA `739598237b3b8b54e5fe9c7cb24f4b2b07c40ae40911d98614c70d2249e1bb01`. 이는 전체 28 Case PASS를 뜻하지 않는다. 상세 준비 보고는 `v43_planning_svr12_actual_v1/PRESTART_REPORT.json`을 따른다.
+
+최신 사용자 지시: 활성 실행은 `V44_JOINT_CALL300_COMPLETED_K48_RESUME_V1` 운영 정책으로 Joint 호출 cap300초를 적용한다. K48 총300 / Joint 총900과 기존 사용량 차감을 유지하며, 완료 K48 지점에서 새 Attempt로 재개한다. 기존 과학적 Source와 기본140초 경로는 보존하고 별도 실행 정책 SHA로 구분한다. 상세 내용은 `v43_planning_svr12_actual_v1/cap300/README.md`를 따른다.
