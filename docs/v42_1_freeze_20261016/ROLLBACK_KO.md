@@ -1,0 +1,1 @@
+V42.1 소스는 불변 태그 v42.1-freeze-20261016의 커밋으로 복원한다. git switch --detach v42.1-freeze-20261016. 별도 체크아웃을 권장한다. 기존 원본 실행 디렉터리는 이동하거나 덮어쓰지 않는다. EXISTING_FILE_SHA256.jsonl과 EXTERNAL_INPUT_SHA256.json의 경로/바이트/SHA256을 재검증한다. PYTHON_SOLVER_ENVIRONMENT.json의 환경과 원래 실행별 Source/Case/Policy 및 Solver 파라미터를 사용한다. 검증되지 않은 과거 결과는 PASS로 승격하지 않는다.

@@ -4,7 +4,7 @@ import scipy.sparse as sp
 import pytest
 from v42_a_stage_phase1.core import elastic_master,primal_replay,verify_zero
 from v42_integration import table_v_phase_policy as policy
-from v42_integration.table_v_phase_diagnostics import extend_basis,residual_report
+from v42_integration.table_v_phase_diagnostics import extend_basis,residual_report,basis_admission
 from tests.test_v42_table_v_phase_policy import snapshot
 
 
@@ -33,13 +33,70 @@ def test_included_rows_and_artificial_columns_map_with_new_basic_slacks():
     original=snapshot();old=elastic_master(original,[0])
     bigger=replace(original,matrix=sp.csr_matrix([[1.],[2.]]),rhs=np.array([0.,1.]),senses=np.array(['>','=']))
     new=elastic_master(bigger,[0,1])
-    raw=dict(VBasis=np.array([-1,0]),CBasis=np.array([-1]))
+    raw=dict(VBasis=np.array([-1,0]),CBasis=np.array([-1]),X=np.array([0.,0.]))
     v,c,proof=extend_basis(old.snapshot,new.snapshot,raw)
-    assert np.array_equal(v,[-1,0,-1,-1]) and np.array_equal(c,[-1,0])
+    assert np.array_equal(v,[-1,0,0,-1]) and np.array_equal(c,[-1,-1])
     assert proof['exact_inclusion'] and proof['LPWarmStart']==2 and not proof['PStart_DStart_installed']
+    assert proof['new_local_artificials_basic']==1 and proof['new_row_slacks_basic']==0
+    assert not proof['uncompensated_prior_point_replay']['PASS']
+    assert proof['extended_elastic_witness_replay']['PASS']
     B=new.snapshot.matrix[:,np.flatnonzero(v==0)].toarray()
     B=np.c_[B,np.eye(2)[:,np.flatnonzero(c==0)]]
     assert np.linalg.matrix_rank(B)==2
+
+
+@pytest.mark.parametrize('sense,rhs,basic', [('=',-2.,3),('>',2.,2),('<',-2.,2),('<',2.,None)])
+def test_basis_extension_uses_correct_signed_artificial_or_feasible_slack(sense,rhs,basic):
+    original=snapshot();old=elastic_master(original,[0])
+    bigger=replace(original,matrix=sp.csr_matrix([[1.],[2.]]),rhs=np.array([0.,rhs]),senses=np.array(['>',sense]))
+    new=elastic_master(bigger,[0,1]);raw=dict(VBasis=np.array([-1,0]),CBasis=np.array([-1]),X=np.array([0.,0.]))
+    v,c,proof=extend_basis(old.snapshot,new.snapshot,raw)
+    assert np.array_equal(v[:2],raw['VBasis']) and c[0]==raw['CBasis'][0]
+    assert proof['extended_elastic_witness_replay']['PASS']
+    assert proof['original_FULL_feasible_claimed'] is False
+    assert proof['elastic_witness_installed_as_start'] is False
+    if basic is None:assert c[1]==0 and np.count_nonzero(v[2:]==0)==0
+    else:assert c[1]==-1 and v[basic]==0 and np.count_nonzero(v[2:]==0)==1
+
+
+def test_basis_extension_cannot_invent_old_point_or_elasticize_new_hard_row():
+    original=snapshot();old=elastic_master(original,[0])
+    bigger=replace(original,matrix=sp.csr_matrix([[1.],[2.]]),rhs=np.array([0.,1.]),senses=np.array(['>','=']))
+    new=elastic_master(bigger,[0]);raw=dict(VBasis=np.array([-1,0]),CBasis=np.array([-1]))
+    with pytest.raises(ValueError,match='ACTUAL_NATIVE_PRIMAL_REQUIRED'):extend_basis(old.snapshot,new.snapshot,raw)
+    raw['X']=np.array([0.,0.])
+    with pytest.raises(ValueError,match='NEW_HARD_ROW'):extend_basis(old.snapshot,new.snapshot,raw)
+    raw['X']=np.array([-1.,0.])
+    with pytest.raises(ValueError,match='OLD_NATIVE_BASIS_POINT_NOT_PRIMAL_FEASIBLE'):extend_basis(old.snapshot,new.snapshot,raw)
+
+
+@pytest.mark.parametrize('rhs,sense,primal',[(1.,'=',True),(-1.,'>',False)])
+def test_positive_elastic_extension_uses_original_primal_basis_and_safe_extension_can_reuse(rhs,sense,primal):
+    original=snapshot();old=elastic_master(original,[0])
+    bigger=replace(original,matrix=sp.csr_matrix([[1.],[2.]]),rhs=np.array([0.,rhs]),senses=np.array(['>',sense]))
+    new=elastic_master(bigger,[0,1]);raw=dict(VBasis=np.array([-1,0]),CBasis=np.array([-1]),X=np.array([0.,0.]))
+    _,_,proof=extend_basis(old.snapshot,new.snapshot,raw);decision=basis_admission(proof)
+    params=dict(policy.SOURCE18R_FAST.parameters(),**decision['parameters'])
+    assert not decision['barrier_required'] and decision['reuse']
+    assert decision['primal_simplex_required']==primal
+    assert params['Method']==(0 if primal else 2) and params['LPWarmStart']==(1 if primal else 2)
+    assert params['Presolve']==(0 if primal else -1)
+    assert decision['native_basis_preserved_as_evidence'] and not decision['original_FULL_UB_claimed']
+
+
+def test_failed_basis_install_restores_cold_profile_instead_of_primal_without_basis():
+    from v42_integration.table_v_phase_diagnostics import restore_cold_phase_policy
+    class PartialInstall:
+        def __init__(self):self.params=dict(Method=0,LPWarmStart=1,Presolve=0);self.reset_called=False
+        def reset(self):self.reset_called=True
+        def setParam(self,key,value):self.params[key]=value
+    model=PartialInstall();restore_cold_phase_policy(model,policy.SOURCE18R_FAST.parameters())
+    assert model.reset_called
+    assert {k:model.params[k] for k in ('Method','LPWarmStart','Presolve')}==dict(Method=2,LPWarmStart=0,Presolve=-1)
+
+
+def test_basis_admission_does_not_promote_unverified_rank_or_primal_proof():
+    with pytest.raises(ValueError,match='VERIFIED_NATIVE_BASIS_EXTENSION'):basis_admission(dict(PASS=True,new_local_artificials_basic=0))
 
 
 def test_basis_rejects_changed_row_and_incomplete_native_basis():

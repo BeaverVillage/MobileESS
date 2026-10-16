@@ -62,11 +62,14 @@ def residual_report(snapshot,raw,folder,*,master=None):
 
 
 def extend_basis(old,new,raw):
-    """Exact row/column inclusion plus new basic slacks preserves basis rank.
+    """Extend an actual native basis with primal-feasible local pivots.
 
     Old basic columns embed as the upper-left block. Each added row receives
-    its own slack basis column, giving a block triangular basis. No primal or
-    dual start is invented, and Gurobi still validates the installed basis.
+    a local artificial pivot when the old point violates it; otherwise its
+    slack remains basic. New equality slacks fixed to zero cannot absorb a
+    nonzero RHS. The old block is unchanged and the extension is triangular.
+    The constructed elastic witness is diagnostic only, never an original
+    feasible point or an installed primal/dual start.
     """
     if not all(k in raw for k in ('VBasis','CBasis')):raise ValueError('NO_VALID_NATIVE_BASIS')
     oc=old.objectives[0].coefficients();nc=new.objectives[0].coefficients()
@@ -107,6 +110,70 @@ def extend_basis(old,new,raw):
     if np.count_nonzero(vb==0)+np.count_nonzero(cb==0)!=old.matrix.shape[0]:raise ValueError('INCOMPLETE_NATIVE_BASIS')
     vnew=np.full(new.matrix.shape[1],-1,dtype=np.int32);cnew=np.zeros(new.matrix.shape[0],dtype=np.int32)
     vnew[columns]=vb;cnew[mapping]=cb
+    from v42_a_stage_phase1.core import primal_replay
+    if 'X' not in raw:raise ValueError('ACTUAL_NATIVE_PRIMAL_REQUIRED_FOR_BASIS_EXTENSION')
+    x=np.asarray(raw['X'],dtype=float)
+    if not primal_replay(old,x,tolerance=1e-5)['PASS']:
+        raise ValueError('OLD_NATIVE_BASIS_POINT_NOT_PRIMAL_FEASIBLE')
+    point=np.zeros(new.matrix.shape[1]);point[columns]=x
+    byart=defaultdict(list)
+    for key,j in target.items():byart[key[0]].append((key[1],j))
+    added=sorted(set(range(new.matrix.shape[0]))-set(mapping))
+    initial=primal_replay(new,point,tolerance=1e-5)
+    pivots=[]
+    for i in added:
+        a,b=new.matrix.indptr[i:i+2]
+        residual=Fraction(float(new.rhs[i]))-sum((Fraction(float(v))*Fraction(float(point[j]))
+            for j,v in zip(new.matrix.indices[a:b],new.matrix.data[a:b]) if point[j]),Fraction(0))
+        sense=new.senses[i]
+        violated=(residual!=0 if sense=='=' else residual<0 if sense=='<' else residual>0)
+        if not violated:continue
+        eligible=[(sign,j) for sign,j in byart[i] if residual/Fraction(sign)>=0]
+        if not eligible:raise ValueError('NEW_HARD_ROW_HAS_NO_PRIMAL_FEASIBLE_BASIS_EXTENSION')
+        sign,j=eligible[0];value=float(residual/Fraction(sign))
+        if not np.isfinite(value) or not new.lower[j]<=value<=new.upper[j]:
+            raise ValueError('NEW_ARTIFICIAL_BASIS_VALUE_OUTSIDE_DOMAIN')
+        vnew[j]=0;cnew[i]=-1;point[j]=value;pivots.append(j)
+    replay=primal_replay(new,point,tolerance=1e-5)
+    if not replay['PASS']:raise ValueError('EXTENDED_ELASTIC_BASIS_WITNESS_REPLAY_FAILED')
+    if np.count_nonzero(vnew==0)+np.count_nonzero(cnew==0)!=new.matrix.shape[0]:
+        raise ValueError('EXTENDED_NATIVE_BASIS_RANK_COUNT')
     return vnew,cnew,dict(PASS=True,old_rows=len(mapping),new_rows=new.matrix.shape[0]-len(mapping),
         old_columns=len(columns),new_columns=new.matrix.shape[1]-len(columns),
-        exact_inclusion=True,new_row_slacks_basic=True,PStart_DStart_installed=False,LPWarmStart=2)
+        exact_inclusion=True,new_row_slacks_basic=len(added)-len(pivots),
+        new_local_artificials_basic=len(pivots),block_triangular_nonzero_local_pivots=True,
+        uncompensated_prior_point_replay=initial,extended_elastic_witness_replay=replay,
+        old_primal_coordinates_unchanged=True,old_native_basis_unchanged=True,
+        original_FULL_feasible_claimed=False,elastic_witness_installed_as_start=False,
+        PStart_DStart_installed=False,LPWarmStart=2)
+
+
+def basis_admission(proof):
+    """Use a proven feasible original basis without crushing positive pivots.
+
+    May01 crossover stalled with LPWarmStart=2; cold barrier then exhausted
+    Phase I after discarding the feasible extension. Primal simplex with
+    LPWarmStart=1 and Presolve=0 consumes that actual basis on the unchanged
+    original elastic matrix. Performance and exact Phi zero still need a solve.
+    """
+    if not (proof.get('PASS') is True and proof.get('exact_inclusion') is True
+            and proof.get('block_triangular_nonzero_local_pivots') is True
+            and proof.get('extended_elastic_witness_replay',{}).get('PASS') is True
+            and proof.get('old_native_basis_unchanged') is True):
+        raise ValueError('VERIFIED_NATIVE_BASIS_EXTENSION_REQUIRED_FOR_ADMISSION')
+    count=proof.get('new_local_artificials_basic')
+    if type(count) is not int or count<0:raise ValueError('EXACT_NEW_ARTIFICIAL_PIVOT_COUNT_REQUIRED')
+    primal=count>0
+    return dict(reuse=True,barrier_required=False,primal_simplex_required=primal,
+        reason='POSITIVE_ELASTIC_PIVOTS_USE_ORIGINAL_PRIMAL_BASIS' if primal else 'FEASIBLE_NATIVE_BASIS_REUSE_ADMITTED',
+        parameters=dict(Method=0,LPWarmStart=1,Presolve=0) if primal else dict(LPWarmStart=2),
+        native_basis_preserved_as_evidence=True,original_FULL_UB_claimed=False,
+        solver_performance_improvement_claimed=False,
+        policy='ACTUAL_MAY01_ORIGINAL_PRIMAL_BASIS_V2')
+
+
+def restore_cold_phase_policy(model,parameters):
+    """A failed basis install must not leave a basis-dependent solver policy."""
+    model.reset()
+    for key,value in parameters.items():model.setParam(key,value)
+    model.setParam('LPWarmStart',0)

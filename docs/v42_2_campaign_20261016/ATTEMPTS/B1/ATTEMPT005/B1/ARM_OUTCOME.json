@@ -1,0 +1,14 @@
+{
+  "status": "INTERRUPTED_BY_USER",
+  "failed_stage": "A1",
+  "error": "CampaignStopped('TABLE_V_CAMPAIGN_STOP_REQUESTED')",
+  "traceback": "Traceback (most recent call last):\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_run.py\", line 217, in run_arm\n    aidc,aa=execute_current_a(context,main,arm=arm,stage=current,output=folder/current,\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_a.py\", line 186, in execute_current_a\n    dw=execute_current_dw(context,case,built,budget,output/'DW')\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_dw.py\", line 719, in execute_current_dw\n    budget.record_external('RELEASE_P1:'+case.stage+':DW_WALL',result['wall_seconds'],solver='WALL_DIAGNOSTIC')\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_budget.py\", line 396, in record_external\n    self._call_gate(label, require_remaining=False)\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_budget.py\", line 333, in _call_gate\n    require_running(self.path.parent)\n  File \"D:\\v42_trajectory_tracking_may01_20261014\\v42_integration\\table_v_control.py\", line 33, in require_running\n    raise CampaignStopped('TABLE_V_CAMPAIGN_STOP_REQUESTED')\nv42_integration.table_v_control.CampaignStopped: TABLE_V_CAMPAIGN_STOP_REQUESTED\n",
+  "completed_planning_stages": [],
+  "attempted_planning_stages": [],
+  "physical_PASS_claimed": false,
+  "day": "2025-05-01",
+  "arm": "B1",
+  "wall_seconds": 464.3638917999997,
+  "P2_calls": 0,
+  "R2": "HOLD"
+}

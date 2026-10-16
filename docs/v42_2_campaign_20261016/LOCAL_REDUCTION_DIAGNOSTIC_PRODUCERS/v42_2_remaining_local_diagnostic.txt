@@ -1,0 +1,49 @@
+"""Read-only structural census; no optimizer and no production mutations."""
+from pathlib import Path
+from collections import Counter
+from fractions import Fraction as F
+import json,gzip,pickle,sys,time
+import numpy as np
+ROOT=Path(r'D:\v42_trajectory_tracking_may01_20261014');sys.path.insert(0,str(ROOT))
+from v42_integration.m_engine import file_record
+base=ROOT/'docs/v42_2_campaign_20261016';source=base/'LOCAL_REDUCTION_NATIVE0_02/RESULT.json'
+manifest=json.loads(source.read_text());counts=Counter();samples=[];start=time.time()
+for record in manifest['records']:
+    receipt=record['transformation']
+    if file_record(receipt['path'])!=receipt:raise ValueError('SOURCE_BLOCK_DRIFT')
+    with gzip.open(receipt['path'],'rb') as stream:r=pickle.load(stream)
+    s=r['snapshot'];A=s.matrix;degrees=np.diff(A.tocsc().indptr)
+    protected=np.asarray(r['B'].getnnz(axis=0)).ravel()>0
+    for o in s.objectives:
+        for j in o.coefficients():protected[j]=True
+    counts['rows']+=A.shape[0];counts['columns']+=A.shape[1];counts['NNZ']+=A.nnz
+    for degree in [0,1,2]:counts['unpriced_uncoupled_degree_'+str(degree)]+=int(np.count_nonzero((degrees==degree)&~protected))
+    directions={}
+    for i in range(A.shape[0]):
+        a,b=A.indptr[i:i+2];n=int(b-a);sense=str(s.senses[i]);counts['sense_'+sense]+=1;counts['width_'+str(n)]+=1
+        if sense=='=' and n==2:
+            x,y=map(float,A.data[a:b]);ratio=-F(x)/F(y)
+            counts['two_term_equalities']+=1
+            if ratio!=1:counts['two_term_scaled_equalities']+=1
+            if len(samples)<8:samples.append(dict(class_id=record['class_id'],columns=A.indices[a:b].tolist(),coefficients=[x,y],rhs=float(s.rhs[i]),ratio=str(ratio)))
+        values=list(map(lambda c:F(float(c)),A.data[a:b]));pivot=values[0] if n else F(1)
+        direction=tuple((int(j),c/pivot) for j,c in zip(A.indices[a:b],values))
+        norm_sense=sense if pivot>0 else {'<':'>','>':'<','=':'='}[sense]
+        directions.setdefault(direction,[]).append((norm_sense,F(float(s.rhs[i]))/pivot))
+    for rows in directions.values():
+        if len(rows)>1:counts['rows_sharing_exact_lhs_extra']+=len(rows)-1
+        lows=[v for sign,v in rows if sign in ('>','=')];highs=[v for sign,v in rows if sign in ('<','=')]
+        equalities=[v for sign,v in rows if sign=='=']
+        if equalities:
+            counts['directions_with_explicit_equality']+=1
+            if len(set(equalities))!=1:raise ValueError('CONTRADICTORY_EQUALITY_DIRECTION')
+            q=equalities[0]
+            if any((sign=='<' and q>v) or (sign=='>' and q<v) for sign,v in rows):raise ValueError('CONTRADICTORY_PARALLEL_INEQUALITY')
+            counts['parallel_rows_removable_using_equality']+=len(rows)-1
+        else:
+            counts['parallel_same_direction_dominated_rows']+=max(0,len(lows)-1)+max(0,len(highs)-1)
+            if lows and highs and max(lows)==min(highs):counts['opposing_inequalities_forcing_equality']+=1
+result=dict(schema='REMAINING_LOCAL_REDUCTION_CANDIDATES_V1',status='READ_ONLY_DIAGNOSTIC_NOT_EQUIVALENCE_PROOF',Native_calls=0,
+    classes=len(manifest['records']),counts=dict(counts),scaled_equality_samples=samples,source=file_record(source),wall_seconds=time.time()-start)
+(base/'B1_REMAINING_LOCAL_REDUCTION_DIAGNOSTIC.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(result,indent=2))

@@ -32,6 +32,7 @@ QUOTAS = dict(original_oracle.QUOTAS)
 ORIGINAL_NATIVE_PARAMETERS = dict(Threads=1, MIPGap=.03, MIPFocus=3,
     FeasibilityTol=1e-8, IntFeasTol=1e-8, OptimalityTol=1e-8, Seed=42)
 ORIGINAL_CALL_CAP = {16: 90., 32: 180., 48: 180.}
+NATIVE_COEFFICIENT_FLOOR = 2.**-39
 
 
 def require(value, reason):
@@ -113,13 +114,23 @@ def exact_cut(A, d, row, columns, geometry=None):
                      delta * F(float(d['upper'][original_j])))
         values[j] = native
     native_rhs = original_oracle.upward(rhs + error)
+    # Helper elimination can create tiny nonzero coefficients that Gurobi
+    # silently omits. Exact powers of two retain every coefficient and the
+    # same inequality; neither physical rows nor bounds are relaxed.
+    exponent=max(0,-39-(math.frexp(min(abs(v) for v in values.values()))[1]-1))
+    scale=math.ldexp(1.,exponent)
+    scaled={j:v*scale for j,v in values.items()}
+    require(all(math.isfinite(v) and F(v)==F(values[j])*F(scale) for j,v in scaled.items())
+        and math.isfinite(native_rhs*scale) and F(native_rhs*scale)==F(native_rhs)*F(scale),
+        'K48_EXACT_NATIVE_ROW_SCALING_NOT_REPRESENTABLE')
     return dict(original_row=int(row), name=str(d['row_names'][row]),
         source_row_sha=original_oracle.row_sha(A, d, int(row)),
         original_terms={str(j): str(c) for j, c in sorted(terms.items())},
         terms={str(j): str(c) for j, c in sorted(local.items())},
-        native_terms={str(j): c for j, c in sorted(values.items())},
+        native_terms={str(j): c for j, c in sorted(scaled.items())},
         exact_rhs=str(rhs), helper_constant=str(constant), coefficient_box_error=str(error),
-        native_rhs=native_rhs, helper_rows=[dict(row=int(i), source_row_sha=original_oracle.row_sha(A, d, i))
+        native_rhs=native_rhs*scale, native_row_scale=scale,
+        helper_rows=[dict(row=int(i), source_row_sha=original_oracle.row_sha(A, d, i))
                                           for i in sorted(dependencies)])
 
 
@@ -147,12 +158,18 @@ def prepare_k16(case, selected_full_point, output):
     began = perf_counter()
     source = identity(case)
     A, d = case.original_A, case.original_d
-    full = np.asarray(case.lift(selected_full_point), dtype=np.float64)
-    original_replay = replay(A, d, full)
-    require(original_replay['PASS'], 'K48_CURRENT_FULL_INTEGER_POINT_REPLAY_FAILED')
+    full = None if selected_full_point is None else np.asarray(case.lift(selected_full_point), dtype=np.float64)
+    original_replay = None if full is None else replay(A, d, full)
+    require(original_replay is None or original_replay['PASS'], 'K48_CURRENT_FULL_INTEGER_POINT_REPLAY_FAILED')
     rows, columns = physical_axes(A, d)
     rho = int(columns[-1])
-    activity = np.asarray(A @ full).ravel()
+    # With no UB, zero dispatch is only a row-ranking reference. Exact helper
+    # elimination includes fixed AIDC/grid constants; no FULL point is asserted.
+    reference = np.zeros(A.shape[1]) if full is None else full
+    geometry = original_oracle.Geometry(A, d)
+    if full is None:
+        geometry.numerical(reference, np.zeros_like(reference))
+    activity = np.asarray(A @ reference).ravel()
     best = {}
     import re
     for i, name in enumerate(d['row_names']):
@@ -161,17 +178,16 @@ def prepare_k16(case, selected_full_point, output):
         match = re.fullmatch(r'line_thermal_face\[(\d+),(\d+),(\d+)\]', str(name))
         require(match is not None, 'K48_ORIGINAL_THERMAL_ROW_AXIS')
         slot = int(match[1])
-        value = float(activity[i] - d['rhs'][i] + full[rho])
+        value = float(activity[i] - d['rhs'][i] + reference[rho])
         if slot not in best or (value, -i) > (best[slot][0], -best[slot][1]):
             best[slot] = value, i
     require(len(best) == 96, 'K48_ORIGINAL_FULL_96_SLOT_SELECTION_REQUIRED')
     selected = sorted(best.values(), key=lambda p: (-p[0], p[1]))[:16]
-    geometry = original_oracle.Geometry(A, d)
     cuts = [exact_cut(A, d, row, columns, geometry) for _, row in selected]
     packet = dict(A=_matrix(A, rows, columns, cuts), d=_data(d, rows, columns, cuts),
-        rows=rows, columns=columns, cuts=cuts, start=full[columns].copy(), full_start=full,
+        rows=rows, columns=columns, cuts=cuts, start=None if full is None else full[columns].copy(), full_start=full,
         source=source, original_replay=original_replay, K=16,
-        selection='TOP16_DISTINCT_SLOT_MAX_FACETS_FROM_CURRENT_FULL',
+        selection='TOP16_DISTINCT_SLOT_MAX_FACETS_FROM_BASE_GRID' if full is None else 'TOP16_DISTINCT_SLOT_MAX_FACETS_FROM_CURRENT_FULL',
         historical_point_or_bound_read=False, build_wall_seconds=perf_counter()-began)
     certificate = verify_packet(case, packet)
     save_packet(packet, certificate, output)
@@ -214,8 +230,15 @@ def verify_packet(case, packet):
             native = float(value); expected_terms[j] = native
             delta = F(native) - value
             error += max(delta * F(float(e['lower'][j])), delta * F(float(e['upper'][j])))
+        # Independent exact-rational derivation of the positive row scale.
+        scale=F(1)
+        while min(abs(F(v)) for v in expected_terms.values())*scale < F(1,2**39):
+            scale*=2
+        require(F(cut.get('native_row_scale',1.))==scale,'K48_EXACT_NATIVE_ROW_SCALE_DRIFT')
+        expected_terms={j:float(F(v)*scale) for j,v in expected_terms.items()}
+        expected_rhs=float(F(independent.upward(rhs+error))*scale)
         require(cut['coefficient_box_error'] == str(error)
-                and cut['native_rhs'] == independent.upward(rhs + error), 'K48_OUTWARD_ROUNDING_FAILED')
+                and F(cut['native_rhs']) == F(expected_rhs), 'K48_OUTWARD_ROUNDING_FAILED')
         begin, end = B.indptr[len(rows) + k:len(rows) + k + 2]
         observed = {int(j): float(v) for j, v in zip(B.indices[begin:end], B.data[begin:end])}
         require(observed == expected_terms and e['rhs'][len(rows)+k] == cut['native_rhs'],
@@ -224,10 +247,14 @@ def verify_packet(case, packet):
             require(helper['source_row_sha'] == independent.original_row_sha(A, independent.canonical_data(d), helper['row']),
                     'K48_HELPER_ROW_BYTES_DRIFT')
     require(len(set(c['original_row'] for c in cuts)) == len(cuts), 'K48_DUPLICATE_ORIGINAL_GRID_ROW')
-    original = replay(A, d, packet['full_start'])
-    projected = replay(B, e, packet['start'])
-    require(original['PASS'] and projected['PASS'] and np.array_equal(packet['start'], packet['full_start'][columns])
-            and original['objective'] == projected['objective'], 'K48_CURRENT_FULL_POINT_INCLUSION_FAILED')
+    original = projected = None
+    if packet['full_start'] is not None:
+        original = replay(A, d, packet['full_start'])
+        projected = replay(B, e, packet['start'])
+        require(original['PASS'] and projected['PASS'] and np.array_equal(packet['start'], packet['full_start'][columns])
+                and original['objective'] == projected['objective'], 'K48_CURRENT_FULL_POINT_INCLUSION_FAILED')
+    else:
+        require(packet['start'] is None, 'K48_SEEDLESS_CANNOT_CLAIM_MIP_START')
     certificate = dict(schema='TABLE_V_CURRENT_K48_PROJECTION_CERTIFICATE_V1', PASS=True, source=source,
         original_matrix_sha=source['matrix_sha'], original_domain_sha=source['domain_sha'],
         packet_matrix_sha=matrix_sha(B), packet_domain_sha=_domain_sha(e),
@@ -236,9 +263,10 @@ def verify_packet(case, packet):
         proof='Literal original physical rows/bounds/types + exact original grid inequalities; outward rounding only relaxes rows',
         coordinate_representation='IDENTITY_ON_ORIGINAL_FULL_PHYSICAL_COLUMNS_AND_RHO',
         independent_original_geometry_replayed=True, historical_LB_or_UB_transferred=False,
+        positive_dyadic_native_row_scaling_exact=True, source_coefficients_not_deleted=True,
         original_FULL_start_replay=original, projected_start_replay=projected,
         K=len(cuts), physical_rows=len(rows), columns=len(columns), nnz=B.nnz,
-        current_FULL_UB=original['objective'], Native_optimize_calls=0,
+        current_FULL_UB=None if original is None else original['objective'], Native_optimize_calls=0,
         builder_source=file_record(__file__), original_oracle_source=file_record(original_oracle.__file__),
         independent_verifier_source=file_record(independent.__file__))
     certificate['certificate_sha'] = digest(certificate)
@@ -250,7 +278,8 @@ def save_packet(packet, certificate, output):
     sparse.save_npz(output / 'JOINT_A.npz', packet['A'])
     np.savez_compressed(output / 'JOINT_DATA.npz', **packet['d'])
     np.savez_compressed(output / 'JOINT_AXES.npz', rows=packet['rows'], columns=packet['columns'])
-    np.savez_compressed(output / 'JOINT_START.npz', point=packet['start'])
+    if packet['start'] is not None:
+        np.savez_compressed(output / 'JOINT_START.npz', point=packet['start'])
     _write(output / 'EXACT_CUTS.json', packet['cuts'])
     _write(output / 'CURRENT_SOURCE_PROJECTION_CERTIFICATE.json', certificate)
     _write(output / 'NATIVE0_MANIFEST.json', dict(source=packet['source'], K=packet['K'],
@@ -279,7 +308,7 @@ def separate(case, packet, relaxed_point):
     """Original fixed-family quota/diversity/refill selection on current rows."""
     A, d = case.original_A, case.original_d
     point = np.asarray(relaxed_point, dtype=np.float64)
-    require(point.shape == packet['start'].shape and np.isfinite(point).all(), 'K48_LB_SEARCH_POINT_AXIS')
+    require(point.shape == (len(packet['columns']),) and np.isfinite(point).all(), 'K48_LB_SEARCH_POINT_AXIS')
     x = np.zeros(A.shape[1]); errors = np.zeros_like(x)
     x[packet['columns']] = point
     geometry = original_oracle.Geometry(A, d)
@@ -381,7 +410,9 @@ def solve_packet(packet, certificate, budget, output):
             setattr(model.Params, key, value)
         model.Params.LogFile = str(output / 'NATIVE_GUROBI.log')
         x = model.addMVar(A.shape[1], lb=d['lower'], ub=d['upper'], vtype=d['types'], obj=d['objective'])
-        x.VarName = d['names'].tolist(); x.Start = packet['start']
+        x.VarName = d['names'].tolist()
+        if packet['start'] is not None:
+            x.Start = packet['start']
         model.ObjCon = float(d['constant'])
         rows = model.addMConstr(A, x, d['sense'], d['rhs']); rows.ConstrName = d['row_names'].tolist()
         model.update()
@@ -391,7 +422,7 @@ def solve_packet(packet, certificate, budget, output):
             names=np.array_equal(x.VarName, d['names']), rows=np.array_equal(rows.ConstrName, d['row_names']),
             lower=np.array_equal(x.LB, d['lower']), upper=np.array_equal(x.UB, d['upper']),
             types=np.array_equal(x.VType, d['types']), objective=np.array_equal(x.Obj, d['objective']),
-            start=np.array_equal(x.Start, packet['start']), objective_constant=model.ObjCon == 0.)
+            start=np.all(np.asarray(x.Start) == gp.GRB.UNDEFINED) if packet['start'] is None else np.array_equal(x.Start, packet['start']), objective_constant=model.ObjCon == 0.)
         require(all(checks.values()), 'K48_NATIVE_PACKET_READBACK_FAILED')
         _write(output / 'NATIVE_READBACK.json', dict(PASS=True, checks=checks, Native_optimize_calls=0))
         cap = min(ORIGINAL_CALL_CAP[packet['K']], float(budget.remaining()))
@@ -439,9 +470,9 @@ def summarize_current_k48(packet, certificate, history):
     for result in history:
         require(result.get('source') == packet['source'], 'K48_HISTORY_CURRENT_CASE_DRIFT')
     best = max((r['Global_LB'] for r in valid), default=None)
-    if best is not None:
+    if best is not None and ub is not None:
         require(best <= ub + 1e-6, 'K48_BOUND_EXCEEDS_CURRENT_ORIGINAL_FULL_UB')
-    gap = None if best is None else max(0., (ub-best) / max(abs(ub), 1e-10))
+    gap = None if best is None or ub is None else max(0., (ub-best) / max(abs(ub), 1e-10))
     completed = any(r['K'] == 48 for r in history)
     valid_k48 = [r for r in valid if r['K'] == 48]
     target_met = gap is not None and gap <= MESS_GLOBAL_GAP_TARGET

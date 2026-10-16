@@ -41,15 +41,19 @@ def activate(state,negative,x,folder,*,max_batch=64):
 
 def run(native,state,day,certified_zero_point=None):
     G=state['grows'];folder=OUT/day;included=set(range(len(G),state['compact'].matrix.shape[0]))|set(state['axes'].values())
+    from v42_integration.pcc_definitions import hard_rows
+    definitions=hard_rows(state)
+    included.update(definitions)
+    elastic_global=tuple(i for i in G if i not in definitions)
     prior=state['prior_compact'];s=state['compact'];activity=s.matrix@prior-s.rhs
     nonzero=np.diff(s.matrix.indptr[:len(G)+1])>0
     included.update(np.flatnonzero(nonzero&(abs(activity[:len(G)])<=1e-6)))
-    full=elastic_master(s,G);p=artificial_point(full,prior)
+    full=elastic_master(s,elastic_global);p=artificial_point(full,prior)
     contributions=np.zeros(len(G))
     for i,w,x in zip(full.artificial_rows,full.weights,p[s.matrix.shape[1]:]):contributions[i]+=float(w)*x
     included.update(np.argsort(-contributions,kind='stable')[:50]);phase_traces=[];stagnation=0;activation_round=0;bestPhi=None
     if certified_zero_point is not None:
-        x=np.asarray(certified_zero_point);allmaster=elastic_master(s,G)
+        x=np.asarray(certified_zero_point);allmaster=elastic_master(s,elastic_global)
         zero=verify_zero(allmaster,artificial_point(allmaster,x))
         ex=expanded_point(state,x);rep=primal_replay(state['reference'],ex)
         if not zero['PASS'] or not rep['PASS']:raise ValueError('PHASE_I_CHECKPOINT_ZERO_NOT_VERIFIED')
@@ -57,7 +61,7 @@ def run(native,state,day,certified_zero_point=None):
             Phi=0.,activation_rounds=0,independently_replayed_checkpoint=True,native_reoptimization_calls=0))
     while certified_zero_point is None:
         native.remaining();s=state['compact'];rows=tuple(sorted(included));r=restricted(s,rows)
-        global_rows=tuple(j for j,i in enumerate(rows) if i<len(G));master=elastic_master(r,global_rows)
+        global_rows=tuple(j for j,i in enumerate(rows) if i<len(G) and i not in definitions);master=elastic_master(r,global_rows)
         f=folder/'PHASE_I'/('S'+str(len(phase_traces)));f.mkdir(parents=True,exist_ok=True)
         rec,raw=native.solve(master.snapshot,f,'PHASE_I')
         if rec['status']!=2 or not all(k in raw for k in ('X','Pi','RC')):raise RuntimeError('PHASE_I_NOT_OPTIMAL')
@@ -70,7 +74,7 @@ def run(native,state,day,certified_zero_point=None):
             included.update(sep['violated_rows'])
             if len(phase_traces)>=POLICY['row_promotion_after']:included=set(range(s.matrix.shape[0]))
             continue
-        allmaster=elastic_master(s,G);fullpoint=artificial_point(allmaster,x);zero=verify_zero(allmaster,fullpoint)
+        allmaster=elastic_master(s,elastic_global);fullpoint=artificial_point(allmaster,x);zero=verify_zero(allmaster,fullpoint)
         if zero['PASS']:
             ex=expanded_point(state,x);rep=primal_replay(state['reference'],ex)
             if not rep['PASS']:raise ValueError('ORIGINAL_ARTIFICIAL_FREE_REPLAY_FAIL')

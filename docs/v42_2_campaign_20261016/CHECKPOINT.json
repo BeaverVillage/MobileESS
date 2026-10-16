@@ -1,0 +1,504 @@
+{
+  "goal_status": "ACTIVE_NOT_COMPLETE",
+  "freeze_source_SHA": "6473cb6dc7360358ff014b3d4bd92586b304383e",
+  "freeze_tag": "v42.1-freeze-20261016",
+  "branch": "codex/v42.2-may01-b1b2b3-20261016",
+  "PR": "https://github.com/BeaverVillage/MobileESS/pull/231",
+  "current_commit": "a6ca2667a88c8984edd54043a9d8cf1fb22c9fd1",
+  "active_stage": "EXACT_LOCAL_REDUCTION_PROVED_PREPARING_CURRENT_SOURCE_M_NATIVE0",
+  "Native_optimize_calls": 3,
+  "active_PID": null,
+  "active_log": null,
+  "active_output": "docs/v42_2_campaign_20261016/B1_NATIVE0_10",
+  "regression01": {
+    "status": "PASS",
+    "tests": 1246,
+    "Native_calls": 0,
+    "baseline_IDs": 682
+  },
+  "regression02": {
+    "status": "PASS",
+    "tests": 1247,
+    "Native_calls": 0
+  },
+  "B1_FULL_PASS": false,
+  "B2_FULL_PASS": false,
+  "B3_FULL_PASS": false,
+  "B1_ACTUAL_FRESH_PASS": false,
+  "B2_ACTUAL_FRESH_PASS": false,
+  "B3_ACTUAL_FRESH_PASS": false,
+  "next_steps": [
+    "Finish fresh whole-Hybrid Native0 including exact opposing-row equalities.",
+    "Prove original FULL permutation across source revisions; fresh current-source M Native0; release and gate before any new actual Attempt.",
+    "Measure same-case actual performance under unchanged caps; if insufficient, validate exact complete-Local-Polytope DW in a separate pilot."
+  ],
+  "constraints": {
+    "Worker": 1,
+    "Threads": 1,
+    "A_stage": 5400,
+    "Phase_I": 900,
+    "M_stage": 1800,
+    "K48_separate": 300,
+    "Joint_call_cap": 140,
+    "P2_calls": 0,
+    "R2": "HOLD",
+    "physics_relaxation": false,
+    "merge_main": false
+  },
+  "prior_failure": {
+    "output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_01",
+    "reason": "Exact M source revision pin not updated before native0 preparation",
+    "Native_calls": 0,
+    "fix": "m_source_revision expected hashes explicitly updated to actual user-authorized V42.2 code"
+  },
+  "B1_NATIVE0": {
+    "status": "PASS_NATIVE0_MATRIX",
+    "PCC_hard_definitions": 1152,
+    "integer_FULL_rows": 2108858,
+    "integer_FULL_columns": 946756,
+    "LP_rows": 1030845,
+    "LP_columns": 195578,
+    "LP_NNZ": 11165284,
+    "classes": 229,
+    "UIDs": 1555,
+    "PCC_symbolic_candidate": "REJECTED_NONEXACT_BINARY64_COEFFICIENT",
+    "Native_calls": 0,
+    "output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\B1_NATIVE0_02"
+  },
+  "regression03": {
+    "status": "PASS",
+    "tests": 1254,
+    "baseline_IDs": 682,
+    "Native_calls": 0,
+    "output": "docs/v42_2_campaign_20261016/REGRESSION03"
+  },
+  "B2_ATTEMPT001": "PREPARED_FOR_NATIVE0_ONLY_NO_SOLVE_NO_NATIVE_USAGE",
+  "supplemental_external_hash_PID": null,
+  "supplemental_external_hash_session": null,
+  "active_exec_session": null,
+  "latest_observation": {
+    "epoch_seconds": 1792106627.6600144,
+    "P1_neutral_tail_candidates_proved": 4800,
+    "original_integer_FULL_modified": false,
+    "solver_performance_improvement_claimed": false,
+    "actual_input_file_SHA_drift_excluding_intended_code_changes": false
+  },
+  "mandatory_resume_rules": [
+    "No actual Native optimizer live; A Native0 PID33376/session75333 is running on current uncommitted source; do not edit its frozen math producers",
+    "M_NATIVE0_03 is STALE for new scientific Source despite its engine bytes matching. Never seal or load its cache for current source",
+    "B2 ATTEMPT004 prepared0Native for new M Native0; next actual B2 attempt is005. Next actual B1 attempt004. Actual order B1 then B2 then B3",
+    "Current code changes exactly project4800 zero-P1-cost unbounded epigraph tails from LP only with verified canonical lift; retain original Integer FULL and all controls/discretes",
+    "Finish fresh B1_NATIVE0_06, then fresh M_NATIVE0_04 from B2 ATTEMPT004 without reuse-static/cache across Source; regression10 mustPASS",
+    "Source gate now requires B1/M Native0 scientific Source SHA equality; commit/push final source and proofs before fresh production attempt",
+    "Interrupted B1 ATTEMPT003 sealed: exactNative143.757, S1 unknown265..396.420; preserve raw backups and uncertainty, no main merge or physics relaxation"
+  ],
+  "M_NATIVE0_02": {
+    "status": "PASS",
+    "Native_calls": 0,
+    "source_commit": "d55271bb0",
+    "wall_seconds": 522.5869387999992,
+    "cache": "docs/v42_2_campaign_20261016/M_NATIVE0_02/VERIFIED_STATIC_CASE.pkl.gz"
+  },
+  "root_cause_fix": {
+    "failed_output": "M_NATIVE0_01",
+    "cause": "Gurobi omitted eight ~8.86e-15 coefficients in exact K16 helper projection",
+    "fix_commit": "d55271bb0",
+    "repair": "Exact positive dyadic row scaling; no coefficients or physical constraints removed",
+    "repair_actual_matrix_native0": "PASS",
+    "Native_usage": 0
+  },
+  "regression04": {
+    "status": "PASS",
+    "tests": 1255
+  },
+  "regression05": {
+    "status": "PASS",
+    "tests": 1259,
+    "Native_calls": 0
+  },
+  "validation_gate": "GATE05_HISTORICAL_ATTEMPT005_ONLY_NEW_RELEASE_GATE_REQUIRED_BEFORE_NATIVE",
+  "M_NATIVE0_03": {
+    "status": "PASS",
+    "Native_calls": 0,
+    "wall_seconds": 372.7489573000057,
+    "current_source_reuse_allowed": false,
+    "invalidation_reason": "Scientific source changed through exact P1-neutral projection adapter; fresh M Native0 required"
+  },
+  "source_editing_locked_until_worker_stop_or_exit": true,
+  "B1_ATTEMPT001": {
+    "status": "OFFICIAL_STOP_FOR_ROOT_CAUSE_REPAIR",
+    "Native_seconds": 517.7680003643036,
+    "inflight": null,
+    "heavy_worker_lock_released": true,
+    "campaign_lock_released": true,
+    "FULL_PASS": false,
+    "Actual_Fresh_PASS": false,
+    "S1_native_seconds": 372.8270001411438,
+    "cause_under_repair": "New rows received basic equality/slack columns with an infeasible extended primal; warm presolve/crossover lost feasibility and residual exceeded1e10",
+    "raw_preserved": true
+  },
+  "active_regression": {
+    "output": "REGRESSION10",
+    "exec_session": 81267,
+    "PID": 3752,
+    "status": "RUNNING"
+  },
+  "regression06": {
+    "status": "PASS",
+    "tests": 1264,
+    "Native_calls": 0
+  },
+  "B1_NATIVE0_03": {
+    "status": "PASS_NATIVE0_MATRIX",
+    "Native_calls": 0,
+    "wall_seconds": 477.41205159999663,
+    "actual_S1_extended_basis": "PASS_NATIVE0_EXACT_MATRIX_AND_PRIMAL_FEASIBLE_EXTENSION",
+    "actual_S1_basis_detail": {
+      "same_original_snapshot_and_native_matrix": true,
+      "old_uncompensated_max_row_violation": 1784.027025724307,
+      "repaired_elastic_witness_max_row_violation": 8.01492205937393E-12,
+      "new_local_artificials_basic": 5933,
+      "Native_calls": 0,
+      "FULL_UB_claimed": false
+    }
+  },
+  "B1_ATTEMPT002": {
+    "status": "OFFICIAL_STOP_FOR_CROSSOVER_POLICY_REPAIR",
+    "Native_seconds": 712.1519999504089,
+    "inflight": null,
+    "FULL_PASS": false,
+    "Actual_Fresh_PASS": false,
+    "raw_preserved": true
+  },
+  "regression07": {
+    "status": "PASS",
+    "tests": 1267,
+    "Native_calls": 0
+  },
+  "B1_NATIVE0_04": {
+    "status": "PASS_NATIVE0_MATRIX",
+    "Native_calls": 0,
+    "wall_seconds": 456.5873606999812,
+    "actual_S1_same_matrix_policy_readback": {
+      "Method": 2,
+      "LPWarmStart": 0
+    }
+  },
+  "current_attempt": 5,
+  "B1_ATTEMPT003": {
+    "status": "HOST_RESTART_INTERRUPTED_NOT_CERTIFIED",
+    "known_Native_seconds": 143.757000207901,
+    "Native_lower_bound_seconds": 408.757000207901,
+    "Native_upper_bound_seconds": 540.1774392127991,
+    "Native_runtime_fully_known": false,
+    "inflight": null,
+    "original_raw_preserved": true,
+    "locks_released": true,
+    "FULL_PASS": false,
+    "Actual_Fresh_PASS": false
+  },
+  "HOST_RECOVERY_NATIVE0_01": {
+    "status": "PASS",
+    "Native_calls": 0,
+    "actual_static_matrix_sources_byte_preserved": true,
+    "static_original_matrix_proof_reused": "B1_NATIVE0_04/M_NATIVE0_03"
+  },
+  "supplemental_external_hash_status": "OS_RESTART_TERMINATED_WITHOUT_FINAL_SUPPLEMENT_PRIMARY_FREEZE_MANIFESTS_UNCHANGED",
+  "current_uncommitted_scientific_source_sha": "2ee61663e39b94cdffd5393f6089e371591db8e4183f80df328097e402d984bf",
+  "B1_NATIVE0_05": {
+    "status": "FAILED_REUSE_GATE_SOURCE_CHANGED",
+    "Native_calls": 0,
+    "reason": "compression adapter changed; old scientific Source cannot authorize prior capture reuse; preserved, not bypassed"
+  },
+  "B1_NATIVE0_06": {
+    "status": "PASS_NATIVE0_MATRIX",
+    "Native_calls": 0,
+    "source_sha": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+    "wall_seconds": 343.71862429999965
+  },
+  "B2_ATTEMPT004": {
+    "status": "PREPARED_ONLY_FOR_CURRENT_SOURCE_M_NATIVE0",
+    "Native_calls": 0,
+    "next_B2_actual_attempt": 5
+  },
+  "regression09": {
+    "status": "PASS",
+    "tests": 1285
+  },
+  "source_editing_locked": false,
+  "regression10": {
+    "status": "PASS",
+    "tests": 1286,
+    "Native_calls": 0
+  },
+  "M_NATIVE0_04": {
+    "status": "PASS",
+    "Native_calls": 0,
+    "PID": 4988,
+    "old_source_cache_reused": false,
+    "wall_seconds": 947.0719735000002,
+    "source_sha": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7"
+  },
+  "original_FULL_cross_source_matrix_permutation_proof": "PASS_EXACT_ALL_ORIGINAL_ROWS_DOMAINS_OBJECTIVES_SEMANTIC_ROLES",
+  "monitor": {
+    "status": "PASS",
+    "url": "http://127.0.0.1:8793/",
+    "monitor_pid": 8788,
+    "read_only": true,
+    "existing_screen": "tools/table_v_monitor/index.html",
+    "backend": "tools/table_v_monitor/v42_2_server.py",
+    "refresh_seconds": 5,
+    "HTTP_API_smoke": "PASS",
+    "JS_render_integration": "PASS",
+    "actual_solver_running": false,
+    "Native0_PID": 4988,
+    "Native0_not_FULL_or_Actual_PASS": true
+  },
+  "phase_I_bottleneck_status": {
+    "resolved_verified": false,
+    "latest_candidate_actual_solve_started": true,
+    "historical_S0_Phi_zero": true,
+    "historical_S1_complete_Phi_zero": false,
+    "full_phase_I_cumulative_cap_seconds": 900
+  },
+  "prepared_cross_source_audit": "tools/audit_v42_2_original_permutation.py",
+  "last_verified_live_M04": {
+    "PID": 4988,
+    "CPU_seconds": 373.0,
+    "RSS_bytes": 4242329600,
+    "status": "STATIC_PRESOLVE_COMPLETED_INDEPENDENT_VERIFICATION_RUNNING"
+  },
+  "regression11": {
+    "status": "PASS",
+    "tests": 1292,
+    "Native_calls": 0
+  },
+  "ORIGINAL_FULL_CROSS_SOURCE_NATIVE0_01": {
+    "status": "PASS",
+    "Native_calls": 0,
+    "rows": 2108858,
+    "columns": 946756,
+    "actual_tail_lift_rows": 4800
+  },
+  "B1_ATTEMPT004": {
+    "status": "OFFICIALLY_STOPPED_RECONCILED",
+    "PID": 23944,
+    "Phase_I_cap": 900,
+    "A_stage_cap": 5400,
+    "Source": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+    "FULL_PASS": false,
+    "Actual_Fresh_PASS": false,
+    "actual_original_NATIVE0_binding_exact_match": true,
+    "S0_Native_Runtime": 117.35099983215332,
+    "S0_exact_Phi": "0",
+    "added_rows": 3533,
+    "S1_Native_Runtime": 782.6640000343323,
+    "Phase_I_Native_Runtime": 900.0149998664856,
+    "Phase_I_exact_zero": false,
+    "Phase_I_Native_status": 9,
+    "original_integer_cap": 4499.985000133514,
+    "Native_Runtime": 1329.7820000648499,
+    "Original_P1_Native_Runtime": 429.76700019836426,
+    "inflight": null,
+    "locks_released": true,
+    "raw_preserved": true
+  },
+  "pending_phase_I_root_cause_hypothesis": {
+    "status": "UNTESTED_DO_NOT_EDIT_SOURCE_WHILE_NATIVE_RUNNING",
+    "actual_S1_presolved_dimensions_same_as_ATTEMPT003": [
+      168195,
+      118692,
+      1144439
+    ],
+    "cold_barrier_initial_Phi_around": 51285000000000.0,
+    "verified_extended_basis_primal_residual_max": 8.640199666842818E-12,
+    "next_candidate": "For positive elastic pivots, retain the proven actual native VBasis/CBasis and use Method=0 primal simplex, LPWarmStart=1, Presolve=0 on the original unpresolved elastic matrix; avoid crushed-basis crossover and cold barrier. Do not invent PStart/DStart or admit a FULL UB. Requires actual S1 Native0, regression, fresh committed gate, independent new whole-arm attempt.",
+    "official_reference": "https://doc.gurobi.com/projects/optimizer/en/current/features/warmstart.html",
+    "scientific_source_note": "Current scientific records contain compression_adapter, but not table_v_dw/phase_diagnostics. An algorithm-only basis policy change must still be pinned by DW_SOURCE_FREEZE and release; verify Science SHA remains identical before considering M04 still valid.",
+    "secondary_idea_only_if_basis_candidate_fails": "A positive artificial-Phi cap preserves every Phi=0 point but changes the elastic search polyhedron; would require a separate zero-set equivalence proof and original dual/basis replay. Do not implement speculatively."
+  },
+  "last_verified_live_A4": {
+    "PID": 23944,
+    "command_verified": true,
+    "CPU_seconds": 1450.328125,
+    "RSS_bytes": 6332792832,
+    "active_label": "RELEASE_P1:A1:ORIGINAL_P1",
+    "call_cap": 4499.985000133514,
+    "call_started_epoch": 1792109392.332741
+  },
+  "next_basis_policy_validation_command": "python -X utf8 -u tools/audit_v42_aidc_compression.py --day 2025-05-01 --output docs/v42_2_campaign_20261016/B1_NATIVE0_07 --matrix --reuse-capture docs/v42_2_campaign_20261016/B1_NATIVE0_06 --phase-basis-predecessor docs/v42_2_campaign_20261016/ATTEMPTS/B1/ATTEMPT004",
+  "next_basis_policy_validation_command_condition": "Only AFTER current entire attempt is terminal/reconciled, and AFTER basis_admission / actual S1 Native0 audit / targeted tests are updated for verified original-basis primal simplex. Never run this concurrently with the current Native call.",
+  "PR189_comparison": "docs/v42_2_campaign_20261016/PR189_B1_MAY01_COMPARISON.json",
+  "B1_NATIVE0_07": {
+    "status": "PASS_NATIVE0_MATRIX",
+    "basis_policy": {
+      "Method": 0,
+      "LPWarmStart": 1,
+      "Presolve": 0
+    },
+    "Native_calls": 0,
+    "total_wall_seconds": 404.68498089999775
+  },
+  "regression12": {
+    "status": "PASS",
+    "tests": 1293,
+    "baseline_IDs": 682,
+    "Native_calls": 0
+  },
+  "mandatory_new_reports": [
+    "B1_PR189_V42_2_STRUCTURE_ROOT_CAUSE_KO.md",
+    "B1_PHASE_I_SOLVER_AB_BENCHMARK.csv",
+    "B1_EXACT_LP_REFORMULATION_CERTIFICATE.json",
+    "B1_MAY01_FINAL_PERFORMANCE_KO.md"
+  ],
+  "latest_user_contract": "docs/v42_2_campaign_20261016/USER_REQUEST_PHASE_I_ROOT_CAUSE_20261016.txt",
+  "B1_ATTEMPT005": {
+    "PID": 28596,
+    "release_commit": "6f8c851e83a7a9e5a7101c69cc434f2e65855b45",
+    "parameters": {
+      "Method": 0,
+      "LPWarmStart": 1,
+      "Presolve": 0
+    },
+    "phase_I_success": false,
+    "FULL_PASS": false,
+    "Actual_Fresh_PASS": false,
+    "Native0_and_regression": "A07_M04_REG12_GATE05",
+    "status": "USER_STOPPED_RECONCILED",
+    "Native_Runtime": 87.13599991798401,
+    "S0_Native": 76.53399991989136,
+    "S0_exact_Phi": 0,
+    "S1_Native": 10.601999998092651,
+    "S1_status": 11,
+    "actual_basis_accepted": true,
+    "actual_S1_initial_primal_infeasibility": 0,
+    "performance_improvement_proven": false
+  },
+  "additional_local_hard_instruction": "Preserve ATTEMPT005/source unchanged; after terminal reconcile, implement low-cost exact reductions under separate Native0, then same-case performance pilot. If needed exact local-polytope DW pilot; finite pool alone cannot certify full pricing or Global LB.",
+  "local_block_support_census": {
+    "path": "docs/v42_2_campaign_20261016/B1_LOCAL_BLOCK_SUPPORT_CENSUS.json",
+    "status": "PASS_EXACT_SUPPORT_CENSUS_NOT_FULL_ENGINEERING_FAMILY_CENSUS",
+    "classes": 229,
+    "rows": 261414,
+    "columns": 174685,
+    "WAN_related_rows": 202028,
+    "full_engineering_family_census": false,
+    "causal_fill_in_proof": false
+  },
+  "LOCAL_REDUCTION_NATIVE0_01": {
+    "status": "PASS_ALL_229_LOCAL_POLYTOPES_NOT_GLOBAL_INTEGRATION",
+    "totals": {
+      "before_rows": 261414,
+      "before_columns": 174685,
+      "before_NNZ": 930913,
+      "after_rows": 210067,
+      "after_columns": 134630,
+      "after_NNZ": 789632
+    },
+    "Native_calls": 0,
+    "global_integration": false,
+    "actual_performance": false
+  },
+  "regression13": {
+    "status": "PASS",
+    "tests": 1305,
+    "baseline_IDs": 682,
+    "Native_calls": 0
+  },
+  "last_local_reduction_commit_pushed": "a6ca2667a88c8984edd54043a9d8cf1fb22c9fd1",
+  "M_NATIVE0_04_current_status": "STALE_SOURCE_AFTER_NEW_LOCAL_MASTER_INTEGRATION_FRESH_M_REQUIRED",
+  "current_source_requires_fresh_M_Native0": true,
+  "local_reduction_02": {
+    "status": "PASS_ALL_229_LOCAL_POLYTOPES_NOT_GLOBAL_INTEGRATION",
+    "totals": {
+      "before_rows": 261414,
+      "before_columns": 174685,
+      "before_NNZ": 930913,
+      "after_rows": 199617,
+      "after_columns": 134630,
+      "after_NNZ": 777078
+    },
+    "Native_calls": 0,
+    "proof": "LOCAL_REDUCTION_NATIVE0_02/RESULT.json",
+    "complete_local_domains_proved": true,
+    "current_global_integration": "B1_NATIVE0_09_RUNNING_NOT_YET_CERTIFIED"
+  },
+  "local_master_01": {
+    "status": "PASS_PREVIOUS_SOURCE",
+    "proof": "B1_NATIVE0_08/REDUCED_HYBRID_NATIVE0.json",
+    "native_binding": {
+      "matrix_sha": "d27f0687ed1cb3b6c0439a8197580005389173e3bfb4f0b46ee61fc219deda4e",
+      "domain_sha": "3fac65f02226041964794489897b5d439d068cc665abdf01b624233d72350e57",
+      "objective_sense": 1,
+      "rows": 974698,
+      "columns": 150723,
+      "nonzeros": 11014403,
+      "Threads": 1
+    }
+  },
+  "regression15": {
+    "Native_calls": 0,
+    "evidence": "REGRESSION15/RESULTS.json",
+    "baseline_IDs": 682,
+    "tests": 1314,
+    "status": "PASS"
+  },
+  "local_reduction_03": {
+    "status": "PASS_ALL_229_LOCAL_POLYTOPES_NOT_GLOBAL_INTEGRATION",
+    "totals": {
+      "before_rows": 261414,
+      "before_columns": 174685,
+      "before_NNZ": 930913,
+      "after_rows": 197359,
+      "after_columns": 134630,
+      "after_NNZ": 770085
+    },
+    "Native_calls": 0,
+    "proof": "LOCAL_REDUCTION_NATIVE0_03/RESULT.json",
+    "current_global_integration": "B1_NATIVE0_10_PASS"
+  },
+  "local_master_02": {
+    "status": "PASS_PREVIOUS_SOURCE",
+    "proof": "B1_NATIVE0_09/REDUCED_HYBRID_NATIVE0.json",
+    "native_binding": {
+      "matrix_sha": "0ae49e4d30d1bef5a999aaab57271062c0c39ab4eeb55057daa0e364aad7c20a",
+      "domain_sha": "3cdcc3ed858967ce088d66b8ca9ff4286a3baf6f4406a3d23e22e218de3583ba",
+      "objective_sense": 1,
+      "rows": 964248,
+      "columns": 150723,
+      "nonzeros": 11001849,
+      "Threads": 1
+    }
+  },
+  "regression16": {
+    "status": "PASS",
+    "tests": 1319,
+    "baseline_IDs": 682,
+    "Native_calls": 0,
+    "evidence": "REGRESSION16/RESULTS.json"
+  },
+  "B1_NATIVE0_10": {
+    "status": "PASS_NATIVE0_MATRIX",
+    "source_sha": "2ee61663e39b94cdffd5393f6089e371591db8e4183f80df328097e402d984bf",
+    "Native_calls": 0,
+    "original_integer_FULL_unchanged": true,
+    "current_complete_hybrid": {
+      "matrix_sha": "70a6aee04dda1d5321a37b97439df22fe330dc7836df8e09b00768f809f36888",
+      "domain_sha": "c71f966ed6d9a51f549c7b47d1ac15984f29b913790faec38a7c7f0805f3ee92",
+      "objective_sense": 1,
+      "rows": 961990,
+      "columns": 150723,
+      "nonzeros": 10994856,
+      "Threads": 1
+    },
+    "proof": "B1_NATIVE0_10/RESULT.json"
+  },
+  "original_full_permutation_02": {
+    "status": "PASS",
+    "Native_calls": 0,
+    "rows": 2108858,
+    "columns": 946756,
+    "NNZ": 21126591,
+    "evidence": "ORIGINAL_FULL_CROSS_SOURCE_PERMUTATION_02/RESULT.json"
+  }
+}

@@ -50,7 +50,9 @@ def capture_release_native0(context,case,built,folder):
     objective=objective_identity(model);memo={};folder=Path(folder)
     class CaptureBoundary(Exception):pass
     def save_boundary(current,original,bindings,descriptor,data):
+        from v42_integration.pcc_definitions import definitions_from_native
         memo.update(original=original,descriptor=descriptor,data=data,
+            pcc_definitions=definitions_from_native(current,context['state']['capacities']),
             runtime={k:int(v.index) for k,v in bindings.get('Runtime_finish_counts',{}).items()
                      if hasattr(v,'index') and isinstance(v.index,int)},
             equalities=[i for i,name in enumerate(current.getAttr('ConstrName')) if name=='exact_Runtime_finish_count'],
@@ -71,7 +73,7 @@ def capture_release_native0(context,case,built,folder):
     return memo,domains,axes,metadata,objective
 
 
-def audit(day,output,*,matrix=False,reuse_capture=None):
+def audit(day,output,*,matrix=False,reuse_capture=None,phase_basis_predecessor=None):
     from v42_integration.release_date_case import compile_date_case
     from v42_integration.table_v_flex_planning import compile_table_v_flex_context,build_flex_native_model
     from v42_integration.table_v_geometry_cache import authorized_data
@@ -154,6 +156,7 @@ def audit(day,output,*,matrix=False,reuse_capture=None):
                 metadata=json.loads((prior/'ORIGINAL_FULL_INTEGER_NATIVE0.json').read_text(encoding='utf8'))
                 if metadata['native_binding']!=raw['native_binding']:raise ValueError('NATIVE0_REUSE_NATIVE_MATRIX_BINDING_DRIFT')
                 memo=dict(original=raw['original'],descriptor=raw['original_descriptor'],data=raw['data'],
+                    pcc_definitions=raw.get('pcc_definitions',[]),
                     runtime=raw['original_runtime_bindings'],equalities=raw['runtime_equality_rows'],original_sha=raw['original'].fingerprint())
                 verified_domains=domains;axes=raw['coupling_rows'];objective=raw['objective_sha']
                 model_seconds=metadata['model_build_seconds']
@@ -181,6 +184,7 @@ def audit(day,output,*,matrix=False,reuse_capture=None):
                 dict(Runtime_finish_counts=memo['runtime'],_runtime_equality_rows=memo['equalities']),
                 memo['descriptor'],memo['data'])
             captured=dict(data=memo['data'],original=memo['original'],projected=projected,descriptor=descriptor,
+                pcc_definitions=memo.get('pcc_definitions',[]),
                 runtime_projection=projection,coupling_rows=axes,case_sha=case.case_sha,objective_sha=objective,
                 native_binding=metadata['native_binding'],source_identity=context['manifest']['identity'],
                 input_sha=context['input_audit']['a_input_sha'])
@@ -200,6 +204,32 @@ def audit(day,output,*,matrix=False,reuse_capture=None):
             memo=None;projected=None;descriptor=None;verified_domains=None;gc.collect()
             state=prepare_current_dw(context,case,built,dw,captured=captured,
                 independent_domain_receipt=file_record(domain_path))
+            if '_local_reduction' in state:
+                from v42_a_stage_domain_v2.stress_backend import materialize
+                from v42_integration.d0_resource import native_binding
+                from v42_a_stage_compact_rowgen.lift import expanded_point
+                import gurobipy as gp
+                import numpy as np
+                if not np.array_equal(expanded_point(state,state['prior_compact']),state['prior_compact']):
+                    raise ValueError('REDUCED_REFERENCE_EXPANDED_POINT_MUST_BE_IDENTITY')
+                reduced_model,reduced_objectives=materialize(state['compact'],day)
+                try:
+                    reduced_model.Params.Threads=1
+                    reduced_model.setObjective(reduced_objectives[0][1],gp.GRB.MINIMIZE);reduced_model.update()
+                    reduced_binding=native_binding(reduced_model)
+                    coefficients=np.zeros(state['compact'].matrix.shape[1])
+                    for j,c in state['compact'].objectives[0].coefficients().items():coefficients[j]=float(c)
+                    if not np.array_equal(reduced_model.getAttr('Obj'),coefficients):
+                        raise ValueError('REDUCED_FULL_HYBRID_OBJECTIVE_READBACK_DRIFT')
+                    _write(output/'REDUCED_HYBRID_NATIVE0.json',dict(PASS=True,Native_calls=0,
+                        native_binding=reduced_binding,all_A_RHS_sense_bounds_types_read_back=True,
+                        objective_read_back=True,expanded_reference_identity=True,
+                        complete_global_local_equivalence=file_record(dw/'LOCAL_POLYTOPE_MASTER_EQUIVALENCE.json'),
+                        Global_LB_issued=False,FULL_feasible_point_claimed=False))
+                finally:reduced_model.dispose()
+            if phase_basis_predecessor is not None:
+                from tools.audit_v42_2_phase_basis import audit as audit_phase_basis
+                audit_phase_basis(state,phase_basis_predecessor,output/'ACTUAL_S1_BASIS_NATIVE0')
             captured=None
             local,owned=partition(state['compact'],state['metas'],state['grows'])
             _,witness=artificial_point(elastic_master(state['compact'],state['grows']),state['prior_compact'])
@@ -268,5 +298,7 @@ def audit(day,output,*,matrix=False,reuse_capture=None):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--day',required=True);parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--matrix',action='store_true');parser.add_argument('--reuse-capture',type=Path);args=parser.parse_args()
-    audit(args.day,args.output,matrix=args.matrix,reuse_capture=args.reuse_capture)
+    parser.add_argument('--matrix',action='store_true');parser.add_argument('--reuse-capture',type=Path)
+    parser.add_argument('--phase-basis-predecessor',type=Path);args=parser.parse_args()
+    audit(args.day,args.output,matrix=args.matrix,reuse_capture=args.reuse_capture,
+        phase_basis_predecessor=args.phase_basis_predecessor)

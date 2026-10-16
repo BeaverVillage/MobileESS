@@ -1,0 +1,638 @@
+# Codex Ultra — V42.1 Freeze → V42.2 Autonomous May01 B1/B2/B3 Campaign
+
+## 0. 최종 목표 및 실행 승인
+
+현재 `BeaverVillage/MobileESS`의 V42 작업을 **V42.1**로 동결하고, 이후 개선 및 실험은 **V42.2**로 진행한다.
+
+이 버전 명칭은 연구 진행 상황을 구분하기 위한 별칭이다. 기존 프로젝트의 전체 파일을 복제하거나 모든 파일명을 변경할 필요는 없다.
+
+**최종 목표는 2025-05-01의 B1, B2, B3 비교군을 최신 V42.2의 동일한 과학적·물리적 계약 아래에서 모두 검증 PASS시키는 것이다.**
+
+이번 지시는 다음 작업을 명시적으로 승인한다.
+
+- B1 A-stage의 기존 개선사항 통합 및 추가 병목 해결
+- B2/B3 M-stage의 Seedless K48 및 Adaptive Beam–Direct Joint MILP 재설계
+- 중복 모델 생성과 검증 비용 최적화
+- 2025-05-01 B1 → B2 → B3 순차 캠페인 실행
+- 오류·INFEASIBLE·TIME_LIMIT·병목 발생 시 근본 원인 조사, 수정, 검증 및 재실행
+- 실패한 비교군의 독립 Attempt를 생성하여 해당 비교군을 처음부터 재실행
+- 기존의 검증된 PASS와 결과를 보존하고, 수정의 영향 범위에 따라 필요한 비교군만 재실행
+- 실행 중 지속적인 상태 확인 및 자동 복구
+
+사용자에게 일상적인 기술적 선택마다 승인을 다시 요청하지 말고, 이 지시 범위에서 자율적으로 판단하고 실행하라.
+
+단, 과학적 제약 완화, 데이터 조작, 예산 무제한 증액 및 검증 우회는 승인하지 않는다.
+
+---
+
+## 1. V42.1 완전 동결 및 롤백 지점 확보
+
+현재 기준 GitHub PR은 다음과 같다.
+
+- Repository: `BeaverVillage/MobileESS`
+- Draft PR: #230
+- 마지막 확인 HEAD: `6473cb6dc7360358ff014b3d4bd92586b304383e`
+- 기존 브랜치: `codex/v42-trajectory-tracking-may01-20261014`
+
+단, 실제 작업 직전 원격 HEAD와 로컬 HEAD를 다시 확인하라. 최근 Codex의 미Push 커밋, 미커밋 수정, 현재 실행 중인 F5 및 실험 원장이 존재할 수 있다.
+
+### 1.1 기존 실행 정리
+
+1. 현재 실행 중인 Native Solver 및 Worker를 확인한다.
+2. F5 등 기존 Heavy 작업이 남아 있다면 공식 Stop 절차로 안전하게 종료한다.
+3. Native 호출의 실제 소비시간, Raw, Solver 로그 및 중단 원인을 보존한다.
+4. Inflight 호출과 Worker Lock 정합성을 확인한다.
+5. 실행 도중 소스를 변경하지 않는다.
+
+강제 종료, 원장 삭제, 기존 결과 덮어쓰기 또는 실행시간 조작을 금지한다.
+
+### 1.2 V42.1 Freeze
+
+실제 로컬 작업 트리와 PR HEAD의 차이를 확인하고, 현재 사용자가 V42.1로 지칭하는 코드 상태를 정확한 Git 커밋으로 보존한다.
+
+- Git commit SHA 고정
+- 불변 Git Tag 생성
+- 원래 PR 및 소스 브랜치 보존
+- Source / Case / Policy SHA 기록
+- 기존 Native 원장 및 Raw 경로와 SHA 기록
+- Solver 설정, Python 환경 및 의존성 기록
+- 기존 PASS 및 미인증 결과 구분
+- 롤백 검증용 Manifest 생성
+
+대형 데이터 전체를 별도 복제하지 않아도 된다. Git 객체와 기존 불변 산출물을 재사용하되, 롤백에 필요한 외부 입력 파일과 원장의 경로·SHA 및 접근 가능성까지 기록한다.
+
+**사용자가 이후 "V42.1로 롤백"이라고 지시하면 현재 V42.1 소스·정책·실험 기준으로 정확히 복귀할 수 있어야 한다.**
+
+Freeze가 완료되면 V42.1에는 새로운 과학적 코드 변경을 가하지 않는다.
+
+### 1.3 V42.2 개발 시작
+
+V42.1의 정확한 Freeze Commit에서 새로운 V42.2 개발 브랜치를 생성한다.
+
+권장 이름:
+
+`codex/v42.2-may01-b1b2b3-20261016`
+
+새 Draft PR을 생성하고 이후 변경을 해당 PR에 기록한다.
+
+기존 PR #230 및 V42.1의 원본 산출물을 훼손하지 않는다.
+
+---
+
+## 2. B1 A-stage 기존 개선사항 적용
+
+PR #230과 최근 B1 구조 감사의 개선사항을 V42.2에 정확하게 반영한다.
+
+### 2.1 적용할 기존 개선사항
+
+- Source18r Phase I Solver 정책
+- Elastic LP의 수치적 admission과 최종 인증 분리
+- B1 Numerical trouble callback 수정
+- FAST_B Fallback 정책
+- 229 Semantic Class 정확한 압축
+- 전체 UID/원본 정수 도메인 보존
+- 정확한 PCC Identity 정의식 처리
+- S0 → S1 반복 비용 개선
+- 기존 유효 Native Basis 재사용
+- 원본 Integer FULL 및 P1 인증 유지
+
+특히 기존 구조 감사에서 확인된 다음 문제를 우선 해결하라.
+
+`PCC_affine_alias[AIDC01,73]` 등 자유 PCC 보조변수의 정의식이 제한 LP에 포함되지 않아, 일부 좌표가 약 `1e17` 수준으로 이동했던 문제.
+
+이 문제는 단순히 Solver tolerance를 완화할 문제가 아니다.
+
+원본 Identity Equality를 hard definition으로 유지하거나, 정확한 수학적 동치성이 입증된 symbolic substitution을 사용하라.
+
+두 방법을 Native0에서 비교하고 정식화 강도, 행렬 규모, 준비시간 및 원본 동치성 관점에서 선택하라.
+
+### 2.2 Phase I 개선 원칙
+
+- S0에서 불필요하게 큰 해가 생성되지 않도록 정의식을 보존한다.
+- 중복 행과 불필요한 모델 재구성을 제거한다.
+- 큰 수의 생략 행을 한꺼번에 활성화하는 과정의 병목을 분석한다.
+- 유효한 Native Basis가 있으면 안전하게 재사용한다.
+- Basis가 없으면 임의로 생성하지 않는다.
+- 독립적으로 검증되지 않은 LP 점을 원본 FULL 가능해로 승격하지 않는다.
+
+Elastic Phi LP의 `1e-5` 수치 admission 정책은 유지하되, 원본 P1 검증의 `1e-6`과 엄격한 인증 기준은 보존한다.
+
+Phase I의 정확한 Phi=0, 인공변수 제거, 생략 행 검사, Pricing 및 Global LB 인증을 생략하지 않는다.
+
+**단순히 OPTIMAL 또는 Phi=0이 출력됐다는 이유만으로 B1을 PASS시키지 마라.**
+
+B1의 Known/Unknown 작업, 조건부 QoS 제어표, GPU 용량, Deadline, Migration, Timeshift와 Planning-Frozen 정책도 유지한다.
+
+---
+
+## 3. B2/B3 M-stage 초기화 알고리즘 근본 재설계
+
+현재 M단계는 초기 실행가능 Seed를 찾기 위해 다음 단계를 수행했다.
+
+- F1: STAY 및 충방전 고정 LP
+- F2: STAY 경로의 Mode 자유 MILP
+- F3: 제한된 이동 사이트 MILP
+- F5: Unrestricted Original FULL MILP
+
+이 과정에서 F5의 Root LP 계산이 지나치게 오래 걸려 K48과 Adaptive Beam–Joint MILP에 진입하지 못했다.
+
+**V42.2에서는 F1/F2/F3/F5의 연속적인 대형 초기화 Solve를 기본 경로에서 제거한다.**
+
+원본 대형 MILP를 풀어서 초기해를 얻은 후 다시 Joint MILP를 푸는 구조를 반복하지 마라.
+
+### 3.1 Seedless K48
+
+K48은 MESS 이동변수와 충방전·SOC를 포함하는 하한 계산용 완화 MILP이다.
+
+K48의 수학적 유효성을 증명하기 위해 사전에 원본 FULL 실행가능 해를 반드시 구해야 하는 것은 아니다.
+
+현재 코드의 `prepare_k16()`은 FULL Incumbent에서 16개 중요 계통 행을 선정하고 Start를 구성하므로, 이 의존성을 제거하라.
+
+개선 구조:
+
+1. 원본 AIDC 고정 계획과 계통 입력을 사용한다.
+2. 초기 STAY 경로는 필요하면 중요도 평가의 참조 후보로만 사용한다.
+3. 실제 FULL 가능해가 없어도 유효한 원본 계통 제약 16개를 선정한다.
+4. K16 → K32 → K48의 원본 정수/물리 영역을 유지한다.
+5. K16/K32 결과의 독립적 제약 위반 검사를 통해 추가 제약을 선택한다.
+6. 정확한 원본 완화 관계 및 Global LB 인증을 보존한다.
+
+**STAY는 K48의 이동경로를 고정하는 제약이 아니다.**
+
+4대 MESS가 각각 STAY 또는 MOVE를 자유롭게 선택할 수 있어야 한다.
+
+K48에 FULL MIP Start가 없다면 Start 없이 풀 수 있도록 하라. STAY 후보를 완전한 실행가능 해라고 가장하지 않는다.
+
+원본 FULL 가능해가 아직 없으면 UB 기반 Gap 평가는 보류하되, 인증 가능한 LB 자체는 별도로 보존한다.
+
+K48이 수치 실패나 제한시간에 도달해도 해당 오류를 분명히 기록하고, UB 탐색을 불필요하게 영구 차단하지 않는다.
+
+### 3.2 Seedless Adaptive Beam Search
+
+기존 Beam Search는 FULL 검증된 Incumbent의 P/Q/SOC와 최대 선로 부하율을 중심으로 후보를 생성한다.
+
+최초 반복만큼은 검증된 FULL Incumbent 없이 시작하도록 수정한다.
+
+초기 후보 생성 기준:
+
+- 실제 MESS 초기 위치
+- 4대 MESS 각각의 STAY 경로
+- 원본 교통 DAG의 유효한 MOVE 경로
+- 24개 연결 후보 노드
+- 이동시간 및 도착시간
+- 이동에너지
+- 초기 및 종단 SOC
+- PCS P/Q 용량
+- 기저 계통 부하율 및 전기적 민감도
+- 충전 후 Rebound 가능성
+
+첫 Beam Search에서는 실제 검증된 UB가 없으므로, 기존 UB가 있다고 가정한 점수식을 사용하지 않는다.
+
+기저 계통 상태와 SOC 도달가능성을 이용하는 독립적인 초기 점수식을 구성하라.
+
+STAY, 단일 MOVE, 복수 MOVE를 모두 탐색하되 특정 차량이나 특정 경로를 강제하지 않는다.
+
+네 차량이 동시에 이동하는 조합도 고려해야 한다.
+
+### 3.3 최초 Joint MILP
+
+Beam Search에서 구성한 후보 경로 Pool을 기존 Exact Direct Joint MILP에 전달한다.
+
+- 4대 차량 공동 최적화
+- 차량별 경로 One-hot 선택
+- Pch/Pdis/Q 최적화
+- 384 Charge Mode 유지
+- 전체 SOC 및 종단 SOC 제약
+- 이동시간과 이동에너지
+- 모든 원본 계통 제약
+- 원본 물리 도메인 및 목적함수 유지
+
+첫 Joint 호출에는 검증된 초기해가 없을 수 있으므로 MIP Start를 선택사항으로 변경한다.
+
+존재하지 않는 FULL Seed를 생성하거나, STAY 점을 유효 MIP Start라고 주장하지 않는다.
+
+NoRel Heuristic 등은 필요하면 기존 Joint MILP 내부에서 제한적으로 활용할 수 있지만, 별도의 무제한 원본 초기화 MILP를 다시 만들지 않는다.
+
+첫 Joint MILP에서 정수해가 발견되면 Original FULL 모델에 정확히 복원하여 독립 검증한다.
+
+검증 PASS일 때만 최초 UB로 등록한다.
+
+### 3.4 최초 해 발견 이후
+
+FULL-feasible UB가 확보되면 기존 PR219–222의 Adaptive Beam 반복 구조를 사용한다.
+
+- 기존 검증 UB 보존
+- Moving Feasible UB 별도 보존
+- 실제 P/Q/SOC 및 병목 선로 Feedback
+- 후보 경로 다양성 유지
+- 4대 공동 Joint MILP 반복
+- Global Gap 평가
+- 중복 Pool 및 동일 수학적 모델 재실행 방지
+
+첫 시도에서 가능해를 못 찾았다고 바로 전체 문제 INFEASIBLE을 선언하지 않는다.
+
+다음 Beam Pool, 다른 경로·시간 조합 및 제한된 정수 휴리스틱을 활용해 시도하라.
+
+단, 무의미한 동일 재시도로 Native 예산을 소비하지 않는다.
+
+---
+
+## 4. 모델 준비 및 검증 병목 제거
+
+현재 M1의 Native0 준비/Direct Readback은 약 824초까지 관측됐다.
+
+이 비용은 Solver Native 최적화시간과 구분해야 한다.
+
+기존 FULL/C3A/Dense 검증을 무조건 매 반복 다시 수행하는 구조를 개선하라.
+
+### 4.1 검증 분리
+
+**Static Verification — 동일 Source/Case에서 1회**
+
+- 원본 FULL 정식화 동치성
+- C3A/Dense 변환의 정확한 동치성
+- 원본 Binary 및 Bounds 보존
+- 불변 행렬/도메인/목적함수 SHA
+- 고정 계통 데이터 및 물리 계약
+
+**Dynamic Verification — 변경된 부분만**
+
+- 새로운 Beam 경로
+- Lambda와 경로 연결식
+- 새 경로의 SOC/이동 제약
+- 실제 Joint Solve 반환값
+- 신규 MIP Start
+- 변경된 Bounds/동적 행
+
+검증된 Static Artifact는 정확한 SHA·Source·Case·Policy·행렬·도메인 일치 조건에서 재사용한다.
+
+SHA가 같다는 사실만으로 과거에 없던 동치성 증명을 만들어내지 않는다.
+
+### 4.2 반드시 남겨야 하는 검증
+
+- 새 FULL Incumbent의 Original FULL Replay
+- 원본 Integer/Binary 검증
+- 전체 P/Q/SOC/PCS/Route 제약
+- 전압·선로·변압기 정격
+- K48 Global LB 인증
+- Actual96 및 Fresh OpenDSS AC 평가
+- Source/Case/Policy 무결성
+- Native 호출 및 누적 예산 검증
+
+검증 제거로 PASS를 만드는 행위를 금지한다.
+
+### 4.3 성능 계측
+
+다음 항목을 별도 측정하라.
+
+- Python Build Wall Time
+- C3A/Dense 준비시간
+- Static Verification Wall Time
+- Dynamic Verification Wall Time
+- Beam Search Wall Time
+- Joint MILP Native Time
+- K48 Native Time
+- Original FULL Replay Time
+- Peak RSS
+- 전체 Arm Wall Time
+
+동일 조건의 전후 A/B 실측으로만 성능 개선을 주장하라.
+
+---
+
+## 5. 2025-05-01 캠페인 순차 실행
+
+V42.2 개선이 Native0와 회귀 테스트를 통과하면 실제 May01 캠페인을 시작한다.
+
+**실행 순서: B1 → B2 → B3**
+
+각 비교군은 독립적인 Source/Case/Policy/예산/결과 원장을 가진다.
+
+B0는 이번 실행 대상이 아니며 기존 자료를 읽기 전용으로 보존한다.
+
+### Phase A — B1
+
+1. 현재 V42.2의 AIDC Source와 Case 생성
+2. 기존 개선된 Phase I 적용
+3. A1 및 원본 Integer/P1 최적화
+4. P1 Gap 0.5% 기준 검사
+5. Original FULL 가능해 검증
+6. Known/Unknown 제어표 확인
+7. Actual96 실행
+8. Fresh AC96 실행
+9. 모든 QoS·GPU·Deadline·전력망 제약 확인
+10. 최종 B1 결과 판정
+
+B1이 PASS하면 결과를 불변 저장하고 다음 비교군으로 진행한다.
+
+### Phase B — B2
+
+1. B2의 Reference AIDC 계획 고정
+2. M1 원본 모델 생성
+3. Seedless K48 계산
+4. Seedless Adaptive Beam Search
+5. 4-MESS Direct Joint MILP
+6. 최초 Original FULL-feasible UB 확보
+7. 잔여 예산에서 Adaptive Beam–Joint 반복 개선
+8. K48 Global LB와 최종 UB 비교
+9. Actual96 실행
+10. Fresh AC96 실행
+11. 최종 B2 결과 판정
+
+K48과 Joint Solver는 메모리 충돌이 없도록 직렬 실행한다.
+
+K48 완료를 기다리느라 전체 UB 탐색이 불필요하게 차단되지 않도록 제한시간 및 Stage 예산을 독립 관리한다.
+
+### Phase C — B3
+
+기존 A1–M1–A2–M2 순서를 보존한다.
+
+1. A1 최적화 및 인증
+2. M1 Seedless K48 / Beam–Joint
+3. A2 최적화 및 인증
+4. M2 Seedless K48 / Beam–Joint
+5. M1 → M2 Warm 경로의 정확한 Source/Case/Domain 정합성 검증
+6. 최종 AIDC–MESS 계획의 Original FULL 검증
+7. Actual96 실행
+8. Fresh AC96 실행
+9. 최종 B3 결과 판정
+
+B3에서는 M1이나 M2의 실패를 숨기고 일부 단계만 PASS시키지 않는다.
+
+---
+
+## 6. 오류·병목·캠페인 중단 자동 복구
+
+**가장 중요한 운영 지시다.**
+
+실행 중 다음 상태가 발생하면 즉시 조사 대상으로 분류한다.
+
+- INFEASIBLE
+- INF_OR_UNBD
+- NUMERIC
+- TIME_LIMIT / 해 없음
+- Root LP 장시간 정체
+- Presolve 병목
+- Python Build 병목
+- 메모리 부족
+- Solver 오류
+- Original FULL Replay FAIL
+- K48 인증 FAIL
+- Actual/Fresh AC FAIL
+- Source/Case 불일치
+- Worker 또는 원장 오류
+- 예상하지 못한 캠페인 중단
+
+### 6.1 근본 원인 조사
+
+단순히 실패 단계의 TimeLimit만 늘리거나 동일 Solve를 반복하지 마라.
+
+원인별로 다음 사항을 확인한다.
+
+- 원본 FULL 자체의 불가능성인지
+- 제한된 정식화만 INFEASIBLE인지
+- 변수 고정에 의한 인위적인 불가능성인지
+- 원본 → C3A → Direct Joint 변환 결함인지
+- RHS/Bounds/이산변수 누락인지
+- 수치적 불안정성인지
+- 모델 생성 또는 검증의 계산 병목인지
+- Solver 파라미터의 부적합인지
+- 스케줄링/권한/원장 문제인지
+
+원본 FULL 모델이 실제로 불가능하다는 독립적인 근거 없이 모델 자체를 INFEASIBLE이라고 보고하지 않는다.
+
+### 6.2 자동 수정
+
+원인이 확인되면 해당 원인을 직접 해결한다.
+
+허용되는 수정 예시:
+
+- 정식화 오류 교정
+- 정확한 변수 대입 및 행렬 축소
+- 불필요한 중복 행 제거
+- Beam 후보 다양화
+- Seedless 초기화 개선
+- Solver 설정 최적화
+- Static Cache 개선
+- 원본과 동치인 효율적인 변환
+- 중복 검증 제거
+- Native 예산 및 Worker 관리 오류 수정
+
+과학적 Source, 전압·정격·SOC·QoS 등의 물리 제약을 임의로 완화하지 않는다.
+
+수정 후 반드시 Native0 회귀 및 정식화 동치성 검증을 수행한다.
+
+### 6.3 해당 비교군을 0초부터 재실행
+
+오류 해결 후에는 **오류가 발생한 비교군 전체를 새로운 Attempt로 처음부터 재실행**한다.
+
+예시:
+
+- B1 실패 → 새 B1 Attempt, B1 A-stage부터 다시 시작
+- B2 실패 → 새 B2 Attempt, B2 준비 단계부터 다시 시작
+- B3 M2 실패 → 새 B3 Attempt, B3 A1부터 다시 시작
+
+이때 "0초"는 새로운 Attempt의 초기 Native 사용량이 0초라는 뜻이다.
+
+다음 사항은 필수로 지켜라.
+
+1. 기존 Attempt의 Native 누적시간, Raw 및 실패 증거를 삭제하지 않는다.
+2. 새 Attempt에 별도 불변 실행 디렉터리와 새 원장을 생성한다.
+3. 사용자 재실행 지시, 변경된 Source 및 실패 원인 수정 Commit을 새 Attempt의 승인 근거에 연결한다.
+4. 기존과 동일한 Stage별 예산 상한을 적용한다.
+5. 새로운 Attempt의 사용량과 전체 연구 누적 소비량을 구분한다.
+6. 허용되지 않은 예산 초과나 동일 Attempt 내 잔여시간 초기화를 하지 않는다.
+7. 공식 예산·실행 게이트를 만족하지 못하면 승인 정보를 위조하지 않는다.
+
+즉, 이전 실패분을 숨기는 Reset이 아니라 **새 실험의 공정한 Fresh Restart**를 수행하라는 뜻이다.
+
+이미 PASS한 다른 비교군은 가능한 한 보존한다.
+
+단, 공통 Source나 알고리즘 변경으로 기존 결과의 Release/Case/Policy 인증이 무효가 되는 경우에는 영향을 받는 비교군을 재검증하고 필요한 경우 다시 실행한다.
+
+**최종 B1/B2/B3 결과는 동일한 최종 V42.2 과학적 기준에서 비교 가능해야 한다.**
+
+### 6.4 반복 개선
+
+다음 반복을 유지한다.
+
+`실행 → 병목/오류 감지 → 근본 원인 조사 → 수정 → Native0 검증 → 신규 Attempt → 다시 실행`
+
+실패가 반복되면 원인을 구분하고 이전 수정이 왜 효과가 없었는지 확인한 후 새로운 개선 방법을 선택한다.
+
+원인 수정 없이 동일한 비싼 실험을 무한 반복하지 않는다.
+
+---
+
+## 7. Native 예산·병렬 실행·과학적 제약
+
+기존 Stage별 공식 예산을 보존한다.
+
+- A-stage: 기존 5,400초/Stage 정책
+- Phase I: 기존 900초 배분
+- M-stage: 1,800초/Stage
+- K48: 기존 별도 누적 한도
+- Joint MILP: 기존 140초/호출 상한
+- Worker: 1
+- Threads: 1
+
+예산은 실제 Gurobi Native Runtime 기준으로 계측한다.
+
+장시간 Python 전처리와 Original FULL 검증 Wall Time은 별도로 기록한다.
+
+실행 중인 Solver와 동일 Source 파일을 동시에 수정하지 않는다.
+
+B1/B2/B3 Heavy 실행을 중첩하지 않는다.
+
+기존 RAM/Commit 수치 기반의 불필요한 차단은 재도입하지 않되, 중복 Heavy Worker 차단과 실제 OOM 보호는 유지한다.
+
+### 변경 금지 사항
+
+- IEEE 123-bus 원본 물리 조건
+- 4대 MESS
+- 원본 24개 연결 노드 및 교통 DAG
+- 실제 이동시간과 이동에너지
+- 전압 0.95–1.05 pu
+- 원본 선로·변압기 정격
+- PCS P/Q 제약
+- SOC·종단 SOC 제약
+- Charge Mode 및 원본 이산 도메인
+- AIDC GPU/Deadline/QoS 계약
+- Known/Unknown Planning/Actual 계약
+- 고정된 ML 모델 및 과학적 입력
+- Original Fresh AC 검증
+- P1-only, P2=0
+- R2 HOLD
+
+IEEE8500과 May02–31 캠페인은 실행하지 않는다.
+
+---
+
+## 8. 실시간 모니터링 및 자동 제어
+
+**B1/B2/B3가 전부 검증 PASS하기 전까지 작업을 완료했다고 선언하거나 자발적으로 Codex 작업을 종료하지 마라.**
+
+Codex 세션이 활성화된 동안 다음 항목을 지속 확인한다.
+
+- 현재 비교군 및 Stage
+- 실제 Solver 상태
+- Root LP / Presolve 진행
+- Incumbent 유무
+- Global UB/LB 및 Gap
+- Native 누적시간
+- Wall Time
+- RSS 및 메모리 사용
+- Worker PID 및 Lock
+- 오류·중단 이벤트
+- 진행 중인 Attempt와 마지막 유효 Checkpoint
+
+Solver 실행은 감독 가능한 프로세스로 관리하고, 진행 상태와 재개 정보를 디스크에 저장한다.
+
+실제 개선 없이 장시간 정체되는 단계는 로그·진단 결과를 기반으로 중단 및 재설계 여부를 판단한다.
+
+단순히 로그 출력이 없다는 이유만으로 정상 계산을 오류로 오판하지 않는다.
+
+작업 세션 또는 실행 환경에 시간 제한이 있는 경우 이를 우회했다고 주장하지 말고, 불변 체크포인트·감독 프로세스·재개 명령을 남겨 다음 세션에서 정확히 복구할 수 있게 한다.
+
+자동 수정이 필요한 경우:
+
+1. 실행 중인 Worker를 안전하게 중단한다.
+2. Native 원장과 Raw를 정산한다.
+3. 원인을 수정한다.
+4. Native0 및 회귀 테스트를 통과한다.
+5. 새 Commit과 새 Attempt를 생성한다.
+6. 해당 비교군을 다시 실행한다.
+
+주요 진행 상황은 한국어로 간결하게 기록한다.
+
+---
+
+## 9. PASS 판정 및 종료 조건
+
+실행 가능성, 최적성 인증, Actual 안전성을 서로 구분하여 보고한다.
+
+### B1 PASS
+
+- 원본 AIDC FULL/P1 최적화 조건 충족
+- 공식 P1 Gap 및 인증 기준 충족
+- Known/Unknown 제어 검증
+- Actual96 완료
+- Fresh AC96 완료
+- 원본 GPU/QoS/Deadline/전력망 제약 PASS
+
+### B2 PASS
+
+- M1 Original FULL-feasible
+- 원본 4-MESS 이동·P/Q/SOC 검증 PASS
+- K48 계산 결과 및 Global LB 인증 상태 명시
+- M 3% Gap 목표 달성 여부 별도 표시
+- Actual96 완료
+- Fresh AC96 완료
+- 모든 원본 물리 제약 PASS
+
+### B3 PASS
+
+- A1/M1/A2/M2 공식 단계 검증
+- M1 및 M2 Original FULL-feasible
+- K48 Global LB와 Gap 상태 명시
+- AIDC–MESS 최종 계획 일관성 PASS
+- Actual96 완료
+- Fresh AC96 완료
+- Known/Unknown 및 모든 QoS·물리 제약 PASS
+
+**FULL-feasible PASS와 3% Global Gap 인증은 절대 혼동하지 않는다.**
+
+Global Gap 목표 미달은 숨기지 말고 `GAP_NOT_CERTIFIED`로 기록한다. 기존 정책에서 Gap 미달이 물리적으로 검증된 Actual을 차단하지 않는다는 계약도 유지한다.
+
+최종적으로 다음 항목을 모두 보고할 수 있어야 한다.
+
+- `B1_FULL_PASS`
+- `B2_FULL_PASS`
+- `B3_FULL_PASS`
+- `B1_ACTUAL_FRESH_PASS`
+- `B2_ACTUAL_FRESH_PASS`
+- `B3_ACTUAL_FRESH_PASS`
+- B2/B3 M 단계별 Global LB/UB/Gap 인증 상태
+- 전체 회귀 PASS
+- 최종 Source/Case/Policy/Release 일관성 PASS
+
+Gap 3%까지 달성하지 못했다면 물리 PASS와 최적성 인증 미달을 구분하고, 허용 예산 안에서 추가 LB 개선을 시도하라. 목표 미달을 임의로 인증 PASS로 표시하지 않는다.
+
+---
+
+## 10. 최종 보고 및 버전 보존
+
+실험 완료 후 다음 항목을 반드시 정리하라.
+
+| 항목 | 보고 내용 |
+|---|---|
+| 버전 | V42.1 Freeze SHA / 최종 V42.2 SHA |
+| B1 | FULL·Actual·Fresh PASS, A-stage Native/Wall |
+| B2 | FULL·Actual·Fresh PASS, M1 UB/LB/Gap |
+| B3 | FULL·Actual·Fresh PASS, M1/M2 UB/LB/Gap |
+| Beam Search | 반복 횟수, 후보 수, 이동경로, UB 개선 |
+| K48 | K16/K32/K48 각각의 Solver 상태 및 인증 LB |
+| 성능 | Build/Verification/Native/Wall/RSS |
+| 자동 복구 | 오류 원인, 수정 Commit, 재실행 횟수 |
+| 원장 | 전체 Attempt, 누적 Native 및 인증 SHA |
+| 롤백 | V42.1 정확한 복귀 절차 |
+
+모든 성공·실패 Attempt의 실행 증거를 보존하라.
+
+최종 V42.2 PR에는 실제 적용된 코드, 회귀 결과, Native 원장 및 실험 결과를 Push한다.
+
+V42.1 Tag와 기존 PR #230은 유지한다. 사용자 승인 없이 Main에 병합하지 않는다.
+
+## 최종 실행 지시
+
+지금부터 다음 순서대로 실제 작업을 진행하라.
+
+**V42.1 Freeze → V42.2 생성 → B1 개선 적용 → Seedless K48·Beam–Joint 구현 → 검증 병목 개선 → Native0/회귀 → May01 B1 → May01 B2 → May01 B3 → 전체 검증**
+
+오류나 병목이 발견되면 근본 원인을 해결하고 실패 비교군을 새 Attempt에서 0초부터 재실행한다.
+
+사용자가 별도로 중지하지 않는 한, 세 비교군의 목표 달성을 위해 허용된 범위에서 자율적으로 수정·검증·실행을 계속하라.
+
+**단순히 장시간 Solver가 실행된다는 이유로 무작정 기다리지 말고, 실제 진행 상태·잔여 예산·유효 Incumbent·병목 근거에 따라 판단하라.**
+
+성공하지 않은 결과를 성공으로 보고하지 말고, V42.1 롤백 가능성과 기존 연구 증거를 끝까지 보존하라.

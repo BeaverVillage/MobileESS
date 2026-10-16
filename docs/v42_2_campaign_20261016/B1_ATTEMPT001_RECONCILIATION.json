@@ -1,0 +1,41 @@
+{
+  "schema": "V42_2_FAILED_ATTEMPT_RECONCILIATION_V1",
+  "arm": "B1",
+  "attempt": 1,
+  "status": "OFFICIAL_STOP_FOR_BASIS_ROOT_CAUSE_REPAIR",
+  "Native_seconds": 517.7680003643036,
+  "prior_native_seconds_preserved": 2980.6410002708435,
+  "inflight": null,
+  "worker_lock_exists": false,
+  "campaign_lock_exists": false,
+  "original_FULL_infeasible_claimed": false,
+  "FULL_PASS": false,
+  "Actual_Fresh_PASS": false,
+  "identical_retry_authorized": false,
+  "S0": {
+    "status": "OPTIMAL_RESTRICTED_PHASE_I",
+    "exact_Phi": "0",
+    "omitted_violated_rows": 5933,
+    "Native_seconds": 144.9410002231598
+  },
+  "S1": {
+    "status": "AGENT_REQUESTED_OFFICIAL_STOP",
+    "Native_seconds": 372.8270001411438,
+    "native_basis_crushed_by_presolve": true,
+    "diagnostic_primal_infeasibility_exceeded": 10000000000.0
+  },
+  "root_cause_under_repair": "Existing rank-preserving extension made every new row slack basic. At the actual S0 point, added equalities/violated inequalities cannot have feasible such slacks. Native warm presolve/crossover then lost feasibility. Retain old native basis and use signed original elastic artificial pivots for violated new rows; verify on identical actual S1 matrix before new Attempt.",
+  "source_scientific_constraints_changed": false,
+  "budget_caps_changed": false,
+  "failed_ledger": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT001\\PLANNING_NATIVE_LEDGER.json",
+    "sha256": "83697796e377571a5078f6856f423e9b3658f7b9da07144732e3e216deb67415",
+    "bytes": 17300
+  },
+  "raw_outcome": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT001\\B1\\ARM_OUTCOME.json",
+    "sha256": "4b9ff63a9ce0623990545f2784424ef1b34cd51888367e17af093dc81c169591",
+    "bytes": 1773
+  },
+  "stop_request": null
+}

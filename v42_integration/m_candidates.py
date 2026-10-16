@@ -19,6 +19,17 @@ from .m_engine import PathGraph, _write, vector_sha
 from .preparation_profile import profile_component
 
 
+def base_grid_reference(case):
+    """Zero MESS dispatch with exact source helper constants, scoring only.
+
+    This vector has no route/SOC feasibility claim and is never a MIP Start.
+    """
+    from tools.critical_grid_cg.oracle import Geometry
+    x = np.zeros(case.original_A.shape[1], dtype=np.float64)
+    Geometry(case.original_A, case.original_d).numerical(x, np.zeros_like(x))
+    return x
+
+
 def grid_context(case, point):
     """Use original recursive helper projection, supplying all current arrays."""
     from tools.time_decomposed_lb.grid import SelectiveAuthority
@@ -42,8 +53,8 @@ def grid_context(case, point):
                         raise ValueError('CURRENT_HELPER_PIVOT_AUTHORITY_DRIFT')
                     self.helper_defs[pivots[0]] = i
     authority = CurrentAuthority()
-    original = case.lift(point)
-    rho = float(case.d['objective'] @ point + case.d['constant'])
+    original = base_grid_reference(case) if point is None else case.lift(point)
+    rho = 0. if point is None else float(case.d['objective'] @ point + case.d['constant'])
     by_slot, scanned = {}, 0
     for tick, indices in sorted(authority.security_by_slot.items()):
         thermal = [i for i in indices if str(authority.maps['row_names'][i]).startswith('line_thermal_face[')]
@@ -73,6 +84,8 @@ def grid_context(case, point):
     H = PathGraph(case).horizon
     if set(by_slot) != set(range(H)):
         raise ValueError('ALL_SLOTS_THERMAL_SCORE_CONTEXT_REQUIRED')
+    if point is None:
+        rho = max(r['loading'] for rows in by_slot.values() for r in rows)
     near = [r for rows in by_slot.values() for r in rows if r['loading'] >= rho - .025]
     selected = []
     for band in range((H+11)//12):
@@ -99,8 +112,9 @@ def grid_context(case, point):
         packet = authority.project(row['original_row'], row['slot'])
         packet.update(slot=row['slot'], metadata=row['metadata'], current_loading=row['loading'])
         rows.append(packet)
-    context = dict(PASS=True, case_sha=case.case_sha, center_vector_sha=vector_sha(point),
-                   rows=rows, current_verified_UB=rho, all_thermal_rows_scanned=scanned,
+    context = dict(PASS=True, case_sha=case.case_sha, center_vector_sha=None if point is None else vector_sha(point),
+                   rows=rows, current_verified_UB=None if point is None else rho,
+                   scoring_reference_peak=rho, seedless=point is None, all_thermal_rows_scanned=scanned,
                    selected_rows=len(rows), Native_optimize_calls=0,
                    exact_original_signed_helper_projection=True,
                    score_is_heuristic_not_FULL_feasibility_or_bound=True)
@@ -130,7 +144,8 @@ class SignedMinimax:
         self.m, self.H = len(self.rows), self.graph.horizon
         self.coeff = np.zeros((len(self.units), len(self.sites), self.m, 3))
         self.base = np.empty(self.m)
-        values = dict(zip(map(str, case.original_d['names']), map(float, case.lift(point))))
+        original = base_grid_reference(case) if point is None else case.lift(point)
+        values = dict(zip(map(str, case.original_d['names']), map(float, original)))
         self.measured = np.zeros((len(self.units), self.m))
         for i, row in enumerate(self.rows):
             terms = {name: float(F(c)) for name, c in row['coeff'].items()}
@@ -154,7 +169,7 @@ class SignedMinimax:
         self.support = np.minimum(0., supports.min(axis=-1))
         self.best_vertex = supports.argmin(axis=-1)
         self.path_cache, self.future_cache = {}, {}
-        self.baseline_paths = self.graph.paths(point)
+        self.baseline_paths = {u: self.graph.complete(u) for u in self.units} if point is None else self.graph.paths(point)
         self.base_support = self.measured.copy()
         self.moves_by_origin = defaultdict(list)
         for unit in self.units:
@@ -346,10 +361,10 @@ def generate(case, point, bank, budget):
     feedback_point=getattr(case,'mess_feedback_point',point)
     context = grid_context(case, feedback_point)
     scoring = SignedMinimax(case, feedback_point, context, pcs_vertices(case))
-    base = graph.paths(point)
+    base = {u: graph.complete(u) for u in graph.origins} if point is None else graph.paths(point)
     candidates = {u: {} for u in graph.origins}
     counters = Counter()
-    ub = bank.best[1]['Global_UB']
+    ub = context['scoring_reference_peak'] if bank.best is None else bank.best[1]['Global_UB']
     weights = 1 + np.maximum(0., scoring.loading-(ub-.025))*20
     def register(unit, path, origin):
         graph.validate(unit, path)
@@ -363,7 +378,7 @@ def generate(case, point, bank, budget):
             moves=sum(graph.arcs[k][-1] is not None for k in path))
     for unit in sorted(graph.origins):
         register(unit, graph.complete(unit), 'STAY')
-        register(unit, base[unit], 'CURRENT_FULL')
+        register(unit, base[unit], 'INITIAL_STAY_REFERENCE_ONLY' if point is None else 'CURRENT_FULL')
         if unit in getattr(case,'warm_route_seed',{}):
             register(unit,case.warm_route_seed[unit],'M1_ROUTE_ONLY_M2_REDISPATCH')
         if bank.best_moving is not None:
@@ -538,7 +553,8 @@ def generate(case, point, bank, budget):
     target=getattr(case,'mess_iteration_output',case.output / 'COMMON_M_PR222')
     _write(target / 'FRESH_BEAM_AND_REDISPATCH_ADMISSION.json', dict(
         coverage=coverage,PR222_joint_redispatch_admission=True,
-        epoch=epoch,feedback=state.get('feedback',[])[-1:],current_dispatch_vector_sha=vector_sha(feedback_point),
+        epoch=epoch,feedback=state.get('feedback',[])[-1:],current_dispatch_vector_sha=None if feedback_point is None else vector_sha(feedback_point),
+        seedless=point is None, verified_UB_available=bank.best is not None,
         grid_feedback_rows=len(context['rows']),
         backward_terminal_SOC_lookahead=True,charge_rebound_counted_once=True,
         PASS=True, counters=dict(counters), generated={u: len(c) for u, c in candidates.items()},

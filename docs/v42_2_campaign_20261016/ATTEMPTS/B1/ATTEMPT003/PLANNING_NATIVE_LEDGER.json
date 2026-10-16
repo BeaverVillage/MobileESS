@@ -1,0 +1,417 @@
+{
+  "schema": "TABLE_V_NATIVE_STAGE_LEDGER_V1",
+  "limit_seconds": null,
+  "total_limit_enabled": false,
+  "calls": [
+    {
+      "label": "RELEASE_P1:A1:MODEL_BUILD",
+      "solver": "BUILD",
+      "status": "COMPLETED",
+      "measured_seconds": 224.92047599999933,
+      "stage_context": {
+        "day": "2025-05-01",
+        "arm": "B1",
+        "stage": "A1",
+        "stage_case_sha": "dd24490103fe2892d294b40b51da6132bac16ca76b96acca4e50167fc811c3a0",
+        "source_sha": "66a3b8e333fa45e01524f9e49bed366c75b3815555e0696b4a3fe783222f7aba",
+        "parent_result_sha": "f838762ecfa035281579a4c32e4f82196e7768a7a63ed4197e0734c6b48510ae"
+      },
+      "P2_call": false,
+      "consumes_native_timeout": false
+    },
+    {
+      "label": "RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_FAST",
+      "solver": "GUROBI",
+      "Native_Runtime": 143.757000207901,
+      "wall_seconds": 144.22602349999943,
+      "charged_seconds": 143.757000207901,
+      "cap_seconds": 900.0,
+      "overshoot_seconds": 0.0,
+      "error": null,
+      "status": 2,
+      "stage_context": {
+        "day": "2025-05-01",
+        "arm": "B1",
+        "stage": "A1",
+        "stage_case_sha": "dd24490103fe2892d294b40b51da6132bac16ca76b96acca4e50167fc811c3a0",
+        "source_sha": "66a3b8e333fa45e01524f9e49bed366c75b3815555e0696b4a3fe783222f7aba",
+        "parent_result_sha": "f838762ecfa035281579a4c32e4f82196e7768a7a63ed4197e0734c6b48510ae"
+      },
+      "native_binding": {
+        "matrix_sha": "ce2eae3dbbc716d29f96be55e5a2459825a86c7270be932046529548946cf658",
+        "domain_sha": "2cc1e83273268a9401267a2f3cfc2cefb5683c540032d638ad6b2a2ad1315fa6",
+        "objective_sense": 1,
+        "rows": 276433,
+        "columns": 215037,
+        "nonzeros": 1793606,
+        "Threads": 1
+      },
+      "resource_before_solve": {
+        "memory": {
+          "AvailableMBytes": 12069,
+          "CommittedBytes": 28409995264,
+          "CommitLimit": 68408958976,
+          "PercentCommittedBytesInUse": 41
+        },
+        "workers": [
+          {
+            "ProcessId": 60804,
+            "Name": "python.exe",
+            "CommandLine": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -u D:\\v42_trajectory_tracking_may01_20261014\\tools\\serve_v42_table_v_monitor.py --port 8793 --source D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION02"
+          },
+          {
+            "ProcessId": 70412,
+            "Name": "python.exe",
+            "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u D:/v42_monitor_e08_clockfix_20261015/serve.py D:/v42_trajectory_tracking_may01_20261014/docs/v42_b1_structure_b2_solo_20261015/TRACK_B/MAY01_RUN01/EXECUTIONS/2025-05-01 8794"
+          },
+          {
+            "ProcessId": 71500,
+            "Name": "python.exe",
+            "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -"
+          },
+          {
+            "ProcessId": 62704,
+            "Name": "python.exe",
+            "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/run_v42_2_campaign.py --arm B1 --attempt 3 --reason USER_AUTHORIZED_FRESH_B1_AFTER_ATTEMPT002_LPWARMSTART2_CROSSOVER_BYPASS_BOTTLENECK_REPAIRED_ACTUAL_S1_COLD_BARRIER_NATIVE0_AND_1267_REGRESSION_PASS --corrective-commit 9ceee6fb0ba1c06a1c250c4b95481839c0e756a1 --validation-gate docs/v42_2_campaign_20261016/VALIDATION_GATE_03.json"
+          }
+        ],
+        "psutil_available_RAM_bytes": 12701892608,
+        "CPU_percent": 7.0
+      },
+      "P2_call": false,
+      "objective_scope": "ORIGINAL_P1_CURRENT_MATRIX_NOT_UNPRICED_GLOBAL_CERTIFICATE",
+      "native_execution_entered": true,
+      "native_numeric_attributes": {
+        "ObjBound": 0.0,
+        "ObjVal": 0.0,
+        "SolCount": 1.0,
+        "IsMIP": 0.0
+      }
+    },
+    {
+      "label": "RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_FAST",
+      "solver": "GUROBI_INTERRUPTED",
+      "Native_Runtime": null,
+      "charged_seconds": 396.42043900489807,
+      "status": "INTERRUPTED_NOT_CERTIFIED",
+      "evidence": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT003\\HOST_RESTART_RECOVERY\\RESTART_RECEIPT.json",
+        "sha256": "6b9cb96b452d8483cbefae7858a43f6cbe67e9d364d66519492a734f8e69b4d9",
+        "bytes": 2392
+      },
+      "stage_context": {
+        "day": "2025-05-01",
+        "arm": "B1",
+        "stage": "A1",
+        "stage_case_sha": "dd24490103fe2892d294b40b51da6132bac16ca76b96acca4e50167fc811c3a0",
+        "source_sha": "66a3b8e333fa45e01524f9e49bed366c75b3815555e0696b4a3fe783222f7aba",
+        "parent_result_sha": "f838762ecfa035281579a4c32e4f82196e7768a7a63ed4197e0734c6b48510ae"
+      },
+      "interrupted_call": {
+        "label": "RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_FAST",
+        "cap": 756.242999792099,
+        "pid": 62704,
+        "stage_context": {
+          "day": "2025-05-01",
+          "arm": "B1",
+          "stage": "A1",
+          "stage_case_sha": "dd24490103fe2892d294b40b51da6132bac16ca76b96acca4e50167fc811c3a0",
+          "source_sha": "66a3b8e333fa45e01524f9e49bed366c75b3815555e0696b4a3fe783222f7aba",
+          "parent_result_sha": "f838762ecfa035281579a4c32e4f82196e7768a7a63ed4197e0734c6b48510ae"
+        },
+        "native_binding": {
+          "matrix_sha": "f1f86d02b3f76b73f97a6a3a43771a2c42f5f5cf37d53b7f0cb24100f590029c",
+          "domain_sha": "228d7dd89d0806f1946ba23a7c5f505a68683eb1dadfab083f74f50676db7947",
+          "objective_sense": 1,
+          "rows": 282366,
+          "columns": 221020,
+          "nonzeros": 1891227,
+          "Threads": 1
+        },
+        "started_epoch_seconds": 1792090490.797776,
+        "worker_lock_owner": {
+          "schema": "V42_RELEASE_OWNED_LOCK_V1",
+          "kind": "HEAVY_WORKER",
+          "pid": 62704,
+          "nonce": "53de1a8973b64d749146b4cc6ca3da50",
+          "ledger_path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT003\\PLANNING_NATIVE_LEDGER.json",
+          "authorization_sha": "8c82fc1628a4a69f7c52dcdbc5f29ab28fd4e37d4791cdae10a74ffc224b4d36",
+          "created_epoch_seconds": 1792090490.7924917
+        },
+        "worker_lock_record": {
+          "path": "D:\\V42_UNIFIED_HEAVY_WORKER.lock",
+          "sha256": "f27f2c9bda2ef87bf7f96b45fb61048f27e3c5d146c2a7b49f308034dbf669e5",
+          "bytes": 403
+        }
+      },
+      "native_runtime_bounds_seconds": {
+        "lower": 265.0,
+        "upper": 396.42043900489807,
+        "exact": null,
+        "printed_native_log_seconds": 266.0,
+        "first_proven_reboot_epoch_seconds": 1792090886.218215,
+        "accounting": "NATIVE_INTERVAL_NOT_EXACT_RUNTIME",
+        "offline_downtime_charged_as_native": false
+      },
+      "host_restart_receipt": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT003\\HOST_RESTART_RECOVERY\\RESTART_RECEIPT.json",
+        "sha256": "6b9cb96b452d8483cbefae7858a43f6cbe67e9d364d66519492a734f8e69b4d9",
+        "bytes": 2392
+      }
+    }
+  ],
+  "inflight": null,
+  "active_stage_context": null,
+  "Gurobi_Native_seconds": 143.757000207901,
+  "other_solver_wall_seconds": 224.92047599999933,
+  "conservative_solve_seconds": 540.1774392127991,
+  "AC_wall_seconds": 0.0,
+  "carried_forward_predecessors": [],
+  "prior_arm_stage_costs_reset": true,
+  "historical_ledgers_merged": false,
+  "release_identity": {
+    "authorization_sha": "8c82fc1628a4a69f7c52dcdbc5f29ab28fd4e37d4791cdae10a74ffc224b4d36",
+    "historical_read_only": [
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\UNIFIED_NATIVE_RUNTIME_LEDGER.json",
+        "sha256": "96dafdd5a0f261e2446d66de8070d604c588a8cbf8bfd9e4960f5c20730deadc",
+        "bytes": 105988
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC01\\A1_P1_120\\SEPARATE_NATIVE_LEDGER_180.json",
+        "sha256": "1f26c7f0a0f5e20f93b758cc94d319bb5eb749ad6c55a6ffdf224e3368a555f7",
+        "bytes": 3687
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_b1_structure_b2_solo_20261015\\TRACK_B\\MAY01_RUN01\\EXECUTIONS\\2025-05-01\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "1a3059a4c30f44575edb7ca8a6966d7daf1405446e65f06e7080326e69d758be",
+        "bytes": 69563
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT001\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "83697796e377571a5078f6856f423e9b3658f7b9da07144732e3e216deb67415",
+        "bytes": 17300
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT002\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "9791a1d5f72e2a8f7b0c97996387ed2f7f332baaf4e5a5db281e2fe5af6e6560",
+        "bytes": 18270
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B2\\ATTEMPT001\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "0f227a46deb7036db4db784da4e1b276507548f7d69a2a6c7322da7ad9bcbd9c",
+        "bytes": 7283
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B2\\ATTEMPT002\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "75d0bc03d3663ab076e28e382d458d7dd6dd1cf16a0b0a97c62bbd294253be70",
+        "bytes": 8148
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B2\\ATTEMPT003\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "403ec9151d73191af73f27e9b25f2ed94af5a052920aa762842ad69b0259e992",
+        "bytes": 9016
+      }
+    ],
+    "authorization_claim": {
+      "path": "D:\\.V42_TABLE_V_AUTHORIZATION_CLAIMS\\16791e5de5da81c400f9a1ded088c6669665cba166feb316a5dca553c8bf6374.json",
+      "sha256": "ca436661132382a650e94d37fc21d17a72d1e49b1663aefaf72b6fccd8d21967",
+      "bytes": 247
+    }
+  },
+  "authorization_document": {
+    "schema": "TABLE_V_ARM_STAGE_NATIVE_ONLY_AUTHORIZATION_V1",
+    "approved": true,
+    "budget_kind": "PLANNING_NATIVE",
+    "authorization_id": "V42_2_PLANNING_B1_003_8043808184ad4dfb89adc914bb745857",
+    "authorized_ledger_path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT003\\PLANNING_NATIVE_LEDGER.json",
+    "stage_caps_seconds": {
+      "B1:A1": 5400.0,
+      "B2:M1": 1800.0,
+      "B3:A1": 5400.0,
+      "B3:M1": 1800.0,
+      "B3:A2": 5400.0,
+      "B3:M2": 1800.0
+    },
+    "total_limit_seconds": null,
+    "total_limit_enabled": false,
+    "timeout_basis": "CUMULATIVE_GUROBI_NATIVE_OPTIMIZE_PER_ARM_STAGE",
+    "P2_calls": 0,
+    "Worker": 1,
+    "Threads": 1,
+    "human_approval_reference": {
+      "authority": "DIRECT_HUMAN_REQUEST_IN_THIS_CHAT",
+      "request": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_1_freeze_20261016\\USER_REQUEST.txt",
+        "sha256": "63880348b8cf0fcb6331c81721638e4333bcfdbaf210aaf65f04f00fdfd7e99c",
+        "bytes": 25464
+      },
+      "requested_operation": "V42.2 independent fresh arm attempt from zero; preserve all previous usage and evidence",
+      "day": "2025-05-01",
+      "arm": "B1",
+      "attempt": 3,
+      "reason": "USER_AUTHORIZED_FRESH_B1_AFTER_ATTEMPT002_LPWARMSTART2_CROSSOVER_BYPASS_BOTTLENECK_REPAIRED_ACTUAL_S1_COLD_BARRIER_NATIVE0_AND_1267_REGRESSION_PASS",
+      "corrective_commit": "9ceee6fb0ba1c06a1c250c4b95481839c0e756a1",
+      "run_arms": [
+        "B1"
+      ],
+      "Worker": 1,
+      "Threads": 1,
+      "P2_calls": 0,
+      "R2": "HOLD",
+      "unlimited_stage_budget": false
+    },
+    "source_cases": [
+      {
+        "day": "2025-05-01",
+        "source_sha": "66a3b8e333fa45e01524f9e49bed366c75b3815555e0696b4a3fe783222f7aba",
+        "source_identity": {
+          "science_sha": "d2a03cf146099f865364974135b414d95b2ffe27d6181321f21ad719b36b3e0c",
+          "case_sha": "2b731e608afcb7e09777579098d0ae0c078b038c4941210e1a1b81f9c0c6b43f",
+          "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+          "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+          "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b"
+        }
+      }
+    ],
+    "authorized_arm_stages": [
+      "B1:A1"
+    ],
+    "fresh_native_cycle": {
+      "schema": "TABLE_V_EXPLICIT_FRESH_NATIVE_CYCLE_V1",
+      "approved": true,
+      "start_native_seconds": 0,
+      "human_approval_reference": {
+        "authority": "DIRECT_HUMAN_REQUEST_IN_THIS_CHAT",
+        "request": {
+          "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_1_freeze_20261016\\USER_REQUEST.txt",
+          "sha256": "63880348b8cf0fcb6331c81721638e4333bcfdbaf210aaf65f04f00fdfd7e99c",
+          "bytes": 25464
+        },
+        "requested_operation": "V42.2 independent fresh arm attempt from zero; preserve all previous usage and evidence",
+        "day": "2025-05-01",
+        "arm": "B1",
+        "attempt": 3,
+        "reason": "USER_AUTHORIZED_FRESH_B1_AFTER_ATTEMPT002_LPWARMSTART2_CROSSOVER_BYPASS_BOTTLENECK_REPAIRED_ACTUAL_S1_COLD_BARRIER_NATIVE0_AND_1267_REGRESSION_PASS",
+        "corrective_commit": "9ceee6fb0ba1c06a1c250c4b95481839c0e756a1",
+        "run_arms": [
+          "B1"
+        ],
+        "Worker": 1,
+        "Threads": 1,
+        "P2_calls": 0,
+        "R2": "HOLD",
+        "unlimited_stage_budget": false
+      },
+      "cycle_id": "B1_003_8043808184ad4dfb89adc914bb745857",
+      "archived_native_ledgers": [
+        {
+          "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_b1_structure_b2_solo_20261015\\TRACK_B\\MAY01_RUN01\\EXECUTIONS\\2025-05-01\\PLANNING_NATIVE_LEDGER.json",
+          "sha256": "1a3059a4c30f44575edb7ca8a6966d7daf1405446e65f06e7080326e69d758be",
+          "bytes": 69563
+        },
+        {
+          "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT001\\PLANNING_NATIVE_LEDGER.json",
+          "sha256": "83697796e377571a5078f6856f423e9b3658f7b9da07144732e3e216deb67415",
+          "bytes": 17300
+        },
+        {
+          "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT002\\PLANNING_NATIVE_LEDGER.json",
+          "sha256": "9791a1d5f72e2a8f7b0c97996387ed2f7f332baaf4e5a5db281e2fe5af6e6560",
+          "bytes": 18270
+        },
+        {
+          "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B2\\ATTEMPT001\\PLANNING_NATIVE_LEDGER.json",
+          "sha256": "0f227a46deb7036db4db784da4e1b276507548f7d69a2a6c7322da7ad9bcbd9c",
+          "bytes": 7283
+        },
+        {
+          "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B2\\ATTEMPT002\\PLANNING_NATIVE_LEDGER.json",
+          "sha256": "75d0bc03d3663ab076e28e382d458d7dd6dd1cf16a0b0a97c62bbd294253be70",
+          "bytes": 8148
+        },
+        {
+          "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B2\\ATTEMPT003\\PLANNING_NATIVE_LEDGER.json",
+          "sha256": "403ec9151d73191af73f27e9b25f2ed94af5a052920aa762842ad69b0259e992",
+          "bytes": 9016
+        }
+      ],
+      "reuse_previous_solution_or_bound": false
+    }
+  },
+  "worker_lock_path": "D:\\V42_UNIFIED_HEAVY_WORKER.lock",
+  "P2_calls": 0,
+  "Worker": 1,
+  "Threads": 1,
+  "fresh_native_cycle": {
+    "schema": "TABLE_V_EXPLICIT_FRESH_NATIVE_CYCLE_V1",
+    "approved": true,
+    "start_native_seconds": 0,
+    "human_approval_reference": {
+      "authority": "DIRECT_HUMAN_REQUEST_IN_THIS_CHAT",
+      "request": {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_1_freeze_20261016\\USER_REQUEST.txt",
+        "sha256": "63880348b8cf0fcb6331c81721638e4333bcfdbaf210aaf65f04f00fdfd7e99c",
+        "bytes": 25464
+      },
+      "requested_operation": "V42.2 independent fresh arm attempt from zero; preserve all previous usage and evidence",
+      "day": "2025-05-01",
+      "arm": "B1",
+      "attempt": 3,
+      "reason": "USER_AUTHORIZED_FRESH_B1_AFTER_ATTEMPT002_LPWARMSTART2_CROSSOVER_BYPASS_BOTTLENECK_REPAIRED_ACTUAL_S1_COLD_BARRIER_NATIVE0_AND_1267_REGRESSION_PASS",
+      "corrective_commit": "9ceee6fb0ba1c06a1c250c4b95481839c0e756a1",
+      "run_arms": [
+        "B1"
+      ],
+      "Worker": 1,
+      "Threads": 1,
+      "P2_calls": 0,
+      "R2": "HOLD",
+      "unlimited_stage_budget": false
+    },
+    "cycle_id": "B1_003_8043808184ad4dfb89adc914bb745857",
+    "archived_native_ledgers": [
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_b1_structure_b2_solo_20261015\\TRACK_B\\MAY01_RUN01\\EXECUTIONS\\2025-05-01\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "1a3059a4c30f44575edb7ca8a6966d7daf1405446e65f06e7080326e69d758be",
+        "bytes": 69563
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT001\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "83697796e377571a5078f6856f423e9b3658f7b9da07144732e3e216deb67415",
+        "bytes": 17300
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT002\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "9791a1d5f72e2a8f7b0c97996387ed2f7f332baaf4e5a5db281e2fe5af6e6560",
+        "bytes": 18270
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B2\\ATTEMPT001\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "0f227a46deb7036db4db784da4e1b276507548f7d69a2a6c7322da7ad9bcbd9c",
+        "bytes": 7283
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B2\\ATTEMPT002\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "75d0bc03d3663ab076e28e382d458d7dd6dd1cf16a0b0a97c62bbd294253be70",
+        "bytes": 8148
+      },
+      {
+        "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B2\\ATTEMPT003\\PLANNING_NATIVE_LEDGER.json",
+        "sha256": "403ec9151d73191af73f27e9b25f2ed94af5a052920aa762842ad69b0259e992",
+        "bytes": 9016
+      }
+    ],
+    "reuse_previous_solution_or_bound": false
+  },
+  "fresh_cycle_native_start_seconds": 0.0,
+  "archived_native_seconds_excluded_from_current_cycle": 4210.561000585556,
+  "archived_ledgers_overwritten": false,
+  "active_stage_owner_pid": null,
+  "sealed_interrupted_attempt": true,
+  "Native_Runtime_fully_known": false,
+  "Native_Runtime_bounds_seconds": {
+    "lower": 408.757000207901,
+    "upper": 540.1774392127991
+  }
+}

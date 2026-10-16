@@ -1,0 +1,610 @@
+# Codex Ultra — V42.2 B1 Phase I 근본 병목 해결 및 May01 캠페인 재개
+
+## 0. 최종 목표
+
+현재 V42.2의 B1 A1 Phase I 병목을 근본적으로 해결하라.
+
+단순히 Solver 제한시간을 늘리거나 수치 허용오차를 완화하는 것이 아니라, **원본 수학적 문제를 유지하면서 대규모 LP의 정식화 효율과 Solver 실행 성능을 개선**하는 것이 목표다.
+
+이번 작업에서는 다음 두 가지 원인을 독립적으로 해결해야 한다.
+
+1. S0 → S1 과정에서 검증된 실행가능 Basis를 재사용하지 못해 Cold Barrier를 반복하는 문제
+2. PR189 대비 LP의 구조와 규모가 증가하면서 Presolve·Factorization 비용 및 수치 불안정성이 급증한 문제
+
+기존 V42.1 Freeze 및 PR231 작업 결과를 보존하고, 개선은 V42.2 브랜치에서 수행한다.
+
+**최종 목표: May01 B1 A1 최적화 및 원본 인증 완료 → B1 Actual96/Fresh96 PASS → B2 → B3 캠페인 진행.**
+
+실제 결과가 증명되지 않은 개선을 성공으로 보고하지 마라.
+
+---
+
+## 1. 기준 자료 및 현재 실행 상태 확인
+
+Repository: `BeaverVillage/MobileESS`
+
+현재 개발 브랜치:
+
+`codex/v42.2-may01-b1b2b3-20261016`
+
+관련 PR:
+
+- PR #189: 기존 B1 May01 성공 기록
+- PR #230: B1 Phase I 및 M 준비 병목 개선
+- PR #231: 현재 V42.2 캠페인
+
+비교 자료:
+
+`docs/v42_2_campaign_20261016/PR189_B1_MAY01_COMPARISON.json`
+
+현재 작업을 시작하기 전에 다음을 확인하라.
+
+1. 실제 Git HEAD와 작업 트리 상태
+2. 현재 B1 Original Integer P1 Solver 및 다른 Native 작업의 실행 여부
+3. 진행 중인 Worker PID, Lock, Native 원장과 마지막 유효 Raw
+4. 이미 개발 중인 S0→S1 Primal Simplex 수정사항
+5. 최신 Source/Case/Policy 및 현재 실험의 승인 상태
+
+실행 중인 Solver가 있으면 해당 실행 소스를 변경하지 마라.
+
+진행 중인 계산은 공식 종료 또는 안전한 Checkpoint 경계에서 정산한다. 사용자 승인 범위를 벗어나는 새 실험을 시작하지 않는다.
+
+### 기준 실험
+
+| 항목 | PR189 May01 | V42.2 May01 |
+|---|---:|---:|
+| 최적화 Job | 1,499 | 1,555 |
+| Semantic Class | 117 | 229 |
+| S1 Presolved Rows | 6,029 | 168,195 |
+| S1 Factor NZ | 약 400,000 | 약 65,730,000 |
+| S1 Factor Ops | 약 4.8e7 | 약 8.631e10 |
+| 계수 범위 | 4e-10 ~ 6 | 1e-13 ~ 3e5 |
+| Phase I Native | 63.82초 | 900.015초 |
+| B1 전체 Native | 97.47초 | 미인증 |
+
+PR189는 성능 비교 및 알고리즘 참고 자료이며, 현재 원본 모델의 가능해나 인증 하한을 제공하는 근거가 아니다.
+
+과거 UB/LB·Raw·계획을 새 Case의 인증으로 재사용하지 마라.
+
+---
+
+## 2. 최우선: S0 → S1 Primal Simplex Warm Start 완성
+
+현재 S0에서는 다음이 확인됐다.
+
+- Native Runtime: 117.351초
+- 정확한 Phi = 0
+- 생략된 원본 행 3,533개 위반
+- S1에서 추가 행 활성화 필요
+- S0에서 검증된 Native Basis 존재
+- 실제 S1 확장 Basis의 Primal Feasibility 검증 이력 존재
+
+반면 S1은 Cold Barrier를 실행해 약 900초 누적 Phase I 한도를 소진했다.
+
+현재 개발 중인 Primal Simplex 정책부터 완성하라.
+
+### 2.1 정확한 Basis 확장
+
+S0의 Native VBasis/CBasis를 사용하되 다음을 독립적으로 검증한다.
+
+- S0/S1 원본 행·열 Identity
+- 기존 행의 계수, RHS, Sense, Bounds
+- 신규 행 및 Artificial Column mapping
+- 모든 기존 변수가 유지되는지
+- 새 Artificial의 정확한 부호와 Objective Weight
+- 기본변수 수와 행 개수의 일치
+- Basis의 비특이성 및 Gurobi 수용 여부
+- 새로운 행까지 포함한 Primal Feasibility
+- 원본 좌표 기준 최대 잔차
+- 정확한 Phi 목적함수
+
+새로운 Equality 및 Elastic 행을 만족시키는 데 필요한 기본변수와 Artificial 값은 실제 식에서 구성하라.
+
+이미 검증된 Basis를 불필요하게 폐기하지 않는다.
+
+단, 검증에 실패한 Basis를 강제로 Solver에 전달하지 않는다.
+
+### 2.2 Solver 후보 A — 직접 Primal Simplex
+
+동일한 실제 S1 행렬에서 다음 정책을 실험한다.
+
+```python
+Method = 0
+LPWarmStart = 1
+Presolve = 0
+Threads = 1
+```
+
+기존 원본 Solver 수치 허용오차와 Source 조건은 유지한다.
+
+모델을 완전히 생성하고 `update()`한 후, 정확하게 검증된 VBasis/CBasis를 설치하고 `optimize()`를 호출하라.
+
+로그에서 실제 Basis 채택 여부를 확인한다.
+
+특히 다음 상태를 구분해 기록한다.
+
+- Basis 정상 수용
+- Basis 거부
+- 수치적으로 불안정한 Basis
+- 초기 Primal Feasible
+- Simplex Iteration 진행
+- Phi=0 도달
+- OPTIMAL 및 원본 KKT 재검증
+
+Gurobi 내부 로그의 Objective를 원본 정확 Phi 인증으로 대체하지 않는다.
+
+### 2.3 Solver 후보 B — Presolve Warm Start
+
+후보 A가 느리거나 수치적으로 불안정하면, 동일한 원본 S1 행렬에서 아래 방식을 비교하라.
+
+```python
+Method = 0
+LPWarmStart = 2
+Presolve = -1
+Threads = 1
+```
+
+현재의 Barrier 설정 및 이전 Basis Crossover 실패 사례와 비교한다.
+
+Presolve된 모델에서 직접 원본 Basis를 사용한다고 가정하지 마라. Gurobi가 기존 Basis로부터 시작 벡터를 구성하고 Presolved 모델에 적용하는 과정을 실제 로그로 확인해야 한다.
+
+기존에 발생한 Crushed Basis/Crossover 병목이 재발하는지 별도로 계측하라.
+
+### 2.4 Solver 정책 선정 기준
+
+동일한 S1 Source/Case/Matrix/Objective/Budget 조건을 비교한다.
+
+- 최초 실행가능점 확보시간
+- Phi=0 도달시간
+- OPTIMAL까지의 Native Runtime
+- 원본 Primal/Dual/KKT PASS
+- Peak RSS
+- Basis 복원 및 적용 비용
+- Presolve/Factorization/Iteration 비용
+- S1 후속 행 검사 PASS 여부
+
+TIME_LIMIT로 중단된 실행을 완료된 실행보다 빠르다고 판단하지 않는다.
+
+새 정책이 효과가 없으면 추가로 동일 설정을 반복하지 말고 아래 구조적 개선으로 진행한다.
+
+---
+
+## 3. S1이 27.9배 커진 근본 원인 분석
+
+현재 V42.2는 PR189와 다른 과학적 모델이다.
+
+D0 초기 잔여 작업·점유, E1/FLEX30, Checkpoint/Migration, Reserve 및 Known/Unknown 계약을 포함한다.
+
+**추가 제약의 물리적·수학적 의미를 유지하면서 어떤 제약 구조가 Presolve 및 Barrier Fill-in을 증가시켰는지 밝혀라.**
+
+### 3.1 Row/Column Family 전수 분석
+
+현재 S0/S1과 PR189 모델을 비교하여 다음 Family별로 규모를 산출한다.
+
+- UID-local scheduling/state
+- Job Start/Finish/Service
+- GPU/Rack Capacity
+- Known/Unknown Backlog
+- D0 Residual Service
+- CC4 Q50/Q90 Reserve
+- E1/FLEX30 QoS
+- Checkpoint/Migration
+- WAN Transfer
+- PCC Affine Identity
+- Grid Voltage
+- Line Thermal Loading
+- Transformer Rating
+- Coupling/Linking Constraints
+- Artificial Columns
+
+Family별로 다음 정보를 기록한다.
+
+1. 원본 행 수 및 열 수
+2. Nonzero 개수
+3. 계수 최소·최대 절댓값
+4. Free Variable 개수
+5. Equality/Inequality 비율
+6. 시간별·사이트별·UID별 Coupling 구조
+7. 해당 Family의 Presolve 생존 여부를 확인할 수 있는 증거
+8. 구조 변경 시 Factor Fill-in에 영향을 줄 가능성
+
+단순히 원본 행 수가 많다는 이유로 해당 Family가 Factor Fill-in의 원인이라고 단정하지 않는다.
+
+Presolve 변환에서 원본 행과의 정확한 대응을 추적할 수 없다면 불확실성을 명시하라.
+
+### 3.2 원인 분리 실험
+
+서로 다른 모델을 단순 비교한 결과와 동일 모델의 Solver 비교를 구분하라.
+
+- 실험 A: 현재 S1 행렬 고정, Solver 정책만 변경
+- 실험 B: 현재 과학적 제약 고정, 동치인 LP 표현만 변경
+- 실험 C: 행/열 Family별 기여도를 분석하는 독립 진단
+
+실험 C에서 제약 Family를 제거하는 Ablation을 사용하더라도 이는 원인 분석 전용이며, 결과를 생산용 최적화나 공식 인증으로 승격하지 않는다.
+
+PR189의 작은 모델로 돌아가 단순히 PASS를 재현하는 것은 V42.2 해결이 아니다.
+
+---
+
+## 4. 핵심: 정확한 LP 정식화 규모 축소
+
+Solver 정책 개선만으로 Phase I가 정상 완료되지 않는다면 구조적 LP 축소를 수행하라.
+
+우선순위는 다음과 같다.
+
+### 4.1 Local Constraints와 Global Coupling 분리
+
+현재 압축 DW LP의 Local 제약이 Restricted Master를 지나치게 크게 만드는지 확인하라.
+
+Dantzig–Wolfe 분해의 기본 목적에 맞게 다음 구조를 검토한다.
+
+- UID/Class-local 물리·스케줄링 제약은 Local Polytope 또는 Pricing Oracle에서 처리
+- GPU/전력망/WAN 등 필요한 Global Coupling은 Master에서 처리
+- Master는 실제로 필요한 연결 변수와 Column만 유지
+
+수학적으로 가능하다면 229 Semantic Class 각각의 정확한 Local Feasible Region을 Pricing 측에서 유지하고, Master의 불필요한 Local Hard Rows를 줄여라.
+
+단순히 Master 행을 삭제해서는 안 된다.
+
+반드시 다음을 증명하라.
+
+- 원본 LP의 Feasible Projection 보존
+- 모든 Local Feasible Trajectory의 표현 가능성
+- Master ↔ Original 변수 복원
+- 목적함수 보존
+- 완전한 Pricing Domain Coverage
+- Reduced Cost 및 Dual Bound의 정확성
+- Global LB의 Weak Duality 유지
+
+이 과정은 기존 229 Class 압축만으로 해결됐다고 간주하지 않는다.
+
+새로운 DW 구조가 더 느리거나 인증이 어려우면 채택하지 않는다.
+
+### 4.2 정확한 Variable Elimination
+
+다음 후보를 조사한다.
+
+- 중복된 보조변수
+- 고정된 State Variables
+- 선형 Equality로 결정되는 보조변수
+- P1 목적에 영향을 주지 않는 Epigraph Variables
+- 반복적으로 표현되는 동일 Affine Definition
+- Local Auxiliary Flow Variables
+
+현재 적용된 **4,800개 CC4 P1-neutral Epigraph Tail Projection은 이미 완료한 개선**으로 구분하라.
+
+기존 제거 항목을 새로운 개선으로 중복 계상하지 않는다.
+
+추가로 제거 가능한 변수만 대상으로 정확한 대수적 치환을 수행한다.
+
+Fraction 기반 동치성 검증, 원본 좌표 복원 및 독립 Original Row Replay를 통과해야 한다.
+
+Binary64에서 정확하게 표현할 수 없는 계수로 바뀌면 임의 반올림하지 말고 기존 표현을 유지한다.
+
+### 4.3 정확한 Redundant Row 제거
+
+현재 S1 및 전체 압축 LP에서 다음을 조사한다.
+
+- Exact Duplicate Rows
+- 정확한 비례관계의 제약
+- 고정 변수로 자동 만족되는 제약
+- 이미 다른 Hard Definition이 함의하는 제약
+- 중복된 Class-local 구조
+
+필요한 경우 Exact Rational 관계로 Redundancy를 증명하라.
+
+수치 Rank가 낮다는 이유만으로 원본 행을 삭제하지 않는다.
+
+원본 각 제약의 이중변수 및 인증 결과를 복원할 수 있어야 한다.
+
+### 4.4 Row Generation 개선
+
+S0에서 위반한 3,533개 행을 추가하는 방식도 다시 검토하라.
+
+모든 위반 행을 한 번에 추가하는 방식과, 물리적 중요도·제약 Family·위반 정도별로 묶어 추가하는 방식의 비용을 비교한다.
+
+다만 작은 Batch를 지나치게 여러 번 풀면서 Solve 오버헤드가 증가하지 않도록 한다.
+
+최종 Phase I가 끝나기 전 반드시 전체 생략 행 검사와 완전한 Pricing Closure를 통과해야 한다.
+
+특정 제약을 영구적으로 제외하지 않는다.
+
+---
+
+## 5. Numerical Scaling과 Conditioning 개선
+
+현재 S1의 계수 범위는 약 `1e-13 ~ 3e5`이다.
+
+원본 물리적 단위를 임의로 바꾸거나 수치 허용오차를 완화하지 않고 안정성을 개선하라.
+
+다음 후보를 검토한다.
+
+- Exact power-of-two Row Scaling
+- Exact power-of-two Column Scaling
+- 변수 Family별 적절한 수치 표현
+- Free Auxiliary Variable의 정확한 치환
+- 수치적으로 불리한 Equality 구조 축소
+- Scaling에 따른 Presolve/Factor 변화
+
+Scaling의 양수성, 계수 재현성, Bounds, RHS, Objective, Primal/Dual 복원을 검증한다.
+
+Gurobi가 내부적으로 사용하는 Scaling과 원본 모델을 실제로 변환하는 Scaling을 구분하라.
+
+Scaled 좌표에서 PASS했다고 원본 전압·선로·GPU 제약의 허용오차가 완화되면 안 된다.
+
+Scaling 전후의 원본 좌표에서 동일한 해와 목적함수를 독립 검산한다.
+
+인증 Global LB는 기존 Rational 또는 Outward Error Correction 조건을 유지한다.
+
+---
+
+## 6. 검증 작업의 계산시간도 함께 개선
+
+대형 Native0 감사와 Original FULL 검증을 반복해서 수백 초 소비하는 문제도 개선하라.
+
+다음과 같이 분리한다.
+
+**Static Verification**
+
+동일 Source/Case/Matrix/Domain/Objective에서 1회 완료한 정확한 증명을 SHA와 함께 보존한다.
+
+- Original FULL → Compact 동치성
+- 229 Class Aggregation
+- PCC Hard Definitions
+- 기존 4,800 Tail Projection
+- 고정 행렬/도메인 증명
+
+**Dynamic Verification**
+
+새로운 모델 또는 해에서 변경되는 내용만 검증한다.
+
+- 새 Row/Column Activation
+- 새로운 Basis Mapping
+- 새 Solver Native Readback
+- 새 Original FULL Incumbent
+- 새로운 Pricing 및 Global LB 증거
+
+검증된 Cache가 실제로 같은 원본 수학적 대상을 나타낼 때만 재사용하라.
+
+새 Source 또는 다른 Case에서는 과거 증명을 무조건 재사용하지 않는다.
+
+최종 Original FULL Replay, 정수형 검사, Exact Phi=0, 모든 생략 행 검사와 Global LB 인증은 유지한다.
+
+검증을 생략해서 속도가 개선된 것처럼 보고하지 않는다.
+
+---
+
+## 7. 기존 과학적 조건 변경 금지
+
+다음 조건을 유지하라.
+
+- IEEE 123-bus 원본 계통
+- 원본 전압·선로·변압기 정격
+- AIDC 12개 사이트
+- 현재 1,555 최적화 UID와 229 Semantic Class의 의미
+- 원본 D0 Running/Pending 및 Residual Service
+- E1/FLEX30 계약
+- Checkpoint/Migration/WAN
+- Q50/Q90 Reserve 및 CC4 모델
+- 원본 Known/Unknown 제어 계약
+- GPU·Rack 용량
+- Completion/Deadline 및 Service 권한
+- 1,152 PCC Hard Definitions
+- 원본 Integer FULL 모델
+- P1-only / P2=0
+- R2 HOLD
+- B1 0.5% Global Gap 기준
+
+원본 사업·물리 제약이나 현재 연구 계약을 임의로 완화하여 속도 문제를 해결하지 마라.
+
+과거 PR189 입력으로 변경하여 V42.2 결과라고 주장하지 마라.
+
+---
+
+## 8. 실험 순서 및 Native 예산 관리
+
+모든 개선을 한꺼번에 변경하지 말고 원인별 성능 효과를 확인하라.
+
+### Stage A — 현재 Basis 개선 실험
+
+1. 진행 중인 기존 Solver 상태 확인 및 안전한 정산
+2. 기존 Primal Simplex 수정사항 완료
+3. 실제 S1 Native0 검증
+4. 회귀 테스트
+5. 정확한 Source/Case/Policy Gate 검증
+6. 승인된 예산 내에서 실제 S1 Solve
+7. Native Runtime, Phi, KKT 및 Original Replay 확인
+
+현재 900초가 소진된 Attempt의 원장을 초기화하지 않는다.
+
+새로운 Attempt는 기존 실행 이력과 별도 관리하고, 원본 Native 소비를 감사 기록에 보존하라.
+
+### Stage B — 구조적 원인 분석
+
+Stage A가 실패하거나 성능 목표에 미달하면 다음을 수행한다.
+
+1. Family별 Row/Column/NNZ 분석
+2. Presolve 및 Factor Fill-in 원인 분석
+3. Exact Reformulation 후보 도출
+4. Solver Native0 차단 상태에서 동치성 증명
+5. 제한된 실제 성능 파일럿
+6. 동일 과학적 Case에서 기존 방식과 비교
+
+### Stage C — 가장 효과적인 개선 채택
+
+다음 세 기준을 모두 통과한 개선만 채택한다.
+
+1. 수학적 동치성 PASS
+2. 원본 수치·물리 인증 PASS
+3. 실제 Native 또는 전체 Wall Time의 유의미한 개선 확인
+
+개선이 확인되지 않으면 해당 후보를 기각하고 다음 후보를 시도하라.
+
+단순히 테스트가 PASS했기 때문에 Solver 속도 개선이 확인됐다고 보고하지 않는다.
+
+기존 Stage 예산은 다음과 같이 유지한다.
+
+- A-stage 전체 Native 5,400초
+- Phase I 누적 900초
+- 원본 Integer 탐색용 기존 Reserve 보존
+- Threads=1
+- Worker=1
+
+예산을 임의로 증액하지 않는다.
+
+---
+
+## 9. Phase I 최종 성공 판정
+
+S0의 Phi=0만으로 성공 판정하지 않는다.
+
+다음 항목을 모두 충족해야 한다.
+
+1. S0 최적화 완료
+2. S1 및 필요한 후속 Restricted LP 완료
+3. 모든 활성 제약에서 정확 Phi=0
+4. Artificial Variables의 정확한 Zero 검증
+5. 모든 생략 원본 행 검사 PASS
+6. 전체 Local Domain Pricing Closure PASS
+7. Original Full-domain P1 LP 하한 인증
+8. Primal/Dual/KKT 검증
+9. 원본 Source/Case/Objective 무결성 확인
+
+이 결과를 만족한 후 Original Integer P1을 수행하여 최종 B1 계획과 Gap을 검증한다.
+
+한편 Phase I가 완료되지 않았더라도 원본 Integer MILP가 직접 유효한 FULL UB와 인증 가능한 Global LB를 제공하는 경우에는 기존 공식 Acceptance 계약에 따라 별도로 평가한다.
+
+이 경우 DW Phase I 및 Pricing 인증이 완료된 것처럼 보고하지 않는다.
+
+---
+
+## 10. May01 캠페인 재개
+
+B1 개선이 완료되면 새로운 승인된 Attempt에서 2025-05-01 B1을 재실행한다.
+
+실행 순서:
+
+1. B1 A1 Native 최적화
+2. B1 P1 인증
+3. B1 Original FULL 검증
+4. B1 Actual96
+5. B1 Fresh AC96
+6. B1 최종 PASS
+
+B1이 통과하면 동일한 최종 V42.2 Science/Policy 기준으로 B2 및 B3 실행을 계속한다.
+
+B2는 이미 설계된 Seedless K48 및 Adaptive Beam–4-MESS Direct Joint를 사용한다.
+
+B3는 A1 → M1 → A2 → M2 구조를 유지한다.
+
+B1에서 개발한 알고리즘이 B3 A1/A2에도 적용된다면 동일한 개선을 사용하되, M1 이후 A2의 입력 및 고정된 MESS 조건을 독립 검증한다.
+
+실패 시 근본 원인을 파악하고 공식적으로 새 Attempt를 시작한다.
+
+- 이전 Raw/Native 원장 보존
+- 새 Attempt 시간 0초에서 시작
+- 실제 누적 연구 소비시간 별도 보존
+- 새로운 Source/Case SHA 검증
+- Native0 및 회귀 PASS 후 실행
+
+과학적 Source가 변경되어 이전 B1 PASS와 비교할 수 없게 된 경우에는 영향을 받는 비교군을 재검증한다.
+
+May02–31 및 IEEE8500은 실행하지 않는다.
+
+---
+
+## 11. 필수 보고서
+
+다음 자료를 작성하고 V42.2 Draft PR에 기록하라.
+
+### A. PR189 대비 모델 규모 원인 분석
+
+`B1_PR189_V42_2_STRUCTURE_ROOT_CAUSE_KO.md`
+
+- 원본 행/열 Family 비교
+- Presolve 행/열 비교
+- Factor Fill-in 비교
+- Coupling 구조 분석
+- 117 → 229 Class 증가의 실제 영향
+- D0/E1/FLEX30 신규 제약의 실제 기여
+- 확인된 원인과 미확인 가설 구분
+
+### B. S0→S1 Solver 실측 비교
+
+`B1_PHASE_I_SOLVER_AB_BENCHMARK.csv`
+
+필드:
+
+- Solver Policy
+- Matrix SHA
+- Source/Case SHA
+- Warm Basis Accepted
+- Presolve Rows/Columns
+- Iterations
+- Factor NZ/Ops
+- Native Runtime
+- Wall Time
+- Peak RSS
+- Final Phi
+- Numerical Status
+- Original KKT PASS
+- Omitted-row Closure PASS
+
+### C. 정식화 축소 결과
+
+`B1_EXACT_LP_REFORMULATION_CERTIFICATE.json`
+
+- Before/After Rows
+- Before/After Columns
+- Before/After NNZ
+- 원본 Feasible Projection 동치성
+- Objective 동치성
+- Original Point Lift
+- Dual/Pricing Certificate
+- Native0/Regression 결과
+- 실제 성능 개선 여부
+
+### D. 최종 B1 캠페인 결과
+
+`B1_MAY01_FINAL_PERFORMANCE_KO.md`
+
+- 최종 알고리즘 및 Source SHA
+- Phase I 전체 Native Runtime
+- S0/S1 및 후속 Iteration별 Runtime
+- Original Integer P1 Runtime
+- UB/LB/Global Gap
+- FULL Feasibility
+- Actual96/Fresh96 PASS
+- 전체 Wall Time
+- Peak RSS
+- 실패·재시도 횟수 및 원인
+
+---
+
+## 12. 최종 실행 지시
+
+현재 진행 중인 작업을 안전하게 확인한 뒤 다음 순서로 실행하라.
+
+**1. S0→S1 Primal Simplex 실험 완료**
+
+**2. 현재 S1의 Presolve/Factor 병목 원인 분석**
+
+**3. 필요한 경우 Exact LP Reformulation**
+
+**4. 동일 Case 실제 Native 성능 비교 및 개선 채택**
+
+**5. May01 B1 재실행 및 Original FULL 인증**
+
+**6. B1 Actual96/Fresh96 PASS**
+
+**7. B2 → B3 캠페인 계속 실행**
+
+원본 수학적 모델을 유지하면서 Phase I를 900초 이내에 완료하는 것이 첫 번째 성능 목표다.
+
+가능하면 PR189 수준의 빠른 계산 구조를 참고하되, PR189의 63.82초를 현재 모델에서 이미 달성 가능한 목표라고 가정하지 마라.
+
+**문제의 본질은 단순한 Solver TimeLimit이 아니라, 큰 LP 구조와 비효율적인 Solver 재시작이 결합된 것이다. 두 원인을 분리해 측정하고, 각각 해결하라.**
+
+검증된 새 개선을 실제 캠페인 경로에 연결하고, 수정 사항을 Commit/Push한 뒤 다음 단계까지 진행하라.
+
+V42.1 Freeze와 기존 결과는 유지하고, Main 병합은 수행하지 않는다.

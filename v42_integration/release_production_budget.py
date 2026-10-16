@@ -379,7 +379,7 @@ class ReleaseProductionBudget(IntegrationBudget):
             self.record_external(label, perf_counter() - began, solver=solver)
 
 
-def reconcile_interrupted_ledger(path, *, evidence, charge_seconds):
+def reconcile_interrupted_ledger(path, *, evidence, charge_seconds,host_restart_receipt=None):
     """Offline only: preserve the unknown call and conservatively charge it.
 
     The caller must establish the original PID has exited and supply a durable
@@ -395,7 +395,17 @@ def reconcile_interrupted_ledger(path, *, evidence, charge_seconds):
     if (not (call or context) or pid is None or psutil.pid_exists(pid) or not evidence
             or not math.isfinite(charge_seconds) or charge_seconds < 0):
         raise ValueError('EXIT_EVIDENCE_AND_CONSERVATIVE_INTERRUPTION_CHARGE_REQUIRED')
-    if call:
+    restart_interval=None
+    if host_restart_receipt is not None:
+        from .table_v_interruption import validate_restart_receipt
+        if not call or file_record(host_restart_receipt['path'])!=host_restart_receipt:
+            raise ValueError('EXACT_HOST_RESTART_RECEIPT_REQUIRED')
+        receipt=json.loads(Path(host_restart_receipt['path']).read_text(encoding='utf8'))
+        restart_interval=validate_restart_receipt(receipt,call)
+        if psutil.boot_time()<receipt['observed_new_boot_epoch_seconds']-30:
+            raise ValueError('HOST_RESTART_RECEIPT_NEW_BOOT_REQUIRED')
+        minimum=restart_interval['upper']
+    elif call:
         minimum = max(call['cap'],time()-call.get('started_epoch_seconds',time()))
     else:
         # HiGHS may have run before its return receipt. Without a durable
@@ -413,6 +423,13 @@ def reconcile_interrupted_ledger(path, *, evidence, charge_seconds):
         charged_seconds=charge_seconds, status='INTERRUPTED_NOT_CERTIFIED', evidence=evidence,
         stage_context=(call.get('stage_context') or context) if call else context,
         interrupted_call=call))
+    if restart_interval is not None:
+        d['calls'][-1].update(native_runtime_bounds_seconds=restart_interval,
+            host_restart_receipt=host_restart_receipt)
+        d.update(sealed_interrupted_attempt=True,Native_Runtime_fully_known=False,
+            Native_Runtime_bounds_seconds=dict(
+                lower=d['Gurobi_Native_seconds']+restart_interval['lower'],
+                upper=d['Gurobi_Native_seconds']+restart_interval['upper']))
     d['conservative_solve_seconds'] += charge_seconds
     d['inflight'] = None
     d['active_stage_context'] = None

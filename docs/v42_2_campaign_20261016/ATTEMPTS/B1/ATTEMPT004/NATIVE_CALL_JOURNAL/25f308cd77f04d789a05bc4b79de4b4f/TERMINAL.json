@@ -1,0 +1,78 @@
+{
+  "label": "RELEASE_P1:A1:ORIGINAL_P1",
+  "finalized_call": {
+    "label": "RELEASE_P1:A1:ORIGINAL_P1",
+    "solver": "GUROBI",
+    "Native_Runtime": 429.76700019836426,
+    "wall_seconds": 429.81379650000235,
+    "charged_seconds": 429.76700019836426,
+    "cap_seconds": 4499.985000133514,
+    "overshoot_seconds": 0.0,
+    "error": null,
+    "status": 11,
+    "stage_context": {
+      "day": "2025-05-01",
+      "arm": "B1",
+      "stage": "A1",
+      "stage_case_sha": "43fd7f506686dfb9ac2464f23d02c6d56028bd89fbd247ddcba6d0def5bf8ac0",
+      "source_sha": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+      "parent_result_sha": "4a621a19af9adaada41f30e63bbbce672f3541e092bd14038713d3586e60546d"
+    },
+    "native_binding": {
+      "matrix_sha": "3b8477baa4aa493ef03109a612425a56c00f516b069a1fb10d0f23b75a5bd6ee",
+      "domain_sha": "680b2e32535c4b648043ec72a2e27dc7d57b4ffa13e423decf1232a456483734",
+      "objective_sense": 1,
+      "rows": 2108858,
+      "columns": 946756,
+      "nonzeros": 21126591,
+      "Threads": 1
+    },
+    "resource_before_solve": {
+      "memory": {
+        "AvailableMBytes": 13345,
+        "CommittedBytes": 23691730944,
+        "CommitLimit": 68408958976,
+        "PercentCommittedBytesInUse": 34
+      },
+      "workers": [
+        {
+          "ProcessId": 14832,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -m v42_pr134_b1.host monitor \"C:\\v42_pr134_sc_execution_20261007\""
+        },
+        {
+          "ProcessId": 8788,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/table_v_monitor/v42_2_server.py --port 8793"
+        },
+        {
+          "ProcessId": 23944,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/run_v42_2_campaign.py --arm B1 --attempt 4 --reason FRESH_B1_AFTER_EXACT_4800_P1_TAIL_PROJECTION_FULL_PERMUTATION_PROOF_CURRENT_SOURCE_A_M_NATIVE0_AND_1292_REGRESSION_PASS --corrective-commit 20e8d59909f1fecbf8e122b748f4faa04b59bf90 --validation-gate docs/v42_2_campaign_20261016/VALIDATION_GATE_04.json"
+        }
+      ],
+      "psutil_available_RAM_bytes": 13985935360,
+      "CPU_percent": 18.4
+    },
+    "P2_call": false,
+    "objective_scope": "ORIGINAL_P1_CURRENT_MATRIX_NOT_UNPRICED_GLOBAL_CERTIFICATE",
+    "native_execution_entered": true,
+    "native_numeric_attributes": {
+      "ObjBound": 0.6131179484539293,
+      "SolCount": 0.0,
+      "IsMIP": 1.0
+    }
+  },
+  "arrays": null,
+  "available_attributes": [],
+  "scalar_attributes": {
+    "BarIterCount": 73.0,
+    "IterCount": 297550.0,
+    "SolCount": 0.0
+  },
+  "observed_native_runtime_lower_bound": 429.7180001735687,
+  "journal_errors": [],
+  "diagnostic_only": true,
+  "partial_BarX_is_not_original_FULL_UB": true,
+  "original_solver_return_attributes_unmodified": true
+}

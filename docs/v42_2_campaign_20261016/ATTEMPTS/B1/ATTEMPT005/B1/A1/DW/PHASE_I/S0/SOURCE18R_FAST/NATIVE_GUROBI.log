@@ -1,0 +1,108 @@
+
+Gurobi 13.0.2 (win64) logging started Fri Oct 16 09:38:28 2026
+
+Set parameter LogFile to value "D:\v42_trajectory_tracking_may01_20261014\docs\v42_2_campaign_20261016\ATTEMPTS\B1\ATTEMPT005\B1\A1\DW\PHASE_I\S0\SOURCE18R_FAST\NATIVE_GUROBI.log"
+Set parameter Threads to value 1
+Set parameter TimeLimit to value 900
+Gurobi Optimizer version 13.0.2 build v13.0.2rc1 (win64 - Windows 11+.0 (26200.2))
+
+CPU model: 13th Gen Intel(R) Core(TM) i7-13620H, instruction set [SSE2|AVX|AVX2]
+Thread count: 10 physical cores, 16 logical processors, using up to 1 threads
+
+Non-default parameters:
+TimeLimit  900
+MIPGap  0.005
+Method  2
+MIPFocus  3
+NodeMethod  1
+LogToConsole  0
+Seed  20260929
+Threads  1
+
+Optimize a model with 276433 rows, 210237 columns and 1793606 nonzeros (Min)
+Model fingerprint: 0x883fd9cb
+Model has 19459 linear objective coefficients
+Coefficient statistics:
+  Matrix range     [1e-13, 3e+05]
+  Objective range  [5e-07, 1e+00]
+  Bounds range     [1e+00, 2e+06]
+  RHS range        [2e-09, 2e+06]
+Warning: Model contains large matrix coefficient range
+         Consider reformulating model or setting NumericFocus parameter
+         to avoid numerical issues.
+
+Presolve removed 116988 rows and 102338 columns
+Presolve time: 0.47s
+Presolved: 159445 rows, 107899 columns, 1009764 nonzeros
+
+Ordering time: 3.94s
+
+Barrier statistics:
+ Dense cols : 1
+ AA' NZ     : 5.289e+06
+ Factor NZ  : 6.542e+07 (roughly 600 MB of memory)
+ Factor Ops : 8.625e+10 (roughly 2 seconds per iteration)
+ Threads    : 1
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0   1.88300591e+06 -9.39958707e+05  6.03e+05 0.00e+00  3.00e+02     5s
+   1   6.41836510e+05 -9.78406877e+05  1.91e+05 3.71e-02  9.73e+01     7s
+   2   1.52105707e+05 -7.87733334e+05  3.81e+04 4.56e-03  2.18e+01     9s
+   3   3.36786252e+04 -3.57337875e+05  6.79e+03 1.84e-04  4.41e+00    12s
+   4   1.18726402e+04 -1.27211026e+05  2.14e+03 3.91e-14  1.31e+00    14s
+   5   3.74095839e+03 -3.71973135e+04  5.85e+02 6.20e-15  3.37e-01    17s
+   6   1.21772853e+03 -1.30691501e+04  1.42e+02 5.07e-15  8.89e-02    19s
+   7   5.19053435e+02 -8.70912654e+03  3.59e+01 5.27e-15  4.17e-02    22s
+   8   2.86973195e+02 -2.88277335e+03  1.17e+01 4.57e-15  1.32e-02    25s
+   9   1.64066787e+02 -1.01906159e+03  1.93e+00 4.41e-15  4.49e-03    28s
+  10   1.20891590e+02 -4.14702297e+02  7.92e-01 2.65e-15  2.00e-03    30s
+  11   5.98801590e+01 -2.24326372e+02  3.36e-01 1.87e-15  1.05e-03    33s
+  12   1.97829123e+01 -1.32683122e+02  1.97e-01 1.78e-15  5.64e-04    36s
+  13   1.16070447e+01 -8.53543242e+01  1.67e-01 1.78e-15  3.59e-04    39s
+  14   8.35050111e+00 -3.47596313e+01  1.28e-01 1.78e-15  1.60e-04    41s
+  15   4.87286353e+00 -2.27062696e+01  9.64e-02 3.55e-15  1.02e-04    44s
+  16   2.90785230e+00 -1.35068112e+01  7.17e-02 3.55e-15  6.07e-05    47s
+  17   5.49950791e-01 -1.60733078e+00  2.22e-04 1.78e-15  7.92e-06    51s
+  18   1.82053206e-02 -9.80446541e-02  6.68e-06 1.78e-15  4.27e-07    57s
+  19   2.05306364e-05 -9.84176371e-05  7.02e-10 1.78e-15  4.37e-10    61s
+  20   2.05310503e-08 -9.84153460e-08  5.73e-11 1.78e-15  4.37e-13    64s
+  21   2.05310507e-11 -9.84173026e-11  2.78e-12 1.78e-15  4.37e-16    66s
+  22   2.05310506e-14 -1.04817848e-13  1.25e-12 1.78e-15  4.37e-19    68s
+
+Barrier solved model in 22 iterations and 68.34 seconds (83.58 work units)
+Optimal objective 2.05310506e-14
+
+Crossover log...
+
+     892 DPushes remaining with DInf 0.0000000e+00                68s
+       0 DPushes remaining with DInf 0.0000000e+00                68s
+
+   44880 PPushes remaining with PInf 0.0000000e+00                68s
+   15340 PPushes remaining with PInf 0.0000000e+00                70s
+       0 PPushes remaining with PInf 0.0000000e+00                75s
+
+  Push phase complete: Pinf 0.0000000e+00, Dinf 0.0000000e+00     75s
+
+Crossover time: 6.64 seconds (8.39 work units)
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   45290    0.0000000e+00   0.000000e+00   0.000000e+00     75s
+
+Use crossover to convert LP symmetric solution to basic solution...
+Crossover log...
+
+    3927 DPushes remaining with DInf 0.0000000e+00                75s
+
+    4540 PPushes remaining with PInf 0.0000000e+00                75s
+       0 PPushes remaining with PInf 0.0000000e+00                76s
+
+  Push phase complete: Pinf 0.0000000e+00, Dinf 0.0000000e+00     76s
+
+Crossover time: 1.27 seconds (2.07 work units)
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+   49833    0.0000000e+00   0.000000e+00   0.000000e+00     77s
+
+Solved in 49833 iterations and 76.53 seconds (94.24 work units)
+Optimal objective  0.000000000e+00
+
+User-callback calls 52400, time in user-callback 1.26 sec

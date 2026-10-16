@@ -1,0 +1,113 @@
+{
+  "status": 11,
+  "SolCount": 0,
+  "native_seconds": 372.8270001411438,
+  "Work": 534.5167462121904,
+  "objective": null,
+  "snapshot_sha": "649af18adda4c2c7f6342362e6bc84fba04a51d47147110d02bff086451402b4",
+  "ledger_call": {
+    "label": "RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_FAST",
+    "solver": "GUROBI",
+    "Native_Runtime": 372.8270001411438,
+    "wall_seconds": 373.18928660001257,
+    "charged_seconds": 372.8270001411438,
+    "cap_seconds": 755.0589997768402,
+    "overshoot_seconds": 0.0,
+    "error": null,
+    "status": 11,
+    "stage_context": {
+      "day": "2025-05-01",
+      "arm": "B1",
+      "stage": "A1",
+      "stage_case_sha": "dd24490103fe2892d294b40b51da6132bac16ca76b96acca4e50167fc811c3a0",
+      "source_sha": "66a3b8e333fa45e01524f9e49bed366c75b3815555e0696b4a3fe783222f7aba",
+      "parent_result_sha": "f838762ecfa035281579a4c32e4f82196e7768a7a63ed4197e0734c6b48510ae"
+    },
+    "native_binding": {
+      "matrix_sha": "f1f86d02b3f76b73f97a6a3a43771a2c42f5f5cf37d53b7f0cb24100f590029c",
+      "domain_sha": "228d7dd89d0806f1946ba23a7c5f505a68683eb1dadfab083f74f50676db7947",
+      "objective_sense": 1,
+      "rows": 282366,
+      "columns": 221020,
+      "nonzeros": 1891227,
+      "Threads": 1
+    },
+    "resource_before_solve": {
+      "memory": {
+        "AvailableMBytes": 12351,
+        "CommittedBytes": 28426022912,
+        "CommitLimit": 68408958976,
+        "PercentCommittedBytesInUse": 41
+      },
+      "workers": [
+        {
+          "ProcessId": 60804,
+          "Name": "python.exe",
+          "CommandLine": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -u D:\\v42_trajectory_tracking_may01_20261014\\tools\\serve_v42_table_v_monitor.py --port 8793 --source D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION02"
+        },
+        {
+          "ProcessId": 70412,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u D:/v42_monitor_e08_clockfix_20261015/serve.py D:/v42_trajectory_tracking_may01_20261014/docs/v42_b1_structure_b2_solo_20261015/TRACK_B/MAY01_RUN01/EXECUTIONS/2025-05-01 8794"
+        },
+        {
+          "ProcessId": 71500,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -"
+        },
+        {
+          "ProcessId": 62144,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/run_v42_2_campaign.py --arm B1 --attempt 1 --reason USER_AUTHORIZED_V42_2_MAY01_B1_FULL_P1_ACTUAL96_FRESH96_AFTER_NATIVE0_AND_REGRESSION_PASS --corrective-commit 671697a2340b088a432513d6c90e390bf06f9c40 --validation-gate docs/v42_2_campaign_20261016/VALIDATION_GATE_01.json"
+        }
+      ],
+      "psutil_available_RAM_bytes": 12992835584,
+      "CPU_percent": 10.3
+    },
+    "P2_call": false,
+    "objective_scope": "ORIGINAL_P1_CURRENT_MATRIX_NOT_UNPRICED_GLOBAL_CERTIFICATE",
+    "native_execution_entered": true,
+    "native_numeric_attributes": {
+      "ObjBound": 0.0,
+      "SolCount": 0.0,
+      "IsMIP": 0.0
+    }
+  },
+  "component": "PHASE_I",
+  "adaptive_policy": "SOURCE18R_FAST",
+  "source_sha": "66a3b8e333fa45e01524f9e49bed366c75b3815555e0696b4a3fe783222f7aba",
+  "case_sha": "dd24490103fe2892d294b40b51da6132bac16ca76b96acca4e50167fc811c3a0",
+  "Stage_Native_cumulative": 517.7680003643036,
+  "certified_Global_LB": null,
+  "FULL_verified_UB": null,
+  "Global_Gap": null,
+  "diagnostic_objective_is_global_certificate": false,
+  "memory": {
+    "RSS_bytes": 5102891008,
+    "private_bytes": 5943287808,
+    "system_available_bytes": 12515680256,
+    "system_RAM_bytes": 34049220608,
+    "system_committed_bytes": 29469515776,
+    "system_commit_limit_bytes": 68408958976
+  },
+  "process_peak_RSS_bytes": 5607038976,
+  "process_peak_private_bytes": 5968269312,
+  "residual_comparison": {
+    "numerical_1e5": {
+      "PASS": false,
+      "reason": "OPTIMAL_PRIMAL_DUAL_ATTRIBUTES_REQUIRED"
+    },
+    "legacy_1e6": {
+      "PASS": false,
+      "reason": "OPTIMAL_PRIMAL_DUAL_ATTRIBUTES_REQUIRED"
+    },
+    "certified_Global_LB": null,
+    "physical_constraints_modified": false
+  },
+  "independent_numerical_validation": {
+    "PASS": false,
+    "reason": "OPTIMAL_PRIMAL_DUAL_ATTRIBUTES_REQUIRED"
+  },
+  "numerical_attempts": 1,
+  "validation_accepted": false
+}

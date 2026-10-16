@@ -1,0 +1,38 @@
+"""Read-only support census of the independently proved reduced polytopes."""
+from pathlib import Path
+import gzip,pickle,json,time,sys,hashlib
+from collections import Counter
+ROOT=Path(r'D:\v42_trajectory_tracking_may01_20261014');sys.path.insert(0,str(ROOT))
+from v42_integration.m_engine import file_record
+base=ROOT/'docs/v42_2_campaign_20261016';source=base/'LOCAL_REDUCTION_NATIVE0_03/RESULT.json'
+manifest=json.loads(source.read_text());stats={};columns=Counter();began=time.time()
+def group(families):
+    if families & {'link_bytes','link_selected'}:return 'WAN_LINK_BYTES_AND_LINKING'
+    if families & {'wan_start','wan_active','wan_final','remaining','sent','depart','arrive'}:return 'WAN_TRANSFER_DYNAMICS_AND_LINKING'
+    if families & {'q','pair','migration_selected','source_selected','destination_selected'}:return 'CHECKPOINT_MIGRATION_SELECTION'
+    if families & {'r0','h','r1'}:return 'LOCAL_SERVICE_STATE'
+    if families & {'y','f0','f1'}:return 'JOB_START_FINISH_SERVICE'
+    return 'UNANNOTATED_LOCAL'
+for record in manifest['records']:
+    receipt=record['transformation']
+    if file_record(receipt['path'])!=receipt:raise ValueError('PROJECTED_SOURCE_DRIFT')
+    with gzip.open(receipt['path'],'rb') as stream:r=pickle.load(stream)
+    s=r['snapshot'];A=s.matrix;tags=[set() for _ in range(A.shape[1])]
+    for unit in r['units']:
+        for family,items in unit['v'].items():
+            for e in items.values():
+                js=[e[1]] if e[0]=='v' else e[2] if e[0]=='e' else []
+                for j in js:tags[int(j)].add(family)
+    columns.update('+'.join(sorted(t)) or 'UNANNOTATED_LOCAL' for t in tags)
+    for i in range(A.shape[0]):
+        a,b=A.indptr[i:i+2];families=set().union(*(tags[j] for j in A.indices[a:b]));key=group(families)
+        v=stats.setdefault(key,dict(rows=0,NNZ=0,equality_rows=0,less_rows=0,greater_rows=0))
+        v['rows']+=1;v['NNZ']+=int(b-a);v[{'=':'equality_rows','<':'less_rows','>':'greater_rows'}[str(s.senses[i])]]+=1
+result=dict(schema='REDUCED_ALL_229_LOCAL_SUPPORT_CENSUS_V1',status='READ_ONLY_SUPPORT_CENSUS_NOT_CAUSAL_FILL_OR_PERFORMANCE_PROOF',
+    Native_calls=0,classes=len(manifest['records']),source=file_record(source),rows=sum(v['rows'] for v in stats.values()),
+    columns=sum(columns.values()),families=stats,column_family_signature_counts=dict(columns),
+    classification='Exact sparse support; mixed rows use priority WAN link, WAN dynamics, migration, local state, job/service. Not unique semantic row-name lineage.',
+    wall_seconds=time.time()-began)
+assert result['rows']==197359 and result['columns']==134630
+(base/'B1_REDUCED_LOCAL_SUPPORT_CENSUS.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(dict(rows=result['rows'],columns=result['columns'],families=stats,wall_seconds=result['wall_seconds']),indent=2))

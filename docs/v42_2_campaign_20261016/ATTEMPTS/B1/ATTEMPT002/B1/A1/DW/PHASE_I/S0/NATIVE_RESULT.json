@@ -1,0 +1,305 @@
+{
+  "status": 2,
+  "SolCount": 1,
+  "native_seconds": 143.79999995231628,
+  "Work": 89.12772474800109,
+  "objective": 0.0,
+  "snapshot_sha": "e3d11ef623c329cf4dd8952283bdb9ccb28d4ed3abc1a40a9f8ad02b9be9329b",
+  "ledger_call": {
+    "label": "RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_FAST",
+    "solver": "GUROBI",
+    "Native_Runtime": 143.79999995231628,
+    "wall_seconds": 144.22420840000268,
+    "charged_seconds": 143.79999995231628,
+    "cap_seconds": 900.0,
+    "overshoot_seconds": 0.0,
+    "error": null,
+    "status": 2,
+    "stage_context": {
+      "day": "2025-05-01",
+      "arm": "B1",
+      "stage": "A1",
+      "stage_case_sha": "dd24490103fe2892d294b40b51da6132bac16ca76b96acca4e50167fc811c3a0",
+      "source_sha": "66a3b8e333fa45e01524f9e49bed366c75b3815555e0696b4a3fe783222f7aba",
+      "parent_result_sha": "f838762ecfa035281579a4c32e4f82196e7768a7a63ed4197e0734c6b48510ae"
+    },
+    "native_binding": {
+      "matrix_sha": "ce2eae3dbbc716d29f96be55e5a2459825a86c7270be932046529548946cf658",
+      "domain_sha": "2cc1e83273268a9401267a2f3cfc2cefb5683c540032d638ad6b2a2ad1315fa6",
+      "objective_sense": 1,
+      "rows": 276433,
+      "columns": 215037,
+      "nonzeros": 1793606,
+      "Threads": 1
+    },
+    "resource_before_solve": {
+      "memory": {
+        "AvailableMBytes": 12254,
+        "CommittedBytes": 28323172352,
+        "CommitLimit": 68408958976,
+        "PercentCommittedBytesInUse": 41
+      },
+      "workers": [
+        {
+          "ProcessId": 60804,
+          "Name": "python.exe",
+          "CommandLine": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -u D:\\v42_trajectory_tracking_may01_20261014\\tools\\serve_v42_table_v_monitor.py --port 8793 --source D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_unified_aidc_mess_research_20261014\\RELEASE_RECOVERY_20261015\\RC04\\TABLE_V\\EXECUTION02"
+        },
+        {
+          "ProcessId": 70412,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u D:/v42_monitor_e08_clockfix_20261015/serve.py D:/v42_trajectory_tracking_may01_20261014/docs/v42_b1_structure_b2_solo_20261015/TRACK_B/MAY01_RUN01/EXECUTIONS/2025-05-01 8794"
+        },
+        {
+          "ProcessId": 71500,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -"
+        },
+        {
+          "ProcessId": 65264,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/run_v42_2_campaign.py --arm B1 --attempt 2 --reason USER_AUTHORIZED_FRESH_B1_AFTER_ATTEMPT001_WARM_BASIS_PRIMAL_EXTENSION_REPAIR_ACTUAL_S1_NATIVE0_AND_1264_REGRESSION_PASS --corrective-commit 1b749c436df467b64b6c3f27e96add1f22566376 --validation-gate docs/v42_2_campaign_20261016/VALIDATION_GATE_02.json"
+        }
+      ],
+      "psutil_available_RAM_bytes": 12903178240,
+      "CPU_percent": 8.5
+    },
+    "P2_call": false,
+    "objective_scope": "ORIGINAL_P1_CURRENT_MATRIX_NOT_UNPRICED_GLOBAL_CERTIFICATE",
+    "native_execution_entered": true,
+    "native_numeric_attributes": {
+      "ObjBound": 0.0,
+      "ObjVal": 0.0,
+      "SolCount": 1.0,
+      "IsMIP": 0.0
+    }
+  },
+  "component": "PHASE_I",
+  "adaptive_policy": "SOURCE18R_FAST",
+  "source_sha": "66a3b8e333fa45e01524f9e49bed366c75b3815555e0696b4a3fe783222f7aba",
+  "case_sha": "dd24490103fe2892d294b40b51da6132bac16ca76b96acca4e50167fc811c3a0",
+  "Stage_Native_cumulative": 143.79999995231628,
+  "certified_Global_LB": null,
+  "FULL_verified_UB": null,
+  "Global_Gap": null,
+  "diagnostic_objective_is_global_certificate": false,
+  "memory": {
+    "RSS_bytes": 4839157760,
+    "private_bytes": 5323309056,
+    "system_available_bytes": 12651036672,
+    "system_RAM_bytes": 34049220608,
+    "system_committed_bytes": 28814176256,
+    "system_commit_limit_bytes": 68408958976
+  },
+  "process_peak_RSS_bytes": 5604708352,
+  "process_peak_private_bytes": 5797310464,
+  "LP_basis": {
+    "available": true,
+    "native_raw": true,
+    "reused_as_start": false
+  },
+  "residual_comparison": {
+    "numerical_1e5": {
+      "PASS": true,
+      "original_primal": {
+        "PASS": true,
+        "max_row_violation": 8.01492205937393e-12,
+        "max_bound_violation": 0.0,
+        "tolerance": 1e-05,
+        "rows": 276433,
+        "columns": 215037,
+        "raw_point_rounded_or_clipped": false
+      },
+      "native_dual_reconstruction": {
+        "PASS": true,
+        "convention": "min: RC=c-A.T@Pi; <=Pi<=0, >=Pi>=0; bounds retained",
+        "maximum_absolute_error": 0.0,
+        "rejected_columns": [],
+        "absolute_tolerance": 1e-05,
+        "relative_tolerance": 1e-10,
+        "every_native_column_reconstructed": true,
+        "raw_pi_or_primal_modified": false
+      },
+      "dual_KKT": {
+        "max_dual_sign_violation": -0.0,
+        "max_reduced_cost_bound_violation": 0.0,
+        "max_complementarity": 0.0,
+        "PASS": true
+      },
+      "numerical_admission_only": true,
+      "replay_tolerance": 1e-05,
+      "raw_point_modified": false,
+      "Phi_zero_or_global_LB_claimed": false
+    },
+    "legacy_1e6": {
+      "PASS": true,
+      "original_primal": {
+        "PASS": true,
+        "max_row_violation": 8.01492205937393e-12,
+        "max_bound_violation": 0.0,
+        "tolerance": 1e-06,
+        "rows": 276433,
+        "columns": 215037,
+        "raw_point_rounded_or_clipped": false
+      },
+      "native_dual_reconstruction": {
+        "PASS": true,
+        "convention": "min: RC=c-A.T@Pi; <=Pi<=0, >=Pi>=0; bounds retained",
+        "maximum_absolute_error": 0.0,
+        "rejected_columns": [],
+        "absolute_tolerance": 1e-07,
+        "relative_tolerance": 1e-10,
+        "every_native_column_reconstructed": true,
+        "raw_pi_or_primal_modified": false
+      },
+      "dual_KKT": {
+        "max_dual_sign_violation": -0.0,
+        "max_reduced_cost_bound_violation": 0.0,
+        "max_complementarity": 0.0,
+        "PASS": true
+      },
+      "numerical_admission_only": true,
+      "replay_tolerance": 1e-06,
+      "raw_point_modified": false,
+      "Phi_zero_or_global_LB_claimed": false
+    },
+    "certified_Global_LB": null,
+    "physical_constraints_modified": false,
+    "max_absolute_row_violation": 8.01492205937393e-12,
+    "max_relative_row_violation": 1.6994392004754388e-13,
+    "relative_denominator": "max(1,abs(rhs),sum(abs(A_ij*x_j))) diagnostic only",
+    "row_units": "UNANNOTATED in LinearSnapshot; no physical unit conversion or row scaling applied",
+    "worst_20_exact_dyadic_residuals": [
+      {
+        "snapshot_row": 43218,
+        "signed_exact_residual": "-73269/576460752303423488"
+      },
+      {
+        "snapshot_row": 58778,
+        "signed_exact_residual": "-1019401/576460752303423488"
+      },
+      {
+        "snapshot_row": 105098,
+        "signed_exact_residual": "-151229/288230376151711744"
+      },
+      {
+        "snapshot_row": 167190,
+        "signed_exact_residual": "-42109/1152921504606846976"
+      },
+      {
+        "snapshot_row": 269467,
+        "signed_exact_residual": "-129969/288230376151711744"
+      },
+      {
+        "snapshot_row": 68885,
+        "signed_exact_residual": "-209571/1152921504606846976"
+      },
+      {
+        "snapshot_row": 118804,
+        "signed_exact_residual": "-146577/72057594037927936"
+      },
+      {
+        "snapshot_row": 211444,
+        "signed_exact_residual": "1331/18014398509481984"
+      },
+      {
+        "snapshot_row": 78599,
+        "signed_exact_residual": "215/4503599627370496"
+      },
+      {
+        "snapshot_row": 144978,
+        "signed_exact_residual": "-4431187/2305843009213693952"
+      },
+      {
+        "snapshot_row": 245475,
+        "signed_exact_residual": "-51547/288230376151711744"
+      },
+      {
+        "snapshot_row": 186916,
+        "signed_exact_residual": "-266571/288230376151711744"
+      },
+      {
+        "snapshot_row": 136194,
+        "signed_exact_residual": "10947/72057594037927936"
+      },
+      {
+        "snapshot_row": 97599,
+        "signed_exact_residual": "1/18014398509481984"
+      },
+      {
+        "snapshot_row": 215963,
+        "signed_exact_residual": "71/4503599627370496"
+      },
+      {
+        "snapshot_row": 233284,
+        "signed_exact_residual": "307/72057594037927936"
+      },
+      {
+        "snapshot_row": 16642,
+        "signed_exact_residual": "-399/18014398509481984"
+      },
+      {
+        "snapshot_row": 30167,
+        "signed_exact_residual": "-631/72057594037927936"
+      },
+      {
+        "snapshot_row": 112290,
+        "signed_exact_residual": "-7/9007199254740992"
+      },
+      {
+        "snapshot_row": 82987,
+        "signed_exact_residual": "-79/72057594037927936"
+      }
+    ],
+    "all_original_coefficients_retained": true,
+    "relative_dual_KKT": {
+      "max_stationarity": 0.0,
+      "max_complementarity": 0.0,
+      "diagnostic_only": true,
+      "acceptance_uses_absolute_residuals": true
+    },
+    "Phi": {
+      "exact": "0",
+      "float_value": 0.0,
+      "exact_zero": true,
+      "artificial_max_abs": 0.0,
+      "artificial_nonnegative_violation": -0.0,
+      "artificial_count": 19459,
+      "certified_Global_LB": null
+    }
+  },
+  "independent_numerical_validation": {
+    "PASS": true,
+    "original_primal": {
+      "PASS": true,
+      "max_row_violation": 8.01492205937393e-12,
+      "max_bound_violation": 0.0,
+      "tolerance": 1e-05,
+      "rows": 276433,
+      "columns": 215037,
+      "raw_point_rounded_or_clipped": false
+    },
+    "native_dual_reconstruction": {
+      "PASS": true,
+      "convention": "min: RC=c-A.T@Pi; <=Pi<=0, >=Pi>=0; bounds retained",
+      "maximum_absolute_error": 0.0,
+      "rejected_columns": [],
+      "absolute_tolerance": 1e-05,
+      "relative_tolerance": 1e-10,
+      "every_native_column_reconstructed": true,
+      "raw_pi_or_primal_modified": false
+    },
+    "dual_KKT": {
+      "max_dual_sign_violation": -0.0,
+      "max_reduced_cost_bound_violation": 0.0,
+      "max_complementarity": 0.0,
+      "PASS": true
+    },
+    "numerical_admission_only": true,
+    "replay_tolerance": 1e-05,
+    "raw_point_modified": false,
+    "Phi_zero_or_global_LB_claimed": false
+  },
+  "numerical_attempts": 1,
+  "validation_accepted": true
+}

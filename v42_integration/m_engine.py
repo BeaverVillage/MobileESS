@@ -345,7 +345,7 @@ def _validate(case, point, path, validator):
 def pin_pools(case, point, bank, candidate_pools=None):
     """Pin complete verified paths and STAY without requiring a MOVE choice."""
     graph = bank.graph
-    current = graph.paths(point)
+    current = {u: graph.complete(u) for u in graph.origins} if point is None else graph.paths(point)
     pool = {}
     for unit in sorted(graph.origins):
         paths, seen = [], set()
@@ -373,7 +373,7 @@ def direct_joint(case, point, pools):
     units = sorted(graph.origins)
     if set(pools) != set(units):
         raise ValueError("ALL_MESS_POOL_REQUIRED")
-    center = graph.paths(point)
+    center = {u: graph.complete(u) for u in units} if point is None else graph.paths(point)
     cache_key = (matrix_sha(case.A), domain_sha(case.d),
                  matrix_sha(case.original_A), domain_sha(case.original_d),
                  file_record(__file__)['sha256'], binding(case)['route_contract_sha'])
@@ -389,7 +389,8 @@ def direct_joint(case, point, pools):
                    for u in units}
         if sum(map(len, grouped.values())) != len(route):
             raise ValueError("ORIGINAL_ROUTE_UNIT_AXIS_DRIFT")
-        cache = dict(key=cache_key, route=route, keep=keep, grouped=grouped, path_products={})
+        cache = dict(key=cache_key, route=route, keep=keep, grouped=grouped, path_products={},
+                     fixed_columns=case.A[:,keep].tocsr())
         case._direct_static_cache = cache
     route, keep, grouped = cache['route'], cache['keep'], cache['grouped']
     rows, columns, coefficients, axis, selections = list(map(int, keep)), list(range(len(keep))), [1.] * len(keep), [], []
@@ -417,11 +418,9 @@ def direct_joint(case, point, pools):
             axis.append(dict(unit=unit, ordinal=ordinal, path=list(path), name=f"lambda[{unit},{ordinal}]"))
             selections.append(float(path == center[unit]))
     lift = sparse.csr_matrix((coefficients, (rows, columns)), shape=(case.A.shape[1], len(keep) + len(axis)))
-    product = (case.A @ lift).tocsr()
-    product.eliminate_zeros()
-    product.sort_indices()
-    if (product[:, :len(keep)] != case.A[:, keep]).nnz:
-        raise ValueError("DIRECT_NONROUTE_SOURCE_COLUMN_DRIFT")
+    # Reuse only source-SHA-bound static columns and independently checked
+    # exact path products. New lambda paths still receive exact source sums.
+    product_rows,product_cols,product_values=[],[],[]
     checked = 0
     for ordinal in range(len(axis)):
         path_columns = lift[:, len(keep) + ordinal].tocoo().row
@@ -434,10 +433,15 @@ def direct_joint(case, point, pools):
                 exact[int(row)] += Fraction(float(value))
             exact = {r:v for r,v in exact.items() if v}
             cache['path_products'][path_key] = exact
-        observed = product[:, len(keep) + ordinal].tocoo()
-        if exact != {int(r): Fraction(float(v)) for r,v in zip(observed.row,observed.data)}:
-            raise ValueError('SPARSE_PRODUCT_NOT_EXACT_DYADIC')
+        for row,value in exact.items():
+            native=float(value)
+            if Fraction(native)!=value:
+                raise ValueError('SPARSE_PRODUCT_NOT_EXACT_DYADIC')
+            product_rows.append(row);product_cols.append(ordinal);product_values.append(native)
         checked += len(exact)
+    dynamic=sparse.csr_matrix((product_values,(product_rows,product_cols)),shape=(case.A.shape[0],len(axis)))
+    product=sparse.hstack((cache['fixed_columns'],dynamic),format='csr')
+    product.sort_indices()
     one = sparse.csr_matrix(([1.] * len(axis), ([units.index(a["unit"]) for a in axis],
                              [len(keep) + i for i in range(len(axis))])), shape=(len(units), lift.shape[1]))
     A = sparse.vstack((product, one), format="csr")
@@ -450,8 +454,8 @@ def direct_joint(case, point, pools):
              objective=np.r_[case.d["objective"][keep], np.zeros(len(axis))],
              constant=np.asarray(case.d["constant"]).copy(),
              row_names=np.r_[case.d["row_names"], np.asarray(["route_pool_one[" + u + "]" for u in units])])
-    start = np.r_[point[keep], selections]
-    if not np.array_equal(lift @ start, point) or not np.array_equal(one @ start, np.ones(len(units))):
+    start = None if point is None else np.r_[point[keep], selections]
+    if start is not None and (not np.array_equal(lift @ start, point) or not np.array_equal(one @ start, np.ones(len(units)))):
         raise ValueError("UNCHANGED_RAW_START_NOT_RESTORED")
     original_modes = int(sum(str(name).startswith("charge_mode[") for name in case.d["names"]))
     retained_modes = int(sum(str(name).startswith("charge_mode[") for name in d["names"]))
@@ -466,7 +470,8 @@ def direct_joint(case, point, pools):
                  lambda_axis=axis, keep_columns=keep.tolist(), removed_route_columns=route.tolist(),
                  source_matrix_sha=matrix_sha(case.A), source_domain_sha=domain_sha(case.d),
                  compact_matrix_sha=matrix_sha(A), compact_domain_sha=domain_sha(d), lift_sha=matrix_sha(lift),
-                 unchanged_raw_Start_restored=True, point_vector_sha256=vector_sha(point),
+                 unchanged_raw_Start_restored=start is not None, point_vector_sha256=None if point is None else vector_sha(point),
+                 MIP_Start_present=start is not None,
                  no_MOVE_forcing=True, restricted_ObjBound_is_Global_LB=False)
     return A, d, lift, start, proof
 
@@ -494,7 +499,8 @@ def _native_joint(case, budget, packet, folder, seconds, native0=False):
         with measure(folder,'M_NATIVE_MODEL_READBACK'):
             x = model.addMVar(A.shape[1], lb=d["lower"], ub=d["upper"], vtype=d["types"], obj=d["objective"])
             x.VarName = d["names"].tolist()
-            x.Start = start
+            if start is not None:
+                x.Start = start
             model.ObjCon = float(d["constant"])
             rows = model.addMConstr(A, x, d["sense"], d["rhs"])
             rows.ConstrName = d["row_names"].tolist()
@@ -505,8 +511,8 @@ def _native_joint(case, budget, packet, folder, seconds, native0=False):
                           bounds_exact=np.array_equal(x.LB, d["lower"]) and np.array_equal(x.UB, d["upper"]),
                           types_exact=np.array_equal(x.VType, d["types"]),
                           objective_exact=np.array_equal(x.Obj, d["objective"]) and model.ObjCon == float(d["constant"]),
-                          Start_exact=np.array_equal(x.Start, start),
-                          literal_inverse_Start_exact=np.array_equal(lift @ x.Start, lift @ start))
+                          Start_exact=np.all(np.asarray(x.Start) == gp.GRB.UNDEFINED) if start is None else np.array_equal(x.Start, start),
+                          literal_inverse_Start_exact=True if start is None else np.array_equal(lift @ x.Start, lift @ start))
             if not all(checks.values()):
                 raise ValueError("COMMON_M_NATIVE_READBACK_DRIFT")
             _write(folder / "NATIVE_READBACK.json", dict(PASS=True, checks=checks, Optimize_calls=0))
@@ -546,7 +552,8 @@ def _native_joint(case, budget, packet, folder, seconds, native0=False):
                 result["restricted_ObjBound_diagnostic"] = float(model.ObjBound)
                 capture(x.X, model.ObjVal, model.Runtime)
         result.update(start_processing=dict(attribute_readback=True, Optimize_entered=not native0,
-                      messages=messages, classification=_start_classification(messages, result, float(d["objective"] @ start + d["constant"]))),
+                      MIP_Start_present=start is not None, messages=messages,
+                      classification='NO_MIP_START' if start is None else _start_classification(messages, result, float(d["objective"] @ start + d["constant"]))),
                       callback_errors=errors, capture_count=len(captures))
         _write(folder / "NATIVE_CALL.json", result)
         return result, captures
@@ -660,18 +667,13 @@ def optimize_mess(case, initial_point, incumbent_registry, budget):
     for point, certificate in admit_registry(case, records, folder, validator, key):
         bank.offer(point, certificate)
     cold_used = bank.best is None
-    cold_invoked = cold_used and budget.remaining() > 0
+    # Seedless Beam--Direct Joint is the default. A FULL initialization MILP
+    # must never consume the stage before the first candidate pool is tried.
+    cold_invoked = cold_used and budget.remaining() > 0 and getattr(case, 'cold_initializer', None) is not None
     cold_history = []
     if cold_invoked:
         initializer = getattr(case, "cold_initializer", None)
-        if initializer is None:
-            from v42_common_mess.engine import _initialize
-            from v42_common_mess.budget import StageBudget
-            case.point = None
-            point, certificate, cold_history = _initialize(case, StageBudget(budget), validator, None,
-                                                          APPROVED_JOINT_PARAMETERS)
-        else:
-            point, certificate, cold_history = initializer(case, budget, validator)
+        point, certificate, cold_history = initializer(case, budget, validator)
         if point is not None:
             # Cold results are replayed here, regardless of producer certificate.
             certificate = _validate(case, point, folder / "COLD_INITIAL_POINT.npz", validator)
@@ -682,7 +684,7 @@ def optimize_mess(case, initial_point, incumbent_registry, budget):
     native, captures, pools, proof = None, [], None, None
     initial_ub = bank.fields()["BEST_GLOBAL_UB"]
     adaptive = dict(history=[],joint_calls=0,unique_pools=0,stop_reason='NO_FULL_SEED_OR_NATIVE_BUDGET')
-    if bank.best is not None:
+    if budget.remaining() > 0:
         from .m_adaptive import run
         native, adaptive = run(case, bank, budget, folder, validator)
     registry = bank.save(folder, key)

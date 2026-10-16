@@ -1,0 +1,89 @@
+{
+  "label": "RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_FAST",
+  "finalized_call": {
+    "label": "RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_FAST",
+    "solver": "GUROBI",
+    "Native_Runtime": 10.601999998092651,
+    "wall_seconds": 10.654448500001308,
+    "charged_seconds": 10.601999998092651,
+    "cap_seconds": 823.4660000801086,
+    "overshoot_seconds": 0.0,
+    "error": null,
+    "status": 11,
+    "stage_context": {
+      "day": "2025-05-01",
+      "arm": "B1",
+      "stage": "A1",
+      "stage_case_sha": "43fd7f506686dfb9ac2464f23d02c6d56028bd89fbd247ddcba6d0def5bf8ac0",
+      "source_sha": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+      "parent_result_sha": "4a621a19af9adaada41f30e63bbbce672f3541e092bd14038713d3586e60546d"
+    },
+    "native_binding": {
+      "matrix_sha": "2abd6849b60cb5cdb71af43ac1434d58220032d81c912cc874e8f65ef6a80823",
+      "domain_sha": "beadadf1bc4f63e01cfbcb9f2d377ed7f163620532d6d4b8fc19dc914b69691e",
+      "objective_sense": 1,
+      "rows": 279966,
+      "columns": 213820,
+      "nonzeros": 1884027,
+      "Threads": 1
+    },
+    "resource_before_solve": {
+      "memory": {
+        "AvailableMBytes": 12462,
+        "CommittedBytes": 26058764288,
+        "CommitLimit": 68408958976,
+        "PercentCommittedBytesInUse": 38
+      },
+      "workers": [
+        {
+          "ProcessId": 14832,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -m v42_pr134_b1.host monitor \"C:\\v42_pr134_sc_execution_20261007\""
+        },
+        {
+          "ProcessId": 8788,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/table_v_monitor/v42_2_server.py --port 8793"
+        },
+        {
+          "ProcessId": 28596,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/run_v42_2_campaign.py --arm B1 --attempt 5 --reason ORIGINAL_PRIMAL_BASIS_METHOD0_LPW1_PRESOLVE0_AFTER_VERIFIED_COLD_BARRIER_FAILURE --corrective-commit 6f8c851e83a7a9e5a7101c69cc434f2e65855b45 --validation-gate docs/v42_2_campaign_20261016/VALIDATION_GATE_05.json"
+        }
+      ],
+      "psutil_available_RAM_bytes": 13114015744,
+      "CPU_percent": 12.9
+    },
+    "P2_call": false,
+    "objective_scope": "ORIGINAL_P1_CURRENT_MATRIX_NOT_UNPRICED_GLOBAL_CERTIFICATE",
+    "native_execution_entered": true,
+    "native_numeric_attributes": {
+      "ObjVal": 1305.0980196941157,
+      "SolCount": 0.0,
+      "IsMIP": 0.0
+    }
+  },
+  "arrays": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT005\\NATIVE_CALL_JOURNAL\\21a193cddea14eb6ae7ea713f0fb2bf2\\UNMODIFIED_NATIVE_ATTRIBUTES.npz",
+    "sha256": "b3d5d781f00c895078fbbe6570f6b379e7b9e958d63a938273e103db819090ae",
+    "bytes": 843063
+  },
+  "available_attributes": [
+    "X",
+    "Pi",
+    "RC",
+    "VBasis",
+    "CBasis"
+  ],
+  "scalar_attributes": {
+    "Kappa": 57514604467.724266,
+    "BarIterCount": 0.0,
+    "IterCount": 8660.0,
+    "SolCount": 0.0
+  },
+  "observed_native_runtime_lower_bound": 10.033999919891357,
+  "journal_errors": [],
+  "diagnostic_only": true,
+  "partial_BarX_is_not_original_FULL_UB": true,
+  "original_solver_return_attributes_unmodified": true
+}

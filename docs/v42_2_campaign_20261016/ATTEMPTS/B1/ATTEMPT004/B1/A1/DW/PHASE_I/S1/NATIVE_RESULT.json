@@ -1,0 +1,107 @@
+{
+  "status": 9,
+  "SolCount": 0,
+  "native_seconds": 782.6640000343323,
+  "Work": 936.1085608000874,
+  "objective": null,
+  "snapshot_sha": "ecef9b413f2fbe2f81b1a4aa3d5578bf09f65d98c57b86cdfdcb6bdf5bcae187",
+  "ledger_call": {
+    "label": "RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_FAST",
+    "solver": "GUROBI",
+    "Native_Runtime": 782.6640000343323,
+    "wall_seconds": 782.7093522999967,
+    "charged_seconds": 782.6640000343323,
+    "cap_seconds": 782.6490001678467,
+    "overshoot_seconds": 0.014999866485595703,
+    "error": null,
+    "status": 9,
+    "stage_context": {
+      "day": "2025-05-01",
+      "arm": "B1",
+      "stage": "A1",
+      "stage_case_sha": "43fd7f506686dfb9ac2464f23d02c6d56028bd89fbd247ddcba6d0def5bf8ac0",
+      "source_sha": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+      "parent_result_sha": "4a621a19af9adaada41f30e63bbbce672f3541e092bd14038713d3586e60546d"
+    },
+    "native_binding": {
+      "matrix_sha": "2abd6849b60cb5cdb71af43ac1434d58220032d81c912cc874e8f65ef6a80823",
+      "domain_sha": "beadadf1bc4f63e01cfbcb9f2d377ed7f163620532d6d4b8fc19dc914b69691e",
+      "objective_sense": 1,
+      "rows": 279966,
+      "columns": 213820,
+      "nonzeros": 1884027,
+      "Threads": 1
+    },
+    "resource_before_solve": {
+      "memory": {
+        "AvailableMBytes": 12701,
+        "CommittedBytes": 23227559936,
+        "CommitLimit": 68408958976,
+        "PercentCommittedBytesInUse": 33
+      },
+      "workers": [
+        {
+          "ProcessId": 14832,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -m v42_pr134_b1.host monitor \"C:\\v42_pr134_sc_execution_20261007\""
+        },
+        {
+          "ProcessId": 8788,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/table_v_monitor/v42_2_server.py --port 8793"
+        },
+        {
+          "ProcessId": 23944,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/run_v42_2_campaign.py --arm B1 --attempt 4 --reason FRESH_B1_AFTER_EXACT_4800_P1_TAIL_PROJECTION_FULL_PERMUTATION_PROOF_CURRENT_SOURCE_A_M_NATIVE0_AND_1292_REGRESSION_PASS --corrective-commit 20e8d59909f1fecbf8e122b748f4faa04b59bf90 --validation-gate docs/v42_2_campaign_20261016/VALIDATION_GATE_04.json"
+        }
+      ],
+      "psutil_available_RAM_bytes": 13361766400,
+      "CPU_percent": 15.7
+    },
+    "P2_call": false,
+    "objective_scope": "ORIGINAL_P1_CURRENT_MATRIX_NOT_UNPRICED_GLOBAL_CERTIFICATE",
+    "native_execution_entered": true,
+    "native_numeric_attributes": {
+      "SolCount": 0.0,
+      "IsMIP": 0.0
+    }
+  },
+  "component": "PHASE_I",
+  "adaptive_policy": "SOURCE18R_FAST",
+  "source_sha": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+  "case_sha": "43fd7f506686dfb9ac2464f23d02c6d56028bd89fbd247ddcba6d0def5bf8ac0",
+  "Stage_Native_cumulative": 900.0149998664856,
+  "certified_Global_LB": null,
+  "FULL_verified_UB": null,
+  "Global_Gap": null,
+  "diagnostic_objective_is_global_certificate": false,
+  "memory": {
+    "RSS_bytes": 5197168640,
+    "private_bytes": 5405073408,
+    "system_available_bytes": 13931159552,
+    "system_RAM_bytes": 34049220608,
+    "system_committed_bytes": 23767830528,
+    "system_commit_limit_bytes": 68408958976
+  },
+  "process_peak_RSS_bytes": 6271918080,
+  "process_peak_private_bytes": 6467153920,
+  "residual_comparison": {
+    "numerical_1e5": {
+      "PASS": false,
+      "reason": "OPTIMAL_PRIMAL_DUAL_ATTRIBUTES_REQUIRED"
+    },
+    "legacy_1e6": {
+      "PASS": false,
+      "reason": "OPTIMAL_PRIMAL_DUAL_ATTRIBUTES_REQUIRED"
+    },
+    "certified_Global_LB": null,
+    "physical_constraints_modified": false
+  },
+  "independent_numerical_validation": {
+    "PASS": false,
+    "reason": "OPTIMAL_PRIMAL_DUAL_ATTRIBUTES_REQUIRED"
+  },
+  "numerical_attempts": 1,
+  "validation_accepted": false
+}

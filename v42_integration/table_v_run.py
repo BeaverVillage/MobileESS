@@ -32,7 +32,7 @@ def adapters():
            'table_v_resources.py','table_v_launch.py','table_v_launch_evidence.py',
            'table_v_geometry_cache.py','table_v_compression.py','table_v_compression_verify.py',
            'table_v_compression_adapter.py','m_adaptive.py','m_warm.py','table_v_evaluation.py','m_source_revision.py',
-           'table_v_global_control.py','table_v_a_control.py','table_v_phase_policy.py']
+           'table_v_global_control.py','table_v_a_control.py','table_v_phase_policy.py','pcc_definitions.py','m_static_reuse.py']
     return [file_record(Path(__file__).with_name(n)) for n in names]+[
         file_record(ROOT/'v42_may_campaign_native90/m_model.py'),
         file_record(Path(__file__).with_name('release_production_budget.py'))]

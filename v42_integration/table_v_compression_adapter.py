@@ -87,6 +87,22 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
     if built[6]['native_binding']!=captured['native_binding']:
         raise ValueError('COMPRESSION_CURRENT_ORIGINAL_FULL_BINDING_DRIFT')
     data=captured['data'];base=captured['projected'];descriptor=captured['descriptor']
+    # P2 deviation epigraphs have no P1 cost and can be existentially lifted.
+    # Remove only independently proved neutral tails before building Phi, so
+    # their unbounded null directions cannot contaminate the elastic LP.
+    from .table_v_p1_tails import project as project_p1_tails
+    projection=deepcopy(captured['runtime_projection'])
+    runtime_rows=projection['retained_original_rows'];runtime_columns=projection['retained_original_columns']
+    runtime_rowmap={int(row):i for i,row in enumerate(runtime_rows)}
+    protected={runtime_rowmap[int(i)] for i in captured['coupling_rows'].values()}
+    before_tails=base
+    base,descriptor,tail_proof,tail_rows,tail_columns=project_p1_tails(base,descriptor,protected_rows=protected)
+    _write(output/'P1_NEUTRAL_TAIL_PROJECTION.json',tail_proof)
+    projection.update(runtime_only_projected_FULL_sha=projection['projected_FULL_sha'],
+        projected_FULL_sha=base.fingerprint(),
+        retained_original_rows=[runtime_rows[int(i)] for i in tail_rows],
+        retained_original_columns=[runtime_columns[int(j)] for j in tail_columns],
+        P1_neutral_tail_projection=file_record(output/'P1_NEUTRAL_TAIL_PROJECTION.json'))
     if 'preserve_singleton_mixed_flow' not in data[7]:
         data=(*data[:7],dict(data[7],preserve_singleton_mixed_flow=[]))
     model=built[0]
@@ -102,21 +118,28 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
     semantic=semantic_classes(data,domains,context['tablev_flex']['known_issued_receipts'])
     _write(output/'UID_AUTHORITY_TO_MATHEMATICAL_CLASS.json',dict(UIDs=semantic['uid_ledger'],
         original_receipts_preserved=True,source_identity=context['manifest']['identity'],case_sha=case.case_sha))
-    projection=captured['runtime_projection'];_write(output/'ORIGINAL_RUNTIME_AUXILIARY_PROJECTION.json',projection)
+    _write(output/'ORIGINAL_RUNTIME_AUXILIARY_PROJECTION.json',projection)
     old_to_projected={int(row):i for i,row in enumerate(projection['retained_original_rows'])}
     axes={(family.upper(),*key) if isinstance(key,tuple) else (family.upper(),'',key):old_to_projected[row]
           for (family,key),row in captured['coupling_rows'].items()}
-    result=compress_lp(base,descriptor,data,semantic,forced_global=axes.values(),
+    old_columns={int(j):i for i,j in enumerate(projection['retained_original_columns'])}
+    pcc=[dict(entry,row=old_to_projected[entry['row']],pivot=old_columns[entry['pivot']])
+         for entry in captured.get('pcc_definitions',[])]
+    if not pcc and getattr(case.grid,'alias_controls',False):
+        raise ValueError('PCC_DEFINITION_PROVENANCE_REQUIRED_REBUILD_CAPTURE')
+    result=compress_lp(base,descriptor,data,semantic,forced_global=list(axes.values())+[e['row'] for e in pcc],
         progress=lambda value:_prepare_progress(output,**value))
     exact=verify_sum(base,result)
     old_global_position={int(row):i for i,row in enumerate(result['global_rows'])}
     coupling={key:old_global_position[row] for key,row in axes.items()}
     _prepare_progress(output,'EXACT_REDUNDANT_ROW_PROOF',classes=len(result['records']))
-    compact,redundancy=redundant_rows(result['snapshot'],protected_rows=coupling.values())
+    protected_pcc=[old_global_position[e['row']] for e in pcc]
+    compact,redundancy=redundant_rows(result['snapshot'],protected_rows=list(coupling.values())+protected_pcc)
     independent=verify_redundancy(result['snapshot'],compact,redundancy)
     rowmap={int(row):i for i,row in enumerate(redundancy['retained_rows'])}
     ng=sum(int(row)<len(result['global_rows']) for row in redundancy['retained_rows'])
     newaxes={key:rowmap[row] for key,row in coupling.items()}
+    hard_pcc=[dict(e,row=rowmap[old_global_position[e['row']]],pivot=int(result['fold'][e['pivot']])) for e in pcc]
     G=tuple(range(ng));n=result['prefix']
     translated=compressed_descriptor(descriptor,result['records'],result['fold'])
     groups={r['class_id']:r['members'] for r in result['records']}
@@ -128,6 +151,11 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
     prior,_=constructed_point(base,descriptor,data,n,local_original)
     initial=np.zeros(compact.matrix.shape[1]);initial[:n]=prior[:n]
     np.add.at(initial,result['fold'][n:],prior[n:])
+    from .pcc_definitions import satisfy_definitions,compare_forms
+    initial=satisfy_definitions(compact,initial,hard_pcc)
+    _write(output/'PCC_FORMULATION_NATIVE0_COMPARISON.json',compare_forms(compact,hard_pcc))
+    _write(output/'PCC_HARD_DEFINITIONS.json',dict(PASS=True,definitions=hard_pcc,
+        original_identity_rows_preserved=True,Native_calls=0,reference_is_FULL_feasible=False))
     local_new=replace(compact,matrix=compact.matrix[ng:].tocsr(),senses=compact.senses[ng:],rhs=compact.rhs[ng:])
     witness=primal_replay(local_new,initial)
     if not witness['PASS']:raise ValueError('COMPRESSED_ORIGINAL_LOCAL_WITNESS_REPLAY_FAILED')
@@ -174,11 +202,10 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
         original_integer_size=size(captured['original']),objective_unchanged=True,
         all_rows_boxes_coefficients_exact=True,only_continuous_LP_compressed=True,integer_compression_applied=False,
         exact_class_projection=exact,redundancy=independent,Runtime_auxiliaries_removed=projection['eliminated_auxiliaries'],
+        P1_neutral_auxiliary_projection=file_record(output/'P1_NEUTRAL_TAIL_PROJECTION.json'),
         UID_authority_ledger=file_record(output/'UID_AUTHORITY_TO_MATHEMATICAL_CLASS.json'))
-    _write(output/'ORIGINAL_FULL_DW_MATH_EQUIVALENCE.json',proof)
     _write(output/'AIDC_SEMANTIC_CLASS_EQUIVALENCE.json',dict(PASS=True,classes=len(groups),UIDs=len(data[1]),
         groups=groups,identities=semantic['identities'],source_identity=context['manifest']['identity'],case_sha=case.case_sha))
-    _write(output/'AIDC_FULL_DW_COMPRESSION_CERTIFICATE.json',proof)
     np.savez_compressed(output/'EXACT_PROJECTION_COORDINATES.npz',fold=result['fold'],scale=result['scale'])
     resource_variables=[]
     for kind,site,t in newaxes:
@@ -186,13 +213,24 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
         resource_variables.append(int(e[1]) if e is not None and e[0]=='v' else -1)
     state=dict(compact=compact,reference=compact,reference_descriptor=translated,scientific_descriptor=translated,
         data=newdata,domains=domains,ledger=_ledger(newdata,domains,{}),metas=metas,n=n,grows=G,axes=newaxes,
-        prior_original=initial,prior_compact=initial,global_types=base.vtypes[:n].copy(),projection_proofs=[exact],
+        prior_original=initial,prior_compact=initial,hard_pcc_definitions=hard_pcc,
+        global_types=base.vtypes[:n].copy(),projection_proofs=[exact],
         atlas=dict(rf=np.zeros(len(G),dtype=int),rf_names=np.asarray(['ORIGINAL_FULL_ROW']),node_names=np.asarray([]),
             voltage_lower_rows=np.asarray([],dtype=int),voltage_upper_rows=np.asarray([],dtype=int),
             resource_variables=np.asarray(resource_variables),domains=domains),
-        _class_sum=dict(result=result,original_LP=base),
+        _class_sum=dict(result=result,original_LP=base,p1_tail_source=before_tails,p1_tail_proof=tail_proof),
         _table_v=dict(case_sha=case.case_sha,native_binding=deepcopy(built[6]['native_binding']),stage_binding=binding,
             source_domain_audit_sha=digest(audit),equivalent=proof,full_physical_domain_sha=data[7]['physical_domain_hash'],classes=len(groups)))
+    # Keep complete local polytopes, rather than a finite path pool. The new
+    # projection is independently proved before its Master/pricing interfaces
+    # replace the untransformed ones. Original integer FULL is untouched.
+    from .table_v_local_master import reduce_state
+    _write(output/'CLASS_SUM_BEFORE_LOCAL_PROJECTION.json',proof)
+    state=reduce_state(state,output)
+    compact=state['compact'];proof=state['_table_v']['equivalent']
+    _write(output/'ORIGINAL_FULL_DW_MATH_EQUIVALENCE.json',proof)
+    _write(output/'AIDC_FULL_DW_COMPRESSION_CERTIFICATE.json',proof)
+    _write(output/'PCC_FORMULATION_NATIVE0_COMPARISON.json',compare_forms(compact,hard_pcc))
     from .table_v_memory import memory_sample
     import psutil
     process_memory=psutil.Process().memory_info()
@@ -202,7 +240,8 @@ def prepare_exact_dw(context,case,built,output,*,captured=None,independent_domai
         peak_private_commit_bytes=getattr(process_memory,'peak_pagefile',getattr(process_memory,'private',None)),
         native_calls=0,classes=len(groups),pricing_blocks=len(roster),compressed_size=size(compact),
         full_integer_size=size(captured['original']),geometry_cache=data[7].get('authorized_domain_generation'),
-        original_local_witness=witness))
+        original_local_witness=state['_local_reduction']['proof']['local_witness'],
+        exact_local_projection=state['_local_reduction']['proof']))
     _prepare_progress(output,'VERIFIED_CLASS_DW_NATIVE0_PASS',classes=len(groups))
     return state
 
@@ -212,9 +251,21 @@ def source_lp_replay(state,point,output):
     from v42_a_stage_phase1.core import primal_replay
     info=state.get('_class_sum')
     if not info:return None
-    result=info['result'];lift=np.asarray(point)[result['fold']]/result['scale']
+    from .table_v_local_master import lift_compact
+    result=info['result'];compressed_original=lift_compact(state,point)
+    lift=compressed_original[result['fold']]/result['scale']
+    if '_local_reduction' in state:
+        before=primal_replay(state['_local_reduction']['source'],compressed_original)
+        if not before['PASS']:raise ValueError('LOCAL_PROJECTION_PREVIOUS_COMPACT_REPLAY_FAILED')
     replay=primal_replay(info['original_LP'],lift)
     if not replay['PASS']:raise ValueError('COMPRESSED_P1_ORIGINAL_UID_LP_REPLAY_FAILED')
+    if info.get('p1_tail_proof',{}).get('entries'):
+        from .table_v_p1_tails import lift as lift_p1_tails
+        lift=lift_p1_tails(info['p1_tail_source'],lift,info['p1_tail_proof'])
+        replay=primal_replay(info['p1_tail_source'],lift)
+        if not replay['PASS']:raise ValueError('P1_TAIL_CANONICAL_ORIGINAL_UID_REPLAY_FAILED')
+        replay.update(P1_only_auxiliary_lift=True,native_compressed_point_unchanged=True,
+            all_pre_tail_original_UID_rows_replayed=True)
     np.savez_compressed(Path(output)/'ORIGINAL_UID_LP_POINT.npz',point=lift)
     _write(Path(output)/'ORIGINAL_UID_LP_REPLAY.json',dict(replay,scope='ORIGINAL_UID_LP_NOT_INTEGER_POINT',
         point=file_record(Path(output)/'ORIGINAL_UID_LP_POINT.npz'),integer_feasibility_claimed=False))

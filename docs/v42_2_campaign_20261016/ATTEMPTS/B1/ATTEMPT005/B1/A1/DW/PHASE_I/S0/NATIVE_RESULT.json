@@ -1,0 +1,300 @@
+{
+  "status": 2,
+  "SolCount": 1,
+  "native_seconds": 76.53399991989136,
+  "Work": 94.23709923013132,
+  "objective": 0.0,
+  "snapshot_sha": "35a6451b48134ea7a59db568b23ba40b22bb5d7d9ebe9a9104c8c19971b54b89",
+  "ledger_call": {
+    "label": "RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_FAST",
+    "solver": "GUROBI",
+    "Native_Runtime": 76.53399991989136,
+    "wall_seconds": 76.5968924000008,
+    "charged_seconds": 76.53399991989136,
+    "cap_seconds": 900.0,
+    "overshoot_seconds": 0.0,
+    "error": null,
+    "status": 2,
+    "stage_context": {
+      "day": "2025-05-01",
+      "arm": "B1",
+      "stage": "A1",
+      "stage_case_sha": "43fd7f506686dfb9ac2464f23d02c6d56028bd89fbd247ddcba6d0def5bf8ac0",
+      "source_sha": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+      "parent_result_sha": "4a621a19af9adaada41f30e63bbbce672f3541e092bd14038713d3586e60546d"
+    },
+    "native_binding": {
+      "matrix_sha": "81d1407a9fed7af00aff5dafde7daace86a811b6c0cfe902689520af89aeac52",
+      "domain_sha": "c183d77db70ec1438e29fa1846e10642602b0f8ec0be5a17de5601ee957caeaa",
+      "objective_sense": 1,
+      "rows": 276433,
+      "columns": 210237,
+      "nonzeros": 1793606,
+      "Threads": 1
+    },
+    "resource_before_solve": {
+      "memory": {
+        "AvailableMBytes": 12357,
+        "CommittedBytes": 26257735680,
+        "CommitLimit": 68408958976,
+        "PercentCommittedBytesInUse": 38
+      },
+      "workers": [
+        {
+          "ProcessId": 14832,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -m v42_pr134_b1.host monitor \"C:\\v42_pr134_sc_execution_20261007\""
+        },
+        {
+          "ProcessId": 8788,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/table_v_monitor/v42_2_server.py --port 8793"
+        },
+        {
+          "ProcessId": 28596,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/run_v42_2_campaign.py --arm B1 --attempt 5 --reason ORIGINAL_PRIMAL_BASIS_METHOD0_LPW1_PRESOLVE0_AFTER_VERIFIED_COLD_BARRIER_FAILURE --corrective-commit 6f8c851e83a7a9e5a7101c69cc434f2e65855b45 --validation-gate docs/v42_2_campaign_20261016/VALIDATION_GATE_05.json"
+        }
+      ],
+      "psutil_available_RAM_bytes": 12999237632,
+      "CPU_percent": 8.4
+    },
+    "P2_call": false,
+    "objective_scope": "ORIGINAL_P1_CURRENT_MATRIX_NOT_UNPRICED_GLOBAL_CERTIFICATE",
+    "native_execution_entered": true,
+    "native_numeric_attributes": {
+      "ObjBound": 0.0,
+      "ObjVal": 0.0,
+      "SolCount": 1.0,
+      "IsMIP": 0.0
+    }
+  },
+  "component": "PHASE_I",
+  "adaptive_policy": "SOURCE18R_FAST",
+  "source_sha": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+  "case_sha": "43fd7f506686dfb9ac2464f23d02c6d56028bd89fbd247ddcba6d0def5bf8ac0",
+  "Stage_Native_cumulative": 76.53399991989136,
+  "certified_Global_LB": null,
+  "FULL_verified_UB": null,
+  "Global_Gap": null,
+  "diagnostic_objective_is_global_certificate": false,
+  "memory": {
+    "RSS_bytes": 5208240128,
+    "private_bytes": 5696290816,
+    "system_available_bytes": 13014409216,
+    "system_RAM_bytes": 34049220608,
+    "system_committed_bytes": 26380050432,
+    "system_commit_limit_bytes": 68408958976
+  },
+  "process_peak_RSS_bytes": 6272520192,
+  "process_peak_private_bytes": 6466588672,
+  "LP_basis": {
+    "available": true,
+    "native_raw": true,
+    "reused_as_start": false
+  },
+  "residual_comparison": {
+    "numerical_1e5": {
+      "PASS": true,
+      "original_primal": {
+        "PASS": true,
+        "max_row_violation": 8.640199666842818e-12,
+        "max_bound_violation": 0.0,
+        "tolerance": 1e-05,
+        "rows": 276433,
+        "columns": 210237,
+        "raw_point_rounded_or_clipped": false
+      },
+      "native_dual_reconstruction": {
+        "PASS": true,
+        "convention": "min: RC=c-A.T@Pi; <=Pi<=0, >=Pi>=0; bounds retained",
+        "maximum_absolute_error": 0.0,
+        "rejected_columns": [],
+        "absolute_tolerance": 1e-05,
+        "relative_tolerance": 1e-10,
+        "every_native_column_reconstructed": true,
+        "raw_pi_or_primal_modified": false
+      },
+      "dual_KKT": {
+        "max_dual_sign_violation": -0.0,
+        "max_reduced_cost_bound_violation": 0.0,
+        "max_complementarity": 0.0,
+        "PASS": true
+      },
+      "numerical_admission_only": true,
+      "replay_tolerance": 1e-05,
+      "raw_point_modified": false,
+      "Phi_zero_or_global_LB_claimed": false
+    },
+    "legacy_1e6": {
+      "PASS": true,
+      "original_primal": {
+        "PASS": true,
+        "max_row_violation": 8.640199666842818e-12,
+        "max_bound_violation": 0.0,
+        "tolerance": 1e-06,
+        "rows": 276433,
+        "columns": 210237,
+        "raw_point_rounded_or_clipped": false
+      },
+      "native_dual_reconstruction": {
+        "PASS": true,
+        "convention": "min: RC=c-A.T@Pi; <=Pi<=0, >=Pi>=0; bounds retained",
+        "maximum_absolute_error": 0.0,
+        "rejected_columns": [],
+        "absolute_tolerance": 1e-07,
+        "relative_tolerance": 1e-10,
+        "every_native_column_reconstructed": true,
+        "raw_pi_or_primal_modified": false
+      },
+      "dual_KKT": {
+        "max_dual_sign_violation": -0.0,
+        "max_reduced_cost_bound_violation": 0.0,
+        "max_complementarity": 0.0,
+        "PASS": true
+      },
+      "numerical_admission_only": true,
+      "replay_tolerance": 1e-06,
+      "raw_point_modified": false,
+      "Phi_zero_or_global_LB_claimed": false
+    },
+    "certified_Global_LB": null,
+    "physical_constraints_modified": false,
+    "max_absolute_row_violation": 8.640199666842818e-12,
+    "max_relative_row_violation": 2.0383694732117874e-13,
+    "relative_denominator": "max(1,abs(rhs),sum(abs(A_ij*x_j))) diagnostic only",
+    "row_units": "UNANNOTATED in LinearSnapshot; no physical unit conversion or row scaling applied",
+    "worst_20_exact_dyadic_residuals": [
+      {
+        "snapshot_row": 58778,
+        "signed_exact_residual": "-266391/36028797018963968"
+      },
+      {
+        "snapshot_row": 105098,
+        "signed_exact_residual": "-3629801/1152921504606846976"
+      },
+      {
+        "snapshot_row": 43218,
+        "signed_exact_residual": "635625/288230376151711744"
+      },
+      {
+        "snapshot_row": 259755,
+        "signed_exact_residual": "-6457881/4611686018427387904"
+      },
+      {
+        "snapshot_row": 186916,
+        "signed_exact_residual": "31139/36028797018963968"
+      },
+      {
+        "snapshot_row": 78599,
+        "signed_exact_residual": "29715/144115188075855872"
+      },
+      {
+        "snapshot_row": 118804,
+        "signed_exact_residual": "854259/288230376151711744"
+      },
+      {
+        "snapshot_row": 167190,
+        "signed_exact_residual": "-53259/72057594037927936"
+      },
+      {
+        "snapshot_row": 269467,
+        "signed_exact_residual": "-7/1125899906842624"
+      },
+      {
+        "snapshot_row": 136194,
+        "signed_exact_residual": "43027/72057594037927936"
+      },
+      {
+        "snapshot_row": 68885,
+        "signed_exact_residual": "20043/576460752303423488"
+      },
+      {
+        "snapshot_row": 175973,
+        "signed_exact_residual": "-757/1125899906842624"
+      },
+      {
+        "snapshot_row": 144978,
+        "signed_exact_residual": "-1389169/576460752303423488"
+      },
+      {
+        "snapshot_row": 211444,
+        "signed_exact_residual": "60625/144115188075855872"
+      },
+      {
+        "snapshot_row": 117198,
+        "signed_exact_residual": "-143/562949953421312"
+      },
+      {
+        "snapshot_row": 97599,
+        "signed_exact_residual": "1575/72057594037927936"
+      },
+      {
+        "snapshot_row": 117178,
+        "signed_exact_residual": "31/140737488355328"
+      },
+      {
+        "snapshot_row": 57094,
+        "signed_exact_residual": "-465/2251799813685248"
+      },
+      {
+        "snapshot_row": 57199,
+        "signed_exact_residual": "459/2251799813685248"
+      },
+      {
+        "snapshot_row": 105084,
+        "signed_exact_residual": "5401/36028797018963968"
+      }
+    ],
+    "all_original_coefficients_retained": true,
+    "relative_dual_KKT": {
+      "max_stationarity": 0.0,
+      "max_complementarity": 0.0,
+      "diagnostic_only": true,
+      "acceptance_uses_absolute_residuals": true
+    },
+    "Phi": {
+      "exact": "0",
+      "float_value": 0.0,
+      "exact_zero": true,
+      "artificial_max_abs": 0.0,
+      "artificial_nonnegative_violation": -0.0,
+      "artificial_count": 19459,
+      "certified_Global_LB": null
+    }
+  },
+  "independent_numerical_validation": {
+    "PASS": true,
+    "original_primal": {
+      "PASS": true,
+      "max_row_violation": 8.640199666842818e-12,
+      "max_bound_violation": 0.0,
+      "tolerance": 1e-05,
+      "rows": 276433,
+      "columns": 210237,
+      "raw_point_rounded_or_clipped": false
+    },
+    "native_dual_reconstruction": {
+      "PASS": true,
+      "convention": "min: RC=c-A.T@Pi; <=Pi<=0, >=Pi>=0; bounds retained",
+      "maximum_absolute_error": 0.0,
+      "rejected_columns": [],
+      "absolute_tolerance": 1e-05,
+      "relative_tolerance": 1e-10,
+      "every_native_column_reconstructed": true,
+      "raw_pi_or_primal_modified": false
+    },
+    "dual_KKT": {
+      "max_dual_sign_violation": -0.0,
+      "max_reduced_cost_bound_violation": 0.0,
+      "max_complementarity": 0.0,
+      "PASS": true
+    },
+    "numerical_admission_only": true,
+    "replay_tolerance": 1e-05,
+    "raw_point_modified": false,
+    "Phi_zero_or_global_LB_claimed": false
+  },
+  "numerical_attempts": 1,
+  "validation_accepted": true
+}

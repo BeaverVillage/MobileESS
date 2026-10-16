@@ -46,7 +46,7 @@ def run(case, bank, budget, folder, validator):
         if control is not None and control.target_met():
             reason='GLOBAL_GAP_TARGET_MET'
             break
-        if bank.best is None or budget.remaining() <= reserve:
+        if budget.remaining() <= reserve:
             break
         state['epoch'] = epoch
         tick = perf_counter()
@@ -55,7 +55,7 @@ def run(case, bank, budget, folder, validator):
         case.mess_iteration_output = iteration
         before = bank.fields()['BEST_GLOBAL_UB']
         try:
-            center = bank.best[0]
+            center = None if bank.best is None else bank.best[0]
             candidates = generator(case, center, bank, budget) if generator else supplied
             if generator and candidates is None:
                 reason = 'DIVERSE_CURRENT_DOMAIN_POOLS_EXHAUSTED'
@@ -70,7 +70,8 @@ def run(case, bank, budget, folder, validator):
                 continue
             state['seen_pools'].add(signature)
             _write(iteration/'POOL.json', dict(pools=pools, pool_sha=signature,
-                STAY_preserved=True, complete_incumbent_paths_pinned=True, no_MOVE_forcing=True))
+                STAY_preserved=True, complete_incumbent_paths_pinned=center is not None,
+                seedless=center is None, no_MOVE_forcing=True))
             packet = direct_joint(case, center, pools)
             math_key = (matrix_sha(packet[0]), domain_sha(packet[1]))
             if math_key in seen_models:
@@ -107,7 +108,7 @@ def run(case, bank, budget, folder, validator):
                 mess_upper(control,case,bank,Native_Runtime=native.get('Native_Runtime'),Native_remaining=budget.remaining(),pool_sha=signature)
             row = dict(epoch=epoch,pool_sha=signature,pool_counts={u:len(p) for u,p in pools.items()},
                 status='REPLAYED',FULL_verified_UB_before=before,FULL_verified_UB_after=after,
-                improvement=before-after,Native_Runtime=native.get('Native_Runtime'),
+                improvement=None if before is None or after is None else before-after,Native_Runtime=native.get('Native_Runtime'),
                 wall_seconds=perf_counter()-tick,remaining_native_seconds=budget.remaining(),
                 restricted_ObjBound_is_Global_LB=False)
             state['feedback'].append(row)

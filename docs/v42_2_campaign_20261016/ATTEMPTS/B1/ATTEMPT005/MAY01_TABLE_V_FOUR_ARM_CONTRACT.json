@@ -1,0 +1,78 @@
+{
+  "schema": "TABLE_V_FOUR_ARM_CONTRACT_V1",
+  "day": "2025-05-01",
+  "Arms": {
+    "B0": {
+      "stages": [],
+      "computing": "REFERENCE",
+      "MESS": "OFF_LITERAL_ZERO_PQ"
+    },
+    "B1": {
+      "stages": [
+        "A1"
+      ],
+      "computing": "FULL_E1_FLEX30_R1",
+      "MESS": "OFF_LITERAL_ZERO_PQ"
+    },
+    "B2": {
+      "stages": [
+        "M1"
+      ],
+      "computing": "REFERENCE",
+      "MESS": "ORIGINAL_FULL_FOUR_MESS_ALL_IDC_AND_STA_PQ"
+    },
+    "B3": {
+      "stages": [
+        "A1",
+        "M1",
+        "A2",
+        "M2"
+      ],
+      "computing": "FULL_E1_FLEX30_R1",
+      "MESS": "ORIGINAL_FULL_FOUR_MESS_ALL_IDC_AND_STA_PQ"
+    }
+  },
+  "reference_result_sha": "a966c072c44b80892ed010ae6cdeb7c1a7f1397798e7478c5572aabb2f5fe21a",
+  "reference_acceptance_sha": "ece3bb7da9e3cc52bd7bdfde92984d0bc0b093c756e53cdf6046e7a29b7409aa",
+  "common_initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+  "source_identity": {
+    "science_sha": "2af8290b60840eb73ada901abbf1ca0ebe4374d06b191a33f27fa6efbf5b8910",
+    "case_sha": "406854bddbc2d80d3c5fd8fcdbc28f8a5c79842cb9e20a62a5a998bf5b71c11a",
+    "initial_state_sha": "5df25289619221a8ed1f7ee6d13a00e73ad5a4e38ac0cf08228e93c3fb67c573",
+    "cc4_sha": "8a8a5e6ffd81ce4d2a619fbea61d8d5cb1de4ad08aa391e4c52fb7137d326077",
+    "runtime_sha": "de097089bee9484954d300951b2e368d8f7f82a84027eadfea9c45f4e1dbdb1b"
+  },
+  "source_sha": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+  "official_physics": "900_SECONDS_X_96_SETTLE_SLOT_THEN_MEASURE_FULL_NETWORK",
+  "substep_diagnostics_are_mandatory_gate": false,
+  "original_11SVR_7RegControl_AUTO_delays_history": true,
+  "P2_calls": 0,
+  "Worker": 1,
+  "Threads": 1,
+  "R2": "HOLD_PRESERVE_ONLY_NO_IMPLEMENT_MODIFY_RUN_VALIDATE",
+  "run_order": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "arm_failure_does_not_stop_others": true,
+  "total_native_limit_seconds": null,
+  "total_native_limit_enabled": false,
+  "stage_caps_seconds": {
+    "B1:A1": 5400.0,
+    "B2:M1": 1800.0,
+    "B3:A1": 5400.0,
+    "B3:M1": 1800.0,
+    "B3:A2": 5400.0,
+    "B3:M2": 1800.0
+  },
+  "K48_separate_stage_caps_seconds": {
+    "B2:K48_M1": 300.0,
+    "B3:K48_M1": 300.0,
+    "B3:K48_M2": 300.0
+  },
+  "K48_target_failure_blocks_feasible_Actual": false,
+  "historical_Basic_A1_not_new_fullflex_optimum": true,
+  "input_preparation_wall_seconds": 14.601128000002063
+}

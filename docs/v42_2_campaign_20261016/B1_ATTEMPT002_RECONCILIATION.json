@@ -1,0 +1,45 @@
+{
+  "schema": "V42_2_FAILED_ATTEMPT_RECONCILIATION_V1",
+  "arm": "B1",
+  "attempt": 2,
+  "status": "OFFICIAL_STOP_FOR_CROSSOVER_POLICY_ROOT_CAUSE_REPAIR",
+  "Native_seconds": 712.1519999504089,
+  "archived_prior_native_seconds": 3498.409000635147,
+  "research_native_including_this_attempt": 4210.561000585556,
+  "inflight": null,
+  "heavy_worker_lock_exists": false,
+  "campaign_lock_exists": false,
+  "FULL_PASS": false,
+  "Actual_Fresh_PASS": false,
+  "original_FULL_infeasible_claimed": false,
+  "S0": {
+    "exact_Phi": "0",
+    "omitted_violated_rows": 5933,
+    "Native_seconds": 143.79999995231628
+  },
+  "S1": {
+    "Native_seconds": 568.3519999980927,
+    "status": "AGENT_OFFICIAL_STOP",
+    "primal_infeasibility_in_log": 0,
+    "native_optimal": false,
+    "original_FULL_UB": null,
+    "last_logged_diagnostic_Phi": 233.30723,
+    "native_SolCount": 0,
+    "diagnostic_is_not_a_returned_feasible_point": true
+  },
+  "root_cause": "Primal-feasible extension fixed the first failure. However Method=2 plus LPWarmStart=2 bypasses barrier, crushes basis-derived vectors, and performs crossover. This actual identical S1 spent568.352Native seconds without optimum, while dual infeasibility remained large. Numerical basis validity did not ensure an efficient or stable crossover.",
+  "correction": "Preserve and independently verify native basis. If new positive original elastic pivots are needed, LPWarmStart=0 retains actual Source18r barrier; otherwise exact feasible extension remains eligible for basis reuse. No physical, objective or tolerance relaxation.",
+  "official_parameter_reference": "https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parameterlpwarmstart",
+  "failed_ledger": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT002\\PLANNING_NATIVE_LEDGER.json",
+    "sha256": "9791a1d5f72e2a8f7b0c97996387ed2f7f332baaf4e5a5db281e2fe5af6e6560",
+    "bytes": 18270
+  },
+  "raw_outcome": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT002\\B1\\ARM_OUTCOME.json",
+    "sha256": "884ae0dc833a3ac0be654aa56f6df52a2d6861a217fdd59f071cb88560a03cd3",
+    "bytes": 1773
+  },
+  "prior_attempt_untouched": true,
+  "identical_retry": false
+}
