@@ -1,0 +1,86 @@
+{
+  "UTC": "2026-10-16T04:41:48.055437+00:00",
+  "scope_authority": {
+    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\USER_STEERING_MAY01_FOUR_ARM_ONLY.txt",
+    "bytes": 15576,
+    "sha256": "616cdf65b1df0179b2c9b5890a1c9c01465e0abd02fa98516ddafb34a5d27231"
+  },
+  "allowed_execution_dates": [
+    "2025-05-01"
+  ],
+  "May02_to_31_authorized": false,
+  "worktree": "D:/v43_pr189_fast_planning_20261016",
+  "branch": "codex/v43-pr189-fast-planning-unknown-presite",
+  "PR": "https://github.com/BeaverVillage/MobileESS/pull/232",
+  "Gate_A": {
+    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GOLDEN003_CERTIFIED_NUMERICAL_CASE.json",
+    "bytes": 5952,
+    "sha256": "f464847e5c6f4569e42cf4d8091961dd99ed726746827f46f55e31735cc519f5"
+  },
+  "Golden003_reexecution_allowed": false,
+  "Phase_A": {
+    "state": "RUNNING",
+    "attempt": "D:\\MobileESS_V43\\runtime\\gate_b_c0_c1_actual96_attempt001",
+    "source_freeze": {
+      "path": "D:\\MobileESS_V43\\runtime\\gate_b_c0_c1_actual96_attempt001\\START.json",
+      "bytes": 6977,
+      "sha256": "2c060ffcb70280899934c4c35d41a79dc109ba6ababe7e216509ca840d718334"
+    },
+    "pid": 31260,
+    "creation": 1792123867.2474737,
+    "C0": "Actual96_Fresh96_PASS",
+    "C1": "RUNNING",
+    "last_observed_control_tick": 90
+  },
+  "Phase_B_B0": {
+    "state": "REFERENCE_AND_COHORT_NATIVE0_PASS_ACTUAL_NOT_RUN",
+    "reference": "D:/MobileESS_V43/inputs/V43_MAY01_B0_REFERENCE_003/AIDC_REFERENCE.json",
+    "audit": {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_REFERENCE_AUDIT.json",
+      "bytes": 4128,
+      "sha256": "47316032b72d1959565f85404c900787331cdb50dc0d66dfe79f3dc68285c7ac"
+    },
+    "Native0": {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_REFERENCE_NATIVE0_CERTIFICATION.json",
+      "bytes": 11778,
+      "sha256": "67bea8ac58913b72b66bd5ff943895635dfaf319124be6807f3516029f2da5ff"
+    }
+  },
+  "Phase_C_B2": {
+    "state": "SOURCE_ADAPTER_READY_REAL_FULL_NATIVE0_NOT_RUN",
+    "command": "python -m v43_mess.worker <explicit request>",
+    "AIDC": "B0_REFERENCE_003_ONLY",
+    "old_FULL_MILP_seed": false
+  },
+  "Phase_D_B3": {
+    "A1": "GOLDEN003_EXACT_FREEZE_REUSE_CANDIDATE",
+    "M1": "SOURCE_ADAPTER_READY_NOT_RUN",
+    "A2": "NOT_IMPLEMENTED_PR189_FIXED_M1_ADAPTER_REQUIRED",
+    "M2": "NOT_RUN"
+  },
+  "next_tasks": [
+    "Reconcile current Gate B and run independent UID/physical report",
+    "Reuse original B0 Reference and verify independent B0 input/PCC identity",
+    "Native0 M full/compact/K48/Joint with exact B0-fixed B2 Case",
+    "Execute B2 independently; B3 A1/M1/A2/M2 remains independent if B2-specific failure",
+    "Freeze final per-arm P/Q/AIDC and run shared C0/C1 plus Fresh96",
+    "Update required four-arm tables/graph, source/Native ledgers, commit/push and PR232"
+  ],
+  "Worker": 1,
+  "Threads": 1,
+  "heavy_concurrency": 1,
+  "FORECAST_CAUSAL_AVAILABILITY": "NOT_CERTIFIED",
+  "CAUSAL_PASS": false,
+  "automation_id": "v43-may01",
+  "automation_status": "ACTIVE_10_MIN_MAY01_ONLY",
+  "adapter_tests": {
+    "artifact": {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_MAY01_ADAPTER_NATIVE0_GUARDS.xml",
+      "bytes": 2264,
+      "sha256": "598cb891a7230ab33c2313eb8c63a01222a19416130aefc14660c468a9fec883"
+    },
+    "passed": 15,
+    "scope": "PURE_ARITHMETIC_SOURCE_AND_BINDING_GUARDS_NOT_REAL_M_FULL_OR_OPTIMIZATION"
+  },
+  "active_worker_source_unchanged": true
+}
