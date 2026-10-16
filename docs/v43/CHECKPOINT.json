@@ -1,40 +1,27 @@
 {
-  "state": "GATE_A_HOLD_GFS06Z_AFTER_CUTOFF_CAUSAL_SOURCE_REPAIR_RUNNING",
+  "state": "RUNNING_GATE_A",
+  "pid": 15620,
+  "process_created": 1792118306.2390027,
+  "started_UTC": "2026-10-16T02:38:26.983719+00:00",
+  "request": {
+    "path": "D:\\MobileESS_V43\\runtime\\golden_B1_20250501_attempt002\\request.json",
+    "bytes": 12483,
+    "sha256": "226e75d2b1091b36ee2772737099b797a03872e9e794ac78bc6b50d77c808c65"
+  },
+  "Source": {
+    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GOLDEN_SOURCE_FREEZE_ATTEMPT002.json",
+    "bytes": 279209,
+    "sha256": "e9a640b1dd83bc3eb6f55eabf2091e496953d4a9d59064dd13ac3ff552c918e7"
+  },
+  "source_commit": "3f989f23c5623f1da638a950f68099394b469f76",
+  "Worker": 1,
+  "Threads": 1,
   "Gate_A_PASS": false,
   "Gate_B_PASS": false,
   "Gate_C_PASS": false,
   "Gate_D_PASS": false,
   "May31_PASS": false,
-  "Golden_attempt001": "OFFICIALLY_STOPPED_CAUSAL_INPUT_REJECTED",
-  "Native_calls": 0,
-  "Native_seconds": 0,
-  "inflight": null,
-  "heavy_solver_PID": null,
-  "source_recovery_PID": 31160,
-  "source_recovery_output": "D:/MobileESS_V43/inputs/weather/2025-05-01_GFS00Z",
-  "source_recovery_command": "python -B -X utf8 -u -m v43.weather_repair",
-  "automation_id": "v43-pr189",
-  "automation_interval_minutes": 10,
-  "GFS06Z_evidence": {
-    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GFS_HISTORICAL_AVAILABILITY_HEAD_AUDIT.json",
-    "bytes": 1477,
-    "sha256": "cbd5fb6f491f3e2960c3063248369e5fc209c6e3cf6c7579e9ab54a08b40b2ac"
-  },
-  "GFS00Z_preflight": {
-    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GFS00Z_CAUSAL_REPAIR_PREFLIGHT.json",
-    "bytes": 844,
-    "sha256": "9f65625548ae2d248cfd06e6fb7b61db60c87407b09252ce28e5a5d6099e8a01"
-  },
-  "next_steps": [
-    "Verify all recovered GFS00Z raw message bytes, availability and original decode/interpolation.",
-    "Preserve original PR189 AIDC formulation; regenerate C1/B0 anchor and electrical sensitivities in an independent V43 case.",
-    "Fresh Native0, regression, commit and source/case/policy freeze before new Golden attempt.",
-    "Do not call original invalid-input Golden again; do not advance Gates B/C/D or May31 until Gate A certified."
-  ],
-  "next_electrical_repair_recipe": {
-    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\NEXT_ELECTRICAL_REPAIR_RECIPE.md",
-    "bytes": 3125,
-    "sha256": "41f5f8190c35798d53f07276c53f9f024e4754a5553088e72b836821a234de0a"
-  },
-  "last_observed_UTC": "2026-10-16T02:24:54.309010+00:00"
+  "PR189_NUMERICAL_REPRODUCTION": "RUNNING",
+  "FORECAST_CAUSAL_AVAILABILITY": "NOT_CERTIFIED",
+  "CAUSAL_PASS": false
 }
