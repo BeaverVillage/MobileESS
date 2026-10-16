@@ -22,7 +22,9 @@ SLICES={
     'tools.critical_grid_cg.verify':(PR231/'tools/critical_grid_cg/verify.py',
         ('FAMILIES','PHYSICAL','require','dyadic','upward','axis','canonical_data','digests','original_row_sha','Geometry')),
     'tools.time_decomposed_lb.grid':(PR231/'tools/time_decomposed_lb/grid.py',
-        ('FAMILIES','PHYSICAL','require','_row_sha','_upward','SelectiveAuthority')),
+        ('FAMILIES','PHYSICAL','require','canonical_sha','_row_sha','_upward','SelectiveAuthority')),
+    'v42_ultracompact.current_verify':(PR231/'v42_ultracompact/current_verify.py',
+        ('_rational','family','vec','physical_pcs_authority')),
 }
 MANIFEST=DOC/'V43_MESS_REUSE_SOURCE_MANIFEST.json'
 
@@ -167,6 +169,17 @@ def load():
     authority.require_real_budget=require_budget
     modules={name:__import__(PREFIX+'.'+name,fromlist=['*']) for name in WHOLE}
     return modules
+
+
+def dependency_smoke():
+    """Exercise lazy Beam dependencies before spending any K48 Native budget."""
+    import importlib
+    grid=importlib.import_module('tools.time_decomposed_lb.grid')
+    pcs=importlib.import_module('v42_ultracompact.current_verify')
+    checksum=grid._row_sha(0,'V43_DEPENDENCY_CANARY','<',1.,[(0,1.)])
+    if len(checksum)!=64 or not callable(pcs.physical_pcs_authority):
+        raise ValueError('M_RUNTIME_DEPENDENCY_CANARY_FAILED')
+    return dict(PASS=True,row_hash=checksum,PCS_dependency=pcs._v43_source_pin,Native_calls=0)
 
 
 if __name__=='__main__':

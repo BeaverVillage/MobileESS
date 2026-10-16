@@ -36,7 +36,8 @@ def build(payload,request,progress=None):
     if request['arm']=='B3' and payload['identity']['stage']!=('A1' if request['stage']=='M1' else 'A2'):
         raise ValueError('B3_A1_M1_A2_M2_HANDOFF_REQUIRED')
     load()
-    case=build_case(payload,request,progress)
+    from .performance import profiled_build
+    case=profiled_build(build_case)(payload,request,progress)
     verify_case(case)
     inherited=deepcopy(case.identity)
     case.identity=dict(inherited,schema='V43_MAY01_FIXED_AIDC_MESS_CASE_V1',

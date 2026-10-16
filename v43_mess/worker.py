@@ -12,8 +12,26 @@ import psutil
 
 from v43.common import ROOT,DOC,read,record,verify_records,atomic,git,now
 from v42_native.contracts import digest
-from .library import load
+from .library import load,dependency_smoke
 from .budget import worker_permit,StageBudget,heavy_peers
+
+
+def result_fields(ub, bounds):
+    """One authoritative FULL verdict; no duplicate update keyword fields."""
+    full = ub['FULL_validated']
+    if bounds['FULL_feasible'] != full:
+        raise ValueError('M_FULL_POINT_AND_GLOBAL_CONTROL_DISAGREE')
+    return dict(bounds, PASS=full)
+
+
+def execution_status(ub,bounds):
+    search=ub.get('adaptive_search',{})
+    failed=search.get('termination_reason')=='IMPLEMENTATION_OR_NUMERICAL_FAILURE'
+    errors=[r.get('error') for r in search.get('history',[]) if r.get('error')]
+    return dict(M_stage_execution_PASS=not failed,implementation_errors=errors,
+        status='IMPLEMENTATION_FAILURE_BEST_FULL_PRESERVED' if failed and ub['FULL_validated'] else
+            'IMPLEMENTATION_FAILURE' if failed else 'GLOBAL_GAP_PASS' if bounds['global_gap_certified'] else
+            'FULL_FEASIBLE_GAP_NOT_CERTIFIED' if ub['FULL_validated'] else 'NO_FULL_FEASIBLE_POINT')
 
 
 def run(request_path):
@@ -60,9 +78,13 @@ def run(request_path):
                     raise ValueError('M2_REQUIRES_CURRENT_FULL_A2_WITH_INDEPENDENT_GAP')
                 verify_records([i['parent_acceptance']])
             with native_zero() as denied:
+                load()
+                atomic(out/'RUNTIME_DEPENDENCY_CANARY.json',dependency_smoke())
                 progress(dict(phase='ORIGINAL_FULL_M_BUILD_NATIVE0'))
                 case=build(payload,request,progress)
                 modules=load();k=modules['table_v_k48'];m=modules['m_engine']
+                from .performance import install,record_caches
+                install(case,modules)
                 packet,proof=k.prepare_k16(case,None,out/'NATIVE0_K16')
                 if denied or proof.get('PASS') is not True:raise ValueError('REAL_M_NATIVE0_ORIGINAL_RELAXATION_PROOF_FAILED')
                 atomic(out/'NATIVE0_CERTIFICATION.json',dict(PASS=True,Native_calls=0,case_sha=case.case_sha,
@@ -76,27 +98,32 @@ def run(request_path):
             progress(dict(phase='SEEDLESS_K16_K32_K48',case_sha=case.case_sha))
             from .prepared import run_prepared_k48
             lb=run_prepared_k48(k,case,packet,proof,lower,out/'K48_EXECUTION')
+            atomic(out/'LOWER_STAGE_RESULT.json',lb)
             del packet
             upper=StageBudget(out/'JOINT_NATIVE_LEDGER.json',case=case,kind='PLANNING_NATIVE',progress=progress);budgets.append(upper)
             progress(dict(phase='ADAPTIVE_BEAM_FOUR_DIRECT_JOINT'))
             ub,point=m.optimize_mess(case,None,[],upper)
+            atomic(out/'UPPER_STAGE_RESULT.json',ub)
+            record_caches(case,out/'CURRENT_CASE_CACHE_METRICS.json')
+            from v42_may_campaign_native90.m_model import verify_case
+            verify_case(case)
             if point is not None:
                 np.savez_compressed(out/'ACCEPTED_M_POINT.npz',point=point)
             bounds=control.bounds()
-            result.update(PASS=ub['FULL_validated'],FULL_feasible=ub['FULL_validated'],case_sha=case.case_sha,
+            result.update(case_sha=case.case_sha,
                 identity=record(out/'SCIENTIFIC_CASE_IDENTITY.json'),fixed_AIDC=payload['identity'],
-                lower=lb,upper=ub,**bounds,build_wall_seconds=build_wall,
+                lower=lb,upper=ub,**result_fields(ub,bounds),build_wall_seconds=build_wall,
                 K48_Native_seconds=lower.used(),Joint_Native_seconds=upper.used(),
                 K48_measured_ceiling_overrun_seconds=max(0.,lower.used()-lower.native_limit),
                 Joint_measured_ceiling_overrun_seconds=max(0.,upper.used()-upper.native_limit),
                 Native_budget_compliance='WITHIN_MEASURED_CEILINGS' if lower.used()<=lower.native_limit and upper.used()<=upper.native_limit
                     else 'MEASURED_SOLVER_TIMELIMIT_OVERRUN_RECORDED_NO_FURTHER_CALLS_IN_EXHAUSTED_LEDGER',
                 MESS_plan=ub['mess'],Native_calls=sum(len(b.calls) for b in budgets),
-                status='GLOBAL_GAP_PASS' if bounds['global_gap_certified'] else
-                    'FULL_FEASIBLE_GAP_NOT_CERTIFIED' if ub['FULL_validated'] else 'NO_FULL_FEASIBLE_POINT',
+                **execution_status(ub,bounds),
                 Actual_diagnostic_allowed=ub['FULL_validated'],restricted_ObjBound_is_Global_LB=False,
                 historical_case_bounds_or_clocks_transferred=False,P2_calls=0)
-            control.finish('GLOBAL_GAP_TARGET_MET' if bounds['global_gap_certified'] else
+            control.finish('IMPLEMENTATION_OR_NUMERICAL_FAILURE' if not execution_status(ub,bounds)['M_stage_execution_PASS'] else
+                'GLOBAL_GAP_TARGET_MET' if bounds['global_gap_certified'] else
                 'NATIVE_BUDGET_EXHAUSTED' if upper.remaining()<=10 else
                 'NO_FURTHER_CERTIFIED_IMPROVEMENT' if ub['FULL_validated'] else 'NO_FULL_FEASIBLE_SOLUTION')
             verify_records(sources)

@@ -112,6 +112,16 @@ class StageBudget(DateBudget):
             return super().native_optimize(model,callback,component='UB',track='M',label=label,requested_seconds=cap)
         finally:self._call_cap=None
 
+    def record_external(self,label,seconds,*,solver='OTHER',status='COMPLETED'):
+        """Original TableV rule: measured score-LP wall is not Native Runtime."""
+        if (solver.upper().startswith('GUROBI') or not math.isfinite(float(seconds)) or float(seconds)<0
+                or 'P2' in label.upper()):
+            raise ValueError('MEASURED_NON_NATIVE_EXTERNAL_COST_REQUIRED')
+        row=dict(kind='OTHER_SOLVER',label=label,solver=solver,status=status,
+            wall_seconds=float(seconds),measured_seconds=float(seconds),
+            consumes_native_timeout=False,Native_Runtime=0.,stage_context=dict(self.context))
+        self.costs.append(row);self.persist();return row
+
 
 def require_budget(budget,kind):
     if type(budget) is not StageBudget or budget.kind!=kind or budget.inflight is not None:
