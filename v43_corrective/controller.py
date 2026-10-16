@@ -9,6 +9,7 @@ from v43_actual.controller import V43EventController,V43Reservations
 from v43_actual.vendor.actual import JobEventController
 from v43_actual.vendor.policy import digest
 from .participation import ArrivalParticipation
+from .performance import single_resource_fit
 
 
 def admission_core():
@@ -42,16 +43,31 @@ class CorrectiveReservations(V43Reservations):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self._incoming_uid=None
+        self.revision=0;self._union_cache={}
+
+    def retain_running(self,*args,**kwargs):
+        result=super().retain_running(*args,**kwargs);self.revision+=1;return result
+
+    def release(self,*args,**kwargs):
+        result=super().release(*args,**kwargs);self.revision+=1;return result
+
+    def activate(self,*args,**kwargs):
+        result=super().activate(*args,**kwargs);self.revision+=1;return result
 
     def reserve(self,uid,segments,**kwargs):
         with self._lock:
             previous=self._incoming_uid;self._incoming_uid=uid
-            try:return super().reserve(uid,segments,**kwargs)
+            try:
+                result=super().reserve(uid,segments,**kwargs)
+                if result[0]:self.revision+=1
+                return result
             finally:self._incoming_uid=previous
 
     def _fits(self,segments,*,exclude=None,envelope=None,scope='physical'):
         if exclude is None and self._incoming_uid in self.known_plans:
             exclude=self._incoming_uid
+        if len(segments)==1 and segments[0]['resource'].startswith('gpu:') and envelope is None:
+            return single_resource_fit(self,segments,exclude)
         return super()._fits(segments,exclude=exclude,envelope=envelope,scope=scope)
 
 
@@ -69,15 +85,15 @@ class CorrectiveController(UniformArmController):
         self._last_admission_state=None
 
     def _state_key(self,now):
-        return digest(dict(now=now,pending=sorted(self.pending),
-            observed_jobs=self.ledger.jobs,committed=self.reservations.reservations,
-            known_plans=self.reservations.known_plans))
+        return (now,tuple(sorted(self.pending)),self.reservations.revision)
 
     def submit(self,request,now):
         super().submit(request,now)
         m=self.metadata[request.uid]
         if m['origin_unknown']:
             m['r1_flex30']=self.participation.observe(m,now)
+            self._event(request.uid,now,'BASIC_SITE_DESIGNATED_PENDING',site=m['reference_site'],
+                state=m['state'],GPU_started=False,rule='EXISTING_CAUSAL_REFERENCE_FCFS')
             self._event(request.uid,now,'R1_PARTICIPATION_OBSERVED',
                 participant=m['r1_flex30']['participant'],eligible=m['r1_flex30']['eligible'],
                 authority='R1_ASSUMED',receipt_sha=m['r1_flex30']['receipt_sha'])

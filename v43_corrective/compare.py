@@ -23,7 +23,7 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
     output=Path(output);freeze=output.with_name(output.name+'.CORRECTIVE_SOURCE_FREEZE.json')
     if output.exists() or freeze.exists():raise ValueError('NEW_CORRECTIVE_ACTUAL_ATTEMPT_REQUIRED')
     variants=tuple(variants)
-    if variants not in (('C0',),('C0','C1')):raise ValueError('EXPLICIT_SUPPORTED_CONTROL_VARIANTS_REQUIRED')
+    if variants not in (('C0',),('C1',),('C0','C1')):raise ValueError('EXPLICIT_SUPPORTED_CONTROL_VARIANTS_REQUIRED')
     if not 0<float(wall_limit_seconds)<=2400:raise ValueError('USER_40_MINUTE_WALL_CEILING_REQUIRED')
     began=perf_counter()
     def check_deadline():
@@ -85,6 +85,7 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
     # Fresh always takes the independent original sequential all-measurement
     # path, even when admission uses certified historical proof reuse.
     body=textwrap.dedent(inspect.getsource(original.run))
+    body=body.replace('from v43.golden import no_heavy_peer','from v43_corrective.safety import no_heavy_peer')
     if body.count('fresh=oracle._probe(rows)')!=1:raise ValueError('INDEPENDENT_FRESH_REUSE_BOUNDARY_DRIFT')
     body=body.replace('fresh=oracle._probe(rows)','__check_deadline();fresh=oracle.full_fresh_probe(rows)')
     if body.count("for variant in ('C0','C1'):")!=1:raise ValueError('EXPLICIT_VARIANT_REUSE_BOUNDARY_DRIFT')
@@ -105,6 +106,7 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
     frozen['transformed_driver']=record(driver);atomic(freeze,frozen)
     exec(compile(body,str(driver),'exec'),namespace);function=namespace['run']
     verify_records(sources);result=function(output,control_slots=control_slots);verify_records(sources)
+    for p in policies:p.require_bindings(p.bindings)
     if not result['PASS']:
         for c in controllers:
             try:
@@ -114,7 +116,7 @@ def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,co
             except Exception as error:
                 atomic(output/f'PARTIAL_CAPTURE_ERROR_{c.policy.variant}.json',dict(error=repr(error)))
     atomic(output/'CORRECTIVE_POLICY_RECEIPTS.json',dict(arm=arm,policy_version=POLICY_ID,
-        source_freeze=record(freeze),policies=[dict(variant=p.variant,spec=p.spec,sha=p.sha,
+        source_freeze=record(freeze),policies=[dict(variant=p.variant,spec=p.spec,sha=p.sha,timings=p.timings,
             current_diagnostics=p.current_diagnostics,candidate_funnel=p.funnel) for p in policies],
         controllers=[dict(variant=c.policy.variant,participation=list(c.participation.receipts.values()),
             overruns=c.overrun_observations,Known_commands_unchanged=c.known_schedule==c._frozen_known_commands)

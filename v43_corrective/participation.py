@@ -68,6 +68,9 @@ def change_authority(metadata, site, now):
         return 'R1_ARRIVAL_RECEIPT_REQUIRED'
     if not r.get('participant') or r.get('authority') != 'R1_ASSUMED':
         return 'R1_NOT_PARTICIPATING'
+    if (metadata.get('source_pre_site_forbidden') is True or metadata.get('presite_explicitly_forbidden') is True
+            or metadata.get('protected') is not False or metadata.get('qos') not in ('normal','standby')):
+        return 'SOURCE_PRE_SITE_FORBIDDEN'
     if r.get('observed_at_seconds', float('inf')) > now:
         return 'R1_FUTURE_AUTHORITY_FORBIDDEN'
     if site not in permitted_destinations(metadata) or site not in r.get('destinations', ()):

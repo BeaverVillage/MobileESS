@@ -11,6 +11,7 @@ from v43_actual.vendor.policy import digest
 from v43_actual.vendor.trajectory_tracking import require_tracking_public
 from . import POLICY_ID
 from .participation import change_authority
+from .performance import PublicCalculationCache
 
 
 def score_core():
@@ -18,6 +19,11 @@ def score_core():
     if source.count('if violations:') != 1:
         raise ValueError('SIGNED_SCORE_REUSE_BOUNDARY_DRIFT')
     source = source.replace('if violations:', 'if violations and self.affine_hard_gate:')
+    # The complete numeric authority is checked on construction and after
+    # execution. Avoid rehashing megabytes of unchanged rows per candidate.
+    left=source.index('    authority = (')
+    right=source.index('    key = ',left)
+    source=source[:left]+"    authority = (self._score_authority, digest(self._current_weather(now)), instant_base.tobytes())\n"+source[right:]
     source = source.replace('affine_approximation_only=True, Fresh_AC_PASS_claimed=False)',
         'affine_approximation_only=True, Fresh_AC_PASS_claimed=False, predicted_violations=violations)')
     ns = dict(SignedSensitivityPolicy._score.__globals__)
@@ -25,7 +31,7 @@ def score_core():
     return ns['_score']
 
 
-class CorrectivePolicy(IssueContinuityPolicy):
+class CorrectivePolicy(PublicCalculationCache,IssueContinuityPolicy):
     _score = score_core()
 
     def __init__(self,*args,correction_proof=None,**kwargs):
@@ -49,6 +55,9 @@ class CorrectivePolicy(IssueContinuityPolicy):
             final_execution_gate='UNCHANGED_ORIGINAL_CURRENT_AC',intentional_delay=False)
         self.sha = digest(self.spec)
         self.current_diagnostics = []
+        self.initialize_caches()
+        self._score_authority=(digest(self.packet.bindings),digest(self.packet.authority),
+            self.spec['response_numeric_sha'])
 
     def current_guard(self,m,segments,now,observed):
         self.observe(now,observed,self.metadata)
@@ -57,7 +66,9 @@ class CorrectivePolicy(IssueContinuityPolicy):
             predicted = SignedSensitivityPolicy.current_guard(self,m,segments,now,observed)
         # Always compare the independent physical gate, even if the frozen
         # forecast-affine rows reject. No guard tolerance is changed.
+        began=perf_counter()
         actual = self.oracle.guard(m,segments,now,observed)
+        self.timings['current_AC_seconds']+=perf_counter()-began
         self.current_diagnostics.append(dict(uid=m['uid'],time_seconds=now,
             candidate_sites=[s['resource'][4:] for s in segments if s['resource'].startswith('gpu:')],
             affine_reject=predicted,current_AC_reject=actual,
@@ -78,11 +89,6 @@ class CorrectivePolicy(IssueContinuityPolicy):
             return self._record(m,now,dict(action='QUEUE',status='SOURCE_RELEASE_NOT_READY'),began,0,[])
         basic=m['reference_site'];rejected=[];candidates=[]
         baseline=None
-        if now>=self.reference.begin:
-            baseline,_=self._public_future(reservations,m['uid'])
-            if self.anonymous_residual_audit['status'] not in (
-                    'SOURCE_COHORT_CDF_CARRY_CONSERVATION_PASS','ZERO_ANONYMOUS_FORECAST'):
-                return self._record(m,now,dict(action='QUEUE',status='CC4_CONSERVATION_NOT_CERTIFIED'),began,0,[])
         # FIFO controls evaluation order, not a global future start barrier.
         sites=[basic]+sorted(set(m['compatible_sites'])-{basic})
         for site in sites:
@@ -99,14 +105,27 @@ class CorrectivePolicy(IssueContinuityPolicy):
             if reason is None and any(m.get(k) is not None and value>m[k] for k,value in
                     [('hard_latest_start_seconds',now),('completion_deadline_seconds',end)]):reason='SOURCE_HARD_WINDOW'
             segments=[dict(resource='gpu:'+site,begin=now,end=end,quantity=m['gpu'])]
-            if reason is None:reason=reservations.feasible(segments,exclude=m['uid'])
+            if reason is None:
+                began_reservation=perf_counter()
+                reason=reservations.feasible(segments,exclude=m['uid'])
+                self.timings['reservation_seconds']+=perf_counter()-began_reservation
             stages['GPU_rack_QoS_PASS']=reason is None
             score=None
             if reason is None:
-                if baseline is None:
+                if now<self.reference.begin:
                     score=dict(grid_peak=0.,loading_hours=0.,risk_GPUh=0.,profile=None,
                         checked_grid_slots=0,prefix_signed_ranking_not_certified=True)
-                else:score,reason=self._score(m,segments,now,baseline)
+                else:
+                    if baseline is None and now>=self.reference.begin:
+                        baseline,_=self._public_future(reservations,m['uid'])
+                    if self.anonymous_residual_audit['status'] not in (
+                            'SOURCE_COHORT_CDF_CARRY_CONSERVATION_PASS','ZERO_ANONYMOUS_FORECAST'):
+                        return self._record(m,now,dict(action='QUEUE',status='CC4_CONSERVATION_NOT_CERTIFIED'),began,0,[])
+                    began_score=perf_counter();score,reason=self._score(m,segments,now,baseline)
+                    self.timings['sensitivity_seconds']+=perf_counter()-began_score
+            stages.update(sensitivity_evaluated=score is not None,
+                sensitivity=None if score is None else {k:v for k,v in score.items() if k!='profile'},
+                basic_site=basic,participant=m.get('r1_flex30',{}).get('participant',False))
             if reason:
                 blocking=[uid for uid,other in self.metadata.items() if other.get('state')=='RUNNING'
                     and other.get('current_site')==site and other.get('accumulated_compute_seconds',0)>other['t50_seconds']]
@@ -114,6 +133,8 @@ class CorrectivePolicy(IssueContinuityPolicy):
                     'NO_CAPACITY','PHYSICAL_CAPACITY_RUNNING_RETAINED') else []))
                 self.funnel.append(dict(stages,reason=reason));continue
             key=(round(score['grid_peak'],12),score['loading_hours'],score['risk_GPUh'],0 if site==basic else 1,site)
+            stages.update(reason='SCORED_FEASIBLE_NOT_SELECTED')
+            self.funnel.append(stages)
             candidates.append((key,site,segments,score,stages))
         # No impossible basic-site score is ever a comparison threshold.
         # Signed ranking is computed first; actual AC confirms each candidate
@@ -121,7 +142,7 @@ class CorrectivePolicy(IssueContinuityPolicy):
         for key,site,segments,score,stages in sorted(candidates,key=lambda row:row[0]):
             reason=self.current_guard(m,segments,now,self.current[1])
             if reason:
-                rejected.append(dict(site=site,reason=reason));self.funnel.append(dict(stages,reason=reason));continue
+                rejected.append(dict(site=site,reason=reason));stages.update(reason=reason);continue
             stages['Current_AC_PASS']=True
             if reserve:
                 ok,reason=reservations.reserve(m['uid'],segments,replace=True)
@@ -131,8 +152,7 @@ class CorrectivePolicy(IssueContinuityPolicy):
                 site=site,start_seconds=now,nominal_end_seconds=segments[0]['end'],segments=segments,
                 additional_start_delay_seconds=0.,r1_authority='R1_ASSUMED',
                 actual_execution_confirmed=False,tracking={k:v for k,v in score.items() if k!='profile'})
-            self.funnel.append(dict(stages,selected=True,reason='SIGNED_SELECTED_CURRENT_AC_PASS',
-                selection_is_not_execution=True))
+            stages.update(selected=True,reason='SIGNED_SELECTED_CURRENT_AC_PASS',selection_is_not_execution=True)
             return self._record(m,now,decision,began,len(sites),rejected)
         return self._record(m,now,dict(action='QUEUE',status='NO_HARD_FEASIBLE_CORRECTIVE_ACTION'),
             began,len(sites),rejected)
