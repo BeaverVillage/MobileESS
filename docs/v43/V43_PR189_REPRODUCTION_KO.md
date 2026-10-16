@@ -15,7 +15,7 @@ CAUSAL_PASS는 False다. GFS06Z 공개시각 증거는 보존하되 재조사하
 
 Golden001은 공식 중지됐고 Native 호출 0회/0초/inflight 없음, Wall 132.525초로 정산됐다. 원본 Raw와 중지 원장은 변경하지 않는다. GFS00Z 수집 결과와 전기 Case 준비 코드·오류 증거는 역사적 진단 자료로 보존했고, 공식 실행 경로에서는 중단했다. 새로운 다운로드나 C1/B0/전기계수 재생성은 하지 않는다.
 
-Golden002는 별도 출력·새 Native=0 원장으로 시작했다. 공유 Native 예산은 원본 A-stage 5,400초이며 Phase I에 별도 900초 제한을 추가하지 않는다. Worker1/Threads1이다. 원본 May01 요청의 검증된 완전 물리 Domain 캐시만 동일 입력/Source/Case SHA 검증 후 재사용한다. 과거 point/UB/LB/Native 소비는 읽지 않는다. Fast Active Domain, SUM/Hybrid, Row Generation, Full Pricing, Integer Restoration과 FULL replay를 보존한다.
+Golden002는 별도 출력·새 Native=0 원장으로 시작했다. 공유 Native 예산은 원본 A-stage 5,400초이며 Phase I에 별도 900초 제한을 추가하지 않는다. Worker1/Threads1이다. 원본 May01 완전 물리 Domain 캐시를 요청했으나 원본 검증기가 생산자 파일의 전체 경로까지 비교하여 거부했다. 3개 생산자 소스의 SHA/bytes는 같지만 V43 worktree 경로가 다르다. Golden002는 완전 Domain을 재구성하고 실제 Build Wall을 별도로 기록한다. 살아 있는 worker나 원본 검증기는 변경하지 않는다. 과거 point/UB/LB/Native 소비는 읽지 않는다. Fast Active Domain, SUM/Hybrid, Row Generation, Full Pricing, Integer Restoration과 FULL replay를 보존한다.
 
 Historical 비교값은 Phase I Native 63.820초, 전체 B1 Native 97.472초, UB 0.6718471055537026, LB 0.6715871456570585다. 과거 준비 Wall 1,098.747초는 Native와 구분한다. 신규 값은 실제 실행 원장으로 보고한다.
 
