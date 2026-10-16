@@ -26,6 +26,8 @@ def report(attempt):
     arm=case.get('arm','B1')
     arm_freeze=attempt.with_name(attempt.name+'.ARM_SOURCE_FREEZE.json')
     if arm_freeze.exists():verify_records(read(arm_freeze)['sources'])
+    corrective_freeze=attempt.with_name(attempt.name+'.CORRECTIVE_SOURCE_FREEZE.json')
+    if corrective_freeze.exists():verify_records(read(corrective_freeze)['sources'])
     verify_records(case['source_receipts'])
     source_plan=read(case['source_receipts'][0]['path'])
     source_actual=read(case['source_receipts'][1]['path'])
@@ -47,7 +49,9 @@ def report(attempt):
     if set(commands)!=set(selected) or digest(commands)!=case['Known_commands_sha']:
         raise ValueError('GOLDEN_SELECTED_COMMAND_CONTENT_CHANGED')
     summaries=[];uid_rows=[];physical={}
-    for variant in ('C0','C1'):
+    variants=tuple(result['variants'])
+    if variants not in (('C0',),('C0','C1')):raise ValueError('SUPPORTED_ACTUAL_REPORT_VARIANTS_REQUIRED')
+    for variant in variants:
         folder=attempt/variant
         stage=read(folder/'RESULT.json')
         event=read(folder/'ACTUAL_EVENT_LEDGERS.json')
@@ -174,14 +178,17 @@ def report(attempt):
             Note='Hard-feasible alternative count is zero if Source eligibility is zero; otherwise requires candidate-level score evidence.')
         if not eligible:summary['Pre_site_Hard_Feasible']=0
         summaries.append(summary)
-    equal={key:np.array_equal(physical['C0'][key],physical['C1'][key]) for key in physical['C0']}
+    equal=({key:np.array_equal(physical['C0'][key],physical['C1'][key]) for key in physical['C0']}
+        if 'C1' in variants else 'NOT_APPLICABLE_C0_ONLY')
     artifact=attempt/'INDEPENDENT_UNKNOWN_UID_AUDIT.csv'
     with artifact.open('x',encoding='utf-8-sig',newline='') as stream:
         writer=csv.DictWriter(stream,fieldnames=list(uid_rows[0]));writer.writeheader();writer.writerows(uid_rows)
     report=dict(UTC=now(),schema='V43_INDEPENDENT_ACTUAL_UID_AND_PHYSICAL_REPORT_V1',arm=arm,
         result=record(attempt/'RESULT.json'),summaries=summaries,UID_audit=record(artifact),
         C0_C1_physical_bit_exact=equal,Source_pre_site_production_claim=False,
-        initial_source_sites='44_MODEL_ASSUMED_210_ORIGINAL_FIXED',R1='NOT_EXECUTED',R2='HOLD',
+        initial_source_sites='44_MODEL_ASSUMED_210_ORIGINAL_FIXED',
+        R1='ASSUMED_PARTICIPATION_NO_C0_ALTERNATIVE_SITE_AUTHORITY' if corrective_freeze.exists() else 'NOT_EXECUTED',R2='HOLD',
+        control_variants=list(variants),C1_comparison_executed='C1' in variants,
         original_control_contract='7REG_SNAPSHOT_STATIC_NO_ADDED_SVR',
         FORECAST_CAUSAL_AVAILABILITY='NOT_CERTIFIED',CAUSAL_PASS=False,
         conditional_Gate_B_execution_PASS=result.get('Gate_B_PASS',False),

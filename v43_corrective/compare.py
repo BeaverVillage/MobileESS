@@ -17,6 +17,7 @@ from .current_ac import FullPrefixReferenceAC,CertifiedPrefixAC,ShadowCertifiedP
 
 def run(arm,output,*,reference_folder=None,mess_result=None,control_slots=120,correction_proof=None,
         ac_mode='SHADOW',ac_certification=None,variants=('C0',)):
+    if arm not in ('B1','B3'):raise ValueError('C0_CONTROL_ONLY_B1_B3_BASELINES_USE_EVENT_FCFS')
     output=Path(output);freeze=output.with_name(output.name+'.CORRECTIVE_SOURCE_FREEZE.json')
     if output.exists() or freeze.exists():raise ValueError('NEW_CORRECTIVE_ACTUAL_ATTEMPT_REQUIRED')
     variants=tuple(variants)

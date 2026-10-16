@@ -19,7 +19,7 @@ def report(attempt):
     observations=load_observations(begin=issue,end=end)
     weather=[observations.at(issue+t*900,observed_now=issue+t*900)['weather']['values'] for t in range(120)]
     model,sources=power_model(power,plan['capacities']);rows=[]
-    for variant in ('C0','C1'):
+    for variant in read(attempt/'RESULT.json')['variants']:
         physical=attempt/variant/'ACTUAL_PHYSICAL.npz'
         with np.load(physical,allow_pickle=False) as z:
             fresh=model.recompute(z['GPU'],tuple(map(str,z['sites'])),weather)

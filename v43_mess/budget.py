@@ -20,7 +20,8 @@ def heavy_peers(processes=None,own_pid=None):
         if process.pid==own_pid or name not in ('python.exe','pythonw.exe','python','gurobi_cl.exe'):continue
         command=' '.join(info.get('cmdline') or []).lower()
         if name=='gurobi_cl.exe' or any(x in command for x in ('-m v43_actual.compare','-m v43_arms.compare',
-                '-m v43_mess.worker','-m v43_a2.worker','-m v43.golden','.worker','solve_v42')):
+                '-m v43_mess.worker','-m v43_a2.worker','-m v43.golden','-m v43.may01',
+                '-m v43_corrective.compare','.worker','solve_v42')):
             peers.append(info)
     return peers
 

@@ -6,6 +6,10 @@ from .common import DOC,read,verify_records
 
 
 def actual(arm,output,*,reference_folder=None,mess_result=None,correction_proof=None):
+    if arm in ('B0','B2'):
+        if correction_proof is not None:raise ValueError('BASELINE_HAS_NO_AFFINE_CONTROL_POLICY')
+        from v43_baseline.worker import run
+        return run(arm,output,reference_folder=reference_folder,mess_result=mess_result)
     pointer=DOC/'V43_CURRENT_AC_PRODUCTION_CERTIFICATION_POINTER.json'
     if not pointer.exists():
         raise RuntimeError('RUN_REAL_PREFIX_EQUIVALENCE_AND_B1_PAIRED_CANARY_BEFORE_FULL_ACTUAL')
