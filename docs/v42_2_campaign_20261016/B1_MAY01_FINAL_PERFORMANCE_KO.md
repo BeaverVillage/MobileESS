@@ -18,6 +18,8 @@ ATTEMPT001: basis 확장/수치 병목으로 공식 중지. ATTEMPT002: crossove
 
 ## 현재 개발 단계
 
-229개 전체 Local Polytope의 정확한 축소 Native0와 회귀 1,305개는 PASS했다. Local Hard 261,414→210,067행, local 변수 174,685→134,630열. 아직 전체 Hybrid Master에는 연결하지 않았고 실제 속도 개선은 미검증이다.
+Local Hard 추가 축소는 전체 229 Class에서 독립 검증과 Native0 readback을 통과했다. 누적 261,414→197,359행(24.50% 감소), Local 변수 174,685→134,630개. 상세 증거는 `B1_LOCAL_REDUCTION_PROGRESS_KO.md`와 `LOCAL_REDUCTION_NATIVE0_03/RESULT.json`이다.
 
-다음 실제 실행은 Global Master·Original lift·full-domain pricing 인증 경로의 검증과 현재 Source/Case/Policy Gate를 통과한 새 Attempt에서만 수행한다. 원본 과학·물리 계약, A 5,400초/Phase I 900초, Worker1/Threads1 및 V42.1 Freeze는 유지한다.
+1차 축소의 전체 Master 통합은 B1_NATIVE0_08 PASS. Bounds 추가 축소의 전체 Master 통합은 B1_NATIVE0_09 PASS. 역방향·평행 행 정리까지 포함한 현재 Source 전체 Master 검증도 B1_NATIVE0_10 PASS. 전체 Hybrid는 1,026,045×190,778→961,990×150,723으로 줄었다. 실제 축소 후 최적화 속도, Phase I 종료, FULL/Actual96/Fresh96는 아직 검증하지 않았다.
+
+현재 Source의 Global Master·Original lift·full-domain pricing 경로·M Native0·회귀·Gate를 통과한 새 Attempt에서만 실제 실행한다. 원본 과학·물리 계약, A 5,400초/Phase I 900초, Worker1/Threads1 및 V42.1 Freeze를 유지한다.

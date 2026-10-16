@@ -77,3 +77,16 @@ ATTEMPT005와 생산 코드는 변경하지 않는다. 실행 정산 후 exact f
 Binary64에서 정확하게 표현할 수 없는 합은 반올림하지 않고 거부하도록 구현했다. 실제 229개 블록은 모두 정확한 readback을 통과했다. 회귀 1,305개 PASS이며 기존 682개 기준 및 과거 원장 byte가 보존됐다.
 
 **현재 범위는 완전한 local polytope들의 동치 축소다. 전체 Hybrid Master 연결, global row/column mapping, pricing 인증 경로, 실제 Native 성능은 아직 미검증이다. 생산 채택이나 B1 PASS를 뜻하지 않는다.**
+
+
+## 추가 Local 구조 개선 — 현재 Source Native0 검증 완료
+
+사용자 요청으로 ATTEMPT005를 중지·정산한 뒤, 별도 Source에서 정확한 zero/alias 소거, 단일 변수 Bounds 흡수와 box-implied 행 삭제, 역방향 부등식의 등식화 및 평행 중복 제거를 구현했다. 원래 Integer FULL과 원래 과학·물리 계약은 유지했다.
+
+전체 229 Class Local Hard 261,414→197,359행(24.50%), Local 변수 174,685→134,630(22.93%), Local NNZ 930,913→770,085(17.28%). `LOCAL_REDUCTION_NATIVE0_03/RESULT.json`에서 양방향 동치성·결합·목적함수·UID 표현과 모든 Native 필드를 독립 검사했다.
+
+현재 전체 Hybrid 통합도 `B1_NATIVE0_10/RESULT.json` PASS. 1,026,045×190,778→961,990×150,723이며 모든 Global 행·우변·sense·Global boxes·PCC 하드 정의식과 완전 Local pricing 도메인을 유지했다. 원본 Integer FULL은 2,108,858×946,756 그대로다. 1,319개 회귀 PASS, 과거 682 IDs와 원장 보존.
+
+남은 197,359개 Local 행 중 support 분류상 WAN 전송·링크 관련은 193,380개다. Alias 후 혼합 변수의 family 태그가 합쳐지므로 전후 개별 family 행 수는 원래 행의 유일한 semantic lineage로 비교하지 않는다. 축소 효과와 fill·수치 병목의 인과는 구분한다.
+
+실제 축소 후 Phase I 시간·exact Phi=0·Global LB·FULL/Actual96/Fresh96는 아직 미검증이다. 같은 물리 Case의 Original FULL 대응 증명, 현재 Source M Native0 및 Gate를 완료한 새 Attempt에서 성능을 측정한다. 부족하면 Local 행을 Master에서 제거해 전체 Local Polytope oracle로 가격화하는 정확한 DW 파일럿을 별도로 검증한다. 유한 Pool만으로 Full-domain pricing이나 Global LB를 발급하지 않는다. 상세 단계와 수치는 `B1_LOCAL_REDUCTION_PROGRESS_KO.md`를 따른다.

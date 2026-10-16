@@ -4,12 +4,12 @@
   "freeze_tag": "v42.1-freeze-20261016",
   "branch": "codex/v42.2-may01-b1b2b3-20261016",
   "PR": "https://github.com/BeaverVillage/MobileESS/pull/231",
-  "current_commit": "6f8c851e83a7a9e5a7101c69cc434f2e65855b45",
-  "active_stage": "LOCAL_REDUCTION_NATIVE0_PASS_GLOBAL_MASTER_INTEGRATION_REQUIRED",
+  "current_commit": "a6ca2667a88c8984edd54043a9d8cf1fb22c9fd1",
+  "active_stage": "EXACT_LOCAL_REDUCTION_PROVED_PREPARING_CURRENT_SOURCE_M_NATIVE0",
   "Native_optimize_calls": 3,
   "active_PID": null,
-  "active_log": "D:/v42_2_b1_attempt005.log",
-  "active_output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT005",
+  "active_log": null,
+  "active_output": "docs/v42_2_campaign_20261016/B1_NATIVE0_10",
   "regression01": {
     "status": "PASS",
     "tests": 1246,
@@ -28,9 +28,9 @@
   "B2_ACTUAL_FRESH_PASS": false,
   "B3_ACTUAL_FRESH_PASS": false,
   "next_steps": [
-    "Implement and independently verify local zero implications, exact variable aliases and proportional row redundancy; keep original integer FULL unchanged.",
-    "Run separate all-229-block Native0 with exact forward/inverse, coupling, objective and original-row verification. Integrate only after proof; actual performance pilot must use a new attempt.",
-    "Complete full engineering family/presolve investigation, all required reports, then original May01 B1 FULL/Actual96/Fresh96 and B2/B3."
+    "Finish fresh whole-Hybrid Native0 including exact opposing-row equalities.",
+    "Prove original FULL permutation across source revisions; fresh current-source M Native0; release and gate before any new actual Attempt.",
+    "Measure same-case actual performance under unchanged caps; if insufficient, validate exact complete-Local-Polytope DW in a separate pilot."
   ],
   "constraints": {
     "Worker": 1,
@@ -116,7 +116,7 @@
     "tests": 1259,
     "Native_calls": 0
   },
-  "validation_gate": "docs/v42_2_campaign_20261016/VALIDATION_GATE_05.json",
+  "validation_gate": "GATE05_HISTORICAL_ATTEMPT005_ONLY_NEW_RELEASE_GATE_REQUIRED_BEFORE_NATIVE",
   "M_NATIVE0_03": {
     "status": "PASS",
     "Native_calls": 0,
@@ -156,7 +156,7 @@
     "actual_S1_basis_detail": {
       "same_original_snapshot_and_native_matrix": true,
       "old_uncompensated_max_row_violation": 1784.027025724307,
-      "repaired_elastic_witness_max_row_violation": 8.01492205937393e-12,
+      "repaired_elastic_witness_max_row_violation": 8.01492205937393E-12,
       "new_local_artificials_basic": 5933,
       "Native_calls": 0,
       "FULL_UB_claimed": false
@@ -204,7 +204,7 @@
     "static_original_matrix_proof_reused": "B1_NATIVE0_04/M_NATIVE0_03"
   },
   "supplemental_external_hash_status": "OS_RESTART_TERMINATED_WITHOUT_FINAL_SUPPLEMENT_PRIMARY_FREEZE_MANIFESTS_UNCHANGED",
-  "current_uncommitted_scientific_source_sha": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+  "current_uncommitted_scientific_source_sha": "2ee61663e39b94cdffd5393f6089e371591db8e4183f80df328097e402d984bf",
   "B1_NATIVE0_05": {
     "status": "FAILED_REUSE_GATE_SOURCE_CHANGED",
     "Native_calls": 0,
@@ -311,7 +311,7 @@
       1144439
     ],
     "cold_barrier_initial_Phi_around": 51285000000000.0,
-    "verified_extended_basis_primal_residual_max": 8.640199666842818e-12,
+    "verified_extended_basis_primal_residual_max": 8.640199666842818E-12,
     "next_candidate": "For positive elastic pivots, retain the proven actual native VBasis/CBasis and use Method=0 primal simplex, LPWarmStart=1, Presolve=0 on the original unpresolved elastic matrix; avoid crushed-basis crossover and cold barrier. Do not invent PStart/DStart or admit a FULL UB. Requires actual S1 Native0, regression, fresh committed gate, independent new whole-arm attempt.",
     "official_reference": "https://doc.gurobi.com/projects/optimizer/en/current/features/warmstart.html",
     "scientific_source_note": "Current scientific records contain compression_adapter, but not table_v_dw/phase_diagnostics. An algorithm-only basis policy change must still be pinned by DW_SOURCE_FREEZE and release; verify Science SHA remains identical before considering M04 still valid.",
@@ -404,5 +404,101 @@
     "tests": 1305,
     "baseline_IDs": 682,
     "Native_calls": 0
+  },
+  "last_local_reduction_commit_pushed": "a6ca2667a88c8984edd54043a9d8cf1fb22c9fd1",
+  "M_NATIVE0_04_current_status": "STALE_SOURCE_AFTER_NEW_LOCAL_MASTER_INTEGRATION_FRESH_M_REQUIRED",
+  "current_source_requires_fresh_M_Native0": true,
+  "local_reduction_02": {
+    "status": "PASS_ALL_229_LOCAL_POLYTOPES_NOT_GLOBAL_INTEGRATION",
+    "totals": {
+      "before_rows": 261414,
+      "before_columns": 174685,
+      "before_NNZ": 930913,
+      "after_rows": 199617,
+      "after_columns": 134630,
+      "after_NNZ": 777078
+    },
+    "Native_calls": 0,
+    "proof": "LOCAL_REDUCTION_NATIVE0_02/RESULT.json",
+    "complete_local_domains_proved": true,
+    "current_global_integration": "B1_NATIVE0_09_RUNNING_NOT_YET_CERTIFIED"
+  },
+  "local_master_01": {
+    "status": "PASS_PREVIOUS_SOURCE",
+    "proof": "B1_NATIVE0_08/REDUCED_HYBRID_NATIVE0.json",
+    "native_binding": {
+      "matrix_sha": "d27f0687ed1cb3b6c0439a8197580005389173e3bfb4f0b46ee61fc219deda4e",
+      "domain_sha": "3fac65f02226041964794489897b5d439d068cc665abdf01b624233d72350e57",
+      "objective_sense": 1,
+      "rows": 974698,
+      "columns": 150723,
+      "nonzeros": 11014403,
+      "Threads": 1
+    }
+  },
+  "regression15": {
+    "Native_calls": 0,
+    "evidence": "REGRESSION15/RESULTS.json",
+    "baseline_IDs": 682,
+    "tests": 1314,
+    "status": "PASS"
+  },
+  "local_reduction_03": {
+    "status": "PASS_ALL_229_LOCAL_POLYTOPES_NOT_GLOBAL_INTEGRATION",
+    "totals": {
+      "before_rows": 261414,
+      "before_columns": 174685,
+      "before_NNZ": 930913,
+      "after_rows": 197359,
+      "after_columns": 134630,
+      "after_NNZ": 770085
+    },
+    "Native_calls": 0,
+    "proof": "LOCAL_REDUCTION_NATIVE0_03/RESULT.json",
+    "current_global_integration": "B1_NATIVE0_10_PASS"
+  },
+  "local_master_02": {
+    "status": "PASS_PREVIOUS_SOURCE",
+    "proof": "B1_NATIVE0_09/REDUCED_HYBRID_NATIVE0.json",
+    "native_binding": {
+      "matrix_sha": "0ae49e4d30d1bef5a999aaab57271062c0c39ab4eeb55057daa0e364aad7c20a",
+      "domain_sha": "3cdcc3ed858967ce088d66b8ca9ff4286a3baf6f4406a3d23e22e218de3583ba",
+      "objective_sense": 1,
+      "rows": 964248,
+      "columns": 150723,
+      "nonzeros": 11001849,
+      "Threads": 1
+    }
+  },
+  "regression16": {
+    "status": "PASS",
+    "tests": 1319,
+    "baseline_IDs": 682,
+    "Native_calls": 0,
+    "evidence": "REGRESSION16/RESULTS.json"
+  },
+  "B1_NATIVE0_10": {
+    "status": "PASS_NATIVE0_MATRIX",
+    "source_sha": "2ee61663e39b94cdffd5393f6089e371591db8e4183f80df328097e402d984bf",
+    "Native_calls": 0,
+    "original_integer_FULL_unchanged": true,
+    "current_complete_hybrid": {
+      "matrix_sha": "70a6aee04dda1d5321a37b97439df22fe330dc7836df8e09b00768f809f36888",
+      "domain_sha": "c71f966ed6d9a51f549c7b47d1ac15984f29b913790faec38a7c7f0805f3ee92",
+      "objective_sense": 1,
+      "rows": 961990,
+      "columns": 150723,
+      "nonzeros": 10994856,
+      "Threads": 1
+    },
+    "proof": "B1_NATIVE0_10/RESULT.json"
+  },
+  "original_full_permutation_02": {
+    "status": "PASS",
+    "Native_calls": 0,
+    "rows": 2108858,
+    "columns": 946756,
+    "NNZ": 21126591,
+    "evidence": "ORIGINAL_FULL_CROSS_SOURCE_PERMUTATION_02/RESULT.json"
   }
 }

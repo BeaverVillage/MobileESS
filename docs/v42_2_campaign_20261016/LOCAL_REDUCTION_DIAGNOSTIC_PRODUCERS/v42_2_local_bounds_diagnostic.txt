@@ -1,0 +1,53 @@
+"""Read-only exact bound absorption census on all already-projected blocks."""
+from pathlib import Path
+from fractions import Fraction as F
+import gzip,pickle,json,time,sys,hashlib
+import numpy as np
+ROOT=Path(r'D:\v42_trajectory_tracking_may01_20261014');sys.path.insert(0,str(ROOT))
+OUT=ROOT/'docs/v42_2_campaign_20261016'
+manifest=json.loads((OUT/'LOCAL_REDUCTION_NATIVE0_01/RESULT.json').read_text())
+records=[];started=time.time()
+for index,entry in enumerate(manifest['records']):
+    receipt=entry['transformation'];p=Path(receipt['path'])
+    with p.open('rb') as stream:sha=hashlib.file_digest(stream,'sha256').hexdigest()
+    if sha!=receipt['sha256']:raise ValueError('PROJECTED_SOURCE_BLOCK_CHANGED')
+    with gzip.open(p,'rb') as stream:r=pickle.load(stream)
+    s=r['snapshot'];A=s.matrix;low=s.lower.copy();high=s.upper.copy();singletons=0;skipped=0
+    for i in np.flatnonzero(np.diff(A.indptr)==1):
+        pos=A.indptr[i];j=int(A.indices[pos]);a=F(float(A.data[pos]));bound=F(float(s.rhs[i]))/a
+        value=float(bound)
+        if not np.isfinite(value) or F(value)!=bound or abs(value)>=1e100:skipped+=1;continue
+        sense=str(s.senses[i])
+        if a<0:sense={'<':'>','>':'<','=':'='}[sense]
+        if sense in ('=','>'):low[j]=max(low[j],value)
+        if sense in ('=','<'):high[j]=min(high[j],value)
+        if low[j]>high[j]:raise ValueError('EXACT_SINGLETON_BOUND_CONTRADICTION')
+        singletons+=1
+    removed=[];retained_NNZ=0
+    for i in range(A.shape[0]):
+        start,end=A.indptr[i:i+2];minimum=F(0);maximum=F(0);minimum_finite=True;maximum_finite=True
+        for j,a in zip(A.indices[start:end],A.data[start:end]):
+            a=F(float(a));lo=low[j] if a>0 else high[j];hi=high[j] if a>0 else low[j]
+            if np.isfinite(lo) and abs(lo)<1e100:minimum+=a*F(float(lo))
+            else:minimum_finite=False
+            if np.isfinite(hi) and abs(hi)<1e100:maximum+=a*F(float(hi))
+            else:maximum_finite=False
+        rhs=F(float(s.rhs[i]));sense=str(s.senses[i])
+        implied=(maximum_finite and maximum<=rhs if sense=='<' else minimum_finite and minimum>=rhs if sense=='>' else minimum_finite and maximum_finite and minimum==maximum==rhs)
+        if implied:removed.append(int(i))
+        else:retained_NNZ+=int(end-start)
+    records.append(dict(class_id=entry['class_id'],before_rows=A.shape[0],after_rows=A.shape[0]-len(removed),
+        before_columns=A.shape[1],after_columns=A.shape[1],before_NNZ=A.nnz,after_NNZ=retained_NNZ,
+        absorbed_singleton_rows=singletons,nonrepresentable_singletons_skipped=skipped,
+        tightened_lower_bounds=int(np.count_nonzero(low!=s.lower)),tightened_upper_bounds=int(np.count_nonzero(high!=s.upper)),
+        newly_fixed_nonzero_variables=int(np.count_nonzero((low==high)&(low!=0)&(s.lower!=s.upper))),
+        bound_implied_rows_removed=len(removed),global_RHS_changed=False,original_integer_FULL_changed=False))
+    if index%40==0:print('BOUNDS_CLASS',index+1,229,flush=True)
+totals={key:sum(r[key] for r in records) for key in records[0] if key not in ['class_id','global_RHS_changed','original_integer_FULL_changed']}
+result=dict(schema='LOCAL_EXACT_BOUND_ABSORPTION_DIAGNOSTIC_V1',status='DIAGNOSTIC_ONLY_NOT_NATIVE0_EQUIVALENCE_CERTIFIED',Native_calls=0,
+    source_manifest_sha=hashlib.sha256((OUT/'LOCAL_REDUCTION_NATIVE0_01/RESULT.json').read_bytes()).hexdigest(),
+    classes=len(records),totals=totals,records=records,production_source_or_matrix_changed=False,
+    original_global_RHS_unchanged=True,finite_column_pool_used=False,integrality_assumed=False,
+    mathematical_certificate_and_native_readback_required=True,actual_performance_improvement_claimed=False,wall_seconds=time.time()-started)
+(OUT/'B1_LOCAL_BOUND_ABSORPTION_DIAGNOSTIC.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+print('BOUNDS_DIAGNOSTIC_COMPLETE',totals,result['wall_seconds'],flush=True)

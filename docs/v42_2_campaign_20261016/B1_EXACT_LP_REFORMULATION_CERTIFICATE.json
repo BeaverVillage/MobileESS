@@ -1,38 +1,31 @@
 {
   "schema": "V42_2_EXACT_LP_REFORMULATION_STATUS_V1",
-  "status": "PASS_229_LOCAL_EXACT_PROJECTIONS_GLOBAL_INTEGRATION_PENDING",
+  "status": "PASS_CURRENT_COMPLETE_HYBRID_AND_ALL_229_LOCAL_NATIVE0_NO_ACTUAL_PERFORMANCE_YET",
   "new_formulation_improvement_claimed": false,
   "before": {
-    "rows": 279966,
-    "columns": 213820,
-    "NNZ": 1884027,
-    "native_binding": {
-      "matrix_sha": "2abd6849b60cb5cdb71af43ac1434d58220032d81c912cc874e8f65ef6a80823",
-      "domain_sha": "beadadf1bc4f63e01cfbcb9f2d377ed7f163620532d6d4b8fc19dc914b69691e",
-      "objective_sense": 1,
-      "rows": 279966,
-      "columns": 213820,
-      "nonzeros": 1884027,
-      "Threads": 1
-    }
+    "scope": "COMPLETE_HYBRID_BEFORE_NEW_LOCAL_REDUCTION",
+    "rows": 1026045,
+    "columns": 190778,
+    "NNZ": 11155684
   },
   "after": {
-    "rows": 279966,
-    "columns": 213820,
-    "NNZ": 1884027,
+    "scope": "COMPLETE_HYBRID_AFTER_NEW_LOCAL_REDUCTION_NATIVE0",
+    "rows": 961990,
+    "columns": 150723,
+    "NNZ": 10994856,
     "native_binding": {
-      "matrix_sha": "2abd6849b60cb5cdb71af43ac1434d58220032d81c912cc874e8f65ef6a80823",
-      "domain_sha": "beadadf1bc4f63e01cfbcb9f2d377ed7f163620532d6d4b8fc19dc914b69691e",
+      "matrix_sha": "70a6aee04dda1d5321a37b97439df22fe330dc7836df8e09b00768f809f36888",
+      "domain_sha": "c71f966ed6d9a51f549c7b47d1ac15984f29b913790faec38a7c7f0805f3ee92",
       "objective_sense": 1,
-      "rows": 279966,
-      "columns": 213820,
-      "nonzeros": 1884027,
+      "rows": 961990,
+      "columns": 150723,
+      "nonzeros": 10994856,
       "Threads": 1
     }
   },
-  "original_feasible_projection": "IDENTITY_FOR_CURRENT_SOLVER_POLICY_CHANGE",
-  "objective_equivalence": "IDENTICAL_ORIGINAL_OBJECTIVE",
-  "point_lift": "IDENTITY_FOR_CURRENT_SOLVER_POLICY_CHANGE",
+  "original_feasible_projection": "EXACT_ZERO_ALIAS_PROJECTION_THEN_PROVED_BOXES_AND_EQUIVALENT_PARALLEL_ROWS",
+  "objective_equivalence": "ALL_ORIGINAL_OBJECTIVES_AND_COUPLING_EXACTLY_PRESERVED",
+  "point_lift": "SOURCE_COORDINATES_ZERO_OR_RETAINED_ALIAS; NONZERO_FIXED_COORDINATES_RETAINED",
   "dual_pricing_certificate": "NO_NEW_PRODUCTION_GLOBAL_LB_OR_PRICING_CLOSURE_YET",
   "static_existing_4800_tail_projection": {
     "status": "PREEXISTING_NOT_NEW_IMPROVEMENT",
@@ -41,29 +34,64 @@
   },
   "Native0": {
     "status": "PASS",
-    "evidence": "B1_NATIVE0_07/RESULT.json"
+    "evidence": "B1_NATIVE0_10/RESULT.json",
+    "reduced_native_readback": "B1_NATIVE0_10/REDUCED_HYBRID_NATIVE0.json"
   },
   "regression": {
     "status": "PASS",
-    "tests": 1305,
-    "evidence": "REGRESSION13/RESULTS.json"
+    "tests": 1319,
+    "evidence": "REGRESSION16/RESULTS.json"
   },
-  "actual_performance_improvement": "NOT_RUN",
-  "remaining_scope": "If actual original-primal policy fails or remains slow, evaluate additional exact LP reductions/scaling with forward/inverse and dual certification before adoption.",
+  "actual_performance_improvement": "NOT_RUN_AFTER_REFORMULATION",
+  "remaining_scope": "Original FULL across-source permutation, fresh current-source M Native0 and release gate; same-case actual Native performance; Phase I exact Phi0/full pricing/KKT and FULL/Actual96/Fresh96 remain required.",
   "local_reduction": {
     "before_rows": 261414,
     "before_columns": 174685,
     "before_NNZ": 930913,
-    "after_rows": 210067,
+    "after_rows": 197359,
     "after_columns": 134630,
-    "after_NNZ": 789632
+    "after_NNZ": 770085
   },
-  "local_complete_polytope_proof": "LOCAL_REDUCTION_NATIVE0_01/RESULT.json",
+  "local_complete_polytope_proof": "LOCAL_REDUCTION_NATIVE0_03/RESULT.json",
   "local_original_projection_equivalence": true,
   "local_original_point_lift": true,
   "local_complete_coupling_and_objective_equivalence": true,
   "original_integer_FULL_changed": false,
-  "global_master_integration_verified": false,
+  "global_master_integration_verified": true,
   "finite_column_pool_used": false,
-  "Global_LB_issued": false
+  "Global_LB_issued": false,
+  "current_global_native0": "B1_NATIVE0_10/RESULT.json",
+  "previous_source_global_master_integration": {
+    "PASS": true,
+    "proof": "B1_NATIVE0_09/REDUCED_HYBRID_NATIVE0.json",
+    "native_binding": {
+      "matrix_sha": "0ae49e4d30d1bef5a999aaab57271062c0c39ab4eeb55057daa0e364aad7c20a",
+      "domain_sha": "3cdcc3ed858967ce088d66b8ca9ff4286a3baf6f4406a3d23e22e218de3583ba",
+      "objective_sense": 1,
+      "rows": 964248,
+      "columns": 150723,
+      "nonzeros": 11001849,
+      "Threads": 1
+    }
+  },
+  "last_actual_attempt005_native_binding": {
+    "rows": 279966,
+    "columns": 213820,
+    "NNZ": 1884027,
+    "native_binding": {
+      "matrix_sha": "2abd6849b60cb5cdb71af43ac1434d58220032d81c912cc874e8f65ef6a80823",
+      "domain_sha": "beadadf1bc4f63e01cfbcb9f2d377ed7f163620532d6d4b8fc19dc914b69691e",
+      "objective_sense": 1,
+      "rows": 279966,
+      "columns": 213820,
+      "nonzeros": 1884027,
+      "Threads": 1
+    }
+  },
+  "source_sha": "2ee61663e39b94cdffd5393f6089e371591db8e4183f80df328097e402d984bf",
+  "global_master_projection_proof": "B1_NATIVE0_10/B1/A1/DW/LOCAL_POLYTOPE_MASTER_EQUIVALENCE.json",
+  "original_FULL_across_source_equivalence": {
+    "evidence": "ORIGINAL_FULL_CROSS_SOURCE_PERMUTATION_02/RESULT.json",
+    "status": "PASS"
+  }
 }

@@ -10,7 +10,7 @@ from fractions import Fraction as F
 import numpy as np
 import scipy.sparse as sp
 
-VERSION='LOCAL_EXACT_ZERO_ALIAS_PROJECTION_V1'
+VERSION='LOCAL_EXACT_ZERO_ALIAS_BOUND_PARALLEL_PROJECTION_V3'
 
 
 class NonBinary64Projection(ValueError):
@@ -68,13 +68,80 @@ def _map_expression(expression,mapping):
     return ('e',expression[1],np.asarray(js,dtype=np.int64),np.asarray([binary64(values[j]) for j in js]))
 
 
-def reduce_block(snapshot,coupling,units=(),*,max_rounds=100):
+def absorb_bounds(snapshot):
+    """Replace singleton rows by exact boxes; prove other rows by intervals.
+
+    Nonzero fixed variables remain coordinates. Thus all coupling matrices,
+    objectives and UID expressions retain their coefficients and constants.
+    Gurobi infinity sentinels are deliberately treated as unbounded here.
+    """
+    A=snapshot.matrix;low=snapshot.lower.copy();high=snapshot.upper.copy();steps=[];skipped=0
+    for i in np.flatnonzero(np.diff(A.indptr)==1):
+        k=A.indptr[i];j=int(A.indices[k]);a=F(float(A.data[k]));q=F(float(snapshot.rhs[i]))/a
+        try:value=binary64(q)
+        except (NonBinary64Projection,OverflowError):skipped+=1;continue
+        if abs(value)>=1e100:skipped+=1;continue
+        sense=str(snapshot.senses[i])
+        if a<0:sense={'<':'>','>':'<','=':'='}[sense]
+        if sense in ('=','>'):low[j]=max(low[j],value)
+        if sense in ('=','<'):high[j]=min(high[j],value)
+        if low[j]>high[j]:raise ValueError('EXACT_SINGLETON_BOUND_CONTRADICTION')
+        steps.append(int(i))
+    kept=[]
+    for i in range(A.shape[0]):
+        start,end=A.indptr[i:i+2];minimum=F(0);maximum=F(0);minfinite=True;maxfinite=True
+        for j,c in zip(A.indices[start:end],A.data[start:end]):
+            c=F(float(c));lo=low[j] if c>0 else high[j];hi=high[j] if c>0 else low[j]
+            if np.isfinite(lo) and abs(lo)<1e100:minimum+=c*F(float(lo))
+            else:minfinite=False
+            if np.isfinite(hi) and abs(hi)<1e100:maximum+=c*F(float(hi))
+            else:maxfinite=False
+        rhs=F(float(snapshot.rhs[i]));sense=str(snapshot.senses[i])
+        implied=(maxfinite and maximum<=rhs if sense=='<' else minfinite and minimum>=rhs if sense=='>'
+            else minfinite and maxfinite and minimum==maximum==rhs)
+        if not implied:kept.append(i)
+    box_removed=A.shape[0]-len(kept);groups=defaultdict(list);new_senses=snapshot.senses.copy();relations={};opposing={};selected=[]
+    for i in kept:
+        start,end=A.indptr[i:i+2];values=[F(float(c)) for c in A.data[start:end]];pivot=values[0]
+        direction=tuple((int(j),c/pivot) for j,c in zip(A.indices[start:end],values))
+        sense=str(snapshot.senses[i])
+        if pivot<0:sense={'<':'>','>':'<','=':'='}[sense]
+        groups[direction].append((i,sense,F(float(snapshot.rhs[i]))/pivot))
+    for rows in groups.values():
+        equal=[r for r in rows if r[1]=='='];lows=[r for r in rows if r[1]=='>'];highs=[r for r in rows if r[1]=='<']
+        lo=max(lows,key=lambda r:r[2]) if lows else None;hi=min(highs,key=lambda r:r[2]) if highs else None
+        if equal:
+            i,_,q=equal[0]
+            if any((sign=='=' and v!=q) or (sign=='<' and v<q) or (sign=='>' and v>q) for _,sign,v in rows):
+                raise ValueError('EXACT_PARALLEL_ROW_CONTRADICTION')
+            selected.append(i);relations.update({j:i for j,_,_ in rows})
+        elif lo is not None and hi is not None and lo[2]>=hi[2]:
+            if lo[2]>hi[2]:raise ValueError('EXACT_PARALLEL_ROW_CONTRADICTION')
+            i=lo[0];new_senses[i]='=';opposing[i]=hi[0];selected.append(i);relations.update({j:i for j,_,_ in rows})
+        else:
+            for strongest,sign in ((lo,'>'),(hi,'<')):
+                if strongest is not None:
+                    selected.append(strongest[0]);relations.update({j:strongest[0] for j,s,_ in rows if s==sign})
+    selected=np.asarray(sorted(selected),dtype=np.int64);positions={int(i):t for t,i in enumerate(selected)}
+    row_targets=np.asarray([positions[relations[i]] if i in relations else -1 for i in range(A.shape[0])],dtype=np.int64)
+    kept=selected
+    target=replace(snapshot,matrix=A[kept].tocsr(),senses=new_senses[kept].copy(),rhs=snapshot.rhs[kept].copy(),lower=low,upper=high).require()
+    return target,dict(source_snapshot_sha=snapshot.fingerprint(),target_snapshot_sha=target.fingerprint(),
+        singleton_rows=steps,kept_rows=kept,row_targets=row_targets,opposing_rows=opposing,
+        box_implied_rows_removed=box_removed,parallel_rows_removed=A.shape[0]-len(kept)-box_removed,
+        nonrepresentable_singletons_skipped=skipped,
+        rows_removed=A.shape[0]-len(kept),tightened_lower_bounds=int(np.count_nonzero(low!=snapshot.lower)),
+        tightened_upper_bounds=int(np.count_nonzero(high!=snapshot.upper)),nonzero_fixed_coordinates_eliminated=False)
+
+
+def reduce_block(snapshot,coupling,units=(),*,max_rounds=100,absorb_singletons=True):
     """Return an exact complete-polytope projection or reject representation.
 
     Only zeros are fixed: global coupling constants and RHS are never rounded.
     Equalities may identify x=y, with the exact intersection of their boxes.
     Every implied relation is recorded before it is used. Row deletion is
-    limited to rational tautologies and exact proportional duplicates.
+    includes rational tautologies, exact proportional duplicates and rows
+    implied by exactly representable singleton bounds.
     """
     snapshot.require();A=snapshot.matrix;B=coupling.tocsr(copy=False)
     n=A.shape[1]
@@ -150,12 +217,19 @@ def reduce_block(snapshot,coupling,units=(),*,max_rounds=100):
         vtypes=np.full(len(representatives),'C'),objectives=tuple(objectives)).require()
     mapped_units=[dict(u,v={family:{key:_map_expression(e,mapping) for key,e in items.items()}
         for family,items in u['v'].items()}) for u in units]
+    before_bounds=projected
+    if absorb_singletons:projected,bounds=absorb_bounds(projected)
+    else:bounds=None
     return dict(snapshot=projected,B=newB,units=mapped_units,mapping=mapping,
+        pre_bound_snapshot=before_bounds,bound_absorption=bounds,
         representatives=np.asarray(representatives,dtype=np.int64),kept_rows=np.asarray(kept,dtype=np.int64),
         row_targets=np.asarray(targets,dtype=np.int64),row_multipliers=multipliers,
         proof=dict(version=VERSION,source_snapshot_sha=snapshot.fingerprint(),target_snapshot_sha=projected.fingerprint(),
+            zero_alias_target_snapshot_sha=before_bounds.fingerprint(),
             original_rows=A.shape[0],original_columns=n,original_NNZ=A.nnz,
-            reduced_rows=matrix.shape[0],reduced_columns=matrix.shape[1],reduced_NNZ=matrix.nnz,
+            reduced_rows=projected.matrix.shape[0],reduced_columns=projected.matrix.shape[1],reduced_NNZ=projected.matrix.nnz,
+            exact_bound_rows_removed=0 if bounds is None else bounds['box_implied_rows_removed'],
+            exact_parallel_rows_removed=0 if bounds is None else bounds['parallel_rows_removed'],
             inference_steps=steps,propagation_rounds=turn+1,propagation_converged=not changed,
             original_integer_FULL_changed=False,global_RHS_or_constant_changed=False,
             mathematical_equivalence_independently_verified=False,performance_improvement_claimed=False))

@@ -204,6 +204,29 @@ def audit(day,output,*,matrix=False,reuse_capture=None,phase_basis_predecessor=N
             memo=None;projected=None;descriptor=None;verified_domains=None;gc.collect()
             state=prepare_current_dw(context,case,built,dw,captured=captured,
                 independent_domain_receipt=file_record(domain_path))
+            if '_local_reduction' in state:
+                from v42_a_stage_domain_v2.stress_backend import materialize
+                from v42_integration.d0_resource import native_binding
+                from v42_a_stage_compact_rowgen.lift import expanded_point
+                import gurobipy as gp
+                import numpy as np
+                if not np.array_equal(expanded_point(state,state['prior_compact']),state['prior_compact']):
+                    raise ValueError('REDUCED_REFERENCE_EXPANDED_POINT_MUST_BE_IDENTITY')
+                reduced_model,reduced_objectives=materialize(state['compact'],day)
+                try:
+                    reduced_model.Params.Threads=1
+                    reduced_model.setObjective(reduced_objectives[0][1],gp.GRB.MINIMIZE);reduced_model.update()
+                    reduced_binding=native_binding(reduced_model)
+                    coefficients=np.zeros(state['compact'].matrix.shape[1])
+                    for j,c in state['compact'].objectives[0].coefficients().items():coefficients[j]=float(c)
+                    if not np.array_equal(reduced_model.getAttr('Obj'),coefficients):
+                        raise ValueError('REDUCED_FULL_HYBRID_OBJECTIVE_READBACK_DRIFT')
+                    _write(output/'REDUCED_HYBRID_NATIVE0.json',dict(PASS=True,Native_calls=0,
+                        native_binding=reduced_binding,all_A_RHS_sense_bounds_types_read_back=True,
+                        objective_read_back=True,expanded_reference_identity=True,
+                        complete_global_local_equivalence=file_record(dw/'LOCAL_POLYTOPE_MASTER_EQUIVALENCE.json'),
+                        Global_LB_issued=False,FULL_feasible_point_claimed=False))
+                finally:reduced_model.dispose()
             if phase_basis_predecessor is not None:
                 from tools.audit_v42_2_phase_basis import audit as audit_phase_basis
                 audit_phase_basis(state,phase_basis_predecessor,output/'ACTUAL_S1_BASIS_NATIVE0')

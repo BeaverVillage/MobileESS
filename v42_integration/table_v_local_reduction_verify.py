@@ -4,6 +4,72 @@ from fractions import Fraction
 import numpy as np
 
 
+def verify_bounds(source,target,proof):
+    """Independent replay: original rows imply boxes; boxes imply deletions."""
+    if source.fingerprint()!=proof['source_snapshot_sha'] or target.fingerprint()!=proof['target_snapshot_sha']:
+        raise ValueError('BOUND_ABSORPTION_SOURCE_OR_TARGET_DRIFT')
+    low=source.lower.copy();high=source.upper.copy();A=source.matrix
+    for i in proof['singleton_rows']:
+        a,b=A.indptr[i:i+2]
+        if b-a!=1:raise ValueError('UNPROVED_SINGLETON_BOUND')
+        j=int(A.indices[a]);coefficient=Fraction(float(A.data[a]));q=Fraction(float(source.rhs[i]))/coefficient
+        value=float(q)
+        if not np.isfinite(value) or abs(value)>=1e100 or Fraction(value)!=q:raise ValueError('INEXACT_SINGLETON_BOUND')
+        sense=str(source.senses[i]);lower=sense in ('=','>') if coefficient>0 else sense in ('=','<')
+        upper=sense in ('=','<') if coefficient>0 else sense in ('=','>')
+        if lower:low[j]=max(low[j],value)
+        if upper:high[j]=min(high[j],value)
+        if low[j]>high[j]:raise ValueError('BOUND_ABSORPTION_INFEASIBLE_BOX')
+    if not np.array_equal(low,target.lower) or not np.array_equal(high,target.upper):raise ValueError('UNPROVED_TIGHTENED_BOX')
+    kept=np.asarray(proof['kept_rows'])
+    if kept.ndim!=1 or len(set(map(int,kept)))!=len(kept) or any(not 0<=i<A.shape[0] for i in kept):
+        raise ValueError('BOUND_ABSORPTION_ROW_AXIS')
+    expected=A[kept].tocsr();actual=target.matrix
+    if (expected.shape!=actual.shape or not np.array_equal(expected.indptr,actual.indptr)
+            or not np.array_equal(expected.indices,actual.indices) or not np.array_equal(expected.data,actual.data)
+            or not np.array_equal(source.rhs[kept],target.rhs)
+            or not np.array_equal(source.vtypes,target.vtypes) or source.objectives!=target.objectives):
+        raise ValueError('BOUND_ABSORPTION_RETAINED_MODEL_DRIFT')
+    def coefficients(matrix,i):
+        a,b=matrix.indptr[i:i+2]
+        return {int(j):Fraction(float(c)) for j,c in zip(matrix.indices[a:b],matrix.data[a:b]) if c}
+    def scale_between(left,right):
+        if not left or set(left)!=set(right):raise ValueError('PARALLEL_ROW_SUPPORT_DRIFT')
+        j=next(iter(left));scale=left[j]/right[j]
+        if any(left[k]!=scale*right[k] for k in left):raise ValueError('PARALLEL_ROW_COEFFICIENT_DRIFT')
+        return scale
+    for t,i in enumerate(kept):
+        if str(source.senses[i])==str(target.senses[t]):continue
+        if str(target.senses[t])!='=' or i not in proof.get('opposing_rows',{}):raise ValueError('UNPROVED_OPPOSING_ROW_EQUALITY')
+        j=proof['opposing_rows'][i]
+        if not 0<=j<A.shape[0]:raise ValueError('OPPOSING_ROW_AXIS')
+        scale=scale_between(coefficients(A,j),coefficients(A,i));other=str(source.senses[j])
+        if scale<0:other={'<':'>','>':'<','=':'='}[other]
+        if ({str(source.senses[i]),other}!={'<','>'}
+                or Fraction(float(source.rhs[j]))!=scale*Fraction(float(source.rhs[i]))):
+            raise ValueError('UNPROVED_OPPOSING_ROW_EQUALITY')
+    retained=set(map(int,kept))
+    for i in range(A.shape[0]):
+        start,end=A.indptr[i:i+2];sums=[Fraction(0),Fraction(0)];finite=[True,True]
+        for j,c in zip(A.indices[start:end],A.data[start:end]):
+            c=Fraction(float(c));ends=(low[j],high[j]) if c>0 else (high[j],low[j])
+            for k,bound in enumerate(ends):
+                if np.isfinite(bound) and abs(bound)<1e100:sums[k]+=c*Fraction(float(bound))
+                else:finite[k]=False
+        rhs=Fraction(float(source.rhs[i]));sense=str(source.senses[i])
+        implied=(finite[1] and sums[1]<=rhs if sense=='<' else finite[0] and sums[0]>=rhs if sense=='>'
+                else all(finite) and sums[0]==sums[1]==rhs)
+        if implied:continue
+        t=int(proof['row_targets'][i])
+        if not 0<=t<target.matrix.shape[0]:raise ValueError('REMOVED_ROW_NOT_EXACTLY_IMPLIED_BY_PROVED_BOX_OR_PARALLEL_ROW')
+        scale=scale_between(coefficients(A,i),coefficients(target.matrix,t));other=str(target.senses[t]);q=scale*Fraction(float(target.rhs[t]))
+        if scale<0:other={'<':'>','>':'<','=':'='}[other]
+        if not (other in ('<','=') and q<=rhs if sense=='<' else other in ('>','=') and q>=rhs if sense=='>' else other=='=' and q==rhs):
+            raise ValueError('PARALLEL_ROW_NOT_IMPLIED_BY_RETAINED_ROW')
+    return dict(PASS=True,removed_rows_checked=A.shape[0]-len(kept),singleton_inferences_checked=len(proof['singleton_rows']),
+        all_original_points_satisfy_new_boxes=True,all_removed_rows_implied_by_new_boxes=True,Native_calls=0)
+
+
 def verify(source,coupling,result,units=None):
     """Verify universal forward/inverse, boxes, all rows, objectives and B.
 
@@ -13,8 +79,9 @@ def verify(source,coupling,result,units=None):
     can substitute for these symbolic checks.
     """
     n=source.matrix.shape[1];parent=np.arange(n);low=source.lower.copy();high=source.upper.copy();zero=set()
-    proof=result['proof'];target=result['snapshot'];mapping=np.asarray(result['mapping'])
-    if (proof['source_snapshot_sha']!=source.fingerprint() or proof['target_snapshot_sha']!=target.fingerprint()
+    proof=result['proof'];final=result['snapshot'];target=result.get('pre_bound_snapshot',final);mapping=np.asarray(result['mapping'])
+    if (proof['source_snapshot_sha']!=source.fingerprint() or proof['target_snapshot_sha']!=final.fingerprint()
+            or proof.get('zero_alias_target_snapshot_sha',proof['target_snapshot_sha'])!=target.fingerprint()
             or np.any(source.vtypes!='C') or np.any(target.vtypes!='C')):
         raise ValueError('LOCAL_PROJECTION_SOURCE_OR_TARGET_DRIFT')
     def representative(j):
@@ -114,7 +181,13 @@ def verify(source,coupling,result,units=None):
                         if mapping[j]>=0:projected[int(mapping[j])]+=c
                     if (constant,{j:c for j,c in projected.items() if c})!=decode(mapped['v'][family][key]):
                         raise ValueError('LOCAL_PRIMITIVE_LIFT_NOT_EXACT')
+    bounds=result.get('bound_absorption')
+    if bounds is not None:bound_verification=verify_bounds(target,final,bounds)
+    else:
+        if final.fingerprint()!=target.fingerprint():raise ValueError('MISSING_BOUND_ABSORPTION_PROOF')
+        bound_verification=None
     return dict(PASS=True,scope='UNIVERSAL_COMPLETE_CONTINUOUS_LOCAL_POLYTOPE',
+        exact_bound_absorption=bound_verification,
         inference_steps_replayed=len(proof['inference_steps']),original_rows_checked=source.matrix.shape[0],
         original_columns_checked=n,all_coupling_rows_checked=coupling.shape[0],
         forward_projection=True,inverse_original_point_lift=True,objective_preserved=True,

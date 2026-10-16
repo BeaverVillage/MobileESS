@@ -1,0 +1,44 @@
+"""Read-only pilot: exact opposite inequalities imply an equality."""
+from pathlib import Path
+from collections import defaultdict,Counter
+from dataclasses import replace
+from fractions import Fraction as F
+import json,gzip,pickle,sys,time
+import numpy as np
+ROOT=Path(r'D:\v42_trajectory_tracking_may01_20261014');sys.path.insert(0,str(ROOT))
+from v42_integration.m_engine import file_record
+from v42_integration.table_v_local_reduction import reduce_block
+base=ROOT/'docs/v42_2_campaign_20261016';path=base/'LOCAL_REDUCTION_NATIVE0_02/RESULT.json';manifest=json.loads(path.read_text())
+records=[];samples=[];started=time.time()
+for entry in manifest['records']:
+    receipt=entry['transformation']
+    if file_record(receipt['path'])!=receipt:raise ValueError('SOURCE_DRIFT')
+    with gzip.open(receipt['path'],'rb') as stream:r=pickle.load(stream)
+    s=r['snapshot'];A=s.matrix;groups=defaultdict(list);senses=s.senses.copy();deleted=set();inferred=0
+    for i in range(A.shape[0]):
+        a,b=A.indptr[i:i+2];values=list(map(lambda c:F(float(c)),A.data[a:b]));pivot=values[0]
+        signature=tuple((int(j),v/pivot) for j,v in zip(A.indices[a:b],values));sense=str(s.senses[i])
+        if pivot<0:sense={'<':'>','>':'<','=':'='}[sense]
+        groups[signature].append((i,sense,F(float(s.rhs[i]))/pivot))
+    for signature,rows in groups.items():
+        eq=[row for row in rows if row[1]=='='];low=[row for row in rows if row[1]=='>'];high=[row for row in rows if row[1]=='<']
+        if eq:
+            i,_,q=eq[0]
+            for j,sign,v in rows:
+                if j!=i and (sign=='=' and v==q or sign=='<' and v>=q or sign=='>' and v<=q):deleted.add(j)
+        elif low and high and max(row[2] for row in low)==min(row[2] for row in high):
+            q=max(row[2] for row in low);i=next(j for j,sign,v in rows if v==q);senses[i]='=';inferred+=1
+            deleted.update(j for j,_,_ in rows if j!=i)
+            if len(samples)<12:
+                a,b=A.indptr[i:i+2];samples.append(dict(class_id=entry['class_id'],columns=A.indices[a:b].tolist(),coefficients=A.data[a:b].tolist(),rhs=float(s.rhs[i])))
+    kept=np.asarray([i for i in range(A.shape[0]) if i not in deleted],dtype=np.int64)
+    candidate=replace(s,matrix=A[kept].tocsr(),senses=senses[kept],rhs=s.rhs[kept]).require()
+    after=reduce_block(candidate,r['B'],r['units'])
+    records.append(dict(class_id=entry['class_id'],before_rows=A.shape[0],after_rows=after['snapshot'].matrix.shape[0],
+        before_columns=A.shape[1],after_columns=after['snapshot'].matrix.shape[1],before_NNZ=A.nnz,after_NNZ=after['snapshot'].matrix.nnz,
+        opposing_pairs_to_equalities=inferred,parallel_rows_deleted=len(deleted)))
+totals={key:sum(record[key] for record in records) for key in records[0] if key!='class_id'}
+result=dict(status='DIAGNOSTIC_ONLY_UNCOMPOSED_NOT_PRODUCTION_EQUIVALENCE_CERTIFIED',Native_calls=0,classes=len(records),
+    totals=totals,samples=samples,records=records,source=file_record(path),wall_seconds=time.time()-started)
+(base/'B1_OPPOSING_LOCAL_DIAGNOSTIC.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(dict(totals=totals,samples=samples,wall_seconds=result['wall_seconds']),indent=2))
