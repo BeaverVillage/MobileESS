@@ -24,6 +24,7 @@ def run(request_path):
                 ('-m v43_actual.compare','-m v43_arms.compare','-m v43_mess.worker','-m v43.golden')):
             raise RuntimeError('OTHER_V43_HEAVY_WORKER_ALIVE')
     sources=request['sources'];verify_records(sources)
+    if 'fixed_AIDC_record' in request:verify_records([request['fixed_AIDC_record']])
     if digest(sources)!=request['source_sha']:raise ValueError('M_STAGE_SOURCE_FREEZE_SHA')
     out.mkdir(parents=True)
     atomic(out/'request.json',request)
@@ -33,7 +34,11 @@ def run(request_path):
     latest={};done=threading.Event();began=time.perf_counter();budgets=[]
     def progress(value):
         latest.update(value);atomic(out/'progress.json',dict(latest,UTC=now()))
-        if (out/'STOP_REQUESTED.json').exists():raise RuntimeError('V43_M_OFFICIAL_STOP_REQUESTED')
+        if (out/'STOP_REQUESTED.json').exists():
+            from v42_may_campaign.execution import _model
+            live=_model.get()
+            if live is None:raise RuntimeError('V43_M_OFFICIAL_STOP_REQUESTED')
+            live['model'].terminate()
     def heartbeat():
         while not done.wait(10):
             p=psutil.Process();atomic(out/'HEARTBEAT.json',dict(UTC=now(),pid=p.pid,latest=latest,
@@ -66,14 +71,15 @@ def run(request_path):
                 atomic(out/'NATIVE0_CERTIFICATION.json',dict(PASS=True,Native_calls=0,case_sha=case.case_sha,
                     K16_original_FULL_inclusion=proof,previous_UB_LB_point_or_clock_reused=False,
                     Joint_FULL_lift='CHECKED_ON_EACH_GENERATED_POOL_BEFORE_NATIVE'))
-                del packet
             build_wall=time.perf_counter()-began
             control_module=modules['table_v_global_control']
             control=control_module.GlobalGapControl(control_module.mess_scope(case),.03,out/'GLOBAL_CONTROL')
             case.global_gap_control=control
             lower=StageBudget(out/'K48_NATIVE_LEDGER.json',case=case,kind='K48_SEPARATE',progress=progress);budgets.append(lower)
             progress(dict(phase='SEEDLESS_K16_K32_K48',case_sha=case.case_sha))
-            lb=k.run_current_k48(case,None,lower,out/'K48_EXECUTION')
+            from .prepared import run_prepared_k48
+            lb=run_prepared_k48(k,case,packet,proof,lower,out/'K48_EXECUTION')
+            del packet
             upper=StageBudget(out/'JOINT_NATIVE_LEDGER.json',case=case,kind='PLANNING_NATIVE',progress=progress);budgets.append(upper)
             progress(dict(phase='ADAPTIVE_BEAM_FOUR_DIRECT_JOINT'))
             ub,point=m.optimize_mess(case,None,[],upper)
@@ -84,6 +90,10 @@ def run(request_path):
                 identity=record(out/'SCIENTIFIC_CASE_IDENTITY.json'),fixed_AIDC=payload['identity'],
                 lower=lb,upper=ub,**bounds,build_wall_seconds=build_wall,
                 K48_Native_seconds=lower.used(),Joint_Native_seconds=upper.used(),
+                K48_measured_ceiling_overrun_seconds=max(0.,lower.used()-lower.native_limit),
+                Joint_measured_ceiling_overrun_seconds=max(0.,upper.used()-upper.native_limit),
+                Native_budget_compliance='WITHIN_MEASURED_CEILINGS' if lower.used()<=lower.native_limit and upper.used()<=upper.native_limit
+                    else 'MEASURED_SOLVER_TIMELIMIT_OVERRUN_RECORDED_NO_FURTHER_CALLS_IN_EXHAUSTED_LEDGER',
                 MESS_plan=ub['mess'],Native_calls=sum(len(b.calls) for b in budgets),
                 status='GLOBAL_GAP_PASS' if bounds['global_gap_certified'] else
                     'FULL_FEASIBLE_GAP_NOT_CERTIFIED' if ub['FULL_validated'] else 'NO_FULL_FEASIBLE_POINT',

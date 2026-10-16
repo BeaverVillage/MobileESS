@@ -64,13 +64,21 @@ def run(path):
     done=threading.Event();latest={};began=time.perf_counter()
     def progress(value):
         latest.update(value);atomic(attempt/'progress.json',dict(latest,UTC=now(),stage='A2'))
-        if (attempt/'STOP_REQUESTED.json').exists():raise RuntimeError('V43_A2_OFFICIAL_STOP_REQUESTED')
+        if (attempt/'STOP_REQUESTED.json').exists():
+            from v42_may_campaign.execution import _model
+            live=_model.get()
+            if live is None:raise RuntimeError('V43_A2_OFFICIAL_STOP_REQUESTED')
+            live['model'].terminate()
     def heartbeat():
         while not done.wait(10):
             p=psutil.Process();atomic(attempt/'HEARTBEAT.json',dict(UTC=now(),pid=p.pid,latest=latest,
                 CPU_seconds=sum(p.cpu_times()[:2]),RSS_bytes=p.memory_info().rss,wall_seconds=time.perf_counter()-began))
     thread=threading.Thread(target=heartbeat,daemon=True);thread.start()
-    budget=DateBudget(attempt/'NATIVE_RUNTIME_LEDGER.json',native_limit=5400.,progress=progress)
+    class Budget(DateBudget):
+        def check(self,reserve=0):
+            if (attempt/'STOP_REQUESTED.json').exists():raise RuntimeError('V43_A2_OFFICIAL_STOP_REQUESTED')
+            return super().check(reserve)
+    budget=Budget(attempt/'NATIVE_RUNTIME_LEDGER.json',native_limit=5400.,progress=progress)
     result=dict(PASS=False,arm='B3',stage='A2',day='2025-05-01')
     try:
         with worker_permit(request,request['sources']):

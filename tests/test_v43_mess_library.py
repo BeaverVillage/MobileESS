@@ -120,3 +120,38 @@ def test_real_m_budget_gate_rejects_duck_typed_fixture():
     from v43_mess.budget import require_budget
     with pytest.raises(PermissionError,match='REAL_M_STAGE_BUDGET'):
         require_budget(SimpleNamespace(kind='K48_SEPARATE',inflight=None),'K48_SEPARATE')
+
+
+def test_v43_status_io_preserves_original_exact_fraction_serializer(tmp_path):
+    from fractions import Fraction
+    from v43.common import read
+    module=load()['m_engine'];out=tmp_path/'EXACT_PROOF.json'
+    module._write(out,dict(rational=Fraction(1,7),array=np.array([2.])))
+    assert read(out)==dict(rational='1/7',array=[2.])
+
+
+def test_current_native0_k16_reuse_does_not_rebuild_or_import_a_bound(tmp_path):
+    from v43_mess.prepared import run_prepared_k48
+    from unittest.mock import patch
+    k=load()['table_v_k48'];case=example()
+    packet,proof=k.prepare_k16(case,None,tmp_path/'ORIGINAL_NATIVE0')
+    with patch.object(k,'prepare_k16',side_effect=AssertionError('DUPLICATE_BUILD')):
+        # No budget is admitted here. Reusing the current proof creates no LB
+        # and the unmodified driver reports that no K was solved.
+        summary=run_prepared_k48(k,case,packet,proof,SimpleNamespace(remaining=lambda:0.),tmp_path/'EXECUTION')
+    assert summary['Global_LB'] is None and summary['K_solved'] is None
+
+
+def test_measured_m_time_limit_overshoot_is_recorded_and_no_budget_reappears():
+    from v43_mess.budget import StageBudget
+    from v43.common import read
+    from pathlib import Path
+    from tempfile import TemporaryDirectory
+    parent=Path('D:/MobileESS_V43/tmp/NATIVE0_BUDGET_FIXTURES');parent.mkdir(parents=True,exist_ok=True)
+    with TemporaryDirectory(dir=parent,prefix='UNIT_ONLY_') as name:
+        path=Path(name).resolve();assert path.is_relative_to(parent.resolve())
+        budget=StageBudget(path/'FIXTURE_LEDGER.json',case=example(),kind='K48_SEPARATE')
+        budget.charge(300.125)
+        assert budget.remaining()==0. and budget.used()==300.125
+        receipt=read(path/'FIXTURE_LEDGER_MEASURED_CEILING_OVERRUN.json')
+        assert receipt['overrun_seconds']==.125 and not receipt['next_native_call_permitted']

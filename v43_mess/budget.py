@@ -2,6 +2,7 @@
 from contextlib import contextmanager, ExitStack
 from pathlib import Path
 import os
+import math
 
 import psutil
 
@@ -53,10 +54,29 @@ class StageBudget(DateBudget):
         left=super().remaining(reserve)
         return left if self._call_cap is None else min(left,self._call_cap)
 
+    def check(self,reserve=0):
+        if (self.path.parent/'STOP_REQUESTED.json').exists():raise RuntimeError('V43_M_OFFICIAL_STOP_REQUESTED')
+        # Existing TableV M budgets subtract measured Runtime and admit no
+        # next call when exhausted. A solver's actual TimeLimit overshoot is
+        # recorded honestly rather than discarding its returned valid bound.
+        return None
+
+    def charge(self,runtime):
+        if not math.isfinite(float(runtime)) or runtime<0:raise ValueError('NONFINITE_NATIVE_RUNTIME')
+        self.native_used+=float(runtime);self.persist()
+        if self.native_used>self.native_limit:
+            atomic(self.path.with_name(self.path.stem+'_MEASURED_CEILING_OVERRUN.json'),dict(
+                measured_Native_seconds=self.native_used,requested_ceiling_seconds=self.native_limit,
+                overrun_seconds=self.native_used-self.native_limit,next_native_call_permitted=False,
+                original_policy='TableVStageBudget.remaining: max(0, cap - measured Runtime)',
+                source=record(ROOT/'v43_mess/budget.py')))
+
     def solve(self,model,*,label,cap,callback=None):
         from .library import current_identity
         from v42_may_campaign_native90.execution import current
         authority=current_identity(self.case)
+        if 'P2' in label.upper() or not math.isfinite(float(cap)) or float(cap)<=0:
+            raise PermissionError('V43_M_FINITE_POSITIVE_P1_CALL_ONLY')
         context=current()
         if (context is None or context['request']['source_sha']!=authority['source_sha']
                 or context['request']['arm']!=authority['arm'] or context['request']['stage']!=authority['stage']):

@@ -135,7 +135,11 @@ class _SourceLoader(importlib.abc.MetaPathFinder,importlib.abc.Loader):
             if body.count(old)!=1:raise ValueError('M_GLOBAL_SOURCE_BINDING_SHAPE_DRIFT')
             exec(compile(body.replace(old,"case.identity.get('source_sha')"),str(path),'exec'),module.__dict__)
         if name.startswith(PREFIX+'.') and hasattr(module,'_write'):
-            from v43_actual.io import write
+            def write(path,value):
+                # Keep the original Fraction/dataclass/NumPy serializer; only
+                # unique-temp/locking/replace IO belongs to the V43 writer.
+                from v43_mess.reuse.m_engine import _json_value
+                atomic(path,_json_value(value))
             module._write=write
 
 
