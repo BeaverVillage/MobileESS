@@ -1,0 +1,179 @@
+{
+  "schema": "V43_B0_ACTUAL002_READ_ONLY_BOTTLENECK_AUDIT_V1",
+  "UTC": "2026-10-16T05:18:00.310767+00:00",
+  "attempt": "D:\\MobileESS_V43\\runtime\\may01_B0_C0_C1_actual96_attempt002",
+  "pid": 31144,
+  "creation": 1792126209.8237405,
+  "expected_creation": 1792126209.8237405,
+  "source_drift": [],
+  "heartbeat": {
+    "UTC": "2026-10-16T05:17:58.000767+00:00",
+    "pid": 31144,
+    "latest": {
+      "phase": "EVENT_ACTUAL_CURRENT_AC",
+      "variant": "C0",
+      "completed_control_ticks": 120,
+      "control_time_seconds": 1746104400.0,
+      "last_tick_wall_seconds": 47.96086800000194,
+      "current_AC_calls": 1468
+    },
+    "CPU_seconds": 1559.765625,
+    "RSS_bytes": 3112493056,
+    "wall_seconds": 1662.2521183999997
+  },
+  "diagnosis": "CPU_ACTIVE_CURRENT_AC_CANDIDATE_ADMISSION_WITH_FULL_OBSERVED_PREFIX_REPLAY",
+  "deadlock_evidence": false,
+  "Native_optimizer_runtime": "NOT_APPLICABLE_NATIVE0_EVENT_AC_RUN",
+  "M1_started": false,
+  "cpu_observation": {
+    "wall_interval_seconds": 5.000345399996149,
+    "process_CPU_delta_seconds": 4.8125,
+    "read_bytes_delta": 249398,
+    "write_bytes_delta": 403
+  },
+  "live_sampling": {
+    "command": "py-spy record --pid 31144 --nonblocking --duration 15 --rate 20 --format raw --full-filenames",
+    "raw": {
+      "path": "D:\\MobileESS_V43\\diagnostics\\B0_actual002_bottleneck_20261016T0517\\current_ac_profile.raw",
+      "bytes": 182070,
+      "sha256": "824ffdfc9190c3db4268e2b107d0cd9825763aa4c01260195c63e5eba37e6a01"
+    },
+    "samples": 278,
+    "failed_sample_reads": 21,
+    "category_inclusive_samples": {
+      "current_guard": 262,
+      "probe": 247,
+      "branch_measurement": 114,
+      "evaluate": 260,
+      "inventory": 45,
+      "SolveSnap": 7,
+      "json_encode": 13
+    },
+    "category_percent": {
+      "current_guard": 94.24460431654676,
+      "probe": 88.84892086330935,
+      "branch_measurement": 41.007194244604314,
+      "evaluate": 93.5251798561151,
+      "inventory": 16.18705035971223,
+      "SolveSnap": 2.5179856115107913,
+      "json_encode": 4.676258992805756
+    },
+    "top_functions": [
+      [
+        "run",
+        266
+      ],
+      [
+        "<module>",
+        266
+      ],
+      [
+        "_run_module_as_main",
+        266
+      ],
+      [
+        "_run_code",
+        266
+      ],
+      [
+        "run_actual",
+        266
+      ],
+      [
+        "admit",
+        266
+      ],
+      [
+        "current_guard",
+        262
+      ],
+      [
+        "guard",
+        260
+      ],
+      [
+        "evaluate",
+        260
+      ],
+      [
+        "_probe",
+        247
+      ],
+      [
+        "<listcomp>",
+        132
+      ],
+      [
+        "branch_measurement",
+        114
+      ],
+      [
+        "inventory",
+        41
+      ],
+      [
+        "<genexpr>",
+        39
+      ],
+      [
+        "apply",
+        38
+      ],
+      [
+        "Value",
+        37
+      ],
+      [
+        "<dictcomp>",
+        34
+      ],
+      [
+        "allocate",
+        31
+      ],
+      [
+        "BusNames",
+        24
+      ],
+      [
+        "_setCurrentProperty",
+        22
+      ]
+    ],
+    "limitations": "15-second local nonblocking sample; not whole-run time shares. Inclusive categories overlap. Some stack reads failed. No source patch or worker pause was requested."
+  },
+  "completed_B1_comparison": {
+    "C0": {
+      "wall_seconds": 1086.5760221999954,
+      "unique_AC_calls": 867,
+      "receipts": 3169,
+      "cache_hits": 2302,
+      "measured_cache_miss_AC_wall_seconds": 997.672746599841,
+      "AC_fraction_of_variant_wall": 0.9181803446940128,
+      "total_prefix_slot_replays": 48863
+    },
+    "C1": {
+      "wall_seconds": 970.2414963,
+      "unique_AC_calls": 867,
+      "measured_cache_miss_AC_wall_seconds": 873.2699966000946,
+      "AC_fraction_of_variant_wall": 0.900054264768406,
+      "total_prefix_slot_replays": 48863
+    },
+    "scope": "Completed B1 contextual evidence; not new B0 results or runtime copied to B0"
+  },
+  "code_findings": [
+    "Every cache-miss candidate compiles a verified electrical engine and replays every observed prior slot plus current candidate.",
+    "Each replayed slot applies loads and checks inventory before and after SolveSnap, then measures every original branch phase.",
+    "Cache is capped at32 whole-candidate entries; history is part of the exact key. Distinct candidates or clock prefixes require new probes.",
+    "Per-tick current_AC_calls is published only when the tick completes; static progress during an active long tick alone is not a hang."
+  ],
+  "action": "KEEP_B0_ATTEMPT002_RUNNING_UNMODIFIED; AFTER_OFFICIAL_TERMINATION_PROFILE_C0_C1_RECEIPTS; ANY_SPEEDUP_REQUIRES_IDENTICAL_PHYSICS_AND_CAUSAL_STATE_PROOF_BEFORE_NEW_ARM_USE",
+  "candidate_future_improvements": [
+    "Avoid repeated metadata and inventory construction only after proving identical source/inventory and measurements.",
+    "Reuse only identical prefix/candidate results with bound Source, hardware, observed history, AIDC and MESS identities; no cross-arm dispatch or result substitution.",
+    "Preserve independent C0/C1 event execution and independent Fresh96."
+  ],
+  "no_new_heavy_worker": true,
+  "no_new_GFS_or_electrical_coefficients": true,
+  "Golden003_rerun": false
+}
