@@ -1,0 +1,91 @@
+{
+  "label": "RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_FAST",
+  "finalized_call": {
+    "label": "RELEASE_P1:A1:DW:PHASE_I:SOURCE18R_FAST",
+    "solver": "GUROBI",
+    "Native_Runtime": 117.35099983215332,
+    "wall_seconds": 117.41879700000209,
+    "charged_seconds": 117.35099983215332,
+    "cap_seconds": 900.0,
+    "overshoot_seconds": 0.0,
+    "error": null,
+    "status": 2,
+    "stage_context": {
+      "day": "2025-05-01",
+      "arm": "B1",
+      "stage": "A1",
+      "stage_case_sha": "43fd7f506686dfb9ac2464f23d02c6d56028bd89fbd247ddcba6d0def5bf8ac0",
+      "source_sha": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+      "parent_result_sha": "4a621a19af9adaada41f30e63bbbce672f3541e092bd14038713d3586e60546d"
+    },
+    "native_binding": {
+      "matrix_sha": "81d1407a9fed7af00aff5dafde7daace86a811b6c0cfe902689520af89aeac52",
+      "domain_sha": "c183d77db70ec1438e29fa1846e10642602b0f8ec0be5a17de5601ee957caeaa",
+      "objective_sense": 1,
+      "rows": 276433,
+      "columns": 210237,
+      "nonzeros": 1793606,
+      "Threads": 1
+    },
+    "resource_before_solve": {
+      "memory": {
+        "AvailableMBytes": 12604,
+        "CommittedBytes": 23384207360,
+        "CommitLimit": 68408958976,
+        "PercentCommittedBytesInUse": 34
+      },
+      "workers": [
+        {
+          "ProcessId": 14832,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -m v42_pr134_b1.host monitor \"C:\\v42_pr134_sc_execution_20261007\""
+        },
+        {
+          "ProcessId": 8788,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/table_v_monitor/v42_2_server.py --port 8793"
+        },
+        {
+          "ProcessId": 23944,
+          "Name": "python.exe",
+          "CommandLine": "\"C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\" -X utf8 -u tools/run_v42_2_campaign.py --arm B1 --attempt 4 --reason FRESH_B1_AFTER_EXACT_4800_P1_TAIL_PROJECTION_FULL_PERMUTATION_PROOF_CURRENT_SOURCE_A_M_NATIVE0_AND_1292_REGRESSION_PASS --corrective-commit 20e8d59909f1fecbf8e122b748f4faa04b59bf90 --validation-gate docs/v42_2_campaign_20261016/VALIDATION_GATE_04.json"
+        }
+      ],
+      "psutil_available_RAM_bytes": 13271191552,
+      "CPU_percent": 4.9
+    },
+    "P2_call": false,
+    "objective_scope": "ORIGINAL_P1_CURRENT_MATRIX_NOT_UNPRICED_GLOBAL_CERTIFICATE",
+    "native_execution_entered": true,
+    "native_numeric_attributes": {
+      "ObjBound": 0.0,
+      "ObjVal": 0.0,
+      "SolCount": 1.0,
+      "IsMIP": 0.0
+    }
+  },
+  "arrays": {
+    "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT004\\NATIVE_CALL_JOURNAL\\9815e94a84464b659a302e0bb58813ea\\UNMODIFIED_NATIVE_ATTRIBUTES.npz",
+    "sha256": "860699319338d88331351f63ffa6073c6da5c48f3c7c95f7fbc0a8e82e134270",
+    "bytes": 1185314
+  },
+  "available_attributes": [
+    "BarX",
+    "X",
+    "Pi",
+    "RC",
+    "VBasis",
+    "CBasis"
+  ],
+  "scalar_attributes": {
+    "Kappa": 191834617769.16724,
+    "BarIterCount": 22.0,
+    "IterCount": 49833.0,
+    "SolCount": 1.0
+  },
+  "observed_native_runtime_lower_bound": 116.94299983978271,
+  "journal_errors": [],
+  "diagnostic_only": true,
+  "partial_BarX_is_not_original_FULL_UB": true,
+  "original_solver_return_attributes_unmodified": true
+}

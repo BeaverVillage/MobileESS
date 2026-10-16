@@ -55,13 +55,16 @@ def audit(state,predecessor,output):
         previous=json.loads((root/'PHASE_I/S1/SOURCE18R_FAST/NATIVE_RESULT.json').read_text())['ledger_call']['native_binding']
         if binding!=previous or not exact:raise ValueError('BASIS_NATIVE0_NATIVE_MATRIX_OR_BASIS_READBACK_DRIFT')
         # Read back the selected production parameters on the same exact model.
-        # LPWarmStart=0 ignores even a supplied basis, so Method=2 really runs
-        # barrier. No Optimize/presolve call is made in this audit.
+        # Positive elastic pivots use the actual original basis with primal
+        # simplex and no presolve crushing. No Optimize call is made here.
         model.Params.Method=2
         for k,v in admission['parameters'].items():model.setParam(k,v)
-        selected=dict(Method=int(model.Params.Method),LPWarmStart=int(model.Params.LPWarmStart))
-        if admission['barrier_required'] and selected!={'Method':2,'LPWarmStart':0}:
-            raise ValueError('BASIS_NATIVE0_SOURCE18R_BARRIER_POLICY_READBACK_DRIFT')
+        selected={k:int(getattr(model.Params,k)) for k in ('Method','LPWarmStart','Presolve')}
+        if admission['primal_simplex_required'] and selected!={'Method':0,'LPWarmStart':1,'Presolve':0}:
+            raise ValueError('BASIS_NATIVE0_ORIGINAL_PRIMAL_POLICY_READBACK_DRIFT')
+        model.update()
+        if not (np.array_equal(model.getAttr('VBasis'),vb) and np.array_equal(model.getAttr('CBasis'),cb)):
+            raise ValueError('BASIS_POLICY_DISCARDED_ACTUAL_NATIVE_BASIS')
         if native_binding(model)!=previous:raise ValueError('BASIS_POLICY_CHANGED_NATIVE_MATRIX_DOMAIN_OBJECTIVE')
     finally:model.dispose()
     result=dict(PASS=True,Native_calls=0,proof=proof,actual_S0_S1_exact_snapshots=True,

@@ -571,7 +571,7 @@ class CurrentNative:
                 for k,v in parameters.items():model.setParam(k,v)
                 basis_start=dict(installed=False,reason='NO_PRIOR_ACCEPTED_PHASE_BASIS')
                 if component=='PHASE_I' and self.phase_basis is not None and not attempts:
-                    from .table_v_phase_diagnostics import extend_basis,basis_admission
+                    from .table_v_phase_diagnostics import extend_basis,basis_admission,restore_cold_phase_policy
                     try:
                         vb,cb,proof=extend_basis(self.phase_basis[0],snapshot,self.phase_basis[1])
                         admission=basis_admission(proof)
@@ -583,7 +583,8 @@ class CurrentNative:
                         basis_start=dict(installed=admission['reuse'],proof=proof,admission=admission,
                             retained_native_basis=file_record(path))
                     except (ValueError,AttributeError,gp.GurobiError) as error:
-                        model.reset();basis_start=dict(installed=False,reason=str(error))
+                        restore_cold_phase_policy(model,parameters)
+                        basis_start=dict(installed=False,reason=str(error),cold_profile_restored=True)
                 model.Params.Threads=1;model.Params.LogFile=str(attempt/'NATIVE_GUROBI.log')
                 _write(attempt/'MODEL_IDENTITY.json',dict(original_snapshot_sha256=snapshot.fingerprint(),
                     component=component,case_sha=self.case.case_sha,objective_name=snapshot.objectives[0].name,

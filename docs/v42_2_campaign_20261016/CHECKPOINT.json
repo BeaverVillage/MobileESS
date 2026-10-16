@@ -4,12 +4,12 @@
   "freeze_tag": "v42.1-freeze-20261016",
   "branch": "codex/v42.2-may01-b1b2b3-20261016",
   "PR": "https://github.com/BeaverVillage/MobileESS/pull/231",
-  "current_commit": "c1989703787f7ebdd525efb6a51d398cee59e7c9",
-  "active_stage": "VALIDATED_SOURCE_EVIDENCE_COMMIT_AND_RELEASE_GATE",
-  "Native_optimize_calls": 2,
+  "current_commit": "20e8d59909f1fecbf8e122b748f4faa04b59bf90",
+  "active_stage": "NATIVE0_AND_REGRESSION_PASS_PREPARE_ORIGINAL_PRIMAL_B1_ATTEMPT005",
+  "Native_optimize_calls": 3,
   "active_PID": null,
-  "active_log": "D:/v42_2_original_full_cross_source_native0_01.log",
-  "active_output": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ORIGINAL_FULL_CROSS_SOURCE_NATIVE0_01",
+  "active_log": "D:/v42_2_b1_native0_07.log",
+  "active_output": "docs/v42_2_campaign_20261016/B1_NATIVE0_07",
   "regression01": {
     "status": "PASS",
     "tests": 1246,
@@ -28,10 +28,10 @@
   "B2_ACTUAL_FRESH_PASS": false,
   "B3_ACTUAL_FRESH_PASS": false,
   "next_steps": [
-    "Commit/push exact new tail formulation, guard, Native0 and regression1292 evidence.",
-    "Seal VALIDATION_GATE_04 with B1_NATIVE0_06, M_NATIVE0_04, REGRESSION11 at current committed HEAD.",
-    "Run fresh B1 ATTEMPT004 with original PhaseI900/A5400 caps and full certification/Actual96/Fresh96.",
-    "Only after B1 PASS proceed B2 ATTEMPT005 then B3 ATTEMPT001."
+    "Commit/push the actually verified original-primal policy candidate and all failed Attempt004 evidence; seal GATE05 on the resulting release.",
+    "Run fresh whole B1 ATTEMPT005 under unchanged Stage and Phase I caps; do not reopen exhausted Attempt004. Measure actual basis acceptance, exact Phi, KKT and omitted-row checks.",
+    "Independently quantify row/column-family structure and presolve/factor evidence. If direct primal policy fails or remains slow, compare presolve warm start and exact reformulation with proof before further fresh attempts.",
+    "Complete all four required reports and real B1 FULL/Actual96/Fresh96, then B2 and B3. Tests and Native0 alone are not optimization success."
   ],
   "constraints": {
     "Worker": 1,
@@ -76,7 +76,7 @@
   "B2_ATTEMPT001": "PREPARED_FOR_NATIVE0_ONLY_NO_SOLVE_NO_NATIVE_USAGE",
   "supplemental_external_hash_PID": null,
   "supplemental_external_hash_session": null,
-  "active_exec_session": 75333,
+  "active_exec_session": null,
   "latest_observation": {
     "epoch_seconds": 1792106627.6600144,
     "P1_neutral_tail_candidates_proved": 4800,
@@ -117,7 +117,7 @@
     "tests": 1259,
     "Native_calls": 0
   },
-  "validation_gate": "docs/v42_2_campaign_20261016/VALIDATION_GATE_03.json",
+  "validation_gate": "docs\\v42_2_campaign_20261016\\VALIDATION_GATE_04.json",
   "M_NATIVE0_03": {
     "status": "PASS",
     "Native_calls": 0,
@@ -185,7 +185,7 @@
       "LPWarmStart": 0
     }
   },
-  "current_attempt": 3,
+  "current_attempt": 4,
   "B1_ATTEMPT003": {
     "status": "HOST_RESTART_INTERRUPTED_NOT_CERTIFIED",
     "known_Native_seconds": 143.757000207901,
@@ -257,7 +257,7 @@
   },
   "phase_I_bottleneck_status": {
     "resolved_verified": false,
-    "latest_candidate_actual_solve_started": false,
+    "latest_candidate_actual_solve_started": true,
     "historical_S0_Phi_zero": true,
     "historical_S1_complete_Phi_zero": false,
     "full_phase_I_cumulative_cap_seconds": 900
@@ -280,5 +280,77 @@
     "rows": 2108858,
     "columns": 946756,
     "actual_tail_lift_rows": 4800
-  }
+  },
+  "B1_ATTEMPT004": {
+    "status": "OFFICIALLY_STOPPED_RECONCILED",
+    "PID": 23944,
+    "Phase_I_cap": 900,
+    "A_stage_cap": 5400,
+    "Source": "49e1ea5b416509ae6a499c0cb69a8c5a6026178f5fea77c14a779087aec1bec7",
+    "FULL_PASS": false,
+    "Actual_Fresh_PASS": false,
+    "actual_original_NATIVE0_binding_exact_match": true,
+    "S0_Native_Runtime": 117.35099983215332,
+    "S0_exact_Phi": "0",
+    "added_rows": 3533,
+    "S1_Native_Runtime": 782.6640000343323,
+    "Phase_I_Native_Runtime": 900.0149998664856,
+    "Phase_I_exact_zero": false,
+    "Phase_I_Native_status": 9,
+    "original_integer_cap": 4499.985000133514,
+    "Native_Runtime": 1329.7820000648499,
+    "Original_P1_Native_Runtime": 429.76700019836426,
+    "inflight": null,
+    "locks_released": true,
+    "raw_preserved": true
+  },
+  "pending_phase_I_root_cause_hypothesis": {
+    "status": "UNTESTED_DO_NOT_EDIT_SOURCE_WHILE_NATIVE_RUNNING",
+    "actual_S1_presolved_dimensions_same_as_ATTEMPT003": [
+      168195,
+      118692,
+      1144439
+    ],
+    "cold_barrier_initial_Phi_around": 51285000000000.0,
+    "verified_extended_basis_primal_residual_max": 8.640199666842818e-12,
+    "next_candidate": "For positive elastic pivots, retain the proven actual native VBasis/CBasis and use Method=0 primal simplex, LPWarmStart=1, Presolve=0 on the original unpresolved elastic matrix; avoid crushed-basis crossover and cold barrier. Do not invent PStart/DStart or admit a FULL UB. Requires actual S1 Native0, regression, fresh committed gate, independent new whole-arm attempt.",
+    "official_reference": "https://doc.gurobi.com/projects/optimizer/en/current/features/warmstart.html",
+    "scientific_source_note": "Current scientific records contain compression_adapter, but not table_v_dw/phase_diagnostics. An algorithm-only basis policy change must still be pinned by DW_SOURCE_FREEZE and release; verify Science SHA remains identical before considering M04 still valid.",
+    "secondary_idea_only_if_basis_candidate_fails": "A positive artificial-Phi cap preserves every Phi=0 point but changes the elastic search polyhedron; would require a separate zero-set equivalence proof and original dual/basis replay. Do not implement speculatively."
+  },
+  "last_verified_live_A4": {
+    "PID": 23944,
+    "command_verified": true,
+    "CPU_seconds": 1450.328125,
+    "RSS_bytes": 6332792832,
+    "active_label": "RELEASE_P1:A1:ORIGINAL_P1",
+    "call_cap": 4499.985000133514,
+    "call_started_epoch": 1792109392.332741
+  },
+  "next_basis_policy_validation_command": "python -X utf8 -u tools/audit_v42_aidc_compression.py --day 2025-05-01 --output docs/v42_2_campaign_20261016/B1_NATIVE0_07 --matrix --reuse-capture docs/v42_2_campaign_20261016/B1_NATIVE0_06 --phase-basis-predecessor docs/v42_2_campaign_20261016/ATTEMPTS/B1/ATTEMPT004",
+  "next_basis_policy_validation_command_condition": "Only AFTER current entire attempt is terminal/reconciled, and AFTER basis_admission / actual S1 Native0 audit / targeted tests are updated for verified original-basis primal simplex. Never run this concurrently with the current Native call.",
+  "PR189_comparison": "docs/v42_2_campaign_20261016/PR189_B1_MAY01_COMPARISON.json",
+  "B1_NATIVE0_07": {
+    "status": "PASS_NATIVE0_MATRIX",
+    "basis_policy": {
+      "Method": 0,
+      "LPWarmStart": 1,
+      "Presolve": 0
+    },
+    "Native_calls": 0,
+    "total_wall_seconds": 404.68498089999775
+  },
+  "regression12": {
+    "status": "PASS",
+    "tests": 1293,
+    "baseline_IDs": 682,
+    "Native_calls": 0
+  },
+  "mandatory_new_reports": [
+    "B1_PR189_V42_2_STRUCTURE_ROOT_CAUSE_KO.md",
+    "B1_PHASE_I_SOLVER_AB_BENCHMARK.csv",
+    "B1_EXACT_LP_REFORMULATION_CERTIFICATE.json",
+    "B1_MAY01_FINAL_PERFORMANCE_KO.md"
+  ],
+  "latest_user_contract": "docs/v42_2_campaign_20261016/USER_REQUEST_PHASE_I_ROOT_CAUSE_20261016.txt"
 }

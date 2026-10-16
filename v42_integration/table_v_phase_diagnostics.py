@@ -149,13 +149,12 @@ def extend_basis(old,new,raw):
 
 
 def basis_admission(proof):
-    """A feasible extension need not make crossover a safe numerical method.
+    """Use a proven feasible original basis without crushing positive pivots.
 
-    Actual May01 attempts show that newly positive elastic pivots can give a
-    feasible basis yet spend the shared allowance in crossover. With Method=2,
-    LPWarmStart=2 skips barrier entirely. Retain that native basis as evidence,
-    but require cold Source18r barrier for this structural change. Extensions
-    needing no new artificial pivot remain eligible for native basis reuse.
+    May01 crossover stalled with LPWarmStart=2; cold barrier then exhausted
+    Phase I after discarding the feasible extension. Primal simplex with
+    LPWarmStart=1 and Presolve=0 consumes that actual basis on the unchanged
+    original elastic matrix. Performance and exact Phi zero still need a solve.
     """
     if not (proof.get('PASS') is True and proof.get('exact_inclusion') is True
             and proof.get('block_triangular_nonzero_local_pivots') is True
@@ -164,9 +163,17 @@ def basis_admission(proof):
         raise ValueError('VERIFIED_NATIVE_BASIS_EXTENSION_REQUIRED_FOR_ADMISSION')
     count=proof.get('new_local_artificials_basic')
     if type(count) is not int or count<0:raise ValueError('EXACT_NEW_ARTIFICIAL_PIVOT_COUNT_REQUIRED')
-    cold=count>0
-    return dict(reuse=not cold,barrier_required=cold,
-        reason='POSITIVE_NEW_ELASTIC_PIVOTS_REQUIRE_SOURCE18R_BARRIER' if cold else 'FEASIBLE_NATIVE_BASIS_REUSE_ADMITTED',
-        parameters=dict(LPWarmStart=0 if cold else 2),
+    primal=count>0
+    return dict(reuse=True,barrier_required=False,primal_simplex_required=primal,
+        reason='POSITIVE_ELASTIC_PIVOTS_USE_ORIGINAL_PRIMAL_BASIS' if primal else 'FEASIBLE_NATIVE_BASIS_REUSE_ADMITTED',
+        parameters=dict(Method=0,LPWarmStart=1,Presolve=0) if primal else dict(LPWarmStart=2),
         native_basis_preserved_as_evidence=True,original_FULL_UB_claimed=False,
-        policy='ACTUAL_MAY01_CROSSOVER_STAGNATION_GUARD_V1')
+        solver_performance_improvement_claimed=False,
+        policy='ACTUAL_MAY01_ORIGINAL_PRIMAL_BASIS_V2')
+
+
+def restore_cold_phase_policy(model,parameters):
+    """A failed basis install must not leave a basis-dependent solver policy."""
+    model.reset()
+    for key,value in parameters.items():model.setParam(key,value)
+    model.setParam('LPWarmStart',0)

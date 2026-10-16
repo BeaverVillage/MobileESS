@@ -1,0 +1,153 @@
+{
+  "original_snapshot_sha256": "ecef9b413f2fbe2f81b1a4aa3d5578bf09f65d98c57b86cdfdcb6bdf5bcae187",
+  "component": "PHASE_I",
+  "case_sha": "43fd7f506686dfb9ac2464f23d02c6d56028bd89fbd247ddcba6d0def5bf8ac0",
+  "objective_name": "Phi",
+  "solver_policy": {
+    "schema": "A_STAGE_SOLVER_POLICY_V2",
+    "PASS": true,
+    "frozen_gurobi_version": [
+      13,
+      0,
+      2
+    ],
+    "original_authority_parameters": {
+      "Threads": 1,
+      "Method": 1,
+      "Seed": 20260929,
+      "MIPGap": 0.005,
+      "Presolve": -1,
+      "Cuts": -1,
+      "Heuristics": 0.05,
+      "NumericFocus": 0,
+      "FeasibilityTol": 1e-06,
+      "OptimalityTol": 1e-06,
+      "IntFeasTol": 1e-05
+    },
+    "parameters": {
+      "Threads": 1,
+      "Method": 2,
+      "Seed": 20260929,
+      "MIPGap": 0.005,
+      "Presolve": -1,
+      "Cuts": -1,
+      "Heuristics": 0.05,
+      "NumericFocus": 0,
+      "FeasibilityTol": 1e-06,
+      "OptimalityTol": 1e-06,
+      "IntFeasTol": 1e-05,
+      "NodeMethod": 1,
+      "MIPFocus": 3,
+      "Crossover": -1
+    },
+    "preserved_scientific_settings": {
+      "MIPGap": 0.005,
+      "Seed": 20260929,
+      "FeasibilityTol": 1e-06,
+      "OptimalityTol": 1e-06,
+      "IntFeasTol": 1e-05
+    },
+    "parameter_support": {
+      "NodeMethod": {
+        "current": -1,
+        "minimum": -1,
+        "maximum": 5,
+        "default": -1
+      },
+      "MIPFocus": {
+        "current": 0,
+        "minimum": 0,
+        "maximum": 3,
+        "default": 0
+      },
+      "Crossover": {
+        "current": -1,
+        "minimum": -1,
+        "maximum": 5,
+        "default": -1
+      }
+    },
+    "algorithmic_changes": [
+      "Threads=1",
+      "Method=2",
+      "NodeMethod=1",
+      "MIPFocus=3"
+    ],
+    "scientific_model_change": false,
+    "parameter_sweep": false,
+    "cumulative_native_seconds_per_date": 3600,
+    "build_and_static_verification_outside_native_budget": true,
+    "crossover_rule": "Preserve frozen authority setting or frozen native default; diagnostic LP Crossover=0 is rejected"
+  },
+  "numerical_policy": null,
+  "adaptive_policy": "SOURCE18R_FAST",
+  "parameters": {
+    "Presolve": -1,
+    "FeasibilityTol": 1e-06,
+    "OptimalityTol": 1e-06,
+    "NumericFocus": 0,
+    "ScaleFlag": -1,
+    "Method": 2,
+    "Threads": 1,
+    "OutputFlag": 1,
+    "LogToConsole": 0,
+    "Crossover": -1,
+    "BarHomogeneous": -1
+  },
+  "basis_start": {
+    "installed": false,
+    "proof": {
+      "PASS": true,
+      "old_rows": 276433,
+      "new_rows": 3533,
+      "old_columns": 210237,
+      "new_columns": 3583,
+      "exact_inclusion": true,
+      "new_row_slacks_basic": 0,
+      "new_local_artificials_basic": 3533,
+      "block_triangular_nonzero_local_pivots": true,
+      "uncompensated_prior_point_replay": {
+        "PASS": false,
+        "max_row_violation": 1784.027025724307,
+        "max_bound_violation": 0.0,
+        "tolerance": 1e-05,
+        "rows": 279966,
+        "columns": 213820,
+        "raw_point_rounded_or_clipped": false
+      },
+      "extended_elastic_witness_replay": {
+        "PASS": true,
+        "max_row_violation": 8.640199666842818e-12,
+        "max_bound_violation": 0.0,
+        "tolerance": 1e-05,
+        "rows": 279966,
+        "columns": 213820,
+        "raw_point_rounded_or_clipped": false
+      },
+      "old_primal_coordinates_unchanged": true,
+      "old_native_basis_unchanged": true,
+      "original_FULL_feasible_claimed": false,
+      "elastic_witness_installed_as_start": false,
+      "PStart_DStart_installed": false,
+      "LPWarmStart": 2
+    },
+    "admission": {
+      "reuse": false,
+      "barrier_required": true,
+      "reason": "POSITIVE_NEW_ELASTIC_PIVOTS_REQUIRE_SOURCE18R_BARRIER",
+      "parameters": {
+        "LPWarmStart": 0
+      },
+      "native_basis_preserved_as_evidence": true,
+      "original_FULL_UB_claimed": false,
+      "policy": "ACTUAL_MAY01_CROSSOVER_STAGNATION_GUARD_V1"
+    },
+    "retained_native_basis": {
+      "path": "D:\\v42_trajectory_tracking_may01_20261014\\docs\\v42_2_campaign_20261016\\ATTEMPTS\\B1\\ATTEMPT004\\B1\\A1\\DW\\PHASE_I\\S1\\SOURCE18R_FAST\\VERIFIED_CANDIDATE_NATIVE_BASIS.npz",
+      "sha256": "0f43bfb191bde0139a671507cae795906e4ece175088fe61eba5cff673c1ba83",
+      "bytes": 32356
+    }
+  },
+  "Threads": 1,
+  "P2_calls": 0
+}
