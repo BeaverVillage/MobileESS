@@ -1,5 +1,5 @@
 {
-  "state": "RUNNING_MAY01_B0_ACTUAL_ATTEMPT002",
+  "state": "B0_USER_STOP_RECONCILED_PREPARE_FAST_AC_EQUIVALENCE",
   "pid": 39084,
   "process_created": 1792120643.9523497,
   "started_UTC": "2026-10-16T03:17:24.701728+00:00",
@@ -25,13 +25,13 @@
   "FORECAST_CAUSAL_AVAILABILITY": "NOT_CERTIFIED",
   "CAUSAL_PASS": false,
   "finished_UTC": "2026-10-16T03:41:28.647150+00:00",
-  "active_PID": 31144,
+  "active_PID": null,
   "result": {
     "path": "D:\\MobileESS_V43\\runtime\\golden_B1_20250501_attempt003\\RESULT.json",
     "bytes": 3552,
     "sha256": "298251269b7227d49e8c445af58206fb2a3800f48995fc65526661a5fc596bc5"
   },
-  "next_stage": "FINISH_B0_C0_C1_ACTUAL96_THEN_B2_M1",
+  "next_stage": "FAST_AC_REAL_PREFIX_EQUIVALENCE_THEN_B1_SHORT_CANARY",
   "Golden004_required": false,
   "numerical_certificate": {
     "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GOLDEN003_CERTIFIED_NUMERICAL_CASE.json",
@@ -47,7 +47,7 @@
     "sha256": "2c060ffcb70280899934c4c35d41a79dc109ba6ababe7e216509ca840d718334"
   },
   "Gate_B_started_UTC": "2026-10-16T04:11:08.245762+00:00",
-  "updated_UTC": "2026-10-16T05:44:56.367773+00:00",
+  "updated_UTC": "2026-10-16T05:46:45.701867+00:00",
   "allowed_execution_dates": [
     "2025-05-01"
   ],
@@ -65,7 +65,7 @@
     "sha256": "e2611237892f67a48237bba88a8abd469a92fea6c940aaff7581577103d8f58c"
   },
   "automation_id": "v43-may01",
-  "active_process_created": 1792126209.8237405,
+  "active_process_created": null,
   "active_attempt": "D:/MobileESS_V43/runtime/may01_B0_C0_C1_actual96_attempt002",
   "M1_status": "NOT_STARTED_WAIT_B0_RECONCILIATION",
   "M1_requests_source_commit": "5ca34a8ae",
@@ -119,5 +119,12 @@
   "official_corrective_canary_entrypoint": "python -m v43.may01 canary B1 <new-attempt> --ac-mode SHADOW",
   "legacy_strict_actual_entrypoints": "HISTORICAL_ONLY_NO_NEW_OFFICIAL_CAMPAIGN_EXECUTION",
   "official_corrective_route_status": "APPLIED_REAL_PREFIX_AND_SHORT_EVENT_VALIDATION_REQUIRED_BEFORE_FULL_ACTUAL",
-  "B1_corrective_real_event_canary": "NOT_STARTED_WAIT_B0_OFFICIAL_EXIT"
+  "B1_corrective_real_event_canary": "NOT_STARTED_WAIT_B0_OFFICIAL_EXIT",
+  "user_stop_current_attempt": true,
+  "restart_same_slow_actual_allowed": false,
+  "B0_stop_reconciliation": {
+    "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\V43_B0_ACTUAL002_USER_STOP_RECONCILED.json",
+    "bytes": 2038,
+    "sha256": "b7c67ac05ce03bd26d832600b64e97b4050c73b853cdfe7dfee4b855a8533730"
+  }
 }

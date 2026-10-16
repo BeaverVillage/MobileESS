@@ -50,7 +50,11 @@ class CorrectiveBinding:
         args['reference']=reference
         case=dict(case,strict_parent_case_sha=case['case_sha'],policy_version=POLICY_ID,
             case_sha=digest(dict(parent=case['case_sha'],policy=POLICY_ID,
-                corrective_sources=[record(p) for p in sorted((ROOT/'v43_corrective').glob('*.py'))])),
+                request_descriptors=record(ROOT/'docs/v43/V43_R1_RECORDED_REQUEST_DESCRIPTOR_CACHE.json'),
+                current_C1_model=args['power_model'].authority_sha,
+                corrective_sources=[record(ROOT/'v43_corrective'/name) for name in (
+                    '__init__.py','binding.py','reference.py','participation.py','policy.py',
+                    'controller.py','current_ac.py','compare.py','public_metadata.py')])),
             reference_sha=reference.reference_sha,Known_commands_sha=digest(args['known_schedule']),
             future_Known_global_Unknown_start_barrier=False,Strict_parent_raw_modified=False,
             R1='ASSUMED_ARRIVAL_HASH30',R2='HOLD',Actual96_PASS=False,Fresh96_PASS=False)

@@ -23,7 +23,11 @@ def run(output,*,source_attempt='D:/MobileESS_V43/runtime/may01_B0_C0_C1_actual9
         process=psutil.Process(start['pid'])
         if process.create_time()==start['process_created']:raise RuntimeError('SOURCE_ACTUAL_WORKER_STILL_ALIVE')
     except psutil.NoSuchProcess:pass
-    if not read(source_attempt/'RESULT.json')['PASS']:raise ValueError('SOURCE_ACTUAL_NOT_SUCCESSFULLY_RECONCILED')
+    total=read(source_attempt/'RESULT.json')
+    completed=read(source_attempt/'C0/RESULT.json')
+    stopped=(source_attempt/'STOP_REQUESTED.json').exists() and 'V43_ACTUAL_OFFICIAL_STOP_REQUESTED' in total.get('error','')
+    if not total['PASS'] and not (stopped and completed['Actual96_execution_PASS'] and completed['Fresh96_physical_PASS']):
+        raise ValueError('SOURCE_C0_NOT_INDEPENDENTLY_COMPLETED_AND_RECONCILED')
     rec=read(source_attempt/'RECONCILIATION.json')
     if rec['inflight'] is not None or rec['Native_calls']!=0:raise ValueError('SOURCE_LEDGER_NOT_SETTLED')
     output.mkdir(parents=True);began=perf_counter()
@@ -85,6 +89,7 @@ def run(output,*,source_attempt='D:/MobileESS_V43/runtime/may01_B0_C0_C1_actual9
             reference_candidate_wall_seconds=sum(p['reference_wall_seconds'] for p in oracle.equivalence),
             Source_actual_Fresh96_PASS=len(fresh['physical_steps'][24:])==96 and all(s['PASS'] for s in fresh['physical_steps'][24:]),
             wall_seconds=perf_counter()-began,state_clone_claimed=False,all_current_candidates_fully_measured=True,
+            source_attempt_user_stopped=stopped,source_C0_independently_complete=True,
             actual_execution_UID_site_time_GPU_equivalence='PENDING_PAIRED_SHORT_EVENT_CANARY',
             new_full_Actual_wall_seconds=None,new_max_controller_latency_seconds=None,
             scope='EXACT_DECLARED_OBSERVED_PREFIX_CANDIDATE_SET_NOT_ALL_MAY01_CANDIDATES_OR_NEW_ACTUAL_SERVICE')

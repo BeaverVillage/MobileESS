@@ -12,9 +12,9 @@ from v43.common import ROOT,RUNS,DOC,read,record,atomic,now
 from v43_actual.vendor.qos import CausalReferenceScheduler
 from v43_actual.observations import load_observations
 from v43_actual.vendor.policy import digest
-from v43_arms.current_ac import ArmCurrentAC
 from v43_mess.budget import heavy_peers
 from .binding import CorrectiveBinding
+from .current_ac import FullPrefixReferenceAC
 
 
 def run(output,*,strict='D:/MobileESS_V43/runtime/gate_b_c0_c1_actual96_attempt001',samples=3):
@@ -59,7 +59,7 @@ def run(output,*,strict='D:/MobileESS_V43/runtime/gate_b_c0_c1_actual96_attempt0
             for other,row in jobs.items():
                 if row['admitted_time'] is not None and row['admitted_time']<=when and other not in released:
                     gpu[reference.sites.index(row['site'])]+=row['GPU_gang']
-            gpu[reference.sites.index(site)]+=request.gpu
+            baseline_gpu=gpu.copy();gpu[reference.sites.index(site)]+=request.gpu
             obs=observations.at(when,observed_now=when)
             physical=args['power_model'].recompute(gpu[None,:],reference.sites,[obs['weather']['values']])
             cols=[packet.control_names.index('aidc_load_kw['+s+']') for s in reference.sites]
@@ -73,15 +73,27 @@ def run(output,*,strict='D:/MobileESS_V43/runtime/gate_b_c0_c1_actual96_attempt0
                 history.append(dict(slot=t,start_seconds=begin,end_seconds=begin+900,
                     GPU=history_arrays['GPU'][t].tolist(),P=history_arrays['PCC_P_kw'][t].tolist(),
                     Q=history_arrays['PCC_Q_kvar'][t].tolist(),observations=observations.at(begin,observed_now=when)))
-            oracle=ArmCurrentAC(mess_plan=None,day_start_seconds=reference.begin,issue_seconds=args['begin'],
+            oracle=FullPrefixReferenceAC(mess_plan=None,day_start_seconds=reference.begin,issue_seconds=args['begin'],detailed=True,
                 sites=reference.sites,power_model=args['power_model'],observations=observations)
             oracle.observe(when,history);ac=oracle.evaluate(when,gpu,uid=uid)
             receipt=output/f'CANDIDATE_{index+1:03d}_CURRENT_AC.json';atomic(receipt,ac)
+            baseline_ac=oracle.evaluate(when,baseline_gpu,uid='OBSERVED_BASELINE')
+            baseline_receipt=output/f'BASELINE_{index+1:03d}_CURRENT_AC.json';atomic(baseline_receipt,baseline_ac)
+            nodes=ac['current']['voltage_node_names']
+            if len(nodes)!=len(v2):raise ValueError('SIGNED_CURRENT_AC_VOLTAGE_AXIS_SIZE_MISMATCH')
+            bad=np.flatnonzero((v2<packet.voltage_lower)|(v2>packet.voltage_upper))
             comparisons.append(dict(uid=uid,time_seconds=when,site=site,gpu=request.gpu,
                 Signed_violations=violations,Signed_peak=peak,Signed_voltage_squared_min=float(v2.min()),
                 Signed_voltage_squared_max=float(v2.max()),Signed_voltage_min_index=int(np.argmin(v2)),
                 Signed_voltage_max_index=int(np.argmax(v2)),Current_AC=record(receipt),
                 Current_AC_PASS=ac['PASS'],Current_AC_current=ac['current'],
+                baseline_Current_AC=record(baseline_receipt),baseline_Current_AC_PASS=baseline_ac['PASS'],
+                rejected_voltage_nodes=[dict(node=nodes[int(j)],phase='ABC'[int(nodes[int(j)].rsplit('.',1)[-1])-1],
+                    Signed_v_squared=float(v2[j]),Signed_v_pu=math.sqrt(v2[j]) if v2[j]>=0 else None,
+                    Current_AC_v_pu=ac['current']['voltage_vector_pu'][j],
+                    lower_pu=.95,upper_pu=1.05) for j in bad],
+                physical_current_background='OBSERVED_AEMO_ASOF_NATIVE_LOAD_ALLOCATION',
+                Signed_background='IMMUTABLE_D1_FORECAST_COEFFICIENT_INTERCEPT_AND_ANCHOR',
                 candidate_GPU_by_site=dict(zip(reference.sites,gpu.tolist())),
                 Source_coefficient_sha=c.coefficient_sha256,Source_actual_weather=obs['weather'],
                 input_history_contains_only_past_slots=True))

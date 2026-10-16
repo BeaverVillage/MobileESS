@@ -51,6 +51,7 @@ def probe_function(*,reuse):
         'checked_nodes=len(names),checked_branch_phases=len(branches),\n'
         '                        native_state=self._native_state(source["native_state"](odd)),\n'
         '                        voltage_vector_pu=voltage.tolist() if self.detailed else None,\n'
+        '                        voltage_node_names=list(names) if self.detailed else None,\n'
         '                        branch_measurement_rows=self._measurements(measured) if self.detailed else None,\n'
         '                        maximum_line_phase=str(branches[np.flatnonzero(lines)[np.argmax(measured[lines,1])]].branch_id),\n'
         '                        maximum_line_phase_letter=str(branches[np.flatnonzero(lines)[np.argmax(measured[lines,1])]].phase),\n'
