@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import subprocess
+import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
 DOC = ROOT / 'docs/v43'
@@ -25,11 +26,18 @@ def record(path):
     return dict(path=str(path), bytes=path.stat().st_size, sha256=sha(path))
 
 def atomic(path, value):
+    from v42_pr134_b1.common import write_lock, replace_file
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + f'.{os.getpid()}.tmp')
-    tmp.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + '\n', encoding='utf8')
-    os.replace(tmp, path)
+    tmp = path.with_name(path.name + f'.{os.getpid()}.{uuid.uuid4().hex}.tmp')
+    # Reuse PR189's proven Windows sharing retry and per-path thread lock.
+    # Serialization remains strict; only status-file IO changes.
+    with write_lock(path):
+        try:
+            tmp.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + '\n', encoding='utf8')
+            replace_file(tmp, path)
+        finally:
+            tmp.unlink(missing_ok=True)
 
 def git(*args):
     return subprocess.check_output(['git', *args], cwd=ROOT)

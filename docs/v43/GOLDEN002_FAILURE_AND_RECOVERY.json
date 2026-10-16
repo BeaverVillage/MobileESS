@@ -1,0 +1,59 @@
+{
+  "UTC": "2026-10-16T03:10:55.500841+00:00",
+  "classification": "STATUS_FILE_WINDOWS_SHARING_FAILURE_NOT_SCIENTIFIC_INFEASIBILITY",
+  "result": {
+    "path": "D:\\MobileESS_V43\\runtime\\golden_B1_20250501_attempt002\\RESULT.json",
+    "bytes": 4506,
+    "sha256": "31c92ab898eb56d4afbb387faaa382d755061876fe4a390266bd3c600e7411ac"
+  },
+  "reconciliation": {
+    "path": "D:\\MobileESS_V43\\runtime\\golden_B1_20250501_attempt002\\RECONCILIATION.json",
+    "bytes": 207,
+    "sha256": "8c133b2901f1a32feeb7ada173d4a2ee785f774d5feaea109441f1288662c55d"
+  },
+  "start": {
+    "path": "D:\\MobileESS_V43\\runtime\\golden_B1_20250501_attempt002\\START.json",
+    "bytes": 932,
+    "sha256": "36a0d735d669da323943dd6211949f6530f467539e4b2b60e169b3fab1348d77"
+  },
+  "ledger": {
+    "path": "D:\\MobileESS_V43\\runtime\\golden_B1_20250501_attempt002\\NATIVE_RUNTIME_LEDGER.json",
+    "bytes": 725,
+    "sha256": "3bba3f81c9e621e73812f2464100ee4880a016eaf48c7e73b1f5b5b2399780a5"
+  },
+  "process_exited": true,
+  "forced_stop": false,
+  "Native_calls": 0,
+  "Native_seconds": 0.0,
+  "inflight": null,
+  "total_wall_seconds": 1711.4792715999974,
+  "stage_totals": {
+    "complete_compact_class_assembly": 30.38620179999998,
+    "fresh_DATA": 179.34769850000157,
+    "load_current_date_physical_cache/full_domain_hash": 0.036850100001174724,
+    "original_matrix_assembly": 75.33156889999736,
+    "original_matrix_snapshot": 1.2341692999980296,
+    "physical_domain/checkpoint_records": 1313.4560096999849,
+    "prepare_fast_active/active_graph": 1314.8559490000007
+  },
+  "root_cause": "V43 status writer lacked PR189 unique temp filenames, per-path writer locks and retry for Windows sharing errors. Exact file holder was not captured; same-process concurrent writers and transient external readers were not protected.",
+  "original_PR189_writer_reused": true,
+  "original_PR189_mathematics_or_numeric_policy_changed": false,
+  "archived_execution_source": [
+    {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GOLDEN002_FAILURE_SOURCE\\v43\\common.py",
+      "bytes": 2457,
+      "sha256": "0a299f8b37ee23a5f3560eb7fa0a8cb6affbac673befdfd385651f612fdc4efa"
+    },
+    {
+      "path": "D:\\v43_pr189_fast_planning_20261016\\docs\\v43\\GOLDEN002_FAILURE_SOURCE\\v43\\golden.py",
+      "bytes": 8167,
+      "sha256": "5624a09b0a9e98036ed90cb4a151cd2a19c83e41920027a6029d86ebe12e63e7"
+    }
+  ],
+  "new_Golden_needed_because_Golden002_FAILED": true,
+  "Golden003_if_Golden002_PASS": false,
+  "completed_117_class_domains_preserved": true,
+  "cache_revalidation": "REQUIRED_BEFORE_NEW_ATTEMPT",
+  "permission_request_required": false
+}

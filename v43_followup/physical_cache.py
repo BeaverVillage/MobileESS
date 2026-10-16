@@ -67,12 +67,11 @@ def relocated_receipt(raw, *, historical_root, current_root, pinned_sources):
     return projected, aliases
 
 
-def _completed(start, result, reconciliation):
-    if (result.get('Gate_A_PASS') is not True
-            or result.get('PR189_NUMERICAL_REPRODUCTION') != 'PASS'
+def _terminated(start, result, reconciliation):
+    if (not result.get('finished_UTC')
             or reconciliation.get('inflight') is not None
             or reconciliation.get('Native_runtime_known') is not True):
-        raise ValueError('COMPLETED_GOLDEN_NUMERICAL_PASS_REQUIRED')
+        raise ValueError('TERMINATED_RECONCILED_GOLDEN_REQUIRED')
     try:
         process = psutil.Process(start['pid'])
         if process.create_time() == start['process_created'] and process.is_running():
@@ -81,37 +80,58 @@ def _completed(start, result, reconciliation):
         pass
 
 
-def seal_completed_case(request_path, destination):
-    """Seal static evidence from completed Golden002; never copy its solution."""
+def _completed(start, result, reconciliation):
+    if (result.get('Gate_A_PASS') is not True
+            or result.get('PR189_NUMERICAL_REPRODUCTION') != 'PASS'):
+        raise ValueError('COMPLETED_GOLDEN_NUMERICAL_PASS_REQUIRED')
+    _terminated(start, result, reconciliation)
+
+
+def seal_completed_case(request_path, destination, *, domain_only=False):
+    """Seal complete local domains; distinguish them from a FULL-model PASS."""
     request = read(request_path)
     attempt, output = Path(request['root']), Path(request['output'])
     paths = {key: attempt / name for key, name in (
         ('start', 'START.json'), ('result', 'RESULT.json'),
         ('reconciliation', 'RECONCILIATION.json'))}
-    _completed(*(read(paths[k]) for k in ('start', 'result', 'reconciliation')))
+    ( _terminated if domain_only else _completed)(*(read(paths[k]) for k in ('start', 'result', 'reconciliation')))
+    if domain_only and read(paths['reconciliation'])['calls'] != 0:
+        raise ValueError('DOMAIN_ONLY_RECOVERY_REQUIRES_NATIVE0_RECONCILIATION')
     if attempt.name != 'golden_B1_20250501_attempt002':
         raise ValueError('THIS_ADAPTER_SEALS_GOLDEN002_WITHOUT_A_NEW_GOLDEN')
     prepare_path = output / 'A_PREPARE_RECEIPT.json'
     domain_path = output / 'STATIC/DOMAIN' / request['day'] / 'PHYSICAL_DOMAIN_CACHE.json'
-    prepare, domains = read(prepare_path), read(domain_path)
-    verification = prepare['verification']
-    if (prepare.get('PASS') is not True or domains.get('PASS') is not True
-            or verification != request['_expected_model_verification']
+    prepare = read(prepare_path) if prepare_path.exists() else None
+    domains = read(domain_path)
+    verification = request['_expected_model_verification']
+    if (not domain_only and (prepare is None or prepare.get('PASS') is not True
+                            or prepare['verification'] != verification)
+            or domains.get('PASS') is not True
             or domains['complete_domain_hashes'] != request['_expected_complete_domain_hashes']
+            or (domains['jobs'], domains['representatives']) != (1499, 117)
             or (verification['jobs'], verification['classes'], verification['full_STAY'],
                 verification['full_migration']) != (1499, 117, 133609, 624473721)
             or domains['serialized_native_variables'] != 0):
         raise ValueError('GOLDEN002_INDEPENDENT_COMPLETE_DOMAIN_PROOF_REQUIRED')
     freeze = read(request['source_freeze'])
-    verify_records(freeze['sources'] + freeze['support'] + freeze['scientific_inputs'])
+    # V43 lifecycle/status IO may have been repaired after the attempt ended.
+    # Cache authority is pinned to unchanged PR189 scientific source bytes.
+    original_sources = [r for r in freeze['sources']
+        if not Path(r['path']).is_relative_to(ROOT / 'v43')]
+    verify_records(original_sources + freeze['support'] + freeze['scientific_inputs'])
     sources = _base_sources()
     from v42_may_campaign_native90.common import digest
     payload = dict(schema=SCHEMA, UTC=now(), source_base=BASE,
         day=request['day'], arm=request['arm'], request=record(request_path),
         completed={k: record(p) for k, p in paths.items()},
         source_freeze=record(request['source_freeze']), source_files=sources,
-        prepare=record(prepare_path), domain=record(domain_path),
-        scientific_inputs=prepare['scientific_input'], verification=verification,
+        prepare=record(prepare_path) if prepare else None, domain=record(domain_path),
+        scientific_inputs={n: record(Path(request['input_folder']) / n)
+            for n in ('NATIVE_INPUT.json', 'WINDOWS.json')},
+        expected_model_verification=verification,
+        current_model_verification=None if prepare is None else prepare['verification'],
+        domain_only=domain_only,
+        FULL_model_PASS_claimed=not domain_only,
         complete_domain_hashes=domains['complete_domain_hashes'],
         resources_sha256=domains['resources_sha256'],
         scope='COMPLETE_LOCAL_PHYSICAL_DOMAINS_AND_STATIC_PROOF_ONLY',
@@ -130,13 +150,13 @@ def _verified_case(path, request):
             or proof.get('proof_sha') != digest({k: v for k, v in proof.items() if k != 'proof_sha'})
             or (proof['day'], proof['arm']) != (request['day'], request['arm'])):
         raise ValueError('STATIC_PHYSICAL_CASE_PROOF_SEAL_OR_CASE_DRIFT')
-    verify_records([proof['prepare'], proof['domain'], proof['source_freeze'],
+    verify_records(([proof['prepare']] if proof['prepare'] else []) + [proof['domain'], proof['source_freeze'],
                     proof['request'], *proof['completed'].values(), *proof['source_files'].values()])
-    _completed(*(read(proof['completed'][k]['path']) for k in ('start', 'result', 'reconciliation')))
+    (_terminated if proof['domain_only'] else _completed)(*(read(proof['completed'][k]['path']) for k in ('start', 'result', 'reconciliation')))
     original_request = read(proof['request']['path'])
-    if (proof['verification'] != read(proof['prepare']['path'])['verification']
+    if (proof['prepare'] is not None and proof['current_model_verification'] != read(proof['prepare']['path'])['verification']
             or proof['complete_domain_hashes'] != read(proof['domain']['path'])['complete_domain_hashes']
-            or request.get('_expected_model_verification') != proof['verification']
+            or request.get('_expected_model_verification') != proof['expected_model_verification']
             or request.get('_expected_complete_domain_hashes') != proof['complete_domain_hashes']):
         raise ValueError('STATIC_MATRIX_OR_COMPLETE_DOMAIN_BINDING_DRIFT')
     for name in ('NATIVE_INPUT.json', 'WINDOWS.json'):
@@ -148,7 +168,8 @@ def _verified_case(path, request):
 
 
 def load_current_date_physical_cache(request, fresh_data, *, case_proof,
-        historical_source_root='D:/MobileESS_V42', check=lambda: None, progress=None):
+        historical_source_root='D:/MobileESS_V42', check=lambda: None, progress=None,
+        original_loader=None):
     """Run unchanged original verifiers with source-only receipt relocation.
 
     Their full semantic DATA, graph, resources, UID/class, cache byte and
@@ -160,8 +181,8 @@ def load_current_date_physical_cache(request, fresh_data, *, case_proof,
     check()
     proof = _verified_case(case_proof, request)
     sources = _base_sources()
-    if (len(fresh_data[1]) != proof['verification']['jobs']
-            or len(fresh_data[7]['classes']) != proof['verification']['classes']):
+    if (len(fresh_data[1]) != proof['expected_model_verification']['jobs']
+            or len(fresh_data[7]['classes']) != proof['expected_model_verification']['classes']):
         raise ValueError('FRESH_UID_OR_CLASS_POPULATION_DRIFT')
     folder = Path(request['_current_date_physical_cache']) / 'STATIC/DOMAIN' / request['day']
     receipt_path = folder / 'PHYSICAL_DOMAIN_CACHE.json'
@@ -183,7 +204,7 @@ def load_current_date_physical_cache(request, fresh_data, *, case_proof,
             return deepcopy(projected)
         return original_read(path)
 
-    original = a_cache.load_current_date_physical_cache
+    original = original_loader or a_cache.load_current_date_physical_cache
     namespace = dict(original.__globals__, read=routed_read)
     loader = FunctionType(original.__code__, namespace, original.__name__, original.__defaults__, original.__closure__)
     with _mutex, patch.object(fast_census, 'read', routed_read):
@@ -198,7 +219,7 @@ def load_current_date_physical_cache(request, fresh_data, *, case_proof,
             raise ValueError('EXACT_CLASS_DOMAIN_EXPANSION_REQUIRED')
         full_stay += len(domain.stays)
         full_migration += sum(len(block[-1]) for block in domain.blocks)
-    if (full_stay, full_migration) != (proof['verification']['full_STAY'], proof['verification']['full_migration']):
+    if (full_stay, full_migration) != (proof['expected_model_verification']['full_STAY'], proof['expected_model_verification']['full_migration']):
         raise ValueError('COMPLETE_STAY_OR_MIGRATION_CARDINALITY_DRIFT')
     if record(receipt_path) != raw_record:
         raise ValueError('ORIGINAL_CACHE_RECEIPT_MUTATED')
@@ -210,6 +231,7 @@ def load_current_date_physical_cache(request, fresh_data, *, case_proof,
         original_verifier_sources={k: sources[k] for k in VERIFIERS},
         original_verifier_code_unchanged=loader.__code__ is original.__code__,
         original_semantic_and_full_domain_checks_executed=True,
+        FULL_model_certificate_transferred=False,
         jobs=len(domains), classes=len(fresh_data[7]['classes']),
         full_STAY=full_stay, full_migration=full_migration,
         original_input_and_cache_files_modified=False, Native_calls=0,

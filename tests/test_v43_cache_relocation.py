@@ -87,7 +87,7 @@ def test_live_golden_is_rejected_even_when_result_documents_claim_pass(monkeypat
         create_time=lambda: 123., is_running=lambda: True))
     with pytest.raises(PermissionError, match='LIVE_GOLDEN'):
         cache._completed(dict(pid=77, process_created=123.),
-            dict(Gate_A_PASS=True, PR189_NUMERICAL_REPRODUCTION='PASS'),
+            dict(Gate_A_PASS=True, PR189_NUMERICAL_REPRODUCTION='PASS', finished_UTC='finished'),
             dict(inflight=None, Native_runtime_known=True))
 
 
@@ -97,5 +97,16 @@ def test_inflight_native_or_missing_numerical_certificate_blocks_reuse():
         (dict(Gate_A_PASS=True, PR189_NUMERICAL_REPRODUCTION='PASS'),
          dict(inflight={'component': 'PHASE_I'}, Native_runtime_known=True)),
     ]:
-        with pytest.raises(ValueError, match='COMPLETED_GOLDEN'):
+        with pytest.raises(ValueError, match='COMPLETED_GOLDEN|TERMINATED_RECONCILED'):
             cache._completed(dict(pid=77, process_created=123.), result, reconciliation)
+
+
+def test_terminated_native0_failure_can_only_prove_local_domains(monkeypatch):
+    def absent(pid):
+        raise cache.psutil.NoSuchProcess(pid)
+    monkeypatch.setattr(cache.psutil, 'Process', absent)
+    result = dict(Gate_A_PASS=False, finished_UTC='finished')
+    reconciliation = dict(inflight=None, Native_runtime_known=True, calls=0)
+    cache._terminated(dict(pid=77, process_created=123.), result, reconciliation)
+    with pytest.raises(ValueError, match='NUMERICAL_PASS_REQUIRED'):
+        cache._completed(dict(pid=77, process_created=123.), result, reconciliation)
