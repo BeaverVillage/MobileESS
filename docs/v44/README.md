@@ -38,11 +38,11 @@ Current AC 후보별 전체 물리 Raw는 원래 경로에 보존하고, 감사 
 
 # Current execution policy: Q250 / M four threads
 
-The latest user instruction selects `v44.q250_m4`: B2 M1 and B3 M1/M2 use
+The latest user instruction selects `v44.q250_m4_v2`: B2 M1 and B3 M1/M2 use
 per-vehicle reactive operating limits +/-250 kvar and four-thread Barrier,
 with Joint inner gap 3%. A stages retain one thread. PCS400/P300, SOC, routes
 and physical safety checks are preserved. This is an explicit new Q subdomain,
-not an unchanged historical model. Fresh campaign003 starts at May01 B2 with
+not an unchanged historical model. Fresh campaign004 starts at May01 B2 with
 new M/K48/Joint clocks; one Worker processes B2 May01..07 then per-date
 B0 -> B1 -> B3. Golden003 A1 remains reused. The older serial two-thread
-policy is superseded. See [policy and evidence](v43_planning_svr12_actual_v1/q250_m4/README.md).
+policy is superseded. See [policy and evidence](v43_planning_svr12_actual_v1/q250_m4_v2/README.md).
