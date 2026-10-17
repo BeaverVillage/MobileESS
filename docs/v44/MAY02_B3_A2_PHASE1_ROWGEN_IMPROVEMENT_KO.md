@@ -1,6 +1,6 @@
 # May02 B3 A2 Phase I Row Generation 개선
 
-기록 시각 UTC: 2026-10-17T14:29:53.636524+00:00. 상태: **RUNNING**. 대상: `D:\MobileESS_V44\runtime\v43_planning_svr12_actual_v1\campaign004\2025-05-02\B3\attempt005`. PR: https://github.com/BeaverVillage/MobileESS/pull/233
+기록 시각 UTC: 2026-10-17T14:32:41.624387+00:00. 상태: **RUNNING**. 대상: `D:\MobileESS_V44\runtime\v43_planning_svr12_actual_v1\campaign004\2025-05-02\B3\attempt005`. PR: https://github.com/BeaverVillage/MobileESS/pull/233
 
 r021에서 19회 후 및 Column Activation 후 전체 행을 강제 투입하던 두 분기를 V44 전용 어댑터에서 제거했다. 원본 동결 파일은 수정하지 않았다. 기존 certified_separate/restricted/elastic_master/verify_zero와 원본 inclusion/Fraction/primal/dual 검증을 재사용한다.
 
@@ -21,8 +21,8 @@ B1은 실제 A1, B3는 A2 실행 경로에 연결했다. 공통 B1/B3 A2 어댑�
 | Phase I LP Native 초 | 378.960000038147 | 0.0 |
 | 최대 추정 Kappa | 1.260680997159824e+18 | 미측정 |
 | Barrier iteration | 0.0 | 0.0 |
-| A2 Native 누계 초 | 486.14000034332275 | 미측정 |
-| A2 원장 Wall 초 | 4445.492863599997 | 미측정 |
+| A2 Native 누계 초 | 486.14000034332275 | 0.0 |
+| A2 원장 Wall 초 | 4445.492863599997 | 1.5300000086426735e-05 |
 
 기존 S7 참고값: 행791672, 원래변수94158, 인공변수689928(88.0%), NNZ14771533, Native33.817초, 추정 Kappa1.051286e18. 표의 최대값은 중단 시점까지 전체 Phase I 구간이다. 새 모델의 지원 후보와 반복 수가 달라질 수 있어 각 solve를 동일 문제 크기의 속도 비교로 주장하지 않는다.
 
