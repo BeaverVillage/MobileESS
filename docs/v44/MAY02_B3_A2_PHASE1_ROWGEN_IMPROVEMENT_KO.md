@@ -1,6 +1,6 @@
 # May02 B3 A2 Phase I Row Generation 개선
 
-기록 시각 UTC: 2026-10-17T14:44:29.616279+00:00. 상태: **RUNNING**. 대상: `D:\MobileESS_V44\runtime\v43_planning_svr12_actual_v1\campaign004\2025-05-02\B3\attempt005`. PR: https://github.com/BeaverVillage/MobileESS/pull/233
+기록 시각 UTC: 2026-10-17T16:06:44.950263+00:00. 상태: **FAILED**. 대상: `D:\MobileESS_V44\runtime\v43_planning_svr12_actual_v1\campaign004\2025-05-02\B3\attempt005`. PR: https://github.com/BeaverVillage/MobileESS/pull/233
 
 r021에서 19회 후 및 Column Activation 후 전체 행을 강제 투입하던 두 분기를 V44 전용 어댑터에서 제거했다. 원본 동결 파일은 수정하지 않았다. 기존 certified_separate/restricted/elastic_master/verify_zero와 원본 inclusion/Fraction/primal/dual 검증을 재사용한다.
 
@@ -14,19 +14,19 @@ B1은 실제 A1, B3는 A2 실행 경로에 연결했다. 공통 B1/B3 A2 어댑�
 
 | 측정 | 기존 attempt004 | r022 attempt005 |
 |---|---:|---:|
-| 최대 Phase I 행 | 804735 | 57403 |
-| 최대 변수 | 789851 | 90785 |
-| 최대 NNZ | 14853629 | 1640443 |
-| 측정 최대 RSS bytes | 15157084160 | 10795511808 |
-| Phase I LP Native 초 | 378.960000038147 | 14.179999351501465 |
-| 최대 추정 Kappa | 1.260680997159824e+18 | 1.7147404271393372e+16 |
+| 최대 Phase I 행 | 804735 | 129350 |
+| 최대 변수 | 789851 | 118245 |
+| 최대 NNZ | 14853629 | 1942464 |
+| 측정 최대 RSS bytes | 15157084160 | 13069303808 |
+| Phase I LP Native 초 | 378.960000038147 | 347.2279989719391 |
+| 최대 추정 Kappa | 1.260680997159824e+18 | 2.1894790407706276e+19 |
 | Barrier iteration | 0.0 | 0.0 |
-| A2 Native 누계 초 | 486.14000034332275 | 38.036999225616455 |
-| A2 원장 Wall 초 | 4445.492863599997 | 786.393373400002 |
+| A2 Native 누계 초 | 486.14000034332275 | 567.3849945068359 |
+| A2 원장 Wall 초 | 4445.492863599997 | 5719.335952599999 |
 
 기존 S7 참고값: 행791672, 원래변수94158, 인공변수689928(88.0%), NNZ14771533, Native33.817초, 추정 Kappa1.051286e18. 표의 최대값은 중단 시점까지 전체 Phase I 구간이다. 새 모델의 지원 후보와 반복 수가 달라질 수 있어 각 solve를 동일 문제 크기의 속도 비교로 주장하지 않는다.
 
-Full Phase I Zero: False. P1 Full Pricing: False. A2 PASS: 미완료. M2: 미실행. Actual/Fresh 최종 PASS: 미완료.
+Full Phase I Zero: False. P1 Full Pricing: False. A2 PASS: False. M2: 미실행. Actual/Fresh 최종 PASS: False.
 
 기존 PASS 13개 Case와 May02 B3 M1의 원본 파일을 SHA로 보존 검증한다. 같은 날 B1 A1 및 M1의 원본 FULL 가능해, Fixed Plan SHA, Q250, Physical Domain, Hardware, Time Axis를 Native0로 독립 재검산했다. 새 A2는 완료 M1을 읽고 새 Attempt의 독립5400초 원장을 0초부터 사용한다. 과거486.140000343초 및381개 호출은 attempt004에 그대로 남아 있다.
 
