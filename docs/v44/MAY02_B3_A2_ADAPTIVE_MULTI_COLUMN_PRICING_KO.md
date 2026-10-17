@@ -1,6 +1,6 @@
 # May02 B3 A2 Adaptive Multi-Column Pricing r024a
 
-기록 UTC: 2026-10-17T16:20:55.498575+00:00; Case: D:\MobileESS_V44\runtime\v43_planning_svr12_actual_v1\campaign004\2025-05-02\B3\attempt007; PR: https://github.com/BeaverVillage/MobileESS/pull/233
+기록 UTC: 2026-10-17T16:55:56.038746+00:00; Case: D:\MobileESS_V44\runtime\v43_planning_svr12_actual_v1\campaign004\2025-05-02\B3\attempt007; PR: https://github.com/BeaverVillage/MobileESS/pull/233
 
 사용자 지시로 r022 attempt005를 Native 비실행 경계에서 중단했다. 667호출/567.3849945068359초와 Raw/Trace/로그/원장은 보존했고 중단 분류는 USER_REQUESTED_ALGORITHM_REVISION_STOP이다. 마지막 행 검사 완료 Phi는0.0011475893025559441이었다. 기존13 PASS와 완료된 May02 B1 A1 및 B3 M1은 SHA 검증하고 재최적화하지 않는다.
 
@@ -18,14 +18,14 @@ r023의 정확한 sparse 재조립/행 생성/활성행 대응/Full Phi/prior in
 
 | 측정 | 중단 r022 attempt005 | 새 r024a |
 |---|---:|---:|
-| 전체 A2 Native 초 | 567.3849945068359 | 0.0 |
-| 전체 A2 Wall 초 | 5719.335952599999 | 1.3800017768517137e-05 |
-| 최대 Master 행 | 129350 | None |
-| 최대 변수 | 118245 | None |
-| 최대 측정 RSS bytes | 12667404288 | None |
-| 누적 Pricing Class | 기존 초기37LP 시점35/138; 종료 시점은 원본기록 | 0 |
+| 전체 A2 Native 초 | 567.3849945068359 | 342.1169981956482 |
+| 전체 A2 Wall 초 | 5719.335952599999 | 2133.054039600014 |
+| 최대 Master 행 | 129350 | 172587 |
+| 최대 변수 | 118245 | 139368 |
+| 최대 측정 RSS bytes | 12667404288 | 13366767616 |
+| 누적 Pricing Class | 기존 초기37LP 시점35/138; 종료 시점은 원본기록 | 123 |
 
-새 Native0 시작 admission: True; A1/M1 새 Native0회; M1 plan SHA: 0d1bec449f5110dfd76c82265bc98fefa4fb0e8a691445a6f11f660d303eaf10. Full Phase I: False; P1: False; A2: RUNNING; Gap: 미인증; M2: 미실행; Actual/Fresh: 미완료.
+새 Native0 시작 admission: True; A1/M1 새 Native0회; M1 plan SHA: 0d1bec449f5110dfd76c82265bc98fefa4fb0e8a691445a6f11f660d303eaf10. Full Phase I: False; P1: False; A2: USER_REQUESTED_ALGORITHM_REVISION_STOP; Gap: 미인증; M2: 미실행; Actual/Fresh: False.
 
 B1 A1/A2와 B3 A1/A2 공통 scope이며 실제 캠페인은 B1 A1 및 B3 A2에서 사용한다. 이후 미실행 Case에도 현재 A2 PASS 조건 없이 적용한다. A2 인증 후 기존 K48_M2→M2→Actual→독립 Fresh96으로 이어진다. 시간별 Codex 점검과 케이스 오류 격리·다음 날짜 진행 정책을 유지한다.
 
