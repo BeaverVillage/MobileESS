@@ -1,0 +1,644 @@
+# V44 신규 작업 지시 — V43 알고리즘·구조 동결, May01~07 캠페인 준비, B2 2-Worker, M-stage 15분 + K48 5분
+
+현재 MobileESS V43 PR #232에서 작업 중인 알고리즘과 검증 결과를 기반으로 **V44를 구성하라.**
+
+이번 작업의 목적은 새로운 최적화 알고리즘을 개발하는 것이 아니다.
+
+**V43의 최종 알고리즘, 정식화, 물리 모델, 보정제어 정책, 성능 개선을 동결하고, 날짜별 실제 상태와 입력만 변경하여 2025년 5월 1일부터 7일까지의 캠페인을 실행할 수 있도록 준비하는 것이다.**
+
+단, 별도로 지시한 M-stage 시간 예산은 30분에서 15분으로 변경한다. K48 하한 계산에는 독립적으로 5분을 부여한다.
+
+**중요: 이번 작업은 캠페인 실행 직전 단계까지만 수행한다. 실제 7일 캠페인은 시작하지 마라.**
+
+---
+
+## 0. 현재 V43 B2 작업 절대 보호
+
+현재 V43에서 진행 중인 B2 작업을 중단하거나 수정하지 마라.
+
+작업 시작 시 반드시 실제 PID, 생성시각, Worker 상태, Native 원장, Source SHA, Lock 소유 상태를 확인하라.
+
+- 실행 중인 B2 Solver 종료 금지
+- 기존 B2 Source 변경 금지
+- 기존 B2 Native 예산 변경 금지
+- 기존 B2 결과·로그·Raw 수정 금지
+- 현재 V43 작업 디렉터리 덮어쓰기 금지
+- 기존 B2 작업에 경쟁하는 최적화나 OpenDSS 실행 금지
+
+V44는 **별도의 브랜치와 Worktree에서 준비**한다.
+
+V44 Source 변경으로 현재 V43의 실행 중인 파일이 영향을 받지 않도록 작업 경계를 완전히 분리한다.
+
+현재 B2 작업의 공식 종료를 기다리지 않고 수행할 수 있는 Source 구성, 정적 검증, 테스트, 캠페인 설정 작업부터 진행하라.
+
+이번 준비 작업 때문에 V43 B2가 중단되거나 재시작되는 일은 없어야 한다.
+
+---
+
+## 1. V44 알고리즘 및 연구 구조 동결
+
+최신 검증 가능한 V43 Source Commit을 정확히 기록한 후 이를 V44의 기준으로 사용하라.
+
+새 Draft PR 및 `v44` 전용 경로를 구성한다.
+
+### 동결 대상
+
+**AIDC Planning**
+
+- PR189 기반 Fast A1 최적화
+- 기존 Phase I
+- Full Pricing
+- Integer Restoration
+- P1-only Acceptance
+- Original FULL 물리 검증
+- 기존 목적함수 및 목적함수 우선순위
+- Known Workload Allocation
+- Known Time-shifting
+- 기존 허용된 Planned Migration
+- CC4 Q50/Q90
+- Runtime ML V10
+- 기존 QoS·Source 연구 가정
+
+**MESS Planning**
+
+- Seedless K16 → K32 → K48
+- 기존 독립 Global LB 계산
+- Adaptive Beam Search
+- 4-MESS Direct Joint MILP
+- 4대 MESS 각각 독립 STAY/MOVE 결정
+- P/Q/SOC/Mode/이동경로 공동 최적화
+- Original FULL UB Replay
+- 기존 Global Gap 계산 및 인증
+
+**Actual**
+
+- B0/B2 원본 R0·FCFS 이벤트 실행
+- B1/B3 Known 동결 계획 실행
+- 별도 구현된 Known 연구용 허용창 완화 정책
+- Unknown R1-FLEX30-C1 민감도 기반 Pre-site
+- Overrun 관측 및 PENDING Unknown 재평가
+- 실제 GPU 점유 기반 전력 계산
+- 원본 C1 P/Q 계산
+- 인증된 Current AC 및 캐시·성능 개선
+- 최종 독립 Fresh AC96
+
+**전력망 및 이동 물리 조건**
+
+- IEEE123 원본 계통
+- 12개 AIDC
+- 4개 MESS
+- 기존 7 RegControl
+- 전압 0.95~1.05 pu
+- 기존 모든 선로·상 및 변압기 제약
+- GPU/Rack/WAN/SOC/PCS/이동시간 조건
+
+위 알고리즘과 수치 정책은 변경하지 마라.
+
+정식화 재설계, 새로운 휴리스틱, 임의의 제약 완화, 후보 수 정책 변경, STAY/MOVE 강제, 새로운 기상 모델, ML 재학습, 전력망 모델 변경은 금지한다.
+
+V44에서 허용하는 차이는 다음으로 제한한다.
+
+1. 날짜별 실제 입력·초기 상태·시간축·Source Identity
+2. 요청한 M-stage 예산 1,800초 → 900초
+3. 캠페인 Scheduler와 B2 2-Worker 운영
+4. V43에서 검증된 성능 개선의 동일 알고리즘 재사용
+5. 날짜 및 Arm에 따른 기존 정책 연결·입출력 Adapter 변경
+
+알고리즘이 동일함은 Source Manifest, 수학적 Case Identity, 행렬·변수·제약·물리 검증을 통해 확인하라.
+
+날짜별 작업 수가 달라 행렬 크기가 달라지는 것은 허용하지만, **행렬 생성 규칙이 달라져서는 안 된다.**
+
+---
+
+## 2. 캠페인 기간: 2025년 5월 1일~7일
+
+실행 대상은 정확히 다음 7일이다.
+
+- 2025-05-01
+- 2025-05-02
+- 2025-05-03
+- 2025-05-04
+- 2025-05-05
+- 2025-05-06
+- 2025-05-07
+
+총 7일 × 4개 Arm = 28개 독립 일별 Case다.
+
+기존 V43의 May01 전용 날짜 가드, 파일명, Source 바인딩, Snapshot 경로를 V44에서는 날짜 매개변수로 일반화하라.
+
+단순 문자열 치환으로 끝내지 말고, 일별 실제 Source를 검증하라.
+
+### 날짜별 Planning 시간축
+
+각 날짜 D에 대해:
+
+- Planning Issue: D-1 18:00 AEST
+- Planning Prefix: D-1 18:00~24:00
+- Actual 평가: D 00:00~24:00
+- 15분 제어 간격
+- 평가 96슬롯
+- Prefix를 포함한 실행·관측 구간 120슬롯
+
+2025년 5월 Melbourne의 AEST(UTC+10)를 사용한다.
+
+KST/UTC/AEST 변환 오류와 May01 전용 절대 Timestamp의 재사용을 검사한다.
+
+각 날짜는 기존 V43과 같은 **독립 일별 Planning·Actual Case**로 정의한다. 새로운 7일 통합 MILP를 만들지 않는다.
+
+이전 날짜의 최적화 결과를 다음 날짜의 관측 초기 상태로 임의 복사하지 마라.
+
+원본 Source가 제공하는 일별 초기 상태·Carry-in/Running 상태와 실제 작업 이벤트를 사용하고, 필요한 일자 간 연속성은 별도로 검증하라.
+
+### 날짜별 필수 입력
+
+각 날짜에 맞는 원본 입력을 사용한다.
+
+- AEMO 실제 수요
+- Rooftop PV
+- 기존 GFS06Z 기상 입력 정책
+- SCATS/SUMO 이동시간 및 교통 상태
+- Known Job Population
+- Unknown 실제 도착 이벤트
+- Runtime Q50/Q90
+- CC4 Forecast
+- GPU/Rack 점유 및 호환성
+- 초기 Running/Pending 상태
+- MESS 초기 위치·SOC
+- AIDC Source/기준 사이트 및 부하 정보
+
+May01의 Known Job, Unknown 도착, GPU 점유, MESS 초기 위치, SOC, 기상·교통 데이터를 May02~07에 그대로 복사하지 마라.
+
+일별 Source 파일이 없거나 Source 시각·SHA를 인증할 수 없다면 임의 데이터를 생성하지 말고 해당 날짜를 `INPUT_NOT_READY`로 표시한다.
+
+기존 May01 Golden003은 **정확히 동일한 May01 Source/Case에만 재사용**한다. May02~07의 A1은 해당 날짜의 동일 PR189 Fast 알고리즘으로 최적화하도록 준비한다. 날짜별로 이미 인증된 완전히 동일한 결과가 있다면 SHA 검증 후에만 재사용할 수 있다.
+
+Forecast causal availability는 기존과 같이 별도 인증 항목으로 유지한다. 기존 `NOT_CERTIFIED`를 임의로 PASS로 변경하지 않는다.
+
+---
+
+## 3. 캠페인 운영 구조 — Main 레인 + B2 전용 2-Worker
+
+두 개의 독립적인 캠페인 레인을 구성하라.
+
+### Main 레인: Worker 1개
+
+실행 순서:
+
+**May01 B0 → B1 → B3 → May02 B0 → B1 → B3 → ... → May07 B0 → B1 → B3**
+
+각 날짜의 알고리즘:
+
+**B0**
+- PR189 원본 R0/Q50 AIDC Reference
+- 기본 FCFS 이벤트 실행
+- Pre-site, Time-shifting, Migration 최적화 없음
+- MESS 없음
+- 실제 점유 기반 P/Q 및 Fresh AC96
+
+**B1**
+- 기존 PR189 Fast A1
+- Known Allocation/Time-shifting/Planned Migration
+- V43에서 구현한 Known 연구용 허용창 완화 정책
+- Unknown R1-FLEX30-C1 Pre-site
+- MESS 없음
+- Actual96/Fresh96
+
+**B3**
+- 동일 날짜의 A1을 재사용
+- A1 → M1 → A2 → M2
+- Known의 최종 A2 계획 실행
+- B1과 동일한 연구용 Known 허용창 정책 및 Unknown R1-FLEX30-C1 제어
+- 최종 MESS P/Q/경로 동결
+- Actual96/Fresh96
+
+B3가 같은 날짜의 B1 A1을 재사용하더라도 A2 결과를 A1 인증으로 대체하지 마라.
+
+현재 V43에서 Known 허용창 완화가 B1 전용으로 구현되어 있다면, V44 B3는 동일한 동작을 가진 날짜·Arm Adapter만 추가하라. 새로운 Known 최적화 알고리즘을 만들지 않는다.
+
+원본 Source SLA 인증과 연구용 완화 정책은 끝까지 구분한다.
+
+### B2 전용 레인: Worker 2개
+
+Main 레인과 독립된 B2 작업 대기열을 만든다.
+
+대상:
+
+May01 B2 ~ May07 B2
+
+**정확히 2개 B2 Worker가 서로 다른 날짜를 처리할 수 있도록 준비한다.**
+
+예시:
+
+- B2 Worker 1: May01 → May03 → May05 → May07
+- B2 Worker 2: May02 → May04 → May06
+
+이는 예시일 뿐이며 실제 Dispatcher는 Worker가 비는 순서대로 다음 미완료 날짜를 배정해도 된다.
+
+각 B2의 AIDC는 **동일 날짜의 B0 Planning Reference를 고정**한다.
+
+B2는 B0 Actual 완료 또는 B1 최적화 완료를 기다릴 필요가 없다.
+
+B2에서는 AIDC를 다시 최적화하지 않는다.
+
+4대 MESS에 대해 기존 K48 + Adaptive Beam + Direct Joint MILP만 실행한다.
+
+B2 Actual에서는 원본 FCFS와 동결 MESS만 사용한다. Unknown 민감도 Pre-site, Time-shifting, Migration 제어를 새로 활성화하지 않는다.
+
+---
+
+## 4. B2 2-Worker 동시 실행을 위한 안전한 Scheduler
+
+현재 V43의 단일 Heavy Worker 검사와 6개 공유 잠금은 그대로 사용하면 B2 동시 실행을 막을 수 있다.
+
+V42 기존 멀티 Worker Coordinator의 검증된 날짜별 Worker 슬롯·독립 PID·OS Lock 관리 방식을 참고하되, 알고리즘 Source와 과거 최적화 결과는 가져오지 마라.
+
+V44에는 다음이 필요하다.
+
+- Main Worker 슬롯 1개
+- B2 전용 Worker 슬롯 2개
+- 날짜·Arm·Stage별 독립 Attempt
+- Worker별 독립 Temp/Gurobi Nodefile/Log
+- Worker별 독립 Native 예산 원장
+- 서로 다른 날짜의 결과 파일 충돌 방지
+- 같은 Arm·날짜의 중복 실행 방지
+- PID와 프로세스 생성시각 검증
+- 비정상 종료 후 안전한 Resume
+- Source SHA 검증
+- OS Lock 기반 중복 Worker 방지
+
+B2 Worker 두 개의 동시 실행을 허용하되, 기존 V43 Worker나 다른 캠페인의 Source/Lock을 무단으로 우회하지 않는다.
+
+공유 제어 자원의 잠금과 날짜·Worker 전용 잠금을 구분하라.
+
+Main Worker 1개와 B2 Worker 2개는 논리적으로 독립된 레인이다.
+
+최대 3개 Heavy Worker가 동시 실행될 수 있는 구성은 시스템 RAM, Gurobi 환경 및 독립 실행 안정성을 확인한 경우에만 허용한다.
+
+안전성이 확인되지 않았다면 Main 레인 실행을 대기시키면서 B2의 2-Worker 동시 실행을 유지하는 보수적인 스케줄링을 구성한다.
+
+**B2 Worker 수를 임의로 1개로 축소하여 완료했다고 보고하지 마라.**
+
+Worker당 Gurobi Threads=1을 유지한다.
+
+기존에 제거하도록 지시했던 임의의 RAM/Commit 수치 기반 차단 게이트를 다시 도입하지 않는다. 실제 자원 사용량과 동시 실행 가능성을 기록하고 충돌 없이 스케줄링하라.
+
+이번에는 실제 멀티 Worker 최적화를 실행하지 말고, OS Lock과 프로세스 슬롯의 경량 동시성 테스트까지만 수행한다.
+
+---
+
+## 5. M-stage 시간 예산 변경 — 최우선 반영
+
+현재 V43 M-stage의 1,800초 예산을 V44에서 **900초로 변경**한다.
+
+K48은 별도 예산 300초를 유지한다.
+
+### 단계별 예산
+
+| 단계 | K48 Native | Beam + Joint Native |
+|---|---:|---:|
+| B2 M1 | 300초 | 900초 |
+| B3 M1 | 300초 | 900초 |
+| B3 M2 | 300초 | 900초 |
+
+각 M-stage에서 K48 300초와 Joint 900초는 완전히 독립적인 Native 예산이다.
+
+따라서 **K48의 5분을 Joint의 15분에 포함하지 않는다.**
+
+B3 M1과 M2도 서로 별도의 예산을 갖는다.
+
+A1/A2의 원래 알고리즘, Gap 조건 및 Native 예산은 변경하지 않는다.
+
+특히 A2의 기존 0.5% Global Gap 인증 조건은 유지한다.
+
+### 수정 대상
+
+현재 구현의 다음 위치를 확인하라.
+
+- `v43_mess/budget.py`의 `StageBudget`
+- `v43_mess/case.py`의 `mess_stage_budget_seconds`
+- M-stage Worker 및 예산 전달
+- K48 별도 예산 원장
+- M1/M2 Stage Request
+- Stage Resume 및 Timeout 처리
+- Controller·Monitor·최종 보고서의 예산 표기
+
+`1800`이 다른 내부 정책에 남아 있으면 실제 Joint 실행이 30분으로 돌아갈 수 있으므로, 관련 상수와 예산 경로를 모두 확인한다.
+
+단, 원래 알고리즘의 개별 Solver 호출 정책은 유지한다.
+
+- K16/K32/K48 기존 단계별 TimeLimit 유지
+- K48 합계 최대 300초
+- Joint 단일 Native 호출 cap 기존 140초 유지
+- 각 호출은 남은 Stage 예산을 초과하도록 새로 요청하지 않음
+- 동일 Stage에서 Native 누적 900초를 소진하면 추가 Joint Optimize 금지
+- 이전 Stage 또는 이전 날짜의 Native 시간을 새 Stage로 가져오지 않음
+
+시간은 기존과 동일하게 Gurobi의 실제 측정 Native Runtime 기준으로 계산한다.
+
+모델 생성·Source 검증·Full Replay·Fresh AC Wall Time은 별도 기록한다.
+
+단일 Gurobi 호출이 요청 TimeLimit을 소폭 초과한 경우 실제 초과 시간을 기록하고 더 이상의 Native 호출을 허용하지 않는다.
+
+---
+
+## 6. Timeout 발생 시 Best Feasible Incumbent로 계속 진행
+
+**15분에 도달하면 최적해 증명이 완료되지 않았더라도, 그 시점까지 확보한 가장 좋은 물리적 정수 가능해를 사용해 다음 단계로 진행한다.**
+
+다만 반드시 다음 조건을 지켜라.
+
+### M-stage에서 FULL 가능해가 존재하는 경우
+
+- Solver의 현재 Best Incumbent를 보존
+- 같은 날짜·Arm·Stage의 Incumbent인지 확인
+- Original FULL 행·제약·정수성 검증
+- MESS P/Q/SOC/이동경로/Mode 검증
+- 모든 4대 MESS의 물리 상태 일치 확인
+- 검증된 현재 Stage UB를 저장
+- K48 독립 Global LB와의 Gap을 별도로 저장
+- `TIME_LIMIT_FULL_FEASIBLE_GAP_NOT_CERTIFIED` 등 정확한 상태로 표시
+- 다음 Stage에 검증된 가능해를 전달
+
+B2에서는 FULL 가능해가 있으면 해당 MESS 계획을 동결하고 후속 Actual/Fresh 단계로 진행할 수 있도록 한다.
+
+B3에서는 M1 FULL 가능해가 있으면 M1을 고정하여 A2로 넘어가고, M2에서도 동일하게 현재 FULL 가능해를 이용해 후속 Actual/Fresh로 진행한다.
+
+Gap 3%를 달성하지 못했다고 유효한 Incumbent를 버리고 처음부터 다시 풀지 마라.
+
+### 정수 가능해가 없는 경우
+
+- 제한된 Beam Pool 해를 FULL 가능해로 속이지 않음
+- LP 해를 정수 가능해로 취급하지 않음
+- 과거 날짜 또는 다른 Case의 Incumbent 복사 금지
+- 강제로 STAY/MOVE 해를 만들어 사용하지 않음
+- 유효하지 않은 MESS P/Q/SOC로 Actual 실행 금지
+
+이 경우 `TIME_LIMIT_NO_FULL_FEASIBLE_INCUMBENT`로 기록하고 해당 Stage의 후속 의존 단계를 차단한다.
+
+하지만 다른 날짜와 다른 Arm의 캠페인은 계속 진행하도록 한다.
+
+### LB/Gap 처리
+
+K48의 시간 종료 후에도 유효한 Global LB 인증이 있다면 보존한다.
+
+독립적으로 유효한 Global LB가 없으면 `GLOBAL_LB_NOT_CERTIFIED`로 기록한다.
+
+Restricted Master나 Beam Pool의 Bound를 Global LB로 사용하지 않는다.
+
+실제 Gap이 3%를 넘으면 FULL 가능해가 있더라도 `GAP_NOT_CERTIFIED`로 구분한다.
+
+B3 A2는 기존 PR189의 독립 FULL 및 Global Gap 인증 조건을 유지한다. A2의 인증 실패를 M-stage Timeout 정책으로 우회하지 않는다.
+
+**목표는 Timeout 시 이미 확보한 유효한 해를 버리지 않고 다음 단계로 진행하는 것이지, 인증되지 않은 해를 PASS 처리하는 것이 아니다.**
+
+---
+
+## 7. V43에서 검증된 모든 속도 개선 적용
+
+V44에서 새로운 계산 병목을 만들지 마라.
+
+다음 최종 성능 개선을 동결하여 적용한다.
+
+### AIDC
+
+- PR189 Fast A1
+- 기존 Physical Domain Cache
+- Fast Active Domain
+- 원래 Phase I / Pricing 계산 재사용
+- 날짜별 Source에 맞는 Cache SHA 검증
+- 중복 Model Build 및 불필요한 재계산 방지
+
+### MESS
+
+- Seedless K48
+- 기존 Native0 K16 Packet 재사용
+- Adaptive Beam
+- Direct Compact Joint MILP
+- 기존 후보 Scoring 벡터화
+- 기존 Cache 최적화
+- 원래 FULL 검증
+- 중복 Source·Matrix Build 최소화
+
+### Actual
+
+- B0/B2의 빠른 원본 FCFS 실행
+- B1/B3의 검증된 Future Profile Cache
+- Reservation 계산 개선
+- 동일 상태의 서비스 적분·Hash 재사용
+- 인증된 Fast Current AC
+- 동일한 과거 구간 측정·Inventory 재사용
+- 현재 후보의 실제 Current AC 검사 유지
+- 독립 순차 Fresh AC96
+
+이미 검증된 성능 개선은 유지하고, 실험적으로 효과가 확인되지 않은 새로운 계산 방식으로 대체하지 않는다.
+
+May01에서 빠르게 실행된 알고리즘이 May02~07에도 같은 Source 생성 규칙과 성능 개선 코드를 사용하도록 한다.
+
+각 Stage의 Build, Native, Actual, Current AC, Fresh Wall Time을 분리 기록한다.
+
+성능 최적화 때문에 물리 제약이나 검증 정책을 약화하지 마라.
+
+---
+
+## 8. 각 날짜의 Stage 의존관계와 실패 처리
+
+### B0
+
+날짜별 R0/Q50 Reference → Actual FCFS → Fresh96
+
+### B1
+
+날짜별 A1 → Frozen Known/Unknown Actual → Fresh96
+
+### B2
+
+날짜별 B0 Reference 고정 → K48 → M1 Joint → 최종 MESS 동결 → FCFS Actual → Fresh96
+
+### B3
+
+날짜별 A1 → K48/M1 → A2 → K48/M2 → 최종 AIDC/MESS 동결 → Actual → Fresh96
+
+각 날짜의 Input, Stage, Result, UB/LB, Native Clock은 독립적이어야 한다.
+
+May01의 Golden003 인증을 May02~07에 복사하거나 동일한 UB/LB를 전파하지 마라.
+
+### 실패 및 Timeout
+
+캠페인은 어느 한 날짜가 FAIL 또는 TIME_LIMIT이라고 전체를 종료하지 않는다.
+
+- FULL 가능해 존재: 정확한 상태로 후속 가능 단계 진행
+- FULL 가능해 없음: 해당 의존 단계 중단, 다음 독립 날짜 진행
+- Source/Input 오류: 그 날짜 BLOCKED 기록, 다음 날짜 진행
+- Fresh AC 실패: 물리 FAIL 기록, 결과 조작 금지
+- Solver Crash: 마지막 정산된 Incumbent·원장 보존
+- Worker 비정상 종료: PID/Lock/Native Inflight 확인 후 안전한 Resume
+- 같은 날짜의 재실행은 명시적인 새 Attempt로만 수행
+
+중복 최적화, 결과 덮어쓰기, 다른 날짜의 결과 혼용은 금지한다.
+
+---
+
+## 9. 7일 캠페인 실행 전 검증
+
+이번 작업에서는 실제 캠페인 실행 없이 다음 검증을 완료하라.
+
+### Source 및 날짜 검증
+
+- 7일 날짜축 정확성
+- 날짜별 Input SHA와 Source 식별자
+- AEST/UTC/KST 변환
+- 각 날짜의 Planning Issue = D-1 18:00
+- Known/Unknown 구분
+- 날짜별 초기 Running/Pending
+- 초기 MESS 위치/SOC
+- GPU/Rack 및 교통 입력
+- Missing Source 처리
+- May01 Source의 타 날짜 오사용 차단
+
+### 알고리즘 동결 검증
+
+- V43↔V44 알고리즘 Source Identity
+- 목적함수·수학적 제약 생성 규칙
+- K48/Beam/Joint 동일 알고리즘
+- A1/M1/A2/M2 의존관계
+- Known/Unknown Actual 정책
+- P/Q/SOC 및 전력망 제약
+- 모델 크기 차이의 날짜별 입력 원인
+
+### 예산 검증
+
+- Joint M-stage 900초
+- K48 독립 300초
+- B2 M1 / B3 M1 / B3 M2 각각 독립 예산
+- 기존 개별 Native Call TimeLimit 유지
+- Timeout 후 FULL 가능해 보존
+- FULL 불가능해의 후속 단계 차단
+- Gap 미인증 상태 보존
+- Native 예산 중복 충전 및 초과 호출 방지
+
+### Worker 검증
+
+- Main Worker 1개
+- B2 Worker 2개
+- 날짜별 중복 실행 금지
+- 서로 다른 B2 날짜의 병렬 실행 가능
+- Worker 독립 파일·Temp·Native 원장
+- PID/생성시각 및 OS Lock
+- 외부 V43/V42 Worker 충돌 방지
+- 현재 실행 중인 V43 B2 Source·원장 불변
+- Resume 시 원장 정확성
+
+경량 Fixture, Mock Worker, Native0 검증을 활용한다.
+
+실제 `Gurobi.optimize()`, 대규모 Actual96, Fresh96, May01~07 운영 Worker는 시작하지 않는다.
+
+Native0 모델 생성도 현재 V43 B2와 실제 자원 충돌이 없는 경우에만 수행하라.
+
+---
+
+## 10. V44 실행 직전 산출물
+
+다음 자료를 만든다.
+
+### A. V44 Scientific Freeze Manifest
+
+- V43 기준 Commit SHA
+- V44 Source SHA
+- 동결 알고리즘 목록
+- 허용된 변경 항목
+- 원본 정식화·물리·전기계수 식별자
+- Known 연구 가정 식별자
+- Unknown R1-FLEX30-C1 식별자
+- 성능 개선 코드 식별자
+- Native 예산 900+300초
+
+### B. Seven-Day Input Manifest
+
+7일 × 4 Arm의 데이터·Source 준비 상태를 기록한다.
+
+날짜별 입력이 누락되면 해당 날짜만 `NOT_READY`로 표시한다.
+
+### C. Campaign Scheduler Manifest
+
+- Main 레인: B0→B1→B3 × 7일
+- B2 레인: 2-Worker × 7일
+- Stage 의존관계
+- 날짜별 Worker 슬롯
+- Lock 및 동시 실행 정책
+- Resume 정책
+- Timeout 다음 단계 진행 정책
+
+### D. Pre-Execution Certification
+
+- Source PASS/FAIL
+- 입력 PASS/FAIL
+- 날짜축 PASS/FAIL
+- 알고리즘 동결 PASS/FAIL
+- Native 예산 PASS/FAIL
+- Worker2 동시성 PASS/FAIL
+- 부하·물리 계약 PASS/FAIL
+- 남은 준비사항
+
+### E. 모니터 및 실행 명령
+
+캠페인 모니터에는 날짜·Arm·Stage별로 다음을 표시한다.
+
+- 상태
+- Worker/PID
+- Native Used / Remaining
+- K48 LB
+- Original FULL UB
+- Global Gap 및 인증 여부
+- Full Feasible Incumbent 여부
+- Timeout 상태
+- Build/Native/Actual/Fresh 소요시간
+- 다음 단계 및 다음 날짜
+- 오류·Resume 상태
+
+캠페인 실행 명령과 Resume 명령을 준비하되 **실제로 호출하지 않는다.**
+
+---
+
+## 11. 최종 실행 금지 및 보고
+
+이번 지시에서 허용되는 것은 V44 준비 작업뿐이다.
+
+다음은 금지한다.
+
+- V44 실 캠페인 자동 시작
+- 7일 Gurobi Native 최적화
+- 7일 Actual96/Fresh96 실행
+- 현재 V43 B2 Worker 중단
+- 기존 V43 Source/Raw/Native 원장 수정
+- 원본 PR189·Golden003 수정
+- May08~31 실행
+- Main Merge
+
+실행 스크립트의 기본 동작은 `DRY_RUN` 또는 `PREPARE_ONLY`로 설정한다.
+
+실제 실행에는 별도의 명시적인 사용자 승인과 실행 Permit이 필요하도록 한다.
+
+**준비 완료 상태와 실제 실행 시작 상태를 절대 혼동하지 마라.**
+
+### 최종 한국어 보고 형식
+
+작업을 완료하면 다음 사항을 간결하게 보고하라.
+
+1. V44 브랜치·Worktree·Commit·PR
+2. V43 대비 변경 파일 및 변경 이유
+3. 동결된 알고리즘의 동일성 검증
+4. May01~07 날짜별 입력 준비 여부
+5. Main 1 Worker / B2 2-Worker Scheduler 준비 상태
+6. K48 300초 + M-stage 900초 적용 증거
+7. Timeout 시 검증된 Incumbent 인계·실패 차단 테스트
+8. 성능 개선 코드 적용 여부
+9. 회귀 테스트 PASS/FAIL
+10. 현재 V43 B2 작업 불변 확인
+11. 캠페인 시작 전 남은 Blocker
+12. `V44_PRESTART_READY` 또는 `V44_PRESTART_BLOCKED` 최종 상태
+
+Source·데이터·Worker 인증이 충족되지 않았으면 READY를 선언하지 말고 정확한 Blocker를 제시하라.
+
+V44 준비 결과만 Commit/Push하여 새 Draft PR을 만든다.
+
+**최종 목표: V43과 동일한 알고리즘으로 May01~07의 B0/B1/B3 Main 캠페인과 B2 전용 2-Worker 캠페인을, K48 5분 + M-stage 15분 정책으로 실행할 수 있도록 모든 준비를 끝내되, 실제 캠페인은 시작하지 않는 것이다.**

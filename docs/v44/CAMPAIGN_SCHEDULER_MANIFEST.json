@@ -1,0 +1,199 @@
+{
+  "schema": "V44_CAMPAIGN_SCHEDULER_V1",
+  "mode": "PREPARE_ONLY",
+  "days": [
+    "2025-05-01",
+    "2025-05-02",
+    "2025-05-03",
+    "2025-05-04",
+    "2025-05-05",
+    "2025-05-06",
+    "2025-05-07"
+  ],
+  "cases": 28,
+  "Main_workers": 1,
+  "B2_workers": 2,
+  "Threads": 1,
+  "three_heavy_workers_certified": false,
+  "admission": "B2_TWO_FIRST_MAIN_WAITS_WHILE_B2_ACTIVE_OR_READY",
+  "K48_Native_seconds": 300.0,
+  "Joint_Native_seconds": 900.0,
+  "K48_budget_separate": true,
+  "Joint_single_call_cap": 140.0,
+  "A1_A2_Native_seconds": 5400.0,
+  "A1_A2_gap": 0.005,
+  "M_gap": 0.03,
+  "Known_research_policy": "B1_RESEARCH_RELAXED_KNOWN_WINDOW_V1",
+  "Unknown_policy": "R1_FLEX30_C1",
+  "R1_authority": "R1_ASSUMED",
+  "FORECAST_CAUSAL_AVAILABILITY": "NOT_CERTIFIED",
+  "RAM_numeric_gate": false,
+  "new_algorithms": false,
+  "initial_state_copied_from_prior_optimized_day": false,
+  "execution_requires_separate_explicit_user_permit": true,
+  "Main_order": [
+    {
+      "day": "2025-05-01",
+      "arm": "B0"
+    },
+    {
+      "day": "2025-05-01",
+      "arm": "B1"
+    },
+    {
+      "day": "2025-05-01",
+      "arm": "B3"
+    },
+    {
+      "day": "2025-05-02",
+      "arm": "B0"
+    },
+    {
+      "day": "2025-05-02",
+      "arm": "B1"
+    },
+    {
+      "day": "2025-05-02",
+      "arm": "B3"
+    },
+    {
+      "day": "2025-05-03",
+      "arm": "B0"
+    },
+    {
+      "day": "2025-05-03",
+      "arm": "B1"
+    },
+    {
+      "day": "2025-05-03",
+      "arm": "B3"
+    },
+    {
+      "day": "2025-05-04",
+      "arm": "B0"
+    },
+    {
+      "day": "2025-05-04",
+      "arm": "B1"
+    },
+    {
+      "day": "2025-05-04",
+      "arm": "B3"
+    },
+    {
+      "day": "2025-05-05",
+      "arm": "B0"
+    },
+    {
+      "day": "2025-05-05",
+      "arm": "B1"
+    },
+    {
+      "day": "2025-05-05",
+      "arm": "B3"
+    },
+    {
+      "day": "2025-05-06",
+      "arm": "B0"
+    },
+    {
+      "day": "2025-05-06",
+      "arm": "B1"
+    },
+    {
+      "day": "2025-05-06",
+      "arm": "B3"
+    },
+    {
+      "day": "2025-05-07",
+      "arm": "B0"
+    },
+    {
+      "day": "2025-05-07",
+      "arm": "B1"
+    },
+    {
+      "day": "2025-05-07",
+      "arm": "B3"
+    }
+  ],
+  "B2_queue": [
+    {
+      "day": "2025-05-01",
+      "arm": "B2"
+    },
+    {
+      "day": "2025-05-02",
+      "arm": "B2"
+    },
+    {
+      "day": "2025-05-03",
+      "arm": "B2"
+    },
+    {
+      "day": "2025-05-04",
+      "arm": "B2"
+    },
+    {
+      "day": "2025-05-05",
+      "arm": "B2"
+    },
+    {
+      "day": "2025-05-06",
+      "arm": "B2"
+    },
+    {
+      "day": "2025-05-07",
+      "arm": "B2"
+    }
+  ],
+  "stage_dependencies": {
+    "B0": [
+      "REFERENCE",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B1": [
+      "A1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B2": [
+      "REFERENCE",
+      "K48_M1",
+      "M1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B3": [
+      "A1_REUSE",
+      "K48_M1",
+      "M1",
+      "A2",
+      "K48_M2",
+      "M2",
+      "ACTUAL",
+      "FRESH"
+    ]
+  },
+  "B2_reference": "SAME_DAY_PR189_R0_Q50_NO_AIDC_OPTIMIZATION",
+  "B2_waits_for_B0_Actual_or_B1": false,
+  "B3_A1": "EXACT_SAME_DAY_B1_A1",
+  "locks": {
+    "external": "COORDINATOR_OWNS_ALL_LEGACY_SHARED_LOCKS",
+    "worker": "MAIN_SLOT_1_OR_B2_SLOT_1_2_PLUS_DAY_ARM_OS_LOCK",
+    "PID_creation_verified": true,
+    "external_lock_bypass": false
+  },
+  "resume": "NEW_ATTEMPT_ONLY_AFTER_PID_CREATION_EXIT_OS_LOCK_AND_NATIVE_INFLIGHT_RECONCILIATION",
+  "timeout": "FULL_VALIDATED_HEALTHY_M_INCUMBENT_MAY_CONTINUE_WITH_GAP_NOT_CERTIFIED;NO_FULL_BLOCKS_ONLY_DESCENDANTS",
+  "A2_acceptance": "INDEPENDENT_ORIGINAL_FULL_AND_GLOBAL_GAP_LE_0.005",
+  "process_files": "DAY/ARM/ATTEMPT/STAGE/{tmp,Native_ledgers,Native_logs};LEGACY_NODEFILES_IN_STAGE/tmp/gurobi",
+  "stages_timing": [
+    "Build",
+    "Native",
+    "Actual",
+    "Current_AC",
+    "Fresh"
+  ]
+}

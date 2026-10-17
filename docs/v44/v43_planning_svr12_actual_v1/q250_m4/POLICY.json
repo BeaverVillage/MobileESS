@@ -1,0 +1,177 @@
+{
+  "mode": "EXECUTE",
+  "explicit_user_approved": true,
+  "days": [
+    "2025-05-01",
+    "2025-05-02",
+    "2025-05-03",
+    "2025-05-04",
+    "2025-05-05",
+    "2025-05-06",
+    "2025-05-07"
+  ],
+  "source_sha": "f0c56b0ec67f58c213025c6528c5006b2ad20d8bcca2045cf92994835a673f72",
+  "certification_sha": "5db60ca54577000da5f85d08d2ff12d2ae5a9e647607a04049e456de8b8d27d6",
+  "authorization": {
+    "path": "D:\\v44_may01_07_prepare_20261016\\docs\\v44\\v43_planning_svr12_actual_v1\\EXECUTION_AUTHORIZATION.json",
+    "bytes": 1093,
+    "sha256": "af34e40a7f5c1a21ccc133733f60bf59f14c5d0360f44f85ccaebf8adb2bc18e"
+  },
+  "revision": "V44_V43_PLANNING_SVR12_ACTUAL_V1",
+  "B2_workers": 2,
+  "B2_first": true,
+  "Main_workers": 1,
+  "Main_order": [
+    "B0",
+    "B1",
+    "B3"
+  ],
+  "Threads": 1,
+  "UTC": "2026-10-16T14:53:20.786703+00:00",
+  "Raw_overwrite": false,
+  "source_initial_tap_queue": "INDEPENDENT_PER_ARM_AND_FRESH",
+  "operational_overlay": {
+    "policy": "V44_JOINT_CALL300_COMPLETED_K48_RESUME_V1",
+    "Joint_call_cap": 300.0,
+    "K48_total": 300.0,
+    "Joint_total": 900.0,
+    "Threads": 1,
+    "Native_clock_reset": false,
+    "source": {
+      "path": "D:\\v44_may01_07_prepare_20261016\\v44\\cap300.py",
+      "bytes": 8633,
+      "sha256": "31c8f71d415fc0dc3b22aa7ccc7861ad1b0e56e4f85c4484608ad2fa2c77b61e"
+    }
+  },
+  "execution_policy_sha": "fd2d4da735cc4141c0f180588e526fec39a7da44b2b46458bccda576915a7943",
+  "base_source_freeze": {
+    "path": "D:\\v44_may01_07_prepare_20261016\\docs\\v44\\SCIENTIFIC_FREEZE_MANIFEST.json",
+    "bytes": 797305,
+    "sha256": "514050e87e9c356de9e6263d48ecd9c25ad355b6bcb3eb4911f252588be889ea"
+  },
+  "direct_user_instruction": "A stages one thread; B2/B3 all M stages Q +/-250 kvar per vehicle, four threads; fresh May01 campaign.",
+  "Joint_existing_measured_Runtime_deducted": true,
+  "K48_recalculation": false,
+  "numerical_overlay": {
+    "policy": "V44_B2_GAP3_MAY02_ROBUST_BARRIER_FRESH_M_V1",
+    "source": {
+      "path": "D:\\v44_may01_07_prepare_20261016\\v44\\barrier.py",
+      "bytes": 5877,
+      "sha256": "030930cb7b7d9e9d5f8ae8f9b7201dcf2a69336e0d27872b81198d6614a3db87"
+    },
+    "adapter_source": {
+      "path": "D:\\v44_may01_07_prepare_20261016\\v44\\numeric.py",
+      "bytes": 9334,
+      "sha256": "dc1065123ddd42b0ac390e59ef506c464f2304f854688eb3ce6182638aecbebe"
+    },
+    "affected_day": "2025-05-02",
+    "affected_stages": [
+      "M1"
+    ],
+    "affected_arm": "B2",
+    "affected_solver": "M_PR222_JOINT",
+    "May02_parameter_changes": {
+      "Method": 2,
+      "BarHomogeneous": 1,
+      "CrossoverBasis": 1
+    },
+    "all_B2_Joint_parameter_changes": {
+      "MIPGap": 0.03
+    },
+    "unchanged_K48": true,
+    "unchanged_A_stages": true,
+    "unchanged_matrix_and_domain": true,
+    "unchanged_feasibility_tolerances": true,
+    "unchanged_FULL_validation": true,
+    "B3_inner_MIPGap_unchanged": 0.005,
+    "Root_algorithm": "BARRIER",
+    "dual_simplex_production": false,
+    "K48_total": 300.0,
+    "Joint_total": 900.0,
+    "Joint_call_cap": 300.0,
+    "Threads": 1,
+    "fresh_restart_days": [
+      "2025-05-01",
+      "2025-05-02"
+    ],
+    "fresh_M_build": true,
+    "prior_M_clocks_imported": false,
+    "prior_M_incumbents_imported": false,
+    "original_Raw_modified": false
+  },
+  "numerical_policy_sha": "f3e74aa288a826eb8950960d5e0325fb124deb022a6398b1202169674bb936bd",
+  "direct_numerical_instruction": "병목 해결 후 5월 1일 2일 처음부터 재실행. Root Barrier 유지. B2 Joint MILP Gap 3%.",
+  "new_campaign": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign003",
+  "original_campaign_preserved": true,
+  "new_K48_and_Joint_clocks_from_zero": true,
+  "Q250_M4_overlay": {
+    "policy": "V44_M_Q250_BARRIER_THREADS4_GAP3_V1",
+    "source": {
+      "path": "D:\\v44_may01_07_prepare_20261016\\v44\\q250_m4.py",
+      "bytes": 15619,
+      "sha256": "4b25d2cfb1500ca0c21a0523e1038d2444454612410464720ef17257726b2d48"
+    },
+    "adapter_sources": [
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\v44\\barrier.py",
+        "bytes": 5877,
+        "sha256": "030930cb7b7d9e9d5f8ae8f9b7201dcf2a69336e0d27872b81198d6614a3db87"
+      },
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\v44\\cap300.py",
+        "bytes": 8633,
+        "sha256": "31c8f71d415fc0dc3b22aa7ccc7861ad1b0e56e4f85c4484608ad2fa2c77b61e"
+      },
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\v44\\serial_m2.py",
+        "bytes": 10775,
+        "sha256": "39699bf801024fcb30a512d070bc10cfd2f802e0a17770d83f534c0f5723b2c9"
+      },
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\v42_native\\mess.py",
+        "bytes": 11072,
+        "sha256": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec"
+      }
+    ],
+    "Workers": 1,
+    "M_Threads": 4,
+    "A_Threads": 1,
+    "Actual_Workers": 1,
+    "arms": [
+      "B2",
+      "B3"
+    ],
+    "stages": [
+      "M1",
+      "M2"
+    ],
+    "Q_operating_limit_kvar": 250.0,
+    "cap_in_original_FULL": true,
+    "cap_in_connected_Q_rows": true,
+    "cap_in_Beam_and_LP_score": true,
+    "original_matrix_and_domain_changed": true,
+    "change": "ONLY_Q_BOUNDS_AND_CONNECTED_Q_COEFFICIENT",
+    "PCS_kVA": 400.0,
+    "P_limit_kW": 300.0,
+    "SOC_and_route_authority_unchanged": true,
+    "Root_Method": 2,
+    "Joint_MIPGap": 0.03,
+    "K48_Threads": 4,
+    "K48_Method": 2,
+    "K48_total": 300.0,
+    "Joint_total": 900.0,
+    "Joint_call_cap": 300.0,
+    "B2_queue_first": true,
+    "Main_order": "PER_DAY_B0_B1_B3_AFTER_B2_MAY01_THROUGH_07",
+    "May01_A1": "REUSE_GOLDEN003_NO_REOPTIMIZATION",
+    "B3_A1": "REUSE_SAME_DATE_B1",
+    "fresh_M_build": true,
+    "prior_M_clocks_imported": false,
+    "prior_M_incumbents_imported": false,
+    "unchanged_FULL_validation": true,
+    "unchanged_feasibility_tolerances": true,
+    "unchanged_Actual_SVR12": true,
+    "original_Raw_modified": false
+  },
+  "Q250_M4_policy_sha": "fbf49341cf61f742e04dc959f73b4b4366d4067aacab6cfaa4cb61a04ed5f93b"
+}
