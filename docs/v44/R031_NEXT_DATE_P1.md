@@ -1,0 +1,11 @@
+# Next-date P1 improvement
+
+After the same class supplies a certified negative P1 direction twice, r031 can admit that class's complete native graph. Admission is limited to three classes, 8,000 native columns per class and 20,000 columns in total. This addresses repeated small witness expansions that made May02 perform eight full pricing rounds. Actual time savings have not yet been measured.
+
+This extension applies only to B3 A2 P1 from May03 through May07. Every full pricing round still visits all classes. Oracle file/snapshot hashes, complete graph payload inclusion, the original prior-point inclusion replay, exact lower bounds, integer restoration and independent FULL/physical acceptance remain required. Phase I, Native budgets and voltage bands retain r030 behavior, including B3 M1 0.955–1.045 pu and A2 conditional relaxation of ±0.005 pu.
+
+Validation: 80 focused regressions passed. Native0 reconstruction of the three repeatedly negative May02 classes produced bit-identical original local snapshots and coupling matrices, verified all previous physical primitives were contained and exercised the production source compilation chain. Total complete native columns: 19,430. No optimization call ran during validation.
+
+Deployment is armed through `MobileESS_V44_Campaign004_Recovery_R031`. The current May03 B1 attempt002, worker 64936, finishes under r030. An independent handover process waits for the terminal case result and release of the old coordinator and supervisor locks before starting r031. The r030 startup task is disabled; its running worker is untouched. May07 B1's completed A1 reuse remains authorized. Original results, Raw and Native ledgers are preserved.
+
+May02 B3 attempt014 passed P1 LP closure with objective 0.5362899155263658 and certified lower bound 0.5362899153468733. It subsequently failed independent physical acceptance at `CC4_CONSERVATION_ENVELOPE`, with violation 1472.8251211027343. Original integer rows and grid checks passed; this failure is not a P1 convergence failure or a numerical integrality residual. The result is preserved and May02 is not automatically restarted by this next-date extension. The physical acceptance criteria have not been bypassed.
