@@ -1,0 +1,228 @@
+{
+  "UTC": "2026-10-18T00:13:58.331623+00:00",
+  "active_revision": "v44_recovery_r026f1",
+  "source_sha": "4948291c0b41d47cdc30def868225291c6fcf1ab2f866792e341892d126a6a4a",
+  "counts": {
+    "PASS": 17,
+    "FAIL": 9,
+    "RUNNING": 1,
+    "WAITING": 1,
+    "RECOVERY_QUEUED": 0
+  },
+  "counts_note": "FAIL9 includes FAILED4/BLOCKED1/BLOCKED_DEPENDENCY4; no all28 success",
+  "all28_PASS": false,
+  "May02_B3": {
+    "case_result": {
+      "day": "2025-05-02",
+      "arm": "B3",
+      "PASS": false,
+      "status": "FAILED",
+      "error": "ValueError('INCOMPLETE_OR_FAILED_PARENT')",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\v44_r022_rowgen_20261017\\v44_recovery_r026f1\\fresh_a2_case.py\", line 43, in run\n    a2=worker.a_stage(stage,m1=m1);require_a2(a2,request['day'])\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v44_r022_rowgen_20261017\\v44_recovery_r026f1\\voltage_policy.py\", line 176, in require_handoff\n    return require_a2(result,day)\n           ^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v44_may01_07_prepare_20261016\\v44\\stages.py\", line 55, in require_a2\n    require_parent(result,day=day,arm='B3',stage='A2')\n  File \"D:\\v44_may01_07_prepare_20261016\\v44\\stages.py\", line 26, in require_parent\n    raise ValueError('INCOMPLETE_OR_FAILED_PARENT')\nValueError: INCOMPLETE_OR_FAILED_PARENT\n",
+      "finished_UTC": "2026-10-17T23:42:31.311682+00:00"
+    },
+    "A2_result": {
+      "PASS": false,
+      "accepted": false,
+      "day": "2025-05-02",
+      "arm": "B3",
+      "classification": "TIME_LIMIT_NO_VALID_INCUMBENT",
+      "P2_calls": 0,
+      "MESS_optimization_calls": 0,
+      "all_MESS_PQ_zero": false,
+      "old_point_bound_clock_loaded": false,
+      "error": "RuntimeError('BudgetStop: NATIVE_RUNTIME_CEILING_EXCEEDED')",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\v44_may01_07_prepare_20261016\\v42_may_campaign_native90\\a_stage.py\", line 583, in run\n    state, _, expanded, priced = phase_group['run'](native, state, day)\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v44_r022_rowgen_20261017\\v44_recovery_r026f1\\phase_rebuild.py\", line 162, in run\n    return original_run(StableNative(limited) if stable else limited,state,day,certified_zero_point)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v44_r022_rowgen_20261017\\v44_recovery_r026f1\\conditional_voltage.py.phase.generated\", line 86, in run\n    rec,raw=native.solve(s,f,'ORIGINAL_P1')\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v44_r022_rowgen_20261017\\v44_recovery_r026f1\\phase_stability.py\", line 98, in solve\n    try:rec,raw=self.native.solve(snapshot,target,component)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v44_r022_rowgen_20261017\\v44_recovery_r026f1\\phase_limit.py\", line 28, in solve\n    result=self.native.solve(snapshot,folder,component)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v44_may01_07_prepare_20261016\\v42_may_campaign_native90\\a_stage.py\", line 494, in solve\n    return solve_original(self, snapshot, folder, component)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\v44_may01_07_prepare_20261016\\v42_a_stage_acceptance\\native.py\", line 138, in solve\n    finally:\n           ^^\nRuntimeError: BudgetStop: NATIVE_RUNTIME_CEILING_EXCEEDED\n",
+      "scientific_infeasibility_proven": false,
+      "native_seconds": 5400.089005470276,
+      "wall_seconds": 19143.4400569,
+      "native_calls": 3028,
+      "invalid_original_physical_replay_count": 0,
+      "stage": "A2",
+      "finished_UTC": "2026-10-17T23:42:30.719645+00:00",
+      "source_sha": "c144adb79cb0b12de2529ec35b45eee2e63d9b26738a48cb09b2625cc4de7bbb",
+      "Native_seconds": 5400.089005470276,
+      "independent_Global_LB_validated": false,
+      "FULL_feasible": false,
+      "fixed_M1_plan_sha": "0d1bec449f5110dfd76c82265bc98fefa4fb0e8a691445a6f11f660d303eaf10",
+      "M1_UB_LB_transferred": false
+    },
+    "Native_seconds": 5400.089005470276,
+    "Native_inflight": null,
+    "PhaseI_Native_seconds": 576.9910032749176,
+    "P1_rounds": 18,
+    "P1_pricing_closed": false,
+    "INTEGER_CONTROL_completed": false,
+    "global_LB": null,
+    "gap": null,
+    "M2_entered": false,
+    "Actual_Fresh_entered": false,
+    "retry_released": false,
+    "auto_published_report": {
+      "UTC": "2026-10-17T23:42:51.883264+00:00",
+      "PASS": true,
+      "commit": "baeea052ff33671b45ba46ef5069d6198bc61a27",
+      "PR": "https://github.com/BeaverVillage/MobileESS/pull/233",
+      "report": {
+        "path": "D:\\v44_r022_rowgen_20261017\\docs\\v44\\R026F1_MEASURED_OUTCOME.json",
+        "bytes": 3785828,
+        "sha256": "fba4a012dde9693e54b9472be2a5350aaf2be2ee8a75df3b361056db3f00d271"
+      },
+      "push": "'/mnt/c/Program Files/GitHub CLI/gh.exe' auth git-credential store: line 1: /mnt/c/Program Files/GitHub CLI/gh.exe: No such file or directory\n'/mnt/c/Program Files/GitHub CLI/gh.exe' auth git-credential store: line 1: /mnt/c/Program Files/GitHub CLI/gh.exe: No such file or directory\nTo https://github.com/BeaverVillage/MobileESS.git\n   968b03eb8..baeea052f  HEAD -> codex/v44-may01-07-prestart",
+      "completed_case_PASS": false,
+      "existing_PASS_bytes_preserved": true
+    }
+  },
+  "May06_B1_export_diagnostic": {
+    "UTC": "2026-10-18T00:13:58.314623+00:00",
+    "status": "DIAGNOSED_NUMERICAL_EXPORT_MISMATCH_REPAIR_PENDING",
+    "failed_queue": {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R026F1_REPAIR_QUEUE\\2025-05-06_B1_attempt001.json",
+      "bytes": 1001,
+      "sha256": "656de88b488ab17339a1a50e83826e1ed285acb6a982099e983e259f1d62e64d"
+    },
+    "stage_result": {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\2025-05-06\\B1\\attempt001\\A1\\RESULT.json",
+      "bytes": 733,
+      "sha256": "e101862d48bddf1a4a88a159a085ab62fce7dec73643835d2c2fcfb2a21a22d1"
+    },
+    "accepted_producer_result": {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\2025-05-06\\B1\\attempt001\\A1\\OUTPUT\\A_RESULT.json",
+      "bytes": 2827,
+      "sha256": "8a42e9851afd10a86c6a1fa5863af86ec5bdf7b196f92ca39a86972b85c7780e"
+    },
+    "planning": {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\2025-05-06\\B1\\attempt001\\A1\\OUTPUT\\PLANNING_PHYSICAL.npz",
+      "bytes": 8904,
+      "sha256": "17cc5a81ea557202a4d13e8a006a1e83e9c9af73937c0b3387ac32c961e21d50"
+    },
+    "negative_anonymous_GPU": [
+      {
+        "slot": 80,
+        "site": "AIDC05",
+        "GPU": 7.9999981640290825,
+        "known_GPU": 8.0,
+        "anonymous_GPU": -1.8359709175186367e-06
+      },
+      {
+        "slot": 81,
+        "site": "AIDC05",
+        "GPU": 7.999998164029085,
+        "known_GPU": 8.0,
+        "anonymous_GPU": -1.8359709148541015e-06
+      },
+      {
+        "slot": 82,
+        "site": "AIDC05",
+        "GPU": 7.9999981640290825,
+        "known_GPU": 8.0,
+        "anonymous_GPU": -1.8359709175186367e-06
+      },
+      {
+        "slot": 83,
+        "site": "AIDC05",
+        "GPU": 7.9999981640290825,
+        "known_GPU": 8.0,
+        "anonymous_GPU": -1.8359709175186367e-06
+      },
+      {
+        "slot": 84,
+        "site": "AIDC05",
+        "GPU": 7.999998164029085,
+        "known_GPU": 8.0,
+        "anonymous_GPU": -1.8359709148541015e-06
+      }
+    ],
+    "export_minimum_allowed": -1e-07,
+    "producer_materialization_minimum_allowed": -1e-05,
+    "integer_residual": 4.589927291576146e-07,
+    "Native0_replay": {
+      "path": "D:\\MobileESS_V44\\development\\r026f1_export_repair_20261018\\INTEGER_DIAGNOSTIC.json",
+      "bytes": 1570,
+      "sha256": "49627c7b6918ce82ece9586f37b3612d78c1816b48cae5d1b1925f66d6689af1"
+    },
+    "naive_rounding_rejected": {
+      "PASS": false,
+      "max_row_violation": 2.650430259487635e-06,
+      "max_bound_violation": 4.263256414560601e-14,
+      "tolerance": 1e-06,
+      "rows": 693549,
+      "columns": 22616,
+      "raw_point_rounded_or_clipped": false
+    },
+    "original_full_row_replay": {
+      "PASS": true,
+      "max_row_violation": 1.9201706891180947e-10,
+      "max_bound_violation": 4.263256414560601e-14,
+      "tolerance": 1e-06,
+      "rows": 693549,
+      "columns": 22616,
+      "raw_point_rounded_or_clipped": false
+    },
+    "Native_calls": 0,
+    "source_edits": 0,
+    "repair_deployed": false,
+    "retry_released": false,
+    "verified_fix_available": false,
+    "required_next": "At a natural safe boundary under single-worker lock, validate exact original-integer/continuous feasibility restoration and export nonnegative GPU consistency in a separate sealed adapter; require full original rows/bounds/physical/gap and existing 1e-7 export cutoff. Never clip, weaken tolerances or accept the rejected rounded point.",
+    "healthy_worker_preserved": true
+  },
+  "current_May07_B1": {
+    "progress": {
+      "day": "2025-05-07",
+      "arm": "B1",
+      "stage": "ACTUAL_FRESH",
+      "status": "RUNNING",
+      "pid": 61092,
+      "UTC": "2026-10-18T00:12:23.650293+00:00"
+    },
+    "A1_Native_seconds": 14.274998664855957,
+    "A1_PASS": true,
+    "A1_certified_gap": 2.756792297712259e-10,
+    "final_case_PASS": false
+  },
+  "new_B0_PASS": [
+    {
+      "day": "2025-05-06",
+      "receipt": {
+        "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\2025-05-06\\B0\\attempt001\\RESULT.json",
+        "bytes": 2790,
+        "sha256": "b19f7e37acf73cda2edf19ce2e98077b49e224ea184c8ffb88e712ea46f15191"
+      },
+      "Actual96_execution_PASS": true,
+      "Fresh96_physical_PASS": true
+    },
+    {
+      "day": "2025-05-07",
+      "receipt": {
+        "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\2025-05-07\\B0\\attempt001\\RESULT.json",
+        "bytes": 2800,
+        "sha256": "88c4cbbc2ea20719e9aa344e23b13a6f47e2390ef1c773c9e99972d9ab9a8cad"
+      },
+      "Actual96_execution_PASS": true,
+      "Fresh96_physical_PASS": true
+    }
+  ],
+  "processes": [
+    {
+      "pid": 47656,
+      "alive": true,
+      "CPU_delta_2_seconds": 0.0
+    },
+    {
+      "pid": 47812,
+      "alive": true,
+      "CPU_delta_2_seconds": 0.09375
+    },
+    {
+      "pid": 61092,
+      "alive": true,
+      "CPU_delta_2_seconds": 1.75
+    }
+  ],
+  "old_PASS_Raw_A1_M1_and_attempt010_preserved": true,
+  "new_Native_diagnostic_calls": 0,
+  "source_edits": 0,
+  "solver_interventions": 0,
+  "PR233_Draft": true
+}
