@@ -1,0 +1,147 @@
+{
+  "UTC": "2026-10-18T12:39:06.925580+00:00",
+  "policy": "R038_SERIAL_PRE_ACTUAL_BARRIER_THEN_SEVEN_P_ONLY_ACTUAL_FRESH_PROCESSES",
+  "user_authorized": true,
+  "user_instruction": "지금5월 4일 B1 끝나면 나머지 Actual 전까지만 전부 1worker로 돌리고 Actual 전까지 다 끝났으면 7일 7worker로 병렬로 Actual과 나머지 단계 돌려. 5월 4일 B1 끝나고 바로 내가 말한대로 실행되게 셋팅해놔.",
+  "sources": [
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r038\\__init__.py",
+      "bytes": 495,
+      "sha256": "0fba9e05ccc00782b7c48ac3b2cdfaf7b31dd86ef0ceed5a1027b0448b347321"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r038\\batch.py",
+      "bytes": 9847,
+      "sha256": "4a8b93af457167c1536774a99774bbecaeeb41933f99139610cf7b2f67846743"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r038\\cpu.py",
+      "bytes": 4518,
+      "sha256": "0d181f4d3cc73ca716e675cfe27f9d4a934ae87fe59e72c258e55dc1ce191d03"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r038\\monitor.py",
+      "bytes": 4514,
+      "sha256": "893033e4a3b76dc0be88df5380d3c5ee501adc57d97e1678f5b927f7b4c905ea"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r038\\operations.py",
+      "bytes": 8122,
+      "sha256": "1a5273770191b7b7a2793f823037429ac1b6002b5a3144ab5f13c1824371a92f"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r038\\phases.py",
+      "bytes": 6639,
+      "sha256": "a5b3a5e762d0ed09ee9c04dd0e5f61ad2a82c98a501f033d5afcb4447037eda0"
+    }
+  ],
+  "previous_authorization": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R037_ROW_SHARED_STORAGE_AUTHORIZATION.json",
+    "bytes": 2249,
+    "sha256": "32efaf6fbfce19ef72f4ed1abab7e435d997b7266ceb3e457319bc55f94dae0d"
+  },
+  "validation": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R038_CHANGE_AND_VALIDATION.json",
+    "bytes": 2194,
+    "sha256": "7df1c474f5157fddffd79ab48c01f513fe14a154c2f6cb28f88d741701bf24ed"
+  },
+  "queue_plan": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R038_FIXED_BATCH_PLAN.json",
+    "bytes": 738,
+    "sha256": "2bcd6538d2b59c3eee106ce421825b9e25cb39b53a53a8e1bdf718372e3673dd"
+  },
+  "boundary_request": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\USER_PRE_ACTUAL_BATCH_BOUNDARY_REQUEST.json",
+    "bytes": 799,
+    "sha256": "0afceedb9f465435085ced56bb9f943c92d263d38db7581d2a1d5f6b1bddd598"
+  },
+  "confirmation": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R038_USER_BATCH_CONFIRMATION.json",
+    "bytes": 272,
+    "sha256": "3aa30beaca3c64e4ef0b6bc7683e229e4d7132148edd9324d05066a773801796"
+  },
+  "monitoring_sources": [
+    {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\collect_watchdog_r038.py",
+      "bytes": 255,
+      "sha256": "159975e0d15fe210feea24621d5efe4f5d33a0a27cad26f520aefb887f793292"
+    },
+    {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\audit_active_revision_r038.py",
+      "bytes": 251,
+      "sha256": "44c2455a319175f2781c6fa669c68ca6977a5e9d3914fb44ce4c61256ffab3f6"
+    }
+  ],
+  "protected_case_root": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\2025-05-04\\B1\\attempt002",
+  "prepare_workers": 1,
+  "actual_workers": 7,
+  "P_cores_only": true,
+  "cpu_placement": {
+    "physical_P_cores": 6,
+    "P_logical_processors": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "efficiency_class": 1,
+    "slots": [
+      {
+        "slot": 1,
+        "logical": 0,
+        "core": 0,
+        "group": 0
+      },
+      {
+        "slot": 2,
+        "logical": 2,
+        "core": 2,
+        "group": 0
+      },
+      {
+        "slot": 3,
+        "logical": 4,
+        "core": 4,
+        "group": 0
+      },
+      {
+        "slot": 4,
+        "logical": 6,
+        "core": 6,
+        "group": 0
+      },
+      {
+        "slot": 5,
+        "logical": 8,
+        "core": 8,
+        "group": 0
+      },
+      {
+        "slot": 6,
+        "logical": 10,
+        "core": 10,
+        "group": 0
+      },
+      {
+        "slot": 7,
+        "logical": 1,
+        "core": 0,
+        "group": 0
+      }
+    ],
+    "distinct_physical_cores": false,
+    "E_core_workers": 0
+  },
+  "full_Actual_and_Fresh_unmodified": true,
+  "old_scientific_sources_modified": false,
+  "legacy_scientific_slot_preserved": true,
+  "actual_runtime_slots_authorized_separately": true
+}

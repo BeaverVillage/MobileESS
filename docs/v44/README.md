@@ -1,5 +1,7 @@
 # V44: V43 Planning + SVR12 Actual
 
+2026-10-19 r043까지의 최신 결과와 실행 정책은 [r043 릴리스 기록](r043_release_20261019/README.md)에 정리했다. May01~07은 28/28건 Actual 실행 및 독립 Fresh 물리 검증 PASS다. May08~14는 B1/B3를 먼저 완료한 뒤 B0/B2를 날짜별 1-worker Planning→Actual/Fresh로 자동 이어서 실행한다. Planning Global Gap 인증은 Actual/Fresh PASS와 별도다. 이하 본문은 초기 준비 시점의 설계·검증 기록을 보존한다.
+
 최종 Revision은 `V44_V43_PLANNING_SVR12_ACTUAL_V1`이다. 이전 SVR11 Planning Pilot 및 계수/Raw는 `svr11_revision01/`과 원래 Runtime 경로에 보존한다. 이전 준비 상태 문서는 `svr11_revision01/pre_final_architecture_snapshot/`에 보존했다. 최신 실행 여부와 상태는 `PREEXECUTION_CERTIFICATION.json` 및 `D:/MobileESS_V44/runtime/ACTIVE_CAMPAIGN.json`이 가리키는 캠페인 원장을 따른다.
 
 Planning은 원본 IEEE123 / RegControl 7 / 추가 SVR 0 / Fixed ON Capacitor 4 모델이다. PR189 Fast A1, Seedless K16/K32/K48, Adaptive Beam 및 4-MESS Direct Compact Joint, 기존 FULL 제약/검증·Solver 정책을 유지한다. May01 동일 입력의 FULL은 961,472행·316,743열, C3A는 779,129행·306,040열이다. V43과 행렬 계수·목적함수·Bounds·변수 타입·행/열 Identity가 모두 정확히 일치했다. Native0 모델 생성 1회, Gurobi 최적화 0회다. 검증은 캠페인 밖에서 수행했다.
