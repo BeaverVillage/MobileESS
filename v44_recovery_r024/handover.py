@@ -1,0 +1,102 @@
+"""Wait for the entire May02 B3 case; then enable faster May03+ A stages."""
+import time
+from pathlib import Path
+from v44.common import read,atomic,record,verify,now
+from v44.locks import exclusive_lock,alive,process_identity
+
+REASON='R024_USER_REQUESTED_ALGORITHM_REVISION_STOP'
+
+
+def boundary(guard,*,lease,workers):
+    target=Path(guard['protected_case_root'])
+    if workers or alive(lease):return False
+    for name in ('protected_worker','protected_coordinator'):
+        if alive(guard[name]):return False
+    path=target/'RESULT.json'
+    if not path.exists():return False
+    value=read(path)
+    return value.get('status') in ('COMPLETE','FAILED','BLOCKED_DEPENDENCY')
+
+
+def require_boundary():
+    from .operations import OPS,CAMPAIGN,workers
+    guard=read(OPS/'R024_HANDOVER_GUARD.json')
+    lease=read(CAMPAIGN/'COORDINATOR_LEASE.json')
+    if alive(lease):
+        import psutil
+        if 'v44_recovery_r024.operations' in psutil.Process(lease['pid']).cmdline():
+            return guard
+    if not boundary(guard,lease=lease,workers=workers()):
+        raise PermissionError('R024_PROTECTED_B3_ENTIRE_CASE_NOT_FINISHED')
+    return guard
+
+
+def activate(lease):
+    from .operations import OPS,PERMIT
+    guard=read(OPS/'R024_HANDOVER_GUARD.json')
+    path=OPS/'CURRENT_HANDOFF.json';value=read(path)
+    if value.get('active_revision')=='v44_recovery_r024':return
+    atomic(OPS/'R024_PRE_ACTIVATION_HANDOFF_PRESERVED.json',value)
+    value.update(UTC=now(),active_revision='v44_recovery_r024',permit=record(PERMIT),
+        adapter_source_root=str(Path(__file__).resolve().parents[1]),
+        entry='python -m v44_recovery_r024.operations --handover',
+        windows_task='MobileESS_V44_Campaign004_Recovery_R024',
+        pending_revision=None,pending_permit=None,pending_validation=None,
+        next_performance_revision='v44_recovery_r024',performance_revision_state='R024_ACTIVE_MAY02_B3_FRESH_A2_ADAPTIVE_NATIVE0_AND_FUTURE_A_STAGES',
+        active_operational_entry='v44_recovery_r024.operations',active_operational_permit=None,
+        algorithm_revision='v44_recovery_r024',development_revision=None,effective_from_day='2025-05-02',
+        pending_deployment_receipt_file=str(OPS/'R024_FRESH_A2_RESTARTED.json'),unconditional_future_B1_B3=True,pilot_PASS_required=False,
+        protected_case=guard['protected_case_root'],protected_case_finished_receipt=record(Path(guard['protected_case_root'])/'RESULT.json'),
+        r024_coordinator=lease,r024_improved_arms=['B0','B1','B3'],dispatch_hold_reason=None,
+        active_regressions=read(OPS/'R024_CHANGE_AND_VALIDATION.json')['regressions'],
+        collector=str(OPS/'collect_watchdog_r024.py'),active_source_auditor=str(OPS/'audit_active_revision_r024.py'),
+        next='May02 B3 attempt006 fresh A2 Native0 with r024 Adaptive Pricing, then original M2 Actual Fresh after certification. All future B1/B3 A stages unconditional; original PASS preserved.')
+    atomic(path,value)
+
+
+def run():
+    from .operations import CAMPAIGN,OPS,PERMIT,validate,workers,watchdog
+    permit=validate();guard=read(OPS/'R024_HANDOVER_GUARD.json')
+    verify([permit['autonomous_recovery_overlay']['handover_guard']])
+    with exclusive_lock(OPS/'R024_HANDOVER.lock'):
+        while True:
+            stop=OPS/'STOP_AUTONOMY.json';value=read(stop) if stop.exists() else {}
+            lease=read(CAMPAIGN/'COORDINATOR_LEASE.json');active=workers()
+            if value and value.get('reason')!=REASON:
+                from .failure_continue import technical_hold,defer
+                if technical_hold(value,guard):
+                    if not boundary(guard,lease=lease,workers=active):time.sleep(15.);continue
+                    preserved=OPS/'R024_CURRENT_CASE_TECHNICAL_STOP_PRESERVED.json'
+                    if preserved.exists():raise FileExistsError('R024_TECHNICAL_STOP_ALREADY_PRESERVED')
+                    stop.rename(preserved)
+                    defer(OPS,guard['protected_case_root'],read(Path(guard['protected_case_root'])/'RESULT.json'))
+                    value=dict(UTC=now(),reason=REASON,user_stop=False,technical_error_isolated=True)
+                    atomic(stop,value)
+                else:
+                    atomic(OPS/'R024_HANDOVER_USER_STOP.json',dict(UTC=now(),stop=value));return
+            atomic(OPS/'R024_HANDOVER_HEARTBEAT.json',dict(UTC=now(),**process_identity(),
+                protected_case=guard['protected_case_root'],protected_coordinator=lease,
+                coordinator_alive=alive(lease),workers=active,
+                policy='WAIT_ENTIRE_ACTUAL_AND_INDEPENDENT_FRESH_AND_NATURAL_WORKER_COORDINATOR_EXIT'))
+            if not value and alive(lease):
+                import psutil
+                if 'v44_recovery_r024.operations' in psutil.Process(lease['pid']).cmdline():break
+            if boundary(guard,lease=lease,workers=active):
+                result=read(Path(guard['protected_case_root'])/'RESULT.json')
+                if not result.get('PASS') and result.get('classification')!='USER_REQUESTED_ALGORITHM_REVISION_STOP':
+                    from .failure_continue import defer
+                    defer(OPS,guard['protected_case_root'],result)
+                break
+            time.sleep(15.)
+        validate()
+        stop=OPS/'STOP_AUTONOMY.json'
+        if stop.exists():
+            if read(stop).get('reason')!=REASON:return
+            require_boundary()
+            archive=OPS/'R024_HANDOVER_STOP_PRESERVED.json'
+            if archive.exists():raise FileExistsError('R024_HANDOVER_STOP_ALREADY_PRESERVED')
+            stop.rename(archive)
+        atomic(OPS/'R024_HANDOVER_APPLIED.json',dict(UTC=now(),permit=record(PERMIT),
+            protected_worker_interrupted=False,protected_case=guard['protected_case_root'],
+            Native_optimization_repeated=False,improved_arms=['B0','B1','B3']))
+    watchdog()

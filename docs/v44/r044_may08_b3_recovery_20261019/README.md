@@ -1,0 +1,13 @@
+# May08 B3 numerical continuation (r044)
+
+The May08 B3 attempt001 failed in A2 `INTEGER_CONTROL`: the exact saved integer decisions have zero integrality residual, but the original continuous rows have a tolerated maximum residual of `2.050916498852473e-7`. Its exact objective evaluates to `0.5777227843649135`, below the independently certified complete-domain P1 lower bound `0.5777229892771644` by `2.0491225083407727e-7`. The original `A_CERTIFIED_LB_UB_CONFLICT` guard correctly stopped acceptance; the root `INCOMPLETE_OR_FAILED_PARENT` message is a downstream symptom.
+
+The scoped recovery reuses the verified completed M1 and closed strict A2 P1 checkpoint. It fixes every original integer decision and solves only the continuous remainder, adding the existing certified P1 bound as a redundant rho lower bound. It preserves all original rows, upper boxes, objectives and numerical tolerances. The repaired point must pass original integrality, row, physical, objective-identity, exact LB <= UB and gap acceptance checks. No incumbent clipping, restricted MIP ObjBound substitution or false PASS is allowed.
+
+The A2 ledger inherits all 501 original calls and 12.59800386428833 measured Native seconds within the original total ceiling of 5400 seconds. M1's 1190.7179996967316 seconds and fixed plan are reused with zero new M1 calls. Phase I and complete pricing are not repeated. All failed-attempt files remain unchanged; the correction runs only in attempt002.
+
+Validation: 41 focused regressions passed. An additional Native0 check exercised the actual installed dated A2/voltage routing, restored all 697027 original rows and 32084 columns, constructed the real physical model and native factory, and reached the exact continuous-repair Native boundary with the inherited clock intact. It deliberately made no optimize call.
+
+At publication the corrected solve is **pending**: the existing May09 B3 worker remains running. The sealed r044 controller waits for its natural exit and coordinator lease release, prioritizes May08 B3 attempt002, then resumes the unchanged B1/B3 one-worker preparation/seven-worker Actual barrier and B0/B2 one-worker full-case follow-up. Neither repaired A2 PASS nor final Actual/Fresh PASS is claimed in these publication receipts.
+
+Reproduce focused checks in the pinned Windows/D-drive runtime with `validation_tools/actual_performance/validate_r044.py`. The Native0 routing and pipeline check scripts use dedicated one-time operational evidence folders; do not rerun them against an existing output directory. `activate_r044.py` seals authority and launches a controller only after validation; its existing-permit and user-stop guards prevent duplicate activation.

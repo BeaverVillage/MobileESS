@@ -1,0 +1,56 @@
+{
+  "UTC": "2026-10-18T15:27:36.623043+00:00",
+  "user_authorized": true,
+  "user_instruction": "7일 다 planning 끝나면 actual잘 실행될지 다시 한번 점검해. 문제가 있거나 실패가 있거나 한 날짜때문에 전체 actual실행이 안되게 하면 안되고 그 날짜만 제외하고 실행되게 해.",
+  "policy": "R040_RESOLVE_ALL_PREPARATIONS_EXCLUDE_FAILED_CASES_AND_DISPATCH_HEALTHY_ACTUAL_INDEPENDENTLY",
+  "sources": [
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r040\\__init__.py",
+      "bytes": 99,
+      "sha256": "e8ba8f3148f33831f68efaf98977b239bc37a78a3ebc2926ed24d4de66c441d7"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r040\\actual.py",
+      "bytes": 2304,
+      "sha256": "f1529ca7d8eb235c5f86ba2133ed25a51f50aef51584a30d86c3b51a346b8fd5"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r040\\batch.py",
+      "bytes": 11392,
+      "sha256": "21fe1c003e351b4ac21622690f6dac5000cf5b2f9e5b390aa860af7c86afa55b"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r040\\monitor.py",
+      "bytes": 1094,
+      "sha256": "97ef3246766e6fa4f016199b5c1d2c88f23d06ca8728625865f99731fc2d9ae2"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r040\\operations.py",
+      "bytes": 8355,
+      "sha256": "5105b98946e4670fab5290d8bf90fc9599070e1050fada1a0f9827c13510b2b9"
+    }
+  ],
+  "previous_authorization": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R039_LATENCY_AND_PARALLEL_ACTUAL_AUTHORIZATION.json",
+    "bytes": 2766,
+    "sha256": "1b0edd5400b4517b64ee0011473eb31caf05b189e2118e441b811e4713d60c06"
+  },
+  "validation": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R040_CHANGE_AND_VALIDATION.json",
+    "bytes": 2811,
+    "sha256": "18f7a3feae06ff0dbd9b1886bed01545b258704890e62f3b9d9b66c74ea1333b"
+  },
+  "exclude_only_failed_case": true,
+  "exclusion_unit": "DATE_AND_COMPARISON_ARM",
+  "max_Actual_workers": 7,
+  "prepare_workers": 1,
+  "resolve_every_preparation_before_Actual": true,
+  "all_seven_preparations_must_succeed": false,
+  "P_only": true,
+  "no_Actual_before_validated_handoff": true,
+  "all_Actual_and_independent_Fresh_checks_retained": true,
+  "stage_source_sha_and_frozen_plans_preserved": true,
+  "existing_PASS_never_rerun": true,
+  "old_scientific_sources_modified": false,
+  "old_running_worker_must_finish_naturally": true
+}

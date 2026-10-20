@@ -1,0 +1,517 @@
+# V44 최종 구조 확정 — V43 Planning + SVR12 Actual, 기존 최적화 알고리즘 복원 및 V44 완성
+
+현재 MobileESS [Draft PR #233](https://github.com/BeaverVillage/MobileESS/pull/233)의 V44 작업을 계속하라.
+
+**사용자의 최종 설계 결정은 다음과 같다.**
+
+> Planning은 V43의 기존 7-RegControl 전력망과 최적화 알고리즘을 그대로 사용한다. 추가 SVR을 Planning 모델에 포함하지 않는다.
+>
+> Actual에서는 기존 7개 RegControl과 추가 SVR 12뱅크를 사용하고, 실제 관측 상태에 따라 Native AUTO/TIME 전압제어를 수행한다.
+>
+> 기존 AIDC/MESS Planning 결과는 Actual에서 다시 최적화하지 않고 동결한다.
+
+이번 작업에서는 V44의 구조와 실행 코드를 이 정책으로 수정하고, 실제 캠페인 실행 직전까지 필요한 검증을 완료하라.
+
+**새로운 최적화 알고리즘을 개발하지 마라. 기존 V43 Planning 및 기존 V42 SVR 제어 코드를 재사용하라.**
+
+---
+
+## 1. 현재 실행 및 결과 보존
+
+먼저 실제 PID, Worker, Native 원장, Lock, 실행 중인 Gurobi 상태를 확인하라.
+
+기존 May01 B2 SVR11 Planning Pilot은 다음 결과로 종료됐다.
+
+- K48 Native: 300.074초
+- Joint Native: 890.503초
+- Joint 7회 모두 SolCount=0
+- FULL 가능해 없음
+- Global LB=0
+- Actual/Fresh 미실행
+
+이는 새로운 SVR11 Planning 모델의 결과다. 오류나 수학적 INFEASIBLE 증명으로 취급하지 않는다.
+
+Pilot의 Raw, Native Log, 행렬, Budget, 최종 결과를 보존한다.
+
+현재 진행 중인 다른 SVR12 관련 작업이 있다면 자연 종료를 우선한다. 실행 중인 Source는 수정하지 않는다.
+
+새로운 V44 구조는 별도 Equipment/Scientific Revision으로 구현하라.
+
+---
+
+## 2. V44 최종 아키텍처
+
+### Planning: V43 원본 모델
+
+- IEEE123 원본 전력망
+- 기존 RegControl 7개
+- 추가 SVR 0개
+- 기존 Capacitor 4개 Fixed ON
+- PR189 Fast A1
+- 기존 A1–M1–A2–M2 구조
+- Seedless K16/K32/K48
+- Adaptive Beam Search
+- 4-MESS Direct Joint MILP
+- 기존 P/Q/SOC/이동경로/Mode 최적화
+- 기존 목적함수와 모든 원본 물리 제약
+
+V43에서 실제 FULL 가능해를 확보했던 Planning 모델을 복원하라.
+
+SVR11을 추가하면서 생성된 대규모 전압·변압기 응답 행렬은 Planning에서 사용하지 않는다.
+
+### Actual: SVR12 전압제어
+
+- Planning에서 확정한 AIDC/MESS 명령 동결
+- 실제 수요·PV·GPU 점유·Job 이벤트 반영
+- 기존 RegControl 7개
+- 추가 SVR 12뱅크
+- 3상 독립 제어 기준 추가 RegControl 36개
+- 전체 RegControl 43개
+- Native AUTO/TIME 제어
+- 독립 Fresh AC96
+
+실제 설치 구조가 3상 12뱅크인지 OpenDSS Inventory에서 확인하고, 예상 RegControl 수 43개와 대조하라.
+
+**Planning은 기존 7-RegControl 모델이고 Actual은 43-RegControl 모델이라는 차이를 명시적인 연구 설계로 기록한다.**
+
+이를 우발적인 Source 불일치로 처리하지 마라.
+
+---
+
+## 3. 기존 SVR12 성공 사례를 정확히 재사용
+
+사용자가 수행한 기존 진단 결과를 우선 확인하라.
+
+실행 결과:
+
+`D:/MobileESS_V44/runtime/svr12_diagnostic/V43_FINAL_B2_SVR12_ACTUAL_AC_ONCE002/RESULT.json`
+
+관련 코드:
+
+`replay_v43_B2_svr12_ac_once.py`
+
+작업 디렉터리에서 이 스크립트와 해당 실행 당시의 SVR12 Scenario, Equipment, Source SHA 및 Actual 입력·MESS 계획 영수증을 찾아라.
+
+### 기존 검증 결과
+
+- 기존 V43 May01 B2 동결 경로·P/Q 그대로 사용
+- 기존 B2 Actual FCFS 부하 그대로 사용
+- IDC01 MESS 접속점에 추가 SVR 1뱅크
+- 전체 SVR 12뱅크
+- 24슬롯 Prefix + May01 평가 96슬롯
+- 96/96 AC 수렴
+- 최저 전압 0.960443 pu
+- 최고 전압 1.045931 pu
+- 전압 위반 0
+- 선로·변압기 위반 0
+- Planning 재최적화 0회
+- 실제 AC 1회
+- Wall 약 24.0초
+
+이 결과는 새로운 SVR12의 중요한 검증 기준이다.
+
+단, 보고된 수치만 사용해 Scenario를 추측하거나 새로 만들지 말고 **실제 실행 코드·설비·영수증을 확인하여 정확한 설비를 재사용**하라.
+
+원래 SVR11 Epoch12의 11뱅크는 유지한다.
+
+IDC01에 추가한 12번째 뱅크의 정확한 Cut Element, Terminal, 연결 Bus, Sensed Bus, PT/CT, Tap 설정, 정격 및 임피던스는 성공한 진단 소스에서 복원한다.
+
+전압을 직접 지정하는 가상 장치나 무한 정격 변압기로 대체하지 마라.
+
+기존 SVR11의 BUS82 최종 배치를 변경하지 않는다.
+
+---
+
+## 4. Planning 경로를 V43으로 되돌려라
+
+현재 V44의 다음 경로를 확인하라.
+
+- `v44/svr11_grid.py`
+- `v44/svr11_forecast.py`
+- `v44/svr11_forecast_parallel.py`
+- `v44/daily.py`
+- `v44/runtime.py`
+- `v44/worker.py`
+- `v44/frozen/v43_mess/`
+- Planning Source/Case Manifest
+
+현재 `v44/worker.py`의 Reference/A/M Stage와 Actual이 동일한 SVR11 `stage_scope`를 사용하고 있다면, 이를 분리하라.
+
+### Planning 실행
+
+Planning AIDC 및 MESS 단계에서는 SVR11/SVR12 계수 로더를 호출하지 않는다.
+
+원래 V43의 날짜별 7-RegControl 계수와 수학적 Model Builder를 사용한다.
+
+다음 항목이 V43과 일치해야 한다.
+
+- Original FULL 변수·제약 생성 규칙
+- Voltage response
+- Transformer current 및 kVA 계약
+- Route/SOC/PCS
+- Beam 후보 생성 정책
+- Solver Parameters
+- Native Call 정책
+- Compact/Presolve
+- Original FULL Replay
+
+May01의 V43 B2와 새 V44 7-RegControl Planning 모델을 비교하여, 동일 입력에서는 Original FULL·C3A 행렬, 변수 타입, Bounds, 목적함수, 계수, Row/Column Identity가 일치하는지 검증하라.
+
+새 SVR11 모델에서 나타난 약 106만 행 규모와 변압기 응답 확대가 활성 Planning 경로에 남아 있지 않아야 한다.
+
+다만 동일한 과학적 입력이 아닌 경우 행렬의 바이트 동일성을 억지로 주장하지 마라.
+
+**전력망 모델을 V43으로 복원하는 것이지 V43의 과거 최적화해를 모든 날짜에 복사하는 것은 아니다.**
+
+기존 May01 Golden003 또는 B2 FULL 해는 정확한 동일 Case·입력·전력망·정수 도메인·Source 계약을 검증한 경우에만 재사용할 수 있다.
+
+이전 SVR11 Forecast 계수·Native 결과는 삭제하지 말고 비활성 연구 증거로 보존한다.
+
+---
+
+## 5. Actual에서만 SVR12 AUTO/TIME 적용
+
+Actual/Fresh의 전력망 Source는 새로운 SVR12 Revision으로 고정한다.
+
+다음 코드를 재사용하라.
+
+- `v42_voltage_control/svr.py`
+- `v42_voltage_control/timecontrol.py`
+- `v42_voltage_control/integration.py`
+- `v42_voltage_control/isolation.py`
+- 기존 `v44/svr11_ac.py`
+- 기존 `v44/svr11_actual.py`
+- 기존 SVR12 성공 진단의 장비 연결 코드
+
+기존 기능을 새로 구현하지 않고, 12뱅크용으로 필요한 최소 Adapter와 Equipment Manifest만 추가한다.
+
+### Actual 시간별 실행
+
+각 날짜 D에서:
+
+1. D-1 18:00의 독립 Actual Source Initial State 생성
+2. SVR12를 OpenDSS에 설치
+3. 24슬롯 Prefix의 실제 상태 순차 계산
+4. D-day 00:00부터 96슬롯 평가
+5. 실제 AIDC/MESS P/Q 반영
+6. Native TIME에 따라 감지전압·Tap Action·Control Queue 처리
+7. 이전 슬롯의 Tap/Queue 상태 유지
+8. 모든 Node/Phase 전압·전류·kVA 평가
+9. Fresh AC 독립 검증
+
+Planning에서 계산한 Tap 상태나 Control Queue를 Actual로 복사하지 않는다.
+
+**동일한 하드웨어 구성을 Actual의 모든 비교군에 적용하되, 각 Arm의 Actual Simulation Context와 시간별 탭 상태는 독립적으로 유지한다.**
+
+수요와 MESS P/Q가 다르면 B0/B1/B2/B3의 SVR Tap History가 달라지는 것이 정상이다.
+
+SVR Tap은 최적화변수가 아니다. 실제 전압에 따라 Native RegControl이 자동으로 결정한다.
+
+---
+
+## 6. B0/B1/B2/B3 운영 정책 유지
+
+### B0
+
+원본 R0/Q50 AIDC Reference와 FCFS 정책을 유지한다.
+
+Planning에는 추가 SVR을 사용하지 않는다.
+
+Actual에서는 동일한 SVR12 설비가 자동 동작한다.
+
+### B1
+
+PR189 A1 Planning을 사용한다.
+
+- Known Allocation
+- Time-shifting
+- Planned Migration
+- Known 연구용 허용창 완화
+- Unknown R1-FLEX30-C1 Pre-site
+
+Actual의 Unknown 후보 전압·민감도 평가는 **현재 실제 SVR12 계통 상태에 맞게** 검증한다.
+
+기존 7-RegControl 또는 SVR11 Current AC 인증을 SVR12의 인증으로 그대로 재사용하지 않는다.
+
+선택 알고리즘은 유지하되, SVR12 하드웨어·탭 상태·실제 부하에 연결된 Current AC가 최종 안전 판단을 수행해야 한다.
+
+### B2
+
+해당 날짜 B0 Planning Reference를 고정한다.
+
+V43 MESS 알고리즘으로 4대 MESS를 최적화한다.
+
+Actual에서는 원본 FCFS 부하와 동결 MESS P/Q에 SVR12를 적용한다.
+
+### B3
+
+A1 → M1 → A2 → M2 구조를 유지한다.
+
+같은 날짜 B1 A1만 재사용한다.
+
+A2/M2에서도 Planning은 V43 원본 7-RegControl 계통을 사용한다.
+
+Actual에서는 최종 AIDC/MESS 명령을 동결하고 SVR12 자동제어를 수행한다.
+
+**어느 Arm에서도 Actual 전압 위반을 없애기 위해 몰래 P/Q를 재최적화하거나 Job을 임의 이동시키지 마라.**
+
+---
+
+## 7. SVR12는 모든 날짜·Arm의 공통 설비로 동결
+
+May01~07 총 28개 Case에서 Actual 하드웨어는 동일한 SVR12 Revision을 사용한다.
+
+특정 Arm 또는 특정 날짜에만 SVR을 다르게 설치하지 않는다.
+
+향후 추가 전압 위반이 발견되면:
+
+1. 위반 날짜·슬롯·노드·상을 기록
+2. SVR12 Tap/Queue와 전력망 P/Q를 확인
+3. 기존 제어기 영향 범위를 분석
+4. 새 SVR 설치 후보를 별도 진단
+5. 필요 시 새로운 Equipment Revision 제안
+
+**캠페인 실행 도중 미래의 전압 위반 결과를 보고 SVR13을 소급 설치하거나 특정 Arm에만 설치하지 마라.**
+
+추가 설비가 필요하다고 판단되면, 새 Hardware SHA와 독립된 설비 Revision으로 구분하고 관련 비교군을 동일한 새 설비에서 재평가한다.
+
+실제 발전소·배전망 장비 증설이 아닌 과거 데이터를 이용한 연구용 설비 시나리오라는 점을 유지한다.
+
+---
+
+## 8. 성능 및 Native 예산 유지
+
+V43의 기존 성능 개선을 보존한다.
+
+- PR189 Fast A1
+- Phase I / Pricing / Integer Restoration
+- Seedless K16/K32/K48
+- Adaptive Beam
+- Direct Compact Joint
+- 기존 Candidate Scoring/Cache
+- Source·Case SHA 검증
+- Native0 준비·Static Presolve·Inverse Mapping
+- Original FULL 가능해 검증
+
+M-stage 예산:
+
+- K48 별도 300초
+- Joint 별도 900초
+- 기존 Joint 단일 호출 cap 140초
+- Worker당 Threads=1
+
+K48의 LB와 Joint FULL UB는 계속 구분한다.
+
+900초 내 FULL 가능해를 확보하면 Gap 미인증이어도 기존 정책에 따라 후속 Actual로 인계한다.
+
+유효한 FULL 해가 없으면 다른 날짜·Arm으로 진행하되 해당 Stage 의존성을 차단한다.
+
+SVR12를 Actual에만 추가했으므로 **Planning Solver의 모델 규모와 실행속도가 V43 구조로 복귀했는지** 확인한다.
+
+계산속도 개선을 이유로 원래 물리 제약을 생략하지 않는다.
+
+---
+
+## 9. Actual 성능 최적화 및 정확성
+
+기존 SVR12 고정 계획의 Actual AC 1회 소요시간은 약 24초였다.
+
+하지만 B1/B3는 Unknown Pre-site 후보별 Current AC 평가가 추가된다.
+
+따라서 전체 B1/B3 Actual 실행도 무조건 24초에 끝난다고 주장하지 마라.
+
+다음 항목의 시간은 구분 측정한다.
+
+- Actual Event Processing
+- Signed Sensitivity Scoring
+- Candidate Current AC
+- Cache Hits/Misses
+- RegControl TIME Solve
+- Independent Fresh96
+
+기존 SVR11 Current AC의 검증된 Cache 및 성능 개선은 SVR12에서 Source/Hardware/Control State까지 정확히 일치할 때만 재사용한다.
+
+Tap 또는 Native Control Queue 상태가 다른 후보의 측정 결과를 재사용하지 않는다.
+
+실제 Current AC 검사를 생략하거나 전압 한계를 완화하여 성능을 개선하지 마라.
+
+---
+
+## 10. May01 SVR12 결과를 기준으로 회귀 검증
+
+다음 기준 결과를 보존한다.
+
+### Reference A — V43 B2, 원본 7-RegControl
+
+- 동일한 동결 MESS 경로/P/Q
+- Actual 전압 위반 30슬롯
+- Fresh Physical FAIL
+
+### Reference B — V43 B2 + SVR11 Actual
+
+- Planning 재계산 0
+- Actual 전압 위반 11슬롯
+- Fresh Physical FAIL
+
+### Reference C — V43 B2 + SVR12 Actual
+
+- Planning 재계산 0
+- Actual AC 96/96 수렴
+- 전압 0.960443~1.045931 pu
+- 전압 위반 0
+- 선로·변압기 위반 0
+
+Reference C의 기존 Raw를 덮어쓰지 않는다.
+
+새 V44 SVR12 Actual Adapter가 동일한 동결 P/Q·실제 부하·하드웨어에서 기존 결과를 재현할 수 있는지 검증한다.
+
+기존 실행 결과의 Source SHA가 정확히 일치한다면 독립 Raw 검산을 통해 재사용하고, 불필요한 재최적화나 중복 AC 실행을 피한다.
+
+다만 기존 SVR12 성공 사례는 May01 B2의 고정 계획에 대한 검증일 뿐이다.
+
+B0/B1/B3와 May02~07의 물리 PASS를 미리 선언하지 마라.
+
+---
+
+## 11. 날짜별 초기 상태 및 Resume 유지
+
+최근 V44에서 구현한 다음 결과는 보존한다.
+
+- May02~07 초기 RUNNING 사이트 213 UID의 연구용 복원
+- 독립 일별 MESS 위치/SOC 초기 상태 가정
+- 날짜별 Input Manifest
+- Stage Checkpoint/Native Budget Resume
+- B3 A1→M1→A2→M2 연결
+- Main 1 Worker + B2 2 Worker Scheduler
+
+SVR12는 Actual 하드웨어에만 연결하고, 기존 독립 일별 초기 상태 계약은 변경하지 않는다.
+
+Planning과 Actual의 초기 MESS 위치/SOC는 동일한 해당 날짜의 연구 가정을 사용한다.
+
+Planning에서의 미래 Actual 정보 누설은 금지한다.
+
+Resume 시 SVR12 Actual의 Tap/Queue가 포함된 물리 상태를 정확히 복원할 수 없으면 중단된 Actual을 처음부터 새 독립 Attempt로 재생해야 한다.
+
+불완전한 Tap State를 이어 붙여 Fresh96 PASS로 판단하지 마라.
+
+완료된 Planning Stage의 원본 FULL 가능해, Native 예산, Source SHA, Parent Case는 기존 검증 정책에 따라 보존한다.
+
+---
+
+## 12. 새로운 V44 Source Revision 및 인증
+
+기존 V44 SVR11 Planning Pilot과 그 실패 결과는 역사적 증거로 유지한다.
+
+새로운 Revision을 명확히 정의한다.
+
+**`V44_V43_PLANNING_SVR12_ACTUAL_V1`**
+
+두 개의 물리 계통을 별도 Source Identity로 관리한다.
+
+**Planning Physics**
+
+- V43 원본 IEEE123
+- RegControl 7
+- SVR 추가 없음
+- 기존 7-RegControl Forecast 계수
+- 기존 PR189 수학적 모델
+
+**Actual Physics**
+
+- IEEE123 + SVR12
+- RegControl 43
+- Native AUTO/TIME
+- 실제 부하 및 동결 P/Q
+- Full-network Current AC 및 Fresh AC
+
+Original FULL 수치 인증은 Planning 모델의 제약 만족을 뜻한다.
+
+SVR12 Fresh AC 인증은 Actual 전력망의 물리 안전성을 뜻한다.
+
+두 인증을 혼동하지 마라.
+
+V44의 Scientific Source Manifest에는 Planning과 Actual의 의도적인 물리 모델 차이를 명시하고, 과거 SVR11 Planning 계수가 활성 실행에 섞이면 거부하도록 한다.
+
+---
+
+## 13. V44 실행 준비 완료 검증
+
+이번 작업에서는 V44를 실제 7일 캠페인 실행 직전까지 완성한다.
+
+다음 사항을 검증하라.
+
+1. Planning 원본 7-RegControl 계수 사용
+2. Planning 추가 SVR 0
+3. V43 최적화 모델 및 Solver 정책 유지
+4. May01 Original FULL/C3A 수학적 동등성
+5. SVR12 실제 장비 12뱅크 연결
+6. 총 43-RegControl Inventory 확인
+7. Planning/Actual Tap·Queue 완전 분리
+8. 24 Prefix + 96 Actual 슬롯 시간 연속성
+9. SVR12 Current AC 및 독립 Fresh 경로
+10. 기존 May01 SVR12 0위반 결과의 독립 검증·재현 가능성
+11. May02~07 입력 및 초기 연구 가정 준비
+12. B0/B1/B2/B3 모두 새 Actual Hardware 연결
+13. B1/B3 Unknown C1 현재 계통 안전 검사
+14. Stage Timeout 및 Resume
+15. Main 1/B2 2-Worker 동시성
+16. Native 원장·PID·OS Lock
+17. 모든 Source/Case/Hardware SHA
+18. 전압·전류·kVA 제약 불변
+
+경량 테스트와 실제 자원 충돌 없는 필수 Native0/소규모 AC 검증을 완료한다.
+
+이전 SVR11 Planning 모델의 전체 최적화를 다시 실행하지 않는다.
+
+---
+
+## 14. 캠페인 실행 권한
+
+V44의 최종 대상은 May01~07이다.
+
+Main:
+- B0 → B1 → B3
+- 1 Worker
+
+B2:
+- 7일 독립 실행
+- 2 Worker
+
+현재 사용자의 지시는 **V44 최종 코드·물리 구조·실행 준비 완성**이다.
+
+전체 7일 Gurobi/Actual/Fresh 캠페인을 자동 시작하라는 지시는 아니다.
+
+따라서 실제 캠페인 실행 Permit 없이 May01~07 전체 작업을 시작하지 마라.
+
+기존 B2 Pilot과 SVR12 진단은 수행된 별도 승인 실험으로 보존한다.
+
+---
+
+## 15. Commit/Push 및 최종 보고
+
+현재 V44 Draft PR #233을 수정하고 Commit/Push하라.
+
+다음 내용을 최종 한국어 보고서에 포함한다.
+
+1. V43 Planning 복원 완료 여부
+2. 추가 SVR 없는 Planning 모델의 행렬 규모 및 V43 비교
+3. 새 V44 Actual SVR12 장비 Source SHA
+4. 12뱅크 위치·전기적 연결·43-RegControl 검증
+5. SVR12 AUTO/TIME Tap·Queue 작동 검증
+6. Planning/Actual 모델·초기 상태 분리
+7. 기존 May01 SVR12 PASS 증거 재사용·독립 검산
+8. B0/B1/B2/B3 Actual 연결 검증
+9. May02~07 입력 준비 상태
+10. Native 300+900초 및 Worker1/2 정책
+11. V43/V44 회귀 테스트
+12. 아직 인증되지 않은 실제 전체 캠페인 항목
+13. Commit SHA 및 PR
+14. 최종 `V44_PRESTART_READY` 또는 정확한 Blocker
+
+필수 구조·코드·Source·실행 진입 검증이 완료됐다면 PRESTART_READY로 전환할 수 있다.
+
+그러나 실제로 수행하지 않은 7일 FULL 최적화와 Actual/Fresh를 PASS로 표시하지 마라.
+
+**최종 목표: V43에서 성공적으로 FULL 가능해를 찾던 실용적인 Planning 알고리즘을 그대로 유지하고, Actual에만 검증된 SVR12 물리 설비와 자율 전압제어를 추가하여 V44 May01~07 캠페인의 실행 준비를 완성한다.**
+
+SVR12가 모든 날짜의 전압 안전성을 보증한다고 가정하지 않고, 이후 실제 캠페인에서 발견되는 추가 위반은 별도 설비 Revision과 재검증으로 처리한다.

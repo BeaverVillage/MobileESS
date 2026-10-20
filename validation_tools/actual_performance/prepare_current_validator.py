@@ -1,0 +1,10 @@
+from pathlib import Path
+source=Path(__file__).with_name('compare_r016.py')
+target=Path(__file__).with_name('validate_revision_current.py')
+assert not target.exists()
+body=source.read_text(encoding='utf8')
+body=body.replace('from v44_recovery_r015.operations import sources,schema_backend_sources','from v44_recovery_r016.operations import sources,schema_backend_sources')
+body=body.replace('from v44_actual_performance.current_ac import scope as candidate_scope','from v44_recovery_r016.current_ac_performance import live_read_scope as candidate_scope')
+body=body.replace('[0.,.5,1.,1.5]','[0.,.5]')
+body=body.replace("candidate_sources=[record(p) for p in Path('v44_actual_performance').glob('*.py')]",'candidate_sources=sources()')
+target.write_text(body,encoding='utf8')

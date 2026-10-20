@@ -1,0 +1,26 @@
+{
+  "revision": "r030",
+  "purpose": "사용자가 요청한 B3 M1의 전압 여유 확보 실험",
+  "scope": "앞으로 새로 실행하는 모든 날짜의 B3 M1",
+  "M1_voltage_band_pu": [0.955, 1.045],
+  "M1_voltage_squared_band": [0.912025, 1.092025],
+  "restart": "May02 B3 attempt013 사용자 중단 후 새 M1 → 새 A2 → 새 M2",
+  "A1": "같은 날짜의 인증된 B1 A1 재사용",
+  "old_M1_reuse": false,
+  "old_A2_support_point_or_native_time_reuse": false,
+  "other_voltage_policy": {
+    "A1_B2_M1": [0.95, 1.05],
+    "A2_initial": [0.95, 1.05],
+    "A2_conditional_verified_rows_only": [0.945, 1.055],
+    "M2_Actual_Fresh": [0.95, 1.05]
+  },
+  "Native_budgets_seconds": {
+    "M1_K48": 300,
+    "M1_Joint": 900,
+    "A2_PhaseI_including_pricing": 1500,
+    "A2_total": 5400
+  },
+  "evidence": "새 M1 전체 전압 행의 실제 RHS 및 최종 계획 전압을 검증한다. 원본 물리 검증 컨텍스트가 전압 범위를 초기화한 뒤에도 B3 M1의 새 범위만 유지한다.",
+  "preservation": "기존 PASS·중단 결과·Raw·Native 원장은 보존하며, May07 B1의 완료 A1 체크포인트 재사용 경로를 유지한다.",
+  "interpretation": "M1의 제약을 바꾸는 새 과학적 실험 조건이다. 기존 M1에서 오류가 증명됐거나 새 실험 성공이 보장됐다는 뜻은 아니다."
+}

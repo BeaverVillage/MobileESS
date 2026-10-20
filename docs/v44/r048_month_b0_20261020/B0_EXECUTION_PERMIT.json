@@ -1,0 +1,693 @@
+{
+  "mode": "EXECUTE",
+  "explicit_user_approved": true,
+  "days": [
+    "2025-05-22",
+    "2025-05-23",
+    "2025-05-24",
+    "2025-05-25",
+    "2025-05-26",
+    "2025-05-27",
+    "2025-05-28",
+    "2025-05-29",
+    "2025-05-30",
+    "2025-05-31"
+  ],
+  "source_sha": "f0c56b0ec67f58c213025c6528c5006b2ad20d8bcca2045cf92994835a673f72",
+  "certification_sha": "1399d3339dd9718a2c4bd5bafcfadfc96e19b360ff4d1c46d6c53edfb8234706",
+  "authorization": {
+    "path": "D:\\v44_may01_07_prepare_20261016\\docs\\v44\\v43_planning_svr12_actual_v1\\EXECUTION_AUTHORIZATION.json",
+    "bytes": 1093,
+    "sha256": "af34e40a7f5c1a21ccc133733f60bf59f14c5d0360f44f85ccaebf8adb2bc18e"
+  },
+  "revision": "V44_V43_PLANNING_SVR12_ACTUAL_V1",
+  "B2_workers": 2,
+  "B2_first": true,
+  "Main_workers": 1,
+  "Main_order": [
+    "B0",
+    "B1",
+    "B3"
+  ],
+  "Threads": 1,
+  "UTC": "2026-10-20T05:07:29.796120+00:00",
+  "Raw_overwrite": false,
+  "source_initial_tap_queue": "INDEPENDENT_PER_ARM_AND_FRESH",
+  "operational_overlay": {
+    "policy": "V44_JOINT_CALL300_COMPLETED_K48_RESUME_V1",
+    "Joint_call_cap": 300.0,
+    "K48_total": 300.0,
+    "Joint_total": 900.0,
+    "Threads": 1,
+    "Native_clock_reset": false,
+    "source": {
+      "path": "D:\\v44_may01_07_prepare_20261016\\v44\\cap300.py",
+      "bytes": 8633,
+      "sha256": "31c8f71d415fc0dc3b22aa7ccc7861ad1b0e56e4f85c4484608ad2fa2c77b61e"
+    }
+  },
+  "execution_policy_sha": "fd2d4da735cc4141c0f180588e526fec39a7da44b2b46458bccda576915a7943",
+  "base_source_freeze": {
+    "path": "D:\\v44_may01_07_prepare_20261016\\docs\\v44\\SCIENTIFIC_FREEZE_MANIFEST.json",
+    "bytes": 797305,
+    "sha256": "514050e87e9c356de9e6263d48ecd9c25ad355b6bcb3eb4911f252588be889ea"
+  },
+  "direct_user_instruction": "A stages one thread; B2/B3 all M stages Q +/-250 kvar per vehicle, four threads; fresh May01 campaign.",
+  "Joint_existing_measured_Runtime_deducted": true,
+  "K48_recalculation": false,
+  "numerical_overlay": {
+    "policy": "V44_B2_GAP3_MAY02_ROBUST_BARRIER_FRESH_M_V1",
+    "source": {
+      "path": "D:\\v44_may01_07_prepare_20261016\\v44\\barrier.py",
+      "bytes": 5877,
+      "sha256": "030930cb7b7d9e9d5f8ae8f9b7201dcf2a69336e0d27872b81198d6614a3db87"
+    },
+    "adapter_source": {
+      "path": "D:\\v44_may01_07_prepare_20261016\\v44\\numeric.py",
+      "bytes": 9334,
+      "sha256": "dc1065123ddd42b0ac390e59ef506c464f2304f854688eb3ce6182638aecbebe"
+    },
+    "affected_day": "2025-05-02",
+    "affected_stages": [
+      "M1"
+    ],
+    "affected_arm": "B2",
+    "affected_solver": "M_PR222_JOINT",
+    "May02_parameter_changes": {
+      "Method": 2,
+      "BarHomogeneous": 1,
+      "CrossoverBasis": 1
+    },
+    "all_B2_Joint_parameter_changes": {
+      "MIPGap": 0.03
+    },
+    "unchanged_K48": true,
+    "unchanged_A_stages": true,
+    "unchanged_matrix_and_domain": true,
+    "unchanged_feasibility_tolerances": true,
+    "unchanged_FULL_validation": true,
+    "B3_inner_MIPGap_unchanged": 0.005,
+    "Root_algorithm": "BARRIER",
+    "dual_simplex_production": false,
+    "K48_total": 300.0,
+    "Joint_total": 900.0,
+    "Joint_call_cap": 300.0,
+    "Threads": 1,
+    "fresh_restart_days": [
+      "2025-05-01",
+      "2025-05-02"
+    ],
+    "fresh_M_build": true,
+    "prior_M_clocks_imported": false,
+    "prior_M_incumbents_imported": false,
+    "original_Raw_modified": false
+  },
+  "numerical_policy_sha": "f3e74aa288a826eb8950960d5e0325fb124deb022a6398b1202169674bb936bd",
+  "direct_numerical_instruction": "병목 해결 후 5월 1일 2일 처음부터 재실행. Root Barrier 유지. B2 Joint MILP Gap 3%.",
+  "new_campaign": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004",
+  "original_campaign_preserved": true,
+  "new_K48_and_Joint_clocks_from_zero": true,
+  "Q250_M4_overlay": {
+    "policy": "V44_M_Q250_BARRIER_THREADS4_GAP3_V2",
+    "source": {
+      "path": "D:\\v44_may01_07_prepare_20261016\\v44\\q250_m4_v2.py",
+      "bytes": 16206,
+      "sha256": "799d5a3a328b5dcdd1322c535a04121cb5c5724733f85a1380f503226319476d"
+    },
+    "adapter_sources": [
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\v44\\barrier.py",
+        "bytes": 5877,
+        "sha256": "030930cb7b7d9e9d5f8ae8f9b7201dcf2a69336e0d27872b81198d6614a3db87"
+      },
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\v44\\cap300.py",
+        "bytes": 8633,
+        "sha256": "31c8f71d415fc0dc3b22aa7ccc7861ad1b0e56e4f85c4484608ad2fa2c77b61e"
+      },
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\v44\\serial_m2.py",
+        "bytes": 10775,
+        "sha256": "39699bf801024fcb30a512d070bc10cfd2f802e0a17770d83f534c0f5723b2c9"
+      },
+      {
+        "path": "D:\\v44_may01_07_prepare_20261016\\v42_native\\mess.py",
+        "bytes": 11072,
+        "sha256": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec"
+      }
+    ],
+    "Workers": 1,
+    "M_Threads": 4,
+    "A_Threads": 1,
+    "Actual_Workers": 1,
+    "arms": [
+      "B2",
+      "B3"
+    ],
+    "stages": [
+      "M1",
+      "M2"
+    ],
+    "Q_operating_limit_kvar": 250.0,
+    "cap_in_original_FULL": true,
+    "cap_in_connected_Q_rows": true,
+    "cap_in_Beam_and_LP_score": true,
+    "original_matrix_and_domain_changed": true,
+    "change": "ONLY_Q_BOUNDS_AND_CONNECTED_Q_COEFFICIENT",
+    "PCS_kVA": 400.0,
+    "P_limit_kW": 300.0,
+    "SOC_and_route_authority_unchanged": true,
+    "Root_Method": 2,
+    "Joint_MIPGap": 0.03,
+    "K48_Threads": 4,
+    "K48_Method": 2,
+    "K48_total": 300.0,
+    "Joint_total": 900.0,
+    "Joint_call_cap": 300.0,
+    "B2_queue_first": true,
+    "Main_order": "PER_DAY_B0_B1_B3_AFTER_B2_MAY01_THROUGH_07",
+    "May01_A1": "REUSE_GOLDEN003_NO_REOPTIMIZATION",
+    "B3_A1": "REUSE_SAME_DATE_B1",
+    "fresh_M_build": true,
+    "prior_M_clocks_imported": false,
+    "prior_M_incumbents_imported": false,
+    "unchanged_FULL_validation": true,
+    "unchanged_feasibility_tolerances": true,
+    "unchanged_Actual_SVR12": true,
+    "original_Raw_modified": false
+  },
+  "Q250_M4_policy_sha": "9c9b165517907cfbb97f753dadbabac9ac5e0a8832ac3406c06156b2faa7ddc6",
+  "autonomous_recovery_overlay": {
+    "policy": "V44_AUTONOMOUS_RECOVERY_R029",
+    "sources": [
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\__init__.py",
+        "bytes": 408,
+        "sha256": "ff6cd1e6c8ad6d865038ed3751aaacb0374253e139e4b480612ec0123001f3c6"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\a2_cache.py",
+        "bytes": 8134,
+        "sha256": "cba0b9e3b28243a872a1c96a3ae142dcfde5e32f3e76526ffc25e1621aba2818"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\a2_checkpoint.py",
+        "bytes": 9957,
+        "sha256": "ee0ee2564ffba085febc7a5f9e4dbd5f848ab19a756dfacb26933a512370655d"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\a2_continue.py",
+        "bytes": 7758,
+        "sha256": "308979c63c4d87c1569ef136f30f97f50c345e28d18be2da70da055481b3928a"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\a2_resume_case.py",
+        "bytes": 3961,
+        "sha256": "7a9c8f796d6499b529e5e70773eb25c1a80347f723d59abaa939334a4f14c968"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\actual_resume.py",
+        "bytes": 7448,
+        "sha256": "1024da4be507d0c406412b011566fc41c5628bab011c3789d3c980bd113fba22"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\actual_wall.py",
+        "bytes": 2333,
+        "sha256": "d75359ab024aadb4703c8cf06d36584d11a42c6ee4297ba44d720c040cb5f5d9"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\b3_copy.py",
+        "bytes": 1820,
+        "sha256": "9bbe5bcabdd4215e6e4cf88556a85ed5c2b5d3575dfbbfb0f188c8ac42ff4b0c"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\class_metadata.py",
+        "bytes": 1055,
+        "sha256": "7743d1cee9a5da112a2fc0bc03a2ba848574b10dd2a8278c6d504c78a91e20b6"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\compressed_cache.py",
+        "bytes": 460,
+        "sha256": "1c4d2c26dc623c165b810ceed68f4573640029b076ab36a9851583729755c3a5"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\conditional_campaign.py",
+        "bytes": 1018,
+        "sha256": "5b7fd41f195bf10bb5946de73e26b09f222669adc0ccb2046b90279934520614"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\conditional_voltage.py",
+        "bytes": 14665,
+        "sha256": "6f513b64bdcc16148f053193c8f65f29110568bafa8c625c03862d2d906863bf"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\context_gc.py",
+        "bytes": 2331,
+        "sha256": "38ed3bded0de047d127be4a34bb9b25914e3800812019480a47608e97ba0d3e0"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\cpu_placement.py",
+        "bytes": 5917,
+        "sha256": "ff1d9b2a2f4437ee773a7d2cd06473c91935d16d5610562a33cfb1584cb6ba95"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\current_ac_performance.py",
+        "bytes": 18279,
+        "sha256": "b1f2d6bfa364370abfe84e84659b0e47f1fe6bdd4c526d10b27014d07e6b1c24"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\exact_clean.py",
+        "bytes": 1167,
+        "sha256": "6c59b39c8c6d424ad2ecf4d692a7c7e84b9387b79294c7986064727133b9843d"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\failure_continue.py",
+        "bytes": 3166,
+        "sha256": "0c7b56a4243a5f4f869782a19eedb5b9a50098ec5384af144ef5f4a5d2706059"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\finite_bound.py",
+        "bytes": 2926,
+        "sha256": "10c7e237e9cc8240daf65b3dbfc6a1f731fd02dd0eb9f0ec6df386b1b128ffa1"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\fresh_a2_case.py",
+        "bytes": 4574,
+        "sha256": "0ab1bc610020ad9e26e644822edc94065f893d7c329d0f193bcde559d93cd287"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\fresh_performance.py",
+        "bytes": 2279,
+        "sha256": "8aa6e873055fd50ce12165f71aec9a5a3e58094eab4164835045bb0235b77fb6"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\handover.py",
+        "bytes": 5478,
+        "sha256": "8d8191cf776b8e9a17840a80ee940b3c49e081d680a9d91a769300cc49c152f6"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\history.py",
+        "bytes": 7755,
+        "sha256": "2cda2ec217541d47dd480e672b95766c3fb39d50ffe71c68466d6c4609b184f8"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\immutable.py",
+        "bytes": 1548,
+        "sha256": "9fd744e09cfe4cf26b2f431bd03a6d0edca5eb58cc8feeb7d505c3afb96b7798"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\initial_running.py",
+        "bytes": 1036,
+        "sha256": "16018d887647b20767efd8932402e1a500433389d4d53de4947e78b4dea03cbb"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\integer_repair.py",
+        "bytes": 4293,
+        "sha256": "9cdc2631784674f68628c76ed5633196d23e79d5a1e1c3d9f9013ed2f9c84ca3"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\model_difference.py",
+        "bytes": 2357,
+        "sha256": "5798a00d397287cde7abeb864e4952fe4c1cd454381994916272b6c14442ccc2"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\native_cpu.py",
+        "bytes": 2619,
+        "sha256": "14211daa7bab3635f2cef4c4946728788caf19e7c8f0bb63bfa6c74fadcbd78b"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\operations.py",
+        "bytes": 30851,
+        "sha256": "b4ba2a0911667832d2997815b2469f4b362583cdfd5376ecd08a04c65886c331"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\p1_acceleration.py",
+        "bytes": 1476,
+        "sha256": "be16410bc2b42a322a3e125df8fa170d76f9a4795f63633bc2431434a5c1ce7d"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\parent_admission.py",
+        "bytes": 7132,
+        "sha256": "634ae7e8ace53912e375ac168217c307145d7341acc816cbd223d3e04b6dbddc"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\phase_limit.py",
+        "bytes": 3277,
+        "sha256": "aa9736a55353cd72ea9d8532619c42f9f66a2dc4dd1b03a50e9d102c85ad3a83"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\phase_rebuild.py",
+        "bytes": 11826,
+        "sha256": "a98b68ba587c61a65efae4a396587ba3206dc697c8b4d2cecde94d6889253d70"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\phase_speed.py",
+        "bytes": 3254,
+        "sha256": "b438890af72bc88923a36216271b1d667b9eb8ec6af6adcf4e5e79dca4a6a11d"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\phase_stability.py",
+        "bytes": 8927,
+        "sha256": "4cb014e3487e3e3d416ea93a3cfc2388184d828bf060980e4d9242344227376d"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\physical_copy.py",
+        "bytes": 1228,
+        "sha256": "698f6b99029c006bc32364617391703cd2822371bff6c4272d672217f2a7d221"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\planning_reuse.py",
+        "bytes": 4883,
+        "sha256": "8324bcdff56ec4b34eda3673a32660a9ce83ed611297c623ed8a1c951302a818"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\property_metadata.py",
+        "bytes": 2480,
+        "sha256": "daf5c82ae21ec71892a5ea406ef02e912541520411b88983f2aa2499d266ca37"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\repairs.py",
+        "bytes": 994,
+        "sha256": "34c1c978fcd6006038dd5d72c2cc3b638f71ddbfb1ec8ded19cccfb144c505ed"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\reporting.py",
+        "bytes": 2971,
+        "sha256": "e9af4522261c57a76a344f933557da112ef33e26302c9f8de5a2713839d4e437"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\row_generation.py",
+        "bytes": 12954,
+        "sha256": "40dea074e5b6ef304ab7ec9e86d8841bd22eead72fedcc14fbc5f91fe7eb6483"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\snapshot_checks.py",
+        "bytes": 2025,
+        "sha256": "e2d6678dd4b7d04859e6f8a2980b958a9e3d5bf9461e321dd2935df5f90033d7"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\source_io.py",
+        "bytes": 6731,
+        "sha256": "ec18d7cd7871b66157a0f3438122c3dafa77839a2c5a35b902b1300682b972ef"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\source_ports.py",
+        "bytes": 1758,
+        "sha256": "7fe8fceb6b98a62dc7054d6cb4d9b3a82811e1b7daee8a024293c4893019ed95"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\sparse_couplings.py",
+        "bytes": 3048,
+        "sha256": "5cb0f2c2a510f955dce362cb03baabe7d03229bd677cb0b2f33c625b49be7d23"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\stage_costs.py",
+        "bytes": 3769,
+        "sha256": "cd0d8b0b4da0a085f1c42f306182ea0ebfb64717a7683940b7b73777d769a894"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\strict_recovery.py",
+        "bytes": 11467,
+        "sha256": "69533a395857f1cf133c48124893f40ce6304c42ac6b67ce5d53c804ba26be44"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\thread_policy.py",
+        "bytes": 5786,
+        "sha256": "a899b9d7cf7c2f35eeb4f8d919d97ebad59891db8679cd1761917afa740644e8"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\voltage_policy.py",
+        "bytes": 17585,
+        "sha256": "3f85545a0b64f85b8d97fb3cbce3445a0f3cb4d29d890534572927d82832a594"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\wall_resume.py",
+        "bytes": 11029,
+        "sha256": "925159d356bb1f3158be755a5e1b8fed24715d31f2c93b24291c370c86ad94e6"
+      },
+      {
+        "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r029\\weather.py",
+        "bytes": 2722,
+        "sha256": "56de499fb8fe17f20b221eb65cf4c95a4848d727a423db13a0eb3d76172921cc"
+      }
+    ],
+    "schema_backend_sources": [
+      {
+        "path": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\dss_python_backend\\__init__.py",
+        "bytes": 892,
+        "sha256": "4793cb987faaf5ebe6c57fe776c7f4d62e0337ed02555069439a14407b9b411d"
+      },
+      {
+        "path": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\dss_python_backend\\_dss_capi.pyd",
+        "bytes": 1831424,
+        "sha256": "bbef2d39effbedfd3e86283d614eef5ed9522f278cbac90f0ce0004e501947db"
+      },
+      {
+        "path": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\dss_python_backend\\dss_capi.dll",
+        "bytes": 29169756,
+        "sha256": "dcfd2b663fca577ef64795af1b908b509774dac6515de50968479a255024afe5"
+      },
+      {
+        "path": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\dss_python_backend\\libklusolvex.dll",
+        "bytes": 979257,
+        "sha256": "1321f03721243caac886011dcee1c229863958f37c005de076d25a234587793f"
+      },
+      {
+        "path": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\dss_python_backend\\libwinpthread-1.dll",
+        "bytes": 52224,
+        "sha256": "5bbef249a0d00e2d32c699d0bbe89f714ebeb872b3990a5cbeccb1d89f63e5e8"
+      },
+      {
+        "path": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\opendssdirect\\Properties.py",
+        "bytes": 2442,
+        "sha256": "44d3318f626e2528238369f97a4d3dc64dad2da2820a78e4da9bc2a63d776217"
+      }
+    ],
+    "handover_guard": {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R029_HANDOVER_GUARD.json",
+      "bytes": 1681,
+      "sha256": "d82ce11ed9c27f9ccd3897e116caf6837e9f7ccb416ef8a36d6ac0461f279fcd"
+    },
+    "validation": {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R029_CHANGE_AND_VALIDATION.json",
+      "bytes": 13701,
+      "sha256": "de60b86e7fe9fa140c9149a2b71357a3d0be4474cd3a49aa710fc085e96ae392"
+    },
+    "improved_arms": [
+      "B0",
+      "B1",
+      "B3"
+    ],
+    "Fresh_all_live_measurements": true,
+    "Phase_I_row_generation": "NO_ROUND_OR_ACTIVATION_FULL_PROMOTION_SEMANTIC_GLOBAL_ROW_MAPPING_ALL_NEW_HARD_LOCAL_ROWS_FULL_OMITTED_SEPARATION_FULL_EXACT_PHI_ADAPTIVE_BATCH",
+    "Phase_I_full_zero": "FULL_PHI_LE_1E8_NEGATIVE_EXPONENT_AND_ORIGINAL_MAX_VIOLATION_LE_1E6_NEGATIVE_EXPONENT_UNCHANGED",
+    "Phase_I_additional_performance": "BATCHED_SPARSE_ATTRIBUTION_IDENTICAL_ARITHMETIC_EXACT_ZERO_TERM_ELISION_COMPONENT_WALL_RSS_PROFILING",
+    "Phase_I_scaling_revision": false,
+    "Phase_I_rollout": "UNCONDITIONAL_ALL_UNSTARTED_B1_A1_B3_A2_NO_PILOT_RESULT_READ_OR_PASS_GATE",
+    "future_A_stage_rollout": {
+      "unconditional": true,
+      "arms": [
+        "B1",
+        "B3"
+      ],
+      "stages": [
+        "A1",
+        "A2"
+      ],
+      "pilot_PASS_required": false,
+      "current_worker_unchanged": true,
+      "authorization": {
+        "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R029_USER_AUTHORIZATION.json",
+        "bytes": 1374,
+        "sha256": "b4ac58c169cfc61eb874f5c6e99586ed28093e2044adf4295336e610add93fe2"
+      }
+    },
+    "A2_numerical_policy": "ROBUST_SIMPLEX_PHASEI_ONLY_ORIGINAL_BARRIER_P1_PRICING_EXACT_LOCAL_BASIS_REOPT_ONE_VERIFIED_NUMERICAL_REPAIR_ALL_NATIVE_CHARGED",
+    "diagnostic_only_fix": "NONFINITE_SOLVER_BOUND_NULL_WITH_EXPLICIT_NONFINITE_TAG",
+    "source_IO_policy": "WINDOWS_READ_ONLY_SHARE_SOURCE_HANDLES_PARENT_NO_DELETE_LOCKS_MAPPED_BYTES_FULL_SHA_RECOMPUTED_ON_EVERY_RECORD_UNKNOWN_PATHS_ORIGINAL_IO_NO_DIGEST_MEMO",
+    "A1_A2_snapshot_enum_checks": "ALL_CURRENT_U1_ROW_SENSES_AND_VTYPES_VECTOR_EQUALITY_SAME_ALLOWED_LABELS_ERRORS_NO_CACHE_OR_TOLERANCE_CHANGE_OTHER_INPUT_TYPES_ORIGINAL_LOOP",
+    "science_parameters_changed": true,
+    "Native_budgets_changed": true,
+    "legacy_source_IO_ports": "V43_AND_PR134_RECORD_SHA_AND_V44_SHA_MAPPED_SOURCE_FULL_REHASH_EACH_CALL_ORIGINAL_ARGUMENTS_KEYS_ORDER_AND_UNKNOWN_MUTABLE_IO",
+    "exact_clean": "EXACT_PLAIN_BUILTIN_FAST_PATH_NUMPY_PATH_SUBCLASS_FALLBACK_ORIGINAL_NONFINITE_ENCODING_AND_JSON_BYTES_UNCHANGED",
+    "all_stage_observability": "REFERENCE_A1_M1_A2_M2_ACTUAL_AND_NESTED_INDEPENDENT_FRESH_WALL_CPU_SOURCE_IO_NATIVE_TIMING_NEW_SEPARATE_JSONL_NO_PROBES_ADDED",
+    "weather_observation_policy": "REJECT_NONFINITE_ROWS_THEN_UNCHANGED_ASOF_MAX_AGE7200",
+    "weather_raw_modified": false,
+    "weather_values_imputed": false,
+    "initial_running_contract": "EXISTING_CONTINUATION_ONLY_FOR_ALL_SOURCE_RUNNING_WITHOUT_NATIVE_WINDOW_NO_NEW_PENDING_STARTS",
+    "Joint_parameter_lookup": "LIVE_APPROVED_M_ONLY_SCOPE_THREADS4_METHOD2_GAP003_WITH_MAY02_ROBUST_BARRIER",
+    "Actual_wall_budget_seconds": null,
+    "Actual_wall_policy_basis": "V44_CAMPAIGN_STAGE_REQUEST_WALL_BUDGET_NONE_NOT_V43_40_MINUTE_DEFAULT",
+    "Actual_fresh_context": "NEW_INDEPENDENT_NO_PARTIAL_TAP_QUEUE_REUSE",
+    "A2_cache_binding": "ACCEPTED_SAME_DATE_A1_PROOF_AND_BYTE_IDENTICAL_PRODUCER_RELOCATION_ORIGINAL_SEMANTIC_DOMAIN_VERIFIER_TAIL",
+    "Current_AC_performance": "EXACT_PREFIX_HISTORY_AUDIT_REUSE_WITH_LIVE_BOUNDARIES_AND_IMMUTABLE_PHYSICS",
+    "Historical_audit_guard": "FIRST_AND_FINAL_FULL_LIVE_CONTROLS_RATINGS_AND_EXACT_NATIVE_STAMP",
+    "Historical_audit_identity": "ARM_DAY_ISSUE_HARDWARE_SOURCE_SCENARIO_MESS_SITES_FULL_INPUT_PREFIX_EXACT_TAPS_CAPS_QUEUE_TIME_ALL_COMPLEX_VOLTAGES_AND_SOLUTION_COUNTERS",
+    "Historical_native_state_snapshot_restored": false,
+    "Historical_audit_cache_max_slots": 120,
+    "Historical_audit_cache_max_bytes": 134217728,
+    "Historical_low_cost_slots": "UNCHANGED_R016_SETTLE_PATH_WHEN_PREVIOUS_CONTROL_CALL_COUNT_LE3",
+    "performance_scope": "ALL_UNSTARTED_B1_B3_A_STAGES_AND_COMMON_ACTUAL_PERFORMANCE",
+    "Phase_I_rebuild": "R022_EXACT_CACHES_AND_PROOFS_PLUS_ONE_AXIS_VECTOR_AND_COMBINED_SPARSE_GLOBAL_COUPLING_PER_REFERENCE_AND_COMPACT_BUILD",
+    "Phase_I_weights": "FREEZE_INITIAL_REFERENCE_POSITIVE_DYADIC_WEIGHTS_AND_SIGNS_THROUGHOUT_PHASE_I_ALL_ORIGINAL_INCLUSION_CHECKS_RETAINED",
+    "Current_AC_state_reads": "EXACT_LIVE_CONSUMED_TAPS_CAPS_QUEUE_TIME_FIELDS",
+    "SVR_measurement": "ONE_FULL_MEASURE_PLUS_EXACT_SAME_STATE_IMMEDIATE_SECOND_READ_REUSE",
+    "Raw_JSON": "BYTE_IDENTICAL_ROW_ENCODING_MEMO_ALL_RAW_FILES_PRESERVED",
+    "Independent_Fresh": "FULL_INDEPENDENT_MEASUREMENTS_LIVE_PROPERTY_READS_PURE_EXPECTED_COPY_NO_HISTORY_OR_BANK_REUSE",
+    "property_metadata": "INHERITED_R016_LIVE_READERS_CURRENT_AND_FRESH_ALL_LIVE_HISTORICAL_CERTIFICATES_ONLY_BETWEEN_FULL_LIVE_SLOT_GUARDS_BACKEND_SHA_PINNED",
+    "named_equipment_reads": "IDENTICAL_NATIVE_NAME_GETTER_CALLS_SKIP_FAILED_PYTHON_INT_CONVERSION",
+    "Actual_processor_placement": "ONE_PHYSICAL_P_CORE_FIRST_OS_CORE_RESERVATION_E_ONLY_IF_P_CORES_UNAVAILABLE_RESTORE_ON_EXIT",
+    "single_thread_processor_placement": "A1_A2_NATIVE1_AND_ALL_ARMS_ACTUAL_FRESH1_P_FIRST_E_ONLY_IF_P_UNAVAILABLE",
+    "four_thread_processor_placement": "FOUR_DISTINCT_PHYSICAL_CORES_P_FIRST_E_ONLY_FOR_UNAVAILABLE_P_CAPACITY_OS_CORE_RESERVATIONS",
+    "physical_copy": "IMMUTABLE_PHYSICAL_EVIDENCE_SHARED_IN_CURRENT_HISTORY_ONLY_OTHER_VALUES_INHERITED_R016_CLONES_INDEPENDENT_FRESH_NO_HISTORY_REUSE",
+    "Actual_numerical_threads": 1,
+    "model_build_threads": 4,
+    "model_parallel_scope": "INDEPENDENT_COEFFICIENT_ROWS_AND_BLAS_ONLY_NATIVE_CONTEXT_AND_GUROBI_OBJECT_SINGLE_OWNER",
+    "first_task": "DIAGNOSED_IMPLEMENTATION_ERRORS_NEW_ATTEMPTS_ONLY",
+    "failure_policy": "PRESERVE_FAILED_DATE_AND_LEDGER_QUEUE_HOURLY_DIAGNOSED_REPAIR_CONTINUE_NEXT_ELIGIBLE_DATE_WITHOUT_CASE_TECHNICAL_STOP",
+    "later_M_retries": "NEW_ATTEMPT_NATIVE0_NO_SEED_OR_CLOCK_INHERITANCE",
+    "max_attempts": 3,
+    "user_instruction": "2026-10-18 user explicitly requests all implementation errors fixed and May02 B3 P1 bottleneck fixed. Reuse same-date certified Planning where possible. Preserve all old outcomes and Native times; new sealed revision, independent certification, safe natural boundary; no budget or physical tolerance increase.",
+    "original_permit": {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\Q250_M4_V2_EXECUTION_PERMIT.json",
+      "bytes": 6212,
+      "sha256": "e97d02cdbd59c65282f4dbb25a6a635ece71fefb14c34bac7154f2e37b388593"
+    },
+    "algorithm_base": "v44_recovery_r023",
+    "r023_source_sha": "e7533625281ff41f3ed2cb29b2c6cd90292a618eb1f19de5629abf84ff810450",
+    "r023_seal": {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R023_SEALED.json",
+      "bytes": 8473,
+      "sha256": "d712f771b45615c4327a27006992c87449312518eaecedad322df912f90e5c9f"
+    },
+    "A2_voltage_policy": {
+      "policy": "V44_R029_CONDITIONAL_SELECTIVE_A2_HALF_RELAXATION_RECOVER_M2_STRICT_V1",
+      "stage": "A2",
+      "lower_pu": 0.945,
+      "upper_pu": 1.055,
+      "lower_squared": 0.893025,
+      "upper_squared": 1.113025,
+      "maximum_relaxation_pu": 0.005,
+      "original_lower_pu": 0.95,
+      "original_upper_pu": 1.05,
+      "initial_voltage_band": [
+        0.95,
+        1.05
+      ],
+      "scope": "ONLY_TRIGGER_VERIFIED_VIOLATED_NODE_PHASE_SLOT_DIRECTION",
+      "all_nodes_phases_slots": false,
+      "full_eligible_class_pricing_minimum": 1,
+      "recent_actual_column_activations": 2,
+      "each_full_Phi_relative_decrease_strictly_below": 0.05,
+      "minimum_voltage_artificial_fraction": 0.95,
+      "P1_objective_changed": false,
+      "non_voltage_constraints_changed": false,
+      "M2_lower_pu": 0.95,
+      "M2_upper_pu": 1.05,
+      "Actual_Fresh_lower_pu": 0.95,
+      "Actual_Fresh_upper_pu": 1.05,
+      "M2_voltage_recovery_failure_alone_is_case_failure": false,
+      "M2_nonvoltage_certified_operating_plan_may_enter_Actual_Fresh": true,
+      "final_PASS_requires_original_Actual_Fresh_physical_checks": true
+    },
+    "Phase_I_Native_limit": 1500.0,
+    "A_total_Native_limit": 5400.0,
+    "fresh_A2_restart": {
+      "day": "2025-05-02",
+      "arm": "B3",
+      "parent_attempt": "attempt001",
+      "reuse_completed_M1": true,
+      "Native_start": 0.0,
+      "Native_total_ceiling": 5400.0
+    },
+    "M2_voltage_recovery_failure_policy": "RECORD_AND_CONTINUE_ACTUAL_FRESH_WITH_INDEPENDENT_NONVOLTAGE_PLAN_REPLAY_NO_FALSE_FULL_OR_GAP",
+    "P1_acceleration": "FULL_VALIDATED_NEGATIVE_BLOCK_BATCH_AND_REPLAYED_FEASIBLE_PSTART_AND_EXACT_SAME_MATRIX_LOCAL_BASES",
+    "assembly_cache": "LOSSLESS_ZLIB_LEVEL1_SERIALIZED_PAYLOADS_EXACT_KEYS_AND_INDEPENDENT_DESERIALIZED_OUTPUTS_SAME_MEMORY_LIMIT",
+    "Actual_retired_context_GC": "ORIGINAL_RETIREMENT_OWNER_MANAGER_CHECKS_GEN1_EACH_PROBE_FULL_GEN2_EVERY8_OR_PENDING16_FINAL_FULL_CLEANUP",
+    "B1_property_schema": "LIVE_CLASS_AND_COUNT_GUARD_CLASS_IMMUTABLE_NAMES_ONLY_ALL_PROPERTY_VALUES_LIVE",
+    "P1_and_pricing_solver_policy": "INHERITED_ORIGINAL_BARRIER_NORMAL_CALLS_PHASEI_ONLY_ROBUST_SIMPLEX_EXACT_LOCAL_BASIS_DUAL_REOPT_ROBUST_REPAIR_ONLY_AFTER_FAILED_REPLAY",
+    "Planning_export_repair": "FIX_EXISTING_INTEGER_DECISIONS_SOLVE_CONTINUOUS_REMAINDER_REPLAY_ORIGINAL_MATRIX_PHYSICS_AND_GAP_NO_CLIPPING",
+    "May06_Planning_reuse": "PRESERVED_FULL_P1_CLOSURE_AND_DECISIONS_WITH_INHERITED_NATIVE_TIME_PLUS_NEW_CONTINUOUS_REPAIR",
+    "repair_authorization": {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R029_USER_AUTHORIZATION.json",
+      "bytes": 1374,
+      "sha256": "b4ac58c169cfc61eb874f5c6e99586ed28093e2044adf4295336e610add93fe2"
+    }
+  },
+  "autonomous_recovery_policy_sha": "433b519e83f9e3aee60718ecccb41057a411bcc4b4d7cbc3fdfc67c8de7574b9",
+  "campaign_root": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign007_may22_31",
+  "campaign_sources": [
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r048\\__init__.py",
+      "bytes": 99,
+      "sha256": "18efcc05b0af495d3d473ef6816c4b6a9fc51bdc668485607b1db4affa338cfd"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r048\\operations.py",
+      "bytes": 18842,
+      "sha256": "519eed480a0b3e3026ce10fb91f0d17e2486af41a174c395b01615ae0e2288aa"
+    }
+  ],
+  "input_manifest": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign005_may08_14\\DOCUMENTS\\SEVEN_DAY_INPUT_MANIFEST.json",
+    "bytes": 65206,
+    "sha256": "0d405d12bb11de000d99212129f36df5c749d64a9a3eb95b46e8e0b53de29284"
+  },
+  "baseline_permit": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\RECOVERY_R029_EXECUTION_PERMIT.json",
+    "bytes": 29088,
+    "sha256": "933b3f4d27f43bb1551e3fdca6cfa656534797644948e9565ca95c129a5bcf99"
+  },
+  "user_instruction": "5월 22~31일까지 캠페인 준비해놔. 그리고 5월 31일까지 B0은 1worker 추가해서 지금 캠페인 유지하면서 추가해서 돌려.",
+  "prepare_workers": 1,
+  "actual_workers": 1,
+  "all_preparations_barrier": false,
+  "exclude_failed_cases": true,
+  "dispatcher_regressions": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign005_may08_14\\OPERATIONS\\DISPATCH_TESTS.xml",
+    "bytes": 1122,
+    "sha256": "eb97e1def54e2a54c1c2934245e6a4e401ed80f434ec326108c042cb778a24f0"
+  },
+  "allowed_arms": [
+    "B0"
+  ],
+  "B0_workers": 1,
+  "other_arms_execution_authorized": false,
+  "R048_authorization": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign005_may08_14\\OPERATIONS\\R048_MONTH_B0\\AUTHORIZATION.json",
+    "bytes": 16885,
+    "sha256": "8f9733f65147b62e4c6b15db5e5d6e2c25dc7e8223335ba073574b364d97ec89"
+  },
+  "input_sources": [
+    {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign007_may22_31\\OPERATIONS\\PREPARATION_AUTHORIZATION.json",
+      "bytes": 2165,
+      "sha256": "58cdcf80b1a576f5ba759a6538ca759e7ea3062cf138040e3aad9eb68679c2ef"
+    },
+    {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign007_may22_31\\OPERATIONS\\PREPARATION_VALIDATION.json",
+      "bytes": 31146,
+      "sha256": "1959f57ca6853c063308631a99988e19d1922cd3a586be9159acb51cee04d63e"
+    },
+    {
+      "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign007_may22_31\\OPERATIONS\\OBSERVATION_INPUT_PREFLIGHT.json",
+      "bytes": 22327,
+      "sha256": "71bf6453fa01948574b219bc408eff3949f8d8bed0a324da74b01e6913253278"
+    }
+  ],
+  "adapter_sources": [
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r048\\__init__.py",
+      "bytes": 99,
+      "sha256": "18efcc05b0af495d3d473ef6816c4b6a9fc51bdc668485607b1db4affa338cfd"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r048\\operations.py",
+      "bytes": 18842,
+      "sha256": "519eed480a0b3e3026ce10fb91f0d17e2486af41a174c395b01615ae0e2288aa"
+    }
+  ],
+  "excluded_dates": [
+    "2025-05-23"
+  ]
+}

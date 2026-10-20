@@ -1,0 +1,70 @@
+{
+  "UTC": "2026-10-18T13:24:57.951379+00:00",
+  "user_authorized": true,
+  "user_instructions": [
+    "900초 처리 시간 제한 삭제해. B3 실행 냅두고 B1 Actual 병렬로 실행하게 해.",
+    "응 병렬로 Actual 초기 상태부터 지금 재실행하게 해.",
+    "r038에도 900초 시간 제한 삭제해서 현재 캠페인 돌리고 있는 거에도 적용해."
+  ],
+  "policy": "R039_REMOVE_WALL_LATENCY_ABORT_AND_PASS_CRITERION_WITH_PHYSICAL_GATES_RETAINED",
+  "sources": [
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r039\\__init__.py",
+      "bytes": 95,
+      "sha256": "5b83398202616b8876288e74dce0c80c526afc7282ccb1dea02161f80983a8f9"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r039\\latency.py",
+      "bytes": 1980,
+      "sha256": "b64d86ec400d92b8e82f752a0f8c549939257ca47447c338ddcf32cbf935955f"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r039\\monitor.py",
+      "bytes": 1311,
+      "sha256": "f4bf2ef6818a8580f864493fee71ab8040193e79889d164cdbd7d0df405beb3c"
+    },
+    {
+      "path": "D:\\v44_r022_rowgen_20261017\\v44_recovery_r039\\operations.py",
+      "bytes": 13838,
+      "sha256": "94f1e3e9cd02f27ec93d70cdc4f47253bf1eb6991f2c2d6848476221a624f7e7"
+    }
+  ],
+  "previous_authorization": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R038_BATCH_EXECUTION_AUTHORIZATION.json",
+    "bytes": 5020,
+    "sha256": "46835d463d6a5305573a99deb8bd1cbf0fba276c973b678bec54a912ef082afd"
+  },
+  "validation": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\R039_CHANGE_AND_VALIDATION.json",
+    "bytes": 1665,
+    "sha256": "1dd9ad46f2da14e0fd7ae96840c1905f98445a16d7c5ee5dea43d1ad797dba72"
+  },
+  "slot_wall_limit_seconds": null,
+  "latency_is_PASS_criterion": false,
+  "simulation_slot_seconds": 900,
+  "extra_Actual_delegation": {
+    "day": "2025-05-04",
+    "arm": "B1",
+    "Native_optimization_allowed": false,
+    "physical_core_reservation_required": true,
+    "P_only": true,
+    "parallel_with_live_B3_preparation": true
+  },
+  "apply_to_all_remaining_r038_Actual_workers": true,
+  "prepared_sources_and_A1_checkpoints_preserved": true,
+  "live_B3": {
+    "pid": 70596,
+    "process_created": 1792329052.9507995,
+    "affinity": [
+      0,
+      2,
+      4,
+      6
+    ]
+  },
+  "live_B3_request": {
+    "path": "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\AUTONOMOUS_RECOVERY\\requests\\2025-05-04_B3_attempt002.json",
+    "bytes": 356982,
+    "sha256": "7d55d0714d15159dc9a3d410e60f6105ead0f45cc1c3f3461514ebe3863b645b"
+  }
+}
