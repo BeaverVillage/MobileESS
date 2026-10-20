@@ -48,7 +48,7 @@ def report():
         charge_efficiency=.95,discharge_efficiency=.95,desired_vehicle_count=8,AIDC_count=12,service_count=24,
         inherited_feasibility_and_integrality_tolerances_changed=False,
         AC_numerical_tolerance=1e-10,AC_tolerance_scope='Independent finite-difference engine only; strengthened, not relaxed',
-        sensitivity_basis='Peak-hour fresh snapshot from original tap initialization; not the retained 96-slot control history or a completed AIDC B0',
+        sensitivity_basis='Initial survey slot 67 (16:45), fresh original tap initialization; refined sequential peak may differ. Not a completed AIDC B0 peak sensitivity.',
         B3_A1_policy='NEW_CKT24_B1_SAME_DAY_SAME_SOURCE_SHA_ONLY',legacy_A1_checkpoint_LB_UB_imports=0,
         production_modules_imported_by_study=False,production_registry_or_scheduled_tasks_updated=False,
         core_sources=core,code_manifest=[dict(path=p.relative_to(ROOT).as_posix(),sha256=sha(p)) for p in sorted((ROOT/'ckt24_study').glob('*.py'))],
@@ -141,7 +141,7 @@ EPRI SVN r4176의 원본 파일 {len(json.loads((DOC/'ORIGINAL_DSS_SHA256_MANIFE
 
 380개 원본 좌표 보유 MV 3상 bus에서 P ±30 kW / Q ±25 kvar의 독립 Fresh AC를 계산했다. 이는 가상 MV 주입 포트의 순간 응답이며 포트 설치·변압기·PCS 접속·SOC·경로·Job의 운전 가능성 인증이 아니다. 전체 최대 부하율과 Top20 각각의 부하율 변화, 전압 극값, 변압기 부하를 기록했다. 최상 delta rho는 {mess['best_delta_rho']:.9g}, 최악 delta rho는 {mess['worst_delta_rho']:.9g}다. Top20은 기본 혼잡 집합과 전체 max 변화를 함께 기록한다.
 
-민감도는 순차 96슬롯의 피크 시각을 사용하되 각 Fresh 회로에서 원본 tap 초기값부터 정착시킨 별도 snapshot이다. 순차 운전의 tap 이력은 이식하지 않았다. 그러므로 표의 Fresh 기준 rho {float(sensitivity[0]['base_rho']):.9f}와 순차 피크 rho {summary['rho_max']:.9f}는 다를 수 있다. 완성된 AIDC B0나 동일 순차 제어 상태 주변의 민감도라고 주장하지 않는다.
+민감도 조사는 초기 진단에서 선택한 slot {sensitivity[0]['slot']} (16:45)에 고정됐다. 최종 강화 수치 설정의 순차 진단 피크는 slot {summary['peak_slot']}이며, 두 시점이 다르면 최종 피크의 감도를 조사했다고 해석할 수 없다. 각 Fresh 회로는 원본 tap 초기값부터 정착시킨 별도 snapshot이며 순차 운전의 tap 이력을 이식하지 않았다. 표의 Fresh 기준 rho {float(sensitivity[0]['base_rho']):.9f}와 순차 피크 rho {summary['rho_max']:.9f}도 다르다. 이는 미완료 사전 survey이며 완성된 AIDC B0나 동일 순차 제어 상태 주변의 민감도 인증이 아니다.
 
 무교란 0 kW / 0 kvar 포트 추가에서도 최대 {null['max_abs_observed_null_delta']:.9g} pu의 차이가 관측됐다. 이는 엄밀한 오차 상한이 아닌 경험적 수치 바닥이다. 원본 `Other_Feeders`의 R1=1e-8, X1=1e-9 ohm은 수치 조건을 주의해야 하는 요소이며, 원인 확인을 위해 원본 임피던스를 변경하지 않았다. 작은 응답의 신호/무교란 비와 중앙 유한차분을 `FINITE_DIFFERENCE_QUALITY.csv`에 함께 기록했고, 약한 P 응답을 인증으로 승격하지 않았다.
 
