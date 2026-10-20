@@ -14,6 +14,7 @@ def figures():
     links=pd.read_csv(RUNTIME/'traffic/link_order_509.csv')
     inv=json.loads((DOC/'NETWORK_INVENTORY.json').read_text());by={b['bus']:b for b in inv['buses']}
     mapping=pd.read_csv(DOC/'CKT24_SERVICE_SITE_MAPPING.csv') if (DOC/'CKT24_SERVICE_SITE_MAPPING.csv').exists() else None
+    if mapping is not None:mapping=mapping.dropna(subset=['e_x','e_y'])
     colors={r.service_id:plt.get_cmap('tab20')(i%20) for i,r in enumerate(traffic.itertuples())}
     def savefig(fig,name):
         fig.savefig(dest/(name+'.svg'),bbox_inches='tight');fig.savefig(dest/(name+'.png'),bbox_inches='tight');plt.close(fig)

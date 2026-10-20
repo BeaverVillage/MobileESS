@@ -61,12 +61,30 @@ def select():
                     csvout('SPATIAL_RELATIVE_ORDER_VERIFICATION.csv',proof)
                     csvout('CKT24_AIDC_PCC_MAPPING.csv',[r for r in rows if r['type']=='IDC'])
                     if n==24:csvout('CKT24_SERVICE_SITE_MAPPING.csv',rows)
+                    else:
+                        matched={r['service_id']:r for r in rows}
+                        blank={k:'' for k in rows[0]}
+                        complete=[matched.get(s['service_id'],dict(blank,**s,status='UNMAPPED_NO_VERIFIED_PCC')) for s in service]
+                        csvout('CKT24_SERVICE_SITE_MAPPING.csv',complete)
                     result['postcheck']='DRAWING_ORDER_PASS_GEOGRAPHIC_AUTHORITY_AND_PHYSICAL_PCC_PENDING'
                     save('SPATIAL_SCREENING_STATUS.json',dict(attempts=outcome,rows=n,relations=len(proof),
                         inversions=sum(not r['PASS'] for r in proof),frozen=False,
                         selection_limit='No port/transformer/interface engineering or branch-diversity certificate; no final deployment claim'))
-                    if n==24:return
+                    return
     save('SPATIAL_SCREENING_STATUS.json',dict(attempts=outcome,frozen=False,
         status='NO_VERIFIED_WITNESS; time-limit outcomes do not prove infeasibility'))
+    blank_fields=dict(ckt24_bus='',electrical_phase='',voltage_base_ll_kv='',e_x='',e_y='',pcc_rating_kva='',pcc_port_count='',
+                      screening_response_pu='',status='UNMAPPED_NO_VERIFIED_PCC')
+    rows=[dict(**s,**blank_fields) for s in service]
+    csvout('CKT24_SERVICE_SITE_MAPPING.csv',rows)
+    csvout('CKT24_AIDC_PCC_MAPPING.csv',[r for r in rows if r['type']=='IDC'])
+    pending=[]
+    from itertools import combinations
+    for a,b in combinations(service,2):
+        for axis in ['x','y']:
+            pending.append(dict(service_i=a['service_id'],service_j=b['service_id'],axis=axis,
+                traffic_delta=float(a[axis])-float(b[axis]),electrical_delta='',traffic_sign=sign(float(a[axis])-float(b[axis]),.01),
+                electrical_sign='',applicable='',PASS='',both_AIDC=a['type']==b['type']=='IDC',authority='NOT_VERIFIED'))
+    csvout('SPATIAL_RELATIVE_ORDER_VERIFICATION.csv',pending)
 
 if __name__=='__main__':select()

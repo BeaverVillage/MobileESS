@@ -21,7 +21,9 @@ def multiport():
     p=DOC/'CKT24_SERVICE_SITE_MAPPING.csv'
     if not p.exists():
         save('INSTANTANEOUS_MULTIPORT_STATUS.json',dict(status='NOT_RUN_NO_24_SITE_WITNESS'));return
-    inv=json.loads((DOC/'NETWORK_INVENTORY.json').read_text());sites=[r for r in readcsv(p) if r['type']=='STATION']
+    inv=json.loads((DOC/'NETWORK_INVENTORY.json').read_text());sites=[r for r in readcsv(p) if r['type']=='STATION' and r['ckt24_bus']]
+    if len(sites)<8:
+        save('INSTANTANEOUS_MULTIPORT_STATUS.json',dict(status='NOT_RUN_NEEDS_8_MAPPED_STATION_PORTS'));return
     sites=sites[:8]  # deterministic diagnostic roster, never an initial placement freeze
     trials=[('OFF',[])]
     for r in sites:trials.extend([(r['service_id']+'_P',[(r,30,0)]),(r['service_id']+'_Q',[(r,0,25)])])
