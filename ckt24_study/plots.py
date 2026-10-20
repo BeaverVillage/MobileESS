@@ -5,6 +5,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
+from matplotlib.ticker import MaxNLocator
+from matplotlib.text import Text
 
 def figures():
     dest=DOC/'figures';dest.mkdir(exist_ok=True)
@@ -17,12 +19,28 @@ def figures():
     if mapping is not None:mapping=mapping.dropna(subset=['e_x','e_y'])
     colors={r.service_id:plt.get_cmap('tab20')(i%20) for i,r in enumerate(traffic.itertuples())}
     def savefig(fig,name):
+        fig.canvas.draw();renderer=fig.canvas.get_renderer()
+        for ax in fig.axes:
+            occupied=[]
+            for label in [t for t in ax.texts if getattr(t,'_study_site_label',False)]:
+                options=[(4,4)]+[(rad*np.cos(angle),rad*np.sin(angle))
+                    for rad in [8,16,24,36,48] for angle in np.linspace(0,2*np.pi,16,endpoint=False)]
+                best=None
+                for dx,dy in options:
+                    label.set_position((float(dx),float(dy)));label.update_positions(renderer)
+                    box=Text.get_window_extent(label,renderer).expanded(1.08,1.16)
+                    penalty=sum(box.overlaps(old) for old in occupied)*10000+max(0,ax.bbox.x0-box.x0)+max(0,box.x1-ax.bbox.x1)+max(0,ax.bbox.y0-box.y0)+max(0,box.y1-ax.bbox.y1)+.001*(dx*dx+dy*dy)
+                    if best is None or penalty<best[0]:best=(penalty,dx,dy,box)
+                    if penalty<.05:break
+                label.set_position((float(best[1]),float(best[2])));label.update_positions(renderer);occupied.append(best[3])
         fig.savefig(dest/(name+'.svg'),bbox_inches='tight');fig.savefig(dest/(name+'.png'),bbox_inches='tight');plt.close(fig)
     def labels(ax,frame,x,y):
         for r in frame.to_dict('records'):
             marker='o' if r['type']=='IDC' else '^'
             ax.scatter(r[x],r[y],color=colors[r['service_id']],s=38,marker=marker,edgecolor='black',lw=.4,zorder=3)
-            ax.annotate(r['service_id'],(r[x],r[y]),xytext=(3,3),textcoords='offset points',fontsize=6)
+            label=ax.annotate(r['service_id'],(r[x],r[y]),xytext=(4,4),textcoords='offset points',fontsize=6,
+                arrowprops=dict(arrowstyle='-',lw=.35,color='#6b737b'))
+            label._study_site_label=True
     def road(ax):
         lookup={int(r.transport_node_id.split('_')[1]):(r.x,r.y) for r in nodes.itertuples()}
         edges=[(lookup[int(r.from_node)],lookup[int(r.to_node)]) for r in links.itertuples()]
@@ -36,14 +54,14 @@ def figures():
         ax.add_collection(LineCollection(edges,colors='#929da8',lw=.45,alpha=.8));ax.autoscale()
         if mapping is not None:labels(ax,mapping,'e_x','e_y')
         ax.set(xlabel='Original EPRI X (coordinate units)',ylabel='Original EPRI Y (coordinate units)');ax.set_aspect('equal')
-        ax.ticklabel_format(style='plain',useOffset=False)
+        ax.xaxis.set_major_locator(MaxNLocator(5));ax.ticklabel_format(style='plain',useOffset=True,axis='x')
     fig,ax=plt.subplots(figsize=(9,7));road(ax);ax.set_title('Unchanged traffic graph: 12 IDC + 12 STA');savefig(fig,'02_original_traffic')
     fig,ax=plt.subplots(figsize=(9,7));grid(ax)
     missing=sum(not b['coord_defined'] for b in inv['buses'])
     ax.set_title(f'Ckt24 original drawing coordinates; {missing:,} unlocated buses omitted\nProvisional mapping; PCC hardware and GIS authority unverified')
     savefig(fig,'01_ckt24_original_coordinates')
     fig,axs=plt.subplots(1,2,figsize=(14,6));road(axs[0]);grid(axs[1])
-    axs[0].set_title('Original traffic XY');axs[1].set_title('Original Ckt24 XY; provisional order witness')
+    axs[0].set_title('Original traffic XY (IDCnn = AIDCnn)');axs[1].set_title('Original Ckt24 XY: 12 AIDC provisional\nSTA PCCs remain unassigned')
     savefig(fig,'03_relative_direction_comparison')
     top=pd.read_csv(DOC/'B0_MV_LV_BOTTLENECKS.csv').groupby(['line','phase','voltage_class']).loading_pu.max().nlargest(20).sort_values()
     fig,ax=plt.subplots(figsize=(9,6));ax.barh([f'{a} / ph{b} ({c})' for a,b,c in top.index],top.values,

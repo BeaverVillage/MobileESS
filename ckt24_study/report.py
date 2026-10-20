@@ -147,6 +147,8 @@ EPRI SVN r4176의 원본 파일 {len(json.loads((DOC/'ORIGINAL_DSS_SHA256_MANIFE
 
 공간 screening: `{spatial}`. 모든 관계는 원본 X/Y축에서 검산하며 .01m Traffic 공차와 .01 원본 Ckt24 좌표 단위 공차를 먼저 고정했다. Mapping이 존재해도 물리적 PCC freeze가 아닌 **원본 도면 순서의 잠정 witness**다. branch 분산·실제 PCC 정격·포트 수가 인증되지 않아 최종 배치로 사용하지 않았다. 원본 정격을 만족하는 8대 초기 위치도 동결하지 않았다.
 
+이번 offline 후보집합 380개와 3상 MV·서로 다른 bus·엄격한 원본 축 순서 조건에서 전체 24개 모델은 INFEASIBLE(status 3)로 종료했고, AIDC12 모델은 OPTIMAL(status 2) 잠정 witness를 찾았다. 이것은 모든 전압·상·설비 구성을 포괄하는 보편적 불가능성 증명이 아니다. AIDC12의 검산 132개 관계는 역전 0이지만 STA12는 미배치다. 따라서 전체 24개 관계 552개 PASS나 8개 STA 포트 AC 시험을 주장하지 않는다.
+
 원본 Job descriptor와 12개 GPU 용량 및 전력 권한을 보존했다. descriptor의 Timeshift/Migration 권한은 실제 feasible schedule이 아니다. 실제 Job 변경→P/Q→Ckt24 AC witness가 없으므로 AIDC 및 Joint controllability는 false다. 가상 AIDC 부하 응답은 P 주입 부호를 반대로 해석할 수 있지만 실제 부하 감축 가능량으로 인증하지 않는다.
 
 ## 남은 필수 작업과 결과 해석
