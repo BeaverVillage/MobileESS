@@ -12,6 +12,20 @@ def report():
     summary=json.loads((DOC/'ORIGINAL_BASELINE_SUMMARY.json').read_text())
     spatial=json.loads((DOC/'SPATIAL_SCREENING_STATUS.json').read_text())
     sensitivity=readcsv(DOC/'MESS_PQ_CONTROLLABILITY.csv')
+    null=json.loads((DOC/'AC_NULL_PERTURBATION_CHECK.json').read_text())
+    grouped={}
+    for r in sensitivity:
+        grouped.setdefault(r['bus'],{})[('P' if float(r['p_kw']) else 'Q','+' if float(r['p_kw'])+float(r['q_kvar'])>0 else '-')]=r
+    quality=[]
+    for bus,rr in grouped.items():
+        row=dict(bus=bus,empirical_null_floor=null['max_abs_observed_null_delta'],not_a_controllability_certificate=True)
+        for axis,step in [('P',30),('Q',25)]:
+            plus,minus=rr[axis,'+'],rr[axis,'-']
+            row[axis+'_central_derivative']=(float(plus['rho'])-float(minus['rho']))/(2*step)
+            row[axis+'_center_offset']=(float(plus['rho'])+float(minus['rho']))/2-float(plus['base_rho'])
+            row[axis+'_min_signal_to_empirical_null']=min(abs(float(plus['delta_rho'])),abs(float(minus['delta_rho'])))/max(null['max_abs_observed_null_delta'],1e-15)
+        quality.append(row)
+    csvout('FINITE_DIFFERENCE_QUALITY.csv',quality)
     core_paths=['v44/config.py','v44/q250_m4_v2.py','v44/science.py','v44/inputs.py','v44/initial_states.py',
                 'v42_native/mess.py','v42_may_campaign_native90/traffic.py','v42_may_campaign_native90/m_model.py',
                 'v43_actual/planning_reference.py','v44/frozen/v43_mess/library.py']
@@ -125,6 +139,8 @@ EPRI SVN r4176의 원본 파일 {len(json.loads((DOC/'ORIGINAL_DSS_SHA256_MANIFE
 교통 서비스 24개(IDC12+STA12), 48개 교통 노드, 509개 Link 및 May01 Route Table 55,296개 경로를 확인했다. Route/Forecast는 r043 SHA와 일치하고, SUMO 원본 junction에서 XY를 직접 읽었다. 경로·ETA·에너지·connection-ready·서비스 ID를 재생성하지 않았다. `IDCnn → AIDCnn`은 원래 workload와의 명시적 별칭이며 순서를 바꾸지 않았다. 전력망–교통망은 합성적 거점 대응이며 동일 GIS 위치라는 주장이 아니다.
 
 380개 원본 좌표 보유 MV 3상 bus에서 P ±30 kW / Q ±25 kvar의 독립 Fresh AC를 계산했다. 이는 가상 MV 주입 포트의 순간 응답이며 포트 설치·변압기·PCS 접속·SOC·경로·Job의 운전 가능성 인증이 아니다. 전체 최대 부하율과 Top20 각각의 부하율 변화, 전압 극값, 변압기 부하를 기록했다. 최상 delta rho는 {mess['best_delta_rho']:.9g}, 최악 delta rho는 {mess['worst_delta_rho']:.9g}다. Top20은 기본 혼잡 집합과 전체 max 변화를 함께 기록한다.
+
+무교란 0 kW / 0 kvar 포트 추가에서도 최대 {null['max_abs_observed_null_delta']:.9g} pu의 차이가 관측됐다. 이는 엄밀한 오차 상한이 아닌 경험적 수치 바닥이다. 원본 `Other_Feeders`의 R1=1e-8, X1=1e-9 ohm은 수치 조건을 주의해야 하는 요소이며, 원인 확인을 위해 원본 임피던스를 변경하지 않았다. 작은 응답의 신호/무교란 비와 중앙 유한차분을 `FINITE_DIFFERENCE_QUALITY.csv`에 함께 기록했고, 약한 P 응답을 인증으로 승격하지 않았다.
 
 공간 screening: `{spatial}`. 모든 관계는 원본 X/Y축에서 검산하며 .01m Traffic 공차와 .01 원본 Ckt24 좌표 단위 공차를 먼저 고정했다. Mapping이 존재해도 물리적 PCC freeze가 아닌 **원본 도면 순서의 잠정 witness**다. branch 분산·실제 PCC 정격·포트 수가 인증되지 않아 최종 배치로 사용하지 않았다. 원본 정격을 만족하는 8대 초기 위치도 동결하지 않았다.
 
