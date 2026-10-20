@@ -1,0 +1,54 @@
+{
+  "original_commit": "affc7226a519adbe072d7debbc3ae25ea71c3487",
+  "new_scaling_operations": 0,
+  "alpha_BG": 1.15,
+  "alpha_BG_already_in_exported_arrays": true,
+  "alpha_BG_reapplied_to_Greensboro": false,
+  "alpha_grid": 0.7481417265421424,
+  "P95_reference_MW": 7100.2615,
+  "annual_max_reference_MW": 9490.53,
+  "IEEE123_native_P_reference_kw": 3490.0,
+  "IEEE123_native_Q_reference_kvar": 1920.0,
+  "PV_reference_max_MW": 4021.226,
+  "original_PV_capacity_kw": 698.000002861023,
+  "IT_idle_kw_per_installed_GPU": 0.1041606964512843,
+  "IT_swing_kw_per_active_GPU": 0.5477239090195797,
+  "PF_AIDC": 0.95,
+  "C1_normalization_factor": 5.987971384940258,
+  "C1_NLR_equivalent_scale": 3.4987194698200215,
+  "C1_normalization_applied_inside_exact_original_callback": true,
+  "source_functions": [
+    {
+      "path": "D:\\smartds_gso_substation2_v44_r043\\v43_actual\\case.py",
+      "bytes": 13120,
+      "sha256": "cbe887cb593c36dec2556d591ed577129bc2cc2fc6bb821160d98f3534c688da"
+    },
+    {
+      "path": "D:\\smartds_gso_substation2_v44_r043\\v43_actual\\vendor\\actual.py",
+      "bytes": 50758,
+      "sha256": "f5febe15c32304a18deb4b7484ba9e76aa6cdbff188801bc45a11460a998dca3"
+    },
+    {
+      "path": "C:\\codex_mobileess_workspace\\MobileESS_v41r3_scale_rebalance\\dayahead\\grid_background_v16_2.py",
+      "bytes": 10254,
+      "sha256": "85d0e7f566ff90cc0124d5af7465e9586d1a34d9a396985aab4654f93302fb74"
+    },
+    {
+      "path": "D:\\codex_mobileess_workspace\\MobileESS_v41r2_780gpu_capacity_rebase\\dayahead\\v28r2\\c1_affine.py",
+      "bytes": 6122,
+      "sha256": "912c870a2c062431cac60f2157f3b4399ad824119facdafbd7ac3f1788c40c13"
+    }
+  ],
+  "operation_order": [
+    "D1 cutoff selects existing AEMO forecast and GFS; frozen reference/ML/job/traffic inputs retained.",
+    "V16.2 gross=alpha_grid*(demand_MW*3490/7100.2615 + PV_MW*698.000002861023/4021.226).",
+    "Frozen archetype residuals allocate gross P by IEEE123 bus/phase; frozen Q lookup and relative Q/P allocate Q.",
+    "Dated final generation authority applies alpha_BG=1.15 once to gross background P/Q; PV is not multiplied by alpha_BG.",
+    "NativeAllocation converts bus/phase targets to original load elements without duplication.",
+    "Original phase PV Generator Model=1 receives original P and Q=0.",
+    "Actual FCFS GPU -> IT -> exact C1 using raw observed weather -> AIDC P and PF0.95 Q; no planning power copied.",
+    "Original MESS commands and independent Actual TIME controls; Planning7 and Actual43 equipment remain distinct.",
+    "This audit reads setpoints only; no new IEEE123 or Greensboro AC/optimization."
+  ],
+  "Greensboro_rule": "Consume exported final totals directly; never multiply by alpha_BG or alpha_grid again."
+}

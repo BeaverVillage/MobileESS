@@ -1,0 +1,57 @@
+{
+  "experiment_id": "V1_add",
+  "independent_from_V44": true,
+  "decision": "INSUFFICIENT_EVIDENCE",
+  "input_status": "INPUT_MAPPING_NOT_VERIFIED",
+  "gates": {
+    "G1": {
+      "status": "PASS",
+      "reason": "Official uhs2_1247: 6572 buses / 12749 electrical nodes / three feeders"
+    },
+    "G2": {
+      "status": "PASS",
+      "reason": "Original AIDC12/STA12 identities and traffic input receipts retained; no final electrical assignment"
+    },
+    "G3": {
+      "status": "NOT_VERIFIED",
+      "reason": "63 three-phase LV transformer candidates; no complete PCC acceptance or spatial witness"
+    },
+    "G4": {
+      "status": "PASS",
+      "reason": "780 GPU, 2498-job FCFS, site power scale 1.0 and source receipts preserved"
+    },
+    "G5": {
+      "status": "NOT_VERIFIED",
+      "reason": "B0_NOT_BUILT; no admissible B0 maximum"
+    },
+    "G6": {
+      "status": "NOT_VERIFIED",
+      "reason": "Input mapping gate blocks operating AC"
+    },
+    "G7": {
+      "status": "NOT_VERIFIED",
+      "reason": "Permission flags are not a feasible job-control pilot"
+    },
+    "G8": {
+      "status": "NOT_VERIFIED",
+      "reason": "Eight ports, new four initial sites, route/SOC pilot not verified"
+    },
+    "G9": {
+      "status": "NOT_VERIFIED",
+      "reason": "No admitted B0/control pilot; no claimed improvement"
+    },
+    "G10": {
+      "status": "NOT_VERIFIED",
+      "reason": "Static four-unit guards and 7/43-versus-1 physical control mismatch; no eight-unit model build"
+    }
+  },
+  "B0_status": "B0_NOT_BUILT",
+  "control_contract": {
+    "IEEE123_Planning_RegControl": 7,
+    "IEEE123_Actual_RegControl": 43,
+    "Greensboro_original_RegControl": 1,
+    "identical_hardware_contract": "FAIL_WITH_UNMODIFIED_ORIGINAL_EQUIPMENT"
+  },
+  "new_AC_or_optimizer_authorized_by_this_report": false,
+  "production_modified": false
+}
