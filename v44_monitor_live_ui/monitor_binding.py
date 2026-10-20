@@ -390,6 +390,7 @@ def case_loading_table(campaign, cases):
             elif job_status=='PREPARED':cell.update(state='Actual 대기',tone='ready')
             elif job_status=='BASELINE_QUEUED' or sequential and arm in ('B0','B2') and job_status=='PENDING':
                 cell.update(state='후속 대기',reason='B1·B3 종료 후 날짜별 Planning → Actual/Fresh 1-worker')
+                if job.get('weather_recovery'):cell.update(state='기상복구 · 실행 대기',tone='ready',reason='원본 고도계 기압 기반 습구온도 복구 검증 완료 · B0 1-worker 날짜순 실행')
             elif job_status=='PENDING':cell['state']='Planning 대기'
             elif job_status in ('PREPARING','ACTUAL_RUNNING','BASELINE_RUNNING'):
                 case=Path(job['case_root']);progress=optional(case/'progress.json');stage=progress.get('stage','준비')
@@ -398,6 +399,9 @@ def case_loading_table(campaign, cases):
                     cell.update(state='Fresh 검증 중' if 'FRESH' in str(activity.get('phase','')).upper() else 'Actual 실행 중',tone='live')
                 else:cell.update(state=f'{stage} 계산 중',tone='live')
             elif job_status=='ACTUAL_FAILED':cell.update(state='Actual 실패',tone='fail',reason=job.get('exclusion_reason','결과 확인 필요'))
+            if day=='2025-05-23' and arm=='B0' and job_status=='EXCLUDED':
+                recovered=optional(campaign/'OPERATIONS/MAY23_WEATHER_RECOVERY_STATUS.json')
+                if recovered.get('status')=='RECOVERED_REQUEUE_ARMED':cell.update(state='기상복구 · 재등록 중',tone='ready',reason='121개 시점 검증 PASS · 기존 B0 자연 종료 후 재등록')
             if attempts:
                 attempt = attempts[-1]
                 result = optional(attempt/'RESULT.json') or optional(attempt/'ACTUAL/RESULT.json')

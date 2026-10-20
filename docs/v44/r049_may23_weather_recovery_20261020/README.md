@@ -1,0 +1,17 @@
+# V44 r049: restore May23 weather and monthly B0 eligibility
+
+May23's three stale weather lookups came from a decoder omission: the original NOAA rows have valid same-time MA1 altimeter observations, although station and sea-level pressure fields are missing. The recovery derives station pressure from the measured 1018 hPa altimeter and the source station elevation of 132.28 m using the standard-atmosphere Smithsonian/MetPy conversion. This pressure is explicitly **derived**, not a direct station-pressure measurement. It requires the standard-atmosphere conversion assumption.
+
+At 2025-05-22 15:00 and 16:00 UTC (May23 in Melbourne), the valid FM-15/FM-16 duplicates agree on 13 C dry bulb, 11 C dew point and Q1018. The derived station pressure is 1002.4410849095201 hPa. The unchanged original psychrometric functions produce 87.6457107322462% RH and 11.856969099303287 C wet bulb at both instants. Raw rows, QC, hashes, timestamp provenance and the derivation are retained in SAME_TIME_OBSERVATIONS.json.
+
+Only May23's scoped observation loader receives these two records. Raw CSV/parquet files remain byte-identical; demand/PV and all other dates retain their original observation hashes. There is no temporal interpolation or future observation read. The existing 7200-second weather age limit and physical acceptance thresholds are unchanged. Original finite wet-bulb calculations replay exactly: 13,877 values, maximum absolute difference zero.
+
+Validation: 80 focused regressions pass; all May23 121 boundaries pass; all May22-31 1210 boundaries pass with zero failed queries. These are input and regression checks, not completed May23 scientific execution results. A separate May23 worker admission check passes with zero Native calls or control ticks and does not create its case directory.
+
+The r048a monthly controller drained the current May17 B0 case normally, retaining its PASS result. The r049 controller then restored only May23 from EXCLUDED to BASELINE_QUEUED and resumed the same one-worker chronological queue. May15/16/17 PASS result hashes are preserved. May18 B0 entered real Actual/Fresh while the four remaining original B1/B3 Actual workers continued under their original PIDs. Only the existing monitor process was refreshed: its 31-date Fresh loading table and address remain, with May23 shown as recovered and waiting. No new future-date B1/B2/B3 execution is released. The existing main B2 follow-up and resource handover rules remain inherited.
+
+Historical exclusion and failed-attempt evidence remain immutable. The dated recovery permit explicitly supersedes the May23 B0 exclusion; old historical snapshots still describe their original state. May23's Actual/Fresh result remains pending until its chronological turn.
+
+Evidence: VALIDATION.json, MONTH_INPUT_RECHECK.json, LIVE_REQUEUE_VERIFIED.json, MONITOR_VERIFIED.json, the scoped certification/permit and SOURCE_SNAPSHOT.json. Runtime paths in receipts refer to the original live evidence; this directory retains compact snapshots and exact source bytes.
+
+Conversion references: [MetPy API](https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.altimeter_to_station_pressure.html), [versioned implementation](https://github.com/Unidata/MetPy/blob/v1.7.1/src/metpy/calc/basic.py). Source format: [NOAA ISD](https://www.ncei.noaa.gov/products/land-based-station/integrated-surface-database).
