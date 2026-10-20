@@ -41,6 +41,7 @@ def campaign_batch(campaign):
 
 
 def parallel_b0(campaign):
+    if optional(Path(campaign)/'OPERATIONS/R048_MONTH_B0/STATE.json').get('main_adopted'):return {}
     aux=optional(Path(campaign)/'OPERATIONS/R047_B0_PARALLEL/STATE.json')
     return aux if aux.get('phase') not in (None,'MERGED_B2_SERIAL') else {}
 
@@ -374,7 +375,7 @@ def case_loading_table(campaign, cases):
     labels = {'READY':'대기', 'RUNNING':'계산 중', 'COMPLETE':'결과 확인',
         'FAILED':'실패', 'BLOCKED':'차단', 'BLOCKED_DEPENDENCY':'의존성 차단',
         'INPUT_NOT_READY':'입력 미준비', 'INTERRUPTED_BY_USER':'중단',
-        'PRE_ACTUAL_READY':'Actual 준비 완료', 'EXCLUDED':'Actual 제외'}
+        'PRE_ACTUAL_READY':'Actual 준비 완료', 'EXCLUDED':'Actual 제외','PREPARED_HELD':'준비 · 보류'}
     handoff=optional(Path(campaign)/'AUTONOMOUS_RECOVERY/CURRENT_HANDOFF.json')
     retry_pending=bool(handoff.get('pending_revision') and (Path(campaign)/'AUTONOMOUS_RECOVERY/R008_HANDOVER_HEARTBEAT.json').exists())
     rows = []
@@ -538,6 +539,7 @@ def campaign_view(root):
     try:live=abs(psutil.Process(lease['pid']).create_time()-lease['process_created'])<.001
     except (psutil.Error,KeyError):pass
     batch=campaign_batch(campaign);week2=(campaign/'OPERATIONS/BATCH_STATE.json').exists()
+    month=optional(campaign/'OPERATIONS/R048_MONTH_B0/STATE.json')
     aux=parallel_b0(campaign)
     if aux:
         active=[]
@@ -548,12 +550,21 @@ def campaign_view(root):
         status=dict(status,cases=batch.get('jobs',[]),workers=status.get('workers',[])+active)
         try:live=live or abs(psutil.Process(aux['lease']['pid']).create_time()-aux['lease']['process_created'])<.001
         except (psutil.Error,KeyError):pass
+    if month:
+        combined={w['pid']:w for w in status.get('workers',[])}
+        for w in month.get('workers',[]):
+            try:
+                if abs(psutil.Process(w['pid']).create_time()-w['process_created'])<.001:combined[w['pid']]=w
+            except (psutil.Error,KeyError):pass
+        status=dict(status,workers=list(combined.values()))
+        try:live=live or abs(psutil.Process(month['lease']['pid']).create_time()-month['lease']['process_created'])<.001
+        except (psutil.Error,KeyError):pass
     aliases=dict(PENDING='READY',PREPARING='RUNNING',PREPARED='PRE_ACTUAL_READY',PASS='COMPLETE',ACTUAL_RUNNING='RUNNING',ACTUAL_FAILED='FAILED',BASELINE_QUEUED='READY',BASELINE_RUNNING='RUNNING')
     cases=[dict(r,status=aliases.get(r['status'],r['status'])) for r in status.get('cases',[])]
     workers=[dict(w,worker_slot=w.get('worker_slot') or next((j.get('parallel_slot',1) for j in batch.get('jobs',[]) if (j['day'],j['arm'])==(w['day'],w['arm'])),1)) for w in status.get('workers',[])]
     details=[];views=[];bound_history=[]
     for worker in workers:
-        base=campaign/worker['day']/worker['arm']
+        base=Path(worker.get('campaign_root',str(campaign)))/worker['day']/worker['arm']
         attempts=sorted(p for p in base.glob('attempt[0-9][0-9][0-9]') if p.is_dir())
         if not attempts:continue
         case=attempts[-1];progress=optional(case/'progress.json');stage=progress.get('stage','STARTING')
@@ -701,6 +712,21 @@ def campaign_view(root):
             b0_running=sum(j['arm']=='B0' and j['status']=='BASELINE_RUNNING' for j in jobs)
             response['campaign_summary'].update(B0_parallel_workers=b0_running,B0_parallel_limit=1,B2_parallel=False)
             response['progress_summary']+=f' · B0 {b0_running}/1 추가 실행'
+    if month:
+        month_jobs=month.get('jobs',[]);b0_live=[w for w in month.get('workers',[]) if w['arm']=='B0']
+        done=sum(j['status']=='PASS' for j in month_jobs);blocked=[j for j in month_jobs if j['status']=='EXCLUDED']
+        response['campaign_summary'].update(B0_month_end='2025-05-31',B0_parallel_workers=len(b0_live),B0_parallel_limit=1,
+            B0_month_PASS=done,B0_month_excluded=len(blocked),other_new_arms_held=True)
+        response['status']='기존 캠페인 유지 · B0 05/31까지 추가 1-worker'
+        response['progress_summary']=f'기존 캠페인 PASS {passed}/28 · 실행 {len(workers)} · 추가 B0 PASS {done}/17 · 입력 제외 {len(blocked)}'
+        response['solver_note']+='\n추가 B0: 05/15 → 05/31 날짜순 1-worker · 이후 날짜 B1/B2/B3 준비·보류\n'
+        for j in blocked:response['solver_note']+=f"입력 제외 {j['day']} B0: {j.get('exclusion_reason','')}\n"
+        table=response['case_line_loading'];roots=sorted({j['campaign_root'] for j in month_jobs})
+        for future in roots:
+            rows=optional(Path(future)/'CAMPAIGN_STATUS.json').get('cases',[])
+            extra=case_loading_table(Path(future),rows)
+            existing={r['day'] for r in table['rows']};table['rows']+=[r for r in extra['rows'] if r['day'] not in existing]
+        table.update(current_rows=len(table['rows'])-table.get('historical_rows',0),current_date_range='05/08~05/31')
     return response
 
 
