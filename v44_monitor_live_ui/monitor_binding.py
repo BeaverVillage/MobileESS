@@ -31,7 +31,18 @@ def optional(path):
 
 
 def campaign_batch(campaign):
-    return optional(Path(campaign)/'OPERATIONS/BATCH_STATE.json') or optional(Path(campaign)/'AUTONOMOUS_RECOVERY/R038_BATCH_STATE.json')
+    batch=optional(Path(campaign)/'OPERATIONS/BATCH_STATE.json') or optional(Path(campaign)/'AUTONOMOUS_RECOVERY/R038_BATCH_STATE.json')
+    aux=parallel_b0(campaign)
+    if aux:
+        updates={(j['day'],j['arm']):j for j in aux.get('jobs',[])}
+        batch=dict(batch,jobs=[dict(j,**updates.get((j['day'],j['arm']),{})) for j in batch.get('jobs',[])])
+        if batch.get('phase')=='USER_STOPPED':batch['phase']='B0_PARALLEL_SERIAL'
+    return batch
+
+
+def parallel_b0(campaign):
+    aux=optional(Path(campaign)/'OPERATIONS/R047_B0_PARALLEL/STATE.json')
+    return aux if aux.get('phase') not in (None,'MERGED_B2_SERIAL') else {}
 
 
 def campaign_days(campaign):
@@ -527,6 +538,16 @@ def campaign_view(root):
     try:live=abs(psutil.Process(lease['pid']).create_time()-lease['process_created'])<.001
     except (psutil.Error,KeyError):pass
     batch=campaign_batch(campaign);week2=(campaign/'OPERATIONS/BATCH_STATE.json').exists()
+    aux=parallel_b0(campaign)
+    if aux:
+        active=[]
+        for w in aux.get('workers',[]):
+            try:
+                if abs(psutil.Process(w['pid']).create_time()-w['process_created'])<.001:active.append(w)
+            except (psutil.Error,KeyError):pass
+        status=dict(status,cases=batch.get('jobs',[]),workers=status.get('workers',[])+active)
+        try:live=live or abs(psutil.Process(aux['lease']['pid']).create_time()-aux['lease']['process_created'])<.001
+        except (psutil.Error,KeyError):pass
     aliases=dict(PENDING='READY',PREPARING='RUNNING',PREPARED='PRE_ACTUAL_READY',PASS='COMPLETE',ACTUAL_RUNNING='RUNNING',ACTUAL_FAILED='FAILED',BASELINE_QUEUED='READY',BASELINE_RUNNING='RUNNING')
     cases=[dict(r,status=aliases.get(r['status'],r['status'])) for r in status.get('cases',[])]
     workers=[dict(w,worker_slot=w.get('worker_slot') or next((j.get('parallel_slot',1) for j in batch.get('jobs',[]) if (j['day'],j['arm'])==(w['day'],w['arm'])),1)) for w in status.get('workers',[])]
@@ -628,6 +649,7 @@ def campaign_view(root):
         barrier=optional(campaign/'OPERATIONS/ALL_PREPARATIONS_RESOLVED.json') or optional(campaign/'OPERATIONS/B1_B3_PREPARATIONS_RESOLVED.json')
         actual_ready=len(barrier.get('ready',[])) if barrier else ready
         phase_label={'PREPARE_SERIAL':'Planning 1-worker 준비 중','MAIN_PREPARE_SERIAL':'Planning 1-worker 준비 중','ACTUAL_PARALLEL':'Actual/Fresh 최대 7-worker 실행','MAIN_ACTUAL_PARALLEL':'Actual/Fresh 최대 7-worker 실행','BASELINE_SEQUENTIAL':'Planning → Actual/Fresh 1-worker 순차 실행','COMPLETE':'캠페인 완료','USER_STOPPED':'사용자 중단'}.get(phase,phase)
+        if aux:phase_label='기존 Actual + B0 전용 1-worker 병렬 실행' if actual_running else 'B0 전용 1-worker 날짜순 실행'
         summary=dict(phase=phase,phase_label=phase_label,total=total,planning_resolved=resolved,
             prepared_waiting=ready,planning_running=planning_running,planning_pending=planning_pending,
             excluded=excluded,actual_running=actual_running,actual_failed=actual_failed,actual_passed=passed,
@@ -643,6 +665,7 @@ def campaign_view(root):
                 f'Actual 대상 {actual_ready} · PASS {passed} · Actual 실패 {actual_failed} · 실행 {actual_running} · 실패 제외 {excluded}\n'
                 f'전체 준비 판정 {resolved}/{total}건 종료 · 동결된 계획으로 독립 Actual/Fresh 실행\n')
         note+='A 단계 1-thread · M 단계 4-threads · K48 300초 + Joint 900초 · Q ±250 kvar\nPlanning 7-Reg · Actual SVR12 / 43-Reg · Prefix 24 + 평가 96슬롯\n'
+        if aux:note+='B0 추가 1-worker: 05/08 → 05/14 날짜순 Reference → Actual → Fresh · B2는 기존 Actual/B0 종료 후 1-worker 자동 실행\n'
         for job in jobs:
             if job.get('exclusion_reason'):note+=f"제외/오류 {job['day']} {job['arm']}: {job['exclusion_reason']}\n"
     if actual_user_stop:note=('Actual 현재 대기 · 모든 Planning 준비 시도 종료 후 정상 건만 최대 7-worker 자동 시작\n' if actual_auto_start else 'Actual 사용자 중단 · Planning 복구/준비만 허용 · Actual 자동 재개 차단\n')+note
@@ -674,6 +697,10 @@ def campaign_view(root):
             Actual_paused_by_user=actual_user_stop,Actual_auto_start_armed=actual_auto_start,
             excluded=excluded,failed=actual_failed,pending=planning_pending if prep else ready,
             state='COMPLETE' if phase=='COMPLETE' else 'STOPPED_BY_USER' if actual_user_stop else 'RUNNING' if live else 'DISCONNECTED')
+        if aux:
+            b0_running=sum(j['arm']=='B0' and j['status']=='BASELINE_RUNNING' for j in jobs)
+            response['campaign_summary'].update(B0_parallel_workers=b0_running,B0_parallel_limit=1,B2_parallel=False)
+            response['progress_summary']+=f' · B0 {b0_running}/1 추가 실행'
     return response
 
 
