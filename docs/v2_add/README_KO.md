@@ -1,15 +1,15 @@
-# V2_add
+# V2_add — PR236
 
-독립 IEEE8500 Balanced / AIDC12 / STA12 / MESS8 확장실험 준비.
+실제 IEEE8500 Balanced G1 매핑·G2 B0 9개 beta·G3 제어 Pilot을 완료했다. 원래 59개 정적 검증은 재사용했다.
 
-- [현재 한국어 검토](FINAL_V2_ADD_REVIEW_KO.md)
-- [실험 식별](V2_ADD_EXPERIMENT_IDENTITY.json)
-- [공식 계통 감사](IEEE8500_BALANCED_SOURCE_AUDIT.md)
-- [Scale 사전등록](BACKGROUND_SCALE_PREREGISTRATION.json)
-- [실행 Gate](FINAL_GO_NO_GO.json)
+- [최신 한국어 결과](FINAL_V2_ADD_REVIEW_KO.md)
+- [분리한 G1~G4 Gate](PREFLIGHT_GATES.json)
+- [실제 Scale별 결과](BACKGROUND_SCALE_SCREENING.csv)
+- [실행 가능한 Pilot의 전역 효과](CONTROL_PILOT_GLOBAL_COMPARISON.csv)
+- [원본 설정 사전 동결](PHYSICAL_CONFIGURATION_FREEZE.json)
 
-재현: 별도 Python 환경에서 `python -B -m v2_add_preflight.audit`.
-필요 라이브러리: numpy, psutil, opendssdirect.py, matplotlib(figures).
-외부 권위 저장소 경로와 runtime은 CLI 인수로 지정할 수 있다.
-입력 authority 파일이 없거나 SHA가 다르면 PASS를 선언하지 않는다.
-이 진입점은 inventory와 입력 산술까지만 실행하며 B0/Native를 호출하지 않는다.
+G1 PASS / G2 완료 / G3 MESS·Planning 제한 witness 완료/Actual 비영 AIDC 미검증 / G4 미실행. 허용 beta의 Actual B0가 모두70% 미만이므로 Primary Scenario는 없다.
+
+실행 순서: `python -B -m v2_add_preflight.gates` → `screen` → `pilot` → `results`.
+`screen`은 완료 case의 receipt를 재사용한다. `audit`/`verify`는 초기 준비 단계 전용이며 현 단계에서 재실행하지 않는다.
+조밀한 원본 AC 배열은 독립 V2_add_runtime/phase2 아래에 보존하며 경로·SHA와 재계산 가능한 지표를 PR에 기록한다. 장시간 Native/Solver 호출은 없다.

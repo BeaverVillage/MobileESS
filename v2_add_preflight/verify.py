@@ -11,6 +11,8 @@ from .audit import ROOT,DOC,R043,read,save
 
 
 def main():
+    if (DOC/'PREFLIGHT_GATES.json').exists():
+        raise RuntimeError('Phase1 static checks are historical and reused. Use results saved-array numerical review for G2/G3.')
     checks=[]
     def check(name,ok):
         checks.append(dict(check=name,PASS=bool(ok)))

@@ -1,11 +1,11 @@
-V2_add를 V44 r043 (`affc7226a519adbe072d7debbc3ae25ea71c3487`)과 별도의 IEEE8500 Balanced / AIDC12 / STA12 / MESS8 확장실험으로 등록합니다. 독립 브랜치·worktree·runtime·감사 원장을 사용하며 기존 V44/V1_add/IEEE8500 연구 소스, Worker, Monitor, 예산 및 결과는 변경하지 않습니다.
+V2_add PR236의 G1 물리 매핑을 해소하고 G2 실제 B0 Scale Screening 및 G3 제한된 제어 Pilot을 추가했습니다. 기존59개 정적 검증/190행 SHA 및 공식 계통 복원은 재사용했습니다.
 
-PR #197의 공식 계통 31개 파일을 Git 원본 바이트로 복원하고 OpenDSS에서 8,531 전기 노드·3,703 선로·1,177 Triplex·1,190 변압기를 확인했습니다. May01~07 권위 검사 190행(고유 path/SHA 쌍 135개)과 PR #235 May01 동결 전력 배열 16개가 모두 일치합니다. 원본 alpha_BG=1.15는 재적용하지 않았습니다. 최종 Window 권위상 시간 이동 허용 Job 1,024개와 raw Native mask를 구분하며, 이를 실제 피크 kW 제어량으로 해석하지 않습니다.
+- PV: PR197의2354개 Hot Leg/.12kV/설치용량/Model1/Q0를 유지하고 V44의 총량을 고정 설치용량 가중치로 배분합니다. C2 AIDC12/STA12와 기존750kVA 변압기, V44 MESS8 P300/Q250/PCS400/SOC440~1080/초기종단760을 사용합니다.
+- P5 source1.04/12Vreg123.5/CAPBank3 초기OFF를 모든 beta에 고정했습니다. IEEE123 Planning7/Actual43 및 Actual TIME/SVR12와의 차이를 명시했습니다. 연구용 정상상태 AC 가정이며 field 인증이 아닙니다.
+- beta9개 × Planning96/Actual120 × 독립Fresh: **3888 운영 AC**, Fresh18쌍 PASS. 모든 기본 케이스의 전압/선로/변압기/포트 위반0. 모든 원본3703개 선로/1177Triplex/양단/상 포함, source disabled5개도 보존했습니다.
+- Actual B0: beta1.00 **39.4819%**, beta1.50 **56.1469%**. 모든 beta가70% 미만이므로 **NO_QUALIFIED_HIGH_CONTROLLABILITY_SCENARIO**입니다. 후보 범위 밖 배율을 실행하지 않았고 Primary를 동결하지 않았습니다.
+- beta1.00/1.50의 고정/자동제어 민감도와 beta1.50의 제한된 SOC·Job·QoS·Rebound Pilot을 구분했습니다. 과거 후보는 Planning 허용 시작점 불일치414개/Actual 지연 예산 초과192개로 제외했습니다. 새 Planning witness Job10개는 GPUh 변화0으로 검증했으나 Actual 비영 AIDC witness는 미인증입니다. Actual AIDC-only는 FCFS 재생, Joint는 MESS+변경 없는 AIDC이며 공동제어 추가효과로 주장하지 않습니다. Pilot을 B3로 표시하지 않습니다.
 
-후보 beta_BG 1.00~1.50 및 B0·MV/LV·실현 가능한 pilot 중심의 선정/동률 규칙을 먼저 등록했습니다. PR #199 C2 PCC24는 사전 고정된 후보로만 복원하고, 원본 4대 초기 STA를 유지한 8대 초기상태 후보와 기존 route service ID 연결을 기록했습니다. 6대·450 kW 모델은 사용하지 않았습니다.
+G1 PASS / G2 COMPLETE / G3 PARTIAL(MESS·Planning witness PASS, Actual 비영 AIDC NOT_VERIFIED) / G4 NOT_VERIFIED. A1/M1/A2/M2 및 장시간 Native0회. 기존 V44/V1_add Source·Worker·Monitor·예산은 변경0입니다. 전체 scalar/Top20/TapCap CSV, raw AC 경로/SHA, 독립 saved-array 재산술, Python SVG/PNG4쌍 및 실패 endpoint를 보존했습니다.
 
-**현재 상태: NO_GO_PENDING_PREFLIGHT / INPUT_MAPPING_NOT_VERIFIED.** PV 전압/상/인버터 이전, P300/Q250/PCS400 포트 및 8대 동시 접속, IEEE8500과 V44 Planning/Actual 전압제어 계약의 독립 검증이 남아 있습니다. 기존 V44 프로세스와 heavy-worker lease도 활성 상태입니다. 운영 B0 96슬롯, Scale screening, 민감도/pilot, Native 최적화는 실행하지 않았고 Primary Scenario는 동결하지 않았습니다. 미실행 수치는 빈 값과 NOT_VERIFIED/사유로 보존합니다. 이는 적격 시나리오가 없다는 실측 판정이 아닙니다.
-
-검증: 독립 저장 산출물 무결성/보존 검사 59개 PASS, 원본 r043 추적 파일 변경 0. 공식 Master의 CalcVoltageBases 및 source inventory용 명목 snapshot은 운영 입력 AC와 구분합니다. 전체 원본 3,703개 선로를 그린 topology와 PCC 후보 SVG/PNG를 포함하며 측정자료가 없는 성과 그림은 생성하지 않았습니다.
-
-진입점: `docs/v2_add/README_KO.md`; 상세 상태: `FINAL_V2_ADD_REVIEW_KO.md`, `FINAL_GO_NO_GO.json`; 재현: `python -B -m v2_add_preflight.audit`, `figures`, `verify`. Runtime venv는 별도 경로이며 읽기 전용 system site packages를 상속합니다. 완전한 vendored 환경이나 알고리즘 이식 완료를 주장하지 않습니다. 연구 진행 기록용 Draft이며 merge/Production 승격을 요청하지 않습니다.
+진입점: docs/v2_add/README_KO.md. 핵심 보고: FINAL_V2_ADD_REVIEW_KO.md, PREFLIGHT_GATES.json, BACKGROUND_SCALE_SCREENING.csv. Draft 유지; merge/Production 승격 요청 없음.

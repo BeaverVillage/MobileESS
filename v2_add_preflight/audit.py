@@ -237,6 +237,8 @@ def inventory(runtime):
 
 
 def main():
+    if (DOC/'PREFLIGHT_GATES.json').exists():
+        raise RuntimeError('Initial source-only bootstrap is superseded by G1/G2/G3. Reuse its existing SHA certification; use gates/screen/pilot/results instead.')
     ap=argparse.ArgumentParser()
     ap.add_argument('--balanced-repo',type=Path,default=ROOT.parent/'ieee8500_v42_balanced_case_pr')
     ap.add_argument('--joint-repo',type=Path,default=ROOT.parent/'ieee8500_v42_high_impact_pr')
