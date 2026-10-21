@@ -1,0 +1,91 @@
+{
+  "status": "PRESTART_BLOCKED_WITH_EVIDENCE",
+  "experiment": "V2_add",
+  "PR": 236,
+  "baseline_commit": "d3b9f38c473a9304a7cd1d652ba2bd51cf2f51c2",
+  "source_commit": "affc7226a519adbe072d7debbc3ae25ea71c3487",
+  "gates": {
+    "G1": {
+      "status": "BLOCKED",
+      "reason": "S1_03 beta2 Prefix low23s/high18s; Planning native event overvoltage; causal preceding8500 control history unavailable",
+      "evidence": [
+        "FINAL_ELECTRICAL_PRESTART_CERTIFICATION.json",
+        "PREFIX_AND_PLANNING_NATIVE_VIOLATIONS.csv"
+      ]
+    },
+    "G2": {
+      "status": "BLOCKED",
+      "reason": "414 original FULL starts rejected through actual adapter; no new accepted A1; nonzero causal diagnostic rejected for reference mismatch/work/carryout/FULL gaps; migration not certified",
+      "evidence": [
+        "PLANNING_CACHE_ORIGINAL_FULL_REJECTION.json",
+        "AIDC_CAUSAL_DIAGNOSTIC_REJECTION.json"
+      ]
+    },
+    "G3": {
+      "status": "PARTIAL_NOT_CERTIFIED",
+      "reason": "C2 all24 layout directions pass and72 local perturbations measured; physical GIS/road and ideal AIDC MV PCC equipment rating not certified; GPU scale not changed",
+      "evidence": [
+        "AIDC12_PCC_LOCATION_AUDIT.csv",
+        "LOCATION_AUDIT_SUMMARY.json"
+      ]
+    },
+    "G4": {
+      "status": "PARTIAL_NOT_CERTIFIED",
+      "reason": "Original initial8/SOC preserved; STA hardware and finite STAY independent validator pass; Native24-service IDC charging facility gap and full moving-fleet grid feasibility unresolved",
+      "evidence": [
+        "MESS8_ROUTE_SOC_PQ_PORT_CERTIFICATION.json",
+        "STA12_LOCATION_AND_ELECTRICAL_RESPONSE.csv"
+      ]
+    },
+    "G5": {
+      "status": "FINITE_ELECTRICAL_WITNESS_ONLY",
+      "reason": "Two-peak pilot improves global maximum1.920869pp or1.966819pp; new peak76; not a Joint MILP/B3 result; Prefix fails",
+      "evidence": [
+        "TWO_PEAK_CONTROLLABILITY_ANALYSIS.csv",
+        "TWO_PEAK_FRESH_CHECKS.json"
+      ]
+    },
+    "G6": {
+      "status": "BLOCKED",
+      "reason": "Real4/8car original mobility Native0 built; full96 IEEE8500 coefficients/grid rows/K48/Beam/Joint/FULL-case authority not bound",
+      "evidence": [
+        "IEEE8500_V44_R043_FULL_EQUIVALENCE.json",
+        "MESS8_NATIVE0_BUILD_REPORT.json"
+      ]
+    },
+    "G7": {
+      "status": "BLOCKED",
+      "reason": "May01_07 original input receipts verified; May02_07 new8500 AC/Fresh and realFULL handlers missing. Scheduler/checkpoint/hold prepared; campaign not executable",
+      "evidence": [
+        "MAY01_07_PRESTART_INPUT_MANIFEST.json",
+        "B0_B1_B2_B3_STAGE_WIRING_CERTIFICATION.json",
+        "CAMPAIGN_EXECUTION_HOLD.json"
+      ]
+    }
+  },
+  "READY": false,
+  "Primary_Scenario_certified": false,
+  "final_beta_frozen": false,
+  "priority_beta_candidate": 2.0,
+  "official_campaign_started": false,
+  "Native_optimizer_calls": 0,
+  "long_solver_runs": 0,
+  "new_experiment_versions": 0,
+  "original_data_Worker_or_campaign_modified": false,
+  "test_result": {
+    "PASS": true,
+    "tests": 13,
+    "failures": [],
+    "errors": [],
+    "Native_optimizer_calls": 0,
+    "fixture_tests_do_not_certify_FULL_stage_or_campaign_readiness": true
+  },
+  "next_actions": [
+    "Obtain/derive and certify causal IEEE8500 predecessor input/control history; replay all120 safety without changing frozen P5/delays",
+    "Bind same-source r043 Actual controller/FCFS and certify nonzero whole-work/carryout/QoS/JobFULL schedule",
+    "Resolve native24-service MESS charging authority at IDC12 without dropping routes or attaching480V PCS toMV",
+    "Generate all96 Planning8500 affine coefficients/all line+tx ratings; bind original K48/Beam/DirectJoint and independentFULL proofs",
+    "Complete real8500/8car fullNative0 plus May02_07 physical/Fresh and actual stage checkpoint/resume/budget tests",
+    "Only after all gates pass freeze one scenario and obtain separate explicit human campaign approval"
+  ]
+}

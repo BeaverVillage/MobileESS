@@ -1,0 +1,50 @@
+{
+  "chains": {
+    "B0": [
+      "REFERENCE",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B1": [
+      "A1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B2": [
+      "REFERENCE",
+      "K48_M1",
+      "M1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B3": [
+      "A1_REUSE",
+      "K48_M1",
+      "M1",
+      "A2",
+      "K48_M2",
+      "M2",
+      "ACTUAL",
+      "FRESH"
+    ]
+  },
+  "scheduler_implemented": true,
+  "checkpoint_artifact_hash_binding": true,
+  "crash_requires_ledger_reconciliation": true,
+  "independent_date_failures_supported": true,
+  "real_FULL_stage_adapters_bound": false,
+  "A1_reuse": "same date/input/scenario/source/acceptance SHA and original FULL required",
+  "A_stage_acceptance_adapter": "prestart_acceptance.execute_a_stage; original Job validation plus same-case grid and Global LB/gap",
+  "source_stage_entrypoints": {
+    "A1": "v44.worker.a_stage",
+    "M1": "v44.worker.m_stage",
+    "A2": "v44.worker.a_stage(m1=...)",
+    "M2": "v44.worker.m_stage",
+    "K48": "v43_mess.prepared.run_prepared_k48",
+    "Actual": "v44.worker.actual",
+    "Fresh": "v44.campaign.run_case independent Actual replay"
+  },
+  "unsupported": "Source entries retain IEEE123 physical authority/case/budget permits; no guard bypass or fake8500 binding installed.",
+  "fixture_native_calls": "ORIGINAL_NATIVE_STAGE_FIXTURE_CALLS.json",
+  "campaign_started": false
+}

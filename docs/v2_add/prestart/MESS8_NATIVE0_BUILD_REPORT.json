@@ -1,0 +1,402 @@
+{
+  "status": "PARTIAL_NATIVE0_NOT_FULL_EQUIVALENCE",
+  "builds": [
+    {
+      "units": 4,
+      "status": "MOBILITY_NATIVE0_BUILT_FULL_IEEE8500_GRID_NOT_BOUND",
+      "wall_seconds": 28.454958999995142,
+      "peak_RSS_bytes": 408322048,
+      "model": {
+        "binary": 208312,
+        "integer": 0,
+        "continuous": 27215,
+        "linear_constraints": 207488,
+        "quadratic_constraints": 0,
+        "SOS": 0,
+        "general_constraints": 0,
+        "quadratic_objective_terms": 0,
+        "nonzeros": 1263916,
+        "constraint_families": {
+          "flow": 9216,
+          "terminal_location": 4,
+          "initial_SOC": 4,
+          "terminal_SOC": 4,
+          "connected_Pch": 8942,
+          "connected_Pdis": 8942,
+          "no_simultaneous_charge": 8942,
+          "no_simultaneous_discharge": 8942,
+          "connected_Qmax": 8942,
+          "connected_Qmin": 8942,
+          "PCS16": 143072,
+          "energy_balance": 384,
+          "STA_port_occupancy": 1152
+        },
+        "PQ_site_time_axes": 2304,
+        "all_24_services_retained": true
+      },
+      "context": {
+        "reachable_move_columns_by_unit": {
+          "MESS01": 49689,
+          "MESS02": 49758,
+          "MESS03": 49827,
+          "MESS04": 49712
+        },
+        "reachable_stay_columns_by_unit": {
+          "MESS01": 2233,
+          "MESS02": 2236,
+          "MESS03": 2239,
+          "MESS04": 2234
+        },
+        "objectives": [
+          "rho",
+          "reserve_shortfall",
+          "movement_kwh",
+          "movement_count",
+          "tie"
+        ],
+        "Q_bounds_PASS": true,
+        "mobility_matrix_sha256": "8ecd4f763885394193009fea3ba12b90bef0c27e2f67848a3b58c646e4549463",
+        "model_scope": "COMPLETE_ORIGINAL_MOBILITY_PLUS_Q250_AND_STA_OCCUPANCY_ONLY_NO_GRID_ROWS"
+      },
+      "Native_calls": 0,
+      "denied_attempts": [],
+      "input_receipt": {
+        "route_file": {
+          "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\inputs\\B1\\2025-05-01\\ROUTE_TABLE.json.gz",
+          "sha256": "3a08a7485ccfa153a3cd944132a251e8360002ce479546e943d91a4de2f3fca9",
+          "bytes": 5814550,
+          "period": "2025-05-01",
+          "units": "seconds,kWh",
+          "role": "same-day original frozen Route Table"
+        },
+        "excluded": {
+          "same_site_represented_by_stay": 2304,
+          "outside_inherited_RouteArc_time_contract": 1670
+        },
+        "accepted_routes": 51322,
+        "battery": {
+          "minimum": 440.0,
+          "maximum": 1080.0,
+          "initial": 760.0,
+          "terminal": 760.0,
+          "p_limit": 300.0,
+          "pcs_kva": 400.0,
+          "eta_charge": 0.95,
+          "eta_discharge": 0.95,
+          "dt_hours": 0.25
+        },
+        "initial_MESS_sites": {
+          "MESS01": "STA01",
+          "MESS02": "STA12",
+          "MESS03": "STA08",
+          "MESS04": "STA06"
+        },
+        "sites": [
+          "IDC01",
+          "IDC02",
+          "IDC03",
+          "IDC04",
+          "IDC05",
+          "IDC06",
+          "IDC07",
+          "IDC08",
+          "IDC09",
+          "IDC10",
+          "IDC11",
+          "IDC12",
+          "STA01",
+          "STA02",
+          "STA03",
+          "STA04",
+          "STA05",
+          "STA06",
+          "STA07",
+          "STA08",
+          "STA09",
+          "STA10",
+          "STA11",
+          "STA12"
+        ],
+        "native": true,
+        "synthetic": false,
+        "PR101_head": "f536e65fc7fb968c52e99e4a5b017953edc53744",
+        "PR101_wholesale_merge": false,
+        "PR101_code_ported": false,
+        "audit": "Current PR104 constructor already preserves joint route/P/Q/SOC, exact forward reachability, inner16, travel energy and terminal SOC. PR101 native route reduction not material; no extra prescreen port needed for one M1.",
+        "M1_MIP_START_AVAILABLE": false,
+        "M1_start_reason": "No accepted MESS plan bound to this new A1 anchor and voltage authority; old A1 zero P/Q is not a MESS reference plan"
+      },
+      "binary_continuous_counts_measured": true,
+      "IEEE8500_FULL_build_PASS": false
+    },
+    {
+      "units": 8,
+      "status": "MOBILITY_NATIVE0_BUILT_FULL_IEEE8500_GRID_NOT_BOUND",
+      "wall_seconds": 31.811769200023264,
+      "peak_RSS_bytes": 699846656,
+      "model": {
+        "binary": 417296,
+        "integer": 0,
+        "continuous": 54513,
+        "linear_constraints": 414440,
+        "quadratic_constraints": 0,
+        "SOS": 0,
+        "general_constraints": 0,
+        "quadratic_objective_terms": 0,
+        "nonzeros": 2531845,
+        "constraint_families": {
+          "flow": 18432,
+          "terminal_location": 8,
+          "initial_SOC": 8,
+          "terminal_SOC": 8,
+          "connected_Pch": 17912,
+          "connected_Pdis": 17912,
+          "no_simultaneous_charge": 17912,
+          "no_simultaneous_discharge": 17912,
+          "connected_Qmax": 17912,
+          "connected_Qmin": 17912,
+          "PCS16": 286592,
+          "energy_balance": 768,
+          "STA_port_occupancy": 1152
+        },
+        "PQ_site_time_axes": 2304,
+        "all_24_services_retained": true
+      },
+      "context": {
+        "reachable_move_columns_by_unit": {
+          "MESS01": 49689,
+          "MESS02": 49758,
+          "MESS03": 49827,
+          "MESS04": 49712,
+          "MESS05": 49850,
+          "MESS06": 49850,
+          "MESS07": 49919,
+          "MESS08": 50011
+        },
+        "reachable_stay_columns_by_unit": {
+          "MESS01": 2233,
+          "MESS02": 2236,
+          "MESS03": 2239,
+          "MESS04": 2234,
+          "MESS05": 2240,
+          "MESS06": 2240,
+          "MESS07": 2243,
+          "MESS08": 2247
+        },
+        "objectives": [
+          "rho",
+          "reserve_shortfall",
+          "movement_kwh",
+          "movement_count",
+          "tie"
+        ],
+        "Q_bounds_PASS": true,
+        "mobility_matrix_sha256": "196fbe5444a72f38088a55563ddc9610aac906bcd2c3e36181705cd72d1f53fa",
+        "model_scope": "COMPLETE_ORIGINAL_MOBILITY_PLUS_Q250_AND_STA_OCCUPANCY_ONLY_NO_GRID_ROWS"
+      },
+      "Native_calls": 0,
+      "denied_attempts": [],
+      "input_receipt": {
+        "route_file": {
+          "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\inputs\\B1\\2025-05-01\\ROUTE_TABLE.json.gz",
+          "sha256": "3a08a7485ccfa153a3cd944132a251e8360002ce479546e943d91a4de2f3fca9",
+          "bytes": 5814550,
+          "period": "2025-05-01",
+          "units": "seconds,kWh",
+          "role": "same-day original frozen Route Table"
+        },
+        "excluded": {
+          "same_site_represented_by_stay": 2304,
+          "outside_inherited_RouteArc_time_contract": 1670
+        },
+        "accepted_routes": 51322,
+        "battery": {
+          "minimum": 440.0,
+          "maximum": 1080.0,
+          "initial": 760.0,
+          "terminal": 760.0,
+          "p_limit": 300.0,
+          "pcs_kva": 400.0,
+          "eta_charge": 0.95,
+          "eta_discharge": 0.95,
+          "dt_hours": 0.25
+        },
+        "initial_MESS_sites": {
+          "MESS01": "STA01",
+          "MESS02": "STA12",
+          "MESS03": "STA08",
+          "MESS04": "STA06",
+          "MESS05": "STA02",
+          "MESS06": "STA03",
+          "MESS07": "STA04",
+          "MESS08": "STA05"
+        },
+        "sites": [
+          "IDC01",
+          "IDC02",
+          "IDC03",
+          "IDC04",
+          "IDC05",
+          "IDC06",
+          "IDC07",
+          "IDC08",
+          "IDC09",
+          "IDC10",
+          "IDC11",
+          "IDC12",
+          "STA01",
+          "STA02",
+          "STA03",
+          "STA04",
+          "STA05",
+          "STA06",
+          "STA07",
+          "STA08",
+          "STA09",
+          "STA10",
+          "STA11",
+          "STA12"
+        ],
+        "native": true,
+        "synthetic": false,
+        "PR101_head": "f536e65fc7fb968c52e99e4a5b017953edc53744",
+        "PR101_wholesale_merge": false,
+        "PR101_code_ported": false,
+        "audit": "Current PR104 constructor already preserves joint route/P/Q/SOC, exact forward reachability, inner16, travel energy and terminal SOC. PR101 native route reduction not material; no extra prescreen port needed for one M1.",
+        "M1_MIP_START_AVAILABLE": false,
+        "M1_start_reason": "No accepted MESS plan bound to this new A1 anchor and voltage authority; old A1 zero P/Q is not a MESS reference plan"
+      },
+      "binary_continuous_counts_measured": true,
+      "IEEE8500_FULL_build_PASS": false
+    }
+  ],
+  "resources": {
+    "pid": 102144,
+    "priority": 16384,
+    "affinity": [
+      12
+    ],
+    "available_RAM_bytes": 13919252480,
+    "other_python": [
+      {
+        "pid": 14832,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_pr134_b1.host",
+          "monitor",
+          "C:\\v42_pr134_sc_execution_20261007"
+        ]
+      },
+      {
+        "pid": 60860,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-u",
+          "D:\\MobileESS_V43\\development\\monitor_partial\\monitor_binding.py",
+          "8795"
+        ]
+      },
+      {
+        "pid": 85620,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-u",
+          "-m",
+          "v44_week3_recovery",
+          "--worker",
+          "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign006_may15_21\\OPERATIONS\\requests\\2025-05-19_B2_RECOVERY.json"
+        ]
+      },
+      {
+        "pid": 98908,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-u",
+          "-m",
+          "v44_week3_recovery",
+          "--run"
+        ]
+      },
+      {
+        "pid": 100228,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-u",
+          "-m",
+          "v44_week4_execution",
+          "--wait"
+        ]
+      },
+      {
+        "pid": 100264,
+        "command": [
+          "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe",
+          "-X",
+          "utf8",
+          "-u",
+          "-m",
+          "v2_add_preflight.prestart_split_fleet"
+        ]
+      },
+      {
+        "pid": 100284,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-u",
+          "-m",
+          "v2_add_preflight.prestart_split_fleet"
+        ]
+      },
+      {
+        "pid": 107148,
+        "command": [
+          "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe",
+          "-X",
+          "utf8",
+          "-u",
+          "-m",
+          "v2_add_preflight.prestart_native",
+          "build"
+        ]
+      }
+    ]
+  },
+  "original_source": "affc7226a519adbe072d7debbc3ae25ea71c3487",
+  "adapter": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v2_add_preflight\\prestart_native.py",
+    "sha256": "bb3d479fa6005984fe509bffe95df1e87d0bc8af33b15a6d8d804260674befae",
+    "bytes": 8836
+  },
+  "source_native": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v42_native\\mess.py",
+    "sha256": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec",
+    "bytes": 11072
+  },
+  "source_Q250": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v44\\q250_m4.py",
+    "sha256": "4b25d2cfb1500ca0c21a0523e1038d2444454612410464720ef17257726b2d48",
+    "bytes": 15619
+  },
+  "Native_optimize_calls": 0,
+  "IEEE8500_full96_affine_response": "NOT_BOUND",
+  "K48_root_pricing_seconds": null,
+  "Joint_FULL_preparation_seconds": null,
+  "full_native_time_estimate_seconds": null,
+  "missing": "Certified IEEE8500 Planning96 FULL coefficient/current/transformer authority and original K48/Beam/Joint/FULL-case binding; existing wrappers explicitly require IEEE123/7-Reg/120-current-row authorities.",
+  "original_routes_pruned": false,
+  "original_stage_budget_or_gap_changed": false,
+  "route_PQ_at_IDC": "Original24-service domain includes IDC ports; current8500 adapter has only12 STA480V facilities. IDC charging hardware not certified. Do not energize mobile PCS directly at12.47kV."
+}
