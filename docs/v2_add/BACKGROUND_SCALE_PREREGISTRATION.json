@@ -1,0 +1,69 @@
+{
+  "experiment_id": "V2_add",
+  "registered_UTC": "2026-10-21T02:13:58.531834+00:00",
+  "baseline": 1.0,
+  "beta_BG": [
+    1.0,
+    1.05,
+    1.1,
+    1.15,
+    1.2,
+    1.25,
+    1.3,
+    1.4,
+    1.5
+  ],
+  "first_tier": [
+    1.0,
+    1.05,
+    1.1,
+    1.15,
+    1.2,
+    1.25,
+    1.3
+  ],
+  "conditional_stress_tier": [
+    1.4,
+    1.5
+  ],
+  "conditional_stress_trigger": "Only if 1.00..1.30 has no physically qualified target/headroom/controllability candidate; never inspect B1/B2/B3 to trigger extension",
+  "formula": "P_BG=beta_BG*P_BG_V44_frozen; Q_BG=beta_BG*Q_BG_V44_frozen",
+  "alpha_BG_already_in_frozen_arrays": true,
+  "alpha_BG_reapplication": false,
+  "unchanged": [
+    "PV P/Q",
+    "AIDC Jobs/GPU/C1",
+    "ratings",
+    "route/ETA/energy",
+    "per-vehicle battery/P/Q/PCS"
+  ],
+  "common_beta_for_planning_actual": true,
+  "planning_actual_timeseries_separate": true,
+  "physics_required": [
+    "Planning Fresh96",
+    "Actual prefix24+evaluation96",
+    "independent Actual Fresh120",
+    "all original line-phase/both-terminal currents",
+    "all transformers",
+    "all nodes 0.95..1.05 pu",
+    "native taps/caps",
+    "power balance",
+    "PCC ports"
+  ],
+  "selection_order": [
+    "all input/physical gates PASS",
+    "B0 Actual rho 0.75..0.85 preferred, else 0.70..0.85",
+    "MV binding; daily MV-LV >=0.05 preferred plus slotwise top-congestion checks",
+    "accessible PCC and feasible 96-slot joint pilot >=0.01 preferred; >=0.02 recorded",
+    "smaller beta among otherwise equal-priority candidates"
+  ],
+  "tie_break": "Compare target tier, MV/LV headroom preference, feasible pilot >=1pp preference, then smaller beta; no B1/B2/B3 scores",
+  "pilot_below_1pp": "retain failure and causes; do not fabricate dispatch or relax constraints",
+  "beta_above_1_description": "V44-derived background load stress scenario",
+  "no_qualified_status": "NO_QUALIFIED_HIGH_CONTROLLABILITY_SCENARIO only after complete screening",
+  "PCC_policy": "PR199 C2 mapping candidate fixed before scale; no outcome-based reselection",
+  "fallback_PCC_candidates": [],
+  "fallback_policy": "physical failure requires new recorded preregistration before any alternative screening",
+  "selected_beta": null,
+  "B1_B2_B3_results_read": false
+}
