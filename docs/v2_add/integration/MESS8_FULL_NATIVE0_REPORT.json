@@ -1,0 +1,264 @@
+{
+  "status": "FULL_BUILD_BLOCKED_WITH_MEASURED_PARTIAL_MODEL",
+  "full96_Native0_build_PASS": false,
+  "independent_whole_FULL_matrix_domain_certificate": false,
+  "error": "MemoryError('PROTECTED_WORKER_RESOURCE_RESERVE')",
+  "model": {
+    "binary": 417296,
+    "integer": 417296,
+    "continuous": 871199,
+    "variables": 1288495,
+    "linear_constraints": 5338586,
+    "nonzeros": 76723045,
+    "quadratic_constraints": 0,
+    "SOS": 0,
+    "general_constraints": 0
+  },
+  "mobility_before_grid": {
+    "binary": 417296,
+    "integer": 417296,
+    "continuous": 54512,
+    "variables": 471808,
+    "linear_constraints": 415592,
+    "nonzeros": 2540800,
+    "quadratic_constraints": 0,
+    "SOS": 0,
+    "general_constraints": 0
+  },
+  "grid_slots": 23,
+  "all24_occupancy_added": true,
+  "counts_measured_not_projected": true,
+  "route_domain": {
+    "route_file": {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\candidate_20261009_implementation01\\inputs\\B1\\2025-05-01\\ROUTE_TABLE.json.gz",
+      "sha256": "3a08a7485ccfa153a3cd944132a251e8360002ce479546e943d91a4de2f3fca9",
+      "bytes": 5814550,
+      "period": "2025-05-01",
+      "units": "seconds,kWh",
+      "role": "same-day original frozen Route Table"
+    },
+    "excluded": {
+      "same_site_represented_by_stay": 2304,
+      "outside_inherited_RouteArc_time_contract": 1670
+    },
+    "accepted_routes": 51322,
+    "battery": {
+      "minimum": 440.0,
+      "maximum": 1080.0,
+      "initial": 760.0,
+      "terminal": 760.0,
+      "p_limit": 300.0,
+      "pcs_kva": 400.0,
+      "eta_charge": 0.95,
+      "eta_discharge": 0.95,
+      "dt_hours": 0.25
+    },
+    "initial_MESS_sites": {
+      "MESS01": "STA01",
+      "MESS02": "STA12",
+      "MESS03": "STA08",
+      "MESS04": "STA06",
+      "MESS05": "STA02",
+      "MESS06": "STA03",
+      "MESS07": "STA04",
+      "MESS08": "STA05"
+    },
+    "sites": [
+      "IDC01",
+      "IDC02",
+      "IDC03",
+      "IDC04",
+      "IDC05",
+      "IDC06",
+      "IDC07",
+      "IDC08",
+      "IDC09",
+      "IDC10",
+      "IDC11",
+      "IDC12",
+      "STA01",
+      "STA02",
+      "STA03",
+      "STA04",
+      "STA05",
+      "STA06",
+      "STA07",
+      "STA08",
+      "STA09",
+      "STA10",
+      "STA11",
+      "STA12"
+    ],
+    "native": true,
+    "synthetic": false,
+    "PR101_head": "f536e65fc7fb968c52e99e4a5b017953edc53744",
+    "PR101_wholesale_merge": false,
+    "PR101_code_ported": false,
+    "audit": "Current PR104 constructor already preserves joint route/P/Q/SOC, exact forward reachability, inner16, travel energy and terminal SOC. PR101 native route reduction not material; no extra prescreen port needed for one M1.",
+    "M1_MIP_START_AVAILABLE": false,
+    "M1_start_reason": "No accepted MESS plan bound to this new A1 anchor and voltage authority; old A1 zero P/Q is not a MESS reference plan"
+  },
+  "reachable_by_unit": {},
+  "source": "affc7226a519adbe072d7debbc3ae25ea71c3487",
+  "original24_services_retained": true,
+  "mobile_port_occupancy_rows": 2304,
+  "source_mobility": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v42_native\\mess.py",
+    "sha256": "547f5d7aec0572c65b96b9e61382176e269af7d93937fe71ca2a57de265217ec",
+    "bytes": 11072
+  },
+  "source_Q250": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v44\\q250_m4.py",
+    "sha256": "4b25d2cfb1500ca0c21a0523e1038d2444454612410464720ef17257726b2d48",
+    "bytes": 15619
+  },
+  "grid_coefficients": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v2_add\\integration\\GRID_COEFFICIENT_MANIFEST.json",
+    "sha256": "a11445c8560f68d2aaf2b7b4724d3ff7a0e76ea34facd88495935ba6cd2b0db9",
+    "bytes": 40699
+  },
+  "response_factorization": "Lossless equality extension of source 16-face/current-correction equations; no constraint screening",
+  "physical_families": {
+    "parent_line_thermal_face15": 141588,
+    "transformer_nameplate_face9": 82915,
+    "parent_line_Q_binding": 147744,
+    "line_both_end_current": 295728,
+    "parent_line_thermal_face10": 141588,
+    "parent_line_thermal_face11": 141588,
+    "parent_line_thermal_face4": 147744,
+    "transformer_nameplate_face13": 82915,
+    "parent_line_thermal_face5": 147744,
+    "transformer_winding_Q_binding": 82915,
+    "transformer_winding_P_binding": 82915,
+    "parent_line_thermal_face0": 147744,
+    "transformer_nameplate_face2": 82915,
+    "transformer_nameplate_face12": 82915,
+    "transformer_nameplate_face6": 82915,
+    "parent_line_thermal_face14": 141588,
+    "parent_line_thermal_face1": 147744,
+    "transformer_nameplate_face8": 82915,
+    "transformer_nameplate_face1": 82915,
+    "parent_line_thermal_face13": 141588,
+    "parent_line_current_correction_binding": 147744,
+    "parent_line_thermal_face2": 147744,
+    "parent_line_thermal_face7": 141588,
+    "parent_line_thermal_face9": 141588,
+    "parent_line_thermal_face12": 141588,
+    "transformer_nameplate_face10": 82915,
+    "transformer_all_winding_current": 175440,
+    "parent_line_thermal_face3": 147744,
+    "parent_line_P_binding": 147744,
+    "transformer_nameplate_face0": 82915,
+    "transformer_nameplate_face7": 82915,
+    "transformer_nameplate_face14": 82915,
+    "parent_line_thermal_face6": 147744,
+    "node_voltage_squared_binding": 206472,
+    "transformer_nameplate_face11": 82915,
+    "transformer_nameplate_face15": 82915,
+    "transformer_nameplate_face5": 82915,
+    "parent_line_thermal_face8": 141588,
+    "transformer_nameplate_face4": 82915,
+    "transformer_nameplate_face3": 82915
+  },
+  "wall_seconds": 977.8139972000499,
+  "peak_RSS_bytes": 4296380416,
+  "resources": {
+    "pid": 107896,
+    "priority": 16384,
+    "affinity": [
+      12
+    ],
+    "available_RAM_bytes": 9945124864,
+    "other_python": [
+      {
+        "pid": 14832,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_pr134_b1.host",
+          "monitor",
+          "C:\\v42_pr134_sc_execution_20261007"
+        ]
+      },
+      {
+        "pid": 60860,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-u",
+          "D:\\MobileESS_V43\\development\\monitor_partial\\monitor_binding.py",
+          "8795"
+        ]
+      },
+      {
+        "pid": 97320,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-u",
+          "-m",
+          "v44_week3_recovery",
+          "--worker",
+          "D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign006_may15_21\\OPERATIONS\\requests\\2025-05-21_B2_RECOVERY.json"
+        ]
+      },
+      {
+        "pid": 98908,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-u",
+          "-m",
+          "v44_week3_recovery",
+          "--run"
+        ]
+      },
+      {
+        "pid": 109492,
+        "command": [
+          "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe",
+          "-m",
+          "v2_add_preflight.full_days"
+        ]
+      },
+      {
+        "pid": 110572,
+        "command": [
+          "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe",
+          "-m",
+          "v2_add_preflight.full_native"
+        ]
+      },
+      {
+        "pid": 111252,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-m",
+          "v2_add_preflight.full_days"
+        ]
+      }
+    ]
+  },
+  "Native_calls": 0,
+  "denied_attempts": [],
+  "K48_Beam_DirectJoint_connected": false,
+  "AIDC_variable_grid_connected": false,
+  "Actual_SVR3_rating_authority": "Independent Actual/Fresh AC, separate from Planning S0",
+  "objective_materialized_only_on_complete_build": false,
+  "explicit_mobile_port_current_kVA_rows_in_this_attempt": false,
+  "scope": "Measured partial monolithic core-grid attempt before explicit600kVA port rows; not current whole-case Native0 certification",
+  "observer_flag_correction": {
+    "raw_report": {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v2_add\\integration\\MESS8_FULL_NATIVE0_RAW_RUN_REPORT.json",
+      "sha256": "11e8a553159b569f93389f7d022c286a2531ec783940ffaed2f8d8b72fce149a",
+      "bytes": 8298
+    },
+    "evidence_actual_occupancy_matrix_rows": 2304,
+    "reason": "Old observer used optimizer-capture-reached as occupancy flag although2304 rows were inserted before grid construction"
+  }
+}
