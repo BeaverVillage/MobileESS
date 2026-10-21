@@ -1,0 +1,1305 @@
+{
+  "status": "FROZEN_BEFORE_S1_AC",
+  "betas": [
+    1.0,
+    1.5,
+    2.0,
+    2.05,
+    2.1
+  ],
+  "order": [
+    "S0",
+    "S1_03",
+    "S1_06",
+    "S1_12"
+  ],
+  "selection": "S0 settled undervoltage leaves nearest legal three-phase12.47kV ancestor; coverage descending then worst voltage; nested additional nearest ancestors when fewer than12 distinct stems",
+  "source_hardware": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+    "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890",
+    "original_banks": 12
+  },
+  "contracts": {
+    "S1_03": {
+      "schema": "V42_SERIES_SVR_CONTRACT_V1",
+      "Q_injection_devices": 0,
+      "autonomous_native_control": true,
+      "bus_voltage_assignment": false,
+      "tap_optimization_variables": 0,
+      "units": [
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B01",
+          "cut_element": "Line.ln5503544-1",
+          "cut_terminal": 1,
+          "original_bus_spec": "m1108500",
+          "upstream_new_bus": "v2svr_b01",
+          "downstream_bus": "m1108505",
+          "sensed_bus": "m1108505",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx3235946a.1",
+            "sx3235946a.2",
+            "sx3011229a.1",
+            "sx3011229a.2",
+            "sx2767342a.1",
+            "sx2767342a.2",
+            "sx2748780a.1",
+            "sx2748780a.2",
+            "sx2823544a.1",
+            "sx2823544a.2",
+            "sx3195321a.1",
+            "sx3195321a.2",
+            "sx2823545a.1",
+            "sx2823545a.2",
+            "sx3101782a.1",
+            "sx3101782a.2",
+            "sx2748781a.1",
+            "sx2748781a.2",
+            "sx3027122a.1",
+            "sx3027122a.2",
+            "sx3065665a.1",
+            "sx3065665a.2",
+            "sx3108449a.1",
+            "sx3108449a.2",
+            "x2823545a.1",
+            "x2823545a.2",
+            "x3101782a.1",
+            "x3101782a.2",
+            "x2823544a.1",
+            "x2823544a.2",
+            "x3235946a.1",
+            "x3235946a.2",
+            "x2748781a.1",
+            "x2748781a.2",
+            "x3195321a.1",
+            "x3195321a.2",
+            "x3065665a.1",
+            "x3065665a.2",
+            "x3011229a.1",
+            "x3011229a.2",
+            "x2767342a.1",
+            "x2767342a.2",
+            "x3027122a.1",
+            "x3027122a.2",
+            "x3108449a.1",
+            "x3108449a.2",
+            "x2748780a.1",
+            "x2748780a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B02",
+          "cut_element": "Line.ln6318768-1",
+          "cut_terminal": 1,
+          "original_bus_spec": "l2989566",
+          "upstream_new_bus": "v2svr_b02",
+          "downstream_bus": "m1108378",
+          "sensed_bus": "m1108378",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2821087a.1",
+            "sx2821087a.2",
+            "sx2990098a.1",
+            "sx2802481a.1",
+            "sx2802481a.2",
+            "sx3214549a.1",
+            "sx3214549a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B03",
+          "cut_element": "Line.ln5624342-1",
+          "cut_terminal": 1,
+          "original_bus_spec": "m1108505",
+          "upstream_new_bus": "v2svr_b03",
+          "downstream_bus": "l2955047",
+          "sensed_bus": "l2955047",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2955047a.1",
+            "sx2955047a.2",
+            "x2955047a.1",
+            "x2955047a.2"
+          ]
+        }
+      ]
+    },
+    "S1_06": {
+      "schema": "V42_SERIES_SVR_CONTRACT_V1",
+      "Q_injection_devices": 0,
+      "autonomous_native_control": true,
+      "bus_voltage_assignment": false,
+      "tap_optimization_variables": 0,
+      "units": [
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B01",
+          "cut_element": "Line.ln5503544-1",
+          "cut_terminal": 1,
+          "original_bus_spec": "m1108500",
+          "upstream_new_bus": "v2svr_b01",
+          "downstream_bus": "m1108505",
+          "sensed_bus": "m1108505",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx3235946a.1",
+            "sx3235946a.2",
+            "sx3011229a.1",
+            "sx3011229a.2",
+            "sx2767342a.1",
+            "sx2767342a.2",
+            "sx2748780a.1",
+            "sx2748780a.2",
+            "sx2823544a.1",
+            "sx2823544a.2",
+            "sx3195321a.1",
+            "sx3195321a.2",
+            "sx2823545a.1",
+            "sx2823545a.2",
+            "sx3101782a.1",
+            "sx3101782a.2",
+            "sx2748781a.1",
+            "sx2748781a.2",
+            "sx3027122a.1",
+            "sx3027122a.2",
+            "sx3065665a.1",
+            "sx3065665a.2",
+            "sx3108449a.1",
+            "sx3108449a.2",
+            "x2823545a.1",
+            "x2823545a.2",
+            "x3101782a.1",
+            "x3101782a.2",
+            "x2823544a.1",
+            "x2823544a.2",
+            "x3235946a.1",
+            "x3235946a.2",
+            "x2748781a.1",
+            "x2748781a.2",
+            "x3195321a.1",
+            "x3195321a.2",
+            "x3065665a.1",
+            "x3065665a.2",
+            "x3011229a.1",
+            "x3011229a.2",
+            "x2767342a.1",
+            "x2767342a.2",
+            "x3027122a.1",
+            "x3027122a.2",
+            "x3108449a.1",
+            "x3108449a.2",
+            "x2748780a.1",
+            "x2748780a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B02",
+          "cut_element": "Line.ln6318768-1",
+          "cut_terminal": 1,
+          "original_bus_spec": "l2989566",
+          "upstream_new_bus": "v2svr_b02",
+          "downstream_bus": "m1108378",
+          "sensed_bus": "m1108378",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2821087a.1",
+            "sx2821087a.2",
+            "sx2990098a.1",
+            "sx2802481a.1",
+            "sx2802481a.2",
+            "sx3214549a.1",
+            "sx3214549a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B03",
+          "cut_element": "Line.ln5624342-1",
+          "cut_terminal": 1,
+          "original_bus_spec": "m1108505",
+          "upstream_new_bus": "v2svr_b03",
+          "downstream_bus": "l2955047",
+          "sensed_bus": "l2955047",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2955047a.1",
+            "sx2955047a.2",
+            "x2955047a.1",
+            "x2955047a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B04",
+          "cut_element": "Line.ln5920279-2",
+          "cut_terminal": 1,
+          "original_bus_spec": "n1142100",
+          "upstream_new_bus": "v2svr_b04",
+          "downstream_bus": "m1108490",
+          "sensed_bus": "m1108490",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2936214a.1",
+            "sx2936214a.2",
+            "sx2804956a.1",
+            "sx2804956a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B05",
+          "cut_element": "Line.ln8979249-2",
+          "cut_terminal": 1,
+          "original_bus_spec": "221-311609",
+          "upstream_new_bus": "v2svr_b05",
+          "downstream_bus": "l2915542",
+          "sensed_bus": "l2915542",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 1367.9159927909805,
+          "ctprim": 190.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2915542a.1",
+            "sx2915542a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B06",
+          "cut_element": "Line.ln8979254-2",
+          "cut_terminal": 1,
+          "original_bus_spec": "221-311905",
+          "upstream_new_bus": "v2svr_b06",
+          "downstream_bus": "l3215203",
+          "sensed_bus": "l3215203",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 1367.9159927909805,
+          "ctprim": 190.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx3215203a.1",
+            "sx3215203a.2"
+          ]
+        }
+      ]
+    },
+    "S1_12": {
+      "schema": "V42_SERIES_SVR_CONTRACT_V1",
+      "Q_injection_devices": 0,
+      "autonomous_native_control": true,
+      "bus_voltage_assignment": false,
+      "tap_optimization_variables": 0,
+      "units": [
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B01",
+          "cut_element": "Line.ln5503544-1",
+          "cut_terminal": 1,
+          "original_bus_spec": "m1108500",
+          "upstream_new_bus": "v2svr_b01",
+          "downstream_bus": "m1108505",
+          "sensed_bus": "m1108505",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx3235946a.1",
+            "sx3235946a.2",
+            "sx3011229a.1",
+            "sx3011229a.2",
+            "sx2767342a.1",
+            "sx2767342a.2",
+            "sx2748780a.1",
+            "sx2748780a.2",
+            "sx2823544a.1",
+            "sx2823544a.2",
+            "sx3195321a.1",
+            "sx3195321a.2",
+            "sx2823545a.1",
+            "sx2823545a.2",
+            "sx3101782a.1",
+            "sx3101782a.2",
+            "sx2748781a.1",
+            "sx2748781a.2",
+            "sx3027122a.1",
+            "sx3027122a.2",
+            "sx3065665a.1",
+            "sx3065665a.2",
+            "sx3108449a.1",
+            "sx3108449a.2",
+            "x2823545a.1",
+            "x2823545a.2",
+            "x3101782a.1",
+            "x3101782a.2",
+            "x2823544a.1",
+            "x2823544a.2",
+            "x3235946a.1",
+            "x3235946a.2",
+            "x2748781a.1",
+            "x2748781a.2",
+            "x3195321a.1",
+            "x3195321a.2",
+            "x3065665a.1",
+            "x3065665a.2",
+            "x3011229a.1",
+            "x3011229a.2",
+            "x2767342a.1",
+            "x2767342a.2",
+            "x3027122a.1",
+            "x3027122a.2",
+            "x3108449a.1",
+            "x3108449a.2",
+            "x2748780a.1",
+            "x2748780a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B02",
+          "cut_element": "Line.ln6318768-1",
+          "cut_terminal": 1,
+          "original_bus_spec": "l2989566",
+          "upstream_new_bus": "v2svr_b02",
+          "downstream_bus": "m1108378",
+          "sensed_bus": "m1108378",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2821087a.1",
+            "sx2821087a.2",
+            "sx2990098a.1",
+            "sx2802481a.1",
+            "sx2802481a.2",
+            "sx3214549a.1",
+            "sx3214549a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B03",
+          "cut_element": "Line.ln5624342-1",
+          "cut_terminal": 1,
+          "original_bus_spec": "m1108505",
+          "upstream_new_bus": "v2svr_b03",
+          "downstream_bus": "l2955047",
+          "sensed_bus": "l2955047",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2955047a.1",
+            "sx2955047a.2",
+            "x2955047a.1",
+            "x2955047a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B04",
+          "cut_element": "Line.ln5920279-2",
+          "cut_terminal": 1,
+          "original_bus_spec": "n1142100",
+          "upstream_new_bus": "v2svr_b04",
+          "downstream_bus": "m1108490",
+          "sensed_bus": "m1108490",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2936214a.1",
+            "sx2936214a.2",
+            "sx2804956a.1",
+            "sx2804956a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B05",
+          "cut_element": "Line.ln8979249-2",
+          "cut_terminal": 1,
+          "original_bus_spec": "221-311609",
+          "upstream_new_bus": "v2svr_b05",
+          "downstream_bus": "l2915542",
+          "sensed_bus": "l2915542",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 1367.9159927909805,
+          "ctprim": 190.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2915542a.1",
+            "sx2915542a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B06",
+          "cut_element": "Line.ln8979254-2",
+          "cut_terminal": 1,
+          "original_bus_spec": "221-311905",
+          "upstream_new_bus": "v2svr_b06",
+          "downstream_bus": "l3215203",
+          "sensed_bus": "l3215203",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 1367.9159927909805,
+          "ctprim": 190.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx3215203a.1",
+            "sx3215203a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B07",
+          "cut_element": "Line.ln8979251-2",
+          "cut_terminal": 1,
+          "original_bus_spec": "221-308718",
+          "upstream_new_bus": "v2svr_b07",
+          "downstream_bus": "l2803199",
+          "sensed_bus": "l2803199",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 1367.9159927909805,
+          "ctprim": 190.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2803199a.1",
+            "sx2803199a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B08",
+          "cut_element": "Line.ln5576174-2",
+          "cut_terminal": 1,
+          "original_bus_spec": "l2859403",
+          "upstream_new_bus": "v2svr_b08",
+          "downstream_bus": "l2973791",
+          "sensed_bus": "l2973791",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": [
+            "sx2973791a.1",
+            "sx2973791a.2"
+          ]
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B09",
+          "cut_element": "Line.ln5563901-3",
+          "cut_terminal": 1,
+          "original_bus_spec": "n1142104",
+          "upstream_new_bus": "v2svr_b09",
+          "downstream_bus": "m1108500",
+          "sensed_bus": "m1108500",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": []
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B10",
+          "cut_element": "Line.ln5563901-2",
+          "cut_terminal": 1,
+          "original_bus_spec": "l3104830",
+          "upstream_new_bus": "v2svr_b10",
+          "downstream_bus": "n1142104",
+          "sensed_bus": "n1142104",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": []
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B11",
+          "cut_element": "Line.ln6321372-2",
+          "cut_terminal": 1,
+          "original_bus_spec": "n1142103",
+          "upstream_new_bus": "v2svr_b11",
+          "downstream_bus": "l3104830",
+          "sensed_bus": "l3104830",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": []
+        },
+        {
+          "band_volts": 2.0,
+          "delay_seconds": 30.0,
+          "max_tap": 1.1,
+          "max_tap_change": 1,
+          "min_tap": 0.9,
+          "no_load_loss_pct": 0.05,
+          "num_taps": 32,
+          "phases": [
+            1,
+            2,
+            3
+          ],
+          "reverse_policy": "FORWARD_LOCAL_VOLTAGE_BIDIRECTIONAL_POWER",
+          "tap_delay_seconds": 2.0,
+          "vreg_volts": 120.0,
+          "winding_r_pct": 0.2,
+          "xhl_pct": 1.0,
+          "engineering_assumptions": [
+            "Three independent single-phase grounded-wye full-power 1:1 tapped transformers form one bank; not a bus-voltage setter.",
+            "New bank nameplate is finite and no greater than the original service nameplate or original line normal-current capacity.",
+            "New XHL=1%, each winding R=.2%, no-load loss=.05% are explicit development assumptions, not a manufacturer certification.",
+            "Remote LV/MV PT ratio and native tap action must pass real compiled-model sign/readback tests before source qualification.",
+            "Original7 AUTO remains unchanged; new Delay30s follows original Delay15s in native queue, TapDelay2s; STATIC iterations do not represent seconds.",
+            "No reversal of monitored direction: local downstream voltage is controlled for either signed power flow, with R=X=0 and Reversible=No."
+          ],
+          "id": "B12",
+          "cut_element": "Line.ln6321372-3",
+          "cut_terminal": 1,
+          "original_bus_spec": "m1108493",
+          "upstream_new_bus": "v2svr_b12",
+          "downstream_bus": "n1142103",
+          "sensed_bus": "n1142103",
+          "nominal_kv_ln": 7.199557856794634,
+          "sensed_kv_ln": 7.199557856794634,
+          "phase_kva": 2879.8231427178534,
+          "ctprim": 400.0,
+          "ptratio": 59.99631547328862,
+          "remote_ptratio": 59.99631547328862,
+          "series_orientation": "UPSTREAM_OF_EXISTING_BRANCH",
+          "source_receipts": [
+            {
+              "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v44\\v43_planning_svr12_actual_v1\\hardware\\SCENARIO.json",
+              "sha256": "1eae2940a1a9865cf8238c333e04d5bc1ad4abf8818a36054d3591933aebe890"
+            }
+          ],
+          "site_selection_S0_only": true,
+          "downstream_undervoltage_nodes": []
+        }
+      ]
+    }
+  },
+  "original_RegControl_count": 12,
+  "Planning": "S0 original hardware, native TIME same P5",
+  "Actual": "S0 or fixed preregistered S1 hardware; all arms B0/B1/B2/B3 must share selected Actual physical model and controls",
+  "new_Vreg": 120.0,
+  "new_Delay_seconds": 30,
+  "new_TapDelay_seconds": 2,
+  "existing_P5_unchanged": true,
+  "assumptions": "Full-power grounded-wye1:1 regulator transformers, XHL1%, each R.2%, no-load.05%, .9..1.1/32steps, source line ampacity sized; research equipment not manufacturer/site certification",
+  "no_line_deleted": true,
+  "no_original_rating_change": true,
+  "no_optimization": true
+}

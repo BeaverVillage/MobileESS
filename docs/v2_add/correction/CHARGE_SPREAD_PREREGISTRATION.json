@@ -1,0 +1,81 @@
+{
+  "experiment": "V2_add",
+  "authority": "Finite temporal diagnostic scope within user Part E",
+  "reason": "TIME transition voltage safety and charging rebound must be tested; extend charge from2h to6h at identical320kWh SOC cycle before any temporal-pilot result is used",
+  "original_temporal_preregistration_unchanged": true,
+  "beta": [
+    1.5,
+    2.0
+  ],
+  "charge_slots": [
+    0,
+    23
+  ],
+  "schedules": [
+    {
+      "name": "CHARGE24_LATE4",
+      "begin": [
+        72,
+        72,
+        72,
+        72,
+        72,
+        72,
+        72,
+        72
+      ],
+      "duration": 8,
+      "Q": 0
+    },
+    {
+      "name": "CHARGE24_LONG",
+      "begin": [
+        68,
+        68,
+        68,
+        68,
+        68,
+        68,
+        68,
+        68
+      ],
+      "duration": 16,
+      "Q": 0
+    },
+    {
+      "name": "CHARGE24_STAGGERED",
+      "begin": [
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75
+      ],
+      "duration": 8,
+      "Q": 0
+    },
+    {
+      "name": "CHARGE24_LONG_Q100",
+      "begin": [
+        68,
+        68,
+        68,
+        68,
+        68,
+        68,
+        68,
+        68
+      ],
+      "duration": 16,
+      "Q": 100
+    }
+  ],
+  "source_vehicle_P_Q_PCS_SOC_eta_unchanged": true,
+  "physical_settings_unchanged": true,
+  "Native_calls": 0,
+  "selection": "report all; never retune P5 or beta",
+  "code_sha256": "8ad5ade8acbcf0c62ea7ad89dcb5639bafb549c77b2aaecc276335a6b6cef782"
+}
