@@ -52,6 +52,21 @@ class Contracts(unittest.TestCase):
    self.assertFalse(resources.admission('D:/',phase='ACTUAL',pilot_complete=True)['admit'])
 
 class ArchiveIO(unittest.TestCase):
+ def test_new_dated_index_and_equipment_member_are_read_without_extraction(self):
+  with tempfile.TemporaryDirectory() as folder:
+   root=Path(folder);old=root/'old';eq=root/'equipment';camp=old/'campaign006_may15_21';camp.mkdir(parents=True);day='2025-05-15';logical=camp/day/'B3/attempt001/RESULT.json';extra=eq/'campaign'/day/'B2/attempt001/RESULT.json';raw=b'{"PASS":true}';archive=root/'daily.zip'
+   items=[dict(path=day+'/B3/attempt001/RESULT.json',bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest()),dict(path='equipment_versions/test.json',logical_path=str(extra),bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest())]
+   manifest=dict(day=day,source=str(camp/day),campaign=str(camp),source_roots=[str(camp/day),str(eq/'campaign'/day)],files=items)
+   with zipfile.ZipFile(archive,'w') as z:
+    for item in items:z.writestr(item['path'],raw)
+    z.writestr('_ARCHIVE_MANIFEST.json',json.dumps(manifest))
+   atomic(camp/'ARCHIVED_RESULTS_20250515_24.json',dict(days=[dict(day=day,source=str(camp/day),archive=str(archive))]))
+   with patch.object(c,'OLD',old),patch.object(c,'B2_ROOT',eq/'new'):
+    store=archives.Store()
+    try:
+     self.assertEqual(store.read(logical),dict(PASS=True));self.assertEqual(store.read(extra),dict(PASS=True));self.assertFalse(logical.exists());self.assertFalse(extra.exists())
+    finally:store.close()
+
  def test_verified_read_alias_protects_original_writes_and_detects_tamper(self):
   with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
    root=Path(folder);old=root/'old';logical=old/'2025-05-01/B3/attempt001/RESULT.json';raw=b'{"PASS":true}\n';member='2025-05-01/B3/attempt001/RESULT.json';zpath=root/'source.zip'

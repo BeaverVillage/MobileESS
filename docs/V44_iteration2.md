@@ -71,14 +71,22 @@ is killed to satisfy admission. A supervisor restart first waits for surviving
 workers, preserves partial Actual, and uses a fresh independent native engine
 only for an incomplete Actual stage. Complete results are hash-verified/reused.
 
-Monitor: `http://127.0.0.1:8796/`, independent of original8795. It shows Planning
+Monitor: extend the existing V44 r043 `http://127.0.0.1:8795/` in place.
+The same DOM, refresh and `/api/status` retain the current B2 panels and add
 31 dates, five new stages, Actual slots, measured Native clocks and resource
-gates. Its HTTP server is read-only. A quiet Codex heartbeat diagnoses meaningful
+gates. After B2 drains, the same primary cards follow the new experiment.
+`operational_monitor` versions the deployed extension. The former8796 task is
+retired; the CLI monitor entry only verifies the existing8795 connection.
+Its HTTP server is read-only. A quiet Codex heartbeat diagnoses meaningful
 failures and reports completion while the scientific scheduled task survives
 the chat independently.
 
-Archived originals May01–14 are resolved from their verified per-file SHA/CRC
-ZIP manifests. Only needed files materialize into this new experiment's
+Archived originals May01–24 are resolved from all dated verified per-file
+SHA/CRC ZIP indexes. May15–24 exports also include completed825 attempts and
+previous failure evidence. Each archive index is published before source
+removal. Live B2 authority/release-gate metadata stays in place; all other
+exported source result files are removed only after full byte comparison.
+The existing monitor reads missing evidence directly from the ZIP in memory. Only needed files materialize into this new experiment's
 `BASELINE_READONLY`, with exact logical receipt identities and write protection
 over all old campaigns; nothing restores/deletes in original directories.
 Old M1 policies are retained exactly as evidenced; missing historical margin

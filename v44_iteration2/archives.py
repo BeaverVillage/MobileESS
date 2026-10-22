@@ -14,19 +14,32 @@ def key(path):
 class Store:
  def __init__(self):
   self.archives=[];self.zips={};self.entries={};self._lock=threading.RLock()
-  indexes=[c.OLD/n/'ARCHIVED_RESULTS_20250501_14.json' for n in ('campaign004','campaign005_may08_14')]
+  # Each verified date export publishes an index before removing its source.
+  # Read all dated indexes, including May15--24, without restoring originals.
+  indexes=sorted(c.OLD.glob('campaign*/ARCHIVED_RESULTS_*.json'))
   for p in indexes:
    if not p.exists():continue
    for row in read(p)['days']:
-    if row['day'] in self.zips:continue
+    if row['day'] in self.zips:
+     if any(r['day']==row['day'] and r['archive']!=row['archive'] for r in self.archives):raise ValueError('DUPLICATE_ARCHIVE_DATE_DRIFT')
+     continue
     if not Path(row['archive']).is_file():raise FileNotFoundError(row['archive'])
     z=zipfile.ZipFile(row['archive']);manifest=json.loads(z.read('_ARCHIVE_MANIFEST.json'))
     if manifest['day']!=row['day'] or manifest['source']!=row['source']:raise ValueError('ARCHIVE_DATE_ROOT_DRIFT')
     self.archives.append(row);self.zips[row['day']]=z
     camp=Path(manifest['campaign'])
+    roots=[Path(os.path.abspath(p)) for p in manifest.get('source_roots',[manifest['source']])]
+    allowed=(c.OLD,c.B2_ROOT.parent)
+    if any(root.name!=row['day'] or not any(root.is_relative_to(base) for base in allowed) for root in roots):raise ValueError('ARCHIVE_ROOT_OUTSIDE_CAMPAIGNS')
     for item in manifest['files']:
-     if item['path'].startswith(row['day']+'/'):
-      logical=camp/Path(item['path']);self.entries[key(logical)]=(row,z,item)
+     if item.get('logical_path'):
+      logical=Path(item['logical_path'])
+     elif item['path'].startswith(row['day']+'/'):
+      logical=camp/Path(item['path'])
+     else:continue
+     logical=Path(os.path.abspath(logical))
+     if not any(logical.is_relative_to(root) for root in roots):raise ValueError('ARCHIVE_LOGICAL_PATH_ESCAPE')
+     self.entries[key(logical)]=(row,z,item)
  def close(self):
   for z in self.zips.values():z.close()
  def paths(self,day,suffix):
@@ -80,7 +93,7 @@ class Store:
    if isinstance(path,int):return path
    p=Path(path)
    normalized=key(p)
-   if any(normalized.startswith(r+os.sep) for r in roots) and any(x in str(mode) for x in ('w','a','x','+')):raise PermissionError('ORIGINAL_CAMPAIGN_WRITE_FORBIDDEN:'+str(p))
+   if (normalized in self.entries or any(normalized.startswith(r+os.sep) for r in roots)) and any(x in str(mode) for x in ('w','a','x','+')):raise PermissionError('ORIGINAL_CAMPAIGN_WRITE_FORBIDDEN:'+str(p))
    if normalized in self.entries:return self.materialize(p)
    return path
   def opened(path,mode='r',*a,**kw):return original_open(mapped(path,mode),mode,*a,**kw)
