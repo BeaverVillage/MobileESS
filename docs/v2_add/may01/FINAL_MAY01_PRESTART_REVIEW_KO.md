@@ -1,0 +1,20 @@
+# V2_add May01 캠페인 직전 검토
+
+**PRESTART_BLOCKED_WITH_EVIDENCE**. 공식 캠페인과 장시간 Native 최적화는 실행하지 않았다. May01 AEST만 새로 평가했고 May02~07의 기존 증거를 보존했다. 현장 GIS/보호 인증 부재는 별도 `FIELD_INSTALLATION_UNVERIFIED`이며 이번 과학 시뮬레이션 차단 사유가 아니다.
+
+1. **IDC08 원인:** Delta/Wye의 정상적인 불평형 MV 선간전압 전달이다. 480V Base·정격 오류로 판정하지 않았다. 상세 원인·위상/Neutral/권선 직접 readback은 `MAY01_VOLTAGE_ROOT_CAUSE_KO.md`에 있다.
+2. **기존 SVR3:** 원본 IDC Wye/Wye·R/X를 쓰는 Source-YY 후보는 B0 평가96 전압을 통과한다. 전역 최대 75.711008043%, MV 75.711008043%, LV 46.810642843%, MV-LV 28.900365200%p다. 전체120 안전 인증은 아니다.
+3. **추가 Bank 수·위치:** 사전 등록 H1 재배치와 H2/H3/H4의4/5/6 Bank는 모두 전체 TIME 실패다. H4는 과전압도 악화했다. 전체 Gate를 만족하는 최소 설비 수/위치는 아직 인증하지 못했다. Source-YY 평가96에는 추가 Bank 없이 기존3개가 충분했다는 제한적 결과만 확인했다.
+4. **MESS P/Q:** Source-YY P-only 73.790114766%, Q50 73.744163759%, 두 MOVE/재충전/양방향Q 75.711008043%다. 각 Source 차량 가능해·독립Fresh 결과는 `SOURCE_YY_PORT_TIME_COMPARISON.json`, H0/H4의8개 일정은 `MAY01_MESS_PQ_TIME_SECURITY.json`에 있다. 일일 SOC·이동 에너지를 적용했고 Pilot을 M1/B3 성과로 보고하지 않았다.
+5. **Prefix/Planning/Actual 이벤트:** Prefix 저23초/고18초와 Planning TIME 위반이 남는다. YY B0 평가96 PASS를 전체120 PASS로 승격하지 않았다. 인과 이력 없이 Warm Start하지 않았다.
+6. **원본2,063만 행 규모:** 모든 원본20634824행/302476152 Nonzero를 유지한 Oracle과 복원 좌표를 봉인했다. 현재 Native 초기 Master는 실제 431,255행으로 원본 대비 97.9101% 작다. 생략 행을 없앤 근사 FULL로 취급하지 않으며 전체 Separation이 필수다.
+7. **변수/Nonzero:** Binary417296개는 그대로다. Continuous3350097→68609, 97.9520% 감소다. Native 초기 Nonzero 3,071,592, 98.9845% 감소, Peak 0.8852GiB, 초기 전체96 생성 31.00초, 반례 cut 재생·readback 포함 33.91초다. 전체96 생성은4GiB 안에서 완료했다. 모든 행을 즉시 대입한 eager 표현은899058585 Grid Nonzero로 오히려 커져 Native에 채택하지 않았다. 표의 CSR 전처리 시간/메모리와 Native 전체 생성치를 구분했다.
+8. **안전 Prescreen:** 7,784,685개 물리 행은 최대8점유 포트·P300/Q250의 보수적 지원함수와 원래rho[0,1] Bound로 RHS-margin 이하임을 증명했다. 원본 절대 계수와 상수에 따른 상쇄·반올림 오차를 gamma100 외향 한계로 추가한 독립 감사도 통과했다. SOC/ETA/PCS/Route는 원본 이동 행렬에 그대로 남는다. 목적함수 행에는 이 ampacity 제거를 적용하지 않았다. 제거 ID/상하한/마진/복원은 CSV와 SHA로 봉인한 슬롯별 NPZ에 있다. 작은 민감도를0으로 잘라내지 않았다.
+9. **정확한 동등성 범위:** 원본 비교 기준은 B0 고정-AIDC Planning M1이다. Equality34281개/슬롯의 C·상수 및 원본 변수ID/Bound/Type을 보존해3290976개 연속변수를 복원할 수 있다. 채택한 Native는 활성 원본 행에 필요한 보조변수9488개만 복원하고 **원본 Equality/Face 계수·RHS를 곱셈 없이 그대로** 넣는다. 전체 Native 행 readback이 비트 단위로 일치한다. 대입 prototype의 상대 오차 1.04e-15와 구분하며 그 prototype도 보존했다. 가변-AIDC A1/A2와 Source-YY 하드웨어까지 동등하다고 주장하지 않는다.
+10. **Constraint Generation:** 모든16-face·양단전류·전압·변압기·포트·PCS/SOC/Route/점유를 원본 행렬로 검사한다. rho0.1의 가짜 개선을 거부하고 원본ID 행을 정확히 추가했다. STAY/MOVE/양방향Q/충전/경계SOC 점과 도메인 반례를 검사했다. 완료된 최적화 반복이나 Global Gap 인증은 없다. FULL 위반 후보는 UB로 수용하지 않는다.
+11. **K48 Global LB:** 새 IEEE8500 동일 Case/Domain/물리 metadata의 pricing·LB 인터페이스가 아직 연결되지 않아 인증 LB/Gap은 없다. 이전 IEEE123 Bound와 Restricted Master 목적값을 Global LB로 가져오지 않았다.
+12. **8대 자유도:** 전체 원본 이동 CSR/변수/Bounds를 그대로 사용했다. 추가 Route 및 Job-option 제거0개다. 모든 차량의 STAY/MOVE/CHARGE/DISCHARGE/Q와24위치를 유지했고, 실제 `STA01:IDC01:8`·`IDC01:STA01:13`의 두 MOVE 및 이동14.228076kWh·종단760kWh 가능해를 원본 검증기가 통과했다. SOC reachability 수치는 보수적 외피로 구분했다.
+13. **Arm 준비:** B0/B1/B2/B3 Chain과 원래 A5400/K48300/M900초·Gap0.5%/3%·r043 단일Joint300초·Thread 설정을 보존했다. A1/A2 가변 Job→Grid, M1→A2→M2, K48/Beam/Joint의 동일 FULL Case 연결은 미완료다. 모든 Arm은 같은 최종 하드웨어·Actual 정책을 써야 하며 아직 동결하지 않았다.
+14. **남은 결함:** 인과 초기 운전 상태/Planning TIME, Source-YY 물리 구성의 전체120 인증과 그 구성의 새 Grid 계수 바인딩, 원본 알고리즘 Stage/Global Bound 연결이다. 통과 전까지 실행 명령은 HOLD다. `python -m v2_add_preflight.may01_execution plan`은 준비 상태만 기록한다.
+
+독립 원본 검증 결과: `{"STAY": {"row_violations": 0, "maximum_row_violation": 0.0, "maximum_bound_violation": 0.0, "integrality_violation": 0.0, "rows_checked": 20634824, "nnz_checked": 302476152, "PASS": true}, "MOVE": {"row_violations": 0, "maximum_row_violation": 4.009506039061724e-13, "maximum_bound_violation": 0.0, "integrality_violation": 0.0, "rows_checked": 20634824, "nnz_checked": 302476152, "PASS": true}, "BOUNDARY_SOC": {"row_violations": 0, "maximum_row_violation": 4.442958776945989e-10, "maximum_bound_violation": 0.0, "integrality_violation": 0.0, "rows_checked": 20634824, "nnz_checked": 302476152, "PASS": true}}`. 원본 Source·V44/V1_add·Worker·원장·기존 May02~07 증거는 수정하지 않았다. 새 명령은 격리 Fixture·Native0·유한 AC/Fresh와 독립 산술에 한정했다.

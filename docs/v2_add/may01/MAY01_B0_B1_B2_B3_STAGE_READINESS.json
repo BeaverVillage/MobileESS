@@ -1,0 +1,98 @@
+{
+  "experiment": "V2_add",
+  "PR": 236,
+  "day": "2025-05-01",
+  "status": "PRESTART_BLOCKED_WITH_EVIDENCE",
+  "original_source": "affc7226a519adbe072d7debbc3ae25ea71c3487",
+  "base": "759dd5f87edd7340c703507e42dc36ccd32afcdc",
+  "chains": {
+    "B0": [
+      "REFERENCE",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B1": [
+      "A1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B2": [
+      "REFERENCE",
+      "K48_M1",
+      "M1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B3": [
+      "A1_REUSE",
+      "K48_M1",
+      "M1",
+      "A2",
+      "K48_M2",
+      "M2",
+      "ACTUAL",
+      "FRESH"
+    ]
+  },
+  "budgets": {
+    "A1": 5400.0,
+    "A2": 5400.0,
+    "K48_M1": 300.0,
+    "K48_M2": 300.0,
+    "M1": 900.0,
+    "M2": 900.0,
+    "A_gap": 0.005,
+    "M_gap": 0.03,
+    "effective_r043_Joint_single_call_cap": 300.0
+  },
+  "runtime_settings": {
+    "Workers": 1,
+    "M_Threads": 4,
+    "A_Threads": 1,
+    "Actual_Workers": 1,
+    "Root_Method": 2,
+    "K48_Threads": 4,
+    "K48_Method": 2,
+    "K48_total": 300.0,
+    "Joint_total": 900.0,
+    "Joint_call_cap": 300.0
+  },
+  "worker_policy": {
+    "isolated_preparation_processes": true,
+    "heavy_Native_workers": 0,
+    "below_normal_priority": true,
+    "own_affinity_only": [
+      12,
+      13
+    ],
+    "Native0_RSS_limit_GiB": 4,
+    "system_available_reserve_GiB": 5,
+    "protected_workers_not_modified": true
+  },
+  "official_campaign_executed": false,
+  "May02_to_07_new_execution_allowed": false,
+  "stage_bindings": {
+    "B0": "Exact original FCFS replay and fresh finite AC evidence",
+    "A1": "Original FULL option generator retained; IEEE8500 variable-AIDC grid/policy binding unresolved",
+    "M1": "Sealed fixed-B0 M1 + literal original-row delayed master with on-demand auxiliaries + independent original-coordinate oracle, Native0 only",
+    "A2": "Original fixed-M1 handoff and FULL variable-AIDC case not bound",
+    "M2": "Original same-date A2 freeze and full optimizer case not bound",
+    "K48": "Original current-case physical metadata/pricing/global-LB proof interface not bound",
+    "Adaptive_Beam": "Original source preserved; same-case delayed-master adapter not certified",
+    "Direct_Joint": "Original source budget/gap retained; no optimizer run or certified Global Bound",
+    "Actual": "Native CommonClock TIME with all original delays; physical voltage FAIL",
+    "Fresh": "Independent contexts; finite-schedule results only"
+  },
+  "final_hardware_frozen": false,
+  "arm_hardware_policy_must_be_identical": true,
+  "official_campaign_command_runnable": false,
+  "preparation_commands": [
+    "python -m v2_add_preflight.may01_execution plan",
+    "python -m v2_add_preflight.may01_exact_native",
+    "python -m v2_add_preflight.may01_verify"
+  ],
+  "future_campaign_command": "python -m v2_add_preflight.may01_execution campaign --approval <explicit-user-approval.json>",
+  "SCIENTIFIC_SIMULATION_READY": false,
+  "FIELD_INSTALLATION_UNVERIFIED": true,
+  "field_certification_is_not_the_scientific_blocker": true
+}
