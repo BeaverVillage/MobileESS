@@ -26,9 +26,11 @@ class ArchivedReads:
      p=Path(os.path.abspath(logical))
      if not any(p.is_relative_to(r) for r in roots):z.close();raise ValueError('MONITOR_ARCHIVE_MEMBER_ESCAPE')
      self.entries[key(p)]=(z,item)
-     for parent in p.parents:
-      if parent in (BASE,EQUIPMENT):break
-      self.directories.add(key(parent))
+     # Thousands of files share each directory; expand its parents only once.
+     if key(p.parent) not in self.directories:
+      for parent in p.parents:
+       if parent in (BASE,EQUIPMENT):break
+       self.directories.add(key(parent))
     self.zips[path]=z
  def bytes(self,path):
   z,item=self.entries[key(path)]
