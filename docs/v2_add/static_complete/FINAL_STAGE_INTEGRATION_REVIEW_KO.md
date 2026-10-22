@@ -1,6 +1,6 @@
 # V2_add PR #236 May01 최종 Stage 통합 검토
 
-**판정: PRESTART_BLOCKED_WITH_EVIDENCE**. 공식 캠페인 및 Gurobi optimize/presolve는 실행하지 않았다.
+**판정: READY_FOR_MAY01_CAMPAIGN_APPROVAL**. 공식 캠페인 및 Gurobi optimize/presolve는 실행하지 않았다.
 
 공식 캠페인의 RSS·가용 RAM 기준 거부·대기·중단은 제거했다. Gurobi 두 메모리 제한은 양의 Infinity다. 기존 0=무제한 주장은 철회했으며 설치된 13.0.2 기본값과 공식 문서로 바로잡았다. Native0 준비 보호4GiB/여유5GiB와 과거 중단 증거는 유지한다.
 
@@ -18,8 +18,8 @@ Source-YY, 배경배율2.00, Actual SVR3, GPU780 및 MESS8을 유지했다. 선�
 | A_PRODUCTION_ENTRY_BINDING.json | PASS |
 | K48_WHOLE_CASE_PACKET_BINDING.json | PASS |
 | K48_ACTUAL_NATIVE0_READBACK.json | PASS |
-| STAGE_M_RUNTIME_BINDING.json | 미완료/FAIL |
-| BEAM_DIRECT_JOINT_MESS8_BINDING.json | 미완료/FAIL |
+| STAGE_M_RUNTIME_BINDING.json | PASS |
+| BEAM_DIRECT_JOINT_MESS8_BINDING.json | PASS |
 | PRODUCTION_M1_CURRENT_CASE_NATIVE0.json | PASS |
 | PRODUCTION_HANDLER_FINITE_IO_FIXTURE.json | PASS |
 | ACTUAL_SOURCE_POLICY_PREPARATION.json | PASS |
@@ -32,9 +32,11 @@ Source-YY, 배경배율2.00, Actual SVR3, GPU780 및 MESS8을 유지했다. 선�
 
 A1/A2 Native0는 원본 canonical active kernel과117개 완전 로컬 Pricing 블록을 모두 구성한 결과다. 단일 거대 Monolithic Job Native 모델 PASS로 보고하지 않는다. M2는 비영 A2 유한 Witness의 C1을 고정해 새 RHS·Bound·정적 제거 증명과 Native0/독립 FULL 복원을 검사했다. Witness는 최적화된 M1/A2나 공식 캠페인 결과가 아니다.
 
+Direct Joint 실제 Native0는1,740,221행·1,011,235열·49,178,740 Nonzero다. 실제 Gurobi 행렬·RHS·Sense·변수 경계·형·목적함수를 원본 패킷과 대조했다. 전체 행렬 CSR SHA는 e47d287bb577206eb5d76a7c78d30807ceffe8a4c2ba253880bfaf0ca4b7fa7b이며, Native0 총238.982초·Peak RSS3.597GiB였다. Beam은8대 각각 STAY1개/MOVE12개(다중 MOVE8개)를 생성했고 실제3,081열·3,984행 점수 LP 호출 직전까지 연결했다. 점수 LP는 실행하지 않았으며 Native0의 유한 경로 풀을 공식 채택 풀이나 최적화 성과로 보고하지 않는다.
+
 중요한 입력 계약 차이: r043 physical_starts는 입력 WINDOWS 밖121,313개 시작 선택을 허용하며1,395개 Job에 영향이 있다. 본 Adapter는 사용자가 요구한 원본 유한 WINDOW를 강제한다. 원본 알고리즘 파일·Phase-I/P1/Pricing/정수 수용 코드는 보존했지만, r043의 더 넓은 physical-start 수학적 도메인과 동등하다고 주장하지 않는다. 감사 JSON에 개별 차이를 보존했다.
 
-실제 B0 Handler는2,498개 Job의 서비스·Carryout·GPUh·C1을 재생했다. B1/B3의 비영 Migration은 별도 명명 Fixture에서 원본 Controller와 WAN/보류/재시작 구간으로 검증했다. Source 의도적 QoS 예산, 실제 시작/완료 초과, 연구용 Known 정책을 구분하며 고객 SLA 인증을 주장하지 않는다. 최적화된 B1/B2/B3 Actual 보안 결과는 캠페인에서 계산한다.
+실제 B0 Handler는2,498개 Job의 서비스·Carryout·GPUh·C1을 재생했다. B1/B3의 비영 Migration은 별도 명명 Fixture에서 원본 Controller와 WAN/보류/재시작 구간으로 검증했다. Source 의도적 QoS 예산, 실제 시작/완료 초과, 연구용 Known 정책을 구분하며 고객 SLA 인증을 주장하지 않는다. 최적화된 B1/B2/B3 Actual 물리 결과는 캠페인에서 계산한다.
 
 캐시와 재개: 동일 수치 입력의 순수 Native0 K16 구성만 원본 독립 Verifier로 재인증할 수 있다. 과거 UB/LB/Point/Native clock은 가져오지 않는다. 완료 Stage는 파일/결과/날짜/Source SHA로 복원한다. 실패 M은 명시적 재진입과 원본 원장 조정 후 남은 예산으로만 재개하며 A/Actual의 비저장 실시간 상태는 자동 재개하지 않는다.
 
@@ -42,4 +44,4 @@ A1/A2 Native0는 원본 canonical active kernel과117개 완전 로컬 Pricing �
 
 현장 GIS/보호 설비 검증은 FIELD_INSTALLATION_UNVERIFIED로 별도 표시한다. 연구용 시뮬레이션 물리 인증과 혼동하지 않는다. 기존 V44/V1_add 소스·Worker·원장·캠페인과 May02~07은 변경하지 않았다.
 
-남은 필수 증거: STAGE_M_RUNTIME_BINDING.json, BEAM_DIRECT_JOINT_MESS8_BINDING.json, PRODUCTION_M1_HANDLER_ADAPTIVE_SCORE_BOUNDARY
+남은 필수 증거: 없음. 수치 최적화 성과는 승인 후 캠페인의 계산 대상이다.

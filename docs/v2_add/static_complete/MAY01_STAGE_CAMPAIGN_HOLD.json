@@ -63,8 +63,8 @@
       "minimum_system_available_bytes": null,
       "memory_admission_enabled": false,
       "memory_termination_enabled": false,
-      "solver_MemLimit_GB": 0.0,
-      "solver_SoftMemLimit_GB": 0.0
+      "solver_MemLimit_GB": "Infinity",
+      "solver_SoftMemLimit_GB": "Infinity"
     },
     "Native0_preparation": {
       "phase": "NATIVE0_PREPARATION",
@@ -72,8 +72,8 @@
       "minimum_system_available_bytes": 5368709120,
       "memory_admission_enabled": true,
       "memory_termination_enabled": true,
-      "solver_MemLimit_GB": 0.0,
-      "solver_SoftMemLimit_GB": 0.0
+      "solver_MemLimit_GB": "Infinity",
+      "solver_SoftMemLimit_GB": "Infinity"
     },
     "official_memory_watchdog_enabled": false,
     "official_memory_reserve_queue_enabled": false,
@@ -88,7 +88,9 @@
     "worker_duplicate_lock_and_source_checks_preserved": true,
     "official_campaign_executed": false
   },
-  "future_command": "python -m v2_add_preflight.stage_campaign campaign --root <own-new-runtime> --approval <future-explicit-human-approval.json>",
+  "Python": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe",
+  "allowed_runtime_root": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign",
+  "future_command": "python -m v2_add_preflight.stage_campaign campaign --root \"C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_pending_user_approval\" --approval \"<future-explicit-human-approval.json>\"",
   "resume_command": "same command with --resume; only sealed complete stages resume automatically",
   "incomplete_A_or_Actual_live_state_resume": "BLOCKED_WITH_PRESERVED_EVIDENCE",
   "reconciled_M_reentry": "--resume --retry-reconciled-m; new attempt, original measured budget and FULL registry",

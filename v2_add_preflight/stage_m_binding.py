@@ -110,12 +110,31 @@ def build():
             # no generic PASS can conceal the failed required interface.
             packet_test=read(OUT/'K48_WHOLE_CASE_PACKET_BINDING.json') if (OUT/'K48_WHOLE_CASE_PACKET_BINDING.json').exists() else {}
             if packet_test.get('PASS') and packet_test['case_sha']==case.case_sha:report['K48']=packet_test['K48']
-            for name,operation in [('Beam',lambda:beam(case,modules,start))]:
+            saved_beam=OUT/'BEAM_GENERATOR_NATIVE0_BINDING.json'
+            saved_pools=WORK/'BEAM_POOLS.pkl'
+            if saved_beam.exists() and saved_pools.exists():
+                old=read(saved_beam)
+                if old.get('PASS') and old['case_sha']==case.case_sha and old['pools']==record(saved_pools):
+                    with saved_pools.open('rb') as stream:pools=pickle.load(stream)
+                    report['Beam']=old['Beam']
+            operations=[] if report.get('Beam',{}).get('PASS') else [('Beam',lambda:beam(case,modules,start))]
+            for name,operation in operations:
                 try:
                     result=operation()
-                    if name=='Beam':pools,receipt=result;report[name]=receipt
+                    if name=='Beam':
+                        pools,receipt=result;report[name]=receipt
+                        with saved_pools.open('wb') as stream:pickle.dump(pools,stream,protocol=5)
+                        put(saved_beam.name,dict(PASS=True,case_sha=case.case_sha,Beam=receipt,pools=record(saved_pools),Native_optimize_calls=0))
                     else:report[name]=result
                 except Exception as exc:report[name]=dict(PASS=False,error=repr(exc),traceback=traceback.format_exc())
+            report['geometry_IO_counters']=dict(counters)
+        # Candidate matrices and helper caches are unused by Direct Joint.
+        # Release their case-sized closures before the original sparse products.
+        gc.collect()
+        if report.get('Beam',{}).get('PASS'):
+            from .stage_array_io import direct_reference
+            direct_reference(case)
+        with source_binding(case) as modules:
             if report.get('Beam',{}).get('PASS'):
                 guard(start);packet=modules['m_engine'].direct_joint(case,None,pools)
                 A,d,lift,point,proof=packet
@@ -127,7 +146,6 @@ def build():
                     all8_route_pools=True,physical_rows_preserved=proof['original_source_rows_semantically_preserved'],
                     independently_bounded_paths=True,source_direct_joint=record(modules['m_engine'].__file__),
                     actual_Native0_pending=True,restricted_ObjBound_is_Global_LB=False)
-            report['geometry_IO_counters']=dict(counters)
         report.update(PASS=bool(report.get('K48',{}).get('PASS') and report.get('Beam',{}).get('PASS') and report.get('Direct_Joint_substitution',{}).get('PASS')),
             denied_attempts=denied,Native0_only=True,
             production_case_validation_handler_bound=callable(case.strict_validator))
@@ -200,11 +218,16 @@ def joint_native0():
             result,captures=modules['m_engine']._native_joint(None,SimpleNamespace(remaining=lambda:900.),
                 (A,d,lift,None,proof),folder/'NATIVE0',300.,native0=True)
         assert not captures and result['Native_optimize_calls']==0 and not denied
+        validator_ready=all(read(OUT/name)['PASS'] for name in ('M1_ORIGINAL_FULL_VALIDATOR_BINDING.json',
+            'M2_ORIGINAL_FULL_VALIDATOR_BINDING.json','PRODUCTION_M1_CURRENT_CASE_NATIVE0.json'))
+        assert validator_ready
         report.update(PASS=True,source_Native0_result=result,source_direct_joint_proof=record(folder/'PROOF.json'),
             original_r043_effective_parameters=policy,
             model=dict(rows=A.shape[0],columns=A.shape[1],nonzeros=A.nnz,binary=int(np.sum(d['types']=='B'))),
             Native_readback=read(folder/'NATIVE0/NATIVE_READBACK.json'),
             pure_Beam_binding=read(OUT/'STAGE_M_RUNTIME_BINDING.json').get('Beam'),
-            official_pool_admission_score_not_executed=True,production_FULL_validator_bound=False)
+            official_pool_admission_score_not_executed=True,production_FULL_validator_bound=validator_ready,
+            independent_original_FULL_validator_evidence={name:record(OUT/name) for name in (
+                'M1_ORIGINAL_FULL_VALIDATOR_BINDING.json','M2_ORIGINAL_FULL_VALIDATOR_BINDING.json')})
 
 if __name__=='__main__':globals()[sys.argv[1] if len(sys.argv)>1 else 'build']()
