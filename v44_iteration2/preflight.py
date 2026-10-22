@@ -28,7 +28,7 @@ def check():
   # oracle construction in these tests is a failure, including hidden probes.
   suite=unittest.defaultTestLoader.discover(str(c.REPO/'tests_iteration2'),pattern='test_iteration2.py')
   output=io.StringIO()
-  with native_zero() as denied,patch.object(svr12,'SVR12CurrentAC',side_effect=AssertionError('PREFLIGHT_DSS_FORBIDDEN')):
+  with store.read_scope(),native_zero() as denied,patch.object(svr12,'SVR12CurrentAC',side_effect=AssertionError('PREFLIGHT_DSS_FORBIDDEN')):
    result=unittest.TextTestRunner(stream=output,verbosity=2).run(suite)
   value=dict(PASS=result.wasSuccessful() and not denied,UTC=now(),tests=result.testsRun,failed=len(result.failures),errors=len(result.errors),output=output.getvalue(),
    denied_Native_attempts=denied,Native_calls=0,Actual_or_Fresh_calls=0,baseline_dates=31,MESS_units=list(c.FLEET),cpu_placement=record(c.DOC/'CPU_PLACEMENT.json'),
