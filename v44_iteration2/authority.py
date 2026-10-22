@@ -16,9 +16,14 @@ def parent_authority(request):
   return
  if not core.resolve().is_relative_to((c.ROOT/request['day']/'B3').resolve()):raise PermissionError('NEW_STAGE_CANNOT_CONSUME_OLD_CAMPAIGN_OPTIMUM')
  producer=read(core.parent/'request.json')
- if any(producer.get(k)!=v for k,v in dict(day=request['day'],arm='B3',iteration_stage=expected,equipment_version=c.EQUIPMENT,iteration2_authorization=request['iteration2_authorization']).items()):raise PermissionError('NEW_PRECEDING_STAGE_PRODUCER_REQUIRED')
+ if any(producer.get(k)!=v for k,v in dict(day=request['day'],arm='B3',iteration_stage=expected,equipment_version=c.EQUIPMENT).items()):raise PermissionError('NEW_PRECEDING_STAGE_PRODUCER_REQUIRED')
+ if producer.get('iteration2_authorization')!=request['iteration2_authorization']:
+  previous=producer.get('iteration2_authorization')
+  if previous not in read(c.OPS/'AUTHORIZATION.json').get('compatible_previous_authorizations',[]):raise PermissionError('NEW_PRECEDING_STAGE_PRODUCER_REQUIRED')
+  from .history import verify_historical
+  verify_historical([previous])
  verify([reference]);publics=[core.parent.parent/n for n in ('RESULT.json','RECOVERED_COMPLETED_RESULT.json')]
- public=next((read(p) for p in publics if p.exists() and read(p).get('PASS') is True and read(p).get('core_result')==reference),None)
+ public=next((read(p) for p in publics if p.exists() and read(p).get('PASS') is True and not read(p).get('error') and read(p).get('core_result')==reference),None)
  if not public or public['stage']!=expected:raise PermissionError('NEW_PRECEDING_STAGE_FULL_PUBLIC_CERTIFICATE_REQUIRED')
  if expected.startswith('A') and public.get('new_AIDC_FULL_optimization') is not True:raise PermissionError('NEW_AIDC_FULL_OPTIMIZATION_REQUIRED')
 def validate(request=None):

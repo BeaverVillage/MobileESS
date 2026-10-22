@@ -163,6 +163,23 @@ class StageRouting(unittest.TestCase):
   self.assertEqual(seen,[True,True,True])
 
 class CheckpointRepair(unittest.TestCase):
+ def test_recovered_parent_accepts_only_explicitly_pinned_previous_authority(self):
+  with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
+   root=Path(folder);core=root/'2025-05-01/B3/attempt001/M2/RESULT.json';atomic(core,{})
+   old=root/'old_authority.json';atomic(old,dict(version='previous'));previous=record(old)
+   auth=root/'OPS/AUTHORIZATION.json';atomic(auth,dict(compatible_previous_authorizations=[previous]))
+   atomic(core.parent/'request.json',dict(day='2025-05-01',arm='B3',iteration_stage='M2',equipment_version=c.EQUIPMENT,iteration2_authorization=previous))
+   atomic(core.parent.parent/'RESULT.json',dict(PASS=True,core_result=record(core),stage='M2'))
+   request=dict(iteration_stage='A3',day='2025-05-01',fixed_parent_receipt=record(core),fixed_parent_core=str(core),fixed_parent_stage='M2',iteration2_authorization=record(auth))
+   with patch.object(c,'ROOT',root),patch.object(c,'OPS',auth.parent):
+    authority.parent_authority(request)
+    atomic(core.parent.parent/'RESULT.json',dict(PASS=True,core_result=record(core),stage='M2',error='old checkpoint failure'))
+    with self.assertRaises(PermissionError):authority.parent_authority(request)
+    atomic(core.parent.parent/'RECOVERED_COMPLETED_RESULT.json',dict(PASS=True,core_result=record(core),stage='M2'))
+    authority.parent_authority(request)
+    atomic(auth,dict(compatible_previous_authorizations=[]))
+    with self.assertRaises(PermissionError):authority.parent_authority(request)
+
  def test_error_public_receipt_is_recovered_without_checkpoint_key_error(self):
   from v44_iteration2 import supervisor as s,worker,history
   with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
