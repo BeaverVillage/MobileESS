@@ -7,7 +7,7 @@ gap, thread count, source integrity check or worker lease.
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass,asdict
-import os,time
+import os,time,math
 import psutil
 
 
@@ -18,8 +18,8 @@ class Policy:
     minimum_system_available_bytes: int | None
     memory_admission_enabled: bool
     memory_termination_enabled: bool
-    solver_MemLimit_GB: float = 0.
-    solver_SoftMemLimit_GB: float = 0.
+    solver_MemLimit_GB: str = 'Infinity'
+    solver_SoftMemLimit_GB: str = 'Infinity'
 
 
 NATIVE0=Policy('NATIVE0_PREPARATION',4*1024**3,5*1024**3,True,True)
@@ -72,11 +72,13 @@ def check_memory(observation=None):
 
 
 def apply_solver_memory_policy(model):
-    """Zero is Gurobi's unlimited setting. Never call optimize or presolve."""
+    """Positive Infinity is unlimited; zero would be a zero-GB limit."""
     if current().phase==OFFICIAL.phase:
-        model.Params.MemLimit=0.
-        model.Params.SoftMemLimit=0.
-    return dict(MemLimit=float(model.Params.MemLimit),SoftMemLimit=float(model.Params.SoftMemLimit))
+        model.Params.MemLimit=float('inf')
+        model.Params.SoftMemLimit=float('inf')
+        assert all(math.isinf(float(v)) and float(v)>0 for v in (model.Params.MemLimit,model.Params.SoftMemLimit))
+    def value(v):return 'Infinity' if math.isinf(float(v)) and float(v)>0 else float(v)
+    return dict(MemLimit=value(model.Params.MemLimit),SoftMemLimit=value(model.Params.SoftMemLimit))
 
 
 @contextmanager
@@ -122,7 +124,9 @@ def certify():
                 model.Params.Threads=4;model.Params.TimeLimit=300.;model.Params.MIPGap=.03
                 model.Params.MemLimit=1.;model.Params.SoftMemLimit=.5
                 effective=apply_solver_memory_policy(model)
-                assert effective==dict(MemLimit=0.,SoftMemLimit=0.)
+                assert effective==dict(MemLimit='Infinity',SoftMemLimit='Infinity')
+                defaults={name:('Infinity' if math.isinf(model.getParamInfo(name)[5]) else model.getParamInfo(name)[5]) for name in ('MemLimit','SoftMemLimit')}
+                assert defaults==effective
                 assert model.Params.Threads==4 and model.Params.TimeLimit==300. and model.Params.MIPGap==.03
                 # The actual adapter guard also bypasses preparation-only RAM
                 # and wall limits. Source Native Runtime limits stay separate.
@@ -140,6 +144,9 @@ def certify():
         official_extreme_RSS_and_zero_available_memory_admitted=True,
         Native0_extreme_observation_rejected=rejected,actual_Native0_solver_parameters=effective,
         actual_adapter_guard_memory_and_preparation_wall_bypass_PASS=True,
+        installed_Gurobi_default_memory_parameters=defaults,
+        authoritative_parameter_reference='https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parameter:MemLimit',
+        prior_zero_means_unlimited_assertion_retracted=True,zero_is_a_zero_GB_limit=True,
         source_budget_native_scope_bound=True,source_budget_function_body_unchanged=True,
         nonmemory_Threads_TimeLimit_MIPGap_unchanged=True,
         observed_telemetry=observed,Native_optimize_calls=0,Native_presolve_calls=0,

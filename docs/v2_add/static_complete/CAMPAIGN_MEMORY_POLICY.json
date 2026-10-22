@@ -6,8 +6,8 @@
     "minimum_system_available_bytes": null,
     "memory_admission_enabled": false,
     "memory_termination_enabled": false,
-    "solver_MemLimit_GB": 0.0,
-    "solver_SoftMemLimit_GB": 0.0
+    "solver_MemLimit_GB": "Infinity",
+    "solver_SoftMemLimit_GB": "Infinity"
   },
   "Native0_preparation": {
     "phase": "NATIVE0_PREPARATION",
@@ -15,8 +15,8 @@
     "minimum_system_available_bytes": 5368709120,
     "memory_admission_enabled": true,
     "memory_termination_enabled": true,
-    "solver_MemLimit_GB": 0.0,
-    "solver_SoftMemLimit_GB": 0.0
+    "solver_MemLimit_GB": "Infinity",
+    "solver_SoftMemLimit_GB": "Infinity"
   },
   "official_memory_watchdog_enabled": false,
   "official_memory_reserve_queue_enabled": false,
@@ -33,23 +33,30 @@
   "official_extreme_RSS_and_zero_available_memory_admitted": true,
   "Native0_extreme_observation_rejected": true,
   "actual_Native0_solver_parameters": {
-    "MemLimit": 0.0,
-    "SoftMemLimit": 0.0
+    "MemLimit": "Infinity",
+    "SoftMemLimit": "Infinity"
   },
   "actual_adapter_guard_memory_and_preparation_wall_bypass_PASS": true,
+  "installed_Gurobi_default_memory_parameters": {
+    "MemLimit": "Infinity",
+    "SoftMemLimit": "Infinity"
+  },
+  "authoritative_parameter_reference": "https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parameter:MemLimit",
+  "prior_zero_means_unlimited_assertion_retracted": true,
+  "zero_is_a_zero_GB_limit": true,
   "source_budget_native_scope_bound": true,
   "source_budget_function_body_unchanged": true,
   "nonmemory_Threads_TimeLimit_MIPGap_unchanged": true,
   "observed_telemetry": {
-    "timestamp_unix": 1792653464.2674792,
-    "pid": 100936,
-    "RSS_bytes": 102858752,
-    "peak_RSS_bytes": 102858752,
-    "process_commit_bytes": 578191360,
-    "system_available_bytes": 11214151680,
+    "timestamp_unix": 1792660885.0336163,
+    "pid": 50932,
+    "RSS_bytes": 102682624,
+    "peak_RSS_bytes": 102682624,
+    "process_commit_bytes": 577744896,
+    "system_available_bytes": 14767222784,
     "system_total_bytes": 34049220608,
     "memory_information_only": true,
-    "system_commit_bytes": 40740577280,
+    "system_commit_bytes": 34548994048,
     "system_commit_peak_bytes": 61804961792,
     "system_commit_limit_bytes": 68408958976
   },
@@ -59,7 +66,7 @@
   "scope": "Resource policy only; not whole-stage readiness",
   "producer": {
     "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v2_add_preflight\\stage_resources.py",
-    "sha256": "a7d4e4ea05f73405642096ad38eefe94cf103eaca444b270c90e02f92ce4437d",
-    "bytes": 7015
+    "sha256": "6c9f787bd212f399162bfaee449cff48eabdd46e1b76705f034f5f0fa7f7716a",
+    "bytes": 7764
   }
 }
