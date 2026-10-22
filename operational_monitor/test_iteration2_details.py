@@ -25,6 +25,13 @@ class ExistingMonitorDetails(unittest.TestCase):
    for k in old:self.assertEqual(out[k],old[k])
    self.assertEqual(old,before);self.assertEqual(len(out['iteration2_details']['rows']),31);self.assertEqual(out['iteration2_details']['planning_pass'],0);self.assertEqual(len(out['iteration2_details']['slots']),7)
 
+ def test_user_stop_is_explicit_and_has_no_live_workers(self):
+  with tempfile.TemporaryDirectory() as d,patch.object(view,'ROOT',Path(d)):
+   self.state(Path(d),'USER_STOPPED')
+   out=view.apply(dict(worker_alive=False,coordinator_alive=False),lambda who:False)
+   self.assertEqual(out['state'],'USER_STOPPED');self.assertIn('사용자 요청',out['status'])
+   self.assertFalse(out['worker_alive']);self.assertEqual(out['workers'],[])
+
  def test_stage_PASS_needs_SHA_bound_FULL_and_new_A_solver(self):
   with tempfile.TemporaryDirectory() as d,patch.object(view,'ROOT',Path(d)):
    root=Path(d);core=root/'A2/RESULT.json';public=root/'RESULT.json'

@@ -41,19 +41,22 @@ def orphans():
 def completed(folder,stage,day):
  """Recover a completed core after a controller/public-receipt interruption."""
  from .worker import public_result
- from v44.checkpoints import checked
+ from .history import checked_completed
  folder=Path(folder);core=folder/c.CORE_STAGE[stage];request=read(core/'request.json')
- checked(core/'COMPLETED_STAGE_CHECKPOINT.json',request,'COMPLETED')
+ checked_completed(core/'COMPLETED_STAGE_CHECKPOINT.json',request)
  result=read(core/'RESULT.json')
  (full_m if stage.startswith('M') else full_a)(result,day)
  public=folder/'RESULT.json'
- if public.exists() and read(public).get('PASS'):
-  value=read(public);verify([value['core_result'],value['checkpoint']]);return record(public)
+ if public.exists():
+  value=read(public)
+  if value.get('PASS') and not value.get('error') and value.get('checkpoint'):
+   verify([value['core_result'],value['checkpoint']]);return record(public)
  # Preserve any previous failure. This is a completed-stage replay, not a solve.
  output=folder/'RECOVERED_COMPLETED_RESULT.json'
  if not output.exists():
   value=public_result(read(folder/'request.json'),result,core/'RESULT.json',time.monotonic())
   value.update(checkpoint=record(core/'COMPLETED_STAGE_CHECKPOINT.json'),completed_stage_reused=True,new_resume_Native_calls=0)
+  value.update(original_public_result=record(public) if public.exists() else None,original_source_sha=request['source_sha'])
   atomic(output,value)
  return record(output)
 
@@ -198,7 +201,9 @@ def actual(state,lease):
  report(state);state.update(phase='COMPLETE',PASS=all(j.get('actual',{}).get('status')=='PASS' for j in state['jobs']));publish(state);atomic(c.ROOT/'FINAL_RESULT.json',state)
 
 def run():
- c.OPS.mkdir(parents=True,exist_ok=True);authority.validate()
+ c.OPS.mkdir(parents=True,exist_ok=True)
+ if (c.OPS/'USER_STOP.json').exists():return
+ authority.validate()
  with single_owner():
   while True:
    state=optional(STATE) or initial()

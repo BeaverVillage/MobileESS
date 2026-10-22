@@ -74,9 +74,10 @@ def planning_case(request):
      core=worker.a_stage(r,m1=parent)
    corepath=Path(r['root'])/'RESULT.json';result=public_result(request,core,corepath,started)
    from v44.checkpoints import checked
-   checked(Path(r['root'])/'COMPLETED_STAGE_CHECKPOINT.json',read(Path(r['root'])/'request.json'),'COMPLETED')
+   with equipment.scope():
+    checked(Path(r['root'])/'COMPLETED_STAGE_CHECKPOINT.json',read(Path(r['root'])/'request.json'),'COMPLETED')
    result['checkpoint']=record(Path(r['root'])/'COMPLETED_STAGE_CHECKPOINT.json')
-  except BaseException as error:result.update(error=repr(error),traceback=traceback.format_exc(),finished_UTC=now())
+  except BaseException as error:result.update(PASS=False,error=repr(error),traceback=traceback.format_exc(),finished_UTC=now())
   finally:atomic(root/'RESULT.json',result)
  return result
 

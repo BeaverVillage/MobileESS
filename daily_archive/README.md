@@ -21,3 +21,9 @@ exported result files are removed. Progress and receipts are stored under
 `D:/MobileESS_V44/development/archive_may15_24_20261022`, with the final
 verification report beside the ZIP files. A partial or pre-existing archive
 requires inspection rather than overwrite or forced deletion.
+
+The 2026-10-23 continuation is `python -B -X utf8 -u -m daily_archive.archive_may25_31`.
+It exports May25–31 with the same byte/SHA/CRC/inventory checks and retains
+required authority metadata. Before each deletion it also verifies all31
+baseline receipt identities through the newly published archive index.
+Its reports use `archive_may25_31_20261023` and `V44_2025-05-25_31_VERIFICATION.json`.

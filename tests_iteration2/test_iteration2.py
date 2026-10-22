@@ -162,6 +162,69 @@ class StageRouting(unittest.TestCase):
    self.assertTrue(result['PASS'])
   self.assertEqual(seen,[True,True,True])
 
+class CheckpointRepair(unittest.TestCase):
+ def test_error_public_receipt_is_recovered_without_checkpoint_key_error(self):
+  from v44_iteration2 import supervisor as s,worker,history
+  with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
+   root=Path(folder);core=root/'M2';core.mkdir()
+   atomic(core/'request.json',dict(source_sha='original-source'));atomic(root/'request.json',{})
+   atomic(core/'RESULT.json',mresult());atomic(core/'COMPLETED_STAGE_CHECKPOINT.json',{})
+   atomic(root/'RESULT.json',dict(PASS=True,error='old hardware scope failure'))
+   before=(root/'RESULT.json').read_bytes()
+   with patch.object(history,'checked_completed',return_value={}),patch.object(worker,'public_result',return_value=dict(PASS=True,core_result=record(core/'RESULT.json'))):
+    receipt=s.completed(root,'M2','2025-05-01')
+   recovered=read(receipt['path']);self.assertEqual(recovered['new_resume_Native_calls'],0)
+   self.assertIn('checkpoint',recovered);self.assertEqual((root/'RESULT.json').read_bytes(),before)
+
+ def test_completed_checkpoint_keeps_825_hardware_outside_execution_scope(self):
+  from v44_iteration2.bootstrap import equipment
+  from v44_iteration2.history import checked_completed
+  from v44 import checkpoints,svr12
+  with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
+   root=Path(folder);result=root/'RESULT.json';atomic(result,dict(PASS=True))
+   request=dict(day='2025-05-01',arm='B3',stage='M2',source_sha='test',case_root=str(root),sources=[])
+   before=svr12.HARDWARE
+   with equipment.scope():
+    saved=checkpoints.envelope(request,'COMPLETED',[record(result)])
+    self.assertEqual(saved['hardware']['path'],record(c.PROFILE/'equipment/HARDWARE.json')['path'])
+   self.assertEqual(svr12.HARDWARE,before)
+   path=root/'COMPLETED_STAGE_CHECKPOINT.json';atomic(path,saved)
+   self.assertEqual(checked_completed(path,request)['key'],saved['key'])
+   self.assertEqual(svr12.HARDWARE,before)
+   result.write_text('{}')
+   with self.assertRaises(ValueError):checked_completed(path,request)
+
+ def test_historical_source_receipts_require_exact_saved_bytes(self):
+  from v44_iteration2.history import verify_historical
+  with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
+   root=Path(folder);old=root/'old.py';old.write_text('old');receipt=record(old)
+   snapshot=root/'snapshot.py';snapshot.write_bytes(old.read_bytes())
+   manifest=root/'REPAIR_test/HISTORICAL_SOURCES.json'
+   atomic(manifest,dict(files=[dict(original=receipt,snapshot=record(snapshot))]))
+   atomic(root/'AUTHORIZATION.json',dict(historical_source_manifests=[record(manifest)]))
+   old.write_text('new')
+   with patch.object(c,'OPS',root):
+    verify_historical([receipt]);snapshot.write_text('changed')
+    with self.assertRaises(ValueError):verify_historical([receipt])
+
+ def test_worker_failure_after_public_result_cannot_leave_PASS_true(self):
+  from v44_iteration2 import worker
+  from v44_iteration2.bootstrap import equipment
+  from v44 import worker as original,campaign,daily,execution,locks,checkpoints,svr12
+  from contextlib import nullcontext
+  with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
+   root=Path(folder);parent=root/'parent.json';atomic(parent,dict(AIDC_reference=dict(path=str(root/'AIDC_REFERENCE.json'))))
+   case=root/'attempt';request=dict(day='2025-05-01',iteration_stage='M2',case_root=str(case),lease={},fixed_parent_core=str(parent),fixed_parent_receipt=record(parent))
+   def stage_request(*args):
+    core=case/'M2';core.mkdir();atomic(core/'request.json',{})
+    return dict(root=str(core))
+   def checked(*args):
+    self.assertEqual(svr12.HARDWARE,c.PROFILE/'equipment')
+    raise ValueError('synthetic checkpoint verification failure')
+   with patch.object(locks,'worker_slot',lambda *a,**kw:nullcontext()),patch.object(locks,'process_identity',lambda:dict(pid=1,process_created=1)),patch.object(execution,'case_scope',lambda *a:nullcontext()),patch.object(campaign,'stage_request',side_effect=stage_request),patch.object(daily,'load_aidc',return_value=({},None)),patch.object(adapters,'execute_m',return_value={}),patch.object(worker,'public_result',return_value=dict(PASS=True)),patch.object(checkpoints,'checked',side_effect=checked):
+    result=worker.planning_case(request)
+   self.assertFalse(result['PASS']);self.assertIn('synthetic checkpoint',result['error']);self.assertNotIn('checkpoint',result)
+
 class SupervisorOrdering(unittest.TestCase):
  def exercise(self,root,fail=None):
   from v44_iteration2 import supervisor as s

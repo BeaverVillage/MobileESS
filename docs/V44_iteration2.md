@@ -81,8 +81,8 @@ Its HTTP server is read-only. A quiet Codex heartbeat diagnoses meaningful
 failures and reports completion while the scientific scheduled task survives
 the chat independently.
 
-Archived originals May01–24 are resolved from all dated verified per-file
-SHA/CRC ZIP indexes. May15–24 exports also include completed825 attempts and
+Archived originals May01–31 are resolved from all dated verified per-file
+SHA/CRC ZIP indexes. May15–31 exports also include completed825 attempts and
 previous failure evidence. Each archive index is published before source
 removal. Live B2 authority/release-gate metadata stays in place; all other
 exported source result files are removed only after full byte comparison.
@@ -108,3 +108,12 @@ Run only after passing preflight and sealing source authority:
 `scripts/launch_v44_iteration2.ps1`. Runtime is separate at
 `D:/MobileESS_V44/runtime/V44_iteration2`; original scientific code lives under
 the existing sealed D-drive source packages and is never edited here.
+
+Maintenance 2026-10-23: the user stopped execution; the run task is disabled
+and `OPERATIONS/USER_STOP.json` blocks accidental launches. Keep this hold
+until an explicit resume request. Completed-stage verification retains the
+825 equipment scope through checkpoint acceptance, and a checkpoint failure
+always publishes PASS=false. Historical completed checkpoints use exact
+controller bytes preserved before repair and pinned in the new authority;
+the old failures and Native ledgers remain unchanged. May10 was interrupted
+inside a Native call: its unmeasured inflight account cannot silently restart.

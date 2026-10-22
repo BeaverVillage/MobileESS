@@ -22,7 +22,7 @@ def parent_authority(request):
  if not public or public['stage']!=expected:raise PermissionError('NEW_PRECEDING_STAGE_FULL_PUBLIC_CERTIFICATE_REQUIRED')
  if expected.startswith('A') and public.get('new_AIDC_FULL_optimization') is not True:raise PermissionError('NEW_AIDC_FULL_OPTIMIZATION_REQUIRED')
 def validate(request=None):
- auth=read(c.OPS/'AUTHORIZATION.json');verify(auth['sources']+auth['inputs']+[auth['validation'],auth['user_request']])
+ auth=read(c.OPS/'AUTHORIZATION.json');verify(auth['sources']+auth['inputs']+[auth['validation'],auth['user_request']]+auth.get('historical_source_manifests',[]))
  if auth['sources']!=sources() or auth['MESS_units']!=list(c.FLEET):raise PermissionError('ITERATION2_SEALED_SOURCE_OR_FLEET_DRIFT')
  if request:
   root=Path(request['case_root'])

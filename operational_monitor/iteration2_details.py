@@ -13,7 +13,7 @@ LABELS=dict(WAIT_B2='기존 B2 종료 대기',WAIT_B2_RESOURCES='기존 B2 자�
  PLANNING_SERIAL='31일 Planning 순차 실행',RESOURCE_WAIT_PLANNING='Planning 자원 대기',
  PLANNING_FAILED_ACTUAL_HELD='Planning 검증 필요 · Actual 차단',ACTUAL_PARALLEL='Actual120 / 독립 Fresh120 병렬 실행',
  RESOURCE_WAIT_ACTUAL='Actual 메모리·디스크 대기',WAIT_EXISTING_OWN_WORKERS='기존 Worker 자연 종료 확인',
- REPORTING='31일 비교 결과 정리',COMPLETE='31일 실행 종료',SUPERVISOR_ERROR='실행 감독기 오류')
+ REPORTING='31일 비교 결과 정리',COMPLETE='31일 실행 종료',SUPERVISOR_ERROR='실행 감독기 오류',USER_STOPPED='사용자 요청으로 실행 중단')
 _cache={}
 
 def verified(receipt):
@@ -40,6 +40,7 @@ def stage(day,name,item):
    row.update(label='FULL PASS',UB=public.get('UB'),LB=public.get('LB'),Gap=public.get('Gap'),Native_seconds=public.get('Native_seconds'),case_sha=public.get('case_sha'),plan_sha=public.get('plan_sha'),commit_sha=public.get('commit_sha'))
   except (OSError,ValueError,KeyError,TypeError) as error:row.update(status='VERIFY_ERROR',label='검증 오류',error=repr(error))
  elif status=='RUNNING':row['label']='실행 중'
+ elif status=='INTERRUPTED':row['label']='사용자 중단 · 기존 원장 보존'
  elif status in ('FAILED','ENTRY_FAILED','BLOCKED'):row['label']='실행 오류' if item.get('error') else 'FULL 미수용'
  return row
 
@@ -106,7 +107,7 @@ def apply(value,alive):
  live=[w for w in data['workers'] if w['alive']];phase=data.get('phase');planning=phase and ('PLANNING' in phase or phase=='WAIT_EXISTING_OWN_WORKERS')
  completed=data['planning_pass'] if planning else data['actual_pass']
  value.update(active_experiment='V44_iteration2',run_id='V44 r043 · V44_iteration2 · 2025.05.01~31 · B3',
-  status=data['label'],state='COMPLETE' if phase=='COMPLETE' else 'BLOCKED' if phase=='PLANNING_FAILED_ACTUAL_HELD' else 'RUNNING' if data.get('coordinator_alive') else 'DISCONNECTED',
+  status=data['label'],state='USER_STOPPED' if phase=='USER_STOPPED' else 'COMPLETE' if phase=='COMPLETE' else 'BLOCKED' if phase=='PLANNING_FAILED_ACTUAL_HELD' else 'RUNNING' if data.get('coordinator_alive') else 'DISCONNECTED',
   tone='#d97706' if phase in ('PLANNING_FAILED_ACTUAL_HELD','SUPERVISOR_ERROR') else '#059669' if phase=='COMPLETE' else '#2563eb',
   root=str(ROOT),day='2025년 5월 B3 · '+data['label'],detail='원본 A1/M1/A2 재사용 → M2 → 신규 A3 → M3 → 신규 A4 → M4 → Actual120 / 독립 Fresh120',
   workers=live,worker_alive=bool(live),coordinator_alive=data.get('coordinator_alive'),active_state_source=data['state_path'],active_state_age_seconds=data['age_seconds'],active_commit_sha=data['commit_sha'],
