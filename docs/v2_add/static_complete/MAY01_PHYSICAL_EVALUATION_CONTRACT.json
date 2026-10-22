@@ -1,0 +1,300 @@
+{
+  "source": "affc7226a519adbe072d7debbc3ae25ea71c3487",
+  "sources": [
+    {
+      "path": "v44/svr11_frozen/v42_voltage_control/integration.py",
+      "symbol": "PhysicalScenario.settle_actual",
+      "evidence": "Clock completes native due actions; measure_full_network then determines PASS. Intermediate queue solves record controls and ratings, without event-voltage PASS. persist requires all settled slot rows PASS, including prefix after120-axis adapter.",
+      "source": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v44\\svr11_frozen\\v42_voltage_control\\integration.py",
+        "sha256": "80ab368eec4477794f149530ad5151a5fcb647b0202a68bc6ea58e2ffb782123",
+        "bytes": 37947
+      }
+    },
+    {
+      "path": "v44/svr11_ac.py",
+      "symbol": "probe_body/_settle/prefix_audit_class",
+      "evidence": "TIME first solve -> settle_actual -> full measurement at last due action; prefix dimension120 only. OriginalCurrentAC branch measurements occur at that same settled state.",
+      "source": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v44\\svr11_ac.py",
+        "sha256": "517040730db9704c9db3e3d0814ceeaf98fc52de7c10db6f8bc8ebda78b25aa6",
+        "bytes": 16945
+      }
+    },
+    {
+      "path": "v44/svr11_frozen/v42_voltage_control/timecontrol.py",
+      "symbol": "CommonClock.settle_slot",
+      "evidence": "Physical delayed native events within[start,end); boundary event belongs to next inputs. No delay deletion or initial-state reset.",
+      "source": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v44\\svr11_frozen\\v42_voltage_control\\timecontrol.py",
+        "sha256": "40157acd9b91d3721b3952ad9c4da381f8de301ac9caedcb495a444f6f6bff30",
+        "bytes": 9371
+      }
+    }
+  ],
+  "contract": "Original settled-slot physical gate, independent event-envelope diagnosis",
+  "Primary96": "All node/phase voltages0.95..1.05; original Parent Terminal max line loading; both-end current and transformer/PCS/port ratings at original post-TIME measurement",
+  "prefix_contract": "All24 settled prefix slots and exact clock/queue continuity; no intermediate event-voltage gate found in source",
+  "adding_second_by_second_voltage_constraints_to_optimization": false,
+  "original_acceptance_policy_relaxed": false,
+  "earlier_stricter_full_event_gate_superseded_by_source_audit": true,
+  "source_YY_B0_Planning96_Actual96_Fresh_PASS": true,
+  "full120_event_envelope_PASS": false,
+  "TIME_violations_not_deleted": true,
+  "event_diagnosis": {
+    "Actual_prefix_undervoltage_seconds": 23,
+    "Actual_prefix_overvoltage_seconds": 18,
+    "Planning_initial_overvoltage_seconds": 15
+  },
+  "physical_initialization": "Original cold Tap1 and original Cap/emptyQueue; unavailable causal prehistory not invented",
+  "frozen_SVR_banks": 3,
+  "all_arms_same_actual_hardware": true,
+  "results": [
+    {
+      "schedule": "ZERO",
+      "role": "ACTUAL",
+      "fresh": false,
+      "evaluation_tick_count": 96,
+      "evaluation96_PASS": true,
+      "prefix24_settled_PASS": true,
+      "eval_Vmin": 0.9515681447843148,
+      "eval_Vmax": 1.040377077497905,
+      "rho_global": 0.7571100804292894,
+      "rho_MV": 0.7571100804292894,
+      "rho_LV": 0.46810642843122136,
+      "event_envelope_full120_PASS": false,
+      "event_envelope_low_seconds": 23.0,
+      "event_envelope_high_seconds": 18.0,
+      "selection": "Literal last native TIME event within each900s slot; no largest-current selection",
+      "archive": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\ZERO\\2025-05-01_ACTUAL\\AC.npz",
+        "sha256": "ab15b0a789f52f7041c350be57e304ee1dfee2b2265dd16ca5f0098f7a1f0f3a",
+        "bytes": 71699522
+      },
+      "clock": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\ZERO\\2025-05-01_ACTUAL\\CLOCK.json",
+        "sha256": "b9f5b4d00bed152da31dbefcd7d4a93776e6c32c8c0c4d47bd84e2a8cfaad490",
+        "bytes": 323635
+      }
+    },
+    {
+      "schedule": "ZERO",
+      "role": "ACTUAL",
+      "fresh": true,
+      "evaluation_tick_count": 96,
+      "evaluation96_PASS": true,
+      "prefix24_settled_PASS": true,
+      "eval_Vmin": 0.9515681447843148,
+      "eval_Vmax": 1.040377077497905,
+      "rho_global": 0.7571100804292894,
+      "rho_MV": 0.7571100804292894,
+      "rho_LV": 0.46810642843122136,
+      "event_envelope_full120_PASS": false,
+      "event_envelope_low_seconds": 23.0,
+      "event_envelope_high_seconds": 18.0,
+      "selection": "Literal last native TIME event within each900s slot; no largest-current selection",
+      "archive": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\ZERO\\2025-05-01_ACTUAL_FRESH\\AC.npz",
+        "sha256": "ab15b0a789f52f7041c350be57e304ee1dfee2b2265dd16ca5f0098f7a1f0f3a",
+        "bytes": 71699522
+      },
+      "clock": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\ZERO\\2025-05-01_ACTUAL_FRESH\\CLOCK.json",
+        "sha256": "b9f5b4d00bed152da31dbefcd7d4a93776e6c32c8c0c4d47bd84e2a8cfaad490",
+        "bytes": 323635
+      }
+    },
+    {
+      "schedule": "ZERO",
+      "role": "PLANNING",
+      "fresh": false,
+      "evaluation_tick_count": 96,
+      "evaluation96_PASS": true,
+      "prefix24_settled_PASS": true,
+      "eval_Vmin": 0.959196561398404,
+      "eval_Vmax": 1.0405877827394807,
+      "rho_global": 0.7201689974386928,
+      "rho_MV": 0.7201689974386928,
+      "rho_LV": 0.44695204242881476,
+      "event_envelope_full120_PASS": false,
+      "event_envelope_low_seconds": 0.0,
+      "event_envelope_high_seconds": 15.0,
+      "selection": "Literal last native TIME event within each900s slot; no largest-current selection",
+      "archive": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\ZERO\\2025-05-01_PLANNING\\AC.npz",
+        "sha256": "2e4edd9b803bb3b6bf2c099b51d05209bb464df89ae928b85a5cd7ec3f729ba5",
+        "bytes": 41050555
+      },
+      "clock": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\ZERO\\2025-05-01_PLANNING\\CLOCK.json",
+        "sha256": "a98360422cf716389bcc6f175d82059ec9d79e521c2b7b049a7317d9c2d452c6",
+        "bytes": 178795
+      }
+    },
+    {
+      "schedule": "P_ONLY",
+      "role": "ACTUAL",
+      "fresh": false,
+      "evaluation_tick_count": 96,
+      "evaluation96_PASS": true,
+      "prefix24_settled_PASS": true,
+      "eval_Vmin": 0.9564323336719512,
+      "eval_Vmax": 1.0403770775047472,
+      "rho_global": 0.7379011476578863,
+      "rho_MV": 0.7379011476578863,
+      "rho_LV": 0.46686329885432587,
+      "event_envelope_full120_PASS": false,
+      "event_envelope_low_seconds": 23.0,
+      "event_envelope_high_seconds": 18.0,
+      "selection": "Literal last native TIME event within each900s slot; no largest-current selection",
+      "archive": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\P_ONLY\\2025-05-01_ACTUAL\\AC.npz",
+        "sha256": "115a3e62a64044e6c6b2d3c7de88de4913a87d1464869d7c2ae053683957ea88",
+        "bytes": 69314406
+      },
+      "clock": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\P_ONLY\\2025-05-01_ACTUAL\\CLOCK.json",
+        "sha256": "d6df12ac7f9d76e693fac4980fcf2737ebfb27349a0afbc7995799ea78f3122c",
+        "bytes": 312767
+      }
+    },
+    {
+      "schedule": "P_ONLY",
+      "role": "ACTUAL",
+      "fresh": true,
+      "evaluation_tick_count": 96,
+      "evaluation96_PASS": true,
+      "prefix24_settled_PASS": true,
+      "eval_Vmin": 0.9564323336719512,
+      "eval_Vmax": 1.0403770775047472,
+      "rho_global": 0.7379011476578863,
+      "rho_MV": 0.7379011476578863,
+      "rho_LV": 0.46686329885432587,
+      "event_envelope_full120_PASS": false,
+      "event_envelope_low_seconds": 23.0,
+      "event_envelope_high_seconds": 18.0,
+      "selection": "Literal last native TIME event within each900s slot; no largest-current selection",
+      "archive": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\P_ONLY\\2025-05-01_ACTUAL_FRESH\\AC.npz",
+        "sha256": "115a3e62a64044e6c6b2d3c7de88de4913a87d1464869d7c2ae053683957ea88",
+        "bytes": 69314406
+      },
+      "clock": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\P_ONLY\\2025-05-01_ACTUAL_FRESH\\CLOCK.json",
+        "sha256": "d6df12ac7f9d76e693fac4980fcf2737ebfb27349a0afbc7995799ea78f3122c",
+        "bytes": 312767
+      }
+    },
+    {
+      "schedule": "Q50",
+      "role": "ACTUAL",
+      "fresh": false,
+      "evaluation_tick_count": 96,
+      "evaluation96_PASS": true,
+      "prefix24_settled_PASS": true,
+      "eval_Vmin": 0.9635001153369747,
+      "eval_Vmax": 1.0403770775047472,
+      "rho_global": 0.7374416375868313,
+      "rho_MV": 0.7374416375868313,
+      "rho_LV": 0.4653472128269823,
+      "event_envelope_full120_PASS": false,
+      "event_envelope_low_seconds": 23.0,
+      "event_envelope_high_seconds": 18.0,
+      "selection": "Literal last native TIME event within each900s slot; no largest-current selection",
+      "archive": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\Q50\\2025-05-01_ACTUAL\\AC.npz",
+        "sha256": "a174336801336c515b0d4dcc0e4c7fc07578d065f3618bca1d431b750ad9f7bb",
+        "bytes": 73575812
+      },
+      "clock": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\Q50\\2025-05-01_ACTUAL\\CLOCK.json",
+        "sha256": "6fb88ebd3fbe50fc43b410d1a1e39f744f0ecbc1abf325bb5454294b00c678ed",
+        "bytes": 330865
+      }
+    },
+    {
+      "schedule": "Q50",
+      "role": "ACTUAL",
+      "fresh": true,
+      "evaluation_tick_count": 96,
+      "evaluation96_PASS": true,
+      "prefix24_settled_PASS": true,
+      "eval_Vmin": 0.9635001153369747,
+      "eval_Vmax": 1.0403770775047472,
+      "rho_global": 0.7374416375868313,
+      "rho_MV": 0.7374416375868313,
+      "rho_LV": 0.4653472128269823,
+      "event_envelope_full120_PASS": false,
+      "event_envelope_low_seconds": 23.0,
+      "event_envelope_high_seconds": 18.0,
+      "selection": "Literal last native TIME event within each900s slot; no largest-current selection",
+      "archive": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\Q50\\2025-05-01_ACTUAL_FRESH\\AC.npz",
+        "sha256": "a174336801336c515b0d4dcc0e4c7fc07578d065f3618bca1d431b750ad9f7bb",
+        "bytes": 73575812
+      },
+      "clock": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\Q50\\2025-05-01_ACTUAL_FRESH\\CLOCK.json",
+        "sha256": "6fb88ebd3fbe50fc43b410d1a1e39f744f0ecbc1abf325bb5454294b00c678ed",
+        "bytes": 330865
+      }
+    },
+    {
+      "schedule": "TWO_MOVE",
+      "role": "ACTUAL",
+      "fresh": false,
+      "evaluation_tick_count": 96,
+      "evaluation96_PASS": true,
+      "prefix24_settled_PASS": true,
+      "eval_Vmin": 0.9515681447843161,
+      "eval_Vmax": 1.040377077497905,
+      "rho_global": 0.7571100804293455,
+      "rho_MV": 0.7571100804293455,
+      "rho_LV": 0.4681064284312315,
+      "event_envelope_full120_PASS": false,
+      "event_envelope_low_seconds": 23.0,
+      "event_envelope_high_seconds": 18.0,
+      "selection": "Literal last native TIME event within each900s slot; no largest-current selection",
+      "archive": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\TWO_MOVE\\2025-05-01_ACTUAL\\AC.npz",
+        "sha256": "162323577f7ee11fb54bda86ba87f18fd401bd2b47ae43a270d9d2495863acbe",
+        "bytes": 71702464
+      },
+      "clock": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\TWO_MOVE\\2025-05-01_ACTUAL\\CLOCK.json",
+        "sha256": "4a27abe5cf5e591defb1de58defa3fa9825fdd1a560f3dbc44c33910177a3c0c",
+        "bytes": 323635
+      }
+    },
+    {
+      "schedule": "TWO_MOVE",
+      "role": "ACTUAL",
+      "fresh": true,
+      "evaluation_tick_count": 96,
+      "evaluation96_PASS": true,
+      "prefix24_settled_PASS": true,
+      "eval_Vmin": 0.9515681447843161,
+      "eval_Vmax": 1.040377077497905,
+      "rho_global": 0.7571100804293455,
+      "rho_MV": 0.7571100804293455,
+      "rho_LV": 0.4681064284312315,
+      "event_envelope_full120_PASS": false,
+      "event_envelope_low_seconds": 23.0,
+      "event_envelope_high_seconds": 18.0,
+      "selection": "Literal last native TIME event within each900s slot; no largest-current selection",
+      "archive": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\TWO_MOVE\\2025-05-01_ACTUAL_FRESH\\AC.npz",
+        "sha256": "162323577f7ee11fb54bda86ba87f18fd401bd2b47ae43a270d9d2495863acbe",
+        "bytes": 71702464
+      },
+      "clock": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\may01\\source_yy\\TWO_MOVE\\2025-05-01_ACTUAL_FRESH\\CLOCK.json",
+        "sha256": "4a27abe5cf5e591defb1de58defa3fa9825fdd1a560f3dbc44c33910177a3c0c",
+        "bytes": 323635
+      }
+    }
+  ],
+  "SCIENTIFIC_B0_EVALUATION_SCOPE_ONLY": true,
+  "full_campaign_controller_certified": false,
+  "FIELD_INSTALLATION_UNVERIFIED": true
+}

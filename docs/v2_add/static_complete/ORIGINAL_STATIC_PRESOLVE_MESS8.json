@@ -1,0 +1,214 @@
+{
+  "PASS": true,
+  "proof": {
+    "PASS": true,
+    "original_rows": 415592,
+    "original_columns": 471809,
+    "compact_rows": 433696,
+    "compact_columns": 489913,
+    "retained_rows": 432529,
+    "retained_columns": 489321,
+    "exact_aliases_checked": 592,
+    "exact_identical_affine_binding_witnesses_checked": 0,
+    "deleted_row_implications_checked": 1167,
+    "exact_coefficient_fallback_rows": 0,
+    "original_P1_bit_exact": true,
+    "integer_and_full_LP_domains_identical": true,
+    "C3A_policy": "KEEP_ALL_REGENERATED_C2_ROWS",
+    "historical_proof_packets_read": 0,
+    "Native_optimize_calls": 0
+  },
+  "original": {
+    "variables": 471809,
+    "rows": 415592,
+    "nonzeros": 2540800,
+    "binary": 417296
+  },
+  "selected": {
+    "variables": 489321,
+    "rows": 432529,
+    "nonzeros": 2974415,
+    "binary": 18680
+  },
+  "steps": 592,
+  "rounds": [
+    {
+      "round": 1,
+      "rows_before": 433120,
+      "columns_before": 489337,
+      "nnz_before": 2974472,
+      "fixed": 16,
+      "rows_deleted": 575,
+      "substitutions": 0,
+      "rows_after": 432529,
+      "columns_after": 489321,
+      "nnz_after": 2974415,
+      "wall": 131.15506000001915,
+      "categories": "{'CONSTANT_SAFE': 550, 'SINGLETON_BOUND_IMPLIED': 25}"
+    },
+    {
+      "round": 2,
+      "rows_before": 432529,
+      "columns_before": 489321,
+      "nnz_before": 2974415,
+      "fixed": 0,
+      "rows_deleted": 0,
+      "substitutions": 0,
+      "rows_after": 432529,
+      "columns_after": 489321,
+      "nnz_after": 2974415,
+      "wall": 131.46897459996399,
+      "categories": "{}"
+    }
+  ],
+  "static_unit_alias_closure": {
+    "rounds": [
+      {
+        "unit_alias_variables": 576,
+        "components": 384,
+        "proof": "Root-to-leaf original unit equality forest; retained root box/type implies each eliminated domain",
+        "nonunit_or_dense_pivots": 0
+      },
+      {
+        "unit_alias_variables": 0,
+        "components": 0,
+        "proof": "Root-to-leaf original unit equality forest; retained root box/type implies each eliminated domain",
+        "nonunit_or_dense_pivots": 0
+      }
+    ],
+    "unit_alias_variables": 576,
+    "optimizer_calls": 0,
+    "preprocessing_only": true
+  },
+  "original_8_unit_route_domain_unchanged": true,
+  "source_algorithms": [
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v42_supercompact\\formulation.py",
+      "sha256": "183897e4259aaabbbdf7fcc7976adb84147ba04106cbc18bb11f9d3353cfd19f",
+      "bytes": 4740
+    },
+    {
+      "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v42_supercompact\\presolve.py",
+      "sha256": "04adf32c1b83fa49631b64bb317c04e207ca534ba7e2af6c2b9eb16b614ba69f",
+      "bytes": 14438
+    }
+  ],
+  "transport": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\mobility\\TRANSPORT.pkl",
+    "sha256": "aac90626754a19cd4872244635992f43115874e45f0ec6d54467919d51551324",
+    "bytes": 657577350
+  },
+  "grid_coordinate_map": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\mobility\\ORIGINAL_MAP.npz",
+    "sha256": "0f9759882dd2a31016171ae4866cd1ae5cb3b44a31a019e89db733998832852b",
+    "bytes": 719130
+  },
+  "Native_calls": 0,
+  "resources": {
+    "pid": 41428,
+    "priority": 16384,
+    "affinity": [
+      12
+    ],
+    "available_RAM_bytes": 10984169472,
+    "other_python": [
+      {
+        "pid": 14832,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v42_pr134_b1.host",
+          "monitor",
+          "C:\\v42_pr134_sc_execution_20261007"
+        ]
+      },
+      {
+        "pid": 31320,
+        "command": [
+          "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v2_add_preflight.static_screen"
+        ]
+      },
+      {
+        "pid": 48760,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v2_add_preflight.static_coefficients"
+        ]
+      },
+      {
+        "pid": 69500,
+        "command": [
+          "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v2_add_preflight.static_coefficients"
+        ]
+      },
+      {
+        "pid": 97420,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v2_add_preflight.static_screen"
+        ]
+      },
+      {
+        "pid": 110196,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "-u",
+          "D:\\MobileESS_V44\\development\\monitor_recovery_20261022\\monitor_service.py",
+          "--port",
+          "8795"
+        ]
+      },
+      {
+        "pid": 118556,
+        "command": [
+          "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v2_add_preflight.static_pack"
+        ]
+      },
+      {
+        "pid": 119852,
+        "command": [
+          "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v2_add_preflight.static_pack"
+        ]
+      },
+      {
+        "pid": 120784,
+        "command": [
+          "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe",
+          "-X",
+          "utf8",
+          "-m",
+          "v2_add_preflight.static_mobility"
+        ]
+      }
+    ]
+  },
+  "wall_seconds": 401.3812489999691,
+  "peak_RSS_bytes": 2044276736
+}

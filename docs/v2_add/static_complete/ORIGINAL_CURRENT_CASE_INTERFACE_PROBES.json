@@ -1,0 +1,127 @@
+{
+  "checks": [
+    {
+      "interface": "Original K48 Geometry/exact_cut on actual new Source-YY component",
+      "PASS": false,
+      "error": "ValueError('HELPER_PIVOT_AMBIGUOUS')",
+      "scope": "Actual coefficient and original CSR names; single-slot admission probe, not96FULL K48",
+      "diagnosis": "Scaled sparse helpers and IEEE8500 named axes require a certified exact representation adapter; bypassing Geometry would change the LB proof."
+    },
+    {
+      "interface": "Original K48 exact_cut with exact dyadic helper view",
+      "PASS": true,
+      "scope": "One real Source-YY slot, not full96 K48 packet or LB certificate",
+      "helper_view": {
+        "equality_rows": 34329,
+        "positive_binary_power_scales": true,
+        "every_coefficient_and_RHS_exact_roundtrip": true,
+        "original_Native_rows_changed": false,
+        "minimum_pivot": 1.0,
+        "maximum_pivot": 1024.0
+      },
+      "exact_terms": 25,
+      "helper_rows": 50,
+      "new_grid_rows_added": 0,
+      "original_oracle_algorithm_edited": false
+    },
+    {
+      "interface": "Original build_blocks eight-unit guard",
+      "PASS": false,
+      "error": "ValueError('FOUR_ORIGINAL_FLEET_UNITS_REQUIRED')"
+    },
+    {
+      "interface": "Isolated dimension-only eight-unit exact partition",
+      "PASS": true,
+      "units": [
+        "MESS01",
+        "MESS02",
+        "MESS03",
+        "MESS04",
+        "MESS05",
+        "MESS06",
+        "MESS07",
+        "MESS08"
+      ],
+      "proof": {
+        "PASS": true,
+        "case_sha": "dd9313a61ce3e04b5ebfe5ec72a62114cc382b3d71664b0d6c74f1c4e3cd8416",
+        "theorem": "F_EQUALS_PRODUCT_OF_ORIGINAL_LOCAL_DOMAINS_INTERSECT_ORIGINAL_COUPLING",
+        "original_rows": 432529,
+        "original_columns": 489321,
+        "original_nnz": 2974415,
+        "units": {
+          "MESS01": {
+            "rows": 53641,
+            "columns": 60997,
+            "nnz": 368558,
+            "binary_columns": 2329
+          },
+          "MESS02": {
+            "rows": 53713,
+            "columns": 61081,
+            "nnz": 369062,
+            "binary_columns": 2332
+          },
+          "MESS03": {
+            "rows": 53785,
+            "columns": 61165,
+            "nnz": 369566,
+            "binary_columns": 2335
+          },
+          "MESS04": {
+            "rows": 53665,
+            "columns": 61025,
+            "nnz": 368726,
+            "binary_columns": 2330
+          },
+          "MESS05": {
+            "rows": 53809,
+            "columns": 61193,
+            "nnz": 369734,
+            "binary_columns": 2336
+          },
+          "MESS06": {
+            "rows": 53809,
+            "columns": 61193,
+            "nnz": 369734,
+            "binary_columns": 2336
+          },
+          "MESS07": {
+            "rows": 53881,
+            "columns": 61277,
+            "nnz": 370238,
+            "binary_columns": 2339
+          },
+          "MESS08": {
+            "rows": 53977,
+            "columns": 61389,
+            "nnz": 370910,
+            "binary_columns": 2343
+          }
+        },
+        "nonunit_rows": 0,
+        "nonunit_columns": 1,
+        "coupling_rows": 2249,
+        "all_original_nonzeros_retained": true,
+        "all_original_bounds_types_objective_retained": true,
+        "full_96_slot_domain_preserved": true,
+        "original_matrix_sha256": "d90dad8aa50af3a15bdaf34e90a8e91b3fa93800c90cfee9348382d5b7463581",
+        "new_cut": false,
+        "integer_block_strengthening_proven": false
+      },
+      "source": {
+        "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v42_m1_hybrid\\blocks.py",
+        "sha256": "9c9ee88e31af36f51cfcec71816c718e60de02774efec88019375bc6dba2282d",
+        "bytes": 8464
+      },
+      "original_algorithm_file_edited": false,
+      "scope": "MOBILITY_ONLY; not full grid/K48/Joint certification",
+      "independent_unit_MILPs_executed": 0
+    }
+  ],
+  "Native_calls": 0,
+  "denied_attempts": [],
+  "source_algorithms_reused_verbatim": true,
+  "actual96_FULL_stage_interface_PASS": false,
+  "old_IEEE123_bounds_reused": false
+}

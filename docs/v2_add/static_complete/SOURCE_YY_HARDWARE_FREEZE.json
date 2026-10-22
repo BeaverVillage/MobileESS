@@ -1,0 +1,155 @@
+{
+  "experiment": "V2_add",
+  "day": "2025-05-01",
+  "beta_BG": 2.0,
+  "candidate": "H0_SOURCE_YY",
+  "Planning": "S0 original Reg12/CapControl9",
+  "Actual": "S1_03 original Reg12 + serial SVR3 (9 single-phase controls)",
+  "Source_P5_pu": 1.04,
+  "original_Vreg": 123.5,
+  "CAPBank3_initial": "OFF",
+  "IDC": {
+    "candidate": "H0_SOURCE_YY",
+    "SVR_banks": 3,
+    "Source_P5_unchanged": true,
+    "IDC_connection": "Original V44 Wye/Wye",
+    "LV_LL_kV": 0.48,
+    "MV_LL_kV": 12.47,
+    "nameplate_kVA": 750,
+    "normal_emergency_limit_kVA": 750,
+    "port_kVA": 600,
+    "original_source_default_normal_emergency_kVA": [
+      825,
+      1125
+    ],
+    "tightened_new_port_normal_limits_preserved_from_DY_design": true,
+    "R_pct_each": [
+      0.8,
+      0.2
+    ],
+    "XHL_pct": 5.75,
+    "Rneut_each": [
+      -1,
+      -1
+    ],
+    "tap_each": [
+      1,
+      1
+    ],
+    "no_load_loss_pct": 0,
+    "imag_pct": 0,
+    "original_winding_readback": {
+      "name": "MESS_IDC01_TX",
+      "buses": [
+        "149.1.2.3",
+        "mess_idc01_pcc.1.2.3"
+      ],
+      "windings": [
+        {
+          "winding": 1,
+          "kV": 4.16,
+          "kVA": 750.0,
+          "delta": false,
+          "tap": 1.0,
+          "R_pct": 0.8,
+          "Rneut": -1.0,
+          "Xneut": 0.0
+        },
+        {
+          "winding": 2,
+          "kV": 0.48,
+          "kVA": 750.0,
+          "delta": false,
+          "tap": 1.0,
+          "R_pct": 0.2,
+          "Rneut": -1.0,
+          "Xneut": 0.0
+        }
+      ],
+      "properties": {
+        "XHL": "5.75",
+        "%NoLoadLoss": "0",
+        "%Imag": "0",
+        "Conns": "[wye, wye, ]",
+        "kVs": "[4.16, 0.48, ]",
+        "%Rs": "[0.8, 0.2, ]",
+        "Taps": "[1, 1, ]",
+        "NormHkVA": "825",
+        "EmergHkVA": "1125"
+      },
+      "bus_readback": [
+        {
+          "bus": "149.1.2.3",
+          "kV_base_LN": 2.4017771198288433,
+          "nodes": [
+            1,
+            2,
+            3
+          ],
+          "voltage_magnitude_angle": [
+            2401.7771189550685,
+            2.457786220655401e-08,
+            2401.777118955068,
+            -119.99999997543398,
+            2401.7771189550685,
+            120.00000000522296
+          ]
+        },
+        {
+          "bus": "mess_idc01_pcc.1.2.3",
+          "kV_base_LN": 0.27712812921102037,
+          "nodes": [
+            1,
+            2,
+            3
+          ],
+          "voltage_magnitude_angle": [
+            277.1281211427668,
+            3.110567499158796e-07,
+            277.1281211427667,
+            -119.99999968895506,
+            277.12812114276676,
+            120.00000029170182
+          ]
+        }
+      ]
+    },
+    "reason": "Test exact original V44 IDC winding parameters at IEEE8500 MV voltage; no fitted impedance or tap",
+    "frozen_before_sourceYY_operating_AC": true,
+    "schedules": [
+      "ZERO",
+      "P_ONLY",
+      "Q50",
+      "TWO_MOVE"
+    ],
+    "original_DY_reference_and_all_H0_H4_results_preserved": true,
+    "no_selection_without_Planning_Prefix_Actual_and_grid_rebinding": true
+  },
+  "SVR": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v2_add\\may01\\MAY01_HARDWARE_PREREGISTRATION.json",
+    "sha256": "13e4024e9105514aa744fb966b562044148e334899f542cebda150463ed11646",
+    "bytes": 62180
+  },
+  "ports": {
+    "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\docs\\v2_add\\may01\\SOURCE_YY_ALL24_HARDWARE_READBACK.json",
+    "sha256": "1333d56e2089826ee711ab3c50124aa5a4e29e5b187ddb61546fb4064c0052c2",
+    "bytes": 65243
+  },
+  "source": "affc7226a519adbe072d7debbc3ae25ea71c3487",
+  "initial_MESS8": {
+    "MESS01": "STA01",
+    "MESS02": "STA12",
+    "MESS03": "STA08",
+    "MESS04": "STA06",
+    "MESS05": "STA02",
+    "MESS06": "STA03",
+    "MESS07": "STA04",
+    "MESS08": "STA05"
+  },
+  "all_arms_same_hardware_and_policy": true,
+  "frozen_before_new_coefficients": true,
+  "physical_certification_pending": true,
+  "basis": "User fixed beta2/SVR3; source Wye/Wye winding fidelity at native8500 MV. No new hardware search or fitted tap/impedance.",
+  "FIELD_INSTALLATION_UNVERIFIED": true,
+  "hardware_sha": "9f72212c9b154b0e96ddfbbad228d179026caf76654f539718de31e02929c03c"
+}
