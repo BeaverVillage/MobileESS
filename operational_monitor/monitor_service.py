@@ -170,7 +170,7 @@ class SnapshotStore:
             value.update(status='모니터 상태 갱신 오류',state='MONITOR_ERROR',reason=error or '상태 스냅샷 갱신 지연',tone='#d97706')
         return 200,value
 
-def run(port=8795):
+def _run(port=8795):
     store=SnapshotStore()
     def refresh_loop():
       from archive_reads import reader
@@ -201,11 +201,34 @@ def run(port=8795):
                 self.send_header('Cache-Control','no-store');self.end_headers();self.wfile.write(payload)
             except (BrokenPipeError,ConnectionResetError,ConnectionAbortedError):pass
         def log_message(self,*args):pass
-    server=ThreadingHTTPServer(('127.0.0.1',port),Handler)
+    class ExclusiveServer(ThreadingHTTPServer):
+        allow_reuse_address=False
+        def server_bind(self):
+            import socket
+            if hasattr(socket,'SO_EXCLUSIVEADDRUSE'):self.socket.setsockopt(socket.SOL_SOCKET,socket.SO_EXCLUSIVEADDRUSE,1)
+            super().server_bind()
+    server=ExclusiveServer(('127.0.0.1',port),Handler)
     identity=dict(PID=os.getpid(),created=psutil.Process().create_time(),command=psutil.Process().cmdline(),UTC=now(),read_only=True,URL=f'http://127.0.0.1:{port}/')
     binding.atomic(HOME/'MONITOR_PROCESS.json',identity)
     binding.atomic(binding.RUNS/'monitor/MONITOR_PROCESS.json',identity)
     server.serve_forever()
+
+def run(port=8795):
+    # Windows SO_REUSEADDR permits duplicate listeners on the same address.
+    # Hold one OS lock for the complete service lifetime and bind exclusively.
+    guard=(HOME/'MONITOR_SERVICE.lock').open('a+b')
+    try:
+        guard.seek(0,2)
+        if guard.tell()==0:guard.write(b'0');guard.flush()
+        guard.seek(0)
+        if os.name=='nt':
+            import msvcrt
+            msvcrt.locking(guard.fileno(),msvcrt.LK_NBLCK,1)
+        else:
+            import fcntl
+            fcntl.flock(guard.fileno(),fcntl.LOCK_EX|fcntl.LOCK_NB)
+        _run(port)
+    finally:guard.close()
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--port',type=int,default=8795);args=parser.parse_args();run(args.port)
