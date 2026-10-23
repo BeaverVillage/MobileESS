@@ -1,0 +1,1090 @@
+{
+  "active_experiment": "V2_add",
+  "run_id": "V2_add · IEEE8500 · 2025.05.01 · B0 / B1 / B2 / B3",
+  "monitor_read_only": true,
+  "v2_add_details": {
+    "available": true,
+    "label": "실행 오류 수정 후 필수 재검증 중",
+    "phase": "WAITING_REQUIRED_EXECUTION_CHECKS",
+    "official_campaign_started": true,
+    "preparation": [
+      {
+        "name": "A1_receipt",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_a_receipt",
+          "A1"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A1_receipt.log",
+        "exit_code": 0,
+        "wall_seconds": 6.344155500060879,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "RAM_policy",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_resources"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_RAM_policy.log",
+        "exit_code": 0,
+        "wall_seconds": 1.2850331000518054,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "M1_handler",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_factory_fixture"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_M1_handler.log",
+        "exit_code": 0,
+        "wall_seconds": 795.9998596999794,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "M1_FULL",
+        "status": "PASS",
+        "argv": [
+          "-c",
+          "from v2_add_preflight.stage_m_validator_fixture import certify;certify('M1',r'D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\FULL_REPLAY')"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_M1_FULL.log",
+        "exit_code": 0,
+        "wall_seconds": 168.94536080001853,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "M2_FULL",
+        "status": "PASS",
+        "argv": [
+          "-c",
+          "from v2_add_preflight.stage_m_validator_fixture import certify;certify('M2',r'D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\FULL_REPLAY')"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_M2_FULL.log",
+        "exit_code": 0,
+        "wall_seconds": 158.59835400001612,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "Joint_Native0_after",
+        "status": "PASS",
+        "argv": [
+          "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\replay_native0.py",
+          "JOINT"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Joint_Native0_after.log",
+        "exit_code": 0,
+        "wall_seconds": 31.074769699946046,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "M1_static_Native0_after",
+        "status": "PASS",
+        "argv": [
+          "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\replay_native0.py",
+          "M1"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_M1_static_Native0_after.log",
+        "exit_code": 0,
+        "wall_seconds": 178.02750640001614,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "M2_static_Native0_after",
+        "status": "PASS",
+        "argv": [
+          "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\replay_native0.py",
+          "M2"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_M2_static_Native0_after.log",
+        "exit_code": 0,
+        "wall_seconds": 177.6491421998944,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "A2_Native0_after",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_a_canary",
+          "A2"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A2_Native0_after.log",
+        "exit_code": 0,
+        "wall_seconds": 2443.5402145000407,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "A2_receipt",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_a_receipt",
+          "A2"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A2_receipt.log",
+        "exit_code": 0,
+        "wall_seconds": 6.237546699936502,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "A1_grid_FULL",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_a_verify",
+          "A1"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A1_grid_FULL.log",
+        "exit_code": 0,
+        "wall_seconds": 70.2320791000966,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "A2_grid_FULL",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_a_verify",
+          "A2"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A2_grid_FULL.log",
+        "exit_code": 0,
+        "wall_seconds": 66.11946050007828,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "A_handler",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_a_entry_fixture"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A_handler.log",
+        "exit_code": 0,
+        "wall_seconds": 23.463815100025386,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "Actual_prepare",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_actual_prepare_fixture"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Actual_prepare.log",
+        "exit_code": 0,
+        "wall_seconds": 116.795194300008,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "Actual_migration",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_work_migration_fixture"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Actual_migration.log",
+        "exit_code": 0,
+        "wall_seconds": 5.172633299953304,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "Actual_full120",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_handler_fixture"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Actual_full120.log",
+        "exit_code": 0,
+        "wall_seconds": 50.1924972999841,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "Independent_Fresh120",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_fresh_fixture"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Independent_Fresh120.log",
+        "exit_code": 0,
+        "wall_seconds": 88.30440359993372,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "Final_guards",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_guard_fixture"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Final_guards.log",
+        "exit_code": 0,
+        "wall_seconds": 5.78990029997658,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "Gurobi_IO",
+        "status": "PASS",
+        "argv": [
+          "-m",
+          "v2_add_preflight.stage_gurobi_io_fixture"
+        ],
+        "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Gurobi_IO.log",
+        "exit_code": 0,
+        "wall_seconds": 5.200241700047627,
+        "group": "Native0 / FULL / Handler",
+        "detail": ""
+      },
+      {
+        "name": "K48_all_actual_Native0",
+        "status": "PASS",
+        "returncode": 0,
+        "wall_seconds": 111.52396630006842,
+        "group": "수치 실행 / 최종 연결",
+        "detail": ""
+      },
+      {
+        "name": "M1_numerical",
+        "status": "RUNNING",
+        "group": "수치 실행 / 최종 연결",
+        "detail": "28   4.61937816e-01  4.61208694e-01  1.13e-10 3.55e-14  5.75e-10    18s\r\n  29   4.61875171e-01  4.61466879e-01  9.11e-11 2.81e-14  3.22e-10    18s\r\n  30   4.61763945e-01  4.61536279e-01  5.43e-10 4.13e-14  1.80e-10    18s\r\n  31   4.61758226e-01  4.61642894e-01  4.48e-10 2.87e-14  9.09e-11    18s\r\n  32   4.61734165e-01  4.61688758e-01  3.87e-09 1.22e-13  3.58e-11    19s\r\n  33   4.61733319e-01  4.61708690e-01  2.51e-09 1.03e-13  1.94e-11    19s\r\n  34   4.61732006e-01  4.61731298e-01  1.39e-09 9.92e-14  5.59e-13    19s\r\n  35   4.61731877e-01  4.61731876e-01  4.22e-12 2.61e-14  5.63e-16    19s\r\n\r\nBarrier solved model in 35 iterations and 19.47 seconds (28.01 work units)\r\nOptimal objective 4.61731877e-01\r\n\r\n\r\nRoot crossover log...\r\n\r\n   33404 DPushes remaining with DInf 0.0000000e+00                20s\r\n    1484 DPushes remaining with DInf 0.0000000e+00                20s\r\n       0 DPushes remaining with DInf 0.0000000e+00                20s\r\n\r\n  359953 PPushes remaining with PInf 1.4958442e-04                20s\r\n  138827 PPushes remaining with PInf 1.5448534e-05                25s\r\nCrossover changed status from Optimal to Time Limit\r\n\r\nRoot relaxation: time limit, 383859 iterations, 23.80 seconds (32.77 work units)\r\n\r\n    Nodes    |    Current Node    |     Objective Bounds      |     Work\r\n Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time\r\n\r\n     0     0          -    0         0.64373    0.00000   100%     -   30s\r\n\r\nExplored 1 nodes (383859 simplex iterations) in 30.08 seconds (42.97 work units)\r\nThread count was 4 (of 16 available processors)\r\n\r\nSolution count 2: 0.643732 0.643732 \r\n\r\nSolve interrupted\r\nBest objective 6.437318709288e-01, best bound 0.000000000000e+00, gap 100.0000%\r\n\r\nUser-callback calls 3220, time in user-callback 0.05 sec\r\n"
+      },
+      {
+        "name": "A1_numerical",
+        "group": "수치 실행 / 최종 연결",
+        "status": "QUEUED",
+        "detail": ""
+      },
+      {
+        "name": "final_A1_receipt",
+        "group": "수치 실행 / 최종 연결",
+        "status": "QUEUED",
+        "detail": ""
+      },
+      {
+        "name": "final_A2_receipt",
+        "group": "수치 실행 / 최종 연결",
+        "status": "QUEUED",
+        "detail": ""
+      },
+      {
+        "name": "final_A_entry",
+        "group": "수치 실행 / 최종 연결",
+        "status": "QUEUED",
+        "detail": ""
+      }
+    ],
+    "preparation_pass": 20,
+    "preparation_total": 25,
+    "rows": [
+      {
+        "arm": "B0",
+        "stages": [
+          {
+            "stage": "REFERENCE",
+            "status": "COMPLETE",
+            "label": "완료",
+            "root": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B0\\REFERENCE",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 0,
+              "remaining": 0.0,
+              "inflight": false,
+              "text": "Native 차감 없음",
+              "ledger": null
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {
+              "stage_wall_seconds": 2.550714800017886,
+              "stage_CPU_seconds": 1.90625,
+              "this_attempt_measured_Native_seconds": 0.0,
+              "this_attempt_Native_optimize_wall_seconds": 0.0,
+              "non_Native_preparation_validation_IO_and_score_wall_seconds": 2.550714800017886,
+              "A_model_preparation_wall_seconds": 0.0,
+              "external_score_solver_wall_seconds": 0.0,
+              "Native_runtime_measurement_complete": true,
+              "unavailable_Runtime_calls": 0,
+              "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+              "ledgers": [],
+              "error": null
+            },
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "ACTUAL",
+            "status": "COMPLETE",
+            "label": "완료",
+            "root": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B0\\ACTUAL",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 0,
+              "remaining": 0.0,
+              "inflight": false,
+              "text": "Native 차감 없음",
+              "ledger": null
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {
+              "stage_wall_seconds": 23.407125799916685,
+              "stage_CPU_seconds": 22.546875,
+              "this_attempt_measured_Native_seconds": 0.0,
+              "this_attempt_Native_optimize_wall_seconds": 0.0,
+              "non_Native_preparation_validation_IO_and_score_wall_seconds": 23.407125799916685,
+              "A_model_preparation_wall_seconds": 0.0,
+              "external_score_solver_wall_seconds": 0.0,
+              "Native_runtime_measurement_complete": true,
+              "unavailable_Runtime_calls": 0,
+              "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+              "ledgers": [],
+              "error": null
+            },
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "FRESH",
+            "status": "COMPLETE",
+            "label": "완료",
+            "root": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B0\\FRESH",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 0,
+              "remaining": 0.0,
+              "inflight": false,
+              "text": "Native 차감 없음",
+              "ledger": null
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {
+              "stage_wall_seconds": 38.3217505000066,
+              "stage_CPU_seconds": 36.703125,
+              "this_attempt_measured_Native_seconds": 0.0,
+              "this_attempt_Native_optimize_wall_seconds": 0.0,
+              "non_Native_preparation_validation_IO_and_score_wall_seconds": 38.3217505000066,
+              "A_model_preparation_wall_seconds": 0.0,
+              "external_score_solver_wall_seconds": 0.0,
+              "Native_runtime_measurement_complete": true,
+              "unavailable_Runtime_calls": 0,
+              "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+              "ledgers": [],
+              "error": null
+            },
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false,
+            "physical": {
+              "Vmin": 0.9515681447843148,
+              "Vmax": 1.040377077497905,
+              "line_percent": 75.71100804292894,
+              "PASS": true
+            }
+          }
+        ]
+      },
+      {
+        "arm": "B1",
+        "stages": [
+          {
+            "stage": "A1",
+            "status": "BLOCKED",
+            "label": "차단",
+            "root": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B1\\A1",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 7200,
+              "remaining": 7200.0,
+              "inflight": false,
+              "text": "0.0 / 7200 s",
+              "ledger": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B1\\A1\\NATIVE_RUNTIME_LEDGER.json"
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {
+              "stage_wall_seconds": 10.30511070007924,
+              "stage_CPU_seconds": 6.46875,
+              "this_attempt_measured_Native_seconds": 0.0,
+              "this_attempt_Native_optimize_wall_seconds": 0.0,
+              "non_Native_preparation_validation_IO_and_score_wall_seconds": 10.30511070007924,
+              "A_model_preparation_wall_seconds": 0.0031667998991906643,
+              "external_score_solver_wall_seconds": 0.0,
+              "Native_runtime_measurement_complete": true,
+              "unavailable_Runtime_calls": 0,
+              "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+              "ledgers": [
+                {
+                  "path": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B1\\A1\\NATIVE_RUNTIME_LEDGER.json",
+                  "cumulative_measured_Native_seconds": 0.0,
+                  "old_paid_calls_retained": 0,
+                  "this_attempt_calls": 0,
+                  "inflight": null,
+                  "Native_ceiling_seconds": 7200.0
+                }
+              ],
+              "error": null
+            },
+            "error": "ValueError('STAGE_NOT_ACCEPTED:A1')",
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false,
+            "phase_I": {
+              "Phi": null,
+              "zero_PASS": false
+            }
+          },
+          {
+            "stage": "ACTUAL",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B1\\ACTUAL",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 0,
+              "remaining": 0.0,
+              "inflight": false,
+              "text": "Native 차감 없음",
+              "ledger": null
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "FRESH",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B1\\FRESH",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 0,
+              "remaining": 0.0,
+              "inflight": false,
+              "text": "Native 차감 없음",
+              "ledger": null
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          }
+        ]
+      },
+      {
+        "arm": "B2",
+        "stages": [
+          {
+            "stage": "REFERENCE",
+            "status": "COMPLETE",
+            "label": "완료",
+            "root": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B2\\REFERENCE",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 0,
+              "remaining": 0.0,
+              "inflight": false,
+              "text": "Native 차감 없음",
+              "ledger": null
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {
+              "stage_wall_seconds": 0.7780276000266895,
+              "stage_CPU_seconds": 0.734375,
+              "this_attempt_measured_Native_seconds": 0.0,
+              "this_attempt_Native_optimize_wall_seconds": 0.0,
+              "non_Native_preparation_validation_IO_and_score_wall_seconds": 0.7780276000266895,
+              "A_model_preparation_wall_seconds": 0.0,
+              "external_score_solver_wall_seconds": 0.0,
+              "Native_runtime_measurement_complete": true,
+              "unavailable_Runtime_calls": 0,
+              "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+              "ledgers": [],
+              "error": null
+            },
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "K48_M1",
+            "status": "BLOCKED",
+            "label": "차단",
+            "root": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B2\\K48_M1",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 300,
+              "remaining": 300.0,
+              "inflight": false,
+              "text": "0.0 / 300 s",
+              "ledger": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B2\\K48_M1\\K48_NATIVE_LEDGER.json"
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {
+              "stage_wall_seconds": 55.34153209999204,
+              "stage_CPU_seconds": 53.59375,
+              "this_attempt_measured_Native_seconds": 0.0,
+              "this_attempt_Native_optimize_wall_seconds": 0.0,
+              "non_Native_preparation_validation_IO_and_score_wall_seconds": 55.34153209999204,
+              "A_model_preparation_wall_seconds": 0.0,
+              "external_score_solver_wall_seconds": 0.0,
+              "Native_runtime_measurement_complete": true,
+              "unavailable_Runtime_calls": 0,
+              "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+              "ledgers": [],
+              "error": "FileNotFoundError(2, 'No such file or directory')"
+            },
+            "error": "FileNotFoundError(2, 'No such file or directory')",
+            "pid": 130776,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "M1",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B2\\M1",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 3600,
+              "remaining": 3600.0,
+              "inflight": false,
+              "text": "0.0 / 3600 s",
+              "ledger": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B2\\M1\\JOINT_NATIVE_LEDGER.json"
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "ACTUAL",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B2\\ACTUAL",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 0,
+              "remaining": 0.0,
+              "inflight": false,
+              "text": "Native 차감 없음",
+              "ledger": null
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "FRESH",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B2\\FRESH",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 0,
+              "remaining": 0.0,
+              "inflight": false,
+              "text": "Native 차감 없음",
+              "ledger": null
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          }
+        ]
+      },
+      {
+        "arm": "B3",
+        "stages": [
+          {
+            "stage": "A1_REUSE",
+            "status": "BLOCKED",
+            "label": "차단",
+            "root": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\A1_REUSE",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 0,
+              "remaining": 0.0,
+              "inflight": false,
+              "text": "Native 차감 없음",
+              "ledger": null
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {
+              "stage_wall_seconds": 0.10741900000721216,
+              "stage_CPU_seconds": 0.109375,
+              "this_attempt_measured_Native_seconds": 0.0,
+              "this_attempt_Native_optimize_wall_seconds": 0.0,
+              "non_Native_preparation_validation_IO_and_score_wall_seconds": 0.10741900000721216,
+              "A_model_preparation_wall_seconds": 0.0,
+              "external_score_solver_wall_seconds": 0.0,
+              "Native_runtime_measurement_complete": true,
+              "unavailable_Runtime_calls": 0,
+              "budget_basis": "MEASURED_NATIVE_RUNTIME_ONLY",
+              "ledgers": [],
+              "error": "ValueError('SAME_DATE_ACCEPTED_B1_A1_REQUIRED')"
+            },
+            "error": "ValueError('SAME_DATE_ACCEPTED_B1_A1_REQUIRED')",
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "K48_M1",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\K48_M1",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 300,
+              "remaining": 300.0,
+              "inflight": false,
+              "text": "0.0 / 300 s",
+              "ledger": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\K48_M1\\K48_NATIVE_LEDGER.json"
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "M1",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\M1",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 3600,
+              "remaining": 3600.0,
+              "inflight": false,
+              "text": "0.0 / 3600 s",
+              "ledger": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\M1\\JOINT_NATIVE_LEDGER.json"
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "A2",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\A2",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 7200,
+              "remaining": 7200.0,
+              "inflight": false,
+              "text": "0.0 / 7200 s",
+              "ledger": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\A2\\NATIVE_RUNTIME_LEDGER.json"
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "K48_M2",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\K48_M2",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 300,
+              "remaining": 300.0,
+              "inflight": false,
+              "text": "0.0 / 300 s",
+              "ledger": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\K48_M2\\K48_NATIVE_LEDGER.json"
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "M2",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\M2",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 3600,
+              "remaining": 3600.0,
+              "inflight": false,
+              "text": "0.0 / 3600 s",
+              "ledger": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\M2\\JOINT_NATIVE_LEDGER.json"
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "ACTUAL",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\ACTUAL",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 0,
+              "remaining": 0.0,
+              "inflight": false,
+              "text": "Native 차감 없음",
+              "ledger": null
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          },
+          {
+            "stage": "FRESH",
+            "status": "QUEUED",
+            "label": "대기",
+            "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks\\2025-05-01\\B3\\FRESH",
+            "Native": {
+              "measured": 0.0,
+              "ceiling": 0,
+              "remaining": 0.0,
+              "inflight": false,
+              "text": "Native 차감 없음",
+              "ledger": null
+            },
+            "UB": null,
+            "LB": null,
+            "Gap": null,
+            "costs": {},
+            "error": null,
+            "pid": null,
+            "worker_alive": false,
+            "case_sha": null,
+            "reused_exact_A1": false,
+            "B1_A1_result_sha": null,
+            "gap_certified": false,
+            "FULL_feasible": false
+          }
+        ]
+      }
+    ],
+    "workers": [
+      {
+        "pid": 123320,
+        "process_created": 1792764032.5219905,
+        "command": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -X utf8 -B -u -m v2_add_preflight.stage_numerical_canary C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\isolated_numerical_canary\\Oct23_M1_03_official_io_repair D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\ISOLATED_CANARY_AUTHORIZATION_OFFICIAL_IO_REPAIR.json",
+        "age_seconds": 318.00244998931885,
+        "CPU_seconds": 351.609375,
+        "waiting": false
+      },
+      {
+        "pid": 124016,
+        "process_created": 1792764070.0717285,
+        "command": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -X utf8 -B -u D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\complete_preparation_and_launch.py",
+        "age_seconds": 280.452712059021,
+        "CPU_seconds": 1.0625,
+        "waiting": true
+      },
+      {
+        "pid": 132580,
+        "process_created": 1792764030.7093892,
+        "command": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -X utf8 -B -u D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\post_replay_canaries.py",
+        "age_seconds": 319.82405138015747,
+        "CPU_seconds": 1.46875,
+        "waiting": true
+      }
+    ],
+    "worker_count": 1,
+    "coordinator_alive": true,
+    "official_root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks",
+    "error": null,
+    "current_validation_process": {
+      "pid": 123320,
+      "process_created": 1792764032.5219905,
+      "command": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -X utf8 -B -u -m v2_add_preflight.stage_numerical_canary C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\isolated_numerical_canary\\Oct23_M1_03_official_io_repair D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\ISOLATED_CANARY_AUTHORIZATION_OFFICIAL_IO_REPAIR.json",
+      "age_seconds": 318.00244998931885,
+      "CPU_seconds": 351.609375,
+      "waiting": false
+    },
+    "A1_preparation": true,
+    "timing_authority": true,
+    "official_measured_Native_seconds": 0.0,
+    "diagnostic_Native_optimize_calls": 3,
+    "B3_A1_source": "B1.A1 · 같은 날짜/입력/Source/FULL/Gap/SHA 필수",
+    "budgets": {
+      "A1": 7200,
+      "A2": 7200,
+      "K48": 300,
+      "Joint": 3600,
+      "Joint_call": 300
+    },
+    "memory_information_only": true
+  },
+  "state": "WAITING_REQUIRED_EXECUTION_CHECKS",
+  "status": "실행 오류 수정 후 필수 재검증 중",
+  "tone": "#2563eb",
+  "root": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_20261023_after_execution_checks",
+  "day": "May01 · M1_numerical",
+  "detail": "B3 A1은 B1 FULL 결과 재사용 · Planning96 → Actual120 → 독립 Fresh120",
+  "count_text": "완료 Stage 4/19",
+  "progress_percent": 21.052631578947366,
+  "progress_summary": "필수 검증 20/25 · 공식 실행 재개 전 재검증",
+  "used_text": "공식 Native 0초 · 준비/격리 진단과 구분",
+  "remaining_text": "검증 종료 후 B0 → B1 → B2 → B3",
+  "budget_label": "V2_add · 실행 예산",
+  "budget_cap": "A1/A2 각 7200 s · K48 각 300 s 별도 · Joint 각 3600 s / 단일 300 s",
+  "metrics_visible": false,
+  "incumbent": "—",
+  "bound": "—",
+  "gap": "—",
+  "stage_bounds": [
+    {
+      "stage": "B0.REFERENCE",
+      "ub_text": "—",
+      "lb_text": "—",
+      "gap_text": "—",
+      "status": "완료"
+    },
+    {
+      "stage": "B0.ACTUAL",
+      "ub_text": "—",
+      "lb_text": "—",
+      "gap_text": "—",
+      "status": "완료"
+    },
+    {
+      "stage": "B0.FRESH",
+      "ub_text": "—",
+      "lb_text": "—",
+      "gap_text": "—",
+      "status": "완료"
+    },
+    {
+      "stage": "B1.A1",
+      "ub_text": "—",
+      "lb_text": "—",
+      "gap_text": "—",
+      "status": "차단"
+    },
+    {
+      "stage": "B2.REFERENCE",
+      "ub_text": "—",
+      "lb_text": "—",
+      "gap_text": "—",
+      "status": "완료"
+    },
+    {
+      "stage": "B2.K48_M1",
+      "ub_text": "—",
+      "lb_text": "—",
+      "gap_text": "—",
+      "status": "차단"
+    },
+    {
+      "stage": "B3.A1_REUSE",
+      "ub_text": "—",
+      "lb_text": "—",
+      "gap_text": "—",
+      "status": "차단"
+    }
+  ],
+  "metrics_label": "현재 공식 Case · FULL UB / 독립 Global LB",
+  "bound_details": {
+    "lines": [
+      "최종 FULL 수용과 Global Gap 인증을 구분합니다. 격리 검증 값은 공식 결과에 포함하지 않습니다."
+    ]
+  },
+  "loading_label": "현재 공식 Arm · 독립 Fresh120 물리 결과",
+  "line_loading": {
+    "text": "공식 결과 대기",
+    "note": "전체 선로·전압·변압기 및 Prefix24 + 평가96 검사"
+  },
+  "steps": [
+    {
+      "label": "B0",
+      "style": "pass"
+    },
+    {
+      "label": "B1",
+      "style": ""
+    },
+    {
+      "label": "B2",
+      "style": ""
+    },
+    {
+      "label": "B3",
+      "style": ""
+    }
+  ],
+  "build": {
+    "visible": false,
+    "steps": []
+  },
+  "reason": "",
+  "solver_note": "Worker 1 · A Threads 1 / M Threads 4 · A Gap 0.5% / M Gap 3%\nNative 측정 Runtime만 차감 · 모델 생성/검증 Wall/CPU 별도\nRAM은 정보용 · 숫자 기준 진입 거부/중단 없음\nIEEE8500 Balanced Source-YY · BG2 · GPU780 · AIDC12 / STA12 · MESS8 · Actual SVR3",
+  "worker_alive": true,
+  "coordinator_alive": true,
+  "ram": "여유 13.6 / 31.7 GB",
+  "monitor_snapshot_age_seconds": 0.047,
+  "monitor_response_UTC": "2026-10-23T14:05:54.139141+00:00"
+}

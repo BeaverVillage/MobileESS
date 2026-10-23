@@ -5,6 +5,36 @@ from unittest.mock import patch
 import pytest
 import numpy as np
 
+def test_source_A_preparation_has_empty_directory_next_to_existing_ledger(tmp_path):
+    from contextlib import contextmanager
+    from v2_add_preflight import stage_a_casefactory as factory
+    ledger=tmp_path/'NATIVE_RUNTIME_LEDGER.json';ledger.write_text('{}')
+    request=dict(stage='A1',output=str(tmp_path));budget=object();seen=[]
+    def source(actual,account,progress):
+        output=Path(actual['output']);assert output==tmp_path/'SOURCE'
+        assert not output.exists() and ledger.exists() and account is budget
+        seen.append(actual);return dict(original_source_boundary_reached=True)
+    @contextmanager
+    def route(req,m1):
+        assert req is request;yield source
+    with patch.object(factory,'current_stage',route):
+        assert factory.run(request,budget)['original_source_boundary_reached']
+    assert request['output']==str(tmp_path) and len(seen)==1
+
+def test_source_JSON_original_atomic_writer_handles_long_windows_temp_name(tmp_path):
+    import os,json
+    from v43.common import atomic
+    from v2_add_preflight.stage_m_case import source_json_writer
+    folder=tmp_path
+    while len(str(folder.resolve()))<190:
+        folder=folder/'directory';folder.mkdir()
+    target=folder/'CURRENT_SOURCE_PROJECTION_CERTIFICATE.json'
+    if os.name=='nt':assert len(str(target.resolve()))+46>=260
+    payload=dict(PASS=True,current_rows=[1,2,3],original_serializer_unchanged=True)
+    source_json_writer(atomic)(target,payload)
+    assert json.loads(target.read_text(encoding='utf8'))==payload
+    assert not list(folder.glob('*.tmp'))
+
 @pytest.mark.parametrize('bound',[float('-inf'),float('inf'),float('nan'),-12.5])
 def test_unavailable_bound_keeps_measured_call_and_resume_account(tmp_path,bound):
     import json,math

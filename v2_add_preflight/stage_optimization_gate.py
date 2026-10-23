@@ -21,10 +21,12 @@ def replay_source_compatibility(value,entered,work):
     if value.get('validation_source_snapshot_unchanged') is not True:return False
     previous=value.get('validation_source_files')
     if previous==entered:return True
-    path=Path(work)/'BOUND_JSON_REPAIR_20261023/SOURCE_COMPATIBILITY.json'
+    path=Path(work)/'OFFICIAL_IO_REPAIR_20261023/SOURCE_COMPATIBILITY.json'
+    if not path.exists():path=Path(work)/'BOUND_JSON_REPAIR_20261023/SOURCE_COMPATIBILITY.json'
     if not path.exists():return False
     audit=read(path)
-    if (audit.get('PASS') is not True or audit.get('before_source_files')!=previous
+    accepted=audit.get('compatible_previous_source_snapshots',[audit.get('before_source_files')])
+    if (audit.get('PASS') is not True or previous not in accepted
             or audit.get('after_source_files')!=entered
             or audit.get('budget_AST_after_removing_only_bound_telemetry_patch_equals_before') is not True
             or audit.get('all_other_scientific_source_bytes_unchanged') is not True):return False
@@ -56,6 +58,8 @@ def certify(work,instruction,pause):
             if not replay_source_compatibility(value,entered,work):
                 raise ValueError('CURRENT_FROZEN_VALIDATION_SOURCE_REQUIRED:'+name)
         compatibility=work/'BOUND_JSON_REPAIR_20261023/SOURCE_COMPATIBILITY.json'
+        if compatibility.exists():evidence.append(record(compatibility))
+        compatibility=work/'OFFICIAL_IO_REPAIR_20261023/SOURCE_COMPATIBILITY.json'
         if compatibility.exists():evidence.append(record(compatibility))
         for tag in ('M1','M2'):
             new=read(OUT/(tag+'_STATIC_NATIVE0_AFTER_20261023.json'))

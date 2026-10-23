@@ -7,7 +7,7 @@ component cache avoids materializing the 302M-nonzero FULL reference twice.
 """
 from bisect import bisect_right
 from contextlib import contextmanager
-import gc,hashlib,pickle,ast,inspect,textwrap
+import gc,hashlib,pickle,ast,inspect,textwrap,os
 from types import SimpleNamespace,MethodType
 import numpy as np
 import scipy.sparse as sp
@@ -16,6 +16,16 @@ from v42_native.contracts import digest
 from .stage_k48 import slot_view
 from .static_pack import PACK,N_AUX
 from .static_screen import CACHE
+
+def source_json_writer(original):
+    """Keep the original serializer and atomic writer with Win32 long IO."""
+    def write(path,value):
+        target=Path(path).absolute()
+        if os.name=='nt' and not str(target).startswith('\\\\?\\'):
+            text=str(target)
+            target=Path('\\\\?\\UNC\\'+text[2:] if text.startswith('\\\\') else '\\\\?\\'+text)
+        return original(target,value)
+    return write
 
 class Axis:
     def __init__(self,blocks,key,lengths):
@@ -261,6 +271,8 @@ def source_binding(case):
     from .stage_threads import scope as m_threads
     modules=load();saved=[]
     def patch(obj,key,value):saved.append((obj,key,getattr(obj,key)));setattr(obj,key,value)
+    for mod in modules.values():
+        if hasattr(mod,'_write'):patch(mod,'_write',source_json_writer(mod._write))
     k=modules['table_v_k48'];engine=modules['m_engine']
     from .stage_budget import m_result_metadata
     patch(engine,'optimize_mess',m_result_metadata(engine.optimize_mess))

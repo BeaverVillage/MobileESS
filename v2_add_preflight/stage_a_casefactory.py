@@ -55,4 +55,7 @@ def current_stage(request,m1_result=None):
 
 def run(request,budget,m1_result=None,progress=None):
     with current_stage(request,m1_result) as original:
-        return original(request,budget,progress)
+        # The stage root already contains its Runtime ledger. The source
+        # preparation guard requires its own fresh, empty model directory.
+        source_request=dict(request,output=str(Path(request['output'])/'SOURCE'))
+        return original(source_request,budget,progress)
