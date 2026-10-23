@@ -131,7 +131,8 @@ recovery repeats this audit and retains its measured Native accounts.
 Phase I retains the original strict Phi zero threshold of 1e-8 and original
 physical replay tolerance. Continuous Phase I, P1 and local pricing use
 solver FeasibilityTol and OptimalityTol of1e-9. P1/local pricing use quad
-simplex with NumericFocus3 and unscaled residuals. A Phase-I residual in
+simplex with NumericFocus3 and aggressive internal scaling. All acceptance
+checks still replay the original unscaled matrix. A Phase-I residual in
 (1e-8,1e-5] receives one numerical polish of the exact same
 snapshot before domain expansion; every call spends the same original
 A5400/Phase-I1500 accounts. Equations, bounds, gap rules and raw points are
@@ -150,8 +151,9 @@ public failure instead of being masked by a generic A contract error.
 Only the two diagnosed failed A3 stages may cross the explicitly sealed
 source-repair bridge. Completed M stages and May03 A3 remain exact immutable
 checkpoints. Failure receipts, old sources and authorization bytes are saved.
-Each A continuation carries its entire5400 account and all Phase-I/local
-pricing spent before original P1 into the nested1500 account. Old points,
+Each A continuation carries its entire5400 account and the exact persisted
+Phase-I/local pricing subaccount into the nested1500 account, including
+Phase I from subsequent rebuilds after historical P1 calls. Old points,
 bounds and certificates are not promoted. The same stage is rebuilt under
 its remaining accounts; other dates remain queued in the existing campaign.
 
@@ -160,3 +162,16 @@ checkpoint acceptance; any checkpoint failure publishes PASS=false. All31
 dated inputs and archived baseline receipts are verified before authorization.
 The persistent supervisor and the existing8795 monitor resolve the same
 active-runtime pointer and restart with the new campaign.
+
+The second May01 A3 failure was an original-feasible P1 point that failed
+strict prior-point objective dominance. Its normal and repair solves both
+used Method1 because the precision overlay overwrote the inherited repair
+algorithm. The repaired overlay retains a distinct Method0 repair,
+presolve and the original nonzero anti-cycling perturbation, quad
+arithmetic, aggressive scaling and stricter pivot selection. No acceptance
+threshold is relaxed.
+An exact saved failed-LP regression verifies original matrix, bounds and
+objective and must pass original primal/dual checks plus prior dominance.
+Its measured Native calls extend the same A3 account through a sealed
+prefix-checked diagnostic ledger. The regression point or bound is not
+used as a scientific campaign result.

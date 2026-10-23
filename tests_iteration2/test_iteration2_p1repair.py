@@ -73,7 +73,7 @@ class RecoveryAccounts(unittest.TestCase):
   atomic(parent/'request.json',request);atomic(parent/'RESULT.json',dict(error="ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')"))
   calls=[dict(component=k,Native_Runtime=t,status='FINISHED') for k,t in [('PHASE_I',1.),('LOCAL_PRICING',2.),('ORIGINAL_P1',4.),('LOCAL_PRICING',5.)]]
   atomic(parent/'NATIVE_RUNTIME_LEDGER.json',dict(Native_ceiling_seconds=5400.,measured_Native_Runtime=12.,calls=calls,costs=[],wall_seconds=100.,inflight=None))
-  atomic(parent/'RECONCILIATION.json',dict(inflight=None));atomic(parent/'OUTPUT/PHASE_I_NATIVE_BUDGET.json',dict(Native_seconds=3.))
+  atomic(parent/'RECONCILIATION.json',dict(inflight=None));atomic(parent/'OUTPUT/PHASE_I_NATIVE_BUDGET.json',dict(Native_seconds=3.,calls=[dict(label='PHASE_I',Native_seconds=1.),dict(label='LOCAL_PRICING',Native_seconds=2.)]))
   row=dict(day=request['day'],stage='A3',parent_core=str(parent),old_source_sha='old',old_request=record(parent/'request.json'),ledger=record(parent/'NATIVE_RUNTIME_LEDGER.json'),reconciliation=record(parent/'RECONCILIATION.json'),phase_budget=record(parent/'OUTPUT/PHASE_I_NATIVE_BUDGET.json'))
   permit=root/'REPAIR_PERMIT.json';atomic(permit,dict(resumable_A_stages=[row],scientific_equations_domain_and_acceptance_unchanged=True,Native_budget_reset=False))
   ops=root/'OPS';atomic(ops/'AUTHORIZATION.json',dict(repair_permit=record(permit)))
@@ -84,7 +84,7 @@ class RecoveryAccounts(unittest.TestCase):
   with tempfile.TemporaryDirectory(dir=c.ROOT) as d:
    parent,_,_,_=self.fixture(Path(d));account=phase_account(parent)
    self.assertEqual(account['used'],3.);self.assertEqual(len(account['calls']),2)
-   atomic(parent/'OUTPUT/PHASE_I_NATIVE_BUDGET.json',dict(Native_seconds=1.))
+   saved=read(parent/'OUTPUT/PHASE_I_NATIVE_BUDGET.json');saved['Native_seconds']=1.;atomic(parent/'OUTPUT/PHASE_I_NATIVE_BUDGET.json',saved)
    with self.assertRaisesRegex(ValueError,'ACCOUNT_DRIFT'):phase_account(parent)
 
  def test_source_bridge_rejects_unapproved_stage_or_changed_old_ledger(self):
@@ -113,7 +113,7 @@ class RecoveryAccounts(unittest.TestCase):
   from v42_may_campaign_native90 import budget
   with tempfile.TemporaryDirectory(dir=c.ROOT) as d:
    root=Path(d);parent,old,row,ops=self.fixture(root)
-   with patch.object(resume,'admit',return_value=dict(remaining=5388.)),resume.a_scope(parent,{}) as proof:
+   with patch.object(c,'OPS',ops),patch.object(resume,'admit',return_value=dict(remaining=5388.)),resume.a_scope(parent,{}) as proof:
     account=budget.DateBudget(root/'NEW/NATIVE_RUNTIME_LEDGER.json',native_limit=5400.)
     self.assertEqual(account.used(),12.);self.assertEqual(account.remaining(),5388.)
     with phase_limit.phase_scope(SimpleNamespace(remaining=lambda:5388),root/'NEW/OUTPUT') as limited:

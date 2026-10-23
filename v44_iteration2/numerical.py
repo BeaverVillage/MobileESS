@@ -24,8 +24,11 @@ def policy_wrapper(factory,stable):
    if context['component'] in ('ORIGINAL_P1','LOCAL_PRICING'):
     from .p1_interval import LEVEL
     level=LEVEL.get()
-    settings.update(Method=1,NumericFocus=3,ScaleFlag=0,Aggregate=0,Quad=1)
-    if level:settings.update(Method=0 if level==1 else 1,Presolve=0,LPWarmStart=1,PerturbValue=0)
+    settings.update(Method=1,NumericFocus=3,ScaleFlag=2,Aggregate=0,Presolve=1,Quad=1,MarkowitzTol=.5,LPWarmStart=2,PerturbValue=.0002)
+    # The inherited second attempt is a DIFFERENT algorithm. Never overwrite
+    # its repair flag with the normal dual-simplex policy again.
+    if context.get('repair') or level:
+     settings.update(Method=1 if level==2 else 0,Presolve=0 if level==2 else 1)
    if context.get('iteration2_polish'):
     settings.update(Method=0,Quad=1,Presolve=0,Aggregate=0,ScaleFlag=0,LPWarmStart=1,PerturbValue=0)
    for name,value in settings.items():model.setParam(name,value)
