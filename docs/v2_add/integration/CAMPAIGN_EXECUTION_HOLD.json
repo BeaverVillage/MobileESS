@@ -1,0 +1,130 @@
+{
+  "experiment_id": "V2_add",
+  "status": "PRESTART_BLOCKED_WITH_EVIDENCE",
+  "ready_for_user_campaign_approval": false,
+  "SCIENTIFIC_SIMULATION_READY": false,
+  "FIELD_INSTALLATION_UNVERIFIED": true,
+  "source": "affc7226a519adbe072d7debbc3ae25ea71c3487",
+  "baseline": "a4dabafb52e9ee12a95858438b7d65b6b751d34f",
+  "original_chains": {
+    "B0": [
+      "REFERENCE",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B1": [
+      "A1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B2": [
+      "REFERENCE",
+      "K48_M1",
+      "M1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B3": [
+      "A1_REUSE",
+      "K48_M1",
+      "M1",
+      "A2",
+      "K48_M2",
+      "M2",
+      "ACTUAL",
+      "FRESH"
+    ]
+  },
+  "candidate": {
+    "feeder": "IEEE8500 Balanced",
+    "beta_BG": 2.0,
+    "Planning": "S0 original Reg12/Cap9",
+    "Actual": "S1_03 original Reg12 plus3 serial banks",
+    "AIDC": 12,
+    "STA": 12,
+    "mobile_service_locations": 24,
+    "GPU": 780,
+    "MESS": 8,
+    "initial": {
+      "MESS01": "STA01",
+      "MESS02": "STA12",
+      "MESS03": "STA08",
+      "MESS04": "STA06",
+      "MESS05": "STA02",
+      "MESS06": "STA03",
+      "MESS07": "STA04",
+      "MESS08": "STA05"
+    }
+  },
+  "budgets": {
+    "A1": 5400.0,
+    "A2": 5400.0,
+    "K48_M1": 300.0,
+    "K48_M2": 300.0,
+    "M1": 900.0,
+    "M2": 900.0,
+    "A_gap": 0.005,
+    "M_gap": 0.03,
+    "effective_r043_Joint_single_call_cap": 300.0
+  },
+  "original_r043_overlay": {
+    "Workers": 1,
+    "M_Threads": 4,
+    "A_Threads": 1,
+    "Actual_Workers": 1,
+    "Root_Method": 2,
+    "K48_Threads": 4,
+    "K48_Method": 2,
+    "K48_total": 300.0,
+    "Joint_total": 900.0,
+    "Joint_call_cap": 300.0
+  },
+  "runtime": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\integration\\official_may01_07_HOLD",
+  "Python": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe",
+  "preparation_commands": [
+    "python -m v2_add_preflight.full_execution plan",
+    "python -m v2_add_preflight.full_grid",
+    "python -m v2_add_preflight.full_native",
+    "python -m v2_add_preflight.full_pack",
+    "python -m v2_add_preflight.full_days",
+    "python -m v2_add_preflight.full_verify"
+  ],
+  "future_campaign_command_template": "python -m v2_add_preflight.full_execution campaign --approval <explicit-user-approval.json>",
+  "campaign_command_runnable": false,
+  "official_campaign_executed": false,
+  "optimization_calls": 0,
+  "current_worker_policy": {
+    "isolated_preparation_processes": true,
+    "heavy_Native_workers": 0,
+    "below_normal_priority": true,
+    "own_affinity_only": [
+      12,
+      13
+    ],
+    "Native0_RSS_limit_GiB": 4,
+    "system_available_reserve_GiB": 5,
+    "protected_workers_not_modified": true
+  },
+  "stage_bindings": {
+    "REFERENCE": "Original R0/Q50+CC4 and original daily C1, finite diagnostic certified",
+    "ACTUAL": "Original B0 FCFS and exact C1; no official controller or Worker run",
+    "FRESH": "New DSS TIME contexts, finite diagnostics",
+    "A1": "Original complete-option builder/acceptance; whole8500 AIDC-variable grid not bound",
+    "M1": "Original8 mobility plus complete96 fixed-B0 affine matrix/domain pack; monolithic resource gate and original solver-case interface unresolved",
+    "A2": "Requires independent A2 fixed-M1 FULL case",
+    "M2": "Requires original FULL M2 and same-date A2 anchor",
+    "K48": "Original independent Global-LB interface needs complete current FULL CSR/domain/physical metadata",
+    "Adaptive_Beam": "Original method needs same FULL case and independent validator",
+    "Direct_Joint": "Original method needs same FULL case and original call caps"
+  },
+  "checkpoints": "Existing fail-closed Scheduler: source/input/scenario/acceptance/artifact hashes, no in-flight budget reset, OS lease; real optimizer handlers remain unbound",
+  "readiness_excludes_field_certification": true,
+  "blocking_reasons": [
+    "causal initial TIME voltage, Planning TIME and new IDC LV event voltage",
+    "campaign AIDC FULL/policy/Current-AC integration",
+    "monolithic resource clearance and original current-case K48/Beam/Joint binding",
+    "all seven dated whole120 physical PASS and remaining dated optimizer coefficient preparation"
+  ],
+  "no_Golden414_acceptance": true,
+  "no_arbitrary_source_or_rating_or_beta_or_route_changes": true
+}

@@ -1,0 +1,71 @@
+{
+  "status": "HOLD_NO_CAMPAIGN_EXECUTION",
+  "auto_run": false,
+  "Native_long_solver_authorized": false,
+  "reason": "All seven gates must pass and a separate future human campaign approval must match the final certificate.",
+  "runtime": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\prestart\\official_may01_07",
+  "Python": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\.venv\\Scripts\\python.exe",
+  "preparation_command": "python -m v2_add_preflight.prestart_execution plan",
+  "future_campaign_command": "python -m v2_add_preflight.prestart_execution campaign --approval <explicit-human-approval.json>",
+  "command_runnable_now": false,
+  "worker_count": 1,
+  "simultaneous_heavy_Native_workers": 0,
+  "existing_worker_processes_priority_affinity_or_locks_mutated": false,
+  "original_policy": {
+    "mode": "PREPARE_ONLY",
+    "days": [
+      "2025-05-01",
+      "2025-05-02",
+      "2025-05-03",
+      "2025-05-04",
+      "2025-05-05",
+      "2025-05-06",
+      "2025-05-07"
+    ],
+    "cases": 28,
+    "Main_workers": 1,
+    "B2_workers": 2,
+    "Threads": 1,
+    "three_heavy_workers_certified": false,
+    "admission": "B2_TWO_FIRST_MAIN_WAITS_WHILE_B2_ACTIVE_OR_READY",
+    "K48_Native_seconds": 300.0,
+    "Joint_Native_seconds": 900.0,
+    "K48_budget_separate": true,
+    "Joint_single_call_cap": 140.0,
+    "A1_A2_Native_seconds": 5400.0,
+    "A1_A2_gap": 0.005,
+    "M_gap": 0.03,
+    "Known_research_policy": "B1_RESEARCH_RELAXED_KNOWN_WINDOW_V1",
+    "Unknown_policy": "R1_FLEX30_C1",
+    "R1_authority": "R1_ASSUMED",
+    "FORECAST_CAUSAL_AVAILABILITY": "NOT_CERTIFIED",
+    "RAM_numeric_gate": false,
+    "new_algorithms": false,
+    "initial_state_copied_from_prior_optimized_day": false,
+    "execution_requires_separate_explicit_user_permit": true
+  },
+  "budgets_by_stage": {
+    "A1": 5400.0,
+    "A2": 5400.0,
+    "K48_M1": 300.0,
+    "K48_M2": 300.0,
+    "M1": 900.0,
+    "M2": 900.0
+  },
+  "estimates": {
+    "total_native_per_B1_seconds": 5400.0,
+    "total_native_per_B2_seconds": 1200.0,
+    "total_native_per_B3_seconds": 7800.0,
+    "label": "Configured budget ceilings, not measured runtime forecasts; Actual/Fresh/build wall time separate"
+  },
+  "pre_launch_checks": [
+    "seven gates PASS",
+    "same-date same-input acceptance hashes",
+    "certified FULL adapters and independent validators",
+    "original r043 policy overlay/Threads/call caps bound",
+    "held production locks available; no bypass",
+    "resource reserve and single-worker OS lease",
+    "unambiguous prior Native ledgers; no budget reset",
+    "future explicit user approval"
+  ]
+}

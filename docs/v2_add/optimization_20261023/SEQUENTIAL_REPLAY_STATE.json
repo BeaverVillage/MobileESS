@@ -1,0 +1,221 @@
+{
+  "role": "SEQUENTIAL_POST_PAUSE_VALIDATION",
+  "PASS": true,
+  "steps": [
+    {
+      "name": "A1_receipt",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_a_receipt",
+        "A1"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A1_receipt.log",
+      "exit_code": 0,
+      "wall_seconds": 6.344155500060879
+    },
+    {
+      "name": "RAM_policy",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_resources"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_RAM_policy.log",
+      "exit_code": 0,
+      "wall_seconds": 1.2850331000518054
+    },
+    {
+      "name": "M1_handler",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_factory_fixture"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_M1_handler.log",
+      "exit_code": 0,
+      "wall_seconds": 795.9998596999794
+    },
+    {
+      "name": "M1_FULL",
+      "status": "PASS",
+      "argv": [
+        "-c",
+        "from v2_add_preflight.stage_m_validator_fixture import certify;certify('M1',r'D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\FULL_REPLAY')"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_M1_FULL.log",
+      "exit_code": 0,
+      "wall_seconds": 168.94536080001853
+    },
+    {
+      "name": "M2_FULL",
+      "status": "PASS",
+      "argv": [
+        "-c",
+        "from v2_add_preflight.stage_m_validator_fixture import certify;certify('M2',r'D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\FULL_REPLAY')"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_M2_FULL.log",
+      "exit_code": 0,
+      "wall_seconds": 158.59835400001612
+    },
+    {
+      "name": "Joint_Native0_after",
+      "status": "PASS",
+      "argv": [
+        "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\replay_native0.py",
+        "JOINT"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Joint_Native0_after.log",
+      "exit_code": 0,
+      "wall_seconds": 31.074769699946046
+    },
+    {
+      "name": "M1_static_Native0_after",
+      "status": "PASS",
+      "argv": [
+        "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\replay_native0.py",
+        "M1"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_M1_static_Native0_after.log",
+      "exit_code": 0,
+      "wall_seconds": 178.02750640001614
+    },
+    {
+      "name": "M2_static_Native0_after",
+      "status": "PASS",
+      "argv": [
+        "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\replay_native0.py",
+        "M2"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_M2_static_Native0_after.log",
+      "exit_code": 0,
+      "wall_seconds": 177.6491421998944
+    },
+    {
+      "name": "A2_Native0_after",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_a_canary",
+        "A2"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A2_Native0_after.log",
+      "exit_code": 0,
+      "wall_seconds": 2443.5402145000407
+    },
+    {
+      "name": "A2_receipt",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_a_receipt",
+        "A2"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A2_receipt.log",
+      "exit_code": 0,
+      "wall_seconds": 6.237546699936502
+    },
+    {
+      "name": "A1_grid_FULL",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_a_verify",
+        "A1"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A1_grid_FULL.log",
+      "exit_code": 0,
+      "wall_seconds": 70.2320791000966
+    },
+    {
+      "name": "A2_grid_FULL",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_a_verify",
+        "A2"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A2_grid_FULL.log",
+      "exit_code": 0,
+      "wall_seconds": 66.11946050007828
+    },
+    {
+      "name": "A_handler",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_a_entry_fixture"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_A_handler.log",
+      "exit_code": 0,
+      "wall_seconds": 23.463815100025386
+    },
+    {
+      "name": "Actual_prepare",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_actual_prepare_fixture"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Actual_prepare.log",
+      "exit_code": 0,
+      "wall_seconds": 116.795194300008
+    },
+    {
+      "name": "Actual_migration",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_work_migration_fixture"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Actual_migration.log",
+      "exit_code": 0,
+      "wall_seconds": 5.172633299953304
+    },
+    {
+      "name": "Actual_full120",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_handler_fixture"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Actual_full120.log",
+      "exit_code": 0,
+      "wall_seconds": 50.1924972999841
+    },
+    {
+      "name": "Independent_Fresh120",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_fresh_fixture"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Independent_Fresh120.log",
+      "exit_code": 0,
+      "wall_seconds": 88.30440359993372
+    },
+    {
+      "name": "Final_guards",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_guard_fixture"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Final_guards.log",
+      "exit_code": 0,
+      "wall_seconds": 5.78990029997658
+    },
+    {
+      "name": "Gurobi_IO",
+      "status": "PASS",
+      "argv": [
+        "-m",
+        "v2_add_preflight.stage_gurobi_io_fixture"
+      ],
+      "log": "D:\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\optimization_20261023\\REPLAY_Gurobi_IO.log",
+      "exit_code": 0,
+      "wall_seconds": 5.200241700047627
+    }
+  ],
+  "never_official_campaign_launcher": true
+}

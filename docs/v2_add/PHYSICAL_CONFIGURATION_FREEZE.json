@@ -1,0 +1,69 @@
+{
+  "experiment_id": "V2_add",
+  "P5": {
+    "source_pu": 1.04,
+    "all12_Vreg_V": 123.5,
+    "CAPBank3_initial_state": [
+      0
+    ],
+    "native_RegControls": 12,
+    "native_CapControls": 9,
+    "all_other_original_control_properties": "unchanged",
+    "scale_specific_retuning": false,
+    "slot_evolution": "independent initial context per Planning/Actual; carry native taps/caps within sequence; Actual includes prefix24",
+    "Fresh": "new DSS context and complete replay from same original/P5 initial state"
+  },
+  "voltage_contract_difference": "IEEE123 Planning7/Actual43 hardware is not copied. IEEE8500 native12/9 automatic static controls are used in both roles, no Actual-only SVR12 overlay. Algorithms/Jobs unchanged; physical scenario differs explicitly.",
+  "PV": {
+    "records": "source/PR197_PV_HOT_RECORDS.json",
+    "count": 2354,
+    "Model": 1,
+    "Q_kvar": 0,
+    "nominal_kv": 0.12,
+    "connection": "original one-phase wye hot leg buses, no 2.4kV attachment",
+    "installed_capacity": "unchanged PR197 per-hot original kW * original PV_ratio",
+    "dispatch": "each V44 frozen slot total * fixed installation capacity weights",
+    "original_load_netting": false,
+    "duplicate_generators": false
+  },
+  "STA": {
+    "mapping": "fixed original PR199 C2 candidate",
+    "ports": 12,
+    "transformer_kva": 750,
+    "transformer": "original PR199 delta12.47kV / grounded wye480V; same impedances/losses",
+    "interface_kva": 600,
+    "interface_current_A": 721.6878364870323,
+    "occupancy_per_STA": 1,
+    "hardware_assumption": "research AC model only; no field/manufacturer/protection/GIS certification"
+  },
+  "vehicle": {
+    "units": 8,
+    "P_limit_kw": 300,
+    "Q_limit_kvar": 250,
+    "PCS_kva": 400,
+    "PCS_polygon": "16 faces: cos(2*pi*f/16)*P+sin(2*pi*f/16)*Q <= 400*cos(pi/16)",
+    "SOC_min_kwh": 440,
+    "SOC_max_kwh": 1080,
+    "SOC_initial_kwh": 760,
+    "SOC_terminal_kwh": 760,
+    "eta_charge": 0.95,
+    "eta_discharge": 0.95,
+    "terminal_recharge_required": true
+  },
+  "stages": {
+    "G1": "INPUT_AND_PHYSICAL_MAPPING",
+    "G2": "B0_FRESH_AC_AND_SCALE",
+    "G3": "AIDC_MESS_CONTROLLABILITY",
+    "G4": "MESS8_OPTIMIZER_INTEGRATION"
+  },
+  "G2_dependencies": [
+    "G1"
+  ],
+  "G2_not_dependent_on": [
+    "G3",
+    "G4"
+  ],
+  "G1_scope": "wiring/model/capacity/input/automatic-control correspondence plus operating-point AC checks; per-beta operating feasibility belongs to G2, full network-coupled fleet dispatch region belongs to G3",
+  "no_long_solver": true,
+  "no_production_mutations": true
+}

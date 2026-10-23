@@ -1,0 +1,53 @@
+{
+  "experiment_id": "V2_add",
+  "UTC": "2026-10-21T02:44:41.579807+00:00",
+  "G1": {
+    "status": "PASS",
+    "PV_mapping": "PASS",
+    "PV_generator_count": 2354,
+    "PV_installed_kva": 1276.9371053808281,
+    "per_slot_capacity_ratio_max": 0.256823818171484,
+    "command_total_error_max_kw": 0.0,
+    "actual_PV_total_error_max_kw": 8.44266878630151e-09,
+    "balance_max_abs": 2.9870513458263304e-06,
+    "C2_AIDC_MV": 12,
+    "C2_STA_MV": 12,
+    "dedicated_STA_transformers": 12,
+    "original4_initial_locations_preserved": true,
+    "additional4_locations": "STA02/03/04/05; same fixed C2 ports and one-per-port occupancy",
+    "simultaneous8_connection": "distinct electrically instantiated STA ports; full-power fleet operating points evaluated separately under G3/G2 network constraints",
+    "P300_Q250_box_inside_original_PCS16": true,
+    "minimum_PCS16_slack_kva": 3.405382508691048,
+    "full_box_network_feasibility": "not universally assumed; network voltage/current/transformer constraints can tighten the PCS box",
+    "P5_configuration": "PHYSICAL_CONFIGURATION_FREEZE.json",
+    "source_verification": "reuse PR236 59 checks and 190/190 receipt rows, no repeated source restoration/audit"
+  },
+  "G2": {
+    "status": "COMPLETE",
+    "depends_on": [
+      "G1"
+    ],
+    "candidate_count": 9,
+    "physics_pass_count": 9,
+    "target_75_85_count": 0,
+    "target_70_85_count": 0,
+    "operating_solve_count": 3888,
+    "independent_Fresh_pairs": 18,
+    "all_Fresh_PASS": true
+  },
+  "G3": {
+    "status": "PARTIAL_MESS_PASS_ACTUAL_AIDC_NONZERO_NOT_VERIFIED",
+    "not_a_G2_dependency": true,
+    "full96_beta": 1.5,
+    "fresh_pairs": 6,
+    "all_Fresh_PASS": true,
+    "no_optimality_claim": true,
+    "planning_job_witness_count": 10,
+    "actual_job_witness_count": 0
+  },
+  "G4": {
+    "status": "NOT_VERIFIED",
+    "not_a_G2_dependency": true,
+    "long_solver_allowed": false
+  }
+}

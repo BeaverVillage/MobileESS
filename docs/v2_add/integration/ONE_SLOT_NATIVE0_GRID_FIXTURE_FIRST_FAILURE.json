@@ -1,0 +1,39 @@
+{
+  "PASS": false,
+  "error": "ValueError('NATIVE_MATRIX_AXIS_READBACK')",
+  "traceback": "Traceback (most recent call last):\n  File \"<stdin>\", line 8, in <module>\n  File \"C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v2_add_preflight\\full_native.py\", line 72, in build\n    self.add(m,a['tc_J'][12:].T,xx,'<',1-a['tc'],'transformer_all_winding_current',t)\n  File \"C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add\\v2_add_preflight\\full_native.py\", line 41, in add\n    if actual.keys()!=expected.keys():raise ValueError('NATIVE_MATRIX_AXIS_READBACK')\n                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: NATIVE_MATRIX_AXIS_READBACK\n",
+  "model": {
+    "binary": 0,
+    "integer": 0,
+    "continuous": 8700,
+    "variables": 8700,
+    "linear_constraints": 28283,
+    "nonzeros": 1355546,
+    "quadratic_constraints": 0,
+    "SOS": 0,
+    "general_constraints": 0
+  },
+  "blocks": [
+    {
+      "slot": 0,
+      "family": "node_voltage_squared_binding",
+      "rows": 8603,
+      "columns": 8651,
+      "nonzeros": 421547,
+      "matrix_sha": "e583fdbfa1fc1eaa615f7207d760117147ec1f741a722050481e6df295bade0b",
+      "native_readback_rows": 3,
+      "native_readback_max_error": 0.0
+    },
+    {
+      "slot": 0,
+      "family": "line_both_end_current",
+      "rows": 12322,
+      "columns": 48,
+      "nonzeros": 590563,
+      "matrix_sha": "82ba65da76803ca97c554acdebdc9dd3b391b0fcc502e7d90fd34a04e3250901",
+      "native_readback_rows": 3,
+      "native_readback_max_error": 0.0
+    }
+  ],
+  "Native_calls": 0
+}

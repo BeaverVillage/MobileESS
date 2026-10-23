@@ -1,0 +1,100 @@
+{
+  "results": {
+    "STAY": {
+      "PASS": true,
+      "rows": 20634824,
+      "nnz": 302525444,
+      "max_row_violation": 0.0,
+      "max_bound_violation": 0.0,
+      "integer_pattern_exact": true,
+      "physical_replay": {
+        "PASS": true,
+        "original_route_SOC_PCS": {
+          "PASS": true,
+          "violations": [],
+          "max_exact_circle_ratio": 0.0,
+          "mobility_energy_kwh": 0.0
+        },
+        "original_charge_mode_connection": {
+          "charge_mode_and_connection_PASS": true,
+          "charge_mode_and_connection_violations": []
+        },
+        "selected_move_arcs": [],
+        "repairs": 0,
+        "native_optimize_calls": 0
+      }
+    },
+    "MULTI_MOVE_PQ_REBOUND": {
+      "PASS": true,
+      "rows": 20634824,
+      "nnz": 302525444,
+      "max_row_violation": 4.4758137821285743e-10,
+      "max_bound_violation": 0.0,
+      "integer_pattern_exact": true,
+      "physical_replay": {
+        "PASS": true,
+        "original_route_SOC_PCS": {
+          "PASS": true,
+          "violations": [],
+          "max_exact_circle_ratio": 0.075,
+          "mobility_energy_kwh": 14.228076109907192
+        },
+        "original_charge_mode_connection": {
+          "charge_mode_and_connection_PASS": true,
+          "charge_mode_and_connection_violations": []
+        },
+        "selected_move_arcs": [
+          {
+            "unit": "MESS01",
+            "route_id": "STA01:IDC01:8",
+            "source": "STA01",
+            "depart": 8,
+            "destination": "IDC01",
+            "connect": 10,
+            "energy_kwh": 4.317861372947308
+          },
+          {
+            "unit": "MESS01",
+            "route_id": "IDC01:STA01:13",
+            "source": "IDC01",
+            "depart": 13,
+            "destination": "STA01",
+            "connect": 15,
+            "energy_kwh": 9.910214736959885
+          }
+        ],
+        "repairs": 0,
+        "native_optimize_calls": 0
+      }
+    },
+    "SOC440_1080_CHARGE_DISCHARGE_BOTH_Q": {
+      "PASS": true,
+      "rows": 20634824,
+      "nnz": 302525444,
+      "max_row_violation": 5.140354069480014e-09,
+      "max_bound_violation": 0.0,
+      "integer_pattern_exact": true,
+      "physical_replay": {
+        "PASS": true,
+        "original_route_SOC_PCS": {
+          "PASS": true,
+          "violations": [],
+          "max_exact_circle_ratio": 0.43921557185459265,
+          "mobility_energy_kwh": 0.0
+        },
+        "original_charge_mode_connection": {
+          "charge_mode_and_connection_PASS": true,
+          "charge_mode_and_connection_violations": []
+        },
+        "selected_move_arcs": [],
+        "repairs": 0,
+        "native_optimize_calls": 0
+      }
+    }
+  },
+  "source_case_sha": "14420dd935d5bb4834ee35c9cd1c1ebe4e2ebd611cc376ec01232aa0531cd883",
+  "finite_witnesses_are_not_equivalence_proof": true,
+  "Native_calls": 0,
+  "current_stage": "M2",
+  "scope": "Current finite FULL A2 anchor; not an official optimized/accepted A2 result"
+}

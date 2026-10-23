@@ -1,0 +1,99 @@
+{
+  "status": "HOLD_NO_CAMPAIGN_EXECUTION",
+  "experiment_id": "V2_add",
+  "days": [
+    "2025-05-01"
+  ],
+  "chains": {
+    "B0": [
+      "REFERENCE",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B1": [
+      "A1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B2": [
+      "REFERENCE",
+      "K48_M1",
+      "M1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B3": [
+      "A1_REUSE",
+      "K48_M1",
+      "M1",
+      "A2",
+      "K48_M2",
+      "M2",
+      "ACTUAL",
+      "FRESH"
+    ]
+  },
+  "handlers": {
+    "REFERENCE": "v2_add_preflight.stage_handlers.reference",
+    "A1": "v2_add_preflight.stage_handlers.a",
+    "A1_REUSE": "v2_add_preflight.stage_handlers.reuse",
+    "K48_M1": "v2_add_preflight.stage_handlers.k48",
+    "M1": "v2_add_preflight.stage_handlers.m",
+    "A2": "v2_add_preflight.stage_handlers.a",
+    "K48_M2": "v2_add_preflight.stage_handlers.k48",
+    "M2": "v2_add_preflight.stage_handlers.m",
+    "ACTUAL": "v2_add_preflight.stage_handlers.actual",
+    "FRESH": "v2_add_preflight.stage_handlers.fresh"
+  },
+  "official_campaign_executed": false,
+  "auto_run": false,
+  "worker_count": 1,
+  "A_Threads": 1,
+  "M_Threads": 4,
+  "A_seconds": 5400.0,
+  "A_gap": 0.005,
+  "K48_seconds": 300.0,
+  "Joint_seconds": 900.0,
+  "Joint_call_cap": 300.0,
+  "M_gap": 0.03,
+  "resource_policy": {
+    "official_campaign": {
+      "phase": "OFFICIAL_CAMPAIGN",
+      "process_rss_limit_bytes": null,
+      "minimum_system_available_bytes": null,
+      "memory_admission_enabled": false,
+      "memory_termination_enabled": false,
+      "solver_MemLimit_GB": "Infinity",
+      "solver_SoftMemLimit_GB": "Infinity"
+    },
+    "Native0_preparation": {
+      "phase": "NATIVE0_PREPARATION",
+      "process_rss_limit_bytes": 4294967296,
+      "minimum_system_available_bytes": 5368709120,
+      "memory_admission_enabled": true,
+      "memory_termination_enabled": true,
+      "solver_MemLimit_GB": "Infinity",
+      "solver_SoftMemLimit_GB": "Infinity"
+    },
+    "official_memory_watchdog_enabled": false,
+    "official_memory_reserve_queue_enabled": false,
+    "telemetry": [
+      "RSS",
+      "Peak RSS",
+      "process commit",
+      "system available",
+      "system commit"
+    ],
+    "original_solver_budgets_gaps_threads_preserved": true,
+    "worker_duplicate_lock_and_source_checks_preserved": true,
+    "official_campaign_executed": false
+  },
+  "Python": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe",
+  "allowed_runtime_root": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign",
+  "future_command": "python -m v2_add_preflight.stage_campaign campaign --root \"C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\static_complete\\official_stage_campaign\\May01_pending_user_approval\" --approval \"<future-explicit-human-approval.json>\"",
+  "resume_command": "same command with --resume; only sealed complete stages resume automatically",
+  "incomplete_A_or_Actual_live_state_resume": "BLOCKED_WITH_PRESERVED_EVIDENCE",
+  "reconciled_M_reentry": "--resume --retry-reconciled-m; new attempt, original measured budget and FULL registry",
+  "command_runnable_now": false,
+  "required_certificate": "FINAL_MAY01_PRESTART_GO_NO_GO.json"
+}

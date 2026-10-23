@@ -1,0 +1,88 @@
+{
+  "PASS": false,
+  "chains": {
+    "B0": [
+      "REFERENCE",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B1": [
+      "A1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B2": [
+      "REFERENCE",
+      "K48_M1",
+      "M1",
+      "ACTUAL",
+      "FRESH"
+    ],
+    "B3": [
+      "A1_REUSE",
+      "K48_M1",
+      "M1",
+      "A2",
+      "K48_M2",
+      "M2",
+      "ACTUAL",
+      "FRESH"
+    ]
+  },
+  "stage_results": [
+    {
+      "stage": "A1",
+      "status": "BLOCKED",
+      "cause": "Original A builder consumes original_coefficients_for_day + IEEE123 physical_authority. New72-axis Source-YY grid, complete variable Job domain/current-AC and source QoS acceptance have not been bound.",
+      "required": "Variable-AIDC FULL Native0 plus original independent all-Job validation; fixed-B0 screening is invalid for this domain."
+    },
+    {
+      "stage": "M1",
+      "status": "PREPARATION_ONLY",
+      "cause": "Source-YY fixed-B0 static Native0 is independently measured. Original r043 K48/Beam helper metadata requires unit-pivot response bindings and source physical row labels; sparse scaled IEEE8500 helpers need a certified representation adapter.",
+      "required": "Same Case/Domain original K48 metadata/projection, Beam and Joint Native0; no delayed grid master."
+    },
+    {
+      "stage": "A2",
+      "status": "BLOCKED_DEPENDENCY",
+      "cause": "No accepted current Source-YY M1 plan or variable-AIDC full stage. Original require_m1 and fixed plan SHA must be retained.",
+      "required": "Complete A2 Native0 with exact adopted M1 P/Q/Route; original FULL Job acceptance."
+    },
+    {
+      "stage": "M2",
+      "status": "BLOCKED_DEPENDENCY",
+      "cause": "No accepted current A2 anchor. Fixed-B0 M1 bounds and coefficients cannot certify a changed A2 load.",
+      "required": "Rebind same-day A2 affine anchor and regenerate static bounds/proofs; original M1 algorithm reused."
+    }
+  ],
+  "same_case_required": true,
+  "variable_AIDC_not_forced_to_B0": true,
+  "old414_cache_accepted": false,
+  "source_job_policy_relaxed": false,
+  "MESS8_route_domain_retained": true,
+  "budgets": {
+    "A1": 5400.0,
+    "A2": 5400.0,
+    "K48_M1": 300.0,
+    "K48_M2": 300.0,
+    "M1": 900.0,
+    "M2": 900.0,
+    "A_gap": 0.005,
+    "M_gap": 0.03,
+    "effective_r043_Joint_single_call_cap": 300.0
+  },
+  "runtime_settings": {
+    "Workers": 1,
+    "M_Threads": 4,
+    "A_Threads": 1,
+    "Actual_Workers": 1,
+    "Root_Method": 2,
+    "K48_Threads": 4,
+    "K48_Method": 2,
+    "K48_total": 300.0,
+    "Joint_total": 900.0,
+    "Joint_call_cap": 300.0
+  },
+  "stage_fixture_success_is_not_FULL_PASS": true,
+  "official_campaign_executed": false
+}

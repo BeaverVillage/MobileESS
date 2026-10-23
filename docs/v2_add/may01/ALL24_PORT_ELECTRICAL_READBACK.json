@@ -1,0 +1,2320 @@
+{
+  "original_V44_IDC_transformer": {
+    "name": "MESS_IDC01_TX",
+    "buses": [
+      "149.1.2.3",
+      "mess_idc01_pcc.1.2.3"
+    ],
+    "windings": [
+      {
+        "winding": 1,
+        "kV": 4.16,
+        "kVA": 750.0,
+        "delta": false,
+        "tap": 1.0,
+        "R_pct": 0.8,
+        "Rneut": -1.0,
+        "Xneut": 0.0
+      },
+      {
+        "winding": 2,
+        "kV": 0.48,
+        "kVA": 750.0,
+        "delta": false,
+        "tap": 1.0,
+        "R_pct": 0.2,
+        "Rneut": -1.0,
+        "Xneut": 0.0
+      }
+    ],
+    "properties": {
+      "XHL": "5.75",
+      "%NoLoadLoss": "0",
+      "%Imag": "0",
+      "Conns": "[wye, wye, ]",
+      "kVs": "[4.16, 0.48, ]",
+      "%Rs": "[0.8, 0.2, ]",
+      "Taps": "[1, 1, ]",
+      "NormHkVA": "825",
+      "EmergHkVA": "1125"
+    },
+    "bus_readback": [
+      {
+        "bus": "149.1.2.3",
+        "kV_base_LN": 2.4017771198288433,
+        "nodes": [
+          1,
+          2,
+          3
+        ],
+        "voltage_magnitude_angle": [
+          2401.7771189550685,
+          2.457786220655401e-08,
+          2401.777118955068,
+          -119.99999997543398,
+          2401.7771189550685,
+          120.00000000522296
+        ]
+      },
+      {
+        "bus": "mess_idc01_pcc.1.2.3",
+        "kV_base_LN": 0.27712812921102037,
+        "nodes": [
+          1,
+          2,
+          3
+        ],
+        "voltage_magnitude_angle": [
+          277.1281211427668,
+          3.110567499158796e-07,
+          277.1281211427667,
+          -119.99999968895506,
+          277.12812114276676,
+          120.00000029170182
+        ]
+      }
+    ]
+  },
+  "ports": [
+    {
+      "site": "STA01",
+      "port": {
+        "site": "STA01",
+        "mv_bus": "m1142839",
+        "secondary_bus": "high_mv_sta01_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta01",
+        "buses": [
+          "m1142839.1.2.3",
+          "high_mv_sta01_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1142839.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6974.425596565401,
+              -37.764973559449075,
+              6932.7612632126675,
+              -158.1653148976396,
+              7161.560176529731,
+              81.97809824453715
+            ]
+          },
+          {
+            "bus": "high_mv_sta01_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              271.6366849504744,
+              -68.33723700448034,
+              268.1177381552913,
+              171.93292832029988,
+              270.9956061682105,
+              52.44130347229418
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "STA02",
+      "port": {
+        "site": "STA02",
+        "mv_bus": "l3160872",
+        "secondary_bus": "high_mv_sta02_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta02",
+        "buses": [
+          "l3160872.1.2.3",
+          "high_mv_sta02_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "l3160872.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6958.762768723098,
+              -37.83472428410544,
+              6929.289857233494,
+              -158.3070023568712,
+              7170.083756580785,
+              82.01624084377606
+            ]
+          },
+          {
+            "bus": "high_mv_sta02_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              271.6499020519178,
+              -68.4091027175479,
+              267.844859814311,
+              171.85597979404594,
+              270.84745372429626,
+              52.41961140420286
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "STA03",
+      "port": {
+        "site": "STA03",
+        "mv_bus": "m1069497",
+        "secondary_bus": "high_mv_sta03_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta03",
+        "buses": [
+          "m1069497.1.2.3",
+          "high_mv_sta03_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1069497.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6396.872529049113,
+              -42.70422529552752,
+              6480.070295315095,
+              -164.99166922526828,
+              7075.756383601331,
+              78.47977001961404
+            ]
+          },
+          {
+            "bus": "high_mv_sta03_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              260.8558246379074,
+              -73.74275598407938,
+              250.56440486725344,
+              166.352415391993,
+              256.2327729892641,
+              48.29721332534217
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "STA04",
+      "port": {
+        "site": "STA04",
+        "mv_bus": "l2730163",
+        "secondary_bus": "high_mv_sta04_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta04",
+        "buses": [
+          "l2730163.1.2.3",
+          "high_mv_sta04_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "l2730163.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6959.296334352019,
+              -37.999209814616144,
+              6893.803946520823,
+              -158.36286385592365,
+              7125.4820904144435,
+              81.52829423659762
+            ]
+          },
+          {
+            "bus": "high_mv_sta04_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              270.3551415516627,
+              -68.6331060337387,
+              267.0266028822082,
+              171.66009628178728,
+              269.89611114586125,
+              52.12454268843199
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "STA05",
+      "port": {
+        "site": "STA05",
+        "mv_bus": "m1125902",
+        "secondary_bus": "high_mv_sta05_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta05",
+        "buses": [
+          "m1125902.1.2.3",
+          "high_mv_sta05_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1125902.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6950.707445514167,
+              -38.16811830016304,
+              6866.316868651027,
+              -158.48376430703755,
+              7098.027005697601,
+              81.18602473676653
+            ]
+          },
+          {
+            "bus": "high_mv_sta05_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              269.42388524083293,
+              -68.84607945567662,
+              266.26790224392545,
+              171.46967838983326,
+              269.13705170786704,
+              51.892736086133844
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "STA06",
+      "port": {
+        "site": "STA06",
+        "mv_bus": "m1108298",
+        "secondary_bus": "high_mv_sta06_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta06",
+        "buses": [
+          "m1108298.1.2.3",
+          "high_mv_sta06_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1108298.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6940.2192182246245,
+              -38.287835355641555,
+              6849.106289236982,
+              -158.60635866540338,
+              7084.368978819091,
+              81.00422568365074
+            ]
+          },
+          {
+            "bus": "high_mv_sta06_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              268.8753603433563,
+              -68.99029688986566,
+              265.73822389081386,
+              171.33210818765755,
+              268.622053523369,
+              51.749460625324296
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "STA07",
+      "port": {
+        "site": "STA07",
+        "mv_bus": "l2804249",
+        "secondary_bus": "high_mv_sta07_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta07",
+        "buses": [
+          "l2804249.1.2.3",
+          "high_mv_sta07_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "l2804249.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6857.960783898906,
+              -38.32545022163809,
+              6764.099487527812,
+              -158.65737398858442,
+              7011.27598341133,
+              80.96665344417023
+            ]
+          },
+          {
+            "bus": "high_mv_sta07_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              265.8978201735569,
+              -69.05392573872714,
+              262.53257778189294,
+              171.2785565704743,
+              265.5578290315092,
+              51.74006906119345
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "STA08",
+      "port": {
+        "site": "STA08",
+        "mv_bus": "m1069438",
+        "secondary_bus": "high_mv_sta08_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta08",
+        "buses": [
+          "m1069438.1.2.3",
+          "high_mv_sta08_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1069438.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6013.950782536761,
+              -44.33336493700008,
+              6093.250100025002,
+              -167.0670172915566,
+              6789.183166155773,
+              76.9176628978431
+            ]
+          },
+          {
+            "bus": "high_mv_sta08_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              248.01878459405447,
+              -75.66351681615612,
+              236.09019405583834,
+              164.50107348549545,
+              242.87585016523124,
+              46.854502693458045
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "STA09",
+      "port": {
+        "site": "STA09",
+        "mv_bus": "m1047513",
+        "secondary_bus": "high_mv_sta09_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta09",
+        "buses": [
+          "m1047513.1.2.3",
+          "high_mv_sta09_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1047513.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6065.843524935474,
+              -44.307269093953,
+              6231.783935684143,
+              -166.59995127740808,
+              6873.4792037942,
+              77.54474648663998
+            ]
+          },
+          {
+            "bus": "high_mv_sta09_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              251.3988756961749,
+              -75.37246968472297,
+              239.30299240585097,
+              164.96873562419657,
+              246.83680895230594,
+              47.22620607664987
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "STA10",
+      "port": {
+        "site": "STA10",
+        "mv_bus": "m1026830",
+        "secondary_bus": "high_mv_sta10_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta10",
+        "buses": [
+          "m1026830.1.2.3",
+          "high_mv_sta10_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1026830.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6060.737846813705,
+              -44.5359278145183,
+              6235.035634631606,
+              -166.90581821803332,
+              6904.466244195538,
+              77.47932657384177
+            ]
+          },
+          {
+            "bus": "high_mv_sta10_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              252.11307736470798,
+              -75.59717675005083,
+              239.356345988287,
+              164.72227970443024,
+              247.1665318606187,
+              47.12023023698894
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "STA11",
+      "port": {
+        "site": "STA11",
+        "mv_bus": "l3216345",
+        "secondary_bus": "high_mv_sta11_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta11",
+        "buses": [
+          "l3216345.1.2.3",
+          "high_mv_sta11_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "l3216345.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6047.735488675688,
+              -44.59873776284813,
+              6230.407529996711,
+              -166.95400325800796,
+              6900.8657263374635,
+              77.48358551533052
+            ]
+          },
+          {
+            "bus": "high_mv_sta11_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              251.87547987385577,
+              -75.64923762596298,
+              238.9971020367117,
+              164.68906092901003,
+              246.94135684773974,
+              47.10410549048434
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "STA12",
+      "port": {
+        "site": "STA12",
+        "mv_bus": "e182733",
+        "secondary_bus": "high_mv_sta12_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "RESEARCH_MODEL_ASSUMPTION_NOT_FIELD_CERTIFIED"
+      },
+      "transformer": {
+        "name": "high_mv_sta12",
+        "buses": [
+          "e182733.1.2.3",
+          "high_mv_sta12_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0.2",
+          "%Imag": "0.5",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "e182733.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              5903.170164631775,
+              -44.926383098356766,
+              6104.059853260631,
+              -167.58806954450583,
+              6856.824624771015,
+              77.38689946480342
+            ]
+          },
+          {
+            "bus": "high_mv_sta12_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              248.52832200597507,
+              -76.1303943494677,
+              234.06873289182394,
+              164.26328430398803,
+              243.05444775628237,
+              47.01379937350193
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": null
+    },
+    {
+      "site": "IDC01",
+      "port": {
+        "site": "IDC01",
+        "mv_bus": "l2692655",
+        "secondary_bus": "full_mobile_idc01_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc01",
+        "buses": [
+          "l2692655.1.2.3",
+          "full_mobile_idc01_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "l2692655.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6967.862993778463,
+              -37.86295294615631,
+              6916.722740863212,
+              -158.25085594922885,
+              7146.99080011878,
+              81.79449920836997
+            ]
+          },
+          {
+            "bus": "full_mobile_idc01_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              271.1944847265311,
+              -68.4569280366782,
+              267.74670439933277,
+              171.82220606464062,
+              270.62314629751,
+              52.31392216916428
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    },
+    {
+      "site": "IDC02",
+      "port": {
+        "site": "IDC02",
+        "mv_bus": "l2729414",
+        "secondary_bus": "full_mobile_idc02_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc02",
+        "buses": [
+          "l2729414.1.2.3",
+          "full_mobile_idc02_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "l2729414.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              5919.904040290287,
+              -44.604851605699615,
+              6206.354771971873,
+              -166.5392362661898,
+              6774.456189571845,
+              77.61968897889363
+            ]
+          },
+          {
+            "bus": "full_mobile_idc02_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              247.18050033239115,
+              -75.61970767151622,
+              235.64575853732887,
+              165.17916239288505,
+              244.52476175228975,
+              47.11155292883669
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    },
+    {
+      "site": "IDC03",
+      "port": {
+        "site": "IDC03",
+        "mv_bus": "m1009805",
+        "secondary_bus": "full_mobile_idc03_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc03",
+        "buses": [
+          "m1009805.1.2.3",
+          "full_mobile_idc03_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1009805.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              5914.201122180583,
+              -44.908515047363295,
+              6104.306103476888,
+              -167.5824014854376,
+              6857.216683799524,
+              77.36717020135352
+            ]
+          },
+          {
+            "bus": "full_mobile_idc03_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              248.77651892470396,
+              -76.10116057026814,
+              234.37218432520257,
+              164.2499478845887,
+              243.1742898243304,
+              47.00966196960536
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    },
+    {
+      "site": "IDC04",
+      "port": {
+        "site": "IDC04",
+        "mv_bus": "m1047486",
+        "secondary_bus": "full_mobile_idc04_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc04",
+        "buses": [
+          "m1047486.1.2.3",
+          "full_mobile_idc04_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1047486.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6029.077109268212,
+              -44.37838605334205,
+              6163.37624307269,
+              -166.80268047377047,
+              6821.765531116625,
+              77.24771208528914
+            ]
+          },
+          {
+            "bus": "full_mobile_idc04_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              249.47907856011,
+              -75.53870844880151,
+              237.47611162156755,
+              164.75624395746695,
+              244.7824154224975,
+              47.03898206721099
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    },
+    {
+      "site": "IDC05",
+      "port": {
+        "site": "IDC05",
+        "mv_bus": "m1142815",
+        "secondary_bus": "full_mobile_idc05_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc05",
+        "buses": [
+          "m1142815.1.2.3",
+          "full_mobile_idc05_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1142815.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6959.691309986875,
+              -37.92747107805838,
+              6905.139315725828,
+              -158.30887059853842,
+              7137.885148940121,
+              81.68810592052759
+            ]
+          },
+          {
+            "bus": "full_mobile_idc05_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              270.80492162992886,
+              -68.5410493454208,
+              267.3571434584986,
+              171.7526739989586,
+              270.29121049888346,
+              52.23782364791524
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    },
+    {
+      "site": "IDC06",
+      "port": {
+        "site": "IDC06",
+        "mv_bus": "221-312488",
+        "secondary_bus": "full_mobile_idc06_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc06",
+        "buses": [
+          "221-312488.1.2.3",
+          "full_mobile_idc06_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "221-312488.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6704.887665556138,
+              -39.51048631848005,
+              6722.532698607348,
+              -160.77457483850455,
+              7128.824529766716,
+              80.84318158257297
+            ]
+          },
+          {
+            "bus": "full_mobile_idc06_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              266.76056419614883,
+              -70.34007092925184,
+              260.0568948323709,
+              169.89983944606493,
+              264.4269203134239,
+              51.036402427129914
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    },
+    {
+      "site": "IDC07",
+      "port": {
+        "site": "IDC07",
+        "mv_bus": "m1108295",
+        "secondary_bus": "full_mobile_idc07_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc07",
+        "buses": [
+          "m1108295.1.2.3",
+          "full_mobile_idc07_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1108295.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6910.894923617883,
+              -38.30746531676312,
+              6818.685269760995,
+              -158.63144763159627,
+              7058.20125034776,
+              80.98413337497878
+            ]
+          },
+          {
+            "bus": "full_mobile_idc07_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              267.8922848170099,
+              -69.01549023978546,
+              264.67435093329664,
+              171.3098253221467,
+              267.60605975954735,
+              51.742868221707255
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    },
+    {
+      "site": "IDC08",
+      "port": {
+        "site": "IDC08",
+        "mv_bus": "m1047534",
+        "secondary_bus": "full_mobile_idc08_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc08",
+        "buses": [
+          "m1047534.1.2.3",
+          "full_mobile_idc08_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1047534.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6177.0442221026215,
+              -44.03128769318762,
+              6318.413351014691,
+              -166.38306585107406,
+              6963.646890988315,
+              77.69244740538869
+            ]
+          },
+          {
+            "bus": "full_mobile_idc08_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              255.21797130045968,
+              -75.08066433215222,
+              243.29339897029124,
+              165.14953831187117,
+              250.335072972716,
+              47.39596154182449
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    },
+    {
+      "site": "IDC09",
+      "port": {
+        "site": "IDC09",
+        "mv_bus": "l2955081",
+        "secondary_bus": "full_mobile_idc09_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc09",
+        "buses": [
+          "l2955081.1.2.3",
+          "full_mobile_idc09_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "l2955081.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6949.3096028800255,
+              -38.19996869091127,
+              6861.3371266556305,
+              -158.50382586010588,
+              7092.793628754237,
+              81.12119162071951
+            ]
+          },
+          {
+            "bus": "full_mobile_idc09_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              269.3327325321867,
+              -68.88203739314042,
+              266.2101042935264,
+              171.4386776341778,
+              269.0819636960365,
+              51.85321999349174
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    },
+    {
+      "site": "IDC10",
+      "port": {
+        "site": "IDC10",
+        "mv_bus": "m1069498",
+        "secondary_bus": "full_mobile_idc10_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc10",
+        "buses": [
+          "m1069498.1.2.3",
+          "full_mobile_idc10_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "m1069498.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6394.542386986841,
+              -42.72421157804145,
+              6478.314185186,
+              -165.02347952508765,
+              7075.763615001548,
+              78.46576932866162
+            ]
+          },
+          {
+            "bus": "full_mobile_idc10_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              260.89832255951194,
+              -73.76180720575606,
+              250.5750874742002,
+              166.3315622694495,
+              256.2533894434319,
+              48.28328031399591
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    },
+    {
+      "site": "IDC11",
+      "port": {
+        "site": "IDC11",
+        "mv_bus": "l3197646",
+        "secondary_bus": "full_mobile_idc11_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc11",
+        "buses": [
+          "l3197646.1.2.3",
+          "full_mobile_idc11_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "l3197646.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              5993.636235288782,
+              -44.83676027625093,
+              6202.140759805812,
+              -167.19463548094836,
+              6884.617634255109,
+              77.46582823530602
+            ]
+          },
+          {
+            "bus": "full_mobile_idc11_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              250.86452786607137,
+              -75.86803027544846,
+              237.47131078030168,
+              164.52327020308198,
+              245.88326794127516,
+              47.026043797341934
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    },
+    {
+      "site": "IDC12",
+      "port": {
+        "site": "IDC12",
+        "mv_bus": "l3179650",
+        "secondary_bus": "full_mobile_idc12_lv",
+        "transformer_kva": 750.0,
+        "interface_kva": 600.0,
+        "interface_current_A": 721.6878364870323,
+        "vehicle_P_limit_kw": 300.0,
+        "vehicle_Q_limit_kvar": 250.0,
+        "vehicle_PCS_kva": 400.0,
+        "occupancy_limit": 1,
+        "hardware_status": "SCIENTIFIC_MODEL_FIELD_UNVERIFIED"
+      },
+      "transformer": {
+        "name": "full_mobile_idc12",
+        "buses": [
+          "l3179650.1.2.3",
+          "full_mobile_idc12_lv.1.2.3.0"
+        ],
+        "windings": [
+          {
+            "winding": 1,
+            "kV": 12.47,
+            "kVA": 750.0,
+            "delta": true,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": -1.0,
+            "Xneut": 0.0
+          },
+          {
+            "winding": 2,
+            "kV": 0.48,
+            "kVA": 750.0,
+            "delta": false,
+            "tap": 1.0,
+            "R_pct": 0.5,
+            "Rneut": 0.0,
+            "Xneut": 0.0
+          }
+        ],
+        "properties": {
+          "XHL": "5.66237582645306",
+          "%NoLoadLoss": "0",
+          "%Imag": "0",
+          "Conns": "[delta, wye, ]",
+          "kVs": "[12.47, 0.48, ]",
+          "%Rs": "[0.5, 0.5, ]",
+          "Taps": "[1, 1, ]",
+          "NormHkVA": "750",
+          "EmergHkVA": "750"
+        },
+        "bus_readback": [
+          {
+            "bus": "l3179650.1.2.3",
+            "kV_base_LN": 7.199557856794634,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              6708.183535930936,
+              -39.70127699638484,
+              6740.561408913048,
+              -160.95443313401202,
+              7136.693245537893,
+              80.70827768526085
+            ]
+          },
+          {
+            "bus": "full_mobile_idc12_lv.1.2.3.0",
+            "kV_base_LN": 0.27712812921102037,
+            "nodes": [
+              1,
+              2,
+              3
+            ],
+            "voltage_magnitude_angle": [
+              267.051193145999,
+              -70.5118032527093,
+              260.4560837583159,
+              169.74978588962438,
+              264.8572387042124,
+              50.85301387672208
+            ]
+          }
+        ]
+      },
+      "source_equivalent_connection": false
+    }
+  ],
+  "original_source": {
+    "path": "C:\\codex_mobileess_workspace\\MobileESS_v35r3e_r1_beam\\dayahead\\artifacts\\v16_2\\Generated_ThreePhase_PCC_v4.dss",
+    "sha256": "ba13e3081df606c18d61f1e02300b23f7be00dc2d22bc4c8064d04f40beec719",
+    "bytes": 13785
+  },
+  "new_IDC_connection": "delta/grounded-wye",
+  "arbitrary_impedance_or_base_retuning": false,
+  "field_status": "FIELD_INSTALLATION_UNVERIFIED"
+}

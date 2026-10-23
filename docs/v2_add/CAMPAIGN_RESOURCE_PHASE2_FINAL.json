@@ -1,0 +1,88 @@
+{
+  "UTC": "2026-10-21T03:15:38.097097+00:00",
+  "processes": [
+    {
+      "pid": 62308,
+      "parent_pid": 93652,
+      "name": "python.exe",
+      "command": "C:\\Users\\kjw39\\OneDrive\\문서\\ChatGPT\\Mobile ESS 2\\V2_add_runtime\\.venv\\Scripts\\python.exe -B -X utf8 -c import zipfile,shutil; from v2_add_preflight.audit import *; from v2_add_preflight.physical import RUNTIME; z=zipfile.ZipFile(read(Path(r'D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\ARCHIVED_RESULTS_20250501_14.json'))['days'][0]['archive']); out=DOC/'source/aidc_pilot'; copies=[];\nfor member,name in [('campaign_support/references/2025-05-01/AIDC_REFERENCE.json','B0_REFERENCE.json'),('campaign_support/references/2025-05-01/PLANNING_PHYSICAL.npz','B0_PLANNING_PHYSICAL.npz')]:\n b=z.read(member); (out/name).write_bytes(b); copies.append(dict(archive_member=member,target=str((out/name).relative_to(ROOT)),sha256=sha(b)));\nfor src,name in [(Path(r'D:\\smartds_gso_substation2_v44_r043_runtime\\jobs\\ACTUAL_PHYSICAL.npz'),'B0_ACTUAL_PHYSICAL.npz'),(RUNTIME/'phase2/AIDC_FEASIBLE_CANDIDATE.npz','AIDC_FEASIBLE_CANDIDATE.npz'),(Path(r'D:\\MobileESS_V42\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250501\\C1_PLANNING_COEFFICIENTS.csv'),'C1_PLANNING_COEFFICIENTS.csv')]:\n b=src.read_bytes(); (out/name).write_bytes(b); copies.append(dict(source=str(src),target=str((out/name).relative_to(ROOT)),sha256=sha(b)));\nsave('AIDC_PILOT_COPY_RECEIPTS.json',copies); a=read(DOC/'AIDC_FEASIBLE_CANDIDATE_AUDIT.json'); a['git_candidate_copy']='source/aidc_pilot/AIDC_FEASIBLE_CANDIDATE.npz'; a['legacy_planning_physical_sha256']=a['planning_physical_sha256']; a['planning_reference_source']='source/aidc_pilot/B0_REFERENCE.json'; save('AIDC_FEASIBLE_CANDIDATE_AUDIT.json',a); snapshot(RUNTIME,'PHASE2_FINAL'); selected={r['case'] for r in read(DOC/'CONTROL_PILOT_ARCHIVE_RECEIPTS.json')}; prelim=[];\nfor p in (RUNTIME/'phase2').glob('G3_*'):\n if p.name not in selected:\n  r=p/'RECEIPT.json'; prelim.append(dict(path=str(p),status='COMPLETED_UNSELECTED_PRELIMINARY' if r.exists() else 'INCOMPLETE_INTERRUPTED_OWN_RUN',reason='preliminary no-op Job witness; no source/worker changes; completed data preserved'));\nsave('PRELIMINARY_G3_PRESERVATION.json',prelim); print('Published Job witness inputs; preserved preliminary cases',len(prelim)); print('fresh exact',all(r['arrays_bit_identical'] and r['control_states_identical'] for r in read(DOC/'B0_FRESH_REPLAY_CHECKS.json'))); print('all pilot fresh',all(r['PASS'] for r in read(DOC/'CONTROL_PILOT_FRESH_CHECKS.json')))",
+      "rss_bytes": 4943872,
+      "cpu_seconds": 0.015625
+    },
+    {
+      "pid": 70428,
+      "parent_pid": 98908,
+      "name": "python.exe",
+      "command": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -X utf8 -u -m v44_week3_recovery --worker D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign006_may15_21\\OPERATIONS\\requests\\2025-05-15_B1_SEQUENCE_ACTUAL.json",
+      "rss_bytes": 2258489344,
+      "cpu_seconds": 16904.859375
+    },
+    {
+      "pid": 93652,
+      "parent_pid": 63364,
+      "name": "pwsh.exe",
+      "command": "C:\\Users\\kjw39\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}\n& '..\\V2_add_runtime\\.venv\\Scripts\\python.exe' -B -X utf8 -c \"import zipfile,shutil; from v2_add_preflight.audit import *; from v2_add_preflight.physical import RUNTIME; z=zipfile.ZipFile(read(Path(r'D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign004\\ARCHIVED_RESULTS_20250501_14.json'))['days'][0]['archive']); out=DOC/'source/aidc_pilot'; copies=[];\nfor member,name in [('campaign_support/references/2025-05-01/AIDC_REFERENCE.json','B0_REFERENCE.json'),('campaign_support/references/2025-05-01/PLANNING_PHYSICAL.npz','B0_PLANNING_PHYSICAL.npz')]:\n b=z.read(member); (out/name).write_bytes(b); copies.append(dict(archive_member=member,target=str((out/name).relative_to(ROOT)),sha256=sha(b)));\nfor src,name in [(Path(r'D:\\smartds_gso_substation2_v44_r043_runtime\\jobs\\ACTUAL_PHYSICAL.npz'),'B0_ACTUAL_PHYSICAL.npz'),(RUNTIME/'phase2/AIDC_FEASIBLE_CANDIDATE.npz','AIDC_FEASIBLE_CANDIDATE.npz'),(Path(r'D:\\MobileESS_V42\\docs\\v42_may_b0_zero_margin_holdout\\INPUT\\BUNDLE\\DAY_20250501\\C1_PLANNING_COEFFICIENTS.csv'),'C1_PLANNING_COEFFICIENTS.csv')]:\n b=src.read_bytes(); (out/name).write_bytes(b); copies.append(dict(source=str(src),target=str((out/name).relative_to(ROOT)),sha256=sha(b)));\nsave('AIDC_PILOT_COPY_RECEIPTS.json',copies); a=read(DOC/'AIDC_FEASIBLE_CANDIDATE_AUDIT.json'); a['git_candidate_copy']='source/aidc_pilot/AIDC_FEASIBLE_CANDIDATE.npz'; a['legacy_planning_physical_sha256']=a['planning_physical_sha256']; a['planning_reference_source']='source/aidc_pilot/B0_REFERENCE.json'; save('AIDC_FEASIBLE_CANDIDATE_AUDIT.json',a); snapshot(RUNTIME,'PHASE2_FINAL'); selected={r['case'] for r in read(DOC/'CONTROL_PILOT_ARCHIVE_RECEIPTS.json')}; prelim=[];\nfor p in (RUNTIME/'phase2').glob('G3_*'):\n if p.name not in selected:\n  r=p/'RECEIPT.json'; prelim.append(dict(path=str(p),status='COMPLETED_UNSELECTED_PRELIMINARY' if r.exists() else 'INCOMPLETE_INTERRUPTED_OWN_RUN',reason='preliminary no-op Job witness; no source/worker changes; completed data preserved'));\nsave('PRELIMINARY_G3_PRESERVATION.json',prelim); print('Published Job witness inputs; preserved preliminary cases',len(prelim)); print('fresh exact',all(r['arrays_bit_identical'] and r['control_states_identical'] for r in read(DOC/'B0_FRESH_REPLAY_CHECKS.json'))); print('all pilot fresh',all(r['PASS'] for r in read(DOC/'CONTROL_PILOT_FRESH_CHECKS.json')))\"",
+      "rss_bytes": 83030016,
+      "cpu_seconds": 0.484375
+    },
+    {
+      "pid": 98908,
+      "parent_pid": 98492,
+      "name": "python.exe",
+      "command": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -X utf8 -u -m v44_week3_recovery --run",
+      "rss_bytes": 49086464,
+      "cpu_seconds": 118.78125
+    },
+    {
+      "pid": 100228,
+      "parent_pid": 97180,
+      "name": "python.exe",
+      "command": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -X utf8 -u -m v44_week4_execution --wait",
+      "rss_bytes": 41340928,
+      "cpu_seconds": 10.375
+    },
+    {
+      "pid": 100684,
+      "parent_pid": 98908,
+      "name": "python.exe",
+      "command": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -X utf8 -u -m v44_week3_recovery --worker D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign006_may15_21\\OPERATIONS\\requests\\2025-05-16_B3_SEQUENCE_ACTUAL.json",
+      "rss_bytes": 2269687808,
+      "cpu_seconds": 15823.390624999998
+    },
+    {
+      "pid": 102296,
+      "parent_pid": 98908,
+      "name": "python.exe",
+      "command": "C:\\Users\\kjw39\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -X utf8 -u -m v44_week3_recovery --worker D:\\MobileESS_V44\\runtime\\v43_planning_svr12_actual_v1\\campaign006_may15_21\\OPERATIONS\\requests\\2025-05-16_B1_SEQUENCE_ACTUAL.json",
+      "rss_bytes": 2482253824,
+      "cpu_seconds": 16727.546875
+    }
+  ],
+  "locks": [
+    {
+      "path": "D:\\V42_UNIFIED_HEAVY_WORKER.lock",
+      "exists": true,
+      "sha256": null,
+      "read_status": "HELD_OR_NOT_READABLE",
+      "reason": "[Errno 13] Permission denied"
+    },
+    {
+      "path": "D:\\MobileESS_V42\\runtime\\v42_may_campaign\\NATIVE_WORKER.lock",
+      "exists": true,
+      "sha256": null,
+      "read_status": "HELD_OR_NOT_READABLE",
+      "reason": "[Errno 13] Permission denied"
+    },
+    {
+      "path": "D:\\MobileESS_V43\\runtime\\V43_HEAVY_WORKER.lock",
+      "exists": true,
+      "sha256": null,
+      "read_status": "HELD_OR_NOT_READABLE",
+      "reason": "[Errno 13] Permission denied"
+    }
+  ],
+  "available_RAM_bytes": 11848220672,
+  "process_policy": "read-only observation; no terminate/priority/affinity/budget/monitor changes",
+  "new_native_calls": 0,
+  "new_worker_calls": 0
+}

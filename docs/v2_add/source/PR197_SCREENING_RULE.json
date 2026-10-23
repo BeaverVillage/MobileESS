@@ -1,0 +1,80 @@
+{
+  "date": "2025-05-01",
+  "policies": [
+    "B0",
+    "B1"
+  ],
+  "MESS": "OFF",
+  "alpha_BG": 0.5,
+  "PV_mode": "fixed",
+  "PV_alpha_fixed": 0.5,
+  "PV_ratio": 0.11852937486188635,
+  "PV_definition": "Inherited May06 screening recipe applied to May01: date-specific B0 exogenous peak PV/gross ratio; native-P allocation and normalized D1 PV; fixed alpha .50",
+  "source_pu": 1.04,
+  "Vreg_V": 123.5,
+  "CAPBank3": "OFF",
+  "hard_limits": {
+    "Vmin": 0.95,
+    "Vmax": 1.05,
+    "line": 1.0,
+    "transformer_current": 1.0,
+    "transformer_kVA": 1.0
+  },
+  "AIDC_scale": 2.0,
+  "AIDC_authority": {
+    "path": "D:\\ChatGPT\\Mobile ESS 2\\independent_screening\\IEEE8500_MAY01_AIDC2X_HEADROOM2624_20260912\\AIDC_2X_AUTHORITY.json",
+    "sha256": "0bcc0fb5cf7fc9ea71cb8cd2a7ef76f21fc320239456df703c4af8ff51cf6012"
+  },
+  "B1_budget_seconds": 600,
+  "stage_seconds": [
+    300,
+    160,
+    60,
+    40,
+    40
+  ],
+  "checkpoint_seconds": [
+    120,
+    300,
+    600
+  ],
+  "B0_gate": "B0 hard limit FAIL -> immediate STOP; B1 and later validations not run",
+  "selection_or_tuning": false,
+  "capacity_physical": [
+    268,
+    136,
+    268,
+    136,
+    336,
+    268,
+    136,
+    268,
+    136,
+    268,
+    136,
+    268
+  ],
+  "capacity_total": 2624,
+  "workload_and_power_rescale": false,
+  "search_clock": "CONTINUOUS_SEARCH_LOOP_WALL_CLOCK",
+  "scope": [
+    "B0 exact96",
+    "B1 600s",
+    "B1 final exact96",
+    "independent clean96"
+  ],
+  "change_scope": "12 AIDC host mapping only",
+  "search_budget_seconds": 14400,
+  "cumulative_stage_deadlines_seconds": [
+    7200,
+    11040,
+    12480,
+    13440,
+    14400
+  ],
+  "clock_pause_allowed": false,
+  "tap_capacitor": "Unchanged automatic controls; no decision variables or tuning",
+  "external_deadline_enforcement": true,
+  "seed": "Same mapping B0 reference only; no 600s B1 warm start",
+  "postprocessing": "DA and Actual exact/clean/QSAFE without scheduling optimization"
+}
