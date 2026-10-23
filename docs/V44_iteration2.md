@@ -106,14 +106,37 @@ iteration causal improvement is claimed.
 Run only after passing preflight and sealing source authority:
 `python -B -X utf8 -m v44_iteration2 --authorize COMMIT_SHA`, then
 `scripts/launch_v44_iteration2.ps1`. Runtime is separate at
-`D:/MobileESS_V44/runtime/V44_iteration2`; original scientific code lives under
+the `D:/MobileESS_V44/runtime/ACTIVE_ITERATION2_CAMPAIGN.json` pointer;
+original scientific code lives under
 the existing sealed D-drive source packages and is never edited here.
 
-Maintenance 2026-10-23: the user stopped execution; the run task is disabled
-and `OPERATIONS/USER_STOP.json` blocks accidental launches. Keep this hold
-until an explicit resume request. Completed-stage verification retains the
-825 equipment scope through checkpoint acceptance, and a checkpoint failure
-always publishes PASS=false. Historical completed checkpoints use exact
-controller bytes preserved before repair and pinned in the new authority;
-the old failures and Native ledgers remain unchanged. May10 was interrupted
-inside a Native call: its unmeasured inflight account cannot silently restart.
+Fresh restart 2026-10-23: the user explicitly requested all May01–31 dates
+again from M2 and Native zero. The new runtime is
+`D:/MobileESS_V44/runtime/V44_iteration2_fresh_20261023`. All five iteration
+stages, accounts, checkpoints, points and bounds start new. Only original
+r043 A1/M1/A2 inputs remain reusable. The previous iteration runtime is held
+by its own USER_STOP receipt; no result or account from it is imported.
+
+The inherited physical-authority context reset M2 to 0.95–1.05 inside the
+model compiler, despite the outer 0.955–1.045 policy. The adapter now reapplies
+the M2/M3 band after each nested equipment reset. Before any stage Native
+optimization, every actual FULL lower/upper voltage RHS across all96 slots
+and the saved FULL_DATA matrix must match the chosen squared band. A failed
+audit blocks solving. Final plans independently recompute affine voltages
+from original coefficients and unmodified commands. Public completion,
+recovery and downstream admission verify both proofs and matrix bytes.
+M4 and Actual retain the original 0.95–1.05 authority. Same-stage M binary
+recovery repeats this audit and retains its measured Native accounts.
+
+Phase I retains the original strict Phi zero threshold of 1e-8 and original
+physical replay tolerance. Its solver FeasibilityTol and OptimalityTol are
+1e-9. A residual in (1e-8,1e-5] receives one numerical polish of the exact same
+snapshot before domain expansion; every call spends the same original
+A5400/Phase-I1500 accounts. Equations, bounds, gap rules and raw points are
+unchanged. Other A solve components retain their existing policy.
+
+Completed-stage verification retains the825 equipment scope through
+checkpoint acceptance; any checkpoint failure publishes PASS=false. All31
+dated inputs and archived baseline receipts are verified before authorization.
+The persistent supervisor and the existing8795 monitor resolve the same
+active-runtime pointer and restart with the new campaign.

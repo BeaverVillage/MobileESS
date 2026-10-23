@@ -1,8 +1,13 @@
 from pathlib import Path
-import os
+import os,json
 CODE=Path(__file__).resolve().parent
 REPO=CODE.parent
-ROOT=Path(os.environ.get('V44_ITERATION2_RUNTIME','D:/MobileESS_V44/runtime/V44_iteration2'))
+ACTIVE_CAMPAIGN=Path('D:/MobileESS_V44/runtime/ACTIVE_ITERATION2_CAMPAIGN.json')
+def runtime_root():
+ if os.environ.get('V44_ITERATION2_RUNTIME'):return Path(os.environ['V44_ITERATION2_RUNTIME'])
+ if ACTIVE_CAMPAIGN.exists():return Path(json.loads(ACTIVE_CAMPAIGN.read_text(encoding='utf-8-sig'))['root'])
+ return Path('D:/MobileESS_V44/runtime/V44_iteration2')
+ROOT=runtime_root()
 DOC=ROOT/'DOCUMENTS';OPS=ROOT/'OPERATIONS'
 SOURCE=Path(os.environ.get('V44_ITERATION2_SOURCE','D:/v44_r022_rowgen_20261017'))
 PROFILE=Path('D:/v44_mess825_20261022')

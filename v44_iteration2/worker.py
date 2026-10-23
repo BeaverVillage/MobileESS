@@ -23,7 +23,9 @@ def boundary(request):
 
 def public_result(request,core,path,started):
  kind=request['iteration_stage'];day=request['day']
- if kind.startswith('M'):full_m(core,day)
+ if kind.startswith('M'):
+  from .voltage_audit import verify_result
+  full_m(core,day);voltage_proof=verify_result(core,kind)
  else:full_a(core,day)
  plan=core.get('MESS_plan',{})
  receipt=dict(PASS=True,day=day,arm='B3',stage=kind,core_stage=core['stage'],core_result=record(path),
@@ -36,6 +38,7 @@ def public_result(request,core,path,started):
   fixed_parent_stage=request['fixed_parent_stage'],fixed_parent=request['fixed_parent_receipt'],
   new_AIDC_FULL_optimization=kind.startswith('A'),B1_A1_reuse_path_used=False,
   equipment_version=c.EQUIPMENT,commit_sha=authority.validate()['commit_sha'],wall_seconds=time.monotonic()-started,finished_UTC=now())
+ if kind.startswith('M'):receipt['actual_voltage_proof']=voltage_proof
  return receipt
 
 def planning_case(request):
@@ -130,7 +133,8 @@ def run(path):
  request=read(path);boundary(request);store=Store()
  try:
   with adapters.bindings(),store.read_scope(),storage.install(),ExitStack() as stack:
-   stack.enter_context(base.numerical.scope())
+   from .numerical import scope as numerical_scope
+   stack.enter_context(base.numerical.scope());stack.enter_context(numerical_scope())
    stack.enter_context(patch.object(weather,'loader',recovered_weather.loader))
    stack.enter_context(patch.object(handover,'require_boundary',lambda:boundary(request)))
    stack.enter_context(patch.object(reference,'project',base.project))

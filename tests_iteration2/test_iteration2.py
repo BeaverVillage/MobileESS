@@ -144,7 +144,7 @@ class StageRouting(unittest.TestCase):
    from v43_actual.observations import load_observations
    from v44.daily import day_inputs
    from v44_recovery_r029 import phase_stability
-   self.assertIs(phase_stability.StableNative,base.numerical.UnpresolvedNative)
+   self.assertTrue(issubclass(phase_stability.StableNative,base.numerical.UnpresolvedNative))
    if request['iteration_stage']=='A3':
     from v44 import worker as original_worker
     self.assertEqual(original_worker.a_stage.__module__,'v44_recovery_r031.p1_expansion')
@@ -171,7 +171,7 @@ class CheckpointRepair(unittest.TestCase):
    atomic(core.parent/'request.json',dict(day='2025-05-01',arm='B3',iteration_stage='M2',equipment_version=c.EQUIPMENT,iteration2_authorization=previous))
    atomic(core.parent.parent/'RESULT.json',dict(PASS=True,core_result=record(core),stage='M2'))
    request=dict(iteration_stage='A3',day='2025-05-01',fixed_parent_receipt=record(core),fixed_parent_core=str(core),fixed_parent_stage='M2',iteration2_authorization=record(auth))
-   with patch.object(c,'ROOT',root),patch.object(c,'OPS',auth.parent):
+   with patch.object(c,'ROOT',root),patch.object(c,'OPS',auth.parent),patch('v44_iteration2.voltage_audit.verify_result',return_value={}):
     authority.parent_authority(request)
     atomic(core.parent.parent/'RESULT.json',dict(PASS=True,core_result=record(core),stage='M2',error='old checkpoint failure'))
     with self.assertRaises(PermissionError):authority.parent_authority(request)
@@ -188,7 +188,7 @@ class CheckpointRepair(unittest.TestCase):
    atomic(core/'RESULT.json',mresult());atomic(core/'COMPLETED_STAGE_CHECKPOINT.json',{})
    atomic(root/'RESULT.json',dict(PASS=True,error='old hardware scope failure'))
    before=(root/'RESULT.json').read_bytes()
-   with patch.object(history,'checked_completed',return_value={}),patch.object(worker,'public_result',return_value=dict(PASS=True,core_result=record(core/'RESULT.json'))):
+   with patch.object(history,'checked_completed',return_value={}),patch('v44_iteration2.voltage_audit.verify_result',return_value={}),patch.object(worker,'public_result',return_value=dict(PASS=True,core_result=record(core/'RESULT.json'))):
     receipt=s.completed(root,'M2','2025-05-01')
    recovered=read(receipt['path']);self.assertEqual(recovered['new_resume_Native_calls'],0)
    self.assertIn('checkpoint',recovered);self.assertEqual((root/'RESULT.json').read_bytes(),before)

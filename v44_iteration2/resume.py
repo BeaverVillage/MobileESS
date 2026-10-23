@@ -7,6 +7,7 @@ from .io import read,record,verify,atomic
 def admit(parent,request):
  from v44.checkpoints import assert_dead,crash_admission,ledger_state
  parent=Path(parent);assert_dead(parent);old=read(parent/'request.json')
+ if not parent.resolve().is_relative_to((c.ROOT/request['day']/'B3').resolve()):raise PermissionError('OLD_CAMPAIGN_RESUME_FORBIDDEN')
  for k in ('iteration_stage','day','arm','source_sha','equipment_version','fixed_parent_stage','fixed_parent_receipt'):
   if old.get(k)!=request.get(k):raise PermissionError('SAME_PUBLIC_STAGE_SOURCE_PARENT_EQUIPMENT_REQUIRED:'+k)
  verify(old['sources']);request['scientific_case_root']=old.get('scientific_case_root',old['case_root'])

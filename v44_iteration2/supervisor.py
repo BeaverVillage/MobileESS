@@ -46,6 +46,9 @@ def completed(folder,stage,day):
  checked_completed(core/'COMPLETED_STAGE_CHECKPOINT.json',request)
  result=read(core/'RESULT.json')
  (full_m if stage.startswith('M') else full_a)(result,day)
+ if stage.startswith('M'):
+  from .voltage_audit import verify_result
+  verify_result(result,stage)
  public=folder/'RESULT.json'
  if public.exists():
   value=read(public)

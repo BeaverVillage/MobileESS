@@ -40,15 +40,24 @@ def bindings():
 @contextmanager
 def voltage(stage):
  from v42_native import voltage as v
+ from v42_integrated import contract
  before=dict(v._MAPPING);lower,upper=c.band(stage)
  selected=v.Voltage('V44_ITERATION2_'+stage,lower,upper,lower**2,upper**2)
+ original_authority=contract.physical_authority
+ @contextmanager
+ def physical_authority():
+  # The inherited equipment context resets every Planning band. Apply the
+  # requested M band AFTER that reset, before the original model is built.
+  with original_authority() as receipt:
+   if stage!='M4':v._MAPPING[v.Stage.M1]=selected;v._MAPPING[v.Stage.M2]=selected
+   yield receipt
  # M4 retains the exact existing policy object, including its authority name.
  if stage=='M4':
   if (v.voltage_for(v.Stage.M2).lower_pu,v.voltage_for(v.Stage.M2).upper_pu)!=(.95,1.05):raise PermissionError('M4_ORIGINAL_POLICY_DRIFT')
  else:v._MAPPING[v.Stage.M2]=selected
  try:
   if v.voltage_for(v.Stage.ACTUAL)!=before[v.Stage.ACTUAL]:raise PermissionError('ACTUAL_AUTHORITY_LEAK')
-  yield
+  with patch.object(contract,'physical_authority',physical_authority):yield
  finally:v._MAPPING.clear();v._MAPPING.update(before)
 
 def routed_build():
@@ -112,14 +121,30 @@ def new_a_scope(request):
 
 def execute_m(request,payload):
  from .bootstrap import CORE_M,equipment
- from v44 import runtime,q250_m4_v2 as q
+ from v44 import runtime,q250_m4_v2 as q,m_restore
  from v44_recovery_r029.thread_policy import build_scope
  from v44_recovery_r029.cpu_placement import compute_cpu_scope
- ids=set();out=Path(request['output'])
- with patch.object(runtime,'build',routed_build()),voltage(request['iteration_stage']),equipment.scope(),q.m_threads(request) as params,q.q_domain(),build_scope(ids),compute_cpu_scope(4) as cpu:
+ from .voltage_audit import check_rows,check_plan
+ from v44.checkpoints import seal_stage
+ ids=set();out=Path(request['output']);built={};original_bind=q.bind_case;original_restore=m_restore.restore
+ def bind(case,req):
+  case=original_bind(case,req)
+  check_rows(case,request['iteration_stage']);built['case']=case
+  return case
+ def restore(*args,**kwargs):
+  case=original_restore(*args,**kwargs)
+  check_rows(case,request['iteration_stage']);built['case']=case
+  return case
+ with patch.object(runtime,'build',routed_build()),patch.object(q,'bind_case',bind),patch.object(m_restore,'restore',restore),voltage(request['iteration_stage']),equipment.scope(),q.m_threads(request) as params,q.q_domain(),build_scope(ids),compute_cpu_scope(4) as cpu:
   result=CORE_M(request,payload)
   # Original failure cannot be replaced by a previous plan or a diagnostic PASS.
   full_m(result,request['day'])
+  if 'case' not in built:raise ValueError('ITERATION2_VOLTAGE_MATRIX_NOT_AUDITED')
+  check_plan(built['case'],payload,result['MESS_plan'],request['iteration_stage'])
+  result.update(iteration2_voltage_rows=record(out/'ITERATION2_FULL_VOLTAGE_ROWS.json'),
+   iteration2_voltage_plan=record(out/'ITERATION2_PLAN_VOLTAGE.json'))
+  atomic(out/'RESULT.json',result)
+  seal_stage(out,read(out/'request.json'),result)
   atomic(out/'ITERATION2_POLICY.json',dict(PASS=True,UTC=now(),public_stage=request['iteration_stage'],core_stage='M2',
    voltage_band=list(c.band(request['iteration_stage'])),parameters=params,cpu=cpu,equipment=c.EQUIPMENT,
    fallback_plan_used=False,source_algorithm_changed=False,coefficient_worker_thread_ids=sorted(ids)))

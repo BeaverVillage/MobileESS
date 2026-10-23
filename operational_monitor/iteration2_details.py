@@ -6,7 +6,8 @@ import json,hashlib,math
 from bound_details import read,a_bounds,m_bounds,display_fields,text,gap_text
 from active_runtime import native,age,m_panel
 
-ROOT=Path('D:/MobileESS_V44/runtime/V44_iteration2')
+ACTIVE=Path('D:/MobileESS_V44/runtime/ACTIVE_ITERATION2_CAMPAIGN.json')
+ROOT=Path(json.loads(ACTIVE.read_text(encoding='utf-8-sig'))['root']) if ACTIVE.exists() else Path('D:/MobileESS_V44/runtime/V44_iteration2')
 STAGES=('M2','A3','M3','A4','M4')
 CORE={s:'A2' if s.startswith('A') else 'M2' for s in STAGES}
 LABELS=dict(WAIT_B2='기존 B2 종료 대기',WAIT_B2_RESOURCES='기존 B2 자원 해제 대기',

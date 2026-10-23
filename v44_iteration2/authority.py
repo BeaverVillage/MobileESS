@@ -26,8 +26,11 @@ def parent_authority(request):
  public=next((read(p) for p in publics if p.exists() and read(p).get('PASS') is True and not read(p).get('error') and read(p).get('core_result')==reference),None)
  if not public or public['stage']!=expected:raise PermissionError('NEW_PRECEDING_STAGE_FULL_PUBLIC_CERTIFICATE_REQUIRED')
  if expected.startswith('A') and public.get('new_AIDC_FULL_optimization') is not True:raise PermissionError('NEW_AIDC_FULL_OPTIMIZATION_REQUIRED')
+ if expected.startswith('M'):
+  from .voltage_audit import verify_result
+  verify_result(read(core),expected)
 def validate(request=None):
- auth=read(c.OPS/'AUTHORIZATION.json');verify(auth['sources']+auth['inputs']+[auth['validation'],auth['user_request']]+auth.get('historical_source_manifests',[]))
+ auth=read(c.OPS/'AUTHORIZATION.json');verify(auth['sources']+auth['inputs']+[auth['validation'],auth['user_request']]+auth.get('historical_source_manifests',[])+([auth['fresh_start']] if auth.get('fresh_start') else []))
  if auth['sources']!=sources() or auth['MESS_units']!=list(c.FLEET):raise PermissionError('ITERATION2_SEALED_SOURCE_OR_FLEET_DRIFT')
  if request:
   root=Path(request['case_root'])
@@ -52,3 +55,12 @@ def authorize(commit):
   B2_must_finish_and_release_all_resources=True,Actual_requires_31_verified_M4=True,max_Actual_workers=7,
   equipment_version=c.EQUIPMENT,algorithm='ORIGINAL_V44_R043',budgets=dict(K48=300,Joint=900,Joint_call=300,A=5400,A_PhaseI=1500),
   gaps=dict(M=.03,A=.005),threads=dict(A_Native=1,M_Native=4,Actual=1)))
+ fresh=c.OPS/'FRESH_START.json'
+ if fresh.exists():
+  auth=read(path);auth.update(fresh_start=record(fresh),all31_M2_new_from_zero=True,
+   inherited_iteration_results_or_native_accounts_allowed=False,
+   M_voltage_band_M2_M3=[.955,1.045],M4_actual_voltage_band=[.95,1.05],
+   actual_FULL_matrix_and_saved_snapshot_audit_required_before_Native=True,
+   Phase_I_solver_tolerances=dict(FeasibilityTol=1e-9,OptimalityTol=1e-9),Phase_I_zero_threshold=1e-8,
+   same_snapshot_numerical_polish_charged=True)
+  atomic(path,auth)

@@ -30,9 +30,9 @@ def build(store):
   comparison=case;hardware='V44_ORIGINAL_MESS_TX750'
   if day in ('2025-05-29','2025-05-30'):
    comparison=Path('D:/MobileESS_V44/runtime/equipment_versions')/c.EQUIPMENT/'campaign007_fixed750_B3_revalidation'/day/'B3/attempt001'
-   v=read(comparison/'RESULT.json')
+   v=store.read(comparison/'RESULT.json')
    if v.get('PASS') is not True:raise ValueError('VERIFIED_825_COMPARISON_REQUIRED:'+day)
-   hardware=c.EQUIPMENT;evidence.append(record(comparison/'RESULT.json'))
+   hardware=c.EQUIPMENT;evidence.append(store.record(comparison/'RESULT.json'))
   rows.append(dict(day=day,original_case=str(case),A1=str(a1),M1=str(m1),A2=str(a2),
    physical_domain_request=domain,physical_cache_case_proof=proofref,AIDC_reference=a2ref,
    M1_plan_sha=plan['plan_sha'],reused_stages=['A1','M1','A2'],new_reuse_Native_calls=0,

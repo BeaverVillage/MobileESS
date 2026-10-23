@@ -1,6 +1,9 @@
 $ErrorActionPreference='Stop'
 $repoFolder=Split-Path $PSScriptRoot -Parent
-$stopFile='D:\MobileESS_V44\runtime\V44_iteration2\OPERATIONS\USER_STOP.json'
+$runtimeRoot='D:\MobileESS_V44\runtime\V44_iteration2'
+$activeFile='D:\MobileESS_V44\runtime\ACTIVE_ITERATION2_CAMPAIGN.json'
+if (Test-Path -LiteralPath $activeFile) { $runtimeRoot=(Get-Content -LiteralPath $activeFile -Raw | ConvertFrom-Json).root }
+$stopFile=Join-Path $runtimeRoot 'OPERATIONS\USER_STOP.json'
 if (Test-Path -LiteralPath $stopFile) { throw 'V44_iteration2 is stopped by the user. Explicitly resume it before launching.' }
 $pythonExe='C:\Users\kjw39\AppData\Local\Programs\Python\Python311\python.exe'
 $principal=New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited

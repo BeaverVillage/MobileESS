@@ -16,6 +16,12 @@ def check():
  started=time.monotonic();store=Store();margins=[]
  try:
   catalogue=read(c.DOC/'BASELINE_CATALOG.json');assert {r['day'] for r in catalogue['days']}==set(c.DAYS);assert catalogue['MESS_units']==list(c.FLEET)
+  manifest=read(c.DOC/'SEVEN_DAY_INPUT_MANIFEST.json');assert len(manifest['days'])==31 and {r['day'] for r in manifest['days']}==set(c.DAYS)
+  for dated in manifest['days']:
+   if dated.get('blockers'):raise ValueError('DATED_INPUT_BLOCKER:'+dated['day'])
+   for receipt in dated['files'].values():
+    actual=store.record(receipt['path'])
+    if any(actual[k]!=receipt[k] for k in ('bytes','sha256')):raise ValueError('DATED_INPUT_RECEIPT_DRIFT:'+receipt['path'])
   for row in catalogue['days']:
    for receipt in row['evidence']:
     actual=store.record(receipt['path'])
@@ -26,7 +32,7 @@ def check():
   plan=placement(windows_cpu_sets(),7);atomic(c.DOC/'CPU_PLACEMENT.json',plan)
   # Test all core gates and original scoped worker entry. Any optimize or DSS
   # oracle construction in these tests is a failure, including hidden probes.
-  suite=unittest.defaultTestLoader.discover(str(c.REPO/'tests_iteration2'),pattern='test_iteration2.py')
+  suite=unittest.defaultTestLoader.discover(str(c.REPO/'tests_iteration2'),pattern='test_iteration2*.py')
   output=io.StringIO()
   with store.read_scope(),native_zero() as denied,patch.object(svr12,'SVR12CurrentAC',side_effect=AssertionError('PREFLIGHT_DSS_FORBIDDEN')):
    result=unittest.TextTestRunner(stream=output,verbosity=2).run(suite)
