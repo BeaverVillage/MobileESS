@@ -22,6 +22,7 @@ def boundary(request):
  return dict(protected_case_root=str(c.B2_ROOT),new_campaign_lease=lease)
 
 def public_result(request,core,path,started):
+ if core.get('error'):raise RuntimeError('CORE_STAGE_FAILURE:'+str(core['error']))
  kind=request['iteration_stage'];day=request['day']
  if kind.startswith('M'):
   from .voltage_audit import verify_result
@@ -134,7 +135,9 @@ def run(path):
  try:
   with adapters.bindings(),store.read_scope(),storage.install(),ExitStack() as stack:
    from .numerical import scope as numerical_scope
+   from .p1_interval import scope as interval_scope
    stack.enter_context(base.numerical.scope());stack.enter_context(numerical_scope())
+   stack.enter_context(interval_scope())
    stack.enter_context(patch.object(weather,'loader',recovered_weather.loader))
    stack.enter_context(patch.object(handover,'require_boundary',lambda:boundary(request)))
    stack.enter_context(patch.object(reference,'project',base.project))

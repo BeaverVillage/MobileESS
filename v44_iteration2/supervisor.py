@@ -230,6 +230,8 @@ def run():
     try:
      with bindings(),install(),store.read_scope(),coordinator(c.ROOT) as lease,equipment.scope():
       state['lease']=lease
+      from .recovery import requeue
+      requeue(state)
       if planning(state,lease):actual(state,lease)
     finally:store.close()
    except BaseException as error:

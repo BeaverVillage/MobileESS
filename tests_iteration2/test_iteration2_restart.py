@@ -99,14 +99,14 @@ class ActualVoltageRows(unittest.TestCase):
 
 
 class PhaseIPrecision(unittest.TestCase):
- def test_only_phase_I_solver_precision_changes_without_relaxing_acceptance(self):
+ def test_continuous_A_precision_changes_without_relaxing_acceptance_or_integer_policy(self):
   with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
    context=ContextVar('test',default=None);stable=SimpleNamespace(_solve=context)
    model=SimpleNamespace(Params=SimpleNamespace(FeasibilityTol=1e-6,OptimalityTol=1e-6,Threads=1,MIPGap=.005))
    model.setParam=lambda k,v:setattr(model.Params,k,v)
    def base_factory(fn):return lambda m,a,g:dict(FeasibilityTol=m.Params.FeasibilityTol,OptimalityTol=m.Params.OptimalityTol)
    apply=numerical.policy_wrapper(base_factory,stable)(None)
-   for component,want in [('LOCAL_PRICING',1e-6),('PHASE_I',1e-9)]:
+   for component,want in [('LOCAL_PRICING',1e-9),('ORIGINAL_P1',1e-9),('PHASE_I',1e-9),('INTEGER_CONTROL',1e-6)]:
     model.Params.FeasibilityTol=1e-6;model.Params.OptimalityTol=1e-6
     token=context.set(dict(component=component,folder=Path(folder),repair=False))
     try:value=apply(model,{},None)

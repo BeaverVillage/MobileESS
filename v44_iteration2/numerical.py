@@ -1,4 +1,4 @@
-"""Phase-I precision and same-snapshot polish; original acceptance stays strict."""
+"""Continuous-A precision and same-snapshot polish; acceptance stays strict."""
 from contextlib import contextmanager
 from fractions import Fraction
 from pathlib import Path
@@ -19,14 +19,21 @@ def policy_wrapper(factory,stable):
   apply_original=factory(original)
   def apply(model,approved,gp):
    effective=apply_original(model,approved,gp);context=stable._solve.get()
-   if context is None or context['component']!='PHASE_I':return effective
+   if context is None or context['component'] not in ('PHASE_I','ORIGINAL_P1','LOCAL_PRICING'):return effective
    settings=dict(FeasibilityTol=SOLVER_TOLERANCE,OptimalityTol=SOLVER_TOLERANCE)
+   if context['component'] in ('ORIGINAL_P1','LOCAL_PRICING'):
+    from .p1_interval import LEVEL
+    level=LEVEL.get()
+    settings.update(Method=1,NumericFocus=3,ScaleFlag=0,Aggregate=0,Quad=1)
+    if level:settings.update(Method=0 if level==1 else 1,Presolve=0,LPWarmStart=1,PerturbValue=0)
    if context.get('iteration2_polish'):
     settings.update(Method=0,Quad=1,Presolve=0,Aggregate=0,ScaleFlag=0,LPWarmStart=1,PerturbValue=0)
    for name,value in settings.items():model.setParam(name,value)
-   effective.update(settings,iteration2_phase_I_precision=True,scientific_acceptance_unchanged=True)
-   atomic(Path(context['folder'])/'ITERATION2_PHASE_I_NUMERICAL_POLICY.json',dict(UTC=now(),settings=settings,
+   effective.update(settings,iteration2_continuous_A_precision=True,iteration2_phase_I_precision=context['component']=='PHASE_I',scientific_acceptance_unchanged=True)
+   filename='ITERATION2_PHASE_I_NUMERICAL_POLICY.json' if context['component']=='PHASE_I' else 'ITERATION2_P1_PRICING_NUMERICAL_POLICY.json'
+   atomic(Path(context['folder'])/filename,dict(UTC=now(),component=context['component'],settings=settings,
     same_snapshot_polish=bool(context.get('iteration2_polish')),certified_zero_tolerance=str(ZERO),
+    original_exact_price_epsilon=str(ZERO),
     original_physical_replay_tolerance=1e-6,acceptance_relaxed=False,Native_budget_reset=False))
    return effective
   return apply

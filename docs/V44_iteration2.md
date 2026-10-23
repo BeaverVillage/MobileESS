@@ -129,11 +129,31 @@ M4 and Actual retain the original 0.95–1.05 authority. Same-stage M binary
 recovery repeats this audit and retains its measured Native accounts.
 
 Phase I retains the original strict Phi zero threshold of 1e-8 and original
-physical replay tolerance. Its solver FeasibilityTol and OptimalityTol are
-1e-9. A residual in (1e-8,1e-5] receives one numerical polish of the exact same
+physical replay tolerance. Continuous Phase I, P1 and local pricing use
+solver FeasibilityTol and OptimalityTol of1e-9. P1/local pricing use quad
+simplex with NumericFocus3 and unscaled residuals. A Phase-I residual in
+(1e-8,1e-5] receives one numerical polish of the exact same
 snapshot before domain expansion; every call spends the same original
 A5400/Phase-I1500 accounts. Equations, bounds, gap rules and raw points are
-unchanged. Other A solve components retain their existing policy.
+unchanged. Integer-control solve policy remains unchanged.
+
+Repair 2026-10-23: May01/02 A3 both passed strict Phase-I zero, then stopped
+with P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT. Their exact local lower
+bound intervals were unresolved while no negative raw support was certified;
+this was not a proof of infeasibility. P1 now reprices the unchanged snapshot
+at bounded higher precision (at most two refinement rounds) before diagnosing
+failure. It retains every complete local oracle, exact rational bound,
+price epsilon1e-8 and independent full closure requirement. No interval or
+completion flag is converted to PASS. The core error is also retained in the
+public failure instead of being masked by a generic A contract error.
+
+Only the two diagnosed failed A3 stages may cross the explicitly sealed
+source-repair bridge. Completed M stages and May03 A3 remain exact immutable
+checkpoints. Failure receipts, old sources and authorization bytes are saved.
+Each A continuation carries its entire5400 account and all Phase-I/local
+pricing spent before original P1 into the nested1500 account. Old points,
+bounds and certificates are not promoted. The same stage is rebuilt under
+its remaining accounts; other dates remain queued in the existing campaign.
 
 Completed-stage verification retains the825 equipment scope through
 checkpoint acceptance; any checkpoint failure publishes PASS=false. All31

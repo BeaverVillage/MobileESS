@@ -30,7 +30,7 @@ def parent_authority(request):
   from .voltage_audit import verify_result
   verify_result(read(core),expected)
 def validate(request=None):
- auth=read(c.OPS/'AUTHORIZATION.json');verify(auth['sources']+auth['inputs']+[auth['validation'],auth['user_request']]+auth.get('historical_source_manifests',[])+([auth['fresh_start']] if auth.get('fresh_start') else []))
+ auth=read(c.OPS/'AUTHORIZATION.json');verify(auth['sources']+auth['inputs']+[auth['validation'],auth['user_request']]+auth.get('historical_source_manifests',[])+([auth['fresh_start']] if auth.get('fresh_start') else [])+([auth['repair_permit']] if auth.get('repair_permit') else []))
  if auth['sources']!=sources() or auth['MESS_units']!=list(c.FLEET):raise PermissionError('ITERATION2_SEALED_SOURCE_OR_FLEET_DRIFT')
  if request:
   root=Path(request['case_root'])
