@@ -138,6 +138,8 @@ def run(path):
    from .p1_interval import scope as interval_scope
    stack.enter_context(base.numerical.scope());stack.enter_context(numerical_scope())
    stack.enter_context(interval_scope())
+   from .performance import scope as performance_scope
+   stack.enter_context(performance_scope())
    stack.enter_context(patch.object(weather,'loader',recovered_weather.loader))
    stack.enter_context(patch.object(handover,'require_boundary',lambda:boundary(request)))
    stack.enter_context(patch.object(reference,'project',base.project))

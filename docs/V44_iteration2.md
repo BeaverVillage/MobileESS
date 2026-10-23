@@ -175,3 +175,25 @@ objective and must pass original primal/dual checks plus prior dominance.
 Its measured Native calls extend the same A3 account through a sealed
 prefix-checked diagnostic ledger. The regression point or bound is not
 used as a scientific campaign result.
+
+The performance repair applies the existing r031 repeat-class complete-native
+graph promotion to every new May A3/A4 stage. Its old May03-07 and 8,000-column
+gates excluded the observed May01 plateau: eleven repeatedly negative classes
+have 15,725 native columns each. Promotion remains bounded to 12 classes,
+20,000 columns per class and 200,000 total columns. It uses only the same
+verified complete oracle graphs, retains prior/support containment and the
+original inclusion replay, and leaves all exact pricing and FULL gates intact.
+The allowance is reserved until the P1 objective actually plateaus within
+the unchanged 1e-8 criterion, so early progressing classes cannot exhaust it
+before the repeatedly stagnant eleven classes. The scientific domain and
+number of jobs do not increase.
+
+Full pricing indexes owned columns and extracts coupling rows once per round;
+each class still executes its original Native oracle and exact certificate.
+Byte-identical compressed Native MATRIX.npz files share disk blocks through
+verified hard links, with copy-on-write before an existing link is rewritten.
+RHS, bounds, objective, all raw vectors and all certificates remain separate.
+The existing physical caches, compressed rebuild caches and Actual chunking
+remain installed. Performance maintenance may resume a precisely sealed
+same-stage ledger only after stopping outside every Native call; its measured
+A5400 and Phase-I1500 accounts must both carry forward.

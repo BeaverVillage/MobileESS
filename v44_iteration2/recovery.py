@@ -12,7 +12,9 @@ def requeue(state):
   job=next(j for j in state['jobs'] if j['day']==repair['day']);stage=repair['stage'];item=job.get('stages',{}).get(stage)
   if not item or Path(item['root'])!=Path(repair['parent_core']).parent:continue
   if any(h.get('parent_core')==repair['parent_core'] for h in job.get('repair_history',[])):continue
-  if item['status'] not in ('FAILED','ENTRY_FAILED') or job['status']!='PLANNING_FAILED':raise ValueError('REPAIR_REQUEUE_REQUIRES_EXACT_TERMINAL_FAILURE')
+  terminal=item['status'] in ('FAILED','ENTRY_FAILED') and job['status']=='PLANNING_FAILED'
+  maintenance=repair.get('maintenance_stop') and item['status']=='MAINTENANCE_STOPPED' and job['status']=='PLANNING_INTERRUPTED'
+  if not (terminal or maintenance):raise ValueError('REPAIR_REQUEUE_REQUIRES_EXACT_TERMINAL_FAILURE')
   from .resume import repair_source_bridge
   old=read(Path(repair['parent_core'])/'request.json');repair_source_bridge(repair['parent_core'],old,old)
   job.setdefault('repair_history',[]).append(dict(UTC=now(),parent_core=repair['parent_core'],stage=stage,

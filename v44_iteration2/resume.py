@@ -12,6 +12,11 @@ def repair_source_bridge(parent,old,request):
  if row is None or row['old_source_sha']!=old['source_sha']:raise PermissionError('UNAPPROVED_REPAIR_STAGE_OR_SOURCE')
  verify([row[k] for k in ('old_request','ledger','reconciliation','phase_budget')])
  if record(Path(parent)/'request.json')!=row['old_request']:raise PermissionError('REPAIR_PARENT_REQUEST_DRIFT')
+ if row.get('maintenance_stop'):
+  verify([row['maintenance_stop']]);stop=read(row['maintenance_stop']['path'])
+  if stop.get('Native_call_interrupted') is not False or stop.get('ledger')!=row['ledger'] or stop.get('request')!=row['old_request'] or Path(stop['parent_core'])!=Path(parent) or (Path(parent)/'RESULT.json').exists():raise PermissionError('MAINTENANCE_STOP_MUST_BE_EXACT_NON_NATIVE_BOUNDARY')
+  if not policy.get('scientific_equations_domain_and_acceptance_unchanged') or policy.get('Native_budget_reset') is not False:raise PermissionError('REPAIR_MUST_KEEP_DOMAIN_AND_NATIVE_ACCOUNT')
+  return row
  failure=read(Path(parent)/'RESULT.json')
  diagnosed=row.get('diagnosed_error',"ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')")
  allowed=("ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')","ValueError('R029_NUMERICAL_OPTIMALITY_OR_PRIOR_POINT_DOMINANCE_NOT_VERIFIED')")
