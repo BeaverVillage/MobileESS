@@ -228,8 +228,8 @@ Actual only. Completed M4 freeze creation commits are immutable when controller
 code changes; any scientific evidence difference remains an error.
 
 An archived r043 comparison and live py-spy sample distinguish extra iteration
-work from a global performance regression. May07 r043 A2 took845.224s and824/825
-local/total searches; iteration2 A4 took864.882s and824 total calls. May05 A3 and
+work from a global performance regression. May07 r043 A2 took845.224s with825 total Native calls; iteration2 A4
+took864.882s with824 total Native calls. May05 A3 and
 r043 A2 both take approximately6.4min. May01's six graph activations instead
 include986.271s of rebuilding and718.136s of full pricing; the changed fixed
 MESS parent can change the optimization path even with the same job domain.
