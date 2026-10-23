@@ -19,7 +19,7 @@ ACTIVE=ContextVar('V44_ITERATION2_STAGE',default=None)
 @contextmanager
 def bindings():
  from .bootstrap import base
- from v44 import daily,inputs,public_inputs
+ from v44 import daily,inputs,public_inputs,checkpoints
  from v44 import svr12
  from v44_week2.operations import period
  from v44_recovery_r029 import a2_cache
@@ -31,6 +31,7 @@ def bindings():
   # Accepted parents retain their original controller receipts. Only exact
   # archived source bytes may resolve a historical receipt; data stays strict.
   stack.enter_context(patch.object(daily,'verify',verify_historical))
+  stack.enter_context(patch.object(checkpoints,'verify',verify_historical))
   for module in (daily,inputs,public_inputs,a2_cache):stack.enter_context(patch.object(module,'DOC',c.DOC))
   for module in (inputs,public_inputs):stack.enter_context(patch.object(module,'DAYS',c.DAYS))
   native_runtime=c.ROOT/'NATIVE_RUNTIME'
@@ -123,6 +124,19 @@ def new_a_scope(request):
   with patch.object(a2,'require_m1',require_fixed_parent),patch.object(a2_cache,'ownership',domain_ownership):yield
  finally:ACTIVE.reset(token)
 
+def routed_restore(original):
+ """Restore Planning with the same original coefficients as its fresh builder."""
+ source=textwrap.dedent(inspect.getsource(original))
+ old="    from v42_svr11.model import load_coefficients\n    coefficients=load_coefficients(read(payload['bundle']['electrical_certificate']['path']),request['day'])"
+ new="    from v42_pr134_b1.native import original_coefficients_for_day\n    import v42_may01.prepare as original_planning\n    from v42_temporal.native import load_power\n    certificate,_,_,_=load_power(payload['bundle'])\n    coefficients=original_coefficients_for_day(original_planning,certificate,request['day'])"
+ if source.count(old)!=1:raise ValueError('PLANNING_RESTORE_COEFFICIENT_SOURCE_BOUNDARY_DRIFT')
+ source=source.replace(old,new)
+ source=source.replace("read(payload['bundle']['electrical_certificate']['path'])['output']['path']", "read(payload['bundle']['electrical_certificate']['path'])['outputs']['planning_coefficients']['path']")
+ source=source.replace("case._v43_coefficient_metadata={k:z[k].copy() for k in ('node_names','branch_names','transformer_ratings')}","case._v43_coefficient_metadata={k:z[k].copy() for k in ('node_names','branch_names')}\n        case._v43_coefficient_metadata['transformer_ratings']=np.asarray(coefficients[0].transformer_ratings)")
+ ns=dict(original.__globals__);name=__file__+'.restore.generated'
+ linecache.cache[name]=(len(source),None,source.splitlines(True),name)
+ exec(compile(source,name,'exec'),ns);return ns['restore']
+
 def execute_m(request,payload):
  from .bootstrap import CORE_M,equipment
  from v44 import runtime,q250_m4_v2 as q,m_restore
@@ -130,7 +144,7 @@ def execute_m(request,payload):
  from v44_recovery_r029.cpu_placement import compute_cpu_scope
  from .voltage_audit import check_rows,check_plan
  from v44.checkpoints import seal_stage
- ids=set();out=Path(request['output']);built={};original_bind=q.bind_case;original_restore=m_restore.restore
+ ids=set();out=Path(request['output']);built={};original_bind=q.bind_case;original_restore=routed_restore(m_restore.restore)
  def bind(case,req):
   case=original_bind(case,req)
   check_rows(case,request['iteration_stage']);built['case']=case

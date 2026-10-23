@@ -200,3 +200,46 @@ profiling wrappers retain that binding. ITERATION2_PERFORMANCE_BINDING.json
 confirms the runtime connection; per-round plateau/expansion files confirm
 execution. The duplicate legacy hook is disabled. A regression test exercises
 an empty legacy stack and a profiling wrapper installed after compilation.
+
+
+## 2026-10-24 diagnosed failure repair and measured bottlenecks
+
+Completed stages, M4 freezes and every measured Native account remain intact.
+May01 A3 Gurobi allocation failure occurs in the 897931-row, 250631-column,
+17107557-nonzero ORIGINAL_P1 model before presolve completes. Large continuous
+P1 models now use Presolve=0 and LPWarmStart=1, retaining one thread, the exact
+matrix/objective/boxes, independent raw replay and A5400/Phase-I1500 accounts.
+This is a parameter and allocation repair, not an infeasibility certificate.
+
+May04 A4 omitted-row elastic witnesses reach approximately 2e10. Binary64 CSR
+summation can exceed the original 1e-6 replay tolerance even when an exact
+binary-rational residual passes. Reconstruct only auxiliary values; recheck
+failed elastic rows using exact Fraction arithmetic. Original raw variables,
+original-objective/physical replay, FULL acceptance and tolerances are unchanged.
+The saved 699287-row failure replays successfully with original X unchanged and
+no Native call. True residuals or bound violations still fail.
+
+Historical receipts in both the parent reader and checkpoint envelope resolve
+only against exact sealed source snapshots. May02 M3 was FULL feasible before
+its checkpoint write failed; its original plan and K48/Joint clocks are recovered
+without optimization. Binary Planning restore now uses the same dated original
+Planning coefficients and metadata as the fresh builder, preserving SVR12 for
+Actual only. Completed M4 freeze creation commits are immutable when controller
+code changes; any scientific evidence difference remains an error.
+
+An archived r043 comparison and live py-spy sample distinguish extra iteration
+work from a global performance regression. May07 r043 A2 took845.224s and824/825
+local/total searches; iteration2 A4 took864.882s and824 total calls. May05 A3 and
+r043 A2 both take approximately6.4min. May01's six graph activations instead
+include986.271s of rebuilding and718.136s of full pricing; the changed fixed
+MESS parent can change the optimization path even with the same job domain.
+These cross-case timings are observations, not controlled speedup claims.
+
+Live pricing samples show repeated source hashing and JSON audit persistence.
+Retain every full source hash and audit row. Compact C-encoder JSON persistence
+preserves parsed data, numeric/nonfinite rules and atomic replacement. On the
+real693-call May01 ledger, serialization measured0.02769s ->0.00952s (2.91x),
+with1409342 ->1093330 UTF-8 bytes. This is serialization-only, not an overall
+campaign speedup. Matrix hard links and the bounded graph/sparse-index speedups
+remain enabled. Actual still starts only after all31 Planning dates are terminal,
+and launches only ready verified-M4 dates with at most7 workers.

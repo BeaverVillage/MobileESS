@@ -22,7 +22,7 @@ def verify(rows):
 def atomic(path,value):
  p=extended(path);p.parent.mkdir(parents=True,exist_ok=True);tmp=p.with_name(p.name+'.'+uuid.uuid4().hex+'.tmp')
  try:
-  tmp.write_text(json.dumps(value,ensure_ascii=False,indent=2,allow_nan=False)+'\n',encoding='utf8')
+  tmp.write_text(json.dumps(value,ensure_ascii=False,separators=(',',':'),allow_nan=False)+'\n',encoding='utf8')
   for n in range(101):
    try:os.replace(tmp,p);break
    except PermissionError:

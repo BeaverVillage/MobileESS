@@ -19,10 +19,17 @@ def repair_source_bridge(parent,old,request):
   return row
  failure=read(Path(parent)/'RESULT.json')
  diagnosed=row.get('diagnosed_error',"ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')")
- allowed=("ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')","ValueError('R029_NUMERICAL_OPTIMALITY_OR_PRIOR_POINT_DOMINANCE_NOT_VERIFIED')",'MemoryError()')
+ allowed=("ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')","ValueError('R029_NUMERICAL_OPTIMALITY_OR_PRIOR_POINT_DOMINANCE_NOT_VERIFIED')",'MemoryError()',"RuntimeError('GurobiError: Out of memory')","ValueError('PHASE_I_IMPLEMENTATION_INVALID_CONSTRUCTED_ELASTIC_POINT')")
  if diagnosed not in allowed or failure.get('error')!=diagnosed:raise PermissionError('REPAIR_REQUIRES_EXACT_DIAGNOSED_P1_FAILURE')
  if diagnosed=='MemoryError()' and not (row.get('core_failure') and policy.get('exact_canonical_domain_digest_streaming') is True and 'active_key_sha256=digest(sorted(self.active_keys))' in failure.get('traceback','') and "in encode" in failure.get('traceback','')):
   raise PermissionError('ONLY_EXACT_DIAGNOSED_DOMAIN_JSON_ALLOCATION_FAILURE')
+ if diagnosed in ("RuntimeError('GurobiError: Out of memory')","ValueError('PHASE_I_IMPLEMENTATION_INVALID_CONSTRUCTED_ELASTIC_POINT')"):
+  proof=row.get('repair_regression')
+  if not proof or not row.get('core_failure'):raise PermissionError('EXACT_FAILURE_REPAIR_REGRESSION_REQUIRED')
+  verify([proof]);checked=read(proof['path'])
+  if not checked.get('PASS') or checked.get('Native_calls')!=0 or checked.get('tolerance_relaxed') is not False or checked.get('scientific_matrix_unchanged') is not True:raise PermissionError('REPAIR_MUST_KEEP_MATRIX_AND_ACCEPTANCE')
+  if diagnosed.startswith("RuntimeError('GurobiError") and (checked.get('large_LP_Presolve')!=0 or not policy.get('large_LP_presolve_copy_removed')):raise PermissionError('DIAGNOSED_LARGE_LP_MEMORY_REPAIR_REQUIRED')
+  if diagnosed.startswith("ValueError('PHASE_I_IMPLEMENTATION") and (not checked.get('exact_dyadic_arithmetic') or not checked.get('original_raw_variables_unchanged') or not policy.get('exact_elastic_residual_arithmetic')):raise PermissionError('EXACT_ELASTIC_WITNESS_REPAIR_REQUIRED')
  if row.get('core_failure'):
   verify([row['core_failure']])
   if record(Path(parent)/'RESULT.json')!=row['core_failure']:raise PermissionError('REPAIR_FAILURE_RECEIPT_DRIFT')

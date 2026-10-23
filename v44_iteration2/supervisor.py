@@ -100,7 +100,10 @@ def freeze(job):
   M4_core=mr,A4_core=ar,A4_reference=aidc,M4_case_sha=mp['case_sha'],M4_plan_sha=mp['plan_sha'],evidence=evidence,
   actual_voltage_band=[.95,1.05],M4_voltage_band=[.95,1.05],commit_sha=authority.validate()['commit_sha'])
  if path.exists():
-  if read(path)!=value:raise ValueError('FROZEN_M4_DRIFT')
+  previous=read(path)
+  # Creation commit is immutable provenance, not a reason to regenerate a
+  # fully verified completed freeze after a controller-only repair.
+  if {k:v for k,v in previous.items() if k!='commit_sha'}!={k:v for k,v in value.items() if k!='commit_sha'}:raise ValueError('FROZEN_M4_DRIFT')
  else:atomic(path,value)
  job.update(status='PLANNING_PASS',M4_freeze=record(path))
 

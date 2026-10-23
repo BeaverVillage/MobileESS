@@ -29,6 +29,8 @@ def policy_wrapper(factory,stable):
     # its repair flag with the normal dual-simplex policy again.
     if context.get('repair') or level:
      settings.update(Method=1 if level==2 else 0,Presolve=0 if level==2 else 1)
+   if context['component']=='ORIGINAL_P1' and getattr(model,'NumNZs',0)>=10000000:
+    settings.update(Presolve=0,LPWarmStart=1)
    if context.get('iteration2_polish'):
     settings.update(Method=0,Quad=1,Presolve=0,Aggregate=0,ScaleFlag=0,LPWarmStart=1,PerturbValue=0)
    for name,value in settings.items():model.setParam(name,value)
@@ -74,6 +76,11 @@ def precision_native(previous,stable):
 @contextmanager
 def scope():
  from v44_recovery_r029 import phase_stability as stable
+ from v42_a_stage_canary import phase
+ from .elastic import artificial_point,replay_with_exact
+ from v42_a_stage_phase1 import core
+ from v44_recovery_r029 import row_generation
+ exact_replay=replay_with_exact(core.primal_replay)
  previous=stable.StableNative;factory=stable.policy
- with patch.object(stable,'StableNative',precision_native(previous,stable)),patch.object(stable,'policy',policy_wrapper(factory,stable)):
+ with patch.object(stable,'StableNative',precision_native(previous,stable)),patch.object(stable,'policy',policy_wrapper(factory,stable)),patch.object(phase,'point_with_replay',artificial_point),patch.object(core,'primal_replay',exact_replay),patch.object(phase,'primal_replay',exact_replay),patch.object(row_generation,'primal_replay',exact_replay):
   yield
