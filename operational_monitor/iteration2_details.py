@@ -20,8 +20,9 @@ _cache={}
 def phase_one(folder):
  out=Path(folder)/'OUTPUT';trace=read(out/'PHASE_I_TRACE.json');trajectory=trace.get('trajectory',[])
  latest=trajectory[-1] if trajectory else {};budget=read(out/'PHASE_I_NATIVE_BUDGET.json');zero=read(out/'PHASE_I_ZERO_CERTIFICATE.json')
+ admission=read(Path(folder).parent/'RESUME_ADMISSION.json')
  return dict(Phi=number(latest.get('exact_Phi',latest.get('Phi'))),solve=latest.get('solve'),
-  zero_PASS=zero.get('PASS') is True,Native_seconds=budget.get('Native_seconds'),limit=1500.,
+  zero_PASS=zero.get('PASS') is True,Native_seconds=budget.get('Native_seconds',admission.get('inherited_Phase_I_Native_seconds')),limit=1500.,
   active=budget.get('phase_I_active'),activation_rounds=trace.get('activation_rounds'),zero_threshold=1e-8,
   solver_tolerance=1e-9,latest_UTC=budget.get('UTC'))
 

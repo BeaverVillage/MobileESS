@@ -87,6 +87,13 @@ class ExistingMonitorDetails(unittest.TestCase):
    self.assertEqual(p['zero_threshold'],1e-8);self.assertEqual(p['limit'],1500.)
    write(out/'PHASE_I_ZERO_CERTIFICATE.json',dict(PASS=True));self.assertTrue(view.phase_one(root)['zero_PASS'])
 
+ def test_phase_I_spent_time_is_visible_during_resumed_model_build(self):
+  with tempfile.TemporaryDirectory() as d:
+   case=Path(d);folder=case/'A2';write(case/'RESUME_ADMISSION.json',dict(inherited_Phase_I_Native_seconds=16.774))
+   self.assertEqual(view.phase_one(folder)['Native_seconds'],16.774)
+   write(folder/'OUTPUT/PHASE_I_NATIVE_BUDGET.json',dict(Native_seconds=17.5))
+   self.assertEqual(view.phase_one(folder)['Native_seconds'],17.5)
+
  def test_completed_M_cannot_display_PASS_without_actual_voltage_proofs(self):
   with tempfile.TemporaryDirectory() as d,patch.object(view,'ROOT',Path(d)):
    root=Path(d);core=root/'M2/RESULT.json';public=root/'RESULT.json'
