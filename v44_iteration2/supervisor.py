@@ -6,7 +6,7 @@ from . import config as c
 from .io import read,optional,record,verify,atomic,now
 from . import authority,resources
 from .safety import alive,b2_state,ready_receipt,try_os_locks
-from .contracts import actual_barrier,full_a,full_m
+from .contracts import actual_barrier,actual_ready,ready_barrier,full_a,full_m
 
 STATE=c.ROOT/'STATE.json'
 
@@ -104,53 +104,63 @@ def freeze(job):
  else:atomic(path,value)
  job.update(status='PLANNING_PASS',M4_freeze=record(path))
 
+def planning_day(state,lease,job,row):
+ from .requests import make
+ day=job['day']
+ parent=next(r for r in row['evidence'] if Path(r['path'])==Path(row['A2'])/'RESULT.json')
+ job['reused_original_stages']=dict(A1=row['A1'],M1=row['M1'],A2=row['A2'],evidence=row['evidence'],new_Native_calls=0)
+ for stage in c.STAGES:
+  item=job['stages'].get(stage)
+  if item:
+   folder=Path(item['root'])
+   try:
+    reference=completed(folder,stage,day);value=read(reference['path'])
+    item.update(status='PASS',PASS=True,result=reference);parent=value['core_result'];publish(state);continue
+   except (OSError,ValueError,KeyError,PermissionError) as error:
+    if item.get('status')=='PASS':
+     job.update(status='PLANNING_BLOCKED',error='COMPLETED_STAGE_EVIDENCE_DRIFT:'+repr(error));publish(state);break
+    # A recorded scientific failure is terminal for this date. A crash with
+    # no public terminal receipt may resume only a reconciled exact account.
+    if item.get('status') in ('FAILED','ENTRY_FAILED'):
+     job.update(status='PLANNING_FAILED',error=item.get('error',repr(error)));break
+    try:resume=stage_resume(folder,stage,day,parent)
+    except Exception as reason:
+     job.update(status='PLANNING_BLOCKED',error=repr(reason));item.update(status='BLOCKED',error=repr(reason));publish(state);break
+  else:resume=None
+  wait_resources(state,'PLANNING');state['phase']='PLANNING_SERIAL';atomic(c.ROOT/'PHASE.json',dict(lane='MAIN',UTC=now()))
+  request=make(day,stage,lease,parent=parent,resume=resume)
+  p,identity=launch(request);item=dict(status='RUNNING',PASS=False,root=request['case_root'],request=identity['request'],identity=identity)
+  job['stages'][stage]=item;job['status']='PLANNING_RUNNING';state['workers']=[identity];publish(state)
+  while p.poll() is None:
+   item['progress']=optional(Path(request['case_root'])/c.CORE_STAGE[stage]/'progress.json');publish(state);time.sleep(5)
+  state['workers']=[];path=Path(request['case_root'])/'RESULT.json';result=optional(path)
+  item.update(process_exit=p.returncode,status='PASS' if p.returncode==0 and result.get('PASS') else 'FAILED',PASS=p.returncode==0 and result.get('PASS') is True,result=record(path) if path.exists() else None,error=result.get('error'))
+  if not item['PASS']:
+   job.update(status='PLANNING_FAILED',error=result.get('error','STAGE_NOT_FULL_OR_PROCESS_EXIT'));publish(state);break
+  try:
+   item['result']=completed(Path(request['case_root']),stage,day);parent=read(item['result']['path'])['core_result']
+  except Exception as error:
+   item.update(status='FAILED',PASS=False,error=repr(error));job.update(status='PLANNING_FAILED',error=repr(error));publish(state);break
+  publish(state)
+ else:freeze(job);publish(state)
+
 def planning(state,lease):
  from .requests import make
  catalogue={x['day']:x for x in read(c.DOC/'BASELINE_CATALOG.json')['days']}
  for job in state['jobs']:
   if job['status'] in ('PLANNING_FAILED','PLANNING_BLOCKED'):continue
-  day=job['day'];row=catalogue[day]
-  parent=next(r for r in row['evidence'] if Path(r['path'])==Path(row['A2'])/'RESULT.json')
-  job['reused_original_stages']=dict(A1=row['A1'],M1=row['M1'],A2=row['A2'],evidence=row['evidence'],new_Native_calls=0)
-  for stage in c.STAGES:
-   item=job['stages'].get(stage)
-   if item:
-    folder=Path(item['root'])
-    try:
-     reference=completed(folder,stage,day);value=read(reference['path'])
-     item.update(status='PASS',PASS=True,result=reference);parent=value['core_result'];publish(state);continue
-    except (OSError,ValueError,KeyError,PermissionError) as error:
-     if item.get('status')=='PASS':
-      job.update(status='PLANNING_BLOCKED',error='COMPLETED_STAGE_EVIDENCE_DRIFT:'+repr(error));publish(state);break
-     # A recorded scientific failure is terminal for this date. A crash with
-     # no public terminal receipt may resume only a reconciled exact account.
-     if item.get('status') in ('FAILED','ENTRY_FAILED'):
-      job.update(status='PLANNING_FAILED',error=item.get('error',repr(error)));break
-     try:resume=stage_resume(folder,stage,day,parent)
-     except Exception as reason:
-      job.update(status='PLANNING_BLOCKED',error=repr(reason));item.update(status='BLOCKED',error=repr(reason));publish(state);break
-   else:resume=None
-   wait_resources(state,'PLANNING');state['phase']='PLANNING_SERIAL';atomic(c.ROOT/'PHASE.json',dict(lane='MAIN',UTC=now()))
-   request=make(day,stage,lease,parent=parent,resume=resume)
-   p,identity=launch(request);item=dict(status='RUNNING',PASS=False,root=request['case_root'],request=identity['request'],identity=identity)
-   job['stages'][stage]=item;job['status']='PLANNING_RUNNING';state['workers']=[identity];publish(state)
-   while p.poll() is None:
-    item['progress']=optional(Path(request['case_root'])/c.CORE_STAGE[stage]/'progress.json');publish(state);time.sleep(5)
-   state['workers']=[];path=Path(request['case_root'])/'RESULT.json';result=optional(path)
-   item.update(process_exit=p.returncode,status='PASS' if p.returncode==0 and result.get('PASS') else 'FAILED',PASS=p.returncode==0 and result.get('PASS') is True,result=record(path) if path.exists() else None,error=result.get('error'))
-   if not item['PASS']:
-    job.update(status='PLANNING_FAILED',error=result.get('error','STAGE_NOT_FULL_OR_PROCESS_EXIT'));publish(state);break
-   try:
-    item['result']=completed(Path(request['case_root']),stage,day);parent=read(item['result']['path'])['core_result']
-   except Exception as error:
-    item.update(status='FAILED',PASS=False,error=repr(error));job.update(status='PLANNING_FAILED',error=repr(error));publish(state);break
+  try:planning_day(state,lease,job,catalogue[job['day']])
+  except Exception as error:
+   # Finish any already-running native call before advancing the serial lane.
+   while any(alive(w) for w in state.get('workers',[])):time.sleep(5)
+   state['workers']=[]
+   job.update(status='PLANNING_FAILED',error=repr(error),failure_traceback=traceback.format_exc())
    publish(state)
-  else:freeze(job);publish(state)
  if not actual_barrier(state['jobs']):
   state.update(phase='PLANNING_FAILED_ACTUAL_HELD',workers=[],Actual_started=False);publish(state);return False
- freezes=[j['M4_freeze'] for j in state['jobs']];verify(freezes)
- value=dict(PASS=True,UTC=now(),freezes=freezes,days=list(c.DAYS),Actual_started_before_barrier=False,commit_sha=authority.validate()['commit_sha'])
- path=c.OPS/'ALL_31_M4_FROZEN.json'
+ ready=actual_ready(state['jobs']);freezes=[j['M4_freeze'] for j in ready];verify(freezes)
+ value=dict(PASS=True,UTC=now(),freezes=freezes,days=list(c.DAYS),ready_days=[j['day'] for j in ready],excluded_days=[dict(day=j['day'],status=j['status'],error=j.get('error')) for j in state['jobs'] if j not in ready],all_31_Planning_terminal=True,Actual_started_before_barrier=False,commit_sha=authority.validate()['commit_sha'])
+ path=c.OPS/'ALL_31_PLANNING_FINISHED.json'
  if path.exists():
   previous=read(path)
   if previous['freezes']!=freezes:raise ValueError('ALL_31_FROZEN_PLAN_DRIFT')
@@ -158,13 +168,13 @@ def planning(state,lease):
  return True
 
 def actual(state,lease):
- if not actual_barrier(state['jobs']):raise PermissionError('ALL_31_M4_REQUIRED_BEFORE_ANY_ACTUAL_DISPATCH')
- barrier=read(c.OPS/'ALL_31_M4_FROZEN.json');verify(barrier['freezes'])
- if not barrier['PASS'] or barrier['freezes']!=[j['M4_freeze'] for j in state['jobs']]:raise PermissionError('EXACT_31_FROZEN_PLAN_BARRIER_REQUIRED')
+ if not actual_barrier(state['jobs']):raise PermissionError('ALL_31_PLANNING_TERMINAL_REQUIRED_BEFORE_ACTUAL')
+ barrier=read(c.OPS/'ALL_31_PLANNING_FINISHED.json');verify(barrier['freezes'])
+ if not ready_barrier(barrier,state['jobs']):raise PermissionError('EXACT_READY_DATE_FREEZE_BARRIER_REQUIRED')
  from .requests import make
  from v44_recovery_r038.cpu import reserve_pool
  placement=read(c.DOC/'CPU_PLACEMENT.json');running={};queue=[]
- for job in state['jobs']:
+ for job in actual_ready(state['jobs']):
   item=job.get('actual')
   if item and item.get('status')=='RUNNING':
    path=Path(item['root'])/'RESULT.json';value=optional(path)
@@ -179,7 +189,7 @@ def actual(state,lease):
   # leaves its old native control queue and partial files untouched.
   queue.append(job)
  stats=state.setdefault('Actual_memory',dict(peak_process_tree_bytes=0,pilot_complete=False))
- atomic(c.ROOT/'PHASE.json',dict(lane='ACTUAL_PARALLEL',UTC=now(),max_workers=7,barrier=record(c.OPS/'ALL_31_M4_FROZEN.json')))
+ atomic(c.ROOT/'PHASE.json',dict(lane='ACTUAL_PARALLEL',UTC=now(),max_workers=7,barrier=record(c.OPS/'ALL_31_PLANNING_FINISHED.json')))
  with reserve_pool(placement,c.OPS,lease):
   while queue or running:
    for slot,(p,job,identity) in list(running.items()):
@@ -196,12 +206,18 @@ def actual(state,lease):
     if not queue or slot in running:continue
     resource=resources.admission(c.ROOT,phase='ACTUAL',running=len(running),peak=stats['peak_process_tree_bytes'],pilot_complete=stats['pilot_complete']);state['resources']=resource
     if not resource['admit']:break
-    job=queue.pop(0);request=make(job['day'],'ACTUAL',lease,freeze=job['M4_freeze'],slot=slot)
-    p,identity=launch(request);job['actual']=dict(status='RUNNING',root=request['case_root'],identity=identity);running[slot]=(p,job,identity)
+    job=queue.pop(0)
+    try:
+     request=make(job['day'],'ACTUAL',lease,freeze=job['M4_freeze'],slot=slot)
+     p,identity=launch(request);job['actual']=dict(status='RUNNING',root=request['case_root'],identity=identity);running[slot]=(p,job,identity)
+    except Exception as error:job['actual']=dict(status='FAILED',error=repr(error),traceback=traceback.format_exc())
    state.update(phase='ACTUAL_PARALLEL' if running else 'RESOURCE_WAIT_ACTUAL',workers=[v[2] for v in running.values()],Actual_started=True);publish(state);time.sleep(5)
  state.update(phase='REPORTING',workers=[]);publish(state)
  from .report import report
- report(state);state.update(phase='COMPLETE',PASS=all(j.get('actual',{}).get('status')=='PASS' for j in state['jobs']));publish(state);atomic(c.ROOT/'FINAL_RESULT.json',state)
+ report(state);state.update(phase='COMPLETE',PASS=all(j.get('actual',{}).get('status')=='PASS' for j in state['jobs']),
+  Actual_subset_PASS=all(j.get('actual',{}).get('status')=='PASS' for j in actual_ready(state['jobs'])),
+  Actual_ready_count=len(actual_ready(state['jobs'])),Planning_excluded_count=len(state['jobs'])-len(actual_ready(state['jobs'])))
+ publish(state);atomic(c.ROOT/'FINAL_RESULT.json',state)
 
 def run():
  c.OPS.mkdir(parents=True,exist_ok=True)
@@ -217,7 +233,7 @@ def run():
    b2,pointer=b2_state()
    if b2.get('phase')!='COMPLETE':
     state.update(phase='WAIT_B2',B2=dict(phase=b2.get('phase'),state_path=str(pointer),jobs=[dict(day=j['day'],status=j['status']) for j in b2.get('jobs',[])]),workers=[]);publish(state);time.sleep(30);continue
-   if state.get('phase')=='PLANNING_FAILED_ACTUAL_HELD':publish(state);time.sleep(30);continue
+   if state.get('phase')=='PLANNING_FAILED_ACTUAL_HELD':state['phase']='PLANNING_SERIAL'
    gate=ready_receipt();state['B2_release_gate']=gate
    if not gate['ready']:state['phase']='WAIT_B2_RESOURCES';publish(state);time.sleep(30);continue
    try:

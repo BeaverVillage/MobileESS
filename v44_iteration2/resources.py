@@ -10,11 +10,12 @@ def admission(root,*,phase,running=0,peak=0,pilot_complete=False):
  needed=8*G if phase=='PLANNING' else estimate
  reserve=6*G
  allowed=mem.available>=needed+reserve and disk.free>=(16*G if phase=='PLANNING' else 4*G)
- if phase=='ACTUAL' and (running>=7 or not pilot_complete and running>=1):allowed=False
+ if phase=='ACTUAL':allowed=running<7 and disk.free>=4*G
  return dict(admit=bool(allowed),phase=phase,available_RAM_bytes=mem.available,total_RAM_bytes=mem.total,
   reserve_RAM_bytes=reserve,additional_worker_RAM_estimate_bytes=needed,observed_Actual_process_tree_peak_bytes=peak,
   pilot_complete=pilot_complete,running=running,max_workers=7,free_disk_bytes=disk.free,
-  throttle='NO_NEW_DISPATCH_UNTIL_RESOURCES_RECOVER',seven_at_once_memory_validated=bool(pilot_complete and mem.available>=max(0,7-running)*estimate+reserve))
+  throttle='MAX7_AND_DISK_GUARD' if phase=='ACTUAL' else 'NO_NEW_DISPATCH_UNTIL_RESOURCES_RECOVER',
+  actual_RAM_admission_enabled=False,seven_at_once_memory_validated=False)
 
 def rss(identity):
  try:

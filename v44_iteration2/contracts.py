@@ -22,7 +22,17 @@ def full_a(result,day):
 
 def actual_barrier(rows):
  if len(rows)!=31 or {r['day'] for r in rows}!=set(DAYS):return False
- return all(r.get('status')=='PLANNING_PASS' and r.get('M4_freeze') and r.get('stages',{}).get('M4',{}).get('PASS') is True for r in rows)
+ return all(r.get('status') in ('PLANNING_FAILED','PLANNING_BLOCKED') or
+  r.get('status')=='PLANNING_PASS' and r.get('M4_freeze') and r.get('stages',{}).get('M4',{}).get('PASS') is True for r in rows)
+
+def actual_ready(rows):
+ return [r for r in rows if r.get('status')=='PLANNING_PASS' and r.get('M4_freeze') and r.get('stages',{}).get('M4',{}).get('PASS') is True]
+
+def ready_barrier(barrier,rows):
+ ready=actual_ready(rows)
+ return bool(actual_barrier(rows) and barrier.get('PASS') is True and barrier.get('all_31_Planning_terminal') is True
+  and barrier.get('days')==list(DAYS) and barrier.get('ready_days')==[j['day'] for j in ready]
+  and barrier.get('freezes')==[j['M4_freeze'] for j in ready])
 
 def b2_terminal(state,live,unreconciled):
  expected={f'2025-05-{n:02d}' for n in range(22,32)}

@@ -52,7 +52,8 @@ def authorize(commit):
   validation=record(validation),user_request=record(user),MESS_units=list(c.FLEET),
   clarification='Human confirmed existing four MESS, not eight.',explicit_user_approved=True,
   reuse_only=['A1','M1','A2'],new_stages=list(c.STAGES),B1_new_run=False,
-  B2_must_finish_and_release_all_resources=True,Actual_requires_31_verified_M4=True,max_Actual_workers=7,
+  B2_must_finish_and_release_all_resources=True,Actual_requires_31_verified_M4=False,max_Actual_workers=7,
+  Actual_requires_all31_Planning_terminal=True,Actual_only_verified_M4_dates=True,Planning_error_continue_next_date=True,
   equipment_version=c.EQUIPMENT,algorithm='ORIGINAL_V44_R043',budgets=dict(K48=300,Joint=900,Joint_call=300,A=5400,A_PhaseI=1500),
   gaps=dict(M=.03,A=.005),threads=dict(A_Native=1,M_Native=4,Actual=1)))
  fresh=c.OPS/'FRESH_START.json'

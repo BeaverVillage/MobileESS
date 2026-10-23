@@ -14,6 +14,13 @@ def mresult(day='2025-05-01'):
  return dict(day=day,arm='B3',stage='M2',FULL_feasible=True,upper=dict(FULL_validated=True),M_stage_execution_PASS=True,allow_downstream=True,case_sha=p['case_sha'],MESS_plan=p)
 
 class Contracts(unittest.TestCase):
+ def test_ready_subset_barrier_requires_all31_terminal_and_exact_freezes(self):
+  rows=[dict(day=d,status='PLANNING_FAILED',stages={}) for d in c.DAYS]
+  rows[2].update(status='PLANNING_PASS',M4_freeze={'path':'exact'},stages=dict(M4=dict(PASS=True)))
+  b=dict(PASS=True,all_31_Planning_terminal=True,days=list(c.DAYS),ready_days=[rows[2]['day']],freezes=[rows[2]['M4_freeze']])
+  self.assertTrue(contracts.ready_barrier(b,rows));self.assertEqual(contracts.actual_ready(rows),[rows[2]])
+  rows[-1]['status']='QUEUED';self.assertFalse(contracts.ready_barrier(b,rows));rows[-1]['status']='PLANNING_FAILED'
+  self.assertFalse(contracts.ready_barrier(dict(b,freezes=[]),rows))
  def test_four_unit_contract_and_no_old_A_optimum(self):
   result=mresult();contracts.full_m(result,'2025-05-01');bad=copy.deepcopy(result);bad['MESS_plan']['P_kW']['MESS05']=[0.]*96;bad['MESS_plan']['plan_sha']=digest({k:v for k,v in bad['MESS_plan'].items() if k!='plan_sha'})
   with self.assertRaises(ValueError):contracts.full_m(bad,'2025-05-01')
@@ -43,13 +50,16 @@ class Contracts(unittest.TestCase):
   raw['physical_steps'][119]['full_physical']['transformers'][0].update(kVA=830.,loading_pu=830/825);self.assertFalse(physical(raw)['PASS'])
   with self.assertRaises(ValueError):physical(dict(raw,physical_steps=raw['physical_steps'][24:]))
 
- def test_resources_pilot_max7_and_RAM_disk_block(self):
+ def test_actual_up_to7_without_pilot_or_RAM_gate_with_disk_guard(self):
   G=2**30
   with patch.object(resources.psutil,'virtual_memory',return_value=SimpleNamespace(total=32*G,available=30*G)),patch.object(resources.shutil,'disk_usage',return_value=SimpleNamespace(free=40*G)):
-   self.assertTrue(resources.admission('D:/',phase='ACTUAL')['admit']);self.assertFalse(resources.admission('D:/',phase='ACTUAL',running=1)['admit'])
+   self.assertTrue(resources.admission('D:/',phase='ACTUAL')['admit']);self.assertTrue(resources.admission('D:/',phase='ACTUAL',running=1)['admit'])
    self.assertFalse(resources.admission('D:/',phase='ACTUAL',running=7,pilot_complete=True)['admit']);self.assertTrue(resources.admission('D:/',phase='ACTUAL',running=6,pilot_complete=True)['admit'])
   with patch.object(resources.psutil,'virtual_memory',return_value=SimpleNamespace(total=32*G,available=7*G)),patch.object(resources.shutil,'disk_usage',return_value=SimpleNamespace(free=40*G)):
-   self.assertFalse(resources.admission('D:/',phase='ACTUAL',pilot_complete=True)['admit'])
+   self.assertTrue(resources.admission('D:/',phase='ACTUAL',pilot_complete=True)['admit'])
+   self.assertFalse(resources.admission('D:/',phase='PLANNING')['admit'])
+  with patch.object(resources.psutil,'virtual_memory',return_value=SimpleNamespace(total=32*G,available=30*G)),patch.object(resources.shutil,'disk_usage',return_value=SimpleNamespace(free=G)):
+   self.assertFalse(resources.admission('D:/',phase='ACTUAL')['admit'])
 
 class ArchiveIO(unittest.TestCase):
  def test_new_dated_index_and_equipment_member_are_read_without_extraction(self):
@@ -243,13 +253,14 @@ class CheckpointRepair(unittest.TestCase):
    self.assertFalse(result['PASS']);self.assertIn('synthetic checkpoint',result['error']);self.assertNotIn('checkpoint',result)
 
 class SupervisorOrdering(unittest.TestCase):
- def exercise(self,root,fail=None):
+ def exercise(self,root,fail=None,explode=False):
   from v44_iteration2 import supervisor as s
   real_read=s.read;calls=[];counts={};state=s.initial();catalogue=[]
   for day in c.DAYS:
    p=root/'original'/day/'A2/RESULT.json';atomic(p,{})
    catalogue.append(dict(day=day,A1='oldA1',M1='oldM1',A2=str(p.parent),evidence=[record(p)]))
   def make(day,stage,lease,**kw):
+   if explode and (day,stage)==fail:raise RuntimeError('synthetic request failure')
    counts[day]=counts.get(day,0)+1
    return dict(day=day,iteration_stage=stage,case_root=str(root/day/'B3'/f'attempt{counts[day]:03d}'))
   def launch(q):
@@ -273,16 +284,47 @@ class SupervisorOrdering(unittest.TestCase):
    state,calls,passed=self.exercise(Path(folder))
    self.assertTrue(passed);self.assertEqual(calls,[(d,s) for d in c.DAYS for s in c.STAGES]);self.assertTrue(contracts.actual_barrier(state['jobs']))
 
- def test_one_failed_stage_continues_other_dates_but_holds_every_actual(self):
+ def test_one_failed_stage_continues_through31_then_actual_only_ready_dates(self):
   with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
    state,calls,passed=self.exercise(Path(folder),('2025-05-02','A3'))
-   self.assertFalse(passed);self.assertIn(('2025-05-03','M2'),calls);self.assertNotIn(('2025-05-02','M3'),calls)
-   self.assertEqual(state['phase'],'PLANNING_FAILED_ACTUAL_HELD');self.assertFalse((Path(folder)/'OPS/ALL_31_M4_FROZEN.json').exists())
+   self.assertTrue(passed);self.assertIn(('2025-05-31','M4'),calls);self.assertNotIn(('2025-05-02','M3'),calls)
+   barrier=read(Path(folder)/'OPS/ALL_31_PLANNING_FINISHED.json')
+   self.assertEqual(len(barrier['freezes']),30);self.assertNotIn('2025-05-02',barrier['ready_days'])
+   self.assertEqual(len(contracts.actual_ready(state['jobs'])),30)
 
  def test_actual_entry_rejects_any_missing_M4_before_launch(self):
   from v44_iteration2 import supervisor as s
   with patch.object(s,'launch') as launch:
    with self.assertRaises(PermissionError):s.actual(s.initial(),{})
    launch.assert_not_called()
+
+ def test_request_exception_skips_date_and_still_reaches_may31(self):
+  with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
+   state,calls,passed=self.exercise(Path(folder),('2025-05-02','A3'),explode=True)
+   self.assertTrue(passed);self.assertIn(('2025-05-31','M4'),calls)
+   self.assertEqual(state['jobs'][1]['status'],'PLANNING_FAILED')
+
+ def test_actual_dispatches_seven_and_only_ready_dates_after_all_planning(self):
+  from contextlib import nullcontext
+  from v44_iteration2 import supervisor as s
+  from v44_iteration2.report import report
+  from v44_recovery_r038 import cpu
+  with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
+   root=Path(folder);ops=root/'OPS';doc=root/'DOC';atomic(doc/'CPU_PLACEMENT.json',{})
+   jobs=[dict(day=d,status='PLANNING_FAILED',stages={}) for d in c.DAYS]
+   for j in jobs[:8]:
+    p=root/(j['day']+'.json');atomic(p,{})
+    j.update(status='PLANNING_PASS',M4_freeze=record(p),stages=dict(M4=dict(PASS=True)))
+   ready=contracts.actual_ready(jobs)
+   atomic(ops/'ALL_31_PLANNING_FINISHED.json',dict(PASS=True,all_31_Planning_terminal=True,days=list(c.DAYS),ready_days=[j['day'] for j in ready],freezes=[j['M4_freeze'] for j in ready]))
+   launched=[];counts=[];state=dict(jobs=jobs)
+   def make(day,stage,lease,**kw):return dict(day=day,case_root=str(root/day),slot=kw['slot'])
+   def launch(q):
+    launched.append(q);p=Path(q['case_root']);atomic(p/'RESULT.json',dict(PASS=True))
+    return SimpleNamespace(poll=lambda:0,returncode=0),dict(pid=0,process_created=0,root=str(p))
+   with patch.object(c,'ROOT',root),patch.object(c,'OPS',ops),patch.object(c,'DOC',doc),patch.object(requests,'make',make),patch.object(s,'launch',launch),patch.object(s,'publish',lambda v:counts.append(len(v.get('workers',[])))),patch.object(s.time,'sleep',lambda n:None),patch.object(cpu,'reserve_pool',lambda *a:nullcontext()),patch('v44_iteration2.report.report',lambda v:None),patch.object(resources,'admission',lambda *a,**kw:dict(admit=kw['running']<7)):
+    s.actual(state,{})
+   self.assertEqual([q['day'] for q in launched],[j['day'] for j in ready]);self.assertEqual(max(counts),7)
+   self.assertEqual(state['Actual_ready_count'],8);self.assertTrue(state['Actual_subset_PASS'])
 
 if __name__=='__main__':unittest.main()

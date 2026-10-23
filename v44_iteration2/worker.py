@@ -93,8 +93,9 @@ def actual_case(request):
  from v44_recovery_r038.cpu import actual_slot
  from v42_may_campaign_native90.preflight import native_zero
  from .audit import validate_actual
- barrier=read(c.OPS/'ALL_31_M4_FROZEN.json');verify(barrier['freezes'])
- if len(barrier['freezes'])!=31 or not barrier['PASS']:raise PermissionError('ALL_31_DAY_ACTUAL_BARRIER_REQUIRED')
+ from .contracts import ready_barrier
+ barrier=read(c.OPS/'ALL_31_PLANNING_FINISHED.json');verify(barrier['freezes'])
+ if not ready_barrier(barrier,read(c.ROOT/'STATE.json')['jobs']):raise PermissionError('ALL_31_TERMINAL_AND_READY_SUBSET_BARRIER_REQUIRED')
  freeze=read(request['M4_freeze']['path']);verify(freeze['evidence'])
  if freeze['day']!=request['day'] or request['M4_freeze'] not in barrier['freezes']:raise ValueError('M4_DAY_OR_BARRIER_DRIFT')
  root=Path(request['case_root']);root.mkdir(parents=True,exist_ok=False)

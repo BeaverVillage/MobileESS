@@ -21,6 +21,6 @@ foreach ($mode in @('run')) {
  }
  $action=New-ScheduledTaskAction -Execute $pythonExe -Argument "-B -X utf8 -u -m v44_iteration2 --$mode" -WorkingDirectory $repoFolder
  $trigger=New-ScheduledTaskTrigger -AtLogOn -User ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name)
- Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description 'Independent V44_iteration2 B3 May01-31. Wait for final B2 completion, dead PIDs, released locks and reconciled ledgers; all31 M4 barrier; original scientific engines; rolling Actual max7 with RAM gate.' | Out-Null
+ Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description 'Independent V44_iteration2 B3 May01-31. Wait for final B2 completion, dead PIDs, released locks and reconciled ledgers; all31 Planning terminal barrier; failed dates skipped; original scientific engines; verified ready-date Actual max7.' | Out-Null
  Start-ScheduledTask -TaskName $taskName
 }
