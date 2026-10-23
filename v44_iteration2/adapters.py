@@ -27,6 +27,10 @@ def bindings():
  from v44_recovery_r036 import operations as raw36
  from v44_recovery_r037 import operations as raw37
  with base.bindings(),period(c.DAYS),ExitStack() as stack:
+  from .history import verify_historical
+  # Accepted parents retain their original controller receipts. Only exact
+  # archived source bytes may resolve a historical receipt; data stays strict.
+  stack.enter_context(patch.object(daily,'verify',verify_historical))
   for module in (daily,inputs,public_inputs,a2_cache):stack.enter_context(patch.object(module,'DOC',c.DOC))
   for module in (inputs,public_inputs):stack.enter_context(patch.object(module,'DAYS',c.DAYS))
   native_runtime=c.ROOT/'NATIVE_RUNTIME'

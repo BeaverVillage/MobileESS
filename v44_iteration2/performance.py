@@ -3,6 +3,7 @@ from contextlib import contextmanager,ExitStack
 from pathlib import Path
 from unittest.mock import patch
 import hashlib,inspect,linecache,textwrap,os
+import json
 import numpy as np
 import scipy.sparse as sp
 from fractions import Fraction
@@ -12,6 +13,30 @@ from .io import atomic,record,read,now
 MAX_CLASSES=12
 MAX_COLUMNS_PER_CLASS=20000
 MAX_TOTAL_COLUMNS=200000
+
+def streaming_domain_digest(value):
+ """Byte-identical canonical SHA without a giant joined JSON string."""
+ h=hashlib.sha256()
+ if type(value) is list:
+  h.update(b'[')
+  for offset in range(0,len(value),4096):
+   if offset:h.update(b',')
+   # Keep the source C encoder fast, but serialize at most4096 items. Each
+   # batch loses only its outer brackets; list element bytes stay canonical.
+   batch=json.dumps(value[offset:offset+4096],sort_keys=True,separators=(',',':'),default=str,allow_nan=False)
+   h.update(batch[1:-1].encode())
+  h.update(b']');return h.hexdigest()
+ encoder=json.JSONEncoder(sort_keys=True,separators=(',',':'),default=str,allow_nan=False)
+ for chunk in encoder.iterencode(value):h.update(chunk.encode())
+ return h.hexdigest()
+
+def domain_digest_code():
+ from v42_a_stage_domain_v2 import domain
+ if domain.digest.__code__ is streaming_domain_digest.__code__:return streaming_domain_digest.__code__
+ source=textwrap.dedent(inspect.getsource(domain.digest))
+ if source.count('json.dumps(')!=1 or 'allow_nan=False' not in source or "separators=(',', ':')" not in source:
+  raise ValueError('ORIGINAL_DOMAIN_DIGEST_CANONICAL_SCHEMA_DRIFT')
+ return streaming_domain_digest.__code__
 
 def selected(request):
  return request.get('arm')=='B3' and request.get('stage')=='A2' and request.get('iteration_stage') in ('A3','A4') and request.get('day') in c.DAYS
@@ -94,9 +119,12 @@ def scope():
  from v42_a_stage_canary import pricing
  # Imported aliases and routed function copies retain this code object.
  function=pricing.full_pricing;previous=function.__code__;compiled=pricing_code(function)
+ from v42_a_stage_domain_v2 import domain
+ digest_function=domain.digest;old_digest=digest_function.__code__;digest_code=domain_digest_code()
  storage=MatrixStorage(c.ROOT);save=sp.save_npz
  try:
   function.__code__=compiled
+  digest_function.__code__=digest_code
   with ExitStack() as stack:
    # The selective A body can bypass worker.a_stage's legacy request stack.
    # Its compiler now binds directly below; suppress duplicate legacy binding.
@@ -107,5 +135,6 @@ def scope():
    yield storage
  finally:
   function.__code__=previous
+  digest_function.__code__=old_digest
   atomic(c.OPS/'PERFORMANCE_LAST_WORKER.json',dict(UTC=now(),existing_complete_graph_promotion_all31_A3_A4=True,maximum_classes=MAX_CLASSES,maximum_columns_per_class=MAX_COLUMNS_PER_CLASS,maximum_total_promoted_columns=MAX_TOTAL_COLUMNS,
    sparse_coupling_rows_extracted_once_per_round=True,all_native_oracles_and_exact_certificates_retained=True,storage=storage.report()))

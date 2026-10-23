@@ -19,8 +19,10 @@ def repair_source_bridge(parent,old,request):
   return row
  failure=read(Path(parent)/'RESULT.json')
  diagnosed=row.get('diagnosed_error',"ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')")
- allowed=("ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')","ValueError('R029_NUMERICAL_OPTIMALITY_OR_PRIOR_POINT_DOMINANCE_NOT_VERIFIED')")
+ allowed=("ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')","ValueError('R029_NUMERICAL_OPTIMALITY_OR_PRIOR_POINT_DOMINANCE_NOT_VERIFIED')",'MemoryError()')
  if diagnosed not in allowed or failure.get('error')!=diagnosed:raise PermissionError('REPAIR_REQUIRES_EXACT_DIAGNOSED_P1_FAILURE')
+ if diagnosed=='MemoryError()' and not (row.get('core_failure') and policy.get('exact_canonical_domain_digest_streaming') is True and 'active_key_sha256=digest(sorted(self.active_keys))' in failure.get('traceback','') and "in encode" in failure.get('traceback','')):
+  raise PermissionError('ONLY_EXACT_DIAGNOSED_DOMAIN_JSON_ALLOCATION_FAILURE')
  if row.get('core_failure'):
   verify([row['core_failure']])
   if record(Path(parent)/'RESULT.json')!=row['core_failure']:raise PermissionError('REPAIR_FAILURE_RECEIPT_DRIFT')
@@ -28,7 +30,11 @@ def repair_source_bridge(parent,old,request):
  return row
 
 def phase_account(parent):
- parent=Path(parent);ledger=read(parent/'NATIVE_RUNTIME_LEDGER.json');saved=read(parent/'OUTPUT/PHASE_I_NATIVE_BUDGET.json')
+ parent=Path(parent);ledger=read(parent/'NATIVE_RUNTIME_LEDGER.json');phase=parent/'OUTPUT/PHASE_I_NATIVE_BUDGET.json'
+ if not phase.exists():
+  if ledger['calls'] or ledger['inflight'] is not None or ledger['measured_Native_Runtime']!=0:raise ValueError('MISSING_PAID_PHASE_I_ACCOUNT')
+  return dict(used=0.,calls=[])
+ saved=read(phase)
  calls=[];cursor=0
  # A continued account contains old P1 calls BEFORE its new Phase I. Read
  # the exact persisted Phase-I subaccount, then prove it against the full
@@ -104,3 +110,18 @@ def a_scope(parent,request):
 def m_request(parent,request):
  receipt=admit(parent,request)
  return receipt
+
+def entry_repair(folder,stage,day,parent):
+ """Retry only a proved pre-Native M parent-reader failure."""
+ from v44.checkpoints import assert_dead
+ folder=Path(folder);assert_dead(folder)
+ auth=read(c.OPS/'AUTHORIZATION.json');reference=auth['repair_permit'];verify([reference])
+ row=next((r for r in read(reference['path']).get('resumable_M_entries',[]) if r['day']==day and r['stage']==stage and Path(r['folder'])==folder),None)
+ if row is None:raise PermissionError('EXPLICIT_ZERO_NATIVE_M_ENTRY_REPAIR_REQUIRED')
+ verify([row['old_request'],row['failure']]);request=read(row['old_request']['path']);failure=read(row['failure']['path'])
+ if (request['fixed_parent_receipt']!=parent or request['iteration_stage']!=stage or request['day']!=day
+     or not failure.get('error','').startswith("ValueError('SOURCE_SHA_DRIFT:")):
+  raise PermissionError('EXACT_SOURCE_READER_FAILURE_AND_PARENT_REQUIRED')
+ if list(folder.rglob('*LEDGER.json')) or (folder/c.CORE_STAGE[stage]/'request.json').exists():
+  raise PermissionError('ENTRY_REPAIR_CANNOT_RESET_ANY_ALLOCATED_NATIVE_ACCOUNT')
+ return row

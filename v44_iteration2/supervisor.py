@@ -123,7 +123,11 @@ def planning_day(state,lease,job,row):
     # no public terminal receipt may resume only a reconciled exact account.
     if item.get('status') in ('FAILED','ENTRY_FAILED'):
      job.update(status='PLANNING_FAILED',error=item.get('error',repr(error)));break
-    try:resume=stage_resume(folder,stage,day,parent)
+    try:
+     if item.get('status')=='ENTRY_REPAIR_PENDING':
+      from .resume import entry_repair
+      entry_repair(folder,stage,day,parent);resume=None
+     else:resume=stage_resume(folder,stage,day,parent)
     except Exception as reason:
      job.update(status='PLANNING_BLOCKED',error=repr(reason));item.update(status='BLOCKED',error=repr(reason));publish(state);break
   else:resume=None

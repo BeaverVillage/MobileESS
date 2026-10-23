@@ -21,3 +21,11 @@ def requeue(state):
    original_failure=deepcopy(item),original_job_error=job.get('error'),repair_permit=reference,Native_budget_reset=False))
   item.update(status='REPAIR_PENDING',PASS=False,diagnosed_repair=True)
   job.update(status='REPAIR_QUEUED');job.pop('error',None)
+ for repair in permit.get('resumable_M_entries',[]):
+  job=next(j for j in state['jobs'] if j['day']==repair['day']);item=job.get('stages',{}).get(repair['stage'])
+  if not item or Path(item['root'])!=Path(repair['folder']):continue
+  if any(h.get('entry_folder')==repair['folder'] for h in job.get('repair_history',[])):continue
+  if item['status'] not in ('FAILED','ENTRY_FAILED') or job['status']!='PLANNING_FAILED':raise ValueError('ENTRY_REPAIR_REQUIRES_TERMINAL_FAILURE')
+  verify([repair['old_request'],repair['failure']])
+  job.setdefault('repair_history',[]).append(dict(UTC=now(),entry_folder=repair['folder'],original_failure=deepcopy(item),repair_permit=reference,Native_budget_reset=False))
+  item.update(status='ENTRY_REPAIR_PENDING',PASS=False);job.update(status='REPAIR_QUEUED');job.pop('error',None)
