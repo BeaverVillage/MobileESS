@@ -9,15 +9,13 @@ def write(path,value):
  path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(value),encoding='utf8')
 
 class RuntimeTests(unittest.TestCase):
- def test_history_cached_but_active_overlay_runs_each_refresh(self):
+ def test_snapshot_reads_iteration2_only_without_querying_historical_campaigns(self):
   from unittest.mock import patch
-  import active_equipment_overlay
-  s=monitor_service;before=(s._history_key,s._history_view);s._history_key=s._history_view=None
-  try:
-   with patch.object(s.binding,'atomic'),patch.object(s.binding,'optional',return_value=dict(B3_fixed_recovery_PASS=True,original_batch=dict(sha256='fixed'))),patch.object(s.binding,'view',return_value=dict(immutable='history')) as view,patch.object(active_equipment_overlay,'apply',side_effect=lambda value,alive:dict(value,current=True)) as overlay:
-    self.assertTrue(s.snapshot()['current']);self.assertTrue(s.snapshot()['current'])
-    self.assertEqual(view.call_count,1);self.assertEqual(overlay.call_count,2)
-  finally:s._history_key,s._history_view=before
+  import iteration2_details
+  s=monitor_service
+  with patch.object(s.binding,'optional',side_effect=AssertionError('OLD_JOURNAL_READ_FORBIDDEN')),patch.object(s.binding,'view',side_effect=AssertionError('OLD_VIEW_FORBIDDEN')),patch.object(iteration2_details,'apply',side_effect=lambda value,alive:dict(current=True,original_input=value)) as current:
+   self.assertTrue(s.snapshot()['current']);self.assertTrue(s.snapshot()['current'])
+   self.assertEqual(current.call_count,2);self.assertEqual(current.call_args.args[0],{})
  def fixture(self,root):
   case=root/'2025-05-22/B2/attempt003';ctx=dict(arm='B2',stage='M1',source_sha='exact',stage_case_sha='same825')
   write(case/'START.json',dict(pid=3,process_created=30))

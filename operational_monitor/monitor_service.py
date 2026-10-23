@@ -2,7 +2,7 @@
 from pathlib import Path
 from datetime import datetime,timezone
 from copy import deepcopy
-import argparse,json,os,sys,time,threading,traceback
+import argparse,json,os,sys,time,threading,traceback,re
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 import psutil
 
@@ -99,56 +99,46 @@ def normalize(value,campaign,batch,lease,alive=same_process):
         value['solver_note']='\n'.join(lines)
     return value
 
-_history_key=None
-_history_view=None
-
 def snapshot():
-    global _history_key,_history_view
-    pointer=binding.optional(Path('D:/MobileESS_V44/runtime/ACTIVE_CAMPAIGN.json'))
-    equipment=binding.optional(Path('D:/MobileESS_V44/runtime/ACTIVE_EQUIPMENT_LEDGER.json'))
-    campaign=Path(pointer['root']) if pointer.get('root') else None
-    batch=binding.campaign_batch(campaign) if campaign else {}
-    # Historical arms are explicitly protected/frozen during this follow-up.
-    # Read that expensive completed view once; the active overlay below still
-    # reads every current B2 journal and independent verdict on every refresh.
-    key=(str(campaign),equipment.get('original_batch',{}).get('sha256'),json.dumps(batch,sort_keys=True)) if equipment.get('B3_fixed_recovery_PASS') else None
-    if key is None or key!=_history_key or _history_view is None:
-        cache=binding.optional(HOME/'HISTORICAL_VIEW_CACHE.json')
-        if key is not None and cache.get('key')==list(key) and cache.get('value'):
-            value=cache['value']
-            value['historical_cache_UTC']=cache.get('UTC')
-        else:
-            value=binding.view(binding.RUNS/'monitor')
-            if campaign:value=normalize(value,campaign,batch,binding.optional(campaign/'COORDINATOR_LEASE.json'))
-            if key is not None:binding.atomic(HOME/'HISTORICAL_VIEW_CACHE.json',dict(key=list(key),value=value,UTC=now(),scope='Frozen completed history only; current runtime is always overlaid from live journals'))
-        if key is not None:_history_key,_history_view=key,value
-    else:value=_history_view
-    from active_equipment_overlay import apply
-    value=apply(value,same_process)
+    # The same server now reads ONLY the active iteration2 journals. Old r043
+    # snapshots and B0/B1/B2 comparison results cannot leak into this response.
     from iteration2_details import apply as iteration_details
-    value=iteration_details(value,same_process)
+    value=iteration_details({},same_process)
     memory=psutil.virtual_memory();value['ram']=f'여유 {memory.available/2**30:.1f} / {memory.total/2**30:.1f} GB'
     return value
 
 def index():
     page=binding.existing_index()
     if isinstance(page,bytes):page=page.decode('utf8')
-    if Path('D:/MobileESS_V44/runtime/ACTIVE_EQUIPMENT_LEDGER.json').exists():
-        page=page.replace('2025.05.22 — 05.31 · Planning 1 worker → Actual 최대 7 workers','2025.05.22 — 05.31 · B3 고정계획 825 kVA 검증 · B2 1 worker 순차')
-        page=page.replace('완료 Native / 예산','Native 사용량 / 예산').replace('마지막 제어 보고 ','마지막 단계 보고 ')
-        counter="Number.isInteger(row.completed_control_ticks)?row.completed_control_ticks.toLocaleString()+'회':'수신 대기'"
-        page=page.replace(counter,'row.control_tick_text||('+counter+')')
-        page=page.replace('</style>',
-            '.budget{flex-wrap:wrap;gap:8px}.budget>*{min-width:0;overflow-wrap:anywhere}#used{font-size:15px}.budget .remaining{font-size:18px}'
-            '@media(max-width:600px){.budget{align-items:flex-start;flex-direction:column}}</style>',1)
-    # Extend the SAME original DOM/refresh/endpoint, with no second server.
+    # Edit the existing template/cards/refresh loop in place; no second page,
+    # endpoint or monitor. Remove the historical comparison card entirely.
+    for pattern,replacement in (
+        (r'<title>.*?</title>','<title>V44_iteration2 · 2025년 5월</title>'),
+        (r'<h1>.*?</h1>','<h1>V44_iteration2 · 5월 캠페인</h1>'),
+        (r'(<header><div><h1>.*?</h1>)<p>.*?</p>',r'\1<p>2025.05.01 — 05.31 · M2 → A3 → M3 → A4 → M4 → Actual / Fresh120</p>'),
+        (r'<section id="case-loading-card".*?</section>',''),
+        (r'function renderCaseLoading\(data\)\{.*?(?=function renderStageBounds)','')):
+        page,count=re.subn(pattern,replacement,page,count=1,flags=re.S)
+        if count!=1:raise ValueError('EXISTING_ITERATION2_TEMPLATE_ANCHOR_DRIFT:'+pattern)
+    page=page.replace('renderCaseLoading(s.case_line_loading);','')
+    page=page.replace('현재 캠페인 단계 진행','iteration2 · 31일 완료 현황').replace('— / 1일','— / 31일')
+    page=page.replace('현재 Case 단계별 UB · LB','현재 날짜 · iteration2 단계별 UB / LB')
+    page=page.replace('날짜 · 비교군','날짜 · iteration2').replace('날짜 비교군별 준비 및 Actual','iteration2 날짜별 준비 및 Actual')
+    page=page.replace('완료 Native / 예산','Native 사용량 / 예산').replace('마지막 제어 보고 ','마지막 단계 보고 ')
+    page=page.replace('Fresh96','Fresh120').replace('Fresh AC96','Fresh AC120')
+    page=page.replace('<div id="steps"', '<p id="iteration2-policy" class="muted" style="margin-top:10px;line-height:1.8"></p><p id="iteration2-phase" class="muted" style="line-height:1.8"></p><div id="steps"',1)
+    page=page.replace('</style>',
+        '.budget{flex-wrap:wrap;gap:8px}.budget>*{min-width:0;overflow-wrap:anywhere}#used{font-size:15px}.budget .remaining{font-size:18px}'
+        '.iteration2-stage-table td{min-width:110px;vertical-align:top}.iteration2-stage-table small{display:block;margin-top:5px}'
+        '.iteration2-stage-table details>div{margin-top:6px}.iteration2-stage-table{font-variant-numeric:tabular-nums}'
+        '@media(max-width:600px){.budget{align-items:flex-start;flex-direction:column}}</style>',1)
     detail=(HOME/'iteration2_details.html').read_text(encoding='utf8')
     script=(HOME/'iteration2_details.js').read_text(encoding='utf8')
     if page.count('<footer>')!=1 or page.count('async function refresh(){')!=1:raise ValueError('EXISTING_MONITOR_DETAIL_ANCHOR_DRIFT')
     page=page.replace('<footer>',detail+'\n<footer>')
     page=page.replace('async function refresh(){',script+'\nasync function refresh(){')
     page=page.replace('renderActualTicks(s.actual_tick_details);','renderActualTicks(s.actual_tick_details);\nrenderIteration2(s.iteration2_details);')
-    page=page.replace('V44 r043 · 5월 8~14일 캠페인','V44 r043 · 5월 캠페인').replace('V44 · 5월 캠페인','V44 r043 · 5월 캠페인')
+    if 'r043' in page or 'case-loading-body' in page:raise ValueError('HISTORICAL_MONITOR_UI_LEAK')
     return page.encode('utf8')
 
 class SnapshotStore:
@@ -173,14 +163,11 @@ class SnapshotStore:
 def _run(port=8795):
     store=SnapshotStore()
     def refresh_loop():
-      from archive_reads import reader
-      reader.refresh()
-      with reader.scope():
         while True:
             started=time.monotonic()
-            try:reader.refresh();store.refresh()
+            try:store.refresh()
             except Exception as error:
-                binding.atomic(HOME/'ARCHIVE_READ_ERROR.json',dict(UTC=now(),error=repr(error),traceback=traceback.format_exc()))
+                binding.atomic(HOME/'ITERATION2_READ_ERROR.json',dict(UTC=now(),error=repr(error),traceback=traceback.format_exc()))
                 with store.lock:store.error=repr(error)
             time.sleep(max(.05,1-(time.monotonic()-started)))
     threading.Thread(target=refresh_loop,name='read_only_snapshot',daemon=True).start()

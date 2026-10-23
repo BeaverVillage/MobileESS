@@ -18,11 +18,12 @@ class ExistingMonitorDetails(unittest.TestCase):
    supervisor=dict(pid=1,process_created=1),lease=dict(pid=3,process_created=3),UTC=datetime.now(timezone.utc).isoformat(),commit_sha='sealed')
   write(root/'STATE.json',state);return state
 
- def test_B2_remains_primary_with_31_followup_rows(self):
+ def test_old_live_B2_fields_cannot_leak_into_iteration2_even_while_waiting(self):
   with tempfile.TemporaryDirectory() as d,patch.object(view,'ROOT',Path(d)):
    self.state(Path(d));old=dict(day='2025-05-25 B2',stage='M1',worker_PID=100,workers=[dict(pid=100)],worker_alive=True,coordinator_alive=True,active_state_source='B2/state',used_text='K48 300s',cases=[dict(arm='B3',status='PASS')]);before=deepcopy(old)
    out=view.apply(old,lambda who:True)
-   for k in old:self.assertEqual(out[k],old[k])
+   self.assertEqual(out['active_experiment'],'V44_iteration2');self.assertNotIn('cases',out);self.assertNotIn('case_line_loading',out)
+   self.assertNotEqual(out['day'],old['day']);self.assertEqual(out['workers'],[]);self.assertIsNone(out['worker_PID'])
    self.assertEqual(old,before);self.assertEqual(len(out['iteration2_details']['rows']),31);self.assertEqual(out['iteration2_details']['planning_pass'],0);self.assertEqual(len(out['iteration2_details']['slots']),7)
 
  def test_user_stop_is_explicit_and_has_no_live_workers(self):
@@ -65,15 +66,41 @@ class ExistingMonitorDetails(unittest.TestCase):
    s['workers']=[dict(who,day='2025-05-01',stage='M3',root=str(case))];s['jobs'][0]['stages']['M3']=dict(status='RUNNING',root=str(case));write(root/'STATE.json',s)
    old=dict(worker_alive=False,coordinator_alive=False,cases=[dict(arm='B0',status='COMPLETE')],case_line_loading=dict(rows=[dict(day='old',cells=[])]))
    out=view.apply(old,lambda w:w.get('pid') in (1,2,3))
-   self.assertEqual(out['stage'],'M3');self.assertEqual(out['arm'],'B3');self.assertEqual(out['worker_PID'],2);self.assertIn('Joint 90.0',out['used_text']);self.assertEqual(out['case_line_loading'],old['case_line_loading']);self.assertEqual(out['cases'],old['cases'])
+   self.assertEqual(out['stage'],'M3');self.assertEqual(out['arm'],'B3');self.assertEqual(out['worker_PID'],2);self.assertIn('Joint 90.0',out['used_text']);self.assertNotIn('case_line_loading',out);self.assertNotIn('cases',out)
+   current=out['iteration2_details']['rows'][0]['stages'][2];self.assertEqual(current['Native_seconds'],390.);self.assertEqual(current['LB'],.5)
    self.assertEqual(out['actual_tick_details']['total'],31);self.assertEqual(out['actual_tick_details']['rows'][0]['active_stage'],'M3');self.assertEqual(out['actual_tick_details']['rows'][0]['pid'],2)
    write(case/'START.json',dict(pid=999,process_created=2));out=view.apply(old,lambda w:w.get('pid') in (1,2,3));self.assertFalse(out['worker_alive']);self.assertIsNone(out['worker_PID'])
 
- def test_original_DOM_fetch_and_r043_identity_extended_in_place(self):
+ def test_existing_DOM_and_one_refresh_retained_with_only_iteration2_identity(self):
   page=monitor_service.index().decode('utf8')
-  for name in ('case-loading-body','actual-ticks-body','bounds-history-body','iteration2-days','iteration2-workers'):
+  for name in ('actual-ticks-body','bounds-history-body','iteration2-days','iteration2-workers','iteration2-policy','iteration2-phase','day','used','inc'):
    self.assertEqual(page.count('id="'+name+'"'),1)
-  self.assertIn('<h1>V44 r043 · 5월 캠페인</h1>',page);self.assertEqual(page.count("fetch('/api/status'"),1)
+  self.assertIn('<h1>V44_iteration2 · 5월 캠페인</h1>',page);self.assertEqual(page.count("fetch('/api/status'"),1)
+  for old in ('r043','case-loading-card','case-loading-body','renderCaseLoading','후속 캠페인','<th scope="col">B0</th>','Fresh96'):self.assertNotIn(old,page)
   self.assertEqual(page.count('renderIteration2(s.iteration2_details);'),1);self.assertNotIn('8796',page);self.assertNotIn('<iframe',page)
+
+ def test_phase_I_tiny_positive_Phi_remains_nonzero_and_budget_is_separate(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d);out=root/'OUTPUT';write(out/'PHASE_I_TRACE.json',dict(trajectory=[dict(exact_Phi='1/50000000',solve=42)],activation_rounds=3))
+   write(out/'PHASE_I_NATIVE_BUDGET.json',dict(Native_seconds=123.,phase_I_active=True))
+   p=view.phase_one(root);self.assertEqual(p['Phi'],2e-8);self.assertFalse(p['zero_PASS']);self.assertEqual(p['Native_seconds'],123.)
+   self.assertEqual(p['zero_threshold'],1e-8);self.assertEqual(p['limit'],1500.)
+   write(out/'PHASE_I_ZERO_CERTIFICATE.json',dict(PASS=True));self.assertTrue(view.phase_one(root)['zero_PASS'])
+
+ def test_completed_M_cannot_display_PASS_without_actual_voltage_proofs(self):
+  with tempfile.TemporaryDirectory() as d,patch.object(view,'ROOT',Path(d)):
+   root=Path(d);core=root/'M2/RESULT.json';public=root/'RESULT.json'
+   value=dict(FULL_feasible=True,case_sha='new');write(core,value)
+   p=dict(PASS=True,original_FULL_PASS=True,stage='M2',day='2025-05-01',core_result=receipt(core));write(public,p)
+   item=dict(status='PASS',result=receipt(public));self.assertEqual(view.stage('2025-05-01','M2',item)['status'],'VERIFY_ERROR')
+   for key in ('iteration2_voltage_rows','iteration2_voltage_plan'):
+    proof=root/(key+'.json');write(proof,dict(PASS=True,stage='M2',case_sha='new',voltage_band=[.955,1.045]));value[key]=receipt(proof)
+   write(core,value);p['core_result']=receipt(core);write(public,p);item['result']=receipt(public)
+   self.assertEqual(view.stage('2025-05-01','M2',item)['status'],'PASS')
+
+ def test_missing_state_never_falls_back_to_old_monitor(self):
+  with tempfile.TemporaryDirectory() as d,patch.object(view,'ROOT',Path(d)):
+   out=view.apply(dict(day='OLD r043',cases=[dict(PASS=True)]),lambda w:False)
+   self.assertEqual(out['active_experiment'],'V44_iteration2');self.assertEqual(out['stage'],None);self.assertNotIn('cases',out);self.assertEqual(out['iteration2_details']['rows'],[])
 
 if __name__=='__main__':unittest.main()
