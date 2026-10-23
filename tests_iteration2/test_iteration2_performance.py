@@ -8,6 +8,38 @@ from v44_iteration2 import config as c,performance as p,resume,recovery
 from v44_iteration2.io import read,atomic,record
 
 class Performance(unittest.TestCase):
+ def test_real_original_P1_compiler_calls_the_direct_binding(self):
+  from tests_iteration2.test_iteration2_p1repair import P1IntervalRepair
+  from v44_iteration2.adapters import ACTIVE
+  with tempfile.TemporaryDirectory(dir=c.ROOT) as d:
+   root=Path(d);request=dict(day=c.DAYS[0],arm='B3',stage='A2',iteration_stage='A3',output=str(root));token=ACTIVE.set(request)
+   try:
+    with patch.object(p,'bind_pricing',wraps=p.bind_pricing) as observed:
+     P1IntervalRepair().compiled(root,0);observed.assert_called_once()
+     self.assertTrue(read(root/'ITERATION2_PERFORMANCE_BINDING.json')['PASS'])
+   finally:ACTIVE.reset(token)
+
+ def test_actual_compiler_binds_even_when_the_legacy_stage_stack_is_empty(self):
+  from v44_iteration2.adapters import ACTIVE
+  from v44_iteration2.bootstrap import base
+  from v44_recovery_r031 import p1_expansion as e
+  with tempfile.TemporaryDirectory(dir=c.ROOT) as d:
+   root=Path(d);atomic(root/'BLOCK_PRICING_ORACLE_VERIFICATION.json',dict(records=[]));calls=[]
+   def original(*args,**kwargs):
+    calls.append(args);value=dict(active_objective_upper='1/2');atomic(Path(args[13])/'FULL_PRICING_RESULT.json',value);return value,[]
+   ns=dict(full_pricing=original);request=dict(day=c.DAYS[0],arm='B3',stage='A2',iteration_stage='A3',output=str(root))
+   token=ACTIVE.set(request)
+   try:
+    with patch.object(e.Expansion,'apply',p.promotion_wrapper(e.Expansion.apply,e)):
+     p.bind_pricing(ns);bound=ns['full_pricing']
+     # The stage installs a profiling wrapper AFTER compilation.
+     ns['full_pricing']=lambda *a,**kw:bound(*a,**kw)
+     args=[None]*14;args[2]=None;args[13]=root/'P1/S0';ns['full_pricing'](*args)
+     self.assertTrue(read(root/'ITERATION2_PERFORMANCE_BINDING.json')['PASS'])
+     self.assertTrue((root/'P1/S0/ITERATION2_P1_PLATEAU_ACCELERATION.json').exists());self.assertEqual(len(calls),1)
+     old=ns['full_pricing'];p.bind_pricing(ns);self.assertIs(ns['full_pricing'],old)
+   finally:ACTIVE.reset(token)
+
  def test_complete_graph_allowance_is_reserved_for_an_actual_objective_plateau(self):
   module=SimpleNamespace(MAX_COLUMNS_PER_CLASS=20000);seen=[];state=SimpleNamespace()
   def original(self,*args):seen.append(module.MAX_COLUMNS_PER_CLASS);return args[0]

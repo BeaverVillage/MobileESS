@@ -16,6 +16,22 @@ MAX_TOTAL_COLUMNS=200000
 def selected(request):
  return request.get('arm')=='B3' and request.get('stage')=='A2' and request.get('iteration_stage') in ('A3','A4') and request.get('day') in c.DAYS
 
+def bind_pricing(namespace):
+ """Bind to the actual selective A compiler, independent of legacy wrappers."""
+ from .adapters import ACTIVE
+ request=ACTIVE.get()
+ if not request or not selected(request) or namespace.get('_iteration2_direct_pricing_bound'):return
+ from v44_recovery_r031 import p1_expansion
+ from v42_a_stage_phase1.runner import load_cache
+ original=namespace['full_pricing'];expansion=p1_expansion.Expansion();output=Path(request['output'])
+ def full_pricing(*args,**kwargs):
+  priced,negative=original(*args,**kwargs)
+  if args[2] is None and not kwargs.get('zero',False):
+   negative=expansion.apply(negative,args[5],read(output/'BLOCK_PRICING_ORACLE_VERIFICATION.json'),Path(args[13]),load_cache)
+  return priced,negative
+ namespace['full_pricing']=full_pricing;namespace['_iteration2_direct_pricing_bound']=True
+ atomic(output/'ITERATION2_PERFORMANCE_BINDING.json',dict(PASS=True,UTC=now(),day=request['day'],iteration_stage=request['iteration_stage'],binding='ACTUAL_SELECTIVE_P1_COMPILER_SHARED_NAMESPACE',source=record(__file__),legacy_active_request_stack_required=False,all_native_pricing_retained=True))
+
 def promotion_wrapper(original,module):
  def apply(self,negative,data,qualified,folder,loader):
   # Spend the bounded complete-graph allowance on a demonstrated plateau,
@@ -82,7 +98,9 @@ def scope():
  try:
   function.__code__=compiled
   with ExitStack() as stack:
-   stack.enter_context(patch.object(p1_expansion,'selected',selected))
+   # The selective A body can bypass worker.a_stage's legacy request stack.
+   # Its compiler now binds directly below; suppress duplicate legacy binding.
+   stack.enter_context(patch.object(p1_expansion,'selected',lambda request:False))
    stack.enter_context(patch.object(p1_expansion.Expansion,'apply',promotion_wrapper(p1_expansion.Expansion.apply,p1_expansion)))
    for name in ('MAX_CLASSES','MAX_COLUMNS_PER_CLASS','MAX_TOTAL_COLUMNS'):stack.enter_context(patch.object(p1_expansion,name,globals()[name]))
    stack.enter_context(patch.object(sp,'save_npz',storage.saver(save)))

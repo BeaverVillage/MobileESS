@@ -197,3 +197,11 @@ The existing physical caches, compressed rebuild caches and Actual chunking
 remain installed. Performance maintenance may resume a precisely sealed
 same-stage ledger only after stopping outside every Native call; its measured
 A5400 and Phase-I1500 accounts must both carry forward.
+
+The selective A2 compiler can bypass the legacy worker.a_stage active-request
+stack. The promotion hook therefore binds directly to the compiler's actual
+shared pricing namespace using the checked iteration stage context. Late
+profiling wrappers retain that binding. ITERATION2_PERFORMANCE_BINDING.json
+confirms the runtime connection; per-round plateau/expansion files confirm
+execution. The duplicate legacy hook is disabled. A regression test exercises
+an empty legacy stack and a profiling wrapper installed after compilation.

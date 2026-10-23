@@ -38,6 +38,8 @@ def compiler(original):
   namespace.update(_iteration2_interval_level=LEVEL,_iteration2_interval_unresolved=unresolved)
   name=__file__+'.phase.generated';linecache.cache[name]=(len(source),None,source.splitlines(True),name)
   exec(compile(source,name,'exec'),namespace);adapted=namespace['run']
+  from .performance import bind_pricing
+  bind_pricing(namespace)
   @wraps(adapted)
   def run(*args,**kwargs):
    token=LEVEL.set(0)
