@@ -81,7 +81,7 @@ class Performance(unittest.TestCase):
   graph=lambda sha:SimpleNamespace(sha=sha,events={},states={},compatible={},physical={},transfers={},fixed=None)
   active=graph('active');full=graph('full');snapshot=SimpleNamespace(matrix=SimpleNamespace(shape=(1,8000)),fingerprint=lambda:'snapshot')
   keys=['a','b','c','d'];candidates=[dict(class_id=k,graph=active,support_sha256='active') for k in keys]
-  required=[dict(class_id=k,complete_native_primitive_columns=8000,complete_graph_sha256='full') for k in keys]
+  required=[dict(class_id=k,complete_native_primitive_columns=8000,complete_graph_sha256='full',external_full_block_cache={}) for k in keys]
   data=(None,None,None,None,None,{k:active for k in keys},None,dict(classes={k:[k] for k in keys}))
   loaded=[]
   def load(w):loaded.append(w['class_id']);return dict(graph=full,snapshot=snapshot)
