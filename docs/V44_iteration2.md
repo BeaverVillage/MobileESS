@@ -49,7 +49,7 @@ evidence stays intact; other dates continue. No previous-stage fallback/PASS
 override is permitted. A receipt without a public terminal result can recover
 its verified completed stage without another solve, preserving old failures.
 
-Actual cannot start until all31 M4 freezes and the aggregate barrier verify.
+Actual cannot start until all31 Planning dates are terminal. Failed/blocked dates remain excluded. The aggregate barrier records all dates and verifies M4 freezes only for successful, ready dates.
 Then independent per-date processes run original Actual120 followed by separate
 Fresh120. The unchanged Actual engine has no Planning optimization; an outer
 Native-zero guard reinforces this. Final acceptance includes original execution,
@@ -59,12 +59,7 @@ and QoS intentional delay/migration budgets. No result flag can bypass a gate.
 
 ## Resources, monitor and comparison
 
-Actual has a rolling ceiling of seven original P-logical CPU slots. The first
-complete Actual/Fresh calibrates process-tree RSS. Admission reserves 6 GiB and
-uses at least 2 GiB per additional worker or twice observed peak plus1 GiB,
-whichever is larger; calibration starts with one6 GiB worker. Memory/disk
-shortages stop new dispatch until resources recover. Planning requires8 GiB
-available plus6 GiB reserve and16 GiB free disk; Actual requires4 GiB disk.
+Actual dispatches up to seven original P-logical CPU slots immediately when ready dates exist. RAM is observed without an Actual admission threshold or calibration pilot. The 4 GiB disk guard remains. Planning retains its existing resource admission. A Planning exception terminates that date and advances to the next; no failed result is promoted to FULL. All31 dates are attempted before the ready subset enters Actual/Fresh120.
 The seven-worker memory certificate is explicit and can be false; a ceiling of
 seven never claims this machine can safely fit seven at every moment. No worker
 is killed to satisfy admission. A supervisor restart first waits for surviving
