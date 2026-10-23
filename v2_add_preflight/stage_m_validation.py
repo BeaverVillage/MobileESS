@@ -12,12 +12,16 @@ from .stage_common import *
 from .static_pack import N_AUX
 
 def validate(case,point):
+    return _validate(case,point,None)
+
+def _validate(case,point,full):
     from v42_m1_research.check_ub import matrix_replay,physical_replay,vector_sha
     start=time.perf_counter();point=np.asarray(point);before=vector_sha(point)
     if point.dtype!=np.float64 or point.shape!=(case.A.shape[1],) or not np.isfinite(point).all():raise ValueError('LITERAL_CURRENT_RAW_POINT_REQUIRED')
     selected=matrix_replay(case.A,case.d,point)
     assert selected['checked_binary_columns']==int(np.sum(case.d['types']=='B'))
-    full=case.lift(point);b=case._blocks;n=b.nbase
+    if full is None:full=case.lift(point)
+    b=case._blocks;n=b.nbase
     original=matrix_replay(b.mob,b.md,full[:n])
     physics=physical_replay(SimpleNamespace(graph=case.graph,original_d=b.md),full[:n]);results=[]
     for t in range(96):
@@ -45,10 +49,11 @@ def strict(case,path,evidence=None):
     from v42_m1_research.check_ub import vector_sha
     with np.load(path) as z:
         assert z.files==['point'];point=z['point']
-    for domain,values in ((case.d,point),(case.original_d,case.lift(point))):
+    full=case.lift(point)
+    for domain,values in ((case.d,point),(case.original_d,full)):
         discrete=values[domain['types']!='C'];binary=values[domain['types']=='B']
         if not np.array_equal(discrete,np.rint(discrete)) or not np.isin(binary,[0.,1.]).all():raise ValueError('LITERAL_INTEGER_PATTERN_REQUIRED')
-    replay=validate(case,point)
+    replay=_validate(case,point,full)
     if not replay['PASS']:raise ValueError('CURRENT_ORIGINAL_FULL_REPLAY_REJECTED')
     exact=F(replay['exact_objective']);display=float(exact)
     if F(display)<exact:display=float(np.nextafter(display,np.inf))

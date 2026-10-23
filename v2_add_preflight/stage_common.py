@@ -26,6 +26,8 @@ def put(name, value):
 @contextmanager
 def measured(name):
     resources(); WORK.mkdir(exist_ok=True)
+    from .stage_campaign import source_files
+    entered_sources=source_files()
     start=time.perf_counter(); done=threading.Event(); proc=psutil.Process(); peak=[proc.memory_info().rss]
     def sample():
         while not done.wait(.1): peak[0]=max(peak[0],proc.memory_info().rss)
@@ -39,6 +41,10 @@ def measured(name):
         report.update(wall_seconds=time.perf_counter()-start,peak_RSS_bytes=max(peak[0],getattr(proc.memory_info(),'peak_wset',0)),
             system_available_bytes=psutil.virtual_memory().available,process_commit_bytes=proc.memory_info().vms,
             producer=record(ROOT/'v2_add_preflight'/Path(__import__('sys').modules[__name__].__file__).name))
+        report['validation_source_files']=entered_sources
+        report['validation_source_snapshot_unchanged']=source_files()==entered_sources
+        if not report['validation_source_snapshot_unchanged']:
+            report.update(PASS=False,source_snapshot_error='VALIDATION_CODE_OR_AUTHORITY_CHANGED_DURING_RUN')
         put(name,report)
 
 def day_inputs():

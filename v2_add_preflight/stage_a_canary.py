@@ -28,6 +28,15 @@ class Coefficients:
             current_constant=baseline-J.T@anchor,transformer_current_authority_sha256=digest('SourceYY'),
             coefficient_sha256=record(RUN/'coefficients'/f'{t:02d}.npz')['sha256'])
 
+def require_frozen_bundle(value,frozen):
+    """Accept only the original active kernel's audited authority marker."""
+    if digest(value)==digest(frozen):return True
+    from v42_a_stage_domain_v2 import AUTHORITY
+    base=dict(value)
+    if (base.pop('aidc_domain_authority',None)!=AUTHORITY or digest(base)!=digest(frozen)):
+        raise ValueError('CURRENT_FROZEN_NUMERIC_INPUT_BUNDLE_DRIFT')
+    return False
+
 def routed_prepare(original,verify_voltage):
     tree=ast.parse(textwrap.dedent(inspect.getsource(original)))
     cls=next(n for n in ast.walk(tree) if isinstance(n,ast.ClassDef) and n.name=='StaticModel')
@@ -53,7 +62,7 @@ def routed_prepare(original,verify_voltage):
     return ns['prepare']
 
 @contextmanager
-def scope(tag='A1',mess=None,fresh_data_cache=None,m1_result=None,fixture=False,adapter_root=None,output_root=None,grid_certificate=None):
+def scope(tag='A1',mess=None,fresh_data_cache=None,m1_result=None,fixture=False,adapter_root=None,output_root=None,grid_certificate=None,case_root=None):
     from v42_pr134_b1 import native as source_bind
     from v42_may_campaign_native90 import a_stage
     from v42_a_stage_canary import prepare as inherited
@@ -84,13 +93,13 @@ def scope(tag='A1',mess=None,fresh_data_cache=None,m1_result=None,fixture=False,
             assert np.array_equal(mess,expected)
             unit_dispatch={k:np.array([plan[k][u] for u in sorted(INITIAL)]).T for k in ('P_kW','Q_kvar')}
     def bind(b,inputs,output):
-        assert digest(b)==digest(bundle)
+        exact_frozen=require_frozen_bundle(b,bundle)
         # The original binder retains finite WINDOWS, data/rack/domain and C1
         # authorities; only its electrical constructor is replaced.
         fn=types.FunctionType(original_bind.__code__,dict(original_bind.__globals__,
             original_coefficients_for_day=lambda *a:coeff),argdefs=original_bind.__defaults__)
         answer=fn(b,inputs,output)
-        if fresh_data_cache is not None and not (Path(output)/'DATA.pkl').exists():
+        if exact_frozen and fresh_data_cache is not None and not (Path(output)/'DATA.pkl').exists():
             # Reuse only this attempt's independently generated complete data,
             # never an accepted point or the historical START_WINDOW cache.
             import pickle,shutil
@@ -139,8 +148,8 @@ def scope(tag='A1',mess=None,fresh_data_cache=None,m1_result=None,fixture=False,
     prepared=routed_prepare(inherited.prepare,verify_voltage)
     prepared.__globals__.update(physical_authority=physical,all_transformer_rows=lambda f:f,read=metadata_read)
     from .stage_a_validation import scope as validation_scope
-    # Supply the user's original finite source WINDOW input, rather than
-    # treating r043's wider physical-start universe as customer authority.
+    # Preserve the original r043 physical timing domain after the October23
+    # source-authority audit; input WINDOWS remains immutable lineage.
     import v42_a_stage_domain_v2.active as active_source
     from .stage_source_windows import physical_domain as source_window_domain
     # The source export guard means zero MESS, not zero AIDC reactive load.
@@ -175,12 +184,17 @@ def scope(tag='A1',mess=None,fresh_data_cache=None,m1_result=None,fixture=False,
                 from .prestart_acceptance import certify
                 proof=certify(result['selected_jobs'],bundle,read(day_inputs()['files']['windows']['path']),
                     identity={},expected_identity={})
-                result=dict(result,PASS=proof['PASS'],independent_original_finite_WINDOWS=proof)
+                result=dict(result,PASS=proof['PASS'],independent_original_physical_timing=proof)
             return result
         Physical.verify=checked;return Physical,power
     routes['_physical']=physical_with_original_windows
     if tag=='A2':namespace['_physical']=physical_with_original_windows
+    from .stage_a_native import constructor as native_constructor
+    routes['_native']=native_constructor(routes.get('_native',a_stage._native))
+    if tag=='A2':namespace['_native']=routes['_native']
     with ExitStack() as stack:
+        from .stage_a_performance import scope as preparation_performance
+        stack.enter_context(preparation_performance(root=case_root))
         stack.enter_context(validation_scope(tag,folder/'grid'))
         for obj,key,value in [(source_bind,'bind',bind),(a_stage,'_paths',paths),(a_stage,'read',metadata_read),(inherited,'prepare',prepared)]:
             stack.enter_context(patch.object(obj,key,value))
@@ -201,7 +215,7 @@ def prepare(tag='A1'):
             mess,witness=parameter();report.update(M1_fixture=witness,production_M1_acceptance_claimed=False)
         if not read(OUT/(tag+'_VARIABLE_GRID_INDEPENDENT_VERIFICATION.json'))['PASS']:
             raise PermissionError('VARIABLE_GRID_PROOF_REQUIRED')
-        with scope(tag,mess=mess,fresh_data_cache=cache if cache.exists() else None,fixture=tag=='A2') as original:
+        with scope(tag,mess=mess,fresh_data_cache=cache if cache.exists() else None,fixture=tag=='A2',case_root=folder) as original:
             budget=SimpleNamespace(check=lambda:guard(start),wall=lambda:__import__('time').perf_counter()-start,native_used=0.)
             state=original.prepare(dict(day='2025-05-01',arm='B1' if tag=='A1' else 'B3',input_folder=str(Path(row['files']['native']['path']).parent),output=str(folder),_budget=budget),
                 progress=lambda value:print('ORIGINAL P1',tag,value.get('phase'),value.get('classes_complete',''),flush=True))

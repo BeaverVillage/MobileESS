@@ -46,15 +46,11 @@ class NativeRows:
     def fingerprint(self):
         start=time.perf_counter();m=self.model;m.update();n=int(m.NumConstrs);p=int(m.NumVars)
         self.folder.mkdir(parents=True,exist_ok=True);indptr=np.zeros(n+1,dtype=np.int32)
+        from .stage_native_batch import blocks
         with (self.folder/'ACTUAL_INDICES.bin').open('wb') as ix,(self.folder/'ACTUAL_VALUES.bin').open('wb') as values:
-            for i in range(n):
-                row=m.getRow(self.rows[i].item())
-                terms=sorted((row.getVar(k).index,row.getCoeff(k)) for k in range(row.size()))
-                assert all(v!=0 and np.isfinite(v) for j,v in terms)
-                indptr[i+1]=indptr[i]+len(terms)
-                ix.write(np.asarray([j for j,v in terms],dtype=np.int32).tobytes())
-                values.write(np.asarray([v for j,v in terms],dtype=np.float64).tobytes())
-                if i%10000==0:guard(start)
+            for first,A in blocks(m,0,n):
+                indptr[first+1:first+A.shape[0]+1]=A.indptr[1:]+indptr[first]
+                ix.write(memoryview(A.indices));values.write(memoryview(A.data));guard(start)
         assert int(indptr[-1])==int(m.DNumNZs)
         h=hashlib.sha256(np.asarray((n,p),dtype='<i8').tobytes())
         h.update(indptr.dtype.str.encode('ascii'));h.update(memoryview(indptr))
@@ -63,9 +59,10 @@ class NativeRows:
             with (self.folder/key).open('rb') as f:
                 for block in iter(lambda:f.read(1024*1024),b''):h.update(block)
         value=h.hexdigest()
-        (self.folder/'ACTUAL_CSR_READBACK.json').write_text(json.dumps(dict(PASS=True,mode='EVERY_ACTUAL_NATIVE_ROW_STREAMED',
+        (self.folder/'ACTUAL_CSR_READBACK.json').write_text(json.dumps(dict(PASS=True,mode='EVERY_ACTUAL_NATIVE_ROW_BATCHED_C_API',
             rows=n,columns=p,nonzeros=int(indptr[-1]),canonical_CSR_sha256=value,
-            Source_hash_byte_schema_unchanged=True,wall_seconds=time.perf_counter()-start)),encoding='utf-8')
+            Source_hash_byte_schema_unchanged=True,bounded_query_rows=1024,every_coefficient_read_from_actual_Native_model=True,
+            API='GRBgetconstrs',wall_seconds=time.perf_counter()-start)),encoding='utf-8')
         return value
 
 @contextmanager

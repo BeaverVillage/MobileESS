@@ -10,7 +10,7 @@ from .prestart_native import native_zero
 from v42_native.contracts import digest
 
 
-def certify(stage='M1'):
+def certify(stage='M1',fixture_root=None):
     with measured(stage+'_ORIGINAL_FULL_VALIDATOR_BINDING.json') as (report,start),native_zero() as denied:
         root=RUN if stage=='M1' else WORK/'M2';pack=PACK if stage=='M1' else root/'SOURCE_YY_FULL96'
         doc=OUT if stage=='M1' else OUT/'stage_m2'
@@ -42,7 +42,7 @@ def certify(stage='M1'):
             point=np.zeros(A.shape[1]);point[:len(p.col_ids)]=p.forward(compact)
             for t,mp in enumerate(maps):
                 keep=mp>=0;point[mp[keep]]=raw[n+t*N_AUX:n+(t+1)*N_AUX][keep]
-            folder=WORK/(stage+'_VALIDATOR_FIXTURE');folder.mkdir(exist_ok=True)
+            folder=Path(fixture_root or WORK)/(stage+'_VALIDATOR_FIXTURE');folder.mkdir(parents=True,exist_ok=True)
             path=folder/(name+'.npz');np.savez_compressed(path,point=point)
             certificate=strict(case,path);assert certificate['PASS']
             results.append(dict(witness=name,point=record(path),certificate=certificate))

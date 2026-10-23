@@ -30,7 +30,5 @@ def init():
     return resources()
 
 def guard(start,wall=7200):
-    import psutil
-    if psutil.Process().memory_info().rss>=4*1024**3 or psutil.virtual_memory().available<5*1024**3:
-        raise MemoryError('PROTECTED_WORKER_RESOURCE_RESERVE')
+    # October23 human steering: RAM is informational, including preparation.
     if time.perf_counter()-start>wall:raise TimeoutError('STATIC_PREPARATION_WALL_LIMIT')

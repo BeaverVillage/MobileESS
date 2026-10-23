@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 from .stage_common import *
 from .prestart_native import native_zero
+from .stage_budget import scope as budget_scope,JOINT_SECONDS,K48_SECONDS
 
 
 def certify():
@@ -21,8 +22,8 @@ def certify():
         negative=[];ledgers=[]
         # Explicit synthetic Runtime receipts exercise ledger arithmetic only;
         # these are not measurements of an optimization or campaign result.
-        with patch.object(native,'d_path',lambda p:Path(p)):
-            for kind,ceiling in [('K48_SEPARATE',300.),('PLANNING_NATIVE',900.)]:
+        with patch.object(native,'d_path',lambda p:Path(p)),budget_scope():
+            for kind,ceiling in [('K48_SEPARATE',K48_SECONDS),('PLANNING_NATIVE',JOINT_SECONDS)]:
                 folder=root/kind;folder.mkdir();old=StageBudget(folder/'old.json',case=case,kind=kind)
                 old.calls=[dict(status='FINISHED',Native_Runtime=12.5,Native_Work=0.,fixture_synthetic_Runtime=True)]
                 old.native_used=12.5;old.persist()
@@ -90,7 +91,7 @@ def certify():
             nested_original_M4_overlay_PASS=True,official_memory_admission_and_termination=False,
             actual_original_model_scope_and_A1_M1_thread_guard_PASS=True,
             actual_original_Native_scope_restores_positive_Infinity_PASS=True,
-            official_solver_memory_limits_unlimited=True,original_budgets_gaps_and_threads_preserved=True,
+            official_solver_memory_limits_unlimited=True,V2_add_expanded_budget_resume_verified=True,original_gaps_and_threads_preserved=True,
             external_worker_locks_not_acquired=True,fixture_Runtime_values_not_actual_measurements=True,
             complete_checkpoint_resume_test=record(OUT/'PRODUCTION_HANDLER_FINITE_IO_FIXTURE.json'),denied_attempts=denied)
 

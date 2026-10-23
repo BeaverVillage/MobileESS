@@ -22,8 +22,18 @@ def prepare_current(payload,request,root,progress=None):
     p=np.asarray(payload['planning']['PCC_P_kw']);q=np.asarray(payload['planning']['PCC_Q_kvar'])
     if p.shape!=(96,12) or q.shape!=p.shape or not np.isfinite(p).all():raise ValueError('CURRENT_C1_FULL96_REQUIRED')
     if np.max(abs(q-np.tan(np.arccos(.95))*p))>1e-8:raise ValueError('SOURCE_C1_PF_DRIFT')
-    fn=types.FunctionType(original.__code__,dict(original.__globals__,
-        _build=lambda payload,request,progress:_construct(payload,request,root,progress)),argdefs=original.__defaults__)
+    # The inherited entrypoint also checks a literal 900-second Case ceiling
+    # after _build returns. Rebind that single metadata guard with the V2-only
+    # policy, preserving every original date/arm/AIDC-parent admission check.
+    from .stage_budget import JOINT_SECONDS
+    tree=ast.parse(textwrap.dedent(inspect.getsource(original)));changed=[]
+    for node in ast.walk(tree):
+        if isinstance(node,ast.Compare) and ast.unparse(node)=='case.mess_stage_budget_seconds != 900.0':
+            node.comparators[0]=ast.Constant(JOINT_SECONDS);changed.append(node)
+    if len(changed)!=1:raise ValueError('ORIGINAL_M_CASE_BUDGET_GUARD_BOUNDARY_DRIFT')
+    ast.fix_missing_locations(tree)
+    namespace=dict(original.__globals__,_build=lambda payload,request,progress:_construct(payload,request,root,progress))
+    exec(compile(tree,original.__code__.co_filename,'exec'),namespace);fn=namespace[original.__name__]
     return fn(payload,request,progress)
 
 

@@ -49,7 +49,7 @@ def beam(case,modules,start):
     graph=engine.PathGraph(case)
     bank=SimpleNamespace(graph=graph,best=None,best_moving=None)
     class Budget:
-        def remaining(self):guard(start);return 900.
+        def remaining(self):guard(start);return 3600.
         def record_external(self,*a,**k):
             # Source's finally records a failed attempt even when the probe
             # stops before linprog. Keep that honest non-Native IO receipt.
@@ -215,7 +215,7 @@ def joint_native0():
         from v44.q250_m4 import m_threads
         request=dict(day='2025-05-01',arm='B2',stage='M1',worker_slot=1,Threads=4)
         with m_threads(request) as policy,readback_scope(modules['m_engine'],folder/'NATIVE0/READBACK'):
-            result,captures=modules['m_engine']._native_joint(None,SimpleNamespace(remaining=lambda:900.),
+            result,captures=modules['m_engine']._native_joint(None,SimpleNamespace(remaining=lambda:3600.),
                 (A,d,lift,None,proof),folder/'NATIVE0',300.,native0=True)
         assert not captures and result['Native_optimize_calls']==0 and not denied
         validator_ready=all(read(OUT/name)['PASS'] for name in ('M1_ORIGINAL_FULL_VALIDATOR_BINDING.json',

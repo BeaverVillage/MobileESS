@@ -38,6 +38,11 @@ def source_domain(bundle, windows):
 def certify(selected,bundle,windows,*,identity,expected_identity):
     from v42_job_capability import Option,validate,resources_used,resource_limit
     jobs,bounds,seconds,r,raw=source_domain(bundle,windows)
+    from v42_a_stage_domain_v2.domain import physical_starts
+    # The same physical timing contract used by original r043 membership.
+    # WINDOWS remains an input identity; its empirical R0 endpoint is not a
+    # provider-issued hard release/deadline (see domain.py and service.py).
+    bounds={uid:replace(bound,allowed_starts=physical_starts(jobs[uid],bound,r.control_end)) for uid,bound in bounds.items()}
     violations=[];usage=defaultdict(float);checked=0
     if identity!=expected_identity:violations.append(dict(reason='DATE_INPUT_SCENARIO_ACCEPTANCE_IDENTITY_MISMATCH'))
     if set(selected)!=set(jobs):violations.append(dict(reason='FULL_JOB_ROSTER',missing=sorted(set(jobs)-set(selected)),extra=sorted(set(selected)-set(jobs))))
@@ -52,7 +57,7 @@ def certify(selected,bundle,windows,*,identity,expected_identity):
     for key,v in usage.items():
         if v>resource_limit(key,r)+1e-5:violations.append(dict(reason='JOINT_RESOURCE',key=list(key),use=v,limit=resource_limit(key,r)))
     return dict(PASS=not violations,checked_jobs=checked,total_jobs=len(jobs),violations=violations,
-        domain='ORIGINAL_NATIVE_JOBS_PLUS_ORIGINAL_FULL_WINDOWS',selected_sha=digest(selected),identity=identity,
+        domain='ORIGINAL_R043_FULL_PHYSICAL_TIMING_AND_FROZEN_INPUT_LINEAGE',selected_sha=digest(selected),identity=identity,
         math_source=record(Path(__file__).resolve().parents[1]/'v42_job_capability.py'),
         grid_FULL_replay_required=True,Source_customer_QoS_claim=False)
 

@@ -30,17 +30,20 @@ def reconciled(path,ceiling,context=None):
 
 
 def binary_manifest(case,root,anchor):
+    from .stage_budget import policy
     root=Path(root)
     value=dict(stage=case.identity['stage'],arm=case.identity['arm'],case_sha=case.case_sha,
         identity=case.identity,root=str(root.resolve()),pack=str(case.raw_pack.resolve()),
         reference=str(case._blocks.reference_proof.resolve()),view=str(case._blocks.view_root.resolve()),anchor=anchor,
         files=[record(p) for p in case._immutable_file_stats],
         proof_files=list(getattr(case,'_construction_evidence',{}).values()),
-        Native_clock_reset=False,B_and_B_search_state='NOT_SUPPORTED')
+        Native_clock_reset=False,B_and_B_search_state='NOT_SUPPORTED',V2_add_budget_policy=policy())
     value['manifest_sha']=digest(value);return value
 
 
 def load_binary(value,output):
+    from .stage_budget import policy
+    if value.get('V2_add_budget_policy')!=policy():raise ValueError('M_BINARY_EXECUTION_BUDGET_POLICY_DRIFT')
     if digest({k:v for k,v in value.items() if k!='manifest_sha'})!=value['manifest_sha']:raise ValueError('M_BINARY_MANIFEST_DRIFT')
     for item in value['files']+value['proof_files']:
         if record(item['path'])!=item:raise ValueError('M_BINARY_FILE_DRIFT')

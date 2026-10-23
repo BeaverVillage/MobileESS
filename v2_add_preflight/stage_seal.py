@@ -7,7 +7,7 @@ from .stage_common import ROOT, OUT, WORK, read, record, put
 def seal():
     final=read(OUT/'FINAL_MAY01_PRESTART_GO_NO_GO.json')
     assert final['status']=='READY_FOR_MAY01_CAMPAIGN_APPROVAL'
-    assert not final['official_campaign_executed'] and not final['Native_optimize_calls']
+    assert not final['official_campaign_executed'] and not final['official_Native_optimize_calls']
     raw=read(OUT/'ACTUAL_CURRENT_AC_TWO_TICK_ADMISSION.json')
     assert raw['two_tick_measured_results']
     code=sorted((ROOT/'v2_add_preflight').glob('stage_*.py'))

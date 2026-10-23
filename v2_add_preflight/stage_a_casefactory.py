@@ -24,7 +24,7 @@ def current_stage(request,m1_result=None):
             if path.is_file():
                 target=adapter/'grid'/path.relative_to(WORK/'A1/grid')
                 assert record(path)['sha256']==record(target)['sha256']
-        with scope('A1',adapter_root=adapter,output_root=request['campaign_root'],grid_certificate=certificate) as source:
+        with scope('A1',adapter_root=adapter,output_root=request['campaign_root'],grid_certificate=certificate,case_root=request['output']) as source:
             yield source.run
         return
     from v44.stages import require_m1
@@ -49,7 +49,7 @@ def current_stage(request,m1_result=None):
     verifier=types.FunctionType(independent.verify.__code__,dict(independent.verify.__globals__,WORK=adapter,measured=measured))
     verifier('A2');certificate=proof/'A2_VARIABLE_GRID_INDEPENDENT_VERIFICATION.json'
     assert read(certificate)['PASS'] and receipt['MESS_parameter_sha']==digest(mess.tolist())
-    with scope('A2',mess=mess,m1_result=m1_result,adapter_root=base,output_root=request['campaign_root'],grid_certificate=certificate) as source:
+    with scope('A2',mess=mess,m1_result=m1_result,adapter_root=base,output_root=request['campaign_root'],grid_certificate=certificate,case_root=request['output']) as source:
         yield source.run
 
 

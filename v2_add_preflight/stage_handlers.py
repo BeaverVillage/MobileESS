@@ -5,10 +5,12 @@ original source entrypoints. This module supplies dated IO and receipts.
 """
 from contextlib import ExitStack
 from pathlib import Path
+from time import perf_counter
 import numpy as np
 from .stage_common import ROOT,OUT,WORK,read,record,day_inputs
 from .prestart_execution import atomic
 from .stage_authority import current
+from .stage_budget import A_SECONDS,a_budget,policy as budget_policy
 from v44.common import now
 from v42_native.contracts import digest
 
@@ -37,13 +39,13 @@ def a(request,parents):
     from v42_may_campaign_native90.budget import DateBudget
     from v44.daily import export_a
     out=Path(request['output']);out.mkdir(parents=True,exist_ok=False)
-    budget=DateBudget(out/'NATIVE_RUNTIME_LEDGER.json',native_limit=5400.)
+    budget=a_budget(out/'NATIVE_RUNTIME_LEDGER.json')
     m1=parents.get('M1') if request['stage']=='A2' else None
     if m1 is not None:request=dict(request,M1_result=m1)
     result=run(request,budget,m1_result=m1)
     result.update(day=request['day'],arm=request['arm'],stage=request['stage'],finished_UTC=now(),
         source_sha=request['source_sha'],P2_calls=0,Native_seconds=budget.used(),
-        FULL_feasible=result.get('PASS') is True,independent_Global_LB_validated=result.get('PASS') is True)
+        FULL_feasible=result.get('PASS') is True,independent_Global_LB_validated=result.get('PASS') is True,V2_add_budget_policy=budget_policy())
     if m1 is not None:result['fixed_M1_plan_sha']=m1['MESS_plan']['plan_sha']
     if result.get('PASS'):
         folder=export_a(result,request,out/'AIDC_FROZEN',request['stage'])
@@ -81,6 +83,7 @@ def k48(request,parents):
     atomic(out/'START.json',dict(process_identity(),UTC=now(),request=request))
     payload=aidc(parents,'A2' if stage=='M2' else None)
     parent=Path(request['resume_parent']) if request.get('resume_parent') else None
+    preparation_start=perf_counter()
     if parent is None:
         case=prepare_current(payload,bound,out/'CURRENT_CASE');case.output=out
         manifest=binary_manifest(case,case._runtime_storage_root,payload['identity'])
@@ -88,6 +91,9 @@ def k48(request,parents):
         manifest=read(parent/'M_BINARY.json');case=load_binary(manifest,out)
         if manifest['anchor']!=payload['identity']:raise ValueError('M_REENTRY_AIDC_ANCHOR_DRIFT')
     atomic(out/'M_BINARY.json',manifest)
+    case_preparation_seconds=perf_counter()-preparation_start
+    from .stage_case_cache import remember
+    remember(case,manifest)
     with source_binding(case) as modules,geometry(case,modules):
         k=modules['table_v_k48'];g=modules['table_v_global_control']
         control=g.GlobalGapControl(g.mess_scope(case),.03,out/'GLOBAL_CONTROL');case.global_gap_control=control
@@ -104,6 +110,7 @@ def k48(request,parents):
                 lower=run_prepared_k48(k,case,packet,proof,budget,out/'K48_EXECUTION')
             result=dict(PASS=True,lower=lower,M_binary=record(out/'M_BINARY.json'),fixed_AIDC=payload['identity'],
                 Native_seconds=budget.used(),case_sha=case.case_sha,
+                current_case_preparation_wall_seconds=case_preparation_seconds,
                 independent_Global_LB_validated=bool(lower.get('Global_LB_valid')),
                 LB_origin='K48_INDEPENDENT_GLOBAL',Global_LB_numeric_required_for_UB_handoff=False)
             atomic(out/'RESULT.json',result);return result
@@ -123,7 +130,14 @@ def m(request,parents):
     atomic(out/'START.json',dict(process_identity(),UTC=now(),request=request))
     previous=parents['K48_'+request['stage']];manifest=previous['M_binary']
     if record(manifest['path'])!=manifest:raise ValueError('CURRENT_K48_BINARY_DRIFT')
-    case=load_binary(read(manifest['path']),out)
+    from .stage_case_cache import take,clear
+    preparation_start=perf_counter();binary=read(manifest['path']);case=take(binary,out)
+    reused_preparation=case is not None
+    if case is None:case=load_binary(binary,out)
+    case_preparation_seconds=perf_counter()-preparation_start
+    atomic(out/'SAME_CASE_PREPARATION_REUSE.json',dict(PASS=True,reused=reused_preparation,
+        case_sha=case.case_sha,manifest=manifest,old_point_bound_or_Native_clock_reused=False,
+        whole_case_matrix_domain_and_files_byte_verified=reused_preparation))
     with source_binding(case) as modules,geometry(case,modules):
         g=modules['table_v_global_control'];engine=modules['m_engine']
         control=g.GlobalGapControl(g.mess_scope(case),.03,out/'GLOBAL_CONTROL');case.global_gap_control=control
@@ -154,13 +168,14 @@ def m(request,parents):
                 implementation_errors=[r['error'] for r in search.get('history',[]) if r.get('error')],
                 global_LB=bounds['Global_LB'],global_UB=bounds['Global_UB'],
                 independent_Global_LB_validated=bool(lower.get('Global_LB_valid')),LB_origin='K48_INDEPENDENT_GLOBAL',
-                Native_seconds=budget.used(),K48_Native_seconds=previous['Native_seconds'],timeout=budget.remaining()<=10)
+                Native_seconds=budget.used(),K48_Native_seconds=previous['Native_seconds'],timeout=budget.remaining()<=10,V2_add_budget_policy=budget_policy())
+            result.update(current_case_loading_preparation_wall_seconds=case_preparation_seconds)
             result.update(producer='v2_add_preflight.stage_handlers.m',
                 accepted_point=record(out/'ACCEPTED_M_POINT.npz') if point is not None else None,
                 Joint_ledger=record(budget.path),original_upper=record(out/'COMMON_M_PR222/M_STAGE_RESULT.json'))
             result.update(m_outcome(result));result['PASS']=result['allow_downstream']
             atomic(out/'RESULT.json',result);return result
-        finally:control.close()
+        finally:control.close();clear()
 
 
 def actual(request,parents):

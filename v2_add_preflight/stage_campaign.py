@@ -5,6 +5,7 @@ from .stage_common import ROOT,OUT,RUN,SOURCE,read,record,day_inputs,put
 from .prestart_execution import atomic
 from .stage_authority import campaign_lease,stage_scope,require_approval
 from .stage_resources import manifest
+from .stage_budget import A_SECONDS,JOINT_SECONDS,K48_SECONDS,JOINT_CALL_CAP,policy as budget_policy
 from .stage_checkpoint import seal,restore
 from v44.stages import CHAINS,m_outcome,require_a2
 from v44.common import now
@@ -34,7 +35,7 @@ def request(root,arm,stage,sources):
         output=str(out),root=str(out),campaign_root=str(Path(root).resolve()),
         input_folder=str(Path(row['files']['native']['path']).parent),
         sources=sources,source_sha=digest(SOURCE),axis=axis('2025-05-01'),
-        worker_slot=1,Threads=4 if underlying in ('M1','M2') else 1)
+        worker_slot=1,Threads=4 if underlying in ('M1','M2') else 1,V2_add_budget_policy=budget_policy())
 
 
 def validate(stage,result):
@@ -61,7 +62,7 @@ def run(root,approval,*,resume=False,retry_reconciled_m=False):
     require_approval(approval)
     from .stage_handlers import HANDLERS
     root=Path(root);sources=source_files();frozen=dict(source_files=sources,
-        hardware=record(OUT/'SOURCE_YY_HARDWARE_FREEZE.json'),input_files=day_inputs()['files'])
+        hardware=record(OUT/'SOURCE_YY_HARDWARE_FREEZE.json'),input_files=day_inputs()['files'],budget_policy=budget_policy())
     identity=digest(frozen);b1=None;results=[]
     with campaign_lease(root,approval) as lease:
         state=root/'CAMPAIGN_INPUT_IDENTITY.json'
@@ -89,7 +90,7 @@ def run(root,approval,*,resume=False,retry_reconciled_m=False):
                             name='K48_NATIVE_LEDGER.json' if stage.startswith('K48_') else 'JOINT_NATIVE_LEDGER.json'
                             if (parent/name).exists():
                                 from .stage_checkpoint import reconciled
-                                reconciled(parent/name,300. if stage.startswith('K48_') else 900.)
+                                reconciled(parent/name,K48_SECONDS if stage.startswith('K48_') else JOINT_SECONDS)
                             attempt=1
                             while (folder/f'REENTRY_{attempt:03d}').exists():attempt+=1
                             req=dict(req,output=str(folder/f'REENTRY_{attempt:03d}'),root=str(folder/f'REENTRY_{attempt:03d}'),resume_parent=str(parent))
@@ -99,7 +100,10 @@ def run(root,approval,*,resume=False,retry_reconciled_m=False):
                         atomic(root/'CONTROL'/arm/(stage+'_ACTIVE_ATTEMPT.json'),dict(path=str(attempt_path)))
                         with stage_scope(req,lease):
                             fn=HANDLERS[stage]
-                            result=fn(req,parents,b1) if stage=='A1_REUSE' else fn(req,parents)
+                            from .stage_timing import stage as measured_stage
+                            with measured_stage(req) as costs:
+                                result=fn(req,parents,b1) if stage=='A1_REUSE' else fn(req,parents)
+                            result=dict(result,execution_costs=costs)
                         validate(stage,result)
                         folder.mkdir(parents=True,exist_ok=True)
                         atomic(folder/'RESULT.json',result)
@@ -107,6 +111,8 @@ def run(root,approval,*,resume=False,retry_reconciled_m=False):
                     parents[stage]=result
                     if arm=='B1' and stage=='A1':b1=result
                 except BaseException as error:
+                    from .stage_case_cache import clear
+                    clear()
                     folder.mkdir(parents=True,exist_ok=True)
                     atomic(folder/'FAILURE.json',dict(error=repr(error),traceback=traceback.format_exc(),UTC=now(),
                         Native_clock_reset=False,old_results_preserved=True))
@@ -122,10 +128,11 @@ def plan():
         days=['2025-05-01'],chains={k:list(v) for k,v in CHAINS.items()},
         handlers={k:v.__module__+'.'+v.__name__ for k,v in HANDLERS.items()},
         official_campaign_executed=False,auto_run=False,worker_count=1,A_Threads=1,M_Threads=4,
-        A_seconds=5400.,A_gap=.005,K48_seconds=300.,Joint_seconds=900.,Joint_call_cap=300.,M_gap=.03,
+        explicit_human_execution_authorization='2026-10-23 directive; start after all required gates PASS',
+        A_seconds=A_SECONDS,A_gap=.005,K48_seconds=K48_SECONDS,Joint_seconds=JOINT_SECONDS,Joint_call_cap=JOINT_CALL_CAP,M_gap=.03,
         resource_policy=manifest(),Python=str(RUN.parent/'.venv/Scripts/python.exe'),
         allowed_runtime_root=str(RUN/'official_stage_campaign'),
-        future_command='python -m v2_add_preflight.stage_campaign campaign --root "'+str(RUN/'official_stage_campaign/May01_pending_user_approval')+'" --approval "<future-explicit-human-approval.json>"',
+        future_command='python -m v2_add_preflight.stage_campaign campaign --root "'+str(RUN/'official_stage_campaign/May01_20261023_after_gates')+'" --approval "<SHA-bound-October23-approval.json>"',
         resume_command='same command with --resume; only sealed complete stages resume automatically',
         incomplete_A_or_Actual_live_state_resume='BLOCKED_WITH_PRESERVED_EVIDENCE',
         reconciled_M_reentry='--resume --retry-reconciled-m; new attempt, original measured budget and FULL registry',

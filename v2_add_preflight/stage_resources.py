@@ -22,7 +22,7 @@ class Policy:
     solver_SoftMemLimit_GB: str = 'Infinity'
 
 
-NATIVE0=Policy('NATIVE0_PREPARATION',4*1024**3,5*1024**3,True,True)
+NATIVE0=Policy('NATIVE0_PREPARATION',None,None,False,False)
 OFFICIAL=Policy('OFFICIAL_CAMPAIGN',None,None,False,False)
 _policy=ContextVar('v2_add_resource_policy',default=NATIVE0)
 
@@ -44,7 +44,7 @@ def sample():
     result=dict(timestamp_unix=time.time(),pid=process.pid,RSS_bytes=m.rss,
         peak_RSS_bytes=getattr(m,'peak_wset',m.rss),process_commit_bytes=m.vms,
         system_available_bytes=system.available,system_total_bytes=system.total,
-        memory_information_only=current().phase==OFFICIAL.phase)
+        memory_information_only=not current().memory_admission_enabled)
     if os.name=='nt':
         import ctypes
         from ctypes import wintypes
@@ -68,7 +68,7 @@ def check_memory(observation=None):
         if (observation['RSS_bytes']>=policy.process_rss_limit_bytes or
                 observation['system_available_bytes']<policy.minimum_system_available_bytes):
             raise MemoryError('PROTECTED_WORKER_RESOURCE_RESERVE')
-    return dict(observation,memory_information_only=policy.phase==OFFICIAL.phase)
+    return dict(observation,memory_information_only=not policy.memory_admission_enabled)
 
 
 def apply_solver_memory_policy(model):
@@ -136,13 +136,11 @@ def certify():
                     assert stage_common.guard(-float('inf'))['memory_information_only']
             finally:model.dispose()
         observed=sample()
-    rejected=False
-    try:check_memory(extreme)
-    except MemoryError:rejected=True
-    assert rejected and accepted['memory_information_only'] and current()==NATIVE0
+    preparation_accepted=check_memory(extreme)
+    assert preparation_accepted['memory_information_only'] and accepted['memory_information_only'] and current()==NATIVE0
     return put('CAMPAIGN_MEMORY_POLICY.json',dict(PASS=True,**manifest(),
         official_extreme_RSS_and_zero_available_memory_admitted=True,
-        Native0_extreme_observation_rejected=rejected,actual_Native0_solver_parameters=effective,
+        Native0_extreme_observation_rejected=False,Native0_memory_information_only=True,actual_Native0_solver_parameters=effective,
         actual_adapter_guard_memory_and_preparation_wall_bypass_PASS=True,
         installed_Gurobi_default_memory_parameters=defaults,
         authoritative_parameter_reference='https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parameter:MemLimit',

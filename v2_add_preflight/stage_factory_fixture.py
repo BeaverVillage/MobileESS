@@ -6,6 +6,7 @@ import numpy as np
 from .stage_common import *
 from .prestart_native import native_zero
 from .stage_gurobi_io import scope as gurobi_io
+from .stage_case_cache import scope as preparation_scope
 
 
 class ReadbackComplete(RuntimeError):pass
@@ -18,7 +19,7 @@ def certify():
     from v44.frozen.v43_mess.library import load
     from v42_may_campaign_native90 import budget as source_budget
     from .stage_origin import require_m
-    with measured('PRODUCTION_M1_CURRENT_CASE_NATIVE0.json') as (report,start),gurobi_io(),native_zero() as denied:
+    with measured('PRODUCTION_M1_CURRENT_CASE_NATIVE0.json') as (report,start),gurobi_io(),native_zero() as denied,preparation_scope() as preparation:
         root=WORK/('CURRENT_CASE_HANDLER_'+uuid.uuid4().hex[:8]);root.mkdir()
         payload=prepare(root/'R0');p=payload['planning']['PCC_P_kw']
         anchor=[]
@@ -53,6 +54,11 @@ def certify():
         import gc;gc.collect()
         reached=[];candidates=load()['m_candidates']
         def no_score(objective,**kw):
+            # geometry.scope deliberately installs its certified compact IO
+            # function after the source timing wrapper. Check the actual
+            # current binding, rather than that overwritten wrapper's name.
+            scope=candidates.grid_context.__globals__
+            assert callable(scope.get('_compact_current_authority')) and callable(scope.get('_compact_authority_cache')),'CURRENT_CASE_GEOMETRY_IO_NOT_BOUND'
             assert np.isfinite(objective).all() and kw['A_ub'].shape[1]==len(objective)
             assert np.isfinite(kw['b_ub']).all()
             reached.append(dict(columns=len(objective),rows=kw['A_ub'].shape[0]))
@@ -64,6 +70,8 @@ def certify():
             try:mresult=handler.m(mrequest,mparents)
             except ScoreBoundary:mresult=None
         assert reached and not denied
+        reuse=read(root/'M1_NATIVE0/SAME_CASE_PREPARATION_REUSE.json')
+        assert reuse['reused'] and preparation.stats['stored']==preparation.stats['reused']==1
         mledger=read(root/'M1_NATIVE0/JOINT_NATIVE_LEDGER.json')
         assert mledger['measured_Native_Runtime']==0. and not mledger['calls'] and mledger['inflight'] is None
         if mresult is not None:assert mresult['PASS'] is False and mresult['MESS_plan'] is None
@@ -74,6 +82,8 @@ def certify():
             real_production_M1_handler_original_adaptive_Beam_score_boundary_reached=reached,
             probe_is_not_M1_implementation_or_optimization_performance_result=True,
             preparation_only_parent_Global_LB=lower['Global_LB'],M1_Native_ledger=record(root/'M1_NATIVE0/JOINT_NATIVE_LEDGER.json'),
+            actual_handler_same_case_preparation_reused=True,preparation_cache_statistics=dict(preparation.stats),
+            actual_same_case_geometry_IO_binding_reinstalled=True,
             no_accepted_A1_A2_or_M1_M2_optimization_result_fabricated=True,
             explicit_Native0_fixture_authority_only=True,external_worker_locks_not_acquired=True,denied_attempts=denied)
 

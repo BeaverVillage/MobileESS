@@ -54,7 +54,7 @@ class Flat:
         return values
 
 class Blocks:
-    def __init__(self,pack=PACK,stage='M1',view_root=None,reference_proof=None):
+    def __init__(self,pack=PACK,stage='M1',view_root=None,reference_proof=None,case_context=None):
         import types
         self.pack=pack;self.stage=stage
         self.view_root=Path(view_root) if view_root is not None else WORK/stage/'view'
@@ -65,24 +65,49 @@ class Blocks:
         self.md['names']=self.md['names'].astype(object);self.md['row_names']=self.md['row_names'].astype(object)
         self.current=None;self.cached=None;self.records=[];self.row_lengths=[self.mob.shape[0]];self.nz_lengths=[self.mob.nnz]
         ptr=[self.mob.indptr.copy()];offset=self.mob.nnz
+        reference=read(self.reference_proof)
+        baseline=read(OUT/'SOURCE_YY_ORIGINAL_FULL_REFERENCE.json')['identity']
+        legacy_certificate=read(OUT/'K48_WHOLE96_INTERFACE_CERTIFICATION.json')
+        from .stage_view_cache import load_or_build,same_bytes
+        self.view_cache_hits=0
         for t in range(96):
             path=self.view_root/f'{t:02d}';path.mkdir(parents=True,exist_ok=True)
             committed=path/'COMMITTED.json'
-            valid=False
+            authority={name:record(pack/f'{t:02d}'/name) for name in ('MATRIX.npz','ROWS.npz','DOMAIN.npz')}
+            expected=baseline['blocks'][t]['files']
+            # Reanchoring changes ROWS only. Current reference records bind
+            # that exact RHS; matrix/domain retain the frozen Source-YY bits.
+            current_rows=expected['ROWS.npz'] if 'identity' in reference else reference['records'][t]['rows']
+            for name in ('MATRIX.npz','DOMAIN.npz'):
+                if not same_bytes(authority[name],expected[name]):raise ValueError('CURRENT_VIEW_RAW_AUTHORITY_DRIFT:'+name)
+            if not same_bytes(authority['ROWS.npz'],current_rows):raise ValueError('CURRENT_VIEW_RHS_AUTHORITY_DRIFT')
+            authority.update(mobility_domain=record(pack/'MOBILITY_DOMAIN.npz'),
+                coefficients=record(RUN/'coefficients'/f'{t:02d}.npz'),axes=record(OUT/'SOURCE_YY_GRID_AXES.json'),
+                reference=record(self.reference_proof),slot_view_producer=record(ROOT/'v2_add_preflight/stage_k48.py'),
+                case_view_adapter=record(__file__))
+            if not same_bytes(authority['mobility_domain'],baseline['domain']) or not same_bytes(authority['coefficients'],baseline['blocks'][t]['coefficient']):
+                raise ValueError('CURRENT_VIEW_MOBILITY_OR_COEFFICIENT_AUTHORITY_DRIFT')
+            legacy=None
             if committed.exists():
                 proof=read(committed)
-                valid=proof.get('producer',{}).get('sha256')==record(ROOT/'v2_add_preflight/stage_k48.py')['sha256']
-                valid &= proof['raw_component']['sha256']==record(pack/f'{t:02d}/MATRIX.npz')['sha256']
+                # Legacy receipts omitted RHS identity. They are usable only
+                # for the independently certified baseline RHS, never for a
+                # reanchored A1/A2 case with the same matrix coefficients.
+                valid=legacy_certificate.get('representation_all96_PASS') is True
+                valid &= same_bytes(authority['ROWS.npz'],expected['ROWS.npz'])
+                valid &= proof==legacy_certificate['records'][t]
+                valid &= proof.get('producer',{}).get('sha256')==authority['slot_view_producer']['sha256']
+                valid &= proof['raw_component']['sha256']==authority['MATRIX.npz']['sha256']
                 valid &= proof['view_matrix']['sha256']==record(path/'A.npz')['sha256'] and proof['view_domain']['sha256']==record(path/'D.npz')['sha256']
-            if valid:A=sp.load_npz(path/'A.npz')
-            else:
+                if valid:legacy=proof
+            def build():
                 A,d,proof=self.view(t,self.md)
-                sp.save_npz(path/'A.npz',A)
                 local={k:d[k][self.nbase:] for k in ('names','lower','upper','types','objective')}
                 local.update({k:d[k] for k in ('row_names','rhs','sense')})
                 for k in ('names','row_names'):local[k]=local[k].astype(str)
-                np.savez_compressed(path/'D.npz',**local)
-                proof.update(view_matrix=record(path/'A.npz'),view_domain=record(path/'D.npz'))
+                return A,local,proof
+            A,proof,hit=load_or_build(path,authority,dict(case_context or {},slot=t,stage=stage),build,legacy)
+            self.view_cache_hits+=int(hit)
             self.row_lengths.append(A.shape[0]);self.nz_lengths.append(A.nnz);ptr.append(A.indptr[1:].astype(np.int64)+offset);offset+=A.nnz
             self.records.append(proof)
         self.indptr=np.concatenate(ptr).astype(np.int64);self.row_offsets=np.r_[0,np.cumsum(self.row_lengths)]
@@ -164,7 +189,11 @@ def build_case(stage='M1',*,current_root=None,current_pack=None,current_proof=No
     assert stage in ('M1','M2')
     root=(RUN if stage=='M1' else WORK/'M2') if current_root is None else Path(current_root)
     pack=(PACK if stage=='M1' else root/'SOURCE_YY_FULL96') if current_pack is None else Path(current_pack)
-    start=time.perf_counter();blocks=Blocks(pack,stage,view_root=current_view if current_view is not None else (None if current_root is None else root/'view'),reference_proof=current_proof)
+    anchor_for_context=current_anchor if current_anchor is not None else (record(OUT/'SOURCE_YY_PLANNING_ANCHOR.csv') if stage=='M1' else record(root/'A2_FIXTURE.json'))
+    context=dict(day='2025-05-01',stage=stage,arm=arm or ('B2' if stage=='M1' else 'B3'),source=SOURCE,
+        aidc_anchor=anchor_for_context['aidc_anchor'] if current_anchor is not None else digest(anchor_for_context),
+        hardware=record(OUT/'SOURCE_YY_HARDWARE_FREEZE.json'),inputs={k:day_inputs()['files'][k] for k in ('native','windows','actual_input','request_descriptors')})
+    start=time.perf_counter();blocks=Blocks(pack,stage,view_root=current_view if current_view is not None else (None if current_root is None else root/'view'),reference_proof=current_proof,case_context=context)
     A=FullCSR(blocks);d=blocks.domain();guard(start)
     if k48_only:
         # K48 reads the actual original FULL authority, never the selected UB
@@ -213,7 +242,8 @@ def build_case(stage='M1',*,current_root=None,current_pack=None,current_proof=No
     case.lift=lift;case._stream_identity=case.identity['composite_original_reference_sha'];case._blocks=blocks
     case.raw_pack=pack
     case._runtime_storage_root=root;case._k48_only=k48_only
-    case.mess_stage_budget_seconds=900.
+    from .stage_budget import JOINT_SECONDS
+    case.mess_stage_budget_seconds=JOINT_SECONDS
     from .stage_m_validation import validate,strict
     case.validate_full=lambda x:validate(case,x)
     case.strict_validator=strict
@@ -232,6 +262,8 @@ def source_binding(case):
     modules=load();saved=[]
     def patch(obj,key,value):saved.append((obj,key,getattr(obj,key)));setattr(obj,key,value)
     k=modules['table_v_k48'];engine=modules['m_engine']
+    from .stage_budget import m_result_metadata
+    patch(engine,'optimize_mess',m_result_metadata(engine.optimize_mess))
     old_matrix=engine.matrix_sha;old_domain=engine.domain_sha
     def matrix(A):return case._stream_identity if isinstance(A,FullCSR) else old_matrix(A)
     def domain(d):return case._stream_identity if isinstance(d.get('names'),Names) else old_domain(d)
@@ -286,7 +318,9 @@ def source_binding(case):
     exec(compile(tree,engine.__file__,'exec'),namespace);patch(engine,'direct_joint',namespace['direct_joint'])
     request=dict(day='2025-05-01',arm=case.identity['arm'],stage=case.identity['stage'],worker_slot=1,Threads=4)
     try:
-        with m_threads(request) as effective:
+        from .stage_budget import scope as budget_scope
+        from .stage_immutable_io import scope as immutable_io
+        with m_threads(request) as effective,budget_scope(),immutable_io(case,modules):
             modules['_effective_r043_parameters']=effective
             from v44.frozen.v43_mess.performance import install
             if not case._k48_only:
@@ -312,3 +346,9 @@ def source_binding(case):
             yield modules
     finally:
         for obj,key,value in reversed(saved):setattr(obj,key,value)
+        # Source performance.install marks the Case as installed, whereas
+        # these module wrappers have just been restored. A same-case K48→M
+        # reuse must reinstall them in the next scope. Their exact transient
+        # helper caches are scoped to the restored functions, not a live flag.
+        for key in ('_v43_cache_installed','_v43_runtime_cache','_v43_cache_counters','_v43_original_runtime_sources'):
+            if hasattr(case,key):delattr(case,key)

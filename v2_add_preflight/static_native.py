@@ -19,7 +19,12 @@ def stats(m):
         variables=int(m.NumVars),rows=int(m.NumConstrs),nonzeros=int(m.DNumNZs))
 
 def native_rows_exact(model,handle,C,rhs,sense,start):
-    """Every actual Native coefficient, without a full constraint-list copy."""
+    """Every actual Native coefficient, with a bounded C-API row query."""
+    from .stage_native_batch import exact
+    return exact(model,handle,C,rhs,sense,start)
+
+def native_rows_exact_legacy(model,handle,C,rhs,sense,start):
+    """Preserved pre-optimization path for identical-case measurements."""
     for i in range(C.shape[0]):
         constraint=handle[i].item();row=model.getRow(constraint);a,b=C.indptr[i:i+2]
         found={row.getVar(j).index:row.getCoeff(j) for j in range(row.size())}
@@ -50,11 +55,6 @@ def build():
                 guard(start)
                 A,vd,r=load(t);lo=nbase+t*N_AUX
                 with np.load(CACHE/f'{t:02d}'/'STATIC_SELECTION.npz') as z:rows=z['rows'];needed=z['variables']
-                allocation_upper=len(needed)*512+A[rows].nnz*40+len(rows)*160
-                if psutil.Process().memory_info().rss+allocation_upper>4*1024**3-128*1024**2:
-                    raise MemoryError('PREEMPTIVE_4GIB_NATIVE_BUILD_LIMIT')
-                if psutil.virtual_memory().available-allocation_upper<5*1024**3:
-                    raise MemoryError('PREEMPTIVE_PROTECTED_WORKER_5GIB_RESERVE')
                 # Reference components have local suffix00. Native global
                 # names include the real slot; coordinate maps retain both.
                 native_names=np.char.replace(vd['names'][needed].astype(str),'_00[',f'_{t:02d}[')
@@ -181,7 +181,7 @@ def build():
         np.savez_compressed(RUN/'native/COMPLETE_DOMAIN.npz',names=names,row_names=rownames,**export)
     measured_peak=getattr(psutil.Process().memory_info(),'peak_wset',peak[0])
     report.update(wall_seconds=time.perf_counter()-start,peak_RSS_bytes=max(peak[0],measured_peak),resources=res,
-        protection_limit_bytes=4*1024**3,official_campaign_executed=False)
+        protection_limit_bytes=None,memory_information_only=True,official_campaign_executed=False)
     put('IEEE8500_COMPLETE_STATIC_NATIVE0_REPORT.json',report)
     print('COMPLETE STATIC NATIVE0',report['PASS'],report.get('model'),report.get('error'),flush=True)
 
