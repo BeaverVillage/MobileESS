@@ -48,15 +48,17 @@ class Performance(unittest.TestCase):
    folder=Path(d)
    for value in ['3/5','1/2','1/2']:
     atomic(folder/'FULL_PRICING_RESULT.json',dict(active_objective_upper=value));apply(state,[{}],None,None,folder,None)
-   self.assertEqual(seen,[0,0,20000]);self.assertEqual(module.MAX_COLUMNS_PER_CLASS,20000)
+   self.assertEqual(seen,[0,0,8000]);self.assertEqual(module.MAX_COLUMNS_PER_CLASS,20000)
 
  def test_all31_new_A_stages_use_the_existing_bounded_promotion(self):
   for day in c.DAYS:
    for stage in ('A3','A4'):self.assertTrue(p.selected(dict(day=day,stage='A2',iteration_stage=stage,arm='B3')))
   for arm,stage in [('B1','A3'),('B3','M2'),('B3','ACTUAL')]:self.assertFalse(p.selected(dict(day=c.DAYS[0],stage='A2',iteration_stage=stage,arm=arm)))
-  self.assertLessEqual(11*15725,p.MAX_TOTAL_COLUMNS);self.assertGreaterEqual(p.MAX_COLUMNS_PER_CLASS,15725)
+  from v44_iteration2.bootstrap import base
+  from v44_recovery_r031 import p1_expansion as original
+  self.assertEqual((p.MAX_CLASSES,p.MAX_COLUMNS_PER_CLASS,p.MAX_TOTAL_COLUMNS),(original.MAX_CLASSES,original.MAX_COLUMNS_PER_CLASS,original.MAX_TOTAL_COLUMNS))
 
- def test_real_expansion_promotes_15725_columns_on_repeat_and_enforces_limits(self):
+ def test_oversize_whole_graph_is_not_promoted_and_negative_direction_stays_available(self):
   from v44_iteration2.bootstrap import base
   from v44_recovery_r031 import p1_expansion as e
   from v42_a_stage_domain_v2 import domain
@@ -68,9 +70,27 @@ class Performance(unittest.TestCase):
   with tempfile.TemporaryDirectory(dir=c.ROOT) as d,patch.object(e,'MAX_CLASSES',p.MAX_CLASSES),patch.object(e,'MAX_COLUMNS_PER_CLASS',p.MAX_COLUMNS_PER_CLASS),patch.object(e,'MAX_TOTAL_COLUMNS',p.MAX_TOTAL_COLUMNS),patch.object(domain,'graph_content_hash',lambda g:g.sha):
    expansion=e.Expansion();loader=lambda w:dict(graph=full,snapshot=snapshot)
    self.assertEqual(expansion.apply([candidate],data,dict(records=[want]),Path(d),loader)[0]['graph'].sha,'active')
-   self.assertEqual(expansion.apply([candidate],data,dict(records=[want]),Path(d),loader)[0]['graph'].sha,'full')
-   self.assertEqual(expansion.columns,15725)
    self.assertEqual(expansion.apply([candidate],data,dict(records=[want]),Path(d),loader)[0]['graph'].sha,'active')
+   self.assertEqual(expansion.columns,0)
+   self.assertEqual(expansion.apply([candidate],data,dict(records=[want]),Path(d),loader)[0]['graph'].sha,'active')
+
+ def test_original_real_expansion_keeps_every_direction_and_enforces_total_column_budget(self):
+  from v44_iteration2.bootstrap import base
+  from v44_recovery_r031 import p1_expansion as e
+  from v42_a_stage_domain_v2 import domain
+  graph=lambda sha:SimpleNamespace(sha=sha,events={},states={},compatible={},physical={},transfers={},fixed=None)
+  active=graph('active');full=graph('full');snapshot=SimpleNamespace(matrix=SimpleNamespace(shape=(1,8000)),fingerprint=lambda:'snapshot')
+  keys=['a','b','c','d'];candidates=[dict(class_id=k,graph=active,support_sha256='active') for k in keys]
+  required=[dict(class_id=k,complete_native_primitive_columns=8000,complete_graph_sha256='full') for k in keys]
+  data=(None,None,None,None,None,{k:active for k in keys},None,dict(classes={k:[k] for k in keys}))
+  loaded=[]
+  def load(w):loaded.append(w['class_id']);return dict(graph=full,snapshot=snapshot)
+  with tempfile.TemporaryDirectory(dir=c.ROOT) as d,patch.object(e,'MAX_CLASSES',p.MAX_CLASSES),patch.object(e,'MAX_COLUMNS_PER_CLASS',p.MAX_COLUMNS_PER_CLASS),patch.object(e,'MAX_TOTAL_COLUMNS',p.MAX_TOTAL_COLUMNS),patch.object(domain,'graph_content_hash',lambda g:g.sha):
+   expansion=e.Expansion();expansion.apply(candidates,data,dict(records=required),Path(d),load)
+   result=expansion.apply(candidates,data,dict(records=required),Path(d),load)
+   self.assertEqual([r['class_id'] for r in result],keys)
+   self.assertEqual([r['graph'].sha for r in result],['full','full','active','active'])
+   self.assertEqual(loaded,['a','b']);self.assertEqual(expansion.columns,16000)
 
  def test_matrix_links_round_trip_exactly_and_overwriting_one_is_copy_on_write(self):
   with tempfile.TemporaryDirectory(dir=c.ROOT) as d:

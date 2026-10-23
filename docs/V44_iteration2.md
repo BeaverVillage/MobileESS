@@ -238,8 +238,18 @@ These cross-case timings are observations, not controlled speedup claims.
 Live pricing samples show repeated source hashing and JSON audit persistence.
 Retain every full source hash and audit row. Compact C-encoder JSON persistence
 preserves parsed data, numeric/nonfinite rules and atomic replacement. On the
-real693-call May01 ledger, serialization measured0.02769s ->0.00952s (2.91x),
+real cumulative May01 ledger, serialization measured0.02769s ->0.00952s (2.91x),
 with1409342 ->1093330 UTF-8 bytes. This is serialization-only, not an overall
 campaign speedup. Matrix hard links and the bounded graph/sparse-index speedups
 remain enabled. Actual still starts only after all31 Planning dates are terminal,
 and launches only ready verified-M4 dates with at most7 workers.
+
+The direct May01 comparison identifies a controller-side expansion bottleneck:
+complete-graph promotion had widened from r043's3 classes,8000 columns/class
+and20000 total columns to12/20000/200000. Restore3/8000/20000 for iteration2 A3/A4.
+The failed S5->S6 transition added155815 columns at once; r043's last P1 had117918
+columns versus250631 here. Only optional whole-graph promotion is bounded.
+Exact native pricing, every scientific candidate, closure and FULL remain live.
+The second preparation was stopped with zero new Native calls and an exact
+1385-call ledger prefix identical to its original138.038005352s paid account.
+Its partial files remain preserved; continuation uses that same paid parent.

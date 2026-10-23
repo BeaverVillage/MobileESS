@@ -10,9 +10,9 @@ from fractions import Fraction
 from . import config as c
 from .io import atomic,record,read,now
 
-MAX_CLASSES=12
-MAX_COLUMNS_PER_CLASS=20000
-MAX_TOTAL_COLUMNS=200000
+MAX_CLASSES=3
+MAX_COLUMNS_PER_CLASS=8000
+MAX_TOTAL_COLUMNS=20000
 
 def streaming_domain_digest(value):
  """Byte-identical canonical SHA without a giant joined JSON string."""
