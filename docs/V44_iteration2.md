@@ -347,3 +347,12 @@ Native and DSS forbidden. Publish live call counts and time in each A output's
 ITERATION2_MIGRATION_CENSUS.json. Apply through the existing worker scope only,
 leaving pinned original science files unchanged. Maintenance continuation
 retains A5400/Phase-I1500 measured prefixes and the accepted M2 parent.
+
+The resumed coordinator exposed a remaining Planning dispatch regression:
+RAM admission still required8GiB estimated worker plus6GiB reserve, leaving
+an otherwise idle campaign in RESOURCE_WAIT_PLANNING at13.8GiB available.
+Honor the user's explicit no-RAM-blocking instruction for Planning as well as
+Actual. Keep RAM telemetry, the existing Planning16GiB/Actual4GiB free-disk
+guards, serial Planning and Actual max7 unchanged. No Native worker was active
+when this dispatch-only correction was deployed; both inherited accounts stay
+unchanged. Low-RAM tests must admit Planning, while low-disk tests still deny it.

@@ -57,9 +57,11 @@ class Contracts(unittest.TestCase):
    self.assertFalse(resources.admission('D:/',phase='ACTUAL',running=7,pilot_complete=True)['admit']);self.assertTrue(resources.admission('D:/',phase='ACTUAL',running=6,pilot_complete=True)['admit'])
   with patch.object(resources.psutil,'virtual_memory',return_value=SimpleNamespace(total=32*G,available=7*G)),patch.object(resources.shutil,'disk_usage',return_value=SimpleNamespace(free=40*G)):
    self.assertTrue(resources.admission('D:/',phase='ACTUAL',pilot_complete=True)['admit'])
-   self.assertFalse(resources.admission('D:/',phase='PLANNING')['admit'])
+   planning=resources.admission('D:/',phase='PLANNING')
+   self.assertTrue(planning['admit']);self.assertFalse(planning['planning_RAM_admission_enabled'])
   with patch.object(resources.psutil,'virtual_memory',return_value=SimpleNamespace(total=32*G,available=30*G)),patch.object(resources.shutil,'disk_usage',return_value=SimpleNamespace(free=G)):
    self.assertFalse(resources.admission('D:/',phase='ACTUAL')['admit'])
+   self.assertFalse(resources.admission('D:/',phase='PLANNING')['admit'])
 
 class ArchiveIO(unittest.TestCase):
  def test_new_dated_index_and_equipment_member_are_read_without_extraction(self):
