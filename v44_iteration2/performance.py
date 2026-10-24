@@ -70,15 +70,17 @@ def bind_pricing(namespace):
 
 def promotion_wrapper(original,module):
  def apply(self,negative,data,qualified,folder,loader):
-  # Spend the bounded complete-graph allowance on a demonstrated plateau,
-  # rather than exhausting it on early classes while the objective improves.
+  # Keep r031's repeated-negative rule. Requiring an exact objective plateau
+  # disabled every eligible promotion throughout the observed 14 P1 rounds.
   priced=read(Path(folder)/'FULL_PRICING_RESULT.json');value=Fraction(priced['active_objective_upper'])
   prior=getattr(self,'_iteration2_last_upper',None)
   plateau=prior is not None and abs(value-prior)<=Fraction(1,100000000)
   self._iteration2_last_upper=value
-  with patch.object(module,'MAX_COLUMNS_PER_CLASS',MAX_COLUMNS_PER_CLASS if plateau else 0):
+  with patch.object(module,'MAX_COLUMNS_PER_CLASS',MAX_COLUMNS_PER_CLASS):
    result=original(self,negative,data,qualified,folder,loader)
-  atomic(Path(folder)/'ITERATION2_P1_PLATEAU_ACCELERATION.json',dict(UTC=now(),plateau=plateau,prior_upper=str(prior) if prior is not None else None,current_upper=str(value),negative_classes=len(negative),promotion_eligibility_columns=MAX_COLUMNS_PER_CLASS if plateau else 0,maximum_total_columns=MAX_TOTAL_COLUMNS,original_exact_pricing_retained=True))
+  atomic(Path(folder)/'ITERATION2_P1_PLATEAU_ACCELERATION.json',dict(UTC=now(),plateau=plateau,plateau_required=False,
+   original_repeated_negative_rule_retained=True,prior_upper=str(prior) if prior is not None else None,current_upper=str(value),
+   negative_classes=len(negative),promotion_eligibility_columns=MAX_COLUMNS_PER_CLASS,maximum_total_columns=MAX_TOTAL_COLUMNS,original_exact_pricing_retained=True))
   return result
  return apply
 

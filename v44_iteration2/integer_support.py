@@ -24,6 +24,7 @@ def continuation_row(parent):
 
 def load_closed(request,budget):
  parent=Path(request['_iteration2_integer_resume_parent']);row=continuation_row(parent)
+ if row.get('integer_conflict_repair'):request['_iteration2_retry_same_support']=True
  verify([row['closed_state'],row['core_failure'],row['ledger'],row['old_request']]+list(row['certificates'].values()))
  old=read(parent/'request.json');account=read(row['ledger']['path'])
  for name in ('day','arm','iteration_stage','fixed_parent_receipt','equipment_version'):
@@ -114,6 +115,50 @@ def unique_incumbent(output):
  folder=Path(output)/'I'
  used=[int(p.stem[1:]) for p in folder.glob('V[0-9]*.npz') if p.stem[1:].isdigit()]
  return folder/('V'+str(max(used,default=0)+1))
+
+
+def defer_bound_conflict(native,snapshot,point,upper,lower,output):
+ """Quarantine a tolerance-scale candidate; it is never an accepted UB."""
+ if upper>=lower:return False
+ if lower-upper>Fraction(1,1000000) or getattr(native,'_iteration2_conflict_polished',False):
+  raise ValueError('A_CERTIFIED_LB_UB_CONFLICT')
+ folder=Path(output)/'I';folder.mkdir(parents=True,exist_ok=True)
+ stem=folder/('C'+str(len(list(folder.glob('C*.npz')))+1))
+ np.savez_compressed(str(stem)+'.npz',X=point)
+ proof=dict(UTC=now(),exact_candidate_value=str(upper),exact_full_domain_LB=str(lower),
+  original_snapshot_sha256=snapshot.fingerprint(),point=record(str(stem)+'.npz'),
+  candidate_accepted=False,lower_bound_modified=False,gap_target_relaxed=False,
+  action='POST_NATIVE_EXACT_FIXED_INTEGER_NUMERICAL_POLISH')
+ atomic(str(stem)+'.json',proof);native._iteration2_bound_conflict=proof
+ if native.live_model is not None:native.live_model.terminate()
+ return True
+
+
+def repair_conflict(native,snapshot,point,folder,original):
+ if not getattr(native,'_iteration2_bound_conflict',None):return original(native,snapshot,point,folder)
+ from v44_recovery_r029.integer_repair import fixed_snapshot
+ from v42_a_stage_phase1.core import primal_replay
+ from .integer_native import POLISH
+ fixed,integer,residual=fixed_snapshot(snapshot,point)
+ folder=Path(folder);folder.mkdir(parents=True,exist_ok=False)
+ callback=getattr(native,'incumbent_callback',None);warm=getattr(native,'warm_point',None)
+ basis=getattr(native,'warm_basis',None)
+ native.incumbent_callback=None;native.warm_point=None;native.warm_basis=None
+ token=POLISH.set(True)
+ try:rec,raw=native.solve(fixed,folder/'CONTINUOUS','INTEGER_CONTROL')
+ finally:
+  POLISH.reset(token);native.incumbent_callback=callback;native.warm_point=warm;native.warm_basis=basis
+ if 'X' not in raw:raise ValueError('FIXED_INTEGER_CONFLICT_POLISH_NO_POINT')
+ replay=primal_replay(snapshot,raw['X']);exact=np.array_equal(raw['X'][integer],np.rint(point[integer]))
+ proof=dict(PASS=bool(replay['PASS'] and exact),UTC=now(),original_snapshot_sha256=snapshot.fingerprint(),
+  fixed_snapshot_sha256=fixed.fingerprint(),original_rows=replay,integer_decisions_exact=bool(exact),
+  previous_integer_residual=residual,original_conflict=native._iteration2_bound_conflict,
+  shared_original_A5400_budget=True,lower_bound_modified=False,acceptance_relaxed=False,
+  physical_and_gap_revalidation_required=True,native_result=record(folder/'CONTINUOUS/NATIVE_RESULT.json'))
+ atomic(folder/'REPAIR_CERTIFICATE.json',proof)
+ if not proof['PASS']:raise ValueError('FIXED_INTEGER_CONFLICT_POLISH_ORIGINAL_REPLAY_FAILED')
+ native._iteration2_conflict_polished=True;native._iteration2_bound_conflict=None
+ return rec,raw
 
 
 def detach_lp_state(state):
@@ -275,7 +320,9 @@ def compiler(original):
    "        typed, typeproof = restore_types(state, state['global_types'])":
     "        typed,typeproof = _iteration2_integer_support.restore_typed(state,request,restore_types)",
    "        def validate(point, objective):":
-    "        _iteration2_search=_iteration2_integer_support.Support(request,state,output,exact_lb)\n        def validate(point, objective):",
+    "        _iteration2_search=_iteration2_integer_support.Support(request,state,output,exact_lb)\n        native._iteration2_target=exact_lb/(1-Fraction(1,200)) if exact_lb>0 else None\n        def validate(point, objective):",
+   "            if upper < exact_lb:\n                raise ValueError('A_CERTIFIED_LB_UB_CONFLICT')":
+    "            if _iteration2_integer_support.defer_bound_conflict(native,typed,point,upper,exact_lb,output):return",
    "            incarnation = output / 'I' / ('V' + str(len(candidates) + 1))":
     "            incarnation = _iteration2_integer_support.unique_incumbent(output)",
   }
@@ -286,7 +333,7 @@ def compiler(original):
   source=source[:begin]+'''        _iteration2_initial=_iteration2_integer_support.resume_point(request)
         if _iteration2_initial is not None:
             validate(_iteration2_initial,float(objective_value(typed,_iteration2_initial,'rho')))
-            if _iteration2_search.resumed_support:_warm=_iteration2_initial
+            if _iteration2_search.resumed_support or request.get('_iteration2_retry_same_support'):_warm=_iteration2_initial
             else:
                 _next=_iteration2_search.expand(state,typed,_iteration2_initial)
                 if _next is None:raise ValueError('INTEGER_CONTINUATION_HAS_NO_NEW_PHYSICAL_SUPPORT')
@@ -303,7 +350,7 @@ def compiler(original):
             native.incumbent_callback = validate
             rec, raw = native.solve(typed, _iteration2_search.folder(), 'INTEGER_CONTROL')
             if 'X' in raw:
-                _repair=_r029_restore(native,typed,raw['X'],_iteration2_search.folder()/'EXACT_INTEGER_REPAIR')
+                _repair=_iteration2_integer_support.repair_conflict(native,typed,raw['X'],_iteration2_search.folder()/'EXACT_INTEGER_REPAIR',_r029_restore)
                 if _repair is not None:
                     rec,raw=_repair;candidates.clear()
                 validate(raw['X'], rec['objective'])

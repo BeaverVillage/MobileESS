@@ -41,7 +41,7 @@ class IntegerRuntime(unittest.TestCase):
   self.assertIn("if not actual['PASS']:",body)
   self.assertIn('del compiled,delta,expected',body)
   self.assertIn('self.budget.charge(used or 0.)',body)
-  self.assertIn("solver_policy_unchanged=not effective.get('iteration2_global_integer_target',False)",body)
+  self.assertIn("solver_policy_unchanged=not (effective.get('iteration2_global_integer_target',False)",body)
   self.assertIn('model.dispose();self.live_model=None',body)
   routed=routed_optimize(fn,dict(fn.__globals__))
   self.assertIs(routed.__globals__['_iteration2_integer_configure'],configure)
@@ -89,7 +89,7 @@ class IntegerRuntime(unittest.TestCase):
   from v42_may_campaign_native90 import a_stage
   with patch.object(a_stage,'_iteration2_integer_support',support,create=True):
    body=inspect.getsource(base.live_compiler(support.compiler(compile_run))(a_stage.run))
-  self.assertIn('if _iteration2_search.resumed_support:_warm=_iteration2_initial',body)
+  self.assertIn("if _iteration2_search.resumed_support or request.get('_iteration2_retry_same_support'):_warm=_iteration2_initial",body)
   self.assertIn("if acceptance['PASS'] and native.live_model is not None:",body)
   self.assertIn('_iteration2_search.persist(state,typed)',body)
 

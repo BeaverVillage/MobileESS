@@ -173,16 +173,13 @@ prefix-checked diagnostic ledger. The regression point or bound is not
 used as a scientific campaign result.
 
 The performance repair applies the existing r031 repeat-class complete-native
-graph promotion to every new May A3/A4 stage. Its old May03-07 and 8,000-column
-gates excluded the observed May01 plateau: eleven repeatedly negative classes
-have 15,725 native columns each. Promotion remains bounded to 12 classes,
-20,000 columns per class and 200,000 total columns. It uses only the same
-verified complete oracle graphs, retains prior/support containment and the
-original inclusion replay, and leaves all exact pricing and FULL gates intact.
-The allowance is reserved until the P1 objective actually plateaus within
-the unchanged 1e-8 criterion, so early progressing classes cannot exhaust it
-before the repeatedly stagnant eleven classes. The scientific domain and
-number of jobs do not increase.
+graph promotion to every new May A3/A4 stage. Keep the original limits of
+3 classes, 8,000 primitive columns per class and 20,000 total columns. It uses
+only the same verified complete oracle graphs, retains prior/support containment
+and the original inclusion replay, and leaves all exact pricing and FULL gates
+intact. The 2026-10-25 repair removes the added objective-plateau condition: a
+small improvement must not disable the original repeated-negative eligibility.
+The scientific domain and number of jobs do not increase.
 
 Full pricing indexes owned columns and extracts coupling rows once per round;
 each class still executes its original Native oracle and exact certificate.
@@ -455,3 +452,62 @@ removed. The real original A2 physical replay must agree before/after except its
 validation_seconds timer. A restored unchanged round links the already verified
 checkpoint losslessly rather than serializing that full state again; every linked
 target is still fully hashed and checked against the approved bytes.
+
+
+## 2026-10-25 May20 comparison and explicitly fresh May01 A3
+
+Archived r043 May19/20/21 A2 wall times are514.10/810.26/1828.70 seconds,
+with25.265/76.897/41.737 measured Native seconds. May20 closes P1 in one
+round and solves its721974-by119899 integer model in21.558 Native seconds.
+The failed May01 A3 needs14 P1 rounds and first restores a4096846-by2712308
+integer model; after support expansion it reaches4667484-by3298802.
+Dates and fixed M parents differ, so these are not identical-case speed tests.
+Scientific workload growth alone is not evidence of an implementation defect.
+
+The extra objective-plateau condition nevertheless disables every bounded P1
+promotion throughout those14 rounds, despite repeated eligible negative classes.
+Restore r031's original repeated-negative rule with its3/8000/20000 bounds.
+A real same-state Native0 replay promotes the two verified7143/7183-column
+complete graphs on their second encounter while the objective is improving;
+every original primitive and negative direction remains included. Exact pricing,
+full-domain closure, original physical replay and acceptance remain mandatory.
+
+The last integer call spends270.66+934.59=1205.25 seconds in two presolves,
+and only96.68 seconds in the root LP. For integer models with at least1million
+columns, set PrePasses3 and MIPFocus1, keeping Presolve-1, Method2, Threads1,
+all original model coefficients, bounds, integer types and acceptance tolerances.
+Smaller integer models retain the original presolve-pass/focus policy. Normal
+continuous P1 and local pricing retain their existing numerical/basis policies.
+See [Gurobi's parameter guidance](https://docs.gurobi.com/projects/optimizer/en/current/concepts/parameters/guidelines.html).
+No overall speedup is claimed before the fresh campaign actually measures it.
+
+A restricted MIP bound may only schedule an enlargement of the current exact
+support. If it exceeds the independently derived acceptable UB=L/(1-0.005),
+with a conservative numerical margin, stop that Native call and use the existing
+verified superset activation/inclusion path. Keep its paid runtime and incumbent.
+Do not use this bound as the scientific global LB, declare acceptance, delete a
+class or prune a physical option. The original full-domain LB and independent
+physical/global-gap contract remain the only successful termination authority.
+MIPGap0/MIPGapAbs0 still prevent a restricted local gap from ending the stage.
+
+May08 A4 supplies an exactly integral raw point whose rho is2.628116692e-7
+below its certified P1 LB. Original matrix/physical replay passes at the original
+1e-6 tolerance. The callback previously throws before numerical restoration,
+and the inherited restoration skips an exactly integral point. Quarantine this
+candidate without accepting it or modifying the LB. After Native returns, fix
+the original integer decisions exactly and solve the original continuous rows
+with strict same-account numerical polish (FeasibilityTol/OptimalityTol1e-9,
+primal simplex with quad precision). Repeat original rows, physical replay and
+exact gap acceptance. A larger conflict or a conflict after this polish still
+fails closed; no raw-point clipping or tolerance relaxation is permitted.
+Only this diagnosed paid failure may restore its verified same-case P1 checkpoint
+and account. May08 retains14.98799753189087 Native seconds and all513 calls.
+
+The human explicitly requests May01 A3 from the beginning after these repairs.
+Create a new independent A3 attempt with fresh Phase I, P1 and integer search,
+A/Phase-I Native clocks0/0 and no resume parent. Preserve the old5413.158000707626
+paid seconds, all2954 calls and every old attempt as immutable history. Preserve
+completed M2 and every completed stage/freeze on other dates. Apply the shared
+repairs to future A3/A4 execution on every May date. Deploy after the already
+running May10 M3 completes naturally; continue all31 dates before ready-only
+Actual/Fresh with at most7 workers.

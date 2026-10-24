@@ -40,7 +40,7 @@ class Performance(unittest.TestCase):
      old=ns['full_pricing'];p.bind_pricing(ns);self.assertIs(ns['full_pricing'],old)
    finally:ACTIVE.reset(token)
 
- def test_complete_graph_allowance_is_reserved_for_an_actual_objective_plateau(self):
+ def test_improving_objective_does_not_disable_original_repeat_promotion(self):
   module=SimpleNamespace(MAX_COLUMNS_PER_CLASS=20000);seen=[];state=SimpleNamespace()
   def original(self,*args):seen.append(module.MAX_COLUMNS_PER_CLASS);return args[0]
   apply=p.promotion_wrapper(original,module)
@@ -48,7 +48,8 @@ class Performance(unittest.TestCase):
    folder=Path(d)
    for value in ['3/5','1/2','1/2']:
     atomic(folder/'FULL_PRICING_RESULT.json',dict(active_objective_upper=value));apply(state,[{}],None,None,folder,None)
-   self.assertEqual(seen,[0,0,8000]);self.assertEqual(module.MAX_COLUMNS_PER_CLASS,20000)
+   self.assertEqual(seen,[8000,8000,8000]);self.assertEqual(module.MAX_COLUMNS_PER_CLASS,20000)
+   self.assertFalse(read(folder/'ITERATION2_P1_PLATEAU_ACCELERATION.json')['plateau_required'])
 
  def test_all31_new_A_stages_use_the_existing_bounded_promotion(self):
   for day in c.DAYS:

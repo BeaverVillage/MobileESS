@@ -4,14 +4,46 @@ from pathlib import Path
 from unittest.mock import patch
 import inspect,textwrap,linecache,gc,ast
 from types import FunctionType
+from contextvars import ContextVar
+import math
 from .io import atomic,now
+
+POLISH=ContextVar('ITERATION2_FIXED_INTEGER_POLISH',default=False)
+
+
+def support_exhausted(native,model,where,gp,folder):
+ """A restricted bound may guide enlargement, never certify a global gap."""
+ target=getattr(native,'_iteration2_target',None)
+ if target is None or where!=gp.GRB.Callback.MIP:return
+ bound=float(model.cbGet(gp.GRB.Callback.MIP_OBJBND))
+ # Floating solver bounds only schedule a superset search. They never replace
+ # the exact full-domain LB or authorize acceptance, pruning or graph deletion.
+ threshold=math.nextafter(float(target),math.inf)+1e-6
+ if math.isfinite(bound) and abs(bound)<1e90 and bound>threshold:
+  atomic(Path(folder)/'RESTRICTED_SUPPORT_ENLARGEMENT.json',dict(UTC=now(),restricted_bound=bound,
+   exact_acceptable_UB=str(target),reason='CURRENT_SUPPORT_BOUND_ABOVE_GLOBAL_TARGET',
+   restricted_bound_is_global_certificate=False,scientific_acceptance_unchanged=True,
+   prior_graphs_and_incumbent_retained=True,all_calls_in_same_native_account=True))
+  model.terminate()
 
 
 def configure(model,folder):
+ if POLISH.get():
+  if model.NumIntVars:raise ValueError('FIXED_INTEGER_POLISH_MUST_BE_CONTINUOUS')
+  settings=dict(Method=0,Quad=1,Presolve=0,Aggregate=0,ScaleFlag=0,LPWarmStart=1,
+   PerturbValue=0,NumericFocus=3,FeasibilityTol=1e-9,OptimalityTol=1e-9)
+  for name,value in settings.items():model.setParam(name,value)
+  atomic(Path(folder)/'ITERATION2_FIXED_INTEGER_NUMERICAL_POLICY.json',dict(PASS=True,UTC=now(),settings=settings,
+   original_integer_decisions_fixed_exactly=True,acceptance_relaxed=False,shared_original_A_account=True))
+  return dict(settings,iteration2_fixed_integer_polish=True)
  if not model.NumIntVars:return {}
  # A restricted-domain MIPGap is not the independently certified global gap.
  # The unchanged physical callback stops only at the original global target.
  settings=dict(MIPGap=0.,MIPGapAbs=0.)
+ # The old last call spent 1205s in presolve and only 97s in the root LP.
+ # Limit passes only for the observed large integer path, keep auto presolve
+ # and barrier, and seek a qualifying incumbent against the certified P1 LB.
+ if model.NumVars>=1000000:settings.update(PrePasses=3,MIPFocus=1)
  # The observed failure occurred during integer presolve, before root LP.
  # Bound aggregation fill and enable sparse reduction, keeping auto presolve
  # and barrier. No row, bound, type, physical option or RAM gate is changed.
@@ -33,13 +65,15 @@ def compiled(function):
   '    effective=apply_policy(model,self.policy,gp)':
    "    if component=='INTEGER_CONTROL':del compiled,delta,expected\n    effective=apply_policy(model,self.policy,gp)\n    if component=='INTEGER_CONTROL':effective.update(_iteration2_integer_configure(model,folder))",
   "FarkasDual_access=component=='NODE_LP',solver_policy_unchanged=True)":
-   "FarkasDual_access=component=='NODE_LP',solver_policy_unchanged=not effective.get('iteration2_global_integer_target',False))",
+   "FarkasDual_access=component=='NODE_LP',solver_policy_unchanged=not (effective.get('iteration2_global_integer_target',False) or effective.get('iteration2_fixed_integer_polish',False)))",
+  '            telemetry.callback(m,w,gp.GRB)':
+   "            telemetry.callback(m,w,gp.GRB)\n            if component=='INTEGER_CONTROL':_iteration2_support_exhausted(self,m,w,gp,folder)",
  }
  for old,new in changes.items():
   if source.count(old)!=1:raise ValueError('INTEGER_NATIVE_COMPILER_BOUNDARY_DRIFT:'+old)
   source=source.replace(old,new)
  filename=__file__+'.solve.generated';linecache.cache[filename]=(len(source),None,source.splitlines(True),filename)
- namespace=dict(function.__globals__,_iteration2_integer_configure=configure,_iteration2_gc=gc)
+ namespace=dict(function.__globals__,_iteration2_integer_configure=configure,_iteration2_gc=gc,_iteration2_support_exhausted=support_exhausted)
  exec(compile(source,filename,'exec'),namespace)
  return namespace[function.__name__]
 
@@ -74,4 +108,4 @@ def scope():
  # Later stage scopes still bind their current numerical policy in this
  # module. Keep that live namespace instead of freezing an earlier policy.
  function=FunctionType(function.__code__,previous.__globals__,function.__name__,function.__defaults__,function.__closure__)
- with patch.object(native,'_iteration2_integer_configure',configure,create=True),patch.object(native,'_iteration2_gc',gc,create=True),patch.object(native.Native,'solve',function):yield
+ with patch.object(native,'_iteration2_integer_configure',configure,create=True),patch.object(native,'_iteration2_gc',gc,create=True),patch.object(native,'_iteration2_support_exhausted',support_exhausted,create=True),patch.object(native.Native,'solve',function):yield

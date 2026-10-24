@@ -44,7 +44,7 @@ class IntegerSupport(unittest.TestCase):
    self.assertIn('_iteration2_search.expand(state,typed,_point)',source)
    self.assertIn('contract(zero, closure, bound, candidate, verification)',source)
    self.assertIn('physical.verify(point)',source)
-   self.assertIn('_r029_restore(native,typed',source)
+   self.assertIn('repair_conflict(native,typed',source)
    self.assertIn("native.solve(typed, _iteration2_search.folder(), 'INTEGER_CONTROL')",source)
    self.assertIs(fn.__globals__['_iteration2_integer_support'],support)
 
@@ -60,7 +60,7 @@ class IntegerSupport(unittest.TestCase):
     with integer_repair.install(),support.selective_scope(request):
      source=ast.unparse(adapter.source_tree(a_stage,'run'))
      self.assertIn('_iteration2_search.expand(state, typed, _point)',source)
-     self.assertIn('_r029_restore(native, typed',source)
+     self.assertIn('repair_conflict(native, typed',source)
      self.assertTrue((Path(folder)/'ITERATION2_INTEGER_SUPPORT_BINDING.json').exists())
      self.assertFalse((Path(folder)/'OUTPUT').exists(),'Fresh prepare must start with an empty output directory')
 
