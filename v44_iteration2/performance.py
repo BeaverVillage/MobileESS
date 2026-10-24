@@ -131,6 +131,9 @@ def scope():
  # Imported aliases and routed function copies retain this code object.
  function=pricing.full_pricing;previous=function.__code__;compiled=pricing_code(function)
  from v42_a_stage_domain_v2 import domain
+ from v42_a_stage_domain_v2 import active
+ from .migration_keys import Census
+ census=Census()
  digest_function=domain.digest;old_digest=digest_function.__code__;digest_code=domain_digest_code()
  storage=MatrixStorage(c.ROOT);save=sp.save_npz
  try:
@@ -143,9 +146,11 @@ def scope():
    stack.enter_context(patch.object(p1_expansion.Expansion,'apply',promotion_wrapper(p1_expansion.Expansion.apply,p1_expansion)))
    for name in ('MAX_CLASSES','MAX_COLUMNS_PER_CLASS','MAX_TOTAL_COLUMNS'):stack.enter_context(patch.object(p1_expansion,name,globals()[name]))
    stack.enter_context(patch.object(sp,'save_npz',storage.saver(save)))
+   stack.enter_context(patch.object(active,'represented_migration_keys',census))
    yield storage
  finally:
   function.__code__=previous
   digest_function.__code__=old_digest
+  census.flush()
   atomic(c.OPS/'PERFORMANCE_LAST_WORKER.json',dict(UTC=now(),existing_complete_graph_promotion_all31_A3_A4=True,maximum_classes=MAX_CLASSES,maximum_columns_per_class=MAX_COLUMNS_PER_CLASS,maximum_total_promoted_columns=MAX_TOTAL_COLUMNS,
-   sparse_coupling_rows_extracted_once_per_round=True,all_native_oracles_and_exact_certificates_retained=True,storage=storage.report()))
+   sparse_coupling_rows_extracted_once_per_round=True,all_native_oracles_and_exact_certificates_retained=True,storage=storage.report(),migration_census=census.report()))

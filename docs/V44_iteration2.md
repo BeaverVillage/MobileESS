@@ -318,3 +318,32 @@ guards for the entire read scope and perform internal IO on owned view paths.
 No model, candidate, original source/data file or certificate is substituted.
 Deploy only after stopping outside Native; preserve the measured A5400 and
 Phase-I1500 accounts and resume the same parent stage without resetting time.
+
+## 2026-10-24 May01 live timing and activation census
+
+Actual attempt012 confirms the earlier IO repair is bound: full-domain cache
+validation312.567s becomes87.841s; total preparation671.733s becomes447.210s.
+Phase I reaches exact Phi0. The first three normal P1 calls take4.724s,5.445s
+and6.877s with Method2/Presolve=-1. Original pricing, rebuilds, exact prior
+inclusion and FULL checks still run between Native calls; solver Runtime is
+not the complete wall time. A valid exact minor supplies the second P1 basis;
+the third safely declines when basic column identity is not preserved.
+
+The remaining migration census repeatedly scans every slot of the same
+contiguous state intervals. Replace only these three range-membership tests
+with maximal occupied integer runs and exact endpoint queries. Keep every
+physical block, tau membership, compatibility, physical checkpoint, transfer,
+finish predicate and the complete immutable migration-key result. Rebuild the
+index from current states on every call: no graph SHA shortcut or cached graph
+result crosses mutations, rounds, stages or dates. Ledger cardinality,
+scientific acceptance and candidate enumeration are unchanged.
+
+Two real large May01 class comparisons return identical complete key sets
+(1035276 and968484 keys), taking5.710s/5.321s originally versus1.112s/1.047s
+with interval indexing. This component benchmark is not total A3 acceleration.
+Exhaustive holed/negative/empty interval checks, mutated graph/domain cases,
+actual ledger-global binding and all31 A3/A4 shared routing are tested with
+Native and DSS forbidden. Publish live call counts and time in each A output's
+ITERATION2_MIGRATION_CENSUS.json. Apply through the existing worker scope only,
+leaving pinned original science files unchanged. Maintenance continuation
+retains A5400/Phase-I1500 measured prefixes and the accepted M2 parent.
