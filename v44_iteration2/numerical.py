@@ -18,22 +18,40 @@ def policy_wrapper(factory,stable):
  def policy(original):
   apply_original=factory(original)
   def apply(model,approved,gp):
+   # Pending objective/matrix edits invalidate start attributes. Finish them
+   # before the inherited policy assigns local bases or P1 start vectors.
+   if hasattr(model,'update'):model.update()
    effective=apply_original(model,approved,gp);context=stable._solve.get()
    if context is None or context['component'] not in ('PHASE_I','ORIGINAL_P1','LOCAL_PRICING'):return effective
    settings=dict(FeasibilityTol=SOLVER_TOLERANCE,OptimalityTol=SOLVER_TOLERANCE)
    if context['component'] in ('ORIGINAL_P1','LOCAL_PRICING'):
     from .p1_interval import LEVEL
     level=LEVEL.get()
-    settings.update(Method=1,NumericFocus=3,ScaleFlag=2,Aggregate=0,Presolve=1,Quad=1,MarkowitzTol=.5,LPWarmStart=2,PerturbValue=.0002)
-    # The inherited second attempt is a DIFFERENT algorithm. Never overwrite
-    # its repair flag with the normal dual-simplex policy again.
+    # r043 May15 normal P1 uses barrier and automatic presolve. Applying
+    # repair-only quad simplex to every call disables its cheap reduction of
+    # hundreds of thousands of rows. Keep exact replay and strict tolerances;
+    # use the robust policy only after a failed check/unresolved interval.
+    local_basis=context['component']=='LOCAL_PRICING' and context.get('basis') is not None
+    settings.update(Method=1 if local_basis else 2,NumericFocus=0,ScaleFlag=-1,
+     Aggregate=1,Presolve=-1,Quad=-1,MarkowitzTol=.0078125,LPWarmStart=2,PerturbValue=.0002)
     if context.get('repair') or level:
-     settings.update(Method=1 if level==2 else 0,Presolve=0 if level==2 else 1)
-   if context['component']=='ORIGINAL_P1' and getattr(model,'NumNZs',0)>=10000000:
-    settings.update(Presolve=0,LPWarmStart=1)
+     settings.update(Method=1 if level==2 else 0,NumericFocus=3,ScaleFlag=2,
+      Aggregate=0,Presolve=0 if level==2 else 1,Quad=1,MarkowitzTol=.5)
    if context.get('iteration2_polish'):
     settings.update(Method=0,Quad=1,Presolve=0,Aggregate=0,ScaleFlag=0,LPWarmStart=1,PerturbValue=0)
    for name,value in settings.items():model.setParam(name,value)
+   if context['component']=='ORIGINAL_P1' and not context.get('repair'):
+    from .p1_basis import START
+    from .p1_interval import LEVEL
+    start=START.get()
+    if not LEVEL.get() and start is not None and start['basis'] is not None:
+     # LPWarmStart=2 prioritizes vectors. Remove the inherited primal-only
+     # vector so Gurobi derives both vectors from the complete checked basis.
+     vb,cb=start['basis'];variables=model.getVars();rows=model.getConstrs()
+     model.setAttr('PStart',variables,[gp.GRB.UNDEFINED]*len(variables))
+     model.setAttr('DStart',rows,[gp.GRB.UNDEFINED]*len(rows))
+     model.setAttr('VBasis',variables,vb.tolist());model.setAttr('CBasis',rows,cb.tolist())
+     start['used']=True
    effective.update(settings,iteration2_continuous_A_precision=True,iteration2_phase_I_precision=context['component']=='PHASE_I',scientific_acceptance_unchanged=True)
    filename='ITERATION2_PHASE_I_NUMERICAL_POLICY.json' if context['component']=='PHASE_I' else 'ITERATION2_P1_PRICING_NUMERICAL_POLICY.json'
    atomic(Path(context['folder'])/filename,dict(UTC=now(),component=context['component'],settings=settings,
@@ -82,5 +100,6 @@ def scope():
  from v44_recovery_r029 import row_generation
  exact_replay=replay_with_exact(core.primal_replay)
  previous=stable.StableNative;factory=stable.policy
- with patch.object(stable,'StableNative',precision_native(previous,stable)),patch.object(stable,'policy',policy_wrapper(factory,stable)),patch.object(phase,'point_with_replay',artificial_point),patch.object(core,'primal_replay',exact_replay),patch.object(phase,'primal_replay',exact_replay),patch.object(row_generation,'primal_replay',exact_replay):
+ from .p1_basis import native_class
+ with patch.object(stable,'StableNative',precision_native(native_class(previous),stable)),patch.object(stable,'policy',policy_wrapper(factory,stable)),patch.object(phase,'point_with_replay',artificial_point),patch.object(core,'primal_replay',exact_replay),patch.object(phase,'primal_replay',exact_replay),patch.object(row_generation,'primal_replay',exact_replay):
   yield

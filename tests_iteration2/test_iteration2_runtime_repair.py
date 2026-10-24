@@ -41,16 +41,17 @@ class ExactElasticWitness(unittest.TestCase):
   with self.assertRaisesRegex(ValueError,'HARD_ROW'):artificial_point(master,x)
 
 class LargeLPPolicy(unittest.TestCase):
- def test_only_large_original_P1_removes_presolve_copy(self):
+ def test_large_P1_retains_r043_auto_presolve_and_barrier_without_relaxing_precision(self):
   with tempfile.TemporaryDirectory(dir=c.ROOT) as d:
    context=ContextVar('largeLP',default=None);stable=SimpleNamespace(_solve=context)
    apply=numerical.policy_wrapper(lambda original:lambda m,a,g:{},stable)(None)
-   for component,size,want in [('ORIGINAL_P1',17107557,0),('ORIGINAL_P1',2000,1),('LOCAL_PRICING',17107557,1)]:
+   for component,size in [('ORIGINAL_P1',17107557),('ORIGINAL_P1',2000),('LOCAL_PRICING',17107557)]:
     values={};model=SimpleNamespace(NumNZs=size,setParam=lambda k,v:values.update({k:v}))
     token=context.set(dict(component=component,folder=Path(d),repair=False))
     try:apply(model,{},None)
     finally:context.reset(token)
-    self.assertEqual(values['Presolve'],want);self.assertEqual(values['FeasibilityTol'],1e-9)
+    self.assertEqual(values['Presolve'],-1);self.assertEqual(values['Method'],2)
+    self.assertEqual(values['LPWarmStart'],2);self.assertEqual(values['FeasibilityTol'],1e-9)
     self.assertNotIn('Threads',values);self.assertNotIn('MIPGap',values)
 
 class LosslessPersistence(unittest.TestCase):

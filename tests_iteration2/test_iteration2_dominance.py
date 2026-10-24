@@ -30,15 +30,15 @@ class DominanceRepair(unittest.TestCase):
      return dict(Threads=model.Params.Threads,MIPGap=model.Params.MIPGap)
     return apply
    apply=numerical.policy_wrapper(factory,stable)(None)
-   for repair,level,method,presolve in [(False,0,1,1),(True,0,0,1),(False,1,0,1),(False,2,1,0)]:
+   for repair,level,method,presolve in [(False,0,2,-1),(True,0,0,1),(False,1,0,1),(False,2,1,0)]:
     with gp.Model(env=env) as model:
      model.Params.Threads=1;model.Params.MIPGap=.005
      a=stable._solve.set(dict(component='ORIGINAL_P1',repair=repair,folder=Path(d)));b=p1_interval.LEVEL.set(level)
      try:apply(model,{},gp)
      finally:p1_interval.LEVEL.reset(b);stable._solve.reset(a)
      self.assertEqual(model.Params.Method,method);self.assertEqual(model.Params.Presolve,presolve)
-     self.assertEqual(model.Params.ScaleFlag,2);self.assertEqual(model.Params.FeasibilityTol,1e-9)
-     self.assertEqual(model.Params.OptimalityTol,1e-9);self.assertEqual(model.Params.Quad,1)
+     self.assertEqual(model.Params.ScaleFlag,2 if repair or level else -1);self.assertEqual(model.Params.FeasibilityTol,1e-9)
+     self.assertEqual(model.Params.OptimalityTol,1e-9);self.assertEqual(model.Params.Quad,1 if repair or level else -1)
      self.assertEqual(model.Params.PerturbValue,.0002)
      self.assertEqual((model.Params.Threads,model.Params.MIPGap),(1,.005))
 

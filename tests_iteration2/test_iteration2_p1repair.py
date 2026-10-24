@@ -9,7 +9,7 @@ from v44_iteration2 import config as c,p1_interval,numerical
 from v44_iteration2.io import atomic,read,record
 
 class P1IntervalRepair(unittest.TestCase):
- def compiled(self,root,closed_after):
+ def compiled(self,root,closed_after,state_hook=None):
   from v44_iteration2.bootstrap import base
   from v42_a_stage_canary import phase
   from v44_recovery_r029 import p1_acceleration
@@ -23,6 +23,7 @@ class P1IntervalRepair(unittest.TestCase):
     min_stay_rc='-1/100000',complete_STAY_and_migration_coverage=True)
    atomic(path/'FULL_PRICING_RESULT.json',result);prices.append((snapshot,p1_interval.LEVEL.get()));return result,[]
   native=SimpleNamespace(remaining=lambda:100,admit_p1=lambda s,p:None)
+  if state_hook is not None:native.set_p1_state=state_hook
   def solve(s,folder,component):
    calls.append((s,p1_interval.LEVEL.get(),component));return dict(status=2,native_seconds=3,Work=0,objective=1),dict(X=point,Pi=point,RC=point)
   native.solve=solve

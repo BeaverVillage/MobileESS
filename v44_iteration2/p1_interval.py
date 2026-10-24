@@ -27,6 +27,7 @@ def compiler(original):
   edits={
    '    traces=[]\n    while True:':'    traces=[];iteration2_interval_attempt=0\n    while True:',
    "        s=state['compact'];f=folder/'P1'/('S'+str(len(traces)))":"        _iteration2_interval_level.set(iteration2_interval_attempt)\n        s=state['compact'];f=folder/'P1'/('S'+str(len(traces)))",
+   "        native.admit_p1(s,p1point)":"        if hasattr(native,'set_p1_state'):native.set_p1_state(state)\n        native.admit_p1(s,p1point)",
    "        if not negative:raise ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')":
     "        if not negative:\n            iteration2_interval_attempt=_iteration2_interval_unresolved(priced,f,s,iteration2_interval_attempt,native)\n            p1point=raw['X']\n            continue",
    "        state,p1point=activate(state,negative,raw['X'],f,max_batch=len(negative))":
