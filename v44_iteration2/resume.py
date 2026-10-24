@@ -18,6 +18,22 @@ def repair_source_bridge(parent,old,request):
   if not policy.get('scientific_equations_domain_and_acceptance_unchanged') or policy.get('Native_budget_reset') is not False:raise PermissionError('REPAIR_MUST_KEEP_DOMAIN_AND_NATIVE_ACCOUNT')
   return row
  failure=read(Path(parent)/'RESULT.json')
+ if row.get('integer_memory_repair'):
+  verify([row[k] for k in ('core_failure','closed_state','repair_regression','integer_search_checkpoint','integer_model_identity','integer_typeproof')]+list(row['certificates'].values()))
+  proof=read(row['repair_regression']['path']);ledger=read(row['ledger']['path'])
+  if (record(Path(parent)/'RESULT.json')!=row['core_failure'] or
+      failure.get('error')!="RuntimeError('GurobiError: Out of memory')" or
+      failure.get('classification')!='IMPLEMENTATION_FAILURE' or not failure.get('incumbent',{}).get('PASS') or
+      ledger.get('inflight') is not None or not 0<ledger['measured_Native_Runtime']<5400 or
+      ledger['calls'][-1].get('component')!='INTEGER_CONTROL' or ledger['calls'][-1].get('error')!='Out of memory'):
+   raise PermissionError('EXACT_PAID_INTEGER_OOM_WITH_REMAINING_NATIVE_REQUIRED')
+  if not all(read(r['path']).get('PASS') is True for r in row['certificates'].values()):raise PermissionError('VERIFIED_P1_CERTIFICATES_REQUIRED')
+  if not (proof.get('PASS') and proof.get('Native_calls')==0 and proof.get('exact_failed_integer_snapshot_restored')
+          and proof.get('scientific_matrix_unchanged') is True and proof.get('tolerance_relaxed') is False
+          and proof.get('integer_policy_regression_PASS') is True
+          and policy.get('scientific_equations_domain_and_acceptance_unchanged') and policy.get('Native_budget_reset') is False):
+   raise PermissionError('EXACT_INTEGER_REPAIR_REGRESSION_REQUIRED')
+  return row
  if row.get('integer_gap_continuation'):
   verify([row['core_failure'],row['closed_state'],row['repair_regression']]+list(row['certificates'].values()))
   check=read(row['repair_regression']['path']);ledger=read(row['ledger']['path'])

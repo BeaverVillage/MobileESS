@@ -404,3 +404,39 @@ Write the early selective-compiler binding receipt beside OUTPUT in the A-stage
 root, so fresh preparation still starts with an empty OUTPUT directory. A
 pre-Native maintenance continuation keeps the latest identical Native account
 and its history while referring to the explicitly approved earlier P1 checkpoint.
+
+## 2026-10-24 integer termination and failed-search recovery
+
+Attempt015 improves the original physical incumbent to0.5569324994513922,
+but its full-domain gap0.005016995591 exceeds the unchanged0.005 target.
+The inherited restricted MIPGap0.005 stops each integer solve too early,
+causing further graph expansion despite the nearly sufficient incumbent.
+Use MIPGap0 and MIPGapAbs0 for the integer search; keep the existing original
+physical/full-domain gap callback as the successful termination authority.
+Never substitute the restricted MIP bound for the certified full-domain LB.
+
+The third expansion fails during integer presolve, before the root LP.
+Keep Method2, Presolve-1 and Threads1. For integer models with at least3million
+columns, use PreSparsify1/AggFill0 to bound aggregation fill. Release completed
+independent read-back temporaries before this solve and collect disposed models.
+The actual selective A2 native factory retains source/input receipts rather
+than the obsolete full graph state; all original SHA checks remain active.
+Continuous P1/pricing numerical settings and every scientific equation, bound,
+integer type, physical option and acceptance tolerance remain unchanged.
+No finite MemLimit/SoftMemLimit or RAM admission gate is introduced.
+See [Gurobi's allocation-failure guidance](https://support.gurobi.com/hc/en-us/articles/360013195772-How-do-I-avoid-an-out-of-memory-condition).
+
+Restore the exact failed integer snapshot, its LP point, all promoted classes
+and the latest physically validated incumbent, separately from the original P1
+checkpoint. The reconstructed4667484-by3298802 snapshot has the exact original
+failed-model fingerprint. Its Native0/DSS0 regression preserves every integer
+type and original-row replay. Carry all2952 Native calls, including the failed
+273.950-second call, and all3807.321000814438 spent seconds; do not reset either
+the5400-second total account or the Phase-I subaccount. Resume round3 without
+repeating Phase I, full P1 pricing, earlier expansions or earlier integer solves.
+Persist only the latest integer-search checkpoint for future recovery.
+
+Deploy only after the running May07 M4 finishes naturally. Preserve every
+completed stage and M4 freeze. Apply the shared integer correction to all dates;
+continue serial Planning through May31 and then run verified ready Actual/Fresh
+dates with at most7workers under the existing terminal-date barrier.

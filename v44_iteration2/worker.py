@@ -147,7 +147,8 @@ def run(path):
    stack.enter_context(patch.object(weather,'loader',recovered_weather.loader))
    stack.enter_context(patch.object(handover,'require_boundary',lambda:boundary(request)))
    stack.enter_context(patch.object(reference,'project',base.project))
-   from . import integer_support
+   from . import integer_support,integer_native
+   stack.enter_context(integer_native.scope())
    from v42_may_campaign_native90 import a_stage
    stack.enter_context(patch.object(a_stage,'_iteration2_integer_support',integer_support,create=True))
    stack.enter_context(patch.object(integer_repair,'compile_run',base.live_compiler(integer_support.compiler(integer_repair.compile_run))))

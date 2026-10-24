@@ -32,7 +32,15 @@ def load_closed(request,budget):
   if (a['bytes'],a['sha256'])!=(b['bytes'],b['sha256']):raise PermissionError('INTEGER_CONTINUATION_INPUT_DRIFT')
  if budget.native_used!=account['measured_Native_Runtime'] or budget.calls!=account['calls']:
   raise PermissionError('INTEGER_CONTINUATION_ACCOUNT_NOT_INHERITED')
- with gzip.open(row['closed_state']['path'],'rb') as stream:state=pickle.load(stream)
+ checkpoint=row.get('integer_search_checkpoint')
+ if checkpoint:
+  verify([checkpoint,row['integer_model_identity'],row['integer_typeproof']])
+  with gzip.open(checkpoint['path'],'rb') as stream:saved=pickle.load(stream)
+  state=saved.pop('state');request['_iteration2_integer_search']=saved
+  request['_iteration2_integer_model_identity']=row['integer_model_identity']
+  request['_iteration2_integer_typeproof']=row['integer_typeproof']
+ else:
+  with gzip.open(row['closed_state']['path'],'rb') as stream:state=pickle.load(stream)
  output=Path(request['output']);output.mkdir(parents=True,exist_ok=True)
  for name in ('PHASE_I_ZERO_CERTIFICATE.json','PHASE_I_TRACE.json','PHASE_I_NATIVE_BUDGET.json','P1_RESULT.json','P1_TRACE.json','BLOCK_PRICING_ORACLE_VERIFICATION.json','A2_MODEL_VOLTAGE_POLICY.json'):
   atomic(output/name,read(parent/'OUTPUT'/name))
@@ -42,7 +50,9 @@ def load_closed(request,budget):
  from v44_recovery_r029.voltage_policy import ACTIVE
  from v44_recovery_r029.model_difference import verify_state_policy
  controller=ACTIVE.get()
- if controller is None or read(parent/'OUTPUT/R029_CONDITIONAL_VOLTAGE_PROGRESS.json')['approved_rows']:
+ voltage=row.get('voltage_progress')
+ if voltage:verify([voltage])
+ if controller is None or read(voltage['path'] if voltage else parent/'OUTPUT/R029_CONDITIONAL_VOLTAGE_PROGRESS.json')['approved_rows']:
   raise PermissionError('INTEGER_CONTINUATION_REQUIRES_SAME_STRICT_VOLTAGE_MODEL')
  controller.bind(state);verify_state_policy(state,output,controller=controller)
  policy=read(output/'A2_MODEL_VOLTAGE_POLICY.json')
@@ -74,18 +84,20 @@ def persist_closed(path,state,request,original):
 def verify_typed(typed,request):
  if not request.get('_iteration2_integer_resume_parent'):return
  parent=Path(request['_iteration2_integer_resume_parent'])
- expected=read(parent/'OUTPUT/P1/INTEGER_CONTROL/MODEL_IDENTITY.json')['original_snapshot_sha256']
+ identity=request.get('_iteration2_integer_model_identity')
+ if identity:verify([identity])
+ expected=read(identity['path'] if identity else parent/'OUTPUT/P1/INTEGER_CONTROL/MODEL_IDENTITY.json')['original_snapshot_sha256']
  if typed.fingerprint()!=expected:raise ValueError('INTEGER_CONTINUATION_TYPED_SNAPSHOT_DRIFT')
 
 
 def restore_typed(state,request,original):
  if not request.get('_iteration2_integer_resume_parent'):return original(state,state['global_types'])
  parent=Path(request['_iteration2_integer_resume_parent'])/'OUTPUT'
- identity=read(parent/'P1/INTEGER_CONTROL/MODEL_IDENTITY.json');verify([identity['attributes'],identity['matrix']])
+ identity=read(request.get('_iteration2_integer_model_identity',{}).get('path',parent/'P1/INTEGER_CONTROL/MODEL_IDENTITY.json'));verify([identity['attributes'],identity['matrix']])
  with np.load(identity['attributes']['path'],allow_pickle=False) as arrays:
   typed=replace(state['reference'],vtypes=arrays['vtypes'].copy()).require()
  verify_typed(typed,request)
- proof=read(parent/'ORIGINAL_INTEGER_TYPE_RESTORATION.json')
+ proof=read(request.get('_iteration2_integer_typeproof',{}).get('path',parent/'ORIGINAL_INTEGER_TYPE_RESTORATION.json'))
  if proof.get('PASS') is not True:raise PermissionError('VERIFIED_PARENT_INTEGER_RESTORATION_REQUIRED')
  return typed,dict(proof,same_case_type_proof_reused=True,exact_typed_snapshot_sha256=typed.fingerprint())
 
@@ -121,12 +133,35 @@ class Support:
   self.request=request;self.output=Path(output);self.exact_lb=exact_lb
   self.round=0;self.promoted=set();self.history=[]
   self.required={r['class_id']:r for r in read(self.output/'BLOCK_PRICING_ORACLE_VERIFICATION.json')['records']}
+  saved=request.pop('_iteration2_integer_search',None)
+  if saved:
+   from v42_a_stage_phase1.core import primal_replay
+   self.round=saved['round'];self.promoted=set(saved['promoted']);self.history=saved['history'];self.lp_point=saved['lp_point']
+   if (not primal_replay(state['reference'],self.lp_point)['PASS'] or
+       self.promoted!={key for row in self.history for key in row['classes']} or
+       self.round!=self.history[-1]['round']):raise ValueError('INTEGER_SEARCH_CHECKPOINT_STATE_DRIFT')
+   self.resumed_support=True
+   return
+  self.resumed_support=False
   from v42_a_stage_compact_rowgen.lift import expanded_point
   step=Path(read(self.output/'P1_RESULT.json')['full_pricing']['path']).parent.parent
   model=read(step/'MODEL_IDENTITY.json')
   if model['original_snapshot_sha256']!=state['compact'].fingerprint():raise ValueError('INTEGER_SUPPORT_P1_POINT_MODEL_DRIFT')
   raw=read(step/'NATIVE_RESULT.json')['raw_attributes'];verify([raw])
   with np.load(raw['path'],allow_pickle=False) as saved:self.lp_point=expanded_point(state,saved['X'])
+
+ def persist(self,state,typed):
+  """Keep only the latest exact search state, distinct from the P1 checkpoint."""
+  target=self.output/'STATIC/INTEGER_SEARCH_STATE.pkl.gz';target.parent.mkdir(parents=True,exist_ok=True)
+  temporary=target.with_suffix('.tmp')
+  with gzip.open(temporary,'wb',compresslevel=1) as stream:
+   pickle.dump(dict(state=state,lp_point=self.lp_point,round=self.round,history=self.history,promoted=self.promoted),stream,protocol=5)
+  os.replace(temporary,target)
+  atomic(self.output/'INTEGER_SEARCH_CHECKPOINT.json',dict(PASS=True,UTC=now(),state=record(target),
+   typed_snapshot_sha256=typed.fingerprint(),round=self.round,Native_budget_reset=False,
+   complete_graphs_retained=True,P1_certificate_recomputed=False))
+  atomic(self.output/'ITERATION2_INTEGER_SUPPORT.json',dict(PASS=True,UTC=now(),rounds=self.history,
+   original_gap_target=.005,Native_ceiling=5400,Native_budget_reset=False,all_native_calls_in_same_account=True))
 
  def folder(self):
   return self.output/'P1/INTEGER_CONTROL' if self.round==0 else self.output/'P1/INTEGER_SUPPORT'/('R'+str(self.round))
@@ -205,14 +240,18 @@ def compiler(original):
   source=source[:begin]+'''        _iteration2_initial=_iteration2_integer_support.resume_point(request)
         if _iteration2_initial is not None:
             validate(_iteration2_initial,float(objective_value(typed,_iteration2_initial,'rho')))
-            _next=_iteration2_search.expand(state,typed,_iteration2_initial)
-            if _next is None:raise ValueError('INTEGER_CONTINUATION_HAS_NO_NEW_PHYSICAL_SUPPORT')
-            state,typed,_warm=_next
+            if _iteration2_search.resumed_support:_warm=_iteration2_initial
+            else:
+                _next=_iteration2_search.expand(state,typed,_iteration2_initial)
+                if _next is None:raise ValueError('INTEGER_CONTINUATION_HAS_NO_NEW_PHYSICAL_SUPPORT')
+                state,typed,_warm=_next
             physical=Physical(state,typed)
             native.live_model=None;native.warm_basis=None;native.warm_point=_warm
             candidates.clear()
             validate(_warm,float(objective_value(typed,_warm,'rho')))
         while True:
+            if candidates and candidates[-1]['acceptance']['PASS']:break
+            if _iteration2_search.round:_iteration2_search.persist(state,typed)
             native.incumbent_callback = validate
             rec, raw = native.solve(typed, _iteration2_search.folder(), 'INTEGER_CONTROL')
             if 'X' in raw:
@@ -243,6 +282,9 @@ def selective_scope(request):
  from v44.frozen.v43_a2 import adapter
  original=adapter.source_tree
  def source_tree(module,name):
+  if module.__name__=='v42_may_campaign_native90.a_stage' and name=='_native':
+   from .integer_native import receipt_tree
+   return receipt_tree(original(module,name))
   if module.__name__!='v42_may_campaign_native90.a_stage' or name!='run':return original(module,name)
   function=inspect.unwrap(module.run);source=textwrap.dedent(inspect.getsource(function))
   if '_iteration2_search.expand(state,typed,_point)' not in source:raise ValueError('INTEGER_SUPPORT_ACTUAL_SELECTIVE_COMPILER_NOT_BOUND')
