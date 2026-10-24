@@ -125,8 +125,9 @@ recovery repeats this audit and retains its measured Native accounts.
 
 Phase I retains the original strict Phi zero threshold of 1e-8 and original
 physical replay tolerance. Continuous Phase I, P1 and local pricing use
-solver FeasibilityTol and OptimalityTol of1e-9. P1/local pricing use quad
-simplex with NumericFocus3 and aggressive internal scaling. All acceptance
+solver FeasibilityTol and OptimalityTol of1e-9. Normal P1/local pricing retain
+r043 barrier, automatic presolve and same-matrix local basis reuse; quad
+simplex with NumericFocus3 is reserved for numerical repair. All acceptance
 checks still replay the original unscaled matrix. A Phase-I residual in
 (1e-8,1e-5] receives one numerical polish of the exact same
 snapshot before domain expansion; every call spends the same original
@@ -206,10 +207,10 @@ an empty legacy stack and a profiling wrapper installed after compilation.
 
 Completed stages, M4 freezes and every measured Native account remain intact.
 May01 A3 Gurobi allocation failure occurs in the 897931-row, 250631-column,
-17107557-nonzero ORIGINAL_P1 model before presolve completes. Large continuous
-P1 models now use Presolve=0 and LPWarmStart=1, retaining one thread, the exact
-matrix/objective/boxes, independent raw replay and A5400/Phase-I1500 accounts.
-This is a parameter and allocation repair, not an infeasibility certificate.
+17107557-nonzero ORIGINAL_P1 model before presolve completes. The temporary
+Presolve=0/LPWarmStart=1 workaround was superseded by the May15 comparison
+below: disabling presolve on all large models causes a severe solve regression.
+The bounded optional graph promotion remains in place to address allocation.
 
 May04 A4 omitted-row elastic witnesses reach approximately 2e10. Binary64 CSR
 summation can exceed the original 1e-6 replay tolerance even when an exact
@@ -253,3 +254,36 @@ Exact native pricing, every scientific candidate, closure and FULL remain live.
 The second preparation was stopped with zero new Native calls and an exact
 1385-call ledger prefix identical to its original138.038005352s paid account.
 Its partial files remain preserved; continuation uses that same paid parent.
+
+## 2026-10-24 normal P1 policy restored and explicit May01 A3 restart
+
+Archived r043 May15 B3 A2 uses Presolve=-1, Method=2 and LPWarmStart=2.
+Its first P1 reduces703154 rows to17485 and solves in3.53s. Iteration2's
+normal-call precision overlay forced quad simplex and, above10M nonzeros,
+disabled presolve; May01's third P1 then took1201.986s. Restore the r043
+normal algorithm, automatic presolve, default scaling/pivoting and local
+same-matrix basis reuse for all A3/A4 dates, retaining stricter1e-9 solve
+tolerances and every original replay, dominance, pricing and FULL gate.
+Robust numerical repair/refinement remains a separate checked path; there
+is no blanket matrix-size override. A discarded primal start alone is not
+a defect: archived r043 logs contain the same message.
+
+The scoped P1 wrapper now retains the last accepted VBasis/CBasis within one
+A stage, rather than limiting basis reuse to local pricing. Identical
+snapshots reuse the complete basis. Rebuilt graphs identify basic columns by
+physical descriptor roles, then require byte-identical preservation of the
+old nonsingular basic minor. New row slacks complete a block triangular basis;
+missing/ambiguous roles or a changed minor decline reuse and retain the normal
+r043 solve. No positional basis copying or cross-date/parent reuse is allowed.
+Finish pending model edits before assigning starts, clear primal-only starts
+when supplying a complete P1 basis, and retain Method2/Presolve=-1/LPWarmStart2
+so presolve remains enabled. Solver-provided bases are saved only after all
+original primal/dual/dominance checks; a warm basis is never a certificate.
+
+The user explicitly requested May01 A3 to restart from zero after this fix.
+Preserve its interrupted attempt and ledger unchanged as abandoned evidence,
+record the explicit reset in repair history, retain the accepted M2 parent,
+and create a new A3 request with no resume parent or inherited Native calls.
+Only this requested restart resets the A5400 and Phase-I1500 accounts; ordinary
+failure continuations retain their original accounts. Other dates, completed
+stages and the all31-Planning-before-ready-Actual7 rule remain unchanged.
