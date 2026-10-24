@@ -11,5 +11,7 @@ from v44.common import ROOT as PINNED_SCIENCE
 sys.path.insert(0,str(PINNED_SCIENCE))
 import v44_week4_execution as base
 from v44 import worker,runtime
+from v44 import m_restore
 CORE_M=worker.m_stage
 CORE_RUNTIME=runtime.build
+CORE_RESTORE=m_restore.restore

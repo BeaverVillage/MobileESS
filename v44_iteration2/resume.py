@@ -18,6 +18,19 @@ def repair_source_bridge(parent,old,request):
   if not policy.get('scientific_equations_domain_and_acceptance_unchanged') or policy.get('Native_budget_reset') is not False:raise PermissionError('REPAIR_MUST_KEEP_DOMAIN_AND_NATIVE_ACCOUNT')
   return row
  failure=read(Path(parent)/'RESULT.json')
+ if row.get('integer_gap_continuation'):
+  verify([row['core_failure'],row['closed_state'],row['repair_regression']]+list(row['certificates'].values()))
+  check=read(row['repair_regression']['path']);ledger=read(row['ledger']['path'])
+  if record(Path(parent)/'RESULT.json')!=row['core_failure']:raise PermissionError('INTEGER_GAP_FAILURE_RECEIPT_DRIFT')
+  if (failure.get('classification')!='TIME_LIMIT_FEASIBLE_NOT_CERTIFIED' or failure.get('PASS') is not False
+      or failure.get('error') or not failure.get('incumbent',{}).get('PASS') or not failure.get('certified_gap',0)>.005
+      or ledger.get('inflight') is not None or not 0<ledger['measured_Native_Runtime']<5400):
+   raise PermissionError('ONLY_UNCERTIFIED_INTEGER_GAP_WITH_REMAINING_NATIVE')
+  if not all(read(r['path']).get('PASS') is True for r in row['certificates'].values()):raise PermissionError('FULL_P1_CERTIFICATES_REQUIRED_FOR_INTEGER_CONTINUATION')
+  if not (check.get('PASS') and check.get('Native_calls')==0 and check.get('scientific_matrix_unchanged') is True
+          and check.get('tolerance_relaxed') is False and policy.get('scientific_equations_domain_and_acceptance_unchanged')
+          and policy.get('Native_budget_reset') is False):raise PermissionError('VERIFIED_INTEGER_SUPPORT_REPAIR_REQUIRED')
+  return row
  diagnosed=row.get('diagnosed_error',"ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')")
  allowed=("ValueError('P1_UNRESOLVED_INTERVAL_WITHOUT_NEGATIVE_SUPPORT')","ValueError('R029_NUMERICAL_OPTIMALITY_OR_PRIOR_POINT_DOMINANCE_NOT_VERIFIED')",'MemoryError()',"RuntimeError('GurobiError: Out of memory')","ValueError('PHASE_I_IMPLEMENTATION_INVALID_CONSTRUCTED_ELASTIC_POINT')")
  if diagnosed not in allowed or failure.get('error')!=diagnosed:raise PermissionError('REPAIR_REQUIRES_EXACT_DIAGNOSED_P1_FAILURE')
@@ -103,6 +116,10 @@ def a_scope(parent,request):
  from v44_recovery_r029 import phase_limit
  from unittest.mock import patch
  receipt=admit(parent,request)
+ bridge=read(c.OPS/'AUTHORIZATION.json').get('repair_permit')
+ if bridge:
+  row=next((r for r in read(bridge['path'])['resumable_A_stages'] if Path(r['parent_core'])==Path(parent)),None)
+  if row and row.get('integer_gap_continuation'):request['_iteration2_integer_resume_parent']=str(parent)
  # Existing generic adapter retains both total A5400 and spent Phase-I1500.
  # It rebuilds the exact same model under remaining measured budgets; no
  # previous point/LB/certificate is promoted to another A Case.
@@ -126,8 +143,13 @@ def entry_repair(folder,stage,day,parent):
  row=next((r for r in read(reference['path']).get('resumable_M_entries',[]) if r['day']==day and r['stage']==stage and Path(r['folder'])==folder),None)
  if row is None:raise PermissionError('EXPLICIT_ZERO_NATIVE_M_ENTRY_REPAIR_REQUIRED')
  verify([row['old_request'],row['failure']]);request=read(row['old_request']['path']);failure=read(row['failure']['path'])
+ source_error=failure.get('error','').startswith("ValueError('SOURCE_SHA_DRIFT:")
+ adapter_error=failure.get('error')==row.get('diagnosed_error')=="ValueError('PLANNING_RESTORE_COEFFICIENT_SOURCE_BOUNDARY_DRIFT')"
+ if adapter_error:
+  verify([row['repair_regression']]);proof=read(row['repair_regression']['path'])
+  if not (proof.get('PASS') and proof.get('Native_calls')==0 and proof.get('scientific_matrix_unchanged') is True and proof.get('tolerance_relaxed') is False):raise PermissionError('M_ADAPTER_REPAIR_REGRESSION_REQUIRED')
  if (request['fixed_parent_receipt']!=parent or request['iteration_stage']!=stage or request['day']!=day
-     or not failure.get('error','').startswith("ValueError('SOURCE_SHA_DRIFT:")):
+     or not (source_error or adapter_error)):
   raise PermissionError('EXACT_SOURCE_READER_FAILURE_AND_PARENT_REQUIRED')
  if list(folder.rglob('*LEDGER.json')) or (folder/c.CORE_STAGE[stage]/'request.json').exists():
   raise PermissionError('ENTRY_REPAIR_CANNOT_RESET_ANY_ALLOCATED_NATIVE_ACCOUNT')

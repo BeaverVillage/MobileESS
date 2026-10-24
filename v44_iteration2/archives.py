@@ -95,13 +95,19 @@ class Store:
   """
   original_open=builtins.open;original_io=io.open;original_stat=os.stat
   roots=tuple(str(c.campaign(d)).casefold() for d in c.DAYS)+(str(c.B2_ROOT.parent).casefold(),)
+  owned_prefix=key(c.ROOT)+os.sep
+  def owned_long(path):
+   if isinstance(path,int):return path
+   p=Path(path)
+   if p.is_absolute() and len(str(p))>=248 and key(p).startswith(owned_prefix):return extended(p)
+   return path
   def mapped(path,mode='r'):
    if isinstance(path,int):return path
    p=Path(path)
    normalized=key(p)
    if (normalized in self.entries or any(normalized.startswith(r+os.sep) for r in roots)) and any(x in str(mode) for x in ('w','a','x','+')):raise PermissionError('ORIGINAL_CAMPAIGN_WRITE_FORBIDDEN:'+str(p))
    if normalized in self.entries:return self.materialize(p)
-   return path
+   return owned_long(path)
   def opened(path,mode='r',*a,**kw):return original_open(mapped(path,mode),mode,*a,**kw)
   def io_opened(path,mode='r',*a,**kw):return original_io(mapped(path,mode),mode,*a,**kw)
   def stat(path,*a,**kw):
@@ -111,7 +117,7 @@ class Store:
     # still goes through materialize's complete hash check, including tamper.
     try:return original_stat(target,*a,**kw)
     except FileNotFoundError:return original_stat(self.materialize(path),*a,**kw)
-   return original_stat(path,*a,**kw)
+   return original_stat(owned_long(path),*a,**kw)
   # Internal IO addresses the owned view, never an archived logical path.
   # Keep guards installed while materializing: other threads must not see
   # process-wide unpatched opens/stats or a temporarily disabled write guard.

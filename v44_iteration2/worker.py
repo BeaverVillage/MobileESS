@@ -110,6 +110,9 @@ def actual_case(request):
    r=campaign.stage_request(request,'ACTUAL');r['MESS_result']=freeze['M4_core']['path']
    result.update(worker.actual(r,Path(freeze['A4_reference']['path']).parent,plan))
    atomic(root/'ORIGINAL_DRIVER_RESULT.json',result)
+   if result.get('error'):
+    result['original_driver_result']=record(root/'ORIGINAL_DRIVER_RESULT.json')
+    return result
    audit=validate_actual(root,request,freeze,result)
    result.update(PASS=bool(audit['PASS'] and not denied),independent_audit=record(root/'INDEPENDENT_FINAL_AUDIT.json'),new_Planning_optimization_calls_in_Actual=len(denied),commit_sha=authority.validate()['commit_sha'])
   except BaseException as error:result.update(PASS=False,error=repr(error),traceback=traceback.format_exc())
@@ -144,7 +147,10 @@ def run(path):
    stack.enter_context(patch.object(weather,'loader',recovered_weather.loader))
    stack.enter_context(patch.object(handover,'require_boundary',lambda:boundary(request)))
    stack.enter_context(patch.object(reference,'project',base.project))
-   stack.enter_context(patch.object(integer_repair,'compile_run',base.live_compiler(integer_repair.compile_run)))
+   from . import integer_support
+   from v42_may_campaign_native90 import a_stage
+   stack.enter_context(patch.object(a_stage,'_iteration2_integer_support',integer_support,create=True))
+   stack.enter_context(patch.object(integer_repair,'compile_run',base.live_compiler(integer_support.compiler(integer_repair.compile_run))))
    stack.enter_context(inherited.previous.install());stack.enter_context(latency.install(lambda:boundary(request)))
    stack.enter_context(patch.object(conditional_campaign,'run_case',scientific_case))
    if request['iteration_stage']=='ACTUAL':

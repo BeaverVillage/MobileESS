@@ -121,11 +121,28 @@ def new_a_scope(request):
  from v44_recovery_r029 import a2_cache
  token=ACTIVE.set(request)
  try:
-  with patch.object(a2,'require_m1',require_fixed_parent),patch.object(a2_cache,'ownership',domain_ownership):yield
+  from .integer_support import selective_scope
+  with patch.object(a2,'require_m1',require_fixed_parent),patch.object(a2_cache,'ownership',domain_ownership),selective_scope(request):yield
  finally:ACTIVE.reset(token)
 
 def routed_restore(original):
  """Restore Planning with the same original coefficients as its fresh builder."""
+ # The live cap300/fresh900 scopes already install the original Planning
+ # loader, then wrap restoration to retain authorization fields. Verify that
+ # exact adapter rather than attempting to rewrite the outer closure's source.
+ from .bootstrap import CORE_RESTORE
+ from v44 import cap300,fresh900
+ import types,marshal
+ expected=cap300.restore_adapter(CORE_RESTORE)
+ def verified(function):
+  return (marshal.dumps(function.__code__)==marshal.dumps(expected.__code__)
+   and function.__globals__.get('_cap300_coefficients') is cap300.coefficient_loader)
+ if verified(original):return original
+ wrappers=[code for code in inspect.unwrap(fresh900.install).__code__.co_consts if isinstance(code,types.CodeType) and code.co_name=='restore']
+ if original.__code__ in wrappers:
+  wrapped=inspect.getclosurevars(original).nonlocals.get('old_restore')
+  if wrapped is not None and verified(wrapped):return original
+  raise ValueError('PLANNING_RESTORE_WRAPPED_COEFFICIENT_ADAPTER_DRIFT')
  source=textwrap.dedent(inspect.getsource(original))
  old="    from v42_svr11.model import load_coefficients\n    coefficients=load_coefficients(read(payload['bundle']['electrical_certificate']['path']),request['day'])"
  new="    from v42_pr134_b1.native import original_coefficients_for_day\n    import v42_may01.prepare as original_planning\n    from v42_temporal.native import load_power\n    certificate,_,_,_=load_power(payload['bundle'])\n    coefficients=original_coefficients_for_day(original_planning,certificate,request['day'])"

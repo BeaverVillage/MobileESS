@@ -356,3 +356,46 @@ Actual. Keep RAM telemetry, the existing Planning16GiB/Actual4GiB free-disk
 guards, serial Planning and Actual max7 unchanged. No Native worker was active
 when this dispatch-only correction was deployed; both inherited accounts stay
 unchanged. Low-RAM tests must admit Planning, while low-disk tests still deny it.
+
+## 2026-10-24 terminal failure repair and same-case integer continuation
+
+Attempt013 reaches full P1 LP closure but its restricted integer optimum has
+certified global gap0.0068804, above the unchanged0.005 target. It spends only
+564.853 of A5400 Native seconds. A small restricted MIPGap is not a scientific
+global bound. Preserve the failed result; do not relabel it FULL or relax gap.
+When this happens, admit additional complete physical graphs in bounded batches,
+prioritizing fractional P1 support. Verify each complete cache and every prior
+primitive, use original activation/inclusion and original integer restoration,
+map and replay the prior integer point, then continue the same Native account.
+Every new incumbent still passes original rows, integrality, complete physical
+replay and the original independently certified full-domain gap contract.
+Never use the restricted MIP bound as a global bound or remove a physical class.
+Keep every prior point file; new validation cannot overwrite an earlier V file.
+
+For the explicitly permitted same-case failure, restore the verified saved P1
+state, exact typed snapshot, full pricing/zero certificates and both accounts.
+Require identical date, public stage, equipment, fixed parent and input bytes.
+Rebind the same strict voltage controller and repeat all integer/physical/gap
+checks. Do not repeat completed Phase I/P1 searches. Bind through the actual A2
+selective AST source, which otherwise reads the original disk body and bypasses
+the generic integer repair compiler. Fresh cases retain their original P1 path.
+
+All27 failed M entries stop before Native because the coefficient adapter tries
+to transform fresh900's outer restore wrapper a second time. Verify the exact
+cap300 inner bytecode/loader and retain the original fresh900 wrapper, including
+its authorization closure. Unknown adapters still fail closed. Bare restoration
+retains the original routed Planning coefficients and metadata checks.
+
+All3 Actual failures originate in a legacy writer's >260-character Windows
+temporary filename; the subsequent missing Fresh file masks that first error.
+Extend the owned Current/Fresh writer paths while retaining original NumPy and
+nonfinite cleaning and locks. Extend long owned NumPy open/stat paths in the
+existing archive IO scope, keeping every original archive guard and SHA check.
+Preserve driver failures directly instead of running a Fresh audit on missing
+files. Retry through new Actual engines only after all repaired Planning dates
+are terminal; preserve completed stages, M4 freezes and the Actual max7 rule.
+
+The live migration census runs1638 calls in43.454s. Replaying the same actual
+closed state gives2.186s original versus2.023s indexed; this active-state benefit
+is smaller than the complete-graph benchmark. Full pricing2201.56s and rebuilds
+1207.46s dominate this run. No overall A3 completion speedup is claimed.
