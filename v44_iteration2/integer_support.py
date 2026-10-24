@@ -247,7 +247,7 @@ def selective_scope(request):
   function=inspect.unwrap(module.run);source=textwrap.dedent(inspect.getsource(function))
   if '_iteration2_search.expand(state,typed,_point)' not in source:raise ValueError('INTEGER_SUPPORT_ACTUAL_SELECTIVE_COMPILER_NOT_BOUND')
   tree=ast.parse(source).body[0]
-  atomic(Path(request['output'])/'ITERATION2_INTEGER_SUPPORT_BINDING.json',dict(PASS=True,UTC=now(),
+  atomic(Path(request.get('root',request['output']))/'ITERATION2_INTEGER_SUPPORT_BINDING.json',dict(PASS=True,UTC=now(),
    binding='ACTUAL_A2_SELECTIVE_AST_COMPILER',source=record(__file__),day=request['day'],iteration_stage=request['iteration_stage'],
    original_integer_repair_retained=True,full_physical_and_gap_acceptance_retained=True))
   return tree

@@ -399,3 +399,8 @@ The live migration census runs1638 calls in43.454s. Replaying the same actual
 closed state gives2.186s original versus2.023s indexed; this active-state benefit
 is smaller than the complete-graph benchmark. Full pricing2201.56s and rebuilds
 1207.46s dominate this run. No overall A3 completion speedup is claimed.
+
+Write the early selective-compiler binding receipt beside OUTPUT in the A-stage
+root, so fresh preparation still starts with an empty OUTPUT directory. A
+pre-Native maintenance continuation keeps the latest identical Native account
+and its history while referring to the explicitly approved earlier P1 checkpoint.

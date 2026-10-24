@@ -119,7 +119,7 @@ def a_scope(parent,request):
  bridge=read(c.OPS/'AUTHORIZATION.json').get('repair_permit')
  if bridge:
   row=next((r for r in read(bridge['path'])['resumable_A_stages'] if Path(r['parent_core'])==Path(parent)),None)
-  if row and row.get('integer_gap_continuation'):request['_iteration2_integer_resume_parent']=str(parent)
+  if row and row.get('integer_gap_continuation'):request['_iteration2_integer_resume_parent']=row.get('integer_checkpoint_parent',str(parent))
  # Existing generic adapter retains both total A5400 and spent Phase-I1500.
  # It rebuilds the exact same model under remaining measured budgets; no
  # previous point/LB/certificate is promoted to another A Case.

@@ -8,6 +8,7 @@ import numpy as np
 import scipy.sparse as sp
 from dataclasses import replace
 from v44_iteration2.io import read,record,atomic
+from contextlib import nullcontext
 
 
 class IntegerSupport(unittest.TestCase):
@@ -54,13 +55,14 @@ class IntegerSupport(unittest.TestCase):
   from v44.frozen.v43_a2 import adapter
   import ast
   with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
-   request=dict(day=c.DAYS[0],iteration_stage='A3',output=folder)
+   request=dict(day=c.DAYS[0],iteration_stage='A3',root=folder,output=str(Path(folder)/'OUTPUT'))
    with patch.object(a_stage,'_iteration2_integer_support',support,create=True),patch.object(integer_repair,'compile_run',base.live_compiler(support.compiler(integer_repair.compile_run))):
     with integer_repair.install(),support.selective_scope(request):
      source=ast.unparse(adapter.source_tree(a_stage,'run'))
      self.assertIn('_iteration2_search.expand(state, typed, _point)',source)
      self.assertIn('_r029_restore(native, typed',source)
      self.assertTrue((Path(folder)/'ITERATION2_INTEGER_SUPPORT_BINDING.json').exists())
+     self.assertFalse((Path(folder)/'OUTPUT').exists(),'Fresh prepare must start with an empty output directory')
 
  def test_cached_integer_types_require_exact_original_model_fingerprint(self):
   from v42_a_stage_domain_v2.lexstage import LinearSnapshot,Objective
@@ -77,6 +79,20 @@ class IntegerSupport(unittest.TestCase):
    self.assertEqual(answer.fingerprint(),typed.fingerprint());self.assertTrue(proof['same_case_type_proof_reused'])
    np.savez_compressed(attributes,vtypes=snapshot.vtypes);identity['attributes']=record(attributes);atomic(step/'MODEL_IDENTITY.json',identity)
    with self.assertRaisesRegex(ValueError,'TYPED_SNAPSHOT_DRIFT'):support.restore_typed(dict(reference=snapshot),request,None)
+
+ def test_maintenance_keeps_latest_account_and_approved_P1_checkpoint_separate(self):
+  from v44_iteration2 import resume
+  from v44_recovery_r046 import planning
+  with tempfile.TemporaryDirectory(dir=c.ROOT) as folder:
+   root=Path(folder);parent=root/'attempt014/A2';checkpoint=root/'attempt013/A2';ops=root/'OPS';ops.mkdir()
+   permit=ops/'PERMIT.json';atomic(permit,dict(resumable_A_stages=[dict(parent_core=str(parent),integer_gap_continuation=True,integer_checkpoint_parent=str(checkpoint))]))
+   atomic(ops/'AUTHORIZATION.json',dict(repair_permit=record(permit)))
+   request={};receipt=dict(measured=564.853,remaining=4835.147)
+   with patch.object(c,'OPS',ops),patch.object(resume,'admit',return_value=receipt) as admit,patch.object(resume,'phase_account',return_value=dict(used=50.998,calls=[])),patch.object(planning,'a1_scope',return_value=nullcontext()) as clock:
+    with resume.a_scope(parent,request) as result:
+     self.assertEqual(request['_iteration2_integer_resume_parent'],str(checkpoint))
+     self.assertEqual(result['measured'],564.853);self.assertEqual(result['inherited_Phase_I_Native_seconds'],50.998)
+    admit.assert_called_once_with(parent,request);clock.assert_called_once_with(parent)
 
 
 if __name__=='__main__':unittest.main()
