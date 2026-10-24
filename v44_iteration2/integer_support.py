@@ -5,6 +5,7 @@ from copy import deepcopy
 from dataclasses import replace
 import gzip,pickle,inspect,textwrap,linecache,os
 import ast
+import gc
 from contextlib import contextmanager
 from unittest.mock import patch
 import numpy as np
@@ -37,6 +38,7 @@ def load_closed(request,budget):
   verify([checkpoint,row['integer_model_identity'],row['integer_typeproof']])
   with gzip.open(checkpoint['path'],'rb') as stream:saved=pickle.load(stream)
   state=saved.pop('state');request['_iteration2_integer_search']=saved
+  saved['_source_checkpoint']=checkpoint
   request['_iteration2_integer_model_identity']=row['integer_model_identity']
   request['_iteration2_integer_typeproof']=row['integer_typeproof']
  else:
@@ -114,6 +116,14 @@ def unique_incumbent(output):
  return folder/('V'+str(max(used,default=0)+1))
 
 
+def detach_lp_state(state):
+ """All original data/physics stay live; dormant LP state stays on disk."""
+ keep=dict(data=state['data'],atlas=dict(node_names=state['atlas']['node_names']),
+  _campaign=state['_campaign'],_iteration2_offloaded=True)
+ released=sorted(set(state)-set(keep));state.clear();state.update(keep)
+ return released
+
+
 def choose(required,state,scores,promoted,limit=BATCH_COLUMNS):
  chosen=[];columns=0
  for key in sorted(required,key=lambda k:(-scores.get(k,0.),k)):
@@ -132,11 +142,13 @@ class Support:
  def __init__(self,request,state,output,exact_lb):
   self.request=request;self.output=Path(output);self.exact_lb=exact_lb
   self.round=0;self.promoted=set();self.history=[]
+  self.checkpoint=None;self.checkpoint_round=None;self.checkpoint_payload=True;self.typed_sha=None
   self.required={r['class_id']:r for r in read(self.output/'BLOCK_PRICING_ORACLE_VERIFICATION.json')['records']}
   saved=request.pop('_iteration2_integer_search',None)
   if saved:
    from v42_a_stage_phase1.core import primal_replay
    self.round=saved['round'];self.promoted=set(saved['promoted']);self.history=saved['history'];self.lp_point=saved['lp_point']
+   self.checkpoint=saved.get('_source_checkpoint');self.checkpoint_round=self.round
    if (not primal_replay(state['reference'],self.lp_point)['PASS'] or
        self.promoted!={key for row in self.history for key in row['classes']} or
        self.round!=self.history[-1]['round']):raise ValueError('INTEGER_SEARCH_CHECKPOINT_STATE_DRIFT')
@@ -153,15 +165,49 @@ class Support:
  def persist(self,state,typed):
   """Keep only the latest exact search state, distinct from the P1 checkpoint."""
   target=self.output/'STATIC/INTEGER_SEARCH_STATE.pkl.gz';target.parent.mkdir(parents=True,exist_ok=True)
-  temporary=target.with_suffix('.tmp')
-  with gzip.open(temporary,'wb',compresslevel=1) as stream:
-   pickle.dump(dict(state=state,lp_point=self.lp_point,round=self.round,history=self.history,promoted=self.promoted),stream,protocol=5)
-  os.replace(temporary,target)
-  atomic(self.output/'INTEGER_SEARCH_CHECKPOINT.json',dict(PASS=True,UTC=now(),state=record(target),
-   typed_snapshot_sha256=typed.fingerprint(),round=self.round,Native_budget_reset=False,
+  expected=None
+  if self.checkpoint and self.checkpoint_round==self.round:
+   source=Path(self.checkpoint['path']);expected=self.checkpoint
+   if source!=target:
+    try:os.link(source,target)
+    except OSError:
+     import shutil
+     shutil.copyfile(source,target)
+  else:
+   temporary=target.with_suffix('.tmp')
+   with gzip.open(temporary,'wb',compresslevel=1) as stream:
+    pickle.dump(dict(state=state,lp_point=self.lp_point,round=self.round,history=self.history,promoted=self.promoted),stream,protocol=5)
+   os.replace(temporary,target)
+  current=record(target)
+  if expected and (current['bytes'],current['sha256'])!=(expected['bytes'],expected['sha256']):raise ValueError('INTEGER_CHECKPOINT_LOSSLESS_LINK_FAILED')
+  self.checkpoint=current;self.checkpoint_round=self.round;self.checkpoint_payload=True;self.typed_sha=typed.fingerprint()
+  atomic(self.output/'INTEGER_SEARCH_CHECKPOINT.json',dict(PASS=True,UTC=now(),state=self.checkpoint,
+   typed_snapshot_sha256=self.typed_sha,round=self.round,Native_budget_reset=False,
    complete_graphs_retained=True,P1_certificate_recomputed=False))
   atomic(self.output/'ITERATION2_INTEGER_SUPPORT.json',dict(PASS=True,UTC=now(),rounds=self.history,
    original_gap_target=.005,Native_ceiling=5400,Native_budget_reset=False,all_native_calls_in_same_account=True))
+
+ def offload(self,state,typed,physical):
+  if self.round==0:
+   self.checkpoint=record(self.output/'STATIC/P1_CLOSED_STATE.pkl.gz');self.checkpoint_round=0;self.checkpoint_payload=False
+   self.typed_sha=typed.fingerprint()
+  if not self.checkpoint or self.checkpoint_round!=self.round:raise ValueError('COMPLETE_INTEGER_STATE_BACKUP_REQUIRED')
+  if physical.state is not state:raise ValueError('INTEGER_PHYSICAL_STATE_IDENTITY_DRIFT')
+  released=detach_lp_state(state);gc.collect()
+  atomic(self.output/'INTEGER_WORKING_STATE.json',dict(PASS=True,UTC=now(),round=self.round,checkpoint=self.checkpoint,
+   released_LP_only_keys=released,original_physical_data_retained=True,original_typed_snapshot_sha256=self.typed_sha,
+   scientific_option_deletion=False,complete_state_rehydrated_before_any_expansion=True))
+
+ def restore(self,state,typed):
+  if not state.get('_iteration2_offloaded'):return state
+  if typed.fingerprint()!=self.typed_sha:raise ValueError('CURRENT_INTEGER_SNAPSHOT_DRIFT')
+  verify([self.checkpoint])
+  with gzip.open(self.checkpoint['path'],'rb') as stream:saved=pickle.load(stream)
+  full=saved.pop('state') if self.checkpoint_payload else saved
+  restored=replace(full['reference'],vtypes=typed.vtypes).require()
+  if restored.fingerprint()!=self.typed_sha:raise ValueError('REHYDRATED_INTEGER_SNAPSHOT_DRIFT')
+  full['_campaign']=state['_campaign'];state.clear();state.update(full)
+  return state
 
  def folder(self):
   return self.output/'P1/INTEGER_CONTROL' if self.round==0 else self.output/'P1/INTEGER_SUPPORT'/('R'+str(self.round))
@@ -252,6 +298,8 @@ def compiler(original):
         while True:
             if candidates and candidates[-1]['acceptance']['PASS']:break
             if _iteration2_search.round:_iteration2_search.persist(state,typed)
+            _next=None
+            _iteration2_search.offload(state,typed,physical)
             native.incumbent_callback = validate
             rec, raw = native.solve(typed, _iteration2_search.folder(), 'INTEGER_CONTROL')
             if 'X' in raw:
@@ -262,6 +310,7 @@ def compiler(original):
             if not _iteration2_search.need_more(candidates,rec,native):break
             with np.load(candidates[-1]['point']['path'],allow_pickle=False) as _saved:
                 _point=_saved['X'].copy()
+            state=_iteration2_search.restore(state,typed)
             _next=_iteration2_search.expand(state,typed,_point)
             if _next is None:break
             state,typed,_warm=_next

@@ -440,3 +440,18 @@ Deploy only after the running May07 M4 finishes naturally. Preserve every
 completed stage and M4 freeze. Apply the shared integer correction to all dates;
 continue serial Planning through May31 and then run verified ready Actual/Fresh
 dates with at most7workers under the existing terminal-date barrier.
+
+The first live repair still encounters allocation failure at the end of integer
+presolve. Retain that277.924-second failed call as well: total4085.2450008392334,
+2953calls, remaining1314.7549991607666. Do not report the allocation issue fixed
+solely because a solver entry or Native0 test passes.
+
+Before integer Native entry, keep original physical data, voltage node names,
+the complete typed snapshot and the original physical verifier live. Park dormant
+LP assembly, pricing/domain indexes and descriptors in the exact saved checkpoint;
+release their live references. Rehydrate and verify the exact typed snapshot
+before any further support expansion. No physical option or scientific row is
+removed. The real original A2 physical replay must agree before/after except its
+validation_seconds timer. A restored unchanged round links the already verified
+checkpoint losslessly rather than serializing that full state again; every linked
+target is still fully hashed and checked against the approved bytes.
