@@ -12,14 +12,17 @@ def key(path):
  return os.path.normcase(value)
 
 class Store:
- def __init__(self):
+ def __init__(self,days=None):
   self.archives=[];self.zips={};self.entries={};self._lock=threading.RLock()
   # Each verified date export publishes an index before removing its source.
   # Read all dated indexes, including May15--24, without restoring originals.
+  selected=None if days is None else frozenset(days)
+  if selected is not None and not selected.issubset(c.DAYS):raise ValueError('UNKNOWN_ARCHIVE_DAY')
   indexes=sorted(c.OLD.glob('campaign*/ARCHIVED_RESULTS_*.json'))
   for p in indexes:
    if not p.exists():continue
    for row in read(p)['days']:
+    if selected is not None and row['day'] not in selected:continue
     if row['day'] in self.zips:
      if any(r['day']==row['day'] and r['archive']!=row['archive'] for r in self.archives):raise ValueError('DUPLICATE_ARCHIVE_DATE_DRIFT')
      continue
@@ -61,8 +64,7 @@ class Store:
  def materialize(self,path):
   entry=self.entries.get(key(path))
   if not entry:return Path(path)
-  row,z,item=entry;target=c.ROOT/'BASELINE_READONLY'/Path(row['source']).parent.name/Path(item['path'])
-  if not target.resolve().is_relative_to((c.ROOT/'BASELINE_READONLY').resolve()):raise ValueError('ARCHIVE_PATH_ESCAPE')
+  row,z,item=entry;target=self.view_path(path)
   with self._lock:
    if not extended(target).is_file():
     if shutil.disk_usage(c.ROOT).free<item['bytes']+2*2**30:raise OSError('INSUFFICIENT_ARCHIVE_VIEW_DISK')
@@ -79,6 +81,10 @@ class Store:
    actual=record(target)
    if (actual['bytes'],actual['sha256'])!=(item['bytes'],item['sha256']):raise ValueError('OWNED_ARCHIVE_VIEW_DRIFT')
   return extended(target)
+ def view_path(self,path):
+  row,_,item=self.entries[key(path)];target=c.ROOT/'BASELINE_READONLY'/Path(row['source']).parent.name/Path(item['path'])
+  if not target.resolve().is_relative_to((c.ROOT/'BASELINE_READONLY').resolve()):raise ValueError('ARCHIVE_PATH_ESCAPE')
+  return target
 
  @contextmanager
  def read_scope(self):
@@ -88,7 +94,7 @@ class Store:
   In production, materialization occurs only after the B2 release gate.
   """
   original_open=builtins.open;original_io=io.open;original_stat=os.stat
-  roots=tuple(str(c.campaign(d)).casefold() for d in c.DAYS)
+  roots=tuple(str(c.campaign(d)).casefold() for d in c.DAYS)+(str(c.B2_ROOT.parent).casefold(),)
   def mapped(path,mode='r'):
    if isinstance(path,int):return path
    p=Path(path)
@@ -100,10 +106,13 @@ class Store:
   def io_opened(path,mode='r',*a,**kw):return original_io(mapped(path,mode),mode,*a,**kw)
   def stat(path,*a,**kw):
    if not isinstance(path,int) and key(path) in self.entries:
-    return original_stat(self.materialize(path),*a,**kw)
+    target=extended(self.view_path(path))
+    # Metadata access is not a content certificate. Every actual read/open
+    # still goes through materialize's complete hash check, including tamper.
+    try:return original_stat(target,*a,**kw)
+    except FileNotFoundError:return original_stat(self.materialize(path),*a,**kw)
    return original_stat(path,*a,**kw)
-  # materialize uses saved raw IO, avoiding recursive alias callbacks.
-  saved=self.materialize
-  def materialize(path):
-   with patch.object(builtins,'open',original_open),patch.object(io,'open',original_io),patch.object(os,'stat',original_stat):return saved(path)
-  with patch.object(self,'materialize',materialize),patch.object(builtins,'open',opened),patch.object(io,'open',io_opened),patch.object(os,'stat',stat):yield
+  # Internal IO addresses the owned view, never an archived logical path.
+  # Keep guards installed while materializing: other threads must not see
+  # process-wide unpatched opens/stats or a temporarily disabled write guard.
+  with patch.object(builtins,'open',opened),patch.object(io,'open',io_opened),patch.object(os,'stat',stat):yield

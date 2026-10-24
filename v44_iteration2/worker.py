@@ -132,7 +132,7 @@ def run(path):
  from v44_recovery_r029 import handover,conditional_campaign,integer_repair,cpu_placement,weather
  from v44_recovery_r049 import weather as recovered_weather
  from v43_arms import reference
- request=read(path);boundary(request);store=Store()
+ request=read(path);boundary(request);store=Store(days=(request['day'],))
  try:
   with adapters.bindings(),store.read_scope(),storage.install(),ExitStack() as stack:
    from .numerical import scope as numerical_scope

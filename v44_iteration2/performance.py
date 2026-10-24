@@ -17,17 +17,28 @@ MAX_TOTAL_COLUMNS=20000
 def streaming_domain_digest(value):
  """Byte-identical canonical SHA without a giant joined JSON string."""
  h=hashlib.sha256()
- if type(value) is list:
+ def sequence(items):
   h.update(b'[')
-  for offset in range(0,len(value),4096):
+  for offset in range(0,len(items),4096):
    if offset:h.update(b',')
    # Keep the source C encoder fast, but serialize at most4096 items. Each
    # batch loses only its outer brackets; list element bytes stay canonical.
-   batch=json.dumps(value[offset:offset+4096],sort_keys=True,separators=(',',':'),default=str,allow_nan=False)
+   batch=json.dumps(items[offset:offset+4096],sort_keys=True,separators=(',',':'),default=str,allow_nan=False)
    h.update(batch[1:-1].encode())
-  h.update(b']');return h.hexdigest()
- encoder=json.JSONEncoder(sort_keys=True,separators=(',',':'),default=str,allow_nan=False)
- for chunk in encoder.iterencode(value):h.update(chunk.encode())
+  h.update(b']')
+ if type(value) in (list,tuple):sequence(value)
+ elif type(value) is dict and all(type(key) is str for key in value):
+  # Full-domain identities are dictionaries of large stays/blocks sequences.
+  # Python iterencode walks every scalar; retain the C encoder in bounded
+  # top-level chunks instead, with exactly the original canonical JSON bytes.
+  h.update(b'{')
+  for index,key in enumerate(sorted(value)):
+   if index:h.update(b',')
+   h.update(json.dumps(key).encode());h.update(b':');item=value[key]
+   if type(item) in (list,tuple):sequence(item)
+   else:h.update(json.dumps(item,sort_keys=True,separators=(',',':'),default=str,allow_nan=False).encode())
+  h.update(b'}')
+ else:h.update(json.dumps(value,sort_keys=True,separators=(',',':'),default=str,allow_nan=False).encode())
  return h.hexdigest()
 
 def domain_digest_code():

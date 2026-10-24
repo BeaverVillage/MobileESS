@@ -287,3 +287,34 @@ and create a new A3 request with no resume parent or inherited Native calls.
 Only this requested restart resets the A5400 and Phase-I1500 accounts; ordinary
 failure continuations retain their original accounts. Other dates, completed
 stages and the all31-Planning-before-ready-Actual7 rule remain unchanged.
+
+## 2026-10-24 non-P1 input and archive IO audit
+
+Compared archived r043 May15 receipts with the live Phase-I, rebuild,
+integer/FULL, M and Actual/Fresh engines:17 selected pinned source files are
+byte-identical. Retain the existing numerical repairs, M voltage policies,
+all original physical/closure checks, CPU rules and budgets. Fix only the
+following shared IO regressions, for every dated worker and both A stages.
+
+Full-domain identity dictionaries had fallen back to Python JSON iterencode,
+walking every scalar. Keep original canonical JSON and every complete SHA,
+but C-encode bounded top-level sequence batches and dictionary fields. The
+real May01 representatives all117 match the original cached SHA; one large
+representative measures6.198s before versus1.028s after (r043 C encoder0.972s).
+This is a hash microbenchmark, not an overall campaign speedup.
+
+A dated worker now opens only its date's archive index; the supervisor and
+preflight still resolve all31. A real May01 sample reduces index setup from
+15.729s/538397 entries to0.177s/6029 entries. Archive metadata stat calls use
+the existing owned file view without rehashing its content; every actual open
+still validates the complete SHA and rejects changed bytes. Ten34MB-file stat
+queries measure0.277s versus0.0105s. All original-date and equipment archive
+write guards remain active, including dates outside the selected read index.
+
+Materialization previously restored global open/stat functions temporarily,
+allowing another thread to bypass archive read/write guards. Reproduce that
+failure with simultaneous materialization and a forbidden write; retain the
+guards for the entire read scope and perform internal IO on owned view paths.
+No model, candidate, original source/data file or certificate is substituted.
+Deploy only after stopping outside Native; preserve the measured A5400 and
+Phase-I1500 accounts and resume the same parent stage without resetting time.
