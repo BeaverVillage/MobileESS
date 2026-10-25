@@ -18,6 +18,22 @@ def repair_source_bridge(parent,old,request):
   if not policy.get('scientific_equations_domain_and_acceptance_unchanged') or policy.get('Native_budget_reset') is not False:raise PermissionError('REPAIR_MUST_KEEP_DOMAIN_AND_NATIVE_ACCOUNT')
   return row
  failure=read(Path(parent)/'RESULT.json')
+ if row.get('integer_physical_callback_repair'):
+  verify([row['core_failure'],row['closed_state'],row['repair_regression']]+list(row['certificates'].values()))
+  proof=read(row['repair_regression']['path']);ledger=read(row['ledger']['path'])
+  if (record(Path(parent)/'RESULT.json')!=row['core_failure'] or failure.get('error')!=row['diagnosed_error']
+      or 'TELEMETRY_CALLBACK_ERROR' not in failure['error'] or 'NONPHYSICAL_FACTORIZED_STATE:' not in failure['error']
+      or not failure.get('incumbent',{}).get('PASS') or ledger.get('inflight') is not None
+      or not 0<ledger['measured_Native_Runtime']<5400 or ledger['calls'][-1].get('component')!='INTEGER_CONTROL'):
+   raise PermissionError('EXACT_PAID_INTEGER_PHYSICAL_CALLBACK_FAILURE_REQUIRED')
+  if not all(read(r['path']).get('PASS') is True for r in row['certificates'].values()):raise PermissionError('FULL_P1_CERTIFICATES_REQUIRED')
+  if not (proof.get('PASS') and proof.get('Native_calls')==0 and proof.get('same_failed_case_verified')
+          and proof.get('saved_incumbent_original_physical_PASS') and proof.get('known_factorized_rejection_tested')
+          and proof.get('unexpected_errors_propagate') and proof.get('scientific_matrix_unchanged') is True
+          and proof.get('candidate_not_accepted') and proof.get('tolerance_relaxed') is False
+          and policy.get('scientific_equations_domain_and_acceptance_unchanged') and policy.get('Native_budget_reset') is False):
+   raise PermissionError('STRICT_PHYSICAL_CALLBACK_REPAIR_REGRESSION_REQUIRED')
+  return row
  if row.get('integer_conflict_repair'):
   verify([row['core_failure'],row['closed_state'],row['repair_regression']]+list(row['certificates'].values()))
   proof=read(row['repair_regression']['path']);ledger=read(row['ledger']['path'])

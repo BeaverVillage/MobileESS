@@ -24,7 +24,7 @@ def continuation_row(parent):
 
 def load_closed(request,budget):
  parent=Path(request['_iteration2_integer_resume_parent']);row=continuation_row(parent)
- if row.get('integer_conflict_repair'):request['_iteration2_retry_same_support']=True
+ if row.get('integer_conflict_repair') or row.get('integer_physical_callback_repair'):request['_iteration2_retry_same_support']=True
  verify([row['closed_state'],row['core_failure'],row['ledger'],row['old_request']]+list(row['certificates'].values()))
  old=read(parent/'request.json');account=read(row['ledger']['path'])
  for name in ('day','arm','iteration_stage','fixed_parent_receipt','equipment_version'):
@@ -115,6 +115,24 @@ def unique_incumbent(output):
  folder=Path(output)/'I'
  used=[int(p.stem[1:]) for p in folder.glob('V[0-9]*.npz') if p.stem[1:].isdigit()]
  return folder/('V'+str(max(used,default=0)+1))
+
+
+def verify_candidate(physical,point,output):
+ """An original physical rejection rejects this candidate, not the MIP run."""
+ try:return physical.verify(point)
+ except ValueError as error:
+  # Only the diagnosed original factorized-state validator uses this prefix.
+  # Unexpected implementation errors must still propagate and fail visibly.
+  if not str(error).startswith('NONPHYSICAL_FACTORIZED_STATE:'):raise
+  folder=Path(output)/'I';folder.mkdir(parents=True,exist_ok=True)
+  stem=folder/('F'+str(len(list(folder.glob('F*.npz')))+1))
+  np.savez_compressed(str(stem)+'.npz',X=point)
+  proof=dict(PASS=False,UTC=now(),reason='ORIGINAL_PHYSICAL_CANDIDATE_REJECTED',error=str(error),
+   point=record(str(stem)+'.npz'),original_snapshot_sha256=physical.snapshot.fingerprint(),
+   candidate_accepted=False,original_raw_unchanged=True,tolerance_relaxed=False,
+   action='CONTINUE_SOLVER_WITH_EXISTING_VERIFIED_INCUMBENT')
+  atomic(str(stem)+'.json',proof)
+  return proof
 
 
 def defer_bound_conflict(native,snapshot,point,upper,lower,output):
@@ -321,6 +339,8 @@ def compiler(original):
     "        typed,typeproof = _iteration2_integer_support.restore_typed(state,request,restore_types)",
    "        def validate(point, objective):":
     "        _iteration2_search=_iteration2_integer_support.Support(request,state,output,exact_lb)\n        native._iteration2_target=exact_lb/(1-Fraction(1,200)) if exact_lb>0 else None\n        def validate(point, objective):",
+   "            verification = physical.verify(point)":
+    "            verification = _iteration2_integer_support.verify_candidate(physical,point,output)",
    "            if upper < exact_lb:\n                raise ValueError('A_CERTIFIED_LB_UB_CONFLICT')":
     "            if _iteration2_integer_support.defer_bound_conflict(native,typed,point,upper,exact_lb,output):return",
    "            incarnation = output / 'I' / ('V' + str(len(candidates) + 1))":

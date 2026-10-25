@@ -511,3 +511,27 @@ completed M2 and every completed stage/freeze on other dates. Apply the shared
 repairs to future A3/A4 execution on every May date. Deploy after the already
 running May10 M3 completes naturally; continue all31 dates before ready-only
 Actual/Fresh with at most7 workers.
+
+### May01 physical callback repair (2026-10-25)
+
+May01 A3 attempt018 closes P1 but terminates inside the integer callback on
+`NONPHYSICAL_FACTORIZED_STATE:link_bytes:('LOSAng--SNVAng', 47)`.
+The original physical checker raises for an invalid factorized candidate,
+whereas the caller only handles a returned failed certificate. Persist the raw
+rejected point and error, return a failed candidate certificate, and retain the
+original rejection path so search can continue. Only this diagnosed validator
+prefix is handled; unexpected exceptions still propagate. Original rows,
+physical checks, integer types and exact global-gap acceptance remain unchanged.
+
+A Native0/DSS0 replay verifies the exact saved model and valid incumbent. A
+controlled 2e-5 byte perturbation of a scaled link variable reproduces the same
+original physical exception while matrix replay still passes; the rejected
+callback point was not persisted by the old implementation. The repaired path
+rejects this point without changing it and then verifies the valid point again.
+This controlled point is regression evidence, never an accepted candidate.
+
+Resume the verified same-case closed P1 state and integer support with all2373
+paid calls and692.7880055904388 Native seconds, retaining the original Phase-I
+subaccount. Do not reset this account or redo Phase I/P1. Apply the common A3/A4
+adapter to every May date. May14 A4 is held before its first Native call for
+deployment and resumes with the same parent; all completed stages are preserved.
